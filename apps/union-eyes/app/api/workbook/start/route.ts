@@ -52,35 +52,41 @@ export async function POST(request: NextRequest) {
   const { locale, consent, sectorBand, institutionSizeBand, utm } = parse.data;
 
   try {
-    const [wb] = await db
-      .insert(workbooks)
-      .values({
-        locale,
-        consent: consent ?? null,
-        sectorBand: sectorBand ?? null,
-        institutionSizeBand: institutionSizeBand ?? null,
-        utmSource: utm?.source ?? null,
-        utmMedium: utm?.medium ?? null,
-        utmCampaign: utm?.campaign ?? null,
-      })
-      .returning({ id: workbooks.id });
+    // The workbook and its module rows are one record: a failure seeding the modules must not leave a bare workbook.
+    const wb = await db.transaction(async (tx) => {
+      const [created] = await tx
+        .insert(workbooks)
+        .values({
+          locale,
+          consent: consent ?? null,
+          sectorBand: sectorBand ?? null,
+          institutionSizeBand: institutionSizeBand ?? null,
+          utmSource: utm?.source ?? null,
+          utmMedium: utm?.medium ?? null,
+          utmCampaign: utm?.campaign ?? null,
+        })
+        .returning({ id: workbooks.id });
+
+      if (!created) return null;
+
+      // Seed module status rows so the workbook hub renders deterministically.
+      await tx
+        .insert(workbookModules)
+        .values(
+          WORKBOOK_MODULE_IDS.map((moduleId) => ({
+            workbookId: created.id,
+            moduleId,
+            status: 'not_started',
+          })),
+        )
+        .onConflictDoNothing();
+
+      return created;
+    });
 
     if (!wb) {
       return NextResponse.json({ error: 'Failed to create workbook' }, { status: 500 });
     }
-
-    // Seed module status rows so the workbook hub renders deterministically.
-    await db
-      .insert(workbookModules)
-      .values(
-        WORKBOOK_MODULE_IDS.map((moduleId) => ({
-          workbookId: wb.id,
-          moduleId,
-          status: 'not_started',
-        })),
-      )
-      .onConflictDoNothing();
-
     logger.info('[workbook-start] Workbook created', { workbookId: wb.id, locale });
 
     return NextResponse.json({ workbookId: wb.id });

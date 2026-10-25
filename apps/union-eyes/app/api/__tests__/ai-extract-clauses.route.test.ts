@@ -90,7 +90,7 @@ describe('ai/extract-clauses route', () => {
 
     const response = await POST(new Request('http://localhost/api/ai/extract-clauses', {
       method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ batch: true, cbas: [{ id: 'c1' }, { id: 'c2' }], autoSave: false, organizationId: TEST_ORG_ID, cbaId: '11111111-1111-1111-1111-111111111111', pdfUrl: 'http://x.com/a.pdf' }),
+      body: JSON.stringify({ batch: true, cbas: [{ id: '11111111-1111-1111-1111-111111111111', documentUrl: 'http://x.com/1.pdf' }, { id: '22222222-2222-2222-2222-222222222222', documentUrl: 'http://x.com/2.pdf' }], autoSave: false, organizationId: TEST_ORG_ID, cbaId: '11111111-1111-1111-1111-111111111111', pdfUrl: 'http://x.com/a.pdf' }),
     }));
     const payload = await response.json();
 
@@ -98,7 +98,20 @@ describe('ai/extract-clauses route', () => {
     expect(payload.batch).toBe(true);
     expect(payload.totalCBAs).toBe(2);
     expect(payload.successfulExtractions).toBe(1);
-    expect(m.batchExtractClauses).toHaveBeenCalledWith([{ id: 'c1' }, { id: 'c2' }], expect.objectContaining({ autoSave: false, concurrency: 3 }));
+    expect(m.batchExtractClauses).toHaveBeenCalledWith(
+      [{ id: '11111111-1111-1111-1111-111111111111', documentUrl: 'http://x.com/1.pdf' }, { id: '22222222-2222-2222-2222-222222222222', documentUrl: 'http://x.com/2.pdf' }],
+      expect.objectContaining({ organizationId: TEST_ORG_ID, userId: 'u1', autoSave: false, concurrency: 3 }),
+    );
+  });
+
+  it('refuses a body organization that is not the caller organization and extracts nothing', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new Request('http://localhost/api/ai/extract-clauses', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ pdfUrl: 'http://x.com/a.pdf', cbaId: '11111111-1111-1111-1111-111111111111', organizationId: '99999999-9999-9999-9999-999999999999' }),
+    }));
+    expect(response.status).toBe(403);
+    expect(m.extractClausesFromPDF).not.toHaveBeenCalled();
   });
 
   it('extracts single pdf', async () => {
@@ -111,6 +124,6 @@ describe('ai/extract-clauses route', () => {
 
     expect(response.status).toBe(200);
     expect(payload.success).toBe(true);
-    expect(m.extractClausesFromPDF).toHaveBeenCalledWith('http://x.com/a.pdf', '11111111-1111-1111-1111-111111111111', { organizationId: TEST_ORG_ID, autoSave: true });
+    expect(m.extractClausesFromPDF).toHaveBeenCalledWith('http://x.com/a.pdf', '11111111-1111-1111-1111-111111111111', { organizationId: TEST_ORG_ID, userId: 'u1', autoSave: true });
   });
 });

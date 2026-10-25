@@ -19,6 +19,7 @@ import { aiUsageMetrics } from '@/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { enforceAISafety } from '@nzila/policies';
@@ -65,65 +66,87 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
 
     const { query_id, rating, comment } = validation.data;
     const orgId = context.organizationId as string;
+    const userId = context.userId as string;
 
-    // Check for duplicate feedback from same user on same query
-    const existing = await db
-      .select({ id: aiUsageMetrics.id })
-      .from(aiUsageMetrics)
-      .where(
-        and(
-          eq(aiUsageMetrics.requestId, query_id),
-          eq(aiUsageMetrics.operation, 'feedback'),
-          eq(aiUsageMetrics.userId, context.userId!),
-        ),
-      )
-      .limit(1);
+    // The feedback row and its audit record commit together; a user's feedback on a query is created once and then
+    // updated in place, never written onto another user's or organization's row.
+    const saved = await withRLSContext({ organizationId: orgId }, async (tx) => {
+      const [existing] = await tx
+        .select({ id: aiUsageMetrics.id })
+        .from(aiUsageMetrics)
+        .where(
+          and(
+            eq(aiUsageMetrics.requestId, query_id),
+            eq(aiUsageMetrics.operation, 'feedback'),
+            eq(aiUsageMetrics.userId, userId),
+            eq(aiUsageMetrics.organizationId, orgId),
+          ),
+        )
+        .limit(1);
 
-    if (existing.length > 0) {
-      // Update existing feedback
-      await withRLSContext(async () => db.execute(sql`
-        UPDATE ai_usage_metrics
-        SET metadata = jsonb_set(
-          jsonb_set(metadata, '{rating}', ${JSON.stringify(rating)}::jsonb),
-          '{comment}', ${JSON.stringify(comment ?? null)}::jsonb
-        ),
-        created_at = now()
-        WHERE id = ${existing[0].id}
-      `));
+      if (existing) {
+        const updated = await tx.execute(sql`
+          UPDATE ai_usage_metrics
+          SET metadata = jsonb_set(
+            jsonb_set(metadata, '{rating}', ${JSON.stringify(rating)}::jsonb),
+            '{comment}', ${JSON.stringify(comment ?? null)}::jsonb
+          ),
+          created_at = now()
+          WHERE id = ${existing.id}
+            AND organization_id = ${orgId}::uuid
+            AND user_id = ${userId}
+            AND operation = 'feedback'
+          RETURNING id
+        `);
+        if (Array.from(updated as Iterable<unknown>).length === 0) return null;
+        await persistAtomicAudit(tx, {
+          organizationId: orgId,
+          userId,
+          action: 'ai.feedback.update',
+          resourceType: 'ai_usage_metrics',
+          resourceId: existing.id,
+          details: { queryId: query_id, rating },
+        });
+        return { id: existing.id, updated: true as const };
+      }
 
-      return NextResponse.json({
-        id: existing[0].id,
-        query_id,
-        rating,
-        comment: comment ?? null,
-        updated: true,
+      const [inserted] = await tx
+        .insert(aiUsageMetrics)
+        .values({
+          organizationId: orgId,
+          provider: 'internal',
+          model: 'feedback',
+          operation: 'feedback',
+          tokensInput: 0,
+          tokensOutput: 0,
+          tokensTotal: 0,
+          estimatedCost: '0',
+          requestId: query_id,
+          userId,
+          metadata: { rating, comment: comment ?? null },
+        })
+        .returning({ id: aiUsageMetrics.id });
+      await persistAtomicAudit(tx, {
+        organizationId: orgId,
+        userId,
+        action: 'ai.feedback.create',
+        resourceType: 'ai_usage_metrics',
+        resourceId: inserted.id,
+        details: { queryId: query_id, rating },
       });
+      return { id: inserted.id, created: true as const };
+    });
+
+    if (!saved) {
+      return standardErrorResponse(ErrorCode.CONFLICT, 'Feedback changed concurrently; retry');
     }
 
-    // Insert new feedback row
-    const inserted = await db
-      .insert(aiUsageMetrics)
-      .values({
-        organizationId: orgId,
-        provider: 'internal',
-        model: 'feedback',
-        operation: 'feedback',
-        tokensInput: 0,
-        tokensOutput: 0,
-        tokensTotal: 0,
-        estimatedCost: '0',
-        requestId: query_id,
-        userId: context.userId,
-        metadata: { rating, comment: comment ?? null },
-      })
-      .returning({ id: aiUsageMetrics.id });
-
     return NextResponse.json({
-      id: inserted[0].id,
+      id: saved.id,
       query_id,
       rating,
       comment: comment ?? null,
-      created: true,
+      ...('updated' in saved ? { updated: true } : { created: true }),
     });
   } catch (error) {
     logger.error('Feedback submission failed', { error });

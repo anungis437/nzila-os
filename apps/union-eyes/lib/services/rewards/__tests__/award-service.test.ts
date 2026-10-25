@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => ({
   mockApplyLedgerEntry: vi.fn(),
   mockApplyBudgetUsage: vi.fn(),
   mockApplyBudgetUsageChecked: vi.fn(),
+  mockAudit: vi.fn(),
 }));
 
 vi.mock('drizzle-orm', () => ({
@@ -92,6 +93,11 @@ vi.mock('../budget-service', () => ({
   applyBudgetUsageChecked: mocks.mockApplyBudgetUsageChecked,
 }));
 
+vi.mock('../audit', () => ({
+  auditRewards: mocks.mockAudit,
+  rewardsActor: (userId?: string | null, fallback = 'system:rewards') => (userId && userId !== 'system' ? userId : fallback),
+}));
+
 import {
   createAwardRequest,
   approveAward,
@@ -103,6 +109,54 @@ import {
 describe('award-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.mockAudit.mockResolvedValue(undefined);
+    // Plain writes run on a transaction whose chains are the shared mock chains.
+    mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) =>
+      cb({ insert: mocks.mockInsert, update: mocks.mockUpdate }),
+    );
+  });
+
+  describe('audit on the same transaction', () => {
+    it('audits an automation-created award as the system actor, and creates nothing if the audit fails', async () => {
+      mocks.mockQueryRecognitionAwardTypes.findFirst.mockResolvedValue({ id: 'at-1', orgId: 'org-1', programId: 'prog-1', requiresApproval: false });
+      mocks.mockReturning.mockResolvedValueOnce([{ id: 'award-1', status: 'approved' }]);
+      await createAwardRequest({
+        orgId: 'org-1', programId: 'prog-1', awardTypeId: 'at-1', recipientUserId: 'user-1', issuerUserId: 'system', reason: 'Anniversary',
+      });
+      expect(mocks.mockAudit).toHaveBeenCalledWith(
+        expect.objectContaining({ insert: mocks.mockInsert }),
+        expect.objectContaining({ organizationId: 'org-1', userId: 'system:rewards-automation', action: 'rewards.award.create', resourceId: 'award-1' }),
+      );
+
+      mocks.mockReturning.mockResolvedValueOnce([{ id: 'award-2', status: 'approved' }]);
+      mocks.mockAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+      await expect(
+        createAwardRequest({ orgId: 'org-1', programId: 'prog-1', awardTypeId: 'at-1', recipientUserId: 'user-1', reason: 'x' }),
+      ).rejects.toThrow('audit unavailable');
+    });
+
+    it('audits an approval by the approver, and refuses one that raced with another change', async () => {
+      mocks.mockQueryRecognitionAwards.findFirst.mockResolvedValue({ id: 'award-1', status: 'pending', recipientUserId: 'user-1' });
+      mocks.mockReturning.mockResolvedValueOnce([{ id: 'award-1', status: 'approved' }]);
+      await approveAward({ awardId: 'award-1', orgId: 'org-1', approvedByUserId: 'approver-1' });
+      expect(mocks.mockAudit).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ userId: 'approver-1', action: 'rewards.award.approve', resourceId: 'award-1' }),
+      );
+
+      mocks.mockAudit.mockClear();
+      mocks.mockReturning.mockResolvedValueOnce([]);
+      await expect(
+        approveAward({ awardId: 'award-1', orgId: 'org-1', approvedByUserId: 'approver-1' }),
+      ).rejects.toThrow('changed concurrently');
+      expect(mocks.mockAudit).not.toHaveBeenCalled();
+    });
+
+    it('writes no audit when a rejection matches no pending award', async () => {
+      mocks.mockReturning.mockResolvedValueOnce([]);
+      await expect(rejectAward('award-1', 'org-1', 'officer-1', 'no')).rejects.toThrow('cannot be rejected');
+      expect(mocks.mockAudit).not.toHaveBeenCalled();
+    });
   });
 
   /* ============================= createAwardRequest ============================= */

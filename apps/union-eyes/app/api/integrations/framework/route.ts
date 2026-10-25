@@ -45,9 +45,9 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ body, organizationId }) => {
+  async ({ body, organizationId, userId }) => {
     return {
-      integration: await configureIntegrationForOrg(organizationId!, body),
+      integration: await configureIntegrationForOrg(organizationId!, body, userId!),
     };
   },
 );

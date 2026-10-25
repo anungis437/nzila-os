@@ -43,7 +43,7 @@ describe('voting/verify route', () => {
       (_config: unknown, handler: (ctx: any) => Promise<unknown>) =>
         async (req: NextRequest) => {
           const body = await req.json();
-          const result = await handler({ body });
+          const result = await handler({ body, organizationId: 'org_1' });
           return new Response(JSON.stringify(result), {
             status: 200,
             headers: { 'content-type': 'application/json' },
@@ -60,7 +60,7 @@ describe('voting/verify route', () => {
       isAnonymous: true,
     });
     m.optionFindFirst.mockResolvedValue({ id: 'opt_1', text: 'Yes' });
-    m.sessionFindFirst.mockResolvedValue({ id: 'sess_1', title: 'Ratification Vote' });
+    m.sessionFindFirst.mockResolvedValue({ id: 'sess_1', title: 'Ratification Vote', organizationId: 'org_1' });
   });
 
   it('returns not verified when receipt cannot be found', async () => {
@@ -109,10 +109,9 @@ describe('voting/verify route', () => {
     });
   });
 
-  it('falls back to Unknown labels when option or session is unavailable', async () => {
+  it('falls back to an Unknown label when the option is unavailable', async () => {
     const { POST } = await loadRoute();
     m.optionFindFirst.mockResolvedValueOnce(null);
-    m.sessionFindFirst.mockResolvedValueOnce(null);
 
     const response = await POST(new NextRequest('http://localhost/api/voting/verify', {
       method: 'POST',
@@ -122,7 +121,21 @@ describe('voting/verify route', () => {
     const payload = await response.json();
 
     expect(payload.verified).toBe(true);
-    expect(payload.vote.sessionTitle).toBe('Unknown');
+    expect(payload.vote.sessionTitle).toBe('Ratification Vote');
     expect(payload.vote.optionText).toBe('Unknown');
+  });
+
+  it('reports a receipt from another organization\u2019s session exactly like an unknown receipt', async () => {
+    const { POST } = await loadRoute();
+    m.sessionFindFirst.mockResolvedValueOnce({ id: 'sess_1', title: 'Other org vote', organizationId: 'org_other' });
+
+    const response = await POST(new NextRequest('http://localhost/api/voting/verify', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ receiptId: 'r1' }),
+    }));
+    const payload = await response.json();
+
+    expect(payload).toEqual({ verified: false, reason: 'Receipt not found' });
   });
 });

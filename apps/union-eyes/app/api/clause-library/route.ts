@@ -11,10 +11,11 @@
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
-import { organizations, congressMemberships } from '@/db/schema';
+import { organizations, congressMemberships, collectiveAgreements } from '@/db/schema';
 import { eq, ilike, inArray, sql, and, or, gte, isNull } from 'drizzle-orm';
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
-import { buildClauseVisibilityCondition } from '@/lib/clause-library/sharing-authority';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { buildClauseVisibilityCondition, sharingChangeDenial } from '@/lib/clause-library/sharing-authority';
 
 export const dynamic = 'force-dynamic';
 
@@ -166,8 +167,27 @@ export const POST = withApi(
     if (!userId) throw ApiError.badRequest('Authenticated user is required to create a clause.');
     const body = await request.json();
 
-    return await withRLSContext({ organizationId }, async () => {
-      const [created] = await db
+    const denial = await withSystemContext(() =>
+      sharingChangeDenial(organizationId, {
+        sharingLevel: body.sharingLevel,
+        sharedWithOrgIds: body.sharedWithOrgIds,
+      }),
+    );
+    if (denial) {
+      throw denial.status === 403 ? ApiError.forbidden(denial.message) : ApiError.badRequest(denial.message);
+    }
+
+    return await withRLSContext({ organizationId }, async (tx) => {
+      if (body.sourceCbaId) {
+        const [agreement] = await tx
+          .select({ id: collectiveAgreements.id })
+          .from(collectiveAgreements)
+          .where(and(eq(collectiveAgreements.id, body.sourceCbaId), eq(collectiveAgreements.organizationId, organizationId)))
+          .limit(1);
+        if (!agreement) throw ApiError.notFound('agreement', body.sourceCbaId);
+      }
+
+      const [created] = await tx
         .insert(sharedClauseLibrary)
         .values({
           // sourceOrganizationId is ALWAYS the authenticated caller's own
@@ -193,6 +213,15 @@ export const POST = withApi(
           createdBy: userId,
         })
         .returning();
+
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'clause_library.create',
+        resourceType: 'shared_clause_library',
+        resourceId: created.id,
+        details: { clauseType: created.clauseType, sharingLevel: created.sharingLevel, sourceCbaId: created.sourceCbaId ?? null },
+      });
 
       return { success: true, clause: created };
     });

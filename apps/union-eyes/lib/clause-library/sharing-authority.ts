@@ -116,6 +116,44 @@ export function isSharedClauseOwner(callerOrgId: string, clause: { sourceOrganiz
   return clause.sourceOrganizationId === callerOrgId;
 }
 
+export const SHARING_LEVELS = ['private', 'federation', 'congress', 'public'] as const;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const MAX_EXPLICIT_GRANTS = 200;
+
+/**
+ * Whether the owner organization may set this sharing configuration. A level the organization does not qualify for
+ * (federation without a federation ancestor, congress without an active CLC membership) is refused instead of stored,
+ * so a clause can never be shared at a scope the owner has no standing in. Run under the system role: the checks read
+ * the organization hierarchy across tenants.
+ */
+export async function sharingChangeDenial(
+  ownerOrgId: string,
+  change: { sharingLevel?: unknown; sharedWithOrgIds?: unknown },
+): Promise<{ status: 400 | 403; message: string } | null> {
+  if (change.sharingLevel !== undefined) {
+    if (typeof change.sharingLevel !== 'string' || !(SHARING_LEVELS as readonly string[]).includes(change.sharingLevel)) {
+      return { status: 400, message: `sharingLevel must be one of ${SHARING_LEVELS.join(', ')}` };
+    }
+    if (change.sharingLevel === 'federation' && !(await getFederationAncestorId(ownerOrgId))) {
+      return { status: 403, message: 'Federation sharing requires membership of a federation' };
+    }
+    if (change.sharingLevel === 'congress' && !(await isOrgCongressEligible(ownerOrgId))) {
+      return { status: 403, message: 'Congress sharing requires an active congress membership' };
+    }
+  }
+  if (change.sharedWithOrgIds !== undefined && change.sharedWithOrgIds !== null) {
+    const ids = change.sharedWithOrgIds;
+    if (
+      !Array.isArray(ids) ||
+      ids.length > MAX_EXPLICIT_GRANTS ||
+      !ids.every((id) => typeof id === 'string' && UUID_RE.test(id))
+    ) {
+      return { status: 400, message: 'sharedWithOrgIds must be a list of organization ids' };
+    }
+  }
+  return null;
+}
+
 /**
  * SQL WHERE condition equivalent to `canReadSharedClause` evaluated per row,
  * for LIST/SEARCH/COMPARE queries — avoids fetch-then-filter (which would

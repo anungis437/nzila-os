@@ -9,7 +9,16 @@ const m = vi.hoisted(() => ({
   dataIngestion: { ingest: vi.fn() },
   entityExtraction: { extract: vi.fn() },
   ragPipeline: { addDocuments: vi.fn() },
+  operation: vi.fn(),
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}));
+
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: m.operation,
+  operationAuditResponse: (e: unknown) =>
+    (e as { code?: string })?.code === 'OPERATION_AUDIT_UNAVAILABLE'
+      ? { status: 409, body: { error: { code: 'OPERATION_AUDIT_UNAVAILABLE', message: 'not performed' } } }
+      : null,
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({ withRoleAuth: m.withRoleAuth, BaseAuthContext: {} }));
@@ -54,6 +63,38 @@ describe('ai/ingest route', () => {
       orgs: [{ name: 'ACME Union' }],
     });
     m.ragPipeline.addDocuments.mockResolvedValue(undefined);
+    m.operation.mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn());
+  });
+
+  it('indexes the document under the caller organization after recording the intent', async () => {
+    const { POST } = await loadRoute();
+    const form = new FormData();
+    form.set('file', new File([new Uint8Array([1, 2, 3])], 'doc.txt', { type: 'text/plain' }));
+    form.set('data', JSON.stringify({ source: 'manual-upload', addToRAG: true }));
+
+    const response = await POST(new Request('http://localhost/api/ai/ingest', { method: 'POST', body: form }));
+
+    expect(response.status).toBe(201);
+    expect(m.operation).toHaveBeenCalledWith(
+      expect.objectContaining({ organizationId: 'org_1', userId: 'u1', action: 'ai.ingest.rag_index', resourceId: 'doc_1' }),
+      expect.any(Function),
+    );
+    expect(m.ragPipeline.addDocuments).toHaveBeenCalledWith([
+      expect.objectContaining({ metadata: expect.objectContaining({ organizationId: 'org_1' }) }),
+    ]);
+  });
+
+  it('indexes nothing when the intent cannot be recorded', async () => {
+    const { POST } = await loadRoute();
+    m.operation.mockRejectedValueOnce(Object.assign(new Error('x'), { code: 'OPERATION_AUDIT_UNAVAILABLE' }));
+    const form = new FormData();
+    form.set('file', new File([new Uint8Array([1, 2, 3])], 'doc.txt', { type: 'text/plain' }));
+    form.set('data', JSON.stringify({ source: 'manual-upload', addToRAG: true }));
+
+    const response = await POST(new Request('http://localhost/api/ai/ingest', { method: 'POST', body: form }));
+
+    expect(response.status).toBe(409);
+    expect(m.ragPipeline.addDocuments).not.toHaveBeenCalled();
   });
 
   it('returns 400 when file is missing', async () => {

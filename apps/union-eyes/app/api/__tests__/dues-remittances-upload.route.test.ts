@@ -28,6 +28,11 @@ vi.mock('@/lib/api/framework', () => ({
     externalService: (_svc: string, msg: string) => new TestApiError(msg, 502),
   },
 }));
+const audit = vi.hoisted(() => ({ tx: vi.fn() }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (...args: unknown[]) => (args[args.length - 1] as (tx: unknown) => Promise<unknown>)(m.db),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: audit.tx }));
 vi.mock('@/db', () => ({ db: m.db }));
 vi.mock('drizzle-orm', () => ({ and: vi.fn(), eq: vi.fn() }));
 vi.mock('@/db/schema/dues-finance-schema', () => ({
@@ -68,6 +73,7 @@ describe('dues/remittances/upload route', () => {
     m.putBlob.mockResolvedValue({ pathname: 'remittances/org_1/stored.csv' });
     m.deleteBlob.mockResolvedValue(undefined);
     m.buildUnionEvidencePack.mockResolvedValue(undefined);
+    audit.tx.mockResolvedValue(undefined);
   });
 
   it('is restricted to the financial allow-list, not a minimum role level', async () => {
@@ -181,5 +187,16 @@ describe('dues/remittances/upload route', () => {
 
     expect(result.remittance.id).toBe('rem_1');
     expect(m.logger.warn).toHaveBeenCalled();
+  });
+
+  it('records the upload and its audit together, and removes the preserved bytes when the audit fails', async () => {
+    const { POST } = await loadRoute();
+    await POST(ctx(request(csv(), validMeta)));
+    expect(audit.tx).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'dues.remittance.upload', userId: 'u1', organizationId: 'org_1' }));
+
+    audit.tx.mockRejectedValue(new Error('audit down'));
+    m.deleteBlob.mockClear();
+    await expect(POST(ctx(request(new File(['x,y\n3,4'], 'second.csv', { type: 'text/csv' }), validMeta)))).rejects.toThrow('audit down');
+    expect(m.deleteBlob).toHaveBeenCalledWith('remittances/org_1/stored.csv');
   });
 });

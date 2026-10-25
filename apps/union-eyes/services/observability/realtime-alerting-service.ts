@@ -1,5 +1,6 @@
 import { db } from '@/db';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import {
   alertExecutions,
   alertRules,
@@ -60,7 +61,7 @@ async function getOrCreateRealtimeRule(signal: AlertSignal) {
   return created;
 }
 
-async function emitSignal(signal: AlertSignal) {
+async function emitSignal(signal: AlertSignal, tx: RLSTx) {
   const rule = await getOrCreateRealtimeRule(signal);
 
   const execution = { id: randomUUID() };
@@ -118,6 +119,16 @@ async function emitSignal(signal: AlertSignal) {
       signal: signal.kind,
       executionId: execution.id,
     },
+  });
+
+  // Each organization's alert is audited under that organization, in the sweep's transaction.
+  await persistAtomicAudit(tx, {
+    organizationId: signal.organizationId,
+    userId: 'system:cron:observability-alerts',
+    action: 'observability.alert.emit',
+    resourceType: 'alert_executions',
+    resourceId: execution.id,
+    details: { signal: signal.kind, count: signal.count, severity: signal.severity },
   });
 
   return execution;
@@ -203,7 +214,7 @@ export async function runRealtimeObservabilitySweep(): Promise<EmitResult> {
   };
 
   for (const signal of signals) {
-    await emitSignal(signal);
+    await emitSignal(signal, tx);
     byKind[signal.kind] += 1;
   }
 

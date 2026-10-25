@@ -11,7 +11,8 @@
  * must belong to that same list — round 54/55 route-shape fix.
  */
 import { and, eq, ne } from 'drizzle-orm';
-import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { newsletterDistributionLists, newsletterListSubscribers } from '@/db/schema';
 import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
@@ -27,25 +28,38 @@ export const DELETE = withApi(
       description: 'Unsubscribes a member from a distribution list owned by the caller\u2019s organization.',
     },
   },
-  async ({ params, organizationId }) => {
+  async ({ params, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const { id: listId, subscriberId } = params as { id: string; subscriberId: string };
 
-    const [list] = await db
-      .select({ id: newsletterDistributionLists.id })
-      .from(newsletterDistributionLists)
-      .where(and(eq(newsletterDistributionLists.id, listId), eq(newsletterDistributionLists.organizationId, organizationId!)));
-    if (!list) throw ApiError.notFound('Distribution list not found');
+    const updated = await withRLSContext({ organizationId }, async (tx) => {
+      const [list] = await tx
+        .select({ id: newsletterDistributionLists.id })
+        .from(newsletterDistributionLists)
+        .where(and(eq(newsletterDistributionLists.id, listId), eq(newsletterDistributionLists.organizationId, organizationId)));
+      if (!list) throw ApiError.notFound('Distribution list not found');
 
-    const [updated] = await db
-      .update(newsletterListSubscribers)
-      .set({ status: 'unsubscribed', unsubscribedAt: new Date() })
-      .where(and(
-        eq(newsletterListSubscribers.id, subscriberId),
-        eq(newsletterListSubscribers.listId, listId),
-        ne(newsletterListSubscribers.status, 'unsubscribed'),
-      ))
-      .returning();
-    if (!updated) throw ApiError.notFound('Subscriber not found');
+      const [row] = await tx
+        .update(newsletterListSubscribers)
+        .set({ status: 'unsubscribed', unsubscribedAt: new Date() })
+        .where(and(
+          eq(newsletterListSubscribers.id, subscriberId),
+          eq(newsletterListSubscribers.listId, listId),
+          ne(newsletterListSubscribers.status, 'unsubscribed'),
+        ))
+        .returning();
+      if (!row) throw ApiError.notFound('Subscriber not found');
+
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'communications.list_subscriber.unsubscribe',
+        resourceType: 'newsletter_list_subscribers',
+        resourceId: subscriberId,
+        details: { listId },
+      });
+      return row;
+    });
 
     return { data: updated };
   },

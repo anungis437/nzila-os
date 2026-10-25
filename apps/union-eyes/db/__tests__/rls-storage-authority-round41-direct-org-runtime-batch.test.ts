@@ -126,7 +126,7 @@ describe('round 41 defect fix: policy_rules evaluation is organization-scoped', 
       resolve(APP_ROOT, 'app/api/governance/policies/evaluate/route.ts'),
       'utf8',
     );
-    expect(src).toMatch(/organizationId\s*}\s*\)\s*=>/);
+    expect(src).toMatch(/organizationId[^}]*}\s*\)\s*=>/);
     expect(src).toMatch(/policyEngine\.evaluate\(\s*organizationId/);
   });
 });

@@ -7,13 +7,14 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
+import { withRoleAuth, hasMinRole, BaseAuthContext } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { checkEntitlement } from '@/lib/services/entitlements';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
 import { buildCanonicalAiOutput } from '@nzila/ai-sdk';
 import { db } from '@/db/db';
-import { knowledgeBase } from '@/db/schema';
+import { knowledgeBase, exitInterviews } from '@/db/schema';
+import { SENSITIVITY_MIN_ROLE } from '@/lib/knowledge-transfer/governance/consent-controls';
 import { eq, and } from 'drizzle-orm';
 import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_SYSTEM_ORG_ID, UE_PROFILES } from '@/lib/ai/ai-client';
 import { logger } from '@/lib/logger';
@@ -84,7 +85,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
           eq(knowledgeBase.id, document_id),
           eq(knowledgeBase.isActive, true),
         ),
-        columns: { content: true, title: true, organizationId: true, isPublic: true },
+        columns: { content: true, title: true, organizationId: true, isPublic: true, sourceType: true, sourceId: true },
       });
 
       if (!doc) {
@@ -92,6 +93,22 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       }
       if (doc.organizationId !== orgId && !doc.isPublic) {
         return standardErrorResponse(ErrorCode.FORBIDDEN, 'Access denied to this document');
+      }
+
+      // A knowledge asset made from an exit interview keeps that interview's sensitivity: it is readable only at the
+      // role the interview requires. Anything else about it is reported as not found.
+      if (doc.sourceType === 'exit_interview' && doc.sourceId) {
+        const [interview] = await db
+          .select({ sensitivityLevel: exitInterviews.sensitivityLevel })
+          .from(exitInterviews)
+          .where(and(eq(exitInterviews.id, doc.sourceId), eq(exitInterviews.organizationId, doc.organizationId)))
+          .limit(1);
+        const minRole = interview
+          ? SENSITIVITY_MIN_ROLE[interview.sensitivityLevel as keyof typeof SENSITIVITY_MIN_ROLE]
+          : undefined;
+        if (!minRole || !(await hasMinRole(minRole))) {
+          return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
+        }
       }
 
       textToSummarize = doc.content;

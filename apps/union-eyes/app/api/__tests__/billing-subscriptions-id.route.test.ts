@@ -12,6 +12,7 @@ const m = vi.hoisted(() => {
   return {
     state,
     withApi: vi.fn(),
+    audit: vi.fn(),
     logger: { info: vi.fn() },
     db: {
       select: vi.fn(() => createSelectChain()),
@@ -34,10 +35,16 @@ vi.mock('@/lib/api/framework', () => ({
   ApiError: {
     badRequest: (message: string) => new Error(message),
     notFound: (message: string) => new Error(message),
+    conflict: (message: string) => new Error(message),
   },
   z: require('zod'),
 }));
 vi.mock('@/db', () => ({ db: m.db }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (...args: unknown[]) => (args[args.length - 1] as (tx: unknown) => Promise<unknown>)(m.db),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
+vi.mock('@/lib/finance/financial-authority', () => ({ FINANCIAL_MEMBER_DATA_ROLES: ['secretary_treasurer'] }));
 vi.mock('@/db/schema', () => ({ orgSubscriptions: { id: 'id', organizationId: 'organizationId' } }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('drizzle-orm', async (importOriginal) => {
@@ -55,6 +62,7 @@ describe('billing/subscriptions/[id] route', () => {
     m.state.selectRows = [];
     m.state.updateRows = [];
     m.state.setCalls = [];
+    m.audit.mockResolvedValue(undefined);
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
   });
 
@@ -80,28 +88,66 @@ describe('billing/subscriptions/[id] route', () => {
     expect(result).toMatchObject({ data: { id: 'sub_1', status: 'active' } });
   });
 
-  it('PATCH updates an existing subscription', async () => {
+  it('PATCH updates an existing subscription\'s metadata and audits it on the same transaction', async () => {
     const { PATCH } = await loadRoute();
     m.state.selectRows.push([{ id: 'sub_1' }]);
-    m.state.updateRows.push([{ id: 'sub_1', status: 'paused' }]);
+    m.state.updateRows.push([{ id: 'sub_1', metadata: { note: 'x' } }]);
 
     const result = await PATCH({
       organizationId: 'org_1',
+      userId: 'treasurer',
       params: { id: 'sub_1' },
-      request: { json: async () => ({ status: 'paused' }) },
+      request: { json: async () => ({ metadata: { note: 'x' } }) },
     });
 
-    expect(result).toMatchObject({ data: { id: 'sub_1', status: 'paused' } });
+    expect(result).toMatchObject({ data: { id: 'sub_1' } });
+    expect(m.audit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'billing.subscription.metadata_update', userId: 'treasurer' }));
+  });
+
+  it.each([
+    { status: 'active' },
+    { seatCount: 0 },
+    { localCount: 1 },
+    { moduleList: ['all'] },
+    { discountPercent: '100' },
+    { subsidyAmount: '99999' },
+    { endDate: '2099-01-01' },
+  ])('PATCH refuses the commercial term %j instead of silently ignoring it, and writes nothing', async (body) => {
+    const { PATCH } = await loadRoute();
+    await expect(
+      PATCH({ organizationId: 'org_1', userId: 'treasurer', params: { id: 'sub_1' }, request: { json: async () => body } }),
+    ).rejects.toThrow('Only metadata can be changed here');
+    expect(m.db.update).not.toHaveBeenCalled();
+    expect(m.audit).not.toHaveBeenCalled();
+  });
+
+  it('is restricted to the financial authority, not a minimum role level', async () => {
+    vi.resetModules();
+    m.withApi.mockClear();
+    await loadRoute();
+    const configs = m.withApi.mock.calls.map((c) => c[0] as { auth: { roles?: string[]; minRole?: string } });
+    for (const config of configs.slice(1)) {
+      expect(config.auth.roles).toEqual(['secretary_treasurer']);
+      expect(config.auth.minRole).toBeUndefined();
+    }
+  });
+
+  it('DELETE refuses to cancel an already cancelled subscription', async () => {
+    const { DELETE } = await loadRoute();
+    m.state.selectRows.push([{ id: 'sub_1', status: 'cancelled' }]);
+    await expect(DELETE({ organizationId: 'org_1', userId: 'treasurer', params: { id: 'sub_1' } })).rejects.toThrow('already cancelled');
+    expect(m.audit).not.toHaveBeenCalled();
   });
 
   it('DELETE cancels an existing subscription', async () => {
     const { DELETE } = await loadRoute();
-    m.state.selectRows.push([{ id: 'sub_1' }]);
+    m.state.selectRows.push([{ id: 'sub_1', status: 'active' }]);
     m.state.updateRows.push([{ id: 'sub_1', status: 'cancelled' }]);
 
-    const result = await DELETE({ organizationId: 'org_1', params: { id: 'sub_1' } });
+    const result = await DELETE({ organizationId: 'org_1', userId: 'treasurer', params: { id: 'sub_1' } });
 
     expect(result).toMatchObject({ data: { id: 'sub_1', status: 'cancelled' } });
+    expect(m.audit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'billing.subscription.cancel', details: { from: 'active' } }));
   });
 
   it('round 28: a steward PATCH cannot erase the commercial-terms provenance keys by replacing metadata wholesale', async () => {
@@ -120,6 +166,7 @@ describe('billing/subscriptions/[id] route', () => {
 
     await PATCH({
       organizationId: 'org_1',
+      userId: 'treasurer',
       params: { id: 'sub_1' },
       request: { json: async () => ({ metadata: {} }) },
     });
@@ -146,6 +193,7 @@ describe('billing/subscriptions/[id] route', () => {
 
     await PATCH({
       organizationId: 'org_1',
+      userId: 'treasurer',
       params: { id: 'sub_1' },
       request: {
         json: async () => ({
@@ -178,6 +226,7 @@ describe('billing/subscriptions/[id] route', () => {
 
     await PATCH({
       organizationId: 'org_1',
+      userId: 'treasurer',
       params: { id: 'sub_1' },
       request: { json: async () => ({ metadata: { steward_note: 'renewed manually' } }) },
     });
@@ -196,6 +245,7 @@ describe('billing/subscriptions/[id] route', () => {
 
     await PATCH({
       organizationId: 'org_1',
+      userId: 'treasurer',
       params: { id: 'sub_1' },
       request: { json: async () => ({ metadata: { note: 'updated' } }) },
     });
@@ -206,12 +256,13 @@ describe('billing/subscriptions/[id] route', () => {
   it('PATCH without a metadata field never touches the metadata column at all', async () => {
     const { PATCH } = await loadRoute();
     m.state.selectRows.push([{ id: 'sub_1', metadata: { commercialTermsFingerprint: 'real-fingerprint' } }]);
-    m.state.updateRows.push([{ id: 'sub_1', status: 'paused' }]);
+    m.state.updateRows.push([{ id: 'sub_1' }]);
 
     await PATCH({
       organizationId: 'org_1',
+      userId: 'treasurer',
       params: { id: 'sub_1' },
-      request: { json: async () => ({ status: 'paused' }) },
+      request: { json: async () => ({}) },
     });
 
     expect(m.state.setCalls[0]).not.toHaveProperty('metadata');

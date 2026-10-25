@@ -3,7 +3,10 @@
  * GET  /api/satisfaction — list pending surveys for the current member
  * POST /api/satisfaction — (admin) create a satisfaction survey manually
  */
-import { withApi, z } from '@/lib/api/framework';
+import { withApi, ApiError, z } from '@/lib/api/framework';
+import { and, eq } from 'drizzle-orm';
+import { claims } from '@/db/schema';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import {
   getPendingSurveys,
   createSatisfactionSurvey,
@@ -41,13 +44,34 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ body, organizationId }) => {
-    const survey = await createSatisfactionSurvey({
-      organizationId: organizationId!,
-      claimId: body.claimId,
-      memberId: body.memberId,
-      lroId: body.lroId,
-    });
+  async ({ body, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+
+    // The claim must be this organization's, and the survey must go to the claim's own member.
+    const [claim] = await withRLSContext({ organizationId }, (tx) =>
+      tx
+        .select({ memberId: claims.memberId, assignedTo: claims.assignedTo })
+        .from(claims)
+        .where(and(eq(claims.id, body.claimId), eq(claims.organizationId, organizationId)))
+        .limit(1),
+    );
+    if (!claim) throw ApiError.notFound('Claim');
+    if (claim.memberId !== body.memberId) {
+      throw ApiError.badRequest('The survey can only be sent to the member who filed the claim');
+    }
+    if (claim.assignedTo && claim.assignedTo !== body.lroId) {
+      throw ApiError.badRequest('The survey must rate the representative assigned to the claim');
+    }
+
+    const survey = await createSatisfactionSurvey(
+      {
+        organizationId,
+        claimId: body.claimId,
+        memberId: body.memberId,
+        lroId: body.lroId,
+      },
+      userId,
+    );
     return survey;
   }
 );

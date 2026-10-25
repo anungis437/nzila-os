@@ -6,6 +6,8 @@ const h = vi.hoisted(() => ({
   setCached: vi.fn(),
   embed: vi.fn(),
   error: vi.fn(),
+  audit: vi.fn(),
+  operation: vi.fn(),
 }));
 
 function chain(): Record<string, unknown> {
@@ -18,9 +20,15 @@ function chain(): Record<string, unknown> {
   return c;
 }
 
-vi.mock('@/db/db', () => ({ db: chain() }));
+const tx = chain();
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (_scope: unknown, fn: (t: unknown) => Promise<unknown>) => fn(tx),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.audit }));
+vi.mock('@/lib/audit/operation-audit', () => ({ performAuditedOperation: h.operation }));
 vi.mock('@/db/schema', () => ({
   exitInterviews: new Proxy({}, { get: (_t, p) => String(p) }),
+  exitInterviewEvents: new Proxy({}, { get: (_t, p) => String(p) }),
   knowledgeBase: new Proxy({}, { get: (_t, p) => String(p) }),
 }));
 vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a }));
@@ -51,6 +59,8 @@ beforeEach(() => {
   h.setCached.mockReset().mockResolvedValue(undefined);
   h.embed.mockReset();
   h.error.mockReset();
+  h.audit.mockReset().mockResolvedValue(undefined);
+  h.operation.mockReset().mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn());
 });
 
 describe('lib/knowledge-transfer/indexing/semantic-indexer', () => {
@@ -69,16 +79,25 @@ describe('lib/knowledge-transfer/indexing/semantic-indexer', () => {
     expect(content).not.toContain('## Topics');
   });
 
-  it('indexes a new interview with a cached embedding', async () => {
-    h.queue.push(undefined, [interview()], [{ id: 'kb1' }], undefined);
+  it('indexes a new interview with a cached embedding and audits on the same transaction', async () => {
+    h.queue.push([interview()], [{ id: 'kb1' }], [{ id: 'i1' }]);
     h.getCached.mockResolvedValue([0.1, 0.2]);
     const result = await indexExitInterview('i1', 'org-1', 'user-1');
     expect(result).toEqual({ indexed: true, knowledgeBaseId: 'kb1' });
     expect(h.embed).not.toHaveBeenCalled();
+    expect(h.operation).toHaveBeenCalledWith(
+      expect.objectContaining({ organizationId: 'org-1', userId: 'user-1', action: 'exit_interview.index.embed' }),
+      expect.any(Function),
+    );
+    expect(h.audit).toHaveBeenCalledWith(
+      tx,
+      expect.objectContaining({ organizationId: 'org-1', userId: 'user-1', action: 'exit_interview.index', resourceId: 'i1' }),
+      'success',
+    );
   });
 
   it('upserts an existing kb record and generates embedding via AI', async () => {
-    h.queue.push(undefined, [interview({ knowledgeBaseId: 'kb-existing' })], undefined, undefined);
+    h.queue.push([interview({ knowledgeBaseId: 'kb-existing' })], [{ id: 'kb-existing' }], [{ id: 'i1' }]);
     h.getCached.mockResolvedValue(null);
     h.embed.mockResolvedValue({ embeddings: [[0.5, 0.6]] });
     h.setCached.mockRejectedValue(new Error('cache write failed'));
@@ -88,31 +107,63 @@ describe('lib/knowledge-transfer/indexing/semantic-indexer', () => {
     expect(h.setCached).toHaveBeenCalled();
   });
 
-  it('returns not-found when interview missing', async () => {
-    h.queue.push(undefined, []);
+  it('returns not-found without writing or auditing when the interview is missing in the organization', async () => {
+    h.queue.push([]);
     const result = await indexExitInterview('i1', 'org-1', 'user-1');
     expect(result).toEqual({ indexed: false, reason: 'Interview not found' });
+    expect(h.audit).not.toHaveBeenCalled();
   });
 
-  it('skips blocked sensitivity levels', async () => {
-    h.queue.push(undefined, [interview({ sensitivityLevel: 'legal_sensitive' })], undefined);
+  it('skips blocked sensitivity levels and audits the skip', async () => {
+    h.queue.push([interview({ sensitivityLevel: 'legal_sensitive' })], undefined);
     const result = await indexExitInterview('i1', 'org-1', 'user-1');
     expect(result.indexed).toBe(false);
     expect((result as { reason: string }).reason).toContain('blocks indexing');
+    expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'exit_interview.index.skipped' }), 'success');
+    expect(h.operation).not.toHaveBeenCalled();
   });
 
-  it('skips when consent not granted', async () => {
-    h.queue.push(undefined, [interview({ consentGranted: false })], undefined);
+  it('skips when consent not granted and sends nothing to the AI provider', async () => {
+    h.queue.push([interview({ consentGranted: false })], undefined);
     const result = await indexExitInterview('i1', 'org-1', 'user-1');
     expect(result).toEqual({ indexed: false, reason: 'Retiree consent not granted' });
+    expect(h.operation).not.toHaveBeenCalled();
+    expect(h.embed).not.toHaveBeenCalled();
+  });
+
+  it('does not call the AI provider when the operation intent cannot be recorded', async () => {
+    h.queue.push([interview()], undefined);
+    h.operation.mockRejectedValueOnce(new Error('intent not recorded'));
+    const result = await indexExitInterview('i1', 'org-1', 'user-1');
+    expect(result.indexed).toBe(false);
+    expect(h.embed).not.toHaveBeenCalled();
+    expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'exit_interview.index.failed' }), 'failure');
+  });
+
+  it('does not report success when the audit record of the index cannot be written', async () => {
+    h.queue.push([interview()], [{ id: 'kb1' }], [{ id: 'i1' }], undefined);
+    h.getCached.mockResolvedValue([0.1]);
+    h.audit.mockRejectedValueOnce(new Error('audit down'));
+    const result = await indexExitInterview('i1', 'org-1', 'user-1');
+    expect(result.indexed).toBe(false);
+    expect((result as { reason: string }).reason).toContain('audit down');
+  });
+
+  it('records the requested event in the same transaction as the index', async () => {
+    h.queue.push([interview()], [{ id: 'kb1' }], [{ id: 'i1' }], undefined);
+    h.getCached.mockResolvedValue([0.1]);
+    const result = await indexExitInterview('i1', 'org-1', 'user-1', { eventNotes: 'Manual re-index' });
+    expect(result).toEqual({ indexed: true, knowledgeBaseId: 'kb1' });
+    expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'exit_interview.index' }), 'success');
   });
 
   it('handles errors and marks indexing failed', async () => {
-    h.queue.push(undefined, [interview()], undefined);
+    h.queue.push([interview()], undefined);
     h.getCached.mockRejectedValue(new Error('embed boom'));
     const result = await indexExitInterview('i1', 'org-1', 'user-1');
     expect(result.indexed).toBe(false);
     expect((result as { reason: string }).reason).toContain('embed boom');
     expect(h.error).toHaveBeenCalled();
+    expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'exit_interview.index.failed' }), 'failure');
   });
 });

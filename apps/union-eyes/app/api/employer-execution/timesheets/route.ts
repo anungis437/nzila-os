@@ -1,8 +1,9 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
 import { db } from "@/db";
-import { employerTimesheetBatches, employerTimesheetEntries } from "@/db/schema";
+import { employerTimesheetBatches, employerTimesheetEntries, employers, worksites, bargainingUnits } from "@/db/schema";
 import { withRLSContext } from "@/lib/db/with-rls-context";
-import { desc, eq } from "drizzle-orm";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
+import { and, desc, eq, ne } from "drizzle-orm";
 import { normalizeCsv, sha256 } from "../_lib";
 
 const createSchema = z.object({
@@ -41,11 +42,59 @@ export const POST = withApi(
     successStatus: 201,
   },
   async ({ organizationId, userId, body }) => {
-    if (!organizationId) throw ApiError.badRequest("Organization context required");
+    if (!organizationId || !userId) throw ApiError.badRequest("Organization context required");
 
     const normalized = normalizeCsv(body.csvContent);
+    const sourceFileHash = sha256(body.csvContent);
 
-    const batch = await withRLSContext(async (tx) => {
+    const batch = await withRLSContext({ organizationId }, async (tx) => {
+      // Every structural reference must belong to this organization.
+      const [employer] = await tx
+        .select({ id: employers.id })
+        .from(employers)
+        .where(and(eq(employers.organizationId, organizationId), eq(employers.id, body.employerId)))
+        .limit(1);
+      if (!employer) throw ApiError.notFound("Employer not found");
+
+      if (body.worksiteId) {
+        const [worksite] = await tx
+          .select({ id: worksites.id })
+          .from(worksites)
+          .where(and(eq(worksites.organizationId, organizationId), eq(worksites.id, body.worksiteId)))
+          .limit(1);
+        if (!worksite) throw ApiError.notFound("Worksite not found");
+      }
+
+      if (body.bargainingUnitId) {
+        const [unit] = await tx
+          .select({ id: bargainingUnits.id })
+          .from(bargainingUnits)
+          .where(and(eq(bargainingUnits.organizationId, organizationId), eq(bargainingUnits.id, body.bargainingUnitId)))
+          .limit(1);
+        if (!unit) throw ApiError.notFound("Bargaining unit not found");
+      }
+
+      // The same file for the same employer and period must not feed two payroll runs.
+      const [duplicate] = await tx
+        .select({ id: employerTimesheetBatches.id })
+        .from(employerTimesheetBatches)
+        .where(
+          and(
+            eq(employerTimesheetBatches.organizationId, organizationId),
+            eq(employerTimesheetBatches.employerId, body.employerId),
+            eq(employerTimesheetBatches.sourceFileHash, sourceFileHash),
+            eq(employerTimesheetBatches.periodStart, body.periodStart),
+            eq(employerTimesheetBatches.periodEnd, body.periodEnd),
+            ne(employerTimesheetBatches.status, "rejected"),
+          ),
+        )
+        .limit(1);
+      if (duplicate) {
+        throw ApiError.conflict("This timesheet file was already ingested for the employer and period", {
+          batchId: duplicate.id,
+        });
+      }
+
       const [createdBatch] = await tx
         .insert(employerTimesheetBatches)
         .values({
@@ -55,12 +104,12 @@ export const POST = withApi(
           bargainingUnitId: body.bargainingUnitId,
           batchCode: `ts-${Date.now()}`,
           sourceFileName: body.sourceFileName,
-          sourceFileHash: sha256(body.csvContent),
+          sourceFileHash,
           periodStart: body.periodStart,
           periodEnd: body.periodEnd,
           status: normalized.summary.invalid > 0 ? "rejected" : "validated",
           validationSummary: normalized.summary,
-          uploadedBy: userId ?? undefined,
+          uploadedBy: userId,
         })
         .returning();
 
@@ -85,6 +134,24 @@ export const POST = withApi(
           })),
         );
       }
+
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: "employer_execution.timesheet_batch.ingest",
+        resourceType: "employer_timesheet_batches",
+        resourceId: createdBatch.id,
+        details: {
+          batchCode: createdBatch.batchCode,
+          employerId: body.employerId,
+          periodStart: body.periodStart,
+          periodEnd: body.periodEnd,
+          sourceFileName: body.sourceFileName,
+          sourceFileHash,
+          status: createdBatch.status,
+          summary: normalized.summary,
+        },
+      });
 
       return createdBatch;
     });

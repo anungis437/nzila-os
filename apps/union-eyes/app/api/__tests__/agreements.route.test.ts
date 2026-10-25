@@ -6,6 +6,7 @@ const m = vi.hoisted(() => ({
   withRLSContext: vi.fn(),
   withSystemContext: vi.fn(),
   inserted: null as Record<string, unknown> | null,
+  audit: vi.fn(),
 }));
 
 vi.mock('@/lib/api/framework', () => ({
@@ -20,6 +21,7 @@ vi.mock('@/lib/api/framework', () => ({
   },
 }));
 vi.mock('@/db/db', () => ({ db: m.db }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: m.withRLSContext,
   withSystemContext: m.withSystemContext,
@@ -39,7 +41,8 @@ describe('agreements route', () => {
     vi.clearAllMocks();
     m.inserted = null;
     m.withApi.mockImplementation((_cfg: unknown, handler: any) => (ctx: any = {}) => handler(ctx));
-    m.withRLSContext.mockImplementation(async (_context: { organizationId: string }, fn: any) => fn());
+    m.withRLSContext.mockImplementation(async (_context: { organizationId: string }, fn: any) => fn(m.db));
+    m.audit.mockResolvedValue(undefined);
     m.withSystemContext.mockImplementation(async (fn: any) => fn());
 
     m.db.insert = vi.fn();
@@ -96,6 +99,54 @@ describe('agreements route', () => {
     });
     expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org_1' }, expect.any(Function));
     expect(m.withSystemContext).not.toHaveBeenCalled();
+  });
+
+  it('audits the creation on the same transaction and never publishes at creation', async () => {
+    m.db.insert = vi.fn(() => ({
+      values: vi.fn((vals: Record<string, unknown>) => {
+        m.inserted = vals;
+        return { returning: vi.fn(async () => [{ id: 'a1', cbaNumber: 'C-1', status: 'active' }]) };
+      }),
+    }));
+    const { POST } = await loadRoute();
+    await POST({
+      request: new Request('http://localhost/api/agreements', {
+        method: 'POST',
+        body: JSON.stringify({ title: 'New CBA', isPublic: true }),
+      }),
+      organizationId: 'org_1',
+      userId: 'u1',
+    });
+    expect(m.inserted).toMatchObject({ isPublic: false });
+    expect(m.audit).toHaveBeenCalledWith(
+      m.db,
+      expect.objectContaining({ organizationId: 'org_1', userId: 'u1', action: 'agreement.create', resourceId: 'a1' }),
+    );
+  });
+
+  it('fails the creation when its audit record cannot be written', async () => {
+    m.db.insert = vi.fn(() => ({ values: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 'a1' }]) })) }));
+    m.audit.mockRejectedValueOnce(new Error('audit down'));
+    const { POST } = await loadRoute();
+    await expect(
+      POST({
+        request: new Request('http://localhost/api/agreements', { method: 'POST', body: JSON.stringify({ title: 'x' }) }),
+        organizationId: 'org_1',
+        userId: 'u1',
+      }),
+    ).rejects.toThrow('audit down');
+  });
+
+  it('rejects an unknown status', async () => {
+    const { POST } = await loadRoute();
+    await expect(
+      POST({
+        request: new Request('http://localhost/api/agreements', { method: 'POST', body: JSON.stringify({ status: 'approved' }) }),
+        organizationId: 'org_1',
+        userId: 'u1',
+      }),
+    ).rejects.toMatchObject({ status: 400 });
+    expect(m.audit).not.toHaveBeenCalled();
   });
 
   it('rejects create when organization context is missing', async () => {

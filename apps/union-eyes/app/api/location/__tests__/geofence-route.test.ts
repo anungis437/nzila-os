@@ -4,15 +4,26 @@ import { NextRequest } from 'next/server';
 const m = vi.hoisted(() => ({
   withApiAuth: vi.fn(),
   getCurrentUser: vi.fn(),
+  hasMinRole: vi.fn(),
   getOrganizationIdForUser: vi.fn(),
   createGeofence: vi.fn(),
   checkGeofenceEntry: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   standardErrorResponse: vi.fn(),
   standardSuccessResponse: vi.fn(),
+  tx: { marker: 'tx' },
 }));
 
-vi.mock('@/lib/api-auth-guard', () => ({ withApiAuth: m.withApiAuth, getCurrentUser: m.getCurrentUser }));
+vi.mock('@/lib/api-auth-guard', () => ({
+  withApiAuth: m.withApiAuth,
+  getCurrentUser: m.getCurrentUser,
+  hasMinRole: m.hasMinRole,
+}));
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: vi.fn(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(m.tx)),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/services/geofence-privacy-service', () => ({
   GeofencePrivacyService: {
     createGeofence: m.createGeofence,
@@ -35,6 +46,8 @@ describe('location/geofence route (round 52 — tenant/identity IDOR fix)', () =
     m.withApiAuth.mockImplementation((handler: any) => handler);
     m.getCurrentUser.mockResolvedValue({ id: 'caller-own-id' });
     m.getOrganizationIdForUser.mockResolvedValue('caller-org');
+    m.hasMinRole.mockResolvedValue(true);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.createGeofence.mockResolvedValue({ id: 'g1' });
     m.checkGeofenceEntry.mockResolvedValue({ inside: true, distance: 1 });
     m.standardErrorResponse.mockImplementation((code: string, message: string) =>
@@ -60,7 +73,38 @@ describe('location/geofence route (round 52 — tenant/identity IDOR fix)', () =
     expect(m.createGeofence).toHaveBeenCalledWith(
       expect.not.objectContaining({ unionLocalId: expect.anything() }),
       'caller-org',
+      m.tx,
     );
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      m.tx,
+      expect.objectContaining({ organizationId: 'caller-org', userId: 'caller-own-id', action: 'location.geofence.create', resourceId: 'g1' }),
+    );
+  });
+
+  it('POST refuses a member who lacks steward authority, creating nothing', async () => {
+    const { POST } = await loadRoute();
+    m.hasMinRole.mockResolvedValueOnce(false);
+
+    const response = await POST(new NextRequest('http://localhost/api/location/geofence', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Hall', geofenceType: 'union_hall', centerLatitude: 45.5, centerLongitude: -73.6, radiusMeters: 50 }),
+    }));
+
+    expect(response.status).toBe(403);
+    expect(m.createGeofence).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('POST does not report a created geofence when its audit cannot be written', async () => {
+    const { POST } = await loadRoute();
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+
+    const response = await POST(new NextRequest('http://localhost/api/location/geofence', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Hall', geofenceType: 'union_hall', centerLatitude: 45.5, centerLongitude: -73.6, radiusMeters: 50 }),
+    }));
+
+    expect(response.status).toBe(500);
   });
 
   it('POST returns 401 when unauthenticated', async () => {

@@ -7,13 +7,15 @@
 import { NextResponse } from "next/server";
 import {
   listBargainingNotes,
-  createBargainingNote,
-  bulkCreateBargainingNotes,
   getBargainingTimeline,
   getBargainingNotesStatistics,
-  getNotesByTags,
   getSessionTypes,
 } from "@/lib/services/bargaining-notes-service";
+import {
+  createBargainingNoteAudited,
+  ForeignAgreementError,
+} from "@/lib/services/bargaining-notes-audited-service";
+import { getCbaForOrganization } from "@/lib/services/cba-audited-service";
 import { z } from "zod";
 import { withRoleAuth } from '@/lib/api-auth-guard';
 
@@ -29,6 +31,11 @@ import {
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 export const GET = withRoleAuth('member', async (request, context) => {
+  const { userId } = context;
+  const organizationId = context.organizationId;
+  if (!organizationId || !userId) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, 'No active organization');
+  }
   try {
       const { searchParams } = new URL(request.url);
       
@@ -37,14 +44,18 @@ export const GET = withRoleAuth('member', async (request, context) => {
       const statistics = searchParams.get("statistics") === "true";
       const sessionTypes = searchParams.get("sessionTypes") === "true";
       const cbaId = searchParams.get("cbaId");
-      const organizationId = searchParams.get("organizationId");
-  if (organizationId && organizationId !== context.organizationId) {
+      const requestedOrganizationId = searchParams.get("organizationId");
+  if (requestedOrganizationId && requestedOrganizationId !== organizationId) {
     return standardErrorResponse(
       ErrorCode.FORBIDDEN,
       'Forbidden'
     );
   }
 
+      // An agreement outside the caller's organization is not found
+      if (cbaId && !(await getCbaForOrganization(organizationId, cbaId))) {
+        return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'CBA not found');
+      }
 
       // Return timeline
       if (timeline && cbaId) {
@@ -53,36 +64,35 @@ export const GET = withRoleAuth('member', async (request, context) => {
       }
 
       // Return statistics
-      if (statistics && organizationId) {
+      if (statistics) {
         const stats = await getBargainingNotesStatistics(organizationId);
         return NextResponse.json(stats);
       }
 
       // Return session types
-      if (sessionTypes && organizationId) {
+      if (sessionTypes) {
         const types = await getSessionTypes(organizationId);
         return NextResponse.json({ sessionTypes: types });
       }
 
+      // Privileged session notes stay with their author; everyone else sees public and internal notes only
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const filters: Record<string, any> = { organizationId, visibleToUserId: userId };
+
       // Check for tags filter
       const tags = searchParams.get("tags");
       if (tags) {
-        const tagArray = tags.split(",");
         const limit = parseInt(searchParams.get("limit") || "50");
-        const notes = await getNotesByTags(tagArray, organizationId || undefined, limit);
+        const { notes } = await listBargainingNotes(
+          { ...filters, tags: tags.split(",") },
+          { limit },
+        );
         return NextResponse.json({ notes, count: notes.length });
       }
 
       // Build filters
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const filters: Record<string, any> = {};
-      
       if (cbaId) {
         filters.cbaId = cbaId;
-      }
-
-      if (organizationId) {
-        filters.organizationId = organizationId;
       }
 
       const sessionType = searchParams.get("sessionType");
@@ -135,7 +145,7 @@ return standardErrorResponse(
 
 
 const bargainingNotesSchema = z.object({
-  organizationId: z.string().uuid('Invalid organizationId'),
+  organizationId: z.string().uuid('Invalid organizationId').optional(),
   cbaId: z.string().uuid().optional(),
   sessionDate: z.coerce.date(),
   sessionType: z.string().max(100),
@@ -154,7 +164,10 @@ const bargainingNotesSchema = z.object({
 });
 
 export const POST = withRoleAuth('steward', async (request, context) => {
-    const { userId } = context;
+    const { userId, organizationId: contextOrganizationId } = context;
+    if (!userId || !contextOrganizationId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'No active organization');
+    }
 
   try {
       const body = await request.json();
@@ -167,45 +180,25 @@ export const POST = withRoleAuth('steward', async (request, context) => {
         validation.error.errors
       );
     }
-    
-    const { organizationId: _organizationId, sessionDate: _sessionDate, sessionType: _sessionType, title: _title, content: _content } = validation.data;
 
-      // Check if bulk create
-      if (Array.isArray(body)) {
-        // Validate all required fields
-        for (const note of body) {
-          if (!note.organizationId || !note.sessionDate || !note.sessionType || !note.title || !note.content) {
-            return NextResponse.json(
-              { error: "All notes must have organizationId, sessionDate, sessionType, title, and content" },
-              { status: 400 }
-            );
-          }
-        }
+    const { organizationId: requestedOrganizationId, ...noteData } = validation.data;
+    if (requestedOrganizationId && requestedOrganizationId !== contextOrganizationId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Forbidden');
+    }
 
-        // Add createdBy to all notes
-        const notesWithUser = body.map(note => ({
-          ...note,
-          createdBy: userId,
-          lastModifiedBy: userId
-        }));
-
-        const notes = await bulkCreateBargainingNotes(notesWithUser);
-        return standardSuccessResponse(
-      {  notes, count: notes.length  }
-    );
-      }
-
-      // Create note
-      const note = await createBargainingNote({
-        ...validation.data,
-        createdBy: userId!,
-        lastModifiedBy: userId!,
-      });
+      // Create note in the caller's organization
+      const note = await createBargainingNoteAudited(
+        { organizationId: contextOrganizationId, userId },
+        noteData,
+      );
 
       return standardSuccessResponse(
       {  note  }
     );
     } catch (error) {
+      if (error instanceof ForeignAgreementError) {
+        return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'CBA not found');
+      }
 return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Internal server error',

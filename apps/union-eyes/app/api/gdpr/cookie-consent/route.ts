@@ -7,7 +7,11 @@
 import { z } from 'zod';
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from '@/lib/api-auth-guard';
-import { CookieConsentManager } from "@/lib/gdpr/consent-manager";
+import { withSystemContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { organizations } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import { CookieConsentManager, CookieConsentOwnershipError } from "@/lib/gdpr/consent-manager";
 import { logger } from '@/lib/logger';
 
 const gdprCookieConsentSchema = z.object({
@@ -37,20 +41,49 @@ export const POST = async (request: NextRequest) => {
                       request.headers.get("x-real-ip") || 
                       "unknown";
 
-    const consent = await CookieConsentManager.saveCookieConsent({
-      userId,
-      organizationId,
-      consentId,
-      essential: essential ?? true,
-      functional: functional ?? false,
-      analytics: analytics ?? false,
-      marketing: marketing ?? false,
-      ipAddress,
-      userAgent,
-    });
+    // Anonymous visitors have no organization binding, so the write and its audit run on the system connection; the
+    // organization the banner names must exist, and a record held by a signed-in member cannot be changed by others.
+    const result = await withSystemContext(async (tx) => {
+      const [organization] = await tx
+        .select({ id: organizations.id })
+        .from(organizations)
+        .where(eq(organizations.id, organizationId))
+        .limit(1);
+      if (!organization) return { error: 'organization' as const };
 
-    return NextResponse.json(consent);
+      const consent = await CookieConsentManager.saveCookieConsent({
+        userId,
+        organizationId,
+        consentId,
+        essential: essential ?? true,
+        functional: functional ?? false,
+        analytics: analytics ?? false,
+        marketing: marketing ?? false,
+        ipAddress,
+        userAgent,
+      }, tx);
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId: userId ?? 'system:cookie-consent',
+        action: 'gdpr.cookie_consent.save',
+        resourceType: 'cookie_consents',
+        resourceId: consent.id,
+        details: {
+          functional: consent.functional,
+          analytics: consent.analytics,
+          marketing: consent.marketing,
+          authenticated: !!userId,
+        },
+      });
+      return { consent };
+    });
+    if ('error' in result) return NextResponse.json({ error: 'Invalid request data' }, { status: 400 });
+
+    return NextResponse.json(result.consent);
   } catch (error) {
+    if (error instanceof CookieConsentOwnershipError) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
     logger.error('[cookie-consent] POST error', { error });
     return NextResponse.json({ error: 'Failed to save cookie consent' }, { status: 500 });
   }

@@ -50,11 +50,22 @@ vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
+const { audit, operation } = vi.hoisted(() => ({ audit: vi.fn(), operation: vi.fn() }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) =>
+    fn({ insert: () => ({ values: mockInsertValues }) }),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: audit }));
+vi.mock('@/lib/audit/operation-audit', () => ({ performAuditedOperation: operation }));
+
+
 import { analyzeGrievance } from '../grievance-triage';
 
 describe('analyzeGrievance', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    audit.mockResolvedValue(undefined);
+    operation.mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn());
     mockFindFirst.mockResolvedValue({
       id: 'grv-1',
       organizationId: 'org-1',
@@ -94,12 +105,37 @@ describe('analyzeGrievance', () => {
     })).rejects.toThrow('not found');
   });
 
-  it('calls AI client with generate', async () => {
+  it('calls AI client with generate through the audited operation', async () => {
     await analyzeGrievance({
       grievanceId: 'grv-1',
       organizationId: 'org-1',
       userId: 'user-1',
     });
     expect(mockGenerate).toHaveBeenCalledOnce();
+    expect(operation).toHaveBeenCalledWith(
+      expect.objectContaining({ organizationId: 'org-1', userId: 'user-1', action: 'ai.grievance_triage.generate', resourceId: 'grv-1' }),
+      expect.any(Function),
+    );
+  });
+
+  it('persists the triage with its audit record on the same transaction', async () => {
+    await analyzeGrievance({ grievanceId: 'grv-1', organizationId: 'org-1', userId: 'user-1' });
+    expect(mockInsertValues).toHaveBeenCalledWith(expect.objectContaining({ organizationId: 'org-1', status: 'pending' }));
+    expect(audit).toHaveBeenCalledWith(
+      expect.objectContaining({ insert: expect.any(Function) }),
+      expect.objectContaining({ organizationId: 'org-1', userId: 'user-1', action: 'ai.grievance_triage.create' }),
+    );
+  });
+
+  it('sends nothing to the provider and stores nothing when the operation intent cannot be recorded', async () => {
+    operation.mockRejectedValueOnce(new Error('intent not recorded'));
+    await expect(analyzeGrievance({ grievanceId: 'grv-1', organizationId: 'org-1', userId: 'user-1' })).rejects.toThrow('intent not recorded');
+    expect(mockGenerate).not.toHaveBeenCalled();
+    expect(mockInsertValues).not.toHaveBeenCalled();
+  });
+
+  it('does not keep a triage whose audit record cannot be written', async () => {
+    audit.mockRejectedValueOnce(new Error('audit down'));
+    await expect(analyzeGrievance({ grievanceId: 'grv-1', organizationId: 'org-1', userId: 'user-1' })).rejects.toThrow('audit down');
   });
 });

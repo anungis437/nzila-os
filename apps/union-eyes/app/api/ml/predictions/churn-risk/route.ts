@@ -1,4 +1,6 @@
 ﻿import { z } from 'zod';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { getCurrentUser, withRoleAuth } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { enforceAISafety } from '@nzila/policies';
@@ -400,8 +402,9 @@ export const POST = withRoleAuth('officer', async (request, _context) => {
       interventions.push('ðŸ“… Provide case status updates and timeline clarity');
     }
 
-    // Save prediction
-    await db.execute(sql`
+    // The stored prediction and its audit record commit together
+    await withRLSContext({ organizationId: organizationScopeId }, async (tx) => {
+    const saved = await tx.execute(sql`
       INSERT INTO ml_predictions (
         organization_id,
         user_id,
@@ -441,7 +444,17 @@ export const POST = withRoleAuth('officer', async (request, _context) => {
           }
         })}
       )
+      RETURNING id
     `);
+    await persistAtomicAudit(tx, {
+      organizationId: organizationScopeId,
+      userId: userId ?? null,
+      action: 'ml.churn_risk.predict',
+      resourceType: 'ml_predictions',
+      resourceId: (saved as unknown as Array<{ id?: string }>)[0]?.id,
+      details: { memberId, riskLevel, modelVersion: mlPrediction.modelVersion },
+    });
+    });
 
     const lastActivity = new Date();
     lastActivity.setDate(lastActivity.getDate() - daysSinceLastActivity);

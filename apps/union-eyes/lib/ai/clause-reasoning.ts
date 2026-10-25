@@ -13,8 +13,12 @@
  * @module lib/ai/clause-reasoning
  */
 
+import { randomUUID } from 'crypto';
 import { db } from '@/db/db';
 import { eq, and, desc } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { performAuditedOperation } from '@/lib/audit/operation-audit';
 import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { aiClauseReasonings, type AiClauseReasoningInsert } from '@/db/schema/domains/ml/ai-clause-reasoning';
 import { grievances } from '@/db/schema/domains/claims/grievances';
@@ -71,17 +75,28 @@ export async function suggestClausesForGrievance(
     throw new Error(`Grievance ${grievanceId} not found in org ${organizationId}`);
   }
 
-  // 2. Call AI
+  // 2. Call AI. The provider call cannot share a database transaction: its intent is recorded first and the call is
+  // skipped if that record cannot be written.
   const ai = getAiClient();
   const prompt = buildClausePrompt(grievance);
-  const aiResult = await ai.generate({
-    orgId: UE_SYSTEM_ORG_ID,
-    trace: buildOrgAiTrace(organizationId),
-    appKey: UE_APP_KEY,
-    profileKey: UE_PROFILES.CLAUSE_REASONING,
-    input: prompt,
-    dataClass: 'internal',
-  });
+  const aiResult = await performAuditedOperation(
+    {
+      organizationId,
+      userId,
+      action: 'ai.clause_reasoning.generate',
+      resourceType: 'grievances',
+      resourceId: grievanceId,
+    },
+    () =>
+      ai.generate({
+        orgId: UE_SYSTEM_ORG_ID,
+        trace: buildOrgAiTrace(organizationId),
+        appKey: UE_APP_KEY,
+        profileKey: UE_PROFILES.CLAUSE_REASONING,
+        input: prompt,
+        dataClass: 'internal',
+      }),
+  );
 
   // 3. Parse
   const parsed = parseClauseResponse(aiResult.content ?? '');
@@ -98,31 +113,45 @@ export async function suggestClausesForGrievance(
     modelVersion: MODEL_VERSION,
   });
 
-  // 5. Persist each suggestion
-  for (const clause of parsed.result.suggestedClauses) {
-    const insert: AiClauseReasoningInsert = {
+  // 5. Persist every suggestion with one audit record, in one transaction
+  const suggestionIds: string[] = [];
+  await withRLSContext({ organizationId }, async (tx) => {
+    for (const clause of parsed.result.suggestedClauses) {
+      const id = randomUUID();
+      suggestionIds.push(id);
+      const insert: AiClauseReasoningInsert = {
+        id,
+        organizationId,
+        grievanceId,
+        cbaId: grievance.cbaId,
+        clauseArticle: clause.clauseArticle,
+        clauseSection: clause.clauseSection,
+        clauseTitle: clause.clauseTitle,
+        clauseSnippet: clause.clauseSnippet,
+        relevanceScore: clause.relevanceScore.toFixed(4),
+        reasoning: clause.reasoning,
+        applicationNotes: clause.applicationNotes,
+        strengthAssessment: clause.strengthAssessment,
+        precedentRefs: clause.precedentRefs,
+        confidence: parsed.confidence.toFixed(4),
+        explanation: parsed.explanation,
+        factorsJson: [],
+        modelVersion: MODEL_VERSION,
+        profileKey: UE_PROFILES.CLAUSE_REASONING,
+        auditRef,
+        status: 'suggested',
+      };
+      await tx.insert(aiClauseReasonings).values(insert);
+    }
+    await persistAtomicAudit(tx, {
       organizationId,
-      grievanceId,
-      cbaId: grievance.cbaId,
-      clauseArticle: clause.clauseArticle,
-      clauseSection: clause.clauseSection,
-      clauseTitle: clause.clauseTitle,
-      clauseSnippet: clause.clauseSnippet,
-      relevanceScore: clause.relevanceScore.toFixed(4),
-      reasoning: clause.reasoning,
-      applicationNotes: clause.applicationNotes,
-      strengthAssessment: clause.strengthAssessment,
-      precedentRefs: clause.precedentRefs,
-      confidence: parsed.confidence.toFixed(4),
-      explanation: parsed.explanation,
-      factorsJson: [],
-      modelVersion: MODEL_VERSION,
-      profileKey: UE_PROFILES.CLAUSE_REASONING,
-      auditRef,
-      status: 'suggested',
-    };
-    await db.insert(aiClauseReasonings).values(insert);
-  }
+      userId,
+      action: 'ai.clause_reasoning.create',
+      resourceType: 'ai_clause_reasonings',
+      resourceId: grievanceId,
+      details: { grievanceId, suggestionIds, auditRef },
+    });
+  });
 
   return buildAiEnvelope(parsed.result, {
     confidence: parsed.confidence,
@@ -154,14 +183,25 @@ export async function explainClauseRelevance(
     'Return JSON: { reasoning: string, strength: "strong"|"moderate"|"weak", confidence: number, explanation: string }',
   ].join('\n');
 
-  const aiResult = await ai.generate({
-    orgId: UE_SYSTEM_ORG_ID,
-    trace: buildOrgAiTrace(organizationId),
-    appKey: UE_APP_KEY,
-    profileKey: UE_PROFILES.CLAUSE_REASONING,
-    input: prompt,
-    dataClass: 'internal',
-  });
+  const aiResult = await performAuditedOperation(
+    {
+      organizationId,
+      userId,
+      action: 'ai.clause_reasoning.explain',
+      resourceType: 'grievances',
+      resourceId: grievanceId,
+      details: { clauseArticle },
+    },
+    () =>
+      ai.generate({
+        orgId: UE_SYSTEM_ORG_ID,
+        trace: buildOrgAiTrace(organizationId),
+        appKey: UE_APP_KEY,
+        profileKey: UE_PROFILES.CLAUSE_REASONING,
+        input: prompt,
+        dataClass: 'internal',
+      }),
+  );
 
   const json = safeJsonParse(aiResult.content ?? '') as Record<string, unknown>;
   const confidence = typeof json.confidence === 'number' ? json.confidence : 0.5;
@@ -213,40 +253,58 @@ export async function reviewClauseReasoning(opts: {
 }): Promise<void> {
   const { clauseReasoningId, organizationId, reviewedBy, action } = opts;
 
-  const [existing] = await db
-    .select({ id: aiClauseReasonings.id, status: aiClauseReasonings.status })
-    .from(aiClauseReasonings)
-    .where(
-      and(
-        eq(aiClauseReasonings.id, clauseReasoningId),
-        eq(aiClauseReasonings.organizationId, organizationId),
-      ),
-    )
-    .limit(1);
+  // The read, the guard, the update and the audit record share one transaction
+  await withRLSContext({ organizationId }, async (tx) => {
+    const [existing] = await tx
+      .select({ id: aiClauseReasonings.id, status: aiClauseReasonings.status })
+      .from(aiClauseReasonings)
+      .where(
+        and(
+          eq(aiClauseReasonings.id, clauseReasoningId),
+          eq(aiClauseReasonings.organizationId, organizationId),
+        ),
+      )
+      .limit(1);
 
-  if (!existing) {
-    throw new Error(`Clause reasoning ${clauseReasoningId} not found in org ${organizationId}`);
-  }
-  if (existing.status !== 'suggested') {
-    throw new Error(
-      `Clause reasoning ${clauseReasoningId} is already '${existing.status}' and cannot be re-reviewed.`,
-    );
-  }
+    if (!existing) {
+      throw new Error(`Clause reasoning ${clauseReasoningId} not found in org ${organizationId}`);
+    }
+    if (existing.status !== 'suggested') {
+      throw new Error(
+        `Clause reasoning ${clauseReasoningId} is already '${existing.status}' and cannot be re-reviewed.`,
+      );
+    }
 
-  await db
-    .update(aiClauseReasonings)
-    .set({
-      status: action,
-      reviewedBy,
-      reviewedAt: new Date(),
-      humanApproved: action === 'accepted',
-    })
-    .where(
-      and(
-        eq(aiClauseReasonings.id, clauseReasoningId),
-        eq(aiClauseReasonings.organizationId, organizationId),
-      ),
-    );
+    // The suggested predicate keeps a concurrent review from being overwritten
+    const [reviewed] = await tx
+      .update(aiClauseReasonings)
+      .set({
+        status: action,
+        reviewedBy,
+        reviewedAt: new Date(),
+        humanApproved: action === 'accepted',
+      })
+      .where(
+        and(
+          eq(aiClauseReasonings.id, clauseReasoningId),
+          eq(aiClauseReasonings.organizationId, organizationId),
+          eq(aiClauseReasonings.status, 'suggested'),
+        ),
+      )
+      .returning({ id: aiClauseReasonings.id });
+    if (!reviewed) {
+      throw new Error(`Clause reasoning ${clauseReasoningId} was reviewed concurrently and cannot be re-reviewed.`);
+    }
+
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId: reviewedBy,
+      action: 'ai.clause_reasoning.review',
+      resourceType: 'ai_clause_reasonings',
+      resourceId: clauseReasoningId,
+      details: { decision: action },
+    });
+  });
 }
 
 /**

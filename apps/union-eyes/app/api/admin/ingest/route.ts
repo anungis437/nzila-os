@@ -20,6 +20,7 @@ import {
   ingestGrievanceBatch,
   type IngestionGrievanceRecord,
 } from '@/lib/ingestion';
+import { performAuditedOperation, OperationAuditError } from '@/lib/audit/operation-audit';
 import { verifyImportBatch, type VerificationResult } from '@/lib/ingestion/post-import-verification';
 
 const timelineEventSchema = z.object({
@@ -92,15 +93,36 @@ export const POST = withApi(
       );
     }
 
-    const result = await withSystemContext(async () =>
-      ingestGrievanceBatch(body.records as IngestionGrievanceRecord[], {
-        organizationId,
-        sourceSystem: body.source_system,
-        createdBy: userId ?? 'system',
-        dryRun: body.dry_run,
-        continueOnError: body.continue_on_error,
-      }),
-    );
+    const ingest = () =>
+      withSystemContext(async () =>
+        ingestGrievanceBatch(body.records as IngestionGrievanceRecord[], {
+          organizationId,
+          sourceSystem: body.source_system,
+          createdBy: userId ?? 'system',
+          dryRun: body.dry_run,
+          continueOnError: body.continue_on_error,
+        }),
+      );
+
+    // A real import creates cases in bulk: the intent is recorded before any case exists. A dry run writes nothing.
+    let result: Awaited<ReturnType<typeof ingest>>;
+    try {
+      result = body.dry_run
+        ? await ingest()
+        : await performAuditedOperation(
+            {
+              organizationId,
+              userId,
+              action: 'admin.case_ingest',
+              resourceType: 'ingestion_batch',
+              details: { sourceSystem: body.source_system, recordCount: body.records.length, continueOnError: body.continue_on_error },
+            },
+            ingest,
+          );
+    } catch (error) {
+      if (error instanceof OperationAuditError) throw ApiError.conflict(error.message);
+      throw error;
+    }
 
     // Post-import verification for non-dry-run completed batches
     let verification: VerificationResult | null = null;

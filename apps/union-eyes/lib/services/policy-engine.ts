@@ -14,6 +14,8 @@ import {
 } from '@/db/schema/policy-engine-schema';
 import { eq, and, lte, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 interface EvaluationContext {
   subjectType: 'member' | 'user' | 'organization' | 'action';
@@ -81,7 +83,8 @@ export class PolicyEngine {
     organizationId: string,
     ruleType: string,
     category: string,
-    context: EvaluationContext
+    context: EvaluationContext,
+    actorUserId?: string
   ): Promise<EvaluationResult> {
     try {
       // Get active rules for this type and category
@@ -138,21 +141,37 @@ export class PolicyEngine {
         applicableRules: rules.map(r => r.id),
       };
       
-      // Log evaluation for each rule
-      await Promise.all(
-        rules.map((rule, index) =>
-          db.insert(policyEvaluations).values({
-            ruleId: rule.id,
+      // The evaluation records and their audit entry commit together: a decision is never made without its record.
+      await withRLSContext({ organizationId }, async (tx) => {
+        await Promise.all(
+          rules.map((rule, index) =>
+            tx.insert(policyEvaluations).values({
+              ruleId: rule.id,
+              subjectType: context.subjectType,
+              subjectId: context.subjectId,
+              inputData: context.inputData,
+              passed: results[index].passed,
+              failureReason: results[index].failureReason,
+              actionTaken: result.actionTaken,
+              context: context.context || {},
+            })
+          )
+        );
+        await persistAtomicAudit(tx, {
+          organizationId,
+          userId: actorUserId ?? 'system:policy-engine',
+          action: 'policy.evaluate',
+          resourceType: 'policy_evaluations',
+          resourceId: context.subjectId,
+          details: {
+            ruleType,
+            category,
             subjectType: context.subjectType,
-            subjectId: context.subjectId,
-            inputData: context.inputData,
-            passed: results[index].passed,
-            failureReason: results[index].failureReason,
             actionTaken: result.actionTaken,
-            context: context.context || {},
-          })
-        )
-      );
+            ruleIds: rules.map((rule) => rule.id),
+          },
+        });
+      });
       
       return result;
     } catch (error) {

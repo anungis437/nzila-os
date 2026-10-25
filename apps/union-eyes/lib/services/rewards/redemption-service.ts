@@ -1,6 +1,6 @@
 /**
  * Redemption Service
- * Handles member redemption lifecycle
+ * Handles member redemption lifecycle. Every state change commits with its audit record in one transaction.
  */
 
 import { db } from '@/db';
@@ -8,8 +8,9 @@ import {
   rewardRedemptions,
   type RewardRedemption,
 } from '@/db/schema';
-import { eq, and, desc, count } from 'drizzle-orm';
+import { eq, and, desc, count, inArray } from 'drizzle-orm';
 import { applyLedgerEntry } from './wallet-service';
+import { auditRewards, rewardsActor } from './audit';
 
 export interface InitiateRedemptionOptions {
   orgId: string;
@@ -56,6 +57,15 @@ export async function initiateRedemption(
       })
       .returning();
 
+    await auditRewards(tx, {
+      organizationId: orgId,
+      userId,
+      action: 'rewards.redemption.initiate',
+      resourceType: 'reward_redemptions',
+      resourceId: redemption.id,
+      details: { programId, provider, creditsSpent: creditsToSpend },
+    });
+
     return redemption;
   });
 }
@@ -68,28 +78,41 @@ export async function updateRedemptionCheckout(
   redemptionId: string,
   orgId: string,
   checkoutId: string,
-  checkoutUrl: string
+  checkoutUrl: string,
+  actorUserId?: string
 ): Promise<RewardRedemption> {
-  const [updated] = await db
-    .update(rewardRedemptions)
-    .set({
-      providerCheckoutId: checkoutId,
-      status: 'pending_payment',
-      providerPayloadJson: {
-        checkoutId,
-        checkoutUrl,
-      },
-      updatedAt: new Date(),
-    })
-    .where(
-      and(
-        eq(rewardRedemptions.id, redemptionId),
-        eq(rewardRedemptions.orgId, orgId)
+  return await db.transaction(async (tx) => {
+    const [updated] = await tx
+      .update(rewardRedemptions)
+      .set({
+        providerCheckoutId: checkoutId,
+        status: 'pending_payment',
+        providerPayloadJson: {
+          checkoutId,
+          checkoutUrl,
+        },
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(rewardRedemptions.id, redemptionId),
+          eq(rewardRedemptions.orgId, orgId),
+          eq(rewardRedemptions.status, 'initiated')
+        )
       )
-    )
-    .returning();
+      .returning();
+    if (!updated) throw new Error('Redemption not found or not awaiting checkout');
 
-  return updated;
+    await auditRewards(tx, {
+      organizationId: orgId,
+      userId: rewardsActor(actorUserId),
+      action: 'rewards.redemption.checkout',
+      resourceType: 'reward_redemptions',
+      resourceId: redemptionId,
+      details: { checkoutId },
+    });
+    return updated;
+  });
 }
 
 /**
@@ -100,25 +123,38 @@ export async function markRedemptionOrdered(
   redemptionId: string,
   orgId: string,
   orderId: string,
-  orderPayload: Record<string, unknown>
+  orderPayload: Record<string, unknown>,
+  actorUserId?: string
 ): Promise<RewardRedemption> {
-  const [updated] = await db
-    .update(rewardRedemptions)
-    .set({
-      status: 'ordered',
-      providerOrderId: orderId,
-      providerPayloadJson: orderPayload,
-      updatedAt: new Date(),
-    })
-    .where(
-      and(
-        eq(rewardRedemptions.id, redemptionId),
-        eq(rewardRedemptions.orgId, orgId)
+  return await db.transaction(async (tx) => {
+    const [updated] = await tx
+      .update(rewardRedemptions)
+      .set({
+        status: 'ordered',
+        providerOrderId: orderId,
+        providerPayloadJson: orderPayload,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(rewardRedemptions.id, redemptionId),
+          eq(rewardRedemptions.orgId, orgId),
+          inArray(rewardRedemptions.status, ['initiated', 'pending_payment'])
+        )
       )
-    )
-    .returning();
+      .returning();
+    if (!updated) throw new Error('Redemption not found or not awaiting payment');
 
-  return updated;
+    await auditRewards(tx, {
+      organizationId: orgId,
+      userId: rewardsActor(actorUserId, 'system:shopify-webhook'),
+      action: 'rewards.redemption.ordered',
+      resourceType: 'reward_redemptions',
+      resourceId: redemptionId,
+      details: { orderId },
+    });
+    return updated;
+  });
 }
 
 /**
@@ -128,24 +164,43 @@ export async function markRedemptionOrdered(
 export async function markRedemptionFulfilled(
   redemptionId: string,
   orgId: string,
-  fulfillmentPayload: Record<string, unknown>
+  fulfillmentPayload: Record<string, unknown>,
+  actorUserId?: string
 ): Promise<RewardRedemption> {
-  const [updated] = await db
-    .update(rewardRedemptions)
-    .set({
-      status: 'fulfilled',
-      providerPayloadJson: fulfillmentPayload,
-      updatedAt: new Date(),
-    })
-    .where(
-      and(
-        eq(rewardRedemptions.id, redemptionId),
-        eq(rewardRedemptions.orgId, orgId)
+  return await db.transaction(async (tx) => {
+    const [updated] = await tx
+      .update(rewardRedemptions)
+      .set({
+        status: 'fulfilled',
+        providerPayloadJson: fulfillmentPayload,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(rewardRedemptions.id, redemptionId),
+          eq(rewardRedemptions.orgId, orgId),
+          eq(rewardRedemptions.status, 'ordered')
+        )
       )
-    )
-    .returning();
+      .returning();
+    if (!updated) throw new Error('Redemption not found or not awaiting fulfilment');
 
-  return updated;
+    await auditRewards(tx, {
+      organizationId: orgId,
+      userId: rewardsActor(actorUserId, 'system:shopify-webhook'),
+      action: 'rewards.redemption.fulfilled',
+      resourceType: 'reward_redemptions',
+      resourceId: redemptionId,
+      details: {},
+    });
+    return updated;
+  });
+}
+
+export interface CancelRedemptionActor {
+  userId: string;
+  /** When set, only the member who owns the redemption may cancel it; anyone else sees "not found". */
+  mustOwn?: boolean;
 }
 
 /**
@@ -155,7 +210,8 @@ export async function markRedemptionFulfilled(
 export async function cancelRedemption(
   redemptionId: string,
   orgId: string,
-  reason: string
+  reason: string,
+  actor?: CancelRedemptionActor
 ): Promise<{
   redemption: RewardRedemption;
   newBalance: number;
@@ -169,13 +225,35 @@ export async function cancelRedemption(
       ),
     });
 
-    if (!redemption) {
+    if (!redemption || (actor?.mustOwn && redemption.userId !== actor.userId)) {
       throw new Error('Redemption not found');
     }
 
     if (!['initiated', 'pending_payment'].includes(redemption.status)) {
       throw new Error(`Cannot cancel redemption with status: ${redemption.status}`);
     }
+
+    // Update redemption status first: the status predicate stops a concurrent cancel or order from also refunding.
+    const [updated] = await tx
+      .update(rewardRedemptions)
+      .set({
+        status: 'cancelled',
+        providerPayloadJson: {
+          ...((redemption.providerPayloadJson || {}) as Record<string, unknown>),
+          cancelledReason: reason,
+          cancelledAt: new Date().toISOString(),
+        },
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(rewardRedemptions.id, redemptionId),
+          eq(rewardRedemptions.orgId, orgId),
+          eq(rewardRedemptions.status, redemption.status)
+        )
+      )
+      .returning();
+    if (!updated) throw new Error('Cannot cancel redemption: it was changed concurrently');
 
     // Refund credits
     const ledgerEntry = await applyLedgerEntry(tx, {
@@ -188,20 +266,14 @@ export async function cancelRedemption(
       memo: `Redemption cancelled: ${reason}`,
     });
 
-    // Update redemption status
-    const [updated] = await tx
-      .update(rewardRedemptions)
-      .set({
-        status: 'cancelled',
-        providerPayloadJson: {
-          ...((redemption.providerPayloadJson || {}) as Record<string, unknown>),
-          cancelledReason: reason,
-          cancelledAt: new Date().toISOString(),
-        },
-        updatedAt: new Date(),
-      })
-      .where(eq(rewardRedemptions.id, redemptionId))
-      .returning();
+    await auditRewards(tx, {
+      organizationId: orgId,
+      userId: rewardsActor(actor?.userId),
+      action: 'rewards.redemption.cancel',
+      resourceType: 'reward_redemptions',
+      resourceId: redemptionId,
+      details: { reason, creditsRefunded: redemption.creditsSpent, memberUserId: redemption.userId },
+    });
 
     return {
       redemption: updated,
@@ -217,7 +289,8 @@ export async function cancelRedemption(
 export async function processRedemptionRefund(
   redemptionId: string,
   orgId: string,
-  refundPayload: Record<string, unknown>
+  refundPayload: Record<string, unknown>,
+  actorUserId?: string
 ): Promise<{
   redemption: RewardRedemption;
   newBalance: number;
@@ -243,18 +316,7 @@ export async function processRedemptionRefund(
       };
     }
 
-    // Refund credits
-    const ledgerEntry = await applyLedgerEntry(tx, {
-      orgId: redemption.orgId,
-      userId: redemption.userId,
-      eventType: 'refund',
-      amountCredits: redemption.creditsSpent,
-      sourceType: 'redemption',
-      sourceId: redemption.id,
-      memo: `Redemption refunded via Shopify`,
-    });
-
-    // Update redemption status
+    // Update redemption status first: the status predicate stops a concurrent refund from crediting twice.
     const [updated] = await tx
       .update(rewardRedemptions)
       .set({
@@ -266,8 +328,35 @@ export async function processRedemptionRefund(
         },
         updatedAt: new Date(),
       })
-      .where(eq(rewardRedemptions.id, redemptionId))
+      .where(
+        and(
+          eq(rewardRedemptions.id, redemptionId),
+          eq(rewardRedemptions.orgId, orgId),
+          eq(rewardRedemptions.status, redemption.status)
+        )
+      )
       .returning();
+    if (!updated) throw new Error('Redemption refund conflicts with a concurrent change');
+
+    // Refund credits
+    const ledgerEntry = await applyLedgerEntry(tx, {
+      orgId: redemption.orgId,
+      userId: redemption.userId,
+      eventType: 'refund',
+      amountCredits: redemption.creditsSpent,
+      sourceType: 'redemption',
+      sourceId: redemption.id,
+      memo: `Redemption refunded via Shopify`,
+    });
+
+    await auditRewards(tx, {
+      organizationId: orgId,
+      userId: rewardsActor(actorUserId, 'system:shopify-webhook'),
+      action: 'rewards.redemption.refund',
+      resourceType: 'reward_redemptions',
+      resourceId: redemptionId,
+      details: { creditsRefunded: redemption.creditsSpent, memberUserId: redemption.userId },
+    });
 
     return {
       redemption: updated,

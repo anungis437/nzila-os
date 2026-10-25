@@ -11,6 +11,7 @@ import { and, eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { workbookMemoryHolders } from '@/db/schema/workbook-schema';
 import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
+import { auditClaimedWorkbookWrite } from '@/lib/workbook/claimed-write-audit';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -60,8 +61,8 @@ export async function PATCH(
     // the DB execution context that matches the resolved authority.
     const access = await withClaimedWorkbookAccess(
       { workbookId, operation: 'write' },
-      async () =>
-        db
+      async (authority) => {
+        const updated = await db
           .update(workbookMemoryHolders)
           .set(patch)
           .where(
@@ -70,7 +71,17 @@ export async function PATCH(
               eq(workbookMemoryHolders.workbookId, workbookId),
             ),
           )
-          .returning({ id: workbookMemoryHolders.id }),
+          .returning({ id: workbookMemoryHolders.id });
+        if (updated.length > 0) {
+          await auditClaimedWorkbookWrite(authority, {
+            action: 'workbook.memory_holder.update',
+            resourceType: 'workbook_memory_holders',
+            resourceId: holderId,
+            details: { fields: Object.keys(parse.data).filter((k) => parse.data[k as keyof typeof parse.data] !== undefined) },
+          });
+        }
+        return updated;
+      },
     );
 
     if (!access.ok) {
@@ -99,8 +110,8 @@ export async function DELETE(
     // the DB execution context that matches the resolved authority.
     const access = await withClaimedWorkbookAccess(
       { workbookId, operation: 'write' },
-      async () =>
-        db
+      async (authority) => {
+        const removed = await db
           .delete(workbookMemoryHolders)
           .where(
             and(
@@ -108,7 +119,17 @@ export async function DELETE(
               eq(workbookMemoryHolders.workbookId, workbookId),
             ),
           )
-          .returning({ id: workbookMemoryHolders.id }),
+          .returning({ id: workbookMemoryHolders.id });
+        if (removed.length > 0) {
+          await auditClaimedWorkbookWrite(authority, {
+            action: 'workbook.memory_holder.delete',
+            resourceType: 'workbook_memory_holders',
+            resourceId: holderId,
+            details: {},
+          });
+        }
+        return removed;
+      },
     );
 
     if (!access.ok) {

@@ -1,4 +1,5 @@
-import { withApi } from "@/lib/api/framework";
+import { withApi, ApiError } from "@/lib/api/framework";
+import { performAuditedOperation, operationAuditResponse } from "@/lib/audit/operation-audit";
 import { seedSources } from "@/lib/services/cba-intelligence/seed-sources";
 
 // ---------------------------------------------------------------------------
@@ -14,7 +15,18 @@ export const POST = withApi(
       summary: "Seed the 17 real Canadian CBA data sources into the registry",
     },
   },
-  async () => {
-    return seedSources();
+  async ({ userId, organizationId }) => {
+    // Seeding inserts the registry one source at a time, so it cannot share one transaction: its intent is recorded
+    // first and nothing is seeded if that record cannot be written.
+    try {
+      return await performAuditedOperation(
+        { organizationId, userId, action: "cba_intel.sources.seed", resourceType: "cba_intel_sources" },
+        () => seedSources(),
+      );
+    } catch (error) {
+      const refused = operationAuditResponse(error);
+      if (refused) throw ApiError.conflict(refused.body.error.message);
+      throw error;
+    }
   },
 );

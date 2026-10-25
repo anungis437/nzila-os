@@ -7,6 +7,8 @@
 import { withApi, ApiError, z } from '@/lib/api/framework';
 import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import { db } from '@/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { employerRemittances } from '@/db/schema/dues-finance-schema';
 import { eq, desc } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
@@ -53,20 +55,31 @@ export const POST = withApi(
     openapi: { tags: ['Dues'], summary: 'Create an employer remittance' },
   },
   async ({ organizationId, userId, request }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
     const body = createSchema.parse(await request.json());
 
-    const [remittance] = await db
-      .insert(employerRemittances)
-      .values({
-        ...body,
+    const remittance = await withRLSContext({ organizationId }, async (tx) => {
+      const [row] = await tx
+        .insert(employerRemittances)
+        .values({
+          ...body,
+          organizationId,
+          processingStatus: 'pending',
+          isReconciled: false,
+          createdBy: userId ?? undefined,
+        })
+        .returning();
+      await persistAtomicAudit(tx, {
         organizationId,
-        processingStatus: 'pending',
-        isReconciled: false,
-        createdBy: userId ?? undefined,
-      })
-      .returning();
+        userId: userId!,
+        action: 'dues.remittance.create',
+        resourceType: 'employer_remittances',
+        resourceId: row.id,
+        details: { employerId: body.employerId, totalAmount: body.totalAmount, memberCount: body.memberCount },
+      });
+      return row;
+    });
 
     logger.info('Employer remittance created', { remittanceId: remittance.id, organizationId });
 

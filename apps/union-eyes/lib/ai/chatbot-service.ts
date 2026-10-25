@@ -25,6 +25,9 @@ import { embeddingCache } from "@/lib/services/ai/embedding-cache";
 import { logger } from "@/lib/logger";
 import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { checkRateLimit } from '@/lib/rate-limiter';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { performAuditedOperation } from '@/lib/audit/operation-audit';
 import type { ChatMessage as _AiChatMessage } from '@nzila/ai-sdk/types';
 
 /**
@@ -98,21 +101,33 @@ export class ChatSessionManager {
     relatedEntityType?: string;
     relatedEntityId?: string;
   }): Promise<ChatSession> {
-    const session = await db
-      .insert(chatSessions)
-      .values({
-        userId: data.userId,
+    // The session and its audit record commit together
+    return withRLSContext({ organizationId: data.organizationId }, async (tx) => {
+      const session = await tx
+        .insert(chatSessions)
+        .values({
+          userId: data.userId,
+          organizationId: data.organizationId,
+          title: data.title || "New conversation",
+          aiProvider: (data.aiProvider as (typeof chatSessions.aiProvider)['_']['data']) || "openai",
+          model: data.model || "gpt-4",
+          contextTags: data.contextTags,
+          relatedEntityType: data.relatedEntityType,
+          relatedEntityId: data.relatedEntityId,
+        })
+        .returning();
+
+      await persistAtomicAudit(tx, {
         organizationId: data.organizationId,
-        title: data.title || "New conversation",
-        aiProvider: (data.aiProvider as (typeof chatSessions.aiProvider)['_']['data']) || "openai",
-        model: data.model || "gpt-4",
-        contextTags: data.contextTags,
-        relatedEntityType: data.relatedEntityType,
-        relatedEntityId: data.relatedEntityId,
-      })
-      .returning();
-    
-    return session[0];
+        userId: data.userId,
+        action: 'chatbot.session.create',
+        resourceType: 'chat_sessions',
+        resourceId: session[0].id,
+        details: { relatedEntityType: data.relatedEntityType ?? null },
+      });
+
+      return session[0];
+    });
   }
   
   /**
@@ -286,8 +301,8 @@ export class RAGService {
   /**
    * Update document citation count
    */
-  async incrementCitationCount(documentId: string): Promise<void> {
-    await db
+  async incrementCitationCount(documentId: string, exec: typeof db = db): Promise<void> {
+    await exec
       .update(knowledgeBase)
       .set({
         citationCount: sql`${knowledgeBase.citationCount} + 1`,
@@ -342,128 +357,164 @@ export class ChatbotService {
       throw new Error("Session not found");
     }
     
-    // Safety filter on input
-    const safetyCheck = await this.checkContentSafety(data.content, data.sessionId);
-    if (safetyCheck.flagged) {
-      // If the safety system itself is unavailable, skip blocking (fail-open for availability)
-      // Only block when the moderation API explicitly flags the content
-      if (safetyCheck.reason === 'Safety system unavailable') {
-        logger?.warn('[ChatbotService] Content safety system unavailable — proceeding with message', {
-          sessionId: data.sessionId,
+    // Everything that leaves the database — the moderation call, the retrieval and the AI provider call — cannot share
+    // its transaction, so the intent is recorded first and none of it runs if that record cannot be written.
+    const { response, retrievedDocs, responseTime } = await performAuditedOperation(
+      {
+        organizationId: data.organizationId,
+        userId: data.userId,
+        action: 'chatbot.message.respond',
+        resourceType: 'chat_sessions',
+        resourceId: data.sessionId,
+        details: { useRAG: data.useRAG !== false },
+      },
+      async () => {
+        // Safety filter on input
+        const safetyCheck = await this.checkContentSafety(data.content, data.sessionId, {
+          organizationId: data.organizationId,
+          userId: data.userId,
         });
-      } else {
-        throw new Error("Message flagged by content safety filter");
-      }
-    }
-    
-    // Save user message
-    await db.insert(chatMessages).values({
-      sessionId: data.sessionId,
-      role: "user",
-      content: data.content,
-    });
-    
-    // Get conversation history
-    const history = await db
-      .select()
-      .from(chatMessages)
-      .where(eq(chatMessages.sessionId, data.sessionId))
-      .orderBy(desc(chatMessages.createdAt))
-      .limit(10);
-    
-    const conversationMessages = history.reverse().map((m) => ({
-      role: m.role,
-      content: m.content,
-    }));
-    
-    // Perform RAG if enabled
-    let retrievedDocs: Array<{ documentId: string; title: string; relevanceScore: number; excerpt: string }> = [];
-    if (data.useRAG !== false) {
-      try {
-        retrievedDocs = await this.ragService.searchDocuments(data.content, {
-          organizationId: session.organizationId,
-          limit: 3,
-        });
-      } catch (ragError) {
-        logger?.warn('[ChatbotService] RAG search failed — proceeding without context', {
-          error: ragError instanceof Error ? ragError.message : String(ragError),
-          sessionId: data.sessionId,
-        });
-      }
-      
-      // Add context to conversation
-      if (retrievedDocs.length > 0) {
-        const context = retrievedDocs
-          .map((doc) => `[${doc.title}]: ${doc.excerpt}`)
-          .join("\n\n");
-        
-        conversationMessages.unshift({
-          role: "system",
-          content: `You are a helpful union rights assistant. Use the following context to answer questions:\n\n${context}`,
-        });
-      }
-    }
-    
-    // Get AI response
-    let response: { content: string; tokensUsed: number; model: string };
-    try {
-      response = await aiGenerate(conversationMessages, session.organizationId, {
-        temperature: parseFloat(session.temperature || "0.7"),
-        model: session.model,
-      });
-    } catch (aiError) {
-      logger?.error('[ChatbotService] AI generation failed — returning fallback response', {
-        error: aiError instanceof Error ? aiError.message : String(aiError),
-        sessionId: data.sessionId,
-      });
-      response = {
-        content:
-          "I'm sorry, the AI assistant is temporarily unavailable. " +
-          "Please try again in a few moments. If the issue persists, " +
-          "contact your union representative for assistance.",
-        tokensUsed: 0,
-        model: 'fallback',
-      };
-    }
-    
-    // NZ-RISK-026: Cap response length to prevent full CBA clause extraction
-    if (response.content.length > MAX_RESPONSE_LENGTH) {
-      response.content =
-        response.content.slice(0, MAX_RESPONSE_LENGTH) +
-        '\n\n[Response truncated — ask a more specific question for detailed information.]';
-    }
+        if (safetyCheck.flagged) {
+          // If the safety system itself is unavailable, skip blocking (fail-open for availability)
+          // Only block when the moderation API explicitly flags the content
+          if (safetyCheck.reason === 'Safety system unavailable') {
+            logger?.warn('[ChatbotService] Content safety system unavailable — proceeding with message', {
+              sessionId: data.sessionId,
+            });
+          } else {
+            throw new Error("Message flagged by content safety filter");
+          }
+        }
 
-    const responseTime = Date.now() - startTime;
-    
-    // Save assistant message
-    const [assistantMessage] = await db
-      .insert(chatMessages)
-      .values({
+        // Conversation history: what was said before, then this message (stored with the reply below)
+        const history = await db
+          .select()
+          .from(chatMessages)
+          .where(eq(chatMessages.sessionId, data.sessionId))
+          .orderBy(desc(chatMessages.createdAt))
+          .limit(9);
+
+        const conversationMessages = history.reverse().map((m) => ({
+          role: m.role,
+          content: m.content,
+        }));
+        conversationMessages.push({ role: "user", content: data.content });
+
+        // Perform RAG if enabled
+        let docs: Array<{ documentId: string; title: string; relevanceScore: number; excerpt: string }> = [];
+        if (data.useRAG !== false) {
+          try {
+            docs = await this.ragService.searchDocuments(data.content, {
+              organizationId: session.organizationId,
+              limit: 3,
+            });
+          } catch (ragError) {
+            logger?.warn('[ChatbotService] RAG search failed — proceeding without context', {
+              error: ragError instanceof Error ? ragError.message : String(ragError),
+              sessionId: data.sessionId,
+            });
+          }
+
+          // Add context to conversation
+          if (docs.length > 0) {
+            const context = docs
+              .map((doc) => `[${doc.title}]: ${doc.excerpt}`)
+              .join("\n\n");
+
+            conversationMessages.unshift({
+              role: "system",
+              content: `You are a helpful union rights assistant. Use the following context to answer questions:\n\n${context}`,
+            });
+          }
+        }
+
+        // Get AI response
+        let generated: { content: string; tokensUsed: number; model: string };
+        try {
+          generated = await aiGenerate(conversationMessages, session.organizationId, {
+            temperature: parseFloat(session.temperature || "0.7"),
+            model: session.model,
+          });
+        } catch (aiError) {
+          logger?.error('[ChatbotService] AI generation failed — returning fallback response', {
+            error: aiError instanceof Error ? aiError.message : String(aiError),
+            sessionId: data.sessionId,
+          });
+          generated = {
+            content:
+              "I'm sorry, the AI assistant is temporarily unavailable. " +
+              "Please try again in a few moments. If the issue persists, " +
+              "contact your union representative for assistance.",
+            tokensUsed: 0,
+            model: 'fallback',
+          };
+        }
+
+        // NZ-RISK-026: Cap response length to prevent full CBA clause extraction
+        if (generated.content.length > MAX_RESPONSE_LENGTH) {
+          generated.content =
+            generated.content.slice(0, MAX_RESPONSE_LENGTH) +
+            '\n\n[Response truncated — ask a more specific question for detailed information.]';
+        }
+
+        return { response: generated, retrievedDocs: docs, responseTime: Date.now() - startTime };
+      },
+    );
+
+    // The user message, the reply, the session counters, the citation counts and the audit record commit together
+    const assistantMessage = await withRLSContext({ organizationId: data.organizationId }, async (tx) => {
+      await tx.insert(chatMessages).values({
         sessionId: data.sessionId,
-        role: "assistant",
-        content: response.content,
-        modelUsed: response.model,
-        tokensUsed: response.tokensUsed,
-        responseTimeMs: responseTime,
-        retrievedDocuments: retrievedDocs.length > 0 ? (retrievedDocs as (typeof chatMessages.$inferInsert)['retrievedDocuments']) : undefined,
-      })
-      .returning();
-    
-    // Update session
-    await db
-      .update(chatSessions)
-      .set({
-        messageCount: sql`${chatSessions.messageCount} + 2`,
-        lastMessageAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(chatSessions.id, data.sessionId));
-    
-    // Update citation counts
-    for (const doc of retrievedDocs) {
-      await this.ragService.incrementCitationCount(doc.documentId);
-    }
-    
+        role: "user",
+        content: data.content,
+      });
+
+      const [reply] = await tx
+        .insert(chatMessages)
+        .values({
+          sessionId: data.sessionId,
+          role: "assistant",
+          content: response.content,
+          modelUsed: response.model,
+          tokensUsed: response.tokensUsed,
+          responseTimeMs: responseTime,
+          retrievedDocuments: retrievedDocs.length > 0 ? (retrievedDocs as (typeof chatMessages.$inferInsert)['retrievedDocuments']) : undefined,
+        })
+        .returning();
+
+      // Update session, only the session's own owner within its own organization
+      await tx
+        .update(chatSessions)
+        .set({
+          messageCount: sql`${chatSessions.messageCount} + 2`,
+          lastMessageAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(chatSessions.id, data.sessionId),
+            eq(chatSessions.userId, data.userId),
+            eq(chatSessions.organizationId, data.organizationId),
+          ),
+        );
+
+      // Update citation counts
+      for (const doc of retrievedDocs) {
+        await this.ragService.incrementCitationCount(doc.documentId, tx);
+      }
+
+      await persistAtomicAudit(tx, {
+        organizationId: data.organizationId,
+        userId: data.userId,
+        action: 'chatbot.message.exchange',
+        resourceType: 'chat_sessions',
+        resourceId: data.sessionId,
+        details: { model: response.model, retrievedDocumentCount: retrievedDocs.length },
+      });
+
+      return reply;
+    });
+
     return assistantMessage;
   }
   
@@ -496,7 +547,11 @@ export class ChatbotService {
   /**
    * Content safety check
    */
-  private async checkContentSafety(content: string, sessionId?: string): Promise<{
+  private async checkContentSafety(
+    content: string,
+    sessionId: string | undefined,
+    actor: { organizationId: string; userId: string },
+  ): Promise<{
     flagged: boolean;
     categories?: string[];
     reason?: string;
@@ -525,15 +580,26 @@ export class ChatbotService {
           .filter(([_, flagged]) => flagged)
           .map(([category]) => category);
         
-        await db.insert(aiSafetyFilters).values({
-          input: content,
-          flagged: true,
-          flaggedCategories,
-          confidenceScores: result.category_scores,
-          action: "block",
-          reason: "Content policy violation",
-          // round 54: preserve session linkage so flagged rows are traceable to a tenant/session
-          sessionId,
+        // The flagged record and its audit record commit together
+        await withRLSContext({ organizationId: actor.organizationId }, async (tx) => {
+          await tx.insert(aiSafetyFilters).values({
+            input: content,
+            flagged: true,
+            flaggedCategories,
+            confidenceScores: result.category_scores,
+            action: "block",
+            reason: "Content policy violation",
+            // round 54: preserve session linkage so flagged rows are traceable to a tenant/session
+            sessionId,
+          });
+          await persistAtomicAudit(tx, {
+            organizationId: actor.organizationId,
+            userId: actor.userId,
+            action: 'chatbot.safety_filter.flag',
+            resourceType: 'chat_sessions',
+            resourceId: sessionId,
+            details: { categories: flaggedCategories },
+          });
         });
         
         return { flagged: true, categories: flaggedCategories };

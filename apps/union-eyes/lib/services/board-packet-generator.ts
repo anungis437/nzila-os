@@ -9,11 +9,15 @@ import {
   boardPackets,
   boardPacketDistributions,
 } from '@/db/schema/board-packet-schema';
-import { eq, sql } from 'drizzle-orm';
+import { organizationMembers } from '@/db/schema/organization-members-schema';
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 import crypto from 'crypto';
 import { Document, Page, StyleSheet, Text, renderToBuffer } from '@react-pdf/renderer';
 import React from 'react';
 import { getEmailService } from '@/lib/services/messaging/email-service';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { ApiError } from '@/lib/api/errors';
 import { logger } from '@/lib/logger';
 import { moneyToNumber } from '@/lib/decimal-safe';
 
@@ -328,7 +332,12 @@ export class BoardPacketGenerator {
   }
   
   /**
-   * Distribute board packet to recipients
+   * Distribute a finalized board packet to recipients.
+   *
+   * The distribution records, the move to 'distributed' and the audit record commit together, and only members of
+   * the packet's own organization can receive it (their address is taken from their membership record, never from the
+   * request). Email delivery happens after that commit; a failed delivery is reported and recorded, and does not
+   * undo the recorded distribution.
    */
   async distributePacket(
     packetId: string,
@@ -337,71 +346,135 @@ export class BoardPacketGenerator {
       recipientName: string;
       recipientEmail: string;
       recipientRole: string;
-    }>
+    }>,
+    context: { organizationId: string; userId: string }
   ) {
+    const { organizationId, userId } = context;
     try {
       const [packet] = await db
         .select()
         .from(boardPackets)
-        .where(eq(boardPackets.id, packetId))
+        .where(and(eq(boardPackets.id, packetId), eq(boardPackets.organizationId, organizationId)))
         .limit(1);
 
       if (!packet) {
         throw new Error('Board packet not found');
       }
+      if (packet.status !== 'finalized' && packet.status !== 'distributed') {
+        throw ApiError.conflict('Only a finalized board packet can be distributed');
+      }
 
       const pdfResult = await this.generatePDF(packet);
 
-      // Create distribution records
-      const distributions = await db
-        .insert(boardPacketDistributions)
-        .values(
-          recipients.map(recipient => ({
-            packetId,
-            ...recipient,
-            deliveryMethod: 'email',
-            sentAt: new Date(),
-          }))
-        )
-        .returning();
-      
-      // Update packet status
-      await db
-        .update(boardPackets)
-        .set({
-          status: 'distributed',
-          distributedAt: new Date(),
-          distributionList: recipients,
-          pdfUrl: pdfResult.pdfUrl,
-          updatedAt: new Date(),
-        })
-        .where(eq(boardPackets.id, packetId));
-      
+      const distributions = await withRLSContext({ organizationId }, async (tx) => {
+        const members = await tx
+          .select({ userId: organizationMembers.userId, email: organizationMembers.email })
+          .from(organizationMembers)
+          .where(
+            and(
+              eq(organizationMembers.organizationId, organizationId),
+              inArray(organizationMembers.userId, recipients.map((recipient) => recipient.recipientId)),
+              isNull(organizationMembers.deletedAt)
+            )
+          );
+        const emailByMember = new Map(members.map((member) => [member.userId, member.email]));
+        const verified = recipients.map((recipient) => {
+          const email = emailByMember.get(recipient.recipientId);
+          if (!email) {
+            throw ApiError.badRequest('Every recipient must be a member of the organization');
+          }
+          return { ...recipient, recipientEmail: email };
+        });
+
+        const rows = await tx
+          .insert(boardPacketDistributions)
+          .values(
+            verified.map((recipient) => ({
+              packetId,
+              ...recipient,
+              deliveryMethod: 'email',
+              sentAt: new Date(),
+            }))
+          )
+          .returning();
+
+        // The status predicate keeps a concurrent archive or edit from being overwritten.
+        const [updated] = await tx
+          .update(boardPackets)
+          .set({
+            status: 'distributed',
+            distributedAt: new Date(),
+            distributionList: verified,
+            pdfUrl: pdfResult.pdfUrl,
+            updatedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(boardPackets.id, packetId),
+              eq(boardPackets.organizationId, organizationId),
+              inArray(boardPackets.status, ['finalized', 'distributed'])
+            )
+          )
+          .returning({ id: boardPackets.id });
+        if (!updated) throw ApiError.conflict('The board packet changed and can no longer be distributed');
+
+        await persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: 'board_packet.distribute',
+          resourceType: 'board_packets',
+          resourceId: packetId,
+          details: { recipientIds: verified.map((recipient) => recipient.recipientId), deliveryMethod: 'email' },
+        });
+        return rows;
+      });
+
       const emailService = getEmailService();
-      const emailPromises = recipients.map((recipient) =>
-        emailService.send({
-          to: recipient.recipientEmail,
-          subject: `Board Packet: ${packet.title}`,
-          body: `Board Packet: ${packet.title} - Period: ${packet.periodStart} to ${packet.periodEnd}`,
-          html: `
+      const outcomes = await Promise.allSettled(
+        distributions.map((recipient) =>
+          emailService.send({
+            to: recipient.recipientEmail,
+            subject: `Board Packet: ${packet.title}`,
+            body: `Board Packet: ${packet.title} - Period: ${packet.periodStart} to ${packet.periodEnd}`,
+            html: `
             <h2>${packet.title}</h2>
             <p>Hello ${recipient.recipientName},</p>
             <p>The latest board packet has been distributed.</p>
             <p>Period: ${packet.periodStart} to ${packet.periodEnd}</p>
           `,
-          attachments: [
-            {
-              filename: `${packet.title.replace(/\s+/g, '_')}.pdf`,
-              content: pdfResult.pdfBuffer,
-              contentType: 'application/pdf',
-            },
-          ],
-        })
+            attachments: [
+              {
+                filename: `${packet.title.replace(/\s+/g, '_')}.pdf`,
+                content: pdfResult.pdfBuffer,
+                contentType: 'application/pdf',
+              },
+            ],
+          })
+        )
       );
 
-      await Promise.all(emailPromises);
-      
-      return distributions;
+      const failedRecipientIds = distributions
+        .filter((_, index) => outcomes[index].status === 'rejected')
+        .map((recipient) => recipient.recipientId);
+      if (failedRecipientIds.length > 0) {
+        logger.error('Board packet email delivery failed for some recipients', { packetId, failedRecipientIds });
+        await withRLSContext({ organizationId }, (tx) =>
+          persistAtomicAudit(tx, {
+            organizationId,
+            userId,
+            action: 'board_packet.distribute.delivery_failed',
+            resourceType: 'board_packets',
+            resourceId: packetId,
+            details: { failedRecipientIds },
+          })
+        ).catch((error) => logger.error('Board packet delivery failure could not be audited', { packetId, error }));
+      }
+
+      return {
+        distributions,
+        delivered: distributions.length - failedRecipientIds.length,
+        failed: failedRecipientIds.length,
+      };
     } catch (error) {
       logger.error('Error distributing board packet', error);
       throw error;

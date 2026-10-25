@@ -8,7 +8,8 @@
  */
 
 import { NextRequest } from 'next/server';
-import { PaymentService } from '@/lib/services/payment-service';
+import { PaymentService, PaymentAuthorityError } from '@/lib/services/payment-service';
+import { OperationAuditError } from '@/lib/audit/operation-audit';
 import { isMemberDuesPaymentEnabled } from '@/lib/dues/member-dues-flag';
 import {
   ErrorCode,
@@ -68,6 +69,7 @@ export async function POST(request: NextRequest) {
       returnUrl,
       cancelUrl,
       processorType,
+      actor: { userId },
     });
 
     logger.info('Checkout session created', {
@@ -83,6 +85,15 @@ export async function POST(request: NextRequest) {
       currency: result.currency,
     });
   } catch (error) {
+    if (error instanceof PaymentAuthorityError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.code === 'CONFLICT' ? 409 : 404 },
+      );
+    }
+    if (error instanceof OperationAuditError) {
+      return NextResponse.json({ error: error.message }, { status: 409 });
+    }
     logger.error('Error creating checkout session', { error });
 
     return standardErrorResponse(

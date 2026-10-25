@@ -15,6 +15,7 @@ import {
 import { z } from 'zod'
 import { withAdminAuth } from '@/lib/api-auth-guard'
 import { logger } from '@/lib/logger'
+import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit'
 
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses'
 // The in-memory workflow engine reports unknown and already-settled workflows with plain Errors;
@@ -142,13 +143,25 @@ export const DELETE = async (
         )
       }
 
-      cancelWorkflow(workflowId, userId as string, reason)
+      await performAuditedOperation(
+        {
+          organizationId: context.organizationId,
+          userId,
+          action: 'pki.workflow.cancel',
+          resourceType: 'signing_workflow',
+          resourceId: workflowId,
+          details: { reason },
+        },
+        async () => cancelWorkflow(workflowId, userId as string, reason),
+      )
 
       return NextResponse.json({
         success: true,
         message: 'Workflow cancelled successfully',
       })
     } catch (error) {
+      const refused = operationAuditResponse(error)
+      if (refused) return NextResponse.json(refused.body, { status: refused.status })
       const clientError = workflowErrorResponse(error)
       if (clientError) return clientError
       logger.error('Failed to cancel workflow', { error })

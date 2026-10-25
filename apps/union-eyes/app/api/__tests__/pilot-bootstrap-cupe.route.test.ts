@@ -5,8 +5,9 @@ const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   readFile: vi.fn(),
   withSystemContext: vi.fn(),
-  trackPilotEvent: vi.fn(),
-  auditLog: vi.fn(),
+  persistAtomicAudit: vi.fn(),
+  assertPilotDemoMutationRuntime: vi.fn(),
+  apiConfig: undefined as any,
   selectQueue: [] as unknown[][],
 }));
 
@@ -39,17 +40,14 @@ vi.mock('@/lib/api/framework', () => ({
   },
   ApiError: {
     internal: (msg: string) => Object.assign(new Error(msg), { status: 500 }),
+    unauthorized: () => Object.assign(new Error('Authentication required'), { status: 401 }),
+    forbidden: (msg: string) => Object.assign(new Error(msg), { status: 403 }),
   },
 }));
 vi.mock('fs/promises', () => ({ readFile: m.readFile }));
-vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
-vi.mock('@/lib/services/pilot-tracking', () => ({ trackPilotEvent: m.trackPilotEvent }));
-vi.mock('@/lib/audit-logger', () => ({
-  auditLog: m.auditLog,
-  AuditEventType: { DATA_CREATE: 'DATA_CREATE' },
-  AuditSeverity: { HIGH: 'HIGH' },
-}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
+vi.mock('@/lib/config/pilot-demo-runtime', () => ({ assertPilotDemoMutationRuntime: m.assertPilotDemoMutationRuntime }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return { ...actual, eq: vi.fn(() => 'eq') };
@@ -71,52 +69,93 @@ describe('pilot/bootstrap/cupe route', () => {
     vi.clearAllMocks();
     m.selectQueue = [];
     m.readFile.mockResolvedValue(JSON.stringify(fixture));
-    m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
-    m.trackPilotEvent.mockResolvedValue(undefined);
-    m.auditLog.mockResolvedValue(undefined);
+    m.withSystemContext.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => fn(mockDb));
+    m.persistAtomicAudit.mockResolvedValue(undefined);
+    m.assertPilotDemoMutationRuntime.mockReturnValue('pilot');
     m.withApi.mockImplementation(
-      (_cfg: unknown, handler: (ctx: any) => Promise<unknown>) =>
-        async (_request: NextRequest, ctx: any = { body: { reset: false, includeDemoScript: true }, userId: 'u1' }) => {
+      (cfg: unknown, handler: (ctx: any) => Promise<unknown>) => {
+        m.apiConfig = cfg;
+        return async (_request: NextRequest, ctx: any = { body: { reset: false, includeDemoScript: true }, userId: 'u1' }) => {
           try {
             const data = await handler(ctx);
             return new Response(JSON.stringify(data), { status: 200 });
           } catch (err) {
             return new Response(JSON.stringify({ error: (err as Error).message }), { status: (err as any).status ?? 500 });
           }
-        },
+        };
+      },
     );
   });
 
-  it('creates org when missing and returns seeded summary', async () => {
+  const call = async (body: { reset: boolean; includeDemoScript: boolean }, userId: string | null = 'u1') => {
     const { POST } = await loadRoute();
+    return POST(new NextRequest('http://localhost/api/pilot/bootstrap/cupe', { method: 'POST' }), { body, userId });
+  };
+
+  it('is restricted to platform authority', async () => {
+    await loadRoute();
+    expect(m.apiConfig.auth).toEqual({ minRole: 'system_admin' });
+  });
+
+  it('creates org when missing and returns seeded summary, auditing on the same system transaction', async () => {
     m.selectQueue.push([]);
 
-    const response = await POST(new NextRequest('http://localhost/api/pilot/bootstrap/cupe', { method: 'POST' }), {
-      body: { reset: false, includeDemoScript: true },
-      userId: 'u1',
-    });
+    const response = await call({ reset: false, includeDemoScript: true });
 
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.success).toBe(true);
     expect(json.organizationId).toBe('org_new');
     expect(json.seeded.members).toBe(1);
-    expect(m.trackPilotEvent).toHaveBeenCalledTimes(2);
+    expect(m.withSystemContext).toHaveBeenCalledTimes(1);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      mockDb,
+      expect.objectContaining({
+        organizationId: 'org_new',
+        userId: 'u1',
+        action: 'pilot.bootstrap.cupe',
+        details: expect.objectContaining({ reset: false, membersInserted: 1, casesInserted: 1, runtimeMode: 'pilot' }),
+      }),
+    );
   });
 
   it('resets data for existing org when reset=true', async () => {
-    const { POST } = await loadRoute();
     m.selectQueue.push([{ id: 'org_existing' }]);
 
-    const response = await POST(new NextRequest('http://localhost/api/pilot/bootstrap/cupe', { method: 'POST' }), {
-      body: { reset: true, includeDemoScript: false },
-      userId: 'u1',
-    });
+    const response = await call({ reset: true, includeDemoScript: false });
 
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.reset).toBe(true);
     expect(json.demoScript).toHaveLength(0);
-    expect(mockDb.delete).toHaveBeenCalled();
+    expect(mockDb.delete).toHaveBeenCalledTimes(3);
+  });
+
+  it('fails when the audit cannot be written, so nothing it seeded commits', async () => {
+    m.selectQueue.push([]);
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
+
+    const response = await call({ reset: false, includeDemoScript: true });
+
+    expect(response.status).toBe(500);
+  });
+
+  it('stays inert outside a pilot or demo runtime: no fixture read, no database access', async () => {
+    m.assertPilotDemoMutationRuntime.mockImplementationOnce(() => {
+      throw new Error('Demo data operations are disabled unless NZILA_MODE is set to pilot or demo');
+    });
+
+    const response = await call({ reset: true, includeDemoScript: true });
+
+    expect(response.status).toBe(403);
+    expect(m.readFile).not.toHaveBeenCalled();
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+  });
+
+  it('refuses a caller with no resolved user', async () => {
+    const response = await call({ reset: false, includeDemoScript: true }, null);
+
+    expect(response.status).toBe(401);
+    expect(m.withSystemContext).not.toHaveBeenCalled();
   });
 });

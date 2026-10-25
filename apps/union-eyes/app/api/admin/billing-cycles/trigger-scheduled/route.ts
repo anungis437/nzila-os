@@ -21,7 +21,7 @@
  * @module app/api/admin/billing-cycles/trigger-scheduled
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { BillingScheduler } from '@/lib/jobs/billing-scheduler';
 import { withApiAuth, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
 import {
@@ -31,6 +31,7 @@ import {
 } from '@/lib/api/standardized-responses';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
+import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes max execution
@@ -76,7 +77,18 @@ export const POST = withApiAuth(async (request: NextRequest) => {
     });
 
     // Execute scheduled billing
-    const result = await BillingScheduler.manualTrigger(frequency);
+    // Billing every organization is a platform operation: the intent is recorded before it starts.
+    const result = await performAuditedOperation(
+      {
+        organizationId: user.organizationId,
+        userId: user.id,
+        scope: 'system',
+        action: 'platform.billing_cycle.trigger_scheduled',
+        resourceType: 'billing_scheduler',
+        details: { frequency },
+      },
+      () => BillingScheduler.manualTrigger(frequency),
+    );
 
     logger.info('Scheduled billing completed', {
       frequency,
@@ -91,6 +103,8 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       message: `Scheduled billing executed for ${result.totalOrganizations} organizations. ${result.successful} successful, ${result.failed} failed.`,
     });
   } catch (error) {
+    const refused = operationAuditResponse(error);
+    if (refused) return NextResponse.json(refused.body, { status: refused.status });
     logger.error('Error triggering scheduled billing', { error });
 
     return standardErrorResponse(

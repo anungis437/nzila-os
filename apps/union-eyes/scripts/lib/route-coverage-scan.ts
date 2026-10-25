@@ -10,7 +10,7 @@ import { dirname, join, relative, sep } from 'node:path'
 export type RouteGuard =
   | 'CRUD_FACTORY' | 'WITH_API' | 'WITH_API_PUBLIC' | 'ROLE_AUTH' | 'ADMIN_AUTH' | 'ORG_AUTH' | 'SESSION_AUTH' | 'CRON_SECRET'
   | 'WEBHOOK_SIGNATURE' | 'PLATFORM_AUTH_HANDLER' | 'CAPABILITY_TOKEN' | 'RETIRED' | 'DELEGATED' | 'NONE'
-export type RouteAudit = 'EXEMPT_BALLOT_SECRECY' | 'ATOMIC' | 'ATOMIC_SERVICE' | 'NO_WRITES_FOUND' | 'CRUD_ATOMIC' | 'BEST_EFFORT' | 'NONE' | 'READ_ONLY'
+export type RouteAudit = 'COMPUTE_ONLY' | 'EXEMPT_UNATTRIBUTABLE' | 'EXEMPT_BALLOT_SECRECY' | 'ATOMIC' | 'ATOMIC_SERVICE' | 'NO_WRITES_FOUND' | 'CRUD_ATOMIC' | 'BEST_EFFORT' | 'NONE' | 'READ_ONLY'
 export type RouteData = 'TENANT_TX' | 'SYSTEM_CONTEXT' | 'CRUD_TENANT_TX' | 'AMBIENT_DB' | 'NONE'
 
 export interface RouteEntry {
@@ -54,6 +54,7 @@ function methodsOf(source: string): string[] {
 function guardOf(source: string): RouteGuard {
   if (/retired-financial-route/.test(source)) return 'RETIRED'
   if (/retiredHandler\(/.test(source)) return 'RETIRED'
+  if (/capabilityNotImplementedResponse\(/.test(source) && !/\.(insert|update|delete)\(|persistAtomicAudit/.test(source)) return 'RETIRED'
   if (/notImplemented\(/.test(source) && !/\.(insert|update|delete)\(|persistAtomicAudit/.test(source)) return 'RETIRED'
   if (/@nzila\/platform-auth\/[\w/-]*handlers/.test(source)) return 'PLATFORM_AUTH_HANDLER'
   if (/crudRoutes\(/.test(source)) return 'CRUD_FACTORY'
@@ -84,6 +85,63 @@ function dataOf(source: string, guard: RouteGuard): RouteData {
  */
 export const BALLOT_SECRECY_EXEMPT_ROUTES = ['voting/sessions/[id]/vote/route.ts', 'governance/elections/sessions/[id]/vote/route.ts']
 
+/**
+ * POST routes that compute and return a result and write nothing (a quote, a validation, a summary, a preview). They are
+ * mutating by HTTP method only. Each names the first-party modules that do the computing; the manifest test verifies
+ * the route's own source and those modules contain no write and no database client, so a route cannot stay on this
+ * list after it starts persisting.
+ */
+export const COMPUTE_ONLY_ROUTES: Record<string, string[]> = {
+  'billing/validate/route.ts': ['lib/services/transfer-pricing-service.ts'],
+  'finance/pricing/quote/route.ts': ['services/platform-economics/pricing-calculator.ts'],
+  'finance/pricing/compare/route.ts': ['services/platform-economics/pricing-calculator.ts'],
+  'dues/arrears/calculate/route.ts': [],
+  'dues/calculate/route.ts': [],
+  'admin/billing-cycles/preview/route.ts': [],
+}
+
+/**
+ * Routes that read, search, classify, summarise or validate and answer over POST (a body too large or too sensitive for a
+ * query string). They are mutating by HTTP method only. The shared plumbing they reach (the auth guard, the audit logger,
+ * the RLS context) writes its own records, so a transitive write scan cannot prove them read-only; instead each route is
+ * pinned here after review, and route-coverage-manifest.test.ts verifies the route's own source holds no write and
+ * imports no function whose name says it changes state.
+ */
+export const READ_ONLY_POST_ROUTES = [
+  'ai/classify/route.ts', 'ai/mamba/route.ts', 'ai/match-precedents/route.ts', 'ai/pension/plans/[id]/trustee-summary/route.ts',
+  'ai/search/route.ts', 'ai/semantic-search/route.ts', 'ai/summarize/route.ts', 'carbon/validate/route.ts',
+  'clause-library/search/route.ts', 'cognition/precedents/route.ts', 'compliance/validate/route.ts', 'emergency/pipeda/route.ts',
+  'exit-interviews/graph-query/route.ts', 'exit-interviews/mitigation-comparison/route.ts', 'exit-interviews/scenarios/route.ts',
+  'exit-interviews/search/route.ts', 'exit-interviews/simulation/route.ts', 'labour-standards/[jurisdiction]/compliance-check/route.ts',
+  'members/segments/preview/route.ts', 'ml/query/route.ts', 'precedents/search/route.ts', 'reports/execute/route.ts',
+  'social-media/analytics/route.ts', 'v2/[...path]/route.ts', 'voice/transcribe/route.ts', 'voice/upload/route.ts',
+  'voting/verify/route.ts', 'workspace/telemetry/route.ts',
+]
+
+/**
+ * Writes that cannot be attributed to an authenticated actor and organization, so an organization-keyed audit row cannot
+ * be written for them: public pseudonymous intake, capability-token assessment flows, anonymous product telemetry, and
+ * cron-secret platform jobs. Each is bounded by a control the route must be shown to carry (the manifest test checks it),
+ * so the exemption is a statement about what the route is bounded by, not a gap in attention.
+ */
+export const UNATTRIBUTABLE_WRITE_ROUTES: Record<string, { why: string; control: RegExp }> = {
+  'icra/start/route.ts': { why: 'Public pseudonymous assessment intake; no actor, no tenant.', control: /guardPublicIntake|rateLimit\(/ },
+  'icra/submit/route.ts': { why: 'Public assessment submission by capability; no actor, no tenant.', control: /guardPublicIntake|rateLimit\(|assessment-capability/ },
+  'icra/[assessmentId]/answer/route.ts': { why: 'Answer to a pseudonymous assessment, authorised by its capability token.', control: /assessment-capability|rateLimit\(/ },
+  'icra/[assessmentId]/submit/route.ts': { why: 'Submission of a pseudonymous assessment, authorised by its capability token.', control: /assessment-capability|rateLimit\(/ },
+  'icra/[assessmentId]/capability/exchange/route.ts': { why: 'Exchanges a capability for a cookie; writes nothing audit-relevant.', control: /assessment-capability|rateLimit\(/ },
+  'icra/checkout/route.ts': { why: 'Creates a payment-provider session for a pseudonymous assessment; no actor.', control: /assessment-capability|guardPublicIntake|rateLimit\(/ },
+  'icra/email-results/route.ts': { why: 'Emails results of a pseudonymous assessment to its holder; no actor.', control: /assessment-capability|guardPublicIntake|rateLimit\(/ },
+  'icra/telemetry/route.ts': { why: 'Anonymous product telemetry.', control: /rateLimit\(/ },
+  'workbook/start/route.ts': { why: 'Public pseudonymous workbook intake; the id is a bearer reference until claimed (the claim is audited).', control: /guardPublicIntake/ },
+  'pilot/events/route.ts': { why: 'Pilot usage telemetry stamped from the session; an audit row per usage event would flood the audit log.', control: /withRoleAuth|withApiAuth/ },
+  'location/track/route.ts': { why: 'Per-ping location telemetry of a consenting member; consent, geofence and disable changes are audited.', control: /withApiAuth/ },
+  'cron/external-data-sync/route.ts': { why: 'Platform-wide reference data refresh; no acting organization.', control: /cron:\s*true/ },
+  'whop/create-checkout/route.ts': { why: 'Creates a payment-provider checkout session for the signed-in user, who may hold no organization yet; nothing is stored here.', control: /requireUser/ },
+  'organizations/switch/route.ts': { why: 'Session rotation is owned and audited by platform-auth; the legacy branch only validates membership and stores nothing.', control: /auth\(\)/ },
+  'cron/sla-watchdog/route.ts': { why: 'Emits deadline events and metrics only; no acting organization.', control: /cron:\s*true|CRON_SECRET|verifyCronAuth|cronAuth/i },
+}
+
 const ATOMIC_AUDIT = /persistAtomicAudit|appendMandatoryAudit/
 
 /**
@@ -94,6 +152,8 @@ export const AUTH_MANDATORY_AUDIT_SERVICES: Record<string, { file: string; proof
   createInvite: { file: 'invites/service.ts', proof: /\},\s*true\)\s*\n\s*\n\s*return \{ success: true, inviteId/ },
   updateOrgAuthPolicy: { file: 'policy/admin.ts', proof: /await withAuthSavepoint\(async \(\) => db\.insert\(authAuditLog\)[\s\S]*?org_policy_updated/ },
   disableMfa: { file: 'mfa/service.ts', proof: /mfa_disabled[\s\S]*?\}, db, true\)/ },
+  enrollMfa: { file: 'mfa/service.ts', proof: /await logEvent\('mfa_enroll_started', \{ userId: input\.userId \}, db, true\)/ },
+  verifyEnrollment: { file: 'mfa/service.ts', proof: /await logEvent\('mfa_enrolled', \{ userId: input\.userId \}, db, true\)/ },
 }
 /**
  * Case-assignment mutators that go through the authority store, whose relationship writes record their audit row on the
@@ -134,6 +194,8 @@ function reachable(root: string, file: string, source: string, depth: number, se
 function auditOf(route: string, source: string, guard: RouteGuard, mutating: boolean, imports: string[]): RouteAudit {
   if (!mutating) return 'READ_ONLY'
   if (BALLOT_SECRECY_EXEMPT_ROUTES.includes(route)) return 'EXEMPT_BALLOT_SECRECY'
+  if (route in COMPUTE_ONLY_ROUTES || READ_ONLY_POST_ROUTES.includes(route)) return 'COMPUTE_ONLY'
+  if (route in UNATTRIBUTABLE_WRITE_ROUTES) return 'EXEMPT_UNATTRIBUTABLE'
   if (guard === 'CRUD_FACTORY') return 'CRUD_ATOMIC'
   if (ATOMIC_AUDIT.test(source)) return 'ATOMIC'
   if (imports.some((f) => ATOMIC_AUDIT.test(readFileSync(f, 'utf8')))) return 'ATOMIC_SERVICE'

@@ -1,4 +1,5 @@
-import { withApi, z } from "@/lib/api/framework";
+import { withApi, ApiError, z } from "@/lib/api/framework";
+import { performAuditedOperation, operationAuditResponse } from "@/lib/audit/operation-audit";
 import {
   extractDocument,
   runBulkExtraction,
@@ -25,10 +26,27 @@ export const POST = withApi(
         "Run extraction pipeline — single document or all raw documents",
     },
   },
-  async ({ body }) => {
-    if (body?.documentId) {
-      return { data: await extractDocument(body.documentId) };
+  async ({ body, userId, organizationId }) => {
+    // The pipeline reads stored documents and writes extraction runs, findings and agreements across many statements
+    // and calls an AI provider, so it cannot share one transaction: its intent is recorded first and nothing runs if
+    // that record cannot be written; the outcome is recorded after.
+    try {
+      return await performAuditedOperation(
+        {
+          organizationId,
+          userId,
+          action: body?.documentId ? "cba_intel.extraction.run_document" : "cba_intel.extraction.run_bulk",
+          resourceType: "cba_intel_documents",
+          resourceId: body?.documentId,
+        },
+        async () => ({
+          data: body?.documentId ? await extractDocument(body.documentId) : await runBulkExtraction(),
+        }),
+      );
+    } catch (error) {
+      const refused = operationAuditResponse(error);
+      if (refused) throw ApiError.conflict(refused.body.error.message);
+      throw error;
     }
-    return { data: await runBulkExtraction() };
   },
 );

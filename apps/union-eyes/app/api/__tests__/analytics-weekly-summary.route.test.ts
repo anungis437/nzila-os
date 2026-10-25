@@ -6,7 +6,7 @@ const m = vi.hoisted(() => ({
   dbExecute: vi.fn(),
   dbInsert: vi.fn(),
   auditAIInvocation: vi.fn(),
-  auditLog: vi.fn(),
+  audit: vi.fn(),
 }));
 
 vi.mock('@/lib/api/framework', () => ({
@@ -25,10 +25,8 @@ vi.mock('@/db', () => ({
 vi.mock('@/db/schema', () => ({ insightRecommendations: {} }));
 vi.mock('@/lib/audit-logger', () => ({
   auditAIInvocation: m.auditAIInvocation,
-  auditLog: m.auditLog,
-  AuditEventType: { DATA_CREATE: 'DATA_CREATE' },
-  AuditSeverity: { MEDIUM: 'MEDIUM' },
 }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('drizzle-orm', () => ({ sql: vi.fn(() => 'sql') }));
 
@@ -40,9 +38,10 @@ describe('analytics/insights/weekly-summary route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
-    m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    const tx = { insert: m.dbInsert };
+    m.withRLSContext.mockImplementation(async (...args: unknown[]) => (args[args.length - 1] as (t: unknown) => Promise<unknown>)(tx));
     m.auditAIInvocation.mockResolvedValue('ai_ref_1');
-    m.auditLog.mockResolvedValue(undefined);
+    m.audit.mockResolvedValue(undefined);
     m.dbInsert.mockReturnValue({
       values: vi.fn(() => ({
         returning: vi.fn(async () => [{ id: 'insight_1' }]),
@@ -81,7 +80,18 @@ describe('analytics/insights/weekly-summary route', () => {
     expect(result.recommendations[0]).toContain('onboarding');
     expect(result.insightId).toBe('insight_1');
     expect(m.auditAIInvocation).toHaveBeenCalledWith(expect.objectContaining({ organizationId: 'org_1', userId: 'user_1' }));
-    expect(m.auditLog).toHaveBeenCalledWith(expect.objectContaining({ action: 'weekly_insight_generated' }));
+    expect(m.audit).toHaveBeenCalledWith(
+      expect.objectContaining({ insert: m.dbInsert }),
+      expect.objectContaining({ organizationId: 'org_1', userId: 'user_1', action: 'insight.weekly_summary.generate', resourceId: 'insight_1' }),
+    );
+  });
+
+  it('fails the request when the audit record of the persisted insight cannot be written', async () => {
+    const { POST } = await loadRoute();
+    m.dbExecute.mockResolvedValueOnce([{ total_events: 0, sessions_started: 0, cases_created: 0, documents_uploaded: 0, active_users: 0 }]).mockResolvedValueOnce([]);
+    m.audit.mockRejectedValueOnce(new Error('audit down'));
+
+    await expect(POST({ organizationId: 'org_1', userId: 'user_1' })).rejects.toThrow('audit down');
   });
 
   it('uses the fallback recommendation when no friction points are returned', async () => {

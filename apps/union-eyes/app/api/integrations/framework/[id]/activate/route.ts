@@ -18,9 +18,9 @@ export const POST = withApi(
       orgScoping: 'caller-org',
     },
   },
-  async ({ body, organizationId, params }) => {
+  async ({ body, organizationId, userId, params }) => {
     return {
-      integration: await setIntegrationActivationForOrg(organizationId!, params.id, body.enabled),
+      integration: await setIntegrationActivationForOrg(organizationId!, params.id, body.enabled, userId!),
     };
   },
 );

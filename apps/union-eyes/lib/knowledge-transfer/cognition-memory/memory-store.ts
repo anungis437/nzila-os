@@ -11,6 +11,7 @@
 
 import { sql } from 'drizzle-orm';
 import { randomUUID } from 'crypto';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { inOrganization, isUuid } from '../org-scope';
 import {
   type CognitionMemoryEntry,
@@ -38,15 +39,16 @@ function rowToEntry(row: Record<string, unknown>): CognitionMemoryEntry {
   };
 }
 
-/** Save a new cognition memory entry for an organization. */
+/** Save a new cognition memory entry for an organization. The entry and its audit record commit together. */
 export async function saveCognitionMemory(
   orgId: string,
   input: SaveMemoryInput,
+  userId: string,
 ): Promise<CognitionMemoryEntry> {
   const id = randomUUID();
   const now = new Date().toISOString();
-  await inOrganization(orgId, (tx) =>
-    tx.execute(sql`
+  await inOrganization(orgId, async (tx) => {
+    await tx.execute(sql`
       INSERT INTO ue_cognition_memory
         (id, organization_id, memory_type, title, context_summary, payload,
          resilience_score_at_capture, tags, key_insights, session_id, status, created_at, updated_at)
@@ -65,8 +67,16 @@ export async function saveCognitionMemory(
         ${now}::timestamptz,
         ${now}::timestamptz
       )
-    `),
-  );
+    `);
+    await persistAtomicAudit(tx, {
+      organizationId: orgId,
+      userId,
+      action: 'cognition_memory.save',
+      resourceType: 'ue_cognition_memory',
+      resourceId: id,
+      details: { memoryType: input.memoryType, sessionId: input.sessionId ?? null },
+    });
+  });
   return {
     id,
     organizationId: orgId,
@@ -125,16 +135,30 @@ export async function loadCognitionMemory(
   };
 }
 
-/** Archive a cognition memory entry. A malformed id matches nothing. */
-export async function archiveCognitionMemory(orgId: string, entryId: string): Promise<void> {
-  if (!isUuid(entryId)) return;
-  await inOrganization(orgId, (tx) =>
-    tx.execute(sql`
+/**
+ * Archive an active cognition memory entry. Returns false — writing and auditing nothing — when the id is malformed or
+ * matches no active entry of the organization.
+ */
+export async function archiveCognitionMemory(orgId: string, entryId: string, userId: string): Promise<boolean> {
+  if (!isUuid(entryId)) return false;
+  return inOrganization(orgId, async (tx) => {
+    const rows = (await tx.execute(sql`
       UPDATE ue_cognition_memory
       SET status = 'archived', updated_at = now()
-      WHERE id = ${entryId} AND organization_id = ${orgId}
-    `),
-  );
+      WHERE id = ${entryId} AND organization_id = ${orgId} AND status = 'active'
+      RETURNING id
+    `)) as unknown as Array<Record<string, unknown>>;
+    if (rows.length === 0) return false;
+    await persistAtomicAudit(tx, {
+      organizationId: orgId,
+      userId,
+      action: 'cognition_memory.archive',
+      resourceType: 'ue_cognition_memory',
+      resourceId: entryId,
+      details: {},
+    });
+    return true;
+  });
 }
 
 /** Load a single cognition memory entry. */

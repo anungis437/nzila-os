@@ -1,4 +1,5 @@
 import { db } from "@/db";
+import type { RLSTx } from "@/lib/db/with-rls-context";
 import {
   provincialPrivacyConfig,
   provincialConsent,
@@ -161,7 +162,7 @@ export class ProvincialPrivacyService {
   /**
    * Record user consent
    */
-  static async recordConsent(request: ConsentRequest) {
+  static async recordConsent(request: ConsentRequest, tx: RLSTx = db) {
     const config = await this.getProvinceConfig(request.province);
 
     // Validate Quebec explicit consent requirement
@@ -192,7 +193,7 @@ export class ProvincialPrivacyService {
       expiresAt.setFullYear(expiresAt.getFullYear() + 1);
     }
 
-    const [consent] = await db
+    const [consent] = await tx
       .insert(provincialConsent)
       .values({
         userId: request.userId,
@@ -246,17 +247,19 @@ export class ProvincialPrivacyService {
   /**
    * Revoke user consent
    */
-  static async revokeConsent(userId: string, province: Province, consentType: string) {
-    await db
+  static async revokeConsent(userId: string, province: Province, consentType: string, tx: RLSTx = db) {
+    return tx
       .update(provincialConsent)
       .set({ revokedAt: new Date() })
       .where(
         and(
           eq(provincialConsent.userId, userId),
           eq(provincialConsent.province, province),
-          eq(provincialConsent.consentType, consentType)
+          eq(provincialConsent.consentType, consentType),
+          isNull(provincialConsent.revokedAt)
         )
-      );
+      )
+      .returning({ id: provincialConsent.id });
   }
 
   /**

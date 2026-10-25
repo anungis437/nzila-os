@@ -44,7 +44,7 @@ Six aggregate `pnpm test:fast` runs on this branch, each with every individual t
 
 The aggregate cap is now 3 workers. The remaining failures are start-up and I/O starvation on a machine shared with other agents' dev servers and containers (C: is 94% full); the 60 s worker-start timeout is not configurable. **No clean aggregate exit has been achieved**, so this stays an open qualification defect: it needs a quiet, dedicated runner, not further test edits.
 
-## Audit coverage (K-011): 271 to 192
+## Audit coverage (K-011): 271 to 1
 
 Authority-bearing mutations now commit with their audit record on the transaction that does the work; a failed audit write fails and rolls back the change, and a change that matches nothing is a 404 with no audit.
 
@@ -67,9 +67,20 @@ Authority-bearing mutations now commit with their audit record on the transactio
 
 Open institutional decision: `votes.cast_at` is an exact timestamp and can be correlated with participation records; its granularity is a product decision, not an engineering default.
 
+### Round 2: 192 to 1
+
+- Finance and platform operations: dues, payments, billing subscriptions, admin billing cycles, case ingest, PKI sign, verify and cancel, and employer execution. Checkout is limited to the member the transaction belongs to; payment success and failure are idempotent and judge the amount on record; billing PATCH can no longer change commercial terms; payroll needs three different people (prepare, approve, execute) under a named financial authority, with row locks and status predicates.
+- Non-database effects (jobs, flags, billing runs, calendar sync, integration sync, imports, Stripe sessions) use `performAuditedOperation`: the intent is recorded first and the operation is skipped if that fails.
+- AI, CBA, clause library, precedents and bargaining routes are tenant-scoped and audited; unscoped GraphQL CRUD is retired.
+- Member, privacy, GDPR, communications, integrations, satisfaction, targets, SCIM, social, rewards, location, pilot, workbook, ICRA claim, MFA, onboarding, calendar and cron routes are audited or fail closed (see register K-011 for the defects closed).
+- Classification: read-only and compute-only POST routes are pinned (`COMPUTE_ONLY`) with a ratchet that checks they hold no write; writes with no attributable actor and organization are pinned `EXEMPT_UNATTRIBUTABLE` together with the control that bounds each, verified by test.
+- Remaining gap: `icra/report/[assessmentId]/review` (a shared cron secret authorises a human review with a self-asserted reviewer role; no UI caller). This is an institutional decision, left as is.
+- Needs migration or decision: payroll executor column; unique indexes on remittance runs per payroll run and timesheet batches; PKI sign document ownership; platform-wide CBA-intelligence data; user-scoping of copilot conversations; single-platform-administrator deployments cannot approve commercial terms; rate limit on public cookie consent.
+- Verification: `tsc --noEmit` clean; app, lib, services, actions, db and packages suites 1,362 files and 19,531 tests passed in one run (a clean aggregate `pnpm test:fast` is still not demonstrated).
+
 ## Open, in order
 
-1. Audit coverage: 192 mutating routes still have no route-level atomic-audit evidence (scan follows three import hops; 33 handlers were found to contain no writes). Remaining families: finance (platform-economics payments, invoices, allocation), billing send routes, ICRA/OCRA, exit interviews, AI, employer execution, and the board-packet and election-session routes. Denial-path durability (separate transaction after rollback) is designed and proven for the audit primitive, not yet applied route by route.
+1. Audit coverage: one mutating route (`icra/report/[assessmentId]/review`) has no route-level atomic-audit evidence, pending an institutional decision. Denial-path durability (separate transaction after rollback) is designed and proven for the audit primitive, not yet applied route by route.
 2. Finance duties, WorkAid union-side engine, messaging UI and lifecycle.
 3. `union_rep_id` backfill rehearsal and reader migration; the claims path needs a real-PostgreSQL qualification suite (the retired role-model suite is gone).
 4. Voting extension and certified-result supersession workflows (inactive until adopted); voting options, eligibility and proxy routes.

@@ -1,57 +1,14 @@
 /**
  * POST /api/org/switch
  *
- * Switches the authenticated user's active organization.
- * Canonical org endpoint — all new code should hit this route.
+ * Retired: this route confirmed that an organization exists and answered "success" without checking that the caller
+ * belongs to it and without changing which organization the session acts in. The switch that does that, and checks
+ * membership, is /api/organizations/switch.
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { withApiAuth, BaseAuthContext } from "@/lib/api-auth-guard";
-import { validateOrganizationExists } from "@/lib/organization-utils";
-import {
-  ErrorCode,
-  standardErrorResponse,
-} from "@/lib/api/standardized-responses";
+import { withApiAuth } from "@/lib/api-auth-guard";
+import { retiredHandler } from "@/lib/api/retired-route";
 
 export const dynamic = "force-dynamic";
 
-export const POST = withApiAuth(
-  async (request: NextRequest, _context: BaseAuthContext) => {
-    try {
-      const body = await request.json();
-      const { organizationId } = body;
-
-      if (!organizationId || typeof organizationId !== "string") {
-        return standardErrorResponse(
-          ErrorCode.VALIDATION_ERROR,
-          "organizationId is required",
-        );
-      }
-
-      const exists = await validateOrganizationExists(organizationId);
-      if (!exists) {
-        return standardErrorResponse(
-          ErrorCode.NOT_FOUND,
-          "Organization not found",
-        );
-      }
-
-      // Build response with org-only payload
-      const org = {
-        organizationId,
-        name: null as string | null,
-        slug: null as string | null,
-      };
-
-      return NextResponse.json({
-        success: true,
-        org,
-      });
-    } catch (_error) {
-      return standardErrorResponse(
-        ErrorCode.INTERNAL_ERROR,
-        "Failed to switch organization",
-      );
-    }
-  },
-);
+export const POST = withApiAuth(retiredHandler("/api/organizations/switch"));

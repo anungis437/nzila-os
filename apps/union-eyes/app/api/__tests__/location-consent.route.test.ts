@@ -4,21 +4,35 @@ import { NextRequest } from 'next/server';
 const m = vi.hoisted(() => ({
   withApiAuth: vi.fn(),
   getCurrentUser: vi.fn(),
+  getOrganizationIdForUser: vi.fn(),
   requestLocationConsent: vi.fn(),
   hasValidConsent: vi.fn(),
   revokeLocationConsent: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   standardErrorResponse: vi.fn(),
   standardSuccessResponse: vi.fn(),
+  tx: { marker: 'tx' },
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({ withApiAuth: m.withApiAuth, getCurrentUser: m.getCurrentUser }));
-vi.mock('@/services/geofence-privacy-service', () => ({
-  GeofencePrivacyService: {
-    requestLocationConsent: m.requestLocationConsent,
-    hasValidConsent: m.hasValidConsent,
-    revokeLocationConsent: m.revokeLocationConsent,
-  },
+vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: vi.fn(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(m.tx)),
 }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
+vi.mock('@/services/geofence-privacy-service', () => {
+  class LocationConsentConflictError extends Error {}
+  class LocationConsentNotFoundError extends Error {}
+  return {
+    LocationConsentConflictError,
+    LocationConsentNotFoundError,
+    GeofencePrivacyService: {
+      requestLocationConsent: m.requestLocationConsent,
+      hasValidConsent: m.hasValidConsent,
+      revokeLocationConsent: m.revokeLocationConsent,
+    },
+  };
+});
 vi.mock('@/lib/api/standardized-responses', () => ({
   ErrorCode: { AUTH_REQUIRED: 'AUTH_REQUIRED', VALIDATION_ERROR: 'VALIDATION_ERROR' },
   standardErrorResponse: m.standardErrorResponse,
@@ -34,9 +48,11 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
     vi.clearAllMocks();
     m.withApiAuth.mockImplementation((handler: any) => handler);
     m.getCurrentUser.mockResolvedValue({ id: 'caller-own-id' });
+    m.getOrganizationIdForUser.mockResolvedValue('org-1');
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.requestLocationConsent.mockResolvedValue({ id: 'consent_1' });
     m.hasValidConsent.mockResolvedValue(true);
-    m.revokeLocationConsent.mockResolvedValue(undefined);
+    m.revokeLocationConsent.mockResolvedValue({ consentId: 'consent_1' });
     m.standardErrorResponse.mockImplementation((code: string, message: string) =>
       new Response(JSON.stringify({ code, message }), { status: code === 'AUTH_REQUIRED' ? 401 : 400 }));
     m.standardSuccessResponse.mockImplementation((data: unknown) => new Response(JSON.stringify(data), { status: 200 }));
@@ -57,7 +73,38 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
 
     expect(m.requestLocationConsent).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 'caller-own-id' }),
+      m.tx,
     );
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      m.tx,
+      expect.objectContaining({ organizationId: 'org-1', userId: 'caller-own-id', action: 'location.consent.grant', resourceId: 'consent_1' }),
+    );
+  });
+
+  it('POST fails the grant when its audit cannot be written, so no consent is left behind', async () => {
+    const { POST } = await loadRoute();
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+
+    const response = await POST(new NextRequest('http://localhost/api/location/consent', {
+      method: 'POST',
+      body: JSON.stringify({ purpose: 'p', purposeDescription: 'd', consentText: 'I agree' }),
+    }));
+
+    expect(response.status).toBe(500);
+  });
+
+  it('POST answers 409 when the member already has an active consent', async () => {
+    const { POST } = await loadRoute();
+    const { LocationConsentConflictError } = await import('@/services/geofence-privacy-service');
+    m.requestLocationConsent.mockRejectedValueOnce(new LocationConsentConflictError('User already has active location consent'));
+
+    const response = await POST(new NextRequest('http://localhost/api/location/consent', {
+      method: 'POST',
+      body: JSON.stringify({ purpose: 'p', purposeDescription: 'd', consentText: 'I agree' }),
+    }));
+
+    expect(response.status).toBe(409);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('POST returns 401 when unauthenticated', async () => {
@@ -82,6 +129,21 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
 
     await DELETE(new NextRequest('http://localhost/api/location/consent?userId=attacker-supplied-victim-id&reason=done'));
 
-    expect(m.revokeLocationConsent).toHaveBeenCalledWith('caller-own-id', 'done');
+    expect(m.revokeLocationConsent).toHaveBeenCalledWith('caller-own-id', 'done', m.tx);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      m.tx,
+      expect.objectContaining({ userId: 'caller-own-id', action: 'location.consent.revoke', resourceId: 'consent_1' }),
+    );
+  });
+
+  it('DELETE answers 404 and writes no audit when there is no consent to revoke', async () => {
+    const { DELETE } = await loadRoute();
+    const { LocationConsentNotFoundError } = await import('@/services/geofence-privacy-service');
+    m.revokeLocationConsent.mockRejectedValueOnce(new LocationConsentNotFoundError());
+
+    const response = await DELETE(new NextRequest('http://localhost/api/location/consent'));
+
+    expect(response.status).toBe(404);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 });

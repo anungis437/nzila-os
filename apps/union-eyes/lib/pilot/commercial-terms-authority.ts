@@ -40,6 +40,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { pilotApplications, subscriptionPlans } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { getRecommendedEconomicsTier, parsePriceBandLowerBound } from './commercialization-wave1';
 import { pilotHasFinancialArtifacts } from './pilot-ownership';
 
@@ -50,7 +51,7 @@ export type ApproveCommercialTermsResult =
       verifiedPilotAmount: string;
       verifiedSubscriptionPlanId: string | null;
     }
-  | { ok: false; status: 404 | 409; error: string };
+  | { ok: false; status: 403 | 404 | 409; error: string };
 
 /** `numeric(12,2)` column bounds — 10 integer digits, 2 decimal places. */
 const MIN_PILOT_AMOUNT = 0.01;
@@ -141,7 +142,7 @@ export async function approveCommercialTerms(params: {
     };
   }
 
-  return withSystemContext(async (_tx) => {
+  return withSystemContext(async (tx) => {
     if (subscriptionPlanId) {
       const [plan] = await db
         .select({ id: subscriptionPlans.id, isActive: subscriptionPlans.isActive })
@@ -157,7 +158,11 @@ export async function approveCommercialTerms(params: {
     }
 
     const [pilot] = await db
-      .select({ id: pilotApplications.id, verifiedOrganizationId: pilotApplications.verifiedOrganizationId })
+      .select({
+        id: pilotApplications.id,
+        verifiedOrganizationId: pilotApplications.verifiedOrganizationId,
+        verifiedBy: pilotApplications.verifiedBy,
+      })
       .from(pilotApplications)
       .where(eq(pilotApplications.id, pilotId))
       .limit(1)
@@ -178,6 +183,17 @@ export async function approveCommercialTerms(params: {
       };
     }
 
+    // The administrator who verified the organization cannot also approve the money that is bound to it.
+    if (pilot.verifiedBy && pilot.verifiedBy === approvedBy) {
+      return {
+        ok: false,
+        status: 403,
+        error:
+          'The platform administrator who verified this pilot\'s organization cannot approve its commercial terms; ' +
+          'a different platform administrator must approve them.',
+      };
+    }
+
     if (await pilotHasFinancialArtifacts(pilotId)) {
       return {
         ok: false,
@@ -191,6 +207,7 @@ export async function approveCommercialTerms(params: {
       };
     }
 
+    const approvedAt = new Date();
     await db
       .update(pilotApplications)
       .set({
@@ -198,9 +215,24 @@ export async function approveCommercialTerms(params: {
         verifiedPilotAmount: resolvedAmount,
         verifiedSubscriptionPlanId: subscriptionPlanId,
         commercialTermsApprovedBy: approvedBy,
-        commercialTermsApprovedAt: new Date(),
+        commercialTermsApprovedAt: approvedAt,
       })
       .where(eq(pilotApplications.id, pilotId));
+
+    // The approval and its audit record commit together; a failed audit rolls the approval back.
+    await persistAtomicAudit(tx, {
+      organizationId: pilot.verifiedOrganizationId,
+      userId: approvedBy,
+      action: 'pilot.commercial_terms.approve',
+      resourceType: 'pilot_applications',
+      resourceId: pilotId,
+      details: {
+        verifiedMemberCount: memberCount,
+        verifiedPilotAmount: resolvedAmount,
+        verifiedSubscriptionPlanId: subscriptionPlanId,
+        approvedAt: approvedAt.toISOString(),
+      },
+    });
 
     return {
       ok: true,

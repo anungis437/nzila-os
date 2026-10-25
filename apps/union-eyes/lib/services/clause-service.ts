@@ -53,6 +53,8 @@ export interface ClauseSearchOptions {
 export interface ClauseComparisonRequest {
   clauseIds: string[];
   analysisType: "similarities" | "differences" | "best_practices" | "all";
+  /** When set, only clauses of this organization are compared. */
+  organizationId?: string;
 }
 
 export interface ClauseComparisonResult {
@@ -390,7 +392,11 @@ export async function compareClauses(
     const clauses = await db
       .select()
       .from(cbaClause)
-      .where(inArray(cbaClause.id, request.clauseIds));
+      .where(
+        request.organizationId
+          ? and(inArray(cbaClause.id, request.clauseIds), eq(cbaClause.organizationId, request.organizationId))
+          : inArray(cbaClause.id, request.clauseIds),
+      );
 
     if (clauses.length === 0) {
       throw new Error("No clauses found for comparison");

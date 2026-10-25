@@ -7,7 +7,8 @@ import {
   cbaIntelClauses,
   type ReviewStatus,
 } from "@/db/schema";
-import { eq, and, desc, sql, type SQL } from "drizzle-orm";
+import { eq, and, desc, isNull, sql, type SQL } from "drizzle-orm";
+import type { RLSTx } from "@/lib/db/with-rls-context";
 import { logger } from "@/lib/logger";
 import { updateReviewQueueDepthMetrics } from "@/lib/observability/metrics";
 
@@ -129,7 +130,12 @@ const TARGET_TABLES = {
   clause: cbaIntelClauses,
 } as const;
 
-export async function submitReview(action: ReviewAction): Promise<CbaIntelReviewDecision> {
+/**
+ * Record a review decision and apply it to its target. Pass the caller's transaction so the decision, the status change
+ * and the caller's audit record commit together; the status change carries the status it expected, so a concurrent
+ * decision is never overwritten.
+ */
+export async function submitReview(action: ReviewAction, exec: RLSTx = db): Promise<CbaIntelReviewDecision> {
   const table = TARGET_TABLES[action.targetType];
   if (!table) {
     throw new Error(`Unknown target type: ${action.targetType}`);
@@ -137,7 +143,7 @@ export async function submitReview(action: ReviewAction): Promise<CbaIntelReview
 
   try {
     // Fetch current status
-    const [existing] = await db
+    const [existing] = await exec
       .select({ id: (table as typeof cbaIntelFindings).id, reviewStatus: (table as typeof cbaIntelFindings).reviewStatus })
       .from(table)
       .where(eq((table as typeof cbaIntelFindings).id, action.targetId))
@@ -150,7 +156,7 @@ export async function submitReview(action: ReviewAction): Promise<CbaIntelReview
     const previousStatus = existing.reviewStatus ?? "pending_review";
 
     // Insert the review decision (audit trail)
-    const [decision] = await db
+    const [decision] = await exec
       .insert(cbaIntelReviewDecisions)
       .values({
         targetType: action.targetType,
@@ -165,10 +171,20 @@ export async function submitReview(action: ReviewAction): Promise<CbaIntelReview
       .returning();
 
     // Update the target record's review status
-    await db
+    const reviewStatusColumn = (table as typeof cbaIntelFindings).reviewStatus;
+    const [applied] = await exec
       .update(table)
       .set({ reviewStatus: action.decision } as never)
-      .where(eq((table as typeof cbaIntelFindings).id, action.targetId));
+      .where(
+        and(
+          eq((table as typeof cbaIntelFindings).id, action.targetId),
+          existing.reviewStatus == null ? isNull(reviewStatusColumn) : eq(reviewStatusColumn, existing.reviewStatus),
+        ),
+      )
+      .returning({ id: (table as typeof cbaIntelFindings).id });
+    if (!applied) {
+      throw new Error(`Review target changed concurrently: ${action.targetType}/${action.targetId}`);
+    }
 
     logger.info("Review decision submitted", {
       targetType: action.targetType,

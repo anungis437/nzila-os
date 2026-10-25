@@ -1,6 +1,9 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
 import { db } from "@/db";
 import { withRLSContext } from "@/lib/db/with-rls-context";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
+import { FINANCIAL_MEMBER_DATA_ROLES } from "@/lib/finance/financial-authority";
+import { recordedRunAmounts } from "@/lib/employer-execution/run-duties";
 import {
   employerPayrollRuns,
   employerPayrollRunItems,
@@ -32,14 +35,14 @@ const replaySchema = z.object({
 
 export const POST = withApi(
   {
-    auth: { minRole: "steward" },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_execution_replay",
     body: replaySchema,
     successStatus: 201,
     openapi: { tags: ["Employer Execution"], summary: "Replay payroll run and diff results" },
   },
   async ({ organizationId, params, body, userId }) => {
-    if (!organizationId) throw ApiError.badRequest("Organization context required");
+    if (!organizationId || !userId) throw ApiError.badRequest("Organization context required");
     const runId = params?.runId;
     if (typeof runId !== "string") throw ApiError.badRequest("Source payroll run id is required");
 
@@ -63,7 +66,7 @@ export const POST = withApi(
         ),
       );
 
-    const [sourceEvidenceManifest] = await db
+    const sourceEvidenceManifests = await db
       .select()
       .from(employerExecutionArtifacts)
       .where(
@@ -73,8 +76,7 @@ export const POST = withApi(
           eq(employerExecutionArtifacts.artifactType, "evidence_manifest"),
         ),
       )
-      .orderBy(desc(employerExecutionArtifacts.createdAt))
-      .limit(1);
+      .orderBy(desc(employerExecutionArtifacts.createdAt));
 
     const timesheetEntries = await db
       .select()
@@ -294,10 +296,15 @@ export const POST = withApi(
           : "Replay matched original run",
     };
 
-    const parentLink =
-      ((sourceEvidenceManifest?.manifestJson as Record<string, unknown> | undefined)?.chainLink as
-        | { linkId?: string; sealHash?: string; chainDepth?: number }
-        | undefined) ?? undefined;
+    // A replay chains from the run's own seal, never from an earlier replay's manifest.
+    const parentLink = sourceEvidenceManifests
+      .map(
+        (manifest) =>
+          (manifest.manifestJson as Record<string, unknown> | undefined)?.chainLink as
+            | { linkId?: string; sealHash?: string; chainDepth?: number; entityType?: string }
+            | undefined,
+      )
+      .find((link) => link?.entityType === "payroll_run");
 
     const replayEvidencePack = createEvidencePack({
       entityType: "replay",
@@ -327,7 +334,9 @@ export const POST = withApi(
       ],
     });
 
-    const [replay] = await withRLSContext(async (tx) => {
+    // The replay only ever adds records beside the source run; the run's own status, amounts and approvals are
+    // never written here. The replay, its evidence and the audit record commit together.
+    const [replay] = await withRLSContext({ organizationId }, async (tx) => {
       const [createdReplay] = await tx
         .insert(employerExecutionReplays)
         .values({
@@ -423,6 +432,27 @@ export const POST = withApi(
           blocking: "no",
         });
       }
+
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: "employer_execution.replay.create",
+        resourceType: "employer_execution_replays",
+        resourceId: createdReplay.id,
+        details: {
+          sourcePayrollRunId: sourceRun.id,
+          sourceRunStatus: sourceRun.status,
+          mode: body.mode,
+          sourceEngineVersion: sourceRun.engineVersion,
+          replayEngineVersion,
+          sourceRuleVersionId: sourceRun.cbaRuleVersionId,
+          replayRuleVersionId: ruleVersion.id,
+          changed: diff.changed,
+          differenceCount: diff.differences.length,
+          diffHash: createdReplay.diffHash,
+          sourceAmounts: recordedRunAmounts(sourceRun),
+        },
+      });
 
       return [createdReplay];
     });

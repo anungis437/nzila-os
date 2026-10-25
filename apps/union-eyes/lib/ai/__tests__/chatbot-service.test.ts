@@ -22,6 +22,8 @@ const mocks = vi.hoisted(() => ({
   mockAiGenerate: vi.fn(),
   mockAiEmbed: vi.fn(),
   mockFetch: vi.fn(),
+  audit: vi.fn(),
+  operation: vi.fn(),
 }));
 
 vi.mock("@/db", () => ({
@@ -113,6 +115,12 @@ vi.mock("@/lib/logger", () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
+vi.mock("@/lib/db/with-rls-context", () => ({
+  withRLSContext: async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) => fn((await import("@/db")).db),
+}));
+vi.mock("@/lib/audit/atomic-audit", () => ({ persistAtomicAudit: mocks.audit }));
+vi.mock("@/lib/audit/operation-audit", () => ({ performAuditedOperation: mocks.operation }));
+
 vi.mock("@/lib/rate-limiter", () => ({
   checkRateLimit: vi.fn(async () => ({ allowed: true, remaining: 29, limit: 30, resetIn: 60 })),
 }));
@@ -139,6 +147,11 @@ const session = {
   messageCount: 0,
   createdAt: new Date(),
 };
+
+beforeEach(() => {
+  mocks.audit.mockReset().mockResolvedValue(undefined);
+  mocks.operation.mockReset().mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn());
+});
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -326,6 +339,37 @@ describe("ChatbotService", () => {
     });
     expect(msg.role).toBe("assistant");
     expect(msg.content).toContain("union rights");
+  });
+
+  it("sendMessage stores the exchange with its audit record on the same transaction", async () => {
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]).mockResolvedValueOnce([]);
+    await bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "What are my rights?" });
+    expect(mocks.operation).toHaveBeenCalledWith(
+      expect.objectContaining({ organizationId: "org-1", userId: "user-1", action: "chatbot.message.respond", resourceId: "sess-1" }),
+      expect.any(Function),
+    );
+    expect(mocks.audit).toHaveBeenCalledWith(
+      expect.objectContaining({ insert: expect.any(Function) }),
+      expect.objectContaining({ organizationId: "org-1", userId: "user-1", action: "chatbot.message.exchange", resourceId: "sess-1" }),
+    );
+  });
+
+  it("sendMessage sends nothing to the provider when the operation intent cannot be recorded", async () => {
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]);
+    mocks.operation.mockRejectedValueOnce(new Error("intent not recorded"));
+    await expect(
+      bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "hi" }),
+    ).rejects.toThrow("intent not recorded");
+    expect(mocks.mockAiGenerate).not.toHaveBeenCalled();
+    expect(mocks.mockInsertValues).not.toHaveBeenCalled();
+  });
+
+  it("sendMessage does not keep an exchange whose audit record cannot be written", async () => {
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]).mockResolvedValueOnce([]);
+    mocks.audit.mockRejectedValueOnce(new Error("audit down"));
+    await expect(
+      bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "hi", useRAG: false }),
+    ).rejects.toThrow("audit down");
   });
 
   it("sendMessage handles AI error with fallback", async () => {

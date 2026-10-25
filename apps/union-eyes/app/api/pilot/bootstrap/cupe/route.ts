@@ -11,14 +11,13 @@
 import { withApi, z, RATE_LIMITS, ApiError } from '@/lib/api/framework';
 import { readFile } from 'fs/promises';
 import { resolve } from 'path';
-import { db } from '@/db/db';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { organizations } from '@/db/schema-organizations';
-import { organizationMembers, pilotChecklistItems } from '@/db/schema';
+import { organizationMembers, pilotChecklistItems, pilotEvents } from '@/db/schema';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { eq } from 'drizzle-orm';
-import { trackPilotEvent } from '@/lib/services/pilot-tracking';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { assertPilotDemoMutationRuntime } from '@/lib/config/pilot-demo-runtime';
 
 const bodySchema = z.object({
   reset: z.boolean().default(false),
@@ -40,7 +39,9 @@ const CHECKLIST_IDS = [
 
 export const POST = withApi(
   {
-    auth: { minRole: 'admin' },
+    // Seeds and, with `reset`, deletes the members and grievances of a fixed organization across tenants: platform
+    // authority only, and only where the deployment is explicitly a pilot or demo runtime.
+    auth: { minRole: 'system_admin' },
     body: bodySchema,
     rateLimit: RATE_LIMITS.ORG_WRITE,
     openapi: {
@@ -49,6 +50,15 @@ export const POST = withApi(
     },
   },
   async ({ body, userId }) => {
+    if (!userId) throw ApiError.unauthorized();
+
+    let runtimeMode: string;
+    try {
+      runtimeMode = assertPilotDemoMutationRuntime();
+    } catch (error) {
+      throw ApiError.forbidden(error instanceof Error ? error.message : 'Pilot bootstrap is disabled in this runtime');
+    }
+
     const jsonContent = await readFile(CUPE_PILOT_JSON, 'utf-8');
     const fixture = JSON.parse(jsonContent) as {
       org: { name: string; slug?: string };
@@ -59,25 +69,24 @@ export const POST = withApi(
 
     const slug = fixture.org.slug ?? 'cupe-local-123';
 
-    const existingOrg = await db
-      .select()
-      .from(organizations)
-      .where(eq(organizations.slug, slug))
-      .limit(1);
+    // Every write below, and the audit record, is one system transaction: a failure leaves no half-seeded organization.
+    const outcome = await withSystemContext(async (tx) => {
+      const existingOrg = await tx
+        .select()
+        .from(organizations)
+        .where(eq(organizations.slug, slug))
+        .limit(1);
 
-    let orgId = existingOrg[0]?.id;
+      let orgId = existingOrg[0]?.id;
 
-    if (orgId && body.reset) {
-      await withSystemContext(async () => {
-        await db.delete(grievances).where(eq(grievances.organizationId, orgId!));
-        await db.delete(organizationMembers).where(eq(organizationMembers.organizationId, orgId!));
-        await db.delete(pilotChecklistItems).where(eq(pilotChecklistItems.organizationId, orgId!));
-      });
-    }
+      if (orgId && body.reset) {
+        await tx.delete(grievances).where(eq(grievances.organizationId, orgId));
+        await tx.delete(organizationMembers).where(eq(organizationMembers.organizationId, orgId));
+        await tx.delete(pilotChecklistItems).where(eq(pilotChecklistItems.organizationId, orgId));
+      }
 
-    if (!orgId) {
-      const [newOrg] = await withSystemContext(async () =>
-        db
+      if (!orgId) {
+        const [newOrg] = await tx
           .insert(organizations)
           .values({
             name: fixture.org.name,
@@ -85,21 +94,20 @@ export const POST = withApi(
             organizationType: 'local',
             hierarchyPath: [],
           })
-          .returning({ id: organizations.id }),
-      );
-      orgId = newOrg.id;
-    }
+          .returning({ id: organizations.id });
+        orgId = newOrg.id;
+      }
 
-    if (!orgId) throw ApiError.internal('Failed to resolve bootstrap organization');
+      if (!orgId) throw ApiError.internal('Failed to resolve bootstrap organization');
+      const organizationId = orgId;
 
-    let membersInserted = 0;
-    await withSystemContext(async () => {
+      let membersInserted = 0;
       for (const m of fixture.members) {
-        await db
+        await tx
           .insert(organizationMembers)
           .values({
             userId: m.id,
-            organizationId: orgId,
+            organizationId,
             name: `${m.first_name} ${m.last_name}`,
             email: m.email,
             role: m.role,
@@ -109,18 +117,16 @@ export const POST = withApi(
           .onConflictDoNothing();
         membersInserted += 1;
       }
-    });
 
-    let casesInserted = 0;
-    await withSystemContext(async () => {
+      let casesInserted = 0;
       for (const c of fixture.cases) {
         const grievantMember = fixture.members.find((m) => m.id === c.filed_by);
 
-        await db
+        await tx
           .insert(grievances)
           .values({
             grievanceNumber: c.number,
-            organizationId: orgId,
+            organizationId,
             type: c.case_type === 'wage_dispute'
               ? 'contract'
               : c.case_type === 'harassment'
@@ -150,57 +156,58 @@ export const POST = withApi(
           .onConflictDoNothing();
         casesInserted += 1;
       }
-    });
 
-    await withSystemContext(async () => {
       for (const itemId of CHECKLIST_IDS) {
-        await db
+        const done = itemId === 'org_profile_configured' || itemId === 'team_invited' || itemId === 'first_case_created';
+        await tx
           .insert(pilotChecklistItems)
           .values({
-            organizationId: orgId!,
+            organizationId,
             itemId,
-            completed: itemId === 'org_profile_configured' || itemId === 'team_invited' || itemId === 'first_case_created',
-            completedAt: itemId === 'org_profile_configured' || itemId === 'team_invited' || itemId === 'first_case_created' ? new Date() : null,
-            completedBy: userId ?? 'system:pilot-bootstrap',
+            completed: done,
+            completedAt: done ? new Date() : null,
+            completedBy: userId,
           })
           .onConflictDoNothing();
       }
+
+      const sessionId = `pilot-bootstrap:${organizationId}`;
+      await tx.insert(pilotEvents).values([
+        {
+          userId,
+          organizationId,
+          sessionId,
+          eventType: 'org_created',
+          metadata: { source: 'api/pilot/bootstrap/cupe', reset: body.reset },
+        },
+        {
+          userId,
+          organizationId,
+          sessionId,
+          eventType: 'feature_used',
+          metadata: { feature: 'one_click_bootstrap' },
+        },
+      ]);
+
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'pilot.bootstrap.cupe',
+        resourceType: 'organizations',
+        resourceId: organizationId,
+        details: {
+          reset: body.reset,
+          runtimeMode,
+          membersInserted,
+          casesInserted,
+          worksites: fixture.worksites.length,
+        },
+      });
+
+      return { organizationId, membersInserted, casesInserted };
     });
 
-    await trackPilotEvent({
-      userId: userId ?? 'system:pilot-bootstrap',
-      organizationId: orgId,
-      sessionId: `pilot-bootstrap:${orgId}`,
-      eventType: 'org_created',
-      metadata: {
-        source: 'api/pilot/bootstrap/cupe',
-        reset: body.reset,
-      },
-    });
-
-    await trackPilotEvent({
-      userId: userId ?? 'system:pilot-bootstrap',
-      organizationId: orgId,
-      sessionId: `pilot-bootstrap:${orgId}`,
-      eventType: 'feature_used',
-      metadata: {
-        feature: 'one_click_bootstrap',
-      },
-    });
-
-    await auditLog({
-      eventType: AuditEventType.DATA_CREATE,
-      severity: AuditSeverity.HIGH,
-      userId: userId ?? undefined,
-      organizationId: orgId,
-      resource: 'pilot_bootstrap',
-      action: 'cupe_bootstrap_executed',
-      details: {
-        membersInserted,
-        casesInserted,
-        worksites: fixture.worksites.length,
-      },
-    });
+    const { organizationId: orgId, membersInserted, casesInserted } = outcome;
 
     const demoScript = [
       'Open dashboard and verify seeded CUPE organization context.',

@@ -14,6 +14,7 @@ const m = vi.hoisted(() => ({
   auditAIInvocation: vi.fn(),
   dbExecute: vi.fn(),
   predictChurnRisk: vi.fn(),
+  audit: vi.fn(),
   logger: {
     info: vi.fn(),
     warn: vi.fn(),
@@ -61,6 +62,10 @@ vi.mock('@/lib/ml/models/churn-prediction-model', () => ({
 }));
 
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) => fn({ execute: m.dbExecute }),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 
 async function loadRoute() {
   return import('../ml/predictions/churn-risk/route');
@@ -73,6 +78,7 @@ describe('ml/predictions/churn-risk route', () => {
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0, remaining: 99 });
     m.createRateLimitHeaders.mockReturnValue({ 'x-ratelimit-remaining': '99' });
     m.auditAIInvocation.mockResolvedValue('audit_ref_1');
+    m.audit.mockResolvedValue(undefined);
     m.predictChurnRisk.mockResolvedValue({
       riskScore: 72,
       riskLevel: 'high',
@@ -145,6 +151,7 @@ describe('ml/predictions/churn-risk route', () => {
 
     expect(response.status).toBe(404);
     await expect(response.json()).resolves.toMatchObject({ code: 'RESOURCE_NOT_FOUND' });
+    expect(m.audit).not.toHaveBeenCalled();
   });
 
   it('returns generated prediction payload on POST success', async () => {
@@ -181,6 +188,31 @@ describe('ml/predictions/churn-risk route', () => {
       riskLevel: 'high',
     });
     expect(m.predictChurnRisk).toHaveBeenCalled();
+    expect(m.audit).toHaveBeenCalledWith(
+      { execute: m.dbExecute },
+      expect.objectContaining({
+        organizationId: TEST_USER.organizationId,
+        userId: TEST_USER.id,
+        action: 'ml.churn_risk.predict',
+        details: expect.objectContaining({ memberId: '00000000-0000-0000-0000-000000000022', riskLevel: 'high' }),
+      }),
+    );
+  });
+
+  it('fails the prediction when its audit record cannot be written', async () => {
+    const { POST } = await loadRoute();
+    m.audit.mockRejectedValueOnce(new Error('audit down'));
+    m.dbExecute
+      .mockResolvedValueOnce([{ full_name: 'Casey Worker', days_since_last_activity: 95, resolution_rate: 42, avg_satisfaction: 2.4, total_cases: 4, union_tenure_years: 1.5, negative_feedback_count: 3 }])
+      .mockResolvedValueOnce([]);
+
+    const response = await POST(new NextRequest('http://localhost/api/ml/predictions/churn-risk', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ memberId: '00000000-0000-0000-0000-000000000022' }),
+    }));
+
+    expect(response.status).toBe(500);
   });
 
   // ROUND 48 REGRESSION: a caller-supplied organizationId (query param on GET,

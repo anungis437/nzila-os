@@ -207,7 +207,7 @@ async function enrollMfaWithContext(input: EnrollInput): Promise<EnrollResult> {
     })
   }
 
-  await logEvent('mfa_enroll_started', { userId: input.userId })
+  await logEvent('mfa_enroll_started', { userId: input.userId }, db, true)
   return { success: true, secret, otpAuthUri, recoveryCodes }
 }
 
@@ -249,7 +249,7 @@ async function verifyEnrollmentWithContext(input: VerifyEnrollInput): Promise<{ 
     .update(authUsers)
     .set({ twoFactorEnabled: true })
     .where(eq(authUsers.userId, input.userId))
-  await logEvent('mfa_enrolled', { userId: input.userId })
+  await logEvent('mfa_enrolled', { userId: input.userId }, db, true)
   return { success: true }
 }
 

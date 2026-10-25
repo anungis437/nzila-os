@@ -1,4 +1,6 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
+import { withRLSContext } from "@/lib/db/with-rls-context";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import {
   listIngestionJobs,
   createIngestionJob,
@@ -53,15 +55,29 @@ export const POST = withApi(
       summary: "Trigger a new ingestion job",
     },
   },
-  async ({ body, userId }) => {
+  async ({ body, userId, organizationId }) => {
+    if (!userId || !organizationId) throw ApiError.badRequest("Organization context required");
     const source = await getSourceById(body.sourceId);
     if (!source) throw ApiError.notFound("Source not found");
     if (!source.isActive) throw ApiError.badRequest("Source is inactive");
 
-    return { data: await createIngestionJob({
-      sourceId: body.sourceId,
-      triggerType: body.triggerType,
-      triggeredBy: userId,
-    }) };
+    // The job and its audit record commit together.
+    const job = await withRLSContext({ organizationId }, async (tx) => {
+      const created = await createIngestionJob({
+        sourceId: body.sourceId,
+        triggerType: body.triggerType,
+        triggeredBy: userId,
+      }, tx);
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: "cba_ingestion.job.create",
+        resourceType: "cba_intel_ingestion_jobs",
+        resourceId: created.id,
+        details: { sourceId: body.sourceId, triggerType: body.triggerType },
+      });
+      return created;
+    });
+    return { data: job };
   },
 );

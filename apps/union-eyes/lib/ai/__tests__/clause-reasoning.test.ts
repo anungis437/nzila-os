@@ -39,7 +39,7 @@ vi.mock('@/db/schema/domains/claims/grievances', () => ({
   grievances: { id: 'id', organizationId: 'organizationId' },
 }));
 
-vi.mock('./ai-feature-guard', () => ({
+vi.mock('@/lib/ai/ai-feature-guard', () => ({
   auditAiInteraction: vi.fn(async () => 'ai-clause-ref-123'),
   buildAiEnvelope: vi.fn((data: any, meta: Record<string, unknown>) => ({
     available: true, data, ...meta, disclaimer: 'AI disclaimer',
@@ -50,11 +50,22 @@ vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
+const { audit, operation } = vi.hoisted(() => ({ audit: vi.fn(), operation: vi.fn() }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) =>
+    fn({ insert: () => ({ values: mockInsertValues }) }),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: audit }));
+vi.mock('@/lib/audit/operation-audit', () => ({ performAuditedOperation: operation }));
+
+
 import { suggestClausesForGrievance } from '../clause-reasoning';
 
 describe('suggestClausesForGrievance', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    audit.mockResolvedValue(undefined);
+    operation.mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn());
     mockFindFirst.mockResolvedValue({
       id: 'grv-1',
       organizationId: 'org-1',
@@ -99,12 +110,31 @@ describe('suggestClausesForGrievance', () => {
     })).rejects.toThrow('not found');
   });
 
-  it('calls AI generate', async () => {
+  it('calls AI generate through the audited operation', async () => {
     await suggestClausesForGrievance({
       grievanceId: 'grv-1',
       organizationId: 'org-1',
       userId: 'user-1',
     });
     expect(mockGenerate).toHaveBeenCalledOnce();
+    expect(operation).toHaveBeenCalledWith(
+      expect.objectContaining({ organizationId: 'org-1', userId: 'user-1', action: 'ai.clause_reasoning.generate' }),
+      expect.any(Function),
+    );
+  });
+
+  it('persists the suggestions with one audit record on the same transaction', async () => {
+    await suggestClausesForGrievance({ grievanceId: 'grv-1', organizationId: 'org-1', userId: 'user-1' });
+    expect(mockInsertValues).toHaveBeenCalledTimes(1);
+    expect(audit).toHaveBeenCalledTimes(1);
+    expect(audit).toHaveBeenCalledWith(
+      expect.objectContaining({ insert: expect.any(Function) }),
+      expect.objectContaining({ organizationId: 'org-1', userId: 'user-1', action: 'ai.clause_reasoning.create' }),
+    );
+  });
+
+  it('does not keep suggestions whose audit record cannot be written', async () => {
+    audit.mockRejectedValueOnce(new Error('audit down'));
+    await expect(suggestClausesForGrievance({ grievanceId: 'grv-1', organizationId: 'org-1', userId: 'user-1' })).rejects.toThrow('audit down');
   });
 });

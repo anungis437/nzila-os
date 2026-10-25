@@ -1,17 +1,18 @@
 /**
  * Precedents API Routes - Main endpoints for arbitration decisions
  * GET /api/precedents - List precedents with filtering
- * POST /api/precedents - Create a new precedent
+ * POST /api/precedents - Create a new precedent (platform content managers only)
  */
 
 import { NextResponse } from "next/server";
 import { 
   listPrecedents, 
-  createPrecedent,
   getPrecedentStatistics,
   getMostCitedPrecedents,
   getPrecedentsByIssueType
 } from "@/lib/services/precedent-service";
+import { createPrecedentAudited } from "@/lib/services/precedent-audited-service";
+import { tribunalTypeEnum, decisionTypeEnum, outcomeEnum, precedentValueEnum } from "@/db/schema";
 import { z } from "zod";
 import { withRoleAuth } from '@/lib/api-auth-guard';
 
@@ -144,24 +145,42 @@ return standardErrorResponse(
 });
 
 
+// The precedent library is shared across tenants, so only a platform-elevated role may add to it.
 const precedentsSchema = z.object({
-  caseNumber: z.unknown().optional(),
-  caseTitle: z.string().min(1, 'caseTitle is required'),
-  tribunal: z.unknown().optional(),
-  decisionType: z.boolean().optional(),
-  decisionDate: z.boolean().optional(),
-  arbitrator: z.unknown().optional(),
-  union: z.unknown().optional(),
-  employer: z.unknown().optional(),
-  outcome: z.unknown().optional(),
-  precedentValue: z.unknown().optional(),
-  fullText: z.unknown().optional(),
+  caseNumber: z.string().min(1).max(100),
+  caseTitle: z.string().min(1, 'caseTitle is required').max(500),
+  tribunal: z.enum(tribunalTypeEnum.enumValues),
+  decisionType: z.enum(decisionTypeEnum.enumValues),
+  decisionDate: z.coerce.date(),
+  filingDate: z.coerce.date().optional(),
+  hearingDate: z.coerce.date().optional(),
+  arbitrator: z.string().min(1).max(200),
+  panelMembers: z.array(z.string()).optional(),
+  grievor: z.string().max(300).optional(),
+  union: z.string().min(1).max(300),
+  employer: z.string().min(1).max(300),
+  outcome: z.enum(outcomeEnum.enumValues),
+  precedentValue: z.enum(precedentValueEnum.enumValues),
+  keyFindings: z.array(z.string()).optional(),
+  issueTypes: z.array(z.string()).optional(),
+  fullText: z.string().min(1),
+  summary: z.string().optional(),
+  headnote: z.string().optional(),
+  precedentSummary: z.string().optional(),
+  reasoning: z.string().optional(),
+  keyFacts: z.string().optional(),
+  sector: z.string().max(100).optional(),
+  jurisdiction: z.string().max(50).optional(),
+  language: z.string().max(10).optional(),
 });
 
-export const POST = withRoleAuth('steward', async (request, _context) => {
+export const POST = withRoleAuth('content_manager', async (request, context) => {
+  const { userId, organizationId } = context;
+  if (!userId || !organizationId) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, 'No active organization');
+  }
   try {
       const body = await request.json();
-    // Validate request body
     const validation = precedentsSchema.safeParse(body);
     if (!validation.success) {
       return standardErrorResponse(
@@ -170,89 +189,9 @@ export const POST = withRoleAuth('steward', async (request, _context) => {
         validation.error.errors
       );
     }
-    
-    const { caseNumber: _caseNumber, caseTitle: _caseTitle, tribunal: _tribunal, decisionType: _decisionType, decisionDate: _decisionDate, arbitrator: _arbitrator, union: _union, employer: _employer, outcome: _outcome, precedentValue: _precedentValue, fullText: _fullText } = validation.data;
-
-      // Validate required fields
-      if (!body.caseNumber) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'caseNumber is required'
-    );
-      }
-
-      if (!body.caseTitle) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'caseTitle is required'
-    );
-      }
-
-      if (!body.tribunal) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'tribunal is required'
-    );
-      }
-
-      if (!body.decisionType) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'decisionType is required'
-    );
-      }
-
-      if (!body.decisionDate) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'decisionDate is required'
-    );
-      }
-
-      if (!body.arbitrator) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'arbitrator is required'
-    );
-      }
-
-      if (!body.union) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'union is required'
-    );
-      }
-
-      if (!body.employer) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'employer is required'
-    );
-      }
-
-      if (!body.outcome) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'outcome is required'
-    );
-      }
-
-      if (!body.precedentValue) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'precedentValue is required'
-    );
-      }
-
-      if (!body.fullText) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'fullText is required'
-    );
-      }
 
       // Create precedent
-      const precedent = await createPrecedent(body);
+      const precedent = await createPrecedentAudited({ organizationId, userId }, validation.data);
 
       return standardSuccessResponse(
       {  precedent  }
@@ -274,4 +213,3 @@ export const POST = withRoleAuth('steward', async (request, _context) => {
     );
     }
 });
-

@@ -26,17 +26,22 @@ const h = vi.hoisted(() => {
   const db = { select: () => makeChain(), insert: () => makeChain() };
   const withApi = vi.fn();
   const badRequest = vi.fn((msg: string) => ({ apiError: true, status: 400, msg }));
+  const forbidden = vi.fn((msg: string) => ({ apiError: true, status: 403, msg }));
+  const notFound = vi.fn((r: string) => ({ apiError: true, status: 404, msg: r }));
   const buildClauseVisibilityCondition = vi.fn().mockResolvedValue({ op: 'visibility' });
   const withSystemContext = vi.fn((fn: () => unknown) => fn());
-  const withRLSContext = vi.fn((_context: { organizationId: string }, fn: () => unknown) => fn());
-  return { queue, insertedValues, db, withApi, badRequest, buildClauseVisibilityCondition, withSystemContext, withRLSContext };
+  const withRLSContext = vi.fn((_context: { organizationId: string }, fn: (tx: unknown) => unknown) => fn(db));
+  const sharingChangeDenial = vi.fn().mockResolvedValue(null);
+  const persistAtomicAudit = vi.fn().mockResolvedValue(undefined);
+  return { forbidden, notFound, sharingChangeDenial, persistAtomicAudit, queue, insertedValues, db, withApi, badRequest, buildClauseVisibilityCondition, withSystemContext, withRLSContext };
 });
 
 vi.mock('@/db/db', () => ({ db: h.db }));
 vi.mock('@/db/schema/domains/agreements/shared-library', () => ({
   sharedClauseLibrary: { id: 'scl.id', sourceOrganizationId: 'scl.sourceOrganizationId', clauseTitle: 'scl.clauseTitle', clauseText: 'scl.clauseText', clauseType: 'scl.clauseType', sector: 'scl.sector', province: 'scl.province', sharingLevel: 'scl.sharingLevel', expiryDate: 'scl.expiryDate', createdAt: 'scl.createdAt' },
 }));
-vi.mock('@/db/schema', () => ({ organizations: { id: 'org.id', name: 'org.name' }, congressMemberships: { id: 'cm.id', organizationId: 'cm.organizationId', status: 'cm.status' } }));
+vi.mock('@/db/schema', () => ({ organizations: { id: 'org.id', name: 'org.name' }, congressMemberships: { id: 'cm.id', organizationId: 'cm.organizationId', status: 'cm.status' }, collectiveAgreements: { id: 'ca.id', organizationId: 'ca.organizationId' } }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.persistAtomicAudit }));
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((col: unknown, val: unknown) => ({ op: 'eq', col, val })),
   and: vi.fn((...args: unknown[]) => ({ op: 'and', args })),
@@ -51,9 +56,10 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: h.withSystemContext,
   withRLSContext: h.withRLSContext,
 }));
-vi.mock('@/lib/api/framework', () => ({ withApi: h.withApi, ApiError: { badRequest: h.badRequest } }));
+vi.mock('@/lib/api/framework', () => ({ withApi: h.withApi, ApiError: { badRequest: h.badRequest, forbidden: h.forbidden, notFound: h.notFound } }));
 vi.mock('@/lib/clause-library/sharing-authority', () => ({
   buildClauseVisibilityCondition: h.buildClauseVisibilityCondition,
+  sharingChangeDenial: h.sharingChangeDenial,
 }));
 
 async function loadHandlers() {
@@ -89,7 +95,43 @@ describe('POST /api/clause-library (round 55 ownership-spoofing fix)', () => {
     expect(h.insertedValues[0].sourceOrganizationId).not.toBe('attacker-controlled-org');
     expect(h.insertedValues[0].createdBy).toBe('user-1');
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-a' }, expect.any(Function));
-    expect(h.withSystemContext).not.toHaveBeenCalled();
+    // System context is only used for the sharing-authority check, never for the insert.
+    expect(h.sharingChangeDenial).toHaveBeenCalledWith('org-a', expect.any(Object));
+    // The audit row is persisted atomically on the same transaction handle as the insert.
+    expect(h.persistAtomicAudit).toHaveBeenCalledTimes(1);
+    expect(h.persistAtomicAudit).toHaveBeenCalledWith(
+      h.db,
+      expect.objectContaining({
+        organizationId: 'org-a',
+        userId: 'user-1',
+        action: 'clause_library.create',
+        resourceId: 'clause-new',
+      }),
+    );
+  });
+
+  it('denies create and does not insert or audit when the sharing change is not authorized', async () => {
+    h.sharingChangeDenial.mockResolvedValueOnce({ status: 403, message: 'not allowed to share' });
+    const { POST } = await loadHandlers();
+    const request = {
+      json: async () => ({ clauseTitle: 'T', clauseText: 'x', clauseType: 'wages', sharingLevel: 'public' }),
+    };
+
+    await expect(POST({ request, organizationId: 'org-a', userId: 'user-1' })).rejects.toMatchObject({ status: 403 });
+    expect(h.insertedValues).toHaveLength(0);
+    expect(h.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('404s without inserting when sourceCbaId does not belong to the caller organization', async () => {
+    h.queue.push([]); // org-scoped agreement lookup finds nothing
+    const { POST } = await loadHandlers();
+    const request = {
+      json: async () => ({ clauseTitle: 'T', clauseText: 'x', clauseType: 'wages', sourceCbaId: 'cba-other-org' }),
+    };
+
+    await expect(POST({ request, organizationId: 'org-a', userId: 'user-1' })).rejects.toMatchObject({ status: 404 });
+    expect(h.insertedValues).toHaveLength(0);
+    expect(h.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('rejects create when the authenticated user is missing and does not insert', async () => {

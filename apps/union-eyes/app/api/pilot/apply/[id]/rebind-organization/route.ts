@@ -8,12 +8,12 @@
  * 409. This endpoint is the deliberate exception: it requires an explicit
  * `reason`, refuses to proceed at all (409, no override — PR #752 round 27
  * removed the prior acknowledgement escape hatch) if real financial
- * artifacts already exist for this pilot, and is logged (`logger.warn`) for
- * traceability — see `rebindPilotOrganization()`'s doc comment for the
- * current limits of that logging (structured log only, not yet a durable
- * `audit_logs` row) and for why the escape hatch was removed (it combined
- * with round 26's commercial-terms lifecycle guard to create a permanent
- * dead end).
+ * artifacts already exist for this pilot, and is audited durably in the same
+ * transaction under both organizations (see `rebindPilotOrganization()`). A
+ * different platform administrator than the one who made the binding must
+ * make the correction (403 otherwise). The escape hatch was removed because
+ * it combined with round 26's commercial-terms lifecycle guard to create a
+ * permanent dead end.
  */
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';

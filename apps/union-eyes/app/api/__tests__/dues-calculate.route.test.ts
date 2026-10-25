@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
-  withRoleAuth: vi.fn(),
+  withApiAuth: vi.fn(),
+  hasRole: vi.fn(),
   requireEntitlement: vi.fn(),
   checkRateLimit: vi.fn(),
   createRateLimitHeaders: vi.fn(),
@@ -11,7 +12,7 @@ const m = vi.hoisted(() => ({
   standardErrorResponse: vi.fn(),
 }));
 
-vi.mock('@/lib/api-auth-guard', () => ({ withRoleAuth: m.withRoleAuth }));
+vi.mock('@/lib/api-auth-guard', () => ({ withApiAuth: m.withApiAuth, hasRole: m.hasRole }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: m.checkRateLimit,
@@ -32,7 +33,8 @@ async function loadRoute() {
 describe('dues/calculate route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withRoleAuth.mockImplementation((_role: string, handler: any) => (request: NextRequest, context: any = { userId: 'u1', organizationId: 'org_1' }) => handler(request, context));
+    m.withApiAuth.mockImplementation((handler: any) => (request: NextRequest, context: any = { userId: 'u1', organizationId: 'org_1' }) => handler(request, context));
+    m.hasRole.mockResolvedValue(true);
     m.requireEntitlement.mockResolvedValue(undefined);
     m.checkRateLimit.mockResolvedValue({ allowed: true });
     m.createRateLimitHeaders.mockReturnValue({});
@@ -90,5 +92,36 @@ describe('dues/calculate route', () => {
 
     expect(response.status).toBe(200);
     expect(m.logApiAuditEvent).toHaveBeenCalled();
+  });
+
+  describe('financial data of a member', () => {
+    const OTHER = '22222222-2222-2222-2222-222222222222';
+    const call = async (memberId: string, userId = 'u1') => {
+      const { POST } = await loadRoute();
+      return POST(new NextRequest('http://localhost/api/dues/calculate', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ memberId, periodStart: '2026-01-01', periodEnd: '2026-01-31' }),
+      }), { userId, organizationId: 'org_1' } as any);
+    };
+
+    it("refuses someone else's dues to a caller without the financial authority, whatever their rank", async () => {
+      m.hasRole.mockResolvedValue(false);
+      const response = await call(OTHER);
+      expect(response.status).toBe(403);
+      expect(m.DuesCalculationEngine.calculateMemberDues).not.toHaveBeenCalled();
+    });
+
+    it('lets the financial authority calculate any member', async () => {
+      const response = await call(OTHER);
+      expect(response.status).toBe(200);
+      expect(m.hasRole).toHaveBeenCalledWith('secretary_treasurer');
+    });
+
+    it("lets a member calculate their own dues without the financial authority", async () => {
+      m.hasRole.mockResolvedValue(false);
+      const own = '11111111-1111-4111-8111-111111111111';
+      const response = await call(own, own);
+      expect(response.status).toBe(200);
+    });
   });
 });

@@ -6,12 +6,15 @@
 
 import { db } from '@/db';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import {
   organizations,
   organizationMembers,
   perCapitaRemittances,
 } from '@/db/schema';
 import { eq, and, sql, lte, isNotNull } from 'drizzle-orm';
+
+const PER_CAPITA_SYSTEM_ACTOR = 'system:cron:monthly-per-capita';
 
 // =====================================================================================
 // TYPES
@@ -297,8 +300,7 @@ export async function savePerCapitaRemittances(
 
   for (const calc of calculations) {
     try {
-      await withSystemContext(async (_tx) => {
-        // Check if remittance already exists for this period
+      const wrote = await withSystemContext(async (tx) => {
         const [existing] = await db
           .select()
           .from(perCapitaRemittances)
@@ -311,9 +313,13 @@ export async function savePerCapitaRemittances(
             )
           );
 
+        let remittanceId: string | undefined = existing?.id;
+
         if (existing) {
-          // Update existing remittance
-          await db
+          // Only a pending remittance is recalculated; a submitted, paid or overdue one is a settled fact of the period.
+          if (existing.status !== 'pending') return false;
+
+          const updated = await db
             .update(perCapitaRemittances)
             .set({
               totalMembers: calc.totalMembers,
@@ -326,10 +332,12 @@ export async function savePerCapitaRemittances(
               glAccount: calc.glAccount,
               updatedAt: new Date().toISOString(),
             })
-            .where(eq(perCapitaRemittances.id, existing.id));
+            .where(and(eq(perCapitaRemittances.id, existing.id), eq(perCapitaRemittances.status, 'pending')))
+            .returning({ id: perCapitaRemittances.id });
+          if (updated.length === 0) return false;
         } else {
           // Insert new remittance
-          await db.insert(perCapitaRemittances).values({
+          const [inserted] = await db.insert(perCapitaRemittances).values({
             organizationId: calc.fromOrganizationId, // Submitting organization
             fromOrganizationId: calc.fromOrganizationId,
             toOrganizationId: calc.toOrganizationId,
@@ -344,11 +352,30 @@ export async function savePerCapitaRemittances(
             clcAccountCode: calc.clcAccountCode,
             glAccount: calc.glAccount,
             status: 'pending',
-          });
+          }).returning({ id: perCapitaRemittances.id });
+          remittanceId = inserted?.id;
         }
+
+        // Each remitting organization's row is audited under that organization, in the same transaction.
+        await persistAtomicAudit(tx, {
+          organizationId: calc.fromOrganizationId,
+          userId: PER_CAPITA_SYSTEM_ACTOR,
+          action: existing ? 'per_capita.remittance.recalculate' : 'per_capita.remittance.calculate',
+          resourceType: 'per_capita_remittances',
+          resourceId: remittanceId,
+          details: {
+            toOrganizationId: calc.toOrganizationId,
+            remittanceMonth: calc.remittanceMonth,
+            remittanceYear: calc.remittanceYear,
+            remittableMembers: calc.remittableMembers,
+            perCapitaRate: calc.perCapitaRate,
+            totalAmount: calc.totalAmount,
+          },
+        });
+        return true;
       });
 
-      saved++;
+      if (wrote) saved++;
     } catch (_error) {
 errors++;
     }
@@ -437,20 +464,39 @@ export async function markOverdueRemittances(): Promise<number> {
   gracePeriodEnd.setDate(gracePeriodEnd.getDate() - GRACE_PERIOD_DAYS);
   const gracePeriodEndStr = gracePeriodEnd.toISOString().split('T')[0];
 
-  const result = await withSystemContext(async (_tx) => db
-    .update(perCapitaRemittances)
-    .set({ 
-      status: 'overdue',
-      updatedAt: new Date().toISOString(),
-    })
-    .where(
-      and(
-        eq(perCapitaRemittances.status, 'pending'),
-        lte(perCapitaRemittances.dueDate, gracePeriodEndStr)
+  // Each remitting organization's rows are audited under that organization, in the same transaction as the update.
+  return withSystemContext(async (tx) => {
+    const marked = await db
+      .update(perCapitaRemittances)
+      .set({
+        status: 'overdue',
+        updatedAt: new Date().toISOString(),
+      })
+      .where(
+        and(
+          eq(perCapitaRemittances.status, 'pending'),
+          lte(perCapitaRemittances.dueDate, gracePeriodEndStr)
+        )
       )
-    ));
+      .returning({ id: perCapitaRemittances.id, fromOrganizationId: perCapitaRemittances.fromOrganizationId });
 
-  return result.length || 0;
+    const byOrganization = new Map<string, string[]>();
+    for (const row of marked) {
+      if (!row.fromOrganizationId) throw new Error('An overdue remittance has no organization to record its audit under.');
+      byOrganization.set(row.fromOrganizationId, [...(byOrganization.get(row.fromOrganizationId) ?? []), row.id]);
+    }
+    for (const [organizationId, remittanceIds] of byOrganization) {
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId: PER_CAPITA_SYSTEM_ACTOR,
+        action: 'per_capita.remittance.mark_overdue',
+        resourceType: 'per_capita_remittances',
+        details: { remittanceIds, dueOnOrBefore: gracePeriodEndStr },
+      });
+    }
+
+    return marked.length;
+  });
 }
 
 /**

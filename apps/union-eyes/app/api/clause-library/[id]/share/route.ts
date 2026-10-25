@@ -14,9 +14,10 @@
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
-import { eq } from 'drizzle-orm';
-import { withRLSContext } from '@/lib/db/with-rls-context';
-import { isSharedClauseOwner } from '@/lib/clause-library/sharing-authority';
+import { and, eq } from 'drizzle-orm';
+import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { isSharedClauseOwner, sharingChangeDenial } from '@/lib/clause-library/sharing-authority';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,11 +59,11 @@ export const POST = withApi(
     auth: { required: true, minRole: 'steward' },
     openapi: { tags: ['Clause-library'], summary: 'Update sharing settings for a clause' },
   },
-  async ({ request, organizationId }) => {
+  async ({ request, userId, organizationId }) => {
     const url = new URL(request.url);
     const id = url.pathname.split('/clause-library/')[1]?.split('/share')[0];
     const body = await request.json();
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
     const updates: Record<string, unknown> = {};
     if (body.sharingLevel !== undefined) updates.sharingLevel = body.sharingLevel;
@@ -74,9 +75,18 @@ export const POST = withApi(
       throw ApiError.badRequest('No sharing fields to update');
     }
 
-    return withRLSContext({ organizationId }, async () => {
-      const [clause] = await db
-        .select({ id: sharedClauseLibrary.id, sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId })
+    const denial = await withSystemContext(() => sharingChangeDenial(organizationId, updates));
+    if (denial) {
+      throw denial.status === 403 ? ApiError.forbidden(denial.message) : ApiError.badRequest(denial.message);
+    }
+
+    return withRLSContext({ organizationId }, async (tx) => {
+      const [clause] = await tx
+        .select({
+          id: sharedClauseLibrary.id,
+          sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
+          sharingLevel: sharedClauseLibrary.sharingLevel,
+        })
         .from(sharedClauseLibrary)
         .where(eq(sharedClauseLibrary.id, id))
         .limit(1);
@@ -85,10 +95,10 @@ export const POST = withApi(
         throw ApiError.notFound('clause', id);
       }
 
-      const [updated] = await db
+      const [updated] = await tx
         .update(sharedClauseLibrary)
         .set({ ...updates, updatedAt: new Date() })
-        .where(eq(sharedClauseLibrary.id, id))
+        .where(and(eq(sharedClauseLibrary.id, id), eq(sharedClauseLibrary.sourceOrganizationId, organizationId)))
         .returning();
 
       // ue_shared_library_update is owner-org only. A zero-row write is the
@@ -96,6 +106,20 @@ export const POST = withApi(
       if (!updated) {
         throw ApiError.notFound('clause', id);
       }
+
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'clause_library.sharing.update',
+        resourceType: 'shared_clause_library',
+        resourceId: id,
+        details: {
+          fields: Object.keys(updates),
+          fromSharingLevel: clause.sharingLevel,
+          toSharingLevel: updated.sharingLevel,
+          explicitGrantCount: Array.isArray(updated.sharedWithOrgIds) ? updated.sharedWithOrgIds.length : 0,
+        },
+      });
 
       return {
         sharing: {

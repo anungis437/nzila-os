@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { withRoleAuth } from "@/lib/api-auth-guard";
+import { withRoleAuth, type BaseAuthContext } from "@/lib/api-auth-guard";
 import { logger } from "@/lib/logger";
 import { trackPilotEvent, trackCaseCreated, trackUpdateAdded } from "@/lib/services/pilot-tracking";
 import type { PilotEventType } from "@/lib/services/pilot-tracking";
@@ -35,20 +35,37 @@ const VALID_EVENT_TYPES: PilotEventType[] = [
 /**
  * POST /api/pilot/events — record a pilot usage event.
  *
- * Body: { eventType, userId, organizationId, sessionId, metadata? }
+ * Body: { eventType, sessionId, metadata?, userId?, organizationId? }
+ *
+ * The event is always recorded for the authenticated caller in the caller's organization. A body that names a different
+ * user or organization is refused rather than honoured, so a member cannot write usage events into another
+ * organization's pilot metrics.
  *
  * Special handling for case_created and update_added to auto-detect "first" variants.
  */
-export const POST = withRoleAuth('member', async (req) => {
+export const POST = withRoleAuth('member', async (req, context: BaseAuthContext) => {
   try {
     const body = await req.json();
-    const { eventType, userId, organizationId, sessionId, metadata } = body;
+    const { eventType, userId: claimedUserId, organizationId: claimedOrganizationId, sessionId, metadata } = body;
+    const userId = context.userId;
+    const organizationId = context.organizationId;
 
-    if (!eventType || !userId || !organizationId || !sessionId) {
+    if (!userId || !organizationId) {
+      return NextResponse.json({ error: "Organization context required" }, { status: 400 });
+    }
+
+    if (!eventType || !sessionId) {
       return NextResponse.json(
-        { error: "Missing required fields: eventType, userId, organizationId, sessionId" },
+        { error: "Missing required fields: eventType, sessionId" },
         { status: 400 },
       );
+    }
+
+    if (
+      (claimedUserId !== undefined && claimedUserId !== userId) ||
+      (claimedOrganizationId !== undefined && claimedOrganizationId !== organizationId)
+    ) {
+      return NextResponse.json({ error: "Events can only be recorded for the authenticated user and organization" }, { status: 403 });
     }
 
     if (!VALID_EVENT_TYPES.includes(eventType)) {

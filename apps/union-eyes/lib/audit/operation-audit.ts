@@ -13,7 +13,7 @@
  * The record is attributed to the organization the administrator is acting in, because the audit chain is
  * organization-keyed. An administrator with no acting organization cannot perform a platform operation.
  */
-import { withRLSContext } from '@/lib/db/with-rls-context'
+import { withRLSContext, withSystemContext, type RLSTx } from '@/lib/db/with-rls-context'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { logger } from '@/lib/logger'
 
@@ -33,6 +33,12 @@ export interface AuditedOperation {
   resourceType: string
   resourceId?: string
   details?: Record<string, unknown>
+  /**
+   * 'system' records the audit under the system role instead of the actor's own organization binding: needed when a
+   * platform administrator acts on an organization they are not a member of (the record is still attributed to that
+   * organization and to the administrator).
+   */
+  scope?: 'organization' | 'system'
 }
 
 export async function performAuditedOperation<T>(op: AuditedOperation, operation: () => Promise<T>): Promise<T> {
@@ -50,7 +56,7 @@ export async function performAuditedOperation<T>(op: AuditedOperation, operation
   })
 
   try {
-    await withRLSContext({ organizationId }, (tx) => persistAtomicAudit(tx, entry('requested')))
+    await inScope(op.scope, organizationId, (tx) => persistAtomicAudit(tx, entry('requested')))
   } catch (error) {
     logger.error('platform_operation_intent_not_recorded', { action: op.action, error })
     throw new OperationAuditError('The operation was not performed because its audit record could not be written.')
@@ -58,21 +64,25 @@ export async function performAuditedOperation<T>(op: AuditedOperation, operation
 
   try {
     const result = await operation()
-    await recordOutcome(organizationId, entry('completed'), 'success')
+    await recordOutcome(op.scope, organizationId, entry('completed'), 'success')
     return result
   } catch (error) {
-    await recordOutcome(organizationId, entry('failed', { error: error instanceof Error ? error.message : 'unknown' }), 'failure')
+    await recordOutcome(op.scope, organizationId, entry('failed', { error: error instanceof Error ? error.message : 'unknown' }), 'failure')
     throw error
   }
 }
 
+const inScope = <T>(scope: 'organization' | 'system' | undefined, organizationId: string, work: (tx: RLSTx) => Promise<T>) =>
+  scope === 'system' ? withSystemContext((tx) => work(tx as unknown as RLSTx)) : withRLSContext({ organizationId }, work)
+
 async function recordOutcome(
+  scope: 'organization' | 'system' | undefined,
   organizationId: string,
   record: Parameters<typeof persistAtomicAudit>[1],
   outcome: 'success' | 'failure',
 ) {
   try {
-    await withRLSContext({ organizationId }, (tx) => persistAtomicAudit(tx, record, outcome))
+    await inScope(scope, organizationId, (tx) => persistAtomicAudit(tx, record, outcome))
   } catch (error) {
     logger.error('platform_operation_outcome_not_recorded', { action: record.action, outcome, error })
   }

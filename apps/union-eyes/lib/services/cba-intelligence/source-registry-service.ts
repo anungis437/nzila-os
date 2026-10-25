@@ -118,9 +118,10 @@ export async function createSource(data: NewCbaIntelSource, exec: RLSTx = db): P
 export async function updateSource(
   id: string,
   data: Partial<NewCbaIntelSource>,
+  exec: RLSTx = db,
 ): Promise<CbaIntelSource | null> {
   try {
-    const [updated] = await db
+    const [updated] = await exec
       .update(cbaIntelSources)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(cbaIntelSources.id, id))
@@ -173,9 +174,9 @@ export async function updateSourceHealth(
 // Deactivate
 // ---------------------------------------------------------------------------
 
-export async function deactivateSource(id: string): Promise<boolean> {
+export async function deactivateSource(id: string, exec: RLSTx = db): Promise<boolean> {
   try {
-    const [updated] = await db
+    const [updated] = await exec
       .update(cbaIntelSources)
       .set({ isActive: false, updatedAt: new Date() })
       .where(eq(cbaIntelSources.id, id))

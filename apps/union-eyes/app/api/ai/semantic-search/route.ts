@@ -104,6 +104,13 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         hybridSearch,
       } = validation.data;
 
+      // Clauses are searched in the caller's organization only; an organization in the filters is never honoured
+      const organizationId = context.organizationId as string;
+      if (!organizationId) {
+        return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
+      }
+      const scopedFilters = { ...filters, organizationId };
+
       let results;
 
       switch (searchType) {
@@ -111,7 +118,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
           results = await semanticClauseSearch(query!, {
             limit,
             threshold,
-            filters,
+            filters: scopedFilters,
             hybridSearch,
           });
           return NextResponse.json({
@@ -137,6 +144,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
 
         case 'unified':
           results = await unifiedSemanticSearch(query!, {
+            organizationId,
             includeClauses: true,
             includePrecedents: true,
             limit,
@@ -157,6 +165,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
 
         case 'similar':
           results = await findSimilarClauses(clauseId!, {
+            organizationId,
             limit,
             threshold,
             sameTypeOnly: Boolean(filters.sameTypeOnly),

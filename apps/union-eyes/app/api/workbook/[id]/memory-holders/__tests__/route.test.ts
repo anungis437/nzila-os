@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
   withClaimedWorkbookAccess: vi.fn(),
+  auditClaimedWorkbookWrite: vi.fn(),
   runStewardshipCartography: vi.fn(),
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   selectQueue: [] as unknown[][],
@@ -28,6 +29,9 @@ const mockDb = {
 vi.mock('@/db', () => ({ db: mockDb }));
 vi.mock('@/lib/workbook/access-control', () => ({
   withClaimedWorkbookAccess: m.withClaimedWorkbookAccess,
+}));
+vi.mock('@/lib/workbook/claimed-write-audit', () => ({
+  auditClaimedWorkbookWrite: m.auditClaimedWorkbookWrite,
 }));
 vi.mock('@/lib/workbook/engines/stewardshipCartography', () => ({
   runStewardshipCartography: m.runStewardshipCartography,
@@ -68,7 +72,26 @@ describe('workbook/[id]/memory-holders route', () => {
     vi.clearAllMocks();
     m.selectQueue = [];
     m.runStewardshipCartography.mockReturnValue({ score: 0 });
+    m.auditClaimedWorkbookWrite.mockResolvedValue(undefined);
     allowAccess();
+  });
+
+  it('POST records the audit for the new holder inside the access boundary and fails if it cannot', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue.push([]);
+    const call = () => POST(new NextRequest('http://localhost/api/workbook/w1/memory-holders', {
+      method: 'POST',
+      body: JSON.stringify({ role: 'Treasurer', responsibility: 'Payroll' }),
+    }), { params: Promise.resolve({ id: 'w1' }) });
+
+    expect((await call()).status).toBe(201);
+    expect(m.auditClaimedWorkbookWrite).toHaveBeenCalledWith(
+      expect.objectContaining({ workbookId: 'w1' }),
+      expect.objectContaining({ action: 'workbook.memory_holder.create', resourceId: 'holder_1', details: { role: 'Treasurer' } }),
+    );
+
+    m.auditClaimedWorkbookWrite.mockRejectedValueOnce(new Error('audit down'));
+    expect((await call()).status).toBe(503);
   });
 
   it('GET returns the access-control error status when access is denied', async () => {

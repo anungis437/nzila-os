@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
   withClaimedWorkbookAccess: vi.fn(),
+  auditClaimedWorkbookWrite: vi.fn(),
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   updateResult: [{ id: 'holder_1' }] as unknown[],
   deleteResult: [{ id: 'holder_1' }] as unknown[],
@@ -26,6 +27,9 @@ const mockDb = {
 vi.mock('@/db', () => ({ db: mockDb }));
 vi.mock('@/lib/workbook/access-control', () => ({
   withClaimedWorkbookAccess: m.withClaimedWorkbookAccess,
+}));
+vi.mock('@/lib/workbook/claimed-write-audit', () => ({
+  auditClaimedWorkbookWrite: m.auditClaimedWorkbookWrite,
 }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('drizzle-orm', () => ({ eq: vi.fn(), and: vi.fn() }));
@@ -60,7 +64,72 @@ function allowAccess() {
 describe('workbook/[id]/memory-holders/[holderId] route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.updateResult = [{ id: 'holder_1' }];
+    m.deleteResult = [{ id: 'holder_1' }];
+    m.auditClaimedWorkbookWrite.mockResolvedValue(undefined);
     allowAccess();
+  });
+
+  it('PATCH records an audit inside the access boundary and names only the changed fields', async () => {
+    const { PATCH } = await loadRoute();
+
+    const response = await PATCH(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', {
+      method: 'PATCH',
+      body: JSON.stringify({ role: 'x', notes: 'private' }),
+    }), { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) });
+
+    expect(response.status).toBe(200);
+    expect(m.auditClaimedWorkbookWrite).toHaveBeenCalledWith(
+      expect.objectContaining({ workbookId: 'w1' }),
+      expect.objectContaining({
+        action: 'workbook.memory_holder.update',
+        resourceId: 'h1',
+        details: { fields: ['role', 'notes'] },
+      }),
+    );
+  });
+
+  it('PATCH on a holder that is not in the workbook is 404 with no audit', async () => {
+    const { PATCH } = await loadRoute();
+    m.updateResult = [];
+
+    const response = await PATCH(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h9', {
+      method: 'PATCH',
+      body: JSON.stringify({ role: 'x' }),
+    }), { params: Promise.resolve({ id: 'w1', holderId: 'h9' }) });
+
+    expect(response.status).toBe(404);
+    expect(m.auditClaimedWorkbookWrite).not.toHaveBeenCalled();
+  });
+
+  it('PATCH fails when its audit cannot be written', async () => {
+    const { PATCH } = await loadRoute();
+    m.auditClaimedWorkbookWrite.mockRejectedValueOnce(new Error('audit down'));
+
+    const response = await PATCH(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', {
+      method: 'PATCH',
+      body: JSON.stringify({ role: 'x' }),
+    }), { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) });
+
+    expect(response.status).toBe(503);
+  });
+
+  it('DELETE records an audit, and a missing holder is 404 with none', async () => {
+    const { DELETE } = await loadRoute();
+    const ctx = { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) };
+
+    const ok = await DELETE(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', { method: 'DELETE' }), ctx);
+    expect(ok.status).toBe(200);
+    expect(m.auditClaimedWorkbookWrite).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'workbook.memory_holder.delete', resourceId: 'h1' }),
+    );
+
+    m.auditClaimedWorkbookWrite.mockClear();
+    m.deleteResult = [];
+    const missing = await DELETE(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', { method: 'DELETE' }), ctx);
+    expect(missing.status).toBe(404);
+    expect(m.auditClaimedWorkbookWrite).not.toHaveBeenCalled();
   });
 
   it('PATCH returns the access-control error status when access is denied', async () => {

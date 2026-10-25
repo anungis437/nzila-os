@@ -88,7 +88,7 @@ const h = vi.hoisted(() => {
       return makeChain('delete');
     },
   };
-  const bindContext = (mode: 'system' | 'tenant', organizationId: string, fn: () => unknown) => {
+  const bindContext = (mode: 'system' | 'tenant', organizationId: string, fn: (tx?: unknown) => unknown) => {
     const prevMode = session.mode;
     const prevOrg = session.organizationId;
     session.mode = mode;
@@ -98,7 +98,7 @@ const h = vi.hoisted(() => {
       session.organizationId = prevOrg;
     };
     try {
-      const result = fn();
+      const result = fn(db);
       if (result && typeof (result as { then?: unknown }).then === 'function') {
         return Promise.resolve(result).finally(restore);
       }
@@ -113,13 +113,16 @@ const h = vi.hoisted(() => {
   const notFound = vi.fn((resource: string, id?: string) => ({ apiError: true, status: 404, resource, id }));
   const canReadSharedClause = vi.fn();
   const isSharedClauseOwner = vi.fn();
+  const sharingChangeDenial = vi.fn();
+  const persistAtomicAudit = vi.fn();
+  const forbidden = vi.fn((msg: string) => ({ apiError: true, status: 403, msg }));
   const withSystemContext = vi.fn((fn: () => unknown) => {
     if (!allowPrivilegedRead.current) {
       throw new Error('withSystemContext is not tenant mutation authority');
     }
     return bindContext('system', '', fn);
   });
-  const withRLSContext = vi.fn((context: { organizationId?: string }, fn: () => unknown) => {
+  const withRLSContext = vi.fn((context: { organizationId?: string }, fn: (tx?: unknown) => unknown) => {
     if (
       typeof context?.organizationId !== 'string' ||
       context.organizationId.trim() === '' ||
@@ -141,6 +144,9 @@ const h = vi.hoisted(() => {
     notFound,
     canReadSharedClause,
     isSharedClauseOwner,
+    sharingChangeDenial,
+    persistAtomicAudit,
+    forbidden,
     withSystemContext,
     withRLSContext,
   };
@@ -160,11 +166,13 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: h.withSystemContext,
   withRLSContext: h.withRLSContext,
 }));
-vi.mock('@/lib/api/framework', () => ({ withApi: h.withApi, ApiError: { notFound: h.notFound, badRequest: vi.fn((msg: string) => ({ apiError: true, status: 400, msg })) } }));
+vi.mock('@/lib/api/framework', () => ({ withApi: h.withApi, ApiError: { notFound: h.notFound, forbidden: h.forbidden, badRequest: vi.fn((msg: string) => ({ apiError: true, status: 400, msg })) } }));
 vi.mock('@/lib/clause-library/sharing-authority', () => ({
   canReadSharedClause: h.canReadSharedClause,
   isSharedClauseOwner: h.isSharedClauseOwner,
+  sharingChangeDenial: h.sharingChangeDenial,
 }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.persistAtomicAudit }));
 
 const pushSel = (...items: unknown[]) => h.queue.push(...items);
 
@@ -194,6 +202,8 @@ describe('clause-library/[id] item route (round 55)', () => {
     h.applied.deletes = 0;
     h.allowPrivilegedRead.current = false;
     h.witnessedParentOrg.current = null;
+    h.sharingChangeDenial.mockReset().mockResolvedValue(null);
+    h.persistAtomicAudit.mockReset().mockResolvedValue(undefined);
     vi.resetModules();
   });
 
@@ -203,7 +213,7 @@ describe('clause-library/[id] item route (round 55)', () => {
     h.canReadSharedClause.mockResolvedValue(false);
     const { GET } = await loadHandlers();
 
-    await expect(GET({ request: req('clause-1'), organizationId: 'org-b' })).rejects.toMatchObject({ status: 404 });
+    await expect(GET({ request: req('clause-1'), organizationId: 'org-b', userId: 'user-1' })).rejects.toMatchObject({ status: 404 });
     expect(h.withSystemContext).toHaveBeenCalled();
     expect(h.withRLSContext).not.toHaveBeenCalled();
   });
@@ -213,7 +223,7 @@ describe('clause-library/[id] item route (round 55)', () => {
     pushSel([]);
     const { GET } = await loadHandlers();
 
-    await expect(GET({ request: req('missing'), organizationId: 'org-b' })).rejects.toMatchObject({ status: 404 });
+    await expect(GET({ request: req('missing'), organizationId: 'org-b', userId: 'user-1' })).rejects.toMatchObject({ status: 404 });
   });
 
   it('GET redacts sharedWithOrgIds for a non-owner authorized reader', async () => {
@@ -223,7 +233,7 @@ describe('clause-library/[id] item route (round 55)', () => {
     pushSel([]); // tags
     const { GET } = await loadHandlers();
 
-    const result = (await GET({ request: req('clause-1'), organizationId: 'org-b' })) as { sharedWithOrgIds: unknown; isOwner: boolean };
+    const result = (await GET({ request: req('clause-1'), organizationId: 'org-b', userId: 'user-1' })) as { sharedWithOrgIds: unknown; isOwner: boolean };
     expect(result.sharedWithOrgIds).toBeUndefined();
     expect(result.isOwner).toBe(false);
     expect(h.withSystemContext).toHaveBeenCalled();
@@ -237,7 +247,7 @@ describe('clause-library/[id] item route (round 55)', () => {
     pushSel([]); // tags
     const { GET } = await loadHandlers();
 
-    const result = (await GET({ request: req('clause-1'), organizationId: 'org-a' })) as { sharedWithOrgIds: unknown; isOwner: boolean };
+    const result = (await GET({ request: req('clause-1'), organizationId: 'org-a', userId: 'user-1' })) as { sharedWithOrgIds: unknown; isOwner: boolean };
     expect(result.sharedWithOrgIds).toEqual(['org-b']);
     expect(result.isOwner).toBe(true);
   });
@@ -245,47 +255,78 @@ describe('clause-library/[id] item route (round 55)', () => {
   it('PATCH 404s a non-owner even when they can read the clause (federation/congress/public readers cannot mutate)', async () => {
     pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'public' }]);
     h.isSharedClauseOwner.mockReturnValue(false);
+    h.allowPrivilegedRead.current = true; // system role is only used for the sharing-authority check
     const { PATCH } = await loadHandlers();
 
     await expect(
-      PATCH({ request: req('clause-1', { clauseTitle: 'Stolen' }), organizationId: 'org-b' }),
+      PATCH({ request: req('clause-1', { clauseTitle: 'Stolen' }), organizationId: 'org-b', userId: 'user-1' }),
     ).rejects.toMatchObject({ status: 404 });
     expect(h.isSharedClauseOwner).toHaveBeenCalled();
     expect(h.calls.update).toBe(0);
     expect(h.applied.updates).toBe(0);
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
-    expect(h.withSystemContext).not.toHaveBeenCalled();
+    expect(h.sharingChangeDenial).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
+  });
+
+  it('PATCH 403s an unauthorized sharing change before any read, write, or audit', async () => {
+    h.allowPrivilegedRead.current = true;
+    h.sharingChangeDenial.mockResolvedValue({ status: 403, message: 'not allowed to share' });
+    const { PATCH } = await loadHandlers();
+
+    await expect(
+      PATCH({ request: req('clause-1', { sharingLevel: 'public' }), organizationId: 'org-a', userId: 'user-1' }),
+    ).rejects.toMatchObject({ status: 403 });
+    expect(h.withRLSContext).not.toHaveBeenCalled();
+    expect(h.calls.update).toBe(0);
+    expect(h.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('PATCH 404s when tenant visibility does not return another organization clause', async () => {
     pushSel([]);
+    h.allowPrivilegedRead.current = true; // system role is only used for the sharing-authority check
     const { PATCH } = await loadHandlers();
 
     await expect(
-      PATCH({ request: req('clause-1', { clauseTitle: 'Stolen' }), organizationId: 'org-b' }),
+      PATCH({ request: req('clause-1', { clauseTitle: 'Stolen' }), organizationId: 'org-b', userId: 'user-1' }),
     ).rejects.toMatchObject({ status: 404 });
     expect(h.calls.update).toBe(0);
     expect(h.isSharedClauseOwner).not.toHaveBeenCalled();
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
-    expect(h.withSystemContext).not.toHaveBeenCalled();
+    expect(h.sharingChangeDenial).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
   });
 
   it('PATCH succeeds for the owner and ignores a body organization id', async () => {
     pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a' }]);
     h.isSharedClauseOwner.mockReturnValue(true);
     pushSel([{ id: 'clause-1', clauseTitle: 'Updated' }]);
+    h.allowPrivilegedRead.current = true; // system role is only used for the sharing-authority check
     const { PATCH } = await loadHandlers();
 
     const result = (await PATCH({
       request: req('clause-1', { clauseTitle: 'Updated', sourceOrganizationId: 'attacker-controlled-org' }),
       organizationId: 'org-a',
+    userId: 'user-1',
     })) as { success: boolean };
     expect(result.success).toBe(true);
     expect(h.applied.updates).toBe(1);
     expect(h.updatePayloads[0].clauseTitle).toBe('Updated');
     expect(h.updatePayloads[0].sourceOrganizationId).toBeUndefined();
+    expect(h.persistAtomicAudit).toHaveBeenCalledTimes(1);
+    expect(h.persistAtomicAudit).toHaveBeenCalledWith(
+      h.db,
+      expect.objectContaining({ organizationId: 'org-a', action: 'clause_library.update', resourceId: 'clause-1' }),
+    );
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-a' }, expect.any(Function));
-    expect(h.withSystemContext).not.toHaveBeenCalled();
+    expect(h.sharingChangeDenial).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
+  });
+
+  it('does not audit when a non-owner mutation is rejected', async () => {
+    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'public' }]);
+    h.isSharedClauseOwner.mockReturnValue(false);
+    const { DELETE } = await loadHandlers();
+
+    await expect(DELETE({ request: req('clause-1'), organizationId: 'org-b', userId: 'user-2' })).rejects.toMatchObject({ status: 404 });
+    expect(h.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('DELETE 404s a non-owner', async () => {
@@ -294,7 +335,7 @@ describe('clause-library/[id] item route (round 55)', () => {
     const { DELETE } = await loadHandlers();
 
     await expect(
-      DELETE({ request: req('clause-1'), organizationId: 'org-b' }),
+      DELETE({ request: req('clause-1'), organizationId: 'org-b', userId: 'user-1' }),
     ).rejects.toMatchObject({ status: 404 });
     expect(h.isSharedClauseOwner).toHaveBeenCalled();
     expect(h.calls.delete).toBe(0);
@@ -308,7 +349,7 @@ describe('clause-library/[id] item route (round 55)', () => {
     const { DELETE } = await loadHandlers();
 
     await expect(
-      DELETE({ request: req('clause-1'), organizationId: 'org-b' }),
+      DELETE({ request: req('clause-1'), organizationId: 'org-b', userId: 'user-1' }),
     ).rejects.toMatchObject({ status: 404 });
     expect(h.calls.delete).toBe(0);
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
@@ -321,9 +362,13 @@ describe('clause-library/[id] item route (round 55)', () => {
     pushSel([{ id: 'clause-1' }]);
     const { DELETE } = await loadHandlers();
 
-    const result = (await DELETE({ request: req('clause-1'), organizationId: 'org-a' })) as { success: boolean };
+    const result = (await DELETE({ request: req('clause-1'), organizationId: 'org-a', userId: 'user-1' })) as { success: boolean };
     expect(result.success).toBe(true);
     expect(h.applied.deletes).toBe(1);
+    expect(h.persistAtomicAudit).toHaveBeenCalledWith(
+      h.db,
+      expect.objectContaining({ organizationId: 'org-a', action: 'clause_library.delete', resourceId: 'clause-1' }),
+    );
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-a' }, expect.any(Function));
     expect(h.withSystemContext).not.toHaveBeenCalled();
   });
@@ -332,33 +377,35 @@ describe('clause-library/[id] item route (round 55)', () => {
     pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'private', sharedWithOrgIds: [] }]);
     pushSel([{ id: 'clause-1', clauseTitle: 'Stolen' }]);
     h.isSharedClauseOwner.mockReturnValue(true);
+    h.allowPrivilegedRead.current = true; // system role is only used for the sharing-authority check
     const { PATCH } = await loadHandlers();
 
     await expect(
-      PATCH({ request: req('clause-1', { clauseTitle: 'Stolen' }), organizationId: 'org-b' }),
+      PATCH({ request: req('clause-1', { clauseTitle: 'Stolen' }), organizationId: 'org-b', userId: 'user-1' }),
     ).rejects.toMatchObject({ status: 404 });
     expect(h.isSharedClauseOwner).not.toHaveBeenCalled();
     expect(h.calls.update).toBe(0);
     expect(h.applied.updates).toBe(0);
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
-    expect(h.withSystemContext).not.toHaveBeenCalled();
+    expect(h.sharingChangeDenial).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
   });
 
   it('PATCH does not apply a cross-org write when the row is publicly readable and the owner predicate is stubbed open', async () => {
     pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'public' }]);
     pushSel([{ id: 'clause-1', clauseTitle: 'Stolen' }]);
     h.isSharedClauseOwner.mockReturnValue(true);
+    h.allowPrivilegedRead.current = true; // system role is only used for the sharing-authority check
     const { PATCH } = await loadHandlers();
 
     await expect(
-      PATCH({ request: req('clause-1', { clauseTitle: 'Stolen' }), organizationId: 'org-b' }),
+      PATCH({ request: req('clause-1', { clauseTitle: 'Stolen' }), organizationId: 'org-b', userId: 'user-1' }),
     ).rejects.toMatchObject({ status: 404 });
     expect(h.isSharedClauseOwner).toHaveBeenCalled();
     expect(h.calls.update).toBe(1);
     expect(h.applied.updates).toBe(0);
     expect(h.updatePayloads).toHaveLength(0);
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
-    expect(h.withSystemContext).not.toHaveBeenCalled();
+    expect(h.sharingChangeDenial).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
   });
 
   it('DELETE does not apply a cross-org write when an explicit share makes the row readable and the owner predicate is stubbed open', async () => {
@@ -373,7 +420,7 @@ describe('clause-library/[id] item route (round 55)', () => {
     const { DELETE } = await loadHandlers();
 
     await expect(
-      DELETE({ request: req('clause-1'), organizationId: 'org-b' }),
+      DELETE({ request: req('clause-1'), organizationId: 'org-b', userId: 'user-1' }),
     ).rejects.toMatchObject({ status: 404 });
     expect(h.isSharedClauseOwner).toHaveBeenCalled();
     expect(h.calls.delete).toBe(1);

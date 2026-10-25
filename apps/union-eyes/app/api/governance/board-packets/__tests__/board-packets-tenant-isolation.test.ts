@@ -116,7 +116,7 @@ beforeEach(() => {
   m.selectWhere.mockResolvedValue([]);
   m.insertReturning.mockResolvedValue([{ id: 'packet-1', organizationId: ORG_A }]);
   m.updateWhereReturning.mockResolvedValue([{ id: 'packet-1', organizationId: ORG_A }]);
-  m.distributePacket.mockResolvedValue([]);
+  m.distributePacket.mockResolvedValue({ distributions: [], delivered: 0, failed: 0 });
 });
 
 describe('GET /api/governance/board-packets (list) — tenant isolation', () => {
@@ -226,10 +226,11 @@ describe('POST /api/governance/board-packets/[id]/distribute — tenant isolatio
       params: { id: 'packet-1' },
       body: { recipients: [{ recipientId: 'r1', recipientName: 'A', recipientEmail: 'a@x.com', recipientRole: 'member' }] },
       organizationId: ORG_A,
+      userId: 'admin-1',
     } as never);
 
     expect(m.eqCalls.some((a) => a[0] === 'boardPackets.organizationId' && a[1] === ORG_A)).toBe(true);
-    expect(m.distributePacket).toHaveBeenCalledWith('packet-1', expect.any(Array));
+    expect(m.distributePacket).toHaveBeenCalledWith('packet-1', expect.any(Array), { organizationId: ORG_A, userId: 'admin-1' });
   });
 
   it('404s and never calls distributePacket when the packet belongs to a different organization', async () => {
@@ -241,6 +242,7 @@ describe('POST /api/governance/board-packets/[id]/distribute — tenant isolatio
         params: { id: 'packet-1' },
         body: { recipients: [] },
         organizationId: ORG_B,
+        userId: 'admin-2',
       } as never),
     ).rejects.toThrow('404:');
 

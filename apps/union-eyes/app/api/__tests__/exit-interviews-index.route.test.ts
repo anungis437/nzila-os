@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { eq } from 'drizzle-orm';
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
@@ -48,6 +49,28 @@ describe('exit-interviews/[id]/index route', () => {
     const result = await POST({ params: { id: 'ei_1' }, organizationId: 'org_1', userId: 'u1' });
 
     expect(result).toEqual({ data: { indexed: true, knowledgeBaseId: 'kb_1' } });
-    expect(m.indexExitInterview).toHaveBeenCalledWith('ei_1', 'org_1', 'u1');
+    expect(m.indexExitInterview).toHaveBeenCalledWith('ei_1', 'org_1', 'u1', {
+      eventNotes: 'Manual semantic re-index triggered',
+    });
+    // Lookup is scoped to the caller organization, not just the interview id.
+    expect(eq).toHaveBeenCalledWith('organizationId', 'org_1');
+  });
+
+  it('refuses to index an interview that is not published', async () => {
+    m.db.select.mockReturnValueOnce({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => [{ id: 'ei_1', status: 'draft' }]) })) })) } as any);
+    const { POST } = await loadRoute();
+
+    await expect(POST({ params: { id: 'ei_1' }, organizationId: 'org_1', userId: 'u1' })).rejects.toMatchObject({ status: 409 });
+    expect(m.indexExitInterview).not.toHaveBeenCalled();
+  });
+
+  it('does not index when the governance/consent gate denies it', async () => {
+    m.isIndexingAllowed.mockReturnValue(false);
+    m.db.select.mockReturnValueOnce({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => [{ id: 'ei_1', status: 'published', sensitivityLevel: 'restricted', consentGranted: false }]) })) })) } as any);
+    const { POST } = await loadRoute();
+    const result = (await POST({ params: { id: 'ei_1' }, organizationId: 'org_1', userId: 'u1' })) as { data: { indexed: boolean } };
+
+    expect(result.data.indexed).toBe(false);
+    expect(m.indexExitInterview).not.toHaveBeenCalled();
   });
 });

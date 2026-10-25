@@ -29,6 +29,8 @@ export interface BargainingNoteFilters {
   organizationId?: string;
   sessionType?: string[];
   confidentialityLevel?: string;
+  /** Limits results to public/internal notes plus the notes this user wrote. */
+  visibleToUserId?: string;
   dateFrom?: Date;
   dateTo?: Date;
   tags?: string[];
@@ -98,6 +100,15 @@ export async function listBargainingNotes(
 
     if (filters.confidentialityLevel) {
       conditions.push(eq(bargainingNotes.confidentialityLevel, filters.confidentialityLevel));
+    }
+
+    if (filters.visibleToUserId) {
+      conditions.push(
+        or(
+          inArray(bargainingNotes.confidentialityLevel, ["public", "internal"]),
+          eq(bargainingNotes.createdBy, filters.visibleToUserId)
+        )!
+      );
     }
 
     if (filters.dateFrom) {

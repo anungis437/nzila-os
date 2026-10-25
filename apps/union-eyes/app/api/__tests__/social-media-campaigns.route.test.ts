@@ -35,7 +35,11 @@ const m = vi.hoisted(() => {
   return {
     state,
     checkRateLimit: vi.fn(),
-    withRLSContext: vi.fn(async (fn: () => Promise<unknown>) => fn()),
+    withRLSContext: vi.fn(async (contextOrFn: unknown, maybeFn?: (tx: unknown) => Promise<unknown>) => {
+      const fn = (typeof contextOrFn === 'function' ? contextOrFn : maybeFn) as (tx: unknown) => Promise<unknown>;
+      return fn(mockDb);
+    }),
+    persistAtomicAudit: vi.fn(),
     queueSelect: (...results: unknown[][]) => state.selectQueue.push(...results),
     queueInsert: (...results: unknown[][]) => state.insertQueue.push(...results),
     queueUpdate: (...results: unknown[][]) => state.updateQueue.push(...results),
@@ -68,9 +72,14 @@ const mockDb = {
     })),
   })),
   delete: vi.fn(() => ({
-    where: vi.fn(() => m.nextDelete()),
+    where: vi.fn(() => {
+      const rows = m.nextDelete();
+      return Object.assign(rows, { returning: () => rows.then((r) => (r.length ? r : [{ id: 'camp-1' }])) });
+    }),
   })),
 };
+
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 
 vi.mock('@/db', () => ({ db: mockDb }));
 vi.mock('@/lib/rate-limiter', () => ({
@@ -102,6 +111,7 @@ describe('social-media/campaigns route', () => {
     vi.clearAllMocks();
     m.resetQueues();
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0, remaining: 99 });
+    m.persistAtomicAudit.mockResolvedValue(undefined);
   });
 
   it('returns forbidden when organization context is missing', async () => {
@@ -191,6 +201,38 @@ describe('social-media/campaigns route', () => {
     expect(response.status).toBe(200);
     expect(payload.success).toBe(true);
     expect(payload.data.campaign).toMatchObject({ id: 'camp-1', name: 'Summer Mobilization' });
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      mockDb,
+      expect.objectContaining({ action: 'social.campaign.create', resourceId: 'camp-1', userId: TEST_USER.userId }),
+    );
+  });
+
+  it('does not create a campaign when its audit cannot be written', async () => {
+    const { POST } = await loadRoute();
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+
+    const response = await POST(new NextRequest('http://localhost/api/social-media/campaigns', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Summer Mobilization', platforms: ['facebook'] }),
+      headers: { 'content-type': 'application/json' },
+    }));
+
+    expect(response.status).toBe(500);
+  });
+
+  it('answers 404 for another organization\u2019s campaign without updating or auditing', async () => {
+    const { PUT } = await loadRoute();
+    m.queueSelect([]);
+
+    const response = await PUT(new NextRequest('http://localhost/api/social-media/campaigns?id=camp-other', {
+      method: 'PUT',
+      body: JSON.stringify({ name: 'Hijacked' }),
+      headers: { 'content-type': 'application/json' },
+    }));
+
+    expect(response.status).toBe(404);
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('returns validation error when campaign start date is after end date', async () => {
@@ -264,5 +306,9 @@ describe('social-media/campaigns route', () => {
 
     expect(response.status).toBe(200);
     expect(payload).toMatchObject({ message: 'Campaign deleted successfully', campaign_id: 'camp-1' });
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      mockDb,
+      expect.objectContaining({ action: 'social.campaign.delete', resourceId: 'camp-1' }),
+    );
   });
 });

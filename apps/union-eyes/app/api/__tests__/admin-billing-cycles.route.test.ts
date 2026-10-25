@@ -7,11 +7,17 @@ const m = vi.hoisted(() => ({
   hasMinRole: vi.fn(),
   BillingCycleService: { calculatePeriodDates: vi.fn(), generateBillingCycle: vi.fn() },
   logger: { info: vi.fn(), error: vi.fn() },
+  performAuditedOperation: vi.fn(),
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({ withApiAuth: m.withApiAuth, getCurrentUser: m.getCurrentUser, hasMinRole: m.hasMinRole }));
 vi.mock('@/lib/services/billing-cycle-service', () => ({ BillingCycleService: m.BillingCycleService }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: m.performAuditedOperation,
+  operationAuditResponse: () => null,
+}));
+
 vi.mock('@/lib/api/standardized-responses', () => ({
   ErrorCode: { AUTH_REQUIRED: 'AUTH_REQUIRED', FORBIDDEN: 'FORBIDDEN', VALIDATION_ERROR: 'VALIDATION_ERROR', INTERNAL_ERROR: 'INTERNAL_ERROR' },
   standardErrorResponse: vi.fn((code: string, message: string) => new Response(JSON.stringify({ message }), { status: code === 'AUTH_REQUIRED' ? 401 : code === 'FORBIDDEN' ? 403 : 400 })),
@@ -28,6 +34,7 @@ describe('admin/billing-cycles route', () => {
     m.withApiAuth.mockImplementation((handler: any) => (request: NextRequest) => handler(request));
     m.getCurrentUser.mockResolvedValue({ id: 'u1' });
     m.hasMinRole.mockResolvedValue(true);
+    m.performAuditedOperation.mockImplementation((_op: unknown, run: () => unknown) => run());
     m.BillingCycleService.calculatePeriodDates.mockReturnValue({ periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31') });
     m.BillingCycleService.generateBillingCycle.mockResolvedValue({ cycleId: 'bc_1', transactionsCreated: 5, totalAmount: 1000 });
   });
@@ -60,6 +67,26 @@ describe('admin/billing-cycles route', () => {
     }));
     expect(response.status).toBe(200);
     expect(m.BillingCycleService.generateBillingCycle).toHaveBeenCalled();
+    expect(m.performAuditedOperation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        organizationId: '11111111-1111-1111-1111-111111111111',
+        userId: 'u1',
+        scope: 'system',
+        action: 'platform.billing_cycle.generate',
+      }),
+      expect.any(Function),
+    );
+  });
+
+  it('creates nothing when the intent cannot be recorded', async () => {
+    const { POST } = await loadRoute();
+    m.performAuditedOperation.mockRejectedValueOnce(new Error('audit down'));
+    const response = await POST(new NextRequest('http://localhost/api/admin/billing-cycles', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ organizationId: '11111111-1111-1111-1111-111111111111', frequency: 'monthly' }),
+    }));
+    expect(response.status).toBeGreaterThanOrEqual(400);
+    expect(m.BillingCycleService.generateBillingCycle).not.toHaveBeenCalled();
   });
 
   it('performs dry-run when specified', async () => {
@@ -72,6 +99,7 @@ describe('admin/billing-cycles route', () => {
 
     expect(response.status).toBe(200);
     expect(payload.preview).toBe(true);
+    expect(m.performAuditedOperation).not.toHaveBeenCalled();
   });
 
   it('returns 400 when POST payload is invalid', async () => {

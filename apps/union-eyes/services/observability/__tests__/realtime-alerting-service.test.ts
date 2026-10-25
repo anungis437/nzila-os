@@ -25,10 +25,11 @@ const h = vi.hoisted(() => {
     delete: () => makeChain(),
     execute,
   };
-  return { queue, db, execute, values, returning };
+  return { queue, db, execute, values, returning, persistAtomicAudit: vi.fn() };
 });
 
 vi.mock('@/db', () => ({ db: h.db }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.persistAtomicAudit }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: vi.fn((fn: (tx: unknown) => Promise<unknown>) => fn(h.db)),
 }));
@@ -52,6 +53,8 @@ beforeEach(() => {
   h.execute.mockReset();
   h.values.mockClear();
   h.returning.mockClear();
+  h.persistAtomicAudit.mockReset();
+  h.persistAtomicAudit.mockResolvedValue(undefined);
 });
 
 describe('observability/realtime-alerting-service', () => {
@@ -89,6 +92,18 @@ describe('observability/realtime-alerting-service', () => {
       expect(result.byKind.ingestion_failures).toBe(1);
       expect(result.byKind.payment_reconciliation_failures).toBe(1);
       expect(h.returning).toHaveBeenCalledTimes(2); // newly created rules only
+      // One audit per organization's alert, on the sweep's transaction, attributed to the cron system actor.
+      expect(h.persistAtomicAudit).toHaveBeenCalledTimes(3);
+      expect(h.persistAtomicAudit.mock.calls.map((c) => c[1].organizationId)).toEqual(['org-1', 'org-2', 'org-3']);
+      expect(h.persistAtomicAudit).toHaveBeenCalledWith(
+        h.db,
+        expect.objectContaining({
+          userId: 'system:cron:observability-alerts',
+          action: 'observability.alert.emit',
+          resourceType: 'alert_executions',
+          details: expect.objectContaining({ signal: 'sla_breach_imminent', count: 6, severity: 'critical' }),
+        }),
+      );
       for (const offset of [1, 4, 8]) {
         const execution = h.values.mock.calls[offset][0];
         expect(execution.id).toMatch(/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);
@@ -98,6 +113,17 @@ describe('observability/realtime-alerting-service', () => {
         expect(tracking.metadata.executionId).toBe(execution.id);
         expect(notification.data.executionId).toBe(execution.id);
       }
+    });
+
+    it('fails the sweep when an alert audit cannot be written, so its alert rows do not commit', async () => {
+      h.execute
+        .mockResolvedValueOnce([{ organization_id: 'org-1', count: 1 }])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([]);
+      pushSel([{ id: 'rule-1' }], [], [], []);
+      h.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
+
+      await expect(runRealtimeObservabilitySweep()).rejects.toThrow('audit down');
     });
 
     it('returns zero when there are no breaches', async () => {

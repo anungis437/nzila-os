@@ -114,9 +114,15 @@ export async function semanticClauseSearch(
     hybridSearch = { enabled: false, keywordWeight: 0.3 },
   } = options;
 
+  // Clauses belong to an organization: a search that does not say whose clauses to search reads none
+  const organizationId = filters.organizationId;
+  if (!organizationId) {
+    throw new Error('organizationId is required to search clauses');
+  }
+
   try {
     // Generate embedding for search query
-    const queryEmbedding = await generateEmbedding(query, filters.organizationId);
+    const queryEmbedding = await generateEmbedding(query, organizationId);
     const embeddingString = `[${queryEmbedding.join(',')}]`;
 
     // Build WHERE clause based on filters
@@ -145,7 +151,8 @@ export async function semanticClauseSearch(
           (CASE WHEN content ILIKE ${`%${query}%`} THEN ${hybridSearch.keywordWeight || 0.3} ELSE 0 END) as hybrid_score
         ` : sql`1 - (embedding <=> ${embeddingString}::vector) as hybrid_score`}
       FROM cba_clauses
-      ${whereClause ? sql`WHERE ${whereClause}` : sql``}
+      WHERE organization_id = ${organizationId}
+      ${whereClause ? sql`AND ${whereClause}` : sql``}
       ORDER BY ${hybridSearch.enabled ? sql`hybrid_score` : sql`similarity`} DESC
       LIMIT ${limit}
     `);
@@ -174,17 +181,18 @@ export async function semanticClauseSearch(
 export async function findSimilarClauses(
   clauseId: string,
   options: {
+    organizationId: string;
     limit?: number;
     threshold?: number;
     sameTypeOnly?: boolean;
-  } = {}
+  }
 ): Promise<SearchResult[]> {
-  const { limit = 5, threshold = 0.75, sameTypeOnly = false } = options;
+  const { organizationId, limit = 5, threshold = 0.75, sameTypeOnly = false } = options;
 
   try {
-    // Get the source clause
+    // Get the source clause; one in another organization is simply not found
     const sourceClause = await db.query.cbaClause.findFirst({
-      where: eq(cbaClause.id, clauseId),
+      where: and(eq(cbaClause.id, clauseId), eq(cbaClause.organizationId, organizationId)),
     });
 
     if (!sourceClause) {
@@ -212,6 +220,7 @@ export async function findSimilarClauses(
         1 - (embedding <=> ${embeddingString}::vector) as similarity
       FROM cba_clauses
       WHERE id != ${clauseId}
+        AND organization_id = ${organizationId}
       ${typeFilter}
       ORDER BY similarity DESC
       LIMIT ${limit}
@@ -455,17 +464,19 @@ export async function generatePrecedentEmbeddings(
 export async function unifiedSemanticSearch(
   query: string,
   options: {
+    organizationId: string;
     includeClauses?: boolean;
     includePrecedents?: boolean;
     limit?: number;
     threshold?: number;
-  } = {}
+  }
 ): Promise<{
   clauses: SearchResult[];
   precedents: SearchResult[];
   combined: SearchResult[];
 }> {
   const {
+    organizationId,
     includeClauses = true,
     includePrecedents = true,
     limit = 10,
@@ -473,7 +484,7 @@ export async function unifiedSemanticSearch(
   } = options;
 
   const [clauses, precedents] = await Promise.all([
-    includeClauses ? semanticClauseSearch(query, { limit, threshold }) : [],
+    includeClauses ? semanticClauseSearch(query, { limit, threshold, filters: { organizationId } }) : [],
     includePrecedents ? semanticPrecedentSearch(query, { limit, threshold }) : [],
   ]);
 

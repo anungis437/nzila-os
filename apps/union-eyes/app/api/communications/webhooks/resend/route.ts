@@ -3,9 +3,9 @@ import { and, eq } from 'drizzle-orm';
 import { Resend, type WebhookEventPayload } from 'resend';
 import { z } from 'zod';
 
-import { db } from '@/db';
 import { campaigns, communicationPreferences, messageLog } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -160,8 +160,8 @@ export async function POST(request: NextRequest) {
   const providerMessageId = event.data.email_id;
   const eventTimestamp = getEventTimestamp(event);
 
-  await withSystemContext(async () => {
-    const [logRow] = await db
+  await withSystemContext(async (tx) => {
+    const [logRow] = await tx
       .select({
         id: messageLog.id,
         campaignId: messageLog.campaignId,
@@ -239,7 +239,7 @@ export async function POST(request: NextRequest) {
     if (mapping.status === 'unsubscribed' || mapping.status === 'complained') {
       shouldIncrementStat = true;
 
-      await db
+      await tx
         .update(communicationPreferences)
         .set({
           emailEnabled: false,
@@ -254,6 +254,15 @@ export async function POST(request: NextRequest) {
             eq(communicationPreferences.userId, logRow.recipientId),
           ),
         );
+      // Delivery statistics are provider telemetry; suppressing a recipient's email is a change to their consent state.
+      await persistAtomicAudit(tx, {
+        organizationId: logRow.organizationId,
+        userId: 'system:resend-webhook',
+        action: 'communications.email_suppression.apply',
+        resourceType: 'communication_preferences',
+        resourceId: logRow.recipientId,
+        details: { reason: mapping.status === 'complained' ? 'complaint' : 'suppressed', messageLogId: logRow.id, providerMessageId },
+      });
     }
 
     if (
@@ -265,10 +274,10 @@ export async function POST(request: NextRequest) {
       shouldIncrementStat = false;
     }
 
-    await db.update(messageLog).set(updates).where(eq(messageLog.id, logRow.id));
+    await tx.update(messageLog).set(updates).where(eq(messageLog.id, logRow.id));
 
     if (logRow.campaignId && shouldIncrementStat) {
-      const [campaign] = await db
+      const [campaign] = await tx
         .select({ stats: campaigns.stats })
         .from(campaigns)
         .where(eq(campaigns.id, logRow.campaignId))
@@ -280,7 +289,7 @@ export async function POST(request: NextRequest) {
           nextStats = incrementStat(nextStats, 'opened');
         }
 
-        await db
+        await tx
           .update(campaigns)
           .set({
             stats: nextStats,

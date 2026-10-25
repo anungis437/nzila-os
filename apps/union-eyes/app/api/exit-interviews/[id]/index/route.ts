@@ -11,7 +11,7 @@
 import { and, eq } from 'drizzle-orm';
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
-import { exitInterviews, exitInterviewEvents } from '@/db/schema';
+import { exitInterviews } from '@/db/schema';
 import { indexExitInterview } from '@/lib/knowledge-transfer/indexing/semantic-indexer';
 import { isIndexingAllowed } from '@/lib/knowledge-transfer/governance/consent-controls';
 
@@ -49,18 +49,9 @@ export const POST = withApi(
       };
     }
 
-    const result = await indexExitInterview(params.id, organizationId!, userId!);
-
-    if (result.indexed) {
-      await db.insert(exitInterviewEvents).values({
-        interviewId: params.id,
-        organizationId: organizationId!,
-        eventType: 'indexed',
-        actorUserId: userId!,
-        notes: 'Manual semantic re-index triggered',
-        payload: { knowledgeBaseId: result.knowledgeBaseId },
-      });
-    }
+    const result = await indexExitInterview(params.id, organizationId!, userId!, {
+      eventNotes: 'Manual semantic re-index triggered',
+    });
 
     return { data: result };
   },

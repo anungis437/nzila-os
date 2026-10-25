@@ -14,6 +14,7 @@ const h = vi.hoisted(() => {
     return chain;
   };
   const execute = vi.fn();
+  const txSentinel = { tx: true };
   const db = {
     select: () => makeChain(),
     insert: () => makeChain(),
@@ -21,11 +22,12 @@ const h = vi.hoisted(() => {
     delete: () => makeChain(),
     execute,
   };
-  const withSystemContext = vi.fn(async (fn: (tx?: unknown) => unknown) => fn({}));
-  return { queue, db, execute, withSystemContext };
+  const withSystemContext = vi.fn(async (fn: (tx?: unknown) => unknown) => fn(txSentinel));
+  return { queue, db, execute, withSystemContext, persistAtomicAudit: vi.fn(), txSentinel };
 });
 
 vi.mock('@/db', () => ({ db: h.db }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.persistAtomicAudit }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: h.withSystemContext,
 }));
@@ -50,6 +52,8 @@ beforeEach(() => {
   h.queue.length = 0;
   h.execute.mockReset();
   h.withSystemContext.mockClear();
+  h.persistAtomicAudit.mockReset();
+  h.persistAtomicAudit.mockResolvedValue(undefined);
 });
 
 describe('getMemberStanding', () => {
@@ -150,13 +154,68 @@ describe('savePerCapitaRemittances', () => {
   };
 
   it('updates existing remittances and inserts new ones', async () => {
-    pushSel([{ id: 'ex1' }]); // existing for calc1 -> update
-    pushSel([]); // update result
+    pushSel([{ id: 'ex1', status: 'pending' }]); // existing for calc1 -> update
+    pushSel([{ id: 'ex1' }]); // update returning
     pushSel([]); // existing for calc2 (none) -> insert
-    pushSel([]); // insert result
+    pushSel([{ id: 'new1' }]); // insert returning
     const r = await calc.savePerCapitaRemittances([baseCalc, { ...baseCalc, fromOrganizationId: 'o2' }]);
     expect(r.saved).toBe(2);
     expect(r.errors).toBe(0);
+  });
+
+  it('audits each remittance under its remitting organization on the same transaction, as the cron system actor', async () => {
+    pushSel([{ id: 'ex1', status: 'pending' }]);
+    pushSel([{ id: 'ex1' }]);
+    pushSel([]);
+    pushSel([{ id: 'new1' }]);
+    await calc.savePerCapitaRemittances([baseCalc, { ...baseCalc, fromOrganizationId: 'o2' }]);
+
+    expect(h.persistAtomicAudit).toHaveBeenCalledTimes(2);
+    expect(h.persistAtomicAudit).toHaveBeenNthCalledWith(
+      1,
+      h.txSentinel,
+      expect.objectContaining({
+        organizationId: 'o1',
+        userId: 'system:cron:monthly-per-capita',
+        action: 'per_capita.remittance.recalculate',
+        resourceType: 'per_capita_remittances',
+        resourceId: 'ex1',
+      }),
+    );
+    expect(h.persistAtomicAudit).toHaveBeenNthCalledWith(
+      2,
+      h.txSentinel,
+      expect.objectContaining({ organizationId: 'o2', action: 'per_capita.remittance.calculate', resourceId: 'new1' }),
+    );
+  });
+
+  it('counts an error and does not report the row saved when its audit cannot be written', async () => {
+    pushSel([]);
+    pushSel([{ id: 'new1' }]);
+    h.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
+
+    const r = await calc.savePerCapitaRemittances([baseCalc]);
+
+    expect(r).toEqual({ saved: 0, errors: 1 });
+  });
+
+  it('never rewrites a remittance that is no longer pending, and writes no audit for it', async () => {
+    pushSel([{ id: 'ex1', status: 'paid' }]);
+
+    const r = await calc.savePerCapitaRemittances([baseCalc]);
+
+    expect(r).toEqual({ saved: 0, errors: 0 });
+    expect(h.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('writes no audit when a concurrent change means the conditional update matched nothing', async () => {
+    pushSel([{ id: 'ex1', status: 'pending' }]);
+    pushSel([]); // update returning nothing
+
+    const r = await calc.savePerCapitaRemittances([baseCalc]);
+
+    expect(r.saved).toBe(0);
+    expect(h.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('counts errors when a save throws', async () => {
@@ -167,8 +226,8 @@ describe('savePerCapitaRemittances', () => {
   });
 
   it('PR #752 round 33 correction: writes execute inside withSystemContext (cross-org batch, never ordinary tenant runtime)', async () => {
+    pushSel([{ id: 'ex1', status: 'pending' }]);
     pushSel([{ id: 'ex1' }]);
-    pushSel([]);
     await calc.savePerCapitaRemittances([baseCalc]);
     expect(h.withSystemContext).toHaveBeenCalledTimes(1);
   });
@@ -204,17 +263,53 @@ describe('getOverdueRemittances', () => {
 
 describe('markOverdueRemittances', () => {
   it('returns the number of rows marked overdue', async () => {
-    pushSel([{ id: 'r1' }, { id: 'r2' }, { id: 'r3' }]);
+    pushSel([
+      { id: 'r1', fromOrganizationId: 'o1' },
+      { id: 'r2', fromOrganizationId: 'o1' },
+      { id: 'r3', fromOrganizationId: 'o2' },
+    ]);
     expect(await calc.markOverdueRemittances()).toBe(3);
   });
 
-  it('returns zero when no rows are affected', async () => {
+  it('audits once per remitting organization on the same transaction, listing that organization\'s rows', async () => {
+    pushSel([
+      { id: 'r1', fromOrganizationId: 'o1' },
+      { id: 'r2', fromOrganizationId: 'o1' },
+      { id: 'r3', fromOrganizationId: 'o2' },
+    ]);
+    await calc.markOverdueRemittances();
+
+    expect(h.persistAtomicAudit).toHaveBeenCalledTimes(2);
+    expect(h.persistAtomicAudit).toHaveBeenCalledWith(
+      h.txSentinel,
+      expect.objectContaining({
+        organizationId: 'o1',
+        userId: 'system:cron:monthly-per-capita',
+        action: 'per_capita.remittance.mark_overdue',
+        details: expect.objectContaining({ remittanceIds: ['r1', 'r2'] }),
+      }),
+    );
+    expect(h.persistAtomicAudit).toHaveBeenCalledWith(
+      h.txSentinel,
+      expect.objectContaining({ organizationId: 'o2', details: expect.objectContaining({ remittanceIds: ['r3'] }) }),
+    );
+  });
+
+  it('fails (rolling back the update) when an audit cannot be written', async () => {
+    pushSel([{ id: 'r1', fromOrganizationId: 'o1' }]);
+    h.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
+
+    await expect(calc.markOverdueRemittances()).rejects.toThrow('audit down');
+  });
+
+  it('returns zero and writes no audit when no rows are affected', async () => {
     pushSel([]);
     expect(await calc.markOverdueRemittances()).toBe(0);
+    expect(h.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('PR #752 round 33 correction: the cross-org UPDATE executes inside withSystemContext', async () => {
-    pushSel([{ id: 'r1' }]);
+    pushSel([{ id: 'r1', fromOrganizationId: 'o1' }]);
     await calc.markOverdueRemittances();
     expect(h.withSystemContext).toHaveBeenCalledTimes(1);
   });

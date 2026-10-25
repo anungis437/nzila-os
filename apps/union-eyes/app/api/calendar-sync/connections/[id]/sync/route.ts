@@ -8,8 +8,9 @@
 import { z } from 'zod'
 import { and, eq } from 'drizzle-orm'
 import { db } from '@/db/db'
-import { calendars, externalCalendarConnections } from '@/db/schema/calendar-schema'
+import { calendars, calendarEvents, externalCalendarConnections } from '@/db/schema/calendar-schema'
 import { withOrganizationAuth } from '@/lib/organization-middleware'
+import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit'
 import {
   importGoogleEvents,
   exportEventToGoogle,
@@ -57,7 +58,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: SyncR
       )
     }
 
-    const { organizationId } = context
+    const { organizationId, userId } = context
     const { localCalendarId, externalCalendarId, mode, localEventId, since } = parsed.data
 
     const [connection] = await db
@@ -95,7 +96,6 @@ export const POST = withOrganizationAuth(async (request, context, params?: SyncR
     }
 
     const effectiveMode = mode ?? (connection.syncDirection as 'import' | 'export' | 'both' | null) ?? 'import'
-    const results: Record<string, unknown> = {}
     const sinceDate = since ? new Date(since) : undefined
 
     if ((effectiveMode === 'export' || effectiveMode === 'both') && !localEventId) {
@@ -105,47 +105,83 @@ export const POST = withOrganizationAuth(async (request, context, params?: SyncR
       )
     }
 
-    if (connection.provider === 'google') {
-      if (effectiveMode === 'import' || effectiveMode === 'both') {
-        results.import = await importGoogleEvents(
-          connection.id,
-          localCalendarId,
-          externalCalendarId,
-          { timeMin: sinceDate },
-        )
-      }
-      if ((effectiveMode === 'export' || effectiveMode === 'both') && localEventId) {
-        results.export = await exportEventToGoogle(connection.id, localEventId, externalCalendarId)
-      }
-    } else if (connection.provider === 'microsoft') {
-      if (effectiveMode === 'import' || effectiveMode === 'both') {
-        results.import = await importMicrosoftEvents(
-          connection.id,
-          localCalendarId,
-          externalCalendarId,
-          { timeMin: sinceDate },
-        )
-      }
-      if ((effectiveMode === 'export' || effectiveMode === 'both') && localEventId) {
-        results.export = await exportEventToMicrosoft(connection.id, localEventId, externalCalendarId)
-      }
-    } else {
+    if (connection.provider !== 'google' && connection.provider !== 'microsoft') {
       return standardErrorResponse(
         ErrorCode.NOT_IMPLEMENTED,
         `Provider '${connection.provider}' is not supported for sync`,
       )
     }
 
-    await db
-      .update(externalCalendarConnections)
-      .set({
-        lastSyncAt: new Date(),
-        nextSyncAt: getNextSyncAt(),
-        syncStatus: 'synced',
-        syncError: null,
-        updatedAt: new Date(),
-      })
-      .where(eq(externalCalendarConnections.id, connection.id))
+    // The export services load the event by id alone, so the event must be proven to belong to this organization here.
+    if (localEventId) {
+      const [event] = await db
+        .select({ id: calendarEvents.id })
+        .from(calendarEvents)
+        .where(and(eq(calendarEvents.id, localEventId), eq(calendarEvents.organizationId, organizationId)))
+        .limit(1)
+      if (!event) {
+        return standardErrorResponse(ErrorCode.NOT_FOUND, 'Local event not found')
+      }
+    }
+
+    // The sync imports and exports through an external provider, so its effect cannot commit with a database
+    // transaction: the intent is recorded first (no record, no sync) and the outcome afterwards.
+    let results: Record<string, unknown>
+    try {
+      results = await performAuditedOperation(
+        {
+          organizationId,
+          userId,
+          action: 'calendar_sync.connection.sync',
+          resourceType: 'external_calendar_connections',
+          resourceId: connection.id,
+          details: {
+            provider: connection.provider,
+            mode: effectiveMode,
+            localCalendarId,
+            externalCalendarId,
+            localEventId: localEventId ?? null,
+          },
+        },
+        async () => {
+          const synced: Record<string, unknown> = {}
+          const google = connection.provider === 'google'
+
+          if (effectiveMode === 'import' || effectiveMode === 'both') {
+            synced.import = google
+              ? await importGoogleEvents(connection.id, localCalendarId, externalCalendarId, { timeMin: sinceDate })
+              : await importMicrosoftEvents(connection.id, localCalendarId, externalCalendarId, { timeMin: sinceDate })
+          }
+          if ((effectiveMode === 'export' || effectiveMode === 'both') && localEventId) {
+            synced.export = google
+              ? await exportEventToGoogle(connection.id, localEventId, externalCalendarId)
+              : await exportEventToMicrosoft(connection.id, localEventId, externalCalendarId)
+          }
+
+          await db
+            .update(externalCalendarConnections)
+            .set({
+              lastSyncAt: new Date(),
+              nextSyncAt: getNextSyncAt(),
+              syncStatus: 'synced',
+              syncError: null,
+              updatedAt: new Date(),
+            })
+            .where(
+              and(
+                eq(externalCalendarConnections.id, connection.id),
+                eq(externalCalendarConnections.organizationId, organizationId),
+              ),
+            )
+
+          return synced
+        },
+      )
+    } catch (error) {
+      const refused = operationAuditResponse(error)
+      if (refused) return standardErrorResponse(ErrorCode.CONFLICT, refused.body.error.message)
+      throw error
+    }
 
     return standardSuccessResponse({
       connectionId: connection.id,

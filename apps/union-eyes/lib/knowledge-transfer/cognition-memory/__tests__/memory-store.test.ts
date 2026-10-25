@@ -4,7 +4,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { execute } = vi.hoisted(() => ({ execute: vi.fn() }));
 const { withRLSContext } = vi.hoisted(() => ({ withRLSContext: vi.fn() }));
+const { audit } = vi.hoisted(() => ({ audit: vi.fn() }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: audit }));
 vi.mock('drizzle-orm', () => ({
   sql: Object.assign((..._a: unknown[]) => ({}), { raw: (s: string) => s }),
 }));
@@ -21,11 +23,14 @@ const ORG = '11111111-1111-4111-8111-111111111111';
 const OTHER_ORG = '22222222-2222-4222-8222-222222222222';
 const E1 = '33333333-3333-4333-8333-333333333333';
 const E2 = '44444444-4444-4444-8444-444444444444';
+const USER = 'user-1';
 
 beforeEach(() => {
   execute.mockReset();
   execute.mockResolvedValue([]);
   withRLSContext.mockReset();
+  audit.mockReset();
+  audit.mockResolvedValue(undefined);
   withRLSContext.mockImplementation(async (_ctx: unknown, op: (tx: unknown) => unknown) => op({ execute }));
 });
 
@@ -40,7 +45,7 @@ describe('lib/knowledge-transfer/cognition-memory/memory-store', () => {
       tags: ['gov'],
       keyInsights: ['insight'],
       sessionId: 'sess-1',
-    } as never);
+    } as never, USER);
     expect(entry.organizationId).toBe(ORG);
     expect(entry.title).toBe('Decision');
     expect(entry.status).toBe('active');
@@ -50,7 +55,7 @@ describe('lib/knowledge-transfer/cognition-memory/memory-store', () => {
   });
 
   it('saveCognitionMemory applies defaults for optional fields', async () => {
-    const entry = await saveCognitionMemory(ORG, { memoryType: 'memory_captured', title: 'X' } as never);
+    const entry = await saveCognitionMemory(ORG, { memoryType: 'memory_captured', title: 'X' } as never, USER);
     expect(entry.contextSummary).toBe('');
     expect(entry.tags).toEqual([]);
     expect(entry.resilienceScoreAtCapture).toBeNull();
@@ -96,9 +101,23 @@ describe('lib/knowledge-transfer/cognition-memory/memory-store', () => {
     expect(store.resilienceTimeline).toEqual([]);
   });
 
-  it('archiveCognitionMemory executes update', async () => {
-    await archiveCognitionMemory(ORG, E1);
-    expect(execute).toHaveBeenCalled();
+  it('archiveCognitionMemory audits an archived entry on the same transaction', async () => {
+    execute.mockResolvedValue([{ id: E1 }]);
+    expect(await archiveCognitionMemory(ORG, E1, USER)).toBe(true);
+    expect(audit).toHaveBeenCalledWith({ execute }, expect.objectContaining({ organizationId: ORG, userId: USER, action: 'cognition_memory.archive', resourceId: E1 }));
+  });
+
+  it('archiveCognitionMemory matching nothing (missing, other organization, already archived) audits nothing', async () => {
+    execute.mockResolvedValue([]);
+    expect(await archiveCognitionMemory(ORG, E1, USER)).toBe(false);
+    expect(audit).not.toHaveBeenCalled();
+  });
+
+  it('saveCognitionMemory audits on the same transaction and fails when the audit fails', async () => {
+    await saveCognitionMemory(ORG, { memoryType: 'decision_brief', title: 'T' } as never, USER);
+    expect(audit).toHaveBeenCalledWith({ execute }, expect.objectContaining({ organizationId: ORG, userId: USER, action: 'cognition_memory.save' }));
+    audit.mockRejectedValueOnce(new Error('audit down'));
+    await expect(saveCognitionMemory(ORG, { memoryType: 'decision_brief', title: 'T' } as never, USER)).rejects.toThrow('audit down');
   });
 
   it('getCognitionMemoryEntry returns entry when found', async () => {
@@ -117,9 +136,9 @@ describe('lib/knowledge-transfer/cognition-memory/memory-store', () => {
 
   it('runs every operation inside the organization tenant context', async () => {
     await loadCognitionMemory(OTHER_ORG);
-    await archiveCognitionMemory(OTHER_ORG, E1);
+    await archiveCognitionMemory(OTHER_ORG, E1, USER);
     await getCognitionMemoryEntry(OTHER_ORG, E1);
-    await saveCognitionMemory(OTHER_ORG, { memoryType: 'decision_brief', title: 'T' } as never);
+    await saveCognitionMemory(OTHER_ORG, { memoryType: 'decision_brief', title: 'T' } as never, USER);
     expect(withRLSContext).toHaveBeenCalledTimes(4);
     for (const call of withRLSContext.mock.calls) {
       expect(call[0]).toEqual({ organizationId: OTHER_ORG });
@@ -128,14 +147,14 @@ describe('lib/knowledge-transfer/cognition-memory/memory-store', () => {
 
   it('refuses a non-UUID organization before touching the database', async () => {
     await expect(loadCognitionMemory('org-1')).rejects.toThrow('organizationId must be a UUID');
-    await expect(saveCognitionMemory('org-1', { memoryType: 'decision_brief', title: 'T' } as never)).rejects.toThrow();
+    await expect(saveCognitionMemory('org-1', { memoryType: 'decision_brief', title: 'T' } as never, USER)).rejects.toThrow();
     expect(withRLSContext).not.toHaveBeenCalled();
     expect(execute).not.toHaveBeenCalled();
   });
 
   it('treats a malformed entry id as matching nothing without querying', async () => {
     expect(await getCognitionMemoryEntry(ORG, 'not-a-uuid')).toBeNull();
-    await archiveCognitionMemory(ORG, 'not-a-uuid');
+    expect(await archiveCognitionMemory(ORG, 'not-a-uuid', USER)).toBe(false);
     expect(execute).not.toHaveBeenCalled();
   });
 

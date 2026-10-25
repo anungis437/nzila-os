@@ -8,7 +8,7 @@
  */
 
 import { z } from 'zod';
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 import {
   loadCognitionMemory,
   saveCognitionMemory,
@@ -66,9 +66,10 @@ export const POST = withApi(
     entitlement: 'union_knowledge_suite',
     body: SaveMemorySchema,
   },
-  async ({ organizationId, body }) => {
+  async ({ organizationId, userId, body }) => {
     if (body.archiveId) {
-      await archiveCognitionMemory(organizationId!, body.archiveId);
+      const archived = await archiveCognitionMemory(organizationId!, body.archiveId, userId!);
+      if (!archived) throw ApiError.notFound('Memory entry', body.archiveId);
       return { data: { archived: true, id: body.archiveId } };
     }
     const entry = await saveCognitionMemory(organizationId!, {
@@ -80,7 +81,7 @@ export const POST = withApi(
       tags: body.tags,
       keyInsights: body.keyInsights,
       sessionId: body.sessionId,
-    });
+    }, userId!);
     return { data: entry };
   },
 );

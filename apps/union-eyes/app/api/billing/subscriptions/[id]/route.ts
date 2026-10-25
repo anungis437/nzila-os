@@ -10,6 +10,9 @@ import { db } from '@/db';
 import { orgSubscriptions } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,16 +37,11 @@ export const GET = withApi(
   },
 );
 
-const patchSchema = z.object({
-  status: z.enum(['active', 'paused', 'cancelled', 'trialing']).optional(),
-  seatCount: z.number().int().min(0).optional(),
-  localCount: z.number().int().min(0).optional(),
-  moduleList: z.array(z.string()).optional(),
-  discountPercent: z.string().optional(),
-  subsidyAmount: z.string().optional(),
-  endDate: z.coerce.date().optional(),
-  metadata: z.record(z.unknown()).optional(),
-});
+// The commercial terms of a subscription (status, seats, locals, modules, discount, subsidy, end date) are set by the
+// commercial transition and the pause/resume operation, never by the customer: a steward who could edit them could
+// grant their own organization a discount or modules. Only the free-form metadata is the customer's, and unknown
+// fields are refused rather than ignored so a refused change is not mistaken for an applied one.
+const patchSchema = z.object({ metadata: z.record(z.unknown()).optional() }).strict();
 
 // PR #752 round 28: commercial-transition (app/api/pilot/apply/[id]/
 // commercial-transition/route.ts) stamps these 2 keys into a subscription's
@@ -55,15 +53,19 @@ const SERVER_OWNED_SUBSCRIPTION_METADATA_KEYS = ['commercialTermsSnapshot', 'com
 
 export const PATCH = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Billing'], summary: 'Update a subscription' },
   },
-  async ({ organizationId, userId: _userId, params, request }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+  async ({ organizationId, userId, params, request }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const { id } = params;
 
-    const body = patchSchema.parse(await request.json());
+    const parsedBody = patchSchema.safeParse(await request.json());
+    if (!parsedBody.success) {
+      throw ApiError.badRequest('Only metadata can be changed here; commercial terms are set by the commercial transition');
+    }
+    const body = parsedBody.data;
 
     const [existing] = await db
       .select()
@@ -92,11 +94,23 @@ export const PATCH = withApi(
       setValues.metadata = sanitizedMetadata;
     }
 
-    const [updated] = await db
-      .update(orgSubscriptions)
-      .set(setValues)
-      .where(eq(orgSubscriptions.id, id))
-      .returning();
+    const updated = await withRLSContext({ organizationId }, async (tx) => {
+      const [row] = await tx
+        .update(orgSubscriptions)
+        .set(setValues)
+        .where(and(eq(orgSubscriptions.id, id), eq(orgSubscriptions.organizationId, organizationId)))
+        .returning();
+      if (!row) throw ApiError.notFound('Subscription not found');
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'billing.subscription.metadata_update',
+        resourceType: 'org_subscriptions',
+        resourceId: id,
+        details: { fields: Object.keys(body) },
+      });
+      return row;
+    });
 
     logger.info('Subscription updated', { subscriptionId: id, organizationId });
 
@@ -106,12 +120,12 @@ export const PATCH = withApi(
 
 export const DELETE = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Billing'], summary: 'Cancel a subscription' },
   },
-  async ({ organizationId, userId: _userId, params }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+  async ({ organizationId, userId, params }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const { id } = params;
 
     const [existing] = await db
@@ -121,11 +135,31 @@ export const DELETE = withApi(
 
     if (!existing) throw ApiError.notFound('Subscription not found');
 
-    const [cancelled] = await db
-      .update(orgSubscriptions)
-      .set({ status: 'cancelled', endDate: new Date(), updatedAt: new Date() })
-      .where(eq(orgSubscriptions.id, id))
-      .returning();
+    if (existing.status === 'cancelled') throw ApiError.conflict('Subscription is already cancelled');
+
+    const cancelled = await withRLSContext({ organizationId }, async (tx) => {
+      const [row] = await tx
+        .update(orgSubscriptions)
+        .set({ status: 'cancelled', endDate: new Date(), updatedAt: new Date() })
+        .where(
+          and(
+            eq(orgSubscriptions.id, id),
+            eq(orgSubscriptions.organizationId, organizationId),
+            eq(orgSubscriptions.status, existing.status),
+          ),
+        )
+        .returning();
+      if (!row) throw ApiError.conflict('The subscription changed while it was being cancelled');
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'billing.subscription.cancel',
+        resourceType: 'org_subscriptions',
+        resourceId: id,
+        details: { from: existing.status },
+      });
+      return row;
+    });
 
     logger.info('Subscription cancelled', { subscriptionId: id, organizationId });
 

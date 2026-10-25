@@ -5,6 +5,7 @@ import {
 } from "@/db/schema";
 import { eq, and, desc, sql, type SQL } from "drizzle-orm";
 import { logger } from "@/lib/logger";
+import type { RLSTx } from "@/lib/db/with-rls-context";
 import { updateSourceHealth } from "./source-registry-service";
 
 // ---------------------------------------------------------------------------
@@ -79,9 +80,9 @@ export async function getIngestionJobById(id: string): Promise<CbaIntelIngestion
 // Create / Start
 // ---------------------------------------------------------------------------
 
-export async function createIngestionJob(data: NewIngestionJob): Promise<CbaIntelIngestionJob> {
+export async function createIngestionJob(data: NewIngestionJob, exec: RLSTx = db): Promise<CbaIntelIngestionJob> {
   try {
-    const [job] = await db.insert(cbaIntelIngestionJobs).values(data).returning();
+    const [job] = await exec.insert(cbaIntelIngestionJobs).values(data).returning();
     return job;
   } catch (error) {
     logger.error("Error creating ingestion job", { error, sourceId: data.sourceId });

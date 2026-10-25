@@ -16,6 +16,9 @@
 
 import { randomUUID } from 'crypto';
 import { sql } from 'drizzle-orm';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { performAuditedOperation } from '@/lib/audit/operation-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { inOrganization, isUuid } from '../org-scope';
 import {
   buildOrgAiTrace,
@@ -36,53 +39,49 @@ import type { CopilotQueryInput, CopilotQueryResult, CopilotMessage } from './co
 // Profile key for continuity copilot — reuses STEWARD_COPILOT as organizational reasoning profile
 const COPILOT_PROFILE = 'ue-steward-copilot';
 
-/** Load or create a conversation. */
+/** Load or create a conversation, on the caller's transaction. */
 async function upsertConversation(
+  tx: RLSTx,
   orgId: string,
   conversationId: string | null,
   sessionId: string | null,
   contextSnapshot: Record<string, unknown> | null,
-): Promise<string> {
+): Promise<{ id: string; created: boolean }> {
   if (conversationId && isUuid(conversationId)) {
     // Verify it belongs to this org
-    const rows = await inOrganization(orgId, (tx) =>
-      tx.execute(sql`
-        SELECT id FROM ue_copilot_conversations WHERE id = ${conversationId} AND organization_id = ${orgId} LIMIT 1
-      `),
-    );
+    const rows = await tx.execute(sql`
+      SELECT id FROM ue_copilot_conversations WHERE id = ${conversationId} AND organization_id = ${orgId} LIMIT 1
+    `);
     const result = rows as any as Record<string, unknown>[];
-    if (result.length > 0) return conversationId;
+    if (result.length > 0) return { id: conversationId, created: false };
   }
   // Create new conversation
   const id = randomUUID();
   const now = new Date().toISOString();
-  await inOrganization(orgId, (tx) =>
-    tx.execute(sql`
-      INSERT INTO ue_copilot_conversations (id, organization_id, session_id, context_snapshot, created_at, updated_at)
-      VALUES (
-        ${id}, ${orgId}, ${sessionId ?? null},
-        ${contextSnapshot ? JSON.stringify(contextSnapshot) : null}::jsonb,
-        ${now}::timestamptz, ${now}::timestamptz
-      )
-    `),
-  );
-  return id;
+  await tx.execute(sql`
+    INSERT INTO ue_copilot_conversations (id, organization_id, session_id, context_snapshot, created_at, updated_at)
+    VALUES (
+      ${id}, ${orgId}, ${sessionId ?? null},
+      ${contextSnapshot ? JSON.stringify(contextSnapshot) : null}::jsonb,
+      ${now}::timestamptz, ${now}::timestamptz
+    )
+  `);
+  return { id, created: true };
 }
 
-/** Append a message to a conversation. */
+/** Append a message to a conversation, on the caller's transaction. */
 async function appendMessage(
+  tx: RLSTx,
   orgId: string,
   conversationId: string,
   message: CopilotMessage,
 ): Promise<void> {
-  await inOrganization(orgId, (tx) =>
-    tx.execute(sql`
-      UPDATE ue_copilot_conversations
-      SET messages = messages || ${JSON.stringify([message])}::jsonb,
-          updated_at = now()
-      WHERE id = ${conversationId} AND organization_id = ${orgId}
-    `),
-  );
+  await tx.execute(sql`
+    UPDATE ue_copilot_conversations
+    SET messages = messages || ${JSON.stringify([message])}::jsonb,
+        updated_at = now()
+    WHERE id = ${conversationId} AND organization_id = ${orgId}
+  `);
 }
 
 /** Build a continuity-aware system prompt from org context. */
@@ -165,6 +164,7 @@ function extractFollowUps(query: string, _responseType: string): string[] {
 export async function processCopilotQuery(
   orgId: string,
   input: CopilotQueryInput,
+  userId: string,
 ): Promise<CopilotQueryResult> {
   // Load org continuity context
   const [propagationMap, resilienceIndex] = await Promise.all([
@@ -202,16 +202,27 @@ export async function processCopilotQuery(
     { role: 'user', content: input.query },
   ];
 
-  // Call AI with governance-safe profile
+  // The provider call cannot share the database transaction: its intent is recorded first and the call is skipped if
+  // that record cannot be written.
   const ai = getAiClient();
-  const aiResult = await ai.generate({
-    orgId: UE_SYSTEM_ORG_ID,
-    trace: buildOrgAiTrace(orgId),
-    appKey: UE_APP_KEY,
-    profileKey: COPILOT_PROFILE,
-    input: messages,
-    dataClass: 'internal',
-  });
+  const aiResult = await performAuditedOperation(
+    {
+      organizationId: orgId,
+      userId,
+      action: 'exit_interview.copilot.generate',
+      resourceType: 'ue_copilot_conversations',
+      details: { conversationId: input.conversationId ?? null },
+    },
+    () =>
+      ai.generate({
+        orgId: UE_SYSTEM_ORG_ID,
+        trace: buildOrgAiTrace(orgId),
+        appKey: UE_APP_KEY,
+        profileKey: COPILOT_PROFILE,
+        input: messages,
+        dataClass: 'internal',
+      }),
+  );
 
   const answer = aiResult.content;
 
@@ -271,25 +282,36 @@ export async function processCopilotQuery(
     'Review the dependency propagation graph and resilience index for verification.',
   );
 
-  // Persist conversation
-  const convId = await upsertConversation(
-    orgId,
-    input.conversationId ?? null,
-    input.sessionId ?? null,
-    { resilienceScore: resilienceIndex.overallScore, singleSourceCount, totalNodes },
-  );
-
   const userMsgId = randomUUID();
   const assistantMsgId = randomUUID();
   const now = new Date().toISOString();
 
-  await appendMessage(orgId, convId, { id: userMsgId, role: 'user', content: input.query, createdAt: now });
-  await appendMessage(orgId, convId, {
-    id: assistantMsgId,
-    role: 'assistant',
-    content: answer,
-    createdAt: now,
-    explainabilityRef: null,
+  // The conversation and both messages commit with their audit record or not at all
+  const convId = await inOrganization(orgId, async (tx) => {
+    const conversation = await upsertConversation(
+      tx,
+      orgId,
+      input.conversationId ?? null,
+      input.sessionId ?? null,
+      { resilienceScore: resilienceIndex.overallScore, singleSourceCount, totalNodes },
+    );
+    await appendMessage(tx, orgId, conversation.id, { id: userMsgId, role: 'user', content: input.query, createdAt: now });
+    await appendMessage(tx, orgId, conversation.id, {
+      id: assistantMsgId,
+      role: 'assistant',
+      content: answer,
+      createdAt: now,
+      explainabilityRef: null,
+    });
+    await persistAtomicAudit(tx, {
+      organizationId: orgId,
+      userId,
+      action: 'exit_interview.copilot.converse',
+      resourceType: 'ue_copilot_conversations',
+      resourceId: conversation.id,
+      details: { newConversation: conversation.created, assistantMessageId: assistantMsgId },
+    });
+    return conversation.id;
   });
 
   const followUps = extractFollowUps(input.query, 'default');

@@ -21,6 +21,7 @@ import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { enforceAISafety } from '@nzila/policies';
+import { operationAuditResponse } from '@/lib/audit/operation-audit';
 
 export const POST = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
   // 1. Rate limit
@@ -49,7 +50,9 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
       userId: context.userId!,
     });
     return standardSuccessResponse(result);
-  } catch (_error) {
+  } catch (error) {
+    const refused = operationAuditResponse(error);
+    if (refused) return standardErrorResponse(ErrorCode.CONFLICT, refused.body.error.message);
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Grievance triage failed.');
   }
 });

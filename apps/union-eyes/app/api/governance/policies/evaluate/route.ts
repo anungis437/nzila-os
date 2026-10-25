@@ -27,7 +27,7 @@ export const POST = withApi(
     entitlement: 'governance_suite',
     body: evaluateSchema,
   },
-  async ({ body, organizationId }) => {
+  async ({ body, organizationId, userId }) => {
     if (!organizationId) {
       return NextResponse.json({ error: 'Organization context required' }, { status: 400 });
     }
@@ -42,7 +42,8 @@ export const POST = withApi(
         subjectId: validatedData.subjectId,
         inputData: validatedData.inputData,
         context: validatedData.context,
-      }
+      },
+      userId ?? undefined
     );
 
     return NextResponse.json({

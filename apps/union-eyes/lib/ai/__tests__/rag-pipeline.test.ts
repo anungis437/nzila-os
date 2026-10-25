@@ -132,6 +132,21 @@ describe("RAGPipeline", () => {
       }
     });
 
+    it("never returns another organization's chunks, nor organization-owned chunks to a search with no organization", async () => {
+      const own = makeDoc("d-org-a", longContent, "grievance", "ON");
+      own.metadata.organizationId = "org-a";
+      await pipeline.addDocuments([own]);
+
+      const forA = await pipeline.search("grievance procedures", { organizationId: "org-a" });
+      expect(forA.some((r) => r.chunk.documentId === "d-org-a")).toBe(true);
+
+      const forB = await pipeline.search("grievance procedures", { organizationId: "org-b" });
+      expect(forB.some((r) => r.chunk.documentId === "d-org-a")).toBe(false);
+
+      const anonymous = await pipeline.search("grievance procedures");
+      expect(anonymous.some((r) => r.chunk.documentId === "d-org-a")).toBe(false);
+    });
+
     it("filters by type", async () => {
       const results = await pipeline.search("schedule", { type: "contract" });
       for (const r of results) {

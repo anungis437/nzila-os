@@ -5,7 +5,8 @@ import { enforceAISafety } from '@nzila/policies';
 import { db } from '@/db';
 import { mlPredictions, modelMetadata } from '@/db/schema';
 import { and, desc, eq } from 'drizzle-orm';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 const bodySchema = z.object({
   caseId: z.string().uuid(),
@@ -51,68 +52,71 @@ export const POST = withApi(
     enforceAISafety({ origin: 'sla-breach-risk', action: 'POST', organizationId: organizationId!, userId: userId ?? '', userRole: 'steward', dataClass: 'confidential' });
 
     const selectedVersion = body.modelVersion ?? 'sla-risk-v1';
-    const [existingModel] = await db
-      .select()
-      .from(modelMetadata)
-      .where(
-        and(
-          eq(modelMetadata.organizationId, organizationId),
-          eq(modelMetadata.modelType, 'sla_breach_risk'),
-          eq(modelMetadata.version, selectedVersion),
-        ),
-      )
-      .limit(1);
-
-    const activeModel = existingModel
-      ? existingModel
-      : (
-          await db
-            .insert(modelMetadata)
-            .values({
-              organizationId,
-              modelType: 'sla_breach_risk',
-              version: selectedVersion,
-              parameters: {
-                featureSet: body.features.featureRefs,
-                scoring: 'heuristic_v1',
-              },
-            })
-            .returning()
-        )[0];
-
     const score = computeSlaBreachProbability(body.features);
     const now = new Date();
 
-    const [prediction] = await db
-      .insert(mlPredictions)
-      .values({
-        organizationId,
-        predictionType: 'sla_breach_risk',
-        predictionDate: now,
-        predictedValue: score.toString(),
-        lowerBound: Math.max(0, score - 0.08).toFixed(4),
-        upperBound: Math.min(1, score + 0.08).toFixed(4),
-        confidence: '0.78',
-        horizon: 72,
-        granularity: 'case',
-      })
-      .returning();
+    // The model record (when first used), the prediction and their audit record commit together
+    const { activeModel, prediction } = await withRLSContext({ organizationId }, async (tx) => {
+      const [existingModel] = await tx
+        .select()
+        .from(modelMetadata)
+        .where(
+          and(
+            eq(modelMetadata.organizationId, organizationId),
+            eq(modelMetadata.modelType, 'sla_breach_risk'),
+            eq(modelMetadata.version, selectedVersion),
+          ),
+        )
+        .limit(1);
 
-    await auditLog({
-      eventType: AuditEventType.DATA_CREATE,
-      severity: AuditSeverity.HIGH,
-      userId: userId ?? undefined,
-      organizationId,
-      resource: 'ml_predictions',
-      resourceId: prediction.id,
-      action: 'sla_breach_prediction_logged',
-      details: {
-        caseId: body.caseId,
-        modelVersion: activeModel.version,
-        modelType: activeModel.modelType,
-        featureRefs: body.features.featureRefs,
-        score,
-      },
+      const model = existingModel
+        ? existingModel
+        : (
+            await tx
+              .insert(modelMetadata)
+              .values({
+                organizationId,
+                modelType: 'sla_breach_risk',
+                version: selectedVersion,
+                parameters: {
+                  featureSet: body.features.featureRefs,
+                  scoring: 'heuristic_v1',
+                },
+              })
+              .returning()
+          )[0];
+
+      const [stored] = await tx
+        .insert(mlPredictions)
+        .values({
+          organizationId,
+          predictionType: 'sla_breach_risk',
+          predictionDate: now,
+          predictedValue: score.toString(),
+          lowerBound: Math.max(0, score - 0.08).toFixed(4),
+          upperBound: Math.min(1, score + 0.08).toFixed(4),
+          confidence: '0.78',
+          horizon: 72,
+          granularity: 'case',
+        })
+        .returning();
+
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId: userId ?? null,
+        action: 'ml.sla_breach.predict',
+        resourceType: 'ml_predictions',
+        resourceId: stored.id,
+        details: {
+          caseId: body.caseId,
+          modelVersion: model.version,
+          modelType: model.modelType,
+          featureRefs: body.features.featureRefs,
+          score,
+        },
+      });
+
+      return { activeModel: model, prediction: stored };
     });
 
     return {

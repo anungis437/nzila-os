@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { AUTH_MANDATORY_AUDIT_SERVICES, BALLOT_SECRECY_EXEMPT_ROUTES, KERNEL_AUDITED_CALLS, auditGap, kernelPending, scanRoutes } from '../../scripts/lib/route-coverage-scan'
+import { AUTH_MANDATORY_AUDIT_SERVICES, BALLOT_SECRECY_EXEMPT_ROUTES, COMPUTE_ONLY_ROUTES, READ_ONLY_POST_ROUTES, UNATTRIBUTABLE_WRITE_ROUTES, KERNEL_AUDITED_CALLS, auditGap, kernelPending, scanRoutes } from '../../scripts/lib/route-coverage-scan'
 
 /**
  * Route-coverage manifest and ratchets (UE-CONV-K-008). Every app/api route is recorded with how it authenticates,
@@ -127,5 +127,44 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
     expect(run).toBeLessThan(outcome)
     // a failure to record the intent must stop the operation
     expect(source).toMatch(/catch \(error\) \{[\s\S]*?throw new OperationAuditError[\s\S]*?\}\s*\n\s*try \{\s*\n\s*const result = await operation\(\)/)
+  })
+
+  it('keeps a route on the compute-only list only while neither it nor its calculators write or hold a database client', () => {
+    const root = join(__dirname, '..', '..')
+    const WRITE = /\.(insert|update|delete)\(|\b(INSERT\s+INTO|UPDATE\s+\w|DELETE\s+FROM)\b|\.transaction\(/i
+    const DB_VALUE_IMPORT = /^import\s+(?!type\b)[^\n]*from\s+['"]@\/db(\/db)?['"]/m
+    for (const [route, modules] of Object.entries(COMPUTE_ONLY_ROUTES)) {
+      const source = readFileSync(join(root, 'app', 'api', route), 'utf8')
+      expect(source, route).not.toMatch(WRITE)
+      for (const mod of modules) {
+        const text = readFileSync(join(root, mod), 'utf8')
+        expect(text, mod).not.toMatch(WRITE)
+        expect(text, mod).not.toMatch(DB_VALUE_IMPORT)
+      }
+    }
+    expect(readFileSync(join(root, 'app', 'api', 'admin/billing-cycles/preview/route.ts'), 'utf8')).toMatch(/dryRun:\s*true/)
+  })
+
+  it('keeps a route on the read-only POST list only while it holds no write and imports nothing that changes state', () => {
+    const WRITE = /\.(insert|update|delete)\(|\b(INSERT\s+INTO|UPDATE\s+\w|DELETE\s+FROM|TRUNCATE)\b|putBlob\(|deleteBlob\(|\.transaction\(/i
+    const MUTATING_NAME = /^(set|update|create|delete|remove|insert|upsert|enable|disable|toggle|track|save|write|revoke|grant|assign|apply|persist|store|record|send|submit|approve|import|sync)[A-Z_]/
+    for (const route of READ_ONLY_POST_ROUTES) {
+      const source = readFileSync(join(ROOT, 'app', 'api', route), 'utf8')
+      expect(source, route).not.toMatch(WRITE)
+      expect(source, route).not.toMatch(/persistAtomicAudit|performAuditedOperation/)
+      const names = [...source.matchAll(/import\s*(?:type\s*)?\{([^}]*)\}\s*from\s*['"](?!zod|next)/g)]
+        .flatMap((m) => m[1].split(',').map((n) => n.trim().split(/\s+as\s+/)[0]).filter(Boolean))
+        .filter((n) => !/^type\s/.test(n) && !/Headers$/.test(n))
+      expect(names.filter((n) => MUTATING_NAME.test(n)), route).toEqual([])
+      expect(fresh.find((e) => e.route === route)?.mutating, route + ' is not mutating; remove it from the list').toBe(true)
+    }
+  })
+
+  it('keeps an unattributable write exempt only while the route carries the control that bounds it', () => {
+    for (const [route, { why, control }] of Object.entries(UNATTRIBUTABLE_WRITE_ROUTES)) {
+      expect(why.length, route).toBeGreaterThan(20)
+      expect(readFileSync(join(ROOT, 'app', 'api', route), 'utf8'), route).toMatch(control)
+      expect(fresh.find((e) => e.route === route)?.audit, route).toBe('EXEMPT_UNATTRIBUTABLE')
+    }
   })
 })

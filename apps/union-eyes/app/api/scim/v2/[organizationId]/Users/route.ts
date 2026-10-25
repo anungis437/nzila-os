@@ -5,6 +5,8 @@
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { organizationMembers } from '@/db/schema/organization-members-schema';
 import { eq } from 'drizzle-orm';
 
@@ -44,8 +46,11 @@ export const GET = withApi(
       description: 'Returns organization members in SCIM 2.0 format.',
     },
   },
-  async ({ params, request }) => {
-    const orgId = params.organizationId;
+  async ({ params, request, organizationId }) => {
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    // An administrator lists only the organization they are acting in, whatever the path names.
+    if (params.organizationId !== organizationId) throw ApiError.notFound('Organization');
+    const orgId = organizationId;
     const url = new URL(request.url);
     const startIndex = Math.max(1, parseInt(url.searchParams.get('startIndex') || '1', 10));
     const count = Math.min(100, parseInt(url.searchParams.get('count') || '50', 10));
@@ -76,8 +81,10 @@ export const POST = withApi(
       description: 'Provisions a new user in the organization via SCIM 2.0.',
     },
   },
-  async ({ params, request }) => {
-    const orgId = params.organizationId;
+  async ({ params, request, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    // An administrator provisions users only into the organization they are acting in.
+    if (params.organizationId !== organizationId) throw ApiError.notFound('Organization');
     const body = await request.json();
     const { userName, name, emails } = body as {
       userName: string;
@@ -93,18 +100,30 @@ export const POST = withApi(
 
     const fullName = [name?.givenName, name?.familyName].filter(Boolean).join(' ') || userName;
 
-    const [created] = await db
-      .insert(organizationMembers)
-      .values({
-        organizationId: orgId,
-        userId: userName,
-        email: primaryEmail ?? userName,
-        name: fullName,
-        role: 'member',
-        status: 'active',
-      })
-      .returning();
+    return withRLSContext({ organizationId }, async (tx) => {
+      const [created] = await tx
+        .insert(organizationMembers)
+        .values({
+          organizationId,
+          userId: userName,
+          email: primaryEmail ?? userName,
+          name: fullName,
+          role: 'member',
+          status: 'active',
+        })
+        .onConflictDoNothing()
+        .returning();
+      if (!created) throw ApiError.conflict('A user with this userName already exists in the organization');
 
-    return toScimUser(created);
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'scim.user.provision',
+        resourceType: 'organization_members',
+        resourceId: created.id,
+        details: { provisionedUserName: userName },
+      });
+      return toScimUser(created);
+    });
   },
 );

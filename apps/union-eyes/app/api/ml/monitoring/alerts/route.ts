@@ -2,6 +2,8 @@ import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from 'drizzle-orm';
 import { withRoleAuth } from '@/lib/api-auth-guard';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { db } from '@/db';
 import {
@@ -211,9 +213,14 @@ const mlMonitoringAlertsSchema = z.object({
   alertId: z.string().uuid('Invalid alertId'),
 });
 
-export const POST = withRoleAuth('member', async (request: NextRequest, context) => {
+// Acknowledging a monitoring alert changes its shared state, so it is a steward action and is always attributed to an
+// organization: a user id is never used in place of one.
+export const POST = withRoleAuth('steward', async (request: NextRequest, context) => {
   const { userId, organizationId } = context;
-  const organizationScopeId = organizationId || userId;
+  if (!organizationId || !userId) {
+    return NextResponse.json({ error: 'No active organization' }, { status: 400 });
+  }
+  const organizationScopeId = organizationId;
   
   try {
     const body = await request.json();
@@ -236,27 +243,46 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context)
     );
     }
 
-    // Insert or update acknowledgment
-    await db.execute(sql`
-      INSERT INTO ml_alert_acknowledgments (
-        alert_id,
+    // Insert or update the acknowledgment. An acknowledgment another organization already holds for this alert id is
+    // never overwritten: the update only applies to the organization's own row, and matching nothing is a conflict.
+    const acknowledged = await withRLSContext({ organizationId: organizationScopeId }, async (tx) => {
+      const rows = (await tx.execute(sql`
+        INSERT INTO ml_alert_acknowledgments (
+          alert_id,
           organization_id,
-        acknowledged,
-        acknowledged_by,
-        acknowledged_at
-      ) VALUES (
-        ${alertId},
+          acknowledged,
+          acknowledged_by,
+          acknowledged_at
+        ) VALUES (
+          ${alertId},
           ${organizationScopeId},
-        true,
-        ${userId},
-        NOW()
-      )
-      ON CONFLICT (alert_id) 
-      DO UPDATE SET
-        acknowledged = true,
-        acknowledged_by = ${userId},
-        acknowledged_at = NOW()
-    `);
+          true,
+          ${userId},
+          NOW()
+        )
+        ON CONFLICT (alert_id)
+        DO UPDATE SET
+          acknowledged = true,
+          acknowledged_by = ${userId},
+          acknowledged_at = NOW()
+        WHERE ml_alert_acknowledgments.organization_id = ${organizationScopeId}
+        RETURNING alert_id
+      `)) as unknown as unknown[];
+      if (rows.length === 0) return false;
+      await persistAtomicAudit(tx, {
+        organizationId: organizationScopeId,
+        userId,
+        action: 'ml.alert.acknowledge',
+        resourceType: 'ml_alert_acknowledgments',
+        resourceId: alertId,
+        details: {},
+      });
+      return true;
+    });
+
+    if (!acknowledged) {
+      return standardErrorResponse(ErrorCode.CONFLICT, 'This alert is already acknowledged elsewhere and cannot be changed');
+    }
 
     return NextResponse.json({
       success: true,

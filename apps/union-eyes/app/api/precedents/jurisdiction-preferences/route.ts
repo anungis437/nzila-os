@@ -8,6 +8,8 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { memberJurisdictionPreferences } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,12 +64,13 @@ export const PUT = withApi(
     },
   },
   async ({ body, userId, organizationId }) => {
+    if (!userId || !organizationId) throw ApiError.badRequest('Organization context required');
     const {
       preferredJurisdictions,
       preferredLevels,
       includeNational,
       autoApply,
-    } = body as {
+    } = (body ?? {}) as {
       preferredJurisdictions?: string[];
       preferredLevels?: string[];
       includeNational?: boolean;
@@ -98,44 +101,67 @@ export const PUT = withApi(
       }
     }
 
-    const [existing] = await db
-      .select()
-      .from(memberJurisdictionPreferences)
-      .where(
-        and(
-          eq(memberJurisdictionPreferences.userId, userId!),
-          eq(memberJurisdictionPreferences.organizationId, organizationId!),
-        ),
-      )
-      .limit(1);
-
     const data: Record<string, unknown> = { updatedAt: new Date() };
     if (preferredJurisdictions !== undefined) data.preferredJurisdictions = preferredJurisdictions;
     if (preferredLevels !== undefined) data.preferredLevels = preferredLevels;
     if (includeNational !== undefined) data.includeNational = includeNational;
     if (autoApply !== undefined) data.autoApply = autoApply;
 
-    if (existing) {
-      const [updated] = await db
-        .update(memberJurisdictionPreferences)
-        .set(data)
-        .where(eq(memberJurisdictionPreferences.id, existing.id))
+    return withRLSContext({ organizationId: organizationId! }, async (tx) => {
+      const [current] = await tx
+        .select()
+        .from(memberJurisdictionPreferences)
+        .where(
+          and(
+            eq(memberJurisdictionPreferences.userId, userId!),
+            eq(memberJurisdictionPreferences.organizationId, organizationId!),
+          ),
+        )
+        .limit(1);
+
+      if (current) {
+        const [updated] = await tx
+          .update(memberJurisdictionPreferences)
+          .set(data)
+          .where(
+            and(
+              eq(memberJurisdictionPreferences.id, current.id),
+              eq(memberJurisdictionPreferences.userId, userId!),
+              eq(memberJurisdictionPreferences.organizationId, organizationId!),
+            ),
+          )
+          .returning();
+        await persistAtomicAudit(tx, {
+          organizationId: organizationId!,
+          userId: userId!,
+          action: 'precedent.jurisdiction_preferences.update',
+          resourceType: 'member_jurisdiction_preferences',
+          resourceId: current.id,
+          details: { fields: Object.keys(data).filter((k) => k !== 'updatedAt') },
+        });
+        return { ...updated, isConfigured: true };
+      }
+
+      const [created] = await tx
+        .insert(memberJurisdictionPreferences)
+        .values({
+          userId: userId!,
+          organizationId: organizationId!,
+          preferredJurisdictions: preferredJurisdictions ?? [],
+          preferredLevels: preferredLevels ?? [],
+          includeNational: includeNational ?? true,
+          autoApply: autoApply ?? true,
+        })
         .returning();
-      return { ...updated, isConfigured: true };
-    }
-
-    const [created] = await db
-      .insert(memberJurisdictionPreferences)
-      .values({
-        userId: userId!,
+      await persistAtomicAudit(tx, {
         organizationId: organizationId!,
-        preferredJurisdictions: preferredJurisdictions ?? [],
-        preferredLevels: preferredLevels ?? [],
-        includeNational: includeNational ?? true,
-        autoApply: autoApply ?? true,
-      })
-      .returning();
-
-    return { ...created, isConfigured: true };
+        userId: userId!,
+        action: 'precedent.jurisdiction_preferences.create',
+        resourceType: 'member_jurisdiction_preferences',
+        resourceId: created.id,
+        details: {},
+      });
+      return { ...created, isConfigured: true };
+    });
   },
 );

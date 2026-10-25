@@ -103,6 +103,7 @@ class AIPipeline {
         sources = await ragPipeline.search(query, {
           topK: this.config.maxContextChunks,
           jurisdiction: context.jurisdiction,
+          organizationId: context.organizationId,
         });
 
         // Track knowledge gaps
@@ -226,6 +227,7 @@ class AIPipeline {
       id: document.id,
       content: document.content,
       metadata: {
+        organizationId: metadata.organizationId,
         source: metadata.source,
         type: extraction.documentType as DocumentMetadata['type'],
         jurisdiction: metadata.jurisdiction,

@@ -7,6 +7,7 @@ const m = vi.hoisted(() => ({
   getWorkflowStatus: vi.fn(),
   cancelWorkflow: vi.fn(),
   logger: { error: vi.fn() },
+  performAuditedOperation: vi.fn(),
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({ withAdminAuth: m.withAdminAuth }));
@@ -16,6 +17,10 @@ vi.mock('@/services/pki/workflow-engine', () => ({
   cancelWorkflow: m.cancelWorkflow,
 }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: m.performAuditedOperation,
+  operationAuditResponse: () => null,
+}));
 vi.mock('@/lib/api/standardized-responses', () => ({
   ErrorCode: { RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND', VALIDATION_ERROR: 'VALIDATION_ERROR', MISSING_REQUIRED_FIELD: 'MISSING_REQUIRED_FIELD' },
   standardErrorResponse: (code: string, message: string) =>
@@ -40,6 +45,7 @@ describe('admin/pki/workflows/[id] route', () => {
     vi.clearAllMocks();
     m.withAdminAuth.mockImplementation((handler: any) => (request: NextRequest, ctx: any = {}) => handler(request, { userId: 'u1', organizationId: ORG, ...ctx }));
     m.getWorkflow.mockReturnValue({ id: 'wf1', organizationId: ORG });
+    m.performAuditedOperation.mockImplementation((_op: unknown, run: () => unknown) => run());
     m.getWorkflowStatus.mockReturnValue({ id: 'wf1', state: 'running' });
   });
 
@@ -85,5 +91,17 @@ describe('admin/pki/workflows/[id] route', () => {
     const response = await DELETE(req('DELETE', { reason: 'manual cancel' }), { params: { id: 'wf1' } });
     expect(response.status).toBe(200);
     expect(m.cancelWorkflow).toHaveBeenCalledWith('wf1', 'u1', 'manual cancel');
+    expect(m.performAuditedOperation).toHaveBeenCalledWith(
+      expect.objectContaining({ organizationId: ORG, userId: 'u1', action: 'pki.workflow.cancel', resourceId: 'wf1' }),
+      expect.any(Function),
+    );
+  });
+
+  it('DELETE does not cancel when the intent cannot be recorded', async () => {
+    const { DELETE } = await loadRoute();
+    m.performAuditedOperation.mockRejectedValueOnce(new Error('audit down'));
+    const response = await DELETE(req('DELETE', { reason: 'manual cancel' }), { params: { id: 'wf1' } });
+    expect(response.status).toBe(500);
+    expect(m.cancelWorkflow).not.toHaveBeenCalled();
   });
 });

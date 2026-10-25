@@ -1,4 +1,5 @@
-import { withApi, z } from '@/lib/api/framework';
+import { withApi, ApiError, z } from '@/lib/api/framework';
+import { operationAuditResponse } from '@/lib/audit/operation-audit';
 import { initiateTenantIntegrationSync } from '@/lib/integrations/control-plane';
 import { SyncType } from '@/lib/integrations/types';
 
@@ -23,14 +24,20 @@ export const POST = withApi(
     },
   },
   async ({ body, organizationId, userId, params }) => {
-    return {
-      result: await initiateTenantIntegrationSync(organizationId!, userId!, {
-        integrationId: params.id,
-        syncType: body.syncType,
-        entities: body.entities,
-        dryRun: body.dryRun,
-        limit: body.limit,
-      }),
-    };
+    try {
+      return {
+        result: await initiateTenantIntegrationSync(organizationId!, userId!, {
+          integrationId: params.id,
+          syncType: body.syncType,
+          entities: body.entities,
+          dryRun: body.dryRun,
+          limit: body.limit,
+        }),
+      };
+    } catch (error) {
+      const refused = operationAuditResponse(error);
+      if (refused) throw ApiError.conflict(refused.body.error.message);
+      throw error;
+    }
   },
 );

@@ -21,7 +21,9 @@ vi.mock('@/db', () => ({ db: m.db }));
 vi.mock('drizzle-orm', () => ({ and: vi.fn(), eq: vi.fn(), desc: vi.fn() }));
 vi.mock('@/db/schema/dues-finance-schema', () => ({ employerRemittances: { id: 'id', organizationId: 'o', createdAt: 'c' } }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
-vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (fn: (tx: unknown) => Promise<unknown>) => fn(m.db) }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (...args: unknown[]) => (args[args.length - 1] as (tx: unknown) => Promise<unknown>)(m.db),
+}));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn().mockResolvedValue(undefined) }));
 vi.mock('@/lib/evidence', () => ({ buildUnionEvidencePack: vi.fn(() => Promise.resolve()) }));
 

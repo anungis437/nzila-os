@@ -6,6 +6,8 @@
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { inAppNotifications } from '@/db/schema';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { eq, and } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -45,7 +47,8 @@ export const PATCH = withApi(
       description: 'Updates a notification, typically to mark it as read.',
     },
   },
-  async ({ params, body, userId }) => {
+  async ({ params, body, userId, organizationId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const { id } = await params;
     const { read } = (body as { read?: boolean }) || {};
 
@@ -61,17 +64,33 @@ export const PATCH = withApi(
       throw ApiError.badRequest('No updatable fields supplied');
     }
 
-    const [updated] = await db
-      .update(inAppNotifications)
-      .set(updateData)
-      .where(and(eq(inAppNotifications.id, id), eq(inAppNotifications.userId, userId!)))
-      .returning();
+    return withRLSContext({ organizationId }, async (tx) => {
+      const [updated] = await tx
+        .update(inAppNotifications)
+        .set(updateData)
+        .where(
+          and(
+            eq(inAppNotifications.id, id),
+            eq(inAppNotifications.userId, userId),
+            eq(inAppNotifications.organizationId, organizationId),
+          ),
+        )
+        .returning();
 
-    if (!updated) {
-      throw ApiError.notFound('Notification');
-    }
+      if (!updated) {
+        throw ApiError.notFound('Notification');
+      }
 
-    return updated;
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'notification.update',
+        resourceType: 'in_app_notifications',
+        resourceId: id,
+        details: { read },
+      });
+      return updated;
+    });
   },
 );
 
@@ -84,19 +103,36 @@ export const DELETE = withApi(
       description: 'Deletes a single in-app notification.',
     },
   },
-  async ({ params, userId }) => {
+  async ({ params, userId, organizationId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const { id } = await params;
 
-    const [deleted] = await db
-      .delete(inAppNotifications)
-      .where(and(eq(inAppNotifications.id, id), eq(inAppNotifications.userId, userId!)))
-      .returning();
+    return withRLSContext({ organizationId }, async (tx) => {
+      const [deleted] = await tx
+        .delete(inAppNotifications)
+        .where(
+          and(
+            eq(inAppNotifications.id, id),
+            eq(inAppNotifications.userId, userId),
+            eq(inAppNotifications.organizationId, organizationId),
+          ),
+        )
+        .returning({ id: inAppNotifications.id });
 
-    if (!deleted) {
-      throw ApiError.notFound('Notification');
-    }
+      if (!deleted) {
+        throw ApiError.notFound('Notification');
+      }
 
-    return { success: true };
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'notification.delete',
+        resourceType: 'in_app_notifications',
+        resourceId: id,
+        details: {},
+      });
+      return { success: true };
+    });
   },
 );
 

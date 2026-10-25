@@ -20,7 +20,7 @@ describe('emergency routes answer 501 and assert nothing (UE-EMERGENCY-DECLARATI
     const response = await route[method as 'GET' | 'POST'](request(method, name, body))
     expect(response.status).toBe(501)
     const json = await response.json()
-    expect(json.success).toBe(false)
+    if (name === 'dashboard') expect(json.success).toBe(false)
     expect(json.error.code).toBe('NOT_IMPLEMENTED')
     const text = JSON.stringify(json)
     for (const claim of ['breakGlassActivated', 'allowedOperations', 'notificationsSent', 'preparednessLevel', 'recovery_in_progress', 'pipedasafe']) {

@@ -10,6 +10,11 @@ vi.mock('@/lib/api/framework', () => ({
   withApi: m.withApi,
   ApiError: { badRequest: m.badRequest },
 }));
+const audit = vi.hoisted(() => ({ tx: vi.fn() }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (...args: unknown[]) => (args[args.length - 1] as (tx: unknown) => Promise<unknown>)({ insert: m.insert }),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: audit.tx }));
 vi.mock('@/db', () => ({ db: { insert: m.insert } }));
 vi.mock('@/db/schema/dues-finance-schema', () => ({
   memberDuesIssues: { id: 'id' },
@@ -26,6 +31,7 @@ describe('/api/dues/issues route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => handler);
+    audit.tx.mockResolvedValue(undefined);
     m.badRequest.mockImplementation((message: string) => Object.assign(new Error(message), { status: 400 }));
   });
 
@@ -61,6 +67,7 @@ describe('/api/dues/issues route', () => {
     });
 
     expect(m.insert).toHaveBeenCalledTimes(1);
+    expect(audit.tx).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'dues.issue.report', userId: 'user_1', organizationId: 'org_1' }));
     expect(returning).toHaveBeenCalledTimes(1);
     expect(values).toHaveBeenCalledWith(
       { id: 'id' },

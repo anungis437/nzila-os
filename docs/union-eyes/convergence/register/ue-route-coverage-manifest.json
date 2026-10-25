@@ -9,15 +9,15 @@
    "CAPABILITY_TOKEN": 12,
    "CRON_SECRET": 3,
    "CRUD_FACTORY": 297,
-   "DELEGATED": 23,
+   "DELEGATED": 24,
    "NONE": 51,
    "ORG_AUTH": 46,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 58,
-   "ROLE_AUTH": 130,
-   "SESSION_AUTH": 53,
+   "RETIRED": 67,
+   "ROLE_AUTH": 125,
+   "SESSION_AUTH": 52,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 274,
+   "WITH_API": 270,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -25,31 +25,32 @@
    "CAPABILITY_TOKEN": 8,
    "CRON_SECRET": 2,
    "CRUD_FACTORY": 297,
-   "DELEGATED": 16,
+   "DELEGATED": 17,
    "NONE": 8,
    "ORG_AUTH": 26,
    "PLATFORM_AUTH_HANDLER": 7,
-   "RETIRED": 51,
-   "ROLE_AUTH": 79,
-   "SESSION_AUTH": 24,
+   "RETIRED": 60,
+   "ROLE_AUTH": 74,
+   "SESSION_AUTH": 23,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 167
+   "WITH_API": 163
   },
   "mutatingByAudit": {
-   "ATOMIC": 79,
-   "ATOMIC_SERVICE": 65,
-   "BEST_EFFORT": 9,
+   "ATOMIC": 143,
+   "ATOMIC_SERVICE": 120,
+   "COMPUTE_ONLY": 34,
    "CRUD_ATOMIC": 299,
    "EXEMPT_BALLOT_SECRECY": 2,
+   "EXEMPT_UNATTRIBUTABLE": 22,
    "NO_WRITES_FOUND": 14,
-   "NONE": 227
+   "NONE": 61
   },
   "mutatingByData": {
-   "AMBIENT_DB": 34,
+   "AMBIENT_DB": 15,
    "CRUD_TENANT_TX": 299,
-   "NONE": 213,
-   "SYSTEM_CONTEXT": 53,
-   "TENANT_TX": 96
+   "NONE": 194,
+   "SYSTEM_CONTEXT": 55,
+   "TENANT_TX": 132
   }
  },
  "routes": [
@@ -194,7 +195,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "admin/billing-cycles/route.ts",
@@ -207,7 +208,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "admin/billing-cycles/trigger-scheduled/route.ts",
@@ -219,7 +220,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "admin/clc/analytics/annual-report/route.ts",
@@ -587,7 +588,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "admin/job-classifications/[id]/route.ts",
@@ -830,8 +831,8 @@
    "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "admin/pki/signatures/[id]/verify/route.ts",
@@ -843,7 +844,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "admin/pki/signatures/route.ts",
@@ -870,7 +871,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "admin/pki/workflows/route.ts",
@@ -918,10 +919,10 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "NONE",
    "audit": "NONE"
   },
   {
@@ -1076,7 +1077,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "ai/cache-stats/route.ts",
@@ -1089,7 +1090,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "ai/classify/route.ts",
@@ -1101,7 +1102,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "ai/copilot/query/route.ts",
@@ -1114,7 +1115,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "ai/copilot/sessions/[id]/route.ts",
@@ -1126,7 +1127,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "ai/employers/[id]/risk/route.ts",
@@ -1150,7 +1151,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "ai/feedback/route.ts",
@@ -1163,7 +1164,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "ai/finance/analysis/route.ts",
@@ -1187,7 +1188,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "ai/grievances/[id]/triage/route.ts",
@@ -1199,7 +1200,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "ai/grievances/triage/route.ts",
@@ -1211,7 +1212,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "ai/ingest/route.ts",
@@ -1224,7 +1225,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "ai/insights/[reportType]/route.ts",
@@ -1261,7 +1262,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "ai/match-precedents/route.ts",
@@ -1273,7 +1274,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "ai/pension/members/[id]/projection/route.ts",
@@ -1309,7 +1310,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "ai/search/route.ts",
@@ -1322,7 +1323,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "ai/semantic-search/route.ts",
@@ -1335,7 +1336,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "ai/summarize/route.ts",
@@ -1347,7 +1348,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "alerts/realtime/route.ts",
@@ -1591,7 +1592,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "BEST_EFFORT"
+   "audit": "ATOMIC"
   },
   {
    "route": "analytics/kpis/route.ts",
@@ -1669,7 +1670,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "analytics/operational/bottlenecks/route.ts",
@@ -2175,7 +2176,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "auth/mfa/status/route.ts",
@@ -2199,7 +2200,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "auth/policy/route.ts",
@@ -2288,7 +2289,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "bargaining/negotiations/[id]/route.ts",
@@ -2354,8 +2355,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "billing/batch-status/[jobId]/route.ts",
@@ -2441,8 +2442,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "billing/subscriptions/route.ts",
@@ -2467,7 +2468,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "breaks/[id]/route.ts",
@@ -2572,7 +2573,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "calendar-sync/connections/route.ts",
@@ -2736,7 +2737,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "case-studies/[slug]/route.ts",
@@ -3074,7 +3075,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "cba-intelligence/freshness/route.ts",
@@ -3110,8 +3111,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "cba-intelligence/ingestion/run/route.ts",
@@ -3123,7 +3124,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "cba-intelligence/ingestion/seed/route.ts",
@@ -3135,7 +3136,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "cba-intelligence/review/route.ts",
@@ -3147,8 +3148,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "cba-intelligence/sources/[id]/route.ts",
@@ -3160,8 +3161,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "cba-intelligence/sources/route.ts",
@@ -3188,7 +3189,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "cbas/route.ts",
@@ -3197,11 +3198,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "SESSION_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "chatbot/messages/route.ts",
@@ -3213,7 +3214,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "chatbot/sessions/[sessionId]/messages/route.ts",
@@ -3238,7 +3239,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "claims/[id]/defensibility-pack/route.ts",
@@ -3372,7 +3373,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "clause-library/[id]/share/route.ts",
@@ -3384,8 +3385,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
-   "audit": "NONE"
+   "data": "SYSTEM_CONTEXT",
+   "audit": "ATOMIC"
   },
   {
    "route": "clause-library/[id]/tags/route.ts",
@@ -3399,7 +3400,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "clause-library/compare/route.ts",
@@ -3412,7 +3413,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "clause-library/route.ts",
@@ -3425,7 +3426,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "clause-library/search/route.ts",
@@ -3438,7 +3439,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "clauses/[id]/route.ts",
@@ -3452,7 +3453,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "clauses/compare/route.ts",
@@ -3464,7 +3465,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "clauses/route.ts",
@@ -3763,7 +3764,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "AMBIENT_DB",
-   "audit": "BEST_EFFORT"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "cognition/workload/route.ts",
@@ -4025,8 +4026,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "communications/distribution-lists/[id]/subscribers/route.ts",
@@ -4296,7 +4297,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "compliance/alerts/route.ts",
@@ -4320,8 +4321,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "BEST_EFFORT"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "compliance/data-classification-policy/route.ts",
@@ -4358,7 +4359,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "consent/route.ts",
@@ -4407,7 +4408,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "content/templates/route.ts",
@@ -4680,8 +4681,8 @@
    "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "SYSTEM_CONTEXT",
+   "audit": "ATOMIC"
   },
   {
    "route": "cron/deadline-overdue/route.ts",
@@ -4730,7 +4731,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "cron/monthly-dues/route.ts",
@@ -4755,7 +4756,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "cron/observability-alerts/route.ts",
@@ -4767,7 +4768,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "BEST_EFFORT"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "cron/overdue-notifications/route.ts",
@@ -4827,7 +4828,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "currency/convert/route.ts",
@@ -5228,7 +5229,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "dues/arrears/calculate/route.ts",
@@ -5241,7 +5242,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "dues/arrears/route.ts",
@@ -5289,7 +5290,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "dues/create-payment-intent/route.ts",
@@ -5348,8 +5349,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "dues/late-fees/route.ts",
@@ -5446,7 +5447,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "dues/reconciliation/match/route.ts",
@@ -5507,8 +5508,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "dues/remittances/upload/route.ts",
@@ -5519,8 +5520,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "dues/setup-intent/route.ts",
@@ -5532,7 +5533,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "education/certifications/generate/route.ts",
@@ -5736,7 +5737,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -5765,7 +5766,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "emergency/recovery/route.ts",
@@ -5773,7 +5774,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -5789,8 +5790,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "employer-execution/payroll-runs/[id]/route.ts",
@@ -5803,7 +5804,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "employer-execution/payroll-runs/route.ts",
@@ -5816,7 +5817,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "employer-execution/remittance-runs/[id]/route.ts",
@@ -5841,7 +5842,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "employer-execution/replay/[runId]/route.ts",
@@ -5853,7 +5854,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "employer-execution/timesheets/route.ts",
@@ -5866,7 +5867,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "employers/[id]/route.ts",
@@ -6110,7 +6111,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "exit-interviews/[id]/publish/route.ts",
@@ -6170,8 +6171,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "exit-interviews/adaptive-resilience/route.ts",
@@ -6232,7 +6233,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "exit-interviews/continuity-risk/route.ts",
@@ -6257,7 +6258,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "exit-interviews/cross-domain-correlation/route.ts",
@@ -6389,7 +6390,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "exit-interviews/institutional-cognition/route.ts",
@@ -6485,7 +6486,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "exit-interviews/mitigation-effectiveness/route.ts",
@@ -6630,7 +6631,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "exit-interviews/resilience-habits/route.ts",
@@ -6703,7 +6704,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "exit-interviews/search/route.ts",
@@ -6715,7 +6716,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "exit-interviews/simulation/route.ts",
@@ -6727,7 +6728,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "exit-interviews/succession/route.ts",
@@ -6854,8 +6855,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "external-data/lrb/route.ts",
@@ -7186,7 +7187,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "finance/pricing/quote/route.ts",
@@ -7198,7 +7199,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "finance/simulation/route.ts",
@@ -7328,8 +7329,8 @@
    "guard": "SESSION_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "SYSTEM_CONTEXT",
+   "audit": "ATOMIC"
   },
   {
    "route": "gdpr/data-erasure/route.ts",
@@ -7354,8 +7355,8 @@
    "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "gdpr/requests/route.ts",
@@ -7380,7 +7381,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "governance/board-packets/[id]/route.ts",
@@ -7707,7 +7708,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "governance/policies/rules/route.ts",
@@ -7815,7 +7816,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -8230,7 +8231,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "icra/[assessmentId]/capability/exchange/route.ts",
@@ -8242,7 +8243,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "icra/[assessmentId]/claim/route.ts",
@@ -8254,7 +8255,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "icra/[assessmentId]/profile/route.ts",
@@ -8278,7 +8279,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "icra/checkout/route.ts",
@@ -8290,7 +8291,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "icra/email-results/route.ts",
@@ -8302,7 +8303,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "icra/report/[assessmentId]/review/route.ts",
@@ -8351,7 +8352,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "icra/submit/route.ts",
@@ -8363,7 +8364,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "icra/telemetry/route.ts",
@@ -8375,7 +8376,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "integrations/api-keys/route.ts",
@@ -8400,7 +8401,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "integrations/framework/[id]/sync/route.ts",
@@ -8412,7 +8413,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "integrations/framework/route.ts",
@@ -8425,7 +8426,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "integrations/shopify/webhooks/route.ts",
@@ -8438,7 +8439,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "intelligence/route.ts",
@@ -8576,7 +8577,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "labour-standards/[jurisdiction]/route.ts",
@@ -8640,8 +8641,8 @@
    "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "location/geofence/route.ts",
@@ -8653,8 +8654,8 @@
    "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "location/track/route.ts",
@@ -8666,7 +8667,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "meeting-rooms/[id]/bookings/route.ts",
@@ -8772,8 +8773,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "members/[id]/preferences/route.ts",
@@ -8879,7 +8880,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "members/me/route.ts",
@@ -8942,8 +8943,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "members/segments/preview/route.ts",
@@ -8955,7 +8956,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "members/segments/route.ts",
@@ -9120,8 +9121,8 @@
    "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "ml/monitoring/drift/route.ts",
@@ -9171,8 +9172,8 @@
    "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "ml/predictions/claim-outcome/route.ts",
@@ -9197,8 +9198,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "BEST_EFFORT"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "ml/predictions/sla-breach-risk/route.ts",
@@ -9210,8 +9211,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "BEST_EFFORT"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "ml/predictions/timeline/route.ts",
@@ -9249,7 +9250,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "ml/recommendations/route.ts",
@@ -9326,8 +9327,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "movement-insights/trends/route.ts",
@@ -9366,8 +9367,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "notifications/count/route.ts",
@@ -9388,10 +9389,10 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "NONE",
    "audit": "NONE"
   },
   {
@@ -9403,8 +9404,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "notifications/preferences/route.ts",
@@ -9429,8 +9430,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "notifications/test/route.ts",
@@ -9441,8 +9442,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "oci/assessment/route.ts",
@@ -9503,7 +9504,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "ocra/[assessmentId]/claim/route.ts",
@@ -9515,7 +9516,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "ocra/[assessmentId]/profile/route.ts",
@@ -9539,7 +9540,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "ocra/checkout/route.ts",
@@ -9551,7 +9552,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "ocra/email-results/route.ts",
@@ -9563,7 +9564,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "ocra/report/[assessmentId]/route.ts",
@@ -9600,7 +9601,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "ocra/submit/route.ts",
@@ -9612,7 +9613,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "ocra/telemetry/route.ts",
@@ -9624,7 +9625,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "onboarding/discover-federation/route.ts",
@@ -9647,8 +9648,8 @@
    "guard": "ORG_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "BEST_EFFORT"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "onboarding/peer-benchmarks/route.ts",
@@ -9721,8 +9722,8 @@
    "guard": "DELEGATED",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "BEST_EFFORT"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "org/current/route.ts",
@@ -9742,7 +9743,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -9958,7 +9959,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "organizations/tree/route.ts",
@@ -10206,7 +10207,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "payments/webhooks/paypal/route.ts",
@@ -10218,7 +10219,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "payments/webhooks/stripe/route.ts",
@@ -10358,7 +10359,7 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "AMBIENT_DB",
@@ -10371,7 +10372,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "AMBIENT_DB",
@@ -10387,7 +10388,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "pilot/apply/[id]/artifacts/route.ts",
@@ -10412,7 +10413,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "pilot/apply/[id]/commercialization-timeline/route.ts",
@@ -10473,7 +10474,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "pilot/apply/[id]/reference-profile/route.ts",
@@ -10511,7 +10512,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "pilot/apply/route.ts",
@@ -10536,7 +10537,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "BEST_EFFORT"
+   "audit": "ATOMIC"
   },
   {
    "route": "pilot/champions/route.ts",
@@ -10573,7 +10574,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "pilot/events/route.ts",
@@ -10585,7 +10586,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "pilot/feedback/route.ts",
@@ -10598,7 +10599,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "pilot/friction/route.ts",
@@ -10635,7 +10636,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "pilot/overview/route.ts",
@@ -10784,8 +10785,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "precedents/route.ts",
@@ -10798,7 +10799,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "precedents/search/route.ts",
@@ -10810,7 +10811,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "privacy/breach/route.ts",
@@ -10836,8 +10837,8 @@
    "guard": "SESSION_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "privacy/dsar/route.ts",
@@ -11055,7 +11056,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "reports/route.ts",
@@ -11121,7 +11122,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "rewards/export/route.ts",
@@ -11146,7 +11147,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "rewards/wallet/route.ts",
@@ -11171,7 +11172,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "satisfaction/lro/[lroId]/route.ts",
@@ -11207,8 +11208,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "scim/v2/[organizationId]/Users/route.ts",
@@ -11220,8 +11221,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "search/universal/route.ts",
@@ -11336,7 +11337,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "social-media/analytics/route.ts",
@@ -11351,7 +11352,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "social-media/campaigns/route.ts",
@@ -11366,7 +11367,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "social-media/feed/route.ts",
@@ -11393,7 +11394,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "staging-proof/deadline-engine/scenario/route.ts",
@@ -11639,8 +11640,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "targets/route.ts",
@@ -11651,8 +11652,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "targets/summary/route.ts",
@@ -11738,11 +11739,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "DELEGATED",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "tenant/current/route.ts",
@@ -11762,7 +11763,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -11898,7 +11899,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "version/route.ts",
@@ -11994,7 +11995,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "voice/upload/route.ts",
@@ -12006,7 +12007,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "voting/sessions/[id]/results/route.ts",
@@ -12070,7 +12071,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "wcb/assessments/[id]/route.ts",
@@ -12136,7 +12137,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "whop/unauthenticated-checkout/route.ts",
@@ -12184,7 +12185,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "workbook/[id]/export/route.ts",
@@ -12209,7 +12210,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "workbook/[id]/memory-holders/route.ts",
@@ -12222,7 +12223,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "workbook/checkout/route.ts",
@@ -12245,8 +12246,8 @@
    "guard": "NONE",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "AMBIENT_DB",
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "workflow/overdue/route.ts",
@@ -12309,7 +12310,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   }
  ]
 }

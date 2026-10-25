@@ -101,6 +101,15 @@ describe('ai/semantic-search route', () => {
     expect(response.status).toBe(403);
   });
 
+  it('never honours an organization supplied in the body filters', async () => {
+    const { POST } = await loadRoute();
+    await POST(new Request('http://localhost/api/ai/semantic-search', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ query: 'vacation clause', searchType: 'clauses', filters: { organizationId: 'org_other' } }),
+    }));
+    expect(m.semanticClauseSearch).toHaveBeenCalledWith('vacation clause', expect.objectContaining({ filters: expect.objectContaining({ organizationId: 'org_1' }) }));
+  });
+
   it('searches clauses semantically', async () => {
     const { POST } = await loadRoute();
     const response = await POST(new Request('http://localhost/api/ai/semantic-search', {

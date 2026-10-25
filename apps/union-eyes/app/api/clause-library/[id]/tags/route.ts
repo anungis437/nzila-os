@@ -21,12 +21,13 @@ import { db } from '@/db/db';
 import { clauseLibraryTags, sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
 import { eq, and } from 'drizzle-orm';
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { canReadSharedClause, isSharedClauseOwner } from '@/lib/clause-library/sharing-authority';
 
 export const dynamic = 'force-dynamic';
 
-async function getClauseAuthorityRow(id: string) {
-  const [clause] = await db
+async function getClauseAuthorityRow(id: string, executor: typeof db = db) {
+  const [clause] = await executor
     .select({
       id: sharedClauseLibrary.id,
       sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
@@ -85,13 +86,13 @@ export const POST = withApi(
       throw ApiError.badRequest('tagName is required');
     }
 
-    return withRLSContext({ organizationId }, async () => {
-      const clause = await getClauseAuthorityRow(id);
+    return withRLSContext({ organizationId }, async (tx) => {
+      const clause = await getClauseAuthorityRow(id, tx);
       if (!clause || !isSharedClauseOwner(organizationId, clause)) {
         throw ApiError.notFound('clause', id);
       }
 
-      const [tag] = await db
+      const [tag] = await tx
         .insert(clauseLibraryTags)
         .values({
           clauseId: id,
@@ -106,6 +107,15 @@ export const POST = withApi(
         throw ApiError.notFound('clause', id);
       }
 
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'clause_library.tag.add',
+        resourceType: 'clause_library_tags',
+        resourceId: tag.id,
+        details: { clauseId: id, tagName: tag.tagName },
+      });
+
       return { tag };
     });
   },
@@ -116,38 +126,44 @@ export const DELETE = withApi(
     auth: { required: true, minRole: 'steward' },
     openapi: { tags: ['Clause-library'], summary: 'Remove a tag from a clause' },
   },
-  async ({ request, organizationId }) => {
+  async ({ request, userId, organizationId }) => {
     const url = new URL(request.url);
     const id = url.pathname.split('/clause-library/')[1]?.split('/tags')[0];
     const body = await request.json();
     const tagName = body.tagName || body.tag;
     const tagId = body.tagId;
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    if (!tagId && !tagName) throw ApiError.badRequest('tagId or tagName required');
 
-    return withRLSContext({ organizationId }, async () => {
-      const clause = await getClauseAuthorityRow(id);
+    return withRLSContext({ organizationId }, async (tx) => {
+      const clause = await getClauseAuthorityRow(id, tx);
       if (!clause || !isSharedClauseOwner(organizationId, clause)) {
         throw ApiError.notFound('clause', id);
       }
 
-      if (tagId) {
-        // clauseId is required here (not just tagId) — a tag row must
-        // belong to THIS clause to be deletable via this route.
-        await db
-          .delete(clauseLibraryTags)
-          .where(and(eq(clauseLibraryTags.id, tagId), eq(clauseLibraryTags.clauseId, id)));
-      } else if (tagName) {
-        await db
-          .delete(clauseLibraryTags)
-          .where(
-            and(
-              eq(clauseLibraryTags.clauseId, id),
-              eq(clauseLibraryTags.tagName, tagName.trim()),
-            ),
-          );
-      } else {
-        throw ApiError.badRequest('tagId or tagName required');
+      // clauseId is required here (not just tagId) — a tag row must
+      // belong to THIS clause to be deletable via this route.
+      const removed = await tx
+        .delete(clauseLibraryTags)
+        .where(
+          tagId
+            ? and(eq(clauseLibraryTags.id, tagId), eq(clauseLibraryTags.clauseId, id))
+            : and(eq(clauseLibraryTags.clauseId, id), eq(clauseLibraryTags.tagName, tagName.trim())),
+        )
+        .returning({ id: clauseLibraryTags.id, tagName: clauseLibraryTags.tagName });
+
+      if (removed.length === 0) {
+        throw ApiError.notFound('tag', tagId ?? tagName);
       }
+
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'clause_library.tag.remove',
+        resourceType: 'clause_library_tags',
+        resourceId: removed[0].id,
+        details: { clauseId: id, tagName: removed[0].tagName, removedCount: removed.length },
+      });
 
       return { success: true };
     });

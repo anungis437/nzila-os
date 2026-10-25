@@ -30,30 +30,33 @@ export const POST = withApi(
     entitlement: 'governance_suite',
     body: distributePacketSchema,
   },
-  async ({ body, params, organizationId }) => {
+  async ({ body, params, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const packetId = params.id;
     const { recipients } = body;
 
-    // distributePacket() itself only filters by packetId — verify the
-    // packet belongs to the caller's own organization before invoking it,
-    // otherwise any org admin could distribute another org's board packet.
+    // The service reads the packet by id and organization; a packet of another organization is not found.
     const [packet] = await db
       .select({ id: boardPackets.id })
       .from(boardPackets)
-      .where(and(eq(boardPackets.id, packetId), eq(boardPackets.organizationId, organizationId!)));
+      .where(and(eq(boardPackets.id, packetId), eq(boardPackets.organizationId, organizationId)));
     if (!packet) throw ApiError.notFound('Board packet not found');
 
-    const distributions = await boardPacketGenerator.distributePacket(
+    const { distributions, delivered, failed } = await boardPacketGenerator.distributePacket(
       packetId,
-      recipients
+      recipients,
+      { organizationId, userId }
     );
 
     return NextResponse.json({
-      message: 'Board packet distributed successfully',
+      message: failed === 0
+        ? 'Board packet distributed successfully'
+        : 'Board packet distribution recorded; delivery failed for some recipients',
       distributions,
       stats: {
         totalRecipients: recipients.length,
-        sent: distributions.length,
+        sent: delivered,
+        failed,
       },
     });
   },

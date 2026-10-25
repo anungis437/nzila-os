@@ -4,6 +4,18 @@ import { DEFAULT_REDIRECT_URL } from "../webhooks/utils/constants";
 import { requireUser } from '@/lib/api-auth-guard';
 import { logger } from '@/lib/logger';
 
+/** The one origin an absolute post-payment redirect may name: the application's own. */
+function trustedRedirectOrigin(defaultRedirectUrl: string): string | null {
+  for (const candidate of [defaultRedirectUrl, process.env.NEXT_PUBLIC_APP_URL]) {
+    if (!candidate) continue;
+    try {
+      return new URL(candidate).origin;
+    } catch {
+      // A relative default carries no origin; try the next source.
+    }
+  }
+  return null;
+}
 /**
  * API endpoint to create a Whop checkout session with properly structured metadata
  * This ensures the auth userId is included in the membership metadata and will
@@ -46,7 +58,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Determine plan duration based on planId
+    // Determine plan duration based on planId. Only the configured plans may be sold through this route: the plan
+    // id is client-supplied and Whop would otherwise open a checkout for any plan the account owns.
     const monthlyPlanId = process.env.WHOP_PLAN_ID_MONTHLY;
     const yearlyPlanId = process.env.WHOP_PLAN_ID_YEARLY;
     let planDuration = "monthly"; // Default
@@ -55,29 +68,37 @@ export async function POST(req: Request) {
       planDuration = "yearly";
     } else if (planId === monthlyPlanId) {
       planDuration = "monthly";
+    } else {
+      return NextResponse.json(
+        { error: "Unknown plan" },
+        { 
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
     }
     
     // Use the constant from constants.ts instead of hardcoded URL
     const defaultRedirectUrl = DEFAULT_REDIRECT_URL;
     
-    // Validate redirectUrl - ensure it&apos;s a proper URL to prevent ERR_INVALID_URL errors
+    // The post-payment redirect may only point back into this application: an absolute URL on any other origin
+    // would turn a paid checkout into an open redirect, so it falls back to the default.
     let validRedirectUrl = defaultRedirectUrl;
     
-    if (redirectUrl) {
+    if (typeof redirectUrl === 'string' && redirectUrl) {
       try {
-        // If it&apos;s a relative URL, convert to absolute
-        if (redirectUrl.startsWith('/')) {
-          // Use the host from defaultRedirectUrl
-          const baseUrl = new URL(defaultRedirectUrl).origin;
-          validRedirectUrl = `${baseUrl}${redirectUrl}`;
+        const trustedOrigin = trustedRedirectOrigin(defaultRedirectUrl);
+        if (redirectUrl.startsWith('/') && !redirectUrl.startsWith('//')) {
+          validRedirectUrl = `${new URL(defaultRedirectUrl).origin}${redirectUrl}`;
         } else if (redirectUrl.includes('://')) {
-          // Ensure absolute URL is valid by parsing it
-          new URL(redirectUrl);
-          validRedirectUrl = redirectUrl;
+          const parsed = new URL(redirectUrl);
+          if (trustedOrigin && parsed.origin === trustedOrigin) {
+            validRedirectUrl = redirectUrl;
+          } else {
+            logger.warn('Redirect URL is outside the application origin, using default', { redirectOrigin: parsed.origin });
+          }
         } else {
-          // If it&apos;s not a valid URL format, use default
           logger.warn('Invalid redirect URL format, using default', { redirectUrl });
-          validRedirectUrl = defaultRedirectUrl;
         }
       } catch (error) {
         logger.error('Error validating redirect URL', error as Error, { redirectUrl });

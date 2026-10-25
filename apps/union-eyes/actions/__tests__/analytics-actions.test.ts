@@ -25,6 +25,7 @@ const mocks = vi.hoisted(() => {
     revalidatePath: vi.fn(),
     loggerError: vi.fn(),
     getOrganizationIdForUser: vi.fn(),
+    audit: vi.fn(),
   };
   const q = (resultFn: () => unknown) => (opts: { where?: unknown; orderBy?: unknown }) => {
     if (opts && typeof opts.where === 'function') (opts.where as (...a: unknown[]) => unknown)(stub, helpers);
@@ -42,6 +43,7 @@ const mocks = vi.hoisted(() => {
   return { ...m, fakeDb };
 });
 
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mocks.audit }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: (_ctx: unknown, cb: (db: unknown) => unknown) => cb(mocks.fakeDb),
 }));
@@ -93,6 +95,31 @@ describe('analytics-actions', () => {
     mocks.metricsFindMany.mockReturnValue([]);
     mocks.metricsFindFirst.mockReturnValue(undefined);
     mocks.insertReturning.mockReturnValue([{ id: 'row-1' }]);
+    mocks.audit.mockResolvedValue(undefined);
+  });
+
+  describe('atomic audit', () => {
+    it('calculateMetrics audits the stored metric on the same transaction and fails without the audit', async () => {
+      const params = { metricType: 'claims_volume', metricName: 'Claims', periodType: 'monthly' as const, periodStart: new Date('2024-01-01'), periodEnd: new Date('2024-01-31') };
+      expect((await calculateMetrics(params)).success).toBe(true);
+      expect(mocks.audit).toHaveBeenCalledWith(
+        mocks.fakeDb,
+        expect.objectContaining({ organizationId: 'org-1', userId: 'user-1', action: 'analytics.metric.calculate', resourceId: 'row-1' }),
+      );
+
+      mocks.audit.mockRejectedValueOnce(new Error('audit down'));
+      const failed = await calculateMetrics(params);
+      expect(failed.success).toBe(false);
+      expect(failed.error).toBe('audit down');
+    });
+
+    it('createKPI audits the stored configuration on the same transaction', async () => {
+      await createKPI({ name: 'K', metricType: 'claims_volume', dataSource: 'claims', calculation: {}, visualizationType: 'line' });
+      expect(mocks.audit).toHaveBeenCalledWith(
+        mocks.fakeDb,
+        expect.objectContaining({ userId: 'user-1', action: 'analytics.kpi.create', resourceId: 'row-1' }),
+      );
+    });
   });
 
   describe('calculateMetrics', () => {

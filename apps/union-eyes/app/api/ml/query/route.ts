@@ -42,7 +42,9 @@ const QuerySchema = z.object({
  * - "What&apos;s our win rate this quarter?"
  * - "Which employer has the most claims?"
  */
-export const POST = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
+// Natural-language questions are answered over the organization's claims, steward workload and settlement data, which a
+// rank-and-file member is not entitled to read in aggregate; the minimum is steward until the institution names who may ask.
+export const POST = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
   const { userId, organizationId } = context;
 
   // CRITICAL: Rate limit ML query calls (expensive AI operations)

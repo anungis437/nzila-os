@@ -11,6 +11,10 @@ import type { SignDocumentParams } from '@/services/pki/signature-service'
 import { z } from 'zod'
 import { withRoleAuth, type BaseAuthContext } from '@/lib/api-auth-guard'
 import { logger } from '@/lib/logger'
+import { and, eq } from 'drizzle-orm'
+import { withRLSContext } from '@/lib/db/with-rls-context'
+import { organizationMembers } from '@/db/schema/organization-members-schema'
+import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit'
 import { throwIfUnprovisionedRelation } from '@/lib/api/authorization-denial'
 
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses'
@@ -82,25 +86,51 @@ export const POST = withRoleAuth('admin', async (request, context: BaseAuthConte
       userAgent,
     }
 
-    const signature = await signDocument(signParams)
+    // The signer's identity is the session's, not the request body's: the name and email that are bound into the
+    // signature must be the caller's own membership record.
+    const [member] = await withRLSContext({ organizationId }, (tx) =>
+      tx
+        .select({ email: organizationMembers.email })
+        .from(organizationMembers)
+        .where(and(eq(organizationMembers.userId, userId), eq(organizationMembers.organizationId, organizationId)))
+        .limit(1),
+    )
+    if (!member?.email || member.email.toLowerCase() !== userEmail.toLowerCase()) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'A document can only be signed as the authenticated member')
+    }
 
-    // If part of workflow, record signature
+    const signature = await performAuditedOperation(
+      {
+        organizationId,
+        userId,
+        action: 'pki.document.sign',
+        resourceType: 'digital_signature',
+        resourceId: documentId,
+        details: { documentType, workflowId },
+      },
+      () => signDocument(signParams),
+    )
+
     let workflowResult
-    if (workflowId) {
-      try {
-        workflowResult = await recordSignature(workflowId, userId, signature.signatureId)
-      } catch (_error) {
-        // Continue even if workflow update fails
-      }
+    let workflowRecorded = true
+    try {
+      workflowResult = await recordSignature(workflowId, userId, signature.signatureId)
+    } catch (_error) {
+      workflowRecorded = false
     }
 
     return NextResponse.json({
       success: true,
       signature,
       workflow: workflowResult,
-      message: 'Document signed successfully',
+      workflowRecorded,
+      message: workflowRecorded
+        ? 'Document signed successfully'
+        : 'Document signed; the signature could not be recorded into the workflow',
     })
   } catch (error) {
+    const refused = operationAuditResponse(error)
+    if (refused) return NextResponse.json(refused.body, { status: refused.status })
     throwIfUnprovisionedRelation(error)
     logger.error('Failed to sign document', { error })
     return NextResponse.json({ error: 'Failed to sign document' }, { status: 500 })

@@ -50,6 +50,15 @@ vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) =>
+    fn({ insert: () => ({ values: mockInsertValues }) }),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn().mockResolvedValue(undefined) }));
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: async (_op: unknown, fn: () => Promise<unknown>) => fn(),
+}));
+
 import { executeCopilotAction, summarizeTimeline, suggestAction } from '../steward-copilot';
 
 describe('executeCopilotAction', () => {

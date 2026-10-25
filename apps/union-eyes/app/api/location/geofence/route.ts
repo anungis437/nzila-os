@@ -1,8 +1,10 @@
 import { z } from 'zod';
 import { NextRequest, NextResponse } from "next/server";
 import { GeofencePrivacyService } from "@/services/geofence-privacy-service";
-import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
+import { withApiAuth, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 import {
   ErrorCode,
@@ -42,6 +44,10 @@ export const POST = withApiAuth(async (req: NextRequest) => {
     if (!user) {
       return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
     }
+    // Defining a geofence is organizing work, not a member's own data: members may not create them.
+    if (!(await hasMinRole('steward'))) {
+      return NextResponse.json({ error: 'Creating a geofence requires steward authority' }, { status: 403 });
+    }
 
     const body = await req.json();
     const { name, description, geofenceType, centerLatitude, centerLongitude, radiusMeters, strikeId } = body;
@@ -77,18 +83,30 @@ export const POST = withApiAuth(async (req: NextRequest) => {
 
     const trustedUnionLocalId = await getOrganizationIdForUser(user.id);
 
-    const geofence = await GeofencePrivacyService.createGeofence(
-      {
-        name,
-        description,
-        geofenceType,
-        centerLatitude,
-        centerLongitude,
-        radiusMeters,
-        strikeId,
-      },
-      trustedUnionLocalId,
-    );
+    const geofence = await withRLSContext({ organizationId: trustedUnionLocalId }, async (tx) => {
+      const created = await GeofencePrivacyService.createGeofence(
+        {
+          name,
+          description,
+          geofenceType,
+          centerLatitude,
+          centerLongitude,
+          radiusMeters,
+          strikeId,
+        },
+        trustedUnionLocalId,
+        tx,
+      );
+      await persistAtomicAudit(tx, {
+        organizationId: trustedUnionLocalId,
+        userId: user.id,
+        action: 'location.geofence.create',
+        resourceType: 'geofences',
+        resourceId: created.id,
+        details: { name, geofenceType, radiusMeters, strikeId },
+      });
+      return created;
+    });
 
     return standardSuccessResponse(
       { geofence,

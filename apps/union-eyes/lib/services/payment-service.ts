@@ -14,8 +14,11 @@
 
 import { db } from '@/db';
 import { duesTransactions } from '@/db/schema/domains/finance/dues';
+import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { performAuditedOperation } from '@/lib/audit/operation-audit';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { Document, Page, StyleSheet, Text, pdf } from '@react-pdf/renderer';
 import { Readable } from 'node:stream';
@@ -34,6 +37,16 @@ export interface CreateCheckoutSessionParams {
   returnUrl: string;
   cancelUrl: string;
   processorType?: 'stripe' | 'paypal';
+  /** The authenticated caller. A checkout is created only for the member the dues belong to. */
+  actor: { userId: string };
+}
+
+/** A refusal the route reports as 403 (not the payer) or 409 (not payable). */
+export class PaymentAuthorityError extends Error {
+  constructor(readonly code: 'FORBIDDEN' | 'NOT_FOUND' | 'CONFLICT', message: string) {
+    super(message);
+    this.name = 'PaymentAuthorityError';
+  }
 }
 
 export interface CheckoutSessionResult {
@@ -105,7 +118,7 @@ export class PaymentService {
   static async createCheckoutSession(
     params: CreateCheckoutSessionParams
   ): Promise<CheckoutSessionResult> {
-    const { transactionId, returnUrl, cancelUrl, processorType = 'stripe' } = params;
+    const { transactionId, returnUrl, cancelUrl, processorType = 'stripe', actor } = params;
 
     try {
       logger.info('Creating checkout session', { transactionId, processorType });
@@ -118,14 +131,30 @@ export class PaymentService {
         .limit(1);
 
       if (!transaction || transaction.length === 0) {
-        throw new Error(`Transaction not found: ${transactionId}`);
+        throw new PaymentAuthorityError('NOT_FOUND', 'Transaction not found');
       }
 
       const txn = transaction[0];
 
+      // A checkout session lets the holder pay (and receive the receipt for) this transaction, and it names the
+      // member and the amount. Only the member the dues belong to may start one; anyone else cannot tell that the
+      // transaction exists.
+      const [payer] = await db
+        .select({ id: organizationMembers.id })
+        .from(organizationMembers)
+        .where(
+          and(
+            eq(organizationMembers.id, txn.memberId),
+            eq(organizationMembers.userId, actor.userId),
+            eq(organizationMembers.organizationId, txn.organizationId),
+          ),
+        )
+        .limit(1);
+      if (!payer) throw new PaymentAuthorityError('NOT_FOUND', 'Transaction not found');
+
       // Validate transaction status
       if (txn.status !== 'pending' && txn.status !== 'overdue') {
-        throw new Error(`Transaction status is ${txn.status}, cannot create checkout session`);
+        throw new PaymentAuthorityError('CONFLICT', `Transaction status is ${txn.status}, cannot create checkout session`);
       }
 
       // Get member details
@@ -143,21 +172,33 @@ export class PaymentService {
       }
 
       if (processorType === 'stripe') {
-        return await this.createStripeCheckoutSession({
-          transactionId,
-          amount: txn.totalAmount,
-          currency: 'cad',
-          memberEmail: member[0].email,
-          memberName: member[0].name,
-          returnUrl,
-          cancelUrl,
-          duesBreakdown: {
-            dues: txn.duesAmount,
-            cope: txn.copeAmount || '0.00',
-            pac: txn.pacAmount || '0.00',
-            strikeFund: txn.strikeFundAmount || '0.00',
+        // A checkout session is created at the processor, outside the database: the intent is recorded first.
+        return await performAuditedOperation(
+          {
+            organizationId: txn.organizationId,
+            userId: actor.userId,
+            action: 'dues.checkout.create',
+            resourceType: 'dues_transactions',
+            resourceId: transactionId,
+            details: { amount: txn.totalAmount, processorType },
           },
-        });
+          () =>
+            this.createStripeCheckoutSession({
+              transactionId,
+              amount: txn.totalAmount,
+              currency: 'cad',
+              memberEmail: member[0].email,
+              memberName: member[0].name,
+              returnUrl,
+              cancelUrl,
+              duesBreakdown: {
+                dues: txn.duesAmount,
+                cope: txn.copeAmount || '0.00',
+                pac: txn.pacAmount || '0.00',
+                strikeFund: txn.strikeFundAmount || '0.00',
+              },
+            }),
+        );
       } else {
         // PayPal implementation (future)
         throw new Error('PayPal checkout not yet implemented');
@@ -309,19 +350,44 @@ export class PaymentService {
         amount,
       });
 
-      // Update transaction status
-      await db
-        .update(duesTransactions)
-        .set({
-          status: 'paid',
-          paidDate: new Date(),
-          processorType,
-          processorPaymentId,
-          paymentMethod: paymentMethod || 'card',
-          receiptUrl,
-          updatedAt: new Date(),
-        })
-        .where(eq(duesTransactions.id, transactionId));
+      // The status change and its audit commit together. The processor's amount must be the amount on record, and
+      // only a payable transaction becomes paid: a replay of the same payment is a no-op, and a different payment
+      // for an already-paid transaction is refused rather than overwriting the first.
+      const outcome = await withSystemContext(async (tx) => {
+        const [current] = await tx.select().from(duesTransactions).where(eq(duesTransactions.id, transactionId)).limit(1);
+        if (!current) throw new PaymentAuthorityError('NOT_FOUND', 'Transaction not found');
+        if (current.status === 'paid') {
+          if (current.processorPaymentId === processorPaymentId) return 'replay' as const;
+          throw new PaymentAuthorityError('CONFLICT', 'Transaction is already paid by a different payment');
+        }
+        if (Number(amount) !== Number(current.totalAmount)) {
+          throw new PaymentAuthorityError('CONFLICT', 'The paid amount differs from the amount on record');
+        }
+        const [paid] = await tx
+          .update(duesTransactions)
+          .set({
+            status: 'paid',
+            paidDate: new Date(),
+            processorType,
+            processorPaymentId,
+            paymentMethod: paymentMethod || 'card',
+            receiptUrl,
+            updatedAt: new Date(),
+          })
+          .where(and(eq(duesTransactions.id, transactionId), inArray(duesTransactions.status, ['pending', 'overdue', 'partial'])))
+          .returning({ id: duesTransactions.id });
+        if (!paid) throw new PaymentAuthorityError('CONFLICT', 'Transaction is no longer payable');
+        await persistAtomicAudit(tx as unknown as RLSTx, {
+          organizationId: current.organizationId,
+          userId: `system:payment-${processorType}`,
+          action: 'dues.payment.received',
+          resourceType: 'dues_transactions',
+          resourceId: transactionId,
+          details: { amount, processorType, processorPaymentId, from: current.status },
+        });
+        return 'paid' as const;
+      });
+      if (outcome === 'replay') return;
 
       logger.info('Payment success processed', {
         transactionId,
@@ -363,43 +429,47 @@ export class PaymentService {
         errorCode,
       });
 
-      // Get current transaction
-      const transaction = await db
-        .select()
-        .from(duesTransactions)
-        .where(eq(duesTransactions.id, transactionId))
-        .limit(1);
+      // A failure is recorded against a payable transaction only: a late failure notice must not undo a payment that
+      // succeeded. The record and its audit commit together.
+      const failureCount = await withSystemContext(async (tx) => {
+        const [txn] = await tx.select().from(duesTransactions).where(eq(duesTransactions.id, transactionId)).limit(1);
+        if (!txn) throw new PaymentAuthorityError('NOT_FOUND', 'Transaction not found');
+        if (txn.status === 'paid') throw new PaymentAuthorityError('CONFLICT', 'Transaction is already paid; the failure was not applied');
 
-      if (!transaction || transaction.length === 0) {
-        throw new Error(`Transaction not found: ${transactionId}`);
-      }
+        const metadata = (txn.metadata as Record<string, unknown>) || {};
+        metadata.lastFailure = {
+          date: new Date().toISOString(),
+          errorMessage,
+          errorCode,
+          processorPaymentId,
+        };
+        metadata.failureCount = ((metadata.failureCount as number) || 0) + 1;
 
-      const txn = transaction[0];
-
-      // Update metadata with failure info
-      const metadata = (txn.metadata as Record<string, unknown>) || {};
-      metadata.lastFailure = {
-        date: new Date().toISOString(),
-        errorMessage,
-        errorCode,
-        processorPaymentId,
-      };
-      metadata.failureCount = ((metadata.failureCount as number) || 0) + 1;
-
-      // Update transaction
-      await db
-        .update(duesTransactions)
-        .set({
-          status: 'pending', // Keep pending for retry
-          processorPaymentId: processorPaymentId || null,
-          metadata,
-          updatedAt: new Date(),
-        })
-        .where(eq(duesTransactions.id, transactionId));
+        const [updated] = await tx
+          .update(duesTransactions)
+          .set({
+            status: 'pending', // Keep pending for retry
+            processorPaymentId: processorPaymentId || null,
+            metadata,
+            updatedAt: new Date(),
+          })
+          .where(and(eq(duesTransactions.id, transactionId), inArray(duesTransactions.status, ['pending', 'overdue', 'partial'])))
+          .returning({ id: duesTransactions.id });
+        if (!updated) throw new PaymentAuthorityError('CONFLICT', 'Transaction is no longer payable; the failure was not applied');
+        await persistAtomicAudit(tx as unknown as RLSTx, {
+          organizationId: txn.organizationId,
+          userId: `system:payment-${processorType}`,
+          action: 'dues.payment.failed',
+          resourceType: 'dues_transactions',
+          resourceId: transactionId,
+          details: { errorCode: errorCode ?? null, processorPaymentId: processorPaymentId ?? null, failureCount: metadata.failureCount },
+        });
+        return metadata.failureCount as number;
+      });
 
       logger.info('Payment failure processed', {
         transactionId,
-        failureCount: metadata.failureCount,
+        failureCount,
       });
 
       // Send payment failure notification

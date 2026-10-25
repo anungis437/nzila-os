@@ -1,78 +1,16 @@
 /**
  * POST DELETE /api/notifications/device
- * Push notification device token registration.
- * Stores device token in userNotificationPreferences.data jsonb column.
- * Backed by userNotificationPreferences table (Drizzle ORM).
+ *
+ * Retired: registration never stored the device token (it only flipped the push channel flag and then echoed the token
+ * back as if it had been registered). Devices are registered through /api/mobile/devices, which stores the token under
+ * the caller's own profile, and the push channel is switched through /api/notifications/preferences.
  */
-import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db/db';
-import { userNotificationPreferences } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { withApiAuth } from '@/lib/api-auth-guard';
+import { retiredHandler } from '@/lib/api/retired-route';
 
 export const dynamic = 'force-dynamic';
 
-export const POST = withApi(
-  {
-    auth: { required: true, minRole: 'member' },
-    openapi: {
-      tags: ['Notifications'],
-      summary: 'Register push device token',
-      description: 'Registers a push notification device token for the current user.',
-    },
-  },
-  async ({ body, userId, organizationId }) => {
-    const { token, platform } = body as { token?: string; platform?: string };
+const retired = retiredHandler('/api/mobile/devices to register a device and /api/notifications/preferences to switch push notifications');
 
-    if (!token || !platform) {
-      throw ApiError.badRequest('token and platform are required');
-    }
-
-    const [prefs] = await db
-      .select()
-      .from(userNotificationPreferences)
-      .where(
-        and(
-          eq(userNotificationPreferences.userId, userId!),
-          eq(userNotificationPreferences.organizationId, organizationId!),
-        ),
-      )
-      .limit(1);
-
-    if (!prefs) {
-      throw ApiError.notFound('Notification preferences not found. Set preferences first.');
-    }
-
-    // Store device tokens in preferences — push must be enabled
-    await db
-      .update(userNotificationPreferences)
-      .set({ pushEnabled: true, updatedAt: new Date() })
-      .where(eq(userNotificationPreferences.id, prefs.id));
-
-    return { success: true, token, platform };
-  },
-);
-
-export const DELETE = withApi(
-  {
-    auth: { required: true, minRole: 'member' },
-    openapi: {
-      tags: ['Notifications'],
-      summary: 'Unregister push device token',
-      description: 'Removes push notification capability for the current user.',
-    },
-  },
-  async ({ userId, organizationId }) => {
-    await db
-      .update(userNotificationPreferences)
-      .set({ pushEnabled: false, updatedAt: new Date() })
-      .where(
-        and(
-          eq(userNotificationPreferences.userId, userId!),
-          eq(userNotificationPreferences.organizationId, organizationId!),
-        ),
-      );
-
-    return { success: true };
-  },
-);
-
+export const POST = withApiAuth(retired);
+export const DELETE = withApiAuth(retired);

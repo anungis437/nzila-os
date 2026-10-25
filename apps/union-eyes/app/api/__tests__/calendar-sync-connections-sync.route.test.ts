@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
   withOrganizationAuth: vi.fn(),
+  performAuditedOperation: vi.fn(),
+  operationAuditResponse: vi.fn(),
   db: { select: vi.fn(), update: vi.fn() },
   importGoogleEvents: vi.fn(),
   exportEventToGoogle: vi.fn(),
@@ -10,6 +12,10 @@ const m = vi.hoisted(() => ({
 }));
 
 vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOrganizationAuth }));
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: m.performAuditedOperation,
+  operationAuditResponse: m.operationAuditResponse,
+}));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/lib/external-calendar-sync/google-calendar-service', () => ({
   importGoogleEvents: m.importGoogleEvents,
@@ -27,7 +33,8 @@ async function loadRoute() {
 describe('calendar-sync/connections/[id]/sync route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-
+    m.performAuditedOperation.mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn());
+    m.operationAuditResponse.mockReturnValue(null);
     m.withOrganizationAuth.mockImplementation((handler: any) => {
       return (request: Request, context: any = { organizationId: 'org_1' }, params: any = { id: 'conn1' }) =>
         handler(request, context, params);

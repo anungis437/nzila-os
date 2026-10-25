@@ -10,7 +10,7 @@ import {
   platformInvoices,
   subscriptionPlans,
 } from '@/db/schema';
-import { withApiAuth, hasMinRole } from '@/lib/api-auth-guard';
+import { withApiAuth, hasMinRole, getCurrentUser } from '@/lib/api-auth-guard';
 import { authorizePilotAccess, getPilotEffectiveOrganizationId, getPilotVerifiedOrganizationId } from '@/lib/pilot/pilot-ownership';
 import {
   buildPilotArtifactVersionRecord,
@@ -24,7 +24,8 @@ import {
   parsePriceBandLowerBound,
   type CommercialState,
 } from '@/lib/pilot/commercialization-wave1';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -91,6 +92,12 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
     if (!canAccess) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
+
+    const actor = await getCurrentUser();
+    if (!actor) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const actorUserId = actor.id;
 
     const rawParams = context?.params ? await context.params : undefined;
     const id = rawParams?.id;
@@ -593,6 +600,27 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
         .update(pilotApplications)
         .set(updatePayload)
         .where(eq(pilotApplications.id, application.id));
+
+      // The transition, any financial artifact it created, and this record commit together under the pilot's
+      // verified organization; a failed audit rolls all of it back.
+      await persistAtomicAudit(tx as unknown as RLSTx, {
+        organizationId,
+        userId: actorUserId,
+        action: 'pilot.commercial_transition',
+        resourceType: 'pilot_applications',
+        resourceId: application.id,
+        details: {
+          fromState,
+          targetState,
+          status: nextStatus,
+          reason: body.reason ?? null,
+          allowSkip: body.allowSkip === true,
+          contractId: monetization.contractId ?? null,
+          invoiceId: monetization.invoiceId ?? null,
+          subscriptionId: monetization.subscriptionId ?? null,
+          commercialTermsFingerprint: commercialTermsSnapshot?.fingerprint ?? null,
+        },
+      });
         }),
       );
     } catch (err) {

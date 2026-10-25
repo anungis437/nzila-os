@@ -12,6 +12,7 @@ import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { enforceAISafety } from '@nzila/policies';
+import { operationAuditResponse } from '@/lib/audit/operation-audit';
 
 export const POST = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
   const { userId, organizationId } = context;
@@ -43,11 +44,17 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
 
   enforceAISafety({ origin: 'clause-reasoning', action: 'POST', organizationId: organizationId!, userId: userId ?? '', userRole: 'steward', dataClass: 'grievance_legal' });
 
-  const result = await suggestClausesForGrievance({
-    grievanceId: id,
-    organizationId,
-    userId: userId ?? '',
-  });
+  try {
+    const result = await suggestClausesForGrievance({
+      grievanceId: id,
+      organizationId,
+      userId: userId ?? '',
+    });
 
-  return NextResponse.json(result);
+    return NextResponse.json(result);
+  } catch (error) {
+    const refused = operationAuditResponse(error);
+    if (refused) return standardErrorResponse(ErrorCode.CONFLICT, refused.body.error.message);
+    throw error;
+  }
 });

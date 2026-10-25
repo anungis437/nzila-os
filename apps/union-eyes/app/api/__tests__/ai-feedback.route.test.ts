@@ -10,6 +10,7 @@ const m = vi.hoisted(() => ({
   withRLSContext: vi.fn(),
   standardErrorResponse: vi.fn(),
   selectQueue: [] as unknown[][],
+  audit: vi.fn(),
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({ withRoleAuth: m.withRoleAuth, BaseAuthContext: {} }));
@@ -22,16 +23,19 @@ vi.mock('@/lib/ai/ai-feature-guard', () => ({ guardAiFeature: m.guardAiFeature }
 vi.mock('@nzila/policies', () => ({ enforceAISafety: m.enforceAISafety }));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/lib/services/feature-flags', () => ({ AI_FEATURES: { AI_FEEDBACK: 'AI_FEEDBACK' } }));
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn() } }));
 vi.mock('@/lib/api/standardized-responses', () => {
   const statusByCode: Record<string, number> = {
     VALIDATION_ERROR: 400,
+    CONFLICT: 409,
     INTERNAL_ERROR: 500,
   };
   return {
     ErrorCode: {
       VALIDATION_ERROR: 'VALIDATION_ERROR',
+      CONFLICT: 'CONFLICT',
       INTERNAL_ERROR: 'INTERNAL_ERROR',
     },
     standardErrorResponse: m.standardErrorResponse.mockImplementation((code: string, message: string) =>
@@ -70,7 +74,9 @@ describe('ai/feedback route', () => {
 
     m.db.select = vi.fn(() => createSelectChain());
     m.db.insert = vi.fn(() => ({ values: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 'f1' }]) })) }));
-    m.withRLSContext.mockImplementation(async (fn: any) => fn());
+    m.withRLSContext.mockImplementation(async (...args: any[]) => args[args.length - 1](m.db));
+    m.audit.mockResolvedValue(undefined);
+    m.db.execute.mockResolvedValue([{ id: 'existing_feedback' }]);
   });
 
   it('returns 429 when rate-limited', async () => {
@@ -129,7 +135,8 @@ describe('ai/feedback route', () => {
     expect(response.status).toBe(200);
     expect(payload.created).toBe(true);
     expect(payload.id).toBe('f1');
-    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org_1' }, expect.any(Function));
+    expect(m.audit).toHaveBeenCalledWith(m.db, expect.objectContaining({ organizationId: 'org_1', userId: 'u1', action: 'ai.feedback.create', resourceId: 'f1' }));
   });
 
   it('updates existing feedback for the same user and query', async () => {
@@ -146,6 +153,34 @@ describe('ai/feedback route', () => {
     expect(payload.updated).toBe(true);
     expect(payload.id).toBe('existing_feedback');
     expect(m.withRLSContext).toHaveBeenCalled();
+    expect(m.audit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'ai.feedback.update', resourceId: 'existing_feedback' }));
+  });
+
+  it('fails the feedback write when its audit record cannot be written', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue.push([]);
+    m.audit.mockRejectedValueOnce(new Error('audit down'));
+
+    const response = await POST(new Request('http://localhost/api/ai/feedback', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ query_id: '11111111-1111-1111-1111-111111111111', rating: 'good' }),
+    }));
+
+    expect(response.status).toBe(500);
+  });
+
+  it('is a conflict, with no audit, when the user feedback row vanished under the update', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue.push([{ id: 'existing_feedback' }]);
+    m.db.execute.mockResolvedValueOnce([]);
+
+    const response = await POST(new Request('http://localhost/api/ai/feedback', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ query_id: '11111111-1111-1111-1111-111111111111', rating: 'bad' }),
+    }));
+
+    expect(response.status).toBe(409);
+    expect(m.audit).not.toHaveBeenCalled();
   });
 
   it('validates query_id is required for GET', async () => {

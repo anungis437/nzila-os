@@ -1,6 +1,7 @@
-import { db } from '@/db/db';
 import { kpiConfigurations } from '@/db/schema';
-import { withApi, z } from '@/lib/api/framework';
+import { withApi, ApiError, z } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,24 +22,35 @@ export const POST = withApi(
     }),
   },
   async ({ body, organizationId, userId }) => {
-    const [row] = await db
-      .insert(kpiConfigurations)
-      .values({
-        organizationId: organizationId!,
-        createdBy: userId!,
-        name: body.name,
-        description: body.description ?? null,
-        metricType: body.metricType,
-        dataSource: body.dataSource,
-        calculation: body.calculation,
-        visualizationType: body.visualizationType,
-        targetValue: body.targetValue != null ? String(body.targetValue) : null,
-        warningThreshold: body.warningThreshold != null ? String(body.warningThreshold) : null,
-        criticalThreshold: body.criticalThreshold != null ? String(body.criticalThreshold) : null,
-        alertEnabled: body.alertEnabled,
-      })
-      .returning();
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    return withRLSContext({ organizationId }, async (tx) => {
+      const [row] = await tx
+        .insert(kpiConfigurations)
+        .values({
+          organizationId,
+          createdBy: userId,
+          name: body.name,
+          description: body.description ?? null,
+          metricType: body.metricType,
+          dataSource: body.dataSource,
+          calculation: body.calculation,
+          visualizationType: body.visualizationType,
+          targetValue: body.targetValue != null ? String(body.targetValue) : null,
+          warningThreshold: body.warningThreshold != null ? String(body.warningThreshold) : null,
+          criticalThreshold: body.criticalThreshold != null ? String(body.criticalThreshold) : null,
+          alertEnabled: body.alertEnabled,
+        })
+        .returning();
 
-    return row;
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'target.create',
+        resourceType: 'kpi_configurations',
+        resourceId: row.id,
+        details: { name: body.name, metricType: body.metricType, dataSource: body.dataSource, targetValue: body.targetValue ?? null },
+      });
+      return row;
+    });
   },
 );

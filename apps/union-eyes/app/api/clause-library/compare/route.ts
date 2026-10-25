@@ -12,11 +12,11 @@
  * check at all).
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db/db';
 import { sharedClauseLibrary, clauseLibraryTags } from '@/db/schema/domains/agreements/shared-library';
 import { organizations } from '@/db/schema-organizations';
 import { eq, inArray, sql } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { canReadSharedClause } from '@/lib/clause-library/sharing-authority';
 
 export const dynamic = 'force-dynamic';
@@ -36,10 +36,10 @@ export const POST = withApi(
     auth: { required: true, minRole: 'steward' },
     openapi: { tags: ['Clause-library'], summary: 'Compare multiple clauses' },
   },
-  async ({ request, organizationId }) => {
+  async ({ request, userId, organizationId }) => {
     const body = await request.json();
     const { clauseIds } = body;
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
     if (!clauseIds || !Array.isArray(clauseIds) || clauseIds.length < 2) {
       throw ApiError.badRequest('At least 2 clause IDs are required');
@@ -49,8 +49,8 @@ export const POST = withApi(
       throw ApiError.badRequest('Maximum 10 clauses can be compared at once');
     }
 
-    return withSystemContext(async () => {
-      const rows = await db
+    return withSystemContext(async (tx) => {
+      const rows = await tx
         .select({
           id: sharedClauseLibrary.id,
           clauseNumber: sharedClauseLibrary.clauseNumber,
@@ -83,7 +83,7 @@ export const POST = withApi(
       }
 
       // Fetch tags for authorized clauses only.
-      const allTags = await db
+      const allTags = await tx
         .select()
         .from(clauseLibraryTags)
         .where(inArray(clauseLibraryTags.clauseId, authorizedIds));
@@ -103,11 +103,19 @@ export const POST = withApi(
         tags: allTags.filter((t) => t.clauseId === r.id).map((t) => ({ tagName: t.tagName })),
       }));
 
-      // Increment comparison count only on the authorized subset actually returned.
-      await db
+      // Increment comparison count only on the authorized subset actually returned. The counter lives on rows other
+      // organizations own, so it is written under the system role and audited to the comparing organization.
+      await tx
         .update(sharedClauseLibrary)
         .set({ comparisonCount: sql`${sharedClauseLibrary.comparisonCount} + 1` })
         .where(inArray(sharedClauseLibrary.id, authorizedIds));
+      await persistAtomicAudit(tx as RLSTx, {
+        organizationId,
+        userId,
+        action: 'clause_library.compare',
+        resourceType: 'shared_clause_library',
+        details: { clauseIds: authorizedIds },
+      });
 
       // Basic analysis
       const types = new Set(clauses.map((c) => c.clauseType));

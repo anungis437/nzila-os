@@ -52,6 +52,7 @@ let accounts: FakeAccount[];
 
 const m = vi.hoisted(() => ({
   logApiAuditEvent: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   checkRateLimit: vi.fn(),
   createMetaClient: vi.fn(),
   createTwitterClient: vi.fn(),
@@ -62,6 +63,7 @@ const m = vi.hoisted(() => ({
 }));
 
 vi.mock('@/lib/middleware/api-security', () => ({ logApiAuditEvent: m.logApiAuditEvent }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: m.checkRateLimit,
   RATE_LIMITS: { SOCIAL_MEDIA_API: { requests: 30, window: 60 } },
@@ -134,18 +136,20 @@ function makeFakeDb() {
     }),
     update: (_table: unknown) => ({
       set: (patch: Record<string, unknown>) => ({
-        where: async (pred: Predicate) => {
+        where: (pred: Predicate) => {
           const targets = accounts.filter((a) => matches(a as unknown as Record<string, unknown>, pred));
           for (const t of targets) Object.assign(t, patch);
-          return targets;
+          return Object.assign(Promise.resolve(targets), { returning: async () => targets.map((t) => ({ id: t.id })) });
         },
       }),
     }),
     delete: (_table: unknown) => ({
-      where: async (pred: Predicate) => {
-        const before = accounts.length;
+      where: (pred: Predicate) => {
+        const removed = accounts.filter((a) => matches(a as unknown as Record<string, unknown>, pred));
         accounts = accounts.filter((a) => !matches(a as unknown as Record<string, unknown>, pred));
-        return { deletedCount: before - accounts.length };
+        return Object.assign(Promise.resolve({ deletedCount: removed.length }), {
+          returning: async () => removed.map((a) => ({ id: a.id })),
+        });
       },
     }),
   };
@@ -220,6 +224,7 @@ describe('round 37: social-media accounts route org boundary (negative tests 3, 
     m.selectPredicates.length = 0;
     seedAccounts();
     m.checkRateLimit.mockResolvedValue({ allowed: true, remaining: 99, resetIn: 0 });
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.createTwitterClient.mockReturnValue({ revokeToken: vi.fn(async () => undefined) });
   });
 
@@ -301,7 +306,8 @@ describe('round 37: social-media accounts route org boundary (negative tests 3, 
     await GET(new NextRequest('http://localhost/api/social-media/accounts'));
     await DELETE(new NextRequest('http://localhost/api/social-media/accounts?id=legit-account', { method: 'DELETE' }));
 
-    const serializedCalls = JSON.stringify(m.logApiAuditEvent.mock.calls);
+    const serializedCalls = JSON.stringify([...m.logApiAuditEvent.mock.calls, ...m.persistAtomicAudit.mock.calls]);
+    expect(serializedCalls).toContain('social.account.disconnect');
     expect(serializedCalls).not.toContain('legit-secret-access-token');
     expect(serializedCalls).not.toContain('legit-secret-refresh-token');
     expect(serializedCalls).not.toContain('rogue-secret-access-token');

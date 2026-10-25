@@ -15,6 +15,7 @@ import { createLinkedInClient } from '@/lib/social-media/linkedin-api-client';
 import { cookies } from 'next/headers';
 import { db } from '@/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { socialAccounts } from '@/db/schema/social-media-schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { z } from "zod";
@@ -309,26 +310,28 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
 // Continue with deletion even if revocation fails
       }
 
-      // Delete account from database — org predicate is defense-in-depth on top of
+      // Delete account and record the audit together — org predicate is defense-in-depth on top of
       // the ownership check above; trusted org is passed explicitly rather than
       // letting withRLSContext silently re-resolve org through an independent auth path.
-      await withRLSContext({ organizationId }, async (tx) =>
-        tx.delete(socialAccounts).where(
-          and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId))
-        )
-      );
-
-      // Audit log
-      await logApiAuditEvent({
-        userId,
-        organizationId,
-        action: 'DISCONNECT_SOCIAL_ACCOUNT',
-        dataType: 'SOCIAL_MEDIA',
-        recordId: accountId,
-        success: true,
-        metadata: { platform: account.platform },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      const removed = await withRLSContext({ organizationId }, async (tx) => {
+        const rows = await tx
+          .delete(socialAccounts)
+          .where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId)))
+          .returning({ id: socialAccounts.id });
+        if (rows.length === 0) return false;
+        await persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: 'social.account.disconnect',
+          resourceType: 'social_accounts',
+          resourceId: accountId,
+          details: { platform: account.platform },
+        });
+        return true;
+      });
+      if (!removed) {
+        return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Account not found');
+      }
 
       return NextResponse.json({
         message: 'Account disconnected successfully',
@@ -344,11 +347,11 @@ return NextResponse.json(
     }
 });
 
-export const PUT = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
+export const PUT = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
   try {
-      const { _userId, organizationId } = context;
+      const { userId, organizationId } = context;
       
-      if (!organizationId) {
+      if (!organizationId || !userId) {
         return standardErrorResponse(
           ErrorCode.FORBIDDEN,
           'No organization found'
@@ -430,15 +433,28 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
         // the org-scoped SELECT above; trusted org is passed explicitly rather than
         // letting withRLSContext silently re-resolve org through an independent auth path.
         const expiresAt = new Date(Date.now() + expiresIn * 1000);
-        await withRLSContext({ organizationId }, async (tx) =>
-          tx.update(socialAccounts).set({
-            accessToken: newAccessToken,
-            tokenExpiresAt: expiresAt,
-            status: 'active',
-            updatedAt: new Date(),
-            ...(newRefreshToken ? { refreshToken: newRefreshToken } : {}),
-          }).where(and(eq(socialAccounts.id, account_id), eq(socialAccounts.organizationId, organizationId)))
-        );
+        await withRLSContext({ organizationId }, async (tx) => {
+          const rows = await tx
+            .update(socialAccounts)
+            .set({
+              accessToken: newAccessToken,
+              tokenExpiresAt: expiresAt,
+              status: 'active',
+              updatedAt: new Date(),
+              ...(newRefreshToken ? { refreshToken: newRefreshToken } : {}),
+            })
+            .where(and(eq(socialAccounts.id, account_id), eq(socialAccounts.organizationId, organizationId)))
+            .returning({ id: socialAccounts.id });
+          if (rows.length === 0) throw new Error('Account no longer exists');
+          await persistAtomicAudit(tx, {
+            organizationId,
+            userId,
+            action: 'social.account.token_refresh',
+            resourceType: 'social_accounts',
+            resourceId: account_id,
+            details: { platform: account.platform },
+          });
+        });
 
         return NextResponse.json({
           message: 'Token refreshed successfully',
@@ -446,12 +462,25 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
         });
       } catch (error) {
         // Update account status to error — org predicate is defense-in-depth (see above).
-        await withRLSContext({ organizationId }, async (tx) =>
-          tx.update(socialAccounts).set({
-            status: 'expired',
-            updatedAt: new Date(),
-          }).where(and(eq(socialAccounts.id, account_id), eq(socialAccounts.organizationId, organizationId)))
-        );
+        await withRLSContext({ organizationId }, async (tx) => {
+          const rows = await tx
+            .update(socialAccounts)
+            .set({
+              status: 'expired',
+              updatedAt: new Date(),
+            })
+            .where(and(eq(socialAccounts.id, account_id), eq(socialAccounts.organizationId, organizationId)))
+            .returning({ id: socialAccounts.id });
+          if (rows.length === 0) return;
+          await persistAtomicAudit(tx, {
+            organizationId,
+            userId,
+            action: 'social.account.token_refresh_failed',
+            resourceType: 'social_accounts',
+            resourceId: account_id,
+            details: { platform: account.platform },
+          });
+        });
 
         throw error;
       }

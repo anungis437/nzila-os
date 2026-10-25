@@ -17,6 +17,7 @@ import { auth } from '@nzila/platform-auth/entra/server';
 import { workbooks } from '@/db/schema/workbook-schema';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -87,6 +88,15 @@ export async function POST(
         .returning({ id: workbooks.id });
 
       if (claimed) {
+        // The claim and its audit record commit together; a failed audit rolls the claim back.
+        await persistAtomicAudit(tx, {
+          organizationId: orgId,
+          userId,
+          action: 'workbook.claim',
+          resourceType: 'workbooks',
+          resourceId: workbookId,
+          details: { claimedAt: claimedAt.toISOString() },
+        });
         return { status: 'claimed' as const };
       }
 

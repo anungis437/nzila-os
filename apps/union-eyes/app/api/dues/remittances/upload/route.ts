@@ -18,6 +18,8 @@
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { and, eq } from 'drizzle-orm';
 import { createHash } from 'node:crypto';
 import { employerRemittances } from '@/db/schema/dues-finance-schema';
@@ -39,7 +41,7 @@ export const POST = withApi(
     openapi: { tags: ['Dues'], summary: 'Upload employer remittance file' },
   },
   async ({ request, organizationId, userId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
@@ -111,25 +113,37 @@ export const POST = withApi(
 
     let remittance;
     try {
-      [remittance] = await db
-        .insert(employerRemittances)
-        .values({
-          employerId: meta.employerId,
+      // The record and its audit commit together; if either fails the preserved blob is removed again.
+      remittance = await withRLSContext({ organizationId }, async (tx) => {
+        const [row] = await tx
+          .insert(employerRemittances)
+          .values({
+            employerId: meta.employerId!,
+            organizationId,
+            periodStart,
+            periodEnd,
+            fiscalYear: meta.fiscalYear ?? periodStart.getFullYear(),
+            fiscalMonth: meta.fiscalMonth ?? periodStart.getMonth() + 1,
+            remittanceDate: new Date(),
+            fileName: file.name,
+            fileUrl: storedPath,
+            fileHash,
+            processingStatus: 'pending',
+            memberCount: 0,
+            totalAmount: '0',
+            createdBy: userId,
+          })
+          .returning();
+        await persistAtomicAudit(tx, {
           organizationId,
-          periodStart,
-          periodEnd,
-          fiscalYear: meta.fiscalYear ?? periodStart.getFullYear(),
-          fiscalMonth: meta.fiscalMonth ?? periodStart.getMonth() + 1,
-          remittanceDate: new Date(),
-          fileName: file.name,
-          fileUrl: storedPath,
-          fileHash,
-          processingStatus: 'pending',
-          memberCount: 0,
-          totalAmount: '0',
-          createdBy: userId ?? undefined,
-        })
-        .returning();
+          userId,
+          action: 'dues.remittance.upload',
+          resourceType: 'employer_remittances',
+          resourceId: row.id,
+          details: { fileName: file.name, fileHash, employerId: meta.employerId },
+        });
+        return row;
+      });
     } catch (error) {
       await deleteBlob(storedPath).catch(() => undefined);
       throw error;

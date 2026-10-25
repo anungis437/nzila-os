@@ -6,9 +6,9 @@
 
 import { NextResponse } from "next/server";
 import { 
-  compareClauses,
-  saveClauseComparison 
-} from "@/lib/services/clause-service";
+  compareClausesInOrganization,
+  saveClauseComparisonAudited
+} from "@/lib/services/clause-audited-service";
 import { z } from "zod";
 import { withRoleAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
 
@@ -22,13 +22,16 @@ const clausesCompareSchema = z.object({
   analysisType: z.enum(['all', 'similarities', 'differences', 'best_practices']).optional().default("all"),
   save: z.boolean().optional().default(false),
   comparisonName: z.string().optional(),
-  organizationId: z.string().uuid('Invalid organizationId'),
+  organizationId: z.string().uuid('Invalid organizationId').optional(),
 });
 
 export const POST = withRoleAuth('member', async (request, context: BaseAuthContext) => {
     const { userId, organizationId: contextOrganizationId } = context;
     if (!userId) {
       return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
+    }
+    if (!contextOrganizationId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'No active organization');
     }
 
   try {
@@ -44,14 +47,6 @@ export const POST = withRoleAuth('member', async (request, context: BaseAuthCont
     }
     
     const { clauseIds, analysisType = "all", save = false, comparisonName, organizationId } = validation.data;
-    // DUPLICATE REMOVED (Phase 2): Multi-line destructuring of body
-    // const { 
-    // clauseIds, 
-    // analysisType = "all",
-    // save = false,
-    // comparisonName,
-    // organizationId
-    // } = body;
   if (organizationId && organizationId !== contextOrganizationId) {
     return standardErrorResponse(
       ErrorCode.FORBIDDEN,
@@ -74,34 +69,40 @@ export const POST = withRoleAuth('member', async (request, context: BaseAuthCont
         );
       }
 
-      // Perform comparison
-      const result = await compareClauses({
+      // Perform comparison over the caller's organization only; a clause elsewhere is not found
+      const result = await compareClausesInOrganization(contextOrganizationId, {
         clauseIds,
         analysisType
       });
 
+      if (!result) {
+        return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Clause not found');
+      }
+
       // Optionally save the comparison
       if (save) {
-        if (!comparisonName || !organizationId) {
+        if (!comparisonName) {
           return standardErrorResponse(
       ErrorCode.MISSING_REQUIRED_FIELD,
-      'comparisonName and organizationId are required to save comparison'
+      'comparisonName is required to save comparison'
     );
         }
 
         const clauseType = result.clauses[0]?.clauseType || "other";
 
-        const savedComparison = await saveClauseComparison(
-          comparisonName,
-          clauseType,
-          clauseIds,
-          organizationId, userId,
+        const savedComparison = await saveClauseComparisonAudited(
+          { organizationId: contextOrganizationId, userId },
           {
-            similarities: result.similarities,
-            differences: result.differences,
-            bestPractices: result.bestPractices,
-            recommendations: result.recommendations
-          }
+            comparisonName,
+            clauseType,
+            clauseIds,
+            analysisResults: {
+              similarities: result.similarities,
+              differences: result.differences,
+              bestPractices: result.bestPractices,
+              recommendations: result.recommendations
+            },
+          },
         );
 
         return NextResponse.json({ 

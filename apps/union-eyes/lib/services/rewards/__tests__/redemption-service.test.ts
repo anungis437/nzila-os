@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   mockQueryRewardRedemptions: { findFirst: vi.fn(), findMany: vi.fn() },
   // sibling service mocks
   mockApplyLedgerEntry: vi.fn(),
+  mockAudit: vi.fn(),
 }));
 
 vi.mock('drizzle-orm', () => ({
@@ -88,6 +89,11 @@ vi.mock('../wallet-service', () => ({
   applyLedgerEntry: mocks.mockApplyLedgerEntry,
 }));
 
+vi.mock('../audit', () => ({
+  auditRewards: mocks.mockAudit,
+  rewardsActor: (userId?: string | null, fallback = 'system:rewards') => (userId && userId !== 'system' ? userId : fallback),
+}));
+
 import {
   initiateRedemption,
   updateRedemptionCheckout,
@@ -105,6 +111,9 @@ import {
 describe('redemption-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.mockAudit.mockResolvedValue(undefined);
+    // Plain updates run on a transaction whose update chain is the shared mockUpdate chain.
+    mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => cb({ update: mocks.mockUpdate }));
   });
 
   /* ============================= initiateRedemption ============================= */
@@ -288,6 +297,69 @@ describe('redemption-service', () => {
       const result = await processRedemptionRefund('r-1', 'org-1', {});
 
       expect(result.redemption.status).toBe('refunded');
+      expect(mocks.mockApplyLedgerEntry).not.toHaveBeenCalled();
+    });
+  });
+
+  /* ============================= audit and authority ============================= */
+  describe('audit on the same transaction', () => {
+    it('records the order with the webhook actor, and refuses an order that is not awaiting payment', async () => {
+      mocks.mockReturning.mockResolvedValueOnce([{ id: 'r-1', status: 'ordered' }]);
+      await markRedemptionOrdered('r-1', 'org-1', 'order-1', {});
+      expect(mocks.mockAudit).toHaveBeenCalledWith(
+        expect.objectContaining({ update: mocks.mockUpdate }),
+        expect.objectContaining({ organizationId: 'org-1', userId: 'system:shopify-webhook', action: 'rewards.redemption.ordered', resourceId: 'r-1' }),
+      );
+
+      mocks.mockAudit.mockClear();
+      mocks.mockReturning.mockResolvedValueOnce([]);
+      await expect(markRedemptionOrdered('r-1', 'org-1', 'order-1', {})).rejects.toThrow('not awaiting payment');
+      expect(mocks.mockAudit).not.toHaveBeenCalled();
+    });
+
+    it('fails the fulfilment when its audit cannot be written', async () => {
+      mocks.mockReturning.mockResolvedValueOnce([{ id: 'r-1', status: 'fulfilled' }]);
+      mocks.mockAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+      await expect(markRedemptionFulfilled('r-1', 'org-1', {})).rejects.toThrow('audit unavailable');
+    });
+
+    it('lets only the owning member cancel a redemption, and audits the refund', async () => {
+      const redemption = { id: 'r-1', orgId: 'org-1', userId: 'owner', creditsSpent: 50, status: 'initiated', providerPayloadJson: {} };
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) =>
+        cb({
+          query: { rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(redemption) } },
+          update: vi.fn().mockReturnValue({
+            set: vi.fn().mockReturnValue({
+              where: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([{ ...redemption, status: 'cancelled' }]) }),
+            }),
+          }),
+        }),
+      );
+      mocks.mockApplyLedgerEntry.mockResolvedValue({ balanceAfter: 50 });
+
+      await expect(cancelRedemption('r-1', 'org-1', 'member_cancelled', { userId: 'someone-else', mustOwn: true })).rejects.toThrow('Redemption not found');
+      expect(mocks.mockApplyLedgerEntry).not.toHaveBeenCalled();
+      expect(mocks.mockAudit).not.toHaveBeenCalled();
+
+      await cancelRedemption('r-1', 'org-1', 'member_cancelled', { userId: 'owner', mustOwn: true });
+      expect(mocks.mockAudit).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ userId: 'owner', action: 'rewards.redemption.cancel', details: expect.objectContaining({ creditsRefunded: 50 }) }),
+      );
+    });
+
+    it('does not refund credits when a concurrent change already moved the redemption on', async () => {
+      const redemption = { id: 'r-1', orgId: 'org-1', userId: 'owner', creditsSpent: 50, status: 'initiated', providerPayloadJson: {} };
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) =>
+        cb({
+          query: { rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(redemption) } },
+          update: vi.fn().mockReturnValue({
+            set: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([]) }) }),
+          }),
+        }),
+      );
+
+      await expect(cancelRedemption('r-1', 'org-1', 'x')).rejects.toThrow('changed concurrently');
       expect(mocks.mockApplyLedgerEntry).not.toHaveBeenCalled();
     });
   });
