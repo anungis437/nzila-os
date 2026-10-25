@@ -1,8 +1,11 @@
 /**
- * GET POST /api/tax/t4a
- *
- * The same resource as /api/pension/t4a (pension_t4a_records), under the tax name. It used to be a second copy with
- * its own, weaker rules (any member listed every T4A, a steward generated them and could mark them filed); it now is
- * the pension route, so there is one authority for these records.
+ * Retired: this route duplicated the pension T4A route and its older, weaker authorization. The canonical route is
+ * /api/pension/t4a (own records only; administration needs the named financial role). It performs no operation.
  */
-export { GET, POST, dynamic } from '../../pension/t4a/route';
+import { withApiAuth } from '@/lib/api-auth-guard';
+import { retiredHandler } from '@/lib/api/retired-route';
+
+export const dynamic = 'force-dynamic';
+
+export const GET = withApiAuth(retiredHandler('/api/pension/t4a'));
+export const POST = withApiAuth(retiredHandler('/api/pension/t4a'));

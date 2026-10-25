@@ -12,11 +12,11 @@ import pg from 'pg'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { seedMembership, seedUser, type Db } from '../../db/__tests__/authority-kernel-harness'
+import { seedMembership, seedUser, type Db } from './authority-kernel-harness'
 import type { RLSTx } from '@/lib/db/with-rls-context'
-import { assignThread, listTriageQueue } from './thread-assignment'
+import { assignThread, listTriageQueue } from '@/lib/messaging/thread-assignment'
 import { grantDesignation, revokeDesignation } from '@/lib/triage/designations'
-import { createMemberThread, findReadableThread, listThreads } from './thread-access'
+import { createMemberThread, findReadableThread, listThreads } from '@/lib/messaging/thread-access'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 const adapt = (c: pg.Client): Db => ({ exec: (s) => c.query(s), query: (s, p) => c.query(s, p as unknown[]) as never })

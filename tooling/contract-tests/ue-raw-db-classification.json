@@ -136,6 +136,10 @@
       "category": "requires-rls-context",
       "reason": "Golden-share governance under withRLSContext + role auth."
     },
+    "app/api/governance/lifecycle/policies/[id]/approvals/route.ts": {
+      "category": "requires-rls-context",
+      "reason": "Policy approval recorded under withRLSContext with role auth; independent approver and audit on the same transaction."
+    },
     "app/api/governance/lifecycle/policies/route.ts": {
       "category": "requires-rls-context",
       "reason": "Lifecycle policies under withRLSContext + role auth."

@@ -27,7 +27,7 @@ const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')
 export const U = {
   member: id(1), steward: id(2), chief: id(3), officer: id(4), president: id(5),
   treasurer: id(6), auditor: id(7), reviewer: id(8), other: id(9), admin: id(10),
-  platform: id(11), clc: id(12), delegate: id(13), clerk: id(14), respondent: id(15),
+  platform: id(11), clc: id(12), delegate: id(13), registrar: id(14), respondent: id(15),
 }
 export const CASE_ID = id(100)
 export const UNIT_ID = id(101)

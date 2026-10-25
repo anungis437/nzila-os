@@ -9,11 +9,11 @@
    "CAPABILITY_TOKEN": 12,
    "CRON_SECRET": 3,
    "CRUD_FACTORY": 297,
-   "DELEGATED": 24,
+   "DELEGATED": 23,
    "NONE": 51,
    "ORG_AUTH": 47,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 67,
+   "RETIRED": 68,
    "ROLE_AUTH": 125,
    "SESSION_AUTH": 52,
    "WEBHOOK_SIGNATURE": 4,
@@ -25,32 +25,32 @@
    "CAPABILITY_TOKEN": 8,
    "CRON_SECRET": 2,
    "CRUD_FACTORY": 297,
-   "DELEGATED": 17,
+   "DELEGATED": 16,
    "NONE": 8,
    "ORG_AUTH": 27,
    "PLATFORM_AUTH_HANDLER": 7,
-   "RETIRED": 60,
+   "RETIRED": 61,
    "ROLE_AUTH": 74,
    "SESSION_AUTH": 23,
    "WEBHOOK_SIGNATURE": 4,
    "WITH_API": 163
   },
   "mutatingByAudit": {
-   "ATOMIC": 143,
-   "ATOMIC_SERVICE": 122,
+   "ATOMIC": 141,
+   "ATOMIC_SERVICE": 123,
    "COMPUTE_ONLY": 34,
    "CRUD_ATOMIC": 299,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 22,
    "NO_WRITES_FOUND": 14,
-   "NONE": 61
+   "NONE": 62
   },
   "mutatingByData": {
-   "AMBIENT_DB": 15,
+   "AMBIENT_DB": 14,
    "CRUD_TENANT_TX": 299,
-   "NONE": 196,
-   "SYSTEM_CONTEXT": 55,
-   "TENANT_TX": 132
+   "NONE": 197,
+   "SYSTEM_CONTEXT": 56,
+   "TENANT_TX": 131
   }
  },
  "routes": [
@@ -5828,7 +5828,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "ATOMIC"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "employer-execution/payroll-runs/route.ts",
@@ -11763,11 +11763,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "DELEGATED",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
-   "audit": "ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "tenant/current/route.ts",
@@ -12270,7 +12270,7 @@
    "guard": "NONE",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "SYSTEM_CONTEXT",
    "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {

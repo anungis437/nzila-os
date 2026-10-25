@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 const AUTH_GUARD_PATH = resolve(process.cwd(), 'apps/union-eyes/lib/api-auth-guard.ts');
 const ORG_UTILS_PATH = resolve(process.cwd(), 'apps/union-eyes/lib/organization-utils.ts');
 const DOWNLOAD_ROUTE_PATH = resolve(process.cwd(), 'apps/union-eyes/app/api/documents/[id]/download/route.ts');
+const DOWNLOAD_CORE_PATH = resolve(process.cwd(), 'apps/union-eyes/lib/documents/download-issuance.ts');
 
 function read(path: string): string {
   return readFileSync(path, 'utf8');
@@ -30,11 +31,15 @@ describe('UnionEyes offboarding auth boundary contract', () => {
   });
 
   it('keeps direct document download behind organization auth and fresh document authorization', () => {
-    const source = read(DOWNLOAD_ROUTE_PATH);
+    // The route authenticates and delegates; every download path (single and bulk) shares one authorization core.
+    const route = read(DOWNLOAD_ROUTE_PATH);
+    expect(route).toContain('withOrganizationAuth');
+    expect(route).toContain("await requireEntitlement(organizationId, 'grievance_case_suite')");
+    expect(route).toContain("await hasMinRole('member')");
+    expect(route).toContain('issueDocumentDownload(');
+    expect(route).not.toMatch(/generateSasUrl|fileUrl/);
 
-    expect(source).toContain('withOrganizationAuth');
-    expect(source).toContain("await requireEntitlement(organizationId, 'grievance_case_suite')");
-    expect(source).toContain("await hasMinRole('member')");
+    const source = read(DOWNLOAD_CORE_PATH);
     expect(source).toContain('getEffectiveCaseAccess');
     expect(source).toContain('isDocumentVisibleByPolicy');
     expect(source).toContain("eq(documentAccessGrants.status, 'active')");

@@ -129,9 +129,9 @@ describe('independence and conflicts', () => {
 
   it('complaint against the assigned reviewer: the reviewer is stripped of control and cannot keep acting', () => {
     let c = fresh(['someone']);
-    const g = [...grantsFor('clerk', ALL_BUT_BINDING), ...grantsFor('rev', ALL_BUT_BINDING)]
-    c = assessIndependence(assessJurisdiction(c, 'clerk', ctx(g)), 'clerk', ctx(g))
-    c = assignReviewer(c, 'clerk', 'rev', ctx(g))
+    const g = [...grantsFor('registrar', ALL_BUT_BINDING), ...grantsFor('rev', ALL_BUT_BINDING)]
+    c = assessIndependence(assessJurisdiction(c, 'registrar', ctx(g)), 'registrar', ctx(g))
+    c = assignReviewer(c, 'registrar', 'rev', ctx(g))
     const recused: ReviewCase = { ...c, parties: { ...c.parties, respondentIds: [...c.parties.respondentIds, 'rev'] } }
     const attempt = requestEvidence(recused, 'rev', { id: 'e1', holderId: 'sec', description: 'minutes', classification: 'internal' }, ctx(g))
     expect(attempt.evidence[0]).toMatchObject({ status: 'denied', denialReason: 'CONFLICTED' })
@@ -139,16 +139,16 @@ describe('independence and conflicts', () => {
   })
 
   it('a conflicted officer cannot assign the matter to themselves or an ally', () => {
-    const c = assessIndependence(assessJurisdiction(fresh(['president']), 'clerk', ctx(grantsFor('clerk', ALL_BUT_BINDING))), 'clerk', ctx(grantsFor('clerk', ALL_BUT_BINDING)))
-    const g = [...grantsFor('president', ALL_BUT_BINDING), ...grantsFor('clerk', ALL_BUT_BINDING)]
+    const c = assessIndependence(assessJurisdiction(fresh(['president']), 'registrar', ctx(grantsFor('registrar', ALL_BUT_BINDING))), 'registrar', ctx(grantsFor('registrar', ALL_BUT_BINDING)))
+    const g = [...grantsFor('president', ALL_BUT_BINDING), ...grantsFor('registrar', ALL_BUT_BINDING)]
     expectDenied(() => assignReviewer(c, 'president', 'president', ctx(g)), 'CONFLICTED_ASSIGNER')
-    expectDenied(() => assignReviewer({ ...c, parties: { ...c.parties, recusedIds: ['ally'] } }, 'clerk', 'ally', ctx([...g, ...grantsFor('ally', ALL_BUT_BINDING)])), 'CONFLICTED_ASSIGNEE')
+    expectDenied(() => assignReviewer({ ...c, parties: { ...c.parties, recusedIds: ['ally'] } }, 'registrar', 'ally', ctx([...g, ...grantsFor('ally', ALL_BUT_BINDING)])), 'CONFLICTED_ASSIGNEE')
   })
 
   it('assigning a person without their own current grants fails (assignment confers nothing)', () => {
-    const g = grantsFor('clerk', ALL_BUT_BINDING)
-    const c = assessIndependence(assessJurisdiction(fresh(), 'clerk', ctx(g)), 'clerk', ctx(g))
-    expectDenied(() => assignReviewer(c, 'clerk', 'nobody', ctx(g)), 'NO_GRANT')
+    const g = grantsFor('registrar', ALL_BUT_BINDING)
+    const c = assessIndependence(assessJurisdiction(fresh(), 'registrar', ctx(g)), 'registrar', ctx(g))
+    expectDenied(() => assignReviewer(c, 'registrar', 'nobody', ctx(g)), 'NO_GRANT')
   })
 
   it('the complainant cannot review their own complaint', () => {
@@ -165,16 +165,16 @@ describe('independence and conflicts', () => {
 
 describe('GV01–GV09 connected independent review (domain level)', () => {
   const g = [
-    ...grantsFor('clerk', ['monitor']),
+    ...grantsFor('registrar', ['monitor']),
     ...grantsFor('rev', ALL_BUT_BINDING),
     ...grantsFor('chair', ['enforce_certify']),
   ]
 
   function toEvidenceStage() {
     let c = receiveConcern({ id: REVIEW, institutionId: INST, submitterId: 'member-1', respondentIds: ['president'], now: NOW })
-    c = assessJurisdiction(c, 'clerk', ctx(g))
-    c = assessIndependence(c, 'clerk', ctx(g))
-    c = assignReviewer(c, 'clerk', 'rev', ctx(g))
+    c = assessJurisdiction(c, 'registrar', ctx(g))
+    c = assessIndependence(c, 'registrar', ctx(g))
+    c = assignReviewer(c, 'registrar', 'rev', ctx(g))
     c = requestEvidence(c, 'rev', { id: 'e1', holderId: 'secretary', description: 'Meeting minutes', classification: 'confidential' }, ctx(g))
     return c
   }

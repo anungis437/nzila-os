@@ -9,7 +9,7 @@ const codes = (d: Decision): ReasonCode[] => d.reasons.map((r) => r.code)
 
 const approval = (over: Partial<ApprovalRequestFacts> = {}): ApprovalRequestFacts => ({
   kind: 'approval_request', id: APPROVAL_ID, organizationId: ORG, subjectType: 'policy',
-  subjectId: '00000000-0000-4000-8000-0000000f0001', proposedBy: U.clerk, subjectAuthorId: U.clerk,
+  subjectId: '00000000-0000-4000-8000-0000000f0001', proposedBy: U.registrar, subjectAuthorId: U.registrar,
   requiredApprovals: 2, status: 'open', namedApproverIds: [], eligibleCapacities: ['executive'],
   decisions: [], adverseUserIds: [], riskClass: 'medium', ...over,
 })
@@ -70,7 +70,7 @@ describe('governance approval — self-approval and conflicts', () => {
   const f = (u: string, n: number) => exec(u, `00000000-0000-4000-8000-0000000a2${String(n).padStart(3, '0')}`)
 
   it('the proposer cannot approve their own request', () => {
-    expect(codes(approve(U.clerk, f(U.clerk, 1)))).toContain('SELF_APPROVAL')
+    expect(codes(approve(U.registrar, f(U.registrar, 1)))).toContain('SELF_APPROVAL')
   })
 
   it('the subject author cannot approve even if someone else proposed it', () => {

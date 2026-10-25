@@ -30,8 +30,8 @@ describe('case:read_third_party_restricted — narrower than the internal file',
   it('a self-granted or capacity-less collaborator never reaches it', () => {
     const self = relationship({ relation: 'collaborator', origin: 'explicit', grantedBy: U.steward, permissions: ['read_third_party_restricted'] })
     expect(decide(askThirdParty(U.steward), facts(U.steward, ['steward'], { relationships: [self] }), caseFacts(), NOW).effect).toBe('deny')
-    const clerk = relationship({ principalUserId: U.member, relation: 'collaborator', origin: 'explicit', grantedBy: U.chief, permissions: ['read_third_party_restricted'] })
-    expect(decide(askThirdParty(U.member), facts(U.member, ['member'], { relationships: [clerk] }), caseFacts(), NOW).effect).toBe('deny')
+    const registrar = relationship({ principalUserId: U.member, relation: 'collaborator', origin: 'explicit', grantedBy: U.chief, permissions: ['read_third_party_restricted'] })
+    expect(decide(askThirdParty(U.member), facts(U.member, ['member'], { relationships: [registrar] }), caseFacts(), NOW).effect).toBe('deny')
   })
 
   it('a supervisory mandate reaches it only when the power is named; seniority and the internal-read power never do', () => {

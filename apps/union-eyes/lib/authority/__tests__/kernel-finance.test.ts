@@ -8,7 +8,7 @@ const codes = (d: Decision): ReasonCode[] => d.reasons.map((r) => r.code)
 
 const tx = (over: Partial<FinancialTransactionFacts> = {}): FinancialTransactionFacts => ({
   kind: 'financial_transaction', id: TX_ID, organizationId: ORG, accountId: ACCT, amountMinor: 50_000,
-  currency: 'CAD', state: 'prepared', preparedBy: U.clerk, approvals: [], requiredApprovals: 2,
+  currency: 'CAD', state: 'prepared', preparedBy: U.registrar, approvals: [], requiredApprovals: 2,
   executedBy: null, reconciledBy: null, adverseUserIds: [], ...over,
 })
 
@@ -75,7 +75,7 @@ describe('finance — six distinct duties', () => {
 
 describe('finance — segregation of duties against the actual transaction', () => {
   it('the preparer cannot approve their own transaction', () => {
-    const d = act(U.clerk, 'finance:approve', officer(U.clerk, ['approve']), tx())
+    const d = act(U.registrar, 'finance:approve', officer(U.registrar, ['approve']), tx())
     expect(codes(d)).toContain('SELF_APPROVAL')
   })
 
@@ -86,7 +86,7 @@ describe('finance — segregation of duties against the actual transaction', () 
 
   it('the preparer or an approver cannot execute', () => {
     const approved = tx({ state: 'approved', approvals: [{ userId: U.officer, at: ago(HOUR) }, { userId: U.president, at: ago(HOUR) }] })
-    expect(codes(act(U.clerk, 'finance:execute', officer(U.clerk, ['execute']), approved))).toContain('SEGREGATION_OF_DUTIES')
+    expect(codes(act(U.registrar, 'finance:execute', officer(U.registrar, ['execute']), approved))).toContain('SEGREGATION_OF_DUTIES')
     expect(codes(act(U.officer, 'finance:execute', officer(U.officer, ['execute']), approved))).toContain('SEGREGATION_OF_DUTIES')
   })
 
@@ -96,13 +96,13 @@ describe('finance — segregation of duties against the actual transaction', () 
   })
 
   it('the executor cannot reconcile', () => {
-    const t = tx({ state: 'executed', preparedBy: U.clerk, approvals: [{ userId: U.officer, at: ago(HOUR) }, { userId: U.president, at: ago(HOUR) }], executedBy: U.treasurer })
+    const t = tx({ state: 'executed', preparedBy: U.registrar, approvals: [{ userId: U.officer, at: ago(HOUR) }, { userId: U.president, at: ago(HOUR) }], executedBy: U.treasurer })
     expect(codes(act(U.treasurer, 'finance:reconcile', officer(U.treasurer, ['reconcile']), t))).toContain('SEGREGATION_OF_DUTIES')
   })
 
   it('an auditor must be independent of every participant', () => {
     const t = tx({ state: 'reconciled', approvals: [{ userId: U.officer, at: ago(HOUR) }, { userId: U.president, at: ago(HOUR) }], executedBy: U.treasurer, reconciledBy: U.other })
-    for (const participant of [U.clerk, U.officer, U.president, U.treasurer, U.other]) {
+    for (const participant of [U.registrar, U.officer, U.president, U.treasurer, U.other]) {
       const f = officer(participant, ['audit'], {}, ['auditor'])
       expect(codes(act(participant, 'finance:audit', f, t))).toContain('SEGREGATION_OF_DUTIES')
     }
@@ -115,7 +115,7 @@ describe('finance — segregation of duties against the actual transaction', () 
   })
 
   it('a record whose approvals include the preparer is contradictory and blocks everything', () => {
-    const t = tx({ approvals: [{ userId: U.clerk, at: ago(HOUR) }] })
+    const t = tx({ approvals: [{ userId: U.registrar, at: ago(HOUR) }] })
     expect(codes(act(U.treasurer, 'finance:approve', officer(U.treasurer, ['approve']), t))).toContain('FACTS_CONTRADICTORY')
   })
 

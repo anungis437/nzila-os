@@ -8,7 +8,7 @@ describe('canManageOrganizationSettings', () => {
 
   it.each([
     'member', 'steward', 'chief_steward', 'officer', 'president', 'vice_president',
-    'secretary_treasurer', 'clerk', 'bargaining_committee', 'health_safety_rep', 'guest',
+    'secretary_treasurer', 'registrar', 'bargaining_committee', 'health_safety_rep', 'guest',
   ])('denies %s', (role) => {
     expect(canManageOrganizationSettings(role)).toBe(false)
   })

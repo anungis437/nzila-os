@@ -110,6 +110,12 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'structure/page.tsx',                          minRole: 'member',               description: 'Structure management' },
   { path: 'leadership/page.tsx',                         minRole: 'member',               description: 'Leadership view (API gates officer)' },
   { path: 'settings/communications/page.tsx',            minRole: 'member',               description: 'Notification preferences' },
+  { path: 'executive/page.tsx',                          minRole: 'officer',              description: 'Executive destination (page requires officer)' },
+  { path: 'help/page.tsx',                               minRole: 'member',               description: 'Help (any authenticated user)' },
+  { path: 'messages/page.tsx',                           minRole: 'member',               description: 'Member messages (participant-scoped by the API)' },
+  { path: 'preferences/page.tsx',                        minRole: 'member',               description: 'Personal preferences' },
+  { path: 'privacy/page.tsx',                            minRole: 'member',               description: 'Personal privacy and information rights' },
+  { path: 'union/page.tsx',                              minRole: 'member',               description: 'Union destination (member experience; API gates by authority)' },
 
   // ── Dues & receipts (any authenticated member) ─────────────────────────
   { path: 'dues/page.tsx',                               minRole: 'member',               description: 'Member dues dashboard' },
@@ -375,7 +381,7 @@ const API_ROUTE_MATRIX: ApiRouteRule[] = [
   { apiPath: 'messaging/preferences',expectedAuthPattern: 'crudRoutes',           expectedMinRole: 'member',               backingPage: 'settings/communications' },
   { apiPath: 'organizing/notes',     expectedAuthPattern: 'crudRoutes',           expectedMinRole: 'member',               backingPage: 'organizing/notes' },
   { apiPath: 'activities',           expectedAuthPattern: 'withApi',              expectedMinRole: 'member',               backingPage: 'admin (audit log)' },
-  { apiPath: 'dues/calculate',       expectedAuthPattern: 'withRoleAuth',         expectedMinRole: 'steward',              backingPage: 'admin/dues' },
+  { apiPath: 'dues/calculate',       expectedAuthPattern: 'withApiAuth',          expectedMinRole: 'member',               backingPage: 'admin/dues (own record; any other member needs the named financial role)' },
   { apiPath: 'analytics/cross-org',  expectedAuthPattern: 'withApi',              expectedMinRole: 'platform_lead',        backingPage: 'cross-org analytics (platform)' },
 ]
 

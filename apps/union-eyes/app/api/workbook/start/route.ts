@@ -8,7 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { db } from '@/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { workbooks, workbookModules, WORKBOOK_MODULE_IDS } from '@/db/schema/workbook-schema';
 import { logger } from '@/lib/logger';
 import { guardPublicIntake } from '@/lib/public-intake/guard';
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // The workbook and its module rows are one record: a failure seeding the modules must not leave a bare workbook.
-    const wb = await db.transaction(async (tx) => {
+    const wb = await withSystemContext(async (tx) => {
       const [created] = await tx
         .insert(workbooks)
         .values({

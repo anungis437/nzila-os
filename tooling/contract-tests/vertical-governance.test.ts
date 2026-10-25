@@ -13,6 +13,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { join, relative } from 'node:path'
 
+import { isRetiredNoOpRoute } from './retired-routes'
 const ROOT = join(__dirname, '..', '..')
 const APPS_DIR = join(ROOT, 'apps')
 
@@ -139,6 +140,7 @@ describe('INV-11 — Every API route has authorization', () => {
     'verifyShopifySignature(',  // Shopify webhook signature verification
     'withRoleAuth(',             // Role-based auth guard wrapper
     'withAdminAuth(',            // Admin-only auth guard wrapper
+    'withSystemAdminAuth(',      // Platform (system) administrator guard wrapper
     'requireApiAuth(',           // API auth requirement check
     'requireUser(',              // Requires authenticated user
     'getAuth(',                  // Clerk getAuth() direct call
@@ -206,7 +208,7 @@ describe('INV-11 — Every API route has authorization', () => {
         const content = readFileSync(route, 'utf-8')
 
         // Route must contain at least one auth pattern
-        const hasAuth = AUTH_PATTERNS.some((pattern) => content.includes(pattern))
+        const hasAuth = AUTH_PATTERNS.some((pattern) => content.includes(pattern)) || isRetiredNoOpRoute(content)
 
         expect(
           hasAuth,

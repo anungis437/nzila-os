@@ -12,6 +12,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { APP_REGISTRY } from '@nzila/platform-contracts/registry'
 
+import { isRetiredNoOpRoute } from './retired-routes'
 const ROOT = join(__dirname, '..', '..')
 const APPS_DIR = join(ROOT, 'apps')
 
@@ -109,6 +110,7 @@ describe('Org-scope enforcement patterns', () => {
         if (isExemptRoute(route)) continue
         const content = readFileSync(route, 'utf-8')
         const hasOrgGuard =
+          isRetiredNoOpRoute(content) ||
           content.includes('withOrgScope') ||
           content.includes('requireOrgAccess') ||
           /await\s+getCaseActor\s*\(/.test(content) ||
