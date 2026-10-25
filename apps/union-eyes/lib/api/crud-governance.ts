@@ -45,6 +45,7 @@ const OPERATIONAL = [
   'training_programs', 'trend_analyses', 'user_notification_preferences', 'wcb_employer_assessments', 'workplace_incidents', 'worksites',
 ] as const
 
+// ga-check:exempt static classification table built once at module load; it holds no runtime state.
 const POLICY = new Map<string, CrudGovernanceClass>([
   ...DENIED.map((t) => [t, 'DENIED'] as const),
   ...SUBJECT_OWNED.map((t) => [t, 'SUBJECT_OWNED'] as const),

@@ -21,6 +21,7 @@ import * as declarations from '../db/schema'
 
 const dialect = new PgDialect()
 const wanted = new Set(readFileSync(process.argv[2], 'utf8').split(/\r?\n/).map((s) => s.trim()).filter(Boolean))
+// ga-check:exempt one-shot generator script: a local census built per run, never persistence.
 const census = new Map<string, { columnsMissing: string[]; requiredUndeclared: string[] }>(
   (JSON.parse(readFileSync('../../docs/union-eyes/convergence/register/ue-canonical-schema-census.json', 'utf8')).entries as { table: string; columnsMissing: string[]; requiredUndeclared: string[] }[]).map((e) => [e.table, e]),
 )
@@ -49,6 +50,7 @@ function defaultSql(c: any): string | null {
 }
 
 // One enum name declared with different members in different tables cannot be served by one database type.
+// ga-check:exempt one-shot generator script: a local census built per run, never persistence.
 const enumVariants = new Map<string, Set<string>>()
 for (const value of Object.values(declarations as Record<string, unknown>)) {
   if (!is(value, PgTable)) continue
