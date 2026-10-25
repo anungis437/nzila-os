@@ -15,9 +15,9 @@ import {
 import { db } from '@/db/db';
 import { documentAccessGrants, documentLinks, documents } from '@/db/schema/documents-schema';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
-import { isDocumentVisibleByPolicy, toGovernanceLabel } from '@/lib/services/document-governance-service';
 import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit';
 import { isDocumentId } from '@/lib/documents/canonical-journey';
+import { authorizeOcrExtraction, ocrRelationshipFromKernel } from '@/lib/documents/ocr-authorization';
 import { processDocumentOCR } from '@/lib/services/document-service';
 
 type OcrContext = {
@@ -58,6 +58,7 @@ export const POST = withRoleAuth('steward', async (_request: NextRequest, contex
       .select({
         id: documents.id,
         privacyLabel: documents.privacyLabel,
+        uploadedBy: documents.uploadedBy,
         linkedEntityType: documentLinks.linkedEntityType,
         linkedEntityId: documentLinks.linkedEntityId,
       })
@@ -95,36 +96,29 @@ export const POST = withRoleAuth('steward', async (_request: NextRequest, contex
       .limit(1)
   )[0];
 
-  let caseAccess = {
-    isPrimaryOwner: false,
-    canViewCase: false,
-    canViewPrivateDocuments: false,
-  };
-  if (row.linkedEntityType === 'grievance' && row.linkedEntityId) {
-    const effective = await getEffectiveCaseAccess({
+  const linked = row.linkedEntityType === 'grievance' && Boolean(row.linkedEntityId);
+  const kernel = linked && row.linkedEntityId
+    ? await getEffectiveCaseAccess({
       organizationId,
       grievanceId: row.linkedEntityId,
       userId,
-    });
-    caseAccess = {
-      isPrimaryOwner: effective.isPrimaryOwner,
-      canViewCase: effective.canViewCase,
-      canViewPrivateDocuments: effective.canViewPrivateDocuments,
-    };
-  }
-
-  const allowed = isDocumentVisibleByPolicy(
-    toGovernanceLabel({ privacyLabel: row.privacyLabel ?? undefined }),
-    {
-      isOrgMember: true,
-      isStewardPlus: true,
-      isPrimaryOwner: caseAccess.isPrimaryOwner,
-      hasCaseAccess: true,
-      canViewPrivateDocuments: caseAccess.canViewPrivateDocuments,
-      hasExplicitDocumentGrant: Boolean(explicitGrant),
-    },
-  );
-  if (!allowed) {
+    })
+    : null;
+  const kernelRecord = kernel as ({ recused?: boolean } | null);
+  const decision = authorizeOcrExtraction({
+    privacyLabel: row.privacyLabel,
+    relationship: ocrRelationshipFromKernel({
+      linked,
+      isPrimaryOwner: kernel?.isPrimaryOwner === true,
+      canViewCase: kernel?.canViewCase === true,
+      recused: kernelRecord?.recused === true,
+    }),
+    canViewPrivateDocuments: kernel?.canViewPrivateDocuments === true,
+    canUploadDocuments: kernel?.canUploadDocuments === true,
+    hasExplicitViewGrant: Boolean(explicitGrant),
+    isUploader: row.uploadedBy === userId,
+  });
+  if (!decision.allowed) {
     return standardErrorResponse(ErrorCode.FORBIDDEN, 'You do not have access to this document');
   }
 
@@ -139,8 +133,9 @@ export const POST = withRoleAuth('steward', async (_request: NextRequest, contex
     return standardErrorResponse(ErrorCode.EXTERNAL_SERVICE_ERROR, 'OCR processing is unavailable');
   }
 
+  let recorded = false;
   try {
-    await appendMandatoryAudit(db, {
+    recorded = await appendMandatoryAudit(db, {
       organizationId,
       action: 'document.ocr.extract',
       resourceType: 'documents',
@@ -154,6 +149,9 @@ export const POST = withRoleAuth('steward', async (_request: NextRequest, contex
       },
     });
   } catch {
+    return standardErrorResponse(ErrorCode.SERVICE_UNAVAILABLE, 'OCR audit could not be recorded');
+  }
+  if (recorded !== true) {
     return standardErrorResponse(ErrorCode.SERVICE_UNAVAILABLE, 'OCR audit could not be recorded');
   }
 
