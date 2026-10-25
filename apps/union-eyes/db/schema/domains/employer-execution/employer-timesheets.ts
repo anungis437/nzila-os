@@ -10,6 +10,7 @@ import {
   integer,
   jsonb,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { memberEmployment, jobClassifications } from "../member/member-employment";
 import { employers, worksites, bargainingUnits } from "../../union-structure-schema";
@@ -55,6 +56,13 @@ export const employerTimesheetBatches = pgTable(
     employerIdx: index("employer_timesheet_batches_employer_idx").on(table.employerId),
     periodIdx: index("employer_timesheet_batches_period_idx").on(table.periodStart, table.periodEnd),
     statusIdx: index("employer_timesheet_batches_status_idx").on(table.status),
+    filePeriodIdx: uniqueIndex("employer_timesheet_batches_file_period_uidx").on(
+      table.organizationId,
+      table.employerId,
+      table.periodStart,
+      table.periodEnd,
+      table.sourceFileHash,
+    ),
   }),
 );
 

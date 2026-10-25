@@ -388,7 +388,8 @@ describe('employer-execution/payroll-runs/[id] route', () => {
       const result = await PATCH(patch('executor_1', 'run_4', 'seal'));
 
       expect(result.data.run).toMatchObject({ id: 'run_4', status: 'posted' });
-      expect(m.state.updates[0]!.values).toMatchObject({ status: 'posted', immutableSnapshotLocked: true });
+      expect(m.state.updates[0]!.values).toMatchObject({ status: 'posted', immutableSnapshotLocked: true, executedBy: 'executor_1' });
+      expect(m.state.updates[0]!.values.executedAt).toBeInstanceOf(Date);
       expect(m.state.inserts.map((insert) => insert.values.eventCode)).toEqual(['official_run_posted']);
       expect(m.state.inserts[0]!.values.details).toMatchObject({
         executedBy: 'executor_1',

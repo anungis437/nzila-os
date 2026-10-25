@@ -13,6 +13,7 @@ import { organizations } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { CookieConsentManager, CookieConsentOwnershipError } from "@/lib/gdpr/consent-manager";
 import { logger } from '@/lib/logger';
+import { guardPublicIntake } from '@/lib/public-intake/guard';
 
 const gdprCookieConsentSchema = z.object({
   consentId: z.string().uuid('Invalid consentId'),
@@ -26,11 +27,14 @@ const gdprCookieConsentSchema = z.object({
 
 export const POST = async (request: NextRequest) => {
   try {
+    // Public and every save writes an audit row, so it is bounded per client and by body size before anything else.
+    const intake = await guardPublicIntake(request, { bucket: 'write' });
+    if (!intake.ok) return intake.response;
+
     let userId: string | undefined;
     try { const user = await getCurrentUser(); userId = user?.id ?? undefined; } catch { /* unauthenticated */ }
 
-    const body = await request.json();
-    const validation = gdprCookieConsentSchema.safeParse(body);
+    const validation = gdprCookieConsentSchema.safeParse(intake.json);
     if (!validation.success) {
       return NextResponse.json({ error: 'Invalid request data' }, { status: 400 });
     }

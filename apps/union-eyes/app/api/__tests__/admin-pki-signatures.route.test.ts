@@ -62,7 +62,7 @@ describe('admin/pki/signatures/[id]/sign', () => {
     vi.clearAllMocks();
     m.memberRows = [{ email: 'Sam@Example.com' }];
     m.performAuditedOperation.mockImplementation((_op: unknown, run: () => unknown) => run());
-    m.getWorkflow.mockReturnValue({ id: signBody.workflowId, organizationId: 'org-a' });
+    m.getWorkflow.mockReturnValue({ id: signBody.workflowId, organizationId: 'org-a', documentId: 'doc1' });
     m.signDocument.mockResolvedValue({ signatureId: 'sig1' });
     m.recordSignature.mockResolvedValue({ state: 'in_progress' });
   });
@@ -96,6 +96,12 @@ describe('admin/pki/signatures/[id]/sign', () => {
 
   it('is a 404 for another organization\'s workflow', async () => {
     m.getWorkflow.mockReturnValue({ id: signBody.workflowId, organizationId: 'org-b' });
+    expect((await call()).status).toBe(404);
+    expect(m.signDocument).not.toHaveBeenCalled();
+  });
+
+  it('is a 404 when the document is not the one the workflow was opened for', async () => {
+    m.getWorkflow.mockReturnValue({ id: signBody.workflowId, organizationId: 'org-a', documentId: 'another-doc' });
     expect((await call()).status).toBe(404);
     expect(m.signDocument).not.toHaveBeenCalled();
   });

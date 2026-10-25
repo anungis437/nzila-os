@@ -68,7 +68,8 @@ export const POST = withRoleAuth('admin', async (request, context: BaseAuthConte
 
     // A signature can only be recorded into one of this organization's own workflows.
     const targetWorkflow = getWorkflow(workflowId)
-    if (!targetWorkflow || targetWorkflow.organizationId !== organizationId) {
+    // ...and only for the document that workflow was opened for.
+    if (!targetWorkflow || targetWorkflow.organizationId !== organizationId || targetWorkflow.documentId !== documentId) {
       return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Workflow not found')
     }
 

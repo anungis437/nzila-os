@@ -477,6 +477,8 @@ async function executeRun(tx: RLSTx, { organizationId, userId, run }: Transition
     .set({
       status: "posted",
       immutableSnapshotLocked: true,
+      executedBy: userId,
+      executedAt: new Date(),
       updatedAt: new Date(),
     })
     .where(
@@ -490,7 +492,7 @@ async function executeRun(tx: RLSTx, { organizationId, userId, run }: Transition
 
   if (!sealedRun) throw ApiError.conflict("Payroll run is no longer in the approved state; it was already executed or changed");
 
-  // No executor column exists on the run; the executor is recorded here and in the audit entry.
+  // The executor is a column on the run (platform 0021) and is also recorded here and in the audit entry.
   await tx.insert(employerExecutionComplianceEvents).values({
     organizationId,
     payrollRunId: run.id,

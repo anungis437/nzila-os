@@ -223,6 +223,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-final-convergence",
         "note": "Third generated additive evolution of 23 live stub relations to their declared shape (UE-CONV-H-007). Not yet applied to any clone or live database."
+      },
+      {
+        "tag": "0021_employer_execution_integrity",
+        "sha256": "ecd6976878eb61f99f574889f2f0efafc6d99895db776a17e1a4f38afebfe7d4",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-final-convergence",
+        "note": "Payroll-run executor columns, one remittance run per payroll run and one timesheet batch per file and period as unique indexes; refuses existing duplicates. Not yet applied to any clone or live database."
       }
     ]
   }

@@ -11,6 +11,7 @@ const m = vi.hoisted(() => ({
   getReportQueue: vi.fn(),
   queueAdd: vi.fn(),
   persistAtomicAudit: vi.fn(),
+  guardPublicIntake: vi.fn(),
   orgRows: [] as unknown[],
   tx: {} as Record<string, unknown>,
 }));
@@ -24,6 +25,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: vi.fn(async (_ctx: unknown, fn: (t: unknown) => Promise<unknown>) => fn(m.tx)),
   withSystemContext: vi.fn(async (fn: (t: unknown) => Promise<unknown>) => fn(m.tx)),
 }));
+vi.mock('@/lib/public-intake/guard', () => ({ guardPublicIntake: m.guardPublicIntake }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/gdpr/consent-manager', () => {
   class CookieConsentOwnershipError extends Error {}
@@ -142,6 +144,7 @@ describe('gdpr/cookie-consent POST (public)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.getCurrentUser.mockResolvedValue(null);
+    m.guardPublicIntake.mockImplementation(async (request: Request) => ({ ok: true, json: await request.json() }));
     m.persistAtomicAudit.mockResolvedValue(undefined);
     m.saveCookieConsent.mockResolvedValue({ id: 'cc1', functional: false, analytics: true, marketing: false });
     const rows = () => m.orgRows;
@@ -159,6 +162,18 @@ describe('gdpr/cookie-consent POST (public)', () => {
       m.tx,
       expect.objectContaining({ organizationId: ORG, userId: 'system:cookie-consent', action: 'gdpr.cookie_consent.save', resourceId: 'cc1' }),
     );
+  });
+
+  it('is bounded per client before it reads or writes anything', async () => {
+    const { POST } = await import('../gdpr/cookie-consent/route');
+    m.guardPublicIntake.mockResolvedValueOnce({ ok: false, response: new Response('{}', { status: 429 }) });
+
+    const response = await POST(post('cookie-consent', body));
+
+    expect(response.status).toBe(429);
+    expect(m.guardPublicIntake).toHaveBeenCalledWith(expect.anything(), { bucket: 'write' });
+    expect(m.saveCookieConsent).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('attributes the change to a signed-in member', async () => {

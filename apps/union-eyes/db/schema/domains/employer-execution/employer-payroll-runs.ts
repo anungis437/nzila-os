@@ -53,6 +53,8 @@ export const employerPayrollRuns = pgTable(
     immutableSnapshotLocked: boolean("immutable_snapshot_locked").notNull().default(false),
     approvedBy: text("approved_by"),
     approvedAt: timestamp("approved_at", { withTimezone: true }),
+    executedBy: text("executed_by"),
+    executedAt: timestamp("executed_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },

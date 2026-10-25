@@ -42,6 +42,7 @@ export interface RunParticipants {
 interface RunDutyRecord {
   inputSnapshot?: unknown
   approvedBy?: string | null
+  executedBy?: string | null
 }
 
 const asId = (value: unknown): string | null =>
@@ -60,7 +61,7 @@ export function participantsFromRun(run: RunDutyRecord, executedBy?: string | nu
   return {
     preparedBy: asId(snapshot.creatorUserId),
     approvedBy: [...approvers],
-    executedBy: asId(executedBy),
+    executedBy: asId(run.executedBy) ?? asId(executedBy),
   }
 }
 

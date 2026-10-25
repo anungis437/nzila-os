@@ -169,6 +169,13 @@
       "when": 1758790000000,
       "tag": "0020_declared_shape_tranche_3",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1758800000000,
+      "tag": "0021_employer_execution_integrity",
+      "breakpoints": true
     }
   ]
 }

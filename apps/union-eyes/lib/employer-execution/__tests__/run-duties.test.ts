@@ -7,7 +7,7 @@ import {
   type RunParticipants,
 } from '../run-duties'
 
-const run = (over: Partial<{ inputSnapshot: unknown; approvedBy: string | null }> = {}) => ({
+const run = (over: Partial<{ inputSnapshot: unknown; approvedBy: string | null; executedBy: string | null }> = {}) => ({
   inputSnapshot: { creatorUserId: 'preparer' },
   approvedBy: null as string | null,
   ...over,
@@ -107,5 +107,19 @@ describe('recordedRunAmounts', () => {
     expect(
       recordedRunAmounts({ totalGross: '100.00', totalNet: 80, totalDues: '2.00', totalBenefits: '3.00', totalPension: '4.00' }),
     ).toEqual({ totalGross: '100.00', totalNet: '80', totalDues: '2.00', totalBenefits: '3.00', totalPension: '4.00' })
+  })
+})
+
+describe('the executor on the run record', () => {
+  it('is read from the run itself, not only from the caller', () => {
+    expect(participantsFromRun(run({ executedBy: 'executor' })).executedBy).toBe('executor')
+  })
+
+  it('prefers the recorded executor over a supplied one', () => {
+    expect(participantsFromRun(run({ executedBy: 'executor' }), 'someone-else').executedBy).toBe('executor')
+  })
+
+  it('falls back to the supplied executor for a run posted before the column existed', () => {
+    expect(participantsFromRun(run(), 'executor').executedBy).toBe('executor')
   })
 })
