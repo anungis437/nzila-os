@@ -48,6 +48,15 @@ describe('decideOcrProcessing — linked documents', () => {
     expect(decision).toEqual({ allowed: false, reason: 'classification' });
   });
 
+  it('refuses privileged and highly sensitive documents without an explicit document grant', () => {
+    for (const privacyLabel of ['privileged', 'highly_sensitive']) {
+      expect(decideOcrProcessing(facts({ privacyLabel, linkedCase: kernel({ canProcessOcr: true }) }))).toEqual({ allowed: false, reason: 'classification' });
+    }
+    // Only an explicit grant that also carries processing opens a restricted label.
+    expect(decideOcrProcessing(facts({ privacyLabel: 'privileged', linkedCase: kernel({ canProcessOcr: true }), grant: { canView: true, canProcessOcr: true } }))).toMatchObject({ allowed: true });
+    expect(decideOcrProcessing(facts({ privacyLabel: 'privileged', linkedCase: kernel({ canProcessOcr: true }), grant: { canView: true, canProcessOcr: false } }))).toMatchObject({ allowed: true, basis: 'kernel_case_authority' });
+  });
+
   it('refuses an unknown or missing classification', () => {
     expect(decideOcrProcessing(facts({ privacyLabel: null, linkedCase: kernel({ canProcessOcr: true }) }))).toEqual({ allowed: false, reason: 'classification' });
     expect(decideOcrProcessing(facts({ privacyLabel: 'secret', linkedCase: kernel({ canProcessOcr: true }) }))).toEqual({ allowed: false, reason: 'classification' });
