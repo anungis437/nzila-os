@@ -19,6 +19,8 @@ import type { SQL } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { processImageOCR, processPDFOCR } from "@/lib/services/ocr-service";
 import { downloadBuffer } from "@/lib/blob-client";
+import { boundExtractedText, ocrDispatchKind } from "@/lib/documents/ocr-bytes";
+import { isDiscardableBlobPath } from "@/lib/documents/ocr-intake";
 import { extractBlobPathFromUrl } from "@/lib/services/document-blob-integrity-service";
 import { getDocumentMutabilityBlockReason } from "@/lib/services/document-retention-guard";
 
@@ -595,13 +597,14 @@ export async function processDocumentOCR(
         : undefined) ??
       extractBlobPathFromUrl(fileUrl);
 
-    if (!blobPath) {
+    if (!organizationId || !blobPath || !isDiscardableBlobPath(blobPath, organizationId)) {
       throw new Error("Document blob path missing");
     }
 
     const buffer = await downloadBuffer(DOCUMENT_BLOB_CONTAINER, blobPath);
-    const lowerMimeType = (document.mimeType ?? "").toLowerCase();
-    const lowerFileType = (document.fileType ?? "").toLowerCase();
+    const declaredMime = document.mimeType ?? "";
+    const declaredFileType = document.fileType ?? "";
+    const kind = ocrDispatchKind(buffer, declaredMime, declaredFileType);
     const processedAt = new Date();
 
     let extractedText = "";
@@ -611,14 +614,14 @@ export async function processDocumentOCR(
       provider: "native",
     };
 
-    if (lowerMimeType.startsWith("image/")) {
+    if (kind === "image") {
       const imageResult = await processImageOCR(buffer);
       extractedText = imageResult.text;
       confidence = imageResult.confidence;
       metadata = {
         provider: "image-ocr",
       };
-    } else if (lowerMimeType.includes("pdf") || lowerFileType === "pdf") {
+    } else if (kind === "pdf") {
       const pdfResult = await processPDFOCR(buffer);
       extractedText = pdfResult.fullText;
       confidence = pdfResult.pages.length > 0
@@ -628,13 +631,7 @@ export async function processDocumentOCR(
         provider: "pdf-ocr",
         pages: pdfResult.pages.length,
       };
-    } else if (
-      lowerMimeType.startsWith("text/")
-      || lowerMimeType.includes("json")
-      || lowerFileType === "txt"
-      || lowerFileType === "csv"
-      || lowerFileType === "json"
-    ) {
+    } else if (kind === "text") {
       extractedText = buffer.toString("utf8");
       confidence = 100;
       metadata = {
@@ -643,6 +640,13 @@ export async function processDocumentOCR(
     } else {
       throw new Error("OCR_UNSUPPORTED");
     }
+
+    const bounded = boundExtractedText(extractedText);
+    extractedText = bounded.text;
+    metadata = {
+      ...metadata,
+      truncated: bounded.truncated,
+    };
 
     const result: OCRResult = {
       documentId,

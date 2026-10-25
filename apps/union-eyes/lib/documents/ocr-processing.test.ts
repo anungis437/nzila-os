@@ -65,4 +65,33 @@ describe('processDocumentOCR persistence boundary', () => {
     });
     await expect(processDocumentOCR('d1', 'org-1')).rejects.toThrow('Failed to process document OCR');
   });
+
+  it('reads the bytes and the organization prefix before choosing a processor', async () => {
+    mocks.downloadBuffer.mockResolvedValueOnce(Buffer.from('%PDF-1.4\ntext'));
+    mocks.processPDFOCR.mockResolvedValueOnce({ fullText: 'pdf text', pages: [{ confidence: 90 }] });
+    mocks.findFirst.mockResolvedValueOnce({ ...document, mimeType: 'image/png', fileType: 'png' });
+    const pdf = await processDocumentOCR('d1', 'org-1');
+    expect(pdf.text).toBe('pdf text');
+    expect(mocks.processPDFOCR).toHaveBeenCalledOnce();
+    expect(mocks.processImageOCR).not.toHaveBeenCalled();
+
+    mocks.downloadBuffer.mockResolvedValueOnce(Buffer.from('PK\u0003\u0004zip'));
+    mocks.findFirst.mockResolvedValueOnce({ ...document, mimeType: 'image/png', fileType: 'png' });
+    await expect(processDocumentOCR('d1', 'org-1')).rejects.toThrow('OCR_UNSUPPORTED');
+
+    mocks.downloadBuffer.mockResolvedValueOnce(Buffer.from('plain words'));
+    mocks.findFirst.mockResolvedValueOnce({ ...document, mimeType: 'application/pdf', fileType: 'pdf' });
+    const text = await processDocumentOCR('d1', 'org-1');
+    expect(text.text).toBe('plain words');
+    expect(text.metadata.truncated).toBe(false);
+    expect(mocks.processPDFOCR).toHaveBeenCalledOnce();
+
+    mocks.findFirst.mockResolvedValueOnce({
+      ...document,
+      metadata: { blobKey: 'documents/org-2/secret.png' },
+    });
+    await expect(processDocumentOCR('d1', 'org-1')).rejects.toThrow('Document blob path missing');
+    await expect(processDocumentOCR('d1')).rejects.toThrow('Document blob path missing');
+    expect(mocks.downloadBuffer).toHaveBeenCalledTimes(3);
+  });
 });
