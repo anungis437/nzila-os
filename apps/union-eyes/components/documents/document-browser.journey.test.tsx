@@ -15,6 +15,14 @@ vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
 }));
 
+vi.mock('@/components/documents/ocr-upload', () => ({
+  OCRUpload: ({ onUploadComplete }: { onUploadComplete?: (files: Array<{ documentId?: string }>) => void }) => (
+    <button type="button" onClick={() => onUploadComplete?.([{ documentId: '11111111-1111-4111-8111-111111111111' }])}>
+      save-ocr-document
+    </button>
+  ),
+}));
+
 const listRow = {
   id: DOC,
   title: 'Case note',
@@ -138,5 +146,16 @@ describe('document browser canonical journey', () => {
     expect(screen.getAllByRole('button', { name: 'Apercu' }).length).toBeGreaterThan(0);
     expect(screen.getByText(/Le tri et la pagination/)).toBeInTheDocument();
     expect(calls.some((call) => call.includes('documentType='))).toBe(false);
+  });
+
+  it('reloads the repository after a saved OCR document', async () => {
+    const { calls } = installFetch();
+    render(<DocumentBrowser organizationId="org-1" />);
+    await screen.findByText('Case note');
+    const before = calls.filter((call) => call.startsWith('GET /api/documents/repository')).length;
+    await userEvent.click(screen.getByRole('button', { name: 'save-ocr-document' }));
+    await waitFor(() => {
+      expect(calls.filter((call) => call.startsWith('GET /api/documents/repository')).length).toBeGreaterThan(before);
+    });
   });
 });
