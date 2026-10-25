@@ -97,11 +97,10 @@ describe('canonical document journey rules', () => {
       ...coordination.integratorReservedCaseDocumentRoutes,
     ]);
     expect(tracked.some((path) => protectedPaths.has(path))).toBe(false);
-    expect(matrix.paths.filter((entry) => entry.migrationStatus === 'tranche_1_complete')).toEqual([
-      expect.objectContaining({ path: 'apps/union-eyes/app/[locale]/dashboard/documents/page.tsx' }),
-      expect.objectContaining({ path: 'apps/union-eyes/app/api/documents/[id]/download/route.ts' }),
-      expect.objectContaining({ path: 'apps/union-eyes/components/documents/documents-console.tsx' }),
-    ]);
+    const status = new Map(matrix.paths.map((entry) => [entry.path, entry.migrationStatus]));
+    expect(status.get('apps/union-eyes/app/[locale]/dashboard/documents/page.tsx')).toBe('IMPLEMENTED_PENDING_RUNTIME_PROOF');
+    expect(status.get('apps/union-eyes/app/api/documents/[id]/download/route.ts')).toBe('BLOCKED_CANONICAL_CONTRACT');
+    expect(status.get('apps/union-eyes/components/documents/documents-console.tsx')).toBe('IMPLEMENTED_PENDING_RUNTIME_PROOF');
     expect(matrix.canonicalContractGaps.map((gap) => gap.id)).toEqual([
       'document-share-disclosure',
       'document-retention-execution',

@@ -48,12 +48,12 @@ describe('tranche 3 document contract record', () => {
 
   it('moves the portal and signature consumers off the unstarted list', () => {
     const status = new Map(matrix.paths.map((entry) => [entry.path, entry.migrationStatus]));
-    expect(status.get('apps/union-eyes/app/[locale]/dashboard/documents/page.tsx')).toBe('tranche_1_complete');
-    expect(status.get('apps/union-eyes/components/documents/document-browser.tsx')).toBe('tranche_2_complete');
-    expect(status.get('apps/union-eyes/app/api/signatures/documents/route.ts')).toBe('tranche_3_projection');
-    expect(status.get('apps/union-eyes/components/documents/document-preview-modal.tsx')).toBe('tranche_3_fail_closed');
-    expect(status.get('apps/union-eyes/app/api/documents/route.ts')).toBe('tranche_3_blocked_unowned_caller');
-    expect(status.get('apps/union-eyes/lib/documents/batch-operations-service.ts')).toBe('tranche_3_fail_closed');
-    expect(status.get('apps/union-eyes/app/api/external/documents/[id]/download/route.ts')).toBe('tranche_3_sas_without_file_url');
+    expect(status.get('apps/union-eyes/app/[locale]/dashboard/documents/page.tsx')).toBe('IMPLEMENTED_PENDING_RUNTIME_PROOF');
+    expect(status.get('apps/union-eyes/components/documents/document-browser.tsx')).toBe('IMPLEMENTED_PENDING_RUNTIME_PROOF');
+    expect(status.get('apps/union-eyes/app/api/signatures/documents/route.ts')).toBe('IMPLEMENTED_PENDING_RUNTIME_PROOF');
+    expect(status.get('apps/union-eyes/components/documents/document-preview-modal.tsx')).toBe('IMPLEMENTED_PENDING_RUNTIME_PROOF');
+    expect(status.get('apps/union-eyes/app/api/documents/route.ts')).toBe('RETAINED_REQUIRED_CONSUMER');
+    expect(status.get('apps/union-eyes/lib/documents/batch-operations-service.ts')).toBe('BLOCKED_CANONICAL_CONTRACT');
+    expect(status.get('apps/union-eyes/app/api/external/documents/[id]/download/route.ts')).toBe('BLOCKED_CANONICAL_CONTRACT');
   });
 });

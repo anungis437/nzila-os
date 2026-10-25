@@ -35,12 +35,12 @@ describe('tranche 2 document contract record', () => {
 
   it('marks the browser and OCR surfaces migrated without moving tranche 1', () => {
     const status = new Map(matrix.paths.map((entry) => [entry.path, entry.migrationStatus]));
-    expect(status.get('apps/union-eyes/app/[locale]/dashboard/documents/page.tsx')).toBe('tranche_1_complete');
-    expect(status.get('apps/union-eyes/app/api/documents/[id]/download/route.ts')).toBe('tranche_1_complete');
-    expect(status.get('apps/union-eyes/components/documents/documents-console.tsx')).toBe('tranche_1_complete');
-    expect(status.get('apps/union-eyes/components/documents/document-browser.tsx')).toBe('tranche_2_complete');
-    expect(status.get('apps/union-eyes/components/documents/ocr-upload.tsx')).toBe('tranche_2_complete');
-    expect(status.get('apps/union-eyes/app/api/documents/[id]/ocr/route.ts')).toBe('tranche_2_complete');
-    expect(status.get('apps/union-eyes/app/api/documents/upload/route.ts')).toBe('tranche_2_intake');
+    expect(status.get('apps/union-eyes/app/[locale]/dashboard/documents/page.tsx')).toBe('IMPLEMENTED_PENDING_RUNTIME_PROOF');
+    expect(status.get('apps/union-eyes/app/api/documents/[id]/download/route.ts')).toBe('BLOCKED_CANONICAL_CONTRACT');
+    expect(status.get('apps/union-eyes/components/documents/documents-console.tsx')).toBe('IMPLEMENTED_PENDING_RUNTIME_PROOF');
+    expect(status.get('apps/union-eyes/components/documents/document-browser.tsx')).toBe('IMPLEMENTED_PENDING_RUNTIME_PROOF');
+    expect(status.get('apps/union-eyes/components/documents/ocr-upload.tsx')).toBe('IMPLEMENTED_PENDING_RUNTIME_PROOF');
+    expect(status.get('apps/union-eyes/app/api/documents/[id]/ocr/route.ts')).toBe('BLOCKED_CANONICAL_CONTRACT');
+    expect(status.get('apps/union-eyes/app/api/documents/upload/route.ts')).toBe('BLOCKED_CANONICAL_CONTRACT');
   });
 });
