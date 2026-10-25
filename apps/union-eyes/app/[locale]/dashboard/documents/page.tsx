@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import { requireUser, getUserRole } from '@/lib/api-auth-guard';
 import { getDashboardExperience } from '@/lib/dashboard/role-experience';
 import { MemberDocuments } from '@/components/documents/member-documents';
+import { DocumentsConsole } from '@/components/documents/documents-console';
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -20,9 +21,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 /**
- * /dashboard/documents — document library root.
- *
- * Access is gated by the documents layout (requires steward role or above).
+ * /dashboard/documents — canonical document library.
+ * The layout only checks that a session exists. Document authorization is enforced by the repository and download
+ * routes, not by this page. Members get their own surface (their documents and what the union shares with all
+ * members); the library console is the staff surface.
  */
 export default async function DocumentsPage() {
   const user = await requireUser();
@@ -34,11 +36,9 @@ export default async function DocumentsPage() {
     return <MemberDocuments />;
   }
 
-  const t = await getTranslations('documentsPage');
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-4">{t('header.title')}</h1>
-      <p className="text-gray-600">{t('header.description')}</p>
+    <div className="px-4 py-4 sm:px-6 sm:py-6">
+      <DocumentsConsole />
     </div>
   );
 }

@@ -22,6 +22,7 @@ import {
 import { generateSasUrl } from '@/lib/blob-client';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import type { RLSTx } from '@/lib/db/with-rls-context';
+import { isDocumentId } from '@/lib/documents/canonical-journey';
 import { hasDocumentContextAccess } from '@/lib/services/document-member-scope';
 
 const DOCUMENT_BLOB_CONTAINER = process.env.AZURE_BLOB_CONTAINER ?? 'union-eyes';
@@ -35,8 +36,8 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     return standardErrorResponse(ErrorCode.FORBIDDEN, 'Unauthorized');
   }
 
-  if (!params?.id) {
-    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing document ID');
+  if (!params?.id || !isDocumentId(params.id)) {
+    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid document ID');
   }
 
   const row = (
@@ -152,19 +153,34 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
       .limit(1)
   )[0];
 
-  const downloadUrl = latestVersion?.storageKey
-    ? await generateSasUrl(DOCUMENT_BLOB_CONTAINER, latestVersion.storageKey)
-    : row.fileUrl;
+  let downloadUrl: string | null;
+  try {
+    downloadUrl = latestVersion?.storageKey
+      ? await generateSasUrl(DOCUMENT_BLOB_CONTAINER, latestVersion.storageKey)
+      : row.fileUrl;
+  } catch {
+    return standardErrorResponse(ErrorCode.EXTERNAL_SERVICE_ERROR, 'Document storage is unavailable');
+  }
 
-  // Access evidence is mandatory: no download URL is issued without its canonical audit record.
-  await persistAtomicAudit(db as unknown as RLSTx, {
-    organizationId,
-    action: 'document.download',
-    resourceType: 'documents',
-    resourceId: row.id,
-    userId,
-    details: { route: '/api/documents/[id]/download', privacyLabel: row.privacyLabel ?? null },
-  });
+  if (!downloadUrl) {
+    return standardErrorResponse(ErrorCode.EXTERNAL_SERVICE_ERROR, 'Document storage location is missing');
+  }
+
+  // Access evidence is mandatory: no download URL is issued without its canonical audit record. persistAtomicAudit
+  // either records the access (hash-chained in Canonical V2, audit_logs otherwise) or throws; there is no
+  // "audit skipped" result for a URL to slip through.
+  try {
+    await persistAtomicAudit(db as unknown as RLSTx, {
+      organizationId,
+      action: 'document.download',
+      resourceType: 'documents',
+      resourceId: row.id,
+      userId,
+      details: { route: '/api/documents/[id]/download', privacyLabel: row.privacyLabel ?? null },
+    });
+  } catch {
+    return standardErrorResponse(ErrorCode.SERVICE_UNAVAILABLE, 'Document download audit could not be recorded');
+  }
 
   return standardSuccessResponse({
     id: row.id,
