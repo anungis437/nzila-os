@@ -10,6 +10,7 @@ const m = vi.hoisted(() => ({
   flattenExpertiseTags: vi.fn(),
   isIndexingAllowed: vi.fn(),
   indexExitInterview: vi.fn(),
+  audit: vi.fn(),
 }));
 
 const mockDb = {
@@ -44,6 +45,8 @@ vi.mock('@/lib/api/framework', () => ({
 }));
 
 vi.mock('@/db/db', () => ({ db: mockDb }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (_o: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(mockDb) }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/lib/knowledge-transfer/indexing/semantic-indexer', () => ({ indexExitInterview: m.indexExitInterview }));
 vi.mock('@/lib/knowledge-transfer/expertise/expertise-extractor', () => ({
   extractExpertise: m.extractExpertise,
@@ -70,6 +73,7 @@ describe('exit-interviews/[id]/publish route', () => {
     m.flattenExpertiseTags.mockReturnValue(['tag-a']);
     m.isIndexingAllowed.mockReturnValue(true);
     m.indexExitInterview.mockResolvedValue(undefined);
+    m.audit.mockResolvedValue(undefined);
 
     m.withApi.mockImplementation(
       (_config: unknown, handler: (ctx: any) => Promise<unknown>) =>
@@ -130,7 +134,7 @@ describe('exit-interviews/[id]/publish route', () => {
     m.selectQueue.push([
       {
         id: 'iv_1',
-        status: 'submitted',
+        status: 'reviewed',
         title: 'Interview',
         retiringEmployeeName: 'Jane',
         roleInUnion: 'Steward',
@@ -161,5 +165,36 @@ describe('exit-interviews/[id]/publish route', () => {
     const json = await response.json();
     expect(json.data.status).toBe('published');
     expect(json.knowledgeAsset.id).toBe('kb_1');
+    expect(m.audit).toHaveBeenCalledWith(mockDb, expect.objectContaining({ action: 'exit_interview.publish', userId: 'u1', details: { knowledgeBaseId: 'kb_1' } }));
+  });
+
+  it('does not publish an interview that has not been reviewed', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue.push([{ id: 'iv_1', status: 'submitted' }]);
+
+    const response = await POST(new NextRequest('http://localhost/api/exit-interviews/iv_1/publish'), {
+      params: { id: 'iv_1' },
+      organizationId: 'org_1',
+      userId: 'u1',
+    });
+
+    expect(response.status).toBe(409);
+    expect(mockDb.insert).not.toHaveBeenCalled();
+    expect(m.audit).not.toHaveBeenCalled();
+  });
+
+  it('creates no second asset when a concurrent publication already moved the interview on', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue.push([{ id: 'iv_1', status: 'reviewed', title: 'T', topics: [] }]);
+    m.updateReturningQueue.push([]);
+
+    const response = await POST(new NextRequest('http://localhost/api/exit-interviews/iv_1/publish'), {
+      params: { id: 'iv_1' },
+      organizationId: 'org_1',
+      userId: 'u1',
+    });
+
+    expect(response.status).toBe(409);
+    expect(m.audit).not.toHaveBeenCalled();
   });
 });
