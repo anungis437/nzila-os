@@ -37,3 +37,9 @@ A union administrator supplying counsel's id is refused; an assertion for anothe
 ## 5. Open decisions (owner: WorkAid + privacy/legal review)
 
 Which counsel-side system is authoritative; where the allow-list lives; whether counsel may be a member of a *different* organization; the member-facing consent wording.
+
+## 6. Union-side implementation (continuation 7)
+
+Union-side consent, referral, per-document authorisation, shares and revocation are implemented (platform 0027, cache 0026; `lib/authority/store/workaid-disclosure.ts`; routes under `/api/workaid/*`). The member may self-refer through the creator relationship; an assigned representative refers under the kernel's referral authority. Consent is captured only against wording an authorised executive has recorded; the repository authors no wording (tests use a labelled fixture), so capture is refused until an institution records approved text. Revocation cascades atomically and every step commits with its canonical audit record. Counsel reads fail closed and there is no counsel-facing UI.
+
+Two external gates stay open and are **not** satisfied by this work: counsel-side activation (the counsel-side issuer, signature verifier and allow-list) and key custody (UE-CONV-G-003). Native PostgreSQL 15 and 16 runtime-role proofs cover the union side only (`db/__tests__/workaid-union-side.postgres.test.ts`); the counsel read path is proved on PGlite with a test signature verifier.

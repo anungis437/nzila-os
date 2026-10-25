@@ -66,3 +66,9 @@ Residual, stated honestly:
 2. Each request now performs one session-row insert and one update.
 3. The deployment log controls in section 4.1 are unverified and remain an operations gate.
 4. Not a staging isolation pass.
+
+## Continuation 7 addendum
+
+- **Drizzle bind-error token leak (closed):** a failed `set_config` bind in the Drizzle path could echo the bridge token in the error message. `lib/db/binding-error.ts` now reduces the failure to a fixed, token-free error (covered by `session-membership-revocation.pglite.test.ts`; no dedicated ratchet yet).
+- **Residual 1 above is unchanged:** the 30 s bridge window after a parent revocation is still open (needs a parent link and a definer-predicate change through a governed migration).
+- The cookie-as-bearer ratchet (`COOKIE-FORWARDED-AS-DATABASE-BEARER`) still passes.
