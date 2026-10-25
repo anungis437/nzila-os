@@ -160,6 +160,7 @@ vi.mock('@/db/schema/domains/agreements/shared-library', () => ({
 }));
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((col: unknown, val: unknown) => ({ op: 'eq', col, val })),
+  sql: vi.fn((_strings: TemplateStringsArray, ...values: unknown[]) => ({ op: 'sql', values })),
   and: vi.fn((...args: unknown[]) => {
     h.whereSpy(...args);
     return { op: 'and', args };
@@ -300,10 +301,11 @@ describe('clause-library/[id]/tags route (round 55)', () => {
 
     await DELETE({ request: req('clause-1', { tagId: 'tag-from-another-clause' }), organizationId: 'org-a', userId: 'user-1' });
 
-    // and(eq(id, tagId), eq(clauseId, id)) — both predicates present, not tagId alone.
+    // and(eq(clauseId, id), <tag belongs to a clause owned by the caller's organization>, eq(id, tagId)).
     expect(h.whereSpy).toHaveBeenCalledWith(
-      { op: 'eq', col: 'clt.id', val: 'tag-from-another-clause' },
       { op: 'eq', col: 'clt.clauseId', val: 'clause-1' },
+      { op: 'sql', values: ['clt.clauseId', 'clause-1', 'org-a'] },
+      { op: 'eq', col: 'clt.id', val: 'tag-from-another-clause' },
     );
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-a' }, expect.any(Function));
     expect(h.withSystemContext).not.toHaveBeenCalled();

@@ -22,6 +22,7 @@ const NOW = new Date('2026-10-24T12:00:00.000Z')
 const later = (days: number) => new Date(NOW.getTime() + days * DAY)
 
 const MIGRATION = readFileSync(join(__dirname, '..', '..', 'db', 'migrations-platform', '0014_message_thread_triage.sql'), 'utf8')
+const LIFECYCLE_MIGRATION = readFileSync(join(__dirname, '..', '..', 'db', 'migrations-platform', '0025_message_thread_lifecycle_and_retention.sql'), 'utf8')
 
 let pg: PGlite
 let db: ReturnType<typeof drizzle>
@@ -84,12 +85,23 @@ beforeAll(async () => {
   for (const statement of MIGRATION.split('--> statement-breakpoint')) {
     if (statement.replace(/--.*$/gm, '').trim()) await pg.exec(statement)
   }
+  for (const statement of LIFECYCLE_MIGRATION.split('--> statement-breakpoint')) {
+    if (statement.replace(/--.*$/gm, '').trim()) await pg.exec(statement)
+  }
+  // Staff act only while their membership is live; every staff user the tests name starts with one.
+  await pg.exec(`CREATE TABLE organization_members (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, user_id text NOT NULL, role text NOT NULL,
+      status text NOT NULL DEFAULT 'active', deleted_at timestamptz);`)
+  for (const id of staff) await pg.query(`INSERT INTO organization_members(organization_id,user_id,role) VALUES ($1,$2,'steward')`, [org, id])
   // The privileges the storage-authority manifest grants, and nothing more.
   await pg.exec(`
     CREATE ROLE rt NOLOGIN;
     GRANT USAGE ON SCHEMA audit_security TO rt;
     GRANT SELECT, INSERT, UPDATE ON message_threads TO rt;
     GRANT SELECT, INSERT ON messages, in_app_notifications, message_thread_assignments TO rt;
+    GRANT SELECT, INSERT ON message_thread_lifecycle TO rt;
+    GRANT SELECT, INSERT, UPDATE ON message_thread_reads, message_retention_policies TO rt;
+    GRANT SELECT ON organization_members TO rt;
     GRANT SELECT, INSERT, UPDATE ON triage_designations TO rt;
     GRANT SELECT, INSERT ON audit_security.audit_logs TO rt;
     SET ROLE rt;

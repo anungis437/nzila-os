@@ -9,7 +9,7 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import {
   validateTransition,
   getAllowedTransitions,
@@ -141,7 +141,7 @@ export async function PATCH(
             ? { resolvedAt: now }
             : {}),
         })
-        .where(eq(claims.claimId, claim.claimId));
+        .where(and(eq(claims.claimId, claim.claimId), eq(claims.organizationId, orgId)));
 
       // 6. Add transition note
       await tx.insert(claimUpdates).values({

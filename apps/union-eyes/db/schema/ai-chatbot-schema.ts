@@ -19,7 +19,6 @@ import {
   vector,
   decimal,
   date,
-  interval,
 } from "drizzle-orm/pg-core";
 import { organizations } from "../schema-organizations";
 import { profiles } from "./profiles-schema";
@@ -260,108 +259,6 @@ export const knowledgeBase = pgTable(
 );
 
 /**
- * Chatbot Suggestions
- * Pre-defined suggestions and quick replies
- */
-export const chatbotSuggestions = pgTable(
-  "chatbot_suggestions",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    organizationId: uuid("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
-    
-    // Suggestion details
-    category: text("category").notNull(), // grievance, rights, contract, etc.
-    title: text("title").notNull(),
-    prompt: text("prompt").notNull(), // What gets sent to AI
-    description: text("description"),
-    
-    // Display
-    icon: text("icon"),
-    displayOrder: integer("display_order").notNull().default(0),
-    
-    // Context
-    showInContexts: jsonb("show_in_contexts").$type<string[]>(), // When to show
-    requiredTags: jsonb("required_tags").$type<string[]>(),
-    
-    // Statistics
-    useCount: integer("use_count").notNull().default(0),
-    
-    // Status
-    isActive: boolean("is_active").notNull().default(true),
-    
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  },
-  (table) => ({
-    organizationIdIdx: index("chatbot_suggestions_organization_id_idx").on(
-      table.organizationId
-    ),
-    categoryIdx: index("chatbot_suggestions_category_idx").on(table.category),
-    isActiveIdx: index("chatbot_suggestions_is_active_idx").on(
-      table.isActive
-    ),
-  })
-);
-
-/**
- * Chatbot Analytics
- * Track usage, performance, and user satisfaction
- */
-export const chatbotAnalytics = pgTable(
-  "chatbot_analytics",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    organizationId: uuid("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
-    
-    // Time period
-    periodStart: timestamp("period_start").notNull(),
-    periodEnd: timestamp("period_end").notNull(),
-    
-    // Usage metrics
-    totalSessions: integer("total_sessions").notNull().default(0),
-    totalMessages: integer("total_messages").notNull().default(0),
-    uniqueUsers: integer("unique_users").notNull().default(0),
-    
-    // Performance metrics
-    avgResponseTimeMs: integer("avg_response_time_ms"),
-    avgTokensPerMessage: integer("avg_tokens_per_message"),
-    avgMessagesPerSession: integer("avg_messages_per_session"),
-    
-    // Satisfaction metrics
-    helpfulResponses: integer("helpful_responses").notNull().default(0),
-    unhelpfulResponses: integer("unhelpful_responses").notNull().default(0),
-    satisfactionRate: text("satisfaction_rate"), // Percentage
-    
-    // Cost tracking
-    totalTokensUsed: integer("total_tokens_used").notNull().default(0),
-    estimatedCostUsd: text("estimated_cost_usd"),
-    
-    // Top topics
-    topCategories: jsonb("top_categories").$type<
-      Array<{ category: string; count: number }>
-    >(),
-    topQuestions: jsonb("top_questions").$type<
-      Array<{ question: string; count: number }>
-    >(),
-    
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-  },
-  (table) => ({
-    organizationIdIdx: index("chatbot_analytics_organization_id_idx").on(
-      table.organizationId
-    ),
-    periodIdx: index("chatbot_analytics_period_idx").on(
-      table.periodStart,
-      table.periodEnd
-    ),
-  })
-);
-
-/**
  * AI Safety Filters
  * Content moderation and safety checks
  */
@@ -433,27 +330,6 @@ export const aiUsageMetrics = pgTable(
   })
 );
 
-// AI rate limits - per-organization rate limiting configuration
-export const aiRateLimits = pgTable(
-  "ai_rate_limits",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    organizationId: uuid("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
-    limitType: text("limit_type").notNull(), // 'requests_per_minute' | 'tokens_per_hour' | 'cost_per_day'
-    limitValue: integer("limit_value").notNull(),
-    currentValue: integer("current_value").default(0),
-    windowStart: timestamp("window_start").defaultNow(),
-    windowDuration: interval("window_duration").notNull(),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  },
-  (table) => ({
-    orgLimitIdx: index("idx_rate_limits_org").on(table.organizationId, table.limitType),
-  })
-);
-
 // AI budgets - monthly budget allocations and spend tracking
 export const aiBudgets = pgTable(
   "ai_budgets",
@@ -483,14 +359,9 @@ export type ChatMessage = typeof chatMessages.$inferSelect;
 export type NewChatMessage = typeof chatMessages.$inferInsert;
 export type KnowledgeBase = typeof knowledgeBase.$inferSelect;
 export type NewKnowledgeBase = typeof knowledgeBase.$inferInsert;
-export type ChatbotSuggestion = typeof chatbotSuggestions.$inferSelect;
-export type NewChatbotSuggestion = typeof chatbotSuggestions.$inferInsert;
-export type ChatbotAnalytics = typeof chatbotAnalytics.$inferSelect;
 export type AISafetyFilter = typeof aiSafetyFilters.$inferSelect;
 export type AIUsageMetric = typeof aiUsageMetrics.$inferSelect;
 export type NewAIUsageMetric = typeof aiUsageMetrics.$inferInsert;
-export type AIRateLimit = typeof aiRateLimits.$inferSelect;
-export type NewAIRateLimit = typeof aiRateLimits.$inferInsert;
 export type AIBudget = typeof aiBudgets.$inferSelect;
 export type NewAIBudget = typeof aiBudgets.$inferInsert;
 

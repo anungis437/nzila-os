@@ -323,7 +323,7 @@ describe('automation-service', () => {
       const updated = { id: 'r-1', name: 'Updated' };
       mocks.mockReturning.mockResolvedValueOnce([updated]);
 
-      const result = await updateAutomationRule('r-1', { name: 'Updated' });
+      const result = await updateAutomationRule('r-1', 'org-1', { name: 'Updated' });
 
       expect(result.success).toBe(true);
       expect(result.rule).toEqual(updated);
@@ -332,7 +332,7 @@ describe('automation-service', () => {
     it('returns error when rule not found', async () => {
       mocks.mockReturning.mockResolvedValueOnce([undefined]);
 
-      const result = await updateAutomationRule('nope', { name: 'X' });
+      const result = await updateAutomationRule('nope', 'org-1', { name: 'X' });
 
       expect(result.success).toBe(false);
     });
@@ -343,7 +343,7 @@ describe('automation-service', () => {
     it('deletes a rule successfully', async () => {
       mocks.mockDeleteWhere.mockResolvedValue(undefined);
 
-      const result = await deleteAutomationRule('r-1');
+      const result = await deleteAutomationRule('r-1', 'org-1');
 
       expect(result.success).toBe(true);
       expect(mocks.mockDelete).toHaveBeenCalled();

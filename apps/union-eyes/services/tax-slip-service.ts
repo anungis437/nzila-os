@@ -294,18 +294,22 @@ export class TaxSlipService {
       slips.push(slip);
 
       // Mark disbursements as having T4A generated
-      await db
-        .update(strikeFundDisbursements)
-        .set({
-          t4aGenerated: true,
-          t4aGeneratedAt: new Date(),
-        })
-        .where(
-          and(
-            eq(strikeFundDisbursements.userId, userId),
-            eq(strikeFundDisbursements.taxYear, taxYear)
-          )
-        );
+      // One statement per organization that paid the member, each bound to that organization.
+      for (const organizationId of new Set(yearlyDisbursements.map((d) => d.organizationId))) {
+        await db
+          .update(strikeFundDisbursements)
+          .set({
+            t4aGenerated: true,
+            t4aGeneratedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(strikeFundDisbursements.userId, userId),
+              eq(strikeFundDisbursements.taxYear, taxYear),
+              eq(strikeFundDisbursements.organizationId, organizationId)
+            )
+          );
+      }
     }
 
     return slips;
@@ -387,19 +391,23 @@ export class TaxSlipService {
       slips.push(slip);
 
       // Mark disbursements as having RL-1 generated
-      await db
-        .update(strikeFundDisbursements)
-        .set({
-          rl1Generated: true,
-          rl1GeneratedAt: new Date(),
-        })
-        .where(
-          and(
-            eq(strikeFundDisbursements.userId, userId),
-            eq(strikeFundDisbursements.taxYear, taxYear),
-            eq(strikeFundDisbursements.isQuebecResident, true)
-          )
-        );
+      // One statement per organization that paid the member, each bound to that organization.
+      for (const organizationId of new Set(yearlyDisbursements.map((d) => d.organizationId))) {
+        await db
+          .update(strikeFundDisbursements)
+          .set({
+            rl1Generated: true,
+            rl1GeneratedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(strikeFundDisbursements.userId, userId),
+              eq(strikeFundDisbursements.taxYear, taxYear),
+              eq(strikeFundDisbursements.isQuebecResident, true),
+              eq(strikeFundDisbursements.organizationId, organizationId)
+            )
+          );
+      }
     }
 
     return slips;

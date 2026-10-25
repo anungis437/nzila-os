@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, jsonb, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, jsonb, integer } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { claims } from "./claims-schema";
 
@@ -62,62 +62,6 @@ export const defensibilityPacks = pgTable("defensibility_packs", {
   // Timestamps
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
-/**
- * Pack Download Log - Track every access for audit trail
- */
-export const packDownloadLog = pgTable("pack_download_log", {
-  logId: uuid("log_id").primaryKey().defaultRandom(),
-  
-  packId: uuid("pack_id").notNull().references(() => defensibilityPacks.packId),
-  caseNumber: varchar("case_number", { length: 50 }).notNull(),
-  organizationId: uuid("organization_id").notNull(),
-  
-  // Download details
-  downloadedAt: timestamp("downloaded_at", { withTimezone: true }).notNull().defaultNow(),
-  downloadedBy: varchar("downloaded_by", { length: 255 }).notNull(),
-  downloadedByRole: varchar("downloaded_by_role", { length: 50 }), // 'admin' | 'steward' | 'member'
-  
-  // Access context
-  downloadPurpose: varchar("download_purpose", { length: 100 }), // 'review' | 'arbitration' | 'legal' | 'member_request'
-  ipAddress: varchar("ip_address", { length: 45 }), // IPv4 or IPv6
-  userAgent: text("user_agent"),
-  
-  // File details at time of download
-  exportFormat: varchar("export_format", { length: 10 }).notNull(),
-  fileSizeBytes: integer("file_size_bytes"),
-  integrityVerified: boolean("integrity_verified").default(true),
-  
-  // Download success
-  downloadSuccess: boolean("download_success").default(true),
-  errorMessage: text("error_message"),
-});
-
-/**
- * Pack Verification Log - Track integrity checks
- */
-export const packVerificationLog = pgTable("pack_verification_log", {
-  verificationId: uuid("verification_id").primaryKey().defaultRandom(),
-  
-  packId: uuid("pack_id").notNull(),
-  caseNumber: varchar("case_number", { length: 50 }).notNull(),
-  
-  // Verification details
-  verifiedAt: timestamp("verified_at", { withTimezone: true }).notNull().defaultNow(),
-  verifiedBy: varchar("verified_by", { length: 255 }), // User or 'system' for auto-checks
-  
-  // Verification results
-  verificationPassed: boolean("verification_passed").notNull(),
-  expectedHash: varchar("expected_hash", { length: 64 }).notNull(),
-  actualHash: varchar("actual_hash", { length: 64 }),
-  
-  // Failure details
-  failureReason: text("failure_reason"),
-  tamperedFields: jsonb("tampered_fields"), // Array of field paths that failed verification
-  
-  // Context
-  verificationTrigger: varchar("verification_trigger", { length: 50 }), // 'download' | 'scheduled' | 'manual' | 'alert'
 });
 
 // Indexes for query performance

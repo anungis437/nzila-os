@@ -26,6 +26,8 @@ const APP_ROOT = resolve(__dirname, '..', '..')
 export const read = (p: string) => readFileSync(resolve(APP_ROOT, p), 'utf8')
 export const PLATFORM_SQL = read('db/migrations-platform/0013_authority_kernel_storage.sql')
 export const RLS_SQL = read('db/migrations-cache/0020_authority_kernel_rls_closure.sql')
+export const WORKAID_PLATFORM_SQL = read('db/migrations-platform/0027_workaid_union_side_disclosure.sql')
+export const WORKAID_RLS_SQL = read('db/migrations-cache/0026_workaid_union_side_rls_closure.sql')
 export const HELPER = read('db/migrations-cache/0010_tenant_isolation_rls_foundation.sql')
   .match(/CREATE OR REPLACE FUNCTION ue_create_direct_org_rls_policy\([\s\S]*?\$\$ LANGUAGE plpgsql;/)?.[0] as string
 if (!HELPER) throw new Error('ue_create_direct_org_rls_policy not found')
@@ -116,6 +118,8 @@ export async function installAuthoritySchema(db: Db, options: { realAuditLogs?: 
   if (!options.realAuditLogs) await db.exec(AUDIT_FIXTURE_SQL)
   await db.exec(PLATFORM_SQL)
   await db.exec(RLS_SQL)
+  await db.exec(WORKAID_PLATFORM_SQL)
+  await db.exec(WORKAID_RLS_SQL)
   for (const t of ['audit_logs', 'grievances', 'claims', 'grievance_case_access_assignments', 'documents', 'payments']) {
     await db.exec(`SELECT ue_create_direct_org_rls_policy('${t}')`)
   }

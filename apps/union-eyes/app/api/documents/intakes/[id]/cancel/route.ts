@@ -22,8 +22,9 @@ export const POST = withOrganizationAuth(async (_request, context, params?: { id
     return standardErrorResponse(ErrorCode.CONFLICT, result.kind === 'accepted' ? 'An accepted intake cannot be cancelled' : 'The intake has already expired');
   }
 
-  // Prompt cleanup is a courtesy; a failing storage service leaves the row for the reaper, which retries.
-  await finalizeIntakeObjects(blobIntakeStorage, { limit: 5 }).catch((error) =>
+  // Prompt cleanup of THIS intake only (a courtesy). A failing storage service leaves the row for the reaper, which
+  // retries; a request never triggers cleanup of anyone else's objects.
+  await finalizeIntakeObjects(blobIntakeStorage, { limit: 1, only: { organizationId: context.organizationId, intakeId: params.id } }).catch((error) =>
     logger.warn('Intake object cleanup deferred', { error: error instanceof Error ? error.message : 'unknown' }),
   );
   return standardSuccessResponse(result.intake);

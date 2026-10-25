@@ -207,7 +207,7 @@ export async function assignWorkersToDispatch(
       status: filled ? "filled" : "partially_filled",
       updatedAt: new Date(),
     })
-    .where(eq(dispatchRequests.id, requestId));
+    .where(and(eq(dispatchRequests.id, requestId), eq(dispatchRequests.orgId, request.orgId)));
 
   return assignments;
 }

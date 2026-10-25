@@ -479,7 +479,7 @@ export class PayrollIntegrationService {
     await db
       .update(employerRemittances)
       .set({ processingStatus: 'completed' })
-      .where(eq(employerRemittances.id, remittance.id));
+      .where(and(eq(employerRemittances.id, remittance.id), eq(employerRemittances.organizationId, organizationId)));
 
     logger.info('[PayrollIntegration] Remittance processed', {
       remittanceId: remittance.id,

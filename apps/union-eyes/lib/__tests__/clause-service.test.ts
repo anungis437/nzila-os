@@ -229,25 +229,25 @@ describe('clause-service', () => {
     it('updates and returns clause', async () => {
       const updated = { ...CLAUSE, title: 'Updated Wage Rates' };
       mocks.mockUpdate.mockReturnValue(chain([updated]));
-      const result = await updateClause('cl1', { title: 'Updated Wage Rates' } as never);
+      const result = await updateClause('cl1', 'org-1', { title: 'Updated Wage Rates' } as never);
       expect(result).toEqual(updated);
     });
 
     it('returns null when not found', async () => {
       mocks.mockUpdate.mockReturnValue(chain([undefined]));
-      expect(await updateClause('missing', {} as never)).toBeNull();
+      expect(await updateClause('missing', 'org-1', {} as never)).toBeNull();
     });
   });
 
   describe('deleteClause', () => {
     it('deletes and returns true', async () => {
       mocks.mockDelete.mockReturnValue(chain());
-      expect(await deleteClause('cl1')).toBe(true);
+      expect(await deleteClause('cl1', 'org-1')).toBe(true);
     });
 
     it('throws on error', async () => {
       mocks.mockDelete.mockImplementation(() => { throw new Error('fk'); });
-      await expect(deleteClause('cl1')).rejects.toThrow('Failed to delete clause');
+      await expect(deleteClause('cl1', 'org-1')).rejects.toThrow('Failed to delete clause');
     });
   });
 
@@ -419,7 +419,7 @@ describe('clause-service', () => {
 
     it('updateClause throws on error', async () => {
       mocks.mockUpdate.mockImplementation(() => { throw new Error('fail'); });
-      await expect(updateClause('cl1', {} as never)).rejects.toThrow('Failed to update clause');
+      await expect(updateClause('cl1', 'org-1', {} as never)).rejects.toThrow('Failed to update clause');
     });
 
     it('searchClauses throws on error', async () => {

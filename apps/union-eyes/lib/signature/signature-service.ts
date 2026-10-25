@@ -12,7 +12,7 @@ import {
 } from "@/db/schema";
 import SignatureProviderFactory from "./providers";
 import { decideProviderSync, mayAdvanceSigner } from "./provider-sync";
-import { eq, and, or, desc, notInArray, isNull } from "drizzle-orm";
+import { eq, and, or, desc, inArray, notInArray, isNull } from "drizzle-orm";
 import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { createHash } from "crypto";
@@ -35,6 +35,10 @@ export class SignatureAuthorityError extends Error {
 const FINAL_DOCUMENT_STATES = ["completed", "voided", "declined", "expired"] as const;
 /** Signer states that are settled: a signature is not applied over them. */
 const SETTLED_SIGNER_STATES = ["signed", "declined", "authentication_failed", "expired"] as const;
+
+/** Signer rows carry no organization of their own: their ownership is proven through the organization of their document. */
+const documentsOfOrganization = (tx: RLSTx, organizationId: string) =>
+  tx.select({ id: signatureDocuments.id }).from(signatureDocuments).where(eq(signatureDocuments.organizationId, organizationId));
 
 /**
  * Signature Document Service
@@ -303,7 +307,7 @@ export class SignatureService {
             : {}),
           updatedAt: observedAt,
         })
-        .where(and(...conditions))
+        .where(and(...conditions, eq(signatureDocuments.organizationId, document.organizationId)))
         .returning({ id: signatureDocuments.id });
       // Another sync already applied this observation.
       if (!updated) return { synced: false, reason: "already_applied" };
@@ -358,7 +362,7 @@ export class SignatureService {
             ...(signer.viewedAt ? { viewedAt: signer.viewedAt } : {}),
             updatedAt: observedAt,
           })
-          .where(and(eq(documentSigners.id, row.id), eq(documentSigners.status, row.status)))
+          .where(and(eq(documentSigners.id, row.id), eq(documentSigners.status, row.status), inArray(documentSigners.documentId, documentsOfOrganization(tx, document.organizationId))))
           .returning({ id: documentSigners.id });
         if (!advanced) continue;
         await AuditTrailService.log({
@@ -459,7 +463,7 @@ export class SignatureService {
           geolocation: (data.geolocation ?? null) as DocumentSignerInsert['geolocation'],
           updatedAt: new Date(),
         })
-        .where(and(eq(documentSigners.id, data.signerId), notInArray(documentSigners.status, [...SETTLED_SIGNER_STATES])))
+        .where(and(eq(documentSigners.id, data.signerId), inArray(documentSigners.documentId, documentsOfOrganization(tx, document.organizationId)), notInArray(documentSigners.status, [...SETTLED_SIGNER_STATES])))
         .returning();
       if (!updated) throw new SignatureAuthorityError("CONFLICT", "This signer has already completed signing");
 
@@ -507,7 +511,7 @@ export class SignatureService {
           completedAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(and(eq(signatureDocuments.id, documentId), notInArray(signatureDocuments.status, [...FINAL_DOCUMENT_STATES])));
+        .where(and(eq(signatureDocuments.id, documentId), notInArray(signatureDocuments.status, [...FINAL_DOCUMENT_STATES]), eq(signatureDocuments.organizationId, organizationId)));
 
       await AuditTrailService.log({
         documentId,
@@ -569,7 +573,7 @@ export class SignatureService {
           voidReason: reason,
           updatedAt: new Date(),
         })
-        .where(and(eq(signatureDocuments.id, documentId), notInArray(signatureDocuments.status, [...FINAL_DOCUMENT_STATES])))
+        .where(and(eq(signatureDocuments.id, documentId), notInArray(signatureDocuments.status, [...FINAL_DOCUMENT_STATES]), eq(signatureDocuments.organizationId, document.organizationId)))
         .returning({ id: signatureDocuments.id });
       if (!voided) throw new SignatureAuthorityError("CONFLICT", "The document can no longer be voided");
 

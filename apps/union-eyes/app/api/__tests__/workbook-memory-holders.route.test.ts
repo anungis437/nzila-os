@@ -50,7 +50,7 @@ vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomic
 vi.mock('@/lib/workbook/engines/stewardshipCartography', () => ({
   runStewardshipCartography: m.runStewardshipCartography,
 }));
-vi.mock('drizzle-orm', () => ({ eq: vi.fn(), and: vi.fn() }));
+vi.mock('drizzle-orm', async (importOriginal) => ({ ...(await importOriginal<typeof import('drizzle-orm')>()), eq: vi.fn(), and: vi.fn() }));
 // Pass-through RLS context helpers so the real authority boundary runs; the
 // ownership lookup is fed the mock db as its system-context `tx`.
 vi.mock('@/lib/db/with-rls-context', () => ({

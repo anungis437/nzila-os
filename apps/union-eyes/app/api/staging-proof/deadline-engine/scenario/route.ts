@@ -46,9 +46,10 @@
  */
 import { randomUUID, createHash } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/db';
+import { deadlineInOrganization } from '@/lib/deadline-engine/deadline-scope';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { grievanceDeadlines } from '@/db/schema/domains/claims/workflows';
 import { organizations } from '@/db/schema-organizations';
@@ -159,14 +160,18 @@ async function fetchReminders(deadlineId: string): Promise<Array<{
   return rows;
 }
 
-async function cleanup(deadlineId: string | null, grievanceId: string | null): Promise<void> {
+async function cleanup(organizationId: string, deadlineId: string | null, grievanceId: string | null): Promise<void> {
   try {
     if (deadlineId) {
       await db.execute(sql`delete from deadline_reminders where source_deadline_id = ${deadlineId}::uuid`);
-      await db.delete(grievanceDeadlines).where(eq(grievanceDeadlines.id, deadlineId));
+      await db
+        .delete(grievanceDeadlines)
+        .where(and(eq(grievanceDeadlines.id, deadlineId), deadlineInOrganization(organizationId)));
     }
     if (grievanceId) {
-      await db.delete(grievances).where(eq(grievances.id, grievanceId));
+      await db
+        .delete(grievances)
+        .where(and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId)));
     }
   } catch (err) {
     logger.error('deadline-proof: cleanup failed', {
@@ -333,7 +338,7 @@ async function runScheduleBasic(input: RequestBodyT, correlationId: string) {
       assert('scheduled_for strictly < dueDate', rows.every((r) => new Date(r.scheduled_for) < dueDate)),
     ];
   } finally {
-    await cleanup(seedDeadline.deadlineId, seedGrievance.grievanceId);
+    await cleanup(input.organizationId, seedDeadline.deadlineId, seedGrievance.grievanceId);
   }
   return {
     scenario: 'schedule-basic' as const,
@@ -376,7 +381,7 @@ async function runReschedule(input: RequestBodyT, correlationId: string) {
     await db
       .update(grievanceDeadlines)
       .set({ dueDate: newDueDate, notes: `Rescheduled by staging proof ${correlationId}` })
-      .where(eq(grievanceDeadlines.id, seedDeadline.deadlineId));
+      .where(and(eq(grievanceDeadlines.id, seedDeadline.deadlineId), deadlineInOrganization(input.organizationId)));
 
     const second = await scheduleGrievanceDeadlineReminders({
       sourceDeadlineId: seedDeadline.deadlineId,
@@ -428,7 +433,7 @@ async function runReschedule(input: RequestBodyT, correlationId: string) {
       passed: assertions.every((a) => a.passed),
     };
   } finally {
-    await cleanup(seedDeadline.deadlineId, seedGrievance.grievanceId);
+    await cleanup(input.organizationId, seedDeadline.deadlineId, seedGrievance.grievanceId);
   }
 }
 
@@ -508,7 +513,7 @@ async function runCancel(input: RequestBodyT, correlationId: string) {
       passed: assertions.every((a) => a.passed),
     };
   } finally {
-    await cleanup(seedDeadline.deadlineId, seedGrievance.grievanceId);
+    await cleanup(input.organizationId, seedDeadline.deadlineId, seedGrievance.grievanceId);
   }
 }
 

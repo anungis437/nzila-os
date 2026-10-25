@@ -89,44 +89,6 @@ export const crossOrgAccessLog = pgTable("cross_org_access_log", {
 }));
 
 // ============================================================================
-// ORGANIZATION SHARING GRANTS
-// ============================================================================
-
-export const organizationSharingGrants = pgTable("organization_sharing_grants", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  
-  // Grantor and grantee
-  grantorOrgId: uuid("grantor_org_id")
-    .notNull()
-    .references(() => organizations.id, { onDelete: "cascade" }),
-  granteeOrgId: uuid("grantee_org_id")
-    .notNull()
-    .references(() => organizations.id, { onDelete: "cascade" }),
-  
-  // What is granted
-  resourceType: varchar("resource_type", { length: 50 }).notNull(),
-  allResources: boolean("all_resources").default(false),
-  specificResourceIds: uuid("specific_resource_ids").array(),
-  
-  // Grant metadata
-  grantReason: text("grant_reason"),
-  expiresAt: timestamp("expires_at", { withTimezone: true }),
-  revokedAt: timestamp("revoked_at", { withTimezone: true }),
-  revokedBy: varchar("revoked_by", { length: 255 }),
-  revokeReason: text("revoke_reason"),
-  
-  // Audit
-  grantedBy: varchar("granted_by", { length: 255 }).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-}, (table) => ({
-  grantorIdx: index("idx_sharing_grants_grantor").on(table.grantorOrgId),
-  granteeIdx: index("idx_sharing_grants_grantee").on(table.granteeOrgId),
-  resourceIdx: index("idx_sharing_grants_resource").on(table.resourceType),
-  expiresIdx: index("idx_sharing_grants_expires").on(table.expiresAt),
-}));
-
-// ============================================================================
 // RELATIONS
 // ============================================================================
 
@@ -150,19 +112,6 @@ export const crossOrgAccessLogRelations = relations(crossOrgAccessLog, ({ one })
   }),
 }));
 
-export const organizationSharingGrantsRelations = relations(organizationSharingGrants, ({ one }) => ({
-  grantorOrg: one(organizations, {
-    fields: [organizationSharingGrants.grantorOrgId],
-    references: [organizations.id],
-    relationName: "grantorOrg",
-  }),
-  granteeOrg: one(organizations, {
-    fields: [organizationSharingGrants.granteeOrgId],
-    references: [organizations.id],
-    relationName: "granteeOrg",
-  }),
-}));
-
 // ============================================================================
 // TYPESCRIPT TYPES
 // ============================================================================
@@ -173,8 +122,6 @@ export type NewOrganizationSharingSettings = typeof organizationSharingSettings.
 export type CrossOrgAccessLog = typeof crossOrgAccessLog.$inferSelect;
 export type NewCrossOrgAccessLog = typeof crossOrgAccessLog.$inferInsert;
 
-export type OrganizationSharingGrant = typeof organizationSharingGrants.$inferSelect;
-export type NewOrganizationSharingGrant = typeof organizationSharingGrants.$inferInsert;
 
 // Sharing level types (imported from clause library schema)
 // export type SharingLevel = "private" | "federation" | "congress" | "public";

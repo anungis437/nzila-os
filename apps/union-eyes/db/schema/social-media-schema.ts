@@ -259,85 +259,6 @@ export const socialAnalytics = pgTable('social_analytics', {
   uniqueAccountDate: unique().on(table.accountId, table.analyticsDate)
 }));
 
-// Social Media Feeds
-export const socialFeeds = pgTable('social_feeds', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
-  accountId: uuid('account_id').notNull().references(() => socialAccounts.id, { onDelete: 'cascade' }),
-  
-  // Feed Item Details
-  platformItemId: text('platform_item_id').notNull(),
-  itemType: text('item_type').notNull(),
-  content: text('content'),
-  mediaUrls: text('media_urls').array(),
-  
-  // Author Details
-  authorId: text('author_id'),
-  authorName: text('author_name'),
-  authorUsername: text('author_username'),
-  authorImageUrl: text('author_image_url'),
-  
-  // Engagement
-  likesCount: integer('likes_count').default(0),
-  commentsCount: integer('comments_count').default(0),
-  sharesCount: integer('shares_count').default(0),
-  
-  // Timestamps
-  publishedAt: timestamp('published_at', { withTimezone: true }).notNull(),
-  fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow(),
-  
-  // Metadata
-  feedMetadata: jsonb('feed_metadata').default({}),
-  
-  // Audit
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
-}, (table) => ({
-  organizationIdx: index('idx_social_feeds_organization').on(table.organizationId),
-  accountIdx: index('idx_social_feeds_account').on(table.accountId),
-  publishedIdx: index('idx_social_feeds_published').on(table.publishedAt),
-  uniqueAccountItem: unique().on(table.accountId, table.platformItemId)
-}));
-
-// Social Media Engagement
-export const socialEngagement = pgTable('social_engagement', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
-  postId: uuid('post_id').notNull().references(() => socialPosts.id, { onDelete: 'cascade' }),
-  
-  // Engagement Details
-  engagementType: engagementTypeEnum('engagement_type').notNull(),
-  platformEngagementId: text('platform_engagement_id'),
-  
-  // User Details
-  platformUserId: text('platform_user_id'),
-  username: text('username'),
-  displayName: text('display_name'),
-  profileImageUrl: text('profile_image_url'),
-  
-  // Engagement Content
-  content: text('content'),
-  sentiment: text('sentiment'),
-  sentimentScore: decimal('sentiment_score', { precision: 5, scale: 2 }),
-  
-  // Timestamps
-  engagedAt: timestamp('engaged_at', { withTimezone: true }).notNull(),
-  fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow(),
-  
-  // Metadata
-  engagementMetadata: jsonb('engagement_metadata').default({}),
-  
-  // Audit
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
-}, (table) => ({
-  organizationIdx: index('idx_social_engagement_organization').on(table.organizationId),
-  postIdx: index('idx_social_engagement_post').on(table.postId),
-  typeIdx: index('idx_social_engagement_type').on(table.engagementType),
-  engagedAtIdx: index('idx_social_engagement_engaged_at').on(table.engagedAt),
-  sentimentIdx: index('idx_social_engagement_sentiment').on(table.sentiment)
-}));
-
 // ================================================================
 // RELATIONS
 // ================================================================
@@ -353,10 +274,9 @@ export const socialAccountsRelations = relations(socialAccounts, ({ one, many })
   }),
   posts: many(socialPosts),
   analytics: many(socialAnalytics),
-  feeds: many(socialFeeds)
 }));
 
-export const socialPostsRelations = relations(socialPosts, ({ one, many }) => ({
+export const socialPostsRelations = relations(socialPosts, ({ one }) => ({
   organization: one(organizations, {
     fields: [socialPosts.organizationId],
     references: [organizations.id]
@@ -373,7 +293,6 @@ export const socialPostsRelations = relations(socialPosts, ({ one, many }) => ({
     fields: [socialPosts.createdBy],
     references: [profiles.userId]
   }),
-  engagements: many(socialEngagement)
 }));
 
 export const socialCampaignsRelations = relations(socialCampaigns, ({ one, many }) => ({
@@ -399,28 +318,6 @@ export const socialAnalyticsRelations = relations(socialAnalytics, ({ one }) => 
   })
 }));
 
-export const socialFeedsRelations = relations(socialFeeds, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [socialFeeds.organizationId],
-    references: [organizations.id]
-  }),
-  account: one(socialAccounts, {
-    fields: [socialFeeds.accountId],
-    references: [socialAccounts.id]
-  })
-}));
-
-export const socialEngagementRelations = relations(socialEngagement, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [socialEngagement.organizationId],
-    references: [organizations.id]
-  }),
-  post: one(socialPosts, {
-    fields: [socialEngagement.postId],
-    references: [socialPosts.id]
-  })
-}));
-
 // ================================================================
 // TYPE EXPORTS
 // ================================================================
@@ -437,11 +334,7 @@ export type NewSocialCampaign = typeof socialCampaigns.$inferInsert;
 export type SocialAnalytics = typeof socialAnalytics.$inferSelect;
 export type NewSocialAnalytics = typeof socialAnalytics.$inferInsert;
 
-export type SocialFeed = typeof socialFeeds.$inferSelect;
-export type NewSocialFeed = typeof socialFeeds.$inferInsert;
 
-export type SocialEngagement = typeof socialEngagement.$inferSelect;
-export type NewSocialEngagement = typeof socialEngagement.$inferInsert;
 
 // Enum Types
 export type SocialPlatform = 'facebook' | 'twitter' | 'instagram' | 'linkedin' | 'youtube' | 'tiktok';

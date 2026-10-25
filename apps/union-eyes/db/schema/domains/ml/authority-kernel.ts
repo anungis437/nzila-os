@@ -296,3 +296,81 @@ export const ueAuthorityCounselNonces = pgTable('ue_authority_counsel_nonces', {
 }, (table) => ({
   nonceUq: uniqueIndex('ue_authority_nonce_uq').on(table.organizationId, table.nonceHash),
 }));
+
+// ── Union-side WorkAid consent and disclosure (platform 0027, RLS cache 0026) ─────────────────────────────────────
+// References and authorisations only. The counsel-side system, its issuer allow-list and key custody are external.
+
+export const ueAuthorityWorkaidConsentTexts = pgTable('ue_authority_workaid_consent_texts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  version: text('version').notNull(),
+  body: text('body').notNull(),
+  bodySha256: text('body_sha256').notNull(),
+  recordedBy: principal('recorded_by').notNull(),
+  effectiveAt: timestamp('effective_at', { withTimezone: true }).notNull(),
+  retiredAt: timestamp('retired_at', { withTimezone: true }),
+  retiredBy: principal('retired_by'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  versionUq: unique('ue_authority_wa_text_version_uq').on(table.organizationId, table.version),
+}));
+
+export const ueAuthorityWorkaidConsentGrants = pgTable('ue_authority_workaid_consent_grants', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  consentId: uuid('consent_id').notNull().references(() => ueAuthorityDisclosureConsents.id),
+  matterId: uuid('matter_id').notNull(),
+  caseId: uuid('case_id').notNull(),
+  memberUserId: principal('member_user_id').notNull(),
+  textId: uuid('text_id').notNull().references(() => ueAuthorityWorkaidConsentTexts.id),
+  textVersion: text('text_version').notNull(),
+  textSha256: text('text_sha256').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  consentUq: unique('ue_authority_wa_grant_consent_uq').on(table.consentId),
+  matterUq: unique('ue_authority_wa_grant_matter_uq').on(table.organizationId, table.matterId),
+  memberIdx: index('ue_authority_wa_grant_member_idx').on(table.organizationId, table.memberUserId),
+}));
+
+export const ueAuthorityWorkaidDocumentAuths = pgTable('ue_authority_workaid_document_auths', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  matterId: uuid('matter_id').notNull(),
+  consentId: uuid('consent_id').notNull().references(() => ueAuthorityDisclosureConsents.id),
+  documentId: uuid('document_id').notNull(),
+  classification: text('classification').notNull(),
+  authorisedBy: principal('authorised_by').notNull(),
+  authorisedAt: timestamp('authorised_at', { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  revokedBy: principal('revoked_by'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  liveUq: uniqueIndex('ue_authority_wa_docauth_live_uq').on(table.organizationId, table.matterId, table.documentId).where(sql`revoked_at IS NULL`),
+}));
+
+export const ueAuthorityWorkaidShares = pgTable('ue_authority_workaid_shares', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  matterId: uuid('matter_id').notNull().references(() => ueAuthorityWorkaidMatters.id),
+  consentId: uuid('consent_id').notNull().references(() => ueAuthorityDisclosureConsents.id),
+  kind: text('kind').notNull(),
+  categories: text('categories').array().notNull(),
+  documentAuthId: uuid('document_auth_id').references(() => ueAuthorityWorkaidDocumentAuths.id),
+  createdBy: principal('created_by').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  invalidatedAt: timestamp('invalidated_at', { withTimezone: true }),
+  invalidatedBy: principal('invalidated_by'),
+  invalidationReason: text('invalidation_reason'),
+}, (table) => ({
+  matterIdx: index('ue_authority_wa_share_matter_idx').on(table.organizationId, table.matterId).where(sql`invalidated_at IS NULL`),
+}));
+
+export const ueAuthorityWorkaidCounselAccess = pgTable('ue_authority_workaid_counsel_access', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  matterId: uuid('matter_id').notNull().references(() => ueAuthorityWorkaidMatters.id),
+  counselUserId: principal('counsel_user_id').notNull(),
+  sharesServed: integer('shares_served').notNull(),
+  accessedAt: timestamp('accessed_at', { withTimezone: true }).notNull().defaultNow(),
+});

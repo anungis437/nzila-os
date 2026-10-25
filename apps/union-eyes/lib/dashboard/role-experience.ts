@@ -232,6 +232,7 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard/correspondence',
     '/dashboard/clause-library',
     '/dashboard/notifications',
+    '/dashboard/messages/staff',
     '/dashboard/settings',
     '/dashboard/profile',
   ],

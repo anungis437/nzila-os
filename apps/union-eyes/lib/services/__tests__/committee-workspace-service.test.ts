@@ -122,30 +122,43 @@ describe('committee-workspace-service', () => {
 
   it('updateMeeting returns updated or null', async () => {
     h.queue = [[{ id: 'm1', title: 'Updated' }]];
-    expect(await updateMeeting('m1', { title: 'Updated', updatedBy: 'u1' } as never)).toEqual({ id: 'm1', title: 'Updated' });
+    expect(await updateMeeting('m1', 'o1', { title: 'Updated', updatedBy: 'u1' } as never)).toEqual({ id: 'm1', title: 'Updated' });
     h.queue = [[]];
-    expect(await updateMeeting('m1', { title: 'x' } as never)).toBeNull();
+    expect(await updateMeeting('m1', 'o1', { title: 'x' } as never)).toBeNull();
   });
 
   it('recordMinutes updates, audits, and returns nullable', async () => {
     h.queue = [[{ id: 'm1', committeeId: 'c1', organizationId: 'o1' }]];
-    expect(await recordMinutes('m1', 'minutes', 'u1')).toEqual({ id: 'm1', committeeId: 'c1', organizationId: 'o1' });
+    expect(await recordMinutes('m1', 'o1', 'minutes', 'u1')).toEqual({ id: 'm1', committeeId: 'c1', organizationId: 'o1' });
     expect(h.audit).toHaveBeenCalled();
 
     h.audit.mockClear();
     h.queue = [[]];
-    expect(await recordMinutes('m2', 'minutes', 'u1')).toBeNull();
+    expect(await recordMinutes('m2', 'o1', 'minutes', 'u1')).toBeNull();
     expect(h.audit).not.toHaveBeenCalled();
+  });
+
+  it('binds minutes and approval writes to the acting organization in the statement', async () => {
+    const { eq } = await import('drizzle-orm');
+    vi.mocked(eq).mockClear();
+    h.queue = [[]];
+    await recordMinutes('m1', 'org-b', 'minutes', 'u1');
+    h.queue = [[]];
+    await approveMinutes('m1', 'org-b', 'u1');
+    h.queue = [[]];
+    await updateMeeting('m1', 'org-b', { title: 'x' } as never);
+    const orgBindings = vi.mocked(eq).mock.calls.filter((c) => c[0] === 'committeeMeetings.organizationId' && c[1] === 'org-b');
+    expect(orgBindings).toHaveLength(3);
   });
 
   it('approveMinutes updates, audits, and returns nullable', async () => {
     h.queue = [[{ id: 'm1', committeeId: 'c1', organizationId: 'o1' }]];
-    expect(await approveMinutes('m1', 'u1')).toEqual({ id: 'm1', committeeId: 'c1', organizationId: 'o1' });
+    expect(await approveMinutes('m1', 'o1', 'u1')).toEqual({ id: 'm1', committeeId: 'c1', organizationId: 'o1' });
     expect(h.audit).toHaveBeenCalled();
 
     h.audit.mockClear();
     h.queue = [[]];
-    expect(await approveMinutes('m2', 'u1')).toBeNull();
+    expect(await approveMinutes('m2', 'o1', 'u1')).toBeNull();
     expect(h.audit).not.toHaveBeenCalled();
   });
 
@@ -158,7 +171,7 @@ describe('committee-workspace-service', () => {
       [],
       [{ organizationId: 'o1' }],
     ];
-    await expect(recordAttendance('m1', [
+    await expect(recordAttendance('m1', 'o1', [
       { memberId: 'u1', attended: true },
       { memberId: 'u2', attended: false, regrets: true },
     ], 'u9')).resolves.toBeUndefined();
@@ -190,10 +203,10 @@ describe('committee-workspace-service', () => {
 
   it('updateActionItem sets completed fields for completed status', async () => {
     h.queue = [[{ id: 'ai1', status: 'completed' }]];
-    expect(await updateActionItem('ai1', { status: 'completed', updatedBy: 'u1' } as never)).toEqual({ id: 'ai1', status: 'completed' });
+    expect(await updateActionItem('ai1', 'o1', { status: 'completed', updatedBy: 'u1' } as never)).toEqual({ id: 'ai1', status: 'completed' });
 
     h.queue = [[]];
-    expect(await updateActionItem('missing', { status: 'pending' } as never)).toBeNull();
+    expect(await updateActionItem('missing', 'o1', { status: 'pending' } as never)).toBeNull();
   });
 
   it('carryForwardActionItems clones open items and defers originals', async () => {
@@ -207,7 +220,7 @@ describe('committee-workspace-service', () => {
       [{ id: 'n2' }],
       [],
     ];
-    const carried = await carryForwardActionItems('m1', 'm2', 'u99');
+    const carried = await carryForwardActionItems('m1', 'm2', 'o1', 'u99');
     expect(carried).toHaveLength(2);
   });
 
@@ -219,7 +232,7 @@ describe('committee-workspace-service', () => {
     expect(await listCommitteeDocuments('c1', { category: 'agenda', meetingId: 'm1' })).toEqual([{ id: 'd1' }]);
 
     h.queue = [[{ id: 'd1', organizationId: 'o1', committeeId: 'c1', title: 'Doc' }]];
-    await expect(removeDocument('d1', 'u1')).resolves.toBeUndefined();
+    await expect(removeDocument('d1', 'o1', 'u1')).resolves.toBeUndefined();
     expect(h.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'committee.document.removed' }));
   });
 

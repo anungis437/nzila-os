@@ -56,6 +56,7 @@ export const communicationsNotificationsEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "chatbot_suggestions",
@@ -67,6 +68,7 @@ export const communicationsNotificationsEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "communication_analytics",
@@ -89,6 +91,7 @@ export const communicationsNotificationsEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "communication_preferences",
@@ -266,6 +269,7 @@ export const communicationsNotificationsEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "notification_delivery_log",
@@ -343,6 +347,7 @@ export const communicationsNotificationsEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "organizing_campaigns",
@@ -420,6 +425,7 @@ export const communicationsNotificationsEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "social_campaigns",
@@ -486,6 +492,7 @@ export const communicationsNotificationsEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "federation_communications",
@@ -497,6 +504,7 @@ export const communicationsNotificationsEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "newsletter_engagement",
@@ -581,6 +589,39 @@ export const communicationsNotificationsEntries: StorageAuthorityEntry[] = [
     reason: "Append-only history of every assignment, reassignment and release of a member conversation (platform 0014, RLS 0021). Written in the same transaction as the thread change by lib/messaging/thread-assignment.ts through app/api/messages/threads/[threadId]/assignment/route.ts. Triggers refuse UPDATE and DELETE and verify tenant and resulting assignee against the thread.",
     supportingCapability: ["app/api/messages/threads/[threadId]/assignment/route.ts","lib/messaging/thread-assignment.ts","db/migrations-platform/0014_message_thread_triage.sql","db/migrations-cache/0021_message_thread_triage_rls_closure.sql"],
     requiredRuntimePrivileges: ["SELECT","INSERT"],
+    requiredSystemPrivileges: [],
+    invocationAuthority: "TENANT_USER",
+    dbExecutionPrincipal: "TENANT_RUNTIME",
+    reviewPriority: "NONE",
+  },
+  {
+    table: "message_thread_lifecycle",
+    classification: "TENANT_RLS_REQUIRED",
+    reason: "Append-only history of every close, archive and legal-hold decision on a member conversation and how it was authorized (platform 0025, RLS 0024). Written in the same transaction as the thread change and its audit by lib/messaging/thread-lifecycle.ts through app/api/messages/threads/[threadId]/lifecycle/route.ts and app/api/messages/threads/[threadId]/legal-hold/route.ts. It never holds message text. Triggers refuse UPDATE and DELETE, verify tenant and the resulting thread state, and message_threads refuses a status or archive change that has no matching record. UPDATE of message_threads is therefore also used for close and archive.",
+    supportingCapability: ["app/api/messages/threads/[threadId]/lifecycle/route.ts","app/api/messages/threads/[threadId]/legal-hold/route.ts","lib/messaging/thread-lifecycle.ts","db/migrations-platform/0025_message_thread_lifecycle_and_retention.sql","db/migrations-cache/0024_message_thread_lifecycle_and_retention_rls_closure.sql"],
+    requiredRuntimePrivileges: ["SELECT","INSERT"],
+    requiredSystemPrivileges: [],
+    invocationAuthority: "TENANT_USER",
+    dbExecutionPrincipal: "TENANT_RUNTIME",
+    reviewPriority: "NONE",
+  },
+  {
+    table: "message_retention_policies",
+    classification: "TENANT_RLS_REQUIRED",
+    reason: "An organization's adopted retention period for closed member conversations, recorded with the authority that adopted it (platform 0025, RLS 0024). Read to state a conversation's retention position and written by an organization administrator through app/api/messages/retention-policy/route.ts. UPDATE is limited by trigger to recording supersession; rows are never deleted. No row means no policy is adopted. Nothing in the application deletes message content.",
+    supportingCapability: ["app/api/messages/retention-policy/route.ts","lib/messaging/thread-lifecycle.ts","db/migrations-platform/0025_message_thread_lifecycle_and_retention.sql","db/migrations-cache/0024_message_thread_lifecycle_and_retention_rls_closure.sql"],
+    requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
+    requiredSystemPrivileges: [],
+    invocationAuthority: "TENANT_USER",
+    dbExecutionPrincipal: "TENANT_RUNTIME",
+    reviewPriority: "NONE",
+  },
+  {
+    table: "message_thread_reads",
+    classification: "TENANT_RLS_REQUIRED",
+    reason: "Last time each participant read a member conversation (platform 0025, RLS 0024), so the member can see whether the union has read their message without learning who. Upserted by lib/messaging/thread-read-state.ts through app/api/messages/threads/[threadId]/read/route.ts; triggers make identity immutable, verify tenant, never let a marker move backwards and refuse DELETE.",
+    supportingCapability: ["app/api/messages/threads/[threadId]/read/route.ts","lib/messaging/thread-read-state.ts","db/migrations-platform/0025_message_thread_lifecycle_and_retention.sql","db/migrations-cache/0024_message_thread_lifecycle_and_retention_rls_closure.sql"],
+    requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
     requiredSystemPrivileges: [],
     invocationAuthority: "TENANT_USER",
     dbExecutionPrincipal: "TENANT_RUNTIME",

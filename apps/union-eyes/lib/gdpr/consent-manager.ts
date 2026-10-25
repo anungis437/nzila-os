@@ -28,7 +28,7 @@ import {
   smsMessages,
   smsCampaignRecipients,
 } from "@/db/schema";
-import { eq, and, desc, sql, or } from "drizzle-orm";
+import { eq, and, desc, sql, or, inArray } from "drizzle-orm";
 import { createHash } from "crypto";
 import { NotificationService } from "@/lib/services/notification-service";
 import { logger } from "@/lib/logger";
@@ -73,7 +73,8 @@ export class ConsentManager {
    */
   static async withdrawConsent(
     userId: string,
-    consentId: string
+    consentId: string,
+    organizationId: string
   ): Promise<boolean> {
     const result = await db
       .update(userConsents)
@@ -85,7 +86,8 @@ export class ConsentManager {
       .where(
         and(
           eq(userConsents.id, consentId),
-          eq(userConsents.userId, userId)
+          eq(userConsents.userId, userId),
+          eq(userConsents.organizationId, organizationId)
         )
       )
       .returning();
@@ -186,7 +188,7 @@ export class CookieConsentManager {
           expiresAt,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any)
-        .where(eq(cookieConsents.consentId, data.consentId))
+        .where(and(eq(cookieConsents.consentId, data.consentId), eq(cookieConsents.organizationId, data.organizationId)))
         .returning();
 
       return updated;
@@ -415,6 +417,7 @@ export class GdprRequestManager {
    */
   static async updateRequestStatus(
     requestId: string,
+    organizationId: string,
     status: "in_progress" | "completed" | "rejected",
     data?: {
       processedBy?: string;
@@ -441,7 +444,7 @@ export class GdprRequestManager {
       .update(gdprDataRequests)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .set(updateData as any)
-      .where(eq(gdprDataRequests.id, requestId))
+      .where(and(eq(gdprDataRequests.id, requestId), eq(gdprDataRequests.organizationId, organizationId)))
       .returning();
 
     return updated;
@@ -738,7 +741,7 @@ export class DataErasureService {
       });
 
       // 6. Update the GDPR request status
-      await GdprRequestManager.updateRequestStatus(requestId, "completed", {
+      await GdprRequestManager.updateRequestStatus(requestId, organizationId, "completed", {
         processedBy: executedBy,
         responseData: {
           tablesAffected: tablesAffected.length,
@@ -809,10 +812,18 @@ export class DataErasureService {
       )
       .returning();
 
-    // Delete individual messages sent by user
+    // Delete individual messages sent by user, within this organization's threads only
     const deletedMessages = await db
       .delete(messages)
-      .where(eq(messages.senderId, userId))
+      .where(
+        and(
+          eq(messages.senderId, userId),
+          inArray(
+            messages.threadId,
+            db.select({ id: messageThreads.id }).from(messageThreads).where(eq(messageThreads.organizationId, organizationId))
+          )
+        )
+      )
       .returning();
 
     // Delete SMS message records
@@ -887,7 +898,13 @@ export class DataErasureService {
         message: "[Update removed per GDPR data erasure request]",
       })
       .where(
-        eq(claimUpdates.createdBy, userId)
+        and(
+          eq(claimUpdates.createdBy, userId),
+          inArray(
+            claimUpdates.claimId,
+            db.select({ id: claims.id }).from(claims).where(eq(claims.organizationId, organizationId))
+          )
+        )
       )
       .returning();
 

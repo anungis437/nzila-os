@@ -173,7 +173,7 @@ export async function advanceDunningStep(caseId: string): Promise<StepResult> {
         status: 'terminal',
         updatedAt: new Date(),
       })
-      .where(eq(dunningCases.id, caseId));
+      .where(and(eq(dunningCases.id, caseId), eq(dunningCases.organizationId, dCase.organizationId)));
 
     // Pause the subscription
     await db
@@ -182,7 +182,7 @@ export async function advanceDunningStep(caseId: string): Promise<StepResult> {
         status: 'paused',
         updatedAt: new Date(),
       })
-      .where(eq(orgSubscriptions.id, dCase.subscriptionId));
+      .where(and(eq(orgSubscriptions.id, dCase.subscriptionId), eq(orgSubscriptions.organizationId, dCase.organizationId)));
 
     await db.insert(subscriptionEventsLog).values({
       organizationId: dCase.organizationId,
@@ -209,7 +209,7 @@ export async function advanceDunningStep(caseId: string): Promise<StepResult> {
       status: newStatus,
       updatedAt: new Date(),
     })
-    .where(eq(dunningCases.id, caseId));
+    .where(and(eq(dunningCases.id, caseId), eq(dunningCases.organizationId, dCase.organizationId)));
 
   if (step.action === 'retry_payment') {
     await db.insert(subscriptionEventsLog).values({
@@ -263,7 +263,7 @@ export async function resolveDunningCase(
       status: 'active',
       updatedAt: new Date(),
     })
-    .where(eq(orgSubscriptions.id, dCase.subscriptionId));
+    .where(and(eq(orgSubscriptions.id, dCase.subscriptionId), eq(orgSubscriptions.organizationId, dCase.organizationId)));
 
   await db.insert(subscriptionEventsLog).values({
     organizationId: dCase.organizationId,

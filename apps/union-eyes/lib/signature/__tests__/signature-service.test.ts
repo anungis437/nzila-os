@@ -19,7 +19,7 @@ vi.mock('@/db/schema', () => {
   const t = (name: string) => new Proxy({}, { get: (_t, p) => `${name}.${String(p)}` });
   return { signatureDocuments: t('signatureDocuments'), documentSigners: t('documentSigners'), signatureAuditTrail: t('signatureAuditTrail') };
 });
-vi.mock('drizzle-orm', () => ({ eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and'), or: vi.fn(() => 'or'), desc: vi.fn(), notInArray: vi.fn(() => 'notIn') }));
+vi.mock('drizzle-orm', () => ({ eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and'), or: vi.fn(() => 'or'), desc: vi.fn(), notInArray: vi.fn(() => 'notIn'), inArray: vi.fn(() => 'in') }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (_org: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(m.tx),
 }));
@@ -114,6 +114,20 @@ describe('SignatureService authority and atomic audit', () => {
       await SignatureService.recordSignature(input);
       expect(m.trail[0]).toMatchObject({ eventType: 'document_signed', actorUserId: 'signer' });
       expect(m.audit).toHaveBeenCalledWith(m.tx, expect.objectContaining({ action: 'signature.document.sign', userId: 'signer' }));
+    });
+
+    it('proves the signer row belongs to the document organization inside the signing statement', async () => {
+      const { eq } = await import('drizzle-orm');
+      vi.mocked(eq).mockClear();
+      await SignatureService.recordSignature(input);
+      expect(vi.mocked(eq).mock.calls.some((c) => c[0] === 'signatureDocuments.organizationId' && c[1] === 'o1')).toBe(true);
+    });
+
+    it('binds the void and completion statements to the document organization', async () => {
+      const { eq } = await import('drizzle-orm');
+      vi.mocked(eq).mockClear();
+      await SignatureService.voidDocument('d1', 'sender', 'why');
+      expect(vi.mocked(eq).mock.calls.some((c) => c[0] === 'signatureDocuments.organizationId' && c[1] === 'o1')).toBe(true);
     });
 
     it('fails the signature when its audit cannot be written', async () => {

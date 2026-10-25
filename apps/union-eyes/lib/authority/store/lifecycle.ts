@@ -44,6 +44,21 @@ async function holderMembershipOf(exec: SqlExecutor, deps: EnforcementDeps, org:
   return rows.length === 1 ? rows[0] : null
 }
 
+/**
+ * An approval is a vote cast under a membership. The recorded decision outlives that membership, so an instrument
+ * can only count the votes of approvers who are STILL active members when it is issued. Anything unreadable,
+ * duplicated or not active is not counted (fail closed).
+ */
+async function liveApprovalLines(exec: SqlExecutor, deps: EnforcementDeps, org: string, lines: readonly string[]): Promise<string[]> {
+  const distinct = [...new Set(lines)]
+  if (distinct.length === 0) return []
+  const rows = await deps.memberships(exec, org, distinct)
+  return distinct.filter((line) => {
+    const mine = rows.filter((m) => m.userId === line && m.organizationId === org)
+    return mine.length === 1 && mine[0].status === 'active'
+  })
+}
+
 interface Evaluate {
   organizationId: string
   issuerUserId: string
@@ -72,7 +87,7 @@ async function evaluateIssuance(exec: SqlExecutor, deps: EnforcementDeps, e: Eva
     const a = await loadIssuanceApproval(exec, e.organizationId, e.approvalRequestId)
     // The approval must be bound to THIS exact instrument and domain, or it counts for nothing.
     if (a && a.subjectType === `issuance:${e.domain}` && a.subjectId === e.instrumentId) {
-      approval = { status: a.status, approvingLines: a.approvingLines }
+      approval = { status: a.status, approvingLines: await liveApprovalLines(exec, deps, e.organizationId, a.approvingLines) }
     }
   }
   const decision = decideIssuance(
@@ -326,7 +341,8 @@ export async function issueMandate(exec: SqlExecutor, deps: EnforcementDeps, i: 
   let approvedBy: string | null = null
   if (i.kind === 'emergency_access' && i.approvalRequestId) {
     const a = await loadIssuanceApproval(exec, i.organizationId, i.approvalRequestId)
-    approvedBy = a?.approvingLines.find((l) => l !== i.issuerUserId && l !== i.holderUserId) ?? null
+    const live = a ? await liveApprovalLines(exec, deps, i.organizationId, a.approvingLines) : []
+    approvedBy = live.find((l) => l !== i.issuerUserId && l !== i.holderUserId) ?? null
   }
   const mandateId = await insertMandate(exec, {
     id,

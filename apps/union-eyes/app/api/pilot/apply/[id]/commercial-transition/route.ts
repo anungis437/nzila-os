@@ -385,7 +385,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
               signedAt: now,
               updatedAt: now,
             })
-            .where(eq(commercialContracts.id, existingContract.id));
+            .where(and(eq(commercialContracts.id, existingContract.id), eq(commercialContracts.organizationId, organizationId)));
 
           monetization.contractId = existingContract.id;
         } else {
@@ -474,7 +474,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
               await tx
                 .update(orgSubscriptions)
                 .set({ status: 'active', updatedAt: now })
-                .where(eq(orgSubscriptions.id, existingSubscription.id));
+                .where(and(eq(orgSubscriptions.id, existingSubscription.id), eq(orgSubscriptions.organizationId, organizationId)));
               monetization.subscriptionId = existingSubscription.id;
             } else {
               const [subscription] = await tx
@@ -599,7 +599,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       await tx
         .update(pilotApplications)
         .set(updatePayload)
-        .where(eq(pilotApplications.id, application.id));
+        .where(and(eq(pilotApplications.id, application.id), eq(pilotApplications.verifiedOrganizationId, organizationId)));
 
       // The transition, any financial artifact it created, and this record commit together under the pilot's
       // verified organization; a failed audit rolls all of it back.

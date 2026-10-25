@@ -72,39 +72,6 @@ export const boardPackets = pgTable("board_packets", {
 });
 
 /**
- * Board Packet Sections Table
- * Custom sections that can be added to board packets
- */
-export const boardPacketSections = pgTable("board_packet_sections", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  
-  // Section metadata
-  packetId: uuid("packet_id").notNull().references(() => boardPackets.id, { onDelete: "cascade" }),
-  
-  // Section details
-  sectionType: varchar("section_type", { length: 50 }).notNull(), // 'financial' | 'operational' | 'compliance' | 'custom'
-  title: varchar("title", { length: 255 }).notNull(),
-  orderIndex: integer("order_index").notNull().default(0),
-  
-  // Content
-  content: jsonb("content").notNull(), // Section-specific data
-  summary: text("summary"), // Executive summary of section
-  
-  // Source
-  dataSource: varchar("data_source", { length: 100 }), // Where data came from
-  dataQuery: text("data_query"), // SQL query or API call used
-  generatedAt: timestamp("generated_at", { withTimezone: true }).defaultNow(),
-  
-  // Visibility
-  isConfidential: boolean("is_confidential").default(false),
-  requiredRole: varchar("required_role", { length: 50 }), // Minimum role to view
-  
-  // Audit trail
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
-
-/**
  * Board Packet Distribution Log
  * Tracks who received which packets and when
  */
@@ -139,42 +106,8 @@ export const boardPacketDistributions = pgTable("board_packet_distributions", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
-/**
- * Board Packet Templates
- * Reusable templates for different packet types
- */
-export const boardPacketTemplates = pgTable("board_packet_templates", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  
-  // Template metadata
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  packetType: varchar("packet_type", { length: 50 }).notNull(),
-  
-  // Organization (null = global template)
-  organizationId: uuid("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
-  
-  // Template structure
-  sections: jsonb("sections").notNull(), // [{ type, title, dataSource, required }]
-  defaultRecipients: text("default_recipients").array(),
-  
-  // Status
-  isActive: boolean("is_active").default(true),
-  isDefault: boolean("is_default").default(false),
-  
-  // Audit trail
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  createdBy: varchar("created_by", { length: 255 }).notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-  updatedBy: varchar("updated_by", { length: 255 }),
-});
-
 // Export types
 export type BoardPacket = typeof boardPackets.$inferSelect;
 export type NewBoardPacket = typeof boardPackets.$inferInsert;
-export type BoardPacketSection = typeof boardPacketSections.$inferSelect;
-export type NewBoardPacketSection = typeof boardPacketSections.$inferInsert;
 export type BoardPacketDistribution = typeof boardPacketDistributions.$inferSelect;
 export type NewBoardPacketDistribution = typeof boardPacketDistributions.$inferInsert;
-export type BoardPacketTemplate = typeof boardPacketTemplates.$inferSelect;
-export type NewBoardPacketTemplate = typeof boardPacketTemplates.$inferInsert;

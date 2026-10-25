@@ -29,7 +29,7 @@ export const POST = withApi(
     const { id: committeeId, meetingId } = params as { id: string; meetingId: string };
     await requireCommitteeScope(organizationId, committeeId, { meetingId });
 
-    const updated = await recordMinutes(meetingId, body.minutes, userId!);
+    const updated = await recordMinutes(meetingId, organizationId, body.minutes, userId!);
     // Scope is already proven, so no row means the minutes were approved in the meantime.
     if (!updated) throw ApiError.conflict("Approved minutes cannot be changed");
 
@@ -54,7 +54,7 @@ export const PATCH = withApi(
       throw ApiError.badRequest("Cannot approve — no minutes recorded yet");
     }
 
-    const updated = await approveMinutes(meetingId, userId!);
+    const updated = await approveMinutes(meetingId, organizationId, userId!);
     if (!updated) throw ApiError.conflict("The minutes have already been approved");
 
     return updated;

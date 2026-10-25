@@ -84,7 +84,7 @@ import {
 } from '../google-calendar-service';
 
 const conn = {
-  id: 'c1', provider: 'google', refreshToken: 'enc-rt', accessToken: 'enc-at',
+  id: 'c1', organizationId: 'org1', provider: 'google', refreshToken: 'enc-rt', accessToken: 'enc-at',
   tokenExpiresAt: new Date(Date.now() + 3_600_000), calendarMappings: [],
 };
 
@@ -128,6 +128,21 @@ describe('listGoogleCalendars', () => {
 });
 
 describe('importGoogleEvents', () => {
+  it('refuses to import into a calendar of another organization', async () => {
+    h.events = [{ id: 'ev-x', summary: 'X', status: 'confirmed', start: { date: '2024-02-01' }, end: { date: '2024-02-02' } }];
+    h.readQueue = [[conn], [{ id: 'localcal', organizationId: 'org-other' }]];
+    await expect(importGoogleEvents('c1', 'localcal', 'g-cal')).rejects.toThrow(/Local calendar not found/);
+  });
+
+  it('scopes every event update by the connection organization', async () => {
+    const { and, eq } = await import('drizzle-orm');
+    vi.mocked(eq).mockClear();
+    h.events = [{ id: 'ev-existing', summary: 'E', status: 'confirmed', start: { date: '2024-02-01' }, end: { date: '2024-02-02' } }];
+    h.readQueue = [[conn], [{ id: 'localcal', organizationId: 'org1' }], [{ id: 'evdb-existing' }], []];
+    await importGoogleEvents('c1', 'localcal', 'g-cal');
+    expect(vi.mocked(and)).toHaveBeenCalled();
+    expect(vi.mocked(eq).mock.calls.some((c) => c[0] === 'organizationId' && c[1] === 'org1')).toBe(true);
+  });
   it('imports new, updates existing, handles cancelled', async () => {
     h.events = [
       { status: 'cancelled', id: 'gone' },
@@ -151,10 +166,16 @@ describe('importGoogleEvents', () => {
 });
 
 describe('exportEventToGoogle', () => {
+  it('refuses to export an event of another organization', async () => {
+    calendarApi.events.insert.mockClear();
+    h.readQueue = [[conn], [{ id: 'l9', organizationId: 'org-other', title: 'T', isAllDay: true, startTime: new Date(), endTime: new Date() }]];
+    await expect(exportEventToGoogle('c1', 'l9', 'g-cal')).rejects.toThrow(/Local event not found/);
+    expect(calendarApi.events.insert).not.toHaveBeenCalled();
+  });
   it('updates existing external event', async () => {
     h.readQueue = [
       [conn],
-      [{ id: 'l1', title: 'T', description: 'd', location: 'loc', isAllDay: false, timezone: 'UTC', startTime: new Date(), endTime: new Date(), externalEventId: 'ext-1', recurrenceRule: 'RRULE:FREQ=DAILY', meetingUrl: 'https://m' }],
+      [{ id: 'l1', organizationId: 'org1', title: 'T', description: 'd', location: 'loc', isAllDay: false, timezone: 'UTC', startTime: new Date(), endTime: new Date(), externalEventId: 'ext-1', recurrenceRule: 'RRULE:FREQ=DAILY', meetingUrl: 'https://m' }],
     ];
     expect(await exportEventToGoogle('c1', 'l1', 'g-cal')).toEqual({ id: 'g-upd' });
   });
@@ -162,7 +183,7 @@ describe('exportEventToGoogle', () => {
   it('inserts new external event', async () => {
     h.readQueue = [
       [conn],
-      [{ id: 'l2', title: 'T2', isAllDay: true, startTime: new Date(), endTime: new Date() }],
+      [{ id: 'l2', organizationId: 'org1', title: 'T2', isAllDay: true, startTime: new Date(), endTime: new Date() }],
     ];
     expect(await exportEventToGoogle('c1', 'l2', 'g-cal')).toEqual({ id: 'g-new' });
   });

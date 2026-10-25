@@ -402,7 +402,7 @@ export async function reverseTransactionFee(
     const [updatedEvent] = await tx
       .update(transactionFeeEvents)
       .set({ status: newStatus })
-      .where(eq(transactionFeeEvents.id, feeEventId))
+      .where(and(eq(transactionFeeEvents.id, feeEventId), eq(transactionFeeEvents.organizationId, event.organizationId)))
       .returning()
 
     // Create reversal adjustment
@@ -519,12 +519,22 @@ export async function createSettlementBatch(
       })
       .returning()
 
-    // Link events to batch and create settlement lines
-    const eventIds = events.map((e) => e.id)
-    await tx
-      .update(transactionFeeEvents)
-      .set({ settlementBatchId: batch.id })
-      .where(inArray(transactionFeeEvents.id, eventIds))
+    // Link events to batch and create settlement lines (each organization's events are updated under that organization)
+    const eventIdsByOrganization = new Map<string, string[]>()
+    for (const e of events) {
+      eventIdsByOrganization.set(e.organizationId, [...(eventIdsByOrganization.get(e.organizationId) ?? []), e.id])
+    }
+    for (const [organizationId, organizationEventIds] of eventIdsByOrganization) {
+      await tx
+        .update(transactionFeeEvents)
+        .set({ settlementBatchId: batch.id })
+        .where(
+          and(
+            inArray(transactionFeeEvents.id, organizationEventIds),
+            eq(transactionFeeEvents.organizationId, organizationId),
+          ),
+        )
+    }
 
     for (const e of events) {
       await tx.insert(feeSettlementLines).values({
@@ -572,11 +582,22 @@ export async function closeSettlementBatch(batchId: string, closedBy: string) {
       throw new Error(`Settlement batch ${batchId} not found or not open`)
     }
 
-    // Mark events as settled
-    await tx
-      .update(transactionFeeEvents)
-      .set({ status: 'settled' })
+    // Mark events as settled, one statement per organization represented in the batch
+    const batchEvents = await tx
+      .select({ organizationId: transactionFeeEvents.organizationId })
+      .from(transactionFeeEvents)
       .where(eq(transactionFeeEvents.settlementBatchId, batchId))
+    for (const organizationId of new Set(batchEvents.map((row) => row.organizationId))) {
+      await tx
+        .update(transactionFeeEvents)
+        .set({ status: 'settled' })
+        .where(
+          and(
+            eq(transactionFeeEvents.settlementBatchId, batchId),
+            eq(transactionFeeEvents.organizationId, organizationId),
+          ),
+        )
+    }
 
     await auditLog({
       eventType: AuditEventType.DATA_UPDATE,

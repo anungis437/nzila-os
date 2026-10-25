@@ -177,31 +177,31 @@ export class ChatSessionManager {
   /**
    * Update session title (auto-generated from first message)
    */
-  async updateSessionTitle(sessionId: string, title: string): Promise<void> {
+  async updateSessionTitle(sessionId: string, organizationId: string, title: string): Promise<void> {
     await db
       .update(chatSessions)
       .set({ title, updatedAt: new Date() })
-      .where(eq(chatSessions.id, sessionId));
+      .where(and(eq(chatSessions.id, sessionId), eq(chatSessions.organizationId, organizationId)));
   }
   
   /**
    * Archive session
    */
-  async archiveSession(sessionId: string): Promise<void> {
+  async archiveSession(sessionId: string, organizationId: string): Promise<void> {
     await db
       .update(chatSessions)
       .set({ status: "archived", updatedAt: new Date() })
-      .where(eq(chatSessions.id, sessionId));
+      .where(and(eq(chatSessions.id, sessionId), eq(chatSessions.organizationId, organizationId)));
   }
   
   /**
    * Delete session
    */
-  async deleteSession(sessionId: string): Promise<void> {
+  async deleteSession(sessionId: string, organizationId: string): Promise<void> {
     await db
       .update(chatSessions)
       .set({ status: "deleted", updatedAt: new Date() })
-      .where(eq(chatSessions.id, sessionId));
+      .where(and(eq(chatSessions.id, sessionId), eq(chatSessions.organizationId, organizationId)));
   }
 }
 
@@ -301,14 +301,14 @@ export class RAGService {
   /**
    * Update document citation count
    */
-  async incrementCitationCount(documentId: string, exec: typeof db = db): Promise<void> {
+  async incrementCitationCount(documentId: string, organizationId: string, exec: typeof db = db): Promise<void> {
     await exec
       .update(knowledgeBase)
       .set({
         citationCount: sql`${knowledgeBase.citationCount} + 1`,
         lastUsedAt: new Date(),
       })
-      .where(eq(knowledgeBase.id, documentId));
+      .where(and(eq(knowledgeBase.id, documentId), eq(knowledgeBase.organizationId, organizationId)));
   }
 }
 
@@ -500,7 +500,7 @@ export class ChatbotService {
 
       // Update citation counts
       for (const doc of retrievedDocs) {
-        await this.ragService.incrementCitationCount(doc.documentId, tx);
+        await this.ragService.incrementCitationCount(doc.documentId, data.organizationId, tx);
       }
 
       await persistAtomicAudit(tx, {

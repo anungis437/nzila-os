@@ -18,22 +18,10 @@ export type {
   SelectSafetyInspection,
   InsertHazardReport,
   SelectHazardReport,
-  InsertSafetyCommitteeMeeting,
-  SelectSafetyCommitteeMeeting,
   InsertSafetyTrainingRecord,
   SelectSafetyTrainingRecord,
   InsertPpeEquipment,
   SelectPpeEquipment,
-  InsertSafetyAudit,
-  SelectSafetyAudit,
-  InsertInjuryLog,
-  SelectInjuryLog,
-  InsertSafetyPolicy,
-  SelectSafetyPolicy,
-  InsertCorrectiveAction,
-  SelectCorrectiveAction,
-  InsertSafetyCertification,
-  SelectSafetyCertification,
 } from './health-safety-schema';
 
 // Quebec CNESST types

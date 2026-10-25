@@ -19,12 +19,17 @@
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { clauseLibraryTags, sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { canReadSharedClause, isSharedClauseOwner } from '@/lib/clause-library/sharing-authority';
 
 export const dynamic = 'force-dynamic';
+
+// clause_library_tags has no organization column: a tag belongs to its clause, and the clause to its source
+// organization. The statement proves that ownership itself.
+const tagOfOwnedClause = (clauseId: string, organizationId: string) =>
+  sql`${clauseLibraryTags.clauseId} IN (SELECT id FROM shared_clause_library WHERE id = ${clauseId} AND source_organization_id = ${organizationId})`;
 
 async function getClauseAuthorityRow(id: string, executor: typeof db = db) {
   const [clause] = await executor
@@ -146,9 +151,11 @@ export const DELETE = withApi(
       const removed = await tx
         .delete(clauseLibraryTags)
         .where(
-          tagId
-            ? and(eq(clauseLibraryTags.id, tagId), eq(clauseLibraryTags.clauseId, id))
-            : and(eq(clauseLibraryTags.clauseId, id), eq(clauseLibraryTags.tagName, tagName.trim())),
+          and(
+            eq(clauseLibraryTags.clauseId, id),
+            tagOfOwnedClause(id, organizationId),
+            tagId ? eq(clauseLibraryTags.id, tagId) : eq(clauseLibraryTags.tagName, tagName.trim()),
+          ),
         )
         .returning({ id: clauseLibraryTags.id, tagName: clauseLibraryTags.tagName });
 

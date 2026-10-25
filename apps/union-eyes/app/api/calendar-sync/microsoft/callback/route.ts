@@ -84,7 +84,13 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
             ...connectionPayload,
             refreshToken: tokens.refreshToken || undefined,
           })
-          .where(eq(externalCalendarConnections.id, existing.id))
+          .where(
+            and(
+              eq(externalCalendarConnections.id, existing.id),
+              eq(externalCalendarConnections.organizationId, organizationId),
+              eq(externalCalendarConnections.userId, userId),
+            ),
+          )
       } else {
         await db.insert(externalCalendarConnections).values({
           ...connectionPayload,

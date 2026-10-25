@@ -36,7 +36,7 @@ import type {
   Reason,
 } from '../ontology'
 
-const FINANCE_CAPACITIES: readonly Capacity[] = ['financial_officer', 'executive', 'trustee', 'auditor']
+export const FINANCE_CAPACITIES: readonly Capacity[] = ['financial_officer', 'executive', 'trustee', 'auditor']
 
 const validAmount = (n: unknown): n is number => typeof n === 'number' && Number.isSafeInteger(n) && n >= 0
 

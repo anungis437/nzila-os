@@ -2,35 +2,23 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { ArrowLeft, MessageSquare, Plus } from 'lucide-react';
+import { MessageSquare, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ConversationPanel } from '@/components/messages/conversation-panel';
+import { MAX_BODY, MAX_SUBJECT, pick } from '@/components/messages/messages-api';
+
+export { pick };
 
 type Thread = {
   id: string;
   subject: string;
   status: string;
+  isArchived?: boolean;
   lastMessageAt: string | null;
   createdAt: string;
   representativeAssigned: boolean;
 };
-
-type Message = {
-  id: string;
-  fromMe: boolean;
-  senderKind: 'member' | 'union' | 'system';
-  content: string | null;
-  createdAt: string;
-};
-
-const MAX_SUBJECT = 200;
-const MAX_BODY = 5000;
-
-/** Handlers wrap plain objects as { data: ... }; direct responses use the same envelope. */
-export function pick<T>(payload: unknown, key: string): T | undefined {
-  const p = payload as Record<string, any> | null;
-  return (p?.data?.[key] ?? p?.[key] ?? p?.data?.data?.[key]) as T | undefined;
-}
 
 export function MemberMessages({ initialThreadId, compose }: { initialThreadId?: string; compose?: 'privacy' }) {
   const t = useTranslations('memberMessages');
@@ -39,7 +27,10 @@ export function MemberMessages({ initialThreadId, compose }: { initialThreadId?:
   const [listState, setListState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [activeId, setActiveId] = useState<string | null>(initialThreadId ?? null);
   const [composing, setComposing] = useState(Boolean(compose) && !initialThreadId);
+  const [showArchived, setShowArchived] = useState(false);
   const dateFormat = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' });
+  const visibleThreads = threads.filter((thread) => showArchived || !thread.isArchived || thread.id === activeId);
+  const hasArchived = threads.some((thread) => thread.isArchived);
 
   const loadThreads = useCallback(async (quiet = false) => {
     if (!quiet) setListState('loading');
@@ -100,24 +91,33 @@ export function MemberMessages({ initialThreadId, compose }: { initialThreadId?:
             </div>
           )}
           {listState === 'ready' && threads.length > 0 && (
-            <ul className="space-y-2">
-              {threads.map((thread) => (
-                <li key={thread.id}>
-                  <button
-                    type="button"
-                    onClick={() => open(thread.id)}
-                    aria-current={thread.id === activeId ? 'true' : undefined}
-                    className={`w-full rounded-lg border p-3 text-left hover:bg-muted/50 ${thread.id === activeId ? 'bg-muted' : ''}`}
-                  >
-                    <span className="line-clamp-1 font-medium">{thread.subject}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {dateFormat.format(new Date(thread.lastMessageAt ?? thread.createdAt))}
-                      {thread.status !== 'open' ? ` · ${t(`status.${thread.status}` as never)}` : ''}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <>
+              {hasArchived && (
+                <label className="mb-2 flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
+                  {t('showArchived')}
+                </label>
+              )}
+              <ul className="space-y-2">
+                {visibleThreads.map((thread) => (
+                  <li key={thread.id}>
+                    <button
+                      type="button"
+                      onClick={() => open(thread.id)}
+                      aria-current={thread.id === activeId ? 'true' : undefined}
+                      className={`w-full rounded-lg border p-3 text-left hover:bg-muted/50 ${thread.id === activeId ? 'bg-muted' : ''}`}
+                    >
+                      <span className="line-clamp-1 font-medium">{thread.subject}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {dateFormat.format(new Date(thread.lastMessageAt ?? thread.createdAt))}
+                        {thread.status !== 'open' ? ` · ${t(`status.${thread.status}` as never)}` : ''}
+                        {thread.isArchived ? ` · ${t('archived')}` : ''}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
         </section>
 
@@ -130,8 +130,9 @@ export function MemberMessages({ initialThreadId, compose }: { initialThreadId?:
             />
           )}
           {!composing && activeId && (
-            <ThreadView
+            <ConversationPanel
               key={activeId}
+              ns="memberMessages"
               threadId={activeId}
               onBack={() => setActiveId(null)}
               onChanged={() => void loadThreads(true)}
@@ -211,125 +212,5 @@ function NewConversation({ initialSubject, onCancel, onCreated }: { initialSubje
         <Button type="button" variant="outline" onClick={onCancel}>{t('cancel')}</Button>
       </div>
     </form>
-  );
-}
-
-function ThreadView({ threadId, onBack, onChanged }: { threadId: string; onBack: () => void; onChanged: () => void }) {
-  const t = useTranslations('memberMessages');
-  const locale = useLocale();
-  const [thread, setThread] = useState<{ subject: string; status: string; isArchived: boolean; representativeAssigned: boolean } | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [state, setState] = useState<'loading' | 'ready' | 'missing' | 'error'>('loading');
-  const [reply, setReply] = useState('');
-  const [sending, setSending] = useState(false);
-  const [sendError, setSendError] = useState<'failed' | 'closed' | null>(null);
-  const requestId = useRef(crypto.randomUUID());
-  const dateFormat = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' });
-
-  const load = useCallback(async () => {
-    try {
-      const [threadResponse, messageResponse] = await Promise.all([
-        fetch(`/api/messages/threads/${encodeURIComponent(threadId)}`),
-        fetch(`/api/messages/threads/${encodeURIComponent(threadId)}/messages`),
-      ]);
-      if (threadResponse.status === 404 || messageResponse.status === 404) return setState('missing');
-      if (!threadResponse.ok || !messageResponse.ok) throw new Error('load');
-      setThread(pick(await threadResponse.json(), 'thread') ?? null);
-      setMessages(pick<Message[]>(await messageResponse.json(), 'messages') ?? []);
-      setState('ready');
-    } catch {
-      setState('error');
-    }
-  }, [threadId]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void load();
-  }, [load]);
-
-  const send = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (sending || !reply.trim()) return;
-    setSending(true);
-    setSendError(null);
-    try {
-      const response = await fetch(`/api/messages/threads/${encodeURIComponent(threadId)}/messages`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ body: reply.trim(), clientRequestId: requestId.current }),
-      });
-      if (response.status === 409) return setSendError('closed');
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      setReply('');
-      requestId.current = crypto.randomUUID();
-      await load();
-      onChanged();
-    } catch {
-      setSendError('failed');
-    } finally {
-      setSending(false);
-    }
-  };
-
-  if (state === 'loading') return <Skeleton className="h-64 w-full rounded-lg" role="status" aria-busy="true" />;
-  if (state === 'missing') {
-    return (
-      <div role="alert" className="rounded-lg border p-6" data-testid="thread-unavailable">
-        <p className="font-medium">{t('unavailableTitle')}</p>
-        <p className="text-sm text-muted-foreground">{t('unavailableBody')}</p>
-        <Button variant="outline" size="sm" className="mt-3" onClick={onBack}>{t('back')}</Button>
-      </div>
-    );
-  }
-  if (state === 'error' || !thread) {
-    return (
-      <div role="alert" className="rounded-lg border border-destructive/40 p-4 text-sm">
-        <p>{t('loadError')}</p>
-        <Button variant="outline" size="sm" className="mt-3" onClick={() => { setState('loading'); void load(); }}>{t('retry')}</Button>
-      </div>
-    );
-  }
-
-  const open = thread.status === 'open' && !thread.isArchived;
-  return (
-    <div className="flex flex-col gap-4 rounded-lg border p-4" data-testid="thread-view">
-      <div className="flex items-start gap-2">
-        <Button variant="ghost" size="icon" className="md:hidden" onClick={onBack} aria-label={t('back')}>
-          <ArrowLeft className="h-4 w-4" aria-hidden />
-        </Button>
-        <div>
-          <h2 className="text-lg font-semibold">{thread.subject}</h2>
-          <p className="text-xs text-muted-foreground">{thread.representativeAssigned ? t('representativeAssigned') : t('awaitingRepresentative')}</p>
-        </div>
-      </div>
-      <ol className="space-y-3">
-        {messages.map((m) => (
-          <li key={m.id} className={`max-w-[85%] rounded-lg p-3 text-sm ${m.fromMe ? 'ml-auto bg-primary/10' : 'bg-muted'}`}>
-            <p className="mb-1 text-xs font-medium text-muted-foreground">
-              {m.fromMe ? t('you') : m.senderKind === 'system' ? t('system') : t('union')} · {dateFormat.format(new Date(m.createdAt))}
-            </p>
-            <p className="whitespace-pre-wrap break-words">{m.content}</p>
-          </li>
-        ))}
-      </ol>
-      {open ? (
-        <form onSubmit={send} className="space-y-2">
-          <label htmlFor="msg-reply" className="text-sm font-medium">{t('reply')}</label>
-          <textarea
-            id="msg-reply"
-            className="min-h-24 w-full rounded-md border bg-background px-3 py-2 text-sm"
-            value={reply}
-            maxLength={MAX_BODY}
-            onChange={(e) => setReply(e.target.value)}
-            placeholder={t('replyPlaceholder')}
-          />
-          {sendError === 'failed' && <p role="alert" className="text-sm text-destructive">{t('sendError')}</p>}
-          {sendError === 'closed' && <p role="alert" className="text-sm text-destructive">{t('closedNotice')}</p>}
-          <Button type="submit" disabled={sending || !reply.trim()}>{sending ? t('sending') : t('send')}</Button>
-        </form>
-      ) : (
-        <p className="rounded-md border bg-muted/40 p-3 text-sm" data-testid="thread-closed">{t('closedNotice')}</p>
-      )}
-    </div>
   );
 }

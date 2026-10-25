@@ -69,7 +69,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       }
       // The CBA link and its audit record commit together.
       const result = await withRLSContext({ organizationId }, async (tx) => {
-        const linked = await linkClauseToGrievance(params.id!, body.clauseId, tx);
+        const linked = await linkClauseToGrievance(params.id!, body.clauseId, organizationId, tx);
         await persistAtomicAudit(tx, {
           organizationId,
           userId,

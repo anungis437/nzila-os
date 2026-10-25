@@ -252,7 +252,7 @@ export const POST = withApi(
             escalatedGrievanceNumber: g.grievanceNumber,
           },
         })
-        .where(eq(claims.claimId, caseId));
+        .where(and(eq(claims.claimId, caseId), eq(claims.organizationId, orgId)));
 
       // The grievance, the claim's resolution and the audit record commit together.
       await persistAtomicAudit(tx, {

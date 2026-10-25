@@ -278,32 +278,32 @@ describe('document-service', () => {
     it('updates and returns document', async () => {
       const updated = { ...DOC, name: 'Renamed.pdf' };
       mocks.mockUpdate.mockReturnValue(chain([updated]));
-      const result = await updateDocument('d1', { name: 'Renamed.pdf' } as never);
+      const result = await updateDocument('d1', 'org-1', { name: 'Renamed.pdf' } as never);
       expect(result).toEqual(updated);
     });
 
     it('returns null when not found', async () => {
       mocks.mockUpdate.mockReturnValue(chain([undefined]));
-      expect(await updateDocument('missing', {} as never)).toBeNull();
+      expect(await updateDocument('missing', 'org-1', {} as never)).toBeNull();
     });
   });
 
   describe('deleteDocument', () => {
     it('soft deletes and returns true', async () => {
       mocks.mockUpdate.mockReturnValue(chain([DOC]));
-      expect(await deleteDocument('d1')).toBe(true);
+      expect(await deleteDocument('d1', 'org-1')).toBe(true);
     });
 
     it('returns false when not found', async () => {
       mocks.mockUpdate.mockReturnValue(chain([undefined]));
-      expect(await deleteDocument('missing')).toBe(false);
+      expect(await deleteDocument('missing', 'org-1')).toBe(false);
     });
   });
 
   describe('permanentlyDeleteDocument', () => {
     it('hard deletes and returns true', async () => {
       mocks.mockDelete.mockReturnValue(chain());
-      expect(await permanentlyDeleteDocument('d1')).toBe(true);
+      expect(await permanentlyDeleteDocument('d1', 'org-1')).toBe(true);
     });
   });
 
@@ -388,13 +388,13 @@ describe('document-service', () => {
     it('updates and returns folder', async () => {
       const updated = { ...FOLDER, name: 'Renamed' };
       mocks.mockUpdate.mockReturnValue(chain([updated]));
-      const result = await updateFolder('f1', { name: 'Renamed' } as never);
+      const result = await updateFolder('f1', 'org-1', { name: 'Renamed' } as never);
       expect(result).toEqual(updated);
     });
 
     it('returns null when update yields no row', async () => {
       mocks.mockUpdate.mockReturnValue(chain([undefined]));
-      const result = await updateFolder('missing', { name: 'Nope' } as never);
+      const result = await updateFolder('missing', 'org-1', { name: 'Nope' } as never);
       expect(result).toBeNull();
     });
   });
@@ -402,7 +402,7 @@ describe('document-service', () => {
   describe('deleteFolder', () => {
     it('soft deletes folder without contents', async () => {
       mocks.mockUpdate.mockReturnValue(chain([FOLDER]));
-      expect(await deleteFolder('f1')).toBe(true);
+      expect(await deleteFolder('f1', 'org-1')).toBe(true);
     });
 
     it('deletes folder with contents (recursive)', async () => {
@@ -414,7 +414,7 @@ describe('document-service', () => {
         .mockReturnValueOnce(chain([FOLDER])); // delete main folder
       mocks.mockSelect.mockReturnValue(chain([])); // no subfolders
 
-      expect(await deleteFolder('f1', true)).toBe(true);
+      expect(await deleteFolder('f1', 'org-1', true)).toBe(true);
     });
   });
 

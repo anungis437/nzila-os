@@ -123,7 +123,7 @@ describe('gdpr/data-export POST', () => {
     const response = await POST(post('data-export', { organizationId: ORG }), { organizationId: ORG });
 
     expect(response.status).toBe(500);
-    expect(m.updateRequestStatus).toHaveBeenCalledWith('req1', 'rejected', expect.anything(), m.tx);
+    expect(m.updateRequestStatus).toHaveBeenCalledWith('req1', ORG, 'rejected', expect.anything(), m.tx);
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.tx, expect.objectContaining({ action: 'gdpr.data_export.reject' }));
   });
 

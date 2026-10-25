@@ -214,6 +214,7 @@ export async function createDocument(data: NewDocument): Promise<Document> {
  */
 export async function updateDocument(
   id: string,
+  organizationId: string,
   data: Partial<NewDocument>
 ): Promise<Document | null> {
   try {
@@ -223,7 +224,7 @@ export async function updateDocument(
         ...data,
         updatedAt: new Date(),
       })
-      .where(eq(documents.id, id))
+      .where(and(eq(documents.id, id), eq(documents.organizationId, organizationId)))
       .returning();
 
     return updated || null;
@@ -236,7 +237,7 @@ export async function updateDocument(
 /**
  * Soft delete document
  */
-export async function deleteDocument(id: string): Promise<boolean> {
+export async function deleteDocument(id: string, organizationId: string): Promise<boolean> {
   try {
     const [deleted] = await db
       .update(documents)
@@ -244,7 +245,7 @@ export async function deleteDocument(id: string): Promise<boolean> {
         deletedAt: new Date(),
         updatedAt: new Date(),
       })
-      .where(eq(documents.id, id))
+      .where(and(eq(documents.id, id), eq(documents.organizationId, organizationId)))
       .returning();
 
     return !!deleted;
@@ -257,9 +258,9 @@ export async function deleteDocument(id: string): Promise<boolean> {
 /**
  * Permanently delete document
  */
-export async function permanentlyDeleteDocument(id: string): Promise<boolean> {
+export async function permanentlyDeleteDocument(id: string, organizationId: string): Promise<boolean> {
   try {
-    await db.delete(documents).where(eq(documents.id, id));
+    await db.delete(documents).where(and(eq(documents.id, id), eq(documents.organizationId, organizationId)));
 
     return true;
   } catch (error) {
@@ -365,6 +366,7 @@ export async function createFolder(data: NewDocumentFolder): Promise<DocumentFol
  */
 export async function updateFolder(
   id: string,
+  organizationId: string,
   data: Partial<NewDocumentFolder>
 ): Promise<DocumentFolder | null> {
   try {
@@ -374,7 +376,7 @@ export async function updateFolder(
         ...data,
         updatedAt: new Date(),
       })
-      .where(eq(documentFolders.id, id))
+      .where(and(eq(documentFolders.id, id), eq(documentFolders.organizationId, organizationId)))
       .returning();
 
     return updated || null;
@@ -387,23 +389,23 @@ export async function updateFolder(
 /**
  * Delete folder
  */
-export async function deleteFolder(id: string, deleteContents = false): Promise<boolean> {
+export async function deleteFolder(id: string, organizationId: string, deleteContents = false): Promise<boolean> {
   try {
     if (deleteContents) {
       // Delete all documents in folder
       await db
         .update(documents)
         .set({ deletedAt: new Date() })
-        .where(eq(documents.folderId, id));
+        .where(and(eq(documents.folderId, id), eq(documents.organizationId, organizationId)));
 
       // Recursively delete subfolders
       const subfolders = await db
         .select()
         .from(documentFolders)
-        .where(eq(documentFolders.parentFolderId, id));
+        .where(and(eq(documentFolders.parentFolderId, id), eq(documentFolders.organizationId, organizationId)));
 
       for (const subfolder of subfolders) {
-        await deleteFolder(subfolder.id, true);
+        await deleteFolder(subfolder.id, organizationId, true);
       }
     }
 
@@ -411,7 +413,7 @@ export async function deleteFolder(id: string, deleteContents = false): Promise<
     const [deleted] = await db
       .update(documentFolders)
       .set({ deletedAt: new Date() })
-      .where(eq(documentFolders.id, id))
+      .where(and(eq(documentFolders.id, id), eq(documentFolders.organizationId, organizationId)))
       .returning();
 
     return !!deleted;
@@ -771,7 +773,7 @@ export async function bulkUpdateTags(
           newTags = currentTags.filter((t) => !tags.includes(t));
         }
 
-        await updateDocument(doc.id, { tags: newTags });
+        await updateDocument(doc.id, organizationId, { tags: newTags });
       }
     }
 

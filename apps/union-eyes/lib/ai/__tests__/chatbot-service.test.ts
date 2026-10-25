@@ -201,17 +201,17 @@ describe("ChatSessionManager", () => {
   });
 
   it("updateSessionTitle updates", async () => {
-    await mgr.updateSessionTitle("sess-1", "Updated title");
+    await mgr.updateSessionTitle("sess-1", "org-1", "Updated title");
     expect(mocks.mockUpdateWhere).toHaveBeenCalled();
   });
 
   it("archiveSession sets archived status", async () => {
-    await mgr.archiveSession("sess-1");
+    await mgr.archiveSession("sess-1", "org-1");
     expect(mocks.mockUpdateWhere).toHaveBeenCalled();
   });
 
   it("deleteSession sets deleted status", async () => {
-    await mgr.deleteSession("sess-1");
+    await mgr.deleteSession("sess-1", "org-1");
     expect(mocks.mockUpdateWhere).toHaveBeenCalled();
   });
 });
@@ -267,7 +267,7 @@ describe("RAGService", () => {
   });
 
   it("incrementCitationCount updates db", async () => {
-    await rag.incrementCitationCount("doc-1");
+    await rag.incrementCitationCount("doc-1", "org-1");
     expect(mocks.mockUpdateWhere).toHaveBeenCalled();
   });
 });

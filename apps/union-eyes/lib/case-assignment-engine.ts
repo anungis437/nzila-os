@@ -202,7 +202,7 @@ export async function autoAssignGrievance(
         assignedTo: bestMatch.userId,
         assignedAt: new Date(),
       })
-      .where(eq(claims.claimId, claimId));
+      .where(and(eq(claims.claimId, claimId), eq(claims.organizationId, organizationId)));
 
     return {
       success: true,
@@ -301,7 +301,7 @@ export async function manuallyAssignGrievance(
             assignedTo,
             assignedAt: new Date(),
           })
-          .where(eq(claims.claimId, claimId))
+          .where(and(eq(claims.claimId, claimId), eq(claims.organizationId, organizationId)))
       );
     }
 

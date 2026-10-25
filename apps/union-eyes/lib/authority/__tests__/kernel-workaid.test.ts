@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { decide } from '../kernel'
 import type { Decision, ReasonCode, WorkAidMatterFacts } from '../ontology'
-import { CASE_ID, DAY, MATTER_ID, NOW, ORG, ORG_B, U, ago, ahead, consent, delegation, facts, mandate, ref, relationship, request } from './fixtures'
+import { CASE_ID, DAY, MATTER_ID, NOW, ORG, ORG_B, U, ago, ahead, consent, delegation, facts, mandate, recusal, ref, relationship, request } from './fixtures'
 
 const codes = (d: Decision): ReasonCode[] => d.reasons.map((r) => r.code)
 
@@ -92,6 +92,28 @@ describe('WorkAid referral (union → WorkAid) needs relationship AND member con
   it('a member cannot refer on the union\'s behalf (no representation capacity)', () => {
     const f = facts(U.member, ['member'], { relationships: [relationship({ principalUserId: U.member })], consents: [consent()] })
     expect(codes(act(U.member, 'workaid:refer', f, { categories: ['case_summary'] }))).toContain('CAPACITY_NOT_ELIGIBLE')
+  })
+
+  it('the member who filed the case may refer it themselves, under their own live consent, and only that', () => {
+    const own = relationship({ principalUserId: U.member, relation: 'creator' })
+    const f = facts(U.member, ['member'], { relationships: [own], consents: [consent()] })
+    const d = act(U.member, 'workaid:refer', f, { categories: ['case_summary'] })
+    expect(d.effect).toBe('allow')
+    expect(d.authority.map((a) => a.kind)).toEqual(['relationship', 'consent'])
+    expect(codes(act(U.member, 'workaid:refer', facts(U.member, ['member'], { relationships: [own], consents: [] }), { categories: ['case_summary'] }))).toContain('CONSENT_REQUIRED')
+    expect(codes(act(U.member, 'workaid:refer', f, { categories: ['case_summary', 'medical'] }))).toContain('CONSENT_SCOPE_EXCEEDED')
+    // a creator relationship held by someone who is not the matter's member authorises nothing
+    const other = facts(U.other, ['member'], { relationships: [relationship({ principalUserId: U.other, relation: 'creator' })], consents: [consent()] })
+    expect(codes(act(U.other, 'workaid:refer', other, { categories: ['case_summary'] }))).toContain('CAPACITY_NOT_ELIGIBLE')
+  })
+
+  it('a recusal from the underlying case bars the referral, as does a recusal from the matter', () => {
+    const caseRecusal = recusal({ principalUserId: U.steward })
+    expect(codes(refer(handler({ recusals: [caseRecusal] })))).toContain('RECUSED')
+    const matterRecusal = recusal({ principalUserId: U.steward, resource: ref('workaid_matter', MATTER_ID) })
+    expect(codes(refer(handler({ recusals: [matterRecusal] })))).toContain('RECUSED')
+    expect(refer(handler({ recusals: [recusal({ principalUserId: U.steward, liftedAt: ago(1), liftedBy: U.chief })] })).effect).toBe('allow')
+    expect(refer(handler({ recusals: [recusal({ principalUserId: U.chief })] })).effect).toBe('allow')
   })
 
   it('a supervisory mandate does not authorize a referral', () => {

@@ -96,68 +96,6 @@ export const pushDevices = pgTable(
 );
 
 /**
- * Push notification templates
- * Reusable notification templates with content and action configuration
- */
-export const pushNotificationTemplates = pgTable(
-  'push_notification_templates',
-  {
-    id: uuid('id').primaryKey().defaultRandom(),
-    organizationId: uuid('organization_id')
-      .notNull()
-      .references(() => organizations.id, { onDelete: 'cascade' }),
-
-    // Template information
-    name: text('name').notNull(),
-    description: text('description'),
-    category: text('category'),
-
-    // Notification content
-    title: text('title').notNull(),
-    body: text('body').notNull(),
-    iconUrl: text('icon_url'),
-    imageUrl: text('image_url'),
-    badgeCount: integer('badge_count'),
-    sound: text('sound').default('default'),
-
-    // Action configuration
-    clickAction: text('click_action'),
-    actionButtons: jsonb('action_buttons').$type<
-      Array<{
-        id: string;
-        title: string;
-        action: string;
-      }>
-    >(),
-
-    // Variables and personalization
-    variables: jsonb('variables').$type<
-      Array<{
-        key: string;
-        label: string;
-        example: string;
-      }>
-    >(),
-
-    // Template settings
-    priority: pushPriorityEnum('priority').default('normal'),
-    ttl: integer('ttl').default(86400),
-    isSystem: boolean('is_system').notNull().default(false),
-
-    // Metadata
-    createdBy: text('created_by').references(() => profiles.userId),
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-  },
-  (table) => ({
-    organizationIdx: index('idx_push_templates_organization').on(table.organizationId),
-    categoryIdx: index('idx_push_templates_category').on(table.category),
-    systemIdx: index('idx_push_templates_system').on(table.isSystem),
-    createdIdx: index('idx_push_templates_created').on(table.createdAt),
-  })
-);
-
-/**
  * Push notification campaigns
  * Campaign management with targeting, scheduling, and statistics
  */
@@ -171,9 +109,7 @@ export const pushNotifications = pgTable(
 
     // Campaign information
     name: text('name').notNull(),
-    templateId: uuid('template_id').references(() => pushNotificationTemplates.id, {
-      onDelete: 'set null',
-    }),
+    templateId: uuid('template_id'),
 
     // Notification content
     title: text('title').notNull(),
@@ -306,29 +242,10 @@ export const pushDevicesRelations = relations(pushDevices, ({ one, many }) => ({
   deliveries: many(pushDeliveries),
 }));
 
-export const pushNotificationTemplatesRelations = relations(
-  pushNotificationTemplates,
-  ({ one, many }) => ({
-    organization: one(organizations, {
-      fields: [pushNotificationTemplates.organizationId],
-      references: [organizations.id],
-    }),
-    createdByProfile: one(profiles, {
-      fields: [pushNotificationTemplates.createdBy],
-      references: [profiles.userId],
-    }),
-    notifications: many(pushNotifications),
-  })
-);
-
 export const pushNotificationsRelations = relations(pushNotifications, ({ one, many }) => ({
   organization: one(organizations, {
     fields: [pushNotifications.organizationId],
     references: [organizations.id],
-  }),
-  template: one(pushNotificationTemplates, {
-    fields: [pushNotifications.templateId],
-    references: [pushNotificationTemplates.id],
   }),
   createdByProfile: one(profiles, {
     fields: [pushNotifications.createdBy],
@@ -355,8 +272,6 @@ export const pushDeliveriesRelations = relations(pushDeliveries, ({ one }) => ({
 export type PushDevice = typeof pushDevices.$inferSelect;
 export type NewPushDevice = typeof pushDevices.$inferInsert;
 
-export type PushNotificationTemplate = typeof pushNotificationTemplates.$inferSelect;
-export type NewPushNotificationTemplate = typeof pushNotificationTemplates.$inferInsert;
 
 export type PushNotification = typeof pushNotifications.$inferSelect;
 export type NewPushNotification = typeof pushNotifications.$inferInsert;

@@ -24,7 +24,7 @@ import {
 
 async function rejectExportRequest(requestId: string, organizationId: string, userId: string, reason: string) {
   await withRLSContext({ organizationId }, async (tx) => {
-    await GdprRequestManager.updateRequestStatus(requestId, 'rejected', { rejectionReason: reason }, tx);
+    await GdprRequestManager.updateRequestStatus(requestId, organizationId, 'rejected', { rejectionReason: reason }, tx);
     await persistAtomicAudit(tx, {
       organizationId,
       userId,
@@ -104,7 +104,7 @@ export const POST = withApiAuth(async (request: NextRequest, context: { organiza
         },
         tx,
       );
-      await GdprRequestManager.updateRequestStatus(created.id, "in_progress", { processedBy: "system" }, tx);
+      await GdprRequestManager.updateRequestStatus(created.id, organizationId, "in_progress", { processedBy: "system" }, tx);
       await persistAtomicAudit(tx, {
         organizationId,
         userId,

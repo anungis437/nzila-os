@@ -191,7 +191,7 @@ export class GeofencePrivacyService {
 
     // Check expiry
     if (userConsent.expiresAt && new Date() > userConsent.expiresAt) {
-      await this.expireConsent(userConsent.id);
+      await this.expireConsent(userConsent.id, userId);
       return false;
     }
 
@@ -445,14 +445,14 @@ export class GeofencePrivacyService {
   /**
    * Expire consent (after 6 months)
    */
-  private static async expireConsent(consentId: string) {
+  private static async expireConsent(consentId: string, userId: string) {
     await db
       .update(memberLocationConsent)
       .set({
         consentStatus: "expired",
         updatedAt: new Date(),
       })
-      .where(eq(memberLocationConsent.id, consentId));
+      .where(and(eq(memberLocationConsent.id, consentId), eq(memberLocationConsent.userId, userId)));
   }
 
   /**

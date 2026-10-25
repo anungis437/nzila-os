@@ -7,10 +7,11 @@
  *
  *  - `workaid:read_counsel_material` is ALWAYS denied to union principals.
  *    No mandate, delegation, emergency grant or seniority overrides it.
- *  - `workaid:refer` (union → WorkAid) needs: an active membership, a handler
- *    capacity, a live owner/assignee relationship to the underlying case, and a
- *    live MEMBER-issued consent covering every requested category. Consent is
- *    category-explicit; there is no wildcard.
+ *  - `workaid:refer` (union → WorkAid) needs: an active membership, EITHER a handler
+ *    capacity with a live owner/assignee relationship to the underlying case OR the
+ *    member's own live creator relationship to it (self-referral), no recusal from
+ *    the matter or the case, and a live MEMBER-issued consent covering every
+ *    requested category. Consent is category-explicit; there is no wildcard.
  *  - `workaid:receive_disclosure` (WorkAid → union) needs a live disclosure
  *    record ISSUED BY COUNSEL, naming this principal and covering the requested
  *    categories. A union-issued record can never open counsel material.
@@ -53,7 +54,10 @@ export function decideWorkAid(
   const me = req.principalUserId
   const membership = activeMembership(facts, orgId)
   if (!membership) return deny(req, now, { code: 'NOT_AN_ACTIVE_MEMBER' })
-  const recusal = activeRecusal(facts.recusals, me, req.resource, orgId)
+  const recusal =
+    activeRecusal(facts.recusals, me, req.resource, orgId) ??
+    // A recusal from the underlying case also bars every WorkAid act on it: the matter is that case, referred.
+    activeRecusal(facts.recusals, me, { type: 'case', id: matter.caseId, organizationId: orgId }, orgId)
   if (recusal) return deny(req, now, { code: 'RECUSED', ref: recusal.id })
 
   const categories = req.categories ?? []
@@ -62,18 +66,23 @@ export function decideWorkAid(
   }
 
   if (req.action === 'workaid:refer') {
-    if (!hasCapacity(membership, HANDLER)) {
+    const onCase = (relations: readonly string[]) =>
+      facts.relationships.find(
+        (r) =>
+          r.principalUserId === me &&
+          r.organizationId === orgId &&
+          r.resource.type === 'case' &&
+          r.resource.id === matter.caseId &&
+          relations.includes(r.relation) &&
+          isLive(r, now),
+      )
+    // The member who filed the case may refer it themselves; nobody else without a representation capacity may.
+    const selfRel = me === matter.memberUserId ? onCase(['creator']) : undefined
+    const handler = hasCapacity(membership, HANDLER)
+    if (!handler && !selfRel) {
       return deny(req, now, { code: 'CAPACITY_NOT_ELIGIBLE', detail: 'a representation capacity is required to refer a matter' })
     }
-    const rel = facts.relationships.find(
-      (r) =>
-        r.principalUserId === me &&
-        r.organizationId === orgId &&
-        r.resource.type === 'case' &&
-        r.resource.id === matter.caseId &&
-        (r.relation === 'owner' || r.relation === 'assignee') &&
-        isLive(r, now),
-    )
+    const rel = selfRel ?? (handler ? onCase(['owner', 'assignee']) : undefined)
     if (!rel) {
       return deny(req, now, { code: 'NO_SOURCE_OF_AUTHORITY', detail: 'no live owner/assignee relationship to the underlying case' })
     }

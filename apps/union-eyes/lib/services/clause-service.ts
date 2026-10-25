@@ -90,7 +90,7 @@ export async function getClauseById(
         viewCount: sql`${cbaClause.viewCount} + 1`,
         updatedAt: new Date()
       })
-      .where(eq(cbaClause.id, id));
+      .where(and(eq(cbaClause.id, id), eq(cbaClause.organizationId, clause.organizationId)));
 
     return clause;
   } catch (error) {
@@ -238,6 +238,7 @@ export async function bulkCreateClauses(clauses: NewClause[]): Promise<Clause[]>
  */
 export async function updateClause(
   id: string,
+  organizationId: string,
   data: Partial<NewClause>
 ): Promise<Clause | null> {
   try {
@@ -247,7 +248,7 @@ export async function updateClause(
         ...data,
         updatedAt: new Date(),
       })
-      .where(eq(cbaClause.id, id))
+      .where(and(eq(cbaClause.id, id), eq(cbaClause.organizationId, organizationId)))
       .returning();
 
     return updated || null;
@@ -260,11 +261,11 @@ export async function updateClause(
 /**
  * Delete a clause
  */
-export async function deleteClause(id: string): Promise<boolean> {
+export async function deleteClause(id: string, organizationId: string): Promise<boolean> {
   try {
     await db
       .delete(cbaClause)
-      .where(eq(cbaClause.id, id));
+      .where(and(eq(cbaClause.id, id), eq(cbaClause.organizationId, organizationId)));
 
     return true;
   } catch (error) {

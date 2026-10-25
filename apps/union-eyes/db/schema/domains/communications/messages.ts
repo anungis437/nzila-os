@@ -52,28 +52,3 @@ export const messageReadReceipts = pgTable('message_read_receipts', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
-// Message participants table (for group conversations future support)
-export const messageParticipants = pgTable('message_participants', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  threadId: uuid('thread_id').notNull().references(() => messageThreads.id, { onDelete: 'cascade' }),
-  userId: text('user_id').notNull(), // Auth user ID
-  role: text('role').notNull(), // member, staff, admin
-  isActive: boolean('is_active').default(true),
-  lastReadAt: timestamp('last_read_at'),
-  joinedAt: timestamp('joined_at').defaultNow().notNull(),
-  leftAt: timestamp('left_at'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-});
-
-// Message notifications table
-export const messageNotifications = pgTable('message_notifications', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: text('user_id').notNull(), // Auth user ID
-  messageId: uuid('message_id').notNull().references(() => messages.id, { onDelete: 'cascade' }),
-  threadId: uuid('thread_id').notNull().references(() => messageThreads.id, { onDelete: 'cascade' }),
-  isRead: boolean('is_read').default(false),
-  readAt: timestamp('read_at'),
-  notifiedAt: timestamp('notified_at').defaultNow().notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-});
-

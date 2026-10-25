@@ -134,14 +134,22 @@ describe('platform-economics/contract-service', () => {
       pushSel([{ id: 'ctr-1', organizationId: 'o1', expirationDate: new Date('2025-12-31') }]); // update returning
       pushSel([{ id: 'li-1', featureKey: 'f1', expirationDate: null }]); // line items
       pushSel([{ id: 'ent-1' }]); // entitlement upsert returning
-      const result = await activateContract('ctr-1', 'approver');
+      const result = await activateContract('ctr-1', 'o1', 'approver');
       expect(result.entitlements).toHaveLength(1);
       expect(h.auditLog).toHaveBeenCalledTimes(1);
     });
 
     it('throws when the contract is not in draft', async () => {
       pushSel([]); // update returning empty
-      await expect(activateContract('ctr-1', 'approver')).rejects.toThrow('not found or not in draft');
+      await expect(activateContract('ctr-1', 'o1', 'approver')).rejects.toThrow('not found or not in draft');
+    });
+
+    it('binds the activation UPDATE to the acting organization (another organization contract is not found)', async () => {
+      const { eq } = await import('drizzle-orm');
+      vi.mocked(eq).mockClear();
+      pushSel([]); // statement scoped to org-b matches nothing for org-a's contract
+      await expect(activateContract('ctr-1', 'org-b', 'approver')).rejects.toThrow('not found or not in draft');
+      expect(vi.mocked(eq).mock.calls.some((c) => (c[0] as { __col?: string })?.__col === 'organizationId' && c[1] === 'org-b')).toBe(true);
     });
   });
 
@@ -150,7 +158,7 @@ describe('platform-economics/contract-service', () => {
       pushSel([{ id: 'ctr-1', organizationId: 'o1' }]); // update returning
       pushSel([{ id: 'li-1' }]); // line items
       pushSel([]); // update entitlements revoke
-      const result = await terminateContract('ctr-1', 'user-1', 'reason');
+      const result = await terminateContract('ctr-1', 'o1', 'user-1', 'reason');
       expect(result.id).toBe('ctr-1');
       expect(h.auditLog).toHaveBeenCalledTimes(1);
     });
@@ -158,13 +166,13 @@ describe('platform-economics/contract-service', () => {
     it('handles a contract with no line items', async () => {
       pushSel([{ id: 'ctr-1', organizationId: 'o1' }]); // update returning
       pushSel([]); // no line items
-      const result = await terminateContract('ctr-1', 'user-1');
+      const result = await terminateContract('ctr-1', 'o1', 'user-1');
       expect(result.id).toBe('ctr-1');
     });
 
     it('throws when the contract is not active', async () => {
       pushSel([]); // update returning empty
-      await expect(terminateContract('ctr-1', 'user-1')).rejects.toThrow('not found or not active');
+      await expect(terminateContract('ctr-1', 'o1', 'user-1')).rejects.toThrow('not found or not active');
     });
   });
 
@@ -240,8 +248,10 @@ describe('platform-economics/contract-service', () => {
 
   describe('resetExpiredUsagePeriods', () => {
     it('returns the number of reset entitlements', async () => {
-      pushSel([{ id: 'e1' }, { id: 'e2' }]); // update returning
-      expect(await resetExpiredUsagePeriods()).toBe(2);
+      pushSel([{ organizationId: 'o1' }, { organizationId: 'o1' }, { organizationId: 'o2' }]); // candidates
+      pushSel([{ id: 'e1' }, { id: 'e2' }]); // o1 update returning
+      pushSel([{ id: 'e3' }]); // o2 update returning
+      expect(await resetExpiredUsagePeriods()).toBe(3);
     });
   });
 });

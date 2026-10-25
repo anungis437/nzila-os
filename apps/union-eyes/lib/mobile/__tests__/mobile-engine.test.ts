@@ -361,9 +361,9 @@ describe('mobile-engine', () => {
 
     it('updateDevice, deactivateDevice and remoteWipe issue updates', async () => {
       h.queue.push([]); h.queue.push([]); h.queue.push([]);
-      await mobileDeviceManager.updateDevice('dev-1', { deviceName: 'X' });
-      await mobileDeviceManager.deactivateDevice('dev-1', 'logout');
-      await mobileDeviceManager.remoteWipe('dev-1');
+      await mobileDeviceManager.updateDevice('dev-1', 'org-1', { deviceName: 'X' });
+      await mobileDeviceManager.deactivateDevice('dev-1', 'org-1', 'logout');
+      await mobileDeviceManager.remoteWipe('dev-1', 'org-1');
       expect(h.db.update).toHaveBeenCalledTimes(3);
     });
 

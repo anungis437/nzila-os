@@ -66,20 +66,6 @@ export const pciDssQuarterlyScans = pgTable('pci_dss_quarterly_scans', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-export const pciDssCardholderDataFlow = pgTable('pci_dss_cardholder_data_flow', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  organizationId: uuid('organization_id')
-    .references(() => organizations.id, { onDelete: 'cascade' })
-    .notNull(),
-  systemName: varchar('system_name', { length: 255 }).notNull(),
-  dataFlowDescription: text('data_flow_description'),
-  storageLocation: text('storage_location'),
-  encryptionMethod: varchar('encryption_method', { length: 100 }),
-  lastReviewedAt: timestamp('last_reviewed_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-});
-
 export const pciDssEncryptionKeys = pgTable('pci_dss_encryption_keys', {
   id: uuid('id').defaultRandom().primaryKey(),
   organizationId: uuid('organization_id')
@@ -97,5 +83,4 @@ export const pciDssEncryptionKeys = pgTable('pci_dss_encryption_keys', {
 export type PCIDssAssessment = typeof pciDssSaqAssessments.$inferSelect;
 export type PCIDssRequirement = typeof pciDssRequirements.$inferSelect;
 export type PCIDssQuarterlyScan = typeof pciDssQuarterlyScans.$inferSelect;
-export type PCIDssCardholderDataFlow = typeof pciDssCardholderDataFlow.$inferSelect;
 export type PCIDssEncryptionKey = typeof pciDssEncryptionKeys.$inferSelect;

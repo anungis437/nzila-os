@@ -298,7 +298,7 @@ export async function updateClaimStatus(
     const [updatedClaim] = await tx
       .update(claims)
       .set(updateData)
-      .where(eq(claims.claimId, claim.claimId))
+      .where(and(eq(claims.claimId, claim.claimId), eq(claims.organizationId, claim.organizationId)))
       .returning();
 
     // Create audit trail entry with FSM metadata
@@ -500,6 +500,7 @@ export async function updateClaimStatus(
     // Every status change automatically appears in member's case timeline
     addTimelineEntry(
       claim.claimId,
+      claim.organizationId,
       currentStatus,
       newStatus,
       userId,
@@ -754,7 +755,7 @@ export async function addClaimNote(
       .set({
         updatedAt: new Date(),
       })
-      .where(eq(claims.claimId, claim.claimId));
+      .where(and(eq(claims.claimId, claim.claimId), eq(claims.organizationId, claim.organizationId)));
 
     return { success: true };
   } catch (error) {

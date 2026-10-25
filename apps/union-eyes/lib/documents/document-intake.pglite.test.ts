@@ -432,6 +432,17 @@ describe('expiry and abandoned-upload reconciliation', () => {
     expect(state.blobs.has(lapsed.key)).toBe(true);
   });
 
+  it('cleans up only the named intake when asked to (a cancel request never reaps anyone else’s objects)', async () => {
+    const mine = await openOk('mine', { now: new Date(Date.now() - minutes(120)) });
+    const other = await openOk('other', { now: new Date(Date.now() - minutes(120)) });
+    await expireDueIntakes();
+    expect(await finalizeIntakeObjects(state.storage, { only: { organizationId: ORG_A, intakeId: mine.view.intakeId } })).toEqual({ objectsDeleted: 1, deletionFailed: 0, skipped: 0 });
+    expect(state.removed).toEqual([mine.key]);
+    expect(state.blobs.has(other.key)).toBe(true);
+    expect(await finalizeIntakeObjects(state.storage, { only: { organizationId: ORG_B, intakeId: other.view.intakeId } })).toEqual({ objectsDeleted: 0, deletionFailed: 0, skipped: 0 });
+    expect(state.blobs.has(other.key)).toBe(true);
+  });
+
   it('does not expire an intake that was accepted before its expiry was recorded', async () => {
     await addDocument(id(1));
     const { view } = await openOk('a');

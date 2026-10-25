@@ -169,47 +169,6 @@ export const grievances = pgTable("grievances", {
   index("idx_grievances_deadline").on(table.responseDeadline),
 ]);
 
-// Grievance Responses
-export const grievanceResponses = pgTable("grievance_responses", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  grievanceId: uuid("grievance_id").references(() => grievances.id).notNull(),
-  
-  // Response details
-  responseNumber: integer("response_number").notNull(),
-  respondingParty: varchar("responding_party", { length: 100 }).notNull(), // employer, union, arbitration_board
-  responderName: varchar("responder_name", { length: 255 }),
-  responderTitle: varchar("responder_title", { length: 255 }),
-  
-  // Content
-  response: text("response").notNull(),
-  position: text("position"),
-  
-  // Dates
-  responseDate: timestamp("response_date", { withTimezone: true }).notNull(),
-  receivedDate: timestamp("received_date", { withTimezone: true }),
-  
-  // Outcome
-  acceptedByGrievant: boolean("accepted_by_grievant"),
-  acceptedByEmployer: boolean("accepted_by_employer"),
-  
-  // Next steps
-  nextDeadline: timestamp("next_deadline", { withTimezone: true }),
-  nextStep: varchar("next_step", { length: 100 }),
-  
-  // Attachments
-  attachments: jsonb("attachments").$type<Array<{
-    id: string;
-    name: string;
-    url: string;
-    type: string;
-  }>>(),
-  
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (table) => [
-  index("idx_grievance_responses_grievance").on(table.grievanceId),
-  index("idx_grievance_responses_date").on(table.responseDate),
-]);
-
 // Arbitrations
 export const arbitrations = pgTable("arbitrations", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -423,7 +382,6 @@ export type SettlementType = typeof settlementTypeEnum.enumValues[number];
 
 export type Grievance = typeof grievances.$inferSelect;
 export type GrievanceInsert = typeof grievances.$inferInsert;
-export type GrievanceResponse = typeof grievanceResponses.$inferSelect;
 export type Arbitration = typeof arbitrations.$inferSelect;
 export type Settlement = typeof settlements.$inferSelect;
 export type GrievanceTimeline = typeof grievanceTimeline.$inferSelect;

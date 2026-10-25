@@ -301,7 +301,7 @@ export class BoardPacketGenerator {
   /**
    * Finalize board packet (lock it and generate PDF)
    */
-  async finalizePacket(packetId: string, signedBy: string) {
+  async finalizePacket(packetId: string, organizationId: string, signedBy: string) {
     try {
       const [packet] = await db
         .update(boardPackets)
@@ -312,7 +312,7 @@ export class BoardPacketGenerator {
           signedAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(eq(boardPackets.id, packetId))
+        .where(and(eq(boardPackets.id, packetId), eq(boardPackets.organizationId, organizationId)))
         .returning();
       
       const pdfResult = await this.generatePDF(packet);
@@ -322,7 +322,7 @@ export class BoardPacketGenerator {
           pdfUrl: pdfResult.pdfUrl,
           updatedAt: new Date(),
         })
-        .where(eq(boardPackets.id, packetId));
+        .where(and(eq(boardPackets.id, packetId), eq(boardPackets.organizationId, organizationId)));
       
       return packet;
     } catch (error) {

@@ -235,9 +235,7 @@ export class WorkdayAdapter extends BaseIntegration {
 
           if (existing) {
             // Update existing employee
-            await db
-              .update(externalEmployees)
-              .set({
+            const employeeUpdate = {
                 firstName: workdayEmployee.firstName,
                 lastName: workdayEmployee.lastName,
                 email: workdayEmployee.email,
@@ -252,7 +250,10 @@ export class WorkdayAdapter extends BaseIntegration {
                 supervisorName: workdayEmployee.supervisor?.name,
                 lastSyncedAt: new Date(),
                 updatedAt: new Date(),
-              })
+              };
+            await db
+              .update(externalEmployees)
+              .set(employeeUpdate)
               .where(and(eq(externalEmployees.id, existing.id), eq(externalEmployees.organizationId, this.config!.organizationId)));
             updated++;
           } else {

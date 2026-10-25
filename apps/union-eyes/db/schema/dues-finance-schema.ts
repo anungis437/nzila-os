@@ -491,51 +491,6 @@ export const memberDuesIssues = pgTable('member_dues_issues', {
 });
 
 // ============================================================================
-// DUES POLICIES (Org-scoped rules governing dues rates & deduction expectations)
-// ============================================================================
-
-export const duesPolicies = pgTable('dues_policies', {
-  id: uuid('id').primaryKey().defaultRandom(),
-
-  // Scope
-  organizationId: uuid('organization_id').notNull(),
-  localId: uuid('local_id'),
-
-  // Policy Details
-  policyName: text('policy_name').notNull(),
-  policyType: text('policy_type').notNull(), // flat_rate, percentage_of_gross, tiered, formula
-  description: text('description'),
-
-  // Rate/Rule
-  flatAmount: decimal('flat_amount', { precision: 10, scale: 2 }),
-  percentageRate: decimal('percentage_rate', { precision: 5, scale: 4 }),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tierRules: jsonb('tier_rules').$type<Record<string, any>>(),
-  formulaExpression: text('formula_expression'),
-
-  // Applicability
-  employmentTypes: text('employment_types'), // Comma-separated: full_time,part_time,casual
-  classifications: text('classifications'), // Comma-separated job classifications
-
-  // Effective Dates
-  effectiveFrom: timestamp('effective_from').notNull(),
-  effectiveTo: timestamp('effective_to'),
-
-  // Status
-  status: text('status').notNull().default('active'), // active, draft, superseded, inactive
-
-  // Metadata
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata: jsonb('metadata').$type<Record<string, any>>(),
-
-  // Audit
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
-  createdBy: text('created_by'),
-  lastModifiedBy: text('last_modified_by'),
-});
-
-// ============================================================================
 // RELATIONS
 // ============================================================================
 
@@ -598,6 +553,3 @@ export const memberDuesIssuesRelations = relations(memberDuesIssues, ({ one }) =
   }),
 }));
 
-export const duesPoliciesRelations = relations(duesPolicies, ({ many }) => ({
-  rates: many(duesRates),
-}));

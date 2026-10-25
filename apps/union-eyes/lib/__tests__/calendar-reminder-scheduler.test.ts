@@ -183,7 +183,7 @@ describe('calendar-reminder-scheduler', () => {
     it('throws when event not found', async () => {
       mocks.mockDb.select.mockReturnValue(chain([]));
       mocks.mockDb.update.mockReturnValue(chain(undefined));
-      await expect(rescheduleEventReminders('evt-1', new Date())).rejects.toThrow('Event not found');
+      await expect(rescheduleEventReminders('evt-1', 'org-1', new Date())).rejects.toThrow('Event not found');
     });
 
     it('cancels old and schedules new', async () => {
@@ -195,7 +195,7 @@ describe('calendar-reminder-scheduler', () => {
         .mockReturnValueOnce(chain([])); // attendees
       mocks.mockDb.update.mockReturnValue(chain(undefined));
 
-      const count = await rescheduleEventReminders('evt-1', newStart);
+      const count = await rescheduleEventReminders('evt-1', 'org-1', newStart);
       expect(count).toBe(0);
     });
   });

@@ -396,52 +396,6 @@ export const consentRecords = pgTable('consent_records', {
 }));
 
 // ============================================================================
-// COMMUNICATION CHANNELS (PROVIDER CONFIG)
-// ============================================================================
-
-/**
- * Communication Channels
- * Provider configuration for email/SMS services
- */
-export const communicationChannels = pgTable('communication_channels', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id')
-    .notNull()
-    .references(() => organizations.id, { onDelete: 'cascade' }),
-  
-  type: campaignChannelEnum('type').notNull(), // email, sms, push
-  provider: varchar('provider', { length: 50 }).notNull(), // resend, sendgrid, twilio
-  
-  // Configuration (encrypted in production)
-  config: jsonb('config').notNull(), // API keys, sender IDs, etc.
-  
-  // Status
-  isActive: boolean('is_active').default(true),
-  isPrimary: boolean('is_primary').default(false), // Primary provider for channel
-  
-  // Limits
-  dailyLimit: integer('daily_limit'),
-  monthlyLimit: integer('monthly_limit'),
-  currentDailyCount: integer('current_daily_count').default(0),
-  currentMonthlyCount: integer('current_monthly_count').default(0),
-  
-  // Health monitoring
-  lastHealthCheck: timestamp('last_health_check', { withTimezone: true }),
-  healthStatus: varchar('health_status', { length: 50 }).default('unknown'), // healthy, degraded, down
-  
-  // Metadata
-  metadata: jsonb('metadata').default({}),
-  
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-}, (table) => ({
-  orgIdx: index('idx_comm_channels_org').on(table.organizationId),
-  typeIdx: index('idx_comm_channels_type').on(table.type),
-  isActiveIdx: index('idx_comm_channels_active').on(table.isActive),
-  isPrimaryIdx: index('idx_comm_channels_primary').on(table.isPrimary),
-}));
-
-// ============================================================================
 // RELATIONS
 // ============================================================================
 
@@ -490,13 +444,6 @@ export const consentRecordsRelations = relations(consentRecords, ({ one }) => ({
   }),
 }));
 
-export const communicationChannelsRelations = relations(communicationChannels, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [communicationChannels.organizationId],
-    references: [organizations.id],
-  }),
-}));
-
 // ============================================================================
 // INFERRED TYPES
 // ============================================================================
@@ -516,5 +463,3 @@ export type InsertCommunicationPreferences = typeof communicationPreferences.$in
 export type ConsentRecord = typeof consentRecords.$inferSelect;
 export type InsertConsentRecord = typeof consentRecords.$inferInsert;
 
-export type CommunicationChannel = typeof communicationChannels.$inferSelect;
-export type InsertCommunicationChannel = typeof communicationChannels.$inferInsert;

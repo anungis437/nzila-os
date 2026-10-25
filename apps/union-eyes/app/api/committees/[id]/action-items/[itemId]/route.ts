@@ -29,7 +29,7 @@ export const PATCH = withApi(
     const { id: committeeId, itemId } = params as { id: string; itemId: string };
     await requireCommitteeScope(organizationId, committeeId, { actionItemId: itemId });
 
-    const updated = await updateActionItem(itemId, {
+    const updated = await updateActionItem(itemId, organizationId, {
       ...body,
       updatedBy: userId ?? undefined,
     });

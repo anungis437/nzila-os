@@ -334,7 +334,7 @@ export async function expireDueIntakes(input: { now?: Date; limit?: number } = {
  * (deletion_failed, attempts, a sanitized message) and retried later; it never marks the object deleted and never
  * blocks the other rows. Accepted intakes are not selectable here.
  */
-export async function finalizeIntakeObjects(storage: IntakeStorage, input: { limit?: number; now?: Date } = {}): Promise<Pick<ReaperReport, 'objectsDeleted' | 'deletionFailed' | 'skipped'>> {
+export async function finalizeIntakeObjects(storage: IntakeStorage, input: { limit?: number; now?: Date; only?: { organizationId: string; intakeId: string } } = {}): Promise<Pick<ReaperReport, 'objectsDeleted' | 'deletionFailed' | 'skipped'>> {
   const now = input.now ?? new Date();
   const retryBefore = new Date(now.getTime() - RETRY_AFTER_MINUTES * 60_000);
   const candidates = await withSystemContext(async (tx) =>
@@ -347,6 +347,7 @@ export async function finalizeIntakeObjects(storage: IntakeStorage, input: { lim
           inArray(documentIntakes.objectState, ['present', 'deletion_pending', 'deletion_failed']),
           sql`${documentIntakes.deletionAttempts} < ${INTAKE_MAX_DELETION_ATTEMPTS}`,
           sql`(${documentIntakes.deletionAttemptedAt} IS NULL OR ${documentIntakes.deletionAttemptedAt} <= ${retryBefore})`,
+          ...(input.only ? [eq(documentIntakes.id, input.only.intakeId), eq(documentIntakes.organizationId, input.only.organizationId)] : []),
         ),
       )
       .limit(input.limit ?? 100),

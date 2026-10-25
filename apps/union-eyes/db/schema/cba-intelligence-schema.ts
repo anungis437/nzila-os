@@ -1,7 +1,6 @@
 import { pgTable, uuid, varchar, text, timestamp, integer, decimal, jsonb, pgEnum, index, boolean } from "drizzle-orm/pg-core";
 import { collectiveAgreements } from "./collective-agreements-schema";
 import { cbaClause } from "./cba-clauses-schema";
-import { claims } from "./domains/claims/claims";
 
 // Enums for Arbitration and Legal
 export const tribunalTypeEnum = pgEnum("tribunal_type", [
@@ -284,50 +283,5 @@ export const cbaFootnotes = pgTable("cba_footnotes", {
   sourceIdx: index("cba_footnotes_source_idx").on(table.sourceClauseId),
   targetClauseIdx: index("cba_footnotes_target_clause_idx").on(table.targetClauseId),
   targetDecisionIdx: index("cba_footnotes_target_decision_idx").on(table.targetDecisionId),
-}));
-
-// Claim-to-precedent analysis (connects claims module to CBA intelligence)
-export const claimPrecedentAnalysis = pgTable("claim_precedent_analysis", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  claimId: uuid("claim_id").notNull().references(() => claims.claimId), // References claims.claim_id
-  
-  // Matching decisions
-  precedentMatches: jsonb("precedent_matches").$type<Array<{
-    decisionId: string;
-    relevanceScore: number;
-    matchingFactors: string[];
-    divergingFactors?: string[];
-  }>>(),
-  
-  // Success probability
-  successProbability: decimal("success_probability", { precision: 5, scale: 2 }),
-  confidenceLevel: varchar("confidence_level", { length: 50 }), // high, medium, low
-  
-  // Strategy suggestions
-  suggestedStrategy: text("suggested_strategy"),
-  potentialRemedies: jsonb("potential_remedies").$type<Array<{
-    remedy: string;
-    likelihood: string;
-    estimatedValue?: number;
-  }>>(),
-  
-  // Arbitrator insights
-  arbitratorTendencies: jsonb("arbitrator_tendencies").$type<{
-    arbitratorId?: string;
-    arbitratorName?: string;
-    successRate?: number;
-    avgAward?: number;
-    relevantPatterns?: string[];
-  }>(),
-  
-  // Similar CBAs
-  relevantCbaClauseIds: jsonb("relevant_cba_clause_ids").$type<string[]>(),
-  
-  // Audit
-  analyzedAt: timestamp("analyzed_at", { withTimezone: true }).notNull().defaultNow(),
-  analyzedBy: varchar("analyzed_by", { length: 50 }).notNull().default("ai_system"),
-  lastUpdated: timestamp("last_updated", { withTimezone: true }).notNull().defaultNow(),
-}, (table) => ({
-  claimIdx: index("claim_precedent_claim_idx").on(table.claimId),
 }));
 

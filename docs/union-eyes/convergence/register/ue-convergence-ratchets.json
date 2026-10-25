@@ -18,6 +18,7 @@
         { "file": "apps/union-eyes/app/[locale]/dashboard/correspondence/correspondence-dashboard.tsx", "reason": "Admin Clerk office role label; not the identity provider" },
         { "file": "apps/union-eyes/db/schema/domains/documents/correspondence.ts", "reason": "Admin Clerk office role description; not the identity provider" },
         { "file": "apps/union-eyes/lib/auth/platform-org-role.ts", "reason": "Maps the Admin Clerk office role; not the identity provider" },
+        { "file": "apps/union-eyes/lib/auth/identity-provider-residuals.ts", "reason": "The residual register itself: names each remaining retired-provider reference with its classification (UE-CONV-A-006)" },
         { "file": "apps/union-eyes/lib/auth/roles.ts", "reason": "Defines the Admin Clerk office role; not the identity provider" },
         { "file": "apps/union-eyes/lib/dashboard/role-experience.ts", "reason": "Admin Clerk office role; not the identity provider" },
         { "file": "apps/union-eyes/app/api/whop/create-checkout/route.ts", "reason": "Whop metadata still emits the legacy clerkUserId key beside userId until the external consumer is confirmed (UE-CONV-A-007)" },
@@ -189,7 +190,7 @@
       "description": "Case access is decided by the authority kernel's governed relationships. The pre-kernel grievance_case_access_assignments table and its Drizzle declaration must not be read or written by application code (UE-CONV-E-001, UE-CONV-B-001)",
       "pattern": "grievanceCaseAccessAssignments|grievance_case_access_assignments",
       "paths": ["apps/union-eyes/app", "apps/union-eyes/lib", "apps/union-eyes/services"],
-      "exclude": ["**/__tests__/**", "**/*.test.*", "**/node_modules/**", "apps/union-eyes/lib/operations/catalog-authority-contract.json"],
+      "exclude": ["**/__tests__/**", "**/*.test.*", "**/node_modules/**", "apps/union-eyes/lib/operations/catalog-authority-contract.json", "apps/union-eyes/lib/authority/subordinate-authority-register.ts"],
       "mode": "zero"
     },
     {

@@ -146,36 +146,9 @@ export const employerCommunications = pgTable(
 
 // ─── Communication Templates ──────────────────────────────────
 
-export const communicationTemplates = pgTable(
-  "communication_templates",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    organizationId: uuid("organization_id").notNull(),
-
-    name: varchar("name", { length: 255 }).notNull(),
-    category: templateCategoryEnum("category").notNull(),
-    subject: varchar("subject", { length: 500 }).notNull(),
-    body: text("body").notNull(),
-    variables: jsonb("variables").$type<string[]>().default([]),
-
-    isDefault: boolean("is_default").default(false),
-    isActive: boolean("is_active").default(true),
-
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-    createdBy: uuid("created_by"),
-  },
-  (table) => [
-    index("idx_comm_templates_org").on(table.organizationId),
-    index("idx_comm_templates_category").on(table.category),
-  ]
-);
-
 // ─── Type Exports ─────────────────────────────────────────────
 
 export type EmployerContact = typeof employerContacts.$inferSelect;
 export type EmployerContactInsert = typeof employerContacts.$inferInsert;
 export type EmployerCommunication = typeof employerCommunications.$inferSelect;
 export type EmployerCommunicationInsert = typeof employerCommunications.$inferInsert;
-export type CommunicationTemplate = typeof communicationTemplates.$inferSelect;
-export type CommunicationTemplateInsert = typeof communicationTemplates.$inferInsert;

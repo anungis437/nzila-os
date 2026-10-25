@@ -364,6 +364,7 @@ describe("workspace deep-work path coherence", () => {
       "/dashboard/correspondence",
       "/dashboard/clause-library",
       "/dashboard/notifications",
+      "/dashboard/messages/staff",
       "/dashboard/settings",
       "/dashboard/profile",
     ];

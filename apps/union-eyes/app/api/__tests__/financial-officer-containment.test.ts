@@ -50,7 +50,6 @@ describe('member financial data routes use the financial allow-list, not role le
   const guarded = [
     'dues/arrears/route.ts',
     'dues/arrears/calculate/route.ts',
-    'dues/arrears/[id]/payment/route.ts',
     'dues/arrears/[id]/reminder/route.ts',
     'dues/exceptions/route.ts',
     'dues/dashboard/route.ts',
@@ -75,6 +74,30 @@ describe('member financial data routes use the financial allow-list, not role le
     for (const block of authBlocks) {
       expect(block).toContain('roles: FINANCIAL_MEMBER_DATA_ROLES');
       expect(block).not.toMatch(/minRole/);
+    }
+  });
+});
+
+describe('money-moving routes are decided by the authority kernel, not by a role', () => {
+  // dues/arrears/[id]/payment left the role allow-list above when it adopted the kernel execute duty (UE-CONV-D-001).
+  const kernelDecided = [
+    ['dues/arrears/[id]/payment/route.ts', /lib\/dues\/arrears-payment/],
+    ['payments/[id]/duties/route.ts', /lib\/authority\/store\/finance-route-adapter/],
+  ] as const;
+
+  it.each(kernelDecided)('%s has no role or role-level gate and asks the kernel', (rel, adapter) => {
+    const source = read(rel);
+    const authBlocks = source.match(/auth:\s*\{[^}]*\}/g) ?? [];
+    expect(authBlocks.length).toBeGreaterThan(0);
+    for (const block of authBlocks) expect(block).not.toMatch(/roles|minRole/);
+    expect(source).not.toContain('FINANCIAL_MEMBER_DATA_ROLES');
+    expect(source).toMatch(adapter);
+  });
+
+  it('the adapter and the arrears posting never read a role, a role level or a title', () => {
+    for (const file of ['../../lib/authority/store/finance-route-adapter.ts', '../../lib/dues/arrears-payment.ts']) {
+      const source = readFileSync(join(API_ROOT, file), 'utf8');
+      expect(source, file).not.toMatch(/ROLE_HIERARCHY|minRole|withMinRole|FINANCIAL_MEMBER_DATA_ROLES|secretary_treasurer/);
     }
   });
 });

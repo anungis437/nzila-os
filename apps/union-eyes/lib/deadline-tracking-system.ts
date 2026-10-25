@@ -695,6 +695,7 @@ async function scheduleReminders(
  */
 async function cancelDeadlineReminders(deadlineId: string): Promise<void> {
   try {
+    // The owning organization is derived from the deadline's parent grievance inside the statement itself.
     await db
       .update(notifications)
       .set({ status: "cancelled" })
@@ -702,7 +703,15 @@ async function cancelDeadlineReminders(deadlineId: string): Promise<void> {
         and(
           eq(notifications.relatedEntityId, deadlineId),
           eq(notifications.type, "deadline_reminder"),
-          eq(notifications.status, "scheduled")
+          eq(notifications.status, "scheduled"),
+          eq(
+            notifications.organizationId,
+            db
+              .select({ organizationId: grievances.organizationId })
+              .from(grievanceDeadlines)
+              .innerJoin(grievances, eq(grievanceDeadlines.grievanceId, grievances.id))
+              .where(eq(grievanceDeadlines.id, deadlineId))
+          )
         )
       );
   } catch (_error) {

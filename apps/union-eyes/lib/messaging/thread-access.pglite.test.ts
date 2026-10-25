@@ -64,9 +64,18 @@ beforeAll(async () => {
   for (const statement of readFileSync(join(__dirname, '..', '..', 'db', 'migrations-platform', '0014_message_thread_triage.sql'), 'utf8').split('--> statement-breakpoint')) {
     if (statement.replace(/--.*$/gm, '').trim()) await pg.exec(statement)
   }
+  for (const statement of readFileSync(join(__dirname, '..', '..', 'db', 'migrations-platform', '0025_message_thread_lifecycle_and_retention.sql'), 'utf8').split('--> statement-breakpoint')) {
+    if (statement.replace(/--.*$/gm, '').trim()) await pg.exec(statement)
+  }
+  // Staff participation needs a live membership; the fixture holds the one staff member the tests use.
+  await pg.exec(`CREATE TABLE organization_members (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, user_id text NOT NULL, role text NOT NULL,
+      status text NOT NULL DEFAULT 'active', deleted_at timestamptz);
+    INSERT INTO organization_members(organization_id,user_id,role) VALUES ('${org}','steward-1','steward');`)
   // These functions never update or lock a thread, so the role keeps SELECT and INSERT only on it.
   await pg.exec(`CREATE ROLE rt NOLOGIN;
     GRANT SELECT, INSERT ON message_threads, messages, in_app_notifications, triage_designations TO rt;
+    GRANT SELECT ON message_thread_reads, message_thread_lifecycle, message_retention_policies, organization_members TO rt;
     GRANT USAGE ON SCHEMA audit_security TO rt; GRANT SELECT, INSERT ON audit_security.audit_logs TO rt;`)
   tx = drizzle(pg) as unknown as RLSTx
   const rows: Array<[keyof typeof ids, string, string, string | null, string]> = [

@@ -36,7 +36,7 @@
  * under the new organization's context before this guard can even become
  * relevant again.
  */
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { pilotApplications, subscriptionPlans } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
@@ -208,6 +208,8 @@ export async function approveCommercialTerms(params: {
     }
 
     const approvedAt = new Date();
+    // The approval is bound to the organization that was verified under the lock above.
+    const organizationId = pilot.verifiedOrganizationId;
     await db
       .update(pilotApplications)
       .set({
@@ -217,7 +219,7 @@ export async function approveCommercialTerms(params: {
         commercialTermsApprovedBy: approvedBy,
         commercialTermsApprovedAt: approvedAt,
       })
-      .where(eq(pilotApplications.id, pilotId));
+      .where(and(eq(pilotApplications.id, pilotId), eq(pilotApplications.verifiedOrganizationId, organizationId)));
 
     // The approval and its audit record commit together; a failed audit rolls the approval back.
     await persistAtomicAudit(tx, {

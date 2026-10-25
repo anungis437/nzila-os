@@ -8,7 +8,7 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { claims, claimUpdates } from '@/db/schema/claims-schema';
@@ -99,7 +99,7 @@ export async function POST(
           assignedAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(eq(claims.claimId, claim.claimId))
+        .where(and(eq(claims.claimId, claim.claimId), eq(claims.organizationId, orgId)))
         .returning({ claimId: claims.claimId });
       if (!changed) return {conflicted:true as const,claimId:claim.claimId};
 

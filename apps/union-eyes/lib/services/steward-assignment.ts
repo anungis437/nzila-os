@@ -193,13 +193,13 @@ export async function assignSteward(
   const [steward] = await db
     .select()
     .from(stewards)
-    .where(eq(stewards.id, stewardId));
+    .where(and(eq(stewards.id, stewardId), eq(stewards.orgId, organizationId)));
 
   if (steward) {
     await db
       .update(stewards)
       .set({ currentCaseload: steward.currentCaseload + 1 })
-      .where(eq(stewards.id, stewardId));
+      .where(and(eq(stewards.id, stewardId), eq(stewards.orgId, organizationId)));
   }
 
   return assignment;

@@ -855,7 +855,7 @@ export class NotificationService {
               processedAt: new Date(),
               completedAt: new Date(),
               resultNotificationId: response.id,
-            }).where(eq(notificationQueue.id, queuedItem.id));
+            }).where(and(eq(notificationQueue.id, queuedItem.id), eq(notificationQueue.organizationId, queuedItem.organizationId)));
             succeeded++;
           } else {
             // Schedule next retry with exponential backoff
@@ -867,7 +867,7 @@ export class NotificationService {
               attemptCount: `${currentAttempt + 1}`,
               nextRetryAt: nextRetryAt,
               errorMessage: response.failureReason,
-            }).where(eq(notificationQueue.id, queuedItem.id));
+            }).where(and(eq(notificationQueue.id, queuedItem.id), eq(notificationQueue.organizationId, queuedItem.organizationId)));
             failedCount++;
           }
           retried++;
@@ -883,7 +883,7 @@ export class NotificationService {
               await db.update(notificationQueue).set({
                 status: 'failed',
                 errorMessage: error instanceof Error ? error.message : 'Unknown error',
-              }).where(eq(notificationQueue.id, queuedItem.id));
+              }).where(and(eq(notificationQueue.id, queuedItem.id), eq(notificationQueue.organizationId, queuedItem.organizationId)));
             } else {
               const delaySeconds = 300 * Math.pow(2, currentAttempt);
               const nextRetryAt = new Date(Date.now() + delaySeconds * 1000);
@@ -893,7 +893,7 @@ export class NotificationService {
                 attemptCount: `${currentAttempt + 1}`,
                 nextRetryAt: nextRetryAt,
                 errorMessage: error instanceof Error ? error.message : 'Unknown error',
-              }).where(eq(notificationQueue.id, queuedItem.id));
+              }).where(and(eq(notificationQueue.id, queuedItem.id), eq(notificationQueue.organizationId, queuedItem.organizationId)));
             }
           } catch (updateError) {
             logger.error("Failed to update queue entry on error", { updateError });

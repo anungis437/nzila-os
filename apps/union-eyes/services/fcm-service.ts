@@ -338,6 +338,8 @@ export async function sendToDevice(
     };
   }
 
+  let deviceOrganizationId: string | undefined;
+
   try {
     // Fetch notification and device
     const [notification] = await db
@@ -350,7 +352,8 @@ export async function sendToDevice(
       .from(pushDevices)
       .where(eq(pushDevices.id, deviceId));
 
-    if (!notification || !device) {
+    // A notification may only be delivered to a device of its own organization
+    if (!notification || !device || notification.organizationId !== device.organizationId) {
       return {
         success: false,
         error: {
@@ -359,6 +362,7 @@ export async function sendToDevice(
         },
       };
     }
+    deviceOrganizationId = device.organizationId;
 
     // Check if device is enabled
     if (!device.enabled) {
@@ -420,10 +424,12 @@ export async function sendToDevice(
         error.code === 'messaging/registration-token-not-registered'
       ) {
         // Disable the device
-        await db
-          .update(pushDevices)
-          .set({ enabled: false })
-          .where(eq(pushDevices.id, deviceId));
+        if (deviceOrganizationId) {
+          await db
+            .update(pushDevices)
+            .set({ enabled: false })
+            .where(and(eq(pushDevices.id, deviceId), eq(pushDevices.organizationId, deviceOrganizationId)));
+        }
 
         errorMessage = 'Invalid or expired device token';
       }
@@ -590,7 +596,7 @@ export async function sendToUser(payload: {
           await db
             .update(pushDevices)
             .set({ enabled: false })
-            .where(eq(pushDevices.id, device.id));
+            .where(and(eq(pushDevices.id, device.id), eq(pushDevices.organizationId, device.organizationId)));
         }
 
         return {
@@ -792,7 +798,7 @@ export async function cleanupInvalidTokens(organizationId: string): Promise<numb
       await db
         .update(pushDevices)
         .set({ enabled: false })
-        .where(eq(pushDevices.id, device.id));
+        .where(and(eq(pushDevices.id, device.id), eq(pushDevices.organizationId, organizationId)));
       disabledCount++;
     }
   }

@@ -4,6 +4,7 @@ import { messageThreads, messageThreadAssignments } from '@/db/schema/messages-s
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import { hasLiveDesignation, liveDesignees } from '@/lib/triage/designations'
+import { staffMembershipLive } from '@/lib/messaging/staff-liveness'
 
 /**
  * Staff assignment of member conversations.
@@ -42,8 +43,9 @@ type Dependencies = {
 const iso = (d: Date | string | null) => (d ? new Date(d).toISOString() : null)
 const clock = (deps: { now?: () => Date }) => (deps.now ?? (() => new Date()))()
 
-export const hasLiveTriageDesignation = (tx: RLSTx, actor: MessageActor, now = new Date()) =>
-  hasLiveDesignation(tx, actor, 'messages', now)
+export const hasLiveTriageDesignation = async (tx: RLSTx, actor: MessageActor, now = new Date()) =>
+  // A designation is held by a person; it works only while that person is still an active staff member.
+  (await staffMembershipLive(tx, actor)) && hasLiveDesignation(tx, actor, 'messages', now)
 
 /** Unassigned open conversations, metadata only. `null` when the caller holds no live designation. */
 export async function listTriageQueue(tx: RLSTx, actor: MessageActor, now = new Date()): Promise<QueueItem[] | null> {
@@ -113,7 +115,7 @@ export async function assignThread(tx: RLSTx, actor: MessageActor, input: Assign
     .limit(1)
   if (!thread) return { kind: 'not_found' }
 
-  const isAssignee = thread.staffId !== null && thread.staffId === actor.userId
+  const isAssignee = thread.staffId !== null && thread.staffId === actor.userId && (await staffMembershipLive(tx, actor))
   const isTriager = await hasLiveTriageDesignation(tx, actor, now)
   // Authority comes from holding the thread or a live designation. Anyone else cannot even tell the thread exists.
   if (!isAssignee && !isTriager) return { kind: 'not_found' }
@@ -171,7 +173,8 @@ export async function assignThread(tx: RLSTx, actor: MessageActor, input: Assign
       title: 'Conversation assigned to you',
       message: 'A member conversation has been assigned to you.',
       type: 'info',
-      // No action link: the staff conversation surface is not built, and the member page would not admit staff.
+      actionLabel: 'Open conversation',
+      actionUrl: `/dashboard/messages/staff?thread=${thread.id}`,
       data: { event: 'thread_assigned', threadId: thread.id },
     })
   }

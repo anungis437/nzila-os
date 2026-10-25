@@ -142,7 +142,7 @@ describe('grievances/[id]/suggest-clauses route', () => {
 
     expect(response.status).toBe(200);
     expect(payload.data).toMatchObject({ grievanceId: 'g1', clauseId: 'c1' });
-    expect(m.linkClauseToGrievance).toHaveBeenCalledWith('g1', '11111111-1111-1111-1111-111111111111', m.tx);
+    expect(m.linkClauseToGrievance).toHaveBeenCalledWith('g1', '11111111-1111-1111-1111-111111111111', expect.any(String), m.tx);
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.tx, expect.objectContaining({ action: 'grievance.link_clause', resourceId: 'g1' }));
   });
 

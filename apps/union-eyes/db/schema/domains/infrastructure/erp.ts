@@ -59,50 +59,6 @@ export const auditActionEnum = pgEnum('audit_action', [
 ]);
 
 // ============================================================================
-// ERP CONNECTORS
-// ============================================================================
-
-export const erpConnectors = pgTable('erp_connectors', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id')
-    .notNull()
-    .references(() => organizations.id, { onDelete: 'cascade' }),
-  name: varchar('name', { length: 255 }).notNull(),
-  systemType: erpSystemEnum('system_type').notNull(),
-  isActive: boolean('is_active').default(true).notNull(),
-  isPrimary: boolean('is_primary').default(false).notNull(),
-  
-  // Connection credentials (encrypted)
-  encryptedCredentials: text('encrypted_credentials').notNull(),
-  
-  // Configuration
-  config: jsonb('config').$type<{
-    autoSync: boolean;
-    syncInterval?: number;
-    defaultGLAccount: string;
-    baseCurrency: string;
-    timezone: string;
-    webhookUrl?: string;
-    environment?: 'sandbox' | 'production';
-  }>().notNull(),
-  
-  // Status
-  lastSyncAt: timestamp('last_sync_at', { withTimezone: true }),
-  lastErrorAt: timestamp('last_error_at', { withTimezone: true }),
-  lastErrorMessage: text('last_error_message'),
-  
-  // Metadata
-  metadata: jsonb('metadata'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-  createdBy: varchar('created_by', { length: 255 }), // User ID - matches users.userId VARCHAR(255)
-  updatedBy: varchar('updated_by', { length: 255 }), // User ID - matches users.userId VARCHAR(255)
-}, (table) => ({
-  organizationIdx: index('erp_connectors_organization_idx').on(table.organizationId),
-  systemTypeIdx: index('erp_connectors_system_type_idx').on(table.systemType),
-}));
-
-// ============================================================================
 // CHART OF ACCOUNTS
 // ============================================================================
 
@@ -111,7 +67,7 @@ export const chartOfAccounts = pgTable('chart_of_accounts', {
   organizationId: uuid('organization_id')
     .notNull()
     .references(() => organizations.id, { onDelete: 'cascade' }),
-  connectorId: uuid('connector_id').notNull().references(() => erpConnectors.id),
+  connectorId: uuid('connector_id').notNull(),
   
   externalId: varchar('external_id', { length: 255 }).notNull(),
   accountNumber: varchar('account_number', { length: 100 }).notNull(),
@@ -149,7 +105,7 @@ export const glAccountMappings = pgTable('gl_account_mappings', {
   organizationId: uuid('organization_id')
     .notNull()
     .references(() => organizations.id, { onDelete: 'cascade' }),
-  connectorId: uuid('connector_id').notNull().references(() => erpConnectors.id),
+  connectorId: uuid('connector_id').notNull(),
   
   unionEyesAccount: varchar('union_eyes_account', { length: 255 }).notNull(),
   erpAccountId: uuid('erp_account_id').notNull().references(() => chartOfAccounts.id),
@@ -169,74 +125,6 @@ export const glAccountMappings = pgTable('gl_account_mappings', {
 }));
 
 // ============================================================================
-// JOURNAL ENTRIES
-// ============================================================================
-
-export const journalEntries = pgTable('journal_entries', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id')
-    .notNull()
-    .references(() => organizations.id, { onDelete: 'cascade' }),
-  connectorId: uuid('connector_id').references(() => erpConnectors.id),
-  
-  externalId: varchar('external_id', { length: 255 }),
-  entryNumber: varchar('entry_number', { length: 100 }).notNull(),
-  entryDate: timestamp('entry_date', { withTimezone: true }).notNull(),
-  postingDate: timestamp('posting_date', { withTimezone: true }).notNull(),
-  
-  description: text('description').notNull(),
-  reference: varchar('reference', { length: 255 }),
-  currency: varchar('currency', { length: 3 }).default('CAD').notNull(),
-  
-  totalDebit: decimal('total_debit', { precision: 19, scale: 4 }).notNull(),
-  totalCredit: decimal('total_credit', { precision: 19, scale: 4 }).notNull(),
-  
-  isPosted: boolean('is_posted').default(false).notNull(),
-  isReversed: boolean('is_reversed').default(false).notNull(),
-  reversalEntryId: uuid('reversal_entry_id'),
-  
-  createdBy: varchar('created_by', { length: 255 }).notNull(), // User ID - matches users.userId VARCHAR(255)
-  approvedBy: varchar('approved_by', { length: 255 }), // User ID - matches users.userId VARCHAR(255)
-  approvedAt: timestamp('approved_at', { withTimezone: true }),
-  
-  metadata: jsonb('metadata'),
-  syncedAt: timestamp('synced_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-}, (table) => ({
-  organizationIdx: index('je_organization_idx').on(table.organizationId),
-  entryNumberIdx: index('je_entry_number_idx').on(table.entryNumber),
-  entryDateIdx: index('je_entry_date_idx').on(table.entryDate),
-  externalIdIdx: index('je_external_id_idx').on(table.externalId),
-}));
-
-export const journalEntryLines = pgTable('journal_entry_lines', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  entryId: uuid('entry_id').notNull().references(() => journalEntries.id, { onDelete: 'cascade' }),
-  lineNumber: integer('line_number').notNull(),
-  
-  accountId: uuid('account_id').notNull().references(() => chartOfAccounts.id),
-  debitAmount: decimal('debit_amount', { precision: 19, scale: 4 }).default('0').notNull(),
-  creditAmount: decimal('credit_amount', { precision: 19, scale: 4 }).default('0').notNull(),
-  
-  description: text('description'),
-  
-  // Union-specific dimensions
-  memberId: uuid('member_id'),
-  bargainingUnitId: uuid('bargaining_unit_id'),
-  departmentId: varchar('department_id', { length: 255 }),
-  locationId: varchar('location_id', { length: 255 }),
-  projectId: varchar('project_id', { length: 255 }),
-  
-  metadata: jsonb('metadata'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-}, (table) => ({
-  entryIdx: index('jel_entry_idx').on(table.entryId),
-  accountIdx: index('jel_account_idx').on(table.accountId),
-  memberIdx: index('jel_member_idx').on(table.memberId),
-}));
-
-// ============================================================================
 // INVOICES
 // ============================================================================
 
@@ -245,7 +133,7 @@ export const erpInvoices = pgTable('erp_invoices', {
   organizationId: uuid('organization_id')
     .notNull()
     .references(() => organizations.id, { onDelete: 'cascade' }),
-  connectorId: uuid('connector_id').references(() => erpConnectors.id),
+  connectorId: uuid('connector_id'),
   
   externalId: varchar('external_id', { length: 255 }),
   invoiceNumber: varchar('invoice_number', { length: 100 }).notNull(),
@@ -292,7 +180,7 @@ export const bankAccounts = pgTable('bank_accounts', {
   organizationId: uuid('organization_id')
     .notNull()
     .references(() => organizations.id, { onDelete: 'cascade' }),
-  connectorId: uuid('connector_id').references(() => erpConnectors.id),
+  connectorId: uuid('connector_id'),
   
   externalId: varchar('external_id', { length: 255 }),
   bankName: varchar('bank_name', { length: 255 }).notNull(),
@@ -318,34 +206,6 @@ export const bankAccounts = pgTable('bank_accounts', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
   organizationIdx: index('bank_accounts_organization_idx').on(table.organizationId),
-}));
-
-export const bankTransactions = pgTable('bank_transactions', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  bankAccountId: uuid('bank_account_id').notNull().references(() => bankAccounts.id, { onDelete: 'cascade' }),
-  
-  transactionDate: timestamp('transaction_date', { withTimezone: true }).notNull(),
-  postingDate: timestamp('posting_date', { withTimezone: true }).notNull(),
-  
-  description: text('description').notNull(),
-  amount: decimal('amount', { precision: 19, scale: 4 }).notNull(),
-  type: varchar('type', { length: 10 }).notNull(), // 'debit' or 'credit'
-  balance: decimal('balance', { precision: 19, scale: 4 }),
-  
-  reference: varchar('reference', { length: 255 }),
-  payee: varchar('payee', { length: 255 }),
-  category: varchar('category', { length: 255 }),
-  
-  isReconciled: boolean('is_reconciled').default(false).notNull(),
-  reconciledAt: timestamp('reconciled_at', { withTimezone: true }),
-  matchedTransactionId: uuid('matched_transaction_id'),
-  
-  metadata: jsonb('metadata'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-}, (table) => ({
-  bankAccountIdx: index('bank_txns_account_idx').on(table.bankAccountId),
-  transactionDateIdx: index('bank_txns_date_idx').on(table.transactionDate),
-  reconciledIdx: index('bank_txns_reconciled_idx').on(table.isReconciled),
 }));
 
 export const bankReconciliations = pgTable('bank_reconciliations', {
@@ -385,7 +245,7 @@ export const syncJobs = pgTable('sync_jobs', {
   organizationId: uuid('organization_id')
     .notNull()
     .references(() => organizations.id, { onDelete: 'cascade' }),
-  connectorId: uuid('connector_id').notNull().references(() => erpConnectors.id),
+  connectorId: uuid('connector_id').notNull(),
   
   entityType: varchar('entity_type', { length: 100 }).notNull(),
   direction: syncDirectionEnum('direction').notNull(),
@@ -483,60 +343,15 @@ export const currencyExchangeRates = pgTable('currency_exchange_rates', {
 // RELATIONS
 // ============================================================================
 
-export const erpConnectorsRelations = relations(erpConnectors, ({ many }) => ({
-  chartOfAccounts: many(chartOfAccounts),
+export const chartOfAccountsRelations = relations(chartOfAccounts, ({ many }) => ({
   glMappings: many(glAccountMappings),
-  journalEntries: many(journalEntries),
-  invoices: many(erpInvoices),
-  bankAccounts: many(bankAccounts),
-  syncJobs: many(syncJobs),
-}));
-
-export const chartOfAccountsRelations = relations(chartOfAccounts, ({ one, many }) => ({
-  connector: one(erpConnectors, {
-    fields: [chartOfAccounts.connectorId],
-    references: [erpConnectors.id],
-  }),
-  glMappings: many(glAccountMappings),
-  journalEntryLines: many(journalEntryLines),
-}));
-
-export const journalEntriesRelations = relations(journalEntries, ({ one, many }) => ({
-  connector: one(erpConnectors, {
-    fields: [journalEntries.connectorId],
-    references: [erpConnectors.id],
-  }),
-  lines: many(journalEntryLines),
-}));
-
-export const journalEntryLinesRelations = relations(journalEntryLines, ({ one }) => ({
-  entry: one(journalEntries, {
-    fields: [journalEntryLines.entryId],
-    references: [journalEntries.id],
-  }),
-  account: one(chartOfAccounts, {
-    fields: [journalEntryLines.accountId],
-    references: [chartOfAccounts.id],
-  }),
 }));
 
 export const bankAccountsRelations = relations(bankAccounts, ({ one, many }) => ({
-  connector: one(erpConnectors, {
-    fields: [bankAccounts.connectorId],
-    references: [erpConnectors.id],
-  }),
   glAccount: one(chartOfAccounts, {
     fields: [bankAccounts.glAccountId],
     references: [chartOfAccounts.id],
   }),
-  transactions: many(bankTransactions),
   reconciliations: many(bankReconciliations),
-}));
-
-export const bankTransactionsRelations = relations(bankTransactions, ({ one }) => ({
-  bankAccount: one(bankAccounts, {
-    fields: [bankTransactions.bankAccountId],
-    references: [bankAccounts.id],
-  }),
 }));
 

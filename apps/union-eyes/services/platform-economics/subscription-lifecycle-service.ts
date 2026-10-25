@@ -296,7 +296,7 @@ export async function processAutoRenewals(
         endDate: newEnd,
         updatedAt: new Date(),
       })
-      .where(eq(orgSubscriptions.id, sub.id));
+      .where(and(eq(orgSubscriptions.id, sub.id), eq(orgSubscriptions.organizationId, sub.organizationId)));
 
     await db.insert(subscriptionEventsLog).values({
       organizationId: sub.organizationId,

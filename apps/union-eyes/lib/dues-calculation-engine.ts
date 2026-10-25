@@ -526,7 +526,7 @@ throw error;
             totalAmount: newTotal.toString(),
             updatedAt: new Date().toISOString(),
           })
-          .where(eq(duesTransactions.id, transaction.id));
+          .where(and(eq(duesTransactions.id, transaction.id), eq(duesTransactions.organizationId, organizationId)));
       }
 return {
         success: true,

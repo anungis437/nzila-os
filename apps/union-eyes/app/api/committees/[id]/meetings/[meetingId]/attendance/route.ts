@@ -50,7 +50,7 @@ export const POST = withApi(
     if (!organizationId) throw ApiError.badRequest("Organization context required");
     const { id: committeeId, meetingId } = params as { id: string; meetingId: string };
     await requireCommitteeScope(organizationId, committeeId, { meetingId });
-    await recordAttendance(meetingId, body.attendees, userId ?? undefined);
+    await recordAttendance(meetingId, organizationId, body.attendees, userId ?? undefined);
     return { success: true };
   }
 );

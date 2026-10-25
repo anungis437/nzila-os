@@ -32,6 +32,7 @@ import { logger } from '@/lib/logger'
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
 import { getCanonicalOrganizationContext } from '@/lib/auth/canonical-context'
 import { withCanonicalOrganizationBinding } from '@/lib/auth/canonical-organization-selection'
+import { sanitizedBindingError } from '@/lib/db/binding-error'
 import {
   AuthOrgBindingError,
   authenticatedOrgBindingSql,
@@ -128,7 +129,11 @@ export async function withRLSContext<T>(
       (binding) =>
         db.transaction(async (tx) => {
           await tx.execute(sql`SET LOCAL ROLE union_eyes_runtime`)
-          await tx.execute(authenticatedOrgBindingSql(binding))
+          try {
+            await tx.execute(authenticatedOrgBindingSql(binding))
+          } catch (error) {
+            throw sanitizedBindingError(error)
+          }
           return tenantContextStorage.run(tx, () => operation(tx))
         }),
     )

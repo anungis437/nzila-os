@@ -252,6 +252,7 @@ export async function bulkCreateBargainingNotes(
  */
 export async function updateBargainingNote(
   id: string,
+  organizationId: string,
   data: Partial<NewBargainingNote>
 ): Promise<BargainingNote | null> {
   try {
@@ -261,7 +262,7 @@ export async function updateBargainingNote(
         ...data,
         updatedAt: new Date(),
       })
-      .where(eq(bargainingNotes.id, id))
+      .where(and(eq(bargainingNotes.id, id), eq(bargainingNotes.organizationId, organizationId)))
       .returning();
 
     return updated || null;
@@ -274,11 +275,11 @@ export async function updateBargainingNote(
 /**
  * Delete a bargaining note
  */
-export async function deleteBargainingNote(id: string): Promise<boolean> {
+export async function deleteBargainingNote(id: string, organizationId: string): Promise<boolean> {
   try {
     await db
       .delete(bargainingNotes)
-      .where(eq(bargainingNotes.id, id));
+      .where(and(eq(bargainingNotes.id, id), eq(bargainingNotes.organizationId, organizationId)));
 
     return true;
   } catch (error) {
@@ -520,6 +521,7 @@ export async function getBargainingNotesStatistics(organizationId: string) {
  */
 export async function addAttachmentToNote(
   noteId: string,
+  organizationId: string,
   attachment: {
     filename: string;
     url: string;
@@ -528,7 +530,7 @@ export async function addAttachmentToNote(
 ): Promise<BargainingNote | null> {
   try {
     const note = await getBargainingNoteById(noteId);
-    if (!note) return null;
+    if (!note || note.organizationId !== organizationId) return null;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const existingAttachments = (note.attachments as any[]) || [];
@@ -537,7 +539,7 @@ export async function addAttachmentToNote(
       uploadedAt: new Date().toISOString(),
     };
 
-    const updated = await updateBargainingNote(noteId, {
+    const updated = await updateBargainingNote(noteId, organizationId, {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       attachments: [...existingAttachments, newAttachment] as any,
     });

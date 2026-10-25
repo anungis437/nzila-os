@@ -167,7 +167,7 @@ describe('BoardPacketGenerator', () => {
 
   describe('finalizePacket', () => {
     it('updates packet status to finalized', async () => {
-      const result = await generator.finalizePacket('pkt-1', 'user-1');
+      const result = await generator.finalizePacket('pkt-1', 'org-1', 'user-1');
       expect(result).toBeDefined();
       expect(mocks.mockUpdate).toHaveBeenCalled();
     });
@@ -180,7 +180,7 @@ describe('BoardPacketGenerator', () => {
           }),
         }),
       });
-      await expect(generator.finalizePacket('pkt-1', 'user-1')).rejects.toThrow('Update failed');
+      await expect(generator.finalizePacket('pkt-1', 'org-1', 'user-1')).rejects.toThrow('Update failed');
     });
   });
 

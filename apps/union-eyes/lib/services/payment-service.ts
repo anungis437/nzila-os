@@ -374,7 +374,7 @@ export class PaymentService {
             receiptUrl,
             updatedAt: new Date(),
           })
-          .where(and(eq(duesTransactions.id, transactionId), inArray(duesTransactions.status, ['pending', 'overdue', 'partial'])))
+          .where(and(eq(duesTransactions.id, transactionId), inArray(duesTransactions.status, ['pending', 'overdue', 'partial']), eq(duesTransactions.organizationId, current.organizationId)))
           .returning({ id: duesTransactions.id });
         if (!paid) throw new PaymentAuthorityError('CONFLICT', 'Transaction is no longer payable');
         await persistAtomicAudit(tx as unknown as RLSTx, {
@@ -453,7 +453,7 @@ export class PaymentService {
             metadata,
             updatedAt: new Date(),
           })
-          .where(and(eq(duesTransactions.id, transactionId), inArray(duesTransactions.status, ['pending', 'overdue', 'partial'])))
+          .where(and(eq(duesTransactions.id, transactionId), inArray(duesTransactions.status, ['pending', 'overdue', 'partial']), eq(duesTransactions.organizationId, txn.organizationId)))
           .returning({ id: duesTransactions.id });
         if (!updated) throw new PaymentAuthorityError('CONFLICT', 'Transaction is no longer payable; the failure was not applied');
         await persistAtomicAudit(tx as unknown as RLSTx, {
@@ -544,7 +544,7 @@ export class PaymentService {
             receiptUrl,
             updatedAt: new Date(),
           })
-          .where(eq(duesTransactions.id, transactionId));
+          .where(and(eq(duesTransactions.id, transactionId), eq(duesTransactions.organizationId, transaction.organizationId)));
       }
 
       return {

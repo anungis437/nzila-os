@@ -263,15 +263,23 @@ export async function addVotingOption(
 /**
  * Update voting option
  */
+/**
+ * Voting options and eligibility rows carry no organization of their own: ownership is proven in the statement
+ * through the organization of the voting session they belong to.
+ */
+const sessionsOfOrganization = (organizationId: string) =>
+  db.select({ id: votingSessions.id }).from(votingSessions).where(eq(votingSessions.organizationId, organizationId));
+
 export async function updateVotingOption(
   id: string,
+  organizationId: string,
   data: Partial<NewVotingOption>
 ): Promise<VotingOption | null> {
   try {
     const [updated] = await db
       .update(votingOptions)
       .set(data)
-      .where(eq(votingOptions.id, id))
+      .where(and(eq(votingOptions.id, id), inArray(votingOptions.sessionId, sessionsOfOrganization(organizationId))))
       .returning();
 
     return updated || null;
@@ -284,11 +292,11 @@ export async function updateVotingOption(
 /**
  * Delete voting option
  */
-export async function deleteVotingOption(id: string): Promise<boolean> {
+export async function deleteVotingOption(id: string, organizationId: string): Promise<boolean> {
   try {
     await db
       .delete(votingOptions)
-      .where(eq(votingOptions.id, id));
+      .where(and(eq(votingOptions.id, id), inArray(votingOptions.sessionId, sessionsOfOrganization(organizationId))));
 
     return true;
   } catch (error) {
@@ -378,6 +386,7 @@ export async function checkVoterEligibility(
  */
 export async function updateVoterEligibility(
   id: string,
+  organizationId: string,
   data: Partial<NewVoterEligibility>
 ): Promise<VoterEligibility | null> {
   try {
@@ -387,7 +396,7 @@ export async function updateVoterEligibility(
         ...data,
         updatedAt: new Date(),
       })
-      .where(eq(voterEligibility.id, id))
+      .where(and(eq(voterEligibility.id, id), inArray(voterEligibility.sessionId, sessionsOfOrganization(organizationId))))
       .returning();
 
     return updated || null;
@@ -763,7 +772,8 @@ export async function calculateRankedChoiceResults(
 export async function setProxyVoter(
   sessionId: string,
   memberId: string,
-  proxyMemberId: string
+  proxyMemberId: string,
+  organizationId: string
 ): Promise<VoterEligibility | null> {
   try {
     const eligibility = await checkVoterEligibility(sessionId, memberId);
@@ -775,7 +785,7 @@ export async function setProxyVoter(
       throw new Error("Voter cannot delegate");
     }
 
-    const updated = await updateVoterEligibility(eligibility.id, {
+    const updated = await updateVoterEligibility(eligibility.id, organizationId, {
       delegatedTo: proxyMemberId,
     });
 
@@ -791,7 +801,8 @@ export async function setProxyVoter(
  */
 export async function removeProxyVoter(
   sessionId: string,
-  memberId: string
+  memberId: string,
+  organizationId: string
 ): Promise<VoterEligibility | null> {
   try {
     const eligibility = await checkVoterEligibility(sessionId, memberId);
@@ -799,7 +810,7 @@ export async function removeProxyVoter(
       throw new Error("Voter eligibility not found");
     }
 
-    const updated = await updateVoterEligibility(eligibility.id, {
+    const updated = await updateVoterEligibility(eligibility.id, organizationId, {
       delegatedTo: null,
     });
 

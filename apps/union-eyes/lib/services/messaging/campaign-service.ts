@@ -357,7 +357,7 @@ export class CampaignService {
         updatedBy: userId,
         updatedAt: new Date(),
       })
-      .where(eq(campaigns.id, campaignId));
+      .where(and(eq(campaigns.id, campaignId), eq(campaigns.organizationId, campaign.organizationId)));
 
     // Queue messages
     let queued = 0;
@@ -386,7 +386,7 @@ export class CampaignService {
           updatedBy: userId,
           updatedAt: new Date(),
         })
-        .where(eq(campaigns.id, campaignId));
+        .where(and(eq(campaigns.id, campaignId), eq(campaigns.organizationId, campaign.organizationId)));
 
       return {
         campaignId,
@@ -405,7 +405,7 @@ export class CampaignService {
           updatedBy: userId,
           updatedAt: new Date(),
         })
-        .where(eq(campaigns.id, campaignId));
+        .where(and(eq(campaigns.id, campaignId), eq(campaigns.organizationId, campaign.organizationId)));
 
       throw error;
     }
@@ -474,7 +474,7 @@ export class CampaignService {
             errorMessage: error instanceof Error ? error.message : 'Unknown error',
             retryCount: (message.retryCount || 0) + 1,
           })
-          .where(eq(messageLog.id, message.id));
+          .where(and(eq(messageLog.id, message.id), eq(messageLog.organizationId, message.organizationId)));
       }
     }
   }
@@ -530,7 +530,7 @@ export class CampaignService {
           providerMessageId,
           sentAt: new Date(),
         })
-        .where(eq(messageLog.id, message.id));
+        .where(and(eq(messageLog.id, message.id), eq(messageLog.organizationId, message.organizationId)));
     } catch (error) {
       throw error;
     }
@@ -577,7 +577,7 @@ export class CampaignService {
   /**
    * Cancel campaign
    */
-  async cancelCampaign(campaignId: string, userId: string): Promise<Campaign> {
+  async cancelCampaign(campaignId: string, organizationId: string, userId: string): Promise<Campaign> {
     const [campaign] = await db
       .update(campaigns)
       .set({
@@ -585,7 +585,7 @@ export class CampaignService {
         updatedBy: userId,
         updatedAt: new Date(),
       })
-      .where(eq(campaigns.id, campaignId))
+      .where(and(eq(campaigns.id, campaignId), eq(campaigns.organizationId, organizationId)))
       .returning();
 
     return campaign;

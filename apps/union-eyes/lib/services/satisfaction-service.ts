@@ -190,9 +190,7 @@ export async function submitSatisfactionRatings(
     const overallScore = (ratingValues.reduce((a, b) => a + b, 0) / ratingValues.length).toFixed(2);
 
     const updated = await db.transaction(async (tx) => {
-      const [row] = await tx
-        .update(satisfactionSurveys)
-        .set({
+      const completionFields = {
           communicationRating: ratings.communicationRating,
           responsivenessRating: ratings.responsivenessRating,
           knowledgeRating: ratings.knowledgeRating,
@@ -206,11 +204,15 @@ export async function submitSatisfactionRatings(
           status: 'completed',
           completedAt: new Date(),
           updatedAt: new Date(),
-        })
+        };
+      const [row] = await tx
+        .update(satisfactionSurveys)
+        .set(completionFields)
         .where(
           and(
             eq(satisfactionSurveys.id, surveyId),
             eq(satisfactionSurveys.memberId, memberId),
+            eq(satisfactionSurveys.organizationId, survey.organizationId),
             inArray(satisfactionSurveys.status, ['pending', 'sent'])
           )
         )
@@ -257,6 +259,7 @@ export async function declineSurvey(
         and(
           eq(satisfactionSurveys.id, surveyId),
           eq(satisfactionSurveys.memberId, memberId),
+          eq(satisfactionSurveys.organizationId, survey.organizationId),
           inArray(satisfactionSurveys.status, ['pending', 'sent'])
         )
       )

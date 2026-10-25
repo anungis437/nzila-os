@@ -103,7 +103,10 @@ export async function indexExitInterview(
 
   const markSkipped = (reason: string): Promise<IndexResult> =>
     withRLSContext({ organizationId: orgId }, async (tx) => {
-      await tx.update(exitInterviews).set({ indexingStatus: 'skipped', updatedAt: new Date() }).where(ownInterview);
+      await tx
+        .update(exitInterviews)
+        .set({ indexingStatus: 'skipped', updatedAt: new Date() })
+        .where(and(eq(exitInterviews.id, interviewId), eq(exitInterviews.organizationId, orgId)));
       await audit(tx, 'exit_interview.index.skipped', { reason });
       return { indexed: false, reason };
     });
@@ -192,7 +195,13 @@ export async function indexExitInterview(
       const [marked] = await tx
         .update(exitInterviews)
         .set({ knowledgeBaseId, indexingStatus: 'indexed', indexedAt: now, updatedAt: now })
-        .where(and(ownInterview, eq(exitInterviews.status, 'published')))
+        .where(
+          and(
+            eq(exitInterviews.id, interviewId),
+            eq(exitInterviews.organizationId, orgId),
+            eq(exitInterviews.status, 'published'),
+          ),
+        )
         .returning({ id: exitInterviews.id });
       if (!marked) throw new Error('Interview is no longer published');
 
@@ -213,7 +222,10 @@ export async function indexExitInterview(
   } catch (err) {
     logger?.error('Semantic indexing failed', { interviewId, error: String(err) });
     await withRLSContext({ organizationId: orgId }, async (tx) => {
-      await tx.update(exitInterviews).set({ indexingStatus: 'failed', updatedAt: new Date() }).where(ownInterview);
+      await tx
+        .update(exitInterviews)
+        .set({ indexingStatus: 'failed', updatedAt: new Date() })
+        .where(and(eq(exitInterviews.id, interviewId), eq(exitInterviews.organizationId, orgId)));
       await audit(tx, 'exit_interview.index.failed', { error: err instanceof Error ? err.message : String(err) }, 'failure');
     }).catch(() => {});
     return { indexed: false, reason: String(err) };

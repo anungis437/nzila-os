@@ -93,7 +93,7 @@ export const PATCH = withApi(
     await requireCommitteeScope(organizationId, committeeId, { meetingId });
     const { meetingDate, endTime, nextMeetingDate, ...rest } = body;
 
-    const updated = await updateMeeting(meetingId, {
+    const updated = await updateMeeting(meetingId, organizationId, {
       ...rest,
       ...(meetingDate && { meetingDate: new Date(meetingDate) }),
       ...(endTime && { endTime: new Date(endTime) }),

@@ -413,32 +413,6 @@ export const notificationBounceTypeEnum = pgEnum('notification_bounce_type', [
   'manual',
 ]);
 
-export const notificationBounces = pgTable('notification_bounces', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id')
-    .notNull()
-    .references(() => organizations.id, { onDelete: 'cascade' }),
-  
-  // Bounce details
-  email: text('email').notNull(),
-  bounceType: notificationBounceTypeEnum('bounce_type').notNull(),
-  bounceSubType: text('bounce_sub_type'),
-  
-  // Timeline
-  firstBouncedAt: timestamp('first_bounced_at').notNull(),
-  lastBouncedAt: timestamp('last_bounced_at').notNull(),
-  bounceCount: text('bounce_count').notNull().default('1'),
-  
-  // Status
-  isActive: boolean('is_active').notNull().default(true),
-  suppressUntil: timestamp('suppress_until'),
-  suppressionReason: text('suppression_reason'),
-  
-  // Audit
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
-
 // ============================================
 // Indexes
 // ============================================

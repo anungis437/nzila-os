@@ -271,51 +271,6 @@ export const paymentAllocations = pgTable('payment_allocations', {
 }));
 
 // ============================================================================
-// BILLING ADJUSTMENTS
-// ============================================================================
-
-export const billingAdjustments = pgTable('billing_adjustments', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  billingAccountId: uuid('billing_account_id')
-    .notNull()
-    .references(() => billingAccounts.id, { onDelete: 'restrict' }),
-  organizationId: uuid('organization_id')
-    .notNull()
-    .references(() => organizations.id, { onDelete: 'restrict' }),
-  invoiceId: uuid('invoice_id')
-    .references(() => platformInvoices.id, { onDelete: 'restrict' }),
-  type: adjustmentTypeEnum('type').notNull(),
-  amount: decimal('amount', { precision: 14, scale: 2 }).notNull(),
-  currency: varchar('currency', { length: 3 }).notNull().default('CAD'),
-  reason: text('reason').notNull(),
-  effectiveDate: timestamp('effective_date', { withTimezone: true }).notNull(),
-  approvedBy: varchar('approved_by', { length: 255 }),
-  ledgerEntryId: uuid('ledger_entry_id'),
-  metadata: jsonb('metadata').$type<Record<string, unknown>>(),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  createdBy: varchar('created_by', { length: 255 }),
-}, (t) => ({
-  orgIdx: index('billing_adjustments_org_idx').on(t.organizationId),
-  billingAcctIdx: index('billing_adjustments_billing_acct_idx').on(t.billingAccountId),
-}));
-
-// ============================================================================
-// BILLING TERMS
-// ============================================================================
-
-export const billingTerms = pgTable('billing_terms', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  code: varchar('code', { length: 30 }).notNull().unique(), // NET-30, NET-60
-  name: varchar('name', { length: 100 }).notNull(),
-  dueDays: integer('due_days').notNull(),
-  discountPercent: decimal('discount_percent', { precision: 5, scale: 2 }).default('0'),
-  discountDays: integer('discount_days').default(0),
-  isDefault: boolean('is_default').notNull().default(false),
-  isActive: boolean('is_active').notNull().default(true),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-});
-
-// ============================================================================
 // TYPE EXPORTS
 // ============================================================================
 
@@ -328,45 +283,10 @@ export type PlatformInvoice = typeof platformInvoices.$inferSelect;
 export type PlatformInvoiceLineItem = typeof platformInvoiceLineItems.$inferSelect;
 export type PlatformPayment = typeof platformPayments.$inferSelect;
 export type PaymentAllocation = typeof paymentAllocations.$inferSelect;
-export type BillingAdjustment = typeof billingAdjustments.$inferSelect;
-export type BillingTerm = typeof billingTerms.$inferSelect;
 
 // ============================================================================
 // LEGACY BILLING TABLES (console / CFO dashboard)
 // ============================================================================
-
-export const billingInvoices = pgTable('billing_invoices', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'restrict' }),
-  subscriptionId: uuid('subscription_id'),
-  invoiceNumber: text('invoice_number').notNull(),
-  status: text('status').notNull().default('draft'),
-  currency: varchar('currency', { length: 3 }).notNull().default('CAD'),
-  subtotal: decimal('subtotal', { precision: 14, scale: 2 }).notNull().default('0'),
-  taxTotal: decimal('tax_total', { precision: 14, scale: 2 }).notNull().default('0'),
-  total: decimal('total', { precision: 14, scale: 2 }).notNull().default('0'),
-  amountPaid: decimal('amount_paid', { precision: 14, scale: 2 }).notNull().default('0'),
-  amountDue: decimal('amount_due', { precision: 14, scale: 2 }).notNull().default('0'),
-  dueDate: timestamp('due_date', { withTimezone: true }),
-  issuedAt: timestamp('issued_at', { withTimezone: true }),
-  paidAt: timestamp('paid_at', { withTimezone: true }),
-  description: text('description'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-});
-
-export const billingPayments = pgTable('billing_payments', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'restrict' }),
-  invoiceId: uuid('invoice_id'),
-  amount: decimal('amount', { precision: 14, scale: 2 }).notNull(),
-  currency: varchar('currency', { length: 3 }).notNull().default('CAD'),
-  status: text('status').notNull().default('succeeded'),
-  paymentMethod: text('payment_method').notNull().default('card'),
-  cardLast4: varchar('card_last4', { length: 4 }),
-  cardBrand: text('card_brand'),
-  failureReason: text('failure_reason'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-});
 
 export const billingSubscriptions = pgTable('billing_subscriptions', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -384,6 +304,4 @@ export const billingSubscriptions = pgTable('billing_subscriptions', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-export type BillingInvoice = typeof billingInvoices.$inferSelect;
-export type BillingPayment = typeof billingPayments.$inferSelect;
 export type BillingSubscription = typeof billingSubscriptions.$inferSelect;

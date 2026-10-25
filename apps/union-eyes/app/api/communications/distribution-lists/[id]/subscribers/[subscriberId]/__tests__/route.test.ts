@@ -39,6 +39,7 @@ vi.mock('drizzle-orm', () => ({
   eq: vi.fn((col: unknown, val: unknown) => ({ op: 'eq', col, val })),
   and: vi.fn((...args: unknown[]) => ({ op: 'and', args })),
   ne: vi.fn((col: unknown, val: unknown) => ({ op: 'ne', col, val })),
+  sql: vi.fn((strings: TemplateStringsArray, ...values: unknown[]) => ({ op: 'sql', strings, values })),
 }));
 vi.mock('@/lib/api/with-api', () => ({ withApi: h.withApi }));
 vi.mock('@/lib/api/errors', () => ({ ApiError: { notFound: h.notFound, badRequest: h.badRequest } }));

@@ -2,7 +2,7 @@
  * Messages Schema
  * Real-time messaging system for member-staff communication
  */
-import { pgTable, uuid, text, timestamp, boolean, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, boolean, pgEnum, bigint, integer, primaryKey } from 'drizzle-orm/pg-core';
 
 export const messageStatusEnum = pgEnum('message_status', ['sent', 'delivered', 'read']);
 export const messageTypeEnum = pgEnum('message_type', ['text', 'file', 'system']);
@@ -50,6 +50,46 @@ export const messageThreadAssignments = pgTable('message_thread_assignments', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
+// Append-only history of every close, archive and legal-hold decision on a conversation (platform 0025, RLS 0024).
+// It never holds message text; a hold carries only a reference to the matter or authority behind it.
+export const messageThreadLifecycle = pgTable('message_thread_lifecycle', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  seq: bigint('seq', { mode: 'number' }).generatedAlwaysAsIdentity(),
+  organizationId: uuid('organization_id').notNull(),
+  threadId: uuid('thread_id').notNull().references(() => messageThreads.id, { onDelete: 'restrict' }),
+  action: text('action').notNull(), // close, archive, hold_place, hold_release
+  actedBy: text('acted_by').notNull(),
+  actedVia: text('acted_via').notNull(), // thread_member, current_assignee, organization_administrator
+  reference: text('reference'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+// An organization's ADOPTED retention period for closed conversations (platform 0025, RLS 0024). No row: not adopted.
+export const messageRetentionPolicies = pgTable('message_retention_policies', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  policyReference: text('policy_reference').notNull(),
+  authorityReference: text('authority_reference').notNull(),
+  retentionDays: integer('retention_days').notNull(),
+  adoptedBy: text('adopted_by').notNull(),
+  adoptedAt: timestamp('adopted_at', { withTimezone: true }).defaultNow().notNull(),
+  supersededAt: timestamp('superseded_at', { withTimezone: true }),
+  supersededBy: text('superseded_by'),
+});
+
+// Last time each participant read a conversation (platform 0025, RLS 0024).
+export const messageThreadReads = pgTable(
+  'message_thread_reads',
+  {
+    threadId: uuid('thread_id').notNull().references(() => messageThreads.id, { onDelete: 'restrict' }),
+    userId: text('user_id').notNull(),
+    organizationId: uuid('organization_id').notNull(),
+    lastReadAt: timestamp('last_read_at', { withTimezone: true }).notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.threadId, table.userId] })],
+);
+
 // Individual messages table
 export const messages = pgTable('messages', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -76,31 +116,6 @@ export const messageReadReceipts = pgTable('message_read_receipts', {
   messageId: uuid('message_id').notNull().references(() => messages.id, { onDelete: 'cascade' }),
   userId: text('user_id').notNull(), // Auth user ID
   readAt: timestamp('read_at').defaultNow().notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-});
-
-// Message participants table (for group conversations future support)
-export const messageParticipants = pgTable('message_participants', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  threadId: uuid('thread_id').notNull().references(() => messageThreads.id, { onDelete: 'cascade' }),
-  userId: text('user_id').notNull(), // Auth user ID
-  role: text('role').notNull(), // member, staff, admin
-  isActive: boolean('is_active').default(true),
-  lastReadAt: timestamp('last_read_at'),
-  joinedAt: timestamp('joined_at').defaultNow().notNull(),
-  leftAt: timestamp('left_at'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-});
-
-// Message notifications table
-export const messageNotifications = pgTable('message_notifications', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: text('user_id').notNull(), // Auth user ID
-  messageId: uuid('message_id').notNull().references(() => messages.id, { onDelete: 'cascade' }),
-  threadId: uuid('thread_id').notNull().references(() => messageThreads.id, { onDelete: 'cascade' }),
-  isRead: boolean('is_read').default(false),
-  readAt: timestamp('read_at'),
-  notifiedAt: timestamp('notified_at').defaultNow().notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 

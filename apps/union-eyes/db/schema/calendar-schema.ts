@@ -345,41 +345,6 @@ export const roomBookings = pgTable('room_bookings', {
 });
 
 // ============================================================================
-// CALENDAR SHARING TABLE
-// ============================================================================
-
-export const calendarSharing = pgTable('calendar_sharing', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  calendarId: uuid('calendar_id').notNull().references(() => calendars.id, { onDelete: 'cascade' }),
-  organizationId: uuid('organization_id')
-    .notNull()
-    .references(() => organizations.id, { onDelete: 'cascade' }),
-  
-  // Shared with
-  sharedWithUserId: text('shared_with_user_id'),
-  sharedWithEmail: text('shared_with_email'),
-  sharedWithRole: varchar('shared_with_role', { length: 50 }), // For role-based sharing
-  
-  // Permissions
-  permission: calendarPermissionEnum('permission').default('viewer'),
-  canCreateEvents: boolean('can_create_events').default(false),
-  canEditEvents: boolean('can_edit_events').default(false),
-  canDeleteEvents: boolean('can_delete_events').default(false),
-  canShare: boolean('can_share').default(false),
-  
-  // Invitation
-  invitedBy: text('invited_by').notNull(),
-  invitedAt: timestamp('invited_at').defaultNow().notNull(),
-  acceptedAt: timestamp('accepted_at'),
-  
-  // Status
-  isActive: boolean('is_active').default(true),
-  
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
-
-// ============================================================================
 // EXTERNAL CALENDAR CONNECTIONS TABLE
 // ============================================================================
 
@@ -464,7 +429,6 @@ export const eventReminders = pgTable('event_reminders', {
 
 export const calendarsRelations = relations(calendars, ({ many }) => ({
   events: many(calendarEvents),
-  sharingPermissions: many(calendarSharing),
 }));
 
 export const calendarEventsRelations = relations(calendarEvents, ({ one, many }) => ({
@@ -506,13 +470,6 @@ export const roomBookingsRelations = relations(roomBookings, ({ one }) => ({
   }),
 }));
 
-export const calendarSharingRelations = relations(calendarSharing, ({ one }) => ({
-  calendar: one(calendars, {
-    fields: [calendarSharing.calendarId],
-    references: [calendars.id],
-  }),
-}));
-
 // ============================================================================
 // TYPE EXPORTS
 // ============================================================================
@@ -532,8 +489,6 @@ export type NewMeetingRoom = typeof meetingRooms.$inferInsert;
 export type RoomBooking = typeof roomBookings.$inferSelect;
 export type NewRoomBooking = typeof roomBookings.$inferInsert;
 
-export type CalendarSharing = typeof calendarSharing.$inferSelect;
-export type NewCalendarSharing = typeof calendarSharing.$inferInsert;
 
 export type ExternalCalendarConnection = typeof externalCalendarConnections.$inferSelect;
 export type NewExternalCalendarConnection = typeof externalCalendarConnections.$inferInsert;

@@ -339,7 +339,7 @@ export async function updateCorrespondence(params: UpdateCorrespondenceParams) {
     const [updated] = await tx
       .update(correspondence)
       .set(updates)
-      .where(and(eq(correspondence.id, params.id), eq(correspondence.status, "draft")))
+      .where(and(eq(correspondence.id, params.id), eq(correspondence.status, "draft"), eq(correspondence.organizationId, existing.organizationId)))
       .returning();
     if (!updated) throw ApiError.conflict("The correspondence is no longer a draft");
 
@@ -420,7 +420,7 @@ async function transition(id: string, ctx: TransitionContext, spec: TransitionSp
     const [updated] = await tx
       .update(correspondence)
       .set({ ...spec.set, status: spec.target, updatedAt: new Date() })
-      .where(and(eq(correspondence.id, id), eq(correspondence.status, existing.status)))
+      .where(and(eq(correspondence.id, id), eq(correspondence.status, existing.status), eq(correspondence.organizationId, existing.organizationId)))
       .returning();
     if (!updated) throw ApiError.conflict("The correspondence changed state while this action was in progress");
 

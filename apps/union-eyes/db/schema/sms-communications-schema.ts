@@ -190,30 +190,6 @@ export type SmsOptOut = typeof smsOptOuts.$inferSelect;
 export type NewSmsOptOut = typeof smsOptOuts.$inferInsert;
 
 // ============================================================================
-// SMS RATE LIMITS
-// ============================================================================
-
-export const smsRateLimits = pgTable(
-  'sms_rate_limits',
-  {
-    id: uuid('id').primaryKey().defaultRandom(),
-    organizationId: uuid('organization_id')
-      .notNull()
-      .references(() => organizations.id, { onDelete: 'cascade' }),
-    messagesSent: integer('messages_sent').default(0),
-    windowStart: timestamp('window_start', { withTimezone: true }).notNull().defaultNow(),
-    windowEnd: timestamp('window_end', { withTimezone: true }).notNull().defaultNow(),
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  },
-  (table) => ({
-    organizationWindowUnique: unique().on(table.organizationId, table.windowStart),
-  })
-);
-
-export type SmsRateLimit = typeof smsRateLimits.$inferSelect;
-export type NewSmsRateLimit = typeof smsRateLimits.$inferInsert;
-
-// ============================================================================
 // RELATIONS
 // ============================================================================
 
@@ -300,13 +276,6 @@ export const smsOptOutsRelations = relations(smsOptOuts, ({ one }) => ({
   user: one(profiles, {
     fields: [smsOptOuts.userId],
     references: [profiles.userId],
-  }),
-}));
-
-export const smsRateLimitsRelations = relations(smsRateLimits, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [smsRateLimits.organizationId],
-    references: [organizations.id],
   }),
 }));
 

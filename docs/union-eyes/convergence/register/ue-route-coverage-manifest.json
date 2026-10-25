@@ -1,9 +1,9 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 976,
-  "mutating": 702,
-  "kernel": 48,
+  "routes": 988,
+  "mutating": 713,
+  "kernel": 57,
   "byGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 12,
@@ -15,9 +15,9 @@
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 67,
    "ROLE_AUTH": 125,
-   "SESSION_AUTH": 52,
+   "SESSION_AUTH": 59,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 271,
+   "WITH_API": 276,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -31,13 +31,13 @@
    "PLATFORM_AUTH_HANDLER": 7,
    "RETIRED": 60,
    "ROLE_AUTH": 74,
-   "SESSION_AUTH": 23,
+   "SESSION_AUTH": 29,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 164
+   "WITH_API": 169
   },
   "mutatingByAudit": {
-   "ATOMIC": 141,
-   "ATOMIC_SERVICE": 129,
+   "ATOMIC": 140,
+   "ATOMIC_SERVICE": 141,
    "COMPUTE_ONLY": 34,
    "CRUD_ATOMIC": 299,
    "EXEMPT_BALLOT_SECRECY": 2,
@@ -50,7 +50,7 @@
    "CRUD_TENANT_TX": 299,
    "NONE": 199,
    "SYSTEM_CONTEXT": 56,
-   "TENANT_TX": 134
+   "TENANT_TX": 145
   }
  },
  "routes": [
@@ -5312,10 +5312,10 @@
    ],
    "mutating": true,
    "guard": "WITH_API",
-   "kernel": false,
+   "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "ATOMIC"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "dues/arrears/[id]/reminder/route.ts",
@@ -9082,7 +9082,44 @@
    "audit": "READ_ONLY"
   },
   {
+   "route": "messages/retention-policy/route.ts",
+   "methods": [
+    "GET",
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": "THREAD_POLICY",
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
    "route": "messages/threads/[threadId]/assignment/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": "THREAD_POLICY",
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
+   "route": "messages/threads/[threadId]/legal-hold/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": "THREAD_POLICY",
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
+   "route": "messages/threads/[threadId]/lifecycle/route.ts",
    "methods": [
     "POST"
    ],
@@ -9097,6 +9134,18 @@
    "route": "messages/threads/[threadId]/messages/route.ts",
    "methods": [
     "GET",
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": "THREAD_POLICY",
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
+   "route": "messages/threads/[threadId]/read/route.ts",
+   "methods": [
     "POST"
    ],
    "mutating": true,
@@ -10294,6 +10343,19 @@
    "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
+  },
+  {
+   "route": "payments/[id]/duties/route.ts",
+   "methods": [
+    "GET",
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": true,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "payments/checkout/create/route.ts",
@@ -12248,6 +12310,92 @@
    "subordinate": null,
    "data": "NONE",
    "audit": "NO_WRITES_FOUND"
+  },
+  {
+   "route": "workaid/consent-text/route.ts",
+   "methods": [
+    "GET"
+   ],
+   "mutating": false,
+   "guard": "SESSION_AUTH",
+   "kernel": true,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "READ_ONLY"
+  },
+  {
+   "route": "workaid/consents/[consentId]/revoke/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "SESSION_AUTH",
+   "kernel": true,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
+   "route": "workaid/consents/route.ts",
+   "methods": [
+    "GET",
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "SESSION_AUTH",
+   "kernel": true,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
+   "route": "workaid/documents/[authorisationId]/revoke/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "SESSION_AUTH",
+   "kernel": true,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
+   "route": "workaid/documents/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "SESSION_AUTH",
+   "kernel": true,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
+   "route": "workaid/referrals/route.ts",
+   "methods": [
+    "GET",
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "SESSION_AUTH",
+   "kernel": true,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
+   "route": "workaid/shares/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "SESSION_AUTH",
+   "kernel": true,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "workbench/assign/route.ts",

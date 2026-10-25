@@ -92,7 +92,11 @@ export const PUT = withApi(
         .where(and(eq(userNotificationPreferences.userId, userId!), eq(userNotificationPreferences.organizationId, organizationId!)))
         .limit(1);
       if (existing) {
-        const [updated] = await tx.update(userNotificationPreferences).set(values).where(eq(userNotificationPreferences.id, existing.id)).returning();
+        const [updated] = await tx
+          .update(userNotificationPreferences)
+          .set(values)
+          .where(and(eq(userNotificationPreferences.id, existing.id), eq(userNotificationPreferences.organizationId, organizationId!), eq(userNotificationPreferences.userId, userId!)))
+          .returning();
         await auditPreferences(tx, updated.id);
         return updated;
       }

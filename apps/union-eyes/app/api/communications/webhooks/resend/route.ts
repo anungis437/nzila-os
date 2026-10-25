@@ -274,13 +274,16 @@ export async function POST(request: NextRequest) {
       shouldIncrementStat = false;
     }
 
-    await tx.update(messageLog).set(updates).where(eq(messageLog.id, logRow.id));
+    await tx
+      .update(messageLog)
+      .set(updates)
+      .where(and(eq(messageLog.id, logRow.id), eq(messageLog.organizationId, logRow.organizationId)));
 
     if (logRow.campaignId && shouldIncrementStat) {
       const [campaign] = await tx
         .select({ stats: campaigns.stats })
         .from(campaigns)
-        .where(eq(campaigns.id, logRow.campaignId))
+        .where(and(eq(campaigns.id, logRow.campaignId), eq(campaigns.organizationId, logRow.organizationId)))
         .limit(1);
 
       if (campaign) {
@@ -295,7 +298,7 @@ export async function POST(request: NextRequest) {
             stats: nextStats,
             updatedAt: new Date(),
           })
-          .where(eq(campaigns.id, logRow.campaignId));
+          .where(and(eq(campaigns.id, logRow.campaignId), eq(campaigns.organizationId, logRow.organizationId)));
       }
     }
   });

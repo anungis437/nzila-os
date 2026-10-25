@@ -218,7 +218,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, _context
               receiptUrl,
               updatedAt: new Date(),
             })
-            .where(eq(duesTransactions.id, transaction.id));
+            .where(and(eq(duesTransactions.id, transaction.id), eq(duesTransactions.organizationId, transaction.organizationId)));
         }
 
         logger.info('Dues payment processed successfully', {

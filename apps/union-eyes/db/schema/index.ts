@@ -50,11 +50,9 @@ export {
   meetingTypeEnum,
   // Tables
   workplaceIncidents, safetyInspections, hazardReports,
-  safetyCommitteeMeetings, safetyTrainingRecords, ppeEquipment,
-  safetyAudits, injuryLogs, safetyPolicies, correctiveActions, safetyCertifications,
+  safetyTrainingRecords, ppeEquipment,
   // Relations
   workplaceIncidentsRelations, safetyInspectionsRelations, hazardReportsRelations,
-  correctiveActionsRelations, injuryLogsRelations,
   // CNESST enums
   cneesstFilingTypeEnum, cneesstFilingStatusEnum,
   preventiveWithdrawalReasonEnum, rightOfRefusalOutcomeEnum,

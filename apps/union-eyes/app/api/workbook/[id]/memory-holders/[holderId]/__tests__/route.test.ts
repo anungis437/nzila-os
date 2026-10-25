@@ -32,7 +32,7 @@ vi.mock('@/lib/workbook/claimed-write-audit', () => ({
   auditClaimedWorkbookWrite: m.auditClaimedWorkbookWrite,
 }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
-vi.mock('drizzle-orm', () => ({ eq: vi.fn(), and: vi.fn() }));
+vi.mock('drizzle-orm', async (importOriginal) => ({ ...(await importOriginal<typeof import('drizzle-orm')>()), eq: vi.fn(), and: vi.fn() }));
 
 async function loadRoute() {
   return import('../route');

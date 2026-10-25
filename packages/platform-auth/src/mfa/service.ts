@@ -353,6 +353,18 @@ async function consumeMfaChallengeWithContext(input: ConsumeChallengeInput, toke
     return { success: false, error: 'Too many attempts — request a new sign-in' }
   }
 
+  // The challenge outlives the account state it was issued under: a user suspended or deprovisioned in the meantime
+  // must not be handed a session by a challenge that was valid when it was issued.
+  const [account] = await db
+    .select({ active: authUsers.isActive, lifecycle: authUsers.lifecycleState })
+    .from(authUsers)
+    .where(eq(authUsers.userId, challenge.userId))
+    .limit(1)
+  if (!account?.active || account.lifecycle !== 'active') {
+    await logEvent('mfa_challenge_failed', { userId: challenge.userId, ipAddress: input.ipAddress, metadata: { reason: 'account_not_active' } })
+    return { success: false, error: 'Invalid or expired challenge' }
+  }
+
   const [totpRow] = await db
     .select()
     .from(authMfaTotp)

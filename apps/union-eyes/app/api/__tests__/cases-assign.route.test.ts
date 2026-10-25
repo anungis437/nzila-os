@@ -31,7 +31,7 @@ vi.mock('@/lib/pilot-metrics', () => ({ recordUnionEyesCaseAssigned: m.recordUni
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
-  return { ...actual, eq: vi.fn(() => 'eq') };
+  return { ...actual, eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and') };
 });
 
 

@@ -119,30 +119,29 @@ export const POST = withApi(
 
       const trainingDataQueue = [...previousQueue, feedbackEntry].slice(-200);
 
+      const nextParameters = {
+        ...currentParams,
+        feedbackStats: {
+          observations,
+          meanAbsoluteError,
+          qualityScore,
+          retrainRecommended,
+          lastUpdatedAt: new Date().toISOString(),
+        },
+        trainingDataQueue,
+        retrainSignal: {
+          recommended: retrainRecommended,
+          reason: retrainRecommended
+            ? 'mean_absolute_error_above_threshold'
+            : 'within_threshold',
+          threshold: 0.25,
+          minObservations: 30,
+        },
+      };
+
       const [updatedModel] = await tx
         .update(modelMetadata)
-        .set({
-          accuracy: qualityScore.toFixed(6),
-          parameters: {
-            ...currentParams,
-            feedbackStats: {
-              observations,
-              meanAbsoluteError,
-              qualityScore,
-              retrainRecommended,
-              lastUpdatedAt: new Date().toISOString(),
-            },
-            trainingDataQueue,
-            retrainSignal: {
-              recommended: retrainRecommended,
-              reason: retrainRecommended
-                ? 'mean_absolute_error_above_threshold'
-                : 'within_threshold',
-              threshold: 0.25,
-              minObservations: 30,
-            },
-          },
-        })
+        .set({ accuracy: qualityScore.toFixed(6), parameters: nextParameters })
         .where(and(eq(modelMetadata.id, activeModel.id), eq(modelMetadata.organizationId, organizationId)))
         .returning();
 

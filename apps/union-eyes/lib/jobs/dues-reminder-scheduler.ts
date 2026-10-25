@@ -391,7 +391,7 @@ export class DuesReminderScheduler {
           )`,
           updatedAt: new Date(),
         })
-        .where(eq(duesTransactions.id, transaction.id));
+        .where(and(eq(duesTransactions.id, transaction.id), eq(duesTransactions.organizationId, transaction.organizationId)));
 
       logger.info('7-day reminder sent', {
         transactionId: transaction.id,
@@ -484,7 +484,7 @@ export class DuesReminderScheduler {
           )`,
           updatedAt: new Date(),
         })
-        .where(eq(duesTransactions.id, transaction.id));
+        .where(and(eq(duesTransactions.id, transaction.id), eq(duesTransactions.organizationId, transaction.organizationId)));
 
       logger.info('1-day reminder sent', {
         transactionId: transaction.id,
@@ -578,7 +578,7 @@ export class DuesReminderScheduler {
           )`,
           updatedAt: new Date(),
         })
-        .where(eq(duesTransactions.id, transaction.id));
+        .where(and(eq(duesTransactions.id, transaction.id), eq(duesTransactions.organizationId, transaction.organizationId)));
 
       logger.info('Overdue notice sent', {
         transactionId: transaction.id,

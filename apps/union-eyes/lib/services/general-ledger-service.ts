@@ -431,7 +431,7 @@ export async function reconcileGLTransactions(
           reconciledAt: new Date(),
           reconciledBy: userId,
         })
-        .where(eq(glTransactionLog.id, txId));
+        .where(and(eq(glTransactionLog.id, txId), eq(glTransactionLog.organizationId, organizationId)));
     }
 
     // Get unmatched transactions

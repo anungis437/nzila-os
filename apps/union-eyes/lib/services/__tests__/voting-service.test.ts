@@ -310,30 +310,30 @@ describe('VotingService', () => {
   describe('updateVotingOption', () => {
     it('updates and returns option', async () => {
       mocks.mockUpdateReturning.mockResolvedValue([{ ...baseOption, text: 'No' }]);
-      const r = await updateVotingOption('opt-1', { text: 'No' } as never);
+      const r = await updateVotingOption('opt-1', 'org-1', { text: 'No' } as never);
       expect(r?.text).toBe('No');
     });
 
     it('returns null when not found', async () => {
       mocks.mockUpdateReturning.mockResolvedValue([undefined]);
-      expect(await updateVotingOption('x', {} as never)).toBeNull();
+      expect(await updateVotingOption('x', 'org-1', {} as never)).toBeNull();
     });
 
     it('throws on error', async () => {
       mocks.mockUpdateReturning.mockRejectedValue(new Error('DB'));
-      await expect(updateVotingOption('x', {} as never)).rejects.toThrow('Failed to update voting option');
+      await expect(updateVotingOption('x', 'org-1', {} as never)).rejects.toThrow('Failed to update voting option');
     });
   });
 
   // ── deleteVotingOption ────────────────────────────────────────────
   describe('deleteVotingOption', () => {
     it('deletes and returns true', async () => {
-      expect(await deleteVotingOption('opt-1')).toBe(true);
+      expect(await deleteVotingOption('opt-1', 'org-1')).toBe(true);
     });
 
     it('throws on error', async () => {
       mocks.mockDeleteWhere.mockRejectedValue(new Error('DB'));
-      await expect(deleteVotingOption('opt-1')).rejects.toThrow('Failed to delete voting option');
+      await expect(deleteVotingOption('opt-1', 'org-1')).rejects.toThrow('Failed to delete voting option');
     });
   });
 
@@ -387,18 +387,18 @@ describe('VotingService', () => {
   describe('updateVoterEligibility', () => {
     it('updates and returns record', async () => {
       mocks.mockUpdateReturning.mockResolvedValue([{ ...baseEligibility, isEligible: false }]);
-      const r = await updateVoterEligibility('elig-1', { isEligible: false } as never);
+      const r = await updateVoterEligibility('elig-1', 'org-1', { isEligible: false } as never);
       expect(r?.isEligible).toBe(false);
     });
 
     it('returns null when not found', async () => {
       mocks.mockUpdateReturning.mockResolvedValue([undefined]);
-      expect(await updateVoterEligibility('x', {} as never)).toBeNull();
+      expect(await updateVoterEligibility('x', 'org-1', {} as never)).toBeNull();
     });
 
     it('throws on error', async () => {
       mocks.mockUpdateReturning.mockRejectedValue(new Error('DB'));
-      await expect(updateVoterEligibility('x', {} as never)).rejects.toThrow('Failed to update voter eligibility');
+      await expect(updateVoterEligibility('x', 'org-1', {} as never)).rejects.toThrow('Failed to update voter eligibility');
     });
   });
 
@@ -784,18 +784,18 @@ describe('VotingService', () => {
   describe('setProxyVoter', () => {
     it('sets proxy', async () => {
       mocks.mockUpdateReturning.mockResolvedValue([{ ...baseEligibility, delegatedTo: 'member-2' }]);
-      const r = await setProxyVoter('session-1', 'member-1', 'member-2');
+      const r = await setProxyVoter('session-1', 'member-1', 'member-2', 'org-1');
       expect(r?.delegatedTo).toBe('member-2');
     });
 
     it('throws when not eligible', async () => {
       mocks.mockEligibilityFindFirst.mockResolvedValue(null);
-      await expect(setProxyVoter('s', 'm', 'p')).rejects.toThrow('Failed to set proxy voter');
+      await expect(setProxyVoter('s', 'm', 'p', 'org-1')).rejects.toThrow('Failed to set proxy voter');
     });
 
     it('throws when cannot delegate', async () => {
       mocks.mockEligibilityFindFirst.mockResolvedValue({ ...baseEligibility, canDelegate: false });
-      await expect(setProxyVoter('s', 'm', 'p')).rejects.toThrow('Failed to set proxy voter');
+      await expect(setProxyVoter('s', 'm', 'p', 'org-1')).rejects.toThrow('Failed to set proxy voter');
     });
   });
 
@@ -803,13 +803,13 @@ describe('VotingService', () => {
   describe('removeProxyVoter', () => {
     it('removes proxy', async () => {
       mocks.mockUpdateReturning.mockResolvedValue([{ ...baseEligibility, delegatedTo: null }]);
-      const r = await removeProxyVoter('session-1', 'member-1');
+      const r = await removeProxyVoter('session-1', 'member-1', 'org-1');
       expect(r?.delegatedTo).toBeNull();
     });
 
     it('throws when not found', async () => {
       mocks.mockEligibilityFindFirst.mockResolvedValue(null);
-      await expect(removeProxyVoter('s', 'm')).rejects.toThrow('Failed to remove proxy voter');
+      await expect(removeProxyVoter('s', 'm', 'org-1')).rejects.toThrow('Failed to remove proxy voter');
     });
   });
 

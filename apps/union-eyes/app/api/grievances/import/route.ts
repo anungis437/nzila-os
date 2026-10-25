@@ -14,6 +14,10 @@ import { ErrorCode, standardErrorResponse, standardSuccessResponse } from '@/lib
 import { randomBytes, createHash } from 'crypto';
 import { and, eq, sql } from 'drizzle-orm';
 
+// ingestion_records has no organization column: a record belongs to its batch, and the batch to an organization.
+const recordInOrganization = (organizationId: string) =>
+  sql`${ingestionRecords.batchId} IN (SELECT id FROM ingestion_batches WHERE organization_id = ${organizationId})`;
+
 const grievanceTypeValues = [
   'individual', 'group', 'policy', 'contract', 'harassment',
   'discrimination', 'safety', 'seniority', 'discipline', 'termination', 'other',
@@ -310,7 +314,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
           resolvedId: duplicate.resolved_id,
           processedAt: new Date(),
         })
-        .where(eq(ingestionRecords.id, record.id));
+        .where(and(eq(ingestionRecords.id, record.id), recordInOrganization(organizationId)));
 
       continue;
     }
@@ -330,7 +334,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
           errorDetails: { issues: validated.error.issues },
           processedAt: new Date(),
         })
-        .where(eq(ingestionRecords.id, record.id));
+        .where(and(eq(ingestionRecords.id, record.id), recordInOrganization(organizationId)));
 
       await trackPilotEvent({
         userId,
@@ -424,7 +428,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
         resolvedId: created.id,
         processedAt: new Date(),
       })
-      .where(eq(ingestionRecords.id, record.id));
+      .where(and(eq(ingestionRecords.id, record.id), recordInOrganization(organizationId)));
 
     processedCount++;
     succeededCount++;
@@ -448,7 +452,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
       completedAt: new Date(),
       errorSummary: failed.map((f) => ({ rowIndex: f.rowIndex, reason: f.reason })),
     })
-    .where(eq(ingestionBatches.id, batchId));
+    .where(and(eq(ingestionBatches.id, batchId), eq(ingestionBatches.organizationId, organizationId)));
 
   await auditLog({
     eventType: AuditEventType.DATA_CREATE,

@@ -103,6 +103,7 @@ export async function GET(
           .where(
             and(
               eq(messageLog.campaignId, campaignId),
+              eq(messageLog.organizationId, campaign.organizationId),
               eq(messageLog.recipientId, recipientId),
               eq(messageLog.channelType, 'email'),
               ne(messageLog.status, 'unsubscribed'),
@@ -117,7 +118,7 @@ export async function GET(
               stats: incrementStat(campaign.stats, 'unsubscribed'),
               updatedAt: new Date(),
             })
-            .where(eq(campaigns.id, campaignId));
+            .where(and(eq(campaigns.id, campaignId), eq(campaigns.organizationId, campaign.organizationId)));
         }
       }
     }
@@ -144,7 +145,12 @@ export async function GET(
             unsubscribeReason: reason,
             updatedAt: new Date(),
           })
-          .where(eq(communicationPreferences.id, existingPreference.id));
+          .where(
+            and(
+              eq(communicationPreferences.id, existingPreference.id),
+              eq(communicationPreferences.organizationId, organizationId),
+            ),
+          );
       } else {
         await db.insert(communicationPreferences).values({
           organizationId,
@@ -169,16 +175,31 @@ export async function GET(
         },
       });
     } else {
-      await db
-        .update(communicationPreferences)
-        .set({
-          emailEnabled: false,
-          globallyUnsubscribed: true,
-          unsubscribedAt: new Date(),
-          unsubscribeReason: reason,
-          updatedAt: new Date(),
-        })
+      // The token binds only the recipient, so there is no parent row to derive one organization from. The token
+      // authorises this recipient's own preference rows; each is updated under its own organization predicate.
+      const ownPreferences = await db
+        .select({ id: communicationPreferences.id, organizationId: communicationPreferences.organizationId })
+        .from(communicationPreferences)
         .where(eq(communicationPreferences.userId, recipientId));
+
+      for (const preference of ownPreferences) {
+        await db
+          .update(communicationPreferences)
+          .set({
+            emailEnabled: false,
+            globallyUnsubscribed: true,
+            unsubscribedAt: new Date(),
+            unsubscribeReason: reason,
+            updatedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(communicationPreferences.id, preference.id),
+              eq(communicationPreferences.organizationId, preference.organizationId),
+              eq(communicationPreferences.userId, recipientId),
+            ),
+          );
+      }
     }
   });
 

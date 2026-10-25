@@ -1029,7 +1029,7 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     state: 'NOT_IMPLEMENTED',
     ownedBy: [],
     evidence: [
-      'Repo search of apps/union-eyes found no WorkAid, WSIB/WSIAT filing or Clio code (only unrelated WCB-board reference data and substring matches)',
+      'Union-side referral, consent and disclosure records exist (see UE-WORKAID-UNION-SIDE-DISCLOSURE); no counsel-side connector, transmission, acknowledgement, WSIB/WSIAT filing or Clio code exists',
       'No navigation entry, route or component presents WorkAid progress; the representative experience shows no specialist status feed',
     ],
     targetWave: 3,
@@ -1043,6 +1043,23 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'visible to the union by membership alone. No Clio record, professional note or filing validity may be ' +
       'invented. Design reference only: the WorkAid v0.3 contracts under docs/union-eyes/workaid on the ' +
       'agents/workaid-prep-20261023 branch.',
+  },
+  {
+    id: 'UE-WORKAID-UNION-SIDE-DISCLOSURE',
+    title: 'WorkAid union-side consent, referral record, document authorisation and revocation',
+    state: 'LIMITED',
+    ownedBy: ['lib/authority/store/workaid-disclosure.ts', 'app/api/workaid/consents/route.ts', 'app/api/workaid/referrals/route.ts'],
+    evidence: [
+      'db/__tests__/workaid-union-side.pglite.test.ts — consent scope, per-document authorisation, revocation, recusal and removed-representative denial, audit-fault rollback, cross-tenant isolation (PGlite on the real kernel storage; not a native or credentialed run)',
+      'Counsel reads fail closed (COUNSEL_NOT_VERIFIABLE) because no CounselAssertionVerifier is configured',
+    ],
+    targetWave: 3,
+    readinessImpact: 'non_blocking',
+    disposition: 'OPTIONAL_NATIVE_CAPABILITY',
+    notes:
+      'A union-side record only: a referral is not delivery to counsel, no counsel HTTP route or UI exists, and no consent text has been authored ' +
+      '(consent capture is refused until a legally approved wording version is recorded). Two external gates stay separate and closed: ' +
+      'counsel-side activation (a counsel-side system and its issuer allow-list) and key custody (UE-CONV-G-003).',
   },
 ] as const;
 

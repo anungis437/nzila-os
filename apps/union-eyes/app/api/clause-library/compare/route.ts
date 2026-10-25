@@ -14,7 +14,7 @@
 import { withApi, ApiError } from '@/lib/api/framework';
 import { sharedClauseLibrary, clauseLibraryTags } from '@/db/schema/domains/agreements/shared-library';
 import { organizations } from '@/db/schema-organizations';
-import { eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { canReadSharedClause } from '@/lib/clause-library/sharing-authority';
@@ -103,12 +103,19 @@ export const POST = withApi(
         tags: allTags.filter((t) => t.clauseId === r.id).map((t) => ({ tagName: t.tagName })),
       }));
 
-      // Increment comparison count only on the authorized subset actually returned. The counter lives on rows other
-      // organizations own, so it is written under the system role and audited to the comparing organization.
-      await tx
-        .update(sharedClauseLibrary)
-        .set({ comparisonCount: sql`${sharedClauseLibrary.comparisonCount} + 1` })
-        .where(inArray(sharedClauseLibrary.id, authorizedIds));
+      // The counter lives on rows other organizations own, so it is written under the system role. Each increment is
+      // bound to the owning organization the read authorization was evaluated against, and is audited to the comparer.
+      for (const authorized of authorizedRows) {
+        await tx
+          .update(sharedClauseLibrary)
+          .set({ comparisonCount: sql`${sharedClauseLibrary.comparisonCount} + 1` })
+          .where(
+            and(
+              eq(sharedClauseLibrary.id, authorized.id),
+              eq(sharedClauseLibrary.sourceOrganizationId, authorized.sourceOrganizationId),
+            ),
+          );
+      }
       await persistAtomicAudit(tx as RLSTx, {
         organizationId,
         userId,

@@ -26,7 +26,7 @@ export const POST = withApi(
   },
   async ({ body, organizationId, userId }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
-    const result = await resolveException(body.exceptionId, {
+    const result = await resolveException(body.exceptionId, organizationId, {
       status: body.resolution,
       resolvedBy: userId ?? 'system',
       notes: body.notes,

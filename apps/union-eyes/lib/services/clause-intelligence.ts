@@ -204,6 +204,7 @@ export async function findRelevantClauses(
 export async function linkClauseToGrievance(
   grievanceId: string,
   clauseId: string,
+  organizationId: string,
   exec: RLSTx = db,
 ) {
   const [clause] = await exec
@@ -213,7 +214,7 @@ export async function linkClauseToGrievance(
       articleNumber: cbaClause.articleNumber,
     })
     .from(cbaClause)
-    .where(eq(cbaClause.id, clauseId));
+    .where(and(eq(cbaClause.id, clauseId), eq(cbaClause.organizationId, organizationId)));
 
   if (!clause) throw new Error("Clause not found.");
 
@@ -229,7 +230,7 @@ export async function linkClauseToGrievance(
       cbaArticle: clause.articleNumber ?? clause.clauseNumber,
       cbaSection: clause.clauseNumber,
     })
-    .where(eq(grievances.id, grievanceId));
+    .where(and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId)));
 
   return { grievanceId, clauseId, linked: true };
 }

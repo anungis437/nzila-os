@@ -14,7 +14,7 @@ import { AuthorityStoreError, bindSessionActor, sessionActor, type SqlExecutor }
 import { loadApprovalRequestFacts, loadAuthorityFacts, loadHolderMandates, loadRelationships, type MembershipSource } from './facts'
 import { actionForClass, classifyDocument, DEFAULT_DOCUMENT_CLASS_POLICY, type DocumentClassPolicy } from '../document-class'
 import { evaluateCounselCapacity, type CounselEngagement } from '../counsel-boundary'
-import { createCanonicalResourceLoader, loadDocument, type ResourceLoader } from './resources'
+import { createCanonicalResourceLoader, loadCase, loadDocument, type ResourceLoader } from './resources'
 
 export interface EnforcementDeps {
   memberships: MembershipSource
@@ -65,6 +65,11 @@ export async function requireCounselSession(
   if (ok !== true) throw new AuthorityStoreError('DENIED', 'COUNSEL_NOT_VERIFIED: the session principal is not verified counsel for this matter')
   const now = (deps.now ?? (() => new Date()))()
   const union = (await deps.memberships(exec, input.organizationId, [userId])).filter((m) => m.userId === userId && m.organizationId === input.organizationId)
+  // An engagement is an institutional appointment, not a membership: a suspended, deactivated or removed member (or an
+  // ambiguous membership) cannot keep acting as counsel under an engagement that is still live.
+  if (union.length > 1 || union.some((m) => m.status !== 'active')) {
+    throw new AuthorityStoreError('DENIED', 'COUNSEL_MEMBERSHIP_NOT_ACTIVE: a union member acts as counsel only while an active member of this organization')
+  }
   const matter = (
     await exec.query<{ member_user_id: string; referred_by: string; case_id: string }>(
       `SELECT member_user_id, referred_by, case_id::text AS case_id FROM ue_authority_workaid_matters WHERE organization_id = $1 AND id = $2`,
@@ -142,6 +147,9 @@ export async function enforceAuthority(
         // A WorkAid referral is authorised by the principal's relationship to the UNDERLYING CASE.
         if (loaded.resource.kind === 'workaid_matter') {
           related.push(...(await loadRelationships(exec, req.organizationId, req.principalUserId, 'case', loaded.resource.caseId)))
+          // The member's own creator relationship is derived from the case row; it authorises their self-referral.
+          const underlying = await loadCase(exec, { ...req, action: 'case:read', resource: { type: 'case', id: loaded.resource.caseId, organizationId: req.organizationId } }, now)
+          related.push(...(underlying?.relationships ?? []))
         }
         if (related.length) {
           // Only relationships of THIS principal on the case or resource at hand are meaningful to the kernel.

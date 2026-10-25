@@ -11,7 +11,7 @@ import { assertAllowed, enforceAuthority, requireCounselSession, type Enforcemen
 import { AuthorityStoreError, bindSessionActor, sessionActor, type SqlExecutor } from './executor'
 import { loadAuthorityFacts, loadRelationships } from './facts'
 import { requirePrincipals, requireUuids } from './mutations'
-import { decimalToMinor, financeSourceReadiness } from './resources'
+import { decimalToMinor, financeSourceReadiness, loadCase } from './resources'
 
 type Row = Record<string, unknown>
 
@@ -182,10 +182,14 @@ export async function referToWorkAid(
   const resource = { type: 'workaid_matter' as const, id: matterId, organizationId: i.organizationId }
   const facts = await loadAuthorityFacts(exec, deps.memberships, { organizationId: i.organizationId, principalUserId: i.referrerUserId, authenticated: true, resource, now })
   const related = await loadRelationships(exec, i.organizationId, i.referrerUserId, 'case', i.caseId)
+  // The member's own creator relationship is derived from the case row, not stored; it authorises self-referral.
+  const caseRef = { type: 'case' as const, id: i.caseId, organizationId: i.organizationId }
+  const loadedCase = await loadCase(exec, { principalUserId: i.referrerUserId, organizationId: i.organizationId, action: 'case:read', resource: caseRef }, now)
+  const derived = (loadedCase?.relationships ?? []).filter((r) => r.principalUserId === i.referrerUserId)
   const provisional: WorkAidMatterFacts = { kind: 'workaid_matter', id: matterId, organizationId: i.organizationId, memberUserId: i.memberUserId, caseId: i.caseId, counselControlled: true }
   const decision = decide(
     { principalUserId: i.referrerUserId, organizationId: i.organizationId, action: 'workaid:refer', resource, categories: i.categories },
-    { ...facts, relationships: [...facts.relationships, ...related] },
+    { ...facts, relationships: [...facts.relationships, ...related, ...derived] },
     provisional,
     now,
   )

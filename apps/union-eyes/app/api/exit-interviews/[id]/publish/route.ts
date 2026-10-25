@@ -131,7 +131,7 @@ export const POST = withApi(
             continuityRiskFlags: expertiseProfile.undocumentedWorkflows,
             updatedAt: new Date(),
           })
-          .where(eq(exitInterviews.id, params.id));
+          .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!)));
 
         // Semantic index if governance permits
         const shouldIndex = isIndexingAllowed(

@@ -153,33 +153,6 @@ export const insightRecommendations = pgTable('insight_recommendations', {
   createdIdx: index('insight_recommendations_created_idx').on(table.createdAt),
 }));
 
-/**
- * Comparative Analysis Table
- * Cross-organization comparisons and benchmarking
- */
-export const comparativeAnalyses = pgTable('comparative_analyses', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
-  analysisName: text('analysis_name').notNull(),
-  comparisonType: text('comparison_type').notNull(), // 'peer_comparison', 'industry_benchmark', 'historical_comparison'
-  organizationIds: jsonb('organization_ids'), // Array of org IDs being compared (for peer comparison)
-  metrics: jsonb('metrics').notNull(), // Array of metrics being compared
-  timeRange: jsonb('time_range').notNull(),
-  results: jsonb('results').notNull(), // Comparison results with percentiles, rankings
-  benchmarks: jsonb('benchmarks'), // Industry or peer benchmarks
-  organizationRanking: jsonb('organization_ranking'), // How this org ranks
-  gaps: jsonb('gaps'), // Areas where org is underperforming
-  strengths: jsonb('strengths'), // Areas where org is outperforming
-  recommendations: jsonb('recommendations'),
-  visualizationData: jsonb('visualization_data'),
-  isPublic: boolean('is_public').default(false), // Allow sharing with other orgs
-  createdBy: varchar('created_by', { length: 255 }).notNull().references(() => users.userId),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-}, (table) => ({
-  orgIdx: index('comparative_analyses_org_idx').on(table.organizationId),
-  createdIdx: index('comparative_analyses_created_idx').on(table.createdAt),
-}));
-
 // Relations
 export const analyticsMetricsRelations = relations(analyticsMetrics, ({ one }) => ({
   organization: one(organizations, {
@@ -224,17 +197,6 @@ export const insightRecommendationsRelations = relations(insightRecommendations,
   }),
   dismissedByUser: one(users, {
     fields: [insightRecommendations.dismissedBy],
-    references: [users.userId],
-  }),
-}));
-
-export const comparativeAnalysesRelations = relations(comparativeAnalyses, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [comparativeAnalyses.organizationId],
-    references: [organizations.id],
-  }),
-  creator: one(users, {
-    fields: [comparativeAnalyses.createdBy],
     references: [users.userId],
   }),
 }));

@@ -225,13 +225,13 @@ describe('education-service', () => {
     it('updates and returns course', async () => {
       const updated = { ...COURSE, courseName: 'Updated' };
       mocks.mockUpdate.mockReturnValue(chain([updated]));
-      const result = await updateCourse('c1', { courseName: 'Updated' } as never);
+      const result = await updateCourse('c1', 'org-1', { courseName: 'Updated' } as never);
       expect(result).toEqual(updated);
     });
 
     it('returns null when no row matched', async () => {
       mocks.mockUpdate.mockReturnValue(chain([undefined]));
-      const result = await updateCourse('missing', {} as never);
+      const result = await updateCourse('missing', 'org-1', {} as never);
       expect(result).toBeNull();
     });
   });
@@ -242,13 +242,13 @@ describe('education-service', () => {
   describe('deleteCourse', () => {
     it('deletes and returns true', async () => {
       mocks.mockDelete.mockReturnValue(chain());
-      const result = await deleteCourse('c1');
+      const result = await deleteCourse('c1', 'org-1');
       expect(result).toBe(true);
     });
 
     it('throws on error', async () => {
       mocks.mockDelete.mockImplementation(() => { throw new Error('fk'); });
-      await expect(deleteCourse('c1')).rejects.toThrow('Failed to delete course');
+      await expect(deleteCourse('c1', 'org-1')).rejects.toThrow('Failed to delete course');
     });
   });
 
@@ -267,13 +267,13 @@ describe('education-service', () => {
     it('updates and returns session', async () => {
       const updated = { ...SESSION, deliveryMethod: 'in_person' };
       mocks.mockUpdate.mockReturnValue(chain([updated]));
-      const result = await updateSession('s1', { deliveryMethod: 'in_person' } as never);
+      const result = await updateSession('s1', 'org-1', { deliveryMethod: 'in_person' } as never);
       expect(result).toEqual(updated);
     });
 
     it('returns null when not found', async () => {
       mocks.mockUpdate.mockReturnValue(chain([undefined]));
-      const result = await updateSession('missing', {} as never);
+      const result = await updateSession('missing', 'org-1', {} as never);
       expect(result).toBeNull();
     });
   });

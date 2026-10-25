@@ -70,6 +70,14 @@ describe.skipIf(!URL)('conversation assignment on the combined deployed schema, 
     await seedMembership(d, U.other, ORG_A, 'steward')
     await seedMembership(d, U.member, ORG_A, 'member')
     await seedMembership(d, U.foreign, ORG_B, 'steward')
+    // Outside Canonical V2 a staff actor's live membership is read per request from the compatibility projection.
+    for (const [user, org, role] of [[U.admin, ORG_A, 'admin'], [U.triager, ORG_A, 'steward'], [U.steward, ORG_A, 'steward'], [U.other, ORG_A, 'steward'], [U.member, ORG_A, 'member'], [U.foreign, ORG_B, 'steward']]) {
+      await admin.query(
+        `INSERT INTO organization_members (id, created_at, updated_at, user_id, role, status, is_primary, organization_id)
+         VALUES (gen_random_uuid(), now(), now(), $1, $2, 'active', false, $3)`,
+        [user, role, org],
+      )
+    }
     runtime = new pg.Client({ connectionString: URL })
     await runtime.connect()
     await runtime.query('SET ROLE union_eyes_runtime')

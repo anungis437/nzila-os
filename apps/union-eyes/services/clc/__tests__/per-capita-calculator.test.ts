@@ -14,7 +14,6 @@ const h = vi.hoisted(() => {
     return chain;
   };
   const execute = vi.fn();
-  const txSentinel = { tx: true };
   const db = {
     select: () => makeChain(),
     insert: () => makeChain(),
@@ -22,6 +21,8 @@ const h = vi.hoisted(() => {
     delete: () => makeChain(),
     execute,
   };
+  // The system-context transaction is the same chain-capable stand-in: statements must run on it, not on the pool.
+  const txSentinel = db;
   const withSystemContext = vi.fn(async (fn: (tx?: unknown) => unknown) => fn(txSentinel));
   return { queue, db, execute, withSystemContext, persistAtomicAudit: vi.fn(), txSentinel };
 });
@@ -263,20 +264,27 @@ describe('getOverdueRemittances', () => {
 
 describe('markOverdueRemittances', () => {
   it('returns the number of rows marked overdue', async () => {
-    pushSel([
-      { id: 'r1', fromOrganizationId: 'o1' },
-      { id: 'r2', fromOrganizationId: 'o1' },
-      { id: 'r3', fromOrganizationId: 'o2' },
-    ]);
+    pushSel([{ organizationId: 'o1' }, { organizationId: 'o1' }, { organizationId: 'o2' }]); // candidates
+    pushSel([{ id: 'r1' }, { id: 'r2' }]); // o1 update
+    pushSel([{ id: 'r3' }]); // o2 update
     expect(await calc.markOverdueRemittances()).toBe(3);
   });
 
+  it('updates each remitting organization with an organization predicate in the statement', async () => {
+    const { eq } = await import('drizzle-orm');
+    vi.mocked(eq).mockClear();
+    pushSel([{ organizationId: 'o1' }, { organizationId: 'o2' }]);
+    pushSel([{ id: 'r1' }]);
+    pushSel([{ id: 'r3' }]);
+    await calc.markOverdueRemittances();
+    const orgBindings = vi.mocked(eq).mock.calls.filter((c) => (c[0] as { __col?: string })?.__col === 'organizationId').map((c) => c[1]);
+    expect(orgBindings).toEqual(['o1', 'o2']);
+  });
+
   it('audits once per remitting organization on the same transaction, listing that organization\'s rows', async () => {
-    pushSel([
-      { id: 'r1', fromOrganizationId: 'o1' },
-      { id: 'r2', fromOrganizationId: 'o1' },
-      { id: 'r3', fromOrganizationId: 'o2' },
-    ]);
+    pushSel([{ organizationId: 'o1' }, { organizationId: 'o2' }]);
+    pushSel([{ id: 'r1' }, { id: 'r2' }]);
+    pushSel([{ id: 'r3' }]);
     await calc.markOverdueRemittances();
 
     expect(h.persistAtomicAudit).toHaveBeenCalledTimes(2);
@@ -296,7 +304,8 @@ describe('markOverdueRemittances', () => {
   });
 
   it('fails (rolling back the update) when an audit cannot be written', async () => {
-    pushSel([{ id: 'r1', fromOrganizationId: 'o1' }]);
+    pushSel([{ organizationId: 'o1' }]);
+    pushSel([{ id: 'r1' }]);
     h.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
 
     await expect(calc.markOverdueRemittances()).rejects.toThrow('audit down');
@@ -309,7 +318,8 @@ describe('markOverdueRemittances', () => {
   });
 
   it('PR #752 round 33 correction: the cross-org UPDATE executes inside withSystemContext', async () => {
-    pushSel([{ id: 'r1', fromOrganizationId: 'o1' }]);
+    pushSel([{ organizationId: 'o1' }]);
+    pushSel([{ id: 'r1' }]);
     await calc.markOverdueRemittances();
     expect(h.withSystemContext).toHaveBeenCalledTimes(1);
   });

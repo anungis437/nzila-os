@@ -10,7 +10,7 @@
  * caller's organization); `[subscriberId]` is the subscriber row id, and
  * must belong to that same list — round 54/55 route-shape fix.
  */
-import { and, eq, ne } from 'drizzle-orm';
+import { and, eq, ne, sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { newsletterDistributionLists, newsletterListSubscribers } from '@/db/schema';
@@ -45,6 +45,7 @@ export const DELETE = withApi(
         .where(and(
           eq(newsletterListSubscribers.id, subscriberId),
           eq(newsletterListSubscribers.listId, listId),
+          sql`${newsletterListSubscribers.listId} IN (SELECT id FROM newsletter_distribution_lists WHERE id = ${listId} AND organization_id = ${organizationId})`,
           ne(newsletterListSubscribers.status, 'unsubscribed'),
         ))
         .returning();

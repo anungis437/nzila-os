@@ -172,6 +172,20 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-final-convergence",
         "note": "FORCE RLS for document_intakes, document_transcript_revisions and document_transcript_publications created by platform 0022. Not yet applied to any clone or live database."
+      },
+      {
+        "tag": "0024_message_thread_lifecycle_and_retention_rls_closure",
+        "sha256": "24d668fa5176cabdb67d342fb0b07cb207d3e54b7df59f153ac0f266b04de36d",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-final-convergence",
+        "note": "FORCE RLS for the message lifecycle, retention-policy and read-marker relations created by platform 0025. Not yet applied to any clone or live database."
+      },
+      {
+        "tag": "0026_workaid_union_side_rls_closure",
+        "sha256": "04c34d9757bbe07883666082f31e82a50583558fa38d7b4c65c33086fe368b1b",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-final-convergence",
+        "note": "FORCE RLS for the union-side WorkAid relations created by platform 0027. Not yet applied to any clone or live database."
       }
     ],
     "platform": [
@@ -251,6 +265,20 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-final-convergence",
         "note": "Provider-reported acknowledgment time (immutable once set) and local status-observation time on signature documents. Not yet applied to any clone or live database."
+      },
+      {
+        "tag": "0025_message_thread_lifecycle_and_retention",
+        "sha256": "57cac000beedd6841095f5975a01a3c0ad300799b9794f7c4893e7e4a56f6b1c",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-final-convergence",
+        "note": "Message-thread lifecycle (close, archive, legal hold), policy-parameterised retention and read markers. Not yet applied to any clone or live database."
+      },
+      {
+        "tag": "0027_workaid_union_side_disclosure",
+        "sha256": "9c124c6cb7f6f627566d333ed194e15c619e95b1f1b67f1639a035399859e4a5",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-final-convergence",
+        "note": "Union-side WorkAid consent wording, consent grants, document authorisations, shares and counsel-access records. Not yet applied to any clone or live database."
       }
     ]
   }

@@ -90,7 +90,7 @@ function tokenResponse(over: Record<string, unknown> = {}) {
 }
 
 const futureConn = {
-  id: 'c1', provider: 'microsoft', refreshToken: 'enc-rt',
+  id: 'c1', organizationId: 'org1', provider: 'microsoft', refreshToken: 'enc-rt',
   accessToken: 'enc-at', tokenExpiresAt: new Date(Date.now() + 3_600_000),
   calendarMappings: {},
 };
@@ -145,6 +145,20 @@ describe('listMicrosoftCalendars', () => {
 });
 
 describe('importMicrosoftEvents', () => {
+  it('refuses to import into a calendar of another organization', async () => {
+    h.graphGet = { value: [{ id: 'ev-x', subject: 'X', start: { dateTime: '2024-02-01T10:00:00', timeZone: 'UTC' }, end: { dateTime: '2024-02-01T11:00:00', timeZone: 'UTC' } }] };
+    h.readQueue = [[futureConn], [{ id: 'localcal', organizationId: 'org-other' }]];
+    await expect(importMicrosoftEvents('c1', 'localcal', 'ms-cal')).rejects.toThrow(/Local calendar not found/);
+  });
+
+  it('scopes event updates by the connection organization', async () => {
+    const { eq } = await import('drizzle-orm');
+    vi.mocked(eq).mockClear();
+    h.graphGet = { value: [{ id: 'ev-existing', subject: 'E', start: { dateTime: '2024-02-01T10:00:00', timeZone: 'UTC' }, end: { dateTime: '2024-02-01T11:00:00', timeZone: 'UTC' } }] };
+    h.readQueue = [[futureConn], [{ id: 'localcal', organizationId: 'org1' }], [{ id: 'evdb-existing' }], [futureConn]];
+    await importMicrosoftEvents('c1', 'localcal', 'ms-cal');
+    expect(vi.mocked(eq).mock.calls.some((c) => c[0] === 'organizationId' && c[1] === 'org1')).toBe(true);
+  });
   it('imports new, updates existing, handles deleted', async () => {
     const events = [
       { '@removed': true, id: 'gone' },
@@ -179,10 +193,16 @@ describe('importMicrosoftEvents', () => {
 });
 
 describe('exportEventToMicrosoft', () => {
+  it('refuses to export an event of another organization', async () => {
+    graphApi.post.mockClear();
+    h.readQueue = [[futureConn], [{ id: 'local9', organizationId: 'org-other', title: 'T', startTime: new Date(), endTime: new Date() }]];
+    await expect(exportEventToMicrosoft('c1', 'local9', 'ms-cal')).rejects.toThrow(/Local event not found/);
+    expect(graphApi.post).not.toHaveBeenCalled();
+  });
   it('patches existing external event', async () => {
     h.readQueue = [
       [futureConn], // client
-      [{ id: 'local1', title: 'T', externalEventId: 'ext-1', startTime: new Date(), endTime: new Date(), location: 'Room', recurrenceRule: 'FREQ=WEEKLY;INTERVAL=2;COUNT=5;BYDAY=MO,TU;BYMONTHDAY=3', meetingUrl: 'https://m' }],
+      [{ id: 'local1', organizationId: 'org1', title: 'T', externalEventId: 'ext-1', startTime: new Date(), endTime: new Date(), location: 'Room', recurrenceRule: 'FREQ=WEEKLY;INTERVAL=2;COUNT=5;BYDAY=MO,TU;BYMONTHDAY=3', meetingUrl: 'https://m' }],
     ];
     const result = await exportEventToMicrosoft('c1', 'local1', 'ms-cal');
     expect(result).toEqual({ id: 'ms-patched' });
@@ -191,7 +211,7 @@ describe('exportEventToMicrosoft', () => {
   it('posts new external event and stores id', async () => {
     h.readQueue = [
       [futureConn],
-      [{ id: 'local2', title: 'T2', startTime: new Date(), endTime: new Date() }],
+      [{ id: 'local2', organizationId: 'org1', title: 'T2', startTime: new Date(), endTime: new Date() }],
     ];
     const result = await exportEventToMicrosoft('c1', 'local2', 'ms-cal');
     expect(result).toEqual({ id: 'ms-new' });

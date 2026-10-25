@@ -223,7 +223,7 @@ export class IndustrialAllianceAdapter extends BaseIntegration {
           };
 
           if (existing.length > 0) {
-            await db.update(externalInsurancePolicies).set(policyData).where(eq(externalInsurancePolicies.id, existing[0].id));
+            await db.update(externalInsurancePolicies).set(policyData).where(and(eq(externalInsurancePolicies.id, existing[0].id), eq(externalInsurancePolicies.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalInsurancePolicies).values(policyData);
@@ -281,7 +281,7 @@ export class IndustrialAllianceAdapter extends BaseIntegration {
           };
 
           if (existing.length > 0) {
-            await db.update(externalInsuranceClaims).set(claimData).where(eq(externalInsuranceClaims.id, existing[0].id));
+            await db.update(externalInsuranceClaims).set(claimData).where(and(eq(externalInsuranceClaims.id, existing[0].id), eq(externalInsuranceClaims.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalInsuranceClaims).values(claimData);
@@ -337,7 +337,7 @@ export class IndustrialAllianceAdapter extends BaseIntegration {
           };
 
           if (existing.length > 0) {
-            await db.update(externalInsuranceBeneficiaries).set(beneficiaryData).where(eq(externalInsuranceBeneficiaries.id, existing[0].id));
+            await db.update(externalInsuranceBeneficiaries).set(beneficiaryData).where(and(eq(externalInsuranceBeneficiaries.id, existing[0].id), eq(externalInsuranceBeneficiaries.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalInsuranceBeneficiaries).values(beneficiaryData);
@@ -390,7 +390,7 @@ export class IndustrialAllianceAdapter extends BaseIntegration {
           };
 
           if (existing.length > 0) {
-            await db.update(externalBenefitUtilization).set(utilizationData).where(eq(externalBenefitUtilization.id, existing[0].id));
+            await db.update(externalBenefitUtilization).set(utilizationData).where(and(eq(externalBenefitUtilization.id, existing[0].id), eq(externalBenefitUtilization.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalBenefitUtilization).values(utilizationData);

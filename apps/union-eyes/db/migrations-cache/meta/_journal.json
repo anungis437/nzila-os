@@ -162,6 +162,20 @@
       "when": 1790190000000,
       "tag": "0022_document_intake_and_transcription_rls_closure",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1790200000000,
+      "tag": "0024_message_thread_lifecycle_and_retention_rls_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1790210000000,
+      "tag": "0026_workaid_union_side_rls_closure",
+      "breakpoints": true
     }
   ]
 }

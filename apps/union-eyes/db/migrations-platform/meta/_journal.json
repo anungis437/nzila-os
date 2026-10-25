@@ -190,6 +190,20 @@
       "when": 1758820000000,
       "tag": "0023_signature_provider_acknowledgment",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1758830000000,
+      "tag": "0025_message_thread_lifecycle_and_retention",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1758840000000,
+      "tag": "0027_workaid_union_side_disclosure",
+      "breakpoints": true
     }
   ]
 }

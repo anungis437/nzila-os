@@ -125,6 +125,7 @@ export async function listMeetings(
 
 export async function updateMeeting(
   meetingId: string,
+  organizationId: string,
   data: Partial<NewCommitteeMeeting> & { updatedBy?: string }
 ) {
   // Minutes and their approval have their own operations; a generic update cannot rewrite them.
@@ -133,7 +134,7 @@ export async function updateMeeting(
     const [updated] = await tx
       .update(committeeMeetings)
       .set({ ...changes, updatedAt: sql`now()` })
-      .where(eq(committeeMeetings.id, meetingId))
+      .where(and(eq(committeeMeetings.id, meetingId), eq(committeeMeetings.organizationId, organizationId)))
       .returning();
     if (!updated) return null;
     await persistAtomicAudit(tx, {
@@ -150,6 +151,7 @@ export async function updateMeeting(
 
 export async function recordMinutes(
   meetingId: string,
+  organizationId: string,
   minutes: string,
   updatedBy: string
 ) {
@@ -159,7 +161,7 @@ export async function recordMinutes(
     const [updated] = await tx
       .update(committeeMeetings)
       .set({ minutes, status: 'completed', updatedBy, updatedAt: sql`now()` })
-      .where(and(eq(committeeMeetings.id, meetingId), isNull(committeeMeetings.minutesApprovedAt)))
+      .where(and(eq(committeeMeetings.id, meetingId), isNull(committeeMeetings.minutesApprovedAt), eq(committeeMeetings.organizationId, organizationId)))
       .returning();
     if (!updated) return null;
     await persistAtomicAudit(tx, {
@@ -176,6 +178,7 @@ export async function recordMinutes(
 
 export async function approveMinutes(
   meetingId: string,
+  organizationId: string,
   approvedBy: string
 ) {
   return withRLSContext(async (tx) => {
@@ -187,7 +190,7 @@ export async function approveMinutes(
         updatedBy: approvedBy,
         updatedAt: sql`now()`,
       })
-      .where(and(eq(committeeMeetings.id, meetingId), isNull(committeeMeetings.minutesApprovedAt), isNotNull(committeeMeetings.minutes)))
+      .where(and(eq(committeeMeetings.id, meetingId), isNull(committeeMeetings.minutesApprovedAt), isNotNull(committeeMeetings.minutes), eq(committeeMeetings.organizationId, organizationId)))
       .returning();
     if (!updated) return null;
     await persistAtomicAudit(tx, {
@@ -208,6 +211,7 @@ export async function approveMinutes(
 
 export async function recordAttendance(
   meetingId: string,
+  organizationId: string,
   attendees: Array<{
     memberId: string;
     attended: boolean;
@@ -226,7 +230,19 @@ export async function recordAttendance(
         .where(and(eq(committeeMeetingAttendees.meetingId, meetingId), eq(committeeMeetingAttendees.memberId, a.memberId)));
 
       if (existing.length > 0) {
-        await tx.update(committeeMeetingAttendees).set(a).where(eq(committeeMeetingAttendees.id, existing[0].id));
+        // Attendee rows carry no organization of their own: ownership is proven through the meeting's organization in the statement.
+        await tx
+          .update(committeeMeetingAttendees)
+          .set(a)
+          .where(
+            and(
+              eq(committeeMeetingAttendees.id, existing[0].id),
+              inArray(
+                committeeMeetingAttendees.meetingId,
+                tx.select({ id: committeeMeetings.id }).from(committeeMeetings).where(and(eq(committeeMeetings.id, meetingId), eq(committeeMeetings.organizationId, organizationId)))
+              )
+            )
+          );
       } else {
         await tx.insert(committeeMeetingAttendees).values({ meetingId, ...a });
       }
@@ -236,7 +252,7 @@ export async function recordAttendance(
     const [meeting] = await tx
       .update(committeeMeetings)
       .set({ attendeeCount: attendedCount, updatedAt: sql`now()` })
-      .where(eq(committeeMeetings.id, meetingId))
+      .where(and(eq(committeeMeetings.id, meetingId), eq(committeeMeetings.organizationId, organizationId)))
       .returning({ organizationId: committeeMeetings.organizationId });
     if (!meeting) throw ApiError.notFound('Meeting');
 
@@ -310,6 +326,7 @@ export async function listActionItems(
 
 export async function updateActionItem(
   itemId: string,
+  organizationId: string,
   data: Partial<NewCommitteeActionItem> & { updatedBy?: string }
 ) {
   const { organizationId: _org, committeeId: _committee, ...changes } = data;
@@ -325,7 +342,7 @@ export async function updateActionItem(
     const [updated] = await tx
       .update(committeeActionItems)
       .set(updateData)
-      .where(eq(committeeActionItems.id, itemId))
+      .where(and(eq(committeeActionItems.id, itemId), eq(committeeActionItems.organizationId, organizationId)))
       .returning();
     if (!updated) return null;
     await persistAtomicAudit(tx, {
@@ -343,6 +360,7 @@ export async function updateActionItem(
 export async function carryForwardActionItems(
   fromMeetingId: string,
   toMeetingId: string,
+  organizationId: string,
   userId: string
 ) {
   return withRLSContext(async (tx) => {
@@ -352,6 +370,7 @@ export async function carryForwardActionItems(
       .where(
         and(
           eq(committeeActionItems.meetingId, fromMeetingId),
+          eq(committeeActionItems.organizationId, organizationId),
           sql`${committeeActionItems.status} IN ('pending', 'in_progress')`
         )
       );
@@ -380,7 +399,7 @@ export async function carryForwardActionItems(
       await tx
         .update(committeeActionItems)
         .set({ status: 'deferred', updatedBy: userId, updatedAt: sql`now()` })
-        .where(eq(committeeActionItems.id, item.id));
+        .where(and(eq(committeeActionItems.id, item.id), eq(committeeActionItems.organizationId, organizationId)));
     }
 
     if (carried.length > 0) {
@@ -437,11 +456,11 @@ export async function listCommitteeDocuments(
     .orderBy(desc(committeeDocuments.createdAt));
 }
 
-export async function removeDocument(documentId: string, removedBy?: string) {
+export async function removeDocument(documentId: string, organizationId: string, removedBy?: string) {
   await withRLSContext(async (tx) => {
     const [removed] = await tx
       .delete(committeeDocuments)
-      .where(eq(committeeDocuments.id, documentId))
+      .where(and(eq(committeeDocuments.id, documentId), eq(committeeDocuments.organizationId, organizationId)))
       .returning();
     if (!removed) return;
     await persistAtomicAudit(tx, {
