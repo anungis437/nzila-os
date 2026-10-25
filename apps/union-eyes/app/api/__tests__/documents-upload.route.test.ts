@@ -212,6 +212,61 @@ describe('documents/upload route', () => {
     expect(response.status).toBe(400);
   });
 
+  it('stores canonical intake without a document row or a storage url', async () => {
+    const { POST } = await loadRoute();
+    m.putBlob.mockResolvedValueOnce({
+      url: 'https://blob.test/secret',
+      pathname: 'documents/org_1/note.pdf',
+      malwareScan: { status: 'clean' },
+    });
+    const file = new File([new Uint8Array([1, 2, 3])], 'note.pdf', { type: 'application/pdf' });
+    const form = new FormData();
+    form.set('file', file);
+    form.set('organizationId', 'org_1');
+    form.set('canonicalIntake', '1');
+
+    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), {
+      userId: 'u1',
+      organizationId: 'org_1',
+    });
+    const body = await response.json();
+    expect(response.status).toBe(201);
+    expect(body).toEqual({
+      blobPath: 'documents/org_1/note.pdf',
+      checksum: expect.any(String),
+      size: 3,
+      mimeType: 'application/pdf',
+      filename: 'note.pdf',
+    });
+    expect(JSON.stringify(body)).not.toContain('https://blob.test/secret');
+    expect(m.insertDocument).not.toHaveBeenCalled();
+    expect(m.appendMandatoryAudit).not.toHaveBeenCalled();
+  });
+
+  it('discards only an organization-owned blob path and does not require a file', async () => {
+    const { POST } = await loadRoute();
+    const owned = new FormData();
+    owned.set('organizationId', 'org_1');
+    owned.set('discardBlobPath', 'documents/org_1/note.pdf');
+    const discarded = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: owned }), {
+      userId: 'u1',
+      organizationId: 'org_1',
+    });
+    expect(discarded.status).toBe(204);
+    expect(m.deleteBlob).toHaveBeenCalledWith('documents/org_1/note.pdf');
+
+    const foreign = new FormData();
+    foreign.set('organizationId', 'org_1');
+    foreign.set('discardBlobPath', 'documents/org_2/note.pdf');
+    const rejected = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: foreign }), {
+      userId: 'u1',
+      organizationId: 'org_1',
+    });
+    expect(rejected.status).toBe(400);
+    expect(m.deleteBlob).toHaveBeenCalledTimes(1);
+    expect(m.insertDocument).not.toHaveBeenCalled();
+  });
+
   it('rejects disallowed MIME types', async () => {
     const { POST } = await loadRoute();
     const file = new File([new Uint8Array([1, 2, 3])], 'script.exe', { type: 'application/x-msdownload' });

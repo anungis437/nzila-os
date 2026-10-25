@@ -18,6 +18,7 @@ import type { RLSTx } from "@/lib/db/with-rls-context";
 import { withOrgOwnedContext } from "@/lib/db/org-owned-context";
 import { logger } from "@/lib/logger";
 import { isMalwareScanError } from "@/lib/security/clamav";
+import { isDiscardableBlobPath } from "@/lib/documents/ocr-intake";
 
 const ALLOWED_MIME_TYPES_LIST = [
   'application/pdf',
@@ -145,6 +146,18 @@ export const POST = withRoleAuth('member', async (request, context) => {
     const category = formData.get("category") as string | null;
     const isConfidential = formData.get("isConfidential") === "true";
     const accessLevel = (formData.get("accessLevel") as string) || "standard";
+    const discardBlobPath = formData.get('discardBlobPath');
+
+    if (typeof discardBlobPath === 'string' && discardBlobPath.length > 0) {
+      if (!organizationId || !organizationIdFromForm || organizationIdFromForm !== organizationId) {
+        return standardErrorResponse(ErrorCode.FORBIDDEN, 'Forbidden');
+      }
+      if (!isDiscardableBlobPath(discardBlobPath, organizationId)) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Blob path is not owned by this organization');
+      }
+      await deleteBlob(discardBlobPath);
+      return new NextResponse(null, { status: 204 });
+    }
 
     // Validation
     if (!file) {
@@ -214,6 +227,8 @@ export const POST = withRoleAuth('member', async (request, context) => {
     );
     }
 
+    const canonicalIntake = formData.get('canonicalIntake') === '1';
+
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
       logApiAuditEvent({
@@ -267,6 +282,40 @@ export const POST = withRoleAuth('member', async (request, context) => {
         addRandomSuffix: true,
       }
     );
+
+    if (canonicalIntake) {
+      if (!isDiscardableBlobPath(blob.pathname, organizationId)) {
+        await deleteBlob(blob.url).catch((cleanupError) =>
+          logger.warn('Rejected intake blob cleanup failed', { error: String(cleanupError) }),
+        );
+        return standardErrorResponse(
+          ErrorCode.EXTERNAL_SERVICE_ERROR,
+          'Stored object is outside the organization prefix',
+        );
+      }
+      logApiAuditEvent({
+        timestamp: new Date().toISOString(),
+        userId,
+        endpoint: '/api/documents/upload',
+        method: 'POST',
+        eventType: 'success',
+        severity: 'medium',
+        details: {
+          dataType: 'DOCUMENTS',
+          organizationId,
+          fileName: file.name,
+          fileSize: file.size,
+          canonicalIntake: true,
+        },
+      });
+      return NextResponse.json({
+        blobPath: blob.pathname,
+        checksum,
+        size: file.size,
+        mimeType: file.type,
+        filename: file.name,
+      }, { status: 201 });
+    }
 
     // Create document record
     let document: typeof documents.$inferSelect;

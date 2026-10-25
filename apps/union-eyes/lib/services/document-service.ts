@@ -570,7 +570,12 @@ export async function getDocumentVersions(documentId: string, organizationId?: s
 /**
  * Process document with OCR
  */
-export async function processDocumentOCR(documentId: string, organizationId?: string): Promise<OCRResult> {
+export async function processDocumentOCR(
+  documentId: string,
+  organizationId?: string,
+  options?: { persistExtractedText?: boolean },
+): Promise<OCRResult> {
+  const persistExtractedText = options?.persistExtractedText === true;
   try {
     const document = await db.query.documents.findFirst({
       where:
@@ -604,7 +609,6 @@ export async function processDocumentOCR(documentId: string, organizationId?: st
     const language = "en";
     let metadata: Record<string, unknown> = {
       provider: "native",
-      blobPath,
     };
 
     if (lowerMimeType.startsWith("image/")) {
@@ -613,7 +617,6 @@ export async function processDocumentOCR(documentId: string, organizationId?: st
       confidence = imageResult.confidence;
       metadata = {
         provider: "image-ocr",
-        blobPath,
       };
     } else if (lowerMimeType.includes("pdf") || lowerFileType === "pdf") {
       const pdfResult = await processPDFOCR(buffer);
@@ -623,7 +626,6 @@ export async function processDocumentOCR(documentId: string, organizationId?: st
         : 0;
       metadata = {
         provider: "pdf-ocr",
-        blobPath,
         pages: pdfResult.pages.length,
       };
     } else if (
@@ -637,8 +639,9 @@ export async function processDocumentOCR(documentId: string, organizationId?: st
       confidence = 100;
       metadata = {
         provider: "text-decode",
-        blobPath,
       };
+    } else {
+      throw new Error("OCR_UNSUPPORTED");
     }
 
     const result: OCRResult = {
@@ -650,22 +653,35 @@ export async function processDocumentOCR(documentId: string, organizationId?: st
       metadata,
     };
 
-    await updateDocument(documentId, {
-      contentText: extractedText,
-      metadata: {
-        ...(document.metadata && typeof document.metadata === "object" ? document.metadata : {}),
-        ocr: {
-          ...metadata,
-          confidence,
-          language,
-          processedAt: processedAt.toISOString(),
+    if (persistExtractedText) {
+      await updateDocument(documentId, {
+        contentText: extractedText,
+        metadata: {
+          ...(document.metadata && typeof document.metadata === "object" ? document.metadata : {}),
+          ocr: {
+            ...metadata,
+            confidence,
+            language,
+            processedAt: processedAt.toISOString(),
+          },
         },
-      },
-    });
+      });
+    }
 
     return result;
   } catch (error) {
-    logger.error("Error processing document OCR", { error, documentId });
+    if (
+      error instanceof Error
+      && (error.message === "OCR_UNSUPPORTED"
+        || error.message === "Document not found"
+        || error.message === "Document blob path missing")
+    ) {
+      throw error;
+    }
+    logger.error("Error processing document OCR", {
+      documentId,
+      organizationId: organizationId ?? null,
+    });
     throw new Error("Failed to process document OCR");
   }
 }
