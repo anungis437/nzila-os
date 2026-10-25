@@ -44,7 +44,7 @@ Six aggregate `pnpm test:fast` runs on this branch, each with every individual t
 
 The aggregate cap is now 3 workers. The remaining failures are start-up and I/O starvation on a machine shared with other agents' dev servers and containers (C: is 94% full); the 60 s worker-start timeout is not configurable. **No clean aggregate exit has been achieved**, so this stays an open qualification defect: it needs a quiet, dedicated runner, not further test edits.
 
-## Audit coverage (K-011): 271 to 208
+## Audit coverage (K-011): 271 to 193
 
 Authority-bearing mutations now commit with their audit record on the transaction that does the work; a failed audit write fails and rolls back the change, and a change that matches nothing is a 404 with no audit.
 
@@ -58,6 +58,8 @@ Authority-bearing mutations now commit with their audit record on the transactio
 - Correspondence: every transition (status change, hash-chained trail entry, platform audit) commits together and only lands if the letter is still in the status it was decided against; the drafter cannot approve their own letter; stored-signature changes are audited.
 - Signature documents: any member of the organization could view and void any document. Viewing is now the sender and the signers (matching the user's own list) and voiding is the sender; a signature no longer lands on a voided or completed document or over an existing one; send, sign, complete and void are atomic.
 - Committee workspace: every route loaded and changed meetings, minutes, attendance, action items and documents by id alone, outside any tenant context. Each route now proves the committee and its child belong to the caller's organization and to each other and runs in the tenant context; approved minutes cannot be rewritten or re-approved; mutations are atomic.
+- Pension: any member could list every member's benefit claims, contributions and T4A records, submit a claim for anyone with any status (including approved or paid), and a steward could delete a plan or rewrite trustee-meeting minutes. Reads are now the caller's own records (organization-wide only for the pension administrator), a claim is filed for oneself as pending, tax records cannot be marked filed, and administration needs the financial role. Consequence: an organization administrator without that role sees only their own pension records until the trustee-administration authority is adopted.
+- Exit interviews: create, edit, submit, review, publish, governance and attachments are atomic; the author cannot review their own interview and only a reviewed interview publishes; attachments (including transcripts) of an unpublished interview were readable by any member and could be added to a published one; the storage-host check accepted look-alike hosts. Open decision for the privacy officer: retiree consent is recorded by an administrator on the retiree's behalf.
 - Subscription pause and resume commit with their event log and audit record.
 - Kernel case-assignment mutators count as audited while a ratchet proves the store audits on the same executor.
 
@@ -65,7 +67,7 @@ Open institutional decision: `votes.cast_at` is an exact timestamp and can be co
 
 ## Open, in order
 
-1. Audit coverage: 208 mutating routes still have no route-level atomic-audit evidence (scan follows three import hops; 33 handlers were found to contain no writes). Remaining families: finance (platform-economics payments, invoices, allocation), billing send routes, pension, ICRA/OCRA, exit interviews, AI, employer execution, and the board-packet and election-session routes. Denial-path durability (separate transaction after rollback) is designed and proven for the audit primitive, not yet applied route by route.
+1. Audit coverage: 193 mutating routes still have no route-level atomic-audit evidence (scan follows three import hops; 33 handlers were found to contain no writes). Remaining families: finance (platform-economics payments, invoices, allocation), billing send routes, ICRA/OCRA, exit interviews, AI, employer execution, and the board-packet and election-session routes. Denial-path durability (separate transaction after rollback) is designed and proven for the audit primitive, not yet applied route by route.
 2. Finance duties, WorkAid union-side engine, messaging UI and lifecycle.
 3. `union_rep_id` backfill rehearsal and reader migration; the claims path needs a real-PostgreSQL qualification suite (the retired role-model suite is gone).
 4. Voting extension and certified-result supersession workflows (inactive until adopted); voting options, eligibility and proxy routes.
