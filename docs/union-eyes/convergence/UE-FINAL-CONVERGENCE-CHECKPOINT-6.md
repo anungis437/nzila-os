@@ -44,9 +44,24 @@ Six aggregate `pnpm test:fast` runs on this branch, each with every individual t
 
 The aggregate cap is now 3 workers. The remaining failures are start-up and I/O starvation on a machine shared with other agents' dev servers and containers (C: is 94% full); the 60 s worker-start timeout is not configurable. **No clean aggregate exit has been achieved**, so this stays an open qualification defect: it needs a quiet, dedicated runner, not further test edits.
 
+## Audit coverage (K-011): 271 to 246
+
+Authority-bearing mutations now commit with their audit record on the transaction that does the work; a failed audit write fails and rolls back the change, and a change that matches nothing is a 404 with no audit.
+
+- Governance: golden-share issue, reserved-matter vote recording, policy draft, snapshot, conflict resolution, replay start, mission audit, policy rule.
+- Dues: manual match, reject, arrears payment, remittance update, payment plan (reconciliation writes are also now organization-scoped).
+- Organizations: create, update, archive, settings. An organization administrator can no longer change a parent affiliation or status (platform authority required; resubmitting current values is allowed).
+- Members: deactivate and delete audit with the local status change (an incomplete offboarding is recorded as a failure while the denial is still applied); reactivation records its attempt first and grants nothing if the attempt cannot be recorded.
+- Platform-auth: invite creation, organization auth-policy update and MFA disable previously swallowed audit failures; they now fail with the operation. The manifest counts a platform-auth service as audited only while a ratchet proves that.
+- SSO provider creation is audited, and a group-to-role mapping is limited to roles a tenant administrator can assign.
+- Voting session creation is audited. Ballot-casting routes are deliberately unaudited per ballot (G12) and pinned by a ratchet; the ballot error log no longer carries the member or the option.
+- Kernel case-assignment mutators count as audited while a ratchet proves the store audits on the same executor.
+
+Open institutional decision: `votes.cast_at` is an exact timestamp and can be correlated with participation records; its granularity is a product decision, not an engineering default.
+
 ## Open, in order
 
-1. Audit coverage: 271 mutating routes have no route-level atomic-audit evidence (scan now follows three import hops; 33 handlers were found to contain no writes). The authority-bearing ones to convert first: platform-admin member offboarding (`admin/users/[userId]`) and organization create/update, governance system-context routes, dues, finance and payments. Denial-path durability (separate transaction after rollback) is designed and proven for the audit primitive, not yet applied route by route.
+1. Audit coverage: 246 mutating routes still have no route-level atomic-audit evidence (scan follows three import hops; 33 handlers were found to contain no writes). Remaining families: finance, billing, correspondence, signatures, committees, pension, ICRA/OCRA, exit interviews, AI, employer execution, and the board-packet and election-session routes. Denial-path durability (separate transaction after rollback) is designed and proven for the audit primitive, not yet applied route by route.
 2. Finance duties, WorkAid union-side engine, messaging UI and lifecycle.
 3. `union_rep_id` backfill rehearsal and reader migration; the claims path needs a real-PostgreSQL qualification suite (the retired role-model suite is gone).
 4. Voting extension and certified-result supersession workflows (inactive until adopted); voting options, eligibility and proxy routes.
