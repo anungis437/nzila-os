@@ -1,0 +1,14 @@
+{
+  "record": "UE_CONVERGENCE_REGISTER",
+  "integrationBranch": "agents/ue-final-convergence",
+  "cursorBranch": "agents/ue-cursor-documents-convergence",
+  "agreedMergeBaseSha": "0c994b968aed0657cca5b702954ba87252408245",
+  "integratedCursorCommits": [],
+  "lastIntegrationCheckpointSha": null,
+  "semanticCompatibility": "A conflict-free textual merge does not establish semantic compatibility. Each integrated Cursor commit is validated on a fresh checkpoint before it is recorded here.",
+  "deployment": {
+    "UE_SAAS_OPERATIONAL_READINESS": "NO_GO",
+    "PRODUCTION_DEPLOYMENT_AUTHORIZED": "NO",
+    "STAGING_EXECUTION_AUTHORIZED": "NO"
+  }
+}
