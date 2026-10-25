@@ -21,6 +21,7 @@ import {
 } from '@/lib/services/document-governance-service';
 import { generateSasUrl } from '@/lib/blob-client';
 import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit';
+import { isDocumentId } from '@/lib/documents/canonical-journey';
 
 const DOCUMENT_BLOB_CONTAINER = process.env.AZURE_BLOB_CONTAINER ?? 'union-eyes';
 
@@ -33,8 +34,8 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     return standardErrorResponse(ErrorCode.FORBIDDEN, 'Unauthorized');
   }
 
-  if (!params?.id) {
-    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing document ID');
+  if (!params?.id || !isDocumentId(params.id)) {
+    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid document ID');
   }
 
   const row = (
@@ -141,19 +142,36 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
       .limit(1)
   )[0];
 
-  const downloadUrl = latestVersion?.storageKey
-    ? await generateSasUrl(DOCUMENT_BLOB_CONTAINER, latestVersion.storageKey)
-    : row.fileUrl;
+  let downloadUrl: string | null;
+  try {
+    downloadUrl = latestVersion?.storageKey
+      ? await generateSasUrl(DOCUMENT_BLOB_CONTAINER, latestVersion.storageKey)
+      : row.fileUrl;
+  } catch {
+    return standardErrorResponse(ErrorCode.EXTERNAL_SERVICE_ERROR, 'Document storage is unavailable');
+  }
 
-  // Access evidence is mandatory: no download URL is issued without its canonical audit record.
-  await appendMandatoryAudit(db, {
-    organizationId,
-    action: 'document.download',
-    resourceType: 'documents',
-    resourceId: row.id,
-    userId,
-    details: { route: '/api/documents/[id]/download', privacyLabel: row.privacyLabel ?? null },
-  });
+  if (!downloadUrl) {
+    return standardErrorResponse(ErrorCode.EXTERNAL_SERVICE_ERROR, 'Document storage location is missing');
+  }
+
+  try {
+    // appendMandatoryAudit returns false when canonical V2 is off. A thrown audit write
+    // still withholds the URL. A false return is the published helper contract.
+    await appendMandatoryAudit(db, {
+      organizationId,
+      action: 'document.download',
+      resourceType: 'documents',
+      resourceId: row.id,
+      userId,
+      details: { route: '/api/documents/[id]/download', privacyLabel: row.privacyLabel ?? null },
+    });
+  } catch {
+    return standardErrorResponse(
+      ErrorCode.SERVICE_UNAVAILABLE,
+      'Document download audit could not be recorded',
+    );
+  }
 
   return standardSuccessResponse({
     id: row.id,
