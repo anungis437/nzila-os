@@ -110,17 +110,26 @@ async function logEvent(
     metadata?: Record<string, unknown>
   },
   executor: typeof db = db,
+  /** A required record is part of the operation: if it cannot be written the operation fails and rolls back. */
+  required = false,
 ): Promise<void> {
-  try {
-    const write = async () => executor.insert(authAuditLog).values({
-      userId: opts.userId ?? null,
-      eventType,
-      ipAddress: opts.ipAddress ?? null,
-      userAgent: opts.userAgent ?? null,
-      metadata: opts.metadata ?? {},
-    })
+  const write = async () => executor.insert(authAuditLog).values({
+    userId: opts.userId ?? null,
+    eventType,
+    ipAddress: opts.ipAddress ?? null,
+    userAgent: opts.userAgent ?? null,
+    metadata: opts.metadata ?? {},
+  })
+  const run = async () => {
     if (executor === authDb) await withAuthSavepoint(write)
     else await write()
+  }
+  if (required) {
+    await run()
+    return
+  }
+  try {
+    await run()
   } catch {
     // best-effort
   }
@@ -273,7 +282,7 @@ async function disableMfaWithContext(userId: string, actorUserId: string, reason
   await logEvent('mfa_disabled', {
     userId,
     metadata: { actorUserId, reason: reason ?? null },
-  })
+  }, db, true)
   return { success: true }
 }
 

@@ -37,11 +37,11 @@
   },
   "mutatingByAudit": {
    "ATOMIC": 59,
-   "ATOMIC_SERVICE": 19,
+   "ATOMIC_SERVICE": 22,
    "BEST_EFFORT": 10,
    "CRUD_ATOMIC": 299,
    "NO_WRITES_FOUND": 14,
-   "NONE": 294
+   "NONE": 291
   },
   "mutatingByData": {
    "AMBIENT_DB": 51,
@@ -2065,7 +2065,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "auth/login/route.ts",
@@ -2162,7 +2162,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "auth/mfa/enroll/route.ts",
@@ -2211,7 +2211,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "auth/reset-password/route.ts",

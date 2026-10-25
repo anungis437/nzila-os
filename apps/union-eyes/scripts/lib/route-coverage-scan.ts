@@ -79,6 +79,17 @@ function dataOf(source: string, guard: RouteGuard): RouteData {
 
 const ATOMIC_AUDIT = /persistAtomicAudit|appendMandatoryAudit/
 
+/**
+ * Platform-auth services whose audit record is part of the operation (a failed write fails and rolls back the change).
+ * Each entry names the source that must carry that guarantee; route-coverage-manifest.test.ts verifies it.
+ */
+export const AUTH_MANDATORY_AUDIT_SERVICES: Record<string, { file: string; proof: RegExp }> = {
+  createInvite: { file: 'invites/service.ts', proof: /\},\s*true\)\s*\n\s*\n\s*return \{ success: true, inviteId/ },
+  updateOrgAuthPolicy: { file: 'policy/admin.ts', proof: /await withAuthSavepoint\(async \(\) => db\.insert\(authAuditLog\)[\s\S]*?org_policy_updated/ },
+  disableMfa: { file: 'mfa/service.ts', proof: /mfa_disabled[\s\S]*?\}, db, true\)/ },
+}
+const AUTH_AUDITED_CALL = new RegExp(`\\b(${Object.keys(AUTH_MANDATORY_AUDIT_SERVICES).join('|')})\\(`)
+
 /** First-party modules the route imports (the `@/` alias and relative paths), resolved to files that exist. */
 function localImports(root: string, file: string, source: string): string[] {
   const out: string[] = []
@@ -112,6 +123,7 @@ function auditOf(source: string, guard: RouteGuard, mutating: boolean, imports: 
   if (guard === 'CRUD_FACTORY') return 'CRUD_ATOMIC'
   if (ATOMIC_AUDIT.test(source)) return 'ATOMIC'
   if (imports.some((f) => ATOMIC_AUDIT.test(readFileSync(f, 'utf8')))) return 'ATOMIC_SERVICE'
+  if (AUTH_AUDITED_CALL.test(source)) return 'ATOMIC_SERVICE'
   // A mutating method whose handler and everything it reaches contain no write is read-only in effect.
   if (!WRITE_TOKEN.test(source) && !imports.some((f) => WRITE_TOKEN.test(readFileSync(f, 'utf8')))) return 'NO_WRITES_FOUND'
   if (/auditLog|auditDataMutation|auditSecurityEvent|logAuditEvent|recordAudit/.test(source)) return 'BEST_EFFORT'

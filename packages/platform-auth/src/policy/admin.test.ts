@@ -124,4 +124,18 @@ describe('updateOrgAuthPolicy — validation', () => {
     expect(r.success).toBe(true)
     expect(mockUpdate).toHaveBeenCalledTimes(1)
   })
+
+  it('fails the update when the audit record cannot be written, so the change rolls back', async () => {
+    mockSelect.mockReturnValueOnce({
+      from: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue([{ organizationId: 'org1' }]),
+    })
+    mockUpdate.mockReturnValueOnce({ set: vi.fn().mockReturnThis(), where: vi.fn().mockResolvedValue(undefined) })
+    mockInsert.mockReturnValue({ values: vi.fn().mockRejectedValue(new Error('audit down')) })
+
+    await expect(
+      updateOrgAuthPolicy({ organizationId: 'org1', actorUserId: 'actor1', patch: { allowLocalAuth: false } }),
+    ).rejects.toThrow('audit down')
+  })
 })

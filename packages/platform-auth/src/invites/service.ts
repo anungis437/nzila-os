@@ -103,15 +103,22 @@ async function logEvent(
     userAgent?: string | null
     metadata?: Record<string, unknown>
   },
+  /** A required record is part of the operation: if it cannot be written the operation fails and rolls back. */
+  required = false,
 ): Promise<void> {
+  const write = () => withAuthSavepoint(async () => db.insert(authAuditLog).values({
+    userId: opts.userId ?? null,
+    eventType,
+    ipAddress: opts.ipAddress ?? null,
+    userAgent: opts.userAgent ?? null,
+    metadata: opts.metadata ?? {},
+  }))
+  if (required) {
+    await write()
+    return
+  }
   try {
-    await withAuthSavepoint(async () => db.insert(authAuditLog).values({
-      userId: opts.userId ?? null,
-      eventType,
-      ipAddress: opts.ipAddress ?? null,
-      userAgent: opts.userAgent ?? null,
-      metadata: opts.metadata ?? {},
-    }))
+    await write()
   } catch {
     // best-effort
   }
@@ -155,7 +162,7 @@ async function createInviteWithContext(input: CreateInviteInput, email: string, 
       organizationId: input.organizationId,
       role,
     },
-  })
+  }, true)
 
   return { success: true, inviteId: row.id, token, expiresAt }
 }

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { auditGap, kernelPending, scanRoutes } from '../../scripts/lib/route-coverage-scan'
+import { AUTH_MANDATORY_AUDIT_SERVICES, auditGap, kernelPending, scanRoutes } from '../../scripts/lib/route-coverage-scan'
 
 /**
  * Route-coverage manifest and ratchets (UE-CONV-K-008). Every app/api route is recorded with how it authenticates,
@@ -86,6 +86,13 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
     for (const e of fresh.filter((r) => r.kernel && r.guard !== 'DELEGATED')) {
       const source = readFileSync(join(ROOT, 'app', 'api', e.route), 'utf8')
       expect(source).toMatch(/lib\/authority|case-access-service|route-adapter|findReadableCase\(|requireCaseFilingCapacity\(|hasCaseFilingCapacity\(|requireKernelCaseAction\(/)
+    }
+  })
+
+  it('counts a platform-auth service as audited only while its audit record is mandatory, not best-effort', () => {
+    const authSrc = join(__dirname, '..', '..', '..', '..', 'packages', 'platform-auth', 'src')
+    for (const [name, { file, proof }] of Object.entries(AUTH_MANDATORY_AUDIT_SERVICES)) {
+      expect(readFileSync(join(authSrc, file), 'utf8'), name).toMatch(proof)
     }
   })
 })
