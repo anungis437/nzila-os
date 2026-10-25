@@ -6,8 +6,9 @@ This record is the lane contract for two engineering branches and one integratio
 | --- | --- |
 | Integration branch | `agents/ue-final-convergence` |
 | Cursor branch | `agents/ue-cursor-documents-convergence` |
-| Agreed merge base | `0c994b968aed0657cca5b702954ba87252408245` |
-| Integration HEAD | The tip of `agents/ue-final-convergence` after this record is committed. Cursor branches from that exact tip. |
+| Git merge base against `origin/main` | `0c994b968aed0657cca5b702954ba87252408245` |
+| Cursor development baseline | `fde81a81a088a1c8c4aa6d498b2b3a52e0dea298` |
+| Integration HEAD | The moving tip of `agents/ue-final-convergence`. Later integrator commits are not part of Cursor's review range. |
 | Architectural authority | The integration branch. Cursor's branch is an implementation source. |
 | Integrated Cursor commits | None |
 
@@ -32,6 +33,6 @@ Schema, migrations, the architecture and ontology ledgers, route ratchets, finan
 
 ## Integration
 
-Require a path difference against the agreed merge base and against the current integration tip. Overlap is resolved by preserving the canonical contract. Use a conflict-free cherry-pick or a controlled merge. After integration, rerun the affected tests, kernel authorization proofs, this ownership ratchet, schema validation, and the relevant database suite. Record the Cursor commit IDs in the convergence register.
+Before accepting a Cursor handoff, prove `fde81a81a088a1c8c4aa6d498b2b3a52e0dea298` is an ancestor of the Cursor tip and review only `git diff fde81a81a088a1c8c4aa6d498b2b3a52e0dea298...<cursor-tip>`. The Git merge base against `origin/main` stays `0c994b968aed0657cca5b702954ba87252408245` and is a different range. Overlap is resolved by preserving the canonical contract. Use a conflict-free cherry-pick or a controlled merge. After integration, rerun the affected tests, kernel authorization proofs, this ownership ratchet, schema validation, and the relevant database suite. Record the Cursor commit IDs in the convergence register.
 
 `UE_SAAS_OPERATIONAL_READINESS` stays `NO_GO`. This coordination does not authorize staging or production deployment.

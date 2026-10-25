@@ -9,7 +9,8 @@ const coordination = JSON.parse(
 ) as {
   integrationBranch: string
   cursorBranch: string
-  agreedMergeBaseSha: string
+  gitMergeBaseAgainstMainSha: string
+  cursorDevelopmentBaselineSha: string
   cursorMayEdit: string[]
   cursorMustConsumeWithoutEditing: string[]
   integratorReservedCaseDocumentRoutes: string[]
@@ -18,7 +19,8 @@ const coordination = JSON.parse(
   deployment: { UE_SAAS_OPERATIONAL_READINESS: string; PRODUCTION_DEPLOYMENT_AUTHORIZED: string }
 }
 
-const MERGE_BASE = '0c994b968aed0657cca5b702954ba87252408245'
+const MAIN_MERGE_BASE = '0c994b968aed0657cca5b702954ba87252408245'
+const CURSOR_BASELINE = 'fde81a81a088a1c8c4aa6d498b2b3a52e0dea298'
 
 function ancestor(sha: string): boolean {
   try {
@@ -31,10 +33,13 @@ function ancestor(sha: string): boolean {
 
 describe('Union Eyes agent coordination lanes', () => {
   it('pins the integration branch to the published main SHA', () => {
-    expect(coordination.agreedMergeBaseSha).toBe(MERGE_BASE)
+    expect(coordination.gitMergeBaseAgainstMainSha).toBe(MAIN_MERGE_BASE)
+    expect(coordination.cursorDevelopmentBaselineSha).toBe(CURSOR_BASELINE)
+    expect(coordination.cursorDevelopmentBaselineSha).not.toBe(coordination.gitMergeBaseAgainstMainSha)
     expect(coordination.integrationBranch).toBe('agents/ue-final-convergence')
     expect(coordination.cursorBranch).toBe('agents/ue-cursor-documents-convergence')
-    expect(ancestor(MERGE_BASE)).toBe(true)
+    expect(ancestor(MAIN_MERGE_BASE)).toBe(true)
+    expect(ancestor(CURSOR_BASELINE)).toBe(true)
     expect(coordination.deployment.UE_SAAS_OPERATIONAL_READINESS).toBe('NO_GO')
     expect(coordination.deployment.PRODUCTION_DEPLOYMENT_AUTHORIZED).toBe('NO')
     expect(coordination.integratedCursorCommits).toEqual([])
