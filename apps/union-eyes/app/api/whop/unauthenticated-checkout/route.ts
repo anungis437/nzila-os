@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { DEFAULT_REDIRECT_URL } from "../webhooks/utils/constants";
 import crypto from "crypto";
 import { logger } from '@/lib/logger';
+import { guardPublicIntake } from '@/lib/public-intake/guard';
 
 /**
  * API endpoint to create a Whop checkout session for unauthenticated users
@@ -10,7 +11,9 @@ import { logger } from '@/lib/logger';
  */
 export async function POST(req: Request) {
   try {
-    const { planId, _redirectUrl, email } = await req.json();
+    const intake = await guardPublicIntake(req, { bucket: 'checkout' });
+    if (!intake.ok) return intake.response;
+    const { planId, _redirectUrl, email } = (intake.json ?? {}) as { planId?: string; _redirectUrl?: string; email?: string };
     
     // Validate required parameters
     if (!planId) {

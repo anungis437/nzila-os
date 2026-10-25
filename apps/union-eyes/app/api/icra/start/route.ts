@@ -6,6 +6,7 @@ import { logger } from '@/lib/logger'
 import { DOCTRINE_VERSION } from '@/lib/icra/copy'
 import { QUESTION_BANK_VERSION } from '@/lib/icra/questions'
 import { withSystemContext } from '@/lib/db/with-rls-context'
+import { guardPublicIntake } from '@/lib/public-intake/guard'
 import {
   generateCapabilityToken,
   hashCapabilityToken,
@@ -40,8 +41,9 @@ const startSchema = z.object({
 export async function POST(request: Request) {
   let payload: z.infer<typeof startSchema>
   try {
-    const json = await request.json().catch(() => ({}))
-    payload = startSchema.parse(json)
+    const intake = await guardPublicIntake(request, { bucket: 'write' })
+    if (!intake.ok) return intake.response
+    payload = startSchema.parse(intake.json ?? {})
   } catch (err) {
     return NextResponse.json(
       { error: 'Invalid start payload', details: (err as Error).message },

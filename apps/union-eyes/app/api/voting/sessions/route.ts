@@ -95,10 +95,11 @@ export const GET = withApi(
               text: o.text,
               description: o.description,
               orderIndex: o.orderIndex,
-              votes: voteCountMap[o.id] || 0,
-              percentage: totalVotes > 0 ? Math.round(((voteCountMap[o.id] || 0) / totalVotes) * 100) : 0,
             })),
+            // Participation only. Per-option tallies are an officer-level view of a closed session
+            // (GET /api/voting/sessions/[id]/results); no live or final count is disclosed here.
             totalVotes,
+            resultsWithheld: true,
           };
         });
 

@@ -12,6 +12,7 @@ import { logger } from '@/lib/logger'
 import { computeProfile } from '@/lib/icra/scoring'
 import type { Answer } from '@/lib/icra/types'
 import { withSystemContext } from '@/lib/db/with-rls-context'
+import { guardPublicIntake } from '@/lib/public-intake/guard'
 import {
   extractCapabilityToken,
   checkCapability,
@@ -24,6 +25,9 @@ interface RouteContext {
 
 export async function POST(request: Request, { params }: RouteContext) {
   const { assessmentId } = await params
+  // The capability token is the only protection here; slow guessing before any lookup.
+  const intake = await guardPublicIntake(request, { bucket: 'capability', readBody: false })
+  if (!intake.ok) return intake.response
   try {
     return await withSystemContext(async (tx) => {
       const assessments = await tx

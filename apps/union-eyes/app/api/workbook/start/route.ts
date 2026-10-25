@@ -1,7 +1,7 @@
 /**
  * POST /api/workbook/start \u2014 Create a pseudonymous Governance Entropy Workbook.
  *
- * No authentication required. Returns the new workbookId so the caller
+ * No authentication required (public pseudonymous intake, rate limited and body capped). Returns the new workbookId so the caller
  * can route into the workbook flow. Locale and UTM are accepted from the
  * body to preserve attribution and EN/FR posture from the landing page.
  */
@@ -11,6 +11,7 @@ import { z } from 'zod';
 import { db } from '@/db';
 import { workbooks, workbookModules, WORKBOOK_MODULE_IDS } from '@/db/schema/workbook-schema';
 import { logger } from '@/lib/logger';
+import { guardPublicIntake } from '@/lib/public-intake/guard';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -35,16 +36,12 @@ const bodySchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  let body: any = {};
-  try {
-    if (request.headers.get('content-length') && Number(request.headers.get('content-length')) > 0) {
-      body = await request.json();
-    }
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
-  }
+  // Public pseudonymous intake: bounded by a per-client limit and a body cap. The workbook it creates holds no
+  // tenant data and grants no access to any; it is a bearer-id record until claimed by an authenticated user.
+  const intake = await guardPublicIntake(request, { bucket: 'write' });
+  if (!intake.ok) return intake.response;
 
-  const parse = bodySchema.safeParse(body);
+  const parse = bodySchema.safeParse(intake.json ?? {});
   if (!parse.success) {
     return NextResponse.json(
       { error: 'Validation failed', details: parse.error.flatten().fieldErrors },

@@ -23,6 +23,7 @@ import { workbooks } from '@/db/schema/workbook-schema';
 import { WORKBOOK_TIERS } from '@/lib/icra/tiers';
 import { getStripeClient } from '@nzila/payments-stripe';
 import { logger } from '@/lib/logger';
+import { guardPublicIntake } from '@/lib/public-intake/guard';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -34,14 +35,10 @@ const bodySchema = z.object({
 const SELF_GUIDED_TIER_ID = 'workbook_self_guided' as const;
 
 export async function POST(request: NextRequest) {
-  let body: any;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
-  }
+  const intake = await guardPublicIntake(request, { bucket: 'checkout' });
+  if (!intake.ok) return intake.response;
 
-  const parse = bodySchema.safeParse(body);
+  const parse = bodySchema.safeParse(intake.json);
   if (!parse.success) {
     return NextResponse.json(
       { error: 'Validation failed', details: parse.error.flatten().fieldErrors },

@@ -459,7 +459,17 @@ function generateAnonymousVoterId(
 }
 
 /**
- * Cast vote
+ * Ids under which a member's ballot in a session may be stored: the anonymous voter id, and the member id itself for
+ * identified ballots cast before ballots were made secret. Both count as "already voted".
+ */
+function ballotIdentities(sessionId: string, memberId: string): string[] {
+  return [generateAnonymousVoterId(sessionId, memberId).voterId, memberId];
+}
+
+/**
+ * Cast vote. Ballots are secret: the stored voter id is always the anonymous one. An identified (open-roll) ballot is
+ * refused, because it discloses the choice, and because it was never counted by the one-vote check, which let a member
+ * vote once identified and once anonymously.
  */
 export async function castVote(
   sessionId: string,
@@ -468,6 +478,10 @@ export async function castVote(
   isAnonymous = true
 ): Promise<Vote> {
   try {
+    if (!isAnonymous) {
+      throw new Error("Open-roll voting is not available: ballots are secret");
+    }
+
     // Check eligibility
     const eligibility = await checkVoterEligibility(sessionId, memberId);
     if (!eligibility || !eligibility.isEligible) {
@@ -487,12 +501,11 @@ export async function castVote(
       throw new Error("Option does not belong to this voting session");
     }
 
-    // Check if already voted
-    const { voterId } = generateAnonymousVoterId(sessionId, memberId);
+    // Check if already voted, under either identity
     const existingVote = await db.query.votes.findFirst({
       where: and(
         eq(votes.sessionId, sessionId),
-        eq(votes.voterId, voterId)
+        inArray(votes.voterId, ballotIdentities(sessionId, memberId))
       ),
     });
 
@@ -500,10 +513,7 @@ export async function castVote(
       throw new Error("Vote already cast");
     }
 
-    // Generate anonymous voter ID if needed
-    const { voterId: finalVoterId, voterHash } = isAnonymous
-      ? generateAnonymousVoterId(sessionId, memberId)
-      : { voterId: memberId, voterHash: "" };
+    const { voterId: finalVoterId, voterHash } = generateAnonymousVoterId(sessionId, memberId);
 
     // Cast vote
     const [vote] = await db
@@ -513,7 +523,7 @@ export async function castVote(
         optionId,
         voterId: finalVoterId,
         voterHash,
-        isAnonymous,
+        isAnonymous: true,
         castAt: new Date(),
       })
       .returning();
@@ -533,11 +543,10 @@ export async function hasVoted(
   memberId: string
 ): Promise<boolean> {
   try {
-    const { voterId } = generateAnonymousVoterId(sessionId, memberId);
     const vote = await db.query.votes.findFirst({
       where: and(
         eq(votes.sessionId, sessionId),
-        eq(votes.voterId, voterId)
+        inArray(votes.voterId, ballotIdentities(sessionId, memberId))
       ),
     });
 

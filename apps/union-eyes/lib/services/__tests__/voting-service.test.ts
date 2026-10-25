@@ -428,11 +428,21 @@ describe('VotingService', () => {
       await expect(castVote('session-1', 'opt-1', 'member-1')).rejects.toThrow('already cast');
     });
 
-    it('supports non-anonymous voting', async () => {
-      const vote = { id: 'vote-1', voterId: 'member-1' };
-      mocks.mockInsertReturning.mockResolvedValue([vote]);
-      const r = await castVote('session-1', 'opt-1', 'member-1', false);
-      expect(r.id).toBe('vote-1');
+    it('refuses an identified ballot: ballots are secret and an identified one escaped the one-vote check', async () => {
+      await expect(castVote('session-1', 'opt-1', 'member-1', false)).rejects.toThrow('Open-roll voting is not available');
+      expect(mocks.mockInsertReturning).not.toHaveBeenCalled();
+    });
+
+    it('looks for a prior ballot under both the anonymous id and the member id, and never stores the member id', async () => {
+      const { inArray } = await import('drizzle-orm');
+      const spy = vi.mocked(inArray);
+      spy.mockClear();
+      mocks.mockInsertReturning.mockResolvedValue([{ id: 'vote-1' }]);
+      await castVote('session-1', 'opt-1', 'member-1');
+      const ids = spy.mock.calls.find((c) => Array.isArray(c[1]))?.[1] as string[];
+      expect(ids).toHaveLength(2);
+      expect(ids).toContain('member-1');
+      expect(ids.some((i) => i !== 'member-1')).toBe(true);
     });
 
     it('throws when VOTING_SECRET is not configured', async () => {

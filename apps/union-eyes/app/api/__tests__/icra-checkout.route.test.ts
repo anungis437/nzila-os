@@ -22,6 +22,19 @@ function makeSelectChain(rows: unknown[]) {
   return chain;
 }
 
+// The rate limiter and body cap are proven in lib/public-intake; here the guard passes the request through.
+vi.mock('@/lib/public-intake/guard', () => ({
+  guardPublicIntake: async (request: Request, options?: { readBody?: boolean }) => {
+    if (options?.readBody === false) return { ok: true, json: undefined };
+    const text = await request.text();
+    try {
+      return { ok: true, json: text ? JSON.parse(text) : undefined };
+    } catch {
+      return { ok: false, response: new Response(JSON.stringify({ error: 'Invalid JSON body' }), { status: 400 }) };
+    }
+  },
+}));
+
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: (fn: (tx: any) => Promise<unknown>) => {
     const tx = { select: vi.fn(() => makeSelectChain((m.selectQueue.shift() ?? []) as unknown[])) };

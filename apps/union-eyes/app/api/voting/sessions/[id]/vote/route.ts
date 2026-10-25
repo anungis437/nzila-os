@@ -36,6 +36,9 @@ export const POST = withApi(
   },
   async ({ body, userId, organizationId, params }) => {
     const sessionId = params.id;
+    if (body.isAnonymous === false) {
+      throw ApiError.badRequest('Open-roll voting is not available: ballots are secret.');
+    }
     await requireOpenOwnedSession(sessionId, organizationId, true);
     const vote = await castVote(sessionId, body.optionId, userId!, body.isAnonymous);
 

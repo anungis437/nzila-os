@@ -12,6 +12,19 @@ const m = vi.hoisted(() => ({
   eq: vi.fn(),
 }));
 
+// The rate limiter and body cap are proven in lib/public-intake; here the guard passes the request through.
+vi.mock('@/lib/public-intake/guard', () => ({
+  guardPublicIntake: async (request: Request, options?: { readBody?: boolean }) => {
+    if (options?.readBody === false) return { ok: true, json: undefined };
+    const text = await request.text();
+    try {
+      return { ok: true, json: text ? JSON.parse(text) : undefined };
+    } catch {
+      return { ok: false, response: new Response(JSON.stringify({ error: 'Invalid JSON body' }), { status: 400 }) };
+    }
+  },
+}));
+
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
 vi.mock('@/lib/icra/scoring', () => ({ computeProfile: m.computeProfile }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));

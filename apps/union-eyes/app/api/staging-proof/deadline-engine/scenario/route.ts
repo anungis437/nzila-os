@@ -514,6 +514,8 @@ async function runCancel(input: RequestBodyT, correlationId: string) {
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const env = {
+    // Referenced literally so the bundler inlines the value the image was built with.
+    BUILD_APP_ENV: process.env.NEXT_PUBLIC_APP_ENV,
     TARGET_ENVIRONMENT: process.env.TARGET_ENVIRONMENT,
     STAGING_PROOFS_ENABLED: process.env.STAGING_PROOFS_ENABLED,
     UNION_EYES_RUNTIME_ID: process.env.UNION_EYES_RUNTIME_ID,
