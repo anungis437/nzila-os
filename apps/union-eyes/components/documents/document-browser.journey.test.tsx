@@ -66,7 +66,7 @@ function installFetch(options?: { listStatus?: number; downloadStatus?: number; 
     }), { status: 200 });
   });
   vi.stubGlobal('fetch', fetchMock);
-  vi.stubGlobal('open', vi.fn());
+  vi.stubGlobal('open', vi.fn(() => ({ closed: false })));
   return { fetchMock, calls };
 }
 
@@ -133,7 +133,10 @@ describe('document browser canonical journey', () => {
     await userEvent.click(screen.getAllByRole('button', { name: 'Download' })[0]);
     await waitFor(() => expect(screen.getByTestId('browser-notice')).toBeInTheDocument());
     expect(window.open).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId('browser-notice')).toHaveTextContent('1 downloaded. 1 denied. 0 failed.');
+    expect(screen.getByTestId('browser-notice')).toHaveTextContent(
+      '1 download URL issued. 1 denied. 0 failed. 1 browser open attempted. 0 browser opens failed. File transfer is not confirmed.',
+    );
+    expect(screen.getByTestId('browser-notice')).not.toHaveTextContent(/downloaded/i);
     expect(bulk.calls.filter((call) => call.includes('/download'))).toHaveLength(2);
   });
 
