@@ -102,7 +102,7 @@
       "description": "isStewardPlus / case_read_any derive case access from seniority. The grievance document, search and intelligence paths no longer do; the remaining files are the separate CUPE claims module (UE-CONV-E-001)",
       "pattern": "isStewardPlus|case_read_any",
       "paths": ["apps/union-eyes"],
-      "exclude": ["**/__tests__/**", "**/*.test.*", "**/docs/**", "**/node_modules/**"],
+      "exclude": ["**/__tests__/**", "**/*.test.*", "**/docs/**", "**/node_modules/**", "apps/union-eyes/lib/documents/UE_CURSOR_DOCUMENT_CONSUMER_MATRIX.json"],
       "allowed": [
         { "file": "apps/union-eyes/lib/action-enforcer.ts", "reason": "CUPE claims RBAC matrix (numeric levels) still defines the case_read_any action; it no longer scopes any case read and is used only by the member-directory scope. Retire with the claims migration" },
         { "file": "apps/union-eyes/lib/authority/policies/case.ts", "reason": "Comment only: states that the kernel policy replaces these shortcuts" },
@@ -114,7 +114,7 @@
       "description": "grievances.union_rep_id is a mutable identifier with no foreign key and is not an authority source; a new consumer must use kernel assignments (UE-CONV-B-001)",
       "pattern": "union_rep_id|unionRepId",
       "paths": ["apps/union-eyes"],
-      "exclude": ["**/__tests__/**", "**/*.test.*", "**/docs/**", "**/node_modules/**", "apps/union-eyes/db/migrations*/**", "**/reports/**", "apps/union-eyes/backend/**/migrations/**"],
+      "exclude": ["**/__tests__/**", "**/*.test.*", "**/docs/**", "**/node_modules/**", "apps/union-eyes/db/migrations*/**", "**/reports/**", "apps/union-eyes/backend/**/migrations/**", "apps/union-eyes/lib/documents/UE_CURSOR_DOCUMENT_CONSUMER_MATRIX.json"],
       "allowed": [
         { "file": "apps/union-eyes/app/api/grievances/[id]/assign/route.ts", "reason": "Writes the legacy column with the deadline convergence task; migrate to assignCase" },
         { "file": "apps/union-eyes/app/api/grievances/[id]/convert/route.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
@@ -213,7 +213,7 @@
       "description": "appendMandatoryAudit returns false outside Canonical V2 and leaves the caller unaudited. Mutations use persistAtomicAudit; the listed modules own an explicit non-canonical atomic branch",
       "pattern": "audit/mandatory-audit",
       "paths": ["apps/union-eyes"],
-      "exclude": ["**/__tests__/**", "**/*.test.*", "**/docs/**", "**/node_modules/**"],
+      "exclude": ["**/__tests__/**", "**/*.test.*", "**/docs/**", "**/node_modules/**", "apps/union-eyes/lib/documents/UE_CURSOR_DOCUMENT_CONSUMER_MATRIX.json"],
       "allowed": [
         { "file": "apps/union-eyes/lib/audit/atomic-audit.ts", "reason": "The atomic helper: appends canonically, otherwise inserts into audit_logs in the same transaction" },
         { "file": "apps/union-eyes/lib/data-export-import.ts", "reason": "Branches explicitly: canonical ledger, else its own in-transaction audit_logs insert" },

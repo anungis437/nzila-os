@@ -13,7 +13,7 @@ import {
   readCanonicalIntake,
   readCreatedDocument,
   repositoryIntakePayload,
-  transcriptSaveUnavailable,
+  interpretTranscriptSave,
   type OcrPrivacyLabel,
 } from '@/lib/documents/ocr-intake';
 
@@ -34,6 +34,7 @@ interface OCRFile {
   progress: number;
   documentId?: string;
   extractedText?: string;
+  revisionNo?: number | null;
   correction?: string;
   notice?: string;
   privacyLabel?: string;
@@ -80,6 +81,7 @@ export function OCRUpload({
         progress: 100,
         documentId,
         extractedText: extraction.text,
+        revisionNo: extraction.revisionNo,
         correction: extraction.text,
         notice: extraction.text ? copy.review : copy.noText,
       });
@@ -94,6 +96,25 @@ export function OCRUpload({
       documentId,
       notice: extraction.kind === 'denied' ? copy.denied : copy.failed,
     });
+  };
+
+  const saveCorrection = async (entry: OCRFile) => {
+    if (!entry.documentId || !entry.revisionNo || !entry.correction) {
+      update(entry.id, { notice: copy.transcriptFailed });
+      return;
+    }
+    try {
+      const response = await fetch(`/api/documents/${entry.documentId}/transcript`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'draft', expectedRevisionNo: entry.revisionNo, text: entry.correction }),
+      });
+      const result = interpretTranscriptSave(response.status, await response.json().catch(() => null));
+      if (result.kind === 'saved') update(entry.id, { revisionNo: result.revisionNo, notice: copy.transcript });
+      else update(entry.id, { notice: result.kind === 'stale' ? copy.transcriptStale : result.kind === 'denied' ? copy.transcriptDenied : copy.transcriptFailed });
+    } catch {
+      update(entry.id, { notice: copy.transcriptFailed });
+    }
   };
 
   const run = async (entry: OCRFile, privacyLabel: OcrPrivacyLabel) => {
@@ -244,10 +265,7 @@ export function OCRUpload({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => {
-                  transcriptSaveUnavailable();
-                  update(entry.id, { notice: copy.transcript });
-                }}
+                onClick={() => void saveCorrection(entry)}
               >
                 {copy.save}
               </Button>

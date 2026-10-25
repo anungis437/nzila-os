@@ -11,7 +11,8 @@ import {
   signatureAuditTrail,
 } from "@/db/schema";
 import SignatureProviderFactory from "./providers";
-import { eq, and, or, desc, notInArray } from "drizzle-orm";
+import { decideProviderSync, mayAdvanceSigner } from "./provider-sync";
+import { eq, and, or, desc, notInArray, isNull } from "drizzle-orm";
 import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { createHash } from "crypto";
@@ -247,84 +248,129 @@ export class SignatureService {
   }
 
   /**
-   * Sync document status with provider
+   * Sync document status with provider.
+   *
+   * A provider's report is an observation, judged by decideProviderSync: only an external provider reports, a terminal
+   * state is final, a stale or repeated observation changes nothing, and the completion time is the provider's own
+   * event time when it supplied one. The local clock is never stamped as a completion or signing time; when it was
+   * received is kept separately (providerStatusObserved). The change, the signer updates and the audit records commit
+   * together, and the update is conditional on the status that was judged, so two concurrent syncs or a replay cannot
+   * apply twice.
    */
-  static async syncDocumentStatus(documentId: string) {
+  static async syncDocumentStatus(documentId: string): Promise<{ synced: boolean; reason?: string }> {
     const document = await db.query.signatureDocuments.findFirst({
       where: eq(signatureDocuments.id, documentId),
     });
 
     if (!document || !document.providerEnvelopeId) {
-      return;
+      return { synced: false, reason: "no_envelope" };
     }
 
+    let status;
     try {
       const provider = SignatureProviderFactory.getProvider(
         document.provider as "docusign" | "hellosign" | "internal"
       );
-      const status = await provider.getEnvelopeStatus(
-        document.providerEnvelopeId
-      );
+      status = await provider.getEnvelopeStatus(document.providerEnvelopeId);
+    } catch (_error) {
+      // A provider outage leaves the stored state exactly as it was.
+      return { synced: false, reason: "provider_unavailable" };
+    }
 
-      // Update document status
-      if (status.status !== document.status) {
-        await db
-          .update(signatureDocuments)
+    const observedAt = new Date();
+    const decision = decideProviderSync(
+      {
+        status: document.status,
+        provider: document.provider,
+        providerEnvelopeId: document.providerEnvelopeId,
+        providerAcknowledgedAt: document.providerAcknowledgedAt ?? null,
+      },
+      { status: status.status, completedAt: status.completedAt },
+      observedAt,
+    );
+    if (decision.action === "ignore") return { synced: false, reason: decision.reason };
+
+    return withRLSContext({ organizationId: document.organizationId }, async (tx) => {
+      const conditions = [eq(signatureDocuments.id, documentId), eq(signatureDocuments.status, document.status)];
+      if (!decision.statusChanged) conditions.push(isNull(signatureDocuments.providerAcknowledgedAt));
+      const [updated] = await tx
+        .update(signatureDocuments)
+        .set({
+          status: decision.status as SignatureDocumentInsert["status"],
+          providerStatusObservedAt: observedAt,
+          ...(decision.providerAcknowledgedAt
+            ? { providerAcknowledgedAt: decision.providerAcknowledgedAt, completedAt: decision.providerAcknowledgedAt }
+            : {}),
+          updatedAt: observedAt,
+        })
+        .where(and(...conditions))
+        .returning({ id: signatureDocuments.id });
+      // Another sync already applied this observation.
+      if (!updated) return { synced: false, reason: "already_applied" };
+
+      await AuditTrailService.log({
+        documentId,
+        eventType: "status_changed",
+        eventDescription: decision.statusChanged
+          ? `Provider reported status ${decision.status}`
+          : "Provider acknowledged completion",
+        metadata: {
+          previousStatus: document.status,
+          newStatus: decision.status,
+          providerAcknowledgedAt: decision.providerAcknowledgedAt?.toISOString() ?? null,
+          observedAt: observedAt.toISOString(),
+        },
+      }, tx);
+      await persistAtomicAudit(tx, {
+        organizationId: document.organizationId,
+        userId: "system:signature-provider-sync",
+        action: "signature.provider_status_sync",
+        resourceType: "signature_documents",
+        resourceId: documentId,
+        details: {
+          provider: document.provider,
+          from: document.status,
+          to: decision.status,
+          providerAcknowledgedAt: decision.providerAcknowledgedAt?.toISOString() ?? null,
+          observedAt: observedAt.toISOString(),
+        },
+      });
+
+      // Signer updates move forward only, use the provider's own event times, and never overwrite a settled signer.
+      for (const signer of status.signers ?? []) {
+        const next = this.mapProviderSignerStatus(signer.status);
+        const [row] = await tx
+          .select({ id: documentSigners.id, status: documentSigners.status, email: documentSigners.email })
+          .from(documentSigners)
+          .where(
+            and(
+              eq(documentSigners.documentId, documentId),
+              or(eq(documentSigners.providerSignerId, signer.signerId), eq(documentSigners.email, signer.email))
+            )
+          )
+          .limit(1);
+        if (!row || !mayAdvanceSigner(row.status, next)) continue;
+        const [advanced] = await tx
+          .update(documentSigners)
           .set({
-            status: status.status as SignatureDocumentInsert['status'],
-            updatedAt: new Date(),
-            completedAt:
-              status.status === "completed" ? new Date() : undefined,
+            status: next,
+            ...(next === "signed" && signer.signedAt ? { signedAt: signer.signedAt } : {}),
+            ...(signer.viewedAt ? { viewedAt: signer.viewedAt } : {}),
+            updatedAt: observedAt,
           })
-          .where(eq(signatureDocuments.id, documentId));
-
+          .where(and(eq(documentSigners.id, row.id), eq(documentSigners.status, row.status)))
+          .returning({ id: documentSigners.id });
+        if (!advanced) continue;
         await AuditTrailService.log({
           documentId,
-          eventType: "status_changed",
-          eventDescription: `Document status changed to ${status.status}`,
-          metadata: { previousStatus: document.status, newStatus: status.status },
-        });
+          signerId: row.id,
+          eventType: "signer_status_updated",
+          eventDescription: `Signer ${row.email} status updated to ${next}`,
+          metadata: { signerStatus: next, providerSignedAt: signer.signedAt?.toISOString() ?? null },
+        }, tx);
       }
-
-      // Update signer statuses
-      if (status.signers?.length) {
-        for (const signer of status.signers) {
-          const signerStatus = this.mapProviderSignerStatus(signer.status);
-          const updateData: Partial<DocumentSignerInsert> = {
-            status: signerStatus,
-            signedAt: signer.signedAt,
-            viewedAt: signer.viewedAt,
-            declinedAt: signer.status === "declined" ? new Date() : undefined,
-            updatedAt: new Date(),
-          };
-
-          const updated = await db
-            .update(documentSigners)
-            .set(updateData)
-            .where(
-              and(
-                eq(documentSigners.documentId, documentId),
-                or(
-                  eq(documentSigners.providerSignerId, signer.signerId),
-                  eq(documentSigners.email, signer.email)
-                )
-              )
-            )
-            .returning();
-
-          if (updated.length > 0) {
-            await AuditTrailService.log({
-              documentId,
-              signerId: updated[0].id,
-              eventType: "signer_status_updated",
-              eventDescription: `Signer ${signer.email} status updated to ${signerStatus}`,
-              metadata: { signerStatus },
-            });
-          }
-        }
-      }
-    } catch (_error) {
-}
+      return { synced: true };
+    });
   }
 
   private static mapProviderSignerStatus(status: string):

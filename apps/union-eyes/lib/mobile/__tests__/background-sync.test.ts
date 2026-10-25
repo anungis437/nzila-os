@@ -117,10 +117,17 @@ describe('background-sync', () => {
       expect(syncQueueMock.add).toHaveBeenCalled();
     });
 
+    it('refuses to queue a document: it needs a server-issued intake and cannot be replayed from a JSON record', async () => {
+      setSupported(false);
+      const mgr = new BackgroundSyncManager();
+      await expect(mgr.queueForSync({ type: 'create', entity: 'document', data: {}, orgId: 'o1' })).rejects.toThrow(/Documents cannot be synced/);
+      expect(syncQueueMock.add).not.toHaveBeenCalled();
+    });
+
     it('skips trigger when unsupported', async () => {
       setSupported(false);
       const mgr = new BackgroundSyncManager();
-      await mgr.queueForSync({ type: 'delete', entity: 'document', data: {}, orgId: 'o1' });
+      await mgr.queueForSync({ type: 'delete', entity: 'claim', data: {}, orgId: 'o1' });
       expect(syncQueueMock.add).toHaveBeenCalled();
     });
   });
@@ -159,6 +166,16 @@ describe('background-sync', () => {
       const mgr = new BackgroundSyncManager();
       const r = await mgr.processPendingSync();
       expect(r.success).toBe(false);
+    });
+
+    it('fails a document operation already in the queue without calling any documents endpoint', async () => {
+      fetchMock.mockClear();
+      syncQueueMock.getPending.mockResolvedValueOnce([op({ id: 9, entity: 'document', type: 'create' })]);
+      const mgr = new BackgroundSyncManager();
+      const r = await mgr.processPendingSync();
+      expect(r.failed).toBe(1);
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(syncQueueMock.fail).toHaveBeenCalledWith(9, expect.stringMatching(/Documents cannot be synced/));
     });
 
     it('omits the body for delete operations', async () => {

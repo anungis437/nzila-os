@@ -9,17 +9,22 @@
     {
       "id": "document-share-disclosure",
       "owner": "integrator",
-      "detail": "No canonical share, member disclosure, export, or WorkAid counsel route. The console fails closed. Do not implement sharing as a privacy-label PATCH."
+      "detail": "No canonical share, member disclosure, export, or WorkAid counsel route. The console fails closed. Do not implement sharing as a privacy-label PATCH.",
+      "status": "OPEN_FAIL_CLOSED",
+      "integratorNote": "Sharing, member disclosure, export and counsel disclosure remain separate governed actions that are not implemented. Every surface fails closed. They need an institutional disclosure policy (who may disclose what, to whom, with consent) before an action can be authorised; viewing, downloading and processing never imply them."
     },
     {
       "id": "document-retention-execution",
       "owner": "integrator",
-      "detail": "No canonical retention-execute or legal-hold release mutation. The console no longer rewrites privacy labels for those actions."
+      "detail": "No canonical document retention contract or per-document legal-hold record exists (legal_holds is scoped by data type and date range, not by document). The console presents hold and retention status as unavailable and offers no save, release or execute action. A privacy label is never a hold. Metadata flags that the versioning guard reads are not an authoritative hold record.",
+      "status": "OPEN_FAIL_CLOSED",
+      "integratorNote": "No per-document legal-hold or retention-execution record exists. Hold status is shown as unavailable and no release or execute action exists. Needs the institutional retention contract."
     },
     {
       "id": "download-audit-when-canonical-v2-disabled",
       "owner": "integrator",
-      "detail": "appendMandatoryAudit returns false when UE_CANONICAL_BOOTSTRAP_V2 is not 1. The download route withholds a URL when that call throws, and still returns the URL when the helper returns false, matching the published helper. A durable audit row is written when V2 is on."
+      "detail": "Resolved. The route no longer calls appendMandatoryAudit. All downloads go through lib/documents/download-issuance.ts, which calls persistAtomicAudit: it records the access (hash-chained under Canonical V2, audit_logs otherwise) or throws, and has no \"skipped\" result. A URL is issued only after the record is written. Proven against PostgreSQL semantics with V2 on and off, with injected audit faults.",
+      "status": "RESOLVED"
     }
   ],
   "paths": [
@@ -120,7 +125,7 @@
       "classificationRules": "Privileged and highly_sensitive require an explicit grant, primary ownership, or canViewPrivateDocuments. Steward role alone is not enough. A grievance read is not a document read.",
       "storage": "generateSasUrl for the latest document_versions.storage_key. Missing storage returns 502 and no URL.",
       "audit": "appendMandatoryAudit action document.download. A thrown audit write returns 503 and no URL. A false return means canonical V2 is off.",
-      "migrationStatus": "BLOCKED_CANONICAL_CONTRACT",
+      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
       "regressionTests": [
         "apps/union-eyes/app/api/documents/[id]/download/route.test.ts",
         "apps/union-eyes/app/api/documents/[id]/download/route.pglite.test.ts"
@@ -143,7 +148,7 @@
       "classificationRules": "Privileged and highly sensitive documents require a grant, primary ownership, or private-document access.",
       "storage": "The processor reads the stored blob. The response omits blob paths.",
       "audit": "appendMandatoryAudit action document.ocr.extract. A throw or a false result returns 503 and no text. Details omit the text.",
-      "migrationStatus": "BLOCKED_CANONICAL_CONTRACT",
+      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
       "regressionTests": [
         "apps/union-eyes/app/api/documents/[id]/ocr/route.test.ts",
         "apps/union-eyes/app/api/documents/[id]/ocr/route.pglite.test.ts",
@@ -275,7 +280,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "putBlob under documents/${organizationId}/. Intake response has blobPath, checksum, size, mimeType, and filename.",
       "audit": "The legacy insert still writes document.upload. Intake does not write a document row, so it has no document audit.",
-      "migrationStatus": "BLOCKED_CANONICAL_CONTRACT",
+      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
       "regressionTests": [
         "apps/union-eyes/app/api/__tests__/documents-upload.route.test.ts"
       ],
@@ -297,7 +302,7 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "BLOCKED_CANONICAL_CONTRACT",
+      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
       "regressionTests": [],
       "retirementDisposition": "Leave the external route intact this tranche.",
       "disposition": "BLOCKED_CANONICAL_CONTRACT"
@@ -998,6 +1003,12 @@
       ],
       "tests": [
         "repository create audit assertion for an unlinked document, including audit failure rolling back the row"
+      ],
+      "status": "RESOLVED",
+      "resolution": "POST /api/documents/repository audits every create (linked or not) with persistAtomicAudit in the same transaction as the document, its first version, its link and the intake binding. An audit that cannot be written rolls all of it back. The legacy upload route uses the same atomic audit.",
+      "evidence": [
+        "lib/documents/document-intake.pglite.test.ts",
+        "db/__tests__/document-intake.postgres.test.ts"
       ]
     },
     {
@@ -1010,6 +1021,12 @@
       ],
       "tests": [
         "authorized correction persists as a distinct transcript; unauthorized, cross-tenant, and audit-failure writes leave the document unchanged"
+      ],
+      "status": "RESOLVED",
+      "resolution": "document_transcript_revisions (append-only machine extraction, human draft and human-reviewed revisions with provenance, reviewer identity, classification, contiguous revisions and optimistic concurrency) and document_transcript_publications (a separate, once-only publication as evidence of the head reviewed revision), written by lib/documents/transcripts.ts with mandatory audit. The original document version is never changed.",
+      "evidence": [
+        "lib/documents/transcripts.pglite.test.ts",
+        "db/__tests__/document-intake.postgres.test.ts"
       ]
     },
     {
@@ -1022,6 +1039,12 @@
       ],
       "tests": [
         "member with document visibility is allowed only after the contract change; unassigned and foreign callers stay denied"
+      ],
+      "status": "RESOLVED",
+      "resolution": "Processing is its own authority (lib/documents/ocr-authority.ts): the kernel case:process_ocr on a live case relationship, an explicit can_process_ocr grant, or the uploader under an ADOPTED institutional member policy. Role seniority and the legacy representative-identifier column are not inputs. No member policy is adopted by default; adopting one is an institutional decision.",
+      "evidence": [
+        "lib/documents/ocr-authority.test.ts",
+        "app/api/documents/[id]/ocr/route.canonical.pglite.test.ts"
       ]
     },
     {
@@ -1034,6 +1057,11 @@
       ],
       "tests": [
         "V2 enabled writes document.ocr.extract without the extracted text; V2 disabled and a thrown audit write each return 503 and no text under the doc_runtime role"
+      ],
+      "status": "RESOLVED",
+      "resolution": "OCR extraction audits through persistAtomicAudit in the transaction that stores the machine revision; the text is withheld when the write or the audit fails.",
+      "evidence": [
+        "app/api/documents/[id]/ocr/route.canonical.pglite.test.ts"
       ]
     },
     {
@@ -1047,7 +1075,9 @@
       ],
       "tests": [
         "live processor fixture with organization-scoped blob bytes; provider failure returns 502 and writes no contentText"
-      ]
+      ],
+      "status": "OPEN_EXTERNAL_ACTIVATION",
+      "integratorNote": "Real OCR bytes against a live processor and object store have not been exercised. Prerequisite: a non-production environment with the processor and blob credentials, and a corpus of approved test files."
     },
     {
       "id": "temporary-intake-lifecycle",
@@ -1060,6 +1090,12 @@
       ],
       "tests": [
         "same-organization cross-user deletion, attached objects, forged identifiers, replay, parallel races, expired intake, foreign tenants, and cleanup failure against the intake table"
+      ],
+      "status": "RESOLVED",
+      "resolution": "document_intakes (open to accepted, expired or cancelled) bound to the principal, organization, exact server-issued storage key, server checksum, MIME type, size, timestamps and intended operation. Acceptance binds atomically with the document or version; an accepted object can never be cancelled or deleted; abandoned uploads are expired and their exact objects deleted by a retrying reaper. Request and response contract: POST /api/documents/intakes (or /api/documents/upload with canonicalIntake=1) returns { success, data: { intakeId, status, operation, targetDocumentId, filename, mimeType, size, checksum, createdAt, expiresAt } } and never a storage path; POST /api/documents/repository and /api/documents/repository/[id]/versions take intakeId; POST /api/documents/intakes/[id]/cancel cancels.",
+      "evidence": [
+        "lib/documents/document-intake.pglite.test.ts",
+        "db/__tests__/document-intake.postgres.test.ts"
       ]
     },
     {
@@ -1073,6 +1109,11 @@
       ],
       "tests": [
         "unassigned, revoked, expired, recused primary owner, foreign organization, member, view-only assignment, and privileged document without classification authority"
+      ],
+      "status": "RESOLVED",
+      "resolution": "The kernel action case:process_ocr (effective permission canProcessOcr), distinct from view, upload and download, resolved from relationship status, document classification, recusal, expiry and valid document grants.",
+      "evidence": [
+        "lib/documents/ocr-authority.test.ts"
       ]
     }
   ],
@@ -1086,7 +1127,9 @@
         "apps/union-eyes/app/api/documents/route.ts",
         "apps/union-eyes/components/pension/pension-member-console.tsx",
         "apps/union-eyes/lib/mobile/background-sync.ts"
-      ]
+      ],
+      "status": "RESOLVED",
+      "resolution": "The pension console now lists pension documents from the canonical repository; the offline sync queue refuses document operations (a document needs a server-issued intake) and fails any already queued; the smoke script still expects the retired endpoint to answer 501."
     },
     {
       "id": "document-folders",
@@ -1095,7 +1138,9 @@
       "security": "Do not delete the route or answer 501 while the flag is off beyond the existing gate. Do not infer folder visibility from role seniority.",
       "files": [
         "apps/union-eyes/app/api/documents/folders/route.ts"
-      ]
+      ],
+      "status": "OPEN_NO_CANONICAL_CONTRACT",
+      "integratorNote": "No canonical folder model exists. The route stays retired (501) and is retained until one does."
     },
     {
       "id": "document-categories",
@@ -1104,7 +1149,9 @@
       "security": "Do not retarget the route at repository documents and do not delete it to shrink the inventory.",
       "files": [
         "apps/union-eyes/app/api/documents/categories/route.ts"
-      ]
+      ],
+      "status": "OPEN_NO_CANONICAL_CONTRACT",
+      "integratorNote": "Generated CRUD with no caller; no canonical category action. Retained, not retargeted."
     },
     {
       "id": "portal-cms-routes-are-not-the-document-repository",
@@ -1114,7 +1161,9 @@
       "files": [
         "apps/union-eyes/app/api/portal/documents/route.ts",
         "apps/union-eyes/app/[locale]/dashboard/documents/portal/page.tsx"
-      ]
+      ],
+      "status": "RESOLVED",
+      "resolution": "Classification only: the CMS routes are not the repository and are retained as retired stubs."
     },
     {
       "id": "signature-provider-activation",
@@ -1124,7 +1173,9 @@
       "files": [
         "apps/union-eyes/app/api/signatures/documents/route.ts",
         "apps/union-eyes/lib/signature/signature-service.ts"
-      ]
+      ],
+      "status": "OPEN_EXTERNAL_ACTIVATION",
+      "integratorNote": "No provider credentials were used. Prerequisite: sandbox provider accounts, signed webhook secrets and an approved test envelope set. Status handling is implemented and proven without a provider (lib/signature/signature-sync.pglite.test.ts)."
     },
     {
       "id": "sharepoint-credentials",
@@ -1133,7 +1184,9 @@
       "security": "Do not report a successful sync without credentials and a recorded provider response.",
       "files": [
         "apps/union-eyes/lib/integrations/adapters/documents/sharepoint-client.ts"
-      ]
+      ],
+      "status": "OPEN_EXTERNAL_ACTIVATION",
+      "integratorNote": "Needs tenant, client id and secret for a non-production SharePoint site."
     },
     {
       "id": "staff-console-bulk-download",
@@ -1143,7 +1196,9 @@
       "files": [
         "apps/union-eyes/components/documents/documents-console.tsx",
         "apps/union-eyes/components/documents/document-browser.tsx"
-      ]
+      ],
+      "status": "RESOLVED",
+      "resolution": "The console calls POST /api/documents/repository/downloads, which authorizes and audits per document and reports partial success; only issued links are opened."
     },
     {
       "id": "external-download-sas-activation",
@@ -1152,7 +1207,9 @@
       "security": "The SAS URL is an authorized retrieval reference, not a list-field leak. Provider failure must not fall back to the stored file address.",
       "files": [
         "apps/union-eyes/app/api/external/documents/[id]/download/route.ts"
-      ]
+      ],
+      "status": "OPEN_EXTERNAL_ACTIVATION",
+      "integratorNote": "Audit-before-link is proven against PostgreSQL with the authorization chain stood in. Live blob credentials have not been exercised."
     }
   ],
   "qualificationContractGaps": [
@@ -1165,6 +1222,11 @@
         "apps/union-eyes/app/api/external/documents/[id]/download/route.ts",
         "apps/union-eyes/lib/external-resource-middleware.ts",
         "apps/union-eyes/lib/audit/mandatory-audit.ts"
+      ],
+      "status": "RESOLVED",
+      "resolution": "GET /api/external/documents/[id]/download records principal, representative organization, authority, matter grant, matter, document and version durably with persistAtomicAudit before the link is returned. The link and its signature are never recorded; the link is withheld when the audit or signing fails.",
+      "evidence": [
+        "app/api/external/documents/[id]/download/route.pglite.test.ts"
       ]
     },
     {
@@ -1174,7 +1236,63 @@
       "correction": "Persist the provider completion timestamp and provider event id on the signature row. Do not treat a locally stamped completedAt as a verified provider acknowledgment.",
       "files": [
         "apps/union-eyes/lib/signature/signature-service.ts"
+      ],
+      "status": "RESOLVED",
+      "resolution": "SignatureService.syncDocumentStatus judges a provider report with decideProviderSync: only external providers report, terminal states are final, observations move forward only, and a completion time is the provider's own event time (provider_acknowledged_at, immutable, platform 0023) or none; the local receipt time is kept separately as provider_status_observed_at. The change, signer updates and audit commit together and are conditional on the judged status, so a replay or concurrent sync applies once.",
+      "evidence": [
+        "lib/signature/provider-sync.test.ts",
+        "lib/signature/signature-sync.pglite.test.ts",
+        "db/__tests__/document-intake.postgres.test.ts"
       ]
     }
+  ],
+  "integratorResolutions": [
+    {
+      "id": "legacy-file-url-fallback",
+      "resolution": "A legacy row is served only if its file URL validates as a reference into this organization's own storage (host, container, organization folder, no relative segments) and is re-signed from the verified path; a stored external or foreign URL is never returned. lib/documents/legacy-storage-backfill.ts and POST /api/admin/documents/legacy-backfill give verified legacy rows a real version and report the rest."
+    },
+    {
+      "id": "bulk-download",
+      "resolution": "POST /api/documents/repository/downloads: per-document authorization and audit, per-document outcomes, atomic:false. The console reports partial success and opens only issued links. The old sequential stop-on-first-failure loop is gone."
+    },
+    {
+      "id": "version-and-create-verification",
+      "resolution": "resolveStoredBlob accepts only this organization's own storage references, computes the SHA-256 itself, and rejects a claimed hash that differs (409). Versions refuse a stale expectedVersionNo, a file another version already holds, a deleted document, and a legal hold re-read under a row lock. The console no longer invents a \"manual:\" hash and no longer offers external URL import."
+    },
+    {
+      "id": "retention-semantics",
+      "resolution": "Legal hold and retention figures are unavailable (null), not derived from privacy labels; no simulated release, execute or save."
+    },
+    {
+      "id": "temporary-intake-contract",
+      "resolution": "document_intakes (open to accepted, expired or cancelled) bound to the principal, organization, exact server-issued storage key, server checksum, MIME type, size, timestamps and intended operation. Acceptance binds atomically with the document or version; an accepted object can never be cancelled or deleted; abandoned uploads are expired and their exact objects deleted by a retrying reaper. Request and response contract: POST /api/documents/intakes (or /api/documents/upload with canonicalIntake=1) returns { success, data: { intakeId, status, operation, targetDocumentId, filename, mimeType, size, checksum, createdAt, expiresAt } } and never a storage path; POST /api/documents/repository and /api/documents/repository/[id]/versions take intakeId; POST /api/documents/intakes/[id]/cancel cancels."
+    },
+    {
+      "id": "governed-ocr-and-transcripts",
+      "resolution": "Canonical OCR processing authority (case:process_ocr / can_process_ocr), machine and human-reviewed transcript revisions kept apart from the immutable original, evidence publication as a separate act. Cursor's parallel lib/documents/ocr-authorization.ts was removed; the OCR route, transcript routes and the upload consumer use the canonical modules."
+    },
+    {
+      "id": "external-download-audit",
+      "resolution": "GET /api/external/documents/[id]/download records principal, representative organization, authority, matter grant, matter, document and version durably with persistAtomicAudit before the link is returned. The link and its signature are never recorded; the link is withheld when the audit or signing fails."
+    },
+    {
+      "id": "signature-provider-status",
+      "resolution": "SignatureService.syncDocumentStatus judges a provider report with decideProviderSync: only external providers report, terminal states are final, observations move forward only, and a completion time is the provider's own event time (provider_acknowledged_at, immutable, platform 0023) or none; the local receipt time is kept separately as provider_status_observed_at. The change, signer updates and audit commit together and are conditional on the judged status, so a replay or concurrent sync applies once."
+    }
+  ],
+  "integratorCorrectedPaths": [
+    "apps/union-eyes/components/documents/documents-console.tsx",
+    "apps/union-eyes/components/documents/document-retention-policy.tsx",
+    "apps/union-eyes/lib/documents/canonical-journey.ts",
+    "apps/union-eyes/lib/documents/document-repository-client.ts",
+    "apps/union-eyes/app/api/documents/[id]/download/route.ts",
+    "apps/union-eyes/app/api/documents/upload/route.ts",
+    "apps/union-eyes/app/api/external/documents/[id]/download/route.ts",
+    "apps/union-eyes/app/api/documents/[id]/ocr/route.ts",
+    "apps/union-eyes/lib/documents/ocr-intake.ts",
+    "apps/union-eyes/lib/documents/ocr-intake.test.ts",
+    "apps/union-eyes/components/documents/ocr-upload.tsx",
+    "apps/union-eyes/components/documents/ocr-upload.journey.test.tsx",
+    "apps/union-eyes/lib/documents/canonical-journey.test.ts"
   ]
 }

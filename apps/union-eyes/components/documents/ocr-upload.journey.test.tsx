@@ -13,12 +13,18 @@ vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
 }));
 
+const INTAKE = '22222222-2222-4222-8222-222222222222';
 const intake = {
-  blobPath: 'documents/org-1/note.pdf',
-  checksum: 'abc',
-  size: 5,
-  mimeType: 'application/pdf',
-  filename: 'note.pdf',
+  success: true,
+  data: {
+    intakeId: INTAKE,
+    status: 'open',
+    checksum: 'a'.repeat(64),
+    size: 5,
+    mimeType: 'application/pdf',
+    filename: 'note.pdf',
+    expiresAt: '2026-01-01T00:30:00.000Z',
+  },
 };
 
 function json(body: unknown, status = 200) {
@@ -48,10 +54,18 @@ describe('ocr upload canonical journey', () => {
         const payload = JSON.parse(String(init?.body));
         expect(payload.fileUrl).toBeUndefined();
         expect(payload.privacyLabel).toBe('team_confidential');
-        expect(payload.blobPath).toBe(intake.blobPath);
+        // The create request names the server-issued intake; it carries no storage path or url.
+        expect(payload.intakeId).toBe(INTAKE);
+        expect(payload.blobPath).toBeUndefined();
+        expect(payload.fileSize).toBeUndefined();
         return json({ data: { id: DOC, title: 'note.pdf', documentType: 'ocr_upload', privacyLabel: 'privileged', fileUrl: 'https://secret.example/raw.pdf' } }, 201);
       }
-      return json({ data: { text: 'unverified draft', persisted: false, authoritative: false } });
+      if (url.endsWith('/transcript') && init?.method === 'PUT') {
+        const payload = JSON.parse(String(init?.body));
+        expect(payload).toEqual({ action: 'draft', expectedRevisionNo: 1, text: 'unverified draft' });
+        return json({ data: { revision: { revisionNo: 2 } } });
+      }
+      return json({ data: { text: 'unverified draft', revisionNo: 1, persisted: false, authoritative: false } });
     }));
 
     render(<OCRUpload organizationId="org-1" folderId="folder-1" onUploadComplete={onUploadComplete} />);
@@ -69,7 +83,8 @@ describe('ocr upload canonical journey', () => {
     expect(screen.getByTestId('ocr-upload')).toHaveClass('flex-col');
 
     await userEvent.click(screen.getByRole('button', { name: 'Save correction' }));
-    expect(screen.getByText(/cannot be saved/)).toBeInTheDocument();
+    expect(await screen.findByText(/saved as a draft revision. It is not reviewed and not evidence/)).toBeInTheDocument();
+    expect(calls).toContain(`PUT /api/documents/${DOC}/transcript`);
     expect(calls.some((call) => call.includes('PATCH'))).toBe(false);
   });
 

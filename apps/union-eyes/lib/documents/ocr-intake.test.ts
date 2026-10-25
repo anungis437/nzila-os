@@ -2,11 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   assessUpload,
   interpretOcr,
-  isDiscardableBlobPath,
   readCanonicalIntake,
   readCreatedDocument,
   repositoryIntakePayload,
-  transcriptSaveUnavailable,
+  interpretTranscriptSave,
 } from './ocr-intake';
 
 const DOC = '11111111-1111-4111-8111-111111111111';
@@ -26,34 +25,29 @@ describe('ocr intake contract', () => {
     expect(assessUpload({ name: 'a.pdf', size: 4, type: 'application/pdf' })).toEqual({ ok: true });
   });
 
-  it('discards only an organization-prefixed blob path', () => {
-    expect(isDiscardableBlobPath('documents/org-1/file.pdf', 'org-1')).toBe(true);
-    expect(isDiscardableBlobPath('documents/org-2/file.pdf', 'org-1')).toBe(false);
-    expect(isDiscardableBlobPath('documents/org-1/../org-2/file.pdf', 'org-1')).toBe(false);
-    expect(isDiscardableBlobPath('https://storage.example/documents/org-1/file.pdf', 'org-1')).toBe(false);
-    expect(isDiscardableBlobPath('/documents/org-1/file.pdf', 'org-1')).toBe(false);
-    expect(isDiscardableBlobPath('documents/org-1/', 'org-1')).toBe(false);
-  });
-
   it('separates blob intake, the canonical row, and untrusted OCR text', () => {
     const intake = {
-      blobPath: 'documents/org-1/file.pdf',
+      intakeId: DOC,
       checksum: 'abc',
       size: 4,
       mimeType: 'application/pdf',
       filename: 'file.pdf',
+      expiresAt: '2026-01-01T00:30:00.000Z',
     };
+    expect(readCanonicalIntake({ success: true, data: intake })).toEqual(intake);
     expect(readCanonicalIntake(intake)).toEqual(intake);
-    expect(readCanonicalIntake({ ...intake, fileUrl: 'https://storage.example/file.pdf' })).toBeNull();
-    expect(readCanonicalIntake({ id: DOC, fileUrl: 'https://storage.example/file.pdf' })).toBeNull();
+    // A response that carries a storage path or URL is not an intake receipt.
+    expect(readCanonicalIntake({ data: { ...intake, blobPath: 'documents/org-1/file.pdf' } })).toBeNull();
+    expect(readCanonicalIntake({ data: { ...intake, storageKey: 'documents/org-1/intake/x/y' } })).toBeNull();
+    expect(readCanonicalIntake({ data: { ...intake, fileUrl: 'https://storage.example/file.pdf' } })).toBeNull();
+    expect(readCanonicalIntake({ data: { ...intake, intakeId: 'not-a-uuid' } })).toBeNull();
+    // The create request names the intake and never repeats facts the server already recorded.
     expect(repositoryIntakePayload(intake, 'privileged')).toEqual({
       title: 'file.pdf',
       filename: 'file.pdf',
-      blobPath: intake.blobPath,
+      intakeId: DOC,
       documentType: 'ocr_upload',
-      mimeType: 'application/pdf',
       privacyLabel: 'privileged',
-      fileSize: 4,
     });
     expect(readCreatedDocument({
       data: {
@@ -73,10 +67,16 @@ describe('ocr intake contract', () => {
     expect(interpretOcr(200, { data: { text: 'draft', persisted: false, authoritative: false } })).toEqual({
       kind: 'review',
       text: 'draft',
+      revisionNo: null,
     });
     expect(interpretOcr(200, { data: { text: 'draft', authoritative: true } })).toEqual({ kind: 'failed' });
     expect(interpretOcr(200, { data: { text: 'draft', blobPath: 'documents/org-1/file.pdf' } })).toEqual({ kind: 'failed' });
     expect(interpretOcr(501, {})).toEqual({ kind: 'unavailable' });
-    expect(transcriptSaveUnavailable()).toEqual({ accepted: false, reason: 'ocr-transcript-persistence' });
+    expect(interpretOcr(200, { data: { text: 'draft', revisionNo: 1 } })).toEqual({ kind: 'review', text: 'draft', revisionNo: 1 });
+    expect(interpretTranscriptSave(200, { data: { revision: { revisionNo: 2 } } })).toEqual({ kind: 'saved', revisionNo: 2 });
+    expect(interpretTranscriptSave(200, { data: {} })).toEqual({ kind: 'failed' });
+    expect(interpretTranscriptSave(409, {})).toEqual({ kind: 'stale' });
+    expect(interpretTranscriptSave(403, {})).toEqual({ kind: 'denied' });
+    expect(interpretTranscriptSave(503, {})).toEqual({ kind: 'failed' });
   });
 });

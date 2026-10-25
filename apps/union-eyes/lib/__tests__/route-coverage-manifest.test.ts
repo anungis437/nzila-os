@@ -85,7 +85,7 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
   it('treats a route as kernel-decided only when it imports the kernel or the kernel-backed case access service', () => {
     for (const e of fresh.filter((r) => r.kernel && r.guard !== 'DELEGATED')) {
       const source = readFileSync(join(ROOT, 'app', 'api', e.route), 'utf8')
-      expect(source).toMatch(/lib\/authority|case-access-service|download-issuance|route-adapter|findReadableCase\(|requireCaseFilingCapacity\(|hasCaseFilingCapacity\(|requireKernelCaseAction\(/)
+      expect(source).toMatch(/lib\/authority|case-access-service|download-issuance|ocr-authority|intake-lifecycle|route-adapter|findReadableCase\(|requireCaseFilingCapacity\(|hasCaseFilingCapacity\(|requireKernelCaseAction\(/)
     }
   })
 

@@ -13,6 +13,10 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import { documents, documentLinks, documentVersions } from '@/db/schema/documents-schema';
 import { resolveStoredBlob, storedBlobFailure } from '@/lib/services/document-blob-integrity-service';
+import { bindIntakeInTx, checkIntakeForAcceptance, IntakeConflictError } from '@/lib/documents/intake-lifecycle';
+import { blobIntakeStorage } from '@/lib/documents/intake-storage';
+import { intakeRefusal } from '@/lib/documents/intake-acceptance';
+import { generateSasUrl } from '@/lib/blob-client';
 import { getDocumentMutabilityBlockReason } from '@/lib/services/document-retention-guard';
 
 // contentHash is a claim, not a fact: when supplied it must equal the SHA-256 the server computes from storage.
@@ -20,11 +24,13 @@ import { getDocumentMutabilityBlockReason } from '@/lib/services/document-retent
 const appendVersionSchema = z.object({
   fileUrl: z.string().url().optional(),
   blobPath: z.string().min(1).optional(),
+  // The server-issued handle for an uploaded file (POST /api/documents/intakes, operation append_version).
+  intakeId: z.string().uuid().optional(),
   contentHash: z.string().regex(/^[0-9a-fA-F]{64}$/, 'contentHash must be a SHA-256 hex digest').optional(),
   expectedVersionNo: z.number().int().positive().optional(),
-}).strict().refine((value) => Boolean(value.blobPath || value.fileUrl), {
-  message: 'blobPath or fileUrl is required',
-  path: ['blobPath'],
+}).strict().refine((value) => Boolean(value.intakeId) !== Boolean(value.blobPath || value.fileUrl), {
+  message: 'intakeId, or blobPath/fileUrl, is required (not both)',
+  path: ['intakeId'],
 });
 
 export const POST = withOrganizationAuth(async (request, context, params?: { id: string }) => {
@@ -41,14 +47,37 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid version payload', parsed.error.flatten());
   }
 
+  let intakeId: string | null = null;
   let resolvedBlob;
   try {
-    resolvedBlob = await resolveStoredBlob({
-      organizationId,
-      blobPath: parsed.data.blobPath,
-      fileUrl: parsed.data.fileUrl,
-      expectedContentHash: parsed.data.contentHash,
-    });
+    if (parsed.data.intakeId) {
+      const check = await checkIntakeForAcceptance(
+        { organizationId, userId, intakeId: parsed.data.intakeId, operation: 'append_version', targetDocumentId: params.id },
+        blobIntakeStorage,
+      );
+      if (!check.ok) return intakeRefusal(check);
+      if (check.replay) {
+        const [existing] = await db
+          .select()
+          .from(documentVersions)
+          .where(and(eq(documentVersions.id, check.intake.acceptedVersionId ?? ''), eq(documentVersions.organizationId, organizationId)))
+          .limit(1);
+        return existing ? standardSuccessResponse({ ...existing, replay: true }) : standardErrorResponse(ErrorCode.CONFLICT, 'The intake was already used');
+      }
+      intakeId = check.intake.id;
+      resolvedBlob = {
+        blobPath: check.intake.storageKey,
+        contentHash: check.intake.contentHash,
+        fileUrl: await generateSasUrl(process.env.AZURE_BLOB_CONTAINER ?? 'union-eyes', check.intake.storageKey),
+      };
+    } else {
+      resolvedBlob = await resolveStoredBlob({
+        organizationId,
+        blobPath: parsed.data.blobPath,
+        fileUrl: parsed.data.fileUrl,
+        expectedContentHash: parsed.data.contentHash,
+      });
+    }
   } catch (error) {
     const failure = storedBlobFailure(error);
     return standardErrorResponse(
@@ -97,7 +126,9 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
 
   // The new version, the document's current file and the audit record commit together. The document row is locked
   // first, so the stale-base check, the blob-reuse check and the append all judge the same state.
-  const outcome = await withRLSContext({ organizationId }, async (tx) => {
+  let outcome;
+  try {
+  outcome = await withRLSContext({ organizationId }, async (tx) => {
     const [locked] = await tx
       .select({ metadata: documents.metadata })
       .from(documents)
@@ -145,6 +176,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       .update(documents)
       .set({ fileUrl: resolvedBlob.fileUrl, updatedAt: new Date() })
       .where(and(eq(documents.id, params.id), eq(documents.organizationId, organizationId)));
+    if (intakeId) await bindIntakeInTx(tx, { organizationId, userId, intakeId, documentId: params.id, versionId: created.id });
     await persistAtomicAudit(tx, {
       organizationId,
       userId,
@@ -155,6 +187,10 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
     });
     return { kind: 'created' as const, version: created };
   });
+  } catch (error) {
+    if (error instanceof IntakeConflictError) return standardErrorResponse(ErrorCode.CONFLICT, 'The intake is no longer open');
+    throw error;
+  }
 
   switch (outcome.kind) {
     case 'created':

@@ -9,6 +9,8 @@ import { logger } from '@/lib/logger';
 import { syncQueue } from './offline-storage';
 
 // Sync configuration
+const DOCUMENT_NOT_QUEUEABLE = 'Documents cannot be synced from the offline queue; upload them online so the server can issue an intake.';
+
 export interface SyncConfig {
   maxRetries: number;
   retryDelay: number;
@@ -71,6 +73,9 @@ export class BackgroundSyncManager {
    * Queue an item for background sync
    */
   async queueForSync(operation: SyncOperation): Promise<void> {
+    // A document is a file plus a classification, filed through a server-issued intake and the canonical repository.
+    // A JSON record replayed later can carry neither, so documents are never queued.
+    if (operation.entity === 'document') throw new Error(DOCUMENT_NOT_QUEUEABLE);
     await syncQueue.add(operation);
     
     // Try to trigger immediate sync if supported
@@ -133,6 +138,8 @@ export class BackgroundSyncManager {
    * Process a single sync operation
    */
   private async processOperation(operation: QueuedOperation): Promise<void> {
+    // The retired generic documents endpoint answers 501. An already-queued document operation is failed, not retried.
+    if (operation.entity === 'document') throw new Error(DOCUMENT_NOT_QUEUEABLE);
     const endpoint = this.getEndpoint(operation.entity);
     
     const options: RequestInit = {
@@ -161,7 +168,6 @@ export class BackgroundSyncManager {
       claim: '/api/claims',
       member: '/api/members',
       message: '/api/messages',
-      document: '/api/documents',
     };
     return endpoints[entity] || `/api/${entity}`;
   }

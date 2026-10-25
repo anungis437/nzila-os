@@ -25,7 +25,6 @@ const RETIRED: Array<[string, () => Promise<Record<string, unknown>>, readonly s
   ['documents/categories', () => import('../documents/categories/route'), ['GET', 'POST'], DOCS],
   ['documents/folders', () => import('../documents/folders/route'), ['GET', 'POST'], DOCS],
   ['documents/[id]', () => import('../documents/[id]/route'), ['GET', 'PATCH', 'DELETE'], `${DOCS}/{id}`],
-  ['documents/[id]/ocr', () => import('../documents/[id]/ocr/route'), ['POST'], DOCS],
 ];
 
 describe.each(RETIRED)('retired route %s', (_name, load, methods, replacement) => {

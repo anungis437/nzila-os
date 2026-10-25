@@ -49,48 +49,46 @@ export function assessUpload(file: { name: string; size: number; type: string })
   return { ok: true };
 }
 
-/** Organization blob prefix. This check does not authorize deletion. */
-export function isDiscardableBlobPath(path: string, organizationId: string): boolean {
-  if (!organizationId || organizationId.includes('/') || organizationId.includes('..')) return false;
-  if (!path || path.includes('..') || path.includes('\\') || path.includes('://') || path.startsWith('/')) return false;
-  const prefix = `documents/${organizationId}/`;
-  return path.startsWith(prefix) && path.length > prefix.length;
-}
-
+/**
+ * What the server answers after it has received a file (POST /api/documents/upload with canonicalIntake=1, or
+ * POST /api/documents/intakes). The intake id is the only handle: there is no storage path to hold, send or delete.
+ */
 export type CanonicalIntake = {
-  blobPath: string;
+  intakeId: string;
   checksum: string;
   size: number;
   mimeType: string;
   filename: string;
+  expiresAt: string;
 };
 
-/** Intake is the blob contract only. A document row or a storage URL is not intake. */
+/** Intake is the server's receipt. A document row, a storage path or a URL is not an intake. */
 export function readCanonicalIntake(body: unknown): CanonicalIntake | null {
   if (!body || typeof body !== 'object') return null;
-  const source = body as Record<string, unknown>;
-  if ('url' in source || 'fileUrl' in source || 'downloadUrl' in source || 'id' in source || 'contentText' in source) {
-    return null;
+  const envelope = body as Record<string, unknown>;
+  const source = envelope.data && typeof envelope.data === 'object' ? (envelope.data as Record<string, unknown>) : envelope;
+  for (const forbidden of ['url', 'fileUrl', 'downloadUrl', 'blobPath', 'storageKey', 'contentText']) {
+    if (forbidden in source) return null;
   }
-  const blobPath = source.blobPath;
+  const intakeId = source.intakeId;
   const checksum = source.checksum;
   const filename = source.filename;
   const mimeType = source.mimeType;
   const size = source.size;
-  if (typeof blobPath !== 'string' || typeof checksum !== 'string' || typeof filename !== 'string') return null;
+  const expiresAt = source.expiresAt;
+  if (typeof intakeId !== 'string' || !UUID.test(intakeId)) return null;
+  if (typeof checksum !== 'string' || typeof filename !== 'string' || typeof expiresAt !== 'string') return null;
   if (typeof mimeType !== 'string' || typeof size !== 'number' || !Number.isFinite(size)) return null;
-  return { blobPath, checksum, size, mimeType, filename };
+  return { intakeId, checksum, size, mimeType, filename, expiresAt };
 }
 
 export function repositoryIntakePayload(intake: CanonicalIntake, privacyLabel: string) {
   return {
     title: intake.filename,
     filename: intake.filename,
-    blobPath: intake.blobPath,
+    intakeId: intake.intakeId,
     documentType: 'ocr_upload',
-    mimeType: intake.mimeType,
     privacyLabel,
-    fileSize: intake.size,
   };
 }
 
@@ -117,7 +115,7 @@ export function readCreatedDocument(body: unknown): CreatedDocumentRef | null {
 }
 
 export type OcrInterpretation =
-  | { kind: 'review'; text: string }
+  | { kind: 'review'; text: string; revisionNo: number | null }
   | { kind: 'unavailable' }
   | { kind: 'denied' }
   | { kind: 'failed' };
@@ -136,11 +134,29 @@ export function interpretOcr(status: number, body: unknown): OcrInterpretation {
   if (record.persisted === true || record.authoritative === true) return { kind: 'failed' };
   if (typeof record.text !== 'string') return { kind: 'failed' };
   if ('blobPath' in record || 'fileUrl' in record || 'contentText' in record) return { kind: 'failed' };
-  return { kind: 'review', text: record.text };
+  const revisionNo = typeof record.revisionNo === 'number' && Number.isInteger(record.revisionNo) ? record.revisionNo : null;
+  return { kind: 'review', text: record.text, revisionNo };
 }
 
-export function transcriptSaveUnavailable(): { accepted: false; reason: 'ocr-transcript-persistence' } {
-  return { accepted: false, reason: 'ocr-transcript-persistence' };
+export type TranscriptSaveResult =
+  | { kind: 'saved'; revisionNo: number }
+  | { kind: 'stale' }
+  | { kind: 'denied' }
+  | { kind: 'failed' };
+
+/**
+ * A correction is saved as a human draft revision (PUT /api/documents/[id]/transcript). It is not reviewed and it is not
+ * evidence; the screen never claims otherwise, and a stale edit is reported rather than overwritten.
+ */
+export function interpretTranscriptSave(status: number, body: unknown): TranscriptSaveResult {
+  if (status === 409) return { kind: 'stale' };
+  if (status === 401 || status === 403 || status === 404) return { kind: 'denied' };
+  if (status !== 200 || !body || typeof body !== 'object') return { kind: 'failed' };
+  const data = (body as { data?: unknown }).data;
+  const revision = data && typeof data === 'object' ? (data as { revision?: unknown }).revision : null;
+  const revisionNo = revision && typeof revision === 'object' ? (revision as { revisionNo?: unknown }).revisionNo : null;
+  if (typeof revisionNo !== 'number' || !Number.isInteger(revisionNo)) return { kind: 'failed' };
+  return { kind: 'saved', revisionNo };
 }
 
 export function ocrCopy(locale: string) {
@@ -163,7 +179,10 @@ export function ocrCopy(locale: string) {
       denied: 'Vous n avez pas l autorisation de traiter ce document.',
       failed: 'Le traitement OCR a echoue. Le document enregistre reste inchange.',
       notSaved: 'Le document n a pas ete enregistre. Les objets stockes ne peuvent pas etre supprimes depuis cet ecran.',
-      transcript: 'La transcription corrigee ne peut pas etre enregistree. Aucune ecriture canonique n existe pour ce texte.',
+      transcript: 'Correction enregistree comme brouillon de revision. Elle n est ni examinee ni une preuve.',
+      transcriptStale: 'La transcription a change depuis son chargement. Rechargez avant de corriger.',
+      transcriptDenied: 'Vous n avez pas l autorisation de modifier cette transcription.',
+      transcriptFailed: 'La correction n a pas ete enregistree. Le texte original est inchange.',
       cancel: 'Annuler',
       cancelled: 'Traitement annule.',
       retry: 'Reessayer',
@@ -190,7 +209,10 @@ export function ocrCopy(locale: string) {
     denied: 'You do not have permission to process this document.',
     failed: 'OCR processing failed. The saved document was left unchanged.',
     notSaved: 'The document was not saved. Stored objects cannot be deleted from this screen.',
-    transcript: 'The corrected transcription cannot be saved. There is no canonical write for that text.',
+    transcript: 'Correction saved as a draft revision. It is not reviewed and not evidence.',
+    transcriptStale: 'The transcript changed since it was loaded. Reload before correcting.',
+    transcriptDenied: 'You do not have permission to change this transcript.',
+    transcriptFailed: 'The correction was not saved. The extracted text is unchanged.',
     cancel: 'Cancel',
     cancelled: 'Processing cancelled.',
     retry: 'Retry',

@@ -53,6 +53,7 @@ const HANDLER_ACTIONS: readonly Action[] = [
   'case:draft_action',
   'case:upload_evidence',
   'case:modify_document',
+  'case:process_ocr',
   'case:transition',
 ]
 const MEMBER_ACTIONS: readonly Action[] = ['case:read', 'case:comment']

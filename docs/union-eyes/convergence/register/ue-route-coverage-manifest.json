@@ -1,9 +1,9 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 970,
-  "mutating": 697,
-  "kernel": 41,
+  "routes": 976,
+  "mutating": 702,
+  "kernel": 48,
   "byGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 12,
@@ -11,13 +11,13 @@
    "CRUD_FACTORY": 297,
    "DELEGATED": 23,
    "NONE": 51,
-   "ORG_AUTH": 47,
+   "ORG_AUTH": 53,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 68,
+   "RETIRED": 67,
    "ROLE_AUTH": 125,
    "SESSION_AUTH": 52,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 270,
+   "WITH_API": 271,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -27,30 +27,30 @@
    "CRUD_FACTORY": 297,
    "DELEGATED": 16,
    "NONE": 8,
-   "ORG_AUTH": 27,
+   "ORG_AUTH": 32,
    "PLATFORM_AUTH_HANDLER": 7,
-   "RETIRED": 61,
+   "RETIRED": 60,
    "ROLE_AUTH": 74,
    "SESSION_AUTH": 23,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 163
+   "WITH_API": 164
   },
   "mutatingByAudit": {
    "ATOMIC": 141,
-   "ATOMIC_SERVICE": 123,
+   "ATOMIC_SERVICE": 129,
    "COMPUTE_ONLY": 34,
    "CRUD_ATOMIC": 299,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 22,
    "NO_WRITES_FOUND": 14,
-   "NONE": 62
+   "NONE": 61
   },
   "mutatingByData": {
    "AMBIENT_DB": 14,
    "CRUD_TENANT_TX": 299,
-   "NONE": 197,
+   "NONE": 199,
    "SYSTEM_CONTEXT": 56,
-   "TENANT_TX": 131
+   "TENANT_TX": 134
   }
  },
  "routes": [
@@ -4721,6 +4721,19 @@
    "audit": "READ_ONLY"
   },
   {
+   "route": "cron/document-intake-reaper/route.ts",
+   "methods": [
+    "GET",
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": true,
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
    "route": "cron/education-reminders/route.ts",
    "methods": [
     "GET"
@@ -5098,11 +5111,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "RETIRED",
-   "kernel": false,
+   "guard": "ORG_AUTH",
+   "kernel": true,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "documents/[id]/route.ts",
@@ -5117,6 +5130,31 @@
    "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
+  },
+  {
+   "route": "documents/[id]/transcript/publish/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "ORG_AUTH",
+   "kernel": true,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
+   "route": "documents/[id]/transcript/route.ts",
+   "methods": [
+    "GET",
+    "PUT"
+   ],
+   "mutating": true,
+   "guard": "ORG_AUTH",
+   "kernel": true,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "documents/bulk/route.ts",
@@ -5155,6 +5193,42 @@
    "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
+  },
+  {
+   "route": "documents/intakes/[id]/cancel/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "ORG_AUTH",
+   "kernel": true,
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
+   "route": "documents/intakes/[id]/route.ts",
+   "methods": [
+    "GET"
+   ],
+   "mutating": false,
+   "guard": "ORG_AUTH",
+   "kernel": true,
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "READ_ONLY"
+  },
+  {
+   "route": "documents/intakes/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "ORG_AUTH",
+   "kernel": true,
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "documents/repository/[id]/route.ts",

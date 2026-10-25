@@ -65,6 +65,6 @@ describe('document lane qualification statuses', () => {
     expect(status.get('apps/union-eyes/lib/services/cba-intelligence/__tests__/document-service.test.ts')).toBe('IMPLEMENTED_TESTED');
     expect(status.get('apps/union-eyes/lib/services/cba-intelligence/document-service.ts')).toBe('IMPLEMENTED_TESTED');
     expect(status.get('apps/union-eyes/lib/integrations/adapters/documents/sharepoint-adapter.ts')).toBe('BLOCKED_EXTERNAL_ACTIVATION');
-    expect(status.get('apps/union-eyes/app/api/external/documents/[id]/download/route.ts')).toBe('BLOCKED_CANONICAL_CONTRACT');
+    expect(status.get('apps/union-eyes/app/api/external/documents/[id]/download/route.ts')).toBe('IMPLEMENTED_PENDING_RUNTIME_PROOF');
   });
 });

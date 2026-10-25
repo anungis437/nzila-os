@@ -12,6 +12,7 @@ const m = vi.hoisted(() => ({
   isMalwareScanError: vi.fn(),
   requireCaseFilingCapacity: vi.fn(),
   hasCaseFilingCapacity: vi.fn(),
+  openIntake: vi.fn(),
 }));
 
 vi.mock('@/lib/cases/case-authorization', () => ({ requireCaseFilingCapacity: m.requireCaseFilingCapacity, hasCaseFilingCapacity: m.hasCaseFilingCapacity }));
@@ -34,6 +35,8 @@ vi.mock('@/lib/db/org-owned-context', () => ({ withOrgOwnedContext: (operation: 
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.appendMandatoryAudit }));
 vi.mock('@/lib/blob-client', () => ({ putBlob: m.putBlob, deleteBlob: m.deleteBlob }));
 vi.mock('@/lib/security/clamav', () => ({ isMalwareScanError: m.isMalwareScanError }));
+vi.mock('@/lib/documents/intake-lifecycle', () => ({ openIntake: m.openIntake }));
+vi.mock('@/lib/documents/intake-storage', () => ({ blobIntakeStorage: {} }));
 
 async function loadRoute() {
   return import('../documents/upload/route');
@@ -212,12 +215,15 @@ describe('documents/upload route', () => {
     expect(response.status).toBe(400);
   });
 
-  it('stores canonical intake without a document row or a storage url', async () => {
+  it('opens a server-issued intake and returns its id, never a storage path or url', async () => {
     const { POST } = await loadRoute();
-    m.putBlob.mockResolvedValueOnce({
-      url: 'https://blob.test/secret',
-      pathname: 'documents/org_1/note.pdf',
-      malwareScan: { status: 'clean' },
+    m.openIntake.mockResolvedValueOnce({
+      ok: true,
+      intake: {
+        intakeId: '11111111-1111-4111-8111-111111111111', status: 'open', operation: 'create_document', targetDocumentId: null,
+        filename: 'note.pdf', mimeType: 'application/pdf', size: 3, checksum: 'a'.repeat(64),
+        createdAt: '2026-01-01T00:00:00.000Z', expiresAt: '2026-01-01T00:30:00.000Z', acceptedDocumentId: null, acceptedVersionId: null,
+      },
     });
     const file = new File([new Uint8Array([1, 2, 3])], 'note.pdf', { type: 'application/pdf' });
     const form = new FormData();
@@ -231,16 +237,32 @@ describe('documents/upload route', () => {
     });
     const body = await response.json();
     expect(response.status).toBe(201);
-    expect(body).toEqual({
-      blobPath: 'documents/org_1/note.pdf',
-      checksum: expect.any(String),
-      size: 3,
-      mimeType: 'application/pdf',
-      filename: 'note.pdf',
-    });
-    expect(JSON.stringify(body)).not.toContain('https://blob.test/secret');
+    expect(body).toEqual({ success: true, data: expect.objectContaining({ intakeId: '11111111-1111-4111-8111-111111111111', size: 3, checksum: 'a'.repeat(64) }) });
+    expect(JSON.stringify(body)).not.toMatch(/blobPath|storageKey|https?:\/\//);
+    expect(m.openIntake).toHaveBeenCalledWith(
+      expect.objectContaining({ organizationId: 'org_1', userId: 'u1', operation: 'create_document', filename: 'note.pdf', mimeType: 'application/pdf' }),
+      expect.anything(),
+    );
+    // The upload route stores nothing itself in this mode and writes no document.
+    expect(m.putBlob).not.toHaveBeenCalled();
     expect(m.insertDocument).not.toHaveBeenCalled();
-    expect(m.appendMandatoryAudit).not.toHaveBeenCalled();
+  });
+
+  it('reports a refused or failed intake without leaking storage detail', async () => {
+    const { POST } = await loadRoute();
+    const send = async () => {
+      const form = new FormData();
+      form.set('file', new File([new Uint8Array([1])], 'note.pdf', { type: 'application/pdf' }));
+      form.set('organizationId', 'org_1');
+      form.set('canonicalIntake', '1');
+      return POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), { userId: 'u1', organizationId: 'org_1' });
+    };
+    m.openIntake.mockResolvedValueOnce({ ok: false, kind: 'invalid' });
+    expect((await send()).status).toBe(400);
+    m.openIntake.mockResolvedValueOnce({ ok: false, kind: 'upload_failed', error: new Error('documents/org_1/secret failed') });
+    const failed = await send();
+    expect(failed.status).toBeGreaterThanOrEqual(500);
+    expect(JSON.stringify(await failed.json())).not.toContain('documents/org_1/secret');
   });
 
   it('refuses client discard without deleting the supplied path', async () => {

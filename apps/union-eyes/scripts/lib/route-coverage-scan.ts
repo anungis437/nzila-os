@@ -219,7 +219,7 @@ export function scanRoutes(root: string): RouteEntry[] {
         methods,
         mutating,
         guard,
-        kernel: /lib\/authority|case-access-service|lib\/documents\/download-issuance|authority\/store\/route-adapter|findReadableCase\(|requireCaseFilingCapacity\(|hasCaseFilingCapacity\(|requireKernelCaseAction\(/.test(source),
+        kernel: /lib\/authority|case-access-service|lib\/documents\/(?:download-issuance|ocr-authority|intake-lifecycle)|authority\/store\/route-adapter|findReadableCase\(|requireCaseFilingCapacity\(|hasCaseFilingCapacity\(|requireKernelCaseAction\(/.test(source),
         subordinate: (/lib\/messaging\/thread-(access|assignment)/.test(source)
           ? 'THREAD_POLICY'
           : /withExternalMatterResourceAuth/.test(source)

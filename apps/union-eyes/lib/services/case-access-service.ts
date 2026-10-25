@@ -24,6 +24,7 @@ export interface CaseAccessScopeInput {
   canEditCaseNotes?: boolean
   canDraftActions?: boolean
   canModifyDocuments?: boolean
+  canProcessOcr?: boolean
   canViewPrivateDocuments?: boolean
 }
 
@@ -47,6 +48,8 @@ export interface EffectiveCaseAccess {
   canEditCaseNotes: boolean
   canDraftActions: boolean
   canModifyDocuments: boolean
+  /** The kernel's own decision for case:process_ocr. Never inferred from viewing, uploading or modifying. */
+  canProcessOcr: boolean
   canDiscloseToMember: boolean
   canViewPrivateDocuments: boolean
   ownerOnly: {
@@ -86,6 +89,7 @@ export interface CaseCollaborator {
   canEditCaseNotes: boolean
   canDraftActions: boolean
   canModifyDocuments: boolean
+  canProcessOcr: boolean
   canViewPrivateDocuments: boolean
   status: 'active' | 'revoked'
   grantedBy: string | null
@@ -104,6 +108,7 @@ const NO_ACCESS: EffectiveCaseAccess = {
   canEditCaseNotes: false,
   canDraftActions: false,
   canModifyDocuments: false,
+  canProcessOcr: false,
   canDiscloseToMember: false,
   canViewPrivateDocuments: false,
   ownerOnly: { canReassignPrimary: false, canCloseCase: false, canRemovePrimaryAccess: false, canExportSealedEvidence: false },
@@ -132,7 +137,7 @@ async function liveRelationships(tx: RLSTx, organizationId: string, caseId: stri
 const permissionList = (value: unknown): string[] =>
   Array.isArray(value) ? value.map(String) : typeof value === 'string' ? value.replace(/^\{|\}$/g, '').split(',').filter(Boolean) : []
 
-const EDITING_PERMISSIONS = ['write_notes', 'draft_action', 'upload_evidence', 'modify_document'] as const
+const EDITING_PERMISSIONS = ['write_notes', 'draft_action', 'upload_evidence', 'modify_document', 'process_ocr'] as const
 
 function roleFor(permissions: readonly string[]): CaseAccessRole {
   if (EDITING_PERMISSIONS.some((p) => permissions.includes(p))) return 'secondary_lro'
@@ -155,6 +160,7 @@ export async function kernelCaseAccess(
     draft: await allowed('case:draft_action'),
     upload: await allowed('case:upload_evidence'),
     modify: await allowed('case:modify_document'),
+    ocr: await allowed('case:process_ocr'),
     disclose: await allowed('case:disclose_to_member'),
     close: await allowed('case:close'),
     sealed: await allowed('case:export_sealed_evidence'),
@@ -172,6 +178,7 @@ export async function kernelCaseAccess(
     canEditCaseNotes: can.notes,
     canDraftActions: can.draft,
     canModifyDocuments: can.modify,
+    canProcessOcr: can.ocr,
     canDiscloseToMember: can.disclose,
     canViewPrivateDocuments: can.restricted,
   }
@@ -219,6 +226,7 @@ function toCollaborator(r: Row): CaseCollaborator {
     canEditCaseNotes: primary || permissions.includes('write_notes'),
     canDraftActions: primary || permissions.includes('draft_action'),
     canModifyDocuments: primary || permissions.includes('modify_document'),
+    canProcessOcr: primary || permissions.includes('process_ocr'),
     canViewPrivateDocuments: primary || permissions.includes('read_third_party_restricted'),
     status: 'active',
     grantedBy: (r.granted_by as string | null) ?? null,
@@ -239,10 +247,10 @@ export async function assignedCaseRepresentativeIds(organizationId: string, case
 
 /** Validates grant terms independent of who is asking. Pure so the policy can be exercised without a database. */
 export function validateCaseAccessGrantTerms(
-  input: Pick<GrantCaseAccessInput, 'accessRole' | 'expiresAt' | 'canViewPrivateDocuments' | 'canUploadDocuments' | 'canEditCaseNotes' | 'canDraftActions' | 'canModifyDocuments'>,
+  input: Pick<GrantCaseAccessInput, 'accessRole' | 'expiresAt' | 'canViewPrivateDocuments' | 'canUploadDocuments' | 'canEditCaseNotes' | 'canDraftActions' | 'canModifyDocuments' | 'canProcessOcr'>,
   now: Date = new Date(),
 ): CaseAccessMutationFailure | null {
-  if (input.accessRole !== 'secondary_lro' && (input.canEditCaseNotes || input.canDraftActions || input.canUploadDocuments || input.canModifyDocuments)) {
+  if (input.accessRole !== 'secondary_lro' && (input.canEditCaseNotes || input.canDraftActions || input.canUploadDocuments || input.canModifyDocuments || input.canProcessOcr)) {
     return { ok: false, status: 400, code: 'SCOPE_EXCEEDS_ROLE', message: 'Only a secondary LRO grant may carry editing, drafting or upload rights.' }
   }
   const requiresExpiry = input.accessRole !== 'secondary_lro' || input.canViewPrivateDocuments === true
@@ -260,7 +268,7 @@ export function validateCaseAccessGrantTerms(
 
 /** The kernel permissions a collaborator grant carries; the kernel intersects them with its own ceiling. */
 export function collaboratorPermissions(
-  input: Pick<GrantCaseAccessInput, 'accessRole' | 'canComment' | 'canUploadDocuments' | 'canEditCaseNotes' | 'canDraftActions' | 'canModifyDocuments' | 'canViewPrivateDocuments'>,
+  input: Pick<GrantCaseAccessInput, 'accessRole' | 'canComment' | 'canUploadDocuments' | 'canEditCaseNotes' | 'canDraftActions' | 'canModifyDocuments' | 'canProcessOcr' | 'canViewPrivateDocuments'>,
 ): string[] {
   const permissions = ['read', 'read_internal']
   if (input.accessRole !== 'read_only' && input.canComment !== false) permissions.push('comment')
@@ -270,6 +278,7 @@ export function collaboratorPermissions(
     if (input.canDraftActions) permissions.push('draft_action')
     if (input.canUploadDocuments) permissions.push('upload_evidence')
     if (input.canModifyDocuments) permissions.push('modify_document')
+    if (input.canProcessOcr) permissions.push('process_ocr')
   }
   if (input.canViewPrivateDocuments) permissions.push('read_third_party_restricted')
   return permissions
@@ -377,7 +386,7 @@ export async function assignPrimaryRepresentative(
   const holders = [...new Set(current.map((c) => c.userId))]
   if (holders.length === 1 && holders[0] === params.assigneeUserId) return { previousUserId: params.assigneeUserId }
   const effectiveAt = new Date(Date.now() - 1000)
-  const permissions = ['read', 'read_internal', 'comment', 'write_notes', 'draft_action', 'upload_evidence', 'modify_document']
+  const permissions = ['read', 'read_internal', 'comment', 'write_notes', 'draft_action', 'upload_evidence', 'modify_document', 'process_ocr']
   if (holders.length === 0) {
     await assignCase(exec, kernelDeps, {
       organizationId: params.organizationId, issuerUserId: params.issuerUserId, caseId: params.grievanceId,

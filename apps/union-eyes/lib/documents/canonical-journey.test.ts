@@ -85,7 +85,8 @@ describe('canonical document journey rules', () => {
       integratorReservedCaseDocumentRoutes: string[];
     };
     const tracked = matrix.paths.map((entry) => entry.path);
-    expect(tracked).toEqual(coordination.cursorMayEdit);
+    // The integrator registers new Cursor-lane files in cursorMayEdit; the matrix classifies the 48 allocated paths.
+    expect(coordination.cursorMayEdit).toEqual(expect.arrayContaining(tracked));
     const allowed = new Set([
       'MIGRATE',
       'REPLACE',
@@ -103,7 +104,7 @@ describe('canonical document journey rules', () => {
     expect(tracked.some((path) => protectedPaths.has(path))).toBe(false);
     const status = new Map(matrix.paths.map((entry) => [entry.path, entry.migrationStatus]));
     expect(status.get('apps/union-eyes/app/[locale]/dashboard/documents/page.tsx')).toBe('IMPLEMENTED_PENDING_RUNTIME_PROOF');
-    expect(status.get('apps/union-eyes/app/api/documents/[id]/download/route.ts')).toBe('BLOCKED_CANONICAL_CONTRACT');
+    expect(status.get('apps/union-eyes/app/api/documents/[id]/download/route.ts')).toBe('IMPLEMENTED_PENDING_RUNTIME_PROOF');
     expect(status.get('apps/union-eyes/components/documents/documents-console.tsx')).toBe('IMPLEMENTED_PENDING_RUNTIME_PROOF');
     expect(matrix.canonicalContractGaps.map((gap) => gap.id)).toEqual([
       'document-share-disclosure',

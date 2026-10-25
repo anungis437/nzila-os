@@ -197,6 +197,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   // ── Member-facing pages (any authenticated member) ─────────────────────
   { path: 'cases/page.tsx',                              minRole: 'member',               description: 'Cases alias — server redirect to /dashboard/claims (requireUser)' },
   { path: 'documents/page.tsx',                          minRole: 'member',               description: 'Document library root — auth by layout, API routes gate per-op (read→member, write→steward)' },
+  { path: 'documents/portal/page.tsx',                   minRole: 'member',               description: 'Member document portal over the canonical repository — auth by layout; every read, download and upload is authorized per document by the repository routes' },
   { path: 'inbox/page.tsx',                              minRole: 'member',               description: 'Unified signal feed — auth by layout, InboxConsole uses Suspense for useSearchParams' },
   { path: 'priorities/page.tsx',                         minRole: 'member',               description: 'Priorities console — auth by layout, PrioritiesConsole uses Suspense for useSearchParams' },
   { path: 'work/page.tsx',                               minRole: 'member',               description: 'Wave 3 casework alias — auth by layout, renders WorkbenchConsole or InboxConsole by role' },

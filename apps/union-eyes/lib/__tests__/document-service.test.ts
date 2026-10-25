@@ -130,7 +130,6 @@ import {
   createDocumentVersion,
   getDocumentVersions,
   processDocumentOCR,
-  bulkProcessOCR,
   searchDocuments,
   bulkMoveDocuments,
   bulkUpdateTags,
@@ -519,57 +518,21 @@ describe('document-service', () => {
     });
   });
 
-  describe('bulkProcessOCR', () => {
-    it('processes all documents', async () => {
+  describe('OCR persistence', () => {
+    it('never persists extracted text through the service: transcripts are written only by the governed transcript module', async () => {
       mocks.mockFindFirstDoc.mockResolvedValue({
         ...DOC,
         organizationId: 'org-1',
         mimeType: 'image/png',
         metadata: { blobKey: 'documents/org-1/test.png' },
       });
-      mocks.mockUpdate.mockReturnValue(chain([DOC]));
-      const result = await bulkProcessOCR(['d1', 'd2'], 'org-1');
-      expect(result.success).toBe(true);
-      expect(result.processed).toBe(2);
+      await expect(processDocumentOCR('d1', 'org-1', { persistExtractedText: true })).rejects.toThrow('OCR_PERSISTENCE_NOT_PERMITTED');
+      expect(mocks.mockUpdate).not.toHaveBeenCalled();
     });
 
-    it('collects errors for failed documents', async () => {
-      mocks.mockFindFirstDoc
-        .mockResolvedValueOnce({
-          ...DOC,
-          organizationId: 'org-1',
-          mimeType: 'image/png',
-          metadata: { blobKey: 'documents/org-1/test-1.png' },
-        })
-        .mockResolvedValueOnce({
-          ...DOC,
-          organizationId: 'org-1',
-          mimeType: 'image/png',
-          metadata: { blobKey: 'documents/org-1/test-2.png' },
-        });
-      mocks.mockProcessImageOCR
-        .mockResolvedValueOnce({ text: 'ok', confidence: 90 })
-        .mockRejectedValueOnce(new Error('ocr-fail'));
-      mocks.mockUpdate.mockReturnValue(chain([DOC]));
-
-      const result = await bulkProcessOCR(['d1', 'd2'], 'org-1');
-      expect(result.success).toBe(false);
-      expect(result.processed).toBe(1);
-      expect(result.failed).toBe(1);
-    });
-
-    it('uses fallback message when non-Error is thrown during OCR', async () => {
-      mocks.mockFindFirstDoc.mockResolvedValue({
-        ...DOC,
-        organizationId: 'org-1',
-        mimeType: 'image/png',
-        metadata: { blobKey: 'documents/org-1/test.png' },
-      });
-      mocks.mockProcessImageOCR.mockImplementationOnce(() => { throw 'bad-ocr'; });
-
-      const result = await bulkProcessOCR(['d1'], 'org-1');
-      expect(result.success).toBe(false);
-      expect(result.errors?.[0].error).toBe('Failed to process document OCR');
+    it('has no bulk OCR entry point: processing is authorized per document', async () => {
+      const service = await import('@/lib/services/document-service');
+      expect((service as Record<string, unknown>).bulkProcessOCR).toBeUndefined();
     });
   });
 

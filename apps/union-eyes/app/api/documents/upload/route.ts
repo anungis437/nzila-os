@@ -18,7 +18,8 @@ import type { RLSTx } from "@/lib/db/with-rls-context";
 import { withOrgOwnedContext } from "@/lib/db/org-owned-context";
 import { logger } from "@/lib/logger";
 import { isMalwareScanError } from "@/lib/security/clamav";
-import { isDiscardableBlobPath } from "@/lib/documents/ocr-intake";
+import { openIntake } from "@/lib/documents/intake-lifecycle";
+import { blobIntakeStorage } from "@/lib/documents/intake-storage";
 
 const ALLOWED_MIME_TYPES_LIST = [
   'application/pdf',
@@ -270,6 +271,33 @@ export const POST = withRoleAuth('member', async (request, context) => {
       );
     }
 
+    // Canonical intake: the server records the object under a key it issues and returns only an intake id. The
+    // storage path is never returned or accepted, and an unused intake lapses and is cleaned up by exact identity.
+    if (canonicalIntake) {
+      const opened = await openIntake(
+        {
+          organizationId,
+          userId,
+          operation: 'create_document',
+          filename: file.name,
+          mimeType: file.type,
+          bytes: Buffer.from(await file.arrayBuffer()),
+        },
+        blobIntakeStorage,
+      );
+      if (!opened.ok) {
+        if (opened.kind === 'upload_failed' && isMalwareScanError(opened.error)) {
+          return opened.error.result.status === 'infected'
+            ? standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'File blocked by malware scan')
+            : standardErrorResponse(ErrorCode.SERVICE_UNAVAILABLE, 'Malware scanner unavailable; upload blocked by policy');
+        }
+        return opened.kind === 'invalid'
+          ? standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid intake request')
+          : standardErrorResponse(ErrorCode.EXTERNAL_SERVICE_ERROR, 'The file could not be stored');
+      }
+      return NextResponse.json({ success: true, data: opened.intake }, { status: 201 });
+    }
+
     // Upload to Vercel Blob Storage
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const checksum = createHash('sha256').update(fileBuffer).digest('hex');
@@ -280,40 +308,6 @@ export const POST = withRoleAuth('member', async (request, context) => {
         addRandomSuffix: true,
       }
     );
-
-    if (canonicalIntake) {
-      if (!isDiscardableBlobPath(blob.pathname, organizationId)) {
-        await deleteBlob(blob.url).catch((cleanupError) =>
-          logger.warn('Rejected intake blob cleanup failed', { error: String(cleanupError) }),
-        );
-        return standardErrorResponse(
-          ErrorCode.EXTERNAL_SERVICE_ERROR,
-          'Stored object is outside the organization prefix',
-        );
-      }
-      logApiAuditEvent({
-        timestamp: new Date().toISOString(),
-        userId,
-        endpoint: '/api/documents/upload',
-        method: 'POST',
-        eventType: 'success',
-        severity: 'medium',
-        details: {
-          dataType: 'DOCUMENTS',
-          organizationId,
-          fileName: file.name,
-          fileSize: file.size,
-          canonicalIntake: true,
-        },
-      });
-      return NextResponse.json({
-        blobPath: blob.pathname,
-        checksum,
-        size: file.size,
-        mimeType: file.type,
-        filename: file.name,
-      }, { status: 201 });
-    }
 
     // Create document record
     let document: typeof documents.$inferSelect;

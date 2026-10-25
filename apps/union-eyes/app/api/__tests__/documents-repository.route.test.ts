@@ -92,6 +92,7 @@ describe('documents/repository route', () => {
       isPrimaryOwner: true,
       canViewCase: true,
       canViewPrivateDocuments: true,
+      canUploadDocuments: true,
     });
     m.toGovernanceLabel.mockImplementation(({ privacyLabel }: { privacyLabel?: string }) => privacyLabel ?? 'team_confidential');
     m.isDocumentVisibleByPolicy.mockReturnValue(true);
@@ -114,6 +115,9 @@ describe('documents/repository route', () => {
               return {
                 returning: vi.fn(async () => [{ id: 'doc-1', privacyLabel: 'team_confidential', documentType: 'policy' }]),
               };
+            }
+            if (insertCall === 2) {
+              return { returning: vi.fn(async () => [{ id: 'version-1' }]) };
             }
             return Promise.resolve(undefined);
           }),
@@ -280,5 +284,21 @@ describe('documents/repository route', () => {
       resourceId: 'doc-1',
       details: expect.objectContaining({ linkedEntityType: 'grievance', linkedEntityId: '00000000-0000-0000-0000-0000000000aa' }),
     }));
+  });
+
+  it('does not file a document against a case the kernel does not let the principal add evidence to', async () => {
+    const { POST } = await loadRoute();
+    m.getEffectiveCaseAccess.mockResolvedValue({ isPrimaryOwner: false, canViewCase: true, canViewPrivateDocuments: false, canUploadDocuments: false });
+    const response = await POST(new NextRequest('http://localhost/api/documents/repository', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Doc One', filename: 'doc1.pdf', fileUrl: 'https://blob.example/doc1.pdf', documentType: 'policy', mimeType: 'application/pdf',
+        privacyLabel: 'team_confidential', linkedEntityType: 'grievance', linkedEntityId: '00000000-0000-0000-0000-0000000000aa',
+      }),
+    }));
+    expect(response.status).toBe(404);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.resolveStoredBlob).not.toHaveBeenCalled();
   });
 });

@@ -122,12 +122,22 @@ export default function PensionMemberConsole() {
         }
       }
 
-      // Fetch pension-related documents
-      const docsRes = await fetch(`/api/documents?organizationId=${encodeURIComponent(organizationId)}&category=pension&limit=20`);
+      // Pension documents come from the canonical repository, which applies each document's classification policy.
+      const docsRes = await fetch('/api/documents/repository?documentType=pension');
       if (docsRes.ok) {
-        const docsData = await docsRes.json();
+        const docsData = (await docsRes.json()) as {
+          data?: Array<{ id: string; title?: string | null; name?: string | null; filename?: string | null; documentType?: string | null; createdAt: string }>;
+        };
         if (docsData.data && docsData.data.length > 0) {
-          setDocuments(docsData.data);
+          setDocuments(
+            docsData.data.slice(0, 20).map((row) => ({
+              id: row.id,
+              name: row.title ?? row.name ?? row.filename ?? 'Document',
+              category: row.documentType ?? null,
+              fileType: row.filename?.split('.').pop() ?? 'file',
+              createdAt: row.createdAt,
+            })),
+          );
         }
       }
 

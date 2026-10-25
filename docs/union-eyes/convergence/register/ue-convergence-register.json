@@ -597,7 +597,7 @@
       "evidence": [
         { "type": "path", "ref": "apps/union-eyes/db/migrations-platform/0014_message_thread_triage.sql" },
         { "type": "test", "ref": "apps/union-eyes/lib/messaging/thread-assignment.pglite.test.ts" },
-        { "type": "test", "ref": "apps/union-eyes/lib/messaging/thread-assignment.postgres.test.ts" }
+        { "type": "test", "ref": "apps/union-eyes/db/__tests__/thread-assignment.postgres.test.ts" }
       ],
       "status": "IN_PROGRESS",
       "retirement": { "disposition": "NONE" }

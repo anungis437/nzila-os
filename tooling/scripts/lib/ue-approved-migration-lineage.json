@@ -165,6 +165,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-final-convergence",
         "note": "FORCE RLS for message_triage_designations and message_thread_assignments created by platform 0014. Not yet applied to any clone or live database."
+      },
+      {
+        "tag": "0022_document_intake_and_transcription_rls_closure",
+        "sha256": "2e1c830649422b6700a7bd369f517502288d5ec7a53ca366167a187ea99cbc8b",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-final-convergence",
+        "note": "FORCE RLS for document_intakes, document_transcript_revisions and document_transcript_publications created by platform 0022. Not yet applied to any clone or live database."
       }
     ],
     "platform": [
@@ -230,6 +237,20 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-final-convergence",
         "note": "Payroll-run executor columns, one remittance run per payroll run and one timesheet batch per file and period as unique indexes; refuses existing duplicates. Not yet applied to any clone or live database."
+      },
+      {
+        "tag": "0022_document_intake_and_transcription",
+        "sha256": "0073f1b820a8614a659939204f886d4c1b0a8918d6cf2766f0581d50cd2d6ed1",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-final-convergence",
+        "note": "Temporary document intake lifecycle, append-only machine and reviewed transcript revisions and evidence publications, and an explicit OCR-processing grant column. Not yet applied to any clone or live database."
+      },
+      {
+        "tag": "0023_signature_provider_acknowledgment",
+        "sha256": "1ccbeaa48d540d62740238a3d2ab94f674d1a3edc5c97b5dbaa1ba54817db07f",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-final-convergence",
+        "note": "Provider-reported acknowledgment time (immutable once set) and local status-observation time on signature documents. Not yet applied to any clone or live database."
       }
     ]
   }

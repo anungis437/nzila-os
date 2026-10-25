@@ -17,11 +17,9 @@ import { documents, documentFolders, documentVersions } from "@/db/schema";
 import { eq, and, or, desc, asc, sql, inArray, count, like } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { logger } from "@/lib/logger";
-import { processImageOCR, processPDFOCR } from "@/lib/services/ocr-service";
 import { downloadBuffer } from "@/lib/blob-client";
-import { boundExtractedText, ocrDispatchKind } from "@/lib/documents/ocr-bytes";
-import { isDiscardableBlobPath } from "@/lib/documents/ocr-intake";
-import { extractBlobPathFromUrl } from "@/lib/services/document-blob-integrity-service";
+import { extractTextFromBytes } from "@/lib/documents/ocr-extract";
+import { extractBlobPathFromUrl, isBlobPathOwnedByOrganization } from "@/lib/services/document-blob-integrity-service";
 import { getDocumentMutabilityBlockReason } from "@/lib/services/document-retention-guard";
 
 const DOCUMENT_BLOB_CONTAINER = process.env.AZURE_BLOB_CONTAINER ?? "union-eyes";
@@ -570,14 +568,20 @@ export async function getDocumentVersions(documentId: string, organizationId?: s
 // ============================================================================
 
 /**
- * Process document with OCR
+ * Reads a document's stored file and extracts text from its bytes. INTERNAL: this performs no authorization. A caller
+ * must already hold a decision from resolveOcrAuthority (lib/documents/ocr-authority.ts); the canonical route is
+ * POST /api/documents/[id]/ocr. The result is a machine extraction: untrusted, not document content and not evidence.
+ * Persisting it into the document row is not permitted; transcripts are stored only as revisions
+ * (lib/documents/transcripts.ts).
  */
 export async function processDocumentOCR(
   documentId: string,
   organizationId?: string,
   options?: { persistExtractedText?: boolean },
 ): Promise<OCRResult> {
-  const persistExtractedText = options?.persistExtractedText === true;
+  if (options?.persistExtractedText === true) {
+    throw new Error("OCR_PERSISTENCE_NOT_PERMITTED");
+  }
   try {
     const document = await db.query.documents.findFirst({
       where:
@@ -597,82 +601,20 @@ export async function processDocumentOCR(
         : undefined) ??
       extractBlobPathFromUrl(fileUrl);
 
-    if (!organizationId || !blobPath || !isDiscardableBlobPath(blobPath, organizationId)) {
+    if (!organizationId || !blobPath || !isBlobPathOwnedByOrganization(blobPath, organizationId)) {
       throw new Error("Document blob path missing");
     }
 
     const buffer = await downloadBuffer(DOCUMENT_BLOB_CONTAINER, blobPath);
-    const declaredMime = document.mimeType ?? "";
-    const declaredFileType = document.fileType ?? "";
-    const kind = ocrDispatchKind(buffer, declaredMime, declaredFileType);
-    const processedAt = new Date();
-
-    let extractedText = "";
-    let confidence = 0;
-    const language = "en";
-    let metadata: Record<string, unknown> = {
-      provider: "native",
-    };
-
-    if (kind === "image") {
-      const imageResult = await processImageOCR(buffer);
-      extractedText = imageResult.text;
-      confidence = imageResult.confidence;
-      metadata = {
-        provider: "image-ocr",
-      };
-    } else if (kind === "pdf") {
-      const pdfResult = await processPDFOCR(buffer);
-      extractedText = pdfResult.fullText;
-      confidence = pdfResult.pages.length > 0
-        ? Math.round(pdfResult.pages.reduce((sum, page) => sum + page.confidence, 0) / pdfResult.pages.length)
-        : 0;
-      metadata = {
-        provider: "pdf-ocr",
-        pages: pdfResult.pages.length,
-      };
-    } else if (kind === "text") {
-      extractedText = buffer.toString("utf8");
-      confidence = 100;
-      metadata = {
-        provider: "text-decode",
-      };
-    } else {
-      throw new Error("OCR_UNSUPPORTED");
-    }
-
-    const bounded = boundExtractedText(extractedText);
-    extractedText = bounded.text;
-    metadata = {
-      ...metadata,
-      truncated: bounded.truncated,
-    };
-
-    const result: OCRResult = {
+    const extraction = await extractTextFromBytes(buffer, document.mimeType ?? "", document.fileType ?? "");
+    return {
       documentId,
-      text: extractedText,
-      confidence,
-      language,
-      processedAt,
-      metadata,
+      text: extraction.text,
+      confidence: extraction.confidence,
+      language: extraction.language,
+      processedAt: new Date(),
+      metadata: { provider: extraction.engine, ...extraction.metadata },
     };
-
-    if (persistExtractedText) {
-      await updateDocument(documentId, {
-        contentText: extractedText,
-        metadata: {
-          ...(document.metadata && typeof document.metadata === "object" ? document.metadata : {}),
-          ocr: {
-            ...metadata,
-            confidence,
-            language,
-            processedAt: processedAt.toISOString(),
-          },
-        },
-      });
-    }
-
-    return result;
   } catch (error) {
     if (
       error instanceof Error
@@ -687,42 +629,6 @@ export async function processDocumentOCR(
       organizationId: organizationId ?? null,
     });
     throw new Error("Failed to process document OCR");
-  }
-}
-
-/**
- * Bulk process documents with OCR
- */
-export async function bulkProcessOCR(documentIds: string[], organizationId?: string): Promise<BulkOperationResult> {
-  const errors: Array<{ id: string; error: string }> = [];
-  let processed = 0;
-
-  try {
-    for (const id of documentIds) {
-      try {
-        if (organizationId) {
-          await processDocumentOCR(id, organizationId);
-        } else {
-          await processDocumentOCR(id);
-        }
-        processed++;
-      } catch (error) {
-        errors.push({
-          id,
-          error: error instanceof Error ? error.message : "Unknown error",
-        });
-      }
-    }
-
-    return {
-      success: errors.length === 0,
-      processed,
-      failed: errors.length,
-      errors: errors.length > 0 ? errors : undefined,
-    };
-  } catch (error) {
-    logger.error("Error in bulk OCR processing", { error, documentIds });
-    throw new Error("Failed to complete bulk OCR processing");
   }
 }
 

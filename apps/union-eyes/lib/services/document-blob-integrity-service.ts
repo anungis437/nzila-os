@@ -101,6 +101,10 @@ function validateOwnedBlobPath(blobPath: string, organizationId: string): void {
   if (hasUnsafeSegment(blobPath.split('/'))) {
     throw new StoredBlobError('INVALID_REFERENCE', 'The storage reference is not valid');
   }
+  // Uploaded-but-unattached objects live under the intake prefix and are taken only by accepting their intake.
+  if (blobPath.startsWith(`documents/${organizationId}/intake/`)) {
+    throw new StoredBlobError('INVALID_REFERENCE', 'Uploaded files are attached through their intake');
+  }
   if (!isBlobPathOwnedByOrganization(blobPath, organizationId) || blobPath.split('/').length < 3) {
     throw new StoredBlobError('FOREIGN_TENANT', 'Blob path is not scoped to organization storage');
   }

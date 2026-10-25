@@ -317,6 +317,8 @@ export const ACTIONS = [
   'case:draft_action',
   'case:upload_evidence',
   'case:modify_document',
+  // Distinct from viewing, downloading and modifying: extracting text from a document is its own capability.
+  'case:process_ocr',
   'case:disclose_to_member',
   'case:export_sealed_evidence',
   'case:close',
