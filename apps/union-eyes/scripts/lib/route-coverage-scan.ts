@@ -10,7 +10,7 @@ import { dirname, join, relative, sep } from 'node:path'
 export type RouteGuard =
   | 'CRUD_FACTORY' | 'WITH_API' | 'WITH_API_PUBLIC' | 'ROLE_AUTH' | 'ADMIN_AUTH' | 'ORG_AUTH' | 'SESSION_AUTH' | 'CRON_SECRET'
   | 'WEBHOOK_SIGNATURE' | 'PLATFORM_AUTH_HANDLER' | 'CAPABILITY_TOKEN' | 'RETIRED' | 'DELEGATED' | 'NONE'
-export type RouteAudit = 'ATOMIC' | 'ATOMIC_SERVICE' | 'NO_WRITES_FOUND' | 'CRUD_ATOMIC' | 'BEST_EFFORT' | 'NONE' | 'READ_ONLY'
+export type RouteAudit = 'EXEMPT_BALLOT_SECRECY' | 'ATOMIC' | 'ATOMIC_SERVICE' | 'NO_WRITES_FOUND' | 'CRUD_ATOMIC' | 'BEST_EFFORT' | 'NONE' | 'READ_ONLY'
 export type RouteData = 'TENANT_TX' | 'SYSTEM_CONTEXT' | 'CRUD_TENANT_TX' | 'AMBIENT_DB' | 'NONE'
 
 export interface RouteEntry {
@@ -77,6 +77,13 @@ function dataOf(source: string, guard: RouteGuard): RouteData {
   return 'NONE'
 }
 
+/**
+ * Ballot-casting routes carry no per-ballot audit row on purpose (G12): a row with the member and a timestamp would let a
+ * reader of the audit log link a member to a ballot. The ballot row under the anonymous voter id is the participation
+ * record, and the session lifecycle around it is audited. The manifest test pins this list and its justification.
+ */
+export const BALLOT_SECRECY_EXEMPT_ROUTES = ['voting/sessions/[id]/vote/route.ts', 'governance/elections/sessions/[id]/vote/route.ts']
+
 const ATOMIC_AUDIT = /persistAtomicAudit|appendMandatoryAudit/
 
 /**
@@ -124,8 +131,9 @@ function reachable(root: string, file: string, source: string, depth: number, se
   return out
 }
 
-function auditOf(source: string, guard: RouteGuard, mutating: boolean, imports: string[]): RouteAudit {
+function auditOf(route: string, source: string, guard: RouteGuard, mutating: boolean, imports: string[]): RouteAudit {
   if (!mutating) return 'READ_ONLY'
+  if (BALLOT_SECRECY_EXEMPT_ROUTES.includes(route)) return 'EXEMPT_BALLOT_SECRECY'
   if (guard === 'CRUD_FACTORY') return 'CRUD_ATOMIC'
   if (ATOMIC_AUDIT.test(source)) return 'ATOMIC'
   if (imports.some((f) => ATOMIC_AUDIT.test(readFileSync(f, 'utf8')))) return 'ATOMIC_SERVICE'
@@ -156,7 +164,7 @@ export function scanRoutes(root: string): RouteEntry[] {
             ? 'EXTERNAL_AUTHORITY'
             : null) as RouteEntry['subordinate'],
         data: dataOf(source, guard),
-        audit: auditOf(source, guard, mutating, reachable(root, file, source, 3)),
+        audit: auditOf(relative(api, file).split(sep).join('/'), source, guard, mutating, reachable(root, file, source, 3)),
       }
     })
     .sort((a, b) => a.route.localeCompare(b.route))

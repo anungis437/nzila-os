@@ -530,7 +530,8 @@ export async function castVote(
 
     return vote;
   } catch (error) {
-    logger.error("Error casting vote", { error, sessionId, optionId, memberId });
+    // Neither the member nor the option is logged: together they would disclose a secret ballot.
+    logger.error("Error casting vote", { error, sessionId });
     throw new Error(error instanceof Error ? error.message : "Failed to cast vote");
   }
 }

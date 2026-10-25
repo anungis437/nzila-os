@@ -11,6 +11,8 @@ const m = vi.hoisted(() => ({
   returning: vi.fn(),
   eq: vi.fn((col: unknown, val: unknown) => ({ op: 'eq', col, val })),
   encryptSecret: vi.fn(async (plaintext: string) => `encrypted(${plaintext})`),
+  audit: vi.fn(),
+  tx: {} as Record<string, unknown>,
 }));
 
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError: { badRequest: m.badRequest } }));
@@ -19,6 +21,9 @@ vi.mock('@/db/schema/sso-scim-schema', () => ({
 }));
 vi.mock('drizzle-orm', () => ({ eq: m.eq }));
 vi.mock('@/lib/encryption', () => ({ encryptSecret: m.encryptSecret }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (fn: (tx: unknown) => Promise<unknown>) => fn(m.tx) }));
+vi.mock('@nzila/db/auth-storage-authority', () => ({ AUTH_TENANT_ASSIGNABLE_ROLES: ['member', 'steward', 'chief_steward', 'admin'] }));
 vi.mock('@/db/db', () => ({
   db: {
     select: (...args: unknown[]) => { m.select(...args); return { from: m.from }; },
@@ -46,6 +51,8 @@ describe('enterprise/sso/providers route (round 53 — credential redaction on c
       else { capturedPostOpts = opts; capturedPostHandler = handler; }
       return handler;
     });
+    m.audit.mockResolvedValue(undefined);
+    m.tx.insert = (...args: unknown[]) => { m.insert(...args); return { values: m.values }; };
     m.from.mockReturnValue({ where: m.where });
     m.values.mockReturnValue({ returning: m.returning });
     await loadRoute();
@@ -190,6 +197,41 @@ describe('enterprise/sso/providers route (round 53 — credential redaction on c
       userId: 'admin-user',
     })).rejects.toThrow('Production key authority unavailable');
     expect(m.insert).not.toHaveBeenCalled();
+  });
+
+  it('POST refuses a role mapping to any role a tenant administrator cannot assign, and writes nothing', async () => {
+    for (const role of ['owner', 'platform_admin', 'system_admin', 'clc_executive', 42]) {
+      await expect(capturedPostHandler!({
+        body: { name: 'IdP', providerType: 'oidc', attributeMapping: { email: 'email' }, roleMapping: { 'idp-admins': role } },
+        organizationId: 'org-real',
+        userId: 'admin-user',
+      })).rejects.toMatchObject({ status: 400 });
+    }
+    expect(m.insert).not.toHaveBeenCalled();
+    expect(m.audit).not.toHaveBeenCalled();
+  });
+
+  it('POST accepts an assignable role mapping and audits the creation on the same transaction', async () => {
+    m.returning.mockResolvedValue([{ id: 'sp-new', organizationId: 'org-real' }]);
+    await capturedPostHandler!({
+      body: { name: 'IdP', providerType: 'oidc', attributeMapping: { email: 'email' }, roleMapping: { 'idp-stewards': 'steward' } },
+      organizationId: 'org-real',
+      userId: 'admin-user',
+    });
+    expect(m.audit).toHaveBeenCalledWith(
+      m.tx,
+      expect.objectContaining({ organizationId: 'org-real', userId: 'admin-user', action: 'sso.provider.create', resourceId: 'sp-new' }),
+    );
+  });
+
+  it('POST does not report success when the audit write fails', async () => {
+    m.returning.mockResolvedValue([{ id: 'sp-new', organizationId: 'org-real' }]);
+    m.audit.mockRejectedValueOnce(new Error('audit down'));
+    await expect(capturedPostHandler!({
+      body: { name: 'IdP', providerType: 'oidc', attributeMapping: { email: 'email' } },
+      organizationId: 'org-real',
+      userId: 'admin-user',
+    })).rejects.toThrow('audit down');
   });
 
   it('POST rejects an absent parsed body without writing', async () => {

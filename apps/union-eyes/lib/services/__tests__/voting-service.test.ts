@@ -428,6 +428,15 @@ describe('VotingService', () => {
       await expect(castVote('session-1', 'opt-1', 'member-1')).rejects.toThrow('already cast');
     });
 
+    it('never logs the member or the option of a failed ballot, since together they disclose the choice', async () => {
+      const { logger } = await import('@/lib/logger');
+      mocks.mockVotesFindFirst.mockResolvedValue({ id: 'existing' });
+      await expect(castVote('session-1', 'opt-secret', 'member-secret')).rejects.toThrow('already cast');
+      const logged = JSON.stringify(vi.mocked(logger.error).mock.calls);
+      expect(logged).not.toContain('member-secret');
+      expect(logged).not.toContain('opt-secret');
+    });
+
     it('refuses an identified ballot: ballots are secret and an identified one escaped the one-vote check', async () => {
       await expect(castVote('session-1', 'opt-1', 'member-1', false)).rejects.toThrow('Open-roll voting is not available');
       expect(mocks.mockInsertReturning).not.toHaveBeenCalled();

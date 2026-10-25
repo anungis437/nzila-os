@@ -36,19 +36,20 @@
    "WITH_API": 167
   },
   "mutatingByAudit": {
-   "ATOMIC": 59,
+   "ATOMIC": 61,
    "ATOMIC_SERVICE": 23,
    "BEST_EFFORT": 10,
    "CRUD_ATOMIC": 299,
+   "EXEMPT_BALLOT_SECRECY": 2,
    "NO_WRITES_FOUND": 14,
-   "NONE": 290
+   "NONE": 286
   },
   "mutatingByData": {
-   "AMBIENT_DB": 51,
+   "AMBIENT_DB": 49,
    "CRUD_TENANT_TX": 299,
    "NONE": 221,
    "SYSTEM_CONTEXT": 53,
-   "TENANT_TX": 71
+   "TENANT_TX": 73
   }
  },
  "routes": [
@@ -5956,8 +5957,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "entitlements/route.ts",
@@ -7482,7 +7483,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "EXEMPT_BALLOT_SECRECY"
   },
   {
    "route": "governance/elections/sessions/route.ts",
@@ -12044,7 +12045,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "EXEMPT_BALLOT_SECRECY"
   },
   {
    "route": "voting/sessions/route.ts",
@@ -12056,8 +12057,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "voting/verify/route.ts",

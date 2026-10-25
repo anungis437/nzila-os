@@ -11,6 +11,8 @@ vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, z: require('zod').z 
 vi.mock('@/lib/services/voting-service', () => ({ listVotingSessions: m.listVotingSessions, createVotingSession: vi.fn() }));
 vi.mock('@/lib/evidence', () => ({ buildUnionEvidencePack: vi.fn(async () => undefined) }));
 vi.mock('@/lib/logger', () => ({ logger: { warn: vi.fn() } }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (_o: unknown, fn: (tx: unknown) => Promise<unknown>) => fn({}) }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn() }));
 vi.mock('drizzle-orm', () => ({ inArray: vi.fn(), count: vi.fn() }));
 vi.mock('@/db/schema', () => ({ votingOptions: { sessionId: 's', orderIndex: 'o' }, votes: { optionId: 'o', sessionId: 's' } }));
 vi.mock('@/db/db', () => ({

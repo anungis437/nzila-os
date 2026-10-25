@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { AUTH_MANDATORY_AUDIT_SERVICES, KERNEL_AUDITED_CALLS, auditGap, kernelPending, scanRoutes } from '../../scripts/lib/route-coverage-scan'
+import { AUTH_MANDATORY_AUDIT_SERVICES, BALLOT_SECRECY_EXEMPT_ROUTES, KERNEL_AUDITED_CALLS, auditGap, kernelPending, scanRoutes } from '../../scripts/lib/route-coverage-scan'
 
 /**
  * Route-coverage manifest and ratchets (UE-CONV-K-008). Every app/api route is recorded with how it authenticates,
@@ -105,5 +105,15 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
     expect(lifecycle).toMatch(/export async function assignCase[\s\S]*?return insertRelationship\(/)
     expect(lifecycle).toMatch(/export async function revokeCaseAssignment[\s\S]*?await revokeRelationship\(/)
     expect(KERNEL_AUDITED_CALLS.length).toBeGreaterThan(0)
+  })
+
+  it('exempts from per-ballot audit only the ballot-casting routes, and only while they cast a secret ballot', () => {
+    const api = join(__dirname, '..', '..', 'app', 'api')
+    expect(BALLOT_SECRECY_EXEMPT_ROUTES).toHaveLength(2)
+    for (const route of BALLOT_SECRECY_EXEMPT_ROUTES) {
+      const source = readFileSync(join(api, route), 'utf8')
+      expect(source, route).toMatch(/castVote\(/)
+      expect(source, route).not.toMatch(/persistAtomicAudit|buildUnionEvidencePack\([^)]*actorId[^)]*optionId/)
+    }
   })
 })
