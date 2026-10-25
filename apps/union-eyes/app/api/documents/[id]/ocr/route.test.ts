@@ -6,7 +6,19 @@ const state = vi.hoisted(() => ({
   selects: 0,
   process: vi.fn(),
   audit: vi.fn(async () => true),
-  caseAccess: { isPrimaryOwner: false, canViewCase: false, canViewPrivateDocuments: false },
+  caseAccess: {
+    isPrimaryOwner: false,
+    canViewCase: false,
+    canViewPrivateDocuments: false,
+    canUploadDocuments: false,
+    recused: false,
+  } as {
+    isPrimaryOwner: boolean;
+    canViewCase: boolean;
+    canViewPrivateDocuments: boolean;
+    canUploadDocuments: boolean;
+    recused?: boolean;
+  },
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({
@@ -51,6 +63,7 @@ const { POST } = await import('./route');
 
 const DOC = '11111111-1111-4111-8111-111111111111';
 const ORG = '22222222-2222-4222-8222-222222222222';
+const GRIEVANCE = '33333333-3333-4333-8333-333333333333';
 
 function call(id = DOC, body?: unknown) {
   state.selects = 0;
@@ -69,7 +82,13 @@ describe('POST /api/documents/[id]/ocr', () => {
     state.document = null;
     state.grant = null;
     state.selects = 0;
-    state.caseAccess = { isPrimaryOwner: false, canViewCase: false, canViewPrivateDocuments: false };
+    state.caseAccess = {
+      isPrimaryOwner: false,
+      canViewCase: false,
+      canViewPrivateDocuments: false,
+      canUploadDocuments: false,
+      recused: false,
+    };
     state.process.mockReset();
     state.process.mockResolvedValue({
       documentId: DOC,
@@ -87,14 +106,26 @@ describe('POST /api/documents/[id]/ocr', () => {
     expect(forged.status).toBe(400);
     expect(state.process).not.toHaveBeenCalled();
 
-    state.document = { id: DOC, privacyLabel: 'privileged', linkedEntityType: null, linkedEntityId: null };
+    state.document = {
+      id: DOC,
+      privacyLabel: 'privileged',
+      uploadedBy: 'steward-1',
+      linkedEntityType: null,
+      linkedEntityId: null,
+    };
     const privileged = await call();
     expect(privileged.status).toBe(403);
     expect(state.process).not.toHaveBeenCalled();
   });
 
   it('returns unpersisted text and strips storage metadata', async () => {
-    state.document = { id: DOC, privacyLabel: 'team_confidential', linkedEntityType: null, linkedEntityId: null };
+    state.document = {
+      id: DOC,
+      privacyLabel: 'team_confidential',
+      uploadedBy: 'steward-1',
+      linkedEntityType: null,
+      linkedEntityId: null,
+    };
     const response = await call(DOC, { organizationId: 'foreign-org', text: 'injected transcript' });
     expect(response.status).toBe(200);
     const body = await response.json();
@@ -118,7 +149,13 @@ describe('POST /api/documents/[id]/ocr', () => {
   });
 
   it('hides processor, storage, and audit failures without returning text', async () => {
-    state.document = { id: DOC, privacyLabel: 'team_confidential', linkedEntityType: null, linkedEntityId: null };
+    state.document = {
+      id: DOC,
+      privacyLabel: 'team_confidential',
+      uploadedBy: 'steward-1',
+      linkedEntityType: null,
+      linkedEntityId: null,
+    };
     state.process.mockRejectedValueOnce(new Error('OCR_UNSUPPORTED'));
     expect((await call()).status).toBe(501);
 
@@ -134,5 +171,77 @@ describe('POST /api/documents/[id]/ocr', () => {
     const audit = await call();
     expect(audit.status).toBe(503);
     expect(JSON.stringify(await audit.json())).not.toContain('untrusted draft');
+
+    state.audit.mockResolvedValueOnce(false);
+    const disabled = await call();
+    expect(disabled.status).toBe(503);
+    expect(JSON.stringify(await disabled.json())).not.toContain('untrusted draft');
+  });
+
+  it('denies another uploader, a view-only case assignment, and a recused primary owner', async () => {
+    state.document = {
+      id: DOC,
+      privacyLabel: 'team_confidential',
+      uploadedBy: 'other-user',
+      linkedEntityType: null,
+      linkedEntityId: null,
+    };
+    const crossUser = await call();
+    expect(crossUser.status).toBe(403);
+    expect(state.process).not.toHaveBeenCalled();
+
+    state.document = {
+      id: DOC,
+      privacyLabel: 'team_confidential',
+      uploadedBy: 'steward-1',
+      linkedEntityType: 'grievance',
+      linkedEntityId: GRIEVANCE,
+    };
+    state.caseAccess = {
+      isPrimaryOwner: false,
+      canViewCase: true,
+      canViewPrivateDocuments: false,
+      canUploadDocuments: false,
+    };
+    const viewOnly = await call();
+    expect(viewOnly.status).toBe(403);
+
+    state.caseAccess = {
+      isPrimaryOwner: true,
+      canViewCase: true,
+      canViewPrivateDocuments: true,
+      canUploadDocuments: true,
+      recused: true,
+    };
+    const recused = await call();
+    expect(recused.status).toBe(403);
+    expect(state.process).not.toHaveBeenCalled();
+  });
+
+  it('allows a linked assignment only when the kernel grants document processing', async () => {
+    state.document = {
+      id: DOC,
+      privacyLabel: 'team_confidential',
+      uploadedBy: 'other-user',
+      linkedEntityType: 'grievance',
+      linkedEntityId: GRIEVANCE,
+    };
+    state.caseAccess = {
+      isPrimaryOwner: false,
+      canViewCase: false,
+      canViewPrivateDocuments: false,
+      canUploadDocuments: false,
+    };
+    expect((await call()).status).toBe(403);
+
+    state.caseAccess = {
+      isPrimaryOwner: false,
+      canViewCase: true,
+      canViewPrivateDocuments: false,
+      canUploadDocuments: true,
+    };
+    const allowed = await call();
+    expect(allowed.status).toBe(200);
+    expect(state.process).toHaveBeenCalledWith(DOC, ORG, { persistExtractedText: false });
   });
 });
