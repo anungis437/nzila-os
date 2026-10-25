@@ -65,8 +65,12 @@ describe('convergence P0 contracts', () => {
       'main', 'develop', 'feat/x', 'fix/x', 'chore/x', 'docs/x', 'refactor/x', 'perf/x', 'test/x', 'ci/x',
       'hotfix/x', 'integration/x', 'ops/x', 'release/1.2.3', 'release/prod-readiness-2026-10-20',
       'dependabot/npm_and_yarn/x', 'renovate/x', 'copilot/x',
+      'agents/ue-final-convergence', 'agents/ue-cursor-documents-convergence',
     ]) {
       expect(policy(ref).status, ref).toBe(0)
+    }
+    for (const ref of ['agents/other', 'agents/ue-', 'agents/UE-final-convergence', 'agents/ue-final-convergence/extra', 'agents/']) {
+      expect(policy(ref).status, ref).toBe(1)
     }
     expect(policy('release/1.2').status).toBe(1)
     expect(policy('feature/x').status).toBe(1)

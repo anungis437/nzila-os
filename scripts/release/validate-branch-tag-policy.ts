@@ -25,6 +25,9 @@ const BRANCH_PATTERNS: RegExp[] = [
   /^dependabot\/.+/,
   /^renovate\/.+/,
   /^copilot\/.+/,
+  // Union Eyes parallel-agent lanes. Narrower than agents/* so an arbitrary
+  // agents branch is still rejected.
+  /^agents\/ue-[a-z0-9]+(?:-[a-z0-9]+)*$/,
 ]
 
 // No branch is admitted by exact name. The cursor/ family is not approved, and a replacement
@@ -51,7 +54,7 @@ function validateBranch(ref: string): void {
   const matched = GRANDFATHERED_BRANCHES.has(ref) || BRANCH_PATTERNS.some((pattern) => pattern.test(ref))
   if (!matched) {
     fail(
-      `Branch '${ref}' does not match policy. Allowed examples: feat/*, fix/*, chore/*, docs/*, refactor/*, perf/*, test/*, ci/*, hotfix/*, integration/*, ops/*, release/X.Y.Z, release/prod-readiness-YYYY-MM-DD, main, develop, dependabot/*, renovate/*, copilot/*.`,
+      `Branch '${ref}' does not match policy. Allowed examples: feat/*, fix/*, chore/*, docs/*, refactor/*, perf/*, test/*, ci/*, hotfix/*, integration/*, ops/*, agents/ue-*, release/X.Y.Z, release/prod-readiness-YYYY-MM-DD, main, develop, dependabot/*, renovate/*, copilot/*.`,
     )
   }
   ok(`Branch '${ref}' is policy-compliant`)
