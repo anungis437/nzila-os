@@ -14,7 +14,8 @@ import {
   subscriptionEventsLog,
 } from '@/db/schema';
 import { eq, and, lte, sql } from 'drizzle-orm';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { getActiveContract } from './contract-service';
 
 // ============================================================================
@@ -138,52 +139,51 @@ export async function pauseSubscription(
   pausedBy: string,
   reason?: string,
 ): Promise<SubscriptionAction> {
-  const [sub] = await db
-    .update(orgSubscriptions)
-    .set({
-      status: 'paused',
-      updatedAt: new Date(),
-    })
-    .where(
-      and(
-        eq(orgSubscriptions.id, subscriptionId),
-        eq(orgSubscriptions.organizationId, organizationId),
-        eq(orgSubscriptions.status, 'active'),
-      ),
-    )
-    .returning();
+  // The status change, the event-log row and the audit record commit together.
+  return withRLSContext({ organizationId }, async (tx) => {
+    const [sub] = await tx
+      .update(orgSubscriptions)
+      .set({ status: 'paused', updatedAt: new Date() })
+      .where(
+        and(
+          eq(orgSubscriptions.id, subscriptionId),
+          eq(orgSubscriptions.organizationId, organizationId),
+          eq(orgSubscriptions.status, 'active'),
+        ),
+      )
+      .returning();
 
-  if (!sub) {
-    throw new Error(`Subscription ${subscriptionId} not found, not active, or not owned by this organization`);
-  }
+    if (!sub) {
+      throw new Error(`Subscription ${subscriptionId} not found, not active, or not owned by this organization`);
+    }
 
-  await db.insert(subscriptionEventsLog).values({
-    organizationId: sub.organizationId,
-    subscriptionId: sub.id,
-    eventType: 'paused',
-    previousState: { status: 'active' },
-    newState: { status: 'paused' },
-    triggeredBy: pausedBy,
-    reason,
+    await tx.insert(subscriptionEventsLog).values({
+      organizationId: sub.organizationId,
+      subscriptionId: sub.id,
+      eventType: 'paused',
+      previousState: { status: 'active' },
+      newState: { status: 'paused' },
+      triggeredBy: pausedBy,
+      reason,
+    });
+
+    await persistAtomicAudit(tx, {
+      organizationId: sub.organizationId,
+      userId: pausedBy,
+      action: 'subscription_paused',
+      resourceType: 'org_subscription',
+      resourceId: sub.id,
+      details: { reason: reason ?? null },
+    });
+
+    return {
+      subscriptionId: sub.id,
+      organizationId: sub.organizationId,
+      action: 'paused',
+      previousStatus: 'active',
+      newStatus: 'paused',
+    };
   });
-
-  await auditLog({
-    eventType: AuditEventType.DATA_UPDATE,
-    severity: AuditSeverity.HIGH,
-    organizationId: sub.organizationId,
-    resource: 'org_subscription',
-    resourceId: sub.id,
-    action: 'subscription_paused',
-    userId: pausedBy,
-  });
-
-  return {
-    subscriptionId: sub.id,
-    organizationId: sub.organizationId,
-    action: 'paused',
-    previousStatus: 'active',
-    newStatus: 'paused',
-  };
 }
 
 /**
@@ -197,51 +197,49 @@ export async function resumeSubscription(
   subscriptionId: string,
   resumedBy: string,
 ): Promise<SubscriptionAction> {
-  const [sub] = await db
-    .update(orgSubscriptions)
-    .set({
-      status: 'active',
-      updatedAt: new Date(),
-    })
-    .where(
-      and(
-        eq(orgSubscriptions.id, subscriptionId),
-        eq(orgSubscriptions.organizationId, organizationId),
-        eq(orgSubscriptions.status, 'paused'),
-      ),
-    )
-    .returning();
+  return withRLSContext({ organizationId }, async (tx) => {
+    const [sub] = await tx
+      .update(orgSubscriptions)
+      .set({ status: 'active', updatedAt: new Date() })
+      .where(
+        and(
+          eq(orgSubscriptions.id, subscriptionId),
+          eq(orgSubscriptions.organizationId, organizationId),
+          eq(orgSubscriptions.status, 'paused'),
+        ),
+      )
+      .returning();
 
-  if (!sub) {
-    throw new Error(`Subscription ${subscriptionId} not found, not paused, or not owned by this organization`);
-  }
+    if (!sub) {
+      throw new Error(`Subscription ${subscriptionId} not found, not paused, or not owned by this organization`);
+    }
 
-  await db.insert(subscriptionEventsLog).values({
-    organizationId: sub.organizationId,
-    subscriptionId: sub.id,
-    eventType: 'resumed',
-    previousState: { status: 'paused' },
-    newState: { status: 'active' },
-    triggeredBy: resumedBy,
+    await tx.insert(subscriptionEventsLog).values({
+      organizationId: sub.organizationId,
+      subscriptionId: sub.id,
+      eventType: 'resumed',
+      previousState: { status: 'paused' },
+      newState: { status: 'active' },
+      triggeredBy: resumedBy,
+    });
+
+    await persistAtomicAudit(tx, {
+      organizationId: sub.organizationId,
+      userId: resumedBy,
+      action: 'subscription_resumed',
+      resourceType: 'org_subscription',
+      resourceId: sub.id,
+      details: {},
+    });
+
+    return {
+      subscriptionId: sub.id,
+      organizationId: sub.organizationId,
+      action: 'resumed',
+      previousStatus: 'paused',
+      newStatus: 'active',
+    };
   });
-
-  await auditLog({
-    eventType: AuditEventType.DATA_UPDATE,
-    severity: AuditSeverity.MEDIUM,
-    organizationId: sub.organizationId,
-    resource: 'org_subscription',
-    resourceId: sub.id,
-    action: 'subscription_resumed',
-    userId: resumedBy,
-  });
-
-  return {
-    subscriptionId: sub.id,
-    organizationId: sub.organizationId,
-    action: 'resumed',
-    previousStatus: 'paused',
-    newStatus: 'active',
-  };
 }
 
 // ============================================================================

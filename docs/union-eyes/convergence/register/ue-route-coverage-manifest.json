@@ -37,12 +37,12 @@
   },
   "mutatingByAudit": {
    "ATOMIC": 64,
-   "ATOMIC_SERVICE": 43,
-   "BEST_EFFORT": 10,
+   "ATOMIC_SERVICE": 58,
+   "BEST_EFFORT": 9,
    "CRUD_ATOMIC": 299,
    "EXEMPT_BALLOT_SECRECY": 2,
    "NO_WRITES_FOUND": 14,
-   "NONE": 263
+   "NONE": 249
   },
   "mutatingByData": {
    "AMBIENT_DB": 49,
@@ -2379,7 +2379,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "billing/invoices/route.ts",
@@ -2404,7 +2404,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "BEST_EFFORT"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "billing/send-batch/route.ts",
@@ -2416,7 +2416,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "billing/send-invoice/route.ts",
@@ -2428,7 +2428,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "billing/subscriptions/[id]/route.ts",
@@ -2455,7 +2455,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "billing/validate/route.ts",
@@ -4495,7 +4495,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "cope/campaigns/route.ts",
@@ -5434,7 +5434,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "dues/reconciliation/auto-match/route.ts",
@@ -7062,7 +7062,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "finance/allocation/run/route.ts",
@@ -7074,7 +7074,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "finance/billing/route.ts",
@@ -7088,7 +7088,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "finance/chargebacks/route.ts",
@@ -7137,7 +7137,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "finance/invoices/[id]/route.ts",
@@ -7162,7 +7162,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "finance/per-capita/inbound/route.ts",
@@ -7210,7 +7210,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "finance/summary/route.ts",
@@ -10925,7 +10925,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "reconciliation/resolve/route.ts",
@@ -10937,7 +10937,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "reconciliation/upload/route.ts",
