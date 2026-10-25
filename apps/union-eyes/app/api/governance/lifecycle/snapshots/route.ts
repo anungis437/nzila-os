@@ -4,7 +4,8 @@
  */
 import { withApi, ApiError } from '@/lib/api/framework'
 import { db } from '@/db/db'
-import { withSystemContext } from '@/lib/db/with-rls-context'
+import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { policyGovernanceSnapshots, governedPolicies } from '@nzila/db/schema'
 import { desc, sql } from 'drizzle-orm'
 import { createHash } from 'crypto'
@@ -39,10 +40,13 @@ export const POST = withApi(
     auth: { required: true, minRole: 'admin' },
     entitlement: 'governance_suite',
   },
-  async ({ request, user }) => {
+  async ({ request, user, organizationId }) => {
     const actorId = user?.id
     if (!actorId) {
       throw ApiError.badRequest('Authenticated user is required to create a governance snapshot.')
+    }
+    if (!organizationId) {
+      throw ApiError.badRequest('An organization context is required so the snapshot can be audited.')
     }
 
     const body = await request.json() as { correlationId?: string }
@@ -68,6 +72,14 @@ export const POST = withApi(
         })
         .returning()
 
+      await persistAtomicAudit(db as unknown as RLSTx, {
+        organizationId,
+        userId: actorId,
+        action: 'governance.snapshot.create',
+        resourceType: 'policy_governance_snapshots',
+        resourceId: snapshot.id,
+        details: { snapshotHash, activePolicies: active.length },
+      })
       return { snapshot }
     })
   },

@@ -11,9 +11,11 @@ vi.mock('@/lib/api/framework', () => ({
   withApi: m.withApi,
   ApiError: {
     badRequest: (msg: string) => Object.assign(new Error(msg), { status: 400 }),
+    notFound: (resource: string) => Object.assign(new Error(`${resource} not found`), { status: 404 }),
   },
 }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn().mockResolvedValue(undefined) }));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@nzila/db/schema', () => ({ policyConflicts: { id: 'id' } }));
 vi.mock('drizzle-orm', async (importOriginal) => {
@@ -41,11 +43,27 @@ describe('governance/lifecycle/conflicts/[conflictId] route', () => {
 
   it('resolves a conflict', async () => {
     const { PATCH } = await loadRoute();
-    const result = await PATCH({ request: { json: async () => ({ resolutionNotes: 'resolved' }) }, params: { conflictId: 'c1' }, user: { id: 'u1' } });
+    const result = await PATCH({ request: { json: async () => ({ resolutionNotes: 'resolved' }) }, params: { conflictId: 'c1' }, user: { id: 'u1' }, organizationId: 'org_1' });
 
     expect(result).toEqual({ conflict: { id: 'c1', isActive: false } });
     expect(m.updatedValues[0]?.resolvedBy).toBe('u1');
     expect(m.updatedValues[0]?.resolvedBy).not.toBe('system');
+  });
+
+  it('PATCH is a 404 and writes no audit when the conflict does not exist', async () => {
+    m.db.update.mockReturnValue({
+      set: vi.fn(() => ({ where: vi.fn(() => ({ returning: vi.fn(async () => []) })) })),
+    } as any);
+    const { PATCH } = await loadRoute();
+    const { persistAtomicAudit } = await import('@/lib/audit/atomic-audit');
+
+    await expect(PATCH({
+      request: { json: async () => ({ resolutionNotes: 'resolved' }) },
+      params: { conflictId: 'missing' },
+      user: { id: 'u1' },
+      organizationId: 'org_1',
+    })).rejects.toMatchObject({ status: 404 });
+    expect(persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('PATCH rejects a missing user and does not stamp a system actor', async () => {

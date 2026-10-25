@@ -16,6 +16,7 @@ vi.mock('@/lib/api/framework', () => ({
 }));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn().mockResolvedValue(undefined) }));
 vi.mock('@nzila/db/schema', () => ({
   policyGovernanceSnapshots: { generatedAt: 'generatedAt' },
   governedPolicies: { id: 'id', semver: 'semver', domain: 'domain' },
@@ -68,7 +69,7 @@ describe('governance/lifecycle/snapshots route', () => {
   it('creates a governance snapshot', async () => {
     const { POST } = await loadRoute();
     m.selectQueue = [[{ id: 'p1' }, { id: 'p2' }]];
-    const result = await POST({ request: new Request('http://localhost/api/governance/lifecycle/snapshots', { method: 'POST', body: '{}' }), user: { id: 'u1' } });
+    const result = await POST({ request: new Request('http://localhost/api/governance/lifecycle/snapshots', { method: 'POST', body: '{}' }), user: { id: 'u1' }, organizationId: 'org_1' });
 
     expect(result).toEqual({ snapshot: { id: 'snapshot_1' } });
     expect(m.insertedValues[0]?.generatedByUserId).toBe('u1');

@@ -36,12 +36,12 @@
    "WITH_API": 167
   },
   "mutatingByAudit": {
-   "ATOMIC": 45,
+   "ATOMIC": 51,
    "ATOMIC_SERVICE": 18,
    "BEST_EFFORT": 10,
    "CRUD_ATOMIC": 299,
    "NO_WRITES_FOUND": 14,
-   "NONE": 309
+   "NONE": 303
   },
   "mutatingByData": {
    "AMBIENT_DB": 52,
@@ -7532,7 +7532,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "governance/lifecycle/conflicts/route.ts",
@@ -7606,7 +7606,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "governance/lifecycle/policies/[id]/route.ts",
@@ -7644,7 +7644,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "governance/lifecycle/policy-events/route.ts",
@@ -7681,7 +7681,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "governance/mission-audits/route.ts",
@@ -7694,7 +7694,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "governance/policies/evaluate/route.ts",
@@ -7719,7 +7719,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "governance/policy-templates/route.ts",

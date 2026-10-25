@@ -15,6 +15,7 @@ vi.mock('@/lib/api/framework', () => ({
 }));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn().mockResolvedValue(undefined) }));
 vi.mock('@nzila/db/schema', () => ({ governedPolicies: { domain: 'domain', lifecycleStatus: 'lifecycleStatus', createdAt: 'createdAt' } }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
@@ -78,6 +79,7 @@ describe('governance/lifecycle/policies route', () => {
         }),
       }),
       user: { id: 'u1' },
+      organizationId: 'org_1',
     });
 
     expect(result).toEqual({ policy: { id: 'p2', domain: 'finance' } });
