@@ -14,8 +14,8 @@ import {
   type BrowserDocument,
   type BrowserSort,
 } from '@/lib/documents/browser-repository';
-import { listDenied } from '@/lib/documents/document-repository-client';
-import { requestAuthorizedDownload } from '@/lib/documents/document-repository-client';
+import { listDenied, requestAuthorizedDownload } from '@/lib/documents/document-repository-client';
+import { OCRUpload } from '@/components/documents/ocr-upload';
 
 export type { BrowserDocument };
 
@@ -24,6 +24,7 @@ type DocumentBrowserProps = {
   selectionMode?: 'single' | 'multiple' | 'none';
   filterByType?: string[];
   defaultView?: 'grid' | 'list';
+  organizationId?: string;
 };
 
 export function DocumentBrowser({
@@ -31,6 +32,7 @@ export function DocumentBrowser({
   selectionMode = 'none',
   filterByType,
   defaultView = 'grid',
+  organizationId,
 }: DocumentBrowserProps) {
   const locale = useLocale();
   const copy = useMemo(() => browserCopy(locale), [locale]);
@@ -145,6 +147,14 @@ export function DocumentBrowser({
         </div>
       </div>
 
+      {organizationId ? (
+        <OCRUpload
+          organizationId={organizationId}
+          onUploadComplete={() => {
+            void load();
+          }}
+        />
+      ) : null}
       <p className="text-sm text-muted-foreground">{copy.unavailableFilters}</p>
       {notice && <p role="alert" data-testid="browser-notice" className="rounded border px-3 py-2 text-sm">{notice}</p>}
 
