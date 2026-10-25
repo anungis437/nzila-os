@@ -19,23 +19,23 @@
   },
   "networkObservations": [
     {
-      "pid": 54816,
+      "pid": 61304,
       "transport": "PIPE",
-      "targetDigest": "47e4546ac51f65ccd818822f570a96040a2e6d50602e54af0cf64a4a95819836",
+      "targetDigest": "bb4ad74414a060e04ee5d6f9fab3672237a1bb7d6a26b7849c75317fabd038d7",
       "targetClass": "NON_LOOPBACK",
       "port": null,
       "allowed": false
     },
     {
-      "pid": 54816,
+      "pid": 61304,
       "transport": "TCP",
       "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
       "targetClass": "LOOPBACK",
-      "port": 55963,
+      "port": 55766,
       "allowed": true
     },
     {
-      "pid": 54816,
+      "pid": 61304,
       "transport": "DNS_LOOKUP",
       "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
       "targetClass": "LOOPBACK",

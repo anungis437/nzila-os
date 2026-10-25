@@ -1,5 +1,5 @@
 import React from 'react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi, beforeAll } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 
 const {
@@ -44,6 +44,11 @@ vi.mock('@/app/actions/customers', () => ({ getCustomersAction: mockGetCustomers
 vi.mock('@/app/actions/invoices', () => ({ getInvoicesAction: mockGetInvoicesAction }))
 
 describe('analytics page slice', () => {
+  // Load the module under real timers: a cold import under fake timers can stall until the test times out.
+  beforeAll(async () => {
+    await import('@/app/(dashboard)/analytics/page')
+  })
+
   beforeEach(() => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-06-08T12:00:00.000Z'))

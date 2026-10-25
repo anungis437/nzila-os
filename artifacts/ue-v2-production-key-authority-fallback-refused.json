@@ -9,9 +9,9 @@
   "observedError": "Azure Key Vault initialization failed in production environment. Please verify AZURE_KEY_VAULT_URL and Azure credentials are configured correctly.",
   "networkObservations": [
     {
-      "pid": 52092,
+      "pid": 30744,
       "transport": "PIPE",
-      "targetDigest": "cb4d2195d0703d7bdcfafcd45ab0fb16c58d672438915ddac6c42c86e626d190",
+      "targetDigest": "498cb1021293b81402b7daa75c04da0dbd96982fc00a01f98f60b5653ec5c02d",
       "targetClass": "NON_LOOPBACK",
       "port": null,
       "allowed": false
