@@ -1,4 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { vi, describe, expect, it } from 'vitest';
+
+// Authentication is the guard's own contract; these tests exercise the retired handler behind it.
+vi.mock('@/lib/api-auth-guard', () => ({ withApiAuth: (handler: unknown) => handler }));
 
 const ALL_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
 

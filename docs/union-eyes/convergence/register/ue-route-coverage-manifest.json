@@ -3,17 +3,17 @@
  "summary": {
   "routes": 968,
   "mutating": 695,
-  "kernel": 39,
+  "kernel": 40,
   "byGuard": {
    "ADMIN_AUTH": 6,
    "CAPABILITY_TOKEN": 12,
    "CRON_SECRET": 3,
    "CRUD_FACTORY": 297,
-   "DELEGATED": 22,
+   "DELEGATED": 23,
    "NONE": 51,
    "ORG_AUTH": 46,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 58,
+   "RETIRED": 57,
    "ROLE_AUTH": 130,
    "SESSION_AUTH": 54,
    "WEBHOOK_SIGNATURE": 4,
@@ -25,30 +25,30 @@
    "CAPABILITY_TOKEN": 8,
    "CRON_SECRET": 2,
    "CRUD_FACTORY": 297,
-   "DELEGATED": 15,
+   "DELEGATED": 16,
    "NONE": 8,
    "ORG_AUTH": 26,
    "PLATFORM_AUTH_HANDLER": 7,
-   "RETIRED": 51,
+   "RETIRED": 50,
    "ROLE_AUTH": 79,
    "SESSION_AUTH": 25,
    "WEBHOOK_SIGNATURE": 4,
    "WITH_API": 167
   },
   "mutatingByAudit": {
-   "ATOMIC": 42,
+   "ATOMIC": 43,
    "ATOMIC_SERVICE": 18,
    "BEST_EFFORT": 10,
    "CRUD_ATOMIC": 299,
-   "NO_WRITES_FOUND": 33,
-   "NONE": 293
+   "NO_WRITES_FOUND": 14,
+   "NONE": 311
   },
   "mutatingByData": {
    "AMBIENT_DB": 52,
    "CRUD_TENANT_TX": 299,
-   "NONE": 226,
+   "NONE": 225,
    "SYSTEM_CONTEXT": 53,
-   "TENANT_TX": 65
+   "TENANT_TX": 66
   }
  },
  "routes": [
@@ -2911,7 +2911,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "NONE"
   },
   {
    "route": "cases/intake/route.ts",
@@ -2936,7 +2936,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "NONE"
   },
   {
    "route": "cases/outcomes/route.ts",
@@ -2949,7 +2949,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "NONE"
   },
   {
    "route": "cases/route.ts",
@@ -2975,7 +2975,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "NONE"
   },
   {
    "route": "cases/templates/route.ts",
@@ -2988,7 +2988,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "NONE"
   },
   {
    "route": "cases/timeline/route.ts",
@@ -3001,7 +3001,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "NONE"
   },
   {
    "route": "cba-intelligence/agreements/[id]/route.ts",
@@ -3251,7 +3251,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "NONE"
   },
   {
    "route": "claims/[id]/evidence/route.ts",
@@ -3291,7 +3291,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "NONE"
   },
   {
    "route": "claims/[id]/updates/route.ts",
@@ -3305,7 +3305,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "NONE"
   },
   {
    "route": "claims/[id]/workflow/history/route.ts",
@@ -3331,7 +3331,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "NONE"
   },
   {
    "route": "claims/bulk/route.ts",
@@ -4452,11 +4452,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "RETIRED",
-   "kernel": false,
+   "guard": "DELEGATED",
+   "kernel": true,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "continuity/inheritance/route.ts",
@@ -5088,7 +5088,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "NONE"
   },
   {
    "route": "documents/[id]/route.ts",
@@ -5102,7 +5102,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "NONE"
   },
   {
    "route": "documents/bulk/route.ts",
@@ -5114,7 +5114,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "NONE"
   },
   {
    "route": "documents/categories/route.ts",
@@ -5127,7 +5127,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "NONE"
   },
   {
    "route": "documents/folders/route.ts",
@@ -5140,7 +5140,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "NONE"
   },
   {
    "route": "documents/repository/[id]/route.ts",
@@ -5191,7 +5191,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "NONE"
   },
   {
    "route": "documents/upload/route.ts",
@@ -8475,7 +8475,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "NONE"
   },
   {
    "route": "investigations/route.ts",
@@ -8501,7 +8501,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "NONE"
   },
   {
    "route": "jurisdiction-rules/route.ts",
