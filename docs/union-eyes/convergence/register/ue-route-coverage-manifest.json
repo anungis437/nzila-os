@@ -37,12 +37,12 @@
   },
   "mutatingByAudit": {
    "ATOMIC": 64,
-   "ATOMIC_SERVICE": 32,
+   "ATOMIC_SERVICE": 35,
    "BEST_EFFORT": 10,
    "CRUD_ATOMIC": 299,
    "EXEMPT_BALLOT_SECRECY": 2,
    "NO_WRITES_FOUND": 14,
-   "NONE": 274
+   "NONE": 271
   },
   "mutatingByData": {
    "AMBIENT_DB": 49,
@@ -11284,7 +11284,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "signatures/documents/route.ts",
@@ -11297,7 +11297,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "signatures/sign/route.ts",
@@ -11309,7 +11309,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "social-media/accounts/callback/route.ts",

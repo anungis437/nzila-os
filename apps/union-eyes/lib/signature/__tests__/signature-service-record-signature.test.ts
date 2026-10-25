@@ -18,6 +18,8 @@ const mocks = vi.hoisted(() => ({
   updateWhere: vi.fn(),
   updateReturning: vi.fn(),
   insertValues: vi.fn(),
+  documentFind: vi.fn(),
+  audit: vi.fn(),
 }));
 
 vi.mock('@/db', () => ({
@@ -27,6 +29,7 @@ vi.mock('@/db', () => ({
         findFirst: mocks.findFirst,
         findMany: mocks.findMany,
       },
+      signatureDocuments: { findFirst: mocks.documentFind },
     },
     update: vi.fn(() => ({
       set: mocks.updateSet,
@@ -37,6 +40,13 @@ vi.mock('@/db', () => ({
   },
 }));
 
+vi.mock('@/lib/db/with-rls-context', async () => ({
+  withRLSContext: async (_org: unknown, fn: (tx: unknown) => Promise<unknown>) => {
+    const { db } = await import('@/db');
+    return fn({ ...db, select: () => ({ from: () => ({ where: async () => [{ id: 'doc-1' }] }) }) });
+  },
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mocks.audit }));
 vi.mock('@/lib/services/notification-service', () => ({
   NotificationService: { send: vi.fn() },
 }));
@@ -65,6 +75,8 @@ describe('SignatureService.recordSignature ownership verification', () => {
     });
     mocks.insertValues.mockResolvedValue(undefined);
     mocks.findMany.mockResolvedValue([{ status: 'pending' }]);
+    mocks.documentFind.mockResolvedValue({ id: 'doc-1', organizationId: 'org-1', status: 'sent' });
+    mocks.audit.mockResolvedValue(undefined);
   });
 
   it('rejects when the signer row belongs to a different user (impersonation attempt)', async () => {

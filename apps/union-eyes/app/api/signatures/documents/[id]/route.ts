@@ -7,7 +7,7 @@
 import { z } from 'zod';
 import { NextRequest, NextResponse } from "next/server";
 import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
-import { SignatureService } from "@/lib/signature/signature-service";
+import { SignatureService, SignatureAuthorityError } from "@/lib/signature/signature-service";
 
 import {
   ErrorCode,
@@ -105,6 +105,12 @@ export const PATCH = withApiAuth(async (
       'Invalid action'
     );
   } catch (error) {
+    if (error instanceof SignatureAuthorityError) {
+      return standardErrorResponse(
+        error.code === "FORBIDDEN" ? ErrorCode.FORBIDDEN : ErrorCode.VALIDATION_ERROR,
+        error.message,
+      );
+    }
 return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Failed to update document',
