@@ -88,6 +88,12 @@ export const AUTH_MANDATORY_AUDIT_SERVICES: Record<string, { file: string; proof
   updateOrgAuthPolicy: { file: 'policy/admin.ts', proof: /await withAuthSavepoint\(async \(\) => db\.insert\(authAuditLog\)[\s\S]*?org_policy_updated/ },
   disableMfa: { file: 'mfa/service.ts', proof: /mfa_disabled[\s\S]*?\}, db, true\)/ },
 }
+/**
+ * Case-assignment mutators that go through the authority store, whose relationship writes record their audit row on the
+ * same executor (mutations.ts: insertRelationship / revokeRelationship call auditAuthorityMutation). Verified by test.
+ */
+export const KERNEL_AUDITED_CALLS = ['assignCase', 'reassignCase', 'revokeCaseAssignment', 'grantCaseAccessGuarded', 'revokeCaseAccessGuarded', 'assignPrimaryRepresentative']
+const KERNEL_AUDITED_CALL = new RegExp(`\\b(${KERNEL_AUDITED_CALLS.join('|')})\\(`)
 const AUTH_AUDITED_CALL = new RegExp(`\\b(${Object.keys(AUTH_MANDATORY_AUDIT_SERVICES).join('|')})\\(`)
 
 /** First-party modules the route imports (the `@/` alias and relative paths), resolved to files that exist. */
@@ -123,7 +129,7 @@ function auditOf(source: string, guard: RouteGuard, mutating: boolean, imports: 
   if (guard === 'CRUD_FACTORY') return 'CRUD_ATOMIC'
   if (ATOMIC_AUDIT.test(source)) return 'ATOMIC'
   if (imports.some((f) => ATOMIC_AUDIT.test(readFileSync(f, 'utf8')))) return 'ATOMIC_SERVICE'
-  if (AUTH_AUDITED_CALL.test(source)) return 'ATOMIC_SERVICE'
+  if (AUTH_AUDITED_CALL.test(source) || KERNEL_AUDITED_CALL.test(source)) return 'ATOMIC_SERVICE'
   // A mutating method whose handler and everything it reaches contain no write is read-only in effect.
   if (!WRITE_TOKEN.test(source) && !imports.some((f) => WRITE_TOKEN.test(readFileSync(f, 'utf8')))) return 'NO_WRITES_FOUND'
   if (/auditLog|auditDataMutation|auditSecurityEvent|logAuditEvent|recordAudit/.test(source)) return 'BEST_EFFORT'

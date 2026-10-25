@@ -37,11 +37,11 @@
   },
   "mutatingByAudit": {
    "ATOMIC": 59,
-   "ATOMIC_SERVICE": 22,
+   "ATOMIC_SERVICE": 23,
    "BEST_EFFORT": 10,
    "CRUD_ATOMIC": 299,
    "NO_WRITES_FOUND": 14,
-   "NONE": 291
+   "NONE": 290
   },
   "mutatingByData": {
    "AMBIENT_DB": 51,
@@ -7844,7 +7844,7 @@
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "grievances/[id]/assign/route.ts",

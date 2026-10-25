@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { AUTH_MANDATORY_AUDIT_SERVICES, auditGap, kernelPending, scanRoutes } from '../../scripts/lib/route-coverage-scan'
+import { AUTH_MANDATORY_AUDIT_SERVICES, KERNEL_AUDITED_CALLS, auditGap, kernelPending, scanRoutes } from '../../scripts/lib/route-coverage-scan'
 
 /**
  * Route-coverage manifest and ratchets (UE-CONV-K-008). Every app/api route is recorded with how it authenticates,
@@ -94,5 +94,16 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
     for (const [name, { file, proof }] of Object.entries(AUTH_MANDATORY_AUDIT_SERVICES)) {
       expect(readFileSync(join(authSrc, file), 'utf8'), name).toMatch(proof)
     }
+  })
+
+  it('counts a case-assignment mutator as audited only while the store records its audit row on the same executor', () => {
+    const store = join(__dirname, '..', 'authority', 'store')
+    const mutations = readFileSync(join(store, 'mutations.ts'), 'utf8')
+    expect(mutations).toMatch(/export async function insertRelationship[\s\S]*?auditAuthorityMutation\(exec[\s\S]*?export async function revokeRelationship/)
+    expect(mutations).toMatch(/export async function revokeRelationship[\s\S]*?auditAuthorityMutation\(exec/)
+    const lifecycle = readFileSync(join(store, 'lifecycle.ts'), 'utf8')
+    expect(lifecycle).toMatch(/export async function assignCase[\s\S]*?return insertRelationship\(/)
+    expect(lifecycle).toMatch(/export async function revokeCaseAssignment[\s\S]*?await revokeRelationship\(/)
+    expect(KERNEL_AUDITED_CALLS.length).toBeGreaterThan(0)
   })
 })

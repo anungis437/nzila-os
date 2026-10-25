@@ -150,7 +150,6 @@
   "governance/elections/sessions/route.ts",
   "governance/policies/evaluate/route.ts",
   "graphql/route.ts",
-  "grievances/[id]/access/route.ts",
   "icra/[assessmentId]/answer/route.ts",
   "icra/[assessmentId]/capability/exchange/route.ts",
   "icra/[assessmentId]/claim/route.ts",
