@@ -14,14 +14,12 @@
     {
       "id": "document-retention-execution",
       "owner": "integrator",
-      "detail": "No canonical document retention contract or per-document legal-hold record exists (legal_holds is scoped by data type and date range, not by document). The console presents hold and retention status as unavailable and offers no save, release or execute action. A privacy label is never a hold. Metadata flags that the versioning guard reads are not an authoritative hold record.",
-      "status": "OPEN_UNAVAILABLE"
+      "detail": "No canonical retention-execute or legal-hold release mutation. The console no longer rewrites privacy labels for those actions."
     },
     {
       "id": "download-audit-when-canonical-v2-disabled",
       "owner": "integrator",
-      "detail": "Resolved. The route no longer calls appendMandatoryAudit. All downloads go through lib/documents/download-issuance.ts, which calls persistAtomicAudit: it records the access (hash-chained under Canonical V2, audit_logs otherwise) or throws, and has no \"skipped\" result. A URL is issued only after the record is written. Proven against PostgreSQL semantics with V2 on and off, with injected audit faults.",
-      "status": "RESOLVED_BY_INTEGRATOR"
+      "detail": "appendMandatoryAudit returns false when UE_CANONICAL_BOOTSTRAP_V2 is not 1. The download route withholds a URL when that call throws, and still returns the URL when the helper returns false, matching the published helper. A durable audit row is written when V2 is on."
     }
   ],
   "paths": [
@@ -134,19 +132,23 @@
       "methods": [
         "POST"
       ],
-      "operation": "OCR extraction through document-service.",
+      "operation": "Authorized OCR extraction. Text is returned for review and is not written onto the document.",
       "consumers": [
         "components/documents/ocr-upload.tsx"
       ],
-      "authorization": "withRoleAuth steward.",
-      "canonicalReplacement": "GET/POST /api/documents/repository",
-      "kernelAction": "Use isDocumentVisibleByPolicy through the repository and download routes.",
-      "classificationRules": "Do not infer document rights from role seniority or case read access.",
-      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
-      "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
-      "regressionTests": [],
-      "retirementDisposition": "Do not retire until in-repo consumers are migrated.",
+      "authorization": "withRoleAuth steward, then isDocumentVisibleByPolicy, explicit view grant, and case access.",
+      "canonicalReplacement": "Consume repository visibility. Do not persist OCR into contentText.",
+      "kernelAction": "isDocumentVisibleByPolicy and processDocumentOCR persistExtractedText false",
+      "classificationRules": "Privileged and highly sensitive documents require a grant, primary ownership, or private-document access.",
+      "storage": "The processor reads the stored blob. The response omits blob paths.",
+      "audit": "appendMandatoryAudit action document.ocr.extract. A throw returns 503 and no text. Details omit the text.",
+      "migrationStatus": "tranche_2_complete",
+      "regressionTests": [
+        "apps/union-eyes/app/api/documents/[id]/ocr/route.test.ts",
+        "apps/union-eyes/app/api/documents/[id]/ocr/route.pglite.test.ts",
+        "apps/union-eyes/lib/documents/ocr-processing.test.ts"
+      ],
+      "retirementDisposition": "Keep. Unsupported types return 501. Processor failures return 502.",
       "disposition": "MIGRATE"
     },
     {
@@ -158,7 +160,7 @@
       ],
       "operation": "Legacy document detail, update, and delete. Returns 501 unless the legacy flag is set.",
       "consumers": [
-        "components/documents/ocr-upload.tsx"
+        "no remaining ocr-upload call"
       ],
       "authorization": "Legacy flag or role check. Not the canonical document policy.",
       "canonicalReplacement": "GET/POST /api/documents/repository",
@@ -168,7 +170,7 @@
       "audit": "Not the canonical download audit.",
       "migrationStatus": "not_started",
       "regressionTests": [],
-      "retirementDisposition": "Do not retire until in-repo consumers are migrated.",
+      "retirementDisposition": "ocr-upload no longer patches this route. Other callers may remain. Do not switch it to a new 501 from this tranche.",
       "disposition": "MIGRATE"
     },
     {
@@ -261,20 +263,22 @@
       "methods": [
         "POST"
       ],
-      "operation": "Multipart upload.",
+      "operation": "Multipart upload. canonicalIntake=1 stores an organization-prefixed blob and does not insert a document. discardBlobPath deletes only that prefix.",
       "consumers": [
         "components/documents/ocr-upload.tsx",
         "scripts/production/go-live-smoke.ts"
       ],
-      "authorization": "withRoleAuth member. Live even when the legacy flag is off.",
+      "authorization": "withRoleAuth member. Form organization must match the server organization.",
       "canonicalReplacement": "GET/POST /api/documents/repository",
       "kernelAction": "Use isDocumentVisibleByPolicy through the repository and download routes.",
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
-      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
-      "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
-      "regressionTests": [],
-      "retirementDisposition": "go-live-smoke.ts is outside this lane. Do not return 501.",
+      "storage": "putBlob under documents/${organizationId}/. Intake response has blobPath, checksum, size, mimeType, and filename.",
+      "audit": "The legacy insert still writes document.upload. Intake does not write a document row, so it has no document audit.",
+      "migrationStatus": "tranche_2_intake",
+      "regressionTests": [
+        "apps/union-eyes/app/api/__tests__/documents-upload.route.test.ts"
+      ],
+      "retirementDisposition": "Default upload remains because go-live-smoke.ts calls it. Do not return 501.",
       "disposition": "MIGRATE"
     },
     {
@@ -599,22 +603,24 @@
     {
       "path": "apps/union-eyes/components/documents/document-browser.tsx",
       "methods": [],
-      "operation": "Document UI surface.",
+      "operation": "Canonical document browser. Lists and previews repository metadata, downloads through the audited route, and hosts OCR intake.",
       "consumers": [
-        "/api/documents",
-        "/api/documents/batch-download",
-        "/api/documents/batch-delete",
-        "/api/documents/batch-tag"
+        "GET /api/documents/repository",
+        "GET /api/documents/[id]/download",
+        "components/documents/ocr-upload.tsx"
       ],
-      "authorization": "Legacy flag or role check. Not the canonical document policy.",
-      "canonicalReplacement": "Repository and audited download routes",
-      "kernelAction": "Consume repository authorization; do not decide locally",
-      "classificationRules": "Do not infer document rights from role seniority or case read access.",
-      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
-      "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
-      "regressionTests": [],
-      "retirementDisposition": "Migrate callers before removing the component.",
+      "authorization": "Repository list and detail plus requestAuthorizedDownload. A row does not grant download.",
+      "canonicalReplacement": "GET /api/documents/repository and GET /api/documents/[id]/download",
+      "kernelAction": "isDocumentVisibleByPolicy on the repository and download routes",
+      "classificationRules": "Share and delete fail closed. Client sort and extra type filters apply only to the authorized result.",
+      "storage": "fileUrl, storage keys, and extracted text are dropped before render.",
+      "audit": "Download and OCR audits stay on their routes.",
+      "migrationStatus": "tranche_2_complete",
+      "regressionTests": [
+        "apps/union-eyes/lib/documents/browser-repository.test.ts",
+        "apps/union-eyes/components/documents/document-browser.journey.test.tsx"
+      ],
+      "retirementDisposition": "Legacy /api/documents list and batch download, delete, and tag calls removed from this component.",
       "disposition": "MIGRATE"
     },
     {
@@ -785,21 +791,24 @@
     {
       "path": "apps/union-eyes/components/documents/ocr-upload.tsx",
       "methods": [],
-      "operation": "Document UI surface.",
+      "operation": "OCR intake. Canonical blob intake, repository create, authorized extraction, and review.",
       "consumers": [
-        "/api/documents/upload",
-        "/api/documents/${id}/ocr",
-        "/api/documents/${id}"
+        "POST /api/documents/upload?canonicalIntake=1",
+        "POST /api/documents/repository",
+        "POST /api/documents/[id]/ocr"
       ],
-      "authorization": "Legacy flag or role check. Not the canonical document policy.",
-      "canonicalReplacement": "Repository and audited download routes",
-      "kernelAction": "Consume repository authorization; do not decide locally",
-      "classificationRules": "Do not infer document rights from role seniority or case read access.",
-      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
-      "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
-      "regressionTests": [],
-      "retirementDisposition": "Next tranche. Upload route still serves go-live smoke.",
+      "authorization": "The upload, repository, and OCR routes decide. The component does not grant access.",
+      "canonicalReplacement": "POST /api/documents/repository after organization-scoped blob intake",
+      "kernelAction": "repository create and processDocumentOCR persistExtractedText false",
+      "classificationRules": "The user selects a privacy label. OCR text is not evidence and cannot be saved.",
+      "storage": "canonicalIntake returns blobPath only. Repository refusal discards that path.",
+      "audit": "Create audit for unlinked rows is an integrator gap. Extract audit is on the OCR route.",
+      "migrationStatus": "tranche_2_complete",
+      "regressionTests": [
+        "apps/union-eyes/lib/documents/ocr-intake.test.ts",
+        "apps/union-eyes/components/documents/ocr-upload.journey.test.tsx"
+      ],
+      "retirementDisposition": "Legacy multipart document insert and PATCH ocrText removed from this component.",
       "disposition": "MIGRATE"
     },
     {
@@ -975,29 +984,67 @@
       "disposition": "MIGRATE"
     }
   ],
-  "integratorResolutions": [
+  "tranche2ContractGaps": [
     {
-      "id": "legacy-file-url-fallback",
-      "resolution": "A legacy row is served only if its file URL validates as a reference into this organization's own storage (host, container, organization folder, no relative segments) and is re-signed from the verified path; a stored external or foreign URL is never returned. lib/documents/legacy-storage-backfill.ts and POST /api/admin/documents/legacy-backfill give verified legacy rows a real version and report the rest."
+      "id": "repository-create-audit-for-unlinked-documents",
+      "owner": "integrator",
+      "behavior": "POST /api/documents/repository must append a mandatory document-create audit for every accepted row. Today auditCaseMutation runs only when linkedEntityType is grievance.",
+      "security": "An unlinked OCR intake can persist a classified document with no durable create audit. Cursor must not add a second audit writer on the protected route.",
+      "files": [
+        "apps/union-eyes/app/api/documents/repository/route.ts"
+      ],
+      "tests": [
+        "repository create audit assertion for an unlinked document, including audit failure rolling back the row"
+      ]
     },
     {
-      "id": "bulk-download",
-      "resolution": "POST /api/documents/repository/downloads: per-document authorization and audit, per-document outcomes, atomic:false. The console reports partial success and opens only issued links. The old sequential stop-on-first-failure loop is gone."
+      "id": "ocr-transcript-persistence",
+      "owner": "integrator",
+      "behavior": "Add a governed write for reviewed OCR text that stores it separately from the original bytes, document metadata, and grievance evidence.",
+      "security": "The write must repeat document visibility, organization scope, and mandatory audit. It must not treat OCR text as a legal fact or copy it into contentText searched by the repository keyword filter.",
+      "files": [
+        "apps/union-eyes/app/api/documents/repository/[id]/route.ts"
+      ],
+      "tests": [
+        "authorized correction persists as a distinct transcript; unauthorized, cross-tenant, and audit-failure writes leave the document unchanged"
+      ]
     },
     {
-      "id": "version-and-create-verification",
-      "resolution": "resolveStoredBlob accepts only this organization's own storage references, computes the SHA-256 itself, and rejects a claimed hash that differs (409). Versions refuse a stale expectedVersionNo, a file another version already holds, a deleted document, and a legal hold re-read under a row lock. The console no longer invents a \"manual:\" hash and no longer offers external URL import."
+      "id": "ocr-member-visibility-role-gate",
+      "owner": "integrator",
+      "behavior": "Decide whether a member who already passes isDocumentVisibleByPolicy may request OCR. The route currently requires steward before that policy runs.",
+      "security": "Do not infer OCR rights from role seniority alone. A member grant or case assignment should be explicit if the steward minimum is relaxed.",
+      "files": [
+        "apps/union-eyes/app/api/documents/[id]/ocr/route.ts"
+      ],
+      "tests": [
+        "member with document visibility is allowed only after the contract change; unassigned and foreign callers stay denied"
+      ]
     },
     {
-      "id": "retention-semantics",
-      "resolution": "Legal hold and retention figures are unavailable (null), not derived from privacy labels; no simulated release, execute or save."
+      "id": "ocr-audit-when-canonical-v2-disabled",
+      "owner": "integrator",
+      "behavior": "appendMandatoryAudit returns false when UE_CANONICAL_BOOTSTRAP_V2 is not 1. The OCR route withholds text when that call throws and still returns text when the helper returns false.",
+      "security": "Same published helper contract as document download. Cursor does not change the helper.",
+      "files": [
+        "apps/union-eyes/lib/audit/mandatory-audit.ts"
+      ],
+      "tests": [
+        "V2 enabled writes document.ocr.extract without the extracted text; a thrown audit write returns 503 and no text"
+      ]
+    },
+    {
+      "id": "ocr-processor-and-blob-activation",
+      "owner": "operations",
+      "behavior": "Image and PDF extraction call processImageOCR or processPDFOCR after downloadBuffer. Unsupported types return 501. Processor and storage failures return 502 and no text.",
+      "security": "No successful OCR result is manufactured when the processor, blob credentials, or callback is unavailable. Temporary artifacts must stay inside the organization blob prefix.",
+      "files": [
+        "apps/union-eyes/lib/services/ocr-service.ts",
+        "apps/union-eyes/lib/blob-client.ts"
+      ],
+      "tests": [
+        "live processor fixture with organization-scoped blob bytes; provider failure returns 502 and writes no contentText"
+      ]
     }
-  ],
-  "integratorCorrectedPaths": [
-    "apps/union-eyes/components/documents/documents-console.tsx",
-    "apps/union-eyes/components/documents/document-retention-policy.tsx",
-    "apps/union-eyes/lib/documents/canonical-journey.ts",
-    "apps/union-eyes/lib/documents/document-repository-client.ts",
-    "apps/union-eyes/app/api/documents/[id]/download/route.ts"
   ]
 }
