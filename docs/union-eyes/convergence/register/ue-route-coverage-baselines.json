@@ -17,7 +17,6 @@
   "admin/representation-protocol/route.ts",
   "admin/seed-cupe-pilot/route.ts",
   "admin/system/cache/route.ts",
-  "admin/users/[userId]/route.ts",
   "agreements/route.ts",
   "ai/cache-stats/route.ts",
   "ai/classify/route.ts",

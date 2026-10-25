@@ -37,11 +37,11 @@
   },
   "mutatingByAudit": {
    "ATOMIC": 56,
-   "ATOMIC_SERVICE": 18,
+   "ATOMIC_SERVICE": 19,
    "BEST_EFFORT": 10,
    "CRUD_ATOMIC": 299,
    "NO_WRITES_FOUND": 14,
-   "NONE": 298
+   "NONE": 297
   },
   "mutatingByData": {
    "AMBIENT_DB": 52,
@@ -1050,7 +1050,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "admin/users/route.ts",

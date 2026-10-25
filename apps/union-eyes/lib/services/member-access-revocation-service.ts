@@ -1,6 +1,7 @@
 import { db } from '@/db/db';
 import { organizationMembers } from '@/db/schema';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { eq, and, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { authDb, withAuthContext } from '@nzila/platform-auth/auth-execution';
@@ -32,6 +33,8 @@ export interface RevokeMemberAccessInput {
   authUserId: string;
   organizationId: string;
   newLocalStatus: 'inactive' | 'deleted';
+  /** The authenticated administrator performing the offboarding; recorded in the durable audit. */
+  actorUserId: string;
 }
 
 export interface RevokeMemberAccessResult {
@@ -49,6 +52,8 @@ export interface ReactivateMemberAccessInput {
   /** organizationMembers.userId — the REAL authenticated user principal. */
   authUserId: string;
   organizationId: string;
+  /** The authenticated administrator performing the reactivation; recorded in the durable audit. */
+  actorUserId: string;
 }
 
 export interface ReactivateMemberAccessResult {
@@ -156,18 +161,38 @@ export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promis
   // platform-admin caller (see app/api/admin/users/[userId]/route.ts) has
   // no ordinary tenant RLS context for an arbitrary target organization.
   try {
-    await withSystemContext(async (_tx) => {
+    // The local state change and the revocation audit commit together; an outcome that records earlier-step
+    // failures is audited as a failure, but the local denial is still applied.
+    await withSystemContext(async (tx) => {
       if (input.newLocalStatus === 'deleted') {
-        await db
+        await tx
           .update(organizationMembers)
           .set({ deletedAt: new Date(), updatedAt: new Date() })
           .where(eq(organizationMembers.id, input.membershipId));
       } else {
-        await db
+        await tx
           .update(organizationMembers)
           .set({ status: 'inactive', updatedAt: new Date() })
           .where(eq(organizationMembers.id, input.membershipId));
       }
+      await persistAtomicAudit(
+        tx as RLSTx,
+        {
+          organizationId: input.organizationId,
+          userId: input.actorUserId,
+          action: input.newLocalStatus === 'deleted' ? 'member.access.delete' : 'member.access.deactivate',
+          resourceType: 'organization_members',
+          resourceId: input.membershipId,
+          details: {
+            targetUserId: input.authUserId,
+            sessionsRevoked,
+            authMembershipDisabled,
+            liveCaseRelationships: caseAccessRevokedCount,
+            incompleteSteps: errors.length > 0 ? errors : undefined,
+          },
+        },
+        errors.length > 0 ? 'failure' : 'success',
+      );
     });
     localStatusUpdated = true;
   } catch (err) {
@@ -233,6 +258,25 @@ export async function reactivateMemberAccess(
   let authMembershipReenabled = false;
   let localStatusUpdated = false;
 
+  const auditEntry = (action: string, details: Record<string, unknown> = {}) => ({
+    organizationId: input.organizationId,
+    userId: input.actorUserId,
+    action,
+    resourceType: 'organization_members',
+    resourceId: input.membershipId,
+    details: { targetUserId: input.authUserId, ...details },
+  });
+
+  // Reactivation grants authority in two stores that cannot share the audit transaction. The attempt is therefore
+  // made durable first: if it cannot be recorded, nothing is granted.
+  try {
+    await withSystemContext((tx) => persistAtomicAudit(tx as RLSTx, auditEntry('member.access.reactivate_attempt')));
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error('reactivation_attempt_audit_failed', { membershipId: input.membershipId, error: err });
+    return { success: false, authMembershipReenabled, localStatusUpdated, errors: [`audit_unavailable: ${message}`] };
+  }
+
   try {
     const { authOrganizationUsers } = await import('@nzila/db/schema');
 
@@ -278,6 +322,17 @@ export async function reactivateMemberAccess(
       organizationId: input.organizationId,
       error: err,
     });
+  }
+
+  // The attempt record already exists, so a failure to record the outcome is logged rather than reversing a grant.
+  try {
+    await withSystemContext((tx) => persistAtomicAudit(
+      tx as RLSTx,
+      auditEntry('member.access.reactivate', { errors: errors.length > 0 ? errors : undefined }),
+      errors.length > 0 ? 'failure' : 'success',
+    ));
+  } catch (err) {
+    logger.error('reactivation_outcome_audit_failed', { membershipId: input.membershipId, error: err });
   }
 
   const success = errors.length === 0;
