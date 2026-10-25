@@ -1,4 +1,7 @@
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { PENSION_ADMIN_ROLES } from '@/lib/pension/pension-authority';
 import { db } from '@/db/db';
 import { pensionTrusteeMeetings } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
@@ -33,16 +36,27 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { required: true, minRole: 'steward' },
+    auth: { required: true, roles: PENSION_ADMIN_ROLES },
     openapi: { tags: ['Pension'], summary: 'Create trustee meeting', description: 'Schedule a new trustee meeting' },
   },
-  async ({ body, organizationId }) => {
+  async ({ body, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const parsed = createMeetingSchema.parse(body);
-    const [meeting] = await db
-      .insert(pensionTrusteeMeetings)
-      .values({ ...parsed, organizationId: organizationId! })
-      .returning();
-    return meeting;
+    return withRLSContext({ organizationId }, async (tx) => {
+      const [meeting] = await tx
+        .insert(pensionTrusteeMeetings)
+        .values({ ...parsed, organizationId })
+        .returning();
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'pension.trustee_meeting.schedule',
+        resourceType: 'pension_trustee_meetings',
+        resourceId: meeting.id,
+        details: { title: parsed.title },
+      });
+      return meeting;
+    });
   },
 );
 

@@ -36,20 +36,20 @@
    "WITH_API": 167
   },
   "mutatingByAudit": {
-   "ATOMIC": 64,
+   "ATOMIC": 72,
    "ATOMIC_SERVICE": 58,
    "BEST_EFFORT": 9,
    "CRUD_ATOMIC": 299,
    "EXEMPT_BALLOT_SECRECY": 2,
    "NO_WRITES_FOUND": 14,
-   "NONE": 249
+   "NONE": 241
   },
   "mutatingByData": {
-   "AMBIENT_DB": 49,
+   "AMBIENT_DB": 41,
    "CRUD_TENANT_TX": 299,
    "NONE": 213,
    "SYSTEM_CONTEXT": 53,
-   "TENANT_TX": 81
+   "TENANT_TX": 89
   }
  },
  "routes": [
@@ -10242,8 +10242,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "pension/contributions/route.ts",
@@ -10255,8 +10255,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "pension/members/route.ts",
@@ -10268,8 +10268,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "pension/plans/[id]/route.ts",
@@ -10282,8 +10282,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "pension/plans/route.ts",
@@ -10295,8 +10295,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "pension/retirement-eligibility/route.ts",
@@ -10320,8 +10320,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "pension/trustee-meetings/[id]/route.ts",
@@ -10334,8 +10334,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "pension/trustee-meetings/route.ts",
@@ -10347,8 +10347,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "pension/trustees/[id]/route.ts",
