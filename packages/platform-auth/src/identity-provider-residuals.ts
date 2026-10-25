@@ -1,7 +1,7 @@
 /**
  * UE-CONV-A-006 residual list: every file in Union Eyes, the shared platform-auth package and the shared database
  * package that still mentions the retired identity provider (Clerk), with its classification. The list is held to the
- * repository by lib/auth/__tests__/identity-provider-residuals.test.ts: a NEW file mentioning the provider that is not
+ * repository by packages/platform-auth/src/identity-provider-residuals.test.ts: a NEW file mentioning the provider that is not
  * listed here fails the test, so the residual can only shrink.
  *
  * Classes:

@@ -28,7 +28,7 @@ const REMAINING = new Map<string, string>([
   ['app/api/employer-execution/_lib.ts', 'imports the pure payroll, compliance, replay and remittance-generation engines; approves and pays nothing'],
 ]);
 // Mentions only: the capability register describes the service, it does not import it.
-const DESCRIPTIVE = new Set(['lib/reality/capability-registry.ts', 'lib/api/authorization-denial.ts', 'lib/authority/store/finance-route-adapter.ts', 'lib/auth/identity-provider-residuals.ts']);
+const DESCRIPTIVE = new Set(['lib/reality/capability-registry.ts', 'lib/api/authorization-denial.ts', 'lib/authority/store/finance-route-adapter.ts']);
 
 describe('financial-service is not a financial approval path of this application', () => {
   const references = SOURCE_ROOTS.flatMap((root) => sourceFiles(join(ROOT, root)))

@@ -2,9 +2,9 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { DEAD_CANDIDATE_EXPORTS, PROVIDER_RESIDUALS } from '../identity-provider-residuals'
+import { DEAD_CANDIDATE_EXPORTS, PROVIDER_RESIDUALS } from './identity-provider-residuals'
 
-const ROOT = resolve(__dirname, '..', '..', '..', '..', '..')
+const ROOT = resolve(__dirname, '..', '..', '..')
 
 function git(args: readonly string[]): string[] {
   try {
@@ -19,7 +19,7 @@ const EXCLUDES = [
   ':(exclude)**/*.md', ':(exclude)**/*.json', ':(exclude)**/*.lock', ':(exclude)apps/union-eyes/docs', ':(exclude)apps/union-eyes/db/migrations*',
   ':(exclude)apps/union-eyes/db/replay*', ':(exclude)packages/db/drizzle', ':(exclude)apps/union-eyes/.retire-scratch', ':(exclude)apps/union-eyes/.mut-*',
   ':(exclude)apps/union-eyes/backend/*/migrations/*',
-  ':(exclude)apps/union-eyes/lib/auth/identity-provider-residuals.ts', ':(exclude)apps/union-eyes/lib/auth/__tests__/identity-provider-residuals.test.ts',
+  ':(exclude)packages/platform-auth/src/identity-provider-residuals.ts', ':(exclude)packages/platform-auth/src/identity-provider-residuals.test.ts',
 ]
 
 describe('UE-CONV-A-006: provider residuals can only shrink', () => {

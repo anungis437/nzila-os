@@ -113,6 +113,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'executive/page.tsx',                          minRole: 'officer',              description: 'Executive destination (page requires officer)' },
   { path: 'help/page.tsx',                               minRole: 'member',               description: 'Help (any authenticated user)' },
   { path: 'messages/page.tsx',                           minRole: 'member',               description: 'Member messages (participant-scoped by the API)' },
+  { path: 'messages/staff/page.tsx',                     minRole: 'steward',              description: 'Staff conversation workspace (case-policy staff guard; every API call decides again from live membership, designation and assignment)' },
   { path: 'preferences/page.tsx',                        minRole: 'member',               description: 'Personal preferences' },
   { path: 'privacy/page.tsx',                            minRole: 'member',               description: 'Personal privacy and information rights' },
   { path: 'union/page.tsx',                              minRole: 'member',               description: 'Union destination (member experience; API gates by authority)' },

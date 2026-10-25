@@ -241,7 +241,7 @@
         },
         {
           "type": "path",
-          "ref": "apps/union-eyes/lib/auth/identity-provider-residuals.ts"
+          "ref": "packages/platform-auth/src/identity-provider-residuals.ts"
         }
       ],
       "status": "IN_PROGRESS",
