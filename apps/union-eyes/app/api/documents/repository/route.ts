@@ -23,13 +23,15 @@ import {
 } from '@/lib/services/document-governance-service';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { hasDocumentContextAccess } from '@/lib/services/document-member-scope';
-import { resolveStoredBlob } from '@/lib/services/document-blob-integrity-service';
+import { resolveStoredBlob, storedBlobFailure } from '@/lib/services/document-blob-integrity-service';
 
 const uploadDocumentSchema = z.object({
   title: z.string().min(1).max(300),
   filename: z.string().min(1).max(500),
   fileUrl: z.string().url().optional(),
   blobPath: z.string().min(1).optional(),
+  // A claim, not a fact: when supplied it must equal the SHA-256 the server computes from storage.
+  contentHash: z.string().regex(/^[0-9a-fA-F]{64}$/, 'contentHash must be a SHA-256 hex digest').optional(),
   documentType: z.string().min(1).max(120),
   mimeType: z.string().min(1).max(120),
   privacyLabel: z.enum([
@@ -210,15 +212,27 @@ export const POST = withOrganizationAuth(async (request, context) => {
       organizationId,
       blobPath: parsed.data.blobPath,
       fileUrl: parsed.data.fileUrl,
+      expectedContentHash: parsed.data.contentHash,
     });
   } catch (error) {
+    const failure = storedBlobFailure(error);
     return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      error instanceof Error ? error.message : 'Invalid storage payload',
+      failure.status === 'conflict' ? ErrorCode.CONFLICT : ErrorCode.VALIDATION_ERROR,
+      failure.message,
     );
   }
 
   const created = await withRLSContext({ organizationId }, async (tx) => {
+    // A stored file belongs to one document version; one another document already holds cannot be claimed again.
+    const inUse = (
+      await tx
+        .select({ id: documentVersions.id })
+        .from(documentVersions)
+        .where(and(eq(documentVersions.organizationId, organizationId), eq(documentVersions.storageKey, resolvedBlob.blobPath)))
+        .limit(1)
+    )[0];
+    if (inUse) return null;
+
     const [insertedDocument] = await tx
       .insert(documents)
       .values({
@@ -279,6 +293,10 @@ export const POST = withOrganizationAuth(async (request, context) => {
 
     return insertedDocument;
   });
+
+  if (!created) {
+    return standardErrorResponse(ErrorCode.CONFLICT, 'That stored file is already attached to a document version');
+  }
 
   return standardSuccessResponse(created);
 });

@@ -7,6 +7,7 @@ const TEST_USER_ID = 'user_test_001';
 const m = vi.hoisted(() => {
   const state = {
     selectQueue: [] as unknown[][],
+    blobInUse: false,
   };
 
   const nextSelect = () => Promise.resolve((state.selectQueue.shift() ?? []) as unknown[]);
@@ -66,6 +67,10 @@ vi.mock('@/lib/services/document-governance-service', () => ({
 }));
 vi.mock('@/lib/services/document-blob-integrity-service', () => ({
   resolveStoredBlob: m.resolveStoredBlob,
+  storedBlobFailure: (error: { code?: string; message?: string }) => ({
+    status: error?.code === 'CONTENT_HASH_MISMATCH' ? 'conflict' : 'validation',
+    message: error?.message ?? 'Invalid storage payload',
+  }),
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/db/with-rls-context', () => ({
@@ -80,6 +85,7 @@ describe('documents/repository route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.resetQueues();
+    m.state.blobInUse = false;
     m.requireEntitlement.mockResolvedValue(undefined);
     m.hasMinRole.mockResolvedValue(true);
     m.getEffectiveCaseAccess.mockResolvedValue({
@@ -100,6 +106,7 @@ describe('documents/repository route', () => {
     m.withRLSContext.mockImplementation(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => {
       let insertCall = 0;
       const tx = {
+        select: vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => m.state.blobInUse ? [{ id: 'v-other' }] : []) })) })) })),
         insert: vi.fn(() => ({
           values: vi.fn(() => {
             insertCall += 1;
@@ -217,6 +224,33 @@ describe('documents/repository route', () => {
 
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toMatchObject({ code: 'VALIDATION_ERROR', message: 'Blob does not exist' });
+  });
+
+  it('answers 409 and creates nothing when the stored file is already attached to another document version', async () => {
+    const { POST } = await loadRoute();
+    m.state.blobInUse = true;
+    const response = await POST(new NextRequest('http://localhost/api/documents/repository', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Doc One', filename: 'doc1.pdf', blobPath: 'documents/x/doc1.pdf', documentType: 'policy', mimeType: 'application/pdf', privacyLabel: 'team_confidential',
+      }),
+    }));
+    expect(response.status).toBe(409);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('rejects a claimed content hash that is not a SHA-256 digest before touching storage', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/documents/repository', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Doc One', filename: 'doc1.pdf', blobPath: 'documents/x/doc1.pdf', contentHash: 'manual:123', documentType: 'policy', mimeType: 'application/pdf', privacyLabel: 'team_confidential',
+      }),
+    }));
+    expect(response.status).toBe(400);
+    expect(m.resolveStoredBlob).not.toHaveBeenCalled();
   });
 
   it('creates linked grievance documents and emits case audit event', async () => {

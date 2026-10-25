@@ -85,7 +85,7 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
   it('treats a route as kernel-decided only when it imports the kernel or the kernel-backed case access service', () => {
     for (const e of fresh.filter((r) => r.kernel && r.guard !== 'DELEGATED')) {
       const source = readFileSync(join(ROOT, 'app', 'api', e.route), 'utf8')
-      expect(source).toMatch(/lib\/authority|case-access-service|route-adapter|findReadableCase\(|requireCaseFilingCapacity\(|hasCaseFilingCapacity\(|requireKernelCaseAction\(/)
+      expect(source).toMatch(/lib\/authority|case-access-service|download-issuance|route-adapter|findReadableCase\(|requireCaseFilingCapacity\(|hasCaseFilingCapacity\(|requireKernelCaseAction\(/)
     }
   })
 
@@ -165,6 +165,19 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
       expect(why.length, route).toBeGreaterThan(20)
       expect(readFileSync(join(ROOT, 'app', 'api', route), 'utf8'), route).toMatch(control)
       expect(fresh.find((e) => e.route === route)?.audit, route).toBe('EXEMPT_UNATTRIBUTABLE')
+    }
+  })
+
+  it('counts the shared download-issuance core as kernel-decided only while it asks the kernel-backed case access service', () => {
+    const core = readFileSync(join(ROOT, 'lib', 'documents', 'download-issuance.ts'), 'utf8')
+    expect(core).toMatch(/from '@\/lib\/services\/case-access-service'/)
+    expect(core).toMatch(/getEffectiveCaseAccess\(/)
+    expect(core).toMatch(/persistAtomicAudit\(/)
+    // Every route that delegates to the core must not issue a link by any other path.
+    for (const route of ['documents/repository/downloads/route.ts', 'documents/[id]/download/route.ts']) {
+      const source = readFileSync(join(ROOT, 'app', 'api', route), 'utf8')
+      expect(source, route).toMatch(/issueDocumentDownload\(/)
+      expect(source, route).not.toMatch(/generateSasUrl|fileUrl/)
     }
   })
 })

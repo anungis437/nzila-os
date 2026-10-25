@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   listDenied,
   requestAuthorizedDownload,
+  requestBulkDownload,
   submitDocumentVersion,
   submitRepositoryDocument,
 } from './document-repository-client';
@@ -86,5 +87,45 @@ describe('document repository client', () => {
     expect(listDenied(403, { data: [] })).toBe('unauthorized');
     expect(listDenied(200, { unexpected: true })).toBe('list_unavailable');
     expect(listDenied(200, { data: [{ id: DOC }] })).toBeNull();
+  });
+});
+
+describe('bulk download client', () => {
+  const A = '11111111-1111-4111-8111-111111111111';
+  const B = '22222222-2222-4222-8222-222222222222';
+
+  it('reads a partial report as a report, not as a failure and not as success', async () => {
+    const fetchImpl = vi.fn(async () =>
+      jsonResponse(200, {
+        success: true,
+        data: {
+          atomic: false, status: 'partial', requested: 2, issued: 1, failed: 1,
+          items: [{ documentId: A, outcome: 'issued', downloadUrl: 'https://s/a' }, { documentId: B, outcome: 'denied' }],
+        },
+      }),
+    );
+    const result = await requestBulkDownload([A, B], fetchImpl);
+    expect(result.denial).toBeNull();
+    expect(result.report).toMatchObject({ status: 'partial', issued: 1, failed: 1 });
+    expect(fetchImpl).toHaveBeenCalledWith('/api/documents/repository/downloads', expect.objectContaining({ method: 'POST' }));
+  });
+
+  it('refuses locally what the server would refuse, without a request', async () => {
+    const fetchImpl = vi.fn();
+    await expect(requestBulkDownload([], fetchImpl)).resolves.toEqual({ report: null, denial: 'none_selected' });
+    await expect(requestBulkDownload(['nope'], fetchImpl)).resolves.toEqual({ report: null, denial: 'malformed_id' });
+    await expect(requestBulkDownload(Array.from({ length: 26 }, () => A), fetchImpl)).resolves.toEqual({ report: null, denial: 'bulk_limit' });
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it('treats a body that does not say it is non-atomic, or a transport failure, as unavailable', async () => {
+    await expect(requestBulkDownload([A], vi.fn(async () => jsonResponse(200, { data: { status: 'complete', items: [] } })))).resolves.toMatchObject({ report: null, denial: 'bulk_unavailable' });
+    await expect(requestBulkDownload([A], vi.fn(async () => { throw new Error('offline'); }))).resolves.toMatchObject({ report: null, denial: 'bulk_unavailable' });
+    await expect(requestBulkDownload([A], vi.fn(async () => jsonResponse(403, {})))).resolves.toMatchObject({ report: null, denial: 'unauthorized' });
+  });
+
+  it('reads a rejected storage reference on a write as its own denial, and a hash mismatch as a conflict', async () => {
+    await expect(submitRepositoryDocument({}, vi.fn(async () => jsonResponse(400, {})))).resolves.toEqual({ accepted: false, denial: 'reference_rejected' });
+    await expect(submitDocumentVersion(A, { fileUrl: 'u', contentHash: 'h' }, vi.fn(async () => jsonResponse(409, {})))).resolves.toEqual({ accepted: false, denial: 'conflict' });
   });
 });

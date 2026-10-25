@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import { withOrganizationAuth } from '@/lib/organization-middleware';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import {
@@ -12,13 +12,17 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import { documents, documentLinks, documentVersions } from '@/db/schema/documents-schema';
-import { resolveStoredBlob } from '@/lib/services/document-blob-integrity-service';
+import { resolveStoredBlob, storedBlobFailure } from '@/lib/services/document-blob-integrity-service';
 import { getDocumentMutabilityBlockReason } from '@/lib/services/document-retention-guard';
 
+// contentHash is a claim, not a fact: when supplied it must equal the SHA-256 the server computes from storage.
+// expectedVersionNo is the version the caller edited from; a newer version makes the request stale.
 const appendVersionSchema = z.object({
   fileUrl: z.string().url().optional(),
   blobPath: z.string().min(1).optional(),
-}).refine((value) => Boolean(value.blobPath || value.fileUrl), {
+  contentHash: z.string().regex(/^[0-9a-fA-F]{64}$/, 'contentHash must be a SHA-256 hex digest').optional(),
+  expectedVersionNo: z.number().int().positive().optional(),
+}).strict().refine((value) => Boolean(value.blobPath || value.fileUrl), {
   message: 'blobPath or fileUrl is required',
   path: ['blobPath'],
 });
@@ -43,11 +47,13 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       organizationId,
       blobPath: parsed.data.blobPath,
       fileUrl: parsed.data.fileUrl,
+      expectedContentHash: parsed.data.contentHash,
     });
   } catch (error) {
+    const failure = storedBlobFailure(error);
     return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      error instanceof Error ? error.message : 'Invalid storage payload',
+      failure.status === 'conflict' ? ErrorCode.CONFLICT : ErrorCode.VALIDATION_ERROR,
+      failure.message,
     );
   }
 
@@ -62,7 +68,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       })
       .from(documents)
       .leftJoin(documentLinks, eq(documentLinks.documentId, documents.id))
-      .where(and(eq(documents.id, params.id), eq(documents.organizationId, organizationId)))
+      .where(and(eq(documents.id, params.id), eq(documents.organizationId, organizationId), sql`${documents.deletedAt} IS NULL`))
       .limit(1)
   )[0];
 
@@ -89,8 +95,18 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
     );
   }
 
-  // The new version, the document's current file and the audit record commit together.
-  const createdVersion = await withRLSContext({ organizationId }, async (tx) => {
+  // The new version, the document's current file and the audit record commit together. The document row is locked
+  // first, so the stale-base check, the blob-reuse check and the append all judge the same state.
+  const outcome = await withRLSContext({ organizationId }, async (tx) => {
+    const [locked] = await tx
+      .select({ metadata: documents.metadata })
+      .from(documents)
+      .where(and(eq(documents.id, params.id), eq(documents.organizationId, organizationId), sql`${documents.deletedAt} IS NULL`))
+      .for('update');
+    if (!locked) return { kind: 'not_found' as const };
+    const lockedBlock = getDocumentMutabilityBlockReason({ metadata: locked.metadata });
+    if (lockedBlock) return { kind: 'blocked' as const, reason: lockedBlock };
+
     const latest = (
       await tx
         .select({ versionNo: documentVersions.versionNo })
@@ -99,6 +115,20 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
         .orderBy(desc(documentVersions.versionNo))
         .limit(1)
     )[0];
+    if (parsed.data.expectedVersionNo !== undefined && parsed.data.expectedVersionNo !== (latest?.versionNo ?? 0)) {
+      return { kind: 'stale' as const, currentVersionNo: latest?.versionNo ?? 0 };
+    }
+    // A stored file belongs to one document version. Attaching a file another version already holds would let one
+    // document's content stand in for another's.
+    const inUse = (
+      await tx
+        .select({ id: documentVersions.id })
+        .from(documentVersions)
+        .where(and(eq(documentVersions.organizationId, organizationId), eq(documentVersions.storageKey, resolvedBlob.blobPath)))
+        .limit(1)
+    )[0];
+    if (inUse) return { kind: 'blob_in_use' as const };
+
     const nextVersion = (latest?.versionNo ?? 0) + 1;
     const [created] = await tx
       .insert(documentVersions)
@@ -123,8 +153,21 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       resourceId: params.id,
       details: { versionNo: nextVersion, contentHash: resolvedBlob.contentHash },
     });
-    return created;
+    return { kind: 'created' as const, version: created };
   });
 
-  return standardSuccessResponse(createdVersion);
+  switch (outcome.kind) {
+    case 'created':
+      return standardSuccessResponse(outcome.version);
+    case 'not_found':
+      return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
+    case 'blocked':
+      return standardErrorResponse(ErrorCode.CONFLICT, `Document versioning blocked: ${outcome.reason}`);
+    case 'stale':
+      return standardErrorResponse(ErrorCode.CONFLICT, 'The document changed since this version was prepared', {
+        currentVersionNo: outcome.currentVersionNo,
+      });
+    case 'blob_in_use':
+      return standardErrorResponse(ErrorCode.CONFLICT, 'That stored file is already attached to a document version');
+  }
 });

@@ -1,17 +1,17 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 968,
-  "mutating": 695,
-  "kernel": 40,
+  "routes": 970,
+  "mutating": 697,
+  "kernel": 41,
   "byGuard": {
-   "ADMIN_AUTH": 6,
+   "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 12,
    "CRON_SECRET": 3,
    "CRUD_FACTORY": 297,
    "DELEGATED": 24,
    "NONE": 51,
-   "ORG_AUTH": 46,
+   "ORG_AUTH": 47,
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 67,
    "ROLE_AUTH": 125,
@@ -21,13 +21,13 @@
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
-   "ADMIN_AUTH": 6,
+   "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 8,
    "CRON_SECRET": 2,
    "CRUD_FACTORY": 297,
    "DELEGATED": 17,
    "NONE": 8,
-   "ORG_AUTH": 26,
+   "ORG_AUTH": 27,
    "PLATFORM_AUTH_HANDLER": 7,
    "RETIRED": 60,
    "ROLE_AUTH": 74,
@@ -37,7 +37,7 @@
   },
   "mutatingByAudit": {
    "ATOMIC": 143,
-   "ATOMIC_SERVICE": 120,
+   "ATOMIC_SERVICE": 122,
    "COMPUTE_ONLY": 34,
    "CRUD_ATOMIC": 299,
    "EXEMPT_BALLOT_SECRECY": 2,
@@ -48,7 +48,7 @@
   "mutatingByData": {
    "AMBIENT_DB": 15,
    "CRUD_TENANT_TX": 299,
-   "NONE": 194,
+   "NONE": 196,
    "SYSTEM_CONTEXT": 55,
    "TENANT_TX": 132
   }
@@ -397,6 +397,18 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
+   "route": "admin/documents/legacy-backfill/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "ADMIN_AUTH",
+   "kernel": false,
+   "subordinate": null,
+   "data": "NONE",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -5077,7 +5089,7 @@
    "guard": "ORG_AUTH",
    "kernel": true,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -5168,6 +5180,18 @@
    "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
+  },
+  {
+   "route": "documents/repository/downloads/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "ORG_AUTH",
+   "kernel": true,
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "documents/repository/route.ts",

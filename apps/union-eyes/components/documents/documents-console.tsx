@@ -38,15 +38,18 @@ import { DocumentRetentionPolicy } from "@/components/documents/document-retenti
 import { OCRUpload } from "@/components/documents/ocr-upload";
 import { useOrganizationId } from "@/lib/hooks/use-organization";
 import {
-  canonicalClassificationRewriteUnavailable,
   canonicalShareUnavailable,
+  denialForBulkOutcome,
+  formatBulkSummary,
   journeyCopy,
+  type BulkDownloadReport,
   type JourneyDenial,
 } from "@/lib/documents/canonical-journey";
 import {
   listDenied,
   repositoryRows,
   requestAuthorizedDownload,
+  requestBulkDownload,
   submitDocumentVersion,
   submitRepositoryDocument,
 } from "@/lib/documents/document-repository-client";
@@ -86,8 +89,6 @@ type RepositoryDetailResponse = RepositoryDocumentRow & {
   }>;
 };
 
-type RetentionPolicyConfig = NonNullable<React.ComponentProps<typeof DocumentRetentionPolicy>["existingPolicy"]>;
-type LegalHoldEntry = React.ComponentProps<typeof DocumentRetentionPolicy>["legalHolds"][number];
 
 function toDate(value: string | Date | null | undefined): Date {
   if (value instanceof Date) return value;
@@ -159,30 +160,11 @@ export function DocumentsConsole() {
   const [approvalStatusByDocument, setApprovalStatusByDocument] = React.useState<Record<string, WorkflowStatus>>({});
   const [selectedLibraryItems, setSelectedLibraryItems] = React.useState<DocumentItem[]>([]);
   const [selectionResetSignal, setSelectionResetSignal] = React.useState(0);
-  const [retentionPolicy, setRetentionPolicy] = React.useState<RetentionPolicyConfig>({
-    rules: [
-      {
-        name: 'General Documents',
-        category: 'general',
-        retentionPeriod: 7,
-        retentionUnit: 'years',
-        action: 'archive',
-        enabled: true,
-        description: 'Standard retention for union document lifecycle governance',
-      },
-    ],
-    autoEnforce: true,
-    notifyBeforeAction: true,
-    notificationDays: 7,
-  });
   const [repoDocs, setRepoDocs] = React.useState<RepositoryDocumentRow[]>([]);
   const [query, setQuery] = React.useState('');
   const [label, setLabel] = React.useState('');
   const [savedSearches, setSavedSearches] = React.useState<SavedSearch[]>([]);
-  const [importUrlsText, setImportUrlsText] = React.useState('');
-  const [importDocumentType, setImportDocumentType] = React.useState('evidence');
-  const [importPrivacyLabel, setImportPrivacyLabel] = React.useState<PrivacyLabel>('team_confidential');
-  const [importing, setImporting] = React.useState(false);
+  const [bulkReport, setBulkReport] = React.useState<BulkDownloadReport | null>(null);
   const [filters, setFilters] = React.useState<SearchFilters>({ query: '' });
   const [loading, setLoading] = React.useState(false);
   const [uploading, setUploading] = React.useState(false);
@@ -314,20 +296,6 @@ export function DocumentsConsole() {
       }));
   }, [repoDocs]);
 
-  const retentionLegalHolds = React.useMemo<LegalHoldEntry[]>(() => {
-    return repoDocs
-      .filter((document) => document.privacyLabel === 'highly_sensitive')
-      .map((document) => ({
-        id: document.id,
-        documentId: document.id,
-        documentName: document.title ?? document.name ?? document.filename ?? document.id,
-        reason: 'Sensitive document requires review',
-        createdBy: { id: document.uploadedBy ?? 'unknown', name: document.uploadedBy ?? 'Unknown user' },
-        createdAt: new Date(document.createdAt ?? new Date()),
-        status: 'active' as const,
-      }));
-  }, [repoDocs]);
-
   React.useEffect(() => {
     void loadRepository(filters);
   }, [filters, loadRepository]);
@@ -354,7 +322,8 @@ export function DocumentsConsole() {
     try {
       const payload = {
         ...uploadPayload,
-        contentHash: uploadPayload.contentHash || `manual:${Date.now()}`,
+        // The server computes the content hash from storage. A value typed here is only a claim to be checked.
+        contentHash: uploadPayload.contentHash.trim() || undefined,
         linkedEntityType: uploadPayload.linkedEntityId ? uploadPayload.linkedEntityType : undefined,
         linkedEntityId: uploadPayload.linkedEntityId || undefined,
       };
@@ -448,87 +417,25 @@ export function DocumentsConsole() {
     await loadRepository(nextFilters);
   };
 
-  const handleImportFromUrls = async () => {
-    const urls = importUrlsText
-      .split(/\r?\n/)
-      .map((value) => value.trim())
-      .filter(Boolean);
-
-    if (urls.length === 0) {
-      window.alert('Provide at least one URL to import.');
-      return;
-    }
-
-    setImporting(true);
-    try {
-      const failed: string[] = [];
-
-      for (const rawUrl of urls) {
-        try {
-          const parsed = new URL(rawUrl);
-          const fileName = decodeURIComponent(parsed.pathname.split('/').pop() || `import-${Date.now()}.bin`);
-          const title = fileName.replace(/\.[^.]+$/, '') || fileName;
-          const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
-          const mimeType = ext === 'pdf'
-            ? 'application/pdf'
-            : ext === 'png'
-              ? 'image/png'
-              : ext === 'jpg' || ext === 'jpeg'
-                ? 'image/jpeg'
-                : ext === 'txt'
-                  ? 'text/plain'
-                  : 'application/octet-stream';
-
-          const response = await fetch('/api/documents/repository', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              title,
-              filename: fileName,
-              fileUrl: rawUrl,
-              documentType: importDocumentType,
-              mimeType,
-              privacyLabel: importPrivacyLabel,
-            }),
-          });
-
-          if (!response.ok) {
-            failed.push(rawUrl);
-          }
-        } catch {
-          failed.push(rawUrl);
-        }
-      }
-
-      await loadRepository();
-
-      if (failed.length > 0) {
-        setImportUrlsText(failed.join('\n'));
-        setNotice('upload_rejected');
-      } else {
-        setImportUrlsText('');
-        setNotice('saved');
-      }
-    } finally {
-      setImporting(false);
-    }
-  };
-
   const handleBulkDownload = async () => {
     if (selectedLibraryItems.length === 0) {
       setNotice('none_selected');
       return;
     }
 
-    for (const item of selectedLibraryItems) {
-      const result = await requestAuthorizedDownload(item.id);
-      if (!result.downloadUrl) {
-        setNotice(result.denial ?? 'unauthorized');
-        return;
-      }
-      window.open(result.downloadUrl, '_blank', 'noopener,noreferrer');
+    setBulkReport(null);
+    const result = await requestBulkDownload(selectedLibraryItems.map((item) => item.id));
+    if (!result.report) {
+      setNotice(result.denial ?? 'bulk_unavailable');
+      return;
     }
     setNotice(null);
+    setBulkReport(result.report);
+    for (const item of result.report.items) {
+      if (item.outcome === 'issued' && item.downloadUrl) {
+        window.open(item.downloadUrl, '_blank', 'noopener,noreferrer');
+      }
+    }
   };
 
   const handleBulkShare = async (_permission: string) => {
@@ -609,20 +516,6 @@ export function DocumentsConsole() {
     });
   };
 
-  const handleSaveRetentionPolicy: NonNullable<React.ComponentProps<typeof DocumentRetentionPolicy>["onSavePolicy"]> = async (policy) => {
-    setRetentionPolicy(policy);
-  };
-
-  const handleReleaseHold: NonNullable<React.ComponentProps<typeof DocumentRetentionPolicy>["onReleaseHold"]> = async () => {
-    canonicalClassificationRewriteUnavailable();
-    setNotice('classification_change_blocked');
-  };
-
-  const handleExecuteRetention: NonNullable<React.ComponentProps<typeof DocumentRetentionPolicy>["onExecuteRetention"]> = async () => {
-    canonicalClassificationRewriteUnavailable();
-    setNotice('classification_change_blocked');
-  };
-
   const appendVersion = async (documentId: string) => {
     const fileUrl = window.prompt(t('prompts.versionFileUrl'));
     const contentHash = window.prompt(t('prompts.versionContentHash'));
@@ -632,7 +525,11 @@ export function DocumentsConsole() {
 
     setVersioning(true);
     try {
-      const result = await submitDocumentVersion(documentId, { fileUrl, contentHash });
+      const result = await submitDocumentVersion(documentId, {
+        fileUrl,
+        contentHash,
+        expectedVersionNo: selectedDocumentId === documentId ? selectedDocumentVersions[0]?.versionNumber : undefined,
+      });
       if (!result.accepted) {
         setNotice(result.denial ?? 'upload_rejected');
         return;
@@ -654,6 +551,24 @@ export function DocumentsConsole() {
         >
           {notice === 'saved' ? copy.saved : copy[notice]}
         </p>
+      )}
+      {bulkReport && (
+        <div role="status" data-testid="document-bulk-report" className="rounded-md border px-3 py-2 text-sm">
+          <p>{formatBulkSummary(copy, bulkReport)}</p>
+          {bulkReport.items.some((item) => item.outcome !== 'issued') && (
+            <ul className="mt-2 list-disc pl-5">
+              {bulkReport.items
+                .filter((item) => item.outcome !== 'issued')
+                .map((item) => (
+                  <li key={item.documentId}>
+                    {selectedLibraryItems.find((candidate) => candidate.id === item.documentId)?.name ?? item.documentId}
+                    {': '}
+                    {copy[denialForBulkOutcome(item.outcome)]}
+                  </li>
+                ))}
+            </ul>
+          )}
+        </div>
       )}
       {/* Page Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -732,43 +647,6 @@ export function DocumentsConsole() {
             <Button onClick={() => void uploadDocument()} disabled={uploading || !uploadPayload.title || !uploadPayload.filename || !uploadPayload.fileUrl || !uploadPayload.privacyLabel}>
               {uploading ? t('repository.uploading') : t('repository.uploadGoverned')}
             </Button>
-          </div>
-
-          <div className="rounded-lg border p-3">
-            <div className="mb-2 text-sm font-medium">Migration Import (URL list)</div>
-            <p className="mb-3 text-xs text-gray-600">
-              Paste one URL per line to import external documents into the governed repository.
-            </p>
-            <textarea
-              value={importUrlsText}
-              onChange={(e) => setImportUrlsText(e.target.value)}
-              placeholder="https://example.org/documents/collective-agreement.pdf"
-              rows={5}
-              className="mb-3 w-full rounded border px-3 py-2 text-sm"
-            />
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-              <input
-                value={importDocumentType}
-                onChange={(e) => setImportDocumentType(e.target.value)}
-                placeholder="Imported document type"
-                className="rounded border px-3 py-2 text-sm"
-              />
-              <select
-                value={importPrivacyLabel}
-                onChange={(e) => setImportPrivacyLabel(e.target.value as PrivacyLabel)}
-                className="rounded border px-3 py-2 text-sm"
-              >
-                <option value="public_internal">public_internal</option>
-                <option value="team_confidential">team_confidential</option>
-                <option value="lro_confidential">lro_confidential</option>
-                <option value="privileged">privileged</option>
-                <option value="case_restricted">case_restricted</option>
-                <option value="highly_sensitive">highly_sensitive</option>
-              </select>
-              <Button onClick={() => void handleImportFromUrls()} disabled={importing || !importUrlsText.trim()}>
-                {importing ? 'Importing...' : 'Import URLs'}
-              </Button>
-            </div>
           </div>
 
           <div className="rounded-lg border p-3">
@@ -875,19 +753,16 @@ export function DocumentsConsole() {
 
         <TabsContent value="retention">
           <DocumentRetentionPolicy
-            existingPolicy={retentionPolicy}
-            legalHolds={retentionLegalHolds}
+            legalHolds={null}
+            unavailableNotice={copy.retention_unavailable}
             stats={{
               totalDocuments: repoDocs.length,
-              documentsUnderRetention: repoDocs.length,
-              documentsOnHold: retentionLegalHolds.length,
-              scheduledForArchival: repoDocs.filter((document) => document.privacyLabel === 'case_restricted').length,
-              scheduledForDeletion: 0,
+              documentsUnderRetention: null,
+              documentsOnHold: null,
+              scheduledForArchival: null,
+              scheduledForDeletion: null,
             }}
             categories={availableTags}
-            onSavePolicy={handleSaveRetentionPolicy}
-            onReleaseHold={handleReleaseHold}
-            onExecuteRetention={handleExecuteRetention}
           />
         </TabsContent>
 

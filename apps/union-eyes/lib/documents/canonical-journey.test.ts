@@ -11,6 +11,10 @@ import {
   journeyCopy,
   mutationAccepted,
   repositoryRows,
+  bulkReportFrom,
+  denialForBulkOutcome,
+  formatBulkSummary,
+  mutationDenialFromStatus,
 } from './canonical-journey';
 
 const MATRIX = join(__dirname, 'UE_CURSOR_DOCUMENT_CONSUMER_MATRIX.json');
@@ -107,5 +111,38 @@ describe('canonical document journey rules', () => {
       'document-retention-execution',
       'download-audit-when-canonical-v2-disabled',
     ]);
+  });
+});
+
+describe('bulk and retention copy', () => {
+  const report = (status: 'complete' | 'partial' | 'none', issued: number, failed: number) =>
+    ({ atomic: false as const, status, requested: issued + failed, issued, failed, items: [] });
+
+  it('says plainly that a partial bulk keeps the links already issued', () => {
+    const text = formatBulkSummary(journeyCopy('en'), report('partial', 2, 1));
+    expect(text).toContain('2 of 3 links were issued; 1 were not');
+    expect(text).toContain('Links already issued stay valid');
+  });
+
+  it('formats each status in both languages and never leaves a placeholder', () => {
+    for (const locale of ['en', 'fr-CA']) {
+      for (const status of ['complete', 'partial', 'none'] as const) {
+        expect(formatBulkSummary(journeyCopy(locale), report(status, 1, 1))).not.toMatch(/[{}]/);
+      }
+    }
+  });
+
+  it('declares retention unavailable in both languages without claiming a rule or a hold', () => {
+    expect(journeyCopy('en').retention_unavailable).toContain('No canonical document retention record exists yet');
+    expect(journeyCopy('fr').retention_unavailable.length).toBeGreaterThan(40);
+  });
+
+  it('maps bulk outcomes to the same denials as a single download and rejects forged bulk bodies', () => {
+    expect(denialForBulkOutcome('storage_unverified')).toBe('storage_failure');
+    expect(denialForBulkOutcome('audit_failed')).toBe('audit_failure');
+    expect(denialForBulkOutcome('denied')).toBe('unauthorized');
+    expect(mutationDenialFromStatus(400)).toBe('reference_rejected');
+    expect(bulkReportFrom(200, { data: { atomic: true, items: [], requested: 0, issued: 0, failed: 0 } })).toBeNull();
+    expect(bulkReportFrom(500, {})).toBeNull();
   });
 });

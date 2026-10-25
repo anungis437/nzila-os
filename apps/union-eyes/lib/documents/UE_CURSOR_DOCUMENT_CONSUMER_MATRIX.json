@@ -14,12 +14,14 @@
     {
       "id": "document-retention-execution",
       "owner": "integrator",
-      "detail": "No canonical retention-execute or legal-hold release mutation. The console no longer rewrites privacy labels for those actions."
+      "detail": "No canonical document retention contract or per-document legal-hold record exists (legal_holds is scoped by data type and date range, not by document). The console presents hold and retention status as unavailable and offers no save, release or execute action. A privacy label is never a hold. Metadata flags that the versioning guard reads are not an authoritative hold record.",
+      "status": "OPEN_UNAVAILABLE"
     },
     {
       "id": "download-audit-when-canonical-v2-disabled",
       "owner": "integrator",
-      "detail": "appendMandatoryAudit returns false when UE_CANONICAL_BOOTSTRAP_V2 is not 1. The download route withholds a URL when that call throws, and still returns the URL when the helper returns false, matching the published helper. A durable audit row is written when V2 is on."
+      "detail": "Resolved. The route no longer calls appendMandatoryAudit. All downloads go through lib/documents/download-issuance.ts, which calls persistAtomicAudit: it records the access (hash-chained under Canonical V2, audit_logs otherwise) or throws, and has no \"skipped\" result. A URL is issued only after the record is written. Proven against PostgreSQL semantics with V2 on and off, with injected audit faults.",
+      "status": "RESOLVED_BY_INTEGRATOR"
     }
   ],
   "paths": [
@@ -972,5 +974,30 @@
       "retirementDisposition": "Do not delete while OCR and the legacy flag still call it.",
       "disposition": "MIGRATE"
     }
+  ],
+  "integratorResolutions": [
+    {
+      "id": "legacy-file-url-fallback",
+      "resolution": "A legacy row is served only if its file URL validates as a reference into this organization's own storage (host, container, organization folder, no relative segments) and is re-signed from the verified path; a stored external or foreign URL is never returned. lib/documents/legacy-storage-backfill.ts and POST /api/admin/documents/legacy-backfill give verified legacy rows a real version and report the rest."
+    },
+    {
+      "id": "bulk-download",
+      "resolution": "POST /api/documents/repository/downloads: per-document authorization and audit, per-document outcomes, atomic:false. The console reports partial success and opens only issued links. The old sequential stop-on-first-failure loop is gone."
+    },
+    {
+      "id": "version-and-create-verification",
+      "resolution": "resolveStoredBlob accepts only this organization's own storage references, computes the SHA-256 itself, and rejects a claimed hash that differs (409). Versions refuse a stale expectedVersionNo, a file another version already holds, a deleted document, and a legal hold re-read under a row lock. The console no longer invents a \"manual:\" hash and no longer offers external URL import."
+    },
+    {
+      "id": "retention-semantics",
+      "resolution": "Legal hold and retention figures are unavailable (null), not derived from privacy labels; no simulated release, execute or save."
+    }
+  ],
+  "integratorCorrectedPaths": [
+    "apps/union-eyes/components/documents/documents-console.tsx",
+    "apps/union-eyes/components/documents/document-retention-policy.tsx",
+    "apps/union-eyes/lib/documents/canonical-journey.ts",
+    "apps/union-eyes/lib/documents/document-repository-client.ts",
+    "apps/union-eyes/app/api/documents/[id]/download/route.ts"
   ]
 }
