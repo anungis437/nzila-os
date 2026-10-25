@@ -14,6 +14,7 @@ const m = vi.hoisted(() => ({
   memberDuesLedger: { table: 'memberDuesLedger' },
   eq: vi.fn(),
   and: vi.fn(),
+  audit: vi.fn(),
   logger: { info: vi.fn() },
   z: {
     number: vi.fn(),
@@ -28,6 +29,7 @@ vi.mock('@/lib/api/framework', () => ({
   z: m.z,
 }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/db', () => ({ db: m.db }));
 vi.mock('@/db/schema/dues-finance-schema', () => ({ memberArrears: m.memberArrears, memberDuesLedger: m.memberDuesLedger }));
 vi.mock('drizzle-orm', () => ({ eq: m.eq, and: m.and }));
@@ -46,7 +48,8 @@ describe('dues/arrears/[id]/payment route', () => {
     m.notFound.mockImplementation((message: string) => Object.assign(new Error(message), { status: 404 }));
     m.eq.mockImplementation((a: unknown, b: unknown) => ({ a, b }));
     m.and.mockImplementation((...clauses: unknown[]) => clauses);
-    m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.withRLSContext.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => fn(m.db));
+    m.audit.mockResolvedValue(undefined);
 
     m.z.number.mockReturnValue({ positive: () => ({}) });
     m.z.string.mockReturnValue({ max: () => ({ optional: () => ({}) }) });

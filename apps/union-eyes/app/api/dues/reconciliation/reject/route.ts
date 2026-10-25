@@ -7,7 +7,8 @@
  */
 import { withApi, ApiError, z } from '@/lib/api/framework';
 import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
-import { db } from '@/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { remittanceLineItems } from '@/db/schema/dues-finance-schema';
 import { eq, and } from 'drizzle-orm';
 
@@ -33,26 +34,33 @@ export const POST = withApi(
 
     const { remittanceId, reason } = parsed.data;
 
-    const updated = await db
-      .update(remittanceLineItems)
-      .set({
-        lineStatus: 'exception',
-        exceptionReason: reason,
-        resolvedAt: new Date(),
-        resolvedBy: userId ?? undefined,
-        updatedAt: new Date(),
-      })
-      .where(
-        and(
-          eq(remittanceLineItems.remittanceId, remittanceId),
-          eq(remittanceLineItems.organizationId, organizationId),
-        ),
-      )
-      .returning();
-
-    if (updated.length === 0) {
-      throw ApiError.notFound('Line item not found');
-    }
+    await withRLSContext(async (tx) => {
+      const rows = await tx
+        .update(remittanceLineItems)
+        .set({
+          lineStatus: 'exception',
+          exceptionReason: reason,
+          resolvedAt: new Date(),
+          resolvedBy: userId ?? undefined,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(remittanceLineItems.remittanceId, remittanceId),
+            eq(remittanceLineItems.organizationId, organizationId),
+          ),
+        )
+        .returning();
+      if (rows.length === 0) throw ApiError.notFound('Line item not found');
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId: userId!,
+        action: 'dues.reconciliation.reject',
+        resourceType: 'remittance_line_items',
+        resourceId: remittanceId,
+        details: { reason, lineItems: rows.length },
+      });
+    });
 
     return { success: true };
   },

@@ -10,6 +10,7 @@
 import { withApi, ApiError, z } from '@/lib/api/framework';
 import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { db } from '@/db';
 import { memberArrears, memberDuesLedger } from '@/db/schema/dues-finance-schema';
 import { eq, and } from 'drizzle-orm';
@@ -57,8 +58,8 @@ export const POST = withApi(
     const newStatus = balanceAfter === 0 ? 'current' : arrears.arrearsStatus;
 
     // Record payment in ledger and update arrears
-    const updated = await withRLSContext(async () => {
-      await db.insert(memberDuesLedger).values({
+    const updated = await withRLSContext(async (tx) => {
+      await tx.insert(memberDuesLedger).values({
         userId: memberId,
         organizationId,
         transactionType: 'payment',
@@ -74,7 +75,7 @@ export const POST = withApi(
       });
 
       // Update arrears record
-      const [u] = await db
+      const [u] = await tx
         .update(memberArrears)
         .set({
           totalOwed: String(balanceAfter),
@@ -84,6 +85,15 @@ export const POST = withApi(
         })
         .where(eq(memberArrears.id, arrears.id))
         .returning();
+
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId: userId!,
+        action: 'dues.arrears.payment_record',
+        resourceType: 'member_arrears',
+        resourceId: arrears.id,
+        details: { memberId, amount, balanceBefore, balanceAfter },
+      });
 
       return u;
     });

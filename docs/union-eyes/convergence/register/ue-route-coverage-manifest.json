@@ -36,19 +36,19 @@
    "WITH_API": 167
   },
   "mutatingByAudit": {
-   "ATOMIC": 51,
+   "ATOMIC": 56,
    "ATOMIC_SERVICE": 18,
    "BEST_EFFORT": 10,
    "CRUD_ATOMIC": 299,
    "NO_WRITES_FOUND": 14,
-   "NONE": 303
+   "NONE": 298
   },
   "mutatingByData": {
    "AMBIENT_DB": 52,
    "CRUD_TENANT_TX": 299,
-   "NONE": 225,
+   "NONE": 221,
    "SYSTEM_CONTEXT": 53,
-   "TENANT_TX": 66
+   "TENANT_TX": 70
   }
  },
  "routes": [
@@ -5215,7 +5215,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "dues/arrears/[id]/reminder/route.ts",
@@ -5408,8 +5408,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "dues/receipt/[id]/route.ts",
@@ -5456,8 +5456,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "dues/reconciliation/queue/route.ts",
@@ -5480,8 +5480,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "dues/remittances/[id]/route.ts",
@@ -5493,8 +5493,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "dues/remittances/route.ts",
