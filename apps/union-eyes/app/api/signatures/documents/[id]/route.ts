@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { NextRequest, NextResponse } from "next/server";
 import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
 import { SignatureService, SignatureAuthorityError } from "@/lib/signature/signature-service";
+import { projectSignaturePayload } from "@/lib/documents/signature-projection";
 
 import {
   ErrorCode,
@@ -39,7 +40,7 @@ export const GET = withApiAuth(async (
 
     const document = await SignatureService.getDocumentStatus(documentId);
 
-    return NextResponse.json(document);
+    return NextResponse.json(projectSignaturePayload(document));
   } catch (error) {
 return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,

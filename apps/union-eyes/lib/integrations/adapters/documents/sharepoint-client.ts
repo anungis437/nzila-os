@@ -343,6 +343,9 @@ export class SharePointClient {
    * Health check - verify credentials are valid
    */
   async healthCheck(): Promise<{ status: 'ok' | 'error'; message: string }> {
+    if (!this.config.clientId || !this.config.clientSecret || !this.config.tenantId) {
+      return { status: 'error', message: 'SharePoint credentials are not configured' };
+    }
     try {
       await this.authenticate();
       // Try to list sites to verify permissions

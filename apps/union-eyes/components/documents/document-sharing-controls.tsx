@@ -122,7 +122,7 @@ export function DocumentSharingControls({
   shares,
   users,
   groups,
-  onShare,
+  onShare: _onShare,
   onRevokeShare,
   onUpdatePermission,
   onCopyLink,
@@ -141,12 +141,12 @@ export function DocumentSharingControls({
 
   const targetType = form.watch("targetType");
 
-  const handleShare = async (data: ShareFormData) => {
+  const [shareNotice, setShareNotice] = React.useState<string | null>(null);
+
+  const handleShare = async (_data: ShareFormData) => {
     setIsSubmitting(true);
     try {
-      await onShare?.(data);
-      setDialogOpen(false);
-      form.reset();
+      setShareNotice('Sharing is not available. Changing a privacy label does not grant access.');
     } finally {
       setIsSubmitting(false);
     }
@@ -187,6 +187,7 @@ export function DocumentSharingControls({
               <DialogTitle>Share Document</DialogTitle>
             </DialogHeader>
 
+            {shareNotice ? <p role="alert" className="mb-3 text-sm text-muted-foreground">{shareNotice}</p> : null}
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleShare)} className="space-y-4">
                 <FormField

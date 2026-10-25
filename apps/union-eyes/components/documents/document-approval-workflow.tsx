@@ -59,7 +59,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 // Approval stage schema
 const approvalStageSchema = z.object({
@@ -131,6 +131,10 @@ export function DocumentApprovalWorkflow({
   onSubmitReview,
 }: DocumentApprovalWorkflowProps) {
   const t = useTranslations('documents.approvalWorkflow');
+  const locale = useLocale();
+  const approvalBoundary = locale.toLowerCase().startsWith('fr')
+    ? 'Revue interne seulement. Cet ecran ne cree pas une signature electronique ni une execution juridiquement contraignante.'
+    : 'Internal review only. This screen does not create an electronic signature or a legally binding execution.';
   const [configMode, setConfigMode] = React.useState(!existingConfig);
   const [reviewDialogOpen, setReviewDialogOpen] = React.useState(false);
   const [reviewStatus, setReviewStatus] = React.useState<
@@ -186,6 +190,7 @@ export function DocumentApprovalWorkflow({
 
   return (
     <div className="space-y-6">
+      <p className="text-sm text-muted-foreground" data-testid="approval-boundary">{approvalBoundary}</p>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

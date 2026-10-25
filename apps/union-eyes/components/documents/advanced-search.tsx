@@ -6,7 +6,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,7 +41,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -95,6 +95,10 @@ const SIZE_PRESETS = [
 
 export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSearchProps) {
   const t = useTranslations('documents.advancedSearch');
+  const locale = useLocale();
+  const catalogNotice = locale.toLowerCase().startsWith('fr')
+    ? 'Les recherches enregistrees et les catalogues de filtres ne sont pas disponibles. Cette recherche ne lit pas le texte extrait.'
+    : 'Saved searches and filter catalogs are not available. This search does not read extracted text.';
 
   const FILE_TYPES = [
     { value: 'pdf', label: t('typePdf') },
@@ -114,44 +118,13 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
     ...initialFilters,
   });
 
-  const [availableTags, setAvailableTags] = useState<string[]>([]);
-  const [availableUsers, setAvailableUsers] = useState<Array<{ id: string; name: string }>>([]);
-  const [availableFolders, setAvailableFolders] = useState<string[]>([]);
-  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
+  const availableTags: string[] = [];
+  const availableUsers: Array<{ id: string; name: string }> = [];
+  const availableFolders: string[] = [];
+  const savedSearches: SavedSearch[] = [];
   const [searchName, setSearchName] = useState('');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
-
-  /**
-   * Fetch available filter options
-   */
-  useEffect(() => {
-    fetchFilterOptions();
-    fetchSavedSearches();
-  }, []);
-
-  const fetchFilterOptions = async () => {
-    try {
-      const response = await fetch('/api/documents/filters');
-      if (!response.ok) throw new Error('Failed to fetch filters');
-
-      const data = await response.json();
-      setAvailableTags(data.tags || []);
-      setAvailableUsers(data.users || []);
-      setAvailableFolders(data.folders || []);
-    } catch (_err) {
-}
-  };
-
-  const fetchSavedSearches = async () => {
-    try {
-      const response = await fetch('/api/documents/saved-searches');
-      if (!response.ok) throw new Error('Failed to fetch saved searches');
-
-      const data = await response.json();
-      setSavedSearches(data.searches || []);
-    } catch (_err) {
-}
-  };
+  const [searchNotice, setSearchNotice] = useState(catalogNotice);
 
   /**
    * Handle filter changes
@@ -194,7 +167,7 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
    * Handle search actions
    */
   const handleSearch = () => {
-    onSearch(filters);
+    onSearch({ ...filters, ocrSearch: false });
   };
 
   const handleClear = () => {
@@ -205,56 +178,29 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
   /**
    * Save current search
    */
-  const handleSaveSearch = async () => {
+  const handleSaveSearch = () => {
     if (!searchName.trim()) {
       alert(t('nameRequired'));
       return;
     }
 
-    try {
-      const response = await fetch('/api/documents/saved-searches', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: searchName,
-          filters,
-        }),
-      });
-
-      if (!response.ok) throw new Error('Failed to save search');
-
-      const data = await response.json();
-      setSavedSearches((prev) => [...prev, data.search]);
-      setSearchName('');
-      setShowSaveDialog(false);
-    } catch (err) {
-      alert(err instanceof Error ? err.message : t('saveSearchFailed'));
-    }
+    setSearchNotice(catalogNotice);
+    setShowSaveDialog(false);
   };
 
   /**
    * Load saved search
    */
   const handleLoadSearch = (search: SavedSearch) => {
-    setFilters(search.filters);
-    onSearch(search.filters);
+    setFilters({ ...search.filters, ocrSearch: false });
+    onSearch({ ...search.filters, ocrSearch: false });
   };
 
   /**
    * Delete saved search
    */
-  const handleDeleteSearch = async (searchId: string) => {
-    try {
-      const response = await fetch(`/api/documents/saved-searches/${searchId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) throw new Error('Failed to delete search');
-
-      setSavedSearches((prev) => prev.filter((s) => s.id !== searchId));
-    } catch (err) {
-      alert(err instanceof Error ? err.message : t('deleteSearchFailed'));
-    }
+  const handleDeleteSearch = (_searchId: string) => {
+    setSearchNotice(catalogNotice);
   };
 
   /**
@@ -280,6 +226,7 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
               {t('subtitle')}
               {activeFilterCount > 0 && ` • ${t('filtersActive', { count: activeFilterCount })}`}
             </CardDescription>
+            <p role="status" className="mt-2 text-sm text-muted-foreground">{searchNotice}</p>
           </div>
           <div className="flex items-center gap-2">
             {activeFilterCount > 0 && (
@@ -334,8 +281,9 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
           <div className="flex items-center gap-2">
             <Checkbox
               id="ocr-search"
-              checked={filters.ocrSearch}
-              onCheckedChange={(checked) => updateFilter('ocrSearch', checked as boolean)}
+              checked={false}
+              disabled
+              onCheckedChange={() => updateFilter('ocrSearch', false)}
             />
             <Label htmlFor="ocr-search" className="text-sm font-normal cursor-pointer">
               {t('includeOcr')}

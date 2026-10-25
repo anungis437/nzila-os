@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
@@ -13,6 +15,13 @@ async function loadRoute() {
 }
 
 describe('cba-intelligence/documents route', () => {
+  it('reads the CBA source registry rather than the case document repository', () => {
+    const source = readFileSync(resolve(__dirname, '../cba-intelligence/documents/route.ts'), 'utf8');
+    expect(source).toContain('cba-intelligence/document-service');
+    expect(source).not.toContain('documents-schema');
+    expect(source).not.toContain('/api/documents/repository');
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
