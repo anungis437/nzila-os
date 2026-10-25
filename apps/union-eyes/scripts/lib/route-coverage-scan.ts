@@ -57,7 +57,7 @@ function guardOf(source: string): RouteGuard {
   if (/notImplemented\(/.test(source) && !/\.(insert|update|delete)\(|persistAtomicAudit/.test(source)) return 'RETIRED'
   if (/@nzila\/platform-auth\/[\w/-]*handlers/.test(source)) return 'PLATFORM_AUTH_HANDLER'
   if (/crudRoutes\(/.test(source)) return 'CRUD_FACTORY'
-  if (/withAdminAuth/.test(source)) return 'ADMIN_AUTH'
+  if (/withAdminAuth|withSystemAdminAuth/.test(source)) return 'ADMIN_AUTH'
   if (/withRoleAuth|withEnhancedRoleAuth|withSecureAPI|withMinRole|withApiAuth/.test(source)) return 'ROLE_AUTH'
   if (/withOrganizationAuth|withOrganizationMiddleware|withExternalResourceAuth|external-resource-middleware/.test(source)) return 'ORG_AUTH'
   if (/withApi\(/.test(source)) return /required:\s*false/.test(source) ? 'WITH_API_PUBLIC' : 'WITH_API'

@@ -17,6 +17,7 @@ import {
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 import { logger } from '@/lib/logger';
+import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes max execution
@@ -44,7 +45,10 @@ export const POST = withApiAuth(async (_request: NextRequest) => {
     });
 
     // Execute dues reminder job
-    const result = await manualTriggerReminders();
+    const result = await performAuditedOperation(
+      { organizationId: user.organizationId, userId: user.id, action: 'platform.dues.send_reminders', resourceType: 'platform_job' },
+      () => manualTriggerReminders(),
+    );
 
     logger.info('Dues reminders completed', {
       totalProcessed: result.totalProcessed,
@@ -59,6 +63,9 @@ export const POST = withApiAuth(async (_request: NextRequest) => {
       message: `Processed ${result.totalProcessed} transactions. ${result.remindersSent} reminders sent (7-day: ${result.breakdown.sevenDayReminders}, 1-day: ${result.breakdown.oneDayReminders}, overdue: ${result.breakdown.overdueNotices}).`,
     });
   } catch (error) {
+    if (error instanceof Error && (error as { code?: string }).code === 'OPERATION_AUDIT_UNAVAILABLE') {
+      return standardErrorResponse(ErrorCode.CONFLICT, error.message);
+    }
     logger.error('Error triggering dues reminders', { error });
 
     return standardErrorResponse(

@@ -9,6 +9,7 @@ import { NextResponse } from 'next/server';
 import { getAllFeatureFlags, toggleFeatureFlag } from '@/lib/feature-flags';
 import { z } from 'zod';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
+import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 import { withAdminAuth, withSystemAdminAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
 
 import {
@@ -95,7 +96,18 @@ try {
 
       const { name, enabled } = body;
 
-      await toggleFeatureFlag(name, enabled);
+      // A platform-wide flag: the intent is recorded durably before it changes and the outcome after.
+      await performAuditedOperation(
+        {
+          organizationId,
+          userId,
+          action: 'platform.feature_flag.toggle',
+          resourceType: 'feature_flag',
+          resourceId: name,
+          details: { enabled },
+        },
+        () => toggleFeatureFlag(name, enabled),
+      );
 
       logApiAuditEvent({
         timestamp: new Date().toISOString(), userId,
@@ -116,7 +128,9 @@ try {
         severity: 'high',
         details: { error: error instanceof Error ? error.message : 'Unknown error' },
       });
-throw error;
+const refused = operationAuditResponse(error);
+      if (refused) return NextResponse.json(refused.body, { status: refused.status });
+      throw error;
     }
 });
 

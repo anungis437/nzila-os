@@ -1,14 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+const audit = vi.hoisted(() => ({
+  run: vi.fn(async (_op: unknown, fn: () => Promise<unknown>) => fn()),
+}));
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: audit.run,
+  operationAuditResponse: () => null,
+}));
+
 const m = vi.hoisted(() => ({
   auth: vi.fn(),
   isPlatformAdminUser: vi.fn(),
   dbExecute: vi.fn(),
   withSystemContext: vi.fn(),
+  getCurrentUser: vi.fn(),
 }));
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
-vi.mock('@/lib/api-auth-guard', () => ({ isPlatformAdminUser: m.isPlatformAdminUser }));
+vi.mock('@/lib/api-auth-guard', () => ({ isPlatformAdminUser: m.isPlatformAdminUser, getCurrentUser: m.getCurrentUser }));
 vi.mock('@/db/db', () => ({ db: { execute: m.dbExecute } }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
 vi.mock('drizzle-orm', () => ({ sql: vi.fn(() => 'SQL_ANALYZE') }));
@@ -23,6 +32,7 @@ describe('admin/database/optimize route', () => {
     process.env.PLATFORM_ADMIN_USER_IDS = 'admin_1,admin_2';
     m.auth.mockResolvedValue({ userId: 'admin_1' });
     m.isPlatformAdminUser.mockResolvedValue(true);
+    m.getCurrentUser.mockResolvedValue({ id: 'admin_1', organizationId: 'org_1' });
     m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
     m.dbExecute.mockResolvedValue(undefined);
   });
@@ -49,6 +59,10 @@ describe('admin/database/optimize route', () => {
     expect(response.status).toBe(200);
     expect(payload).toMatchObject({ success: true, message: expect.stringContaining('ANALYZE completed') });
     expect(m.dbExecute).toHaveBeenCalled();
+    expect(audit.run).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'platform.database.analyze', organizationId: 'org_1', userId: 'admin_1' }),
+      expect.any(Function),
+    );
   });
 
   it('returns 500 when optimization throws', async () => {

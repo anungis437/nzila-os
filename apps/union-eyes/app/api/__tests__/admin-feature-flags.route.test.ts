@@ -1,6 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
+const audit = vi.hoisted(() => ({
+  run: vi.fn(async (_op: unknown, fn: () => Promise<unknown>) => fn()),
+}));
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: audit.run,
+  operationAuditResponse: () => null,
+}));
+
 const m = vi.hoisted(() => ({
   withAdminAuth: vi.fn(),
   withSystemAdminAuth: vi.fn(),
@@ -131,5 +139,18 @@ describe('admin/feature-flags route', () => {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ name: 'featureA', enabled: false }),
     }), { userId: 'u1', organizationId: 'org_1' } as any)).rejects.toThrow('toggle failed');
+  });
+
+  it('PATCH records the toggle as an audited platform operation', async () => {
+    const { PATCH } = await loadRoute();
+    await PATCH(new NextRequest('http://localhost/api/admin/feature-flags', {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'featureA', enabled: false }),
+    }), { userId: 'u1', organizationId: 'org_1' } as any);
+    expect(audit.run).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'platform.feature_flag.toggle', resourceId: 'featureA', details: { enabled: false } }),
+      expect.any(Function),
+    );
   });
 });

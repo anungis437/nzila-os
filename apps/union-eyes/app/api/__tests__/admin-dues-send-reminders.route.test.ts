@@ -1,6 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
+const audit = vi.hoisted(() => ({
+  run: vi.fn(async (_op: unknown, fn: () => Promise<unknown>) => fn()),
+}));
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: audit.run,
+  operationAuditResponse: () => null,
+}));
+
 const m = vi.hoisted(() => ({
   withApiAuth: vi.fn(),
   getCurrentUser: vi.fn(),
@@ -26,7 +34,7 @@ describe('admin/dues/send-reminders route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.withApiAuth.mockImplementation((handler: any) => (request: NextRequest) => handler(request));
-    m.getCurrentUser.mockResolvedValue({ id: 'u1' });
+    m.getCurrentUser.mockResolvedValue({ id: 'u1', organizationId: 'org_1' });
     m.hasMinRole.mockResolvedValue(true);
     m.manualTriggerReminders.mockResolvedValue({
       totalProcessed: 4,
@@ -72,5 +80,14 @@ describe('admin/dues/send-reminders route', () => {
     const response = await POST(new NextRequest('http://localhost/api/admin/dues/send-reminders', { method: 'POST' }));
 
     expect(response.status).toBe(500);
+  });
+
+  it('records the manual trigger as an audited platform operation', async () => {
+    const { POST } = await loadRoute();
+    await POST(new NextRequest('http://localhost/api/x', { method: 'POST' }));
+    expect(audit.run).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'platform.dues.send_reminders', organizationId: 'org_1', userId: 'u1' }),
+      expect.any(Function),
+    );
   });
 });

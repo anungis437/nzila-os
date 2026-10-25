@@ -13,9 +13,9 @@
    "NONE": 51,
    "ORG_AUTH": 46,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 57,
+   "RETIRED": 58,
    "ROLE_AUTH": 130,
-   "SESSION_AUTH": 54,
+   "SESSION_AUTH": 53,
    "WEBHOOK_SIGNATURE": 4,
    "WITH_API": 274,
    "WITH_API_PUBLIC": 2
@@ -29,20 +29,20 @@
    "NONE": 8,
    "ORG_AUTH": 26,
    "PLATFORM_AUTH_HANDLER": 7,
-   "RETIRED": 50,
+   "RETIRED": 51,
    "ROLE_AUTH": 79,
-   "SESSION_AUTH": 25,
+   "SESSION_AUTH": 24,
    "WEBHOOK_SIGNATURE": 4,
    "WITH_API": 167
   },
   "mutatingByAudit": {
    "ATOMIC": 79,
-   "ATOMIC_SERVICE": 59,
+   "ATOMIC_SERVICE": 65,
    "BEST_EFFORT": 9,
    "CRUD_ATOMIC": 299,
    "EXEMPT_BALLOT_SECRECY": 2,
    "NO_WRITES_FOUND": 14,
-   "NONE": 233
+   "NONE": 227
   },
   "mutatingByData": {
    "AMBIENT_DB": 34,
@@ -396,7 +396,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "admin/dues/overview/route.ts",
@@ -447,7 +447,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "admin/duplicates/route.ts",
@@ -526,7 +526,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "admin/fix-super-admin-roles/route.ts",
@@ -626,7 +626,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "admin/jobs/retry/route.ts",
@@ -638,7 +638,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "admin/jobs/route.ts",
@@ -780,7 +780,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "admin/pilot-status/route.ts",
@@ -1008,7 +1008,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "SESSION_AUTH",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",

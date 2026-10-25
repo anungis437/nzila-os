@@ -116,4 +116,16 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
       expect(source, route).not.toMatch(/persistAtomicAudit|buildUnionEvidencePack\([^)]*actorId[^)]*optionId/)
     }
   })
+
+  it('counts performAuditedOperation as audited only while it records the intent before running the operation', () => {
+    const source = readFileSync(join(__dirname, '..', 'audit', 'operation-audit.ts'), 'utf8')
+    const intent = source.indexOf("entry('requested')")
+    const run = source.indexOf('await operation()')
+    const outcome = source.indexOf("entry('completed')")
+    expect(intent).toBeGreaterThan(-1)
+    expect(intent).toBeLessThan(run)
+    expect(run).toBeLessThan(outcome)
+    // a failure to record the intent must stop the operation
+    expect(source).toMatch(/catch \(error\) \{[\s\S]*?throw new OperationAuditError[\s\S]*?\}\s*\n\s*try \{\s*\n\s*const result = await operation\(\)/)
+  })
 })
