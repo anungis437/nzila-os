@@ -23,6 +23,8 @@ describe('tranche 2 document contract record', () => {
       'ocr-member-visibility-role-gate',
       'ocr-audit-when-canonical-v2-disabled',
       'ocr-processor-and-blob-activation',
+      'temporary-intake-lifecycle',
+      'ocr-case-processing-authority',
     ]);
     for (const gap of matrix.tranche2ContractGaps) {
       expect(gap.owner.length).toBeGreaterThan(0);
