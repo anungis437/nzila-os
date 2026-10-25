@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const m = vi.hoisted(() => ({
   stored: { value: null as unknown },
   update: vi.fn(),
+  audit: vi.fn(),
+  locked: [] as string[],
 }));
 
 vi.mock('@/db/db', () => ({
@@ -12,6 +14,23 @@ vi.mock('@/db/db', () => ({
     insert: vi.fn(),
     delete: vi.fn(),
   },
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (_org: unknown, fn: (tx: unknown) => Promise<unknown>) =>
+    fn({
+      select: () => ({
+        from: () => ({
+          where: () => ({
+            for: async (mode: string) => {
+              m.locked.push(mode);
+              return m.stored.value === null ? [] : [{ value: m.stored.value }];
+            },
+          }),
+        }),
+      }),
+      update: () => ({ set: (v: unknown) => ({ where: async () => m.update(v) }) }),
+    }),
 }));
 vi.mock('@/db/schema', () => ({
   orgConfigurations: { organizationId: 'organizationId', category: 'category', key: 'key' },
@@ -42,6 +61,9 @@ describe('representation protocol execution status (P0-C)', () => {
   beforeEach(() => {
     m.stored.value = null;
     m.update.mockClear();
+    m.audit.mockReset();
+    m.audit.mockResolvedValue(undefined);
+    m.locked = [];
   });
 
   it('a missing configuration yields the steward default for display only', () => {
@@ -146,8 +168,19 @@ describe('representation protocol execution status (P0-C)', () => {
     expect(await approveRepresentationProtocol('org', 'admin-b')).toMatchObject({ ok: true });
     const written = m.update.mock.calls[0][0] as { value: { approval: { approvedBy: string } } };
     expect(written.value.approval.approvedBy).toBe('admin-b');
+    // judged against a locked row, and recorded in the same transaction as the approval
+    expect(m.locked).toContain('update');
+    expect(m.audit).toHaveBeenCalledTimes(1);
+    expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'representation_protocol.approve', userId: 'admin-b' }));
 
     m.stored.value = approved();
     expect(await approveRepresentationProtocol('org', 'admin-c')).toMatchObject({ ok: false, code: 'NOT_PENDING' });
+    expect(m.audit).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not report an approval whose audit record cannot be written', async () => {
+    m.stored.value = { ...PROTOCOL_LRO_LED, approval: { configuredBy: 'admin-a', configuredAt: '2026-10-01T00:00:00Z' } };
+    m.audit.mockRejectedValue(new Error('audit down'));
+    await expect(approveRepresentationProtocol('org', 'admin-b')).rejects.toThrow('audit down');
   });
 });

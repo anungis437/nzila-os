@@ -10,6 +10,8 @@
 import { db } from "@/db/db";
 import { eq, and } from "drizzle-orm";
 import { orgConfigurations } from "@/db/schema";
+import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import {
   type RepresentationProtocol,
   type ProtocolResolution,
@@ -27,14 +29,21 @@ export class RepresentationProtocolNotExecutableError extends Error {
   }
 }
 
+const protocolRow = (organizationId: string) =>
+  and(
+    eq(orgConfigurations.organizationId, organizationId),
+    eq(orgConfigurations.category, CONFIG_CATEGORY),
+    eq(orgConfigurations.key, CONFIG_KEY),
+  );
+
 async function readProtocolValue(organizationId: string): Promise<unknown | null> {
-  const row = await db.query.orgConfigurations.findFirst({
-    where: and(
-      eq(orgConfigurations.organizationId, organizationId),
-      eq(orgConfigurations.category, CONFIG_CATEGORY),
-      eq(orgConfigurations.key, CONFIG_KEY),
-    ),
-  });
+  const row = await db.query.orgConfigurations.findFirst({ where: protocolRow(organizationId) });
+  return row?.value ?? null;
+}
+
+/** Reads the stored value and locks the row, so a decision is made against the value it will replace. */
+async function readProtocolValueForUpdate(tx: RLSTx, organizationId: string): Promise<unknown | null> {
+  const [row] = await tx.select().from(orgConfigurations).where(protocolRow(organizationId)).for("update");
   return row?.value ?? null;
 }
 
@@ -95,29 +104,32 @@ export async function saveRepresentationProtocol(
     ...protocol,
     approval: { configuredBy: updatedBy, configuredAt: new Date().toISOString() },
   };
-  await db
-    .insert(orgConfigurations)
-    .values({
-      organizationId,
-      category: CONFIG_CATEGORY,
-      key: CONFIG_KEY,
-      value: configured,
-      description: "Per-union representation protocol — defines who files and manages grievances.",
-      updatedBy,
-      updatedAt: new Date(),
-    })
-    .onConflictDoUpdate({
-      target: [
-        orgConfigurations.organizationId,
-        orgConfigurations.category,
-        orgConfigurations.key,
-      ],
-      set: {
+  // The new configuration and its audit record commit together.
+  await withRLSContext({ organizationId }, async (tx) => {
+    await tx
+      .insert(orgConfigurations)
+      .values({
+        organizationId,
+        category: CONFIG_CATEGORY,
+        key: CONFIG_KEY,
         value: configured,
+        description: "Per-union representation protocol — defines who files and manages grievances.",
         updatedBy,
         updatedAt: new Date(),
-      },
+      })
+      .onConflictDoUpdate({
+        target: [orgConfigurations.organizationId, orgConfigurations.category, orgConfigurations.key],
+        set: { value: configured, updatedBy, updatedAt: new Date() },
+      });
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId: updatedBy,
+      action: "representation_protocol.save",
+      resourceType: "org_configurations",
+      resourceId: CONFIG_KEY,
+      details: { primaryRepresentative: protocol.primaryRepresentative, status: "pending_approval" },
     });
+  });
 }
 
 export type ProtocolApprovalResult =
@@ -133,25 +145,26 @@ export async function submitLegacyRepresentationProtocolForApproval(
   organizationId: string,
   submitterId: string,
 ): Promise<{ ok: true } | { ok: false; code: "NOT_LEGACY"; message: string }> {
-  const current = resolveStoredProtocol(await readProtocolValue(organizationId));
-  if (current.status !== "legacy_unapproved") {
-    return { ok: false, code: "NOT_LEGACY", message: "Only a historical configuration without provenance can be submitted this way." };
-  }
-  const submitted: RepresentationProtocol = {
-    ...current.protocol,
-    approval: { configuredBy: submitterId, configuredAt: new Date().toISOString() },
-  };
-  await db
-    .update(orgConfigurations)
-    .set({ value: submitted, updatedAt: new Date() })
-    .where(
-      and(
-        eq(orgConfigurations.organizationId, organizationId),
-        eq(orgConfigurations.category, CONFIG_CATEGORY),
-        eq(orgConfigurations.key, CONFIG_KEY),
-      ),
-    );
-  return { ok: true };
+  return withRLSContext({ organizationId }, async (tx) => {
+    const current = resolveStoredProtocol(await readProtocolValueForUpdate(tx, organizationId));
+    if (current.status !== "legacy_unapproved") {
+      return { ok: false as const, code: "NOT_LEGACY" as const, message: "Only a historical configuration without provenance can be submitted this way." };
+    }
+    const submitted: RepresentationProtocol = {
+      ...current.protocol,
+      approval: { configuredBy: submitterId, configuredAt: new Date().toISOString() },
+    };
+    await tx.update(orgConfigurations).set({ value: submitted, updatedAt: new Date() }).where(protocolRow(organizationId));
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId: submitterId,
+      action: "representation_protocol.submit_legacy",
+      resourceType: "org_configurations",
+      resourceId: CONFIG_KEY,
+      details: { status: "pending_approval" },
+    });
+    return { ok: true as const };
+  });
 }
 
 /**
@@ -162,36 +175,39 @@ export async function approveRepresentationProtocol(
   organizationId: string,
   approverId: string,
 ): Promise<ProtocolApprovalResult> {
-  const current = resolveStoredProtocol(await readProtocolValue(organizationId));
-  if (current.status === "missing" || current.status === "invalid") {
-    return { ok: false, code: "NOT_FOUND", message: "No valid protocol configuration is awaiting approval." };
-  }
-  if (current.status === "legacy_unapproved") {
-    return { ok: false, code: "NOT_FOUND", message: "A historical configuration must first be submitted for approval by an administrator." };
-  }
-  if (current.status === "approved") {
-    return { ok: false, code: "NOT_PENDING", message: "The current protocol is already approved." };
-  }
-  const configuredBy = current.protocol.approval?.configuredBy;
-  if (!configuredBy || configuredBy === approverId) {
-    return { ok: false, code: "SELF_APPROVAL_FORBIDDEN", message: "A protocol must be approved by someone other than its author." };
-  }
-  const approvedAt = new Date().toISOString();
-  const approved: RepresentationProtocol = {
-    ...current.protocol,
-    approval: { ...current.protocol.approval!, approvedBy: approverId, approvedAt },
-  };
-  await db
-    .update(orgConfigurations)
-    .set({ value: approved, updatedAt: new Date() })
-    .where(
-      and(
-        eq(orgConfigurations.organizationId, organizationId),
-        eq(orgConfigurations.category, CONFIG_CATEGORY),
-        eq(orgConfigurations.key, CONFIG_KEY),
-      ),
-    );
-  return { ok: true, approvedAt };
+  // The stored value is locked while it is judged, so what is approved is exactly what the approver's decision was
+  // made against; a save that lands in between waits and is then judged on its own.
+  return withRLSContext({ organizationId }, async (tx): Promise<ProtocolApprovalResult> => {
+    const current = resolveStoredProtocol(await readProtocolValueForUpdate(tx, organizationId));
+    if (current.status === "missing" || current.status === "invalid") {
+      return { ok: false, code: "NOT_FOUND", message: "No valid protocol configuration is awaiting approval." };
+    }
+    if (current.status === "legacy_unapproved") {
+      return { ok: false, code: "NOT_FOUND", message: "A historical configuration must first be submitted for approval by an administrator." };
+    }
+    if (current.status === "approved") {
+      return { ok: false, code: "NOT_PENDING", message: "The current protocol is already approved." };
+    }
+    const configuredBy = current.protocol.approval?.configuredBy;
+    if (!configuredBy || configuredBy === approverId) {
+      return { ok: false, code: "SELF_APPROVAL_FORBIDDEN", message: "A protocol must be approved by someone other than its author." };
+    }
+    const approvedAt = new Date().toISOString();
+    const approved: RepresentationProtocol = {
+      ...current.protocol,
+      approval: { ...current.protocol.approval!, approvedBy: approverId, approvedAt },
+    };
+    await tx.update(orgConfigurations).set({ value: approved, updatedAt: new Date() }).where(protocolRow(organizationId));
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId: approverId,
+      action: "representation_protocol.approve",
+      resourceType: "org_configurations",
+      resourceId: CONFIG_KEY,
+      details: { configuredBy, primaryRepresentative: current.protocol.primaryRepresentative },
+    });
+    return { ok: true, approvedAt };
+  });
 }
 
 // ============================================================================
@@ -203,14 +219,17 @@ export async function approveRepresentationProtocol(
  */
 export async function resetRepresentationProtocol(
   organizationId: string,
+  actorUserId: string,
 ): Promise<void> {
-  await db
-    .delete(orgConfigurations)
-    .where(
-      and(
-        eq(orgConfigurations.organizationId, organizationId),
-        eq(orgConfigurations.category, CONFIG_CATEGORY),
-        eq(orgConfigurations.key, CONFIG_KEY),
-      ),
-    );
+  await withRLSContext({ organizationId }, async (tx) => {
+    await tx.delete(orgConfigurations).where(protocolRow(organizationId));
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId: actorUserId,
+      action: "representation_protocol.reset",
+      resourceType: "org_configurations",
+      resourceId: CONFIG_KEY,
+      details: {},
+    });
+  });
 }

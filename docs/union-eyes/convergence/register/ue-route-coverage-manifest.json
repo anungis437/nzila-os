@@ -37,12 +37,12 @@
   },
   "mutatingByAudit": {
    "ATOMIC": 79,
-   "ATOMIC_SERVICE": 58,
+   "ATOMIC_SERVICE": 59,
    "BEST_EFFORT": 9,
    "CRUD_ATOMIC": 299,
    "EXEMPT_BALLOT_SECRECY": 2,
    "NO_WRITES_FOUND": 14,
-   "NONE": 234
+   "NONE": 233
   },
   "mutatingByData": {
    "AMBIENT_DB": 34,
@@ -897,7 +897,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "admin/roles/batch/route.ts",

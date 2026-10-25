@@ -6,7 +6,7 @@
 
 import { NextResponse } from 'next/server'
 import { signDocument } from '@/services/pki/signature-service'
-import { recordSignature } from '@/services/pki/workflow-engine'
+import { getWorkflow, recordSignature } from '@/services/pki/workflow-engine'
 import type { SignDocumentParams } from '@/services/pki/signature-service'
 import { z } from 'zod'
 import { withRoleAuth, type BaseAuthContext } from '@/lib/api-auth-guard'
@@ -61,6 +61,12 @@ export const POST = withRoleAuth('admin', async (request, context: BaseAuthConte
     const ipAddress =
       request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
     const userAgent = request.headers.get('user-agent') || 'unknown'
+
+    // A signature can only be recorded into one of this organization's own workflows.
+    const targetWorkflow = getWorkflow(workflowId)
+    if (!targetWorkflow || targetWorkflow.organizationId !== organizationId) {
+      return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Workflow not found')
+    }
 
     // Sign document
     const signParams: SignDocumentParams = {
