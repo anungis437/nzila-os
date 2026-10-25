@@ -148,15 +148,13 @@ export const POST = withRoleAuth('member', async (request, context) => {
     const accessLevel = (formData.get("accessLevel") as string) || "standard";
     const discardBlobPath = formData.get('discardBlobPath');
 
-    if (typeof discardBlobPath === 'string' && discardBlobPath.length > 0) {
-      if (!organizationId || !organizationIdFromForm || organizationIdFromForm !== organizationId) {
-        return standardErrorResponse(ErrorCode.FORBIDDEN, 'Forbidden');
-      }
-      if (!isDiscardableBlobPath(discardBlobPath, organizationId)) {
-        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Blob path is not owned by this organization');
-      }
-      await deleteBlob(discardBlobPath);
-      return new NextResponse(null, { status: 204 });
+    // Client discard stays closed until an authoritative intake row can prove
+    // the object key, the principal, and that the blob is still unattached.
+    if (discardBlobPath != null && String(discardBlobPath).length > 0) {
+      return standardErrorResponse(
+        ErrorCode.FORBIDDEN,
+        'Unfinished uploads cannot be deleted from this request',
+      );
     }
 
     // Validation

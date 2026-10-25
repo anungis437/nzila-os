@@ -243,27 +243,51 @@ describe('documents/upload route', () => {
     expect(m.appendMandatoryAudit).not.toHaveBeenCalled();
   });
 
-  it('discards only an organization-owned blob path and does not require a file', async () => {
+  it('refuses client discard without deleting the supplied path', async () => {
     const { POST } = await loadRoute();
-    const owned = new FormData();
-    owned.set('organizationId', 'org_1');
-    owned.set('discardBlobPath', 'documents/org_1/note.pdf');
-    const discarded = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: owned }), {
-      userId: 'u1',
-      organizationId: 'org_1',
-    });
-    expect(discarded.status).toBe(204);
-    expect(m.deleteBlob).toHaveBeenCalledWith('documents/org_1/note.pdf');
+    m.deleteBlob.mockRejectedValue(new Error('cleanup failed'));
+    const paths = [
+      'documents/org_1/note.pdf',
+      'documents/org_2/note.pdf',
+      'documents/org_1/../org_2/note.pdf',
+      'documents/org_1/accepted.pdf',
+      'https://storage.example/documents/org_1/note.pdf',
+    ];
 
-    const foreign = new FormData();
-    foreign.set('organizationId', 'org_1');
-    foreign.set('discardBlobPath', 'documents/org_2/note.pdf');
-    const rejected = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: foreign }), {
-      userId: 'u1',
+    for (const blobPath of paths) {
+      const form = new FormData();
+      form.set('organizationId', 'org_1');
+      form.set('discardBlobPath', blobPath);
+      const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), {
+        userId: 'u1',
+        organizationId: 'org_1',
+      });
+      expect(response.status).toBe(403);
+      expect(JSON.stringify(await response.json())).not.toContain(blobPath);
+    }
+
+    const replay = new FormData();
+    replay.set('organizationId', 'org_1');
+    replay.set('discardBlobPath', 'documents/org_1/note.pdf');
+    const again = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: replay }), {
+      userId: 'other-user',
       organizationId: 'org_1',
     });
-    expect(rejected.status).toBe(400);
-    expect(m.deleteBlob).toHaveBeenCalledTimes(1);
+    expect(again.status).toBe(403);
+
+    const raced = await Promise.all([0, 1].map(() => {
+      const form = new FormData();
+      form.set('organizationId', 'org_1');
+      form.set('file', new File([new Uint8Array([1])], 'note.pdf', { type: 'application/pdf' }));
+      form.set('discardBlobPath', 'documents/org_1/note.pdf');
+      return POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), {
+        userId: 'u1',
+        organizationId: 'org_1',
+      });
+    }));
+    expect(raced.map((response) => response.status)).toEqual([403, 403]);
+    expect(m.deleteBlob).not.toHaveBeenCalled();
+    expect(m.putBlob).not.toHaveBeenCalled();
     expect(m.insertDocument).not.toHaveBeenCalled();
   });
 

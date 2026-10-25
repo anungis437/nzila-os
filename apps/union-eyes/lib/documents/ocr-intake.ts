@@ -49,7 +49,7 @@ export function assessUpload(file: { name: string; size: number; type: string })
   return { ok: true };
 }
 
-/** Server-side discard is allowed only for this organization's blob prefix. */
+/** Organization blob prefix. This check does not authorize deletion. */
 export function isDiscardableBlobPath(path: string, organizationId: string): boolean {
   if (!organizationId || organizationId.includes('/') || organizationId.includes('..')) return false;
   if (!path || path.includes('..') || path.includes('\\') || path.includes('://') || path.startsWith('/')) return false;
@@ -162,6 +162,7 @@ export function ocrCopy(locale: string) {
       unavailable: 'Le moteur OCR n est pas disponible pour ce fichier.',
       denied: 'Vous n avez pas l autorisation de traiter ce document.',
       failed: 'Le traitement OCR a echoue. Le document enregistre reste inchange.',
+      notSaved: 'Le document n a pas ete enregistre. Les objets stockes ne peuvent pas etre supprimes depuis cet ecran.',
       transcript: 'La transcription corrigee ne peut pas etre enregistree. Aucune ecriture canonique n existe pour ce texte.',
       cancel: 'Annuler',
       cancelled: 'Traitement annule.',
@@ -188,6 +189,7 @@ export function ocrCopy(locale: string) {
     unavailable: 'OCR is not available for this file.',
     denied: 'You do not have permission to process this document.',
     failed: 'OCR processing failed. The saved document was left unchanged.',
+    notSaved: 'The document was not saved. Stored objects cannot be deleted from this screen.',
     transcript: 'The corrected transcription cannot be saved. There is no canonical write for that text.',
     cancel: 'Cancel',
     cancelled: 'Processing cancelled.',

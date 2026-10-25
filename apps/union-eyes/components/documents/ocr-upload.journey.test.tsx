@@ -73,21 +73,24 @@ describe('ocr upload canonical journey', () => {
     expect(calls.some((call) => call.includes('PATCH'))).toBe(false);
   });
 
-  it('discards the blob when the repository refuses the record and does not claim OCR success', async () => {
+  it('does not delete a blob when the repository refuses the record', async () => {
     const calls: string[] = [];
-    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       calls.push(url);
-      if (calls.filter((item) => item.endsWith('/api/documents/upload')).length === 1) return json(intake, 201);
+      if (init?.body instanceof FormData && init.body.get('discardBlobPath')) {
+        throw new Error('discard must not be sent');
+      }
+      if (url.endsWith('/api/documents/upload')) return json(intake, 201);
       if (url.endsWith('/api/documents/repository')) return json({ code: 'FORBIDDEN' }, 403);
       return json({}, 204);
     }));
     const onUploadComplete = vi.fn();
     render(<OCRUpload organizationId="org-1" onUploadComplete={onUploadComplete} />);
     await choose(new File(['hello'], 'note.pdf', { type: 'application/pdf' }));
-    expect(await screen.findByText(/OCR processing failed/)).toBeInTheDocument();
+    expect(await screen.findByText(/Stored objects cannot be deleted from this screen/)).toBeInTheDocument();
     expect(onUploadComplete).not.toHaveBeenCalled();
-    expect(calls.filter((url) => url.endsWith('/api/documents/upload'))).toHaveLength(2);
+    expect(calls.filter((url) => url.endsWith('/api/documents/upload'))).toHaveLength(1);
     expect(calls.some((url) => url.endsWith('/ocr'))).toBe(false);
   });
 

@@ -135,11 +135,7 @@ export function OCRUpload({
       const createBody = await createResponse.json().catch(() => null);
       const created = readCreatedDocument(createBody);
       if (!createResponse.ok || !created) {
-        const discard = new FormData();
-        discard.set('organizationId', organizationId);
-        discard.set('discardBlobPath', intake.blobPath);
-        await fetch('/api/documents/upload', { method: 'POST', body: discard, signal: controller.signal }).catch(() => undefined);
-        update(entry.id, { status: 'error', notice: copy.failed });
+        update(entry.id, { status: 'error', notice: copy.notSaved });
         return;
       }
 
