@@ -5,9 +5,11 @@
 
 import { z } from "zod";
 import { withApi } from "@/lib/api/with-api";
+import { ApiError } from "@/lib/api/errors";
 import {
   linkDocument,
   listCommitteeDocuments,
+  requireCommitteeScope,
 } from "@/lib/services/committee-workspace-service";
 
 const linkSchema = z.object({
@@ -22,11 +24,14 @@ const linkSchema = z.object({
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "member" },
     openapi: { tags: ["Committees"], summary: "List committee documents" },
   },
-  async ({ params, request }) => {
+  async ({ organizationId, params, request }) => {
+    if (!organizationId) throw ApiError.badRequest("Organization context required");
     const { id: committeeId } = params as { id: string };
+    await requireCommitteeScope(organizationId, committeeId);
     const searchParams = request.nextUrl.searchParams;
     const category = searchParams.get("category") ?? undefined;
     const meetingId = searchParams.get("meetingId") ?? undefined;
@@ -37,17 +42,20 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "steward" },
     body: linkSchema,
     openapi: { tags: ["Committees"], summary: "Link document to committee" },
   },
   async ({ body, organizationId, userId, params }) => {
+    if (!organizationId) throw ApiError.badRequest("Organization context required");
     const { id: committeeId } = params as { id: string };
+    await requireCommitteeScope(organizationId, committeeId, { meetingId: body.meetingId });
 
     return linkDocument({
       ...body,
       committeeId,
-      organizationId: organizationId!,
+      organizationId,
       uploadedBy: userId,
     });
   }

@@ -37,19 +37,19 @@
   },
   "mutatingByAudit": {
    "ATOMIC": 64,
-   "ATOMIC_SERVICE": 35,
+   "ATOMIC_SERVICE": 43,
    "BEST_EFFORT": 10,
    "CRUD_ATOMIC": 299,
    "EXEMPT_BALLOT_SECRECY": 2,
    "NO_WRITES_FOUND": 14,
-   "NONE": 271
+   "NONE": 263
   },
   "mutatingByData": {
    "AMBIENT_DB": 49,
    "CRUD_TENANT_TX": 299,
-   "NONE": 221,
+   "NONE": 213,
    "SYSTEM_CONTEXT": 53,
-   "TENANT_TX": 73
+   "TENANT_TX": 81
   }
  },
  "routes": [
@@ -3786,8 +3786,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "committees/[id]/action-items/route.ts",
@@ -3799,8 +3799,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "committees/[id]/documents/route.ts",
@@ -3812,8 +3812,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "committees/[id]/intelligence/route.ts",
@@ -3825,8 +3825,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "committees/[id]/meetings/[meetingId]/attendance/route.ts",
@@ -3838,8 +3838,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "committees/[id]/meetings/[meetingId]/minutes/route.ts",
@@ -3851,8 +3851,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "committees/[id]/meetings/[meetingId]/route.ts",
@@ -3864,8 +3864,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "committees/[id]/meetings/route.ts",
@@ -3877,8 +3877,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "committees/[id]/route.ts",

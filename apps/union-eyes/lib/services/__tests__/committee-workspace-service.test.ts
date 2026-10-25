@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const h = vi.hoisted(() => ({
   queue: [] as unknown[],
-  createAuditLog: vi.fn(),
+  audit: vi.fn(),
 }));
 
 function makeChain() {
@@ -38,11 +38,17 @@ vi.mock('drizzle-orm', () => ({
   sql: Object.assign(vi.fn(() => 'sql'), { raw: vi.fn(() => 'sql') }),
   inArray: vi.fn(() => 'inArray'),
   between: vi.fn(() => 'between'),
+  isNull: vi.fn(() => 'isNull'),
+  isNotNull: vi.fn(() => 'isNotNull'),
   relations: vi.fn(() => ({})),
 }));
 
-vi.mock('../audit-service', () => ({
-  createAuditLog: h.createAuditLog,
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.audit }));
+vi.mock('@/lib/db/with-rls-context', async () => ({
+  withRLSContext: async (...args: unknown[]) => {
+    const fn = args[args.length - 1] as (tx: unknown) => Promise<unknown>;
+    return fn((await import('@/db')).db);
+  },
 }));
 
 vi.mock('@/db/schema', () => {
@@ -53,6 +59,7 @@ vi.mock('@/db/schema', () => {
     committeeActionItems: t('committeeActionItems'),
     committeeDocuments: t('committeeDocuments'),
     committeeIntelligenceSnapshots: t('committeeIntelligenceSnapshots'),
+    committees: t('committees'),
   };
 });
 
@@ -76,11 +83,13 @@ import {
   listIntelligenceSnapshots,
   gatherCrossCommitteeMinutes,
   getCommitteeStats,
+  requireCommitteeScope,
 } from '../committee-workspace-service';
 
 beforeEach(() => {
   h.queue = [];
-  h.createAuditLog.mockReset();
+  h.audit.mockReset();
+  h.audit.mockResolvedValue(undefined);
 });
 
 describe('committee-workspace-service', () => {
@@ -96,7 +105,7 @@ describe('committee-workspace-service', () => {
       attendeeIds: ['u2', 'u3'],
     } as never);
     expect(result.id).toBe('m1');
-    expect(h.createAuditLog).toHaveBeenCalled();
+    expect(h.audit).toHaveBeenCalled();
   });
 
   it('getMeeting returns first or null', async () => {
@@ -121,19 +130,23 @@ describe('committee-workspace-service', () => {
   it('recordMinutes updates, audits, and returns nullable', async () => {
     h.queue = [[{ id: 'm1', committeeId: 'c1', organizationId: 'o1' }]];
     expect(await recordMinutes('m1', 'minutes', 'u1')).toEqual({ id: 'm1', committeeId: 'c1', organizationId: 'o1' });
-    expect(h.createAuditLog).toHaveBeenCalled();
+    expect(h.audit).toHaveBeenCalled();
 
+    h.audit.mockClear();
     h.queue = [[]];
     expect(await recordMinutes('m2', 'minutes', 'u1')).toBeNull();
+    expect(h.audit).not.toHaveBeenCalled();
   });
 
   it('approveMinutes updates, audits, and returns nullable', async () => {
     h.queue = [[{ id: 'm1', committeeId: 'c1', organizationId: 'o1' }]];
     expect(await approveMinutes('m1', 'u1')).toEqual({ id: 'm1', committeeId: 'c1', organizationId: 'o1' });
-    expect(h.createAuditLog).toHaveBeenCalled();
+    expect(h.audit).toHaveBeenCalled();
 
+    h.audit.mockClear();
     h.queue = [[]];
     expect(await approveMinutes('m2', 'u1')).toBeNull();
+    expect(h.audit).not.toHaveBeenCalled();
   });
 
   it('recordAttendance upserts and updates meeting attendeeCount', async () => {
@@ -143,12 +156,13 @@ describe('committee-workspace-service', () => {
       [],
       [],
       [],
-      [],
+      [{ organizationId: 'o1' }],
     ];
     await expect(recordAttendance('m1', [
       { memberId: 'u1', attended: true },
       { memberId: 'u2', attended: false, regrets: true },
-    ])).resolves.toBeUndefined();
+    ], 'u9')).resolves.toBeUndefined();
+    expect(h.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'committee.attendance.recorded', userId: 'u9', organizationId: 'o1' }));
   });
 
   it('getMeetingAttendees returns rows', async () => {
@@ -163,7 +177,7 @@ describe('committee-workspace-service', () => {
       status: 'pending', priority: 'high', createdBy: 'u1',
     } as never);
     expect(result.id).toBe('ai1');
-    expect(h.createAuditLog).toHaveBeenCalled();
+    expect(h.audit).toHaveBeenCalled();
   });
 
   it('listActionItems supports default and explicit filters', async () => {
@@ -204,8 +218,9 @@ describe('committee-workspace-service', () => {
     h.queue = [[{ id: 'd1' }]];
     expect(await listCommitteeDocuments('c1', { category: 'agenda', meetingId: 'm1' })).toEqual([{ id: 'd1' }]);
 
-    h.queue = [[]];
-    await expect(removeDocument('d1')).resolves.toBeUndefined();
+    h.queue = [[{ id: 'd1', organizationId: 'o1', committeeId: 'c1', title: 'Doc' }]];
+    await expect(removeDocument('d1', 'u1')).resolves.toBeUndefined();
+    expect(h.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'committee.document.removed' }));
   });
 
   it('create and list intelligence snapshots', async () => {
@@ -214,10 +229,31 @@ describe('committee-workspace-service', () => {
       committeeId: 'c1', organizationId: 'o1', title: 'S', generatedBy: 'u1',
     } as never);
     expect(snap.id).toBe('s1');
-    expect(h.createAuditLog).toHaveBeenCalled();
+    expect(h.audit).toHaveBeenCalled();
 
     h.queue = [[{ id: 's1' }]];
     expect(await listIntelligenceSnapshots('o1', { committeeId: 'c1', limit: 5 })).toEqual([{ id: 's1' }]);
+  });
+
+  it('requireCommitteeScope accepts a committee and children of the caller organization', async () => {
+    h.queue = [[{ id: 'c1' }], [{ id: 'm1' }], [{ id: 'ai1' }], [{ id: 'd1' }]];
+    await expect(requireCommitteeScope('o1', 'c1', { meetingId: 'm1', actionItemId: 'ai1', documentId: 'd1' })).resolves.toBeUndefined();
+  });
+
+  it.each([
+    ['the committee', [[]], {}],
+    ['the meeting', [[{ id: 'c1' }], []], { meetingId: 'm1' }],
+    ['the action item', [[{ id: 'c1' }], []], { actionItemId: 'ai1' }],
+    ['the document', [[{ id: 'c1' }], []], { documentId: 'd1' }],
+  ])('requireCommitteeScope is a 404 when %s is not found in this organization and committee', async (_what, queue, children) => {
+    h.queue = queue as unknown[];
+    await expect(requireCommitteeScope('o1', 'c1', children as never)).rejects.toMatchObject({ code: 'NOT_FOUND' });
+  });
+
+  it('a failed audit write fails the mutation', async () => {
+    h.audit.mockRejectedValue(new Error('audit down'));
+    h.queue = [[{ id: 'ai1' }]];
+    await expect(createActionItem({ committeeId: 'c1', organizationId: 'o1', title: 'T', createdBy: 'u1' } as never)).rejects.toThrow('audit down');
   });
 
   it('gatherCrossCommitteeMinutes works with and without committeeIds', async () => {
