@@ -19,23 +19,23 @@
   },
   "networkObservations": [
     {
-      "pid": 9476,
+      "pid": 34712,
       "transport": "PIPE",
-      "targetDigest": "95706c16607082d8eb442c5f2987f049ee2027e019c8c9a41e493ac20d49e7ed",
+      "targetDigest": "9a2c9fd5dba94ec65ea1c3c40c3a7fcfae36ea39573e8c89c2b7f9ba988ce518",
       "targetClass": "NON_LOOPBACK",
       "port": null,
       "allowed": false
     },
     {
-      "pid": 9476,
+      "pid": 34712,
       "transport": "TCP",
       "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
       "targetClass": "LOOPBACK",
-      "port": 58604,
+      "port": 56487,
       "allowed": true
     },
     {
-      "pid": 9476,
+      "pid": 34712,
       "transport": "DNS_LOOKUP",
       "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
       "targetClass": "LOOPBACK",
@@ -43,11 +43,11 @@
       "allowed": true
     },
     {
-      "pid": 9476,
+      "pid": 34712,
       "transport": "TCP",
       "targetDigest": "12ca17b49af2289436f303e0166030a21e525d266e209267433801a8fd4071a0",
       "targetClass": "LOOPBACK",
-      "port": 58603,
+      "port": 56486,
       "allowed": true
     }
   ],

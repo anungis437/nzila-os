@@ -19,23 +19,23 @@
   },
   "networkObservations": [
     {
-      "pid": 37804,
+      "pid": 48300,
       "transport": "PIPE",
-      "targetDigest": "1d68e4250945bebc29bdcadaa732bdb3cc7e60a6586d51bcc28d565fe0bed8c3",
+      "targetDigest": "df1813b569bfe93701d51fa5b5a6df1897b6bef543f35c2074b723d35ba13be6",
       "targetClass": "NON_LOOPBACK",
       "port": null,
       "allowed": false
     },
     {
-      "pid": 37804,
+      "pid": 48300,
       "transport": "TCP",
       "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
       "targetClass": "LOOPBACK",
-      "port": 52656,
+      "port": 56477,
       "allowed": true
     },
     {
-      "pid": 37804,
+      "pid": 48300,
       "transport": "DNS_LOOKUP",
       "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
       "targetClass": "LOOPBACK",
@@ -43,31 +43,31 @@
       "allowed": true
     },
     {
-      "pid": 37804,
+      "pid": 48300,
       "transport": "TCP",
       "targetDigest": "12ca17b49af2289436f303e0166030a21e525d266e209267433801a8fd4071a0",
       "targetClass": "LOOPBACK",
-      "port": 52655,
+      "port": 56476,
       "allowed": true
     },
     {
-      "pid": 43732,
+      "pid": 36828,
       "transport": "PIPE",
-      "targetDigest": "1d68e4250945bebc29bdcadaa732bdb3cc7e60a6586d51bcc28d565fe0bed8c3",
+      "targetDigest": "df1813b569bfe93701d51fa5b5a6df1897b6bef543f35c2074b723d35ba13be6",
       "targetClass": "NON_LOOPBACK",
       "port": null,
       "allowed": false
     },
     {
-      "pid": 43732,
+      "pid": 36828,
       "transport": "TCP",
       "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
       "targetClass": "LOOPBACK",
-      "port": 52656,
+      "port": 56477,
       "allowed": true
     },
     {
-      "pid": 43732,
+      "pid": 36828,
       "transport": "DNS_LOOKUP",
       "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
       "targetClass": "LOOPBACK",
@@ -75,11 +75,11 @@
       "allowed": true
     },
     {
-      "pid": 43732,
+      "pid": 36828,
       "transport": "TCP",
       "targetDigest": "12ca17b49af2289436f303e0166030a21e525d266e209267433801a8fd4071a0",
       "targetClass": "LOOPBACK",
-      "port": 52655,
+      "port": 56476,
       "allowed": true
     }
   ],

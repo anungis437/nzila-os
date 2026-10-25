@@ -147,6 +147,9 @@ vi.mock('@/services/platform-economics/entitlement-guard', () => ({
   },
 }));
 
+// googleapis is a very large SDK; importing it cold took up to the whole test timeout under parallel load. These suites
+// check that every route module imports and its handlers respond, not the SDK (lib/external-calendar-sync has its own tests).
+vi.mock('googleapis', () => ({ google: { auth: { OAuth2: vi.fn() }, calendar: vi.fn() } }));
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
