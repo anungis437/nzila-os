@@ -36,13 +36,13 @@
    "WITH_API": 167
   },
   "mutatingByAudit": {
-   "ATOMIC": 61,
+   "ATOMIC": 64,
    "ATOMIC_SERVICE": 23,
    "BEST_EFFORT": 10,
    "CRUD_ATOMIC": 299,
    "EXEMPT_BALLOT_SECRECY": 2,
    "NO_WRITES_FOUND": 14,
-   "NONE": 286
+   "NONE": 283
   },
   "mutatingByData": {
    "AMBIENT_DB": 49,
@@ -7394,7 +7394,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "governance/board-packets/route.ts",
@@ -7470,7 +7470,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "governance/elections/sessions/[id]/vote/route.ts",
@@ -7496,7 +7496,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "governance/events/route.ts",
