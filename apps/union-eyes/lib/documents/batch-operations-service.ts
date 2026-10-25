@@ -1,14 +1,11 @@
 /**
- * Batch Operations Service - Phase 11
- * 
- * Backend service for performing bulk operations on documents.
- * Database-agnostic: Compatible with PostgreSQL (Supabase) and Azure SQL Server
+ * Batch document helpers.
+ *
+ * These functions do not authorize documents, read storage addresses, or
+ * rewrite privacy labels. Listing and download stay on the canonical
+ * repository and per-document download routes. Folder checks in this file
+ * are not an authorization grant.
  */
-
-import { getDatabase, eq, and, inArray, isNull, getDatabaseConfig } from '@/lib/database/multi-db-client';
-import { documents, documentFolders, auditLogs } from '@/db/schema';
-import archiver from 'archiver';
-import { Readable } from 'stream';
 
 export interface BatchOperationProgress {
   total: number;
@@ -23,651 +20,94 @@ export interface BatchOperationResult {
   message: string;
 }
 
+function refused(action: string, count: number): never {
+  throw new Error(
+    `${action} is refused for ${count} documents. Authorize each document through the canonical repository and download routes.`,
+  );
+}
+
 /**
- * Download multiple documents as a ZIP file
+ * Direct storage archives are refused. Each document is authorized through
+ * GET /api/documents/[id]/download. This function does not read fileUrl.
  */
 export async function downloadMultiple(
   documentIds: string[],
-  organizationId: string,
-  userId: string
-): Promise<{ stream: Readable; filename: string }> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = await getDatabase() as any;
-
-  // Fetch all documents using Drizzle ORM
-  const docs = await db
-    .select({
-      id: documents.id,
-      name: documents.name,
-      fileUrl: documents.fileUrl,
-      fileType: documents.fileType,
-    })
-    .from(documents)
-    .where(
-      and(
-        inArray(documents.id, documentIds),
-        eq(documents.organizationId, organizationId),
-        isNull(documents.deletedAt)
-      )
-    );
-
-  if (!docs || docs.length === 0) {
-    throw new Error('No documents found');
-  }
-
-  // Create archive
-  const archive = archiver('zip', {
-    zlib: { level: 9 },
-  });
-
-  // Track files added
-  let filesAdded = 0;
-  const fileNames = new Set<string>();
-
-  // Add documents to archive
-  for (const doc of docs) {
-    try {
-      if (!doc.fileUrl) {
-continue;
-      }
-
-      // Fetch file content
-      const response = await fetch(doc.fileUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch file: ${response.statusText}`);
-      }
-
-      const arrayBuffer = await response.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-
-      // Handle duplicate filenames
-      let fileName = doc.name;
-      let counter = 1;
-      while (fileNames.has(fileName)) {
-        const ext = fileName.includes('.') ? fileName.substring(fileName.lastIndexOf('.')) : '';
-        const name = ext ? fileName.substring(0, fileName.lastIndexOf('.')) : fileName;
-        fileName = `${name} (${counter})${ext}`;
-        counter++;
-      }
-      fileNames.add(fileName);
-
-      // Add to archive
-      archive.append(buffer, { name: fileName });
-      filesAdded++;
-    } catch (_error) {
-}
-  }
-
-  if (filesAdded === 0) {
-    throw new Error('No files could be added to archive');
-  }
-
-  // Finalize archive
-  archive.finalize();
-
-  // Create audit log using Drizzle ORM
-  await db.insert(auditLogs).values({
-    id: crypto.randomUUID(),
-    tenantId: organizationId,
-    userId,
-    action: 'documents.bulk_download',
-    resourceType: 'document',
-    resourceIds: documentIds,
-    metadata: {
-      count: filesAdded,
-      documentIds,
-    },
-    createdAt: new Date(),
-  });
-
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const filename = `documents_${timestamp}.zip`;
-
-  return {
-    stream: archive as Readable,
-    filename,
-  };
+  _organizationId: string,
+  _userId: string,
+): Promise<never> {
+  refused('Direct storage download', documentIds.length);
 }
 
-/**
- * Add tags to multiple documents
- */
+/** Tag writes stay fail-closed until a canonical tag action exists. */
 export async function bulkTag(
   documentIds: string[],
-  tagsToAdd: string[],
-  organizationId: string,
-  userId: string
+  _tagsToAdd: string[],
+  _organizationId: string,
+  _userId: string,
 ): Promise<BatchOperationResult> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = await getDatabase() as any;
-  const _dbConfig = getDatabaseConfig();
-
-  const progress: BatchOperationProgress = {
-    total: documentIds.length,
-    completed: 0,
-    failed: 0,
-    errors: [],
-  };
-
-  try {
-    // Fetch existing documents with current tags
-    const docs = await db
-      .select({
-        id: documents.id,
-        tags: documents.tags,
-      })
-      .from(documents)
-      .where(
-        and(
-          inArray(documents.id, documentIds),
-          eq(documents.organizationId, organizationId),
-          isNull(documents.deletedAt)
-        )
-      );
-
-    // Update each document
-    for (const doc of docs) {
-      try {
-        // Merge existing tags with new tags (remove duplicates)
-        const existingTags = doc.tags || [];
-        const mergedTags = Array.from(new Set([...existingTags, ...tagsToAdd]));
-
-        // Update document using Drizzle ORM
-        await db
-          .update(documents)
-          .set({
-            tags: mergedTags,
-            updatedAt: new Date(),
-          })
-          .where(eq(documents.id, doc.id));
-
-        progress.completed++;
-      } catch (error) {
-        progress.failed++;
-        progress.errors.push({
-          id: doc.id,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        });
-      }
-    }
-
-    // Create audit log
-    await db.insert(auditLogs).values({
-      id: crypto.randomUUID(),
-      tenantId: organizationId,
-      userId,
-      action: 'documents.bulk_tag',
-      resourceType: 'document',
-      resourceIds: documentIds,
-      metadata: {
-        tags: tagsToAdd,
-        completed: progress.completed,
-        failed: progress.failed,
-      },
-      createdAt: new Date(),
-    });
-
-    return {
-      success: progress.failed === 0,
-      progress,
-      message: `Tagged ${progress.completed} of ${progress.total} documents`,
-    };
-  } catch (error) {
-    throw new Error(`Bulk tag operation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
+  refused('Bulk tag', documentIds.length);
 }
 
-/**
- * Soft delete multiple documents
- */
+/** Role names and uploader identity do not authorize deletion. */
 export async function bulkDelete(
   documentIds: string[],
-  organizationId: string,
-  userId: string,
-  userRole: string
+  _organizationId: string,
+  _userId: string,
+  _userRole: string,
 ): Promise<BatchOperationResult> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = await getDatabase() as any;
-
-  const progress: BatchOperationProgress = {
-    total: documentIds.length,
-    completed: 0,
-    failed: 0,
-    errors: [],
-  };
-
-  try {
-    // Fetch documents to check permissions
-    const docs = await db
-      .select({
-        id: documents.id,
-        uploadedBy: documents.uploadedBy,
-      })
-      .from(documents)
-      .where(
-        and(
-          inArray(documents.id, documentIds),
-          eq(documents.organizationId, organizationId),
-          isNull(documents.deletedAt)
-        )
-      );
-
-    // Check permissions and delete
-    for (const doc of docs) {
-      try {
-        // Only admins and union leaders can delete any document
-        // Regular users can only delete their own documents
-        const canDelete = 
-          userRole === 'admin' ||
-          userRole === 'union_leader' ||
-          doc.uploadedBy === userId;
-
-        if (!canDelete) {
-          progress.failed++;
-          progress.errors.push({
-            id: doc.id,
-            error: 'Insufficient permissions to delete this document',
-          });
-          continue;
-        }
-
-        // Soft delete
-        await db
-          .update(documents)
-          .set({
-            deletedAt: new Date(),
-            deletedBy: userId,
-            updatedAt: new Date(),
-          })
-          .where(eq(documents.id, doc.id));
-
-        progress.completed++;
-      } catch (error) {
-        progress.failed++;
-        progress.errors.push({
-          id: doc.id,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        });
-      }
-    }
-
-    // Create audit log
-    await db.insert(auditLogs).values({
-      id: crypto.randomUUID(),
-      tenantId: organizationId,
-      userId,
-      action: 'documents.bulk_delete',
-      resourceType: 'document',
-      resourceIds: documentIds,
-      metadata: {
-        completed: progress.completed,
-        failed: progress.failed,
-      },
-      createdAt: new Date(),
-    });
-
-    return {
-      success: progress.failed === 0,
-      progress,
-      message: `Deleted ${progress.completed} of ${progress.total} documents`,
-    };
-  } catch (error) {
-    throw new Error(`Bulk delete operation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
+  refused('Bulk delete', documentIds.length);
 }
 
-/**
- * Move multiple documents to a folder
- */
+/** Folder membership is not changed from this helper. */
 export async function moveToFolder(
   documentIds: string[],
-  folderId: string | null,
-  organizationId: string,
-  userId: string
+  _folderId: string | null,
+  _organizationId: string,
+  _userId: string,
 ): Promise<BatchOperationResult> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = await getDatabase() as any;
-
-  const progress: BatchOperationProgress = {
-    total: documentIds.length,
-    completed: 0,
-    failed: 0,
-    errors: [],
-  };
-
-  try {
-    // Validate folder exists if folderId is provided
-    if (folderId) {
-      const folder = await db
-        .select({ id: documentFolders.id })
-        .from(documentFolders)
-        .where(
-          and(
-            eq(documentFolders.id, folderId),
-            eq(documentFolders.organizationId, organizationId),
-            isNull(documentFolders.deletedAt)
-          )
-        )
-        .limit(1);
-
-      if (!folder || folder.length === 0) {
-        throw new Error('Target folder not found');
-      }
-    }
-
-    // Fetch documents
-    const docs = await db
-      .select({ id: documents.id })
-      .from(documents)
-      .where(
-        and(
-          inArray(documents.id, documentIds),
-          eq(documents.organizationId, organizationId),
-          isNull(documents.deletedAt)
-        )
-      );
-
-    // Move each document
-    for (const doc of docs) {
-      try {
-        await db
-          .update(documents)
-          .set({
-            folderId,
-            updatedAt: new Date(),
-          })
-          .where(eq(documents.id, doc.id));
-
-        progress.completed++;
-      } catch (error) {
-        progress.failed++;
-        progress.errors.push({
-          id: doc.id,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        });
-      }
-    }
-
-    // Create audit log
-    await db.insert(auditLogs).values({
-      id: crypto.randomUUID(),
-      tenantId: organizationId,
-      userId,
-      action: 'documents.bulk_move',
-      resourceType: 'document',
-      resourceIds: documentIds,
-      metadata: {
-        folderId,
-        completed: progress.completed,
-        failed: progress.failed,
-      },
-      createdAt: new Date(),
-    });
-
-    return {
-      success: progress.failed === 0,
-      progress,
-      message: `Moved ${progress.completed} of ${progress.total} documents`,
-    };
-  } catch (error) {
-    throw new Error(`Bulk move operation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
+  refused('Bulk move', documentIds.length);
 }
 
 /**
- * Copy multiple documents
+ * Copying by storage address is refused. A canonical copy is a new repository row.
  */
 export async function bulkCopy(
   documentIds: string[],
-  destinationFolderId: string | null,
-  organizationId: string,
-  userId: string
+  _destinationFolderId: string | null,
+  _organizationId: string,
+  _userId: string,
 ): Promise<BatchOperationResult> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = await getDatabase() as any;
-
-  const progress: BatchOperationProgress = {
-    total: documentIds.length,
-    completed: 0,
-    failed: 0,
-    errors: [],
-  };
-
-  try {
-    // Validate destination folder if provided
-    if (destinationFolderId) {
-      const folder = await db
-        .select({ id: documentFolders.id })
-        .from(documentFolders)
-        .where(
-          and(
-            eq(documentFolders.id, destinationFolderId),
-            eq(documentFolders.organizationId, organizationId),
-            isNull(documentFolders.deletedAt)
-          )
-        )
-        .limit(1);
-
-      if (!folder || folder.length === 0) {
-        throw new Error('Destination folder not found');
-      }
-    }
-
-    // Fetch source documents
-    const docs = await db
-      .select({
-        id: documents.id,
-        name: documents.name,
-        fileUrl: documents.fileUrl,
-        fileType: documents.fileType,
-        fileSize: documents.fileSize,
-        mimeType: documents.mimeType,
-        tags: documents.tags,
-        metadata: documents.metadata,
-        contentText: documents.contentText,
-      })
-      .from(documents)
-      .where(
-        and(
-          inArray(documents.id, documentIds),
-          eq(documents.organizationId, organizationId),
-          isNull(documents.deletedAt)
-        )
-      );
-
-    // Copy each document
-    for (const doc of docs) {
-      try {
-        const copyName = `${doc.name} (Copy)`;
-        
-        await db.insert(documents).values({
-          id: crypto.randomUUID(),
-          organizationId,
-          folderId: destinationFolderId,
-          name: copyName,
-          fileUrl: doc.fileUrl,
-          fileType: doc.fileType,
-          fileSize: doc.fileSize,
-          mimeType: doc.mimeType,
-          tags: doc.tags || [],
-          metadata: doc.metadata || {},
-          contentText: doc.contentText,
-          version: 1,
-          uploadedBy: userId,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
-
-        progress.completed++;
-      } catch (error) {
-        progress.failed++;
-        progress.errors.push({
-          id: doc.id,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        });
-      }
-    }
-
-    // Create audit log
-    await db.insert(auditLogs).values({
-      id: crypto.randomUUID(),
-      tenantId: organizationId,
-      userId,
-      action: 'documents.bulk_copy',
-      resourceType: 'document',
-      resourceIds: documentIds,
-      metadata: {
-        destinationFolderId,
-        completed: progress.completed,
-        failed: progress.failed,
-      },
-      createdAt: new Date(),
-    });
-
-    return {
-      success: progress.failed === 0,
-      progress,
-      message: `Copied ${progress.completed} of ${progress.total} documents`,
-    };
-  } catch (error) {
-    throw new Error(`Bulk copy operation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
+  refused('Copying storage addresses', documentIds.length);
 }
 
 /**
- * Update metadata for multiple documents
+ * Bulk metadata writes are refused. Privacy labels are not a share or export grant.
  */
 export async function bulkUpdateMetadata(
   documentIds: string[],
-  metadataUpdates: Record<string, unknown>,
-  organizationId: string,
-  userId: string
+  _metadataUpdates: Record<string, unknown>,
+  _organizationId: string,
+  _userId: string,
 ): Promise<BatchOperationResult> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = await getDatabase() as any;
-
-  const progress: BatchOperationProgress = {
-    total: documentIds.length,
-    completed: 0,
-    failed: 0,
-    errors: [],
-  };
-
-  try {
-    // Fetch documents with existing metadata
-    const docs = await db
-      .select({
-        id: documents.id,
-        metadata: documents.metadata,
-      })
-      .from(documents)
-      .where(
-        and(
-          inArray(documents.id, documentIds),
-          eq(documents.organizationId, organizationId),
-          isNull(documents.deletedAt)
-        )
-      );
-
-    // Update each document
-    for (const doc of docs) {
-      try {
-        // Merge existing metadata with updates
-        const existingMetadata = doc.metadata || {};
-        const mergedMetadata = {
-          ...existingMetadata,
-          ...metadataUpdates,
-        };
-
-        await db
-          .update(documents)
-          .set({
-            metadata: mergedMetadata,
-            updatedAt: new Date(),
-          })
-          .where(eq(documents.id, doc.id));
-
-        progress.completed++;
-      } catch (error) {
-        progress.failed++;
-        progress.errors.push({
-          id: doc.id,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        });
-      }
-    }
-
-    // Create audit log
-    await db.insert(auditLogs).values({
-      id: crypto.randomUUID(),
-      tenantId: organizationId,
-      userId,
-      action: 'documents.bulk_update_metadata',
-      resourceType: 'document',
-      resourceIds: documentIds,
-      metadata: {
-        updates: metadataUpdates,
-        completed: progress.completed,
-        failed: progress.failed,
-      },
-      createdAt: new Date(),
-    });
-
-    return {
-      success: progress.failed === 0,
-      progress,
-      message: `Updated metadata for ${progress.completed} of ${progress.total} documents`,
-    };
-  } catch (error) {
-    throw new Error(`Bulk metadata update failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
+  throw new Error(
+    `Bulk metadata update is refused for ${documentIds.length} documents. Changing a privacy label does not grant access.`,
+  );
 }
 
 /**
- * Validate document permissions
+ * Role names do not grant document access. Visibility stays on isDocumentVisibleByPolicy.
  */
 export async function validateDocumentPermissions(
   documentIds: string[],
-  organizationId: string,
-  userId: string,
-  userRole: string
+  _organizationId: string,
+  _userId: string,
+  _userRole: string,
 ): Promise<{
   hasPermission: boolean;
   deniedDocuments: string[];
 }> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = await getDatabase() as any;
-
-  // Admins and union leaders have access to all documents
-  if (userRole === 'admin' || userRole === 'union_leader') {
-    return {
-      hasPermission: true,
-      deniedDocuments: [],
-    };
-  }
-
-  // Check ownership for regular users
-  const docs = await db
-    .select({
-      id: documents.id,
-      uploadedBy: documents.uploadedBy,
-    })
-    .from(documents)
-    .where(
-      and(
-        inArray(documents.id, documentIds),
-        eq(documents.organizationId, organizationId),
-        isNull(documents.deletedAt)
-      )
-    );
-
-  const deniedDocuments = docs
-    .filter((doc: { id: string; uploadedBy: string }) => doc.uploadedBy !== userId)
-    .map((doc: { id: string; uploadedBy: string }) => doc.id);
-
   return {
-    hasPermission: deniedDocuments.length === 0,
-    deniedDocuments,
+    hasPermission: false,
+    deniedDocuments: [...documentIds],
   };
 }
-

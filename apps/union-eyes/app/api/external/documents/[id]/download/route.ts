@@ -44,7 +44,6 @@ export const GET = withExternalMatterResourceAuth(
         title: documents.title,
         name: documents.name,
         filename: documents.filename,
-        fileUrl: documents.fileUrl,
         mimeType: documents.mimeType,
       })
       .from(documents)
@@ -77,9 +76,11 @@ export const GET = withExternalMatterResourceAuth(
       .orderBy(desc(documentVersions.versionNo))
       .limit(1);
 
-    const downloadUrl = latestVersion?.storageKey
-      ? await generateSasUrl(DOCUMENT_BLOB_CONTAINER, latestVersion.storageKey)
-      : row.fileUrl;
+    if (!latestVersion?.storageKey) {
+      return NextResponse.json({ error: 'Download is not available' }, { status: 404 });
+    }
+
+    const downloadUrl = await generateSasUrl(DOCUMENT_BLOB_CONTAINER, latestVersion.storageKey);
 
     return NextResponse.json({
       data: {

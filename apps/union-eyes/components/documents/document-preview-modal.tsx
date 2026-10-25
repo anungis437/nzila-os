@@ -15,6 +15,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ZoomIn, ZoomOut, RotateCw, Download, Share2, Trash2, ChevronLeft, ChevronRight, Maximize, Minimize, Eye, FileText, Tag, User, Calendar, HardDrive, Clock } from 'lucide-react';
 import { format } from 'date-fns';
+import { canonicalShareUnavailable } from '@/lib/documents/canonical-journey';
+import { requestAuthorizedDownload } from '@/lib/documents/document-repository-client';
 
 interface Document {
   id: string;
@@ -57,24 +59,33 @@ export function DocumentPreviewModal({
   onPrevious,
   onDelete,
   onDownload,
-  onShare,
+  onShare: _onShare,
   hasNext = false,
   hasPrevious = false,
 }: DocumentPreviewModalProps) {
   const [zoom, setZoom] = useState(100);
-  const [rotation, setRotation] = useState(0);
+  const [_rotation, setRotation] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [activeTab, setActiveTab] = useState<'preview' | 'metadata' | 'history'>('preview');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [versionHistory, setVersionHistory] = useState<any[]>([]);
+  const [actionNotice, setActionNotice] = useState<string | null>(null);
 
   const fetchVersionHistory = useCallback(async (documentId: string) => {
     try {
-      const response = await fetch(`/api/documents/${documentId}/versions`);
+      const response = await fetch(`/api/documents/repository/${documentId}/versions`);
       if (!response.ok) throw new Error('Failed to fetch version history');
-      
+
       const data = await response.json();
-      setVersionHistory(data.versions || []);
+      const versions = Array.isArray(data?.data) ? data.data : Array.isArray(data?.versions) ? data.versions : [];
+      setVersionHistory(versions.map((version: Record<string, unknown>) => ({
+        id: version.id,
+        version: version.versionNo ?? version.version,
+        created_at: version.createdAt ?? version.created_at,
+        description: version.description,
+        uploaded_by_name: version.uploadedBy ?? version.uploaded_by_name,
+        file_size: version.fileSize ?? version.file_size,
+      })));
     } catch (_err) {
 setVersionHistory([]);
     }
@@ -172,23 +183,20 @@ setVersionHistory([]);
   const handleDownload = () => {
     if (onDownload) {
       onDownload(document);
-    } else {
-      // Default download behavior
-      const link = window.document.createElement('a');
-      link.href = document.file_url;
-      link.download = document.name;
-      link.click();
+      return;
     }
+    void requestAuthorizedDownload(document.id).then((result) => {
+      if (!result.downloadUrl) {
+        setActionNotice('The download was not authorized.');
+        return;
+      }
+      window.open(result.downloadUrl, '_blank', 'noopener,noreferrer');
+    });
   };
 
   const handleShare = () => {
-    if (onShare) {
-      onShare(document);
-    } else {
-      // Default share behavior - copy link
-      navigator.clipboard.writeText(document.file_url);
-      alert('Link copied to clipboard!');
-    }
+    canonicalShareUnavailable();
+    setActionNotice('Sharing is not available. Changing a privacy label does not grant access.');
   };
 
   const handleDelete = () => {
@@ -204,23 +212,13 @@ setVersionHistory([]);
    */
   const renderPreview = () => {
     const fileType = document.file_type.toLowerCase();
-    const style = {
-      transform: `scale(${zoom / 100}) rotate(${rotation}deg)`,
-      transformOrigin: 'center',
-      transition: 'transform 0.2s ease',
-    };
 
     // Images
     if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileType)) {
       return (
         <div className="flex items-center justify-center w-full h-full bg-black/5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={document.file_url}
-            alt={document.name}
-            style={style}
-            className="max-w-full max-h-full object-contain"
-          />
+          <p className="p-6 text-sm text-muted-foreground">The file opens only through an authorized download.</p>
         </div>
       );
     }
@@ -229,12 +227,7 @@ setVersionHistory([]);
     if (fileType === 'pdf') {
       return (
         <div className="w-full h-full">
-          <iframe
-            src={`${document.file_url}#zoom=${zoom}`}
-            title={document.name}
-            className="w-full h-full border-0"
-            style={{ transform: `rotate(${rotation}deg)` }}
-          />
+          <p className="p-6 text-sm text-muted-foreground">The file opens only through an authorized download.</p>
         </div>
       );
     }
@@ -243,14 +236,7 @@ setVersionHistory([]);
     if (['mp4', 'webm', 'ogg'].includes(fileType)) {
       return (
         <div className="flex items-center justify-center w-full h-full bg-black">
-          <video
-            src={document.file_url}
-            controls
-            style={style}
-            className="max-w-full max-h-full"
-          >
-            Your browser does not support video playback.
-          </video>
+          <p className="p-6 text-sm text-white">The file opens only through an authorized download.</p>
         </div>
       );
     }
@@ -261,20 +247,7 @@ setVersionHistory([]);
         <div className="flex items-center justify-center w-full h-full">
           <div className="text-center space-y-4">
             <FileText className="h-24 w-24 mx-auto text-muted-foreground" />
-            <audio src={document.file_url} controls className="w-full max-w-md" />
-          </div>
-        </div>
-      );
-    }
-
-    // Text files with OCR content
-    if (document.content_text) {
-      return (
-        <div className="w-full h-full p-8 overflow-auto">
-          <div className="max-w-4xl mx-auto">
-            <pre className="whitespace-pre-wrap font-mono text-sm">
-              {document.content_text}
-            </pre>
+            <p className="text-sm text-muted-foreground">The file opens only through an authorized download.</p>
           </div>
         </div>
       );
@@ -353,6 +326,7 @@ setVersionHistory([]);
               </Button>
             </div>
           </div>
+          {actionNotice ? <p role="alert" className="text-sm text-muted-foreground">{actionNotice}</p> : null}
         </DialogHeader>
 
         <div className="flex gap-4 h-[calc(100%-80px)]">
@@ -533,17 +507,7 @@ setVersionHistory([]);
                       )}
                     </div>
 
-                    {/* OCR Content */}
-                    {document.content_text && (
-                      <div>
-                        <h3 className="font-semibold mb-3">Extracted Text (OCR)</h3>
-                        <div className="bg-muted p-3 rounded-lg">
-                          <pre className="text-xs whitespace-pre-wrap font-mono max-h-96 overflow-auto">
-                            {document.content_text}
-                          </pre>
-                        </div>
-                      </div>
-                    )}
+                    <p className="text-sm text-muted-foreground">Extracted text is not shown in this preview.</p>
                   </div>
                 </ScrollArea>
               </TabsContent>

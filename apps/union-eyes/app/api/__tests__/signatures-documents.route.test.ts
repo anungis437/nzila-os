@@ -114,6 +114,20 @@ describe('signatures/documents route', () => {
     expect(response.status).toBe(400);
   });
 
+  it('GET returns user documents without storage locations', async () => {
+    m.getCurrentUser.mockResolvedValue({ id: 'u1', organizationId: 'org_1' });
+    m.getUserDocuments.mockResolvedValueOnce({
+      sent: [{ id: 'doc_1', title: 'Contract', status: 'completed', fileUrl: 'https://storage.example/signed.pdf' }],
+      toSign: [],
+    });
+    const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost/api/signatures/documents'));
+    expect(response.status).toBe(200);
+    const json = await response.json();
+    expect(json.sent).toEqual([{ id: 'doc_1', title: 'Contract', status: 'completed' }]);
+    expect(JSON.stringify(json)).not.toContain('storage.example');
+  });
+
   it('GET returns user documents', async () => {
     m.getCurrentUser.mockResolvedValue({ id: 'u1', organizationId: 'org_1' });
     const { GET } = await loadRoute();

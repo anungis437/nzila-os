@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
 import { clientErrorResponse } from '@/lib/api/authorization-denial';
 import { SignatureService } from "@/lib/signature/signature-service";
+import { projectSignaturePayload } from "@/lib/documents/signature-projection";
 
 import {
   ErrorCode,
@@ -136,7 +137,7 @@ export const GET = withApiAuth(async (_request: NextRequest) => {
       organizationId
     );
 
-    return NextResponse.json(documents);
+    return NextResponse.json(projectSignaturePayload(documents));
   } catch (error) {
 return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
