@@ -506,7 +506,7 @@
     {
       "path": "apps/union-eyes/app/api/__tests__/documents-upload.route.test.ts",
       "methods": [],
-      "operation": "Regression coverage for an owned document path.",
+      "operation": "Upload route tests, including canonical intake and organization-scoped discard.",
       "consumers": [
         "vitest"
       ],
@@ -516,7 +516,7 @@
       "classificationRules": "n/a",
       "storage": "n/a",
       "audit": "n/a",
-      "migrationStatus": "not_started",
+      "migrationStatus": "tranche_2_intake",
       "regressionTests": [
         "apps/union-eyes/app/api/__tests__/documents-upload.route.test.ts"
       ],
@@ -964,7 +964,7 @@
     {
       "path": "apps/union-eyes/lib/services/document-service.ts",
       "methods": [],
-      "operation": "Legacy document service used by disabled list/folder/bulk/OCR routes.",
+      "operation": "Legacy document service. processDocumentOCR now returns unpersisted text and rejects unsupported types instead of writing empty success.",
       "consumers": [
         "app/api/documents/route.ts",
         "folders",
@@ -978,9 +978,11 @@
       "classificationRules": "Do not infer document rights from role seniority or case read access.",
       "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
       "audit": "Not the canonical download audit.",
-      "migrationStatus": "not_started",
-      "regressionTests": [],
-      "retirementDisposition": "Do not delete while OCR and the legacy flag still call it.",
+      "migrationStatus": "tranche_2_ocr_boundary",
+      "regressionTests": [
+        "apps/union-eyes/lib/documents/ocr-processing.test.ts"
+      ],
+      "retirementDisposition": "OCR no longer writes contentText unless persistExtractedText is true. Other service methods remain for later tranches.",
       "disposition": "MIGRATE"
     }
   ],
