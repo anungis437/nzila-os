@@ -132,7 +132,8 @@ describe('document browser canonical journey', () => {
     await userEvent.click(boxes[1]);
     await userEvent.click(screen.getAllByRole('button', { name: 'Download' })[0]);
     await waitFor(() => expect(screen.getByTestId('browser-notice')).toBeInTheDocument());
-    expect(window.open).not.toHaveBeenCalled();
+    expect(window.open).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('browser-notice')).toHaveTextContent('1 downloaded. 1 denied. 0 failed.');
     expect(bulk.calls.filter((call) => call.includes('/download'))).toHaveLength(2);
   });
 

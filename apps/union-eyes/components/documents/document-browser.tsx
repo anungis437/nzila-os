@@ -5,7 +5,7 @@ import { useLocale } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { denialFromStatus, journeyCopy, type JourneyDenial } from '@/lib/documents/canonical-journey';
+import { denialFromStatus, journeyCopy } from '@/lib/documents/canonical-journey';
 import {
   authorizedBrowserDocuments,
   browserCopy,
@@ -14,6 +14,7 @@ import {
   type BrowserDocument,
   type BrowserSort,
 } from '@/lib/documents/browser-repository';
+import { authorizeBulkDownload, bulkOutcomeNotice, permittedDownloadUrls } from '@/lib/documents/bulk-download';
 import { listDenied, requestAuthorizedDownload } from '@/lib/documents/document-repository-client';
 import { OCRUpload } from '@/components/documents/ocr-upload';
 
@@ -109,17 +110,12 @@ export function DocumentBrowser({
       setNotice(denialCopy.none_selected);
       return;
     }
-    const urls: string[] = [];
-    for (const id of selected) {
-      const result = await requestAuthorizedDownload(id);
-      if (!result.downloadUrl) {
-        setNotice(denialCopy[(result.denial ?? 'unauthorized') as JourneyDenial]);
-        return;
-      }
-      urls.push(result.downloadUrl);
+    const report = await authorizeBulkDownload([...selected]);
+    const notice = bulkOutcomeNotice(locale, report);
+    setNotice(notice);
+    for (const url of permittedDownloadUrls(report)) {
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
-    setNotice(null);
-    for (const url of urls) window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const openPreview = async (row: BrowserDocument) => {
