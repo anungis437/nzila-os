@@ -190,7 +190,7 @@ export function DocumentApprovalWorkflow({
 
   return (
     <div className="space-y-6">
-      <p className="text-sm text-muted-foreground" data-testid="approval-boundary">{approvalBoundary}</p>
+      <p className="text-sm text-muted-foreground" data-testid="approval-boundary" data-evidence-class="internal_review">{approvalBoundary}</p>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

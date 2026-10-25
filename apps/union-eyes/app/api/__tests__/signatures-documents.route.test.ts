@@ -124,7 +124,12 @@ describe('signatures/documents route', () => {
     const response = await GET(new NextRequest('http://localhost/api/signatures/documents'));
     expect(response.status).toBe(200);
     const json = await response.json();
-    expect(json.sent).toEqual([{ id: 'doc_1', title: 'Contract', status: 'completed' }]);
+    expect(json.sent).toEqual([{
+      id: 'doc_1',
+      title: 'Contract',
+      status: 'completed',
+      evidenceClass: 'historical_evidence',
+    }]);
     expect(JSON.stringify(json)).not.toContain('storage.example');
   });
 

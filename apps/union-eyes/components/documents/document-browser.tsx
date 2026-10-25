@@ -14,7 +14,7 @@ import {
   type BrowserDocument,
   type BrowserSort,
 } from '@/lib/documents/browser-repository';
-import { authorizeBulkDownload, bulkOutcomeNotice, permittedDownloadUrls } from '@/lib/documents/bulk-download';
+import { authorizeBulkDownload, bulkOutcomeNotice, recordBrowserOpens } from '@/lib/documents/bulk-download';
 import { listDenied, requestAuthorizedDownload } from '@/lib/documents/document-repository-client';
 import { OCRUpload } from '@/components/documents/ocr-upload';
 
@@ -110,12 +110,12 @@ export function DocumentBrowser({
       setNotice(denialCopy.none_selected);
       return;
     }
-    const report = await authorizeBulkDownload([...selected]);
-    const notice = bulkOutcomeNotice(locale, report);
-    setNotice(notice);
-    for (const url of permittedDownloadUrls(report)) {
-      window.open(url, '_blank', 'noopener,noreferrer');
-    }
+    const authorized = await authorizeBulkDownload([...selected]);
+    const report = recordBrowserOpens(authorized, (url) => {
+      const popup = window.open(url, '_blank', 'noopener,noreferrer');
+      return popup != null;
+    });
+    setNotice(bulkOutcomeNotice(locale, report));
   };
 
   const openPreview = async (row: BrowserDocument) => {
