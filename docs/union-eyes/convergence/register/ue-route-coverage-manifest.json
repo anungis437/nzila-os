@@ -36,20 +36,20 @@
    "WITH_API": 167
   },
   "mutatingByAudit": {
-   "ATOMIC": 75,
+   "ATOMIC": 79,
    "ATOMIC_SERVICE": 58,
    "BEST_EFFORT": 9,
    "CRUD_ATOMIC": 299,
    "EXEMPT_BALLOT_SECRECY": 2,
    "NO_WRITES_FOUND": 14,
-   "NONE": 238
+   "NONE": 234
   },
   "mutatingByData": {
-   "AMBIENT_DB": 38,
+   "AMBIENT_DB": 34,
    "CRUD_TENANT_TX": 299,
    "NONE": 213,
    "SYSTEM_CONTEXT": 53,
-   "TENANT_TX": 92
+   "TENANT_TX": 96
   }
  },
  "routes": [
@@ -6085,8 +6085,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "exit-interviews/[id]/governance/route.ts",
@@ -6097,8 +6097,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "exit-interviews/[id]/index/route.ts",
@@ -6158,8 +6158,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "exit-interviews/[id]/summarize/route.ts",
@@ -6690,8 +6690,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "exit-interviews/scenarios/route.ts",

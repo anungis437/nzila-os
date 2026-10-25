@@ -2,6 +2,8 @@
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import {
   exitInterviews,
   exitInterviewEvents,
@@ -81,25 +83,36 @@ export const POST = withApi(
   async ({ organizationId, userId, body }) => {
     const now = new Date();
 
-    const [created] = await db
-      .insert(exitInterviews)
-      .values({
-        ...body,
-        organizationId: organizationId!,
-        createdBy: userId!,
-        updatedBy: userId!,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
+    const created = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
+      const [row] = await tx
+        .insert(exitInterviews)
+        .values({
+          ...body,
+          organizationId: organizationId!,
+          createdBy: userId!,
+          updatedBy: userId!,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
 
-    await db.insert(exitInterviewEvents).values({
-      interviewId: created.id,
-      organizationId: organizationId!,
-      eventType: 'created',
-      actorUserId: userId!,
-      notes: 'Exit interview draft created',
-      payload: { status: created.status },
+      await tx.insert(exitInterviewEvents).values({
+        interviewId: row.id,
+        organizationId: organizationId!,
+        eventType: 'created',
+        actorUserId: userId!,
+        notes: 'Exit interview draft created',
+        payload: { status: row.status },
+      });
+      await persistAtomicAudit(tx, {
+        organizationId: organizationId!,
+        userId: userId!,
+        action: 'exit_interview.create',
+        resourceType: 'exit_interviews',
+        resourceId: row.id,
+        details: { status: row.status },
+      });
+      return row;
     });
 
     return { data: created };
