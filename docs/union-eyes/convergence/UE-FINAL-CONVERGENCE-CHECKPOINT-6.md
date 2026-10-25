@@ -29,6 +29,21 @@ Proof: `lib/cases/kernel-claims.pglite.test.ts` (21 tests on the real kernel sto
 
 Ballots are secret: an identified ballot is refused, and the one-vote check now covers both the anonymous id and the member id (previously one identified plus one anonymous ballot both counted). The session list no longer discloses per-option tallies to members; results stay an officer-level view of a closed session.
 
+## Aggregate test stability (measured, not resolved)
+
+Six aggregate `pnpm test:fast` runs on this branch, each with every individual test passing when run alone:
+
+| Run | Workers | Result |
+| --- | --- | --- |
+| 6, 7 | 4 | exit 1: three worker-start timeouts (vitest 5 hard-codes a 60 s start timeout), then three 120 s cold-import timeouts |
+| 8 | 3 | one real failure (a delegate to a retired route), fixed; no infrastructure failure |
+| 9 | 3 | one failure: the Flow invoices page test. Root cause found and fixed: it loaded a large module graph under fake timers, which stalled to the test timeout (20 s in isolation, 0.9 s after) |
+| 10 | 3 | cold-cache run after many route edits: the first route-matrix test paid for importing the `googleapis` SDK and hit the 120 s timeout; the SDK is now mocked in the three route matrices |
+| 11 | 3 | one 120 s timeout in a full-tree file scan and three worker-start timeouts in `apps/control-plane` |
+| 12 | 2 | 2,353 files and 32,135 tests passed, none failed; one worker-start timeout (`workspace-shell.test.tsx`, which passes alone) |
+
+The aggregate cap is now 3 workers. The remaining failures are start-up and I/O starvation on a machine shared with other agents' dev servers and containers (C: is 94% full); the 60 s worker-start timeout is not configurable. **No clean aggregate exit has been achieved**, so this stays an open qualification defect: it needs a quiet, dedicated runner, not further test edits.
+
 ## Open, in order
 
 1. Audit coverage: 271 mutating routes have no route-level atomic-audit evidence (scan now follows three import hops; 33 handlers were found to contain no writes). The authority-bearing ones to convert first: platform-admin member offboarding (`admin/users/[userId]`) and organization create/update, governance system-context routes, dues, finance and payments. Denial-path durability (separate transaction after rollback) is designed and proven for the audit primitive, not yet applied route by route.
