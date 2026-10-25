@@ -217,7 +217,6 @@ setVersionHistory([]);
     if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileType)) {
       return (
         <div className="flex items-center justify-center w-full h-full bg-black/5">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <p className="p-6 text-sm text-muted-foreground">The file opens only through an authorized download.</p>
         </div>
       );
