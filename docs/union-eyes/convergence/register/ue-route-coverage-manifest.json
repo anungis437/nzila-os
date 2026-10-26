@@ -36,8 +36,8 @@
    "WITH_API": 170
   },
   "mutatingByAudit": {
-   "ATOMIC": 141,
-   "ATOMIC_SERVICE": 141,
+   "ATOMIC": 143,
+   "ATOMIC_SERVICE": 139,
    "COMPUTE_ONLY": 34,
    "CRUD_ATOMIC": 299,
    "EXEMPT_BALLOT_SECRECY": 2,
@@ -2912,7 +2912,7 @@
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "ATOMIC"
   },
   {
    "route": "cases/evidence/route.ts",
@@ -2937,7 +2937,7 @@
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "ATOMIC"
   },
   {
    "route": "cases/meetings/route.ts",
