@@ -1,12 +1,13 @@
 {
   "schemaVersion": 1,
   "mission": "UE-FINAL-CONVERGENCE-2026-10",
+  "gate0Verdict": "IN_PROGRESS",
   "evaluatedBaselineSha": "ce854162cae5595f2f00e65db14444229da0a6ab",
   "statusVocabulary": {
     "NOT_IMPLEMENTED": "The required outcome has no implementation in the cited source.",
     "PARTIAL": "Some of the required outcome exists in source. The recorded gap remains. A cited file is not verification.",
     "SOURCE_IMPLEMENTED": "The recorded source outcome is present in the cited files. Native and browser qualification are separate.",
-    "SOURCE_VERIFIED": "The cited source tests or checker evidence exist. This is not a native PostgreSQL pass and not operational acceptance.",
+    "SOURCE_VERIFIED": "The cited suites were executed and every test file passed in full with no skip, against the recorded revision and file hashes (gate0-source-verification.json). A test file that exists is not verification. This is not a native PostgreSQL pass and not operational acceptance.",
     "NATIVE_PENDING": "The recorded source outcome is present and the blocking remainder is an unrecorded native or credentialed runtime proof.",
     "EXTERNAL_GATE": "A named external owner holds the missing proof. operationallyActivated is false.",
     "SOURCE_UNSPECIFIED": "The frozen source cites the identifier without a distinct in-repository outcome. This is not an implementation claim."
@@ -385,7 +386,19 @@
       "actor": "Supervisory representative",
       "businessOutcome": "Reconcile and backfill primary representative ownership through assignCase under issuance governance.",
       "sourceStatus": "PARTIAL",
-      "gap": "The backfill tool exists and must not be executed as a protected backfill from this gate. Successor acceptance and member-visible handover remain open."
+      "gap": "The backfill tool exists and must not be executed as a protected backfill from this gate. Successor acceptance and member-visible handover remain open.",
+      "trackedDefects": [
+        {
+          "id": "MUTABLE-REP-IDENTIFIER@case-ownership-backfill",
+          "kind": "RATCHET",
+          "ratchetId": "MUTABLE-REP-IDENTIFIER",
+          "file": "apps/union-eyes/lib/authority/store/case-ownership-backfill.ts",
+          "description": "The ownership backfill reads grievances.union_rep_id, a mutable identifier with no foreign key that is not an authority source. The global convergence checker reports an unexpected occurrence. The implementation and the allowlist are unchanged.",
+          "blocksGates": [
+            2
+          ]
+        }
+      ]
     },
     {
       "relatedRegisterIds": [],
@@ -811,7 +824,7 @@
       "relatedRegisterIds": [],
       "registerImplementationOwner": true,
       "dependencyGates": [],
-      "lifecycleState": "SOURCE_VERIFIED",
+      "lifecycleState": "PARTIAL",
       "navigationEntrypoint": null,
       "apiRoute": null,
       "httpAction": null,
@@ -863,8 +876,20 @@
       "primaryGate": 7,
       "actor": "Union-side counsel engagement",
       "businessOutcome": "Keep union-side counsel engagement on the kernel boundary.",
-      "sourceStatus": "SOURCE_VERIFIED",
-      "gap": "Counsel-side verification stays on UE-CONV-G-003. PGlite and unit evidence are not native qualification."
+      "sourceStatus": "PARTIAL",
+      "gap": "Counsel-side verification stays on UE-CONV-G-003. PGlite and unit evidence are not native qualification. Downgraded from SOURCE_VERIFIED: exit code 1; totals passed 53 failed 0 skipped 13; apps/union-eyes/db/__tests__/authority-kernel-counsel.pglite.test.ts did not pass in full.",
+      "trackedDefects": [
+        {
+          "id": "COUNSEL-PGLITE-SUITE-FAILS-AT-SETUP",
+          "kind": "TEST_SUITE",
+          "suite": "apps/union-eyes/db/__tests__/authority-kernel-counsel.pglite.test.ts",
+          "file": "apps/union-eyes/db/__tests__/authority-kernel-counsel.pglite.test.ts",
+          "description": "The suite fails in beforeAll with REFERRAL_SCOPE_REQUIRED, raised by the referral-scope trigger of platform migration 0037, so none of its 13 assertions run.",
+          "blocksGates": [
+            7
+          ]
+        }
+      ]
     },
     {
       "relatedRegisterIds": [],
@@ -1637,7 +1662,20 @@
       "actor": "Governed mutation owner",
       "businessOutcome": "Commit every authority-bearing mutation with its audit record in the same transaction.",
       "sourceStatus": "PARTIAL",
-      "gap": "The best-effort audit ratchet is not at zero for every remaining caller."
+      "gap": "The best-effort audit ratchet is not at zero for every remaining caller.",
+      "trackedDefects": [
+        {
+          "id": "DIRECT-MANDATORY-AUDIT-IMPORT@election-succession",
+          "kind": "RATCHET",
+          "ratchetId": "DIRECT-MANDATORY-AUDIT-IMPORT",
+          "file": "apps/union-eyes/lib/voting/election-succession.ts",
+          "description": "appendMandatoryAudit returns false outside Canonical V2 and leaves the caller unaudited. The global convergence checker reports an unexpected occurrence. The implementation and the allowlist are unchanged.",
+          "blocksGates": [
+            14,
+            12
+          ]
+        }
+      ]
     },
     {
       "relatedRegisterIds": [],
@@ -2405,7 +2443,7 @@
       "actor": "Financial officer",
       "businessOutcome": "Hold the financial-officer identifiers that the repository cites only as a range, without inventing titles.",
       "sourceStatus": "SOURCE_UNSPECIFIED",
-      "gap": "F01–F28 and FJ01–FJ10 are cited. Individual outcomes are stated for F08, F09, F10, F11–F14, F17, F18, and F19 only. F01, F28, FJ01, and FJ10 appear as range endpoints. The other unnamed codes are not given titles in this repository."
+      "gap": "F01–F28 and FJ01–FJ10 form a 38-identifier universe in the financial-officer disposition. F08, F09, F10 and F19 each carry their own statement. F11–F14 and F17–F18 carry shared group labels only. The remaining 28 identifiers (F01–F07, F15, F16, F20–F28, FJ01–FJ10) are cited only as range members and have no title or outcome. No financial-officer canonical file exists in the repository. Gate 0 gives none of them a title."
     },
     {
       "relatedRegisterIds": [],
@@ -2447,10 +2485,10 @@
       "parentRegisterId": "UE-CONV-I-001",
       "obligationKey": "representative-canonical-action-ids",
       "primaryGate": 10,
-      "actor": "Representative and steward",
-      "businessOutcome": "Lock representative and steward action identifiers once the frozen canonical list is in the repository.",
+      "actor": "Representative",
+      "businessOutcome": "Lock the representative R01–R24 identifiers once the frozen UE-REPRESENTATIVE-CANONICAL-2.2 is in the repository.",
       "sourceStatus": "SOURCE_UNSPECIFIED",
-      "gap": "The disposition cites UE-REPRESENTATIVE-CANONICAL-2.2 (FROZEN), and that canonical file is not in the repository. The disposition is a defect list, not an action-id matrix. Steward has no separate action-id matrix. Seven staff navigation destinations are described there and are not given stable action ids."
+      "gap": "The Representative 2.2 disposition cites UE-REPRESENTATIVE-CANONICAL-2.2 (FROZEN), and that canonical file is not in the repository. The disposition gives 7 navigation destinations and a 25-row action proof matrix, and those 32 rows are mapped by source locator. Of R01–R24, 14 identifiers appear only as a status mention or range member without a title (R03–R06, R10, R16–R24), and 10 are not mentioned at all (R01, R02, R07–R09, R11–R15). Gate 0 gives none of the 24 a title."
     },
     {
       "relatedRegisterIds": [],
@@ -2502,622 +2540,2137 @@
       "businessOutcome": "Record queued, attempted, accepted, failed, and retried notification facts, and refuse a retry after acceptance.",
       "sourceStatus": "NATIVE_PENDING",
       "gap": "Native concurrency is not recorded. Retry covers a confirmed failure with no acceptance. It is not exactly-once provider delivery. This obligation is absent from the 41-entry register and does not close UE-CONV-I-002."
+    },
+    {
+      "relatedRegisterIds": [],
+      "registerImplementationOwner": false,
+      "dependencyGates": [],
+      "lifecycleState": "SOURCE_UNSPECIFIED",
+      "navigationEntrypoint": null,
+      "apiRoute": null,
+      "httpAction": null,
+      "service": null,
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "No separate audit record is claimed for this obligation.",
+      "privacyClassification": "Tenant-scoped. This record adopts no new classification label.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "NOT_REQUIRED",
+      "browserQualification": "NOT_REQUIRED",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/lib/dashboard/role-experience.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-STEWARD-CANONICAL-ABSENT",
+      "parentRegisterId": "UE-CONV-I-001",
+      "obligationKey": "steward-canonical-action-ids",
+      "primaryGate": 10,
+      "actor": "Steward",
+      "businessOutcome": "Lock steward action identifiers once a frozen steward canonical exists in the repository.",
+      "sourceStatus": "SOURCE_UNSPECIFIED",
+      "gap": "No steward canonical, steward action-identifier matrix, or steward disposition exists in the repository. The only steward statements are the staff navigation floor in role-experience.ts (Knowledge & Guidance is hidden below steward) and the Representative 2.2 policy-level note that a steward is level 1. Gate 0 invents no steward action. The Steward persona cannot be accepted at Gate 10 until the frozen canonical is supplied."
+    },
+    {
+      "relatedRegisterIds": [],
+      "registerImplementationOwner": false,
+      "dependencyGates": [],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": "/dashboard/correspondence",
+      "apiRoute": "app/api/correspondence/route.ts",
+      "httpAction": null,
+      "service": null,
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "No separate audit record is claimed for this obligation.",
+      "privacyClassification": "Tenant-scoped. This record adopts no new classification label.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/correspondence/route.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-REP-CORRESPONDENCE",
+      "parentRegisterId": "UE-CONV-I-001",
+      "obligationKey": "representative-correspondence-lifecycle",
+      "primaryGate": 11,
+      "actor": "Representative",
+      "businessOutcome": "Draft, approve, dispatch, and track correspondence as distinct governed states, with thread participants and matter grants.",
+      "sourceStatus": "PARTIAL",
+      "gap": "The Representative 2.2 disposition records list and draft as IMPLEMENTED-UNVERIFIED (organization required, fails closed), approve, dispatch, delivery, and receipt as not examined, and thread participants and matter grants as MISSING (no model). The correspondence routes are owned here and no approval or delivery state is claimed."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-010"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        4
+      ],
+      "lifecycleState": "NOT_IMPLEMENTED",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/cases/[caseId]/transition/route.ts",
+      "httpAction": "PATCH",
+      "service": null,
+      "kernelAction": "case:transition",
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "No separate audit record is claimed for this obligation.",
+      "privacyClassification": "Tenant-scoped. This record adopts no new classification label.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "The repair needs a test asserting that the member case-history projection excludes the reason.",
+      "sourceFiles": [],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/cases/[caseId]/transition/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-REP-TRANSITION-REASON-LEAK",
+      "parentRegisterId": "UE-CONV-I-001",
+      "obligationKey": "representative-transition-reason-visibility",
+      "primaryGate": 10,
+      "actor": "Representative and the member on their own case",
+      "businessOutcome": "A member-visible status change records only the from and to status. The representative free-text reason is held in a staff-only record and absent from member-visible metadata.",
+      "sourceStatus": "NOT_IMPLEMENTED",
+      "gap": "Representative 2.2 finding P0-F2 is declared OPEN in that disposition. Gate 0 re-read the route at this revision: the member-visible status_change row (isInternal false, visibilityScope member) embeds the representative reason in its message and in its metadata. No second staff-only row is written. Gate 0 did not change the route.",
+      "trackedDefects": [
+        {
+          "id": "P0-F2-TRANSITION-REASON-LEAK",
+          "kind": "SOURCE_DEFECT",
+          "file": "apps/union-eyes/app/api/cases/[caseId]/transition/route.ts",
+          "sourceQuote": "Status changed: ${fromStatus} → ${toDbStatus}. Reason: ${reason}",
+          "description": "The member-visible case-history row embeds the representative free-text reason in message and metadata (Representative 2.2 finding P0-F2).",
+          "blocksGates": [
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-008"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [],
+      "lifecycleState": "SOURCE_UNSPECIFIED",
+      "navigationEntrypoint": null,
+      "apiRoute": null,
+      "httpAction": null,
+      "service": null,
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "No separate audit record is claimed for this obligation.",
+      "privacyClassification": "Tenant-scoped. This record adopts no new classification label.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "NOT_REQUIRED",
+      "browserQualification": "NOT_REQUIRED",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "docs/union-eyes/convergence/register/ue-route-coverage-manifest.json"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-ROUTE-DOMAIN-SCOPE",
+      "parentRegisterId": "UE-CONV-K-007",
+      "obligationKey": "route-domain-scope-decision",
+      "primaryGate": 13,
+      "actor": "Programme owner (scope decision)",
+      "businessOutcome": "Give each route domain that no register entry, persona source, or capability-registry record names an explicit decision: adopt it under a named capability, retire it to HTTP 501, or record it as out of scope with evidence.",
+      "sourceStatus": "SOURCE_UNSPECIFIED",
+      "gap": "The route-coverage manifest lists operations in domains that no register entry, frozen persona source, or capability-registry record names. Their operations carry disposition SCOPE_UNDECIDED in ue-route-capability-ownership.json, and their control owner stays the guard-class owner. Gate 0 does not guess a business owner from a route name."
     }
   ],
   "personaActions": [
     {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G01",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G02",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G03",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G04",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G05",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G06",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G07",
-      "capabilityId": "UE-CAP-REVIEW-INTAKE",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G08",
-      "capabilityId": "UE-CAP-REVIEW-INTAKE",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G09",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G10",
-      "capabilityId": "UE-CAP-B-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G11",
-      "capabilityId": "UE-CAP-K-009",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G12",
-      "capabilityId": "UE-CAP-K-009",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G13",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G14",
-      "capabilityId": "UE-OMIT-PRIVACY-RIGHTS",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G15",
-      "capabilityId": "UE-OMIT-PRIVACY-RIGHTS",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G16",
-      "capabilityId": "UE-OMIT-PRIVACY-RIGHTS",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G17",
-      "capabilityId": "UE-CAP-F-003",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G18",
-      "capabilityId": "UE-CAP-F-002",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G19",
-      "capabilityId": "UE-CAP-G-002",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G20",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G21",
-      "capabilityId": "UE-CAP-D-003",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G22",
-      "capabilityId": "UE-CAP-K-003",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G23",
-      "capabilityId": "UE-CAP-K-005",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G24",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G25",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G26",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G27",
-      "capabilityId": "UE-CAP-G-002",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G28",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G29",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
-      "actionId": "G30",
-      "capabilityId": "UE-OMIT-A11Y-BILINGUAL",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O01",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O02",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O03",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O04",
-      "capabilityId": "UE-CAP-B-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O05",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O06",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O07",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O08",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O09",
-      "capabilityId": "UE-CAP-K-009",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O10",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O11",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O12",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O13",
-      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O14",
-      "capabilityId": "UE-CAP-D-002",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O15",
-      "capabilityId": "UE-CAP-D-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O16",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O17",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O18",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O19",
-      "capabilityId": "UE-CAP-G-002",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O20",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O21",
-      "capabilityId": "UE-OMIT-PRIVACY-RIGHTS",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O22",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O23",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O24",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O25",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
-      "actionId": "O26",
-      "capabilityId": "UE-OMIT-A11Y-BILINGUAL",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR01",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR02",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR03",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR04",
-      "capabilityId": "UE-CAP-B-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR05",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR06",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR07",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR08",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR09",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR10",
-      "capabilityId": "UE-OMIT-DEADLINE-OVERDUE",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR11",
-      "capabilityId": "UE-CAP-B-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR12",
-      "capabilityId": "UE-CAP-F-002",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR13",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR14",
-      "capabilityId": "UE-CAP-G-002",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR15",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR16",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR17",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR18",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR19",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR20",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR21",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatory": true
-    },
-    {
-      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "SR22",
-      "capabilityId": "UE-OMIT-A11Y-BILINGUAL",
-      "mandatory": true
-    },
-    {
+      "persona": "member",
       "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
       "actionId": "M01",
+      "definition": "INDIVIDUAL",
       "capabilityId": "UE-CAP-A-004",
       "mandatory": true
     },
     {
+      "persona": "member",
       "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
       "actionId": "M02",
+      "definition": "INDIVIDUAL",
       "capabilityId": "UE-CAP-I-001",
       "mandatory": true
     },
     {
+      "persona": "member",
       "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
       "actionId": "M03",
+      "definition": "INDIVIDUAL",
       "capabilityId": "UE-CAP-K-010",
       "mandatory": true
     },
     {
+      "persona": "member",
       "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
       "actionId": "M04",
+      "definition": "INDIVIDUAL",
       "capabilityId": "UE-OMIT-M04-MEMBER-REQUESTS",
       "mandatory": true
     },
     {
+      "persona": "member",
       "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
       "actionId": "M05",
+      "definition": "INDIVIDUAL",
       "capabilityId": "UE-CAP-I-002",
       "mandatory": true
     },
     {
+      "persona": "member",
       "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
       "actionId": "M06",
+      "definition": "INDIVIDUAL",
       "capabilityId": "UE-CAP-F-002",
       "mandatory": true
     },
     {
+      "persona": "member",
       "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
       "actionId": "M07",
+      "definition": "INDIVIDUAL",
       "capabilityId": "UE-CAP-I-001",
       "mandatory": true
     },
     {
+      "persona": "member",
       "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
       "actionId": "M08",
+      "definition": "INDIVIDUAL",
       "capabilityId": "UE-CAP-G-002",
       "mandatory": true
     },
     {
+      "persona": "member",
       "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
       "actionId": "M09",
+      "definition": "INDIVIDUAL",
       "capabilityId": "UE-OMIT-PRIVACY-RIGHTS",
       "mandatory": true
     },
     {
+      "persona": "member",
       "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
       "actionId": "M10",
+      "definition": "INDIVIDUAL",
       "capabilityId": "UE-OMIT-A11Y-BILINGUAL",
       "mandatory": true
     },
     {
-      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "F01",
-      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-NAV-1",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
       "mandatory": true
     },
     {
-      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "F08",
-      "capabilityId": "UE-CAP-D-003",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-NAV-2",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
       "mandatory": true
     },
     {
-      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "F09",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-NAV-3",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-NAV-4",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-REP-CORRESPONDENCE",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-NAV-5",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-F-002",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-NAV-6",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-DEADLINE-OVERDUE",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-NAV-7",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-01",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-02",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-010",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-03",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-010",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-04",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-B-001",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-05",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-B-001",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-06",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-010",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-07",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-010",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-08",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-010",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-09",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-B-001",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-10",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-11",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-12",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-REP-CORRESPONDENCE",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-13",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-REP-CORRESPONDENCE",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-14",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-REP-CORRESPONDENCE",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-15",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-F-002",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-16",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-F-001",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-17",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-F-002",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-18",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-DEADLINE-OVERDUE",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-19",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-010",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-20",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-21",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-B-001",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-22",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-23",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-REP-TRANSITION-REASON-LEAK",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-24",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-G-002",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "REP-ACT-25",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-A11Y-BILINGUAL",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R01",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R02",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R03",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R04",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R05",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R06",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R07",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R08",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R09",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R10",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R11",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R12",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R13",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R14",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R15",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R16",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R17",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R18",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R19",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R20",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R21",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R22",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R23",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "actionId": "R24",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR01",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR02",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR03",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR04",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-B-001",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR05",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR06",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR07",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR08",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR09",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR10",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-DEADLINE-OVERDUE",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR11",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-B-001",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR12",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-F-002",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR13",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR15",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR16",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR17",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR18",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR19",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR20",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR21",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR14",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-G-002",
+      "mandatory": true
+    },
+    {
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "SR22",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-A11Y-BILINGUAL",
+      "mandatory": true
+    },
+    {
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O01",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O02",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O03",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O04",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-B-001",
+      "mandatory": true
+    },
+    {
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O05",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O06",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O07",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O08",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O09",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-009",
+      "mandatory": true
+    },
+    {
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O10",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O11",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O12",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O13",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "mandatory": true
+    },
+    {
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O14",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-D-002",
+      "mandatory": true
+    },
+    {
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O15",
+      "definition": "INDIVIDUAL",
       "capabilityId": "UE-CAP-D-001",
       "mandatory": true
     },
     {
-      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "F10",
-      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O16",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
       "mandatory": true
     },
     {
-      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "F11",
-      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O17",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
       "mandatory": true
     },
     {
-      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "F12",
-      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O18",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
       "mandatory": true
     },
     {
-      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "F13",
-      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O19",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-G-002",
       "mandatory": true
     },
     {
-      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "F14",
-      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O20",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
       "mandatory": true
     },
     {
-      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "F17",
-      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O21",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-PRIVACY-RIGHTS",
       "mandatory": true
     },
     {
-      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "F18",
-      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O22",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
       "mandatory": true
     },
     {
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O23",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O24",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O25",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "actionId": "O26",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-A11Y-BILINGUAL",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
       "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
-      "actionId": "F19",
+      "actionId": "F01",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F02",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F03",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F04",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F05",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F06",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F07",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F08",
+      "definition": "INDIVIDUAL",
       "capabilityId": "UE-CAP-D-003",
       "mandatory": true
     },
     {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F09",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-D-001",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F10",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F11",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F12",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F13",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F14",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F15",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F16",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F17",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F18",
+      "definition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F19",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-D-003",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F20",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F21",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F22",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F23",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F24",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F25",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F26",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "F27",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
       "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
       "actionId": "F28",
+      "definition": "UNSPECIFIED",
       "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
       "mandatory": true
     },
     {
+      "persona": "financial-officer",
       "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
       "actionId": "FJ01",
+      "definition": "UNSPECIFIED",
       "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
       "mandatory": true
     },
     {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "FJ02",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "FJ03",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "FJ04",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "FJ05",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "FJ06",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "FJ07",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "FJ08",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "actionId": "FJ09",
+      "definition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "financial-officer",
       "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
       "actionId": "FJ10",
+      "definition": "UNSPECIFIED",
       "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G01",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G02",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G03",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G04",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G05",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G06",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G07",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-REVIEW-INTAKE",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G08",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-REVIEW-INTAKE",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G09",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G10",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-B-001",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G11",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-009",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G12",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-009",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G13",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G14",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-PRIVACY-RIGHTS",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G15",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-PRIVACY-RIGHTS",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G16",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-PRIVACY-RIGHTS",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G17",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-F-003",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G18",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-F-002",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G19",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-G-002",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G20",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G21",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-D-003",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G22",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-003",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G23",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-005",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G24",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G25",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G26",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G27",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-G-002",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G28",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G29",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true
+    },
+    {
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "actionId": "G30",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-A11Y-BILINGUAL",
       "mandatory": true
     }
   ],
+  "personaCompleteness": [
+    {
+      "persona": "member",
+      "label": "Member",
+      "sourceFile": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
+      "canonicalFileFound": true,
+      "universe": [
+        "M01",
+        "M02",
+        "M03",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M08",
+        "M09",
+        "M10"
+      ],
+      "individuallyDefined": [
+        "M01",
+        "M02",
+        "M03",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M08",
+        "M09",
+        "M10"
+      ],
+      "groupedOnly": [],
+      "unspecified": [],
+      "resolved": true,
+      "trackingCapability": null
+    },
+    {
+      "persona": "steward",
+      "label": "Steward",
+      "sourceFile": null,
+      "canonicalFileFound": false,
+      "universe": [],
+      "individuallyDefined": [],
+      "groupedOnly": [],
+      "unspecified": [],
+      "resolved": false,
+      "trackingCapability": "UE-OMIT-STEWARD-CANONICAL-ABSENT"
+    },
+    {
+      "persona": "representative",
+      "label": "Representative",
+      "sourceFile": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "canonicalFileFound": false,
+      "universe": [
+        "REP-NAV-1",
+        "REP-NAV-2",
+        "REP-NAV-3",
+        "REP-NAV-4",
+        "REP-NAV-5",
+        "REP-NAV-6",
+        "REP-NAV-7",
+        "REP-ACT-01",
+        "REP-ACT-02",
+        "REP-ACT-03",
+        "REP-ACT-04",
+        "REP-ACT-05",
+        "REP-ACT-06",
+        "REP-ACT-07",
+        "REP-ACT-08",
+        "REP-ACT-09",
+        "REP-ACT-10",
+        "REP-ACT-11",
+        "REP-ACT-12",
+        "REP-ACT-13",
+        "REP-ACT-14",
+        "REP-ACT-15",
+        "REP-ACT-16",
+        "REP-ACT-17",
+        "REP-ACT-18",
+        "REP-ACT-19",
+        "REP-ACT-20",
+        "REP-ACT-21",
+        "REP-ACT-22",
+        "REP-ACT-23",
+        "REP-ACT-24",
+        "REP-ACT-25",
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R09",
+        "R10",
+        "R11",
+        "R12",
+        "R13",
+        "R14",
+        "R15",
+        "R16",
+        "R17",
+        "R18",
+        "R19",
+        "R20",
+        "R21",
+        "R22",
+        "R23",
+        "R24"
+      ],
+      "individuallyDefined": [
+        "REP-NAV-1",
+        "REP-NAV-2",
+        "REP-NAV-3",
+        "REP-NAV-4",
+        "REP-NAV-5",
+        "REP-NAV-6",
+        "REP-NAV-7",
+        "REP-ACT-01",
+        "REP-ACT-02",
+        "REP-ACT-03",
+        "REP-ACT-04",
+        "REP-ACT-05",
+        "REP-ACT-06",
+        "REP-ACT-07",
+        "REP-ACT-08",
+        "REP-ACT-09",
+        "REP-ACT-10",
+        "REP-ACT-11",
+        "REP-ACT-12",
+        "REP-ACT-13",
+        "REP-ACT-14",
+        "REP-ACT-15",
+        "REP-ACT-16",
+        "REP-ACT-17",
+        "REP-ACT-18",
+        "REP-ACT-19",
+        "REP-ACT-20",
+        "REP-ACT-21",
+        "REP-ACT-22",
+        "REP-ACT-23",
+        "REP-ACT-24",
+        "REP-ACT-25"
+      ],
+      "groupedOnly": [
+        "R03",
+        "R04",
+        "R05",
+        "R06",
+        "R10",
+        "R16",
+        "R17",
+        "R18",
+        "R19",
+        "R20",
+        "R21",
+        "R22",
+        "R23",
+        "R24"
+      ],
+      "unspecified": [
+        "R01",
+        "R02",
+        "R07",
+        "R08",
+        "R09",
+        "R11",
+        "R12",
+        "R13",
+        "R14",
+        "R15"
+      ],
+      "resolved": false,
+      "trackingCapability": "UE-OMIT-REP-CANONICAL-ABSENT"
+    },
+    {
+      "persona": "senior-representative",
+      "label": "Senior Representative",
+      "sourceFile": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "canonicalFileFound": true,
+      "universe": [
+        "SR01",
+        "SR02",
+        "SR03",
+        "SR04",
+        "SR05",
+        "SR06",
+        "SR07",
+        "SR08",
+        "SR09",
+        "SR10",
+        "SR11",
+        "SR12",
+        "SR13",
+        "SR15",
+        "SR16",
+        "SR17",
+        "SR18",
+        "SR19",
+        "SR20",
+        "SR21",
+        "SR14",
+        "SR22"
+      ],
+      "individuallyDefined": [
+        "SR01",
+        "SR02",
+        "SR03",
+        "SR04",
+        "SR05",
+        "SR06",
+        "SR07",
+        "SR08",
+        "SR09",
+        "SR10",
+        "SR11",
+        "SR12",
+        "SR13",
+        "SR15",
+        "SR16",
+        "SR17",
+        "SR18",
+        "SR19",
+        "SR20",
+        "SR21",
+        "SR14",
+        "SR22"
+      ],
+      "groupedOnly": [],
+      "unspecified": [],
+      "resolved": true,
+      "trackingCapability": null
+    },
+    {
+      "persona": "officer-executive",
+      "label": "Officer / Executive",
+      "sourceFile": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "canonicalFileFound": true,
+      "universe": [
+        "O01",
+        "O02",
+        "O03",
+        "O04",
+        "O05",
+        "O06",
+        "O07",
+        "O08",
+        "O09",
+        "O10",
+        "O11",
+        "O12",
+        "O13",
+        "O14",
+        "O15",
+        "O16",
+        "O17",
+        "O18",
+        "O19",
+        "O20",
+        "O21",
+        "O22",
+        "O23",
+        "O24",
+        "O25",
+        "O26"
+      ],
+      "individuallyDefined": [
+        "O01",
+        "O02",
+        "O03",
+        "O04",
+        "O05",
+        "O06",
+        "O07",
+        "O08",
+        "O09",
+        "O10",
+        "O11",
+        "O12",
+        "O13",
+        "O14",
+        "O15",
+        "O16",
+        "O17",
+        "O18",
+        "O19",
+        "O20",
+        "O21",
+        "O22",
+        "O23",
+        "O24",
+        "O25",
+        "O26"
+      ],
+      "groupedOnly": [],
+      "unspecified": [],
+      "resolved": true,
+      "trackingCapability": null
+    },
+    {
+      "persona": "financial-officer",
+      "label": "Financial Officer",
+      "sourceFile": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "canonicalFileFound": false,
+      "universe": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F08",
+        "F09",
+        "F10",
+        "F11",
+        "F12",
+        "F13",
+        "F14",
+        "F15",
+        "F16",
+        "F17",
+        "F18",
+        "F19",
+        "F20",
+        "F21",
+        "F22",
+        "F23",
+        "F24",
+        "F25",
+        "F26",
+        "F27",
+        "F28",
+        "FJ01",
+        "FJ02",
+        "FJ03",
+        "FJ04",
+        "FJ05",
+        "FJ06",
+        "FJ07",
+        "FJ08",
+        "FJ09",
+        "FJ10"
+      ],
+      "individuallyDefined": [
+        "F08",
+        "F09",
+        "F10",
+        "F19"
+      ],
+      "groupedOnly": [
+        "F11",
+        "F12",
+        "F13",
+        "F14",
+        "F17",
+        "F18"
+      ],
+      "unspecified": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F15",
+        "F16",
+        "F20",
+        "F21",
+        "F22",
+        "F23",
+        "F24",
+        "F25",
+        "F26",
+        "F27",
+        "F28",
+        "FJ01",
+        "FJ02",
+        "FJ03",
+        "FJ04",
+        "FJ05",
+        "FJ06",
+        "FJ07",
+        "FJ08",
+        "FJ09",
+        "FJ10"
+      ],
+      "resolved": false,
+      "trackingCapability": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED"
+    },
+    {
+      "persona": "governance-officer",
+      "label": "Governance Officer",
+      "sourceFile": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "canonicalFileFound": true,
+      "universe": [
+        "G01",
+        "G02",
+        "G03",
+        "G04",
+        "G05",
+        "G06",
+        "G07",
+        "G08",
+        "G09",
+        "G10",
+        "G11",
+        "G12",
+        "G13",
+        "G14",
+        "G15",
+        "G16",
+        "G17",
+        "G18",
+        "G19",
+        "G20",
+        "G21",
+        "G22",
+        "G23",
+        "G24",
+        "G25",
+        "G26",
+        "G27",
+        "G28",
+        "G29",
+        "G30"
+      ],
+      "individuallyDefined": [
+        "G01",
+        "G02",
+        "G03",
+        "G04",
+        "G05",
+        "G06",
+        "G07",
+        "G08",
+        "G09",
+        "G10",
+        "G11",
+        "G12",
+        "G13",
+        "G14",
+        "G15",
+        "G16",
+        "G17",
+        "G18",
+        "G19",
+        "G20",
+        "G21",
+        "G22",
+        "G23",
+        "G24",
+        "G25",
+        "G26",
+        "G27",
+        "G28",
+        "G29",
+        "G30"
+      ],
+      "groupedOnly": [],
+      "unspecified": [],
+      "resolved": true,
+      "trackingCapability": null
+    }
+  ],
+  "routeOwnership": {
+    "file": "docs/union-eyes/convergence/register/ue-route-capability-ownership.json",
+    "entriesHash": "1c26296d4f178a02d7d5493c5cee987611d89ff85412da99562b83a895c5d7e9",
+    "operations": 1644
+  },
   "outOfScope": [
     {
       "id": "UE-SCOPE-ORG-HIERARCHY-SEED",
@@ -3148,12 +4701,6 @@
       "topic": "Counsel HTTP route",
       "reason": "No counsel HTTP route is in the committed engineering scope. Counsel-side verification remains the external gate UE-CONV-G-003.",
       "evidence": "docs/union-eyes/convergence/UE-WORKAID-COUNSEL-BOUNDARY-CONTRACT.md"
-    },
-    {
-      "id": "UE-SCOPE-STEWARD-NO-ACTION-MATRIX",
-      "topic": "Steward action identifiers",
-      "reason": "UE-CONV-I-001 names the Steward experience. The repository has no separate steward action-id matrix, so Gate 0 does not invent steward action ids.",
-      "evidence": "docs/union-eyes/convergence/register/ue-convergence-register.json UE-CONV-I-001"
     }
   ],
   "dispositions": [],
@@ -3209,7 +4756,11 @@
     "UE-OMIT-M04-MEMBER-REQUESTS",
     "UE-OMIT-MAIN-APP-CRONS",
     "UE-OMIT-PRIVACY-RIGHTS",
-    "UE-OMIT-REP-CANONICAL-ABSENT"
+    "UE-OMIT-REP-CANONICAL-ABSENT",
+    "UE-OMIT-REP-CORRESPONDENCE",
+    "UE-OMIT-REP-TRANSITION-REASON-LEAK",
+    "UE-OMIT-ROUTE-DOMAIN-SCOPE",
+    "UE-OMIT-STEWARD-CANONICAL-ABSENT"
   ],
   "routeBaseline": {
     "manifest": "docs/union-eyes/convergence/register/ue-route-coverage-manifest.json",

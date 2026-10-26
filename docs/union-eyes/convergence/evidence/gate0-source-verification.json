@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "recordedAtRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+  "recordedAtRevision": "8c40e84d65f7c86ed6eb334faa6bcea2b9db901f",
   "records": [
     {
       "capabilityId": "UE-CAP-F-001",
@@ -8,7 +8,7 @@
       "assertionFamily": "internal-file read, edit, and disclosure grants stay separate kernel actions",
       "command": "npx vitest run db/__tests__/authority-kernel-resources.pglite.test.ts db/__tests__/authority-kernel-lifecycle.pglite.test.ts --reporter=json --outputFile=<report>",
       "workingDirectory": "apps/union-eyes",
-      "testedRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+      "testedRevision": "8c40e84d65f7c86ed6eb334faa6bcea2b9db901f",
       "testFiles": [
         "apps/union-eyes/db/__tests__/authority-kernel-resources.pglite.test.ts",
         "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts"
@@ -17,9 +17,12 @@
         "apps/union-eyes/db/__tests__/authority-kernel-resources.pglite.test.ts": "ea1f7fbb996c097578c1cd8c7c206c2211405c0f",
         "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts": "94098e3ff629869954ace747f00ddb427aa51db5"
       },
-      "executedAt": "2026-10-26T20:08:17.011Z",
+      "sourceFileBlobs": {
+        "apps/union-eyes/lib/authority/ontology.ts": "e610abfe0cc89fa91ca35ee5878a3e6fe273e9a5"
+      },
+      "executedAt": "2026-10-26T20:13:08.296Z",
       "exitCode": 0,
-      "durationMs": 7075,
+      "durationMs": 7023,
       "totals": {
         "total": 69,
         "passed": 69,
@@ -57,7 +60,7 @@
       "assertionFamily": "counsel engagement stays on the kernel boundary",
       "command": "npx vitest run lib/authority/__tests__/counsel-boundary.test.ts db/__tests__/authority-kernel-resources.pglite.test.ts db/__tests__/authority-kernel-counsel.pglite.test.ts --reporter=json --outputFile=<report>",
       "workingDirectory": "apps/union-eyes",
-      "testedRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+      "testedRevision": "8c40e84d65f7c86ed6eb334faa6bcea2b9db901f",
       "testFiles": [
         "apps/union-eyes/lib/authority/__tests__/counsel-boundary.test.ts",
         "apps/union-eyes/db/__tests__/authority-kernel-resources.pglite.test.ts",
@@ -68,9 +71,12 @@
         "apps/union-eyes/db/__tests__/authority-kernel-resources.pglite.test.ts": "ea1f7fbb996c097578c1cd8c7c206c2211405c0f",
         "apps/union-eyes/db/__tests__/authority-kernel-counsel.pglite.test.ts": "5b89d45e9cb1e615ee96be08d794a32a8e778352"
       },
-      "executedAt": "2026-10-26T20:08:21.776Z",
+      "sourceFileBlobs": {
+        "apps/union-eyes/lib/authority/store/counsel.ts": "8745a51a543f0570d9406733ce3cc7bcd4a7d071"
+      },
+      "executedAt": "2026-10-26T20:13:13.114Z",
       "exitCode": 1,
-      "durationMs": 4756,
+      "durationMs": 4806,
       "totals": {
         "total": 66,
         "passed": 53,
@@ -116,16 +122,19 @@
       "assertionFamily": "retired scaffold detection (rule R-9) against a synthetic tree",
       "command": "npx vitest run --root tooling/reality __tests__/anti-theatre-scan.test.ts --reporter=json --outputFile=<report>",
       "workingDirectory": "tooling/reality",
-      "testedRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+      "testedRevision": "8c40e84d65f7c86ed6eb334faa6bcea2b9db901f",
       "testFiles": [
         "tooling/reality/__tests__/anti-theatre-scan.test.ts"
       ],
       "testFileBlobs": {
         "tooling/reality/__tests__/anti-theatre-scan.test.ts": "f0951ac870504c57c20656fe96b6b40b0448c4af"
       },
-      "executedAt": "2026-10-26T20:08:22.526Z",
+      "sourceFileBlobs": {
+        "tooling/reality/anti-theatre-scan.ts": "651a0dc900611e586e187a810371857daaf2862f"
+      },
+      "executedAt": "2026-10-26T20:13:13.861Z",
       "exitCode": 0,
-      "durationMs": 747,
+      "durationMs": 742,
       "totals": {
         "total": 33,
         "passed": 33,
@@ -155,16 +164,19 @@
       "assertionFamily": "stub and fake-success detection against a synthetic tree",
       "command": "npx vitest run --root tooling/reality __tests__/anti-theatre-scan.test.ts --reporter=json --outputFile=<report>",
       "workingDirectory": "tooling/reality",
-      "testedRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+      "testedRevision": "8c40e84d65f7c86ed6eb334faa6bcea2b9db901f",
       "testFiles": [
         "tooling/reality/__tests__/anti-theatre-scan.test.ts"
       ],
       "testFileBlobs": {
         "tooling/reality/__tests__/anti-theatre-scan.test.ts": "f0951ac870504c57c20656fe96b6b40b0448c4af"
       },
-      "executedAt": "2026-10-26T20:08:23.243Z",
+      "sourceFileBlobs": {
+        "tooling/reality/anti-theatre-scan.ts": "651a0dc900611e586e187a810371857daaf2862f"
+      },
+      "executedAt": "2026-10-26T20:13:14.631Z",
       "exitCode": 0,
-      "durationMs": 714,
+      "durationMs": 766,
       "totals": {
         "total": 33,
         "passed": 33,
@@ -193,16 +205,19 @@
       "assertionFamily": "retired seed route answers HTTP 501",
       "command": "npx vitest run app/api/__tests__/admin-seed-test-data.route.test.ts --reporter=json --outputFile=<report>",
       "workingDirectory": "apps/union-eyes",
-      "testedRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+      "testedRevision": "8c40e84d65f7c86ed6eb334faa6bcea2b9db901f",
       "testFiles": [
         "apps/union-eyes/app/api/__tests__/admin-seed-test-data.route.test.ts"
       ],
       "testFileBlobs": {
         "apps/union-eyes/app/api/__tests__/admin-seed-test-data.route.test.ts": "c3ef25002e6a5f2875917e6d07c08fc89cb037ae"
       },
-      "executedAt": "2026-10-26T20:08:23.920Z",
+      "sourceFileBlobs": {
+        "apps/union-eyes/app/api/admin/seed-test-data/route.ts": "cb160a46daa9885ba1c8e9262c3747a5530d05fa"
+      },
+      "executedAt": "2026-10-26T20:13:15.317Z",
       "exitCode": 0,
-      "durationMs": 675,
+      "durationMs": 682,
       "totals": {
         "total": 2,
         "passed": 2,
@@ -231,16 +246,19 @@
       "assertionFamily": "approved migration lineage verification",
       "command": "node --test --test-reporter=tap tooling/scripts/lib/ue-migration-lineage-certification.test.mjs",
       "workingDirectory": ".",
-      "testedRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+      "testedRevision": "8c40e84d65f7c86ed6eb334faa6bcea2b9db901f",
       "testFiles": [
         "tooling/scripts/lib/ue-migration-lineage-certification.test.mjs"
       ],
       "testFileBlobs": {
         "tooling/scripts/lib/ue-migration-lineage-certification.test.mjs": "573ab6436e3dd0244b3f60a38be3fd72a8c662c3"
       },
-      "executedAt": "2026-10-26T20:08:24.119Z",
+      "sourceFileBlobs": {
+        "tooling/scripts/lib/ue-approved-migration-lineage.json": "b3aeb13bf6ecec0314adf9d3f9d790be9dc0a86e"
+      },
+      "executedAt": "2026-10-26T20:13:15.520Z",
       "exitCode": 0,
-      "durationMs": 196,
+      "durationMs": 199,
       "totals": {
         "total": 9,
         "passed": 9,
@@ -261,7 +279,7 @@
         "Source lineage only. No migration is applied and no native database is touched."
       ],
       "logFile": "docs/union-eyes/convergence/evidence/gate0-source-verification/UE-CAP-K-001.log",
-      "logSha256": "6f17e0aec106af10a99b488e9e5f3d606add7cfefae7bf9fc20eb151e93e0e44"
+      "logSha256": "bcb2681b3f4684b5125a94727bd1bb9b7da04d3764e70dd5eaf0b5f4ba9bdcb8"
     },
     {
       "capabilityId": "UE-CAP-K-003",
@@ -269,14 +287,17 @@
       "assertionFamily": "register integrity and allowlist ratchet evaluation",
       "command": "node --test --test-reporter=tap tooling/scripts/lib/ue-convergence-check.test.mjs",
       "workingDirectory": ".",
-      "testedRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+      "testedRevision": "8c40e84d65f7c86ed6eb334faa6bcea2b9db901f",
       "testFiles": [
         "tooling/scripts/lib/ue-convergence-check.test.mjs"
       ],
       "testFileBlobs": {
         "tooling/scripts/lib/ue-convergence-check.test.mjs": "5b5f73f15c22d6ef8a303ed69ed4a4cdc4664f57"
       },
-      "executedAt": "2026-10-26T20:08:24.224Z",
+      "sourceFileBlobs": {
+        "tooling/scripts/lib/ue-convergence-check.mjs": "3cbd76b3fbb6e9fc99f5ec17b2ce52e199daa04e"
+      },
+      "executedAt": "2026-10-26T20:13:15.627Z",
       "exitCode": 0,
       "durationMs": 103,
       "totals": {
@@ -299,7 +320,7 @@
         "The checker CLI currently fails two ratchets. This suite does not run the CLI."
       ],
       "logFile": "docs/union-eyes/convergence/evidence/gate0-source-verification/UE-CAP-K-003.log",
-      "logSha256": "20f45ddf845580fc4d03f43c7a98c9ec97bad76d83a6c94102a1afb062ba1baa"
+      "logSha256": "70f80b08f49f2d875830a8f1ef4807cc08faf54d4f03edfc9633784f91a728b4"
     },
     {
       "capabilityId": "UE-CAP-REVIEW-INTAKE",
@@ -307,7 +328,7 @@
       "assertionFamily": "member review intake and oversight listing",
       "command": "npx vitest run db/__tests__/review-intake.pglite.test.ts app/api/__tests__/reviews-intake.route.test.ts components/reviews/review-intake.test.tsx --reporter=json --outputFile=<report>",
       "workingDirectory": "apps/union-eyes",
-      "testedRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+      "testedRevision": "8c40e84d65f7c86ed6eb334faa6bcea2b9db901f",
       "testFiles": [
         "apps/union-eyes/db/__tests__/review-intake.pglite.test.ts",
         "apps/union-eyes/app/api/__tests__/reviews-intake.route.test.ts",
@@ -318,9 +339,14 @@
         "apps/union-eyes/app/api/__tests__/reviews-intake.route.test.ts": "8eb06e0d00e6aaf15867300fed7a3992fb54baae",
         "apps/union-eyes/components/reviews/review-intake.test.tsx": "316152a548df262a07652a792b061021a107b832"
       },
-      "executedAt": "2026-10-26T20:08:27.316Z",
+      "sourceFileBlobs": {
+        "apps/union-eyes/lib/authority/store/review-intake.ts": "dca348b7f730394ac71b4bca060e586f96bd15ff",
+        "apps/union-eyes/app/api/reviews/route.ts": "987126d2239d6b56578f4d07bd5838f3d7e6f170",
+        "apps/union-eyes/components/reviews/review-intake.tsx": "76a557dc71fb71fcb1106ab032ea830a144f2196"
+      },
+      "executedAt": "2026-10-26T20:13:18.648Z",
       "exitCode": 0,
-      "durationMs": 3084,
+      "durationMs": 3009,
       "totals": {
         "total": 12,
         "passed": 12,
@@ -366,16 +392,19 @@
       "assertionFamily": "notification delivery ledger arithmetic",
       "command": "npx vitest run lib/services/__tests__/delivery-reconciliation.test.ts --reporter=json --outputFile=<report>",
       "workingDirectory": "apps/union-eyes",
-      "testedRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+      "testedRevision": "8c40e84d65f7c86ed6eb334faa6bcea2b9db901f",
       "testFiles": [
         "apps/union-eyes/lib/services/__tests__/delivery-reconciliation.test.ts"
       ],
       "testFileBlobs": {
         "apps/union-eyes/lib/services/__tests__/delivery-reconciliation.test.ts": "c5dcc75b5313809345143467810278c65494cc2c"
       },
-      "executedAt": "2026-10-26T20:08:28.275Z",
+      "sourceFileBlobs": {
+        "apps/union-eyes/lib/services/delivery-reconciliation.ts": "d256a943719fc6d3c412d565411f299613390c1d"
+      },
+      "executedAt": "2026-10-26T20:13:19.575Z",
       "exitCode": 0,
-      "durationMs": 956,
+      "durationMs": 920,
       "totals": {
         "total": 9,
         "passed": 9,
