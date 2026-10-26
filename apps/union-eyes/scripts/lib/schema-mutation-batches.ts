@@ -102,8 +102,8 @@ const BATCHES: BatchSpec[] = [
     ratchet: 'mutation-scope',
     execution: 'cursor',
     shrink: 'mutation-baseline',
-    action: 'The clc_sync_log update matches syncId only. If no production entry reaches the file, delete the uncalled update and do not leave a caller. If an entry reaches the file, add the caller organizationId to that WHERE and to the insert that creates the row. Do not edit the mutation scanner.',
-    proof: 'apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts',
+    action: 'clc_sync_log is TENANT_RLS_REQUIRED and is served by the organization-scoped routes app/api/clc/sync, app/api/clc/dashboard and app/api/clc/remittances. The partnership service has no caller organization and no production, dynamic, or worker importer. It must not insert or update that table. Django ClcSyncLogViewSet still names the relation and is not changed here. Do not drop the relation. Do not edit the mutation scanner.',
+    proof: 'apps/union-eyes/lib/services/external-data/__tests__/clc-partnership-service.test.ts',
   },
   {
     id: 'mutation-pilot-rebind',

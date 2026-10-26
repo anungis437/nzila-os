@@ -5,8 +5,8 @@
   "note": "Derived batch program for every remaining schema-census entry and the original mutation-scope statements. Program applyNow stays false. A mutation batch sets applyNow only when the live scan no longer counts every source statement in that batch, and the baseline file then shrinks to that scan. This file does not remove a census entry. Hold batches do not shrink either ratchet. Do not edit the mutation scanner or the route-coverage scanner to change a count. Do not regenerate a baseline except to record statements the live scan no longer counts. Finance issuance stays fail-closed. services/financial-service is not an approval path.",
   "censusCount": 231,
   "sourceMutationBaselineSum": 13,
-  "mutationBaselineSum": 6,
-  "mutationLiveSum": 6,
+  "mutationBaselineSum": 5,
+  "mutationLiveSum": 5,
   "graphComplete": true,
   "unresolvedCount": 0,
   "unresolvedSample": [],
@@ -28,14 +28,14 @@
       "id": "mutation-clc-sync-log",
       "order": 2,
       "ratchet": "mutation-scope",
-      "execution": "cursor",
+      "execution": "implemented",
       "shrink": "mutation-baseline",
-      "action": "The clc_sync_log update matches syncId only. If no production entry reaches the file, delete the uncalled update and do not leave a caller. If an entry reaches the file, add the caller organizationId to that WHERE and to the insert that creates the row. Do not edit the mutation scanner.",
-      "proof": "apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts",
-      "applyNow": false,
+      "action": "clc_sync_log is TENANT_RLS_REQUIRED and is served by the organization-scoped routes app/api/clc/sync, app/api/clc/dashboard and app/api/clc/remittances. The partnership service has no caller organization and no production, dynamic, or worker importer. It must not insert or update that table. Django ClcSyncLogViewSet still names the relation and is not changed here. Do not drop the relation. Do not edit the mutation scanner.",
+      "proof": "apps/union-eyes/lib/services/external-data/__tests__/clc-partnership-service.test.ts",
+      "applyNow": true,
       "entryCount": 1,
       "statementCount": 1,
-      "liveStatementCount": 1
+      "liveStatementCount": 0
     },
     {
       "id": "mutation-pilot-rebind",
@@ -3261,10 +3261,10 @@
       "table": "clc_sync_log",
       "batchId": "mutation-clc-sync-log",
       "baselineCount": 1,
-      "liveCount": 1,
-      "execution": "cursor",
+      "liveCount": 0,
+      "execution": "implemented",
       "shrink": "mutation-baseline",
-      "action": "No production entry reaches clc-partnership-service.ts. Prove there is no dynamic import, worker, or test-only caller, then delete the uncalled update or add the caller organizationId. Unreachable alone is not enough to delete it."
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
     },
     {
       "key": "services/financial-service/src/jobs/arrears-management-workflow.ts|dues_transactions",
@@ -3366,17 +3366,6 @@
       "execution": "cursor",
       "shrink": "mutation-baseline",
       "action": "The first pilot bind already names verifiedOrganizationId. The rebind compares that column with the previous organization. Comments inside set() place .where( outside the scanner window of 600 characters, so the live scan still counts the statement. Keep the compare-and-set and put that predicate where the scanner reads it. Do not widen the scanner window and do not edit the mutation scanner."
-    },
-    {
-      "key": "lib/services/external-data/clc-partnership-service.ts|clc_sync_log",
-      "file": "lib/services/external-data/clc-partnership-service.ts",
-      "table": "clc_sync_log",
-      "batchId": "mutation-clc-sync-log",
-      "baselineCount": 1,
-      "liveCount": 1,
-      "execution": "cursor",
-      "shrink": "mutation-baseline",
-      "action": "No production entry reaches clc-partnership-service.ts. Prove there is no dynamic import, worker, or test-only caller, then delete the uncalled update or add the caller organizationId. Unreachable alone is not enough to delete it."
     },
     {
       "key": "services/geofence-privacy-service.ts|geofence_events",
