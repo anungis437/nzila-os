@@ -1859,20 +1859,6 @@
       "confidence": "UNRESOLVED",
       "userConfidence": "HIGH_CONFIDENCE_USER"
     },
-    "contract_amendments": {
-      "physicalTable": "contract_amendments",
-      "sourceFile": "db\\schema\\domains\\finance\\contract-amendments.ts",
-      "directOrgColumns": [],
-      "directUserColumns": [],
-      "otherForeignKeys": [
-        {
-          "column": "contract_id",
-          "referencesImportName": "commercialContracts"
-        }
-      ],
-      "confidence": "NO_DIRECT_ORG_COLUMN",
-      "userConfidence": "NO_USER_COLUMN"
-    },
     "contract_covered_orgs": {
       "physicalTable": "contract_covered_orgs",
       "sourceFile": "db\\schema\\domains\\finance\\contract-amendments.ts",
@@ -1892,20 +1878,6 @@
     "contract_line_items": {
       "physicalTable": "contract_line_items",
       "sourceFile": "db\\schema\\domains\\finance\\contracts.ts",
-      "directOrgColumns": [],
-      "directUserColumns": [],
-      "otherForeignKeys": [
-        {
-          "column": "contract_id",
-          "referencesImportName": "commercialContracts"
-        }
-      ],
-      "confidence": "NO_DIRECT_ORG_COLUMN",
-      "userConfidence": "NO_USER_COLUMN"
-    },
-    "contract_rate_cards": {
-      "physicalTable": "contract_rate_cards",
-      "sourceFile": "db\\schema\\domains\\finance\\contract-amendments.ts",
       "directOrgColumns": [],
       "directUserColumns": [],
       "otherForeignKeys": [
@@ -2404,22 +2376,6 @@
     },
     "document_links": {
       "physicalTable": "document_links",
-      "sourceFile": "db\\schema\\documents-schema.ts",
-      "directOrgColumns": [
-        "organization_id"
-      ],
-      "directUserColumns": [],
-      "otherForeignKeys": [
-        {
-          "column": "document_id",
-          "referencesImportName": "documents"
-        }
-      ],
-      "confidence": "HIGH_CONFIDENCE_DIRECT",
-      "userConfidence": "NO_USER_COLUMN"
-    },
-    "document_search_index": {
-      "physicalTable": "document_search_index",
       "sourceFile": "db\\schema\\documents-schema.ts",
       "directOrgColumns": [
         "organization_id"
@@ -8562,7 +8518,6 @@
     "documentVersions": "document_versions",
     "documentLinks": "document_links",
     "documentAccessGrants": "document_access_grants",
-    "documentSearchIndex": "document_search_index",
     "caseDocuments": "case_documents",
     "documentIntakes": "document_intakes",
     "documentTranscriptRevisions": "document_transcript_revisions",
@@ -8770,8 +8725,6 @@
     "allocationBasisSnapshots": "allocation_basis_snapshots",
     "chargebackStatements": "chargeback_statements",
     "organizationBillingConfig": "organization_billing_config",
-    "contractRateCards": "contract_rate_cards",
-    "contractAmendments": "contract_amendments",
     "contractCoveredOrgs": "contract_covered_orgs",
     "commercialContracts": "commercial_contracts",
     "contractLineItems": "contract_line_items",

@@ -173,20 +173,6 @@ export const documentAccessGrants = pgTable('document_access_grants', {
   index('idx_document_access_grants_status').on(table.status),
 ]);
 
-export const documentSearchIndex = pgTable('document_search_index', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
-  documentId: uuid('document_id').notNull().references(() => documents.id, { onDelete: 'cascade' }),
-  title: text('title'),
-  filename: text('filename'),
-  fullText: text('full_text'),
-  tags: text('tags').array(),
-  indexedAt: timestamp('indexed_at', { withTimezone: true }).defaultNow().notNull(),
-}, (table) => [
-  uniqueIndex('idx_document_search_index_document').on(table.documentId),
-  index('idx_document_search_index_org').on(table.organizationId),
-]);
-
 // Case-Document Join Table — links documents to claims with FK enforcement
 export const caseDocuments = pgTable('case_documents', {
   id: uuid('id').defaultRandom().primaryKey(),

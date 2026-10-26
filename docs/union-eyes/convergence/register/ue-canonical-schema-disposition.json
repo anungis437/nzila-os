@@ -398,18 +398,6 @@
       "references": 2,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
     },
-    "contract_amendments": {
-      "disposition": "RETIRE_DECLARATION",
-      "registryClass": "LATENT_UNREACHABLE",
-      "references": 0,
-      "reason": "registry LATENT_UNREACHABLE and no reference outside the schema folder; deleting the declaration needs the intra-schema foreign keys and relations that name it reworked together"
-    },
-    "contract_rate_cards": {
-      "disposition": "RETIRE_DECLARATION",
-      "registryClass": "LATENT_UNREACHABLE",
-      "references": 0,
-      "reason": "registry LATENT_UNREACHABLE and no reference outside the schema folder; deleting the declaration needs the intra-schema foreign keys and relations that name it reworked together"
-    },
     "contribution_rates": {
       "disposition": "GLOBAL_REFERENCE_SHAPE",
       "registryClass": "GLOBAL_REFERENCE_DATA",
@@ -499,12 +487,6 @@
       "registryClass": "CONTAINED_NO_AUTHORITY",
       "references": 2,
       "reason": "registry CONTAINED_NO_AUTHORITY: no runtime authority is granted, so the relation cannot be reached by the runtime role; evolve only when the capability is enabled"
-    },
-    "document_search_index": {
-      "disposition": "RETIRE_DECLARATION",
-      "registryClass": "LATENT_UNREACHABLE",
-      "references": 0,
-      "reason": "registry LATENT_UNREACHABLE and no reference outside the schema folder; deleting the declaration needs the intra-schema foreign keys and relations that name it reworked together"
     },
     "donation_receipts": {
       "disposition": "CONTAINED_DENY_ALL",

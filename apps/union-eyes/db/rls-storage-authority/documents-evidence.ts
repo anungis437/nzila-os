@@ -116,6 +116,7 @@ export const documentsEvidenceEntries: StorageAuthorityEntry[] = [
   },
   {
     table: "document_search_index",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
     classification: "LATENT_UNREACHABLE",
     reason: "Zero references to the 'documentSearchIndex' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
