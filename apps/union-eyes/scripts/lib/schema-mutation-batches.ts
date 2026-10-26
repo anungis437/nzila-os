@@ -1,0 +1,478 @@
+/**
+ * Batch program for the schema census (UE-CONV-H-007) and the mutation-scope baseline (UE-CONV-K-006).
+ *
+ * Preparation only. `applyNow` is false. This module does not edit either ratchet, does not emit SQL,
+ * and does not start a database. A later batch may shrink a ratchet only after its own code change;
+ * a hold batch never does.
+ */
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
+import { getTableConfig, PgTable } from 'drizzle-orm/pg-core'
+import { is } from 'drizzle-orm'
+import * as declarations from '../../db/schema'
+import { BASELINE, scanUnscopedMutations } from './mutation-scope-scan'
+import { buildReachIndex, productionReferences, tableIsReachable, type ReachIndex } from './production-reachability'
+
+const REGISTER = path.resolve(__dirname, '../../../../docs/union-eyes/convergence/register')
+const ORACLE = path.resolve(__dirname, '../../../../tooling/db/canonical-schema/oracle-binding.json')
+
+const DJANGO_BASE_DEFAULTS = new Set(['id', 'created_at', 'updated_at'])
+
+export interface CensusEntry {
+  table: string
+  defects: string[]
+  columnsMissing: string[]
+  requiredUndeclared: string[]
+}
+
+export interface DispositionEntry {
+  disposition: string
+  reason: string
+  registryClass: string
+}
+
+type Execution = 'cursor' | 'cursor-then-vs' | 'prepared-evolve' | 'baseline-rewrite' | 'hold'
+
+export interface BatchSpec {
+  id: string
+  order: number
+  ratchet: 'census' | 'mutation-scope'
+  execution: Execution
+  shrink: 'census' | 'mutation-baseline' | 'none'
+  action: string
+  proof: string
+}
+
+export interface SchemaAssignment {
+  table: string
+  batchId: string
+  disposition: string
+  registryClass: string
+  defects: string[]
+  reachable: boolean
+  djangoDefined: boolean
+  blockers: string[]
+}
+
+export interface MutationAssignment {
+  key: string
+  file: string
+  table: string
+  batchId: string
+  baselineCount: number
+  liveCount: number
+  execution: Execution
+  shrink: 'mutation-baseline' | 'none'
+  action: string
+}
+
+export interface BatchProgram {
+  schemaVersion: 1
+  mission: 'UE-CURSOR-FINAL-CLOSURE'
+  applyNow: false
+  note: string
+  censusCount: number
+  mutationBaselineSum: number
+  mutationLiveSum: number
+  graphComplete: boolean
+  unresolvedCount: number
+  unresolvedSample: string[]
+  batches: Array<BatchSpec & { entryCount: number; statementCount: number }>
+  schema: SchemaAssignment[]
+  mutations: MutationAssignment[]
+}
+
+const NOTE = 'Derived batch program for every remaining schema-census entry and every mutation-scope baseline key. applyNow is false: this file does not remove a census entry or a baseline key. Hold batches do not shrink either ratchet. Do not edit the mutation scanner or the route-coverage scanner to change a count. Do not regenerate either baseline to change its count. Finance issuance stays fail-closed. services/financial-service is not an approval path.'
+
+const BATCHES: BatchSpec[] = [
+  {
+    id: 'mutation-finance-latent',
+    order: 1,
+    ratchet: 'mutation-scope',
+    execution: 'cursor',
+    shrink: 'mutation-baseline',
+    action: 'Before any financial-service job is mounted, put the job tenant into the WHERE of each flagged update. dues_transactions uses eq(organizationId, tenantId) with the tenantId argument, not the id just loaded. payments and notification_queue declare tenantId; call inOrganization(row.tenantId, callerTenantId), implemented as equality on that column. The caller tenant comes from the job argument. Do not copy the tenant off the row loaded by the same id. Do not insert an unused organization identifier to satisfy the scanner. Do not issue a financial mandate. services/financial-service is not an approval path. Do not edit the mutation scanner.',
+    proof: 'apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts and apps/union-eyes/lib/finance/__tests__/finance-canonical.test.ts',
+  },
+  {
+    id: 'mutation-clc-sync-log',
+    order: 2,
+    ratchet: 'mutation-scope',
+    execution: 'cursor',
+    shrink: 'mutation-baseline',
+    action: 'The clc_sync_log update matches syncId only. If no production entry reaches the file, delete the uncalled update and do not leave a caller. If an entry reaches the file, add the caller organizationId to that WHERE and to the insert that creates the row. Do not edit the mutation scanner.',
+    proof: 'apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts',
+  },
+  {
+    id: 'mutation-pilot-rebind',
+    order: 3,
+    ratchet: 'mutation-scope',
+    execution: 'cursor',
+    shrink: 'mutation-baseline',
+    action: 'The first pilot bind already names verifiedOrganizationId. The rebind compares that column with the previous organization. Comments inside set() place .where( outside the scanner window of 600 characters, so the live scan still counts the statement. Keep the compare-and-set and put that predicate where the scanner reads it. Do not widen the scanner window and do not edit the mutation scanner.',
+    proof: 'apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts',
+  },
+  {
+    id: 'mutation-workbook-unclaimed',
+    order: 4,
+    ratchet: 'mutation-scope',
+    execution: 'cursor',
+    shrink: 'mutation-baseline',
+    action: 'A workbook has no organization until it is claimed. Add isNull(claimedByUserId) beside the existing credential guards on the Stripe fulfilment update and the claim update. Fulfilment still requires a null payment reference and a null claim token. Claim still requires the single-use token, a null claimedAt, and an unexpired token. Do not invent an organization column.',
+    proof: 'apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts',
+  },
+  {
+    id: 'mutation-location-retention',
+    order: 5,
+    ratchet: 'mutation-scope',
+    execution: 'cursor',
+    shrink: 'mutation-baseline',
+    action: 'Rewrite the system retention sweep so each delete names the owning userId and expiresAt. Take the user ids from the expired rows, then delete that user inside the same transaction as the deletion-log insert. Do not use userId IS NOT NULL as the only predicate. The system role still removes every member expired row. The native retention proof stays READY_FOR_VS_EXECUTION.',
+    proof: 'apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts',
+  },
+  {
+    id: 'schema-retire-declaration',
+    order: 6,
+    ratchet: 'census',
+    execution: 'cursor-then-vs',
+    shrink: 'census',
+    action: 'Delete the Drizzle declaration and the schema-folder relations that only name it. Do not DROP the database relation. Do not hand-delete the census row. The census shrinks only when VS Code regenerates it with UE_CENSUS_WRITE=1 on a disposable database after the declaration is gone.',
+    proof: 'apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts and apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts',
+  },
+  {
+    id: 'schema-retire-blocked',
+    order: 7,
+    ratchet: 'census',
+    execution: 'hold',
+    shrink: 'none',
+    action: 'The reference scan still finds a production file. Do not delete the declaration in the retire batch.',
+    proof: 'apps/union-eyes/db/__tests__/schema-mutation-batches.test.ts',
+  },
+  {
+    id: 'schema-live-unreferenced',
+    order: 8,
+    ratchet: 'census',
+    execution: 'cursor-then-vs',
+    shrink: 'census',
+    action: 'The registry class is live and the reference scan finds no production file. Retire the Drizzle declaration only. Do not DROP the live relation and do not hand-delete the census row.',
+    proof: 'apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts',
+  },
+  {
+    id: 'schema-live-unreferenced-blocked',
+    order: 9,
+    ratchet: 'census',
+    execution: 'hold',
+    shrink: 'none',
+    action: 'A production file names this relation. Reclassify it before any retirement.',
+    proof: 'apps/union-eyes/db/__tests__/schema-mutation-batches.test.ts',
+  },
+  {
+    id: 'schema-verify-dead-module',
+    order: 10,
+    ratchet: 'census',
+    execution: 'cursor-then-vs',
+    shrink: 'census',
+    action: 'No production entry reaches a file that names this relation, and the import graph resolved every relative and @/ import. Retire the app Drizzle declaration together with dead importers and their tests. Do not delete a shadow pgTable file and do not DROP the relation. grievance_communications is not in this batch.',
+    proof: 'apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts',
+  },
+  {
+    id: 'schema-verify-unproven',
+    order: 11,
+    ratchet: 'census',
+    execution: 'hold',
+    shrink: 'none',
+    action: 'The import graph has an unresolved relative or @/ import, so a dead-module classification would be unsafe. Do not retire these declarations until the graph is complete.',
+    proof: 'apps/union-eyes/db/__tests__/schema-mutation-batches.test.ts',
+  },
+  {
+    id: 'schema-django-defined',
+    order: 12,
+    ratchet: 'census',
+    execution: 'hold',
+    shrink: 'none',
+    action: 'Django still defines this relation. Do not retire the declaration and do not generate a stub-evolution migration for it.',
+    proof: 'apps/union-eyes/db/__tests__/schema-mutation-batches.test.ts',
+  },
+  {
+    id: 'schema-evolve-reachable',
+    order: 13,
+    ratchet: 'census',
+    execution: 'prepared-evolve',
+    shrink: 'census',
+    action: 'A production entry reaches the relation and the stub-evolution rules accept it: additive nullable columns, declared defaults, and Django id/created_at/updated_at defaults only. No keys and no RLS from that generator. Generate SQL only for this list, review it, and commit it as the next platform migration. Do not apply it here. VS Code proves the shrink on a disposable database.',
+    proof: 'apps/union-eyes/scripts/generate-stub-evolution.ts and apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts',
+  },
+  {
+    id: 'schema-verify-reachable-blocked',
+    order: 14,
+    ratchet: 'census',
+    execution: 'hold',
+    shrink: 'none',
+    action: 'A production entry reaches the relation and the stub generator refuses it (enum collision, pgvector, a required column without a Django base default, or an absent table). Do not generate a tranche for it.',
+    proof: 'apps/union-eyes/scripts/generate-stub-evolution.ts',
+  },
+  {
+    id: 'schema-contained-deny-all',
+    order: 15,
+    ratchet: 'census',
+    execution: 'hold',
+    shrink: 'none',
+    action: 'No runtime authority is granted. Do not evolve the stub and do not grant the runtime role access. The census entry stays until a capability is enabled and a reviewed migration lands, or the declaration is retired under a later decision.',
+    proof: 'apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts',
+  },
+  {
+    id: 'schema-global-reference',
+    order: 16,
+    ratchet: 'census',
+    execution: 'hold',
+    shrink: 'none',
+    action: 'Global reference data. Shape and seed need an owner decision. Do not emit a tenant migration.',
+    proof: 'apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts',
+  },
+  {
+    id: 'schema-system-only',
+    order: 17,
+    ratchet: 'census',
+    execution: 'hold',
+    shrink: 'none',
+    action: 'System-only shape. Do not emit a tenant migration.',
+    proof: 'apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts',
+  },
+  {
+    id: 'schema-create-relation',
+    order: 18,
+    ratchet: 'census',
+    execution: 'hold',
+    shrink: 'none',
+    action: 'The declared relation is absent. Do not invent a CREATE. These names stay equal to tooling/db/canonical-schema/oracle-binding.json dispositionExcluded. Keys and RLS need a reviewed design.',
+    proof: 'tooling/db/canonical-schema/oracle-binding.json',
+  },
+  {
+    id: 'schema-individual-decision',
+    order: 19,
+    ratchet: 'census',
+    execution: 'hold',
+    shrink: 'none',
+    action: 'Enum-name collision, pgvector, or a missing runtime privilege. The stub generator already refuses these. Do not evolve them in a tranche.',
+    proof: 'apps/union-eyes/scripts/generate-stub-evolution.ts',
+  },
+  {
+    id: 'schema-registry-gap',
+    order: 20,
+    ratchet: 'census',
+    execution: 'hold',
+    shrink: 'none',
+    action: 'No storage-authority entry. Classify the relation before any evolution.',
+    proof: 'apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts',
+  },
+  {
+    id: 'schema-separate-database',
+    order: 21,
+    ratchet: 'census',
+    execution: 'hold',
+    shrink: 'none',
+    action: 'The relation belongs to another database. Do not evolve it on this lineage.',
+    proof: 'apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts',
+  },
+]
+
+const MUTATION_BATCH: Record<string, string> = {
+  'app/api/payments/webhooks/stripe/route.ts|workbooks': 'mutation-workbook-unclaimed',
+  'app/api/workbook/[id]/claim/route.ts|workbooks': 'mutation-workbook-unclaimed',
+  'lib/pilot/pilot-ownership.ts|pilot_applications': 'mutation-pilot-rebind',
+  'lib/services/external-data/clc-partnership-service.ts|clc_sync_log': 'mutation-clc-sync-log',
+  'services/financial-service/src/jobs/arrears-management-workflow.ts|dues_transactions': 'mutation-finance-latent',
+  'services/financial-service/src/jobs/payment-collection-workflow.ts|dues_transactions': 'mutation-finance-latent',
+  'services/financial-service/src/jobs/payment-collection-workflow.ts|payments': 'mutation-finance-latent',
+  'services/financial-service/src/services/notification-service.ts|notification_queue': 'mutation-finance-latent',
+  'services/geofence-privacy-service.ts|geofence_events': 'mutation-location-retention',
+  'services/geofence-privacy-service.ts|location_tracking': 'mutation-location-retention',
+}
+
+function loadCensus(): CensusEntry[] {
+  return JSON.parse(readFileSync(path.join(REGISTER, 'ue-canonical-schema-census.json'), 'utf8')).entries as CensusEntry[]
+}
+
+function loadDisposition(): Record<string, DispositionEntry> {
+  return JSON.parse(readFileSync(path.join(REGISTER, 'ue-canonical-schema-disposition.json'), 'utf8')).entries as Record<string, DispositionEntry>
+}
+
+function declaredByName(): Map<string, PgTable> {
+  const seen = new Map<string, PgTable>()
+  for (const value of Object.values(declarations as Record<string, unknown>)) {
+    if (!is(value, PgTable)) continue
+    const config = getTableConfig(value)
+    const qualified = config.schema && config.schema !== 'public' ? `${config.schema}.${config.name}` : config.name
+    if (!seen.has(qualified)) seen.set(qualified, value)
+  }
+  return seen
+}
+
+function enumVariants(): Map<string, Set<string>> {
+  const out = new Map<string, Set<string>>()
+  for (const value of declaredByName().values()) {
+    for (const column of getTableConfig(value).columns as Array<{ getSQLType(): string; enumValues?: readonly string[]; baseColumn?: { enumValues?: readonly string[] } }>) {
+      const values = column.enumValues?.length ? column.enumValues : column.baseColumn?.enumValues
+      if (!values?.length) continue
+      const type = column.getSQLType().replace(/\[\]$/, '')
+      out.set(type, new Set([...(out.get(type) ?? []), JSON.stringify([...values])]))
+    }
+  }
+  return out
+}
+
+function evolutionBlockers(table: string, entry: CensusEntry, declared: Map<string, PgTable>, enums: Map<string, Set<string>>): string[] {
+  const blockers: string[] = []
+  if (entry.defects.includes('TABLE_ABSENT')) blockers.push('table-absent')
+  if (table.includes('.')) blockers.push('non-public-schema')
+  const value = declared.get(table)
+  if (!value) {
+    blockers.push('no-declaration')
+    return blockers.sort()
+  }
+  for (const column of getTableConfig(value).columns as Array<{ name: string; getSQLType(): string; enumValues?: readonly string[]; baseColumn?: { enumValues?: readonly string[] } }>) {
+    const type = column.getSQLType()
+    if (type.startsWith('vector')) blockers.push('pgvector')
+    const values = column.enumValues?.length ? column.enumValues : column.baseColumn?.enumValues
+    const base = type.replace(/\[\]$/, '')
+    if (values?.length && (enums.get(base)?.size ?? 0) > 1) blockers.push(`enum-collision:${base}`)
+  }
+  for (const column of entry.requiredUndeclared) {
+    if (!DJANGO_BASE_DEFAULTS.has(column)) blockers.push(`required-undeclared:${column}`)
+  }
+  return [...new Set(blockers)].sort()
+}
+
+function schemaBatch(entry: CensusEntry, disposition: string, index: ReachIndex, blockers: string[]): string {
+  const refs = productionReferences(index, entry.table)
+  const reachable = tableIsReachable(index, entry.table)
+  switch (disposition) {
+    case 'CONTAINED_DENY_ALL':
+      return 'schema-contained-deny-all'
+    case 'GLOBAL_REFERENCE_SHAPE':
+      return 'schema-global-reference'
+    case 'SYSTEM_ONLY_SHAPE':
+      return 'schema-system-only'
+    case 'SEPARATE_DATABASE':
+      return 'schema-separate-database'
+    case 'REGISTRY_GAP':
+      return 'schema-registry-gap'
+    case 'INDIVIDUAL_DECISION':
+      return 'schema-individual-decision'
+    case 'CREATE_RELATION_REQUIRED':
+      return 'schema-create-relation'
+    case 'RETIRE_DECLARATION':
+      if (entry.table === 'grievance_communications') return 'schema-django-defined'
+      return refs.length === 0 ? 'schema-retire-declaration' : 'schema-retire-blocked'
+    case 'LIVE_UNREFERENCED':
+      return refs.length === 0 ? 'schema-live-unreferenced' : 'schema-live-unreferenced-blocked'
+    case 'VERIFY_UNREACHABLE_THEN_RETIRE':
+      if (!reachable && !index.graphComplete) return 'schema-verify-unproven'
+      if (!reachable) return 'schema-verify-dead-module'
+      if (blockers.length > 0) return 'schema-verify-reachable-blocked'
+      return 'schema-evolve-reachable'
+    default:
+      throw new Error(`no schema batch for ${entry.table} (${disposition})`)
+  }
+}
+
+function mutationExecution(batchId: string, liveCount: number, spec: BatchSpec): Execution {
+  if (liveCount === 0) return 'baseline-rewrite'
+  return spec.execution
+}
+
+export function buildSchemaMutationBatches(live: Record<string, number> = scanUnscopedMutations()): BatchProgram {
+  const census = loadCensus()
+  const disposition = loadDisposition()
+  const declared = declaredByName()
+  const enums = enumVariants()
+  const index = buildReachIndex(census.map((entry) => entry.table))
+  const schema: SchemaAssignment[] = census.map((entry) => {
+    const record = disposition[entry.table]
+    if (!record) throw new Error(`census table has no disposition: ${entry.table}`)
+    const blockers = evolutionBlockers(entry.table, entry, declared, enums)
+    return {
+      table: entry.table,
+      batchId: schemaBatch(entry, record.disposition, index, blockers),
+      disposition: record.disposition,
+      registryClass: record.registryClass,
+      defects: [...entry.defects],
+      reachable: tableIsReachable(index, entry.table),
+      djangoDefined: index.djangoTables.has(entry.table),
+      blockers,
+    }
+  }).sort((a, b) => a.table.localeCompare(b.table))
+
+  const baseline = JSON.parse(readFileSync(BASELINE, 'utf8')).entries as Record<string, number>
+  const regressions = Object.entries(live).filter(([key, count]) => (baseline[key] ?? 0) < count)
+  if (regressions.length) throw new Error(`mutation scan regressed: ${regressions.map(([key]) => key).join(', ')}`)
+  const unknown = Object.keys(baseline).filter((key) => !MUTATION_BATCH[key])
+  if (unknown.length) throw new Error(`mutation baseline key has no batch: ${unknown.join(', ')}`)
+
+  const byId = new Map(BATCHES.map((batch) => [batch.id, batch]))
+  const clcReachable = index.reachable.has('lib/services/external-data/clc-partnership-service.ts')
+  const mutations: MutationAssignment[] = Object.entries(baseline).sort(([a], [b]) => a.localeCompare(b)).map(([key, baselineCount]) => {
+    const [file, table] = [key.slice(0, key.lastIndexOf('|')), key.slice(key.lastIndexOf('|') + 1)]
+    const batchId = MUTATION_BATCH[key]
+    const spec = byId.get(batchId)
+    if (!spec) throw new Error(`missing batch spec ${batchId}`)
+    const liveCount = live[key] ?? 0
+    let action = spec.action
+    if (batchId === 'mutation-clc-sync-log') {
+      action = clcReachable
+        ? 'A production entry reaches clc-partnership-service.ts. Add the caller organizationId to the clc_sync_log update WHERE and to the insert that creates the row.'
+        : 'No production entry reaches clc-partnership-service.ts. Delete the uncalled clc_sync_log update. Do not leave a caller.'
+    }
+    if (liveCount === 0) {
+      action = 'The live scan no longer counts this statement. Do not edit it. Shrink the baseline only through a reviewed regeneration after the scan stays clear.'
+    }
+    return {
+      key,
+      file,
+      table,
+      batchId,
+      baselineCount,
+      liveCount,
+      execution: mutationExecution(batchId, liveCount, spec),
+      shrink: 'mutation-baseline',
+      action,
+    }
+  })
+
+  const createRelation = schema.filter((entry) => entry.batchId === 'schema-create-relation').map((entry) => entry.table).sort()
+  const excluded = [...(JSON.parse(readFileSync(ORACLE, 'utf8')).dispositionExcluded as string[])].sort()
+  if (createRelation.join() !== excluded.join()) {
+    throw new Error(`CREATE_RELATION_REQUIRED drifted from dispositionExcluded: ${createRelation.join(', ')} vs ${excluded.join(', ')}`)
+  }
+
+  const used = new Set([...schema.map((entry) => entry.batchId), ...mutations.map((entry) => entry.batchId)])
+  const batches = BATCHES.filter((batch) => used.has(batch.id)).map((batch) => {
+    const schemaEntries = schema.filter((entry) => entry.batchId === batch.id)
+    const mutationEntries = mutations.filter((entry) => entry.batchId === batch.id)
+    const execution = mutationEntries.length && mutationEntries.every((entry) => entry.execution === 'baseline-rewrite')
+      ? 'baseline-rewrite' as Execution
+      : batch.execution
+    return {
+      ...batch,
+      execution,
+      entryCount: schemaEntries.length + mutationEntries.length,
+      statementCount: mutationEntries.reduce((sum, entry) => sum + entry.baselineCount, 0),
+    }
+  })
+
+  return {
+    schemaVersion: 1,
+    mission: 'UE-CURSOR-FINAL-CLOSURE',
+    applyNow: false,
+    note: NOTE,
+    censusCount: census.length,
+    mutationBaselineSum: Object.values(baseline).reduce((sum, count) => sum + count, 0),
+    mutationLiveSum: mutations.reduce((sum, entry) => sum + entry.liveCount, 0),
+    graphComplete: index.graphComplete,
+    unresolvedCount: index.unresolved.length,
+    unresolvedSample: index.unresolved.slice(0, 30),
+    batches,
+    schema,
+    mutations,
+  }
+}
