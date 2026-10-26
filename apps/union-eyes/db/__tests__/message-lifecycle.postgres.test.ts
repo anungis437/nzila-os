@@ -6,15 +6,19 @@
  * (lib/messaging/thread-lifecycle.pglite.test.ts) has no real roles, RLS or manifest grants.
  *
  * Skipped unless UE_AUTHORITY_COMBINED_URL points at an ADMIN connection to a FRESH disposable database (same preparation
- * as thread-assignment.postgres.test.ts). The suite installs a fault trigger on the audit tables of that database. Not a
- * staging isolation pass, not a credentialed acceptance.
+ * as thread-assignment.postgres.test.ts), including platform 0013, 0014, 0025, 0029 and 0030 and RLS 0020, 0021
+ * and 0024. The suite installs a fault trigger on the audit tables of that database. The issuance block below
+ * is skipped with the rest of this file: it adopts a governance-review rule and issues mandates through the
+ * store. It is not a PASS until this command is run. Not a staging isolation pass, not a credentialed acceptance.
  */
 import { randomUUID } from 'node:crypto'
 import pg from 'pg'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { sql } from 'drizzle-orm'
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
-import { seedMembership, type Db } from './authority-kernel-harness'
+import { changeMandate } from '../../lib/authority/store/lifecycle'
+import { seedMembership, U as AuthorityUser, type Db } from './authority-kernel-harness'
+import { kit } from './authority-kernel-testkit'
 import type { CaseActor } from '@/lib/cases/case-authorization'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 
@@ -550,6 +554,108 @@ describe.skipIf(!URL)('conversation lifecycle, retention and read markers on the
       // Another tenant's session sees no marker.
       const foreignMember = actor(U.foreignMember, 'member', ORG_B)
       expect((await raw<{ rows: Array<{ n: number }> }>(foreignMember, sql`SELECT count(*)::int AS n FROM message_thread_reads`)).rows[0].n).toBe(0)
+    })
+  })
+
+  describe('a governance-review mandate issued through the ceremony', () => {
+    const reviewer = actor(AuthorityUser.reviewer, 'member')
+    const executive = actor(AuthorityUser.president, 'member')
+    let threadId = ''
+    let holdMandate = ''
+    let retentionMandate = ''
+    const authorityDb = (): Db => ({ exec: (s) => admin.query(s), query: (s, p) => admin.query(s, p as never[]) as never })
+
+    beforeAll(async () => {
+      const d = authorityDb()
+      for (const [user, role] of [
+        [AuthorityUser.president, 'president'],
+        [AuthorityUser.vp, 'vice_president'],
+        [AuthorityUser.treasurer, 'secretary_treasurer'],
+        [AuthorityUser.reviewer, 'member'],
+      ] as const) {
+        await seedMembership(d, user, ORG_A, role)
+      }
+      const k = kit(d)
+      await k.adoptDefaultRules(ORG_A, (domain, operation) => domain === 'governance_review' && (operation === 'issue' || operation === 'revoke'))
+      threadId = await mkThread(U.member)
+      holdMandate = await k.grantMandate(
+        'governance_review',
+        AuthorityUser.reviewer,
+        ['place_legal_hold', 'release_legal_hold'],
+        { scope: { resourceIds: [threadId] } },
+        ORG_A,
+      )
+      retentionMandate = await k.grantMandate(
+        'governance_review',
+        AuthorityUser.reviewer,
+        ['adopt_retention', 'read_retention_policy'],
+        { scope: { resourceIds: [ORG_A] } },
+        ORG_A,
+      )
+    }, 120_000)
+
+    it('lets the mandate holder place and release a hold, and an executive title still cannot', async () => {
+      expect(await as(executive, (tx) => lifecycle!.setLegalHold(tx, executive, threadId, 'place', 'HOLD-ISSUED-1'))).toEqual({ kind: 'forbidden' })
+      expect(await lifecycleRows(threadId)).toBe(0)
+      expect(await as(reviewer, (tx) => lifecycle!.setLegalHold(tx, reviewer, threadId, 'place', 'HOLD-ISSUED-1'))).toEqual({ kind: 'ok', held: true })
+      expect(await lifecycleRows(threadId)).toBe(1)
+      expect(await audits('messages.thread.hold_place', threadId)).toBe(1)
+      const stored = await admin.query<{ reference: string; metadata: string }>(
+        `SELECT l.reference, coalesce(a.metadata::text, '') AS metadata
+           FROM message_thread_lifecycle l
+           JOIN audit_security.audit_logs a ON a.resource_id = l.thread_id AND a.action = 'messages.thread.hold_place'
+          WHERE l.thread_id = $1`,
+        [threadId],
+      )
+      expect(stored.rows[0].reference).toBe('HOLD-ISSUED-1')
+      expect(stored.rows[0].metadata).not.toContain('HOLD-ISSUED-1')
+    })
+
+    it('rolls a release back when its audit write fails and leaves the hold in place', async () => {
+      await failAudit('messages.thread.hold_release')
+      await rejectsWith(as(reviewer, (tx) => lifecycle!.setLegalHold(tx, reviewer, threadId, 'release', 'HOLD-ISSUED-1')), /injected audit fault/)
+      expect((await admin.query(`SELECT action FROM message_thread_lifecycle WHERE thread_id = $1 ORDER BY seq`, [threadId])).rows.map((r) => r.action)).toEqual(['hold_place'])
+      expect(await audits('messages.thread.hold_release', threadId)).toBe(0)
+      await clearFaults()
+      expect(await as(reviewer, (tx) => lifecycle!.setLegalHold(tx, reviewer, threadId, 'release', 'HOLD-ISSUED-1'))).toEqual({ kind: 'ok', held: false })
+    })
+
+    it('ends the hold power when that mandate is revoked', async () => {
+      const k = kit(authorityDb())
+      await k.as(AuthorityUser.president, ORG_A)((t) => changeMandate(t, k.deps, {
+        organizationId: ORG_A, issuerUserId: AuthorityUser.president, mandateId: holdMandate, change: 'revoke',
+      }))
+      const before = await lifecycleRows(threadId)
+      expect(await as(reviewer, (tx) => lifecycle!.setLegalHold(tx, reviewer, threadId, 'place', 'HOLD-ISSUED-2'))).toEqual({ kind: 'forbidden' })
+      expect(await lifecycleRows(threadId)).toBe(before)
+    })
+
+    it('records retention for a mandate naming the organization and rolls a failed audit back', async () => {
+      expect(await as(executive, (tx) => lifecycle!.readRetentionPolicy(tx, executive))).toEqual({ kind: 'forbidden' })
+      const read = await as(reviewer, (tx) => lifecycle!.readRetentionPolicy(tx, reviewer))
+      expect(read.kind).toBe('ok')
+      const before = await count(`SELECT count(*) AS n FROM message_retention_policies WHERE organization_id = $1`, [ORG_A])
+      const adopted = await as(reviewer, (tx) => lifecycle!.adoptRetentionPolicy(tx, reviewer, {
+        retentionDays: 30, policyReference: 'Policy issued', authorityReference: 'Resolution issued',
+      }))
+      expect(adopted).toMatchObject({ kind: 'ok', policy: { retentionDays: 30 } })
+      expect(await count(`SELECT count(*) AS n FROM message_retention_policies WHERE organization_id = $1 AND superseded_at IS NULL`, [ORG_A])).toBe(1)
+      expect(await audits('messages.retention.adopt')).toBeGreaterThanOrEqual(1)
+      await failAudit('messages.retention.adopt')
+      await rejectsWith(as(reviewer, (tx) => lifecycle!.adoptRetentionPolicy(tx, reviewer, {
+        retentionDays: 60, policyReference: 'Policy refused', authorityReference: 'Resolution refused',
+      })), /injected audit fault/)
+      expect(await count(`SELECT count(*) AS n FROM message_retention_policies WHERE organization_id = $1`, [ORG_A])).toBe(before + 1)
+      const live = await admin.query<{ policy_reference: string }>(
+        `SELECT policy_reference FROM message_retention_policies WHERE organization_id = $1 AND superseded_at IS NULL`,
+        [ORG_A],
+      )
+      expect(live.rows.map((r) => r.policy_reference)).toEqual(['Policy issued'])
+      const k = kit(authorityDb())
+      await k.as(AuthorityUser.president, ORG_A)((t) => changeMandate(t, k.deps, {
+        organizationId: ORG_A, issuerUserId: AuthorityUser.president, mandateId: retentionMandate, change: 'revoke',
+      }))
+      expect(await as(reviewer, (tx) => lifecycle!.readRetentionPolicy(tx, reviewer))).toEqual({ kind: 'forbidden' })
     })
   })
 })
