@@ -647,6 +647,7 @@ export async function POST(request: NextRequest) {
                       eq(workbooks.id, workbookId),
                       isNull(workbooks.stripePaymentRef),
                       isNull(workbooks.claimToken),
+                      isNull(workbooks.claimedByUserId),
                     ),
                   )
                   .returning({ id: workbooks.id })

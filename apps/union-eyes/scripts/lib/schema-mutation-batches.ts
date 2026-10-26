@@ -120,8 +120,8 @@ const BATCHES: BatchSpec[] = [
     ratchet: 'mutation-scope',
     execution: 'cursor',
     shrink: 'mutation-baseline',
-    action: 'A workbook has no organization until it is claimed. Add isNull(claimedByUserId) beside the existing credential guards on the Stripe fulfilment update and the claim update. Fulfilment still requires a null payment reference and a null claim token. Claim still requires the single-use token, a null claimedAt, and an unexpired token. Do not invent an organization column.',
-    proof: 'apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts',
+    action: 'A workbook has no organization until it is claimed. The Stripe fulfilment update and the claim update require claimedByUserId to be null beside the existing credential guards. Fulfilment still requires a null payment reference and a null claim token. Claim still requires the single-use token, a null claimedAt, and an unexpired token, and writes the organization returned for the authenticated user. In-process PGlite proves one of two serialized transactions wins and the other caller organization is not stored. Native two-session proof stays READY_FOR_VS_EXECUTION. Do not invent an organization column.',
+    proof: 'apps/union-eyes/db/__tests__/workbook-unclaimed-owner.pglite.test.ts',
   },
   {
     id: 'mutation-location-retention',

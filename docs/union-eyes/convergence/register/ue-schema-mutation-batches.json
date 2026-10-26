@@ -5,8 +5,8 @@
   "note": "Derived batch program for every remaining schema-census entry and the original mutation-scope statements. Program applyNow stays false. A mutation batch sets applyNow only when the live scan no longer counts every source statement in that batch, and the baseline file then shrinks to that scan. This file does not remove a census entry. Hold batches do not shrink either ratchet. Do not edit the mutation scanner or the route-coverage scanner to change a count. Do not regenerate a baseline except to record statements the live scan no longer counts. Finance issuance stays fail-closed. services/financial-service is not an approval path.",
   "censusCount": 231,
   "sourceMutationBaselineSum": 13,
-  "mutationBaselineSum": 4,
-  "mutationLiveSum": 4,
+  "mutationBaselineSum": 2,
+  "mutationLiveSum": 2,
   "graphComplete": true,
   "unresolvedCount": 0,
   "unresolvedSample": [],
@@ -54,14 +54,14 @@
       "id": "mutation-workbook-unclaimed",
       "order": 4,
       "ratchet": "mutation-scope",
-      "execution": "cursor",
+      "execution": "implemented",
       "shrink": "mutation-baseline",
-      "action": "A workbook has no organization until it is claimed. Add isNull(claimedByUserId) beside the existing credential guards on the Stripe fulfilment update and the claim update. Fulfilment still requires a null payment reference and a null claim token. Claim still requires the single-use token, a null claimedAt, and an unexpired token. Do not invent an organization column.",
-      "proof": "apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts",
-      "applyNow": false,
+      "action": "A workbook has no organization until it is claimed. The Stripe fulfilment update and the claim update require claimedByUserId to be null beside the existing credential guards. Fulfilment still requires a null payment reference and a null claim token. Claim still requires the single-use token, a null claimedAt, and an unexpired token, and writes the organization returned for the authenticated user. In-process PGlite proves one of two serialized transactions wins and the other caller organization is not stored. Native two-session proof stays READY_FOR_VS_EXECUTION. Do not invent an organization column.",
+      "proof": "apps/union-eyes/db/__tests__/workbook-unclaimed-owner.pglite.test.ts",
+      "applyNow": true,
       "entryCount": 2,
       "statementCount": 2,
-      "liveStatementCount": 2
+      "liveStatementCount": 0
     },
     {
       "id": "mutation-location-retention",
@@ -3228,10 +3228,10 @@
       "table": "workbooks",
       "batchId": "mutation-workbook-unclaimed",
       "baselineCount": 1,
-      "liveCount": 1,
-      "execution": "cursor",
+      "liveCount": 0,
+      "execution": "implemented",
       "shrink": "mutation-baseline",
-      "action": "A workbook has no organization until it is claimed. Add isNull(claimedByUserId) beside the existing credential guards on the Stripe fulfilment update and the claim update. Fulfilment still requires a null payment reference and a null claim token. Claim still requires the single-use token, a null claimedAt, and an unexpired token. Do not invent an organization column."
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
     },
     {
       "key": "app/api/workbook/[id]/claim/route.ts|workbooks",
@@ -3239,10 +3239,10 @@
       "table": "workbooks",
       "batchId": "mutation-workbook-unclaimed",
       "baselineCount": 1,
-      "liveCount": 1,
-      "execution": "cursor",
+      "liveCount": 0,
+      "execution": "implemented",
       "shrink": "mutation-baseline",
-      "action": "A workbook has no organization until it is claimed. Add isNull(claimedByUserId) beside the existing credential guards on the Stripe fulfilment update and the claim update. Fulfilment still requires a null payment reference and a null claim token. Claim still requires the single-use token, a null claimedAt, and an unexpired token. Do not invent an organization column."
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
     },
     {
       "key": "lib/pilot/pilot-ownership.ts|pilot_applications",
@@ -3334,28 +3334,6 @@
     }
   ],
   "mutations": [
-    {
-      "key": "app/api/payments/webhooks/stripe/route.ts|workbooks",
-      "file": "app/api/payments/webhooks/stripe/route.ts",
-      "table": "workbooks",
-      "batchId": "mutation-workbook-unclaimed",
-      "baselineCount": 1,
-      "liveCount": 1,
-      "execution": "cursor",
-      "shrink": "mutation-baseline",
-      "action": "A workbook has no organization until it is claimed. Add isNull(claimedByUserId) beside the existing credential guards on the Stripe fulfilment update and the claim update. Fulfilment still requires a null payment reference and a null claim token. Claim still requires the single-use token, a null claimedAt, and an unexpired token. Do not invent an organization column."
-    },
-    {
-      "key": "app/api/workbook/[id]/claim/route.ts|workbooks",
-      "file": "app/api/workbook/[id]/claim/route.ts",
-      "table": "workbooks",
-      "batchId": "mutation-workbook-unclaimed",
-      "baselineCount": 1,
-      "liveCount": 1,
-      "execution": "cursor",
-      "shrink": "mutation-baseline",
-      "action": "A workbook has no organization until it is claimed. Add isNull(claimedByUserId) beside the existing credential guards on the Stripe fulfilment update and the claim update. Fulfilment still requires a null payment reference and a null claim token. Claim still requires the single-use token, a null claimedAt, and an unexpired token. Do not invent an organization column."
-    },
     {
       "key": "services/geofence-privacy-service.ts|geofence_events",
       "file": "services/geofence-privacy-service.ts",

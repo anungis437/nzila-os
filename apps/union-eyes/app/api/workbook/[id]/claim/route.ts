@@ -82,6 +82,7 @@ export async function POST(
             eq(workbooks.id, workbookId),
             eq(workbooks.claimToken, claimToken),
             isNull(workbooks.claimedAt),
+            isNull(workbooks.claimedByUserId),
             gt(workbooks.claimTokenExpiresAt, claimedAt),
           ),
         )
