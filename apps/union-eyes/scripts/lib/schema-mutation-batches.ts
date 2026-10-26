@@ -129,7 +129,7 @@ const BATCHES: BatchSpec[] = [
     ratchet: 'mutation-scope',
     execution: 'cursor',
     shrink: 'mutation-baseline',
-    action: 'Rewrite the system retention sweep so each delete names the owning userId and expiresAt. Take the user ids from the expired rows, then delete that user inside the same transaction as the deletion-log insert. Do not use userId IS NOT NULL as the only predicate. The system role still removes every member expired row. The native retention proof stays READY_FOR_VS_EXECUTION.',
+    action: 'Each retention delete names the owning userId and expiresAt. The sweep reads the expired owners, deletes that user\'s expired rows, and writes one deletion log in the same transaction. A runtime session cannot see another member\'s rows, so complete coverage still requires the system role. In-process PGlite proves both members\' expired rows go, live rows stay, and a failed log rolls the deletes back. Native combined-schema proof stays READY_FOR_VS_EXECUTION.',
     proof: 'apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts',
   },
   {

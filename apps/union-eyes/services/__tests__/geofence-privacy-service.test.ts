@@ -214,15 +214,23 @@ describe('geofence-privacy-service', () => {
   });
 
   describe('deleteExpiredLocationData', () => {
-    it('deletes expired records and logs when there are deletions', async () => {
-      pushSel([{ id: 't1' }], [{ id: 'e1' }], []); // tracking delete, events delete, deletion log
+    it('deletes each expired owner and logs when there are deletions', async () => {
+      pushSel(
+        [{ userId: 'u1' }],
+        [{ userId: 'u2' }],
+        [{ id: 't1' }],
+        [],
+        [],
+        [{ id: 'e1' }],
+        [],
+      );
       const r = await S.deleteExpiredLocationData();
       expect(r.trackingRecordsDeleted).toBe(1);
       expect(r.eventRecordsDeleted).toBe(1);
     });
 
     it('does not log when there is nothing to delete', async () => {
-      pushSel([], []); // both deletes empty, no log
+      pushSel([], []);
       const r = await S.deleteExpiredLocationData();
       expect(r.trackingRecordsDeleted).toBe(0);
       expect(r.eventRecordsDeleted).toBe(0);

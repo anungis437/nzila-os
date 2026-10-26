@@ -384,34 +384,43 @@ export class GeofencePrivacyService {
    */
   static async deleteExpiredLocationData(tx: RLSTx = db) {
     const now = new Date();
+    const expiredTracking = await tx
+      .select({ userId: locationTracking.userId })
+      .from(locationTracking)
+      .where(lte(locationTracking.expiresAt, now));
+    const expiredEvents = await tx
+      .select({ userId: geofenceEvents.userId })
+      .from(geofenceEvents)
+      .where(lte(geofenceEvents.expiresAt, now));
+    const userIds = [...new Set([...expiredTracking, ...expiredEvents].map((row) => row.userId))];
 
-    // Delete expired location tracking records
-    const deletedTracking = await tx
-      .delete(locationTracking)
-      .where(lte(locationTracking.expiresAt, now))
-      .returning({ id: locationTracking.id });
+    let trackingRecordsDeleted = 0;
+    let eventRecordsDeleted = 0;
+    for (const userId of userIds) {
+      const deletedTracking = await tx
+        .delete(locationTracking)
+        .where(and(eq(locationTracking.userId, userId), lte(locationTracking.expiresAt, now)))
+        .returning({ id: locationTracking.id });
+      const deletedEvents = await tx
+        .delete(geofenceEvents)
+        .where(and(eq(geofenceEvents.userId, userId), lte(geofenceEvents.expiresAt, now)))
+        .returning({ id: geofenceEvents.id });
+      trackingRecordsDeleted += deletedTracking.length;
+      eventRecordsDeleted += deletedEvents.length;
+    }
 
-    // Delete expired geofence events
-    const deletedEvents = await tx
-      .delete(geofenceEvents)
-      .where(lte(geofenceEvents.expiresAt, now))
-      .returning({ id: geofenceEvents.id });
-
-    // Log deletion
-    if (deletedTracking.length > 0 || deletedEvents.length > 0) {
+    // The caller passes the system transaction. Every per-user delete and this log commit or roll back together.
+    if (trackingRecordsDeleted > 0 || eventRecordsDeleted > 0) {
       await tx.insert(locationDeletionLog).values({
         deletionType: "auto_24hr",
         deletionReason: "24-hour retention policy (automatic cleanup)",
-        recordCount: (deletedTracking.length + deletedEvents.length).toString(),
+        recordCount: (trackingRecordsDeleted + eventRecordsDeleted).toString(),
         oldestRecordDate: now,
         newestRecordDate: now,
       });
     }
 
-    return {
-      trackingRecordsDeleted: deletedTracking.length,
-      eventRecordsDeleted: deletedEvents.length,
-    };
+    return { trackingRecordsDeleted, eventRecordsDeleted };
   }
 
   /**

@@ -1,8 +1,5 @@
 {
   "schemaVersion": 1,
   "note": "Unscoped UPDATE/DELETE on tenant-scoped relations. Entries may only be removed or reduced. See UE-CONV-K-006.",
-  "entries": {
-    "services/geofence-privacy-service.ts|geofence_events": 1,
-    "services/geofence-privacy-service.ts|location_tracking": 1
-  }
+  "entries": {}
 }

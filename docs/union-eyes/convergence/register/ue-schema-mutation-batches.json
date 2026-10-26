@@ -5,8 +5,8 @@
   "note": "Derived batch program for every remaining schema-census entry and the original mutation-scope statements. Program applyNow stays false. A mutation batch sets applyNow only when the live scan no longer counts every source statement in that batch, and the baseline file then shrinks to that scan. This file does not remove a census entry. Hold batches do not shrink either ratchet. Do not edit the mutation scanner or the route-coverage scanner to change a count. Do not regenerate a baseline except to record statements the live scan no longer counts. Finance issuance stays fail-closed. services/financial-service is not an approval path.",
   "censusCount": 231,
   "sourceMutationBaselineSum": 13,
-  "mutationBaselineSum": 2,
-  "mutationLiveSum": 2,
+  "mutationBaselineSum": 0,
+  "mutationLiveSum": 0,
   "graphComplete": true,
   "unresolvedCount": 0,
   "unresolvedSample": [],
@@ -67,14 +67,14 @@
       "id": "mutation-location-retention",
       "order": 5,
       "ratchet": "mutation-scope",
-      "execution": "cursor",
+      "execution": "implemented",
       "shrink": "mutation-baseline",
-      "action": "Rewrite the system retention sweep so each delete names the owning userId and expiresAt. Take the user ids from the expired rows, then delete that user inside the same transaction as the deletion-log insert. Do not use userId IS NOT NULL as the only predicate. The system role still removes every member expired row. The native retention proof stays READY_FOR_VS_EXECUTION.",
+      "action": "Each retention delete names the owning userId and expiresAt. The sweep reads the expired owners, deletes that user's expired rows, and writes one deletion log in the same transaction. A runtime session cannot see another member's rows, so complete coverage still requires the system role. In-process PGlite proves both members' expired rows go, live rows stay, and a failed log rolls the deletes back. Native combined-schema proof stays READY_FOR_VS_EXECUTION.",
       "proof": "apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts",
-      "applyNow": false,
+      "applyNow": true,
       "entryCount": 2,
       "statementCount": 2,
-      "liveStatementCount": 2
+      "liveStatementCount": 0
     },
     {
       "id": "schema-retire-declaration",
@@ -3316,10 +3316,10 @@
       "table": "geofence_events",
       "batchId": "mutation-location-retention",
       "baselineCount": 1,
-      "liveCount": 1,
-      "execution": "cursor",
+      "liveCount": 0,
+      "execution": "implemented",
       "shrink": "mutation-baseline",
-      "action": "Rewrite the system retention sweep so each delete names the owning userId and expiresAt. Take the user ids from the expired rows, then delete that user inside the same transaction as the deletion-log insert. Do not use userId IS NOT NULL as the only predicate. The system role still removes every member expired row. The native retention proof stays READY_FOR_VS_EXECUTION."
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
     },
     {
       "key": "services/geofence-privacy-service.ts|location_tracking",
@@ -3327,34 +3327,11 @@
       "table": "location_tracking",
       "batchId": "mutation-location-retention",
       "baselineCount": 1,
-      "liveCount": 1,
-      "execution": "cursor",
+      "liveCount": 0,
+      "execution": "implemented",
       "shrink": "mutation-baseline",
-      "action": "Rewrite the system retention sweep so each delete names the owning userId and expiresAt. Take the user ids from the expired rows, then delete that user inside the same transaction as the deletion-log insert. Do not use userId IS NOT NULL as the only predicate. The system role still removes every member expired row. The native retention proof stays READY_FOR_VS_EXECUTION."
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
     }
   ],
-  "mutations": [
-    {
-      "key": "services/geofence-privacy-service.ts|geofence_events",
-      "file": "services/geofence-privacy-service.ts",
-      "table": "geofence_events",
-      "batchId": "mutation-location-retention",
-      "baselineCount": 1,
-      "liveCount": 1,
-      "execution": "cursor",
-      "shrink": "mutation-baseline",
-      "action": "Rewrite the system retention sweep so each delete names the owning userId and expiresAt. Take the user ids from the expired rows, then delete that user inside the same transaction as the deletion-log insert. Do not use userId IS NOT NULL as the only predicate. The system role still removes every member expired row. The native retention proof stays READY_FOR_VS_EXECUTION."
-    },
-    {
-      "key": "services/geofence-privacy-service.ts|location_tracking",
-      "file": "services/geofence-privacy-service.ts",
-      "table": "location_tracking",
-      "batchId": "mutation-location-retention",
-      "baselineCount": 1,
-      "liveCount": 1,
-      "execution": "cursor",
-      "shrink": "mutation-baseline",
-      "action": "Rewrite the system retention sweep so each delete names the owning userId and expiresAt. Take the user ids from the expired rows, then delete that user inside the same transaction as the deletion-log insert. Do not use userId IS NOT NULL as the only predicate. The system role still removes every member expired row. The native retention proof stays READY_FOR_VS_EXECUTION."
-    }
-  ]
+  "mutations": []
 }
