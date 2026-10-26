@@ -4,7 +4,6 @@
   "entries": {
     "app/api/payments/webhooks/stripe/route.ts|workbooks": 1,
     "app/api/workbook/[id]/claim/route.ts|workbooks": 1,
-    "lib/pilot/pilot-ownership.ts|pilot_applications": 1,
     "services/geofence-privacy-service.ts|geofence_events": 1,
     "services/geofence-privacy-service.ts|location_tracking": 1
   }

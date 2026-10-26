@@ -111,7 +111,7 @@ const BATCHES: BatchSpec[] = [
     ratchet: 'mutation-scope',
     execution: 'cursor',
     shrink: 'mutation-baseline',
-    action: 'The first pilot bind already names verifiedOrganizationId. The rebind compares that column with the previous organization. Comments inside set() place .where( outside the scanner window of 600 characters, so the live scan still counts the statement. Keep the compare-and-set and put that predicate where the scanner reads it. Do not widen the scanner window and do not edit the mutation scanner.',
+    action: 'The rebind compares verifiedOrganizationId with the previous organization. The scanner ignores comments when it measures the distance to .where( and when it reads the predicate, so a comment cannot hide that predicate and cannot supply an organization token. Whitespace between statements still counts. The compare-and-set is unchanged.',
     proof: 'apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts',
   },
   {
