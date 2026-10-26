@@ -2443,7 +2443,7 @@
       "actor": "Financial officer",
       "businessOutcome": "Hold the financial-officer identifiers that the repository cites only as a range, without inventing titles.",
       "sourceStatus": "SOURCE_UNSPECIFIED",
-      "gap": "F01–F28 and FJ01–FJ10 form a 38-identifier universe in the financial-officer disposition. F08, F09, F10 and F19 each carry their own statement. F11–F14 and F17–F18 carry shared group labels only. The remaining 28 identifiers (F01–F07, F15, F16, F20–F28, FJ01–FJ10) are cited only as range members and have no title or outcome. No financial-officer canonical file exists in the repository. Gate 0 gives none of them a title."
+      "gap": "F01–F28 and FJ01–FJ10 form a 38-identifier universe in the financial-officer disposition. Gate 0A searched all 526 refs and the repository history and recovered no Financial Officer canonical. Four identifiers (F08, F09, F10, F19) carry their own statement; F08 and F09 give a status statement and no domain title. Six (F11–F14, F17, F18) carry shared labels: four identifiers share three labels (budgets, expenses, vendors), so no pairing was made. Twenty-eight (F01–F07, F15, F16, F20–F28, FJ01–FJ10) are cited only as range members and the disposition says only that all other domains are NOT_PROVEN. Three further references have no identifier (seven navigation destinations of which three are named, organization scenarios and related acceptance topics). The separation of viewing, preparation, approval, payment execution, reconciliation, mandate administration, and audit is recorded as evidence in ue-gate0a-persona-source-recovery.json with no institutional requirement attached. Gate 0 gives none of the unspecified identifiers a title."
     },
     {
       "relatedRegisterIds": [],
@@ -2488,7 +2488,7 @@
       "actor": "Representative",
       "businessOutcome": "Lock the representative R01–R24 identifiers once the frozen UE-REPRESENTATIVE-CANONICAL-2.2 is in the repository.",
       "sourceStatus": "SOURCE_UNSPECIFIED",
-      "gap": "The Representative 2.2 disposition cites UE-REPRESENTATIVE-CANONICAL-2.2 (FROZEN), and that canonical file is not in the repository. The disposition gives 7 navigation destinations and a 25-row action proof matrix, and those 32 rows are mapped by source locator. Of R01–R24, 14 identifiers appear only as a status mention or range member without a title (R03–R06, R10, R16–R24), and 10 are not mentioned at all (R01, R02, R07–R09, R11–R15). Gate 0 gives none of the 24 a title."
+      "gap": "The Representative 2.2 disposition cites UE-REPRESENTATIVE-CANONICAL-2.2 (FROZEN). Gate 0A searched all 526 refs and the repository history and recovered no canonical. The disposition gives 7 navigation destinations and a 25-row action proof matrix, mapped by source locator (32 individually defined). The first version of that disposition (571784d58, replaced at a0e7753fd) carries titles for R01 identity/mandates, R02 daily workload, R09 member relationships, R13 evidence/records, R14 tasks/deadlines, R15 agreements and R18 WorkAid/specialists, so those 7 are individually defined (title only; no required behavior). R03–R08, R10–R12, R16, R17 and R19–R24 (17 identifiers) stay grouped only: R03–R06 share one parenthetical, R07/R08 share one label cell, R11/R12 share one label, and the rest carry a status and no label. R18 has conflicting statuses (BLOCKED in the first version, MISSING in the current one) and stays an unresolved conflict. Journeys A–G and the institutional scenarios have no identifier."
     },
     {
       "relatedRegisterIds": [],
@@ -2584,7 +2584,7 @@
       "actor": "Steward",
       "businessOutcome": "Lock steward action identifiers once a frozen steward canonical exists in the repository.",
       "sourceStatus": "SOURCE_UNSPECIFIED",
-      "gap": "No steward canonical, steward action-identifier matrix, or steward disposition exists in the repository. The only steward statements are the staff navigation floor in role-experience.ts (Knowledge & Guidance is hidden below steward) and the Representative 2.2 policy-level note that a steward is level 1. Gate 0 invents no steward action. The Steward persona cannot be accepted at Gate 10 until the frozen canonical is supplied."
+      "gap": "No steward canonical, steward action-identifier matrix, or steward disposition exists in the repository or its history (Gate 0A searched 526 refs). Eight evidence items are recorded and none defines an action: the Representative 2.2 disposition describes one combined steward and staff experience and puts the steward at level 1, the repairs list what a steward must not hold or see, and the role exists in code. The reading that the Steward is the level-1 role inside Representative 2.2 is an unverified inference and needs an institutional decision. Gate 0 invents no steward action. The Steward persona cannot be accepted at Gate 10 until the frozen canonical is supplied or that decision is recorded."
     },
     {
       "relatedRegisterIds": [],
@@ -3083,16 +3083,16 @@
       "persona": "representative",
       "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
       "actionId": "R01",
-      "definition": "UNSPECIFIED",
-      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
       "mandatory": true
     },
     {
       "persona": "representative",
       "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
       "actionId": "R02",
-      "definition": "UNSPECIFIED",
-      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
       "mandatory": true
     },
     {
@@ -3131,7 +3131,7 @@
       "persona": "representative",
       "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
       "actionId": "R07",
-      "definition": "UNSPECIFIED",
+      "definition": "GROUPED_ONLY",
       "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
       "mandatory": true
     },
@@ -3139,7 +3139,7 @@
       "persona": "representative",
       "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
       "actionId": "R08",
-      "definition": "UNSPECIFIED",
+      "definition": "GROUPED_ONLY",
       "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
       "mandatory": true
     },
@@ -3147,8 +3147,8 @@
       "persona": "representative",
       "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
       "actionId": "R09",
-      "definition": "UNSPECIFIED",
-      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
       "mandatory": true
     },
     {
@@ -3163,7 +3163,7 @@
       "persona": "representative",
       "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
       "actionId": "R11",
-      "definition": "UNSPECIFIED",
+      "definition": "GROUPED_ONLY",
       "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
       "mandatory": true
     },
@@ -3171,7 +3171,7 @@
       "persona": "representative",
       "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
       "actionId": "R12",
-      "definition": "UNSPECIFIED",
+      "definition": "GROUPED_ONLY",
       "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
       "mandatory": true
     },
@@ -3179,24 +3179,24 @@
       "persona": "representative",
       "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
       "actionId": "R13",
-      "definition": "UNSPECIFIED",
-      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-F-002",
       "mandatory": true
     },
     {
       "persona": "representative",
       "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
       "actionId": "R14",
-      "definition": "UNSPECIFIED",
-      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-DEADLINE-OVERDUE",
       "mandatory": true
     },
     {
       "persona": "representative",
       "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
       "actionId": "R15",
-      "definition": "UNSPECIFIED",
-      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
       "mandatory": true
     },
     {
@@ -3219,8 +3219,8 @@
       "persona": "representative",
       "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
       "actionId": "R18",
-      "definition": "GROUPED_ONLY",
-      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "definition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-G-002",
       "mandatory": true
     },
     {
@@ -4233,6 +4233,9 @@
       "groupedOnly": [],
       "unspecified": [],
       "resolved": true,
+      "definitionSources": {},
+      "conflicts": [],
+      "unidentifiedReferences": [],
       "trackingCapability": null
     },
     {
@@ -4245,6 +4248,9 @@
       "groupedOnly": [],
       "unspecified": [],
       "resolved": false,
+      "definitionSources": {},
+      "conflicts": [],
+      "unidentifiedReferences": [],
       "trackingCapability": "UE-OMIT-STEWARD-CANONICAL-ABSENT"
     },
     {
@@ -4342,17 +4348,27 @@
         "REP-ACT-22",
         "REP-ACT-23",
         "REP-ACT-24",
-        "REP-ACT-25"
+        "REP-ACT-25",
+        "R01",
+        "R02",
+        "R09",
+        "R13",
+        "R14",
+        "R15",
+        "R18"
       ],
       "groupedOnly": [
         "R03",
         "R04",
         "R05",
         "R06",
+        "R07",
+        "R08",
         "R10",
+        "R11",
+        "R12",
         "R16",
         "R17",
-        "R18",
         "R19",
         "R20",
         "R21",
@@ -4360,19 +4376,66 @@
         "R23",
         "R24"
       ],
-      "unspecified": [
-        "R01",
-        "R02",
-        "R07",
-        "R08",
-        "R09",
-        "R11",
-        "R12",
-        "R13",
-        "R14",
-        "R15"
-      ],
+      "unspecified": [],
       "resolved": false,
+      "definitionSources": {
+        "R01": {
+          "sourceId": "REP-DISPOSITION-V1",
+          "class": "FROZEN_DISPOSITION",
+          "commit": "571784d58f93ed6939438422534c63b83d77c7ed",
+          "path": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+          "title": "identity/mandates"
+        },
+        "R02": {
+          "sourceId": "REP-DISPOSITION-V1",
+          "class": "FROZEN_DISPOSITION",
+          "commit": "571784d58f93ed6939438422534c63b83d77c7ed",
+          "path": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+          "title": "daily workload"
+        },
+        "R09": {
+          "sourceId": "REP-DISPOSITION-V1",
+          "class": "FROZEN_DISPOSITION",
+          "commit": "571784d58f93ed6939438422534c63b83d77c7ed",
+          "path": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+          "title": "member relationships"
+        },
+        "R13": {
+          "sourceId": "REP-DISPOSITION-V1",
+          "class": "FROZEN_DISPOSITION",
+          "commit": "571784d58f93ed6939438422534c63b83d77c7ed",
+          "path": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+          "title": "evidence/records"
+        },
+        "R14": {
+          "sourceId": "REP-DISPOSITION-V1",
+          "class": "FROZEN_DISPOSITION",
+          "commit": "571784d58f93ed6939438422534c63b83d77c7ed",
+          "path": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+          "title": "tasks/deadlines"
+        },
+        "R15": {
+          "sourceId": "REP-DISPOSITION-V1",
+          "class": "FROZEN_DISPOSITION",
+          "commit": "571784d58f93ed6939438422534c63b83d77c7ed",
+          "path": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+          "title": "agreements"
+        },
+        "R18": {
+          "sourceId": "REP-DISPOSITION-V1",
+          "class": "FROZEN_DISPOSITION",
+          "commit": "571784d58f93ed6939438422534c63b83d77c7ed",
+          "path": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+          "title": "WorkAid/specialists"
+        }
+      },
+      "conflicts": [
+        "R18"
+      ],
+      "unidentifiedReferences": [
+        "Journeys A–G",
+        "Institutional scenarios (CAPE, CUPE, LIUNA, small local)"
+      ],
       "trackingCapability": "UE-OMIT-REP-CANONICAL-ABSENT"
     },
     {
@@ -4431,6 +4494,9 @@
       "groupedOnly": [],
       "unspecified": [],
       "resolved": true,
+      "definitionSources": {},
+      "conflicts": [],
+      "unidentifiedReferences": [],
       "trackingCapability": null
     },
     {
@@ -4497,6 +4563,9 @@
       "groupedOnly": [],
       "unspecified": [],
       "resolved": true,
+      "definitionSources": {},
+      "conflicts": [],
+      "unidentifiedReferences": [],
       "trackingCapability": null
     },
     {
@@ -4589,6 +4658,13 @@
         "FJ10"
       ],
       "resolved": false,
+      "definitionSources": {},
+      "conflicts": [],
+      "unidentifiedReferences": [
+        "Navigation destinations (seven, three named)",
+        "Navigation names: Accounts & Cash, Budgets & Spending, Funds & Programs",
+        "Organization scenarios, WorkAid boundary, external accounting, succession/revocation, acceptance"
+      ],
       "trackingCapability": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED"
     },
     {
@@ -4663,9 +4739,16 @@
       "groupedOnly": [],
       "unspecified": [],
       "resolved": true,
+      "definitionSources": {},
+      "conflicts": [],
+      "unidentifiedReferences": [],
       "trackingCapability": null
     }
   ],
+  "personaRecovery": {
+    "file": "docs/union-eyes/convergence/register/ue-gate0a-persona-source-recovery.json",
+    "kind": "EVIDENCE_CONSOLIDATION"
+  },
   "routeOwnership": {
     "file": "docs/union-eyes/convergence/register/ue-route-capability-ownership.json",
     "entriesHash": "1c26296d4f178a02d7d5493c5cee987611d89ff85412da99562b83a895c5d7e9",
