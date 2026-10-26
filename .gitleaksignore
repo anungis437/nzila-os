@@ -210,3 +210,5 @@ scripts/cora-farmer360-acceptance.mjs:nzila-database-url-with-password:7
 # Cora disposable bootstrap guard: public database identifiers in a SQL allowlist, not credentials.
 packages/db/bootstrap/platform-authz-fixture.ts:generic-api-key:62
 ffb0c56d8880e96e49e564d816a13dafc4e28c21:docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:158057
+UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:158285
+docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api-key:158285

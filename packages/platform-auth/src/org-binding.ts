@@ -2,6 +2,7 @@ import { createHash, randomBytes } from 'node:crypto'
 import { and, asc, desc, eq, sql } from 'drizzle-orm'
 import { authOrganizationUsers, authUserSessions, authUsers } from '@nzila/db/schema'
 import { authDb, withAuthContext } from './auth-db'
+import { AUTH_BRIDGE_PURPOSE } from '@nzila/db/auth-storage-authority'
 import { SESSION_COOKIE_NAME, validateSession, type SessionData } from './password/session'
 
 export class AuthOrgBindingError extends Error {
@@ -191,7 +192,13 @@ async function withResolvedOrgBinding<T>(
           createdAt: sql`statement_timestamp()`,
           expiresAt: sql`statement_timestamp()+interval '30 seconds'`,
           isActive: true,
-          deviceInfo: { purpose: 'business-org-binding', provider: actor.identityProvider },
+          // The bridge is a request-scoped child of the validated parent session. The business predicate
+          // re-reads the parent on every statement, so revoking it ends the bridge's authority at once.
+          deviceInfo: {
+            purpose: AUTH_BRIDGE_PURPOSE,
+            provider: actor.identityProvider,
+            ...(session && cookie ? { parentSessionId: session.sessionId } : {}),
+          },
         })
         .returning({ expiresAt: authUserSessions.expiresAt })
       if (!created) throw new Error('Canonical business session authority was not created')

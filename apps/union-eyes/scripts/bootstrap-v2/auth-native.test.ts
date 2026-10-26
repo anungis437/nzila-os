@@ -184,6 +184,107 @@ native('local native PostgreSQL auth execution boundary', () => {
     cookies.actor = ''
   })
 
+  it('honours an invitation only while its inviter is still an active administrator of that organization', async () => {
+    const organizationId = '11111111-1111-4111-8111-111111111111'
+    const owner = clients.owner
+    const outcome = async (email: string) => {
+      const rows = (await owner.query('SELECT (SELECT count(*)::int FROM user_management.users WHERE email=$1) AS users', [email])).rows[0]
+      return rows.users as number
+    }
+    cookies.actor = 'auth-proof-a'
+    await owner.query(`UPDATE user_management.organization_users SET role='admin' WHERE user_id='auth-proof-a'`)
+    const issue = async (email: string) => {
+      const created = await createInvite({ email, invitedBy: cookies.actor, organizationId, role: 'member' })
+      expect(created.success).toBe(true)
+      return created.token!
+    }
+    try {
+      const demoted = await issue('invite-demoted@example.invalid')
+      await owner.query(`UPDATE user_management.organization_users SET role='member' WHERE user_id='auth-proof-a'`)
+      expect((await acceptInvite({ token: demoted })).success).toBe(false)
+      expect(await outcome('invite-demoted@example.invalid')).toBe(0)
+
+      await owner.query(`UPDATE user_management.organization_users SET role='admin', is_active=false WHERE user_id='auth-proof-a'`)
+      await expect(createInvite({ email: 'invite-offboarded@example.invalid', invitedBy: cookies.actor, organizationId, role: 'member' })).rejects.toThrow()
+      await owner.query(`UPDATE user_management.organization_users SET is_active=true WHERE user_id='auth-proof-a'`)
+      const removed = await issue('invite-removed@example.invalid')
+      await owner.query(`UPDATE user_management.organization_users SET is_active=false WHERE user_id='auth-proof-a'`)
+      expect((await acceptInvite({ token: removed })).success).toBe(false)
+      expect(await outcome('invite-removed@example.invalid')).toBe(0)
+      await owner.query(`UPDATE user_management.organization_users SET is_active=true WHERE user_id='auth-proof-a'`)
+
+      const suspended = await issue('invite-suspended@example.invalid')
+      await owner.query(`UPDATE user_management.users SET lifecycle_state='suspended' WHERE user_id='auth-proof-a'`)
+      try {
+        expect((await acceptInvite({ token: suspended })).success).toBe(false)
+        expect(await outcome('invite-suspended@example.invalid')).toBe(0)
+      } finally { await owner.query(`UPDATE user_management.users SET lifecycle_state='active' WHERE user_id='auth-proof-a'`) }
+
+      // A forged row whose inviter never administered the organization cannot be redeemed.
+      const forgedToken = 'forged-invite-token-without-admin-inviter'
+      await owner.query(`INSERT INTO user_management.invites(email,organization_id,role,token_hash,invited_by,expires_at)
+        VALUES ('invite-forged@example.invalid',$1,'member',$2,'auth-proof-b',now()+interval '1 day')`,
+      [organizationId, createHash('sha256').update(forgedToken).digest('hex')])
+      expect((await acceptInvite({ token: forgedToken })).success).toBe(false)
+      expect(await outcome('invite-forged@example.invalid')).toBe(0)
+
+      // Control: the same flow succeeds while the inviter remains an active administrator.
+      const live = await issue('invite-live@example.invalid')
+      const accepted = await acceptInvite({ token: live })
+      expect(accepted.success).toBe(true)
+      expect(await outcome('invite-live@example.invalid')).toBe(1)
+      expect((await acceptInvite({ token: live })).success).toBe(false)
+    } finally {
+      await owner.query(`UPDATE user_management.organization_users SET role='member', is_active=true WHERE user_id='auth-proof-a'`)
+      await owner.query(`UPDATE user_management.users SET lifecycle_state='active' WHERE user_id='auth-proof-a'`)
+      cookies.actor = ''
+    }
+  })
+
+  it('ends a bridge session the moment its parent session is revoked and rejects an unknown or foreign parent', async () => {
+    const orgA = '11111111-1111-4111-8111-111111111111'
+    cookies.actor = 'auth-proof-a'
+    const created = await withAuthContext({ phase: 'identity', userId: cookies.actor },
+      () => createSession({ userId: cookies.actor, organizationId: orgA }))
+    const foreign = await withAuthContext({ phase: 'identity', userId: 'auth-proof-b' },
+      () => createSession({ userId: 'auth-proof-b', organizationId: null }))
+    cookies.token = created.token
+    try {
+      await withAuthenticatedOrgBinding({ expectedActorUserId: cookies.actor, organizationId: orgA }, async binding => {
+        const hash = createHash('sha256').update(binding.sessionToken).digest('hex')
+        const setParent = (parent: string | null) => clients.owner.query(
+          `UPDATE user_management.user_sessions SET device_info=CASE WHEN $2::text IS NULL THEN device_info-'parentSessionId'
+            ELSE jsonb_set(device_info,'{parentSessionId}',to_jsonb($2::text)) END WHERE session_token_hash=$1`, [hash, parent])
+        const allowed = async () => {
+          await clients.ordinary.query('BEGIN')
+          try {
+            for (const [key, value] of Object.entries(authBusinessContextSettings(binding)))
+              await clients.ordinary.query('SELECT set_config($1,$2,true)', [key, value])
+            return (await clients.ordinary.query('SELECT user_management.auth_business_org_authorized($1::uuid) AS allowed', [orgA])).rows[0].allowed as boolean
+          } finally { await clients.ordinary.query('ROLLBACK') }
+        }
+        const info = (await clients.owner.query('SELECT device_info FROM user_management.user_sessions WHERE session_token_hash=$1', [hash])).rows[0].device_info
+        expect(info.parentSessionId).toBe(created.session.sessionId)
+        expect(await allowed()).toBe(true)
+        await setParent('00000000-0000-4000-8000-00000000dead')
+        expect(await allowed()).toBe(false)
+        await setParent(foreign.session.sessionId)
+        expect(await allowed()).toBe(false)
+        await setParent(created.session.sessionId)
+        expect(await allowed()).toBe(true)
+        // Revoking only the parent, while the bridge row itself is still live and unexpired, ends authority at once.
+        await clients.owner.query('UPDATE user_management.user_sessions SET is_active=false WHERE session_id=$1', [created.session.sessionId])
+        expect((await clients.owner.query('SELECT is_active FROM user_management.user_sessions WHERE session_token_hash=$1', [hash])).rows[0].is_active).toBe(true)
+        expect(await allowed()).toBe(false)
+        await clients.owner.query('UPDATE user_management.user_sessions SET is_active=true, created_at=now()-interval \'2 seconds\', expires_at=now()-interval \'1 second\' WHERE session_id=$1', [created.session.sessionId])
+        expect(await allowed()).toBe(false)
+      })
+    } finally {
+      cookies.token = ''
+      cookies.actor = ''
+    }
+  })
+
   it('executes real MFA enrollment, verification, alternate first-factor challenge, recovery and replay', async () => {
     const email = 'native-mfa@example.invalid'
     const first = await signup({ email, password: 'Synthetic-mfa-only-2026!' })
