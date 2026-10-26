@@ -129,6 +129,18 @@ export function isDeliveryClaimConflict(error: unknown): boolean {
   return /duplicate key|unique constraint/i.test(message);
 }
 
+function callbackWriteConflict(error: unknown): 'duplicate' | 'ambiguous' | null {
+  if (!isDeliveryClaimConflict(error)) return null;
+  const parts: string[] = [];
+  let current: unknown = error;
+  for (let depth = 0; current && depth < 4; depth += 1) {
+    if (current instanceof Error) parts.push(current.message);
+    else if (typeof current === 'string') parts.push(current);
+    current = (current as { cause?: unknown }).cause;
+  }
+  return /another organization/i.test(parts.join(' ')) ? 'ambiguous' : 'duplicate';
+}
+
 export function ledgerEventsFromRows(rows: unknown): DeliveryFact[] {
   if (!Array.isArray(rows)) return [];
   return rows.flatMap((row) => {
@@ -197,15 +209,21 @@ export async function recordProviderCallback(input: {
   const organizationId = [...organizations][0];
   const notificationId = facts.find((fact) => fact.notificationId)?.notificationId;
   if (!organizationId || !notificationId) return 'ambiguous';
-  await db.insert(notificationDeliveryLog).values({
-    id: uuid(),
-    organizationId,
-    notificationId,
-    event: input.event,
-    eventTimestamp: new Date(),
-    providerId: input.providerId,
-    externalEventId: input.providerMessageId,
-    details: { webhookId: input.webhookId, providerMessageId: input.providerMessageId },
-  });
+  try {
+    await db.insert(notificationDeliveryLog).values({
+      id: uuid(),
+      organizationId,
+      notificationId,
+      event: input.event,
+      eventTimestamp: new Date(),
+      providerId: input.providerId,
+      externalEventId: input.providerMessageId,
+      details: { webhookId: input.webhookId, providerMessageId: input.providerMessageId },
+    });
+  } catch (error) {
+    const conflict = callbackWriteConflict(error);
+    if (conflict) return conflict;
+    throw error;
+  }
   return 'recorded';
 }

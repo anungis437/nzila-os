@@ -54,10 +54,6 @@ vi.mock('@/db/schema', () => ({
   indigenousDataAccessLog: { userId: 'userId', createdAt: 'createdAt' },
 }));
 
-vi.mock('@/db/schema/indigenous-data-schema', () => ({
-  indigenousMemberData: { userId: 'userId', bandCouncilId: 'bandCouncilId' },
-}));
-
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return { ...actual };

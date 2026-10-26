@@ -12,7 +12,7 @@ import {
   type NewForeignWorker,
   type NewGSSApplication,
   type NewMentorship,
-} from '@/db/schema/lmbp-immigration-schema';
+} from '@/db/schema/domains/compliance/immigration';
 import { eq, and, gte, lte, sql } from 'drizzle-orm';
 
 /**

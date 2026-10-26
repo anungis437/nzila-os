@@ -232,6 +232,13 @@
       "when": 1758880000000,
       "tag": "0031_reachable_stub_shape",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1758890000000,
+      "tag": "0032_notification_callback_identity",
+      "breakpoints": true
     }
   ]
 }

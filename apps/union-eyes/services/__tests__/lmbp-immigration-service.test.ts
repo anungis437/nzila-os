@@ -23,7 +23,7 @@ const h = vi.hoisted(() => {
 });
 
 vi.mock('@/db', () => ({ db: h.db }));
-vi.mock('@/db/schema/lmbp-immigration-schema', () => new Proxy({}, {
+vi.mock('@/db/schema/domains/compliance/immigration', () => new Proxy({}, {
   has: () => true,
   get: (_t, n) => (n === '__esModule' ? false : new Proxy({}, { get: (_o, c) => ({ __col: c }) })),
 }));

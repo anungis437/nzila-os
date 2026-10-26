@@ -121,5 +121,44 @@ describe('schema and mutation batch program', () => {
       expect(row?.declarationRemoved).toBeUndefined()
       expect(row?.holdReason).toBeTruthy()
     }
+    const serviceRetained = [
+      'accessibility_audits',
+      'accessibility_issues',
+      'financial_audit_log',
+      'gss_applications',
+      'indigenous_member_data',
+      'member_addresses',
+    ]
+    const dependencyHeld = [
+      'clc_webhook_log',
+      'committee_memberships',
+      'event_reminders',
+      'grievance_approvals',
+      'grievance_assignments',
+      'grievance_stages',
+      'grievance_workflows',
+      'member_documents',
+      'notification_log',
+      'organization_contacts',
+      'organization_sharing_settings',
+      'role_tenure_history',
+      'room_bookings',
+      'segment_executions',
+      'segment_exports',
+      'user_sessions',
+    ]
+    const required = program.batches.find((batch) => batch.id === 'schema-verify-dead-required')
+    expect(required?.execution).toBe('hold')
+    expect(required?.shrink).toBe('none')
+    expect(required?.action).toContain('Do not DROP')
+    expect(program.schema.find((entry) => entry.table === 'financial_audit_log')?.holdReason).toContain('Do not invent a finance officer')
+    for (const table of [...serviceRetained, ...dependencyHeld]) {
+      const row = program.schema.find((entry) => entry.table === table)
+      expect(row?.batchId).toBe('schema-verify-dead-required')
+      expect(row?.declarationRemoved).toBeUndefined()
+      expect(row?.holdReason).toBeTruthy()
+    }
+    expect(program.schema.filter((entry) => entry.batchId === 'schema-verify-dead-module').map((entry) => entry.table))
+      .not.toEqual(expect.arrayContaining(serviceRetained))
   })
 })

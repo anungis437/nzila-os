@@ -88,6 +88,21 @@ const REQUIRED_DEAD_MODULE: Record<string, string> = {
   user_sessions: 'domains/member/user-management.ts re-exports userSessions, and organizationUsers relations name it. The public declaration stays.',
 }
 
+/**
+ * Service readers and writers. None of these is reached from an App Router entry.
+ * The declaration stays because retiring it would drop the canonical shape those
+ * services still import. This is not a finished persona and it does not apply a
+ * shape migration for the census column gaps.
+ */
+const SERVICE_RETAINED: Record<string, string> = {
+  accessibility_audits: 'lib/accessibility/accessibility-service.ts inserts and updates accessibilityAudits. The domain declaration stays. No route reaches that service. The census column gap is not evolved here.',
+  accessibility_issues: 'lib/accessibility/accessibility-service.ts inserts accessibilityIssues for an audit. The domain declaration stays. No route reaches that service. The census column gap is not evolved here.',
+  financial_audit_log: 'lib/services/audit-trail-service.ts inserts and queries financialAuditLog. The signature AuditTrailService is a different class and does not own this table. The declaration stays. Do not invent a finance officer. The census column gap is not evolved here.',
+  gss_applications: 'services/lmbp-immigration-service.ts inserts, selects, and updates gssApplications, including met2WeekTarget. lmbp-immigration-schema.ts re-exports domains/compliance/immigration.ts. The declaration stays. No route reaches that service.',
+  indigenous_member_data: 'lib/services/indigenous-data-service.ts and services/indigenous-data-service.ts read and write indigenousMemberData through the domain declaration. indigenous-data-schema.ts re-exports it. OCAP columns stay. Do not invent a band-council grant. No route reaches either service.',
+  member_addresses: 'services/tax-slip-service.ts selects memberAddresses by userId and addressType. The declaration stays for that mailing-address read. Tax-slip generation still has no route caller. The census column gap is not evolved here.',
+}
+
 export interface MutationAssignment {
   key: string
   file: string
@@ -217,7 +232,7 @@ const BATCHES: BatchSpec[] = [
     ratchet: 'census',
     execution: 'hold',
     shrink: 'none',
-    action: 'A kept Drizzle relation, a public schema export, or a shadow schema still names this declaration. Do not retire it to shrink the census. Do not DROP the relation.',
+    action: 'A kept Drizzle relation, a public schema export, a compatibility re-export, or a service that still reads or writes this declaration keeps it. accessibility_audits, accessibility_issues, financial_audit_log, gss_applications, indigenous_member_data, and member_addresses stay because those services name them. The sixteen dependency holds stay because a kept relation or the public user_sessions export names them. Duplicate pgTable bodies for accessibility, indigenous data, and LMBP immigration now re-export the domain declaration. None of these six services is reached from an App Router entry, so retention is not a finished persona. Census column gaps are not evolved here. Do not retire any of these to shrink the census. Do not DROP the relation.',
     proof: 'apps/union-eyes/db/__tests__/schema-mutation-batches.test.ts',
   },
   {
@@ -428,7 +443,7 @@ function schemaBatch(entry: CensusEntry, disposition: string, index: ReachIndex,
       return 'schema-live-unreferenced'
     case 'VERIFY_UNREACHABLE_THEN_RETIRE':
       if (!reachable && !index.graphComplete) return 'schema-verify-unproven'
-      if (!reachable) return REQUIRED_DEAD_MODULE[entry.table] ? 'schema-verify-dead-required' : 'schema-verify-dead-module'
+      if (!reachable) return (REQUIRED_DEAD_MODULE[entry.table] || SERVICE_RETAINED[entry.table]) ? 'schema-verify-dead-required' : 'schema-verify-dead-module'
       if (blockers.length > 0) return 'schema-verify-reachable-blocked'
       return 'schema-evolve-reachable'
     default:
@@ -488,6 +503,7 @@ export function buildSchemaMutationBatches(live: Record<string, number> = scanUn
     if (!declared.has(entry.table)) row.declarationRemoved = true
     const holdReason = REQUIRED_DECLARATION[entry.table]
       ?? REQUIRED_DEAD_MODULE[entry.table]
+      ?? SERVICE_RETAINED[entry.table]
       ?? (record.disposition === 'LIVE_UNREFERENCED' && refs.length > 0
         ? `A production file reads this relation: ${refs.join(', ')}`
         : undefined)

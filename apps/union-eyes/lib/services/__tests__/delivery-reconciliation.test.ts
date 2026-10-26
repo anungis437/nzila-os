@@ -143,4 +143,33 @@ describe('provider callbacks', () => {
       externalEventId: 'prov-7',
     }));
   });
+
+  it('treats a unique callback insert as a duplicate and a cross-tenant constraint as ambiguous', async () => {
+    mocks.limit.mockResolvedValue([
+      { event: 'accepted', externalEventId: 'prov-8', organizationId: 'org-1', notificationId: 'note-8' },
+    ]);
+    const duplicate = Object.assign(new Error('duplicate key value violates unique constraint'), { code: '23505' });
+    mocks.values.mockRejectedValueOnce(duplicate);
+    await expect(recordProviderCallback({
+      providerMessageId: 'prov-8',
+      event: 'delivered',
+      providerId: 'resend',
+      webhookId: 'hook-6',
+    })).resolves.toBe('duplicate');
+
+    mocks.limit.mockResolvedValue([
+      { event: 'accepted', externalEventId: 'prov-9', organizationId: 'org-1', notificationId: 'note-9' },
+    ]);
+    const foreignOwner = Object.assign(
+      new Error('notification_delivery_log provider message prov-9 is already owned by another organization'),
+      { code: '23505' },
+    );
+    mocks.values.mockRejectedValueOnce(foreignOwner);
+    await expect(recordProviderCallback({
+      providerMessageId: 'prov-9',
+      event: 'delivered',
+      providerId: 'resend',
+      webhookId: 'hook-7',
+    })).resolves.toBe('ambiguous');
+  });
 });

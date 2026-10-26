@@ -307,6 +307,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Revised in place before any apply. Previous unqualified bytes were never executed. Type preflight plus constraint, index, policy, and grant definition fingerprints for data_anonymization_log, employment_history, job_classifications, and member_leaves. NOT NULL only when the relation is empty. No keys, no RLS change, no destructive statement. Has not been applied to a native or live database."
+      },
+      {
+        "tag": "0032_notification_callback_identity",
+        "sha256": "881bb702f123cdd545c43a578bd186519459d34a991526150531113ef0d53ec8",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Partial unique index on notification_delivery_log (external_event_id, event) and a locked owner check so one provider message belongs to one organization. Refuses existing duplicates. Does not delete a row, choose an owner, or change notification_queue. Has not been applied to a native or live database."
       }
     ]
   }
