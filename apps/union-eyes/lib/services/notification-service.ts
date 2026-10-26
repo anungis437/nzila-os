@@ -675,6 +675,11 @@ export class NotificationService {
             .where(and(
               eq(notificationQueue.id, idempotencyKey),
               eq(notificationQueue.organizationId, payload.organizationId),
+              or(
+                eq(notificationQueue.status, "pending"),
+                eq(notificationQueue.status, "failed"),
+                eq(notificationQueue.status, "retrying"),
+              ),
             ))
             .returning({ id: notificationQueue.id });
           if (Array.isArray(claimed) && claimed.length === 0) {

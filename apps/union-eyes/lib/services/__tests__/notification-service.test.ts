@@ -921,6 +921,25 @@ describe('NotificationService', () => {
       expect(send).not.toHaveBeenCalled();
     });
 
+    it('does not resend a confirmed failure when another worker already took the retry', async () => {
+      const send = vi.fn();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+      const key = '55555555-5555-4555-8555-555555555555';
+      mocks.mockLimit.mockResolvedValue([
+        { event: 'failed', organizationId: 'org-1', notificationId: key },
+      ]);
+      historySelect();
+      const returning = vi.fn().mockResolvedValue([]);
+      mocks.mockSet.mockReturnValue({ where: vi.fn().mockReturnValue({ returning }) });
+      mocks.mockUpdate.mockReturnValue({ set: mocks.mockSet });
+
+      const result = await service.send({ ...emailPayload, idempotencyKey: key });
+
+      expect(result.status).toBe('uncertain');
+      expect(send).not.toHaveBeenCalled();
+    });
+
     it('sends a queued notice when its queue row already exists and no outcome is recorded', async () => {
       const send = vi.fn().mockResolvedValue({ id: 'provider-msg', status: 'sent', sentAt: new Date() });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
