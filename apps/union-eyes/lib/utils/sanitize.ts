@@ -58,15 +58,9 @@ export function safeAttributeUrl(value: string, protocols: readonly string[] = [
  */
 export function sanitizeHtml(dirty: string): string {
   if (typeof window === 'undefined') {
-    // Server-side: reduce to plain text (never rendered on the server). Repeat until stable so a nested fragment
-    // cannot reassemble a tag, then drop any leftover angle bracket.
-    let previous: string;
-    let out = dirty;
-    do {
-      previous = out;
-      out = out.replace(/<[^>]*>/g, '');
-    } while (out !== previous);
-    return out.replace(/[<>]/g, '');
+    // Server-side: reduce to plain text (never rendered on the server). Remove tags, then every remaining angle
+    // bracket, so no fragment can reassemble into markup.
+    return dirty.replace(/<[^>]*>/g, '').replace(/[<>]/g, '');
   }
   return DOMPurify.sanitize(dirty, {
     USE_PROFILES: { html: true },

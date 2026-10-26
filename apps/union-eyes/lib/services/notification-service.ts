@@ -152,17 +152,14 @@ export const notifications = pgTable('notifications', {
 // ============================================================================
 
 function stripHtml(html: string): string {
-  // Plain-text conversion for the email fallback. Repeat until stable so a nested fragment cannot reassemble a tag,
-  // and drop any leftover angle bracket.
-  let previous: string;
-  let out = html;
-  do {
-    previous = out;
-    out = out
-      .replace(/<style\b[\s\S]*?<\/style\s*>/gi, '')
-      .replace(/<[^>]*>/g, '');
-  } while (out !== previous);
-  return out.replace(/[<>]/g, '').replace(/\s+/g, ' ').trim();
+  // Plain-text conversion for the email fallback: drop style blocks and tags, then every remaining angle bracket so
+  // no fragment can reassemble into markup.
+  return html
+    .replace(/<style\b[\s\S]*?<\/style\s*>/gi, '')
+    .replace(/<[^>]*>/g, '')
+    .replace(/[<>]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 export class ResendEmailProvider implements NotificationProvider {

@@ -70,17 +70,13 @@ export const sanitizationRules = {
    */
   html: (value: unknown): string => {
     if (typeof value !== 'string') return '';
-    // Strip script/style blocks, then tags, repeating until stable so nested fragments such as `<scr<script>ipt>`
-    // cannot reassemble, and drop any leftover angle bracket. The result is plain text, never rendered as markup.
-    let previous: string;
-    let out = value;
-    do {
-      previous = out;
-      out = out
-        .replace(/<(script|style)\b[\s\S]*?<\/\1\s*>/gi, '')
-        .replace(/<[^>]*>/g, '');
-    } while (out !== previous);
-    return out.replace(/[<>]/g, '').trim();
+    // Plain text only: drop script/style blocks and tags, then every remaining angle bracket, so no fragment can
+    // reassemble into markup (the output contains neither `<` nor `>`).
+    return value
+      .replace(/<(script|style)\b[\s\S]*?<\/\1\s*>/gi, '')
+      .replace(/<[^>]*>/g, '')
+      .replace(/[<>]/g, '')
+      .trim();
   },
 
   /**
