@@ -25,7 +25,7 @@ Status: **progress, not completion. `UE_ENGINEERING_CONVERGENCE` is NOT ACHIEVED
 - `deterministicReportGuardrails`: the email-detection regex was polynomial on long runs of `%`; quantifiers are bounded.
 - `provision-entra-test-users.mjs`, `build-baseline.ts`: backslash is escaped before the characters it escapes.
 - Django JWT authentication returned the verifier's exception text to the caller; the detail stays in the log and the response is generic.
-- Remaining at the last remote run: one medium `js/sensitive-get-query` warning on a financial-service remittance filter. It is warning-level; the check is driven by the two high alerts fixed in `f27b7ff8b`.
+- At the final head CodeQL passes (all three Analyze jobs and the CodeQL check). One medium `js/sensitive-get-query` warning on a financial-service remittance filter may remain; it is warning-level and does not fail the check.
 
 ## The 15 remaining mutation sites (reachability and reason)
 
@@ -69,7 +69,7 @@ Not run: the Windows-incompatible `rls:check-enforcement` (spawns `npx` without 
 
 ## Remote CI on PR #996
 
-At `fd067a562`: 118 checks pass, 8 skipped, 2 fail. At `26cf529e0`: CodeQL 12 → 3 alerts; at `ec0773035`: 6 (the loop form was rejected too), which led to `stripMarkup()`. At `f27b7ff8b`: Unit Tests pass; `Analyze (javascript-typescript)`, `Publish required checks` and `Reconcile Secret Scan frozen head` failed with **GitHub API rate-limit 403s** (infrastructure, not code); the latter two were re-run, the CodeQL run is not re-runnable and needs a new push or a maintainer re-run. The PR page carries the current result. The two failures at `fd067a562` were:
+At `fd067a562`: 118 checks pass, 8 skipped, 2 fail. At `26cf529e0`: CodeQL 12 → 3 alerts; at `ec0773035`: 6 (the loop form was rejected too), which led to `stripMarkup()`. At `f27b7ff8b`: Unit Tests pass; `Analyze (javascript-typescript)`, `Publish required checks` and `Reconcile Secret Scan frozen head` failed with **GitHub API rate-limit 403s** (infrastructure, not code); the latter two were re-run; CodeQL could not be re-run, so the next push (`b6cb99b24`, documentation only) re-triggered it. **Result at `b6cb99b24`: 119 checks pass and 1 fails — Governance Gates, the maintainer `approved-experiment` label below.** CodeQL, Unit Tests, Dependency Audit, all Trivy scans, Schema Drift and Schema Integrity pass. The two failures at `fd067a562` were:
 
 1. **CodeQL** — engineering, fixed above (12 → 3 → the two high alerts addressed in `f27b7ff8b`).
 2. **Governance Gates** — **needs a maintainer, not an engineering change.** `validate-tier-focus` requires the `approved-experiment` label because the zod 4 migration necessarily touches Tier 3/4 apps (`agrimo`, `console`, `control-plane`, `cora`, `mobility`, `nacp-exams`, `nzila-hq`, `orchestrator-api`, `trade`, `trustcore`, `trustcore-trustops`, `union-eyes-demo`, `web`, `weekone`, `zonga`) through their `package.json` ranges and call sites. The existing `owner-approved` and `security-design-reviewed` labels were applied by a maintainer account; this label is the same kind of human approval and I did not apply it. Alternatives that avoid it would leave those apps declaring `zod ^3` while resolving 4.6.7, which I judged worse than asking.
