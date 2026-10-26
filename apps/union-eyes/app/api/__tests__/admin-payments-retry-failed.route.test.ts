@@ -1,6 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
+const audit = vi.hoisted(() => ({
+  run: vi.fn(async (_op: unknown, fn: () => Promise<unknown>) => fn()),
+}));
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: audit.run,
+  operationAuditResponse: () => null,
+}));
+
 const m = vi.hoisted(() => ({
   withApiAuth: vi.fn(),
   getCurrentUser: vi.fn(),
@@ -26,7 +34,7 @@ describe('admin/payments/retry-failed route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.withApiAuth.mockImplementation((handler: any) => (request: NextRequest) => handler(request));
-    m.getCurrentUser.mockResolvedValue({ id: 'u1' });
+    m.getCurrentUser.mockResolvedValue({ id: 'u1', organizationId: 'org_1' });
     m.hasMinRole.mockResolvedValue(true);
     m.manualTriggerRetry.mockResolvedValue({ totalProcessed: 10, retriesAttempted: 8, retriesSucceeded: 5, retriesFailed: 3, markedForAdmin: 2 });
   });
@@ -66,5 +74,14 @@ describe('admin/payments/retry-failed route', () => {
     const response = await POST(new NextRequest('http://localhost/api/admin/payments/retry-failed', { method: 'POST' }));
 
     expect(response.status).toBe(500);
+  });
+
+  it('records the manual trigger as an audited platform operation', async () => {
+    const { POST } = await loadRoute();
+    await POST(new NextRequest('http://localhost/api/x', { method: 'POST' }));
+    expect(audit.run).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'platform.payments.retry_failed', organizationId: 'org_1', userId: 'u1' }),
+      expect.any(Function),
+    );
   });
 });

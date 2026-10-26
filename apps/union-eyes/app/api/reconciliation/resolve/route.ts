@@ -8,7 +8,7 @@ import { resolveException } from '@/services/platform-economics';
 export const dynamic = 'force-dynamic';
 
 const resolveSchema = z.object({
-  exceptionId: z.string().uuid(),
+  exceptionId: z.guid(),
   resolution: z.enum(['resolved', 'written_off']),
   notes: z.string().max(2000),
 });
@@ -26,7 +26,7 @@ export const POST = withApi(
   },
   async ({ body, organizationId, userId }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
-    const result = await resolveException(body.exceptionId, {
+    const result = await resolveException(body.exceptionId, organizationId, {
       status: body.resolution,
       resolvedBy: userId ?? 'system',
       notes: body.notes,

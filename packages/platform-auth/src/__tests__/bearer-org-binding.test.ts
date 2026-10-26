@@ -123,20 +123,28 @@ describe('canonical bearer organization binding contract (unit, not runtime qual
     ).rejects.toMatchObject({ code: 'ROLE_REQUIRED' })
   })
 
-  it('retains selected canonical identity, role and opaque bearer', async () => {
+  it('keeps the validated session cookie out of the binding: a short-lived bridge is minted and revoked on both paths', async () => {
     const callback = vi.fn(async (binding: AuthenticatedOrgBinding) => binding)
     const binding = await withBearerOrgBinding('opaque', {}, callback)
     expect(binding).toMatchObject({
       userId: 'canonical-user',
       organizationId,
       role: 'member',
-      sessionToken: 'opaque',
       authority: 'pg-session',
       isSystemAdmin: false,
     })
+    // The caller's bearer is validated and never forwarded; the binding carries a fresh high-entropy 30-second token.
+    expect(binding.sessionToken).not.toBe('opaque')
+    expect(binding.sessionToken).toMatch(/^[A-Za-z0-9_-]{43}$/)
     expect(state.verify).not.toHaveBeenCalled()
-    expect(state.insert).not.toHaveBeenCalled()
-    expect(state.revoke).not.toHaveBeenCalled()
+    expect(state.insert).toHaveBeenCalledOnce()
+    expect(state.revoke).toHaveBeenCalledOnce()
+  })
+
+  it('revokes the bridge when the callback fails on the password-session path', async () => {
+    const failure = new Error('callback failed')
+    await expect(withBearerOrgBinding('opaque', {}, async () => { throw failure })).rejects.toBe(failure)
+    expect(state.revoke).toHaveBeenCalledOnce()
   })
 
   it('requires explicit business organization selection for provider tokens', async () => {

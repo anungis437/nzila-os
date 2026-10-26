@@ -381,8 +381,32 @@ export function currentBackendSourceDigests(): Record<string, string> {
   )
 }
 
+interface DrizzleSnapshotJson {
+  tables: Record<
+    string,
+    {
+      columns: Record<string, { name: string; type: string; typeSchema?: string; default?: unknown }>
+      indexes: Record<string, { name: string; columns: Array<{ expression: string; isExpression?: boolean }> } & Record<string, unknown>>
+      foreignKeys: Record<
+        string,
+        { columnsFrom: string[]; columnsTo: string[]; tableTo: string; schemaTo?: string } & Record<string, unknown>
+      >
+      uniqueConstraints: Record<string, unknown>
+      checkConstraints: Record<string, { name: string; value: string }>
+    } & Record<string, unknown>
+  >
+  enums: Record<string, { name: string; schema?: string; values: string[] }>
+  schemas?: Record<string, unknown>
+}
+
 export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
-  const { generateDrizzleJson, generateMigration } = await import('drizzle-kit/api')
+  // drizzle-kit derives its declaration types from its own zod schema; under zod 4 they widen to unknown, so the fields
+  // this planner reads are stated once here (the runtime shapes are unchanged).
+  const drizzleKit = await import('drizzle-kit/api')
+  const generateDrizzleJson = (input: Record<string, unknown>) =>
+    drizzleKit.generateDrizzleJson(input as never) as unknown as DrizzleSnapshotJson
+  const generateMigration = (from: DrizzleSnapshotJson, to: DrizzleSnapshotJson) =>
+    drizzleKit.generateMigration(from as never, to as never) as Promise<string[]>
   const currentModels = collectModels(wheelhouse)
   const loadSchema = createRequire(import.meta.url)
   const applicationSchema: Record<string, unknown> = {

@@ -104,71 +104,6 @@ export const automationRules = pgTable("automation_rules", {
   index("idx_automation_rules_priority").on(table.priority),
 ]);
 
-export const automationExecutionLog = pgTable("automation_execution_log", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  ruleId: uuid("rule_id").references(() => automationRules.id).notNull(),
-  
-  // Execution details
-  triggeredBy: varchar("triggered_by", { length: 255 }).notNull(),
-  triggerType: varchar("trigger_type", { length: 50 }).notNull(),
-  
-  // Target
-  targetEntityType: varchar("target_entity_type", { length: 50 }).notNull(),
-  targetEntityId: varchar("target_entity_id", { length: 255 }).notNull(),
-  
-  // Result
-  status: varchar("status", { length: 20 }).notNull(), // success, failed, skipped
-  errorMessage: text("error_message"),
-  errorDetails: jsonb("error_details"),
-  
-  // Actions executed
-  actionsExecuted: jsonb("actions_executed").$type<Array<{
-    actionType: string;
-    status: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    result?: Record<string, any>;
-    duration: number;
-  }>>(),
-  
-  // Timing
-  startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
-  completedAt: timestamp("completed_at", { withTimezone: true }),
-  duration: integer("duration_ms"),
-}, (table) => [
-  index("idx_automation_log_rule").on(table.ruleId),
-  index("idx_automation_log_target").on(table.targetEntityId),
-  index("idx_automation_log_status").on(table.status),
-  index("idx_automation_log_started").on(table.startedAt),
-]);
-
-export const automationSchedules = pgTable("automation_schedules", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  ruleId: uuid("rule_id").references(() => automationRules.id).notNull(),
-  
-  // Schedule configuration
-  scheduleType: varchar("schedule_type", { length: 50 }).notNull(), // daily, weekly, monthly, cron
-  scheduleConfig: jsonb("schedule_config").$type<{
-    cron?: string;
-    dayOfWeek?: number;
-    dayOfMonth?: number;
-    time?: string;
-    timezone?: string;
-  }>(),
-  
-  // Next run
-  nextRunAt: timestamp("next_run_at", { withTimezone: true }),
-  lastRunAt: timestamp("last_run_at", { withTimezone: true }),
-  
-  // Status
-  status: varchar("status", { length: 20 }).notNull().default('active'),
-  
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-}, (table) => [
-  index("idx_automation_schedule_rule").on(table.ruleId),
-  index("idx_automation_schedule_next").on(table.nextRunAt),
-]);
-
 export type AutomationRuleStatus = typeof automationRuleStatusEnum[keyof typeof automationRuleStatusEnum];
 export type AutomationTriggerType = typeof automationTriggerTypeEnum[keyof typeof automationTriggerTypeEnum];
 export type AutomationActionType = typeof automationActionTypeEnum[keyof typeof automationActionTypeEnum];
@@ -176,6 +111,4 @@ export type AutomationTargetEntity = typeof automationTargetEntityEnum[keyof typ
 
 export type AutomationRule = typeof automationRules.$inferSelect;
 export type AutomationRuleInsert = typeof automationRules.$inferInsert;
-export type AutomationExecutionLogRecord = typeof automationExecutionLog.$inferSelect;
-export type AutomationSchedule = typeof automationSchedules.$inferSelect;
 

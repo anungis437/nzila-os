@@ -21,7 +21,8 @@ import {
   toGovernanceLabel,
 } from '@/lib/services/document-governance-service';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
-import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { hasDocumentContextAccess } from '@/lib/services/document-member-scope';
 import { getDocumentMutabilityBlockReason } from '@/lib/services/document-retention-guard';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 
@@ -107,7 +108,8 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
   }
 
-  const isStewardPlus = await hasMinRole('steward');
+  // Representative-level role: eligibility for organization-level (unlinked) documents only, never case content.
+  const isStaff = await hasMinRole('steward');
   let caseAccess = {
     isPrimaryOwner: false,
     canViewCase: false,
@@ -131,9 +133,16 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     toGovernanceLabel({ privacyLabel: row.privacyLabel ?? undefined }),
     {
       isOrgMember: true,
-      isStewardPlus,
       isPrimaryOwner: caseAccess.isPrimaryOwner,
-      hasCaseAccess: isStewardPlus || caseAccess.canViewCase || !row.linkedEntityId,
+      hasCaseAccess: hasDocumentContextAccess({
+        isStaff,
+        canViewCase: caseAccess.canViewCase,
+        hasExplicitGrant: Boolean(explicitGrant),
+        linkedEntityId: row.linkedEntityId,
+        privacyLabel: row.privacyLabel,
+        uploadedBy: row.uploadedBy,
+        userId,
+      }),
       canViewPrivateDocuments: caseAccess.canViewPrivateDocuments,
       hasExplicitDocumentGrant: Boolean(explicitGrant),
     },
@@ -207,6 +216,18 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
     return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
   }
 
+  // Changing a label alters who can read a case document, so it is a case-management power.
+  if (before.linkedEntityType === 'grievance' && before.linkedEntityId) {
+    const relationship = await getEffectiveCaseAccess({
+      organizationId,
+      grievanceId: before.linkedEntityId,
+      userId,
+    });
+    if (!relationship.isPrimaryOwner) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Only the primary owner of the linked case can change this document label');
+    }
+  }
+
   const blockedReason = getDocumentMutabilityBlockReason({ metadata: before.metadata });
   if (blockedReason) {
     return standardErrorResponse(
@@ -215,29 +236,34 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
     );
   }
 
-  const [updated] = await db
-    .update(documents)
-    .set({
-      privacyLabel: parsed.data.privacyLabel,
-      updatedAt: new Date(),
-    })
-    .where(and(eq(documents.id, params.id), eq(documents.organizationId, organizationId)))
-    .returning();
-
-  if (before.linkedEntityType === 'grievance' && before.linkedEntityId) {
-    await auditCaseMutation({
-      event: CaseAuditEvent.DOCUMENT_LABEL_CHANGED,
-      userId,
-      organizationId,
-      caseId: before.linkedEntityId,
-      action: 'update',
-      previousState: { privacyLabel: before.privacyLabel },
-      newState: { privacyLabel: updated.privacyLabel },
-      details: {
-        documentId: updated.id,
-      },
-    });
-  }
+  // The label change and its audit record commit together.
+  const [updated] = await withRLSContext({ organizationId }, async (tx) => {
+    const rows = await tx
+      .update(documents)
+      .set({
+        privacyLabel: parsed.data.privacyLabel,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(documents.id, params.id), eq(documents.organizationId, organizationId)))
+      .returning();
+    if (rows[0]) {
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'document.label_change',
+        resourceType: 'documents',
+        resourceId: rows[0].id,
+        details: {
+          previousPrivacyLabel: before.privacyLabel,
+          privacyLabel: rows[0].privacyLabel,
+          ...(before.linkedEntityType && before.linkedEntityId
+            ? { linkedEntityType: before.linkedEntityType, linkedEntityId: before.linkedEntityId }
+            : {}),
+        },
+      });
+    }
+    return rows;
+  });
 
   return standardSuccessResponse(updated);
 });

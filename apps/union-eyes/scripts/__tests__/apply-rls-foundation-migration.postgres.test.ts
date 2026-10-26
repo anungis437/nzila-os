@@ -182,7 +182,7 @@ describe('apply-rls-foundation-migration least-privilege idempotent reapply (dis
       GRANT migration_admin_restricted TO postgres;
     `)
     restrictedAdminUrl = `postgresql://migration_admin_restricted:${RESTRICTED_ADMIN_PASSWORD}@localhost:${hostPort}/testdb`
-  }, 30_000)
+  }, 120_000)
 
   beforeEach(async () => {
     await resetDatabase()

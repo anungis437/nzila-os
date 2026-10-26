@@ -8,6 +8,7 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createSocialMediaService } from '@/lib/social-media/social-media-service';
+import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 import { db } from '@/db';
 import { socialPosts, socialAccounts } from '@/db/schema/social-media-schema';
 import { eq, and, ilike, desc, count, SQL } from 'drizzle-orm';
@@ -105,10 +106,10 @@ const socialMediaPostsSchema = z.object({
   hashtags: z.array(z.string().regex(/^[a-zA-Z0-9_]+$/, "Invalid hashtag format")).max(30, "Maximum 30 hashtags").optional(),
   mentions: z.array(z.string().max(100)).max(20, "Maximum 20 mentions").optional(),
   scheduled_for: z.string().datetime().optional(),
-  campaign_id: z.string().uuid("Invalid campaign_id").optional(),
+  campaign_id: z.guid("Invalid campaign_id").optional(),
 });
 
-export const POST = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
+export const POST = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
   try {
       const { userId, organizationId } = context;
 
@@ -146,7 +147,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       if (!validation.success) {
         return standardErrorResponse(
           ErrorCode.VALIDATION_ERROR,
-          validation.error.errors[0]?.message || "Invalid request data"
+          validation.error.issues[0]?.message || "Invalid request data"
         );
       }
       
@@ -184,21 +185,31 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       // Create social media service
       const socialMediaService = createSocialMediaService();
 
-      // Publish post
-      const results = await socialMediaService.publishPost(
-        organizationId,
+      // Publish post. It reaches external platforms, so intent is audited before and outcome after.
+      const results = await performAuditedOperation(
         {
-          text: content,
-          media_urls: media_urls || [],
-          link_url,
-          link_title,
-          link_description,
-          hashtags: hashtags || [],
-          mentions: mentions || [],
-          scheduled_for: scheduled_for ? new Date(scheduled_for) : undefined,
-          platforms,
+          organizationId,
+          userId,
+          action: 'social.post.publish',
+          resourceType: 'social_posts',
+          details: { platforms, scheduled: !!scheduled_for, mediaCount: (media_urls || []).length },
         },
-        userId
+        () =>
+          socialMediaService.publishPost(
+            organizationId,
+            {
+              text: content,
+              media_urls: media_urls || [],
+              link_url,
+              link_title,
+              link_description,
+              hashtags: hashtags || [],
+              mentions: mentions || [],
+              scheduled_for: scheduled_for ? new Date(scheduled_for) : undefined,
+              platforms,
+            },
+            userId
+          ),
       );
 
       // Check if any posts succeeded
@@ -221,8 +232,10 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         success: successCount,
         failed: failureCount,
       });
-    } catch (_error) {
-return NextResponse.json(
+    } catch (error) {
+      const refused = operationAuditResponse(error);
+      if (refused) return NextResponse.json(refused.body, { status: refused.status });
+      return NextResponse.json(
         {
           error: 'Internal server error',
         },
@@ -231,11 +244,11 @@ return NextResponse.json(
     }
 });
 
-export const DELETE = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
+export const DELETE = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
   try {
-      const { _userId, organizationId } = context;
+      const { userId, organizationId } = context;
       
-      if (!organizationId) {
+      if (!organizationId || !userId) {
         return standardErrorResponse(
           ErrorCode.FORBIDDEN,
           'No organization found'
@@ -278,16 +291,27 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
         );
       }
 
-      // Delete post using social media service
+      // Delete post using social media service; it removes the post from the external platform, so it is audited
       const socialMediaService = createSocialMediaService();
-      await socialMediaService.deletePost(postId, organizationId);
+      await performAuditedOperation(
+        {
+          organizationId,
+          userId,
+          action: 'social.post.delete',
+          resourceType: 'social_posts',
+          resourceId: postId,
+        },
+        () => socialMediaService.deletePost(postId, organizationId),
+      );
 
       return NextResponse.json({
         message: 'Post deleted successfully',
         post_id: postId,
       });
-    } catch (_error) {
-return NextResponse.json(
+    } catch (error) {
+      const refused = operationAuditResponse(error);
+      if (refused) return NextResponse.json(refused.body, { status: refused.status });
+      return NextResponse.json(
         {
           error: 'Failed to delete post',
         },

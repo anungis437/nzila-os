@@ -208,13 +208,42 @@ export function compileAuthBootstrapSql(options: {
   policy('user_sessions', roles.issuance, 'SELECT', newlyProvisioned)
   policy('user_sessions', roles.issuance, 'INSERT', `${newlyProvisioned} AND organization_id IS NULL`)
 
+  // An invitation is delegated authority, not a bearer-only capability: it is honoured only while the
+  // inviter is still an active administrator of the invited organization. The bearer cannot read
+  // memberships, so a no-argument definer predicate reads only the invite selected by its own hash.
+  const inviteReader = q(roles.orgAuthorityReader)
+  const inviterLive = 'user_management.auth_invite_inviter_live()'
+  grant('invites', roles.orgAuthorityReader, 'SELECT (token_hash, organization_id, invited_by)')
+  grant('organization_users', roles.orgAuthorityReader, 'SELECT (user_id, organization_id, role, is_active)')
+  grant('users', roles.orgAuthorityReader, 'SELECT (user_id, is_active, lifecycle_state)')
+  const readerInvite = `${selector('invite')} AND token_hash=${setting('token_hash')}`
+  policy('invites', roles.orgAuthorityReader, 'SELECT', readerInvite)
+  const readerInviter = (column: string) => `${selector('invite')} AND EXISTS (SELECT FROM user_management.invites i
+    WHERE i.token_hash=${setting('token_hash')} AND i.invited_by=${column})`
+  statements.push(`CREATE POLICY auth_v2_invite_reader_memberships ON user_management.organization_users FOR SELECT TO ${inviteReader}
+      USING (${readerInviter('organization_users.user_id')} AND EXISTS (SELECT FROM user_management.invites i
+        WHERE i.token_hash=${setting('token_hash')} AND i.organization_id=organization_users.organization_id));
+    CREATE POLICY auth_v2_invite_reader_users ON user_management.users FOR SELECT TO ${inviteReader}
+      USING (${readerInviter('users.user_id')});
+    GRANT CREATE ON SCHEMA user_management TO ${inviteReader};
+    CREATE FUNCTION ${inviterLive} RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=pg_catalog AS $auth$
+      SELECT EXISTS (SELECT FROM user_management.invites i
+        JOIN user_management.organization_users a ON a.user_id=i.invited_by AND a.organization_id=i.organization_id
+        JOIN user_management.users u ON u.user_id=a.user_id
+        WHERE i.token_hash=${setting('token_hash')}
+          AND a.is_active AND a.role='admin' AND u.is_active AND u.lifecycle_state='active') $auth$;
+    ALTER FUNCTION ${inviterLive} OWNER TO ${inviteReader};
+    REVOKE CREATE ON SCHEMA user_management FROM ${inviteReader};
+    REVOKE ALL ON FUNCTION ${inviterLive} FROM PUBLIC;
+    GRANT EXECUTE ON FUNCTION ${inviterLive} TO ${q(roles.redemption)};`)
+
   // A bearer is authority only over the live row selected by its hash. Lock
   // that row before side effects; consumption is the final transactional write.
   const live = (kind: string, table: string, sentinel: string) => `${selector(kind)} AND
     ${table}.token_hash=${setting('token_hash')} AND ${table}.expires_at>now() AND ${table}.${sentinel} IS NULL`
   const resetLive = live('reset', 'r', 'used_at')
   const magicLive = `${live('magic-link', 'm', 'used_at')} AND m.purpose='login' AND m.attempts<5`
-  const inviteLive = `${live('invite', 'i', 'accepted_at')} AND i.revoked_at IS NULL`
+  const inviteLive = `${live('invite', 'i', 'accepted_at')} AND i.revoked_at IS NULL AND ${inviterLive}`
   const mfaLive = `${live('mfa', 'c', 'consumed_at')} AND c.attempts<5`
   const bearerEmail = `email IN (
     SELECT m.email FROM user_management.magic_links m WHERE ${magicLive}
@@ -234,7 +263,7 @@ export function compileAuthBootstrapSql(options: {
   ]) {
     grant(table!, roles.redemption, `SELECT, UPDATE (${columns})`)
     for (const op of ['SELECT', 'UPDATE'])
-      policy(table!, roles.redemption, op, `${selector(kind!)} AND ${token}`)
+      policy(table!, roles.redemption, op, `${selector(kind!)} AND ${token}${table === 'invites' ? ` AND ${inviterLive}` : ''}`)
   }
   grant('users', roles.redemption, `SELECT, INSERT (user_id,email,password_hash,first_name,last_name,display_name,email_verified,is_active),
     UPDATE (password_hash,password_changed_at,failed_login_attempts,account_locked_until)`)

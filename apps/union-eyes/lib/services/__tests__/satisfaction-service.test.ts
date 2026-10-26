@@ -23,10 +23,11 @@ const mocks = vi.hoisted(() => ({
   mockSelectDistinct: vi.fn(),
   mockInsert: vi.fn(),
   mockUpdate: vi.fn(),
+  mockAudit: vi.fn(),
 }));
 
-vi.mock('@/db/db', () => ({
-  db: {
+vi.mock('@/db/db', () => {
+  const dbMock = {
     query: {
       satisfactionSurveys: { findFirst: mocks.mockFindFirst },
     },
@@ -34,8 +35,12 @@ vi.mock('@/db/db', () => ({
     selectDistinct: mocks.mockSelectDistinct,
     insert: mocks.mockInsert,
     update: mocks.mockUpdate,
-  },
-}));
+    transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(dbMock),
+  };
+  return { db: dbMock };
+});
+
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mocks.mockAudit }));
 
 vi.mock('@/db/schema', () => ({
   satisfactionSurveys: {
@@ -67,6 +72,7 @@ describe('SatisfactionService', () => {
     mocks.mockSelectDistinct.mockReturnValue(chain([]));
     mocks.mockInsert.mockReturnValue(chain([]));
     mocks.mockUpdate.mockReturnValue(chain([]));
+    mocks.mockAudit.mockResolvedValue(undefined);
   });
 
   // ── createSatisfactionSurvey ──────────────────────────────────
@@ -81,14 +87,52 @@ describe('SatisfactionService', () => {
       expect(result).toEqual(existing);
     });
 
-    it('inserts new survey when none exists', async () => {
+    it('inserts new survey and audits it on the same transaction', async () => {
       const newSurvey = { id: 'srv-new', status: 'pending' };
       mocks.mockInsert.mockReturnValueOnce(chain([newSurvey]));
       const { createSatisfactionSurvey } = await import('../satisfaction-service');
       const result = await createSatisfactionSurvey({
         organizationId: 'org-1', claimId: 'c-2', memberId: 'm-2', lroId: 'lro-1',
-      });
+      }, 'steward-1');
       expect(result).toEqual(newSurvey);
+      expect(mocks.mockAudit).toHaveBeenCalledWith(
+        expect.objectContaining({ query: expect.anything() }),
+        expect.objectContaining({ organizationId: 'org-1', userId: 'steward-1', action: 'satisfaction.survey.create', resourceId: 'srv-new' }),
+      );
+    });
+
+    it('records the claim-closure workflow as the system actor', async () => {
+      mocks.mockInsert.mockReturnValueOnce(chain([{ id: 'srv-new' }]));
+      const { createSatisfactionSurvey } = await import('../satisfaction-service');
+      await createSatisfactionSurvey({ organizationId: 'org-1', claimId: 'c-3', memberId: 'm-3', lroId: 'lro-1' });
+      expect(mocks.mockAudit).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ userId: 'system:claim-closure' }),
+      );
+    });
+
+    it('does not create a survey when its audit cannot be written', async () => {
+      mocks.mockInsert.mockReturnValueOnce(chain([{ id: 'srv-new' }]));
+      mocks.mockAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+      const { createSatisfactionSurvey } = await import('../satisfaction-service');
+      await expect(
+        createSatisfactionSurvey({ organizationId: 'org-1', claimId: 'c-4', memberId: 'm-4', lroId: 'lro-1' }),
+      ).rejects.toThrow('Failed to create satisfaction survey');
+    });
+  });
+
+  // ── getOwnSatisfactionSurvey ──────────────────────────────────
+  describe('getOwnSatisfactionSurvey', () => {
+    it('returns the survey only when it is the member\u2019s own in their organization', async () => {
+      const survey = { id: 'srv-1', memberId: 'm-1', organizationId: 'org-1' };
+      mocks.mockFindFirst.mockResolvedValue(survey);
+      const { getOwnSatisfactionSurvey } = await import('../satisfaction-service');
+      expect(await getOwnSatisfactionSurvey('srv-1', 'm-1', 'org-1')).toEqual(survey);
+    });
+
+    it('returns null when no row matches the member and organization', async () => {
+      const { getOwnSatisfactionSurvey } = await import('../satisfaction-service');
+      expect(await getOwnSatisfactionSurvey('srv-1', 'other-member', 'org-1')).toBeNull();
     });
   });
 
@@ -145,15 +189,43 @@ describe('SatisfactionService', () => {
       wouldRecommend: true,
     };
 
-    it('submits ratings and calculates overall score', async () => {
-      const survey = { id: 's-1', memberId: 'm-1', status: 'pending' };
+    it('submits ratings, calculates overall score, and audits on the same transaction without the ratings', async () => {
+      const survey = { id: 's-1', memberId: 'm-1', status: 'pending', organizationId: 'org-1', claimId: 'c-1' };
       mocks.mockFindFirst.mockResolvedValue(survey);
       const updated = { ...survey, status: 'completed', overallScore: '4.17' };
       mocks.mockUpdate.mockReturnValueOnce(chain([updated]));
 
       const { submitSatisfactionRatings } = await import('../satisfaction-service');
-      const result = await submitSatisfactionRatings('s-1', 'm-1', ratings);
+      const result = await submitSatisfactionRatings('s-1', 'm-1', ratings, 'org-1');
       expect(result.status).toBe('completed');
+      expect(mocks.mockAudit).toHaveBeenCalledWith(
+        expect.objectContaining({ query: expect.anything() }),
+        expect.objectContaining({ organizationId: 'org-1', userId: 'm-1', action: 'satisfaction.survey.submit', resourceId: 's-1' }),
+      );
+      expect(JSON.stringify(mocks.mockAudit.mock.calls)).not.toContain('Good work');
+    });
+
+    it('treats a survey of another organization as not found', async () => {
+      mocks.mockFindFirst.mockResolvedValue({ id: 's-1', memberId: 'm-1', status: 'pending', organizationId: 'org-2' });
+      const { submitSatisfactionRatings } = await import('../satisfaction-service');
+      await expect(submitSatisfactionRatings('s-1', 'm-1', ratings, 'org-1')).rejects.toThrow('Survey not found');
+      expect(mocks.mockAudit).not.toHaveBeenCalled();
+    });
+
+    it('writes no audit and reports a conflict when a concurrent submission already completed the survey', async () => {
+      mocks.mockFindFirst.mockResolvedValue({ id: 's-1', memberId: 'm-1', status: 'pending', organizationId: 'org-1' });
+      mocks.mockUpdate.mockReturnValueOnce(chain([]));
+      const { submitSatisfactionRatings } = await import('../satisfaction-service');
+      await expect(submitSatisfactionRatings('s-1', 'm-1', ratings, 'org-1')).rejects.toThrow('already completed');
+      expect(mocks.mockAudit).not.toHaveBeenCalled();
+    });
+
+    it('fails the submission when its audit cannot be written', async () => {
+      mocks.mockFindFirst.mockResolvedValue({ id: 's-1', memberId: 'm-1', status: 'pending', organizationId: 'org-1' });
+      mocks.mockUpdate.mockReturnValueOnce(chain([{ id: 's-1' }]));
+      mocks.mockAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+      const { submitSatisfactionRatings } = await import('../satisfaction-service');
+      await expect(submitSatisfactionRatings('s-1', 'm-1', ratings, 'org-1')).rejects.toThrow('audit unavailable');
     });
 
     it('throws when survey not found', async () => {
@@ -176,14 +248,24 @@ describe('SatisfactionService', () => {
 
   // ── declineSurvey ─────────────────────────────────────────────
   describe('declineSurvey', () => {
-    it('declines a pending survey', async () => {
-      mocks.mockFindFirst.mockResolvedValue({ id: 's-1', memberId: 'm-1', status: 'pending' });
+    it('declines a pending survey and audits it', async () => {
+      mocks.mockFindFirst.mockResolvedValue({ id: 's-1', memberId: 'm-1', status: 'pending', organizationId: 'org-1' });
       const declined = { id: 's-1', status: 'declined' };
       mocks.mockUpdate.mockReturnValueOnce(chain([declined]));
 
       const { declineSurvey } = await import('../satisfaction-service');
-      const result = await declineSurvey('s-1', 'm-1');
+      const result = await declineSurvey('s-1', 'm-1', 'org-1');
       expect(result.status).toBe('declined');
+      expect(mocks.mockAudit).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ userId: 'm-1', action: 'satisfaction.survey.decline', resourceId: 's-1' }),
+      );
+    });
+
+    it('refuses a survey of another organization', async () => {
+      mocks.mockFindFirst.mockResolvedValue({ id: 's-1', memberId: 'm-1', status: 'pending', organizationId: 'org-2' });
+      const { declineSurvey } = await import('../satisfaction-service');
+      await expect(declineSurvey('s-1', 'm-1', 'org-1')).rejects.toThrow('Survey not found');
     });
 
     it('throws when survey not found', async () => {

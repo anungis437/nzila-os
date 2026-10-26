@@ -161,6 +161,10 @@ export default function FinanceDashboardPage() {
         </div>
       </div>
 
+      <p role="note" className="rounded-md border bg-muted p-3 text-sm text-muted-foreground">
+        {t('platformBillingNotice')}
+      </p>
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="p-4">

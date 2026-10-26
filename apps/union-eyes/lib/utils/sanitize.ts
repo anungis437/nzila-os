@@ -3,6 +3,7 @@
  * Use this to sanitize any HTML before rendering with dangerouslySetInnerHTML
  */
 import DOMPurify from 'dompurify';
+import { stripMarkup } from './strip-markup';
 
 /** Trusted external domains for payment/OAuth redirects */
 const TRUSTED_REDIRECT_DOMAINS = [
@@ -37,14 +38,29 @@ export function validateRedirectUrl(url: string): string | null {
 }
 
 /**
+ * Normalise user-supplied link or image content for an `href`/`src` attribute. Only the listed protocols are allowed,
+ * so `javascript:`, `data:` and `vbscript:` values yield undefined. Relative paths are refused: a block's content is
+ * rendered in a preview and in an email, neither of which has a meaningful base.
+ */
+export function safeAttributeUrl(value: string, protocols: readonly string[] = ['http:', 'https:']): string | undefined {
+  const trimmed = (value ?? '').trim();
+  if (!trimmed) return undefined;
+  try {
+    const parsed = new URL(trimmed);
+    return protocols.includes(parsed.protocol) ? parsed.toString() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * Sanitize HTML content to prevent XSS attacks.
  * Allows safe HTML tags and removes dangerous elements like <script>, event handlers, etc.
  */
 export function sanitizeHtml(dirty: string): string {
   if (typeof window === 'undefined') {
-    // Server-side: strip all HTML tags as a safe fallback (not rendered on server)
-    // codeql[js/incomplete-multi-character-sanitization] - server-side fallback only; client uses DOMPurify
-    return dirty.replace(/<[^>]*>/g, '');
+    // Server-side: reduce to plain text (never rendered on the server); the result never contains markup.
+    return stripMarkup(dirty);
   }
   return DOMPurify.sanitize(dirty, {
     USE_PROFILES: { html: true },

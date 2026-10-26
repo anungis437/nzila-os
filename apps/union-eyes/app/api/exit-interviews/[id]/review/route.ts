@@ -2,6 +2,8 @@
 import { and, eq } from 'drizzle-orm';
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { exitInterviews, exitInterviewEvents } from '@/db/schema';
 import { ROLE_HIERARCHY, normalizeRole } from '@/lib/api-auth-guard';
 import { z } from 'zod';
@@ -48,26 +50,43 @@ export const POST = withApi(
       throw ApiError.conflict('Only submitted interviews can be marked as reviewed');
     }
 
-    const now = new Date();
-    const [updated] = await db
-      .update(exitInterviews)
-      .set({
-        status: 'reviewed',
-        reviewedAt: now,
-        reviewedBy: userId!,
-        updatedAt: now,
-        updatedBy: userId!,
-      })
-      .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!)))
-      .returning();
+    // A review is an independent check: the person who wrote the interview does not review it.
+    if (existing.createdBy === userId) {
+      throw ApiError.forbidden('The author of an exit interview cannot review it');
+    }
 
-    await db.insert(exitInterviewEvents).values({
-      interviewId: params.id,
-      organizationId: organizationId!,
-      eventType: 'reviewed',
-      actorUserId: userId!,
-      notes: body?.notes ?? 'Exit interview reviewed and approved for publishing',
-      payload: { fromStatus: 'submitted', toStatus: 'reviewed', reviewedBy: userId },
+    const now = new Date();
+    const updated = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
+      const [row] = await tx
+        .update(exitInterviews)
+        .set({
+          status: 'reviewed',
+          reviewedAt: now,
+          reviewedBy: userId!,
+          updatedAt: now,
+          updatedBy: userId!,
+        })
+        .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!), eq(exitInterviews.status, 'submitted')))
+        .returning();
+      if (!row) throw ApiError.conflict('Only submitted interviews can be marked as reviewed');
+
+      await tx.insert(exitInterviewEvents).values({
+        interviewId: params.id,
+        organizationId: organizationId!,
+        eventType: 'reviewed',
+        actorUserId: userId!,
+        notes: body?.notes ?? 'Exit interview reviewed and approved for publishing',
+        payload: { fromStatus: 'submitted', toStatus: 'reviewed', reviewedBy: userId },
+      });
+      await persistAtomicAudit(tx, {
+        organizationId: organizationId!,
+        userId: userId!,
+        action: 'exit_interview.review',
+        resourceType: 'exit_interviews',
+        resourceId: params.id,
+        details: { from: 'submitted', to: 'reviewed' },
+      });
+      return row;
     });
 
     return { data: updated };

@@ -10,6 +10,7 @@ const m = vi.hoisted(() => ({
   withRLSContext: vi.fn(),
   db: { select: vi.fn() },
   castVote: vi.fn(),
+  hasVoted: vi.fn(),
 }));
 
 vi.mock('@/lib/api/framework', () => ({
@@ -27,7 +28,7 @@ vi.mock('@/db/schema', () => ({
   votingOptions: { id: 'id', sessionId: 'sessionId' },
   votingSessions: { id: 'id', organizationId: 'organizationId' },
 }));
-vi.mock('@/lib/services/voting-service', () => ({ castVote: m.castVote }));
+vi.mock('@/lib/services/voting-service', () => ({ castVote: m.castVote, hasVoted: m.hasVoted }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return { ...actual, eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and'), desc: vi.fn(() => 'desc') };
@@ -43,12 +44,12 @@ describe('governance/elections/sessions/[id]/vote route (IDOR + eligibility fix)
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
     m.withRLSContext.mockImplementation(async (_opts: unknown, fn: () => Promise<unknown>) => fn());
     m.db.select.mockReturnValue({
-      from: vi.fn(() => ({ where: vi.fn(async () => [{ id: 's1', organizationId: 'org-1' }]) })),
+      from: vi.fn(() => ({ where: vi.fn(async () => [{ id: 's1', organizationId: 'org-1', status: 'active' }]) })),
     } as any);
   });
 
   it('derives voterId/eligibility from the authenticated user via castVote(), not the request body', async () => {
-    m.castVote.mockResolvedValue({ id: 'vote-1', sessionId: 's1', optionId: '11111111-1111-1111-1111-111111111111', receiptId: 'r1' });
+    m.castVote.mockResolvedValue({ id: 'vote-1', sessionId: 's1', optionId: '11111111-1111-1111-1111-111111111111', voterId: 'hmac', voterHash: 'h', castAt: 'now', receiptId: 'r1' });
     const { POST } = await loadRoute();
 
     const result = await POST({
@@ -59,7 +60,47 @@ describe('governance/elections/sessions/[id]/vote route (IDOR + eligibility fix)
     });
 
     expect(m.castVote).toHaveBeenCalledWith('s1', '11111111-1111-1111-1111-111111111111', 'user-1', true);
-    expect(result).toEqual({ id: 'vote-1', sessionId: 's1', optionId: '11111111-1111-1111-1111-111111111111', receiptId: 'r1' });
+    // Ballot secrecy: the receipt never echoes the option, voter id or hash.
+    expect(result).toEqual({ id: 'vote-1', sessionId: 's1', castAt: 'now' });
+  });
+
+  it('refuses ballots for a session that is not active', async () => {
+    m.db.select.mockReturnValue({
+      from: vi.fn(() => ({ where: vi.fn(async () => [{ id: 's1', organizationId: 'org-1', status: 'closed' }]) })),
+    } as any);
+    const { POST } = await loadRoute();
+    await expect(
+      POST({
+        request: { url: 'http://localhost/api/governance/elections/sessions/s1/vote' },
+        body: { optionId: '11111111-1111-1111-1111-111111111111' },
+        organizationId: 'org-1',
+        userId: 'user-1',
+      }),
+    ).rejects.toThrow('not open');
+    expect(m.castVote).not.toHaveBeenCalled();
+  });
+
+  it('GET never returns individual vote rows, only options and own participation', async () => {
+    m.hasVoted.mockResolvedValue(true);
+    const selectFrom: unknown[] = [];
+    m.db.select.mockImplementation(() => ({
+      from: vi.fn((table: unknown) => {
+        selectFrom.push(table);
+        return { where: vi.fn(async () => [{ id: 's1', organizationId: 'org-1', status: 'active' }]) };
+      }),
+    }) as any);
+    const { GET } = await loadRoute();
+
+    const result: any = await GET({
+      request: { url: 'http://localhost/api/governance/elections/sessions/s1/vote' },
+      organizationId: 'org-1',
+      userId: 'user-1',
+    });
+
+    expect(result.votes).toBeUndefined();
+    expect(result.hasVoted).toBe(true);
+    expect(selectFrom).not.toContainEqual(expect.objectContaining({ castAt: 'castAt' }));
+    expect(m.hasVoted).toHaveBeenCalledWith('s1', 'user-1');
   });
 
   it('rejects when no authenticated user is present', async () => {

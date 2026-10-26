@@ -17,6 +17,7 @@ import {
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 import { logger } from '@/lib/logger';
+import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes max execution
@@ -44,7 +45,10 @@ export const POST = withApiAuth(async (_request: NextRequest) => {
     });
 
     // Execute failed payment retry job
-    const result = await manualTriggerRetry();
+    const result = await performAuditedOperation(
+      { organizationId: user.organizationId, userId: user.id, action: 'platform.payments.retry_failed', resourceType: 'platform_job' },
+      () => manualTriggerRetry(),
+    );
 
     logger.info('Failed payment retry completed', {
       totalProcessed: result.totalProcessed,
@@ -60,6 +64,9 @@ export const POST = withApiAuth(async (_request: NextRequest) => {
       message: `Processed ${result.totalProcessed} transactions. ${result.retriesAttempted} retries attempted, ${result.retriesSucceeded} succeeded, ${result.markedForAdmin} marked for admin intervention.`,
     });
   } catch (error) {
+    if (error instanceof Error && (error as { code?: string }).code === 'OPERATION_AUDIT_UNAVAILABLE') {
+      return standardErrorResponse(ErrorCode.CONFLICT, error.message);
+    }
     logger.error('Error triggering failed payment retry', { error });
 
     return standardErrorResponse(

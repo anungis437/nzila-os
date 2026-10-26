@@ -8,7 +8,8 @@
 
 import { NextResponse } from 'next/server';
 import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { memberDuesIssues } from '@/db/schema/dues-finance-schema';
 
 export const dynamic = 'force-dynamic';
@@ -56,19 +57,31 @@ export const POST = withApi(
       throw ApiError.badRequest(`Invalid issue type. Must be one of: ${validIssueTypes.join(', ')}`);
     }
 
-    const [issue] = await db
-      .insert(memberDuesIssues)
-      .values({
+    // A member reports an issue about their own deductions; it is filed as the caller's, as open.
+    const issue = await withRLSContext({ organizationId }, async (tx) => {
+      const [row] = await tx
+        .insert(memberDuesIssues)
+        .values({
+          organizationId,
+          userId,
+          issueType,
+          subject,
+          description,
+          payrollDeductionId: payrollDeductionId ?? null,
+          expectedAmount: expectedAmount != null ? expectedAmount.toFixed(2) : null,
+          status: 'open',
+        })
+        .returning();
+      await persistAtomicAudit(tx, {
         organizationId,
         userId,
-        issueType,
-        subject,
-        description,
-        payrollDeductionId: payrollDeductionId ?? null,
-        expectedAmount: expectedAmount != null ? expectedAmount.toFixed(2) : null,
-        status: 'open',
-      })
-      .returning();
+        action: 'dues.issue.report',
+        resourceType: 'member_dues_issues',
+        resourceId: row.id,
+        details: { issueType },
+      });
+      return row;
+    });
 
     return NextResponse.json({
       success: true,

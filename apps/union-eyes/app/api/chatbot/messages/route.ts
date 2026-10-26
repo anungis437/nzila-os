@@ -13,11 +13,13 @@ import { RATE_LIMITS } from '@/lib/rate-limiter';
 import { enforceAISafety } from '@nzila/policies';
 import { standardSuccessResponse } from '@/lib/api/standardized-responses';
 import { auditAIInvocation } from '@/lib/audit-logger';
+import { ApiError } from '@/lib/api/errors';
+import { operationAuditResponse } from '@/lib/audit/operation-audit';
 
 export const dynamic = 'force-dynamic';
 
 const bodySchema = z.object({
-  sessionId: z.string().uuid(),
+  sessionId: z.guid(),
   content: z.string().min(1).max(10_000),
   useRAG: z.boolean().optional().default(true),
 });
@@ -50,13 +52,20 @@ export const POST = withApi(
       model: process.env.AZURE_OPENAI_DEPLOYMENT ?? 'gpt-4',
       dataClass: 'internal',
     });
-    const assistantMessage = await chatbotService.sendMessage({
-      sessionId: body.sessionId,
-      userId: userId!,
-      organizationId: organizationId!,
-      content: body.content,
-      useRAG: body.useRAG,
-    });
+    let assistantMessage;
+    try {
+      assistantMessage = await chatbotService.sendMessage({
+        sessionId: body.sessionId,
+        userId: userId!,
+        organizationId: organizationId!,
+        content: body.content,
+        useRAG: body.useRAG,
+      });
+    } catch (error) {
+      const refused = operationAuditResponse(error);
+      if (refused) throw ApiError.conflict(refused.body.error.message);
+      throw error;
+    }
 
     return standardSuccessResponse({ data: assistantMessage }, {
       aiGenerated: true,

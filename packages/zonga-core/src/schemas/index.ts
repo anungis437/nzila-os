@@ -48,7 +48,7 @@ const enumValues = <T extends Record<string, string>>(e: T) =>
 // ── Creator ─────────────────────────────────────────────────────────────────
 
 export const CreateCreatorSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.guid(),
   displayName: z.string().min(1).max(255),
   bio: z.string().max(2000).optional(),
   avatarUrl: z.string().url().optional(),
@@ -66,7 +66,7 @@ export type CreateCreatorInput = z.infer<typeof CreateCreatorSchema>
 // ── Content Asset ───────────────────────────────────────────────────────────
 
 export const CreateContentAssetSchema = z.object({
-  creatorId: z.string().uuid(),
+  creatorId: z.guid(),
   title: z.string().min(1).max(255),
   type: z.enum(enumValues(AssetType)),
   description: z.string().max(5000).optional(),
@@ -75,13 +75,13 @@ export const CreateContentAssetSchema = z.object({
   language: z.enum(enumValues(ZongaLanguage)).optional(),
   collaborators: z.array(z.string().max(255)).max(20).optional(),
   isrc: z.string().max(15).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export type CreateContentAssetInput = z.infer<typeof CreateContentAssetSchema>
 
 export const PublishAssetSchema = z.object({
-  assetId: z.string().uuid(),
+  assetId: z.guid(),
   storageUrl: z.string().url(),
   coverArtUrl: z.string().url().optional(),
   audioFingerprint: z.string().optional(),
@@ -94,7 +94,7 @@ export type PublishAssetInput = z.infer<typeof PublishAssetSchema>
 
 /** Royalty split for a collaborator on a release. */
 export const RoyaltySplitSchema = z.object({
-  creatorId: z.string().uuid(),
+  creatorId: z.guid(),
   displayName: z.string().min(1).max(255),
   role: z.enum(['primary', 'featured', 'producer', 'songwriter']),
   sharePercent: z.number().min(0).max(100),
@@ -103,11 +103,11 @@ export const RoyaltySplitSchema = z.object({
 export type RoyaltySplitInput = z.infer<typeof RoyaltySplitSchema>
 
 export const CreateReleaseSchema = z.object({
-  creatorId: z.string().uuid(),
+  creatorId: z.guid(),
   title: z.string().min(1).max(255),
   releaseDate: z.string().datetime().optional(),
   royaltySplits: z.array(RoyaltySplitSchema).max(20).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export type CreateReleaseInput = z.infer<typeof CreateReleaseSchema>
@@ -115,15 +115,15 @@ export type CreateReleaseInput = z.infer<typeof CreateReleaseSchema>
 // ── Revenue Event ───────────────────────────────────────────────────────────
 
 export const RecordRevenueEventSchema = z.object({
-  creatorId: z.string().uuid(),
-  assetId: z.string().uuid().optional(),
+  creatorId: z.guid(),
+  assetId: z.guid().optional(),
   type: z.enum(enumValues(RevenueType)),
   amount: z.number().min(0),
   currency: z.enum(enumValues(ZongaCurrency)).default('USD'),
   description: z.string().max(1000).optional(),
   externalRef: z.string().max(255).optional(),
   occurredAt: z.string().datetime().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export type RecordRevenueEventInput = z.infer<typeof RecordRevenueEventSchema>
@@ -131,7 +131,7 @@ export type RecordRevenueEventInput = z.infer<typeof RecordRevenueEventSchema>
 // ── Payout Preview ──────────────────────────────────────────────────────────
 
 export const PayoutPreviewRequestSchema = z.object({
-  creatorId: z.string().uuid(),
+  creatorId: z.guid(),
   periodStart: z.string().datetime(),
   periodEnd: z.string().datetime(),
   platformFeePercent: z.number().min(0).max(100).default(15),
@@ -145,8 +145,8 @@ export type PayoutPreviewRequestInput = z.infer<typeof PayoutPreviewRequestSchem
 
 /** Validates caller-supplied metadata for an audio file upload. */
 export const AudioUploadMetaSchema = z.object({
-  creatorId: z.string().uuid(),
-  assetId: z.string().uuid(),
+  creatorId: z.guid(),
+  assetId: z.guid(),
   fileName: z.string().min(1).max(500),
   contentType: z.enum([
     'audio/mpeg',
@@ -165,8 +165,8 @@ export type AudioUploadMetaInput = z.infer<typeof AudioUploadMetaSchema>
 // ── Org Context ─────────────────────────────────────────────────────────────
 
 export const ZongaOrgContextSchema = z.object({
-  orgId: z.string().uuid(),
-  actorId: z.string().uuid(),
+  orgId: z.guid(),
+  actorId: z.guid(),
   role: z.enum(enumValues(ZongaRole)),
   permissions: z.array(z.string()),
   requestId: z.string().min(1),
@@ -179,29 +179,29 @@ export const CreateListenerSchema = z.object({
   email: z.string().email().optional(),
   city: z.string().max(100).optional(),
   country: z.string().max(100).optional(),
-  preferencesJson: z.record(z.unknown()).optional(),
+  preferencesJson: z.record(z.string(), z.unknown()).optional(),
 })
 export type CreateListenerInput = z.infer<typeof CreateListenerSchema>
 
 export const ListenerFollowSchema = z.object({
-  listenerId: z.string().uuid(),
-  creatorId: z.string().uuid(),
+  listenerId: z.guid(),
+  creatorId: z.guid(),
 })
 export type ListenerFollowInput = z.infer<typeof ListenerFollowSchema>
 
 export const ListenerFavoriteSchema = z.object({
-  listenerId: z.string().uuid(),
+  listenerId: z.guid(),
   entityType: z.enum(enumValues(FavoriteEntityType)),
-  targetEntityId: z.string().uuid(),
+  targetEntityId: z.guid(),
 })
 export type ListenerFavoriteInput = z.infer<typeof ListenerFavoriteSchema>
 
 export const ListenerActivitySchema = z.object({
-  listenerId: z.string().uuid(),
+  listenerId: z.guid(),
   activityType: z.enum(enumValues(ListenerActivityType)),
   entityType: z.string().max(50).optional(),
-  targetEntityId: z.string().uuid().optional(),
-  metadataJson: z.record(z.unknown()).optional(),
+  targetEntityId: z.guid().optional(),
+  metadataJson: z.record(z.string(), z.unknown()).optional(),
 })
 export type ListenerActivityInput = z.infer<typeof ListenerActivitySchema>
 
@@ -215,13 +215,13 @@ export const CreateEventSchema = z.object({
   country: z.string().max(100).optional(),
   startsAt: z.string().datetime(),
   endsAt: z.string().datetime().optional(),
-  creatorId: z.string().uuid().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  creatorId: z.guid().optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 export type CreateEventInput = z.infer<typeof CreateEventSchema>
 
 export const CreateTicketTypeSchema = z.object({
-  eventId: z.string().uuid(),
+  eventId: z.guid(),
   ticketType: z.string().min(1).max(100),
   price: z.number().min(0),
   currency: z.enum(enumValues(ZongaCurrency)).default('USD'),
@@ -230,9 +230,9 @@ export const CreateTicketTypeSchema = z.object({
 export type CreateTicketTypeInput = z.infer<typeof CreateTicketTypeSchema>
 
 export const PurchaseTicketSchema = z.object({
-  eventId: z.string().uuid(),
-  ticketTypeId: z.string().uuid(),
-  listenerId: z.string().uuid().optional(),
+  eventId: z.guid(),
+  ticketTypeId: z.guid(),
+  listenerId: z.guid().optional(),
   successUrl: z.string().url(),
   cancelUrl: z.string().url(),
 })
@@ -244,15 +244,15 @@ export const CreatePlaylistSchema = z.object({
   title: z.string().min(1).max(255),
   description: z.string().max(2000).optional(),
   ownerType: z.enum(enumValues(PlaylistOwnerType)),
-  ownerId: z.string().uuid(),
+  ownerId: z.guid(),
   visibility: z.enum(enumValues(PlaylistVisibility)).default('public'),
 })
 export type CreatePlaylistInput = z.infer<typeof CreatePlaylistSchema>
 
 export const AddPlaylistItemSchema = z.object({
-  playlistId: z.string().uuid(),
+  playlistId: z.guid(),
   entityType: z.enum(['track', 'release']),
-  targetEntityId: z.string().uuid(),
+  targetEntityId: z.guid(),
   position: z.number().int().min(0),
 })
 export type AddPlaylistItemInput = z.infer<typeof AddPlaylistItemSchema>
@@ -261,16 +261,16 @@ export type AddPlaylistItemInput = z.infer<typeof AddPlaylistItemSchema>
 
 export const CreateModerationCaseSchema = z.object({
   entityType: z.enum(['creator', 'asset', 'release', 'event']),
-  targetEntityId: z.string().uuid(),
+  targetEntityId: z.guid(),
   caseType: z.enum(enumValues(ModerationCaseType)),
   severity: z.enum(['info', 'low', 'medium', 'high', 'critical']).default('medium'),
   notes: z.string().max(5000).optional(),
-  assignedTo: z.string().uuid().optional(),
+  assignedTo: z.guid().optional(),
 })
 export type CreateModerationCaseInput = z.infer<typeof CreateModerationCaseSchema>
 
 export const ResolveModerationCaseSchema = z.object({
-  caseId: z.string().uuid(),
+  caseId: z.guid(),
   resolution: z.enum(['resolved', 'dismissed', 'escalated']),
   notes: z.string().max(5000).optional(),
 })
@@ -279,7 +279,7 @@ export type ResolveModerationCaseInput = z.infer<typeof ResolveModerationCaseSch
 // ── Notification ────────────────────────────────────────────────────────────
 
 export const CreateNotificationSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.guid(),
   type: z.enum(enumValues(NotificationType)),
   title: z.string().min(1).max(500),
   body: z.string().max(5000).optional(),
@@ -299,8 +299,8 @@ export const CreateRightsOwnerSchema = z.object({
 export type CreateRightsOwnerInput = z.infer<typeof CreateRightsOwnerSchema>
 
 export const CreateRightsShareSchema = z.object({
-  assetId: z.string().uuid(),
-  ownerId: z.string().uuid(),
+  assetId: z.guid(),
+  ownerId: z.guid(),
   ownerRole: z.enum(enumValues(RightsOwnerRole)),
   sharePercent: z.number().min(0).max(100),
   territory: z.string().max(100).default('WORLDWIDE'),
@@ -310,11 +310,11 @@ export const CreateRightsShareSchema = z.object({
 export type CreateRightsShareInput = z.infer<typeof CreateRightsShareSchema>
 
 export const CreateSplitAgreementSchema = z.object({
-  releaseId: z.string().uuid().optional(),
-  assetId: z.string().uuid().optional(),
+  releaseId: z.guid().optional(),
+  assetId: z.guid().optional(),
   title: z.string().min(1).max(255),
   shares: z.array(z.object({
-    ownerId: z.string().uuid(),
+    ownerId: z.guid(),
     ownerName: z.string().min(1).max(255),
     role: z.enum(enumValues(RightsOwnerRole)),
     sharePercent: z.number().min(0).max(100),
@@ -328,16 +328,16 @@ export type CreateSplitAgreementInput = z.infer<typeof CreateSplitAgreementSchem
 
 export const CreateDisputeSchema = z.object({
   disputeType: z.enum(enumValues(DisputeType)),
-  respondentId: z.string().uuid().optional(),
-  assetId: z.string().uuid().optional(),
-  releaseId: z.string().uuid().optional(),
+  respondentId: z.guid().optional(),
+  assetId: z.guid().optional(),
+  releaseId: z.guid().optional(),
   description: z.string().min(10).max(5000),
   evidenceUrls: z.array(z.string().url()).max(10).optional(),
 })
 export type CreateDisputeInput = z.infer<typeof CreateDisputeSchema>
 
 export const ResolveDisputeSchema = z.object({
-  disputeId: z.string().uuid(),
+  disputeId: z.guid(),
   resolution: z.enum(enumValues(DisputeStatus)),
   notes: z.string().max(5000).optional(),
   payoutBlockActive: z.boolean().optional(),
@@ -345,8 +345,8 @@ export const ResolveDisputeSchema = z.object({
 export type ResolveDisputeInput = z.infer<typeof ResolveDisputeSchema>
 
 export const CreateTakedownSchema = z.object({
-  assetId: z.string().uuid().optional(),
-  releaseId: z.string().uuid().optional(),
+  assetId: z.guid().optional(),
+  releaseId: z.guid().optional(),
   reason: z.enum(enumValues(TakedownReason)),
   description: z.string().min(10).max(5000),
   requestedByEmail: z.string().email().optional(),
@@ -357,8 +357,8 @@ export type CreateTakedownInput = z.infer<typeof CreateTakedownSchema>
 // ── Streaming ───────────────────────────────────────────────────────────────
 
 export const RecordStreamEventSchema = z.object({
-  assetId: z.string().uuid(),
-  listenerId: z.string().uuid().optional(),
+  assetId: z.guid(),
+  listenerId: z.guid().optional(),
   durationSeconds: z.number().int().min(0),
   quality: z.enum(enumValues(AudioQuality)),
   completionPercent: z.number().min(0).max(100),
@@ -370,8 +370,8 @@ export const RecordStreamEventSchema = z.object({
 export type RecordStreamEventInput = z.infer<typeof RecordStreamEventSchema>
 
 export const RequestDownloadSchema = z.object({
-  assetId: z.string().uuid(),
-  listenerId: z.string().uuid(),
+  assetId: z.guid(),
+  listenerId: z.guid(),
   quality: z.enum(enumValues(AudioQuality)),
 })
 export type RequestDownloadInput = z.infer<typeof RequestDownloadSchema>
@@ -382,21 +382,21 @@ export const CreateEventExtendedSchema = z.object({
   title: z.string().min(1).max(255),
   description: z.string().max(5000).optional(),
   eventType: z.enum(enumValues(EventType)),
-  venueId: z.string().uuid().optional(),
+  venueId: z.guid().optional(),
   venue: z.string().max(255).optional(),
   city: z.string().max(100).optional(),
   country: z.string().max(100).optional(),
   startsAt: z.string().datetime(),
   endsAt: z.string().datetime().optional(),
-  creatorId: z.string().uuid().optional(),
-  seriesId: z.string().uuid().optional(),
+  creatorId: z.guid().optional(),
+  seriesId: z.guid().optional(),
   imageUrl: z.string().url().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 export type CreateEventExtendedInput = z.infer<typeof CreateEventExtendedSchema>
 
 export const CreateTicketTypeExtendedSchema = z.object({
-  eventId: z.string().uuid(),
+  eventId: z.guid(),
   name: z.string().min(1).max(100),
   tier: z.enum(enumValues(TicketTier)),
   price: z.number().min(0),
@@ -410,7 +410,7 @@ export const CreateTicketTypeExtendedSchema = z.object({
 export type CreateTicketTypeExtendedInput = z.infer<typeof CreateTicketTypeExtendedSchema>
 
 export const CreatePromoCodeSchema = z.object({
-  eventId: z.string().uuid(),
+  eventId: z.guid(),
   code: z.string().min(3).max(30).regex(/^[A-Z0-9_-]+$/),
   type: z.enum(enumValues(PromoCodeType)),
   value: z.number().min(0),
@@ -421,21 +421,21 @@ export const CreatePromoCodeSchema = z.object({
 export type CreatePromoCodeInput = z.infer<typeof CreatePromoCodeSchema>
 
 export const TicketTransferSchema = z.object({
-  ticketHolderId: z.string().uuid(),
+  ticketHolderId: z.guid(),
   toEmail: z.string().email(),
 })
 export type TicketTransferInput = z.infer<typeof TicketTransferSchema>
 
 export const TicketRefundSchema = z.object({
-  orderId: z.string().uuid(),
-  ticketHolderId: z.string().uuid().optional(),
+  orderId: z.guid(),
+  ticketHolderId: z.guid().optional(),
   reason: z.string().min(5).max(1000),
 })
 export type TicketRefundInput = z.infer<typeof TicketRefundSchema>
 
 export const TicketScanSchema = z.object({
-  ticketHolderId: z.string().uuid(),
-  eventId: z.string().uuid(),
+  ticketHolderId: z.guid(),
+  eventId: z.guid(),
   deviceId: z.string().max(100).optional(),
   latitude: z.number().min(-90).max(90).optional(),
   longitude: z.number().min(-180).max(180).optional(),
@@ -458,7 +458,7 @@ export type CreateVenueInput = z.infer<typeof CreateVenueSchema>
 // ── Creator Verification ────────────────────────────────────────────────────
 
 export const CreateVerificationSchema = z.object({
-  creatorId: z.string().uuid(),
+  creatorId: z.guid(),
   verificationType: z.enum(enumValues(VerificationType)),
   evidenceUrls: z.array(z.string().url()).min(1).max(5),
 })
@@ -467,7 +467,7 @@ export type CreateVerificationInput = z.infer<typeof CreateVerificationSchema>
 // ── Payout Account ──────────────────────────────────────────────────────────
 
 export const CreatePayoutAccountSchema = z.object({
-  creatorId: z.string().uuid(),
+  creatorId: z.guid(),
   rail: z.enum(enumValues(PayoutRail)),
   accountRef: z.string().min(1).max(255),
   accountName: z.string().max(255).optional(),
@@ -502,7 +502,7 @@ export type CreateLabelInput = z.infer<typeof CreateLabelSchema>
 // ── Consent ─────────────────────────────────────────────────────────────────
 
 export const RecordConsentSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.guid(),
   consentType: z.enum(enumValues(ConsentType)),
   granted: z.boolean(),
   version: z.string().min(1).max(20),
@@ -514,7 +514,7 @@ export type RecordConsentInput = z.infer<typeof RecordConsentSchema>
 export const CreateExportJobSchema = z.object({
   entityType: z.enum(['revenue', 'payouts', 'streams', 'listeners', 'moderation', 'events']),
   format: z.enum(enumValues(ExportFormat)),
-  filters: z.record(z.unknown()).optional(),
+  filters: z.record(z.string(), z.unknown()).optional(),
 })
 export type CreateExportJobInput = z.infer<typeof CreateExportJobSchema>
 
@@ -523,7 +523,7 @@ export type CreateExportJobInput = z.infer<typeof CreateExportJobSchema>
 export const CreateFraudReviewSchema = z.object({
   signalType: z.enum(enumValues(FraudSignalType)),
   entityType: z.enum(['creator', 'asset', 'listener', 'payout', 'event']),
-  targetEntityId: z.string().uuid(),
+  targetEntityId: z.guid(),
   severity: z.enum(['low', 'medium', 'high', 'critical']),
   score: z.number().min(0).max(100),
   explanation: z.string().min(5).max(2000),
@@ -533,18 +533,18 @@ export type CreateFraudReviewInput = z.infer<typeof CreateFraudReviewSchema>
 // ── Recommendation ──────────────────────────────────────────────────────────
 
 export const RecommendationRequestSchema = z.object({
-  listenerId: z.string().uuid(),
+  listenerId: z.guid(),
   type: z.enum(enumValues(RecommendationType)),
   limit: z.number().int().min(1).max(100).default(20),
-  excludeAssetIds: z.array(z.string().uuid()).max(100).optional(),
-  context: z.record(z.unknown()).optional(),
+  excludeAssetIds: z.array(z.guid()).max(100).optional(),
+  context: z.record(z.string(), z.unknown()).optional(),
 })
 export type RecommendationRequestInput = z.infer<typeof RecommendationRequestSchema>
 
 // ── Distribution ────────────────────────────────────────────────────────────
 
 export const CreateDistributionSchema = z.object({
-  releaseId: z.string().uuid(),
+  releaseId: z.guid(),
   target: z.enum(enumValues(DistributionTarget)),
 })
 export type CreateDistributionInput = z.infer<typeof CreateDistributionSchema>

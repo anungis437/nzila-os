@@ -15,7 +15,7 @@ import { bindPilotOrganization } from '@/lib/pilot/pilot-ownership';
 export const dynamic = 'force-dynamic';
 
 const verifyOrganizationBodySchema = z.object({
-  organizationId: z.string().uuid(),
+  organizationId: z.guid(),
 });
 
 export const POST = withApiAuth(async (request: NextRequest, context?: { params?: Promise<{ id: string }> | { id: string } }) => {

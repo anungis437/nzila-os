@@ -88,32 +88,6 @@ export const engagementEventEnum = pgEnum('newsletter_engagement_event', [
 // ============================================================================
 
 /**
- * Newsletter Templates
- * Reusable email templates with HTML content, JSON structure, and variables
- */
-export const newsletterTemplates = pgTable('newsletter_templates', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  organizationId: uuid('organization_id')
-    .notNull()
-    .references(() => organizations.id, { onDelete: 'cascade' }),
-  name: varchar('name', { length: 255 }).notNull(),
-  description: text('description'),
-  category: varchar('category', { length: 100 }),
-  thumbnailUrl: text('thumbnail_url'),
-  htmlContent: text('html_content').notNull(),
-  jsonStructure: jsonb('json_structure'), // Block-based editor structure
-  variables: jsonb('variables').$type<TemplateVariable[]>().default([]),
-  isSystem: boolean('is_system').default(false),
-  isActive: boolean('is_active').default(true),
-  usageCount: integer('usage_count').default(0),
-  createdBy: text('created_by').references(() => profiles.userId, {
-    onDelete: 'set null',
-  }),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
-});
-
-/**
  * Distribution Lists
  * Subscriber groups for targeted newsletter campaigns
  */
@@ -172,9 +146,7 @@ export const newsletterCampaigns = pgTable('newsletter_campaigns', {
   organizationId: uuid('organization_id')
     .notNull()
     .references(() => organizations.id, { onDelete: 'cascade' }),
-  templateId: uuid('template_id').references(() => newsletterTemplates.id, {
-    onDelete: 'set null',
-  }),
+  templateId: uuid('template_id'),
   name: varchar('name', { length: 255 }).notNull(),
   subject: varchar('subject', { length: 500 }).notNull(),
   previewText: varchar('preview_text', { length: 500 }),
@@ -263,21 +235,6 @@ export const newsletterEngagement = pgTable('newsletter_engagement', {
 // RELATIONS
 // ============================================================================
 
-export const newsletterTemplatesRelations = relations(
-  newsletterTemplates,
-  ({ one, many }) => ({
-    organization: one(organizations, {
-      fields: [newsletterTemplates.organizationId],
-      references: [organizations.id],
-    }),
-    creator: one(profiles, {
-      fields: [newsletterTemplates.createdBy],
-      references: [profiles.userId],
-    }),
-    campaigns: many(newsletterCampaigns),
-  })
-);
-
 export const newsletterDistributionListsRelations = relations(
   newsletterDistributionLists,
   ({ one, many }) => ({
@@ -313,10 +270,6 @@ export const newsletterCampaignsRelations = relations(
     organization: one(organizations, {
       fields: [newsletterCampaigns.organizationId],
       references: [organizations.id],
-    }),
-    template: one(newsletterTemplates, {
-      fields: [newsletterCampaigns.templateId],
-      references: [newsletterTemplates.id],
     }),
     creator: one(profiles, {
       fields: [newsletterCampaigns.createdBy],
@@ -364,8 +317,6 @@ export const newsletterEngagementRelations = relations(
 // TYPES
 // ============================================================================
 
-export type NewsletterTemplate = typeof newsletterTemplates.$inferSelect;
-export type NewNewsletterTemplate = typeof newsletterTemplates.$inferInsert;
 
 export type NewsletterDistributionList =
   typeof newsletterDistributionLists.$inferSelect;

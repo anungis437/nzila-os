@@ -8,7 +8,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
+import { withRoleAuth, hasMinRole, BaseAuthContext } from '@/lib/api-auth-guard';
+import { readableSensitivityLevels } from '@/lib/knowledge-transfer/governance/consent-controls';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { checkEntitlement } from '@/lib/services/entitlements';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
@@ -70,7 +71,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid search request',
-        validation.error.errors,
+        validation.error.issues,
       );
     }
 
@@ -85,6 +86,10 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
     const typeFilter = document_type
       ? sql`AND document_type = ${document_type}`
       : sql``;
+
+    // A knowledge asset made from an exit interview keeps that interview's sensitivity: it is only returned to a caller
+    // who holds the role that sensitivity requires.
+    const readableLevels = JSON.stringify(await readableSensitivityLevels(hasMinRole));
 
     // Semantic search with org-scoping + visibility rules
     const results = await withRLSContext(async () => db.execute(sql`
@@ -109,6 +114,15 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         AND (organization_id = ${orgId} OR is_public = true)
         AND (expiry_date IS NULL OR expiry_date > now())
         AND embedding IS NOT NULL
+        AND (
+          source_type IS DISTINCT FROM 'exit_interview'
+          OR EXISTS (
+            SELECT 1 FROM exit_interviews ei
+            WHERE ei.id::text = knowledge_base.source_id::text
+              AND ei.organization_id = knowledge_base.organization_id
+              AND ei.sensitivity_level IN (SELECT jsonb_array_elements_text(${readableLevels}::jsonb))
+          )
+        )
         ${typeFilter}
       ORDER BY similarity DESC
       LIMIT ${max_results}
@@ -193,6 +207,10 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
 });
 
 export const GET = withRoleAuth('member', async (_request: NextRequest, _context: BaseAuthContext) => {
+  if (!_context.organizationId) {
+    return NextResponse.json({ error: 'No active organization' }, { status: 400 });
+  }
+  const statsOrgId = _context.organizationId;
   // OWASP AI: Feature flag gate for knowledge base stats
   const getBlocked = await guardAiFeature(AI_FEATURES.AI_SEARCH, { userId: _context.userId, organizationId: _context.organizationId });
   if (getBlocked) return getBlocked;
@@ -206,6 +224,7 @@ export const GET = withRoleAuth('member', async (_request: NextRequest, _context
         count(DISTINCT document_type)::int AS document_types
       FROM knowledge_base
       WHERE is_active = true
+        AND organization_id = ${statsOrgId}
     `));
 
     const stats = (rows as any as Array<Record<string, unknown>>)[0] || {};

@@ -1,4 +1,10 @@
 import { getRoleLevel, UserRole } from '../auth/roles';
+import {
+  EXECUTIVE_ALLOWED_PREFIXES,
+  EXECUTIVE_HOME_HREF,
+  getExecutiveNavigation,
+  meetsExecutiveDestinationRole,
+} from '../executive/executive-navigation';
 
 export type DashboardExperience = 'member' | 'staff' | 'executive' | 'governance' | 'admin';
 
@@ -26,7 +32,6 @@ const ADMIN_ROLES = new Set([
 
 const GOVERNANCE_ROLES = new Set([
   'governance',
-  'officer',
   'compliance_manager',
   'security_manager',
   'clc_executive',
@@ -41,6 +46,7 @@ const EXECUTIVE_ROLES = new Set([
   'president',
   'vice_president',
   'secretary_treasurer',
+  'officer',
   'national_officer',
 ]);
 
@@ -83,22 +89,22 @@ export function getDashboardExperience(role?: string | null): DashboardExperienc
 
 /**
  * Doctrine orientation hub (Club360 seven-tab Workspace).
- * This is not the post-login role execution home, except for `member`,
- * where the two routes coincide. EC-G03 labels that split; it does not
- * retarget either surface.
+ * This is not the post-login role execution home for any role. Members do not
+ * have the hub at all: they start at their own Home (/dashboard) and the hub is not in their
+ * navigation or allow-list.
  */
 export const WORKSPACE_ORIENTATION_HUB_PATH = '/dashboard/workspace' as const;
 
 /**
  * Role execution homes — the routes `getRoleLandingPath` returns.
- * Targets are unchanged by EC-G03. Staff, executive, governance, and admin
- * land off the Workspace hub on purpose. Do not silently rewrite these to
- * the hub (that redirect belongs to G-04, which is out of this slice).
+ * Staff, executive, governance, and admin land off the Workspace hub on
+ * purpose. Do not silently rewrite these to the hub (that redirect belongs to
+ * G-04, which is out of this slice). Members start at their own Home.
  */
 export const ROLE_EXECUTION_HOME_BY_EXPERIENCE = {
-  member: WORKSPACE_ORIENTATION_HUB_PATH,
+  member: '/dashboard',
   staff: '/dashboard/workbench',
-  executive: '/dashboard/intelligence',
+  executive: EXECUTIVE_HOME_HREF,
   governance: '/dashboard/governance',
   admin: '/dashboard/admin/organizations',
 } as const satisfies Record<DashboardExperience, string>;
@@ -109,7 +115,7 @@ export type DualNavHomes = {
   roleHomeHref: string;
   /** Workspace orientation hub. Always `/dashboard/workspace`. */
   orientationHubHref: typeof WORKSPACE_ORIENTATION_HUB_PATH;
-  /** True only for member, where landing and the hub are the same route. */
+  /** Always false now that members no longer land on the hub; kept for consumers. */
   roleHomeIsOrientationHub: boolean;
 };
 
@@ -126,7 +132,7 @@ export function getDualNavHomes(role?: string | null): DualNavHomes {
     experience,
     roleHomeHref,
     orientationHubHref: WORKSPACE_ORIENTATION_HUB_PATH,
-    roleHomeIsOrientationHub: roleHomeHref === WORKSPACE_ORIENTATION_HUB_PATH,
+    roleHomeIsOrientationHub: false,
   };
 }
 
@@ -139,44 +145,37 @@ export function getRoleLandingPath(role?: string | null): string {
 export function getNavigationForExperience(experience: DashboardExperience): NavigationItem[] {
   if (experience === 'member') {
     return [
-      { label: 'Workspace', href: '/dashboard/workspace', icon: 'dashboard' },
-      { label: 'Home', href: '/dashboard/inbox' },
-      { label: 'My Cases', href: '/dashboard/inbox?type=intake' },
-      { label: 'Open Representation Case', href: '/dashboard/claims/new' },
-      { label: 'Messages', href: '/dashboard/inbox?type=message' },
-      { label: 'Documents', href: '/dashboard/documents' },
-      { label: 'Profile & Settings', href: '/dashboard/settings' },
+      { label: 'Home', href: '/dashboard' },
+      { label: 'My Representation', href: '/dashboard/claims' },
+      { label: 'Messages', href: '/dashboard/messages' },
+      { label: 'My Documents', href: '/dashboard/documents' },
+      { label: 'My Union', href: '/dashboard/union' },
+      { label: 'Help & Resources', href: '/dashboard/help' },
+      // Account controls are not primary destinations (UE-MEMBER-CANONICAL-2.1).
+      { label: 'Profile', href: '/dashboard/profile', group: 'Account' },
+      { label: 'Preferences', href: '/dashboard/preferences', group: 'Account' },
+      { label: 'Privacy', href: '/dashboard/privacy', group: 'Account' },
     ];
   }
 
   if (experience === 'staff') {
+    // UE-REPRESENTATIVE-CANONICAL-2.2: seven invariant destinations. Each maps to an existing
+    // route; legacy routes (notifications, intake queue, workspace hub) stay reachable by deep link.
     return [
-      { label: 'Workspace', href: '/dashboard/workspace', icon: 'dashboard', group: 'Workspace' },
-      { label: 'Operations (Casework Console)', href: '/dashboard/workbench', group: 'Operations' },
-      { label: 'Operations Queue (Representation Cases)', href: '/dashboard/inbox?type=intake', group: 'Operations' },
-      { label: 'Operations Priorities (Commitments & Deadlines)', href: '/dashboard/priorities', group: 'Operations' },
-      { label: 'Members', href: '/dashboard/members', group: 'Operations' },
-      { label: 'Documents', href: '/dashboard/documents', group: 'Operations' },
-      { label: 'Operations Communications', href: '/dashboard/correspondence', group: 'Operations' },
-      { label: 'Institutional Intelligence Reports', href: '/dashboard/intelligence', group: 'Operations' },
-      { label: 'Notifications', href: '/dashboard/notifications', group: 'Operations' },
+      { label: 'Today', href: '/dashboard/inbox', group: 'Operations' },
+      { label: 'Representation', href: '/dashboard/workbench', group: 'Operations' },
+      { label: 'Members & Workplaces', href: '/dashboard/members', group: 'Operations' },
+      { label: 'Communications', href: '/dashboard/correspondence', group: 'Operations' },
+      { label: 'Documents & Evidence', href: '/dashboard/documents', group: 'Operations' },
+      { label: 'Tasks & Deadlines', href: '/dashboard/priorities', group: 'Operations' },
+      { label: 'Knowledge & Guidance', href: '/dashboard/clause-library', group: 'Operations' },
       { label: 'Profile & Settings', href: '/dashboard/settings', group: 'Settings' },
     ];
   }
 
   if (experience === 'executive') {
-    return [
-      { label: 'Workspace', href: '/dashboard/workspace', icon: 'dashboard', group: 'Workspace' },
-      { label: 'OCRA Intelligence (Executive Overview)', href: '/dashboard/intelligence?scope=executive', group: 'OCRA' },
-      { label: 'OCRA Signals (Continuity Insights)', href: '/dashboard/continuity-intelligence', group: 'OCRA' },
-      { label: 'Operations Continuity', href: '/dashboard/executive-operating-intelligence', group: 'Operations' },
-      { label: 'Governance Continuity', href: '/dashboard/governance-center', group: 'Governance Continuity' },
-      { label: 'Operations Outcomes (Member Outcomes Ledger)', href: '/dashboard/outcomes', group: 'Operations' },
-      { label: 'Onboarding Survivability (Leadership Continuity)', href: '/dashboard/leadership', group: 'Operations' },
-      { label: 'Institutional Intelligence Reports', href: '/dashboard/intelligence', group: 'Operations' },
-      { label: 'Governance Trust & Oversight', href: '/dashboard/trust', group: 'Governance Continuity' },
-      { label: 'Profile & Settings', href: '/dashboard/settings', group: 'Settings' },
-    ];
+    // UE-OFFICER-EXECUTIVE-CANONICAL-2.1: exactly seven destinations (lib/executive).
+    return getExecutiveNavigation();
   }
 
   if (experience === 'governance') {
@@ -209,14 +208,16 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
 const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
   member: [
     '/dashboard',
-    '/dashboard/workspace',
-    '/dashboard/inbox',
     '/dashboard/claims',
     '/dashboard/claims/new',
     '/dashboard/documents',
+    '/dashboard/messages',
+    '/dashboard/union',
+    '/dashboard/help',
     '/dashboard/settings',
     '/dashboard/profile',
-    '/dashboard/support',
+    '/dashboard/preferences',
+    '/dashboard/privacy',
   ],
   staff: [
     '/dashboard',
@@ -229,24 +230,13 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard/members',
     '/dashboard/documents',
     '/dashboard/correspondence',
+    '/dashboard/clause-library',
     '/dashboard/notifications',
+    '/dashboard/messages/staff',
     '/dashboard/settings',
     '/dashboard/profile',
   ],
-  executive: [
-    '/dashboard',
-    '/dashboard/workspace',
-    '/dashboard/intelligence',
-    '/dashboard/continuity-intelligence',
-    '/dashboard/executive-operating-intelligence',
-    '/dashboard/operations',
-    '/dashboard/governance-center',
-    '/dashboard/outcomes',
-    '/dashboard/leadership',
-    '/dashboard/trust',
-    '/dashboard/settings',
-    '/dashboard/profile',
-  ],
+  executive: [...EXECUTIVE_ALLOWED_PREFIXES],
   governance: [
     '/dashboard',
     '/dashboard/workspace',
@@ -347,7 +337,10 @@ export function getVisibleNavigationForExperience(
     const pathname = item.href.split('?')[0];
     const platformRoles = PLATFORM_NAVIGATION_ROLES[pathname];
     if (platformRoles && !platformRoles.includes(role)) return false;
+    if (experience === 'executive' && !meetsExecutiveDestinationRole(pathname, role)) return false;
     if (pathname === '/dashboard/audits' && getRoleLevel(role as UserRole) < getRoleLevel(UserRole.ADMIN)) return false;
+    // The clause library page redirects below steward; do not advertise it to those roles.
+    if (pathname === '/dashboard/clause-library' && getRoleLevel(role as UserRole) < getRoleLevel(UserRole.STEWARD)) return false;
     return canAccessDashboardPath(pathname, experience, isPilotMode);
   });
 }

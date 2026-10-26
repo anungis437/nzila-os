@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   withSystemContext: vi.fn(),
   auditLog: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   selectQueue: [] as unknown[][],
   updateFailAt: -1,
 }));
@@ -41,6 +42,7 @@ vi.mock('@/lib/api/framework', () => {
     z: {
       object: () => ({}),
       string: () => zString,
+      guid: () => zString,
       array: () => zArray,
       coerce: { number: () => zNumber },
       enum: () => ({ optional: () => ({}) }),
@@ -51,7 +53,11 @@ vi.mock('@/lib/api/framework', () => {
     },
   };
 });
-vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: m.withSystemContext,
+  withRLSContext: async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(mockDb),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/lib/audit-logger', () => ({
   auditLog: m.auditLog,
@@ -87,6 +93,7 @@ describe('admin/ingest/retry route', () => {
     );
     m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
     m.auditLog.mockResolvedValue(undefined);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
   });
 
   it('POST returns 400 when organization context is missing', async () => {
@@ -130,20 +137,18 @@ describe('admin/ingest/retry route', () => {
     const json = await response.json();
     expect(json.retried).toBe(2);
     expect(json.succeeded).toBe(2);
-    expect(m.auditLog).toHaveBeenCalled();
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'ingest.retry', organizationId: 'org_1', userId: 'u1', resourceId: 'b1' }));
   });
 
-  it('POST increments failed count when update errors occur', async () => {
+  it('POST re-queues all failed records or none: a failed audit fails the request', async () => {
     const { POST } = await loadRoute();
     m.selectQueue.push([{ id: 'batch_1' }], [{ id: 'r1' }, { id: 'r2' }]);
-    m.updateFailAt = 2;
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit write failed'));
 
     const response = await POST(new NextRequest('http://localhost/api/admin/ingest/retry', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ batch_id: 'b1' }),
     }), { organizationId: 'org_1', userId: 'u1' });
 
-    const json = await response.json();
-    expect(json.failed).toBe(1);
-    expect(json.succeeded).toBe(1);
+    expect(response.status).toBe(500);
   });
 });

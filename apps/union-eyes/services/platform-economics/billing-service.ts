@@ -187,7 +187,7 @@ export async function closeBillingPeriod(
   const [updated] = await db
     .update(billingPeriods)
     .set({ isClosed: true, closedAt: new Date(), closedBy })
-    .where(eq(billingPeriods.id, billingPeriodId))
+    .where(and(eq(billingPeriods.id, billingPeriodId), eq(billingPeriods.organizationId, period.organizationId)))
     .returning();
 
   await auditLog({
@@ -561,7 +561,7 @@ export async function recordPayment(input: RecordPaymentInput) {
         status: newStatus,
         updatedAt: new Date(),
       })
-      .where(eq(platformInvoices.id, input.invoiceId));
+      .where(and(eq(platformInvoices.id, input.invoiceId), eq(platformInvoices.organizationId, input.organizationId)));
 
     return payment;
   });
@@ -683,7 +683,7 @@ export async function reconcileExternalInvoicePayment(input: ReconcileExternalIn
             lastReconciledPaymentId: payment.id,
           },
         })
-        .where(eq(platformInvoices.id, invoice.id));
+        .where(and(eq(platformInvoices.id, invoice.id), eq(platformInvoices.organizationId, input.organizationId)));
     });
   } else if (normalizedStatus === 'failed') {
     await db
@@ -698,7 +698,7 @@ export async function reconcileExternalInvoicePayment(input: ReconcileExternalIn
           lastFailureReason: input.failureReason ?? null,
         },
       })
-      .where(eq(platformInvoices.id, invoice.id));
+      .where(and(eq(platformInvoices.id, invoice.id), eq(platformInvoices.organizationId, input.organizationId)));
   }
 
   return payment;
@@ -771,7 +771,7 @@ export async function runBillingLifecycleAutomation(runAt = new Date(), actor = 
             finalizedBy: actor,
           },
         })
-        .where(eq(platformInvoices.id, draft.id));
+        .where(and(eq(platformInvoices.id, draft.id), eq(platformInvoices.organizationId, subscription.organizationId)));
       invoicesFinalized += 1;
     }
 
@@ -802,7 +802,7 @@ export async function runBillingLifecycleAutomation(runAt = new Date(), actor = 
             failedAt: runAt.toISOString(),
           },
         })
-        .where(eq(platformInvoices.id, inv.id));
+        .where(and(eq(platformInvoices.id, inv.id), eq(platformInvoices.organizationId, subscription.organizationId)));
       invoicesMarkedOverdue += 1;
     }
   }

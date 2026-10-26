@@ -130,6 +130,7 @@ export function GrievanceDetailConsole() {
   const [collabRole, setCollabRole] = useState<'secondary_lro' | 'reviewer' | 'read_only'>('reviewer');
   const [collabCanViewPrivate, setCollabCanViewPrivate] = useState(false);
   const [accessSaving, setAccessSaving] = useState(false);
+  const [accessError, setAccessError] = useState<string | null>(null);
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const [uploadPayload, setUploadPayload] = useState({
     title: '',
@@ -188,20 +189,28 @@ export function GrievanceDetailConsole() {
       return;
     }
     setAccessSaving(true);
+    setAccessError(null);
     try {
-      await fetch(`/api/grievances/${id}/access`, {
+      const needsExpiry = collabRole !== 'secondary_lro' || collabCanViewPrivate;
+      const res = await fetch(`/api/grievances/${id}/access`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: collabUserId,
           accessRole: collabRole,
+          expiresAt: needsExpiry ? new Date(Date.now() + 30 * 86_400_000).toISOString() : null,
           canComment: true,
-          canUploadDocuments: collabRole !== 'read_only',
+          canUploadDocuments: collabRole === 'secondary_lro',
           canEditCaseNotes: collabRole === 'secondary_lro',
           canDraftActions: collabRole === 'secondary_lro',
           canViewPrivateDocuments: collabCanViewPrivate,
         }),
       });
+      if (!res.ok) {
+        const json = await res.json().catch(() => null);
+        setAccessError(json?.error?.message ?? json?.message ?? 'Access could not be granted.');
+        return;
+      }
       setCollabUserId('');
       setCollabRole('reviewer');
       setCollabCanViewPrivate(false);
@@ -213,12 +222,17 @@ export function GrievanceDetailConsole() {
 
   async function revokeCollaborator(assignmentId: string) {
     setAccessSaving(true);
+    setAccessError(null);
     try {
-      await fetch(`/api/grievances/${id}/access`, {
+      const res = await fetch(`/api/grievances/${id}/access`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ assignmentId, status: 'revoked' }),
       });
+      if (!res.ok) {
+        setAccessError('Access could not be revoked.');
+        return;
+      }
       await refetchGrievance();
     } finally {
       setAccessSaving(false);
@@ -552,6 +566,12 @@ export function GrievanceDetailConsole() {
                 </div>
               ))}
             </div>
+          )}
+
+          {accessError && (
+            <p role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-xs text-red-800">
+              {accessError}
+            </p>
           )}
 
           {grievance.effectiveAccess?.canManageAssignments && (

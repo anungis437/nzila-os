@@ -133,10 +133,10 @@ describe("dashboard-kpi-service", () => {
 
     expect(result.totalMembers).toBe(2);
     expect(result.activeGrievances).toBe(1);
-    expect(result.pendingApprovals).toBe(1);
-    expect(result.upcomingMeetings).toBe(1);
-    expect(result.monthlyBudget.spent).toBe(100001);
-    expect(result.monthlyBudget.allocated).toBe(100001);
+    expect(result.atRiskStrategicGoals).toBe(1);
+    expect(result.grievanceMeetingsNext30Days).toBe(1);
+    expect(result.duesRemittances.receivedAmount).toBe(100001);
+    expect(result.duesRemittances.expectedAmount).toBe(50000);
     expect(result.grievanceResolutionRate).toBe(50);
     expect(result.provenance.sources.some((s) => s.table === "organization_members")).toBe(true);
   });
@@ -537,8 +537,8 @@ describe("dashboard-kpi-service", () => {
     const mod = await import("@/lib/services/dashboard-kpi-service");
     const result = await mod.getExecutiveMetrics({ organizationId: "org-1", timeframe: "monthly", now: iso("2026-05-10T00:00:00.000Z") });
 
-    expect(result.pendingApprovals).toBe(1);
-    expect(result.monthlyBudget.allocated).toBe(20);
+    expect(result.atRiskStrategicGoals).toBe(1);
+    expect(result.duesRemittances.expectedAmount).toBe(20);
     expect(result.provenance.cache.hit).toBe(false);
     expect(cacheSetMock).toHaveBeenCalledTimes(1);
   });
@@ -549,11 +549,11 @@ describe("dashboard-kpi-service", () => {
     const cacheGetMock = vi.fn().mockResolvedValue({
       totalMembers: 5,
       activeGrievances: 2,
-      pendingApprovals: 1,
-      upcomingMeetings: 0,
-      monthlyBudget: {
-        allocated: 1000,
-        spent: 100,
+      atRiskStrategicGoals: 1,
+      grievanceMeetingsNext30Days: 0,
+      duesRemittances: {
+        expectedAmount: 1000,
+        receivedAmount: 100,
         currency: "USD",
       },
       membershipTrend: 0,
@@ -651,8 +651,9 @@ describe("dashboard-kpi-service", () => {
       iso("2026-06-18T00:00:00.000Z"),
     );
 
-    expect(result.monthlyBudget.spent).toBe(1250);
-    expect(result.monthlyBudget.allocated).toBe(1250);
+    expect(result.duesRemittances.receivedAmount).toBe(1250);
+    // An unparseable expected amount is reported as 0, not silently raised to the received amount.
+    expect(result.duesRemittances.expectedAmount).toBe(0);
   });
 
   it("buildLeadershipDashboard handles malformed dates, empty employer metadata, and out-of-window trend events", () => {
@@ -790,8 +791,8 @@ describe("dashboard-kpi-service", () => {
     expect(result.totalMembers).toBe(1);
     expect(result.grievanceResolutionRate).toBe(0);
     expect(result.membershipTrend).toBe(0);
-    expect(result.monthlyBudget.spent).toBe(0);
-    expect(result.monthlyBudget.allocated).toBe(0);
+    expect(result.duesRemittances.receivedAmount).toBe(0);
+    expect(result.duesRemittances.expectedAmount).toBe(0);
   });
 
   it("buildLeadershipDashboard covers infer-triage fallbacks and trend bucket misses", () => {

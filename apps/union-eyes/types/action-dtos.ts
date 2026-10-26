@@ -88,12 +88,12 @@ export type UpdateOrgInput = z.infer<typeof UpdateOrgInputSchema>;
 
 export const UpdateRoleInputSchema = z.object({
   userId: z.string().min(1),
-  organizationId: z.string().uuid(),
+  organizationId: z.guid(),
   newRole: UserRoleSchema,
 });
 
 export const UpdateConfigInputSchema = z.object({
-  organizationId: z.string().uuid(),
+  organizationId: z.guid(),
   category: z.string().min(1),
   key: z.string().min(1),
   value: z.unknown(),
@@ -168,7 +168,7 @@ export const RecordMetricInputSchema = z.object({
   metricValue: z.number(),
   metricUnit: z.string().optional(),
   category: z.string().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const DateRangeSchema = z.object({
@@ -201,7 +201,7 @@ export interface SegmentMember {
 export const CreateSegmentInputSchema = z.object({
   name: z.string().min(1).max(255),
   description: z.string().optional(),
-  criteria: z.record(z.unknown()),
+  criteria: z.record(z.string(), z.unknown()),
 });
 
 // ---------------------------------------------------------------------------
@@ -219,7 +219,7 @@ export interface PendingProfile {
 
 export const WhopWebhookPayloadSchema = z.object({
   event: z.string(),
-  data: z.record(z.unknown()),
+  data: z.record(z.string(), z.unknown()),
 });
 
 // ---------------------------------------------------------------------------

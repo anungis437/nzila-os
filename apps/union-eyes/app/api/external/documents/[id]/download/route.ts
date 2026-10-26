@@ -9,6 +9,8 @@ import {
   externalForbidden,
   resolveExternalDocumentResource,
 } from '@/lib/external-resource-route-utils';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { authorizeExternalDocumentAccess } from '@/lib/services/external-resource-authorization-service';
 
 const DOCUMENT_BLOB_CONTAINER = process.env.AZURE_BLOB_CONTAINER ?? 'union-eyes';
@@ -44,7 +46,6 @@ export const GET = withExternalMatterResourceAuth(
         title: documents.title,
         name: documents.name,
         filename: documents.filename,
-        fileUrl: documents.fileUrl,
         mimeType: documents.mimeType,
       })
       .from(documents)
@@ -66,7 +67,7 @@ export const GET = withExternalMatterResourceAuth(
     }
 
     const [latestVersion] = await db
-      .select({ storageKey: documentVersions.storageKey })
+      .select({ id: documentVersions.id, versionNo: documentVersions.versionNo, storageKey: documentVersions.storageKey })
       .from(documentVersions)
       .where(
         and(
@@ -77,9 +78,41 @@ export const GET = withExternalMatterResourceAuth(
       .orderBy(desc(documentVersions.versionNo))
       .limit(1);
 
-    const downloadUrl = latestVersion?.storageKey
-      ? await generateSasUrl(DOCUMENT_BLOB_CONTAINER, latestVersion.storageKey)
-      : row.fileUrl;
+    if (!latestVersion?.storageKey) {
+      return NextResponse.json({ error: 'Download is not available' }, { status: 404 });
+    }
+
+    let downloadUrl: string;
+    try {
+      downloadUrl = await generateSasUrl(DOCUMENT_BLOB_CONTAINER, latestVersion.storageKey);
+    } catch {
+      return NextResponse.json({ error: 'Download is not available' }, { status: 503 });
+    }
+    if (!downloadUrl) return NextResponse.json({ error: 'Download is not available' }, { status: 503 });
+
+    // The access is on the record before the link leaves the server. The link itself is never recorded.
+    try {
+      await persistAtomicAudit(db as unknown as RLSTx, {
+        organizationId: context.organizationId,
+        userId: context.actor.userId,
+        action: 'document.external_download',
+        resourceType: 'documents',
+        resourceId: row.id,
+        details: {
+          actorKind: 'external_representative',
+          representativeOrganizationId: context.actor.representativeOrganizationId ?? null,
+          authorityId: context.authorityId,
+          matterGrantId: context.matterGrantId,
+          matterType: context.matterType,
+          matterId: context.matterId,
+          documentId: row.id,
+          versionId: latestVersion.id,
+          versionNo: latestVersion.versionNo,
+        },
+      });
+    } catch {
+      return NextResponse.json({ error: 'Download is unavailable' }, { status: 503 });
+    }
 
     return NextResponse.json({
       data: {

@@ -33,6 +33,7 @@ vi.mock('@/db/db', () => ({
   db: dbMock,
 }));
 
+vi.mock('@/lib/services/case-access-service', () => ({ assignedCaseRepresentativeIds: vi.fn(async () => ['lro-1']) }));
 vi.mock('@/lib/services/document-authorization-service', () => ({
   filterAuthorizedDocumentsForActor,
 }));
@@ -109,7 +110,6 @@ describe('case-related-documents-service', () => {
       orgId: 'org-1',
       actor: {
         userId: 'user-1',
-        isStewardPlus: false,
       },
       limit: 10,
     });
@@ -179,7 +179,6 @@ describe('case-related-documents-service', () => {
       orgId: 'org-1',
       actor: {
         userId: 'user-1',
-        isStewardPlus: false,
       },
       limit: 10,
     });
@@ -251,7 +250,6 @@ describe('case-related-documents-service', () => {
       orgId: 'org-1',
       actor: {
         userId: 'user-1',
-        isStewardPlus: false,
       },
       limit: 10,
     });

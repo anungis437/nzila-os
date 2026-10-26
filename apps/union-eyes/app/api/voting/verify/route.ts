@@ -22,7 +22,7 @@ export const POST = withApi(
       description: 'Verify that a vote was recorded correctly using the receipt ID.',
     },
   },
-  async ({ body }) => {
+  async ({ body, organizationId }) => {
     const { receiptId, verificationCode } = body;
 
     // Look up the vote by receipt ID
@@ -48,6 +48,11 @@ export const POST = withApi(
         where: eq(votingSessions.id, vote.sessionId),
       }),
     ]);
+
+    // A receipt from another organization's session is reported exactly like an unknown receipt.
+    if (!session || session.organizationId !== organizationId) {
+      return { verified: false, reason: 'Receipt not found' };
+    }
 
     return {
       verified: true,

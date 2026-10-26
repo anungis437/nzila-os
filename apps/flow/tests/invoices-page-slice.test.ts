@@ -36,7 +36,10 @@ function isoDaysFrom(base: string, days: number): string {
 }
 
 describe('invoices page slice', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
+    // Load the page module under real timers: the first import resolves a large server-component graph, and doing it
+    // under fake timers stalls any timer-based step in module loading until the test times out.
+    await import('@/app/(dashboard)/invoices/page')
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-06-20T12:00:00.000Z'))
   })

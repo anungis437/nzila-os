@@ -35,7 +35,13 @@ if (!ENTRA_CLIENT_ID || !ENTRA_CLIENT_SECRET) {
 const PG_PASSWORD = process.env.PGPASSWORD;
 if (!PG_PASSWORD) throw new Error('PGPASSWORD env var is required');
 
-const TEST_PASSWORD = process.env.PROVISION_USER_PASSWORD || 'NzilaTest2026!';
+// No default: a shared, repository-known password on real Entra accounts is a credential
+// exposure. The caller must supply one (from the team secret store).
+const TEST_PASSWORD = process.env.PROVISION_USER_PASSWORD;
+if (!TEST_PASSWORD || TEST_PASSWORD.length < 16) {
+  console.error('ERROR: PROVISION_USER_PASSWORD env var (min 16 characters) is required.');
+  process.exit(1);
+}
 const PSQL = String.raw`C:\Program Files\PostgreSQL\17\bin\psql.exe`;
 
 // Support staging DB via DATABASE_URL or individual vars
@@ -145,8 +151,7 @@ function runSQL(sql) {
   const oneLine = sql.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
   try {
     return execSync(
-      // codeql[js/incomplete-sanitization] - dev/test-only script; SQL is developer-controlled, not user input
-      `"${PSQL}" ${DB_CONN} -t -A --pset=pager=off -c "${oneLine.replace(/"/g, '\\"')}"`,
+      `"${PSQL}" ${DB_CONN} -t -A --pset=pager=off -c "${oneLine.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`,
       { env: { ...process.env, PGPASSWORD: PG_PASSWORD, PGSSLMODE: DB_SSLMODE }, encoding: 'utf-8' },
     ).trim();
   } catch (err) {

@@ -2,7 +2,7 @@
  * Documents Schema
  * Database schema for general document management with folder support
  */
-import { pgTable, text, integer, timestamp, uuid, boolean, jsonb, index, uniqueIndex, pgEnum, bigint } from 'drizzle-orm/pg-core';
+import { pgTable, text, integer, timestamp, uuid, boolean, jsonb, index, uniqueIndex, pgEnum, bigint, numeric } from 'drizzle-orm/pg-core';
 import { organizations } from '../schema-organizations';
 import { claims } from './claims-schema';
 
@@ -161,6 +161,8 @@ export const documentAccessGrants = pgTable('document_access_grants', {
   canView: boolean('can_view').notNull().default(true),
   canDownload: boolean('can_download').notNull().default(false),
   canShare: boolean('can_share').notNull().default(false),
+  // Explicit authority to process (extract text from) the document. A view or download grant never implies it.
+  canProcessOcr: boolean('can_process_ocr').notNull().default(false),
   expiresAt: timestamp('expires_at', { withTimezone: true }),
   revokedAt: timestamp('revoked_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -169,20 +171,6 @@ export const documentAccessGrants = pgTable('document_access_grants', {
   index('idx_document_access_grants_user').on(table.userId),
   index('idx_document_access_grants_org').on(table.organizationId),
   index('idx_document_access_grants_status').on(table.status),
-]);
-
-export const documentSearchIndex = pgTable('document_search_index', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
-  documentId: uuid('document_id').notNull().references(() => documents.id, { onDelete: 'cascade' }),
-  title: text('title'),
-  filename: text('filename'),
-  fullText: text('full_text'),
-  tags: text('tags').array(),
-  indexedAt: timestamp('indexed_at', { withTimezone: true }).defaultNow().notNull(),
-}, (table) => [
-  uniqueIndex('idx_document_search_index_document').on(table.documentId),
-  index('idx_document_search_index_org').on(table.organizationId),
 ]);
 
 // Case-Document Join Table — links documents to claims with FK enforcement
@@ -216,3 +204,76 @@ export type DocumentLink = typeof documentLinks.$inferSelect;
 export type NewDocumentLink = typeof documentLinks.$inferInsert;
 export type DocumentAccessGrant = typeof documentAccessGrants.$inferSelect;
 export type NewDocumentAccessGrant = typeof documentAccessGrants.$inferInsert;
+
+export const documentIntakes = pgTable('document_intakes', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  organizationId: uuid('organization_id').notNull(),
+  principalUserId: text('principal_user_id').notNull(),
+  operation: text('operation').notNull().$type<'create_document' | 'append_version'>(),
+  targetDocumentId: uuid('target_document_id'),
+  storageKey: text('storage_key').notNull(),
+  originalFilename: text('original_filename').notNull(),
+  mimeType: text('mime_type').notNull(),
+  sizeBytes: bigint('size_bytes', { mode: 'number' }).notNull(),
+  contentHash: text('content_hash').notNull(),
+  status: text('status').notNull().default('open').$type<'open' | 'accepted' | 'expired' | 'cancelled'>(),
+  objectState: text('object_state').notNull().default('present').$type<'present' | 'attached' | 'deletion_pending' | 'deleted' | 'deletion_failed'>(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  acceptedAt: timestamp('accepted_at', { withTimezone: true }),
+  acceptedDocumentId: uuid('accepted_document_id'),
+  acceptedVersionId: uuid('accepted_version_id'),
+  cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
+  expiredAt: timestamp('expired_at', { withTimezone: true }),
+  deletionAttempts: integer('deletion_attempts').notNull().default(0),
+  deletionAttemptedAt: timestamp('deletion_attempted_at', { withTimezone: true }),
+  deletionError: text('deletion_error'),
+}, (table) => [
+  uniqueIndex('document_intakes_storage_key_uidx').on(table.storageKey),
+  index('document_intakes_principal_idx').on(table.organizationId, table.principalUserId, table.status),
+]);
+
+export type DocumentIntake = typeof documentIntakes.$inferSelect;
+
+export const documentTranscriptRevisions = pgTable('document_transcript_revisions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  organizationId: uuid('organization_id').notNull(),
+  documentId: uuid('document_id').notNull().references(() => documents.id),
+  versionId: uuid('version_id').notNull().references(() => documentVersions.id),
+  revisionNo: integer('revision_no').notNull(),
+  baseRevisionNo: integer('base_revision_no'),
+  state: text('state').notNull().$type<'machine_extraction' | 'human_draft' | 'human_reviewed'>(),
+  text: text('text').notNull(),
+  textHash: text('text_hash').notNull(),
+  sourceContentHash: text('source_content_hash').notNull(),
+  classification: text('classification').notNull(),
+  engine: text('engine'),
+  engineVersion: text('engine_version'),
+  language: text('language'),
+  confidence: numeric('confidence', { precision: 5, scale: 2 }),
+  authoredBy: text('authored_by').notNull(),
+  reviewedBy: text('reviewed_by'),
+  reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+  changeNote: text('change_note'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex('document_transcript_revisions_rev_uidx').on(table.documentId, table.versionId, table.revisionNo),
+  index('document_transcript_revisions_org_idx').on(table.organizationId, table.documentId),
+]);
+
+export type DocumentTranscriptRevision = typeof documentTranscriptRevisions.$inferSelect;
+
+export const documentTranscriptPublications = pgTable('document_transcript_publications', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  organizationId: uuid('organization_id').notNull(),
+  documentId: uuid('document_id').notNull().references(() => documents.id),
+  versionId: uuid('version_id').notNull().references(() => documentVersions.id),
+  revisionNo: integer('revision_no').notNull(),
+  textHash: text('text_hash').notNull(),
+  linkedCaseId: uuid('linked_case_id'),
+  publishedBy: text('published_by').notNull(),
+  publishedAt: timestamp('published_at', { withTimezone: true }).defaultNow().notNull(),
+  purpose: text('purpose').notNull(),
+}, (table) => [
+  uniqueIndex('document_transcript_publications_rev_uidx').on(table.documentId, table.versionId, table.revisionNo),
+]);

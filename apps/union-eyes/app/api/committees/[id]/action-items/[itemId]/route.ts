@@ -5,7 +5,7 @@
 import { z } from "zod";
 import { withApi } from "@/lib/api/with-api";
 import { ApiError } from "@/lib/api/errors";
-import { updateActionItem } from "@/lib/services/committee-workspace-service";
+import { updateActionItem, requireCommitteeScope } from "@/lib/services/committee-workspace-service";
 
 const updateSchema = z.object({
   title: z.string().min(3).max(500).optional(),
@@ -19,14 +19,17 @@ const updateSchema = z.object({
 
 export const PATCH = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "steward" },
     body: updateSchema,
     openapi: { tags: ["Committees"], summary: "Update action item" },
   },
-  async ({ body, userId, params }) => {
-    const { itemId } = params as { id: string; itemId: string };
+  async ({ body, userId, organizationId, params }) => {
+    if (!organizationId) throw ApiError.badRequest("Organization context required");
+    const { id: committeeId, itemId } = params as { id: string; itemId: string };
+    await requireCommitteeScope(organizationId, committeeId, { actionItemId: itemId });
 
-    const updated = await updateActionItem(itemId, {
+    const updated = await updateActionItem(itemId, organizationId, {
       ...body,
       updatedBy: userId ?? undefined,
     });

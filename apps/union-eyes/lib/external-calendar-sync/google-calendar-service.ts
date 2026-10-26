@@ -91,6 +91,7 @@ export async function exchangeCodeForTokens(code: string) {
  * Refresh access token
  */
 export async function refreshAccessToken(connectionId: string): Promise<string> {
+  let organizationId: string | undefined;
   try {
     const [connection] = await db
       .select()
@@ -101,6 +102,7 @@ export async function refreshAccessToken(connectionId: string): Promise<string> 
     if (!connection || connection.provider !== 'google') {
       throw new Error('Google Calendar connection not found');
     }
+    organizationId = connection.organizationId;
 
     const oauth2Client = getOAuth2Client();
     oauth2Client.setCredentials({
@@ -120,18 +122,20 @@ export async function refreshAccessToken(connectionId: string): Promise<string> 
         tokenExpiresAt: new Date(credentials.expiry_date!),
         updatedAt: new Date(),
       })
-      .where(eq(externalCalendarConnections.id, connectionId));
+      .where(and(eq(externalCalendarConnections.id, connectionId), eq(externalCalendarConnections.organizationId, connection.organizationId)));
 
     return credentials.access_token!;
   } catch (error) {
 // Mark connection as failed
-    await db
-      .update(externalCalendarConnections)
-      .set({
-        syncStatus: 'failed',
-        syncError: error instanceof Error ? error.message : 'Token refresh failed',
-      })
-      .where(eq(externalCalendarConnections.id, connectionId));
+    if (organizationId) {
+      await db
+        .update(externalCalendarConnections)
+        .set({
+          syncStatus: 'failed',
+          syncError: error instanceof Error ? error.message : 'Token refresh failed',
+        })
+        .where(and(eq(externalCalendarConnections.id, connectionId), eq(externalCalendarConnections.organizationId, organizationId)));
+    }
     
     throw error;
   }
@@ -170,7 +174,7 @@ async function getAuthenticatedClient(connectionId: string) {
     refresh_token: resolvedRefreshToken,
   });
 
-  return oauth2Client;
+  return { oauth2Client, organizationId: connection.organizationId };
 }
 
 // ============================================================================
@@ -182,7 +186,7 @@ async function getAuthenticatedClient(connectionId: string) {
  */
 export async function listGoogleCalendars(connectionId: string) {
   try {
-    const oauth2Client = await getAuthenticatedClient(connectionId);
+    const { oauth2Client } = await getAuthenticatedClient(connectionId);
     
     const response = await calendar.calendarList.list({
       auth: oauth2Client,
@@ -213,7 +217,7 @@ export async function importGoogleEvents(
   }
 ) {
   try {
-    const oauth2Client = await getAuthenticatedClient(connectionId);
+    const { oauth2Client, organizationId } = await getAuthenticatedClient(connectionId);
     
     const params: calendar_v3.Params$Resource$Events$List = {
       auth: oauth2Client,
@@ -245,7 +249,7 @@ export async function importGoogleEvents(
       .where(eq(calendars.id, localCalendarId))
       .limit(1);
 
-    if (!localCalendar) {
+    if (!localCalendar || localCalendar.organizationId !== organizationId) {
       throw new Error('Local calendar not found');
     }
 
@@ -257,7 +261,7 @@ export async function importGoogleEvents(
       try {
         // Check if event is deleted
         if (googleEvent.status === 'cancelled') {
-          await handleDeletedGoogleEvent(localCalendarId, googleEvent.id!);
+          await handleDeletedGoogleEvent(localCalendarId, googleEvent.id!, organizationId);
           deletedCount++;
           continue;
         }
@@ -284,7 +288,7 @@ export async function importGoogleEvents(
               ...eventData,
               updatedAt: new Date(),
             })
-            .where(eq(calendarEvents.id, existingEvent.id));
+            .where(and(eq(calendarEvents.id, existingEvent.id), eq(calendarEvents.organizationId, organizationId)));
           updatedCount++;
         } else {
           // Create new event
@@ -296,7 +300,7 @@ export async function importGoogleEvents(
     }
 
     // Update sync token
-    await updateSyncToken(connectionId, googleCalendarId, newSyncToken || null);
+    await updateSyncToken(connectionId, organizationId, googleCalendarId, newSyncToken || null);
 
     return {
       imported: importedCount,
@@ -318,7 +322,7 @@ export async function exportEventToGoogle(
   googleCalendarId: string
 ) {
   try {
-    const oauth2Client = await getAuthenticatedClient(connectionId);
+    const { oauth2Client, organizationId } = await getAuthenticatedClient(connectionId);
     
     // Get local event
     const [localEvent] = await db
@@ -327,7 +331,7 @@ export async function exportEventToGoogle(
       .where(eq(calendarEvents.id, localEventId))
       .limit(1);
 
-    if (!localEvent) {
+    if (!localEvent || localEvent.organizationId !== organizationId) {
       throw new Error('Local event not found');
     }
 
@@ -359,7 +363,7 @@ export async function exportEventToGoogle(
           externalEventId: response.data.id!,
           updatedAt: new Date(),
         })
-        .where(eq(calendarEvents.id, localEventId));
+        .where(and(eq(calendarEvents.id, localEventId), eq(calendarEvents.organizationId, organizationId)));
 
       return response.data;
     }
@@ -377,7 +381,7 @@ export async function deleteEventFromGoogle(
   googleEventId: string
 ) {
   try {
-    const oauth2Client = await getAuthenticatedClient(connectionId);
+    const { oauth2Client } = await getAuthenticatedClient(connectionId);
     
     await calendar.events.delete({
       auth: oauth2Client,
@@ -473,7 +477,7 @@ function mapLocalEventToGoogle(localEvent: CalendarEvent): calendar_v3.Schema$Ev
 /**
  * Handle deleted Google event
  */
-async function handleDeletedGoogleEvent(calendarId: string, googleEventId: string) {
+async function handleDeletedGoogleEvent(calendarId: string, googleEventId: string, organizationId: string) {
   try {
     const [event] = await db
       .select()
@@ -481,6 +485,7 @@ async function handleDeletedGoogleEvent(calendarId: string, googleEventId: strin
       .where(
         and(
           eq(calendarEvents.calendarId, calendarId),
+          eq(calendarEvents.organizationId, organizationId),
           eq(calendarEvents.externalEventId, googleEventId)
         )
       )
@@ -494,7 +499,7 @@ async function handleDeletedGoogleEvent(calendarId: string, googleEventId: strin
           cancelledAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(eq(calendarEvents.id, event.id));
+        .where(and(eq(calendarEvents.id, event.id), eq(calendarEvents.organizationId, organizationId)));
     }
   } catch (_error) {
 }
@@ -505,6 +510,7 @@ async function handleDeletedGoogleEvent(calendarId: string, googleEventId: strin
  */
 async function updateSyncToken(
   connectionId: string,
+  organizationId: string,
   googleCalendarId: string,
   syncToken: string | null
 ) {
@@ -512,7 +518,7 @@ async function updateSyncToken(
     const [connection] = await db
       .select({ calendarMappings: externalCalendarConnections.calendarMappings })
       .from(externalCalendarConnections)
-      .where(eq(externalCalendarConnections.id, connectionId))
+      .where(and(eq(externalCalendarConnections.id, connectionId), eq(externalCalendarConnections.organizationId, organizationId)))
       .limit(1);
 
     const mappings: CalendarMapping[] = Array.isArray(connection?.calendarMappings)
@@ -540,7 +546,7 @@ async function updateSyncToken(
         syncStatus: 'synced',
         updatedAt: new Date(),
       })
-      .where(eq(externalCalendarConnections.id, connectionId));
+      .where(and(eq(externalCalendarConnections.id, connectionId), eq(externalCalendarConnections.organizationId, organizationId)));
   } catch (_error) {
 }
 }

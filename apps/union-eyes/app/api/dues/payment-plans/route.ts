@@ -4,7 +4,10 @@
  */
 
 import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import { db } from '@/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { paymentPlans } from '@/db/schema/dues-finance-schema';
 import { eq, desc } from 'drizzle-orm';
 
@@ -23,7 +26,7 @@ const createPlanSchema = z.object({
 
 export const GET = withApi(
   {
-    auth: { minRole: 'officer' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: {
       tags: ['Dues'],
@@ -43,7 +46,7 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     body: createPlanSchema,
     rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
@@ -52,9 +55,10 @@ export const POST = withApi(
       summary: 'Create a dues payment plan',
     },
   },
-  async ({ body, organizationId }) => {
+  async ({ body, organizationId, userId }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
-    const [plan] = await db
+    return withRLSContext(async (tx) => {
+    const [plan] = await tx
       .insert(paymentPlans)
       .values({
         organizationId,
@@ -70,6 +74,15 @@ export const POST = withApi(
         status: 'active',
       })
       .returning();
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId: userId!,
+      action: 'dues.payment_plan.create',
+      resourceType: 'payment_plans',
+      resourceId: plan.id,
+      details: { memberId: body.userId, totalOwed: body.totalOwed, installmentCount: body.installmentCount },
+    });
     return plan;
+    });
   },
 );

@@ -202,48 +202,6 @@ export const clcRemittanceMapping = pgTable(
   })
 );
 
-/**
- * CLC API Configuration - stores sync configuration and credentials
- */
-export const clcApiConfig = pgTable(
-  "clc_api_config",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    organizationId: uuid("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
-    
-    // API credentials (encrypted in application)
-    apiUrl: varchar("api_url", { length: 500 }).notNull(),
-    apiKeyEncrypted: varchar("api_key_encrypted"), // Store encrypted
-    apiSecret: varchar("api_secret"), // Store encrypted
-    
-    // Configuration
-    isEnabled: boolean("is_enabled").default(true),
-    syncFrequency: varchar("sync_frequency", { length: 50 }), // hourly, daily, weekly
-    lastSyncAt: timestamp("last_sync_at"),
-    nextSyncAt: timestamp("next_sync_at"),
-    
-    // Webhook configuration
-    webhookUrlLocal: varchar("webhook_url_local", { length: 500 }),
-    webhookSecretEncrypted: varchar("webhook_secret_encrypted"), // Store encrypted
-    isWebhookVerified: boolean("is_webhook_verified").default(false),
-    
-    // Sync settings
-    syncMembersEnabled: boolean("sync_members_enabled").default(true),
-    syncRemittancesEnabled: boolean("sync_remittances_enabled").default(true),
-    syncDisputesEnabled: boolean("sync_disputes_enabled").default(false),
-    
-    // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-    configuredBy: varchar("configured_by", { length: 255 }),
-  },
-  (t) => ({
-    orgIdx: index("clc_api_config_org_idx").on(t.organizationId),
-  })
-);
-
 // ============================================================================
 // RELATIONS
 // ============================================================================
@@ -270,13 +228,6 @@ export const clcWebhookLogRelations = relations(clcWebhookLog, ({ one }) => ({
 export const clcRemittanceMappingRelations = relations(clcRemittanceMapping, ({ one }) => ({
   organization: one(organizations, {
     fields: [clcRemittanceMapping.organizationId],
-    references: [organizations.id],
-  }),
-}));
-
-export const clcApiConfigRelations = relations(clcApiConfig, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [clcApiConfig.organizationId],
     references: [organizations.id],
   }),
 }));

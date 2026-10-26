@@ -7,10 +7,8 @@
 
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
-import {
-  emitCapeAuditEvent,
-  CAPE_AUDIT_EVENTS,
-} from "@/lib/audit/cape-audit-events";
+import { CAPE_AUDIT_EVENTS } from "@/lib/audit/cape-audit-events";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import {
   ErrorCode,
   standardErrorResponse,
@@ -22,12 +20,14 @@ import {
   getDemoDatasetSummary,
 } from "@/lib/pilot/cape-demo-data";
 import { assertPilotDemoMutationRuntime } from "@/lib/config/pilot-demo-runtime";
-import { db } from "@/db/db";
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { pilotDemoSeeds } from "@/db/schema/domains/pilot/pilot-demo-seeds";
 import { employers } from "@/db/schema/union-structure-schema";
 import { grievances } from "@/db/schema/domains/claims/grievances";
-import { eq, and, like } from "drizzle-orm";
+import { eq, and, like, isNull, isNotNull } from "drizzle-orm";
+
+// Thrown inside the seed transaction so a lost race rolls back the rows it had already inserted.
+class DemoSeedConflict extends Error {}
 
 function requireDemoRuntimeMode() {
   try {
@@ -69,42 +69,33 @@ export const POST = withOrganizationAuth(async (_request, context) => {
       );
     }
 
-    // Check if already seeded (and not purged)
-    const existing = await db
-      .select()
-      .from(pilotDemoSeeds)
-      .where(eq(pilotDemoSeeds.organizationId, organizationId));
-
-    if (existing.length > 0 && !existing[0].purgedAt) {
-      return standardErrorResponse(
-        ErrorCode.CONFLICT,
-        "Demo data already seeded for this organization"
-      );
-    }
-
     // Generate demo rows
     const demoEmployers = generateDemoEmployers(organizationId);
     const demoGrievances = generateDemoGrievances(organizationId);
-
-    await withRLSContext(async () => {
-      // Insert employers
-      if (demoEmployers.length > 0) {
-        await db.insert(employers).values(demoEmployers);
-      }
-
-      // Insert grievances
-      if (demoGrievances.length > 0) {
-        await db.insert(grievances).values(demoGrievances);
-      }
-    });
-
     const summary = getDemoDatasetSummary(organizationId);
 
-    // Record the seed event
-    await withRLSContext(async () => {
+    // The seeded rows, the seed marker and the audit record commit together; the already-seeded check is made
+    // inside the same transaction so two concurrent seeds cannot both pass it.
+    let seeded: boolean;
+    try {
+      seeded = await withRLSContext({ organizationId }, async (tx) => {
+      const existing = await tx
+        .select()
+        .from(pilotDemoSeeds)
+        .where(eq(pilotDemoSeeds.organizationId, organizationId));
+
+      if (existing.length > 0 && !existing[0].purgedAt) return false;
+
+      if (demoEmployers.length > 0) {
+        await tx.insert(employers).values(demoEmployers);
+      }
+      if (demoGrievances.length > 0) {
+        await tx.insert(grievances).values(demoGrievances);
+      }
+
       if (existing.length > 0) {
-        // Re-seed after a purge
-        await db
+        // Re-seed after a purge: only a purged marker may be reopened.
+        const reopened = await tx
           .update(pilotDemoSeeds)
           .set({
             seededBy: userId,
@@ -114,28 +105,38 @@ export const POST = withOrganizationAuth(async (_request, context) => {
             grievanceCount: summary.grievances,
             updatedAt: new Date(),
           })
-          .where(eq(pilotDemoSeeds.organizationId, organizationId));
+          .where(and(eq(pilotDemoSeeds.organizationId, organizationId), isNotNull(pilotDemoSeeds.purgedAt)))
+          .returning({ id: pilotDemoSeeds.id });
+        if (reopened.length === 0) throw new DemoSeedConflict();
       } else {
-        await db.insert(pilotDemoSeeds).values({
+        await tx.insert(pilotDemoSeeds).values({
           organizationId,
           seededBy: userId,
           employerCount: summary.employers,
           grievanceCount: summary.grievances,
         });
       }
-    });
 
-    await emitCapeAuditEvent({
-      eventType: CAPE_AUDIT_EVENTS.PILOT_DEMO_DATA_SEEDED,
-      userId,
-      organizationId,
-      resource: "pilot_demo_data",
-      details: {
-        ...summary,
-        runtimeMode,
-        telemetryTag: "demo_mode_mutation",
-      },
-    });
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: CAPE_AUDIT_EVENTS.PILOT_DEMO_DATA_SEEDED,
+        resourceType: 'pilot_demo_seeds',
+        details: { ...summary, runtimeMode, telemetryTag: 'demo_mode_mutation' },
+      });
+      return true;
+      });
+    } catch (error) {
+      if (!(error instanceof DemoSeedConflict)) throw error;
+      seeded = false;
+    }
+
+    if (!seeded) {
+      return standardErrorResponse(
+        ErrorCode.CONFLICT,
+        "Demo data already seeded for this organization"
+      );
+    }
 
     return standardSuccessResponse({
       seeded: true,
@@ -168,57 +169,58 @@ export const DELETE = withOrganizationAuth(async (_request, context) => {
       );
     }
 
-    const existing = await db
-      .select()
-      .from(pilotDemoSeeds)
-      .where(eq(pilotDemoSeeds.organizationId, organizationId));
+    // The purge, the marker and the audit record commit together. The marker is closed first and only if it was open,
+    // so a concurrent purge or a missing seed deletes nothing.
+    let purged = false;
+    try {
+      await withRLSContext({ organizationId }, async (tx) => {
+        const closed = await tx
+          .update(pilotDemoSeeds)
+          .set({ purgedAt: new Date(), updatedAt: new Date() })
+          .where(and(eq(pilotDemoSeeds.organizationId, organizationId), isNull(pilotDemoSeeds.purgedAt)))
+          .returning({ id: pilotDemoSeeds.id });
+        if (closed.length === 0) throw new DemoSeedConflict();
 
-    if (existing.length === 0 || existing[0].purgedAt) {
+        // Delete demo grievances (identified by GRV-DEMO-* number)
+        await tx
+          .delete(grievances)
+          .where(
+            and(
+              eq(grievances.organizationId, organizationId),
+              like(grievances.grievanceNumber, "GRV-DEMO-%"),
+            ),
+          );
+
+        // Delete demo employers (identified by demo contact emails)
+        await tx
+          .delete(employers)
+          .where(
+            and(
+              eq(employers.organizationId, organizationId),
+              like(employers.email, "lr-demo@%"),
+            ),
+          );
+
+        await persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: CAPE_AUDIT_EVENTS.PILOT_DEMO_DATA_PURGED,
+          resourceType: 'pilot_demo_seeds',
+          resourceId: closed[0].id,
+          details: { runtimeMode, telemetryTag: 'demo_mode_mutation' },
+        });
+      });
+      purged = true;
+    } catch (error) {
+      if (!(error instanceof DemoSeedConflict)) throw error;
+    }
+
+    if (!purged) {
       return standardErrorResponse(
         ErrorCode.NOT_FOUND,
         "No demo data to purge"
       );
     }
-
-    // Purge demo data within RLS context
-    await withRLSContext(async () => {
-      // Delete demo grievances (identified by GRV-DEMO-* number)
-      await db
-        .delete(grievances)
-        .where(
-          and(
-            eq(grievances.organizationId, organizationId),
-            like(grievances.grievanceNumber, "GRV-DEMO-%"),
-          ),
-        );
-
-      // Delete demo employers (identified by demo contact emails)
-      await db
-        .delete(employers)
-        .where(
-          and(
-            eq(employers.organizationId, organizationId),
-            like(employers.email, "lr-demo@%"),
-          ),
-        );
-
-      // Mark as purged
-      await db
-        .update(pilotDemoSeeds)
-        .set({ purgedAt: new Date(), updatedAt: new Date() })
-        .where(eq(pilotDemoSeeds.organizationId, organizationId));
-    });
-
-    await emitCapeAuditEvent({
-      eventType: CAPE_AUDIT_EVENTS.PILOT_DEMO_DATA_PURGED,
-      userId,
-      organizationId,
-      resource: "pilot_demo_data",
-      details: {
-        runtimeMode,
-        telemetryTag: "demo_mode_mutation",
-      },
-    });
 
     return standardSuccessResponse({ purged: true });
   } catch (_error) {

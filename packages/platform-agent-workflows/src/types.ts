@@ -36,12 +36,12 @@ export const workflowStepSchema = z.object({
       result: z.enum(['allow', 'deny', 'requires_approval']),
     })
     .optional(),
-  output: z.record(z.unknown()).optional(),
+  output: z.record(z.string(), z.unknown()).optional(),
   error: z.string().optional(),
 })
 
 export const agentWorkflowSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   name: z.string(),
   triggerEvent: z.string(),
   app: z.string(),
@@ -66,7 +66,7 @@ export interface Recommendation {
 }
 
 export const recommendationSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   workflowId: z.string(),
   timestamp: z.string().datetime(),
   title: z.string(),

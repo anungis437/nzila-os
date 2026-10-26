@@ -8,7 +8,7 @@
  */
 
 import { z } from 'zod';
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 import {
   loadCognitionMemory,
   saveCognitionMemory,
@@ -35,13 +35,13 @@ const SaveMemorySchema = z.object({
   ]),
   title: z.string().min(1).max(200),
   contextSummary: z.string().max(2000).optional(),
-  payload: z.record(z.unknown()).optional(),
+  payload: z.record(z.string(), z.unknown()).optional(),
   resilienceScoreAtCapture: z.number().int().min(0).max(100).optional(),
   tags: z.array(z.string()).optional(),
   keyInsights: z.array(z.string()).optional(),
   sessionId: z.string().optional(),
   /** Archive an existing entry by ID */
-  archiveId: z.string().uuid().optional(),
+  archiveId: z.guid().optional(),
 });
 
 export const GET = withApi(
@@ -66,9 +66,10 @@ export const POST = withApi(
     entitlement: 'union_knowledge_suite',
     body: SaveMemorySchema,
   },
-  async ({ organizationId, body }) => {
+  async ({ organizationId, userId, body }) => {
     if (body.archiveId) {
-      await archiveCognitionMemory(organizationId!, body.archiveId);
+      const archived = await archiveCognitionMemory(organizationId!, body.archiveId, userId!);
+      if (!archived) throw ApiError.notFound('Memory entry', body.archiveId);
       return { data: { archived: true, id: body.archiveId } };
     }
     const entry = await saveCognitionMemory(organizationId!, {
@@ -80,7 +81,7 @@ export const POST = withApi(
       tags: body.tags,
       keyInsights: body.keyInsights,
       sessionId: body.sessionId,
-    });
+    }, userId!);
     return { data: entry };
   },
 );

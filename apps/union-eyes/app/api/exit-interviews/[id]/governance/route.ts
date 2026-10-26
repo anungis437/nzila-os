@@ -12,6 +12,8 @@ import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { exitInterviews, exitInterviewEvents } from '@/db/schema';
 import { SENSITIVITY_LEVELS } from '@/lib/knowledge-transfer/governance/consent-controls';
 
@@ -64,24 +66,38 @@ export const PATCH = withApi(
       }
     }
 
-    const [updated] = await db
-      .update(exitInterviews)
-      .set(updates as never)
-      .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!)))
-      .returning();
+    // The classification or consent change, its event and its audit record commit together.
+    const updated = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
+      const [row] = await tx
+        .update(exitInterviews)
+        .set(updates as never)
+        .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!)))
+        .returning();
+      if (!row) throw ApiError.notFound('Exit interview');
 
-    await db.insert(exitInterviewEvents).values({
-      interviewId: params.id,
-      organizationId: organizationId!,
-      eventType: 'governance_updated',
-      actorUserId: userId!,
-      notes: body?.consentNotes ?? 'Governance controls updated',
-      payload: {
+      const change = {
         previousSensitivity: existing.sensitivityLevel,
-        newSensitivity: updated.sensitivityLevel,
+        newSensitivity: row.sensitivityLevel,
         previousConsent: existing.consentGranted,
-        newConsent: updated.consentGranted,
-      },
+        newConsent: row.consentGranted,
+      };
+      await tx.insert(exitInterviewEvents).values({
+        interviewId: params.id,
+        organizationId: organizationId!,
+        eventType: 'governance_updated',
+        actorUserId: userId!,
+        notes: body?.consentNotes ?? 'Governance controls updated',
+        payload: change,
+      });
+      await persistAtomicAudit(tx, {
+        organizationId: organizationId!,
+        userId: userId!,
+        action: 'exit_interview.governance_update',
+        resourceType: 'exit_interviews',
+        resourceId: params.id,
+        details: change,
+      });
+      return row;
     });
 
     const indexingEligible = SENSITIVITY_LEVELS[updated.sensitivityLevel]?.indexingAllowed && updated.consentGranted;

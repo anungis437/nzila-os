@@ -77,16 +77,16 @@ const narProofAdapter = createNarProofAdapter({
 
 const CreateActionSchema = z.object({
   operation: z.literal('create'),
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   actionType: z.string().min(1),
-  payload: z.record(z.string(), z.unknown()).default({}),
+  payload: z.record(z.string(), z.unknown()).prefault({}),
   createdBy: z.string().min(1),
 })
 
 const SubmitActionSchema = z.object({
   operation: z.literal('submit'),
-  actionId: z.string().uuid(),
-  orgId: z.string().uuid(),
+  actionId: z.guid(),
+  orgId: z.guid(),
   submittedBy: z.string().min(1),
   context: z
     .object({
@@ -101,9 +101,9 @@ const SubmitActionSchema = z.object({
 
 const DecideApprovalSchema = z.object({
   operation: z.literal('decide'),
-  actionId: z.string().uuid(),
-  orgId: z.string().uuid(),
-  approvalId: z.string().uuid(),
+  actionId: z.guid(),
+  orgId: z.guid(),
+  approvalId: z.guid(),
   decidedBy: z.string().min(1),
   decision: z.enum(['approved', 'rejected']),
   notes: z.string().optional(),
@@ -111,8 +111,8 @@ const DecideApprovalSchema = z.object({
 
 const ExecuteActionSchema = z.object({
   operation: z.literal('execute'),
-  actionId: z.string().uuid(),
-  orgId: z.string().uuid(),
+  actionId: z.guid(),
+  orgId: z.guid(),
   executedBy: z.string().min(1),
 })
 

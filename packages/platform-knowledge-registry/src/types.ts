@@ -119,7 +119,7 @@ const knowledgeTypeValues = Object.values(KnowledgeTypes) as [string, ...string[
 const knowledgeStatusValues = Object.values(KnowledgeStatuses) as [string, ...string[]]
 
 export const KnowledgeAssetSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   tenantScope: z.string().min(1),
   domainScope: z.string().min(1),
   title: z.string().min(1).max(512),
@@ -129,7 +129,7 @@ export const KnowledgeAssetSchema = z.object({
   effectiveDate: z.string().datetime(),
   status: z.enum(knowledgeStatusValues),
   tags: z.array(z.string().min(1)).default([]),
-  structuredPayload: z.record(z.unknown()).default({}),
+  structuredPayload: z.record(z.string(), z.unknown()).prefault({}),
   textPayload: z.string().default(''),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -143,6 +143,6 @@ export const CreateKnowledgeAssetSchema = z.object({
   source: z.string().min(1),
   effectiveDate: z.string().datetime(),
   tags: z.array(z.string().min(1)).optional(),
-  structuredPayload: z.record(z.unknown()).optional(),
+  structuredPayload: z.record(z.string(), z.unknown()).optional(),
   textPayload: z.string().optional(),
 })

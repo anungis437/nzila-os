@@ -62,8 +62,8 @@ function mapSessions(apiSessions: any[]): Vote[] {
     options: (s.options || []).map((o: any) => ({
       id: o.id,
       label: o.text || o.label || '',
-      votes: o.votes || 0,
-      percentage: o.percentage || 0,
+      votes: typeof o.votes === 'number' ? o.votes : undefined,
+      percentage: typeof o.percentage === 'number' ? o.percentage : undefined,
     })),
     totalVotes: s.totalVotes || 0,
     hasVoted: s.hasVoted || false,
@@ -324,6 +324,9 @@ alert(err instanceof Error ? err.message : 'Failed to submit vote');
                           <BarChart3 size={18} />
                           {vote.status === "closed" ? t('voting.finalResults') : t('voting.currentResults')}
                         </h4>
+                        {vote.options.some((option) => option.percentage === undefined) ? (
+                          <p className="text-sm text-gray-600">Results are released by the election officer after the vote closes.</p>
+                        ) : (
                         <div className="space-y-3">
                           {vote.options.map((option) => (
                             <div key={option.id}>
@@ -356,6 +359,7 @@ alert(err instanceof Error ? err.message : 'Failed to submit vote');
                             </div>
                           ))}
                         </div>
+                        )}
                       </div>
                     )}
 

@@ -15,7 +15,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   mockAuth: vi.fn(),
-  mockClerkCurrentUser: vi.fn(),
+  mockCurrentUser: vi.fn(),
   mockOrgMembersFindFirst: vi.fn(),
   mockGetOrganizationIdForUser: vi.fn(),
   mockSelect: vi.fn(),
@@ -44,7 +44,7 @@ function chain(resolveValue: any): any {
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: (fn: any) => fn() }));
 vi.mock('@nzila/platform-auth/entra/server', () => ({
   auth: mocks.mockAuth,
-  currentUser: mocks.mockClerkCurrentUser,
+  currentUser: mocks.mockCurrentUser,
 }));
 
 vi.mock('drizzle-orm', async (importOriginal) => {
@@ -168,7 +168,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 /* ── helpers ────────────────────────────────────────────────────────── */
 
-const clerkUser = {
+const authUser = {
   emailAddresses: [{ emailAddress: 'test@union.org' }],
   fullName: 'Test User',
   firstName: 'Test',
@@ -206,7 +206,7 @@ describe('ApiAuthGuard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.mockAuth.mockResolvedValue({ userId: 'user_123', orgId: null });
-    mocks.mockClerkCurrentUser.mockResolvedValue(clerkUser);
+    mocks.mockCurrentUser.mockResolvedValue(authUser);
     mocks.mockOrgMembersFindFirst.mockResolvedValue(baseMembership);
     mocks.mockGetOrganizationIdForUser.mockResolvedValue('org-1');
     mocks.mockSelect.mockReturnValue(chain([]));
@@ -307,7 +307,7 @@ describe('ApiAuthGuard', () => {
     });
 
     it('returns null when auth user is null', async () => {
-      mocks.mockClerkCurrentUser.mockResolvedValue(null);
+      mocks.mockCurrentUser.mockResolvedValue(null);
       expect(await getCurrentUser()).toBeNull();
     });
 
@@ -354,7 +354,7 @@ describe('ApiAuthGuard', () => {
 
     it('falls back to member role when no membership', async () => {
       mocks.mockOrgMembersFindFirst.mockResolvedValue(undefined);
-      mocks.mockClerkCurrentUser.mockResolvedValue({ publicMetadata: {} });
+      mocks.mockCurrentUser.mockResolvedValue({ publicMetadata: {} });
       const ctx = await getUserContext();
       expect(ctx).not.toBeNull();
       expect(ctx!.roles).toContain('member');
@@ -369,7 +369,7 @@ describe('ApiAuthGuard', () => {
 
     it('falls back to publicMetadata role when no membership and not admin', async () => {
       mocks.mockOrgMembersFindFirst.mockResolvedValue(undefined);
-      mocks.mockClerkCurrentUser.mockResolvedValue({
+      mocks.mockCurrentUser.mockResolvedValue({
         publicMetadata: { role: 'officer' },
       });
       const ctx = await getUserContext();
@@ -385,7 +385,7 @@ describe('ApiAuthGuard', () => {
       });
       mocks.mockOrgMembersFindFirst.mockResolvedValue(undefined);
       mocks.mockGetOrganizationIdForUser.mockRejectedValue(new Error('RLS context required'));
-      mocks.mockClerkCurrentUser.mockResolvedValue({ publicMetadata: {} });
+      mocks.mockCurrentUser.mockResolvedValue({ publicMetadata: {} });
 
       const ctx = await getUserContext();
 
@@ -440,7 +440,7 @@ describe('ApiAuthGuard', () => {
 
     it('falls back to member context when no membership', async () => {
       mocks.mockOrgMembersFindFirst.mockResolvedValue(undefined);
-      mocks.mockClerkCurrentUser.mockResolvedValue({ publicMetadata: {} });
+      mocks.mockCurrentUser.mockResolvedValue({ publicMetadata: {} });
       const ctx = await requireUser();
       expect(ctx.roles).toContain('member');
     });

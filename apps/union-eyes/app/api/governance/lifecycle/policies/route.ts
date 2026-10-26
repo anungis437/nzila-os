@@ -7,7 +7,8 @@
  */
 import { withApi, ApiError } from '@/lib/api/framework'
 import { db } from '@/db/db'
-import { withSystemContext } from '@/lib/db/with-rls-context'
+import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { governedPolicies, type NewGovernedPolicyRow } from '@nzila/db/schema'
 import { desc, eq, and, type SQL } from 'drizzle-orm'
 
@@ -48,10 +49,13 @@ export const POST = withApi(
     auth: { required: true, minRole: 'admin' },
     entitlement: 'governance_suite',
   },
-  async ({ request, user }) => {
+  async ({ request, user, organizationId }) => {
     const actorId = user?.id
     if (!actorId) {
       throw ApiError.badRequest('Authenticated user is required to create a policy.')
+    }
+    if (!organizationId) {
+      throw ApiError.badRequest('An organization context is required so the policy creation can be audited.')
     }
 
     const body = await request.json() as {
@@ -88,6 +92,14 @@ export const POST = withApi(
         effectiveUntil: body.effectiveUntil ? new Date(body.effectiveUntil) : null,
       }
       const [draft] = await db.insert(governedPolicies).values(values).returning()
+      await persistAtomicAudit(db as unknown as RLSTx, {
+        organizationId,
+        userId: actorId,
+        action: 'governance.policy.draft_create',
+        resourceType: 'governed_policies',
+        resourceId: draft.id,
+        details: { policyFamilyId: body.policyFamilyId, semver: body.semver, domain: body.domain },
+      })
       return { policy: draft }
     })
   },

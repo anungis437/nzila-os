@@ -9,7 +9,7 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import {
   validateTransition,
   getAllowedTransitions,
@@ -19,11 +19,13 @@ import {
 import { toLifecycleState } from '@/lib/workflow/state-bridge';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { claims, claimUpdates, claimStatusEnum } from '@/db/schema/claims-schema';
-import { auditDataMutation, auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
-import { canPerformAction } from '@/lib/action-enforcer';
+import { inAppNotifications } from '@/db/schema';
+import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
-import { getCaseActor, findReadableCase, requireCaseAction, caseAuthorizationResponse } from '@/lib/cases/case-authorization';
+import { getCaseActor, findReadableCase, caseAuthorizationResponse } from '@/lib/cases/case-authorization';
 import { authorizationDenialResponse } from '@/lib/api/authorization-denial';
+import { inAppNoticeAllowed } from '@/lib/notifications/in-app-preferences';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { claimHistoryReference } from '@/lib/cases/claim-history-reference';
@@ -45,7 +47,6 @@ export async function PATCH(
     // 1. Auth
     const actor = await getCaseActor();
     const { userId, organizationId: orgId } = actor;
-    await requireCaseAction(actor, 'case_transition', caseId);
     await requireEntitlement(orgId, 'grievance_case_suite');
 
     // 2. Parse + validate body
@@ -78,7 +79,8 @@ export async function PATCH(
 
     // 3. Load claim in RLS context (with row lock to prevent TOCTOU race)
     const result = await withRLSContext(async (tx) => {
-      const claim = await findReadableCase(tx, actor, caseId, true);
+      // The kernel decides this actor may transition this case; closing or reopening is a separate, narrower decision.
+      const claim = await findReadableCase(tx, actor, caseId, true, 'case:transition');
 
       if (!claim) {
         return { found: false as const };
@@ -98,14 +100,12 @@ export async function PATCH(
         };
       }
 
+      if (targetLifecycleState === 'closed' || currentLifecycleState === 'closed') {
+        const closer = await findReadableCase(tx, actor, caseId, true, 'case:close');
+        if (!closer) return { found: false as const };
+      }
+
       const normalizedRole = normalizeActorRole(actor.role);
-      const action = targetLifecycleState === 'closed' ? 'case_close'
-        : currentLifecycleState === 'closed' ? 'case_reopen' : 'case_transition';
-      const permission = canPerformAction(action, actor.role, { caseStatus: claim.status });
-      if (!permission.allowed) return {
-        found: true as const, allowed: false as const,
-        reason: permission.reason, nextAllowedStatuses: [] as string[],
-      };
       const validation = validateTransition({
         caseId,
         currentState: currentLifecycleState,
@@ -141,7 +141,7 @@ export async function PATCH(
             ? { resolvedAt: now }
             : {}),
         })
-        .where(eq(claims.claimId, claim.claimId));
+        .where(and(eq(claims.claimId, claim.claimId), eq(claims.organizationId, orgId)));
 
       // 6. Add transition note
       await tx.insert(claimUpdates).values({
@@ -158,6 +158,38 @@ export async function PATCH(
           toStatus: toDbStatus,
           cupeFromStatus: cupeCurrentStatus,
           cupeToStatus: targetStatus,
+          reason: reason ?? null,
+        },
+      });
+
+      // The member is told in-app when their own case moves; the same transaction guarantees the
+      // notice exists only if the transition committed.
+      if (claim.memberId && claim.memberId !== userId && (await inAppNoticeAllowed(claim.memberId, actor.organizationId, 'case'))) {
+        await tx.insert(inAppNotifications).values({
+          userId: claim.memberId,
+          organizationId: actor.organizationId,
+          title: 'Your case status was updated',
+          message: `Your case is now ${toDbStatus.replace(/_/g, ' ')}.`,
+          type: 'info',
+          actionLabel: 'View case',
+          actionUrl: `/dashboard/claims/${claim.claimId}`,
+          data: { event: 'case_status_changed', claimId: claim.claimId, toStatus: toDbStatus },
+        });
+      }
+
+      // The transition, its history, the member's notice and its audit record commit together.
+      await persistAtomicAudit(tx, {
+        organizationId: orgId,
+        userId,
+        action: 'case.transition',
+        resourceType: 'claims',
+        resourceId: claim.claimId,
+        details: {
+          event: 'CASE_TRANSITIONED',
+          from: fromStatus,
+          to: toDbStatus,
+          cupeFrom: cupeCurrentStatus,
+          cupeTo: targetStatus,
           reason: reason ?? null,
         },
       });
@@ -197,23 +229,6 @@ export async function PATCH(
         { status: 403 },
       );
     }
-
-    // 7. Audit trail (outside RLS context — audit logger has its own)
-    await auditDataMutation({
-      userId,
-      organizationId: orgId,
-      resource: 'claims',
-      resourceId: result.claimId,
-      action: 'update',
-      details: {
-        event: 'CASE_TRANSITIONED',
-        from: result.fromStatus,
-        to: result.toStatus,
-        cupeFrom: result.cupeFromStatus,
-        cupeTo: result.cupeToStatus,
-        reason: reason ?? null,
-      },
-    });
 
     logger.info('Case transitioned', {
       claimId: result.claimId,

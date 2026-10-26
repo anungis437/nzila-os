@@ -1,8 +1,9 @@
 import { z } from 'zod';
 import { withOrganizationAuth } from '@/lib/organization-middleware';
 import { hasMinRole } from '@/lib/api-auth-guard';
-import { trackPilotEvent } from '@/lib/services/pilot-tracking';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { pilotEvents } from '@/db/schema';
 import { ErrorCode, standardErrorResponse, standardSuccessResponse } from '@/lib/api/standardized-responses';
 
 const payloadSchema = z.object({
@@ -26,30 +27,35 @@ export const POST = withOrganizationAuth(async (request, context) => {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid onboarding event payload', parsed.error.flatten());
   }
 
-  await trackPilotEvent({
-    userId,
-    organizationId,
-    sessionId: `server:onboarding:${parsed.data.eventType}`,
-    eventType: parsed.data.eventType,
-    metadata: {
-      targetUserId: parsed.data.targetUserId,
-      role: parsed.data.role,
-      ...(parsed.data.metadata ?? {}),
-    },
-  });
+  // The event row and its audit record commit together; a failed audit rolls the event back.
+  await withRLSContext({ organizationId }, async (tx) => {
+    const [event] = await tx
+      .insert(pilotEvents)
+      .values({
+        userId,
+        organizationId,
+        sessionId: `server:onboarding:${parsed.data.eventType}`,
+        eventType: parsed.data.eventType,
+        metadata: {
+          targetUserId: parsed.data.targetUserId,
+          role: parsed.data.role,
+          ...(parsed.data.metadata ?? {}),
+        },
+      })
+      .returning({ id: pilotEvents.id });
 
-  await auditLog({
-    eventType: AuditEventType.DATA_CREATE,
-    severity: AuditSeverity.MEDIUM,
-    userId,
-    organizationId,
-    resource: 'onboarding_events',
-    action: parsed.data.eventType,
-    details: {
-      targetUserId: parsed.data.targetUserId,
-      role: parsed.data.role,
-      metadata: parsed.data.metadata ?? {},
-    },
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId,
+      action: `onboarding.event.${parsed.data.eventType}`,
+      resourceType: 'pilot_events',
+      resourceId: event?.id,
+      details: {
+        targetUserId: parsed.data.targetUserId ?? null,
+        role: parsed.data.role ?? null,
+        metadata: parsed.data.metadata ?? {},
+      },
+    });
   });
 
   return standardSuccessResponse({

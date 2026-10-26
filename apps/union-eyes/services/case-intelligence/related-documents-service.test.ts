@@ -30,6 +30,7 @@ const dbMock = {
 };
 
 vi.mock('@/db/db', () => ({ db: dbMock }));
+vi.mock('@/lib/services/case-access-service', () => ({ assignedCaseRepresentativeIds: vi.fn(async () => ['lro-1']) }));
 vi.mock('@/lib/services/document-authorization-service', () => ({ filterAuthorizedDocumentsForActor }));
 vi.mock('@/lib/services/feature-flags-service', () => ({ isFeatureEnabled }));
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
@@ -87,7 +88,7 @@ describe('case-intelligence related-documents-service', () => {
     const { getRelatedDocuments } = await import('./related-documents-service');
     const result = await getRelatedDocuments({
       context: { caseId: 'case-1', orgId: 'org-1', actorId: 'user-1' },
-      actor: { userId: 'user-1', isStewardPlus: false },
+      actor: { userId: 'user-1' },
       limit: 10,
     });
 
@@ -127,7 +128,7 @@ describe('case-intelligence related-documents-service', () => {
     const { getRelatedDocuments } = await import('./related-documents-service');
     const result = await getRelatedDocuments({
       context: { caseId: 'case-2', orgId: 'org-1', actorId: 'user-1' },
-      actor: { userId: 'user-1', isStewardPlus: false },
+      actor: { userId: 'user-1' },
       limit: 10,
     });
 
@@ -161,7 +162,7 @@ describe('case-intelligence related-documents-service', () => {
     const { getRelatedDocuments } = await import('./related-documents-service');
     const result = await getRelatedDocuments({
       context: { caseId: 'case-3', orgId: 'org-1', actorId: 'user-1' },
-      actor: { userId: 'user-1', isStewardPlus: false },
+      actor: { userId: 'user-1' },
       limit: 10,
     });
 

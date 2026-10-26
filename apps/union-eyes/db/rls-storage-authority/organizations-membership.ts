@@ -57,6 +57,7 @@ export const organizationsMembershipEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "icra_organizations",
@@ -79,6 +80,7 @@ export const organizationsMembershipEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "member_addresses",
@@ -233,6 +235,7 @@ export const organizationsMembershipEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "member_segments",
@@ -277,6 +280,7 @@ export const organizationsMembershipEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "organization_billing_config",
@@ -354,6 +358,7 @@ export const organizationsMembershipEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "gss_applications",
@@ -398,6 +403,7 @@ export const organizationsMembershipEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "pilot_applications",

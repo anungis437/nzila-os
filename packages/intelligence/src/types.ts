@@ -198,13 +198,13 @@ export const intelligenceContextSchema = z.object({
   environment: z.enum(['local', 'preview', 'staging', 'production']).optional(),
   correlationId: z.string().optional(),
   dataClass: z.enum(['public', 'internal', 'sensitive', 'regulated']).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const intelligenceRequestSchema = z.object({
   orgId: z.string().min(1),
   app: z.enum(NIL_APPS),
   useCase: z.string().min(1),
-  input: z.record(z.unknown()),
+  input: z.record(z.string(), z.unknown()),
   context: intelligenceContextSchema.optional(),
 })

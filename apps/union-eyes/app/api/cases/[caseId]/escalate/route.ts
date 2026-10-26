@@ -12,7 +12,7 @@ import { claims } from '@/db/schema';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { grievanceEvents } from '@/db/schema/domains/claims/grievance-lifecycle';
 import { eq, and } from 'drizzle-orm';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { updateClaimStatusById } from '@/lib/workflow-engine';
 import { enforceDecision } from '@nzila/decision-core';
@@ -20,7 +20,7 @@ import { createNarProofAdapter, getNarSigningSecret } from '@nzila/nar';
 import { platformDb } from '@nzila/db/platform';
 import { auditRecords } from '@nzila/db/schema';
 import { desc } from 'drizzle-orm';
-import { getCaseActor, caseReadScope, requireCaseAction } from '@/lib/cases/case-authorization';
+import { getCaseActor, findReadableCase } from '@/lib/cases/case-authorization';
 
 export const dynamic = 'force-dynamic';
 
@@ -132,16 +132,17 @@ export const POST = withApi(
     }
 
     const actor = await getCaseActor();
-    await requireCaseAction(actor, 'case_transition', caseId);
-
-    // Apply the same ownership/assignment scope before any decision proof or write.
-    const [claim] = await withRLSContext(async (tx) =>
-      tx
+    // The kernel decides the caller may move this case before any decision proof or write.
+    const claim = await withRLSContext(async (tx) => {
+      const readable = await findReadableCase(tx, actor, caseId, false, 'case:transition');
+      if (!readable) return null;
+      const [row] = await tx
         .select()
         .from(claims)
-        .where(and(eq(claims.claimId, caseId), caseReadScope(actor)))
-        .limit(1)
-    );
+        .where(and(eq(claims.claimId, readable.claimId), eq(claims.organizationId, actor.organizationId)))
+        .limit(1);
+      return row ?? null;
+    });
 
     if (!claim) {
       return NextResponse.json(
@@ -251,7 +252,21 @@ export const POST = withApi(
             escalatedGrievanceNumber: g.grievanceNumber,
           },
         })
-        .where(eq(claims.claimId, caseId));
+        .where(and(eq(claims.claimId, caseId), eq(claims.organizationId, orgId)));
+
+      // The grievance, the claim's resolution and the audit record commit together.
+      await persistAtomicAudit(tx, {
+        organizationId: orgId,
+        userId: ctx.userId ?? 'system',
+        action: 'case.escalate_to_grievance',
+        resourceType: 'claims',
+        resourceId: caseId,
+        details: {
+          claimNumber: claim.claimNumber,
+          grievanceId: g.id,
+          grievanceNumber: g.grievanceNumber,
+        },
+      });
 
       return { success: true as const, grievance: g };
     });
@@ -264,23 +279,6 @@ export const POST = withApi(
     }
 
     const grievance = escalationResult.grievance;
-
-    // Audit
-    await auditLog({
-      eventType: AuditEventType.DATA_CREATE,
-      severity: AuditSeverity.HIGH,
-      userId: ctx.userId ?? '',
-      organizationId: orgId,
-      resource: 'claims',
-      action: 'escalate_to_grievance',
-      resourceId: caseId,
-      details: {
-        claimNumber: claim.claimNumber,
-        grievanceId: grievance.id,
-        grievanceNumber: grievance.grievanceNumber,
-      },
-      outcome: 'success',
-    });
 
     const recordedDecision = await enforceDecision({
       decisionType: 'union.case.escalated',

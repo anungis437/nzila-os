@@ -224,32 +224,32 @@ describe("bargaining-notes-service", () => {
     it("returns updated note", async () => {
       const updated = { id: "n1", title: "Updated" };
       mocks.mockReturning.mockResolvedValueOnce([updated]);
-      const result = await updateBargainingNote("n1", { title: "Updated" } as never);
+      const result = await updateBargainingNote("n1", "org-1", { title: "Updated" } as never);
       expect(result).toEqual(updated);
     });
 
     it("returns null when note not found (empty returning)", async () => {
       mocks.mockReturning.mockResolvedValueOnce([undefined]);
-      const result = await updateBargainingNote("nope", {} as never);
+      const result = await updateBargainingNote("nope", "org-1", {} as never);
       expect(result).toBeNull();
     });
 
     it("throws on DB error", async () => {
       mocks.mockUpdate.mockImplementationOnce(() => { throw new Error("db"); });
-      await expect(updateBargainingNote("n1", {} as never)).rejects.toThrow("Failed to update bargaining note");
+      await expect(updateBargainingNote("n1", "org-1", {} as never)).rejects.toThrow("Failed to update bargaining note");
     });
   });
 
   // ── deleteBargainingNote ─────────────────────────────────────────────────
   describe("deleteBargainingNote", () => {
     it("returns true on success", async () => {
-      const result = await deleteBargainingNote("n1");
+      const result = await deleteBargainingNote("n1", "org-1");
       expect(result).toBe(true);
     });
 
     it("throws on DB error", async () => {
       mocks.mockDelete.mockImplementationOnce(() => { throw new Error("db"); });
-      await expect(deleteBargainingNote("n1")).rejects.toThrow("Failed to delete bargaining note");
+      await expect(deleteBargainingNote("n1", "org-1")).rejects.toThrow("Failed to delete bargaining note");
     });
   });
 
@@ -418,6 +418,7 @@ describe("bargaining-notes-service", () => {
     it("appends attachment and returns updated note", async () => {
       const existing = {
         id: "n1",
+        organizationId: "org-1",
         attachments: [{ filename: "old.txt", url: "https://cdn/old", fileType: "text/plain", uploadedAt: "2026-01-01T00:00:00.000Z" }],
       };
       const updated = { id: "n1", attachments: [{ filename: "old.txt" }, { filename: "new.pdf" }] };
@@ -425,7 +426,7 @@ describe("bargaining-notes-service", () => {
       mocks.mockDb.query.bargainingNotes.findFirst.mockResolvedValueOnce(existing as never);
       mocks.mockReturning.mockResolvedValueOnce([updated]);
 
-      const result = await addAttachmentToNote("n1", {
+      const result = await addAttachmentToNote("n1", "org-1", {
         filename: "new.pdf",
         url: "https://cdn/new.pdf",
         fileType: "application/pdf",
@@ -435,13 +436,13 @@ describe("bargaining-notes-service", () => {
     });
 
     it("creates the first attachment when none exist", async () => {
-      const existing = { id: "n2" };
+      const existing = { id: "n2", organizationId: "org-1" };
       const updated = { id: "n2", attachments: [{ filename: "first.pdf" }] };
 
       mocks.mockDb.query.bargainingNotes.findFirst.mockResolvedValueOnce(existing as never);
       mocks.mockReturning.mockResolvedValueOnce([updated]);
 
-      const result = await addAttachmentToNote("n2", {
+      const result = await addAttachmentToNote("n2", "org-1", {
         filename: "first.pdf",
         url: "https://cdn/first.pdf",
         fileType: "application/pdf",
@@ -452,7 +453,7 @@ describe("bargaining-notes-service", () => {
 
     it("returns null when note is missing", async () => {
       mocks.mockDb.query.bargainingNotes.findFirst.mockResolvedValueOnce(undefined);
-      const result = await addAttachmentToNote("missing", {
+      const result = await addAttachmentToNote("missing", "org-1", {
         filename: "new.pdf",
         url: "https://cdn/new.pdf",
         fileType: "application/pdf",
@@ -462,14 +463,14 @@ describe("bargaining-notes-service", () => {
     });
 
     it("throws on update failure", async () => {
-      mocks.mockDb.query.bargainingNotes.findFirst.mockResolvedValueOnce({ id: "n3", attachments: [] } as never);
+      mocks.mockDb.query.bargainingNotes.findFirst.mockResolvedValueOnce({ id: "n3", organizationId: "org-1", attachments: [] } as never);
       mocks.mockDb.update.mockReturnValue({
         set: vi.fn().mockReturnValue({
           where: vi.fn().mockImplementation(() => { throw new Error("db"); }),
         }),
       } as never);
 
-      await expect(addAttachmentToNote("n3", {
+      await expect(addAttachmentToNote("n3", "org-1", {
         filename: "broken.pdf",
         url: "https://cdn/broken.pdf",
         fileType: "application/pdf",

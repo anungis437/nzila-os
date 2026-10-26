@@ -864,11 +864,9 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   ],
   
   [UserRole.UNION_REP]: [
-    // Union representatives have broad access
-    Permission.VIEW_ALL_CLAIMS,
+    // Legacy steward alias: case reads/edits are decided per case by lib/cases/case-authorization.
     Permission.VIEW_OWN_CLAIMS,
     Permission.CREATE_CLAIM,
-    Permission.EDIT_ALL_CLAIMS,
     Permission.EDIT_OWN_CLAIMS,
     Permission.APPROVE_CLAIM,
     Permission.VIEW_ALL_MEMBERS,
@@ -888,8 +886,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   ],
   
   [UserRole.STAFF_REP]: [
-    // Staff representatives have moderate access
-    Permission.VIEW_ALL_CLAIMS,
+    // Legacy steward alias: no organization-wide claim read grant.
     Permission.VIEW_OWN_CLAIMS,
     Permission.CREATE_CLAIM,
     Permission.EDIT_OWN_CLAIMS,
@@ -1069,13 +1066,11 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   // ========================================================
 
   [UserRole.STEWARD]: [
-    // Steward - front-line representation
-    Permission.VIEW_ALL_CLAIMS,
+    // Steward - front-line representation. Case reads/edits/assignment are decided per case by
+    // lib/cases/case-authorization (assigned casework only); no organization-wide claim grants here.
     Permission.VIEW_OWN_CLAIMS,
     Permission.CREATE_CLAIM,
-    Permission.EDIT_ALL_CLAIMS,
     Permission.EDIT_OWN_CLAIMS,
-    Permission.ASSIGN_CLAIMS,
     Permission.VIEW_ALL_MEMBERS,
     Permission.VIEW_OWN_PROFILE,
     Permission.VIEW_VOTING,

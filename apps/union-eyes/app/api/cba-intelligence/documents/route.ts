@@ -9,7 +9,7 @@ import type { DocumentFilters } from "@/lib/services/cba-intelligence/document-s
 const listQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional(),
   limit: z.coerce.number().int().positive().max(100).optional(),
-  sourceId: z.string().uuid().optional(),
+  sourceId: z.guid().optional(),
   documentType: z.string().optional(),
   processingStatus: z.string().optional(),
   jurisdiction: z.string().optional(),

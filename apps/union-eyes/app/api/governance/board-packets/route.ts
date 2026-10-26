@@ -8,7 +8,7 @@ import { db } from '@/db/db';
 import { boardPackets } from '@/db/schema/board-packet-schema';
 import { desc, count, eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { auditDataMutation } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 const createBoardPacketSchema = z.object({
   title: z.string().min(1).max(255),
@@ -20,17 +20,17 @@ const createBoardPacketSchema = z.object({
   fiscalQuarter: z.number().int().min(1).max(4).optional(),
   generatedBy: z.string().min(1).max(255),
   status: z.enum(['draft', 'finalized', 'distributed', 'archived']).default('draft'),
-  financialSummary: z.record(z.unknown()),
-  membershipStats: z.record(z.unknown()),
-  caseSummary: z.record(z.unknown()),
-  motionsAndVotes: z.record(z.unknown()).optional(),
-  auditExceptions: z.record(z.unknown()).optional(),
-  complianceStatus: z.record(z.unknown()),
-  actionItems: z.record(z.unknown()).optional(),
+  financialSummary: z.record(z.string(), z.unknown()),
+  membershipStats: z.record(z.string(), z.unknown()),
+  caseSummary: z.record(z.string(), z.unknown()),
+  motionsAndVotes: z.record(z.string(), z.unknown()).optional(),
+  auditExceptions: z.record(z.string(), z.unknown()).optional(),
+  complianceStatus: z.record(z.string(), z.unknown()),
+  actionItems: z.record(z.string(), z.unknown()).optional(),
   recipientRoles: z.array(z.string().max(100)),
-  distributionList: z.record(z.unknown()).optional(),
+  distributionList: z.record(z.string(), z.unknown()).optional(),
   pdfUrl: z.string().url().max(2000).optional(),
-  attachments: z.record(z.unknown()).optional(),
+  attachments: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const dynamic = 'force-dynamic';
@@ -70,19 +70,19 @@ export const POST = withApi(
   },
   async ({ body, userId, organizationId }) => {
     const parsed = createBoardPacketSchema.parse(body);
-    // organizationId always comes from the resolved caller context, never
-    // client input — a create request cannot mint a board packet for a
-    // different organization.
-    const [packet] = await withRLSContext(async (tx) =>
-      tx.insert(boardPackets).values({ ...parsed, organizationId: organizationId! }).returning()
-    );
-    await auditDataMutation({
-      userId: userId!,
-      organizationId: organizationId!,
-      resource: 'board_packets',
-      resourceId: packet.id,
-      action: 'create',
-      details: { title: parsed.title, packetType: parsed.packetType, status: parsed.status },
+    // The packet and its audit record commit together; organizationId always comes from the resolved caller
+    // context, never client input, so a create request cannot mint a board packet for another organization.
+    const [packet] = await withRLSContext(async (tx) => {
+      const [created] = await tx.insert(boardPackets).values({ ...parsed, organizationId: organizationId! }).returning()
+      await persistAtomicAudit(tx, {
+        organizationId: organizationId!,
+        userId: userId!,
+        action: 'governance.board_packet.create',
+        resourceType: 'board_packets',
+        resourceId: created.id,
+        details: { title: parsed.title, packetType: parsed.packetType, status: parsed.status },
+      })
+      return [created]
     });
     return packet;
   },

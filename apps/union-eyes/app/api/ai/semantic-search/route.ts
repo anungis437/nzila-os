@@ -31,10 +31,10 @@ import {
 const semanticSearchSchema = z.object({
   query: z.string().max(1000, 'Query too long').optional(),
   searchType: z.enum(['clauses', 'precedents', 'unified', 'similar']).default('unified'),
-  clauseId: z.string().uuid().optional(),
+  clauseId: z.guid().optional(),
   limit: z.number().int().min(1).max(100).default(10),
   threshold: z.number().min(0).max(1).default(0.7),
-  filters: z.record(z.string(), z.unknown()).default({}),
+  filters: z.record(z.string(), z.unknown()).prefault({}),
   hybridSearch: z.object({
     enabled: z.boolean().default(false),
     keywordWeight: z.number().min(0).max(1).default(0.3),
@@ -90,7 +90,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         return standardErrorResponse(
           ErrorCode.VALIDATION_ERROR,
           'Invalid semantic search request',
-          validation.error.errors
+          validation.error.issues
         );
       }
 
@@ -104,6 +104,13 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         hybridSearch,
       } = validation.data;
 
+      // Clauses are searched in the caller's organization only; an organization in the filters is never honoured
+      const organizationId = context.organizationId as string;
+      if (!organizationId) {
+        return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
+      }
+      const scopedFilters = { ...filters, organizationId };
+
       let results;
 
       switch (searchType) {
@@ -111,7 +118,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
           results = await semanticClauseSearch(query!, {
             limit,
             threshold,
-            filters,
+            filters: scopedFilters,
             hybridSearch,
           });
           return NextResponse.json({
@@ -137,6 +144,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
 
         case 'unified':
           results = await unifiedSemanticSearch(query!, {
+            organizationId,
             includeClauses: true,
             includePrecedents: true,
             limit,
@@ -157,6 +165,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
 
         case 'similar':
           results = await findSimilarClauses(clauseId!, {
+            organizationId,
             limit,
             threshold,
             sameTypeOnly: Boolean(filters.sameTypeOnly),

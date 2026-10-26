@@ -8,7 +8,7 @@ import { generateInvoice } from '@/services/platform-economics';
 export const dynamic = 'force-dynamic';
 
 const bodySchema = z.object({
-  billingPeriodId: z.string().uuid(),
+  billingPeriodId: z.guid(),
 });
 
 export const POST = withApi(

@@ -14,8 +14,8 @@ import { commercialContracts } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 
 const createContractSchema = z.object({
-  billingAccountId: z.string().uuid(),
-  subscriptionId: z.string().uuid().optional(),
+  billingAccountId: z.guid(),
+  subscriptionId: z.guid().optional(),
   name: z.string().min(1).max(255),
   description: z.string().optional(),
   effectiveDate: z.coerce.date(),

@@ -10,12 +10,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import {
   getWorkflow,
   getWorkflowStatus,
-  advanceWorkflow,
   cancelWorkflow,
 } from '@/services/pki/workflow-engine'
 import { z } from 'zod'
 import { withAdminAuth } from '@/lib/api-auth-guard'
 import { logger } from '@/lib/logger'
+import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit'
 
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses'
 // The in-memory workflow engine reports unknown and already-settled workflows with plain Errors;
@@ -33,25 +33,32 @@ function workflowErrorResponse(error: unknown) {
   return null
 }
 
+// A workflow belongs to one organization. A workflow of another organization is indistinguishable from a missing one,
+// so an administrator cannot read, advance or cancel it by guessing its id.
+function ownedWorkflow(workflowId: string, organizationId: string | null | undefined) {
+  const workflow = getWorkflow(workflowId)
+  if (!workflow || !organizationId || workflow.organizationId !== organizationId) return null
+  return workflow
+}
+
 export const GET = async (
   request: NextRequest,
   { params: pendingParams }: { params: Promise<{ id: string }> },
 ) => {
   // Next 16 supplies route params as a Promise.
   const params = await pendingParams
-  return withAdminAuth(async (request, _context) => {
+  return withAdminAuth(async (request, context) => {
     try {
       const workflowId = params.id
       const { searchParams } = new URL(request.url)
       const detailLevel = searchParams.get('detail') || 'status'
 
-      if (detailLevel === 'full') {
-        // Get full workflow details
-        const workflow = getWorkflow(workflowId)
+      const workflow = ownedWorkflow(workflowId, context.organizationId)
+      if (!workflow) {
+        return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Workflow not found')
+      }
 
-        if (!workflow) {
-          return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Workflow not found')
-        }
+      if (detailLevel === 'full') {
 
         return NextResponse.json({
           success: true,
@@ -85,25 +92,20 @@ export const PUT = async (
 ) => {
   // Next 16 supplies route params as a Promise.
   const params = await pendingParams
-  return withAdminAuth(async (_request, _context) => {
-    try {
-      const workflowId = params.id
-
-      const result = advanceWorkflow(workflowId)
-
-      return NextResponse.json({
-        success: true,
-        result,
-        message: result.isComplete
-          ? 'Workflow completed'
-          : `Advanced to step ${result.currentStep} of ${result.totalSteps}`,
-      })
-    } catch (error) {
-      const clientError = workflowErrorResponse(error)
-      if (clientError) return clientError
-      logger.error('Failed to advance workflow', { error })
-      return NextResponse.json({ error: 'Failed to advance workflow' }, { status: 500 })
-    }
+  return withAdminAuth(async (_request, context) => {
+    // Advancing a workflow by hand moves it past signatures that have not been given. A workflow advances only when
+    // its current signers sign (recordSignature), so no administrator override is offered.
+    const workflow = ownedWorkflow(params.id, context.organizationId)
+    if (!workflow) return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Workflow not found')
+    return NextResponse.json(
+      {
+        error: {
+          code: 'NOT_IMPLEMENTED',
+          message: 'A signing workflow advances only when its signers sign; it cannot be advanced manually.',
+        },
+      },
+      { status: 501 },
+    )
   })(request, { params })
 }
 
@@ -118,6 +120,9 @@ export const DELETE = async (
 
     try {
       const workflowId = params.id
+      if (!ownedWorkflow(workflowId, context.organizationId)) {
+        return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Workflow not found')
+      }
       const body = await request.json()
       // Validate request body
       const validation = adminPkiWorkflowsSchema.safeParse(body)
@@ -125,7 +130,7 @@ export const DELETE = async (
         return standardErrorResponse(
           ErrorCode.VALIDATION_ERROR,
           'Invalid request data',
-          validation.error.errors,
+          validation.error.issues,
         )
       }
 
@@ -138,13 +143,25 @@ export const DELETE = async (
         )
       }
 
-      cancelWorkflow(workflowId, userId as string, reason)
+      await performAuditedOperation(
+        {
+          organizationId: context.organizationId,
+          userId,
+          action: 'pki.workflow.cancel',
+          resourceType: 'signing_workflow',
+          resourceId: workflowId,
+          details: { reason },
+        },
+        async () => cancelWorkflow(workflowId, userId as string, reason),
+      )
 
       return NextResponse.json({
         success: true,
         message: 'Workflow cancelled successfully',
       })
     } catch (error) {
+      const refused = operationAuditResponse(error)
+      if (refused) return NextResponse.json(refused.body, { status: refused.status })
       const clientError = workflowErrorResponse(error)
       if (clientError) return clientError
       logger.error('Failed to cancel workflow', { error })

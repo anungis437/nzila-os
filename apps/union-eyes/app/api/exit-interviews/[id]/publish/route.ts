@@ -2,6 +2,8 @@
 import { and, eq } from 'drizzle-orm';
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { exitInterviews, exitInterviewEvents, knowledgeBase } from '@/db/schema';
 import { indexExitInterview } from '@/lib/knowledge-transfer/indexing/semantic-indexer';
 import { extractExpertise, flattenExpertiseTags } from '@/lib/knowledge-transfer/expertise/expertise-extractor';
@@ -34,63 +36,79 @@ export const POST = withApi(
       return { data: existing, alreadyPublished: true };
     }
 
-    if (existing.status !== 'submitted' && existing.status !== 'reviewed') {
-      throw ApiError.conflict('Only submitted or reviewed interviews can be published');
+    // Publication follows an independent review (review refuses the author); a submitted interview is not published
+    // directly.
+    if (existing.status !== 'reviewed') {
+      throw ApiError.conflict('Only reviewed interviews can be published');
     }
 
     const now = new Date();
-    const [kbRecord] = await db
-      .insert(knowledgeBase)
-      .values({
+    // The knowledge-base record, the status change, the event and the audit commit together; the status predicate
+    // keeps two concurrent publications from creating two records.
+    const { kbRecord, updated } = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
+      const [kb] = await tx
+        .insert(knowledgeBase)
+        .values({
+          organizationId: organizationId!,
+          title: existing.title,
+          documentType: 'guide',
+          content: [
+            `Retiring employee: ${existing.retiringEmployeeName}`,
+            `Role in union: ${existing.roleInUnion}`,
+            `Years of service: ${existing.yearsOfService}`,
+            `Key lessons: ${existing.keyLessons}`,
+            existing.bestPractices ? `Best practices: ${existing.bestPractices}` : '',
+            existing.bargainingAdvice ? `Bargaining advice: ${existing.bargainingAdvice}` : '',
+            existing.mediationAdvice ? `Mediation advice: ${existing.mediationAdvice}` : '',
+            existing.incomingOfficerAdvice ? `Incoming officer advice: ${existing.incomingOfficerAdvice}` : '',
+          ]
+            .filter(Boolean)
+            .join('\n\n'),
+          summary: existing.summary,
+          sourceType: 'exit_interview',
+          sourceId: existing.id,
+          tags: existing.topics,
+          keywords: existing.topics,
+          isPublic: false,
+          isActive: true,
+          createdBy: userId!,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
+
+      const [row] = await tx
+        .update(exitInterviews)
+        .set({
+          status: 'published',
+          reviewedAt: existing.reviewedAt ?? now,
+          reviewedBy: existing.reviewedBy ?? userId!,
+          publishedAt: now,
+          knowledgeBaseId: kb.id,
+          updatedAt: now,
+          updatedBy: userId!,
+        })
+        .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!), eq(exitInterviews.status, 'reviewed')))
+        .returning();
+      if (!row) throw ApiError.conflict('The interview is no longer awaiting publication');
+
+      await tx.insert(exitInterviewEvents).values({
+        interviewId: params.id,
         organizationId: organizationId!,
-        title: existing.title,
-        documentType: 'guide',
-        content: [
-          `Retiring employee: ${existing.retiringEmployeeName}`,
-          `Role in union: ${existing.roleInUnion}`,
-          `Years of service: ${existing.yearsOfService}`,
-          `Key lessons: ${existing.keyLessons}`,
-          existing.bestPractices ? `Best practices: ${existing.bestPractices}` : '',
-          existing.bargainingAdvice ? `Bargaining advice: ${existing.bargainingAdvice}` : '',
-          existing.mediationAdvice ? `Mediation advice: ${existing.mediationAdvice}` : '',
-          existing.incomingOfficerAdvice ? `Incoming officer advice: ${existing.incomingOfficerAdvice}` : '',
-        ]
-          .filter(Boolean)
-          .join('\n\n'),
-        summary: existing.summary,
-        sourceType: 'exit_interview',
-        sourceId: existing.id,
-        tags: existing.topics,
-        keywords: existing.topics,
-        isPublic: false,
-        isActive: true,
-        createdBy: userId!,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
-
-    const [updated] = await db
-      .update(exitInterviews)
-      .set({
-        status: 'published',
-        reviewedAt: existing.reviewedAt ?? now,
-        reviewedBy: existing.reviewedBy ?? userId!,
-        publishedAt: now,
-        knowledgeBaseId: kbRecord.id,
-        updatedAt: now,
-        updatedBy: userId!,
-      })
-      .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!)))
-      .returning();
-
-    await db.insert(exitInterviewEvents).values({
-      interviewId: params.id,
-      organizationId: organizationId!,
-      eventType: 'published',
-      actorUserId: userId!,
-      notes: 'Exit interview published to knowledge base',
-      payload: { knowledgeBaseId: kbRecord.id },
+        eventType: 'published',
+        actorUserId: userId!,
+        notes: 'Exit interview published to knowledge base',
+        payload: { knowledgeBaseId: kb.id },
+      });
+      await persistAtomicAudit(tx, {
+        organizationId: organizationId!,
+        userId: userId!,
+        action: 'exit_interview.publish',
+        resourceType: 'exit_interviews',
+        resourceId: params.id,
+        details: { knowledgeBaseId: kb.id },
+      });
+      return { kbRecord: kb, updated: row };
     });
 
     // --- Intelligence Layer: expertise extraction + semantic indexing ---
@@ -113,7 +131,7 @@ export const POST = withApi(
             continuityRiskFlags: expertiseProfile.undocumentedWorkflows,
             updatedAt: new Date(),
           })
-          .where(eq(exitInterviews.id, params.id));
+          .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!)));
 
         // Semantic index if governance permits
         const shouldIndex = isIndexingAllowed(

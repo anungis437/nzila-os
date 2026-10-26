@@ -58,6 +58,8 @@ export function RepresentationProtocolEditor() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [execution, setExecution] = useState<{ status: string; executable: boolean } | null>(null);
+  const [approveError, setApproveError] = useState<string | null>(null);
 
   // Fetch current protocol
   const fetchProtocol = async () => {
@@ -67,6 +69,7 @@ export function RepresentationProtocolEditor() {
       if (res.ok) {
         const data = await res.json();
         setProtocol(data.protocol ?? PROTOCOL_STEWARD_LED);
+        setExecution(data.execution ?? null);
       }
     } catch {
       // Fall back to steward-led on error
@@ -91,12 +94,48 @@ export function RepresentationProtocolEditor() {
       });
       if (res.ok) {
         setSaved(true);
+        setApproveError(null);
+        setExecution({ status: "pending_approval", executable: false });
         setTimeout(() => setSaved(false), 3000);
       }
     } catch {
       // Failed silently — UI state already reflects current value
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSubmitLegacy = async () => {
+    setApproveError(null);
+    try {
+      const res = await fetch("/api/admin/representation-protocol", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "submit_legacy" }),
+      });
+      if (res.ok) {
+        setExecution({ status: "pending_approval", executable: false });
+      } else {
+        const body = await res.json().catch(() => null);
+        setApproveError(body?.message ?? "Submission was not recorded.");
+      }
+    } catch {
+      setApproveError("Submission was not recorded.");
+    }
+  };
+
+  const handleApprove = async () => {
+    setApproveError(null);
+    try {
+      const res = await fetch("/api/admin/representation-protocol", { method: "POST" });
+      if (res.ok) {
+        setExecution({ status: "approved", executable: true });
+      } else {
+        const body = await res.json().catch(() => null);
+        setApproveError(body?.message ?? "Approval was not recorded.");
+      }
+    } catch {
+      setApproveError("Approval was not recorded.");
     }
   };
 
@@ -158,6 +197,26 @@ export function RepresentationProtocolEditor() {
             {saving ? "Saving…" : "Save Changes"}
           </Button>
         </div>
+      </div>
+
+      {/* Execution status: displayed defaults are not institutional authority */}
+      <div role="status" className="rounded-md border p-3 text-sm">
+        {execution?.executable ? (
+          <p>This protocol is approved and governs assignment.</p>
+        ) : execution?.status === "pending_approval" ? (
+          <div className="space-y-2">
+            <p>This protocol is awaiting approval by an administrator other than its author. It does not yet govern assignment.</p>
+            <Button size="sm" variant="outline" onClick={handleApprove}>Approve protocol</Button>
+          </div>
+        ) : execution?.status === "legacy_unapproved" ? (
+          <div className="space-y-2">
+            <p>These settings were saved before approval tracking existed. They are kept unchanged but do not govern assignment until submitted and approved by a different administrator.</p>
+            <Button size="sm" variant="outline" onClick={handleSubmitLegacy}>Submit existing settings for approval</Button>
+          </div>
+        ) : (
+          <p>No approved protocol is configured. The steward-led layout shown is a display default only; authority-bearing assignment is disabled until a protocol is saved and approved.</p>
+        )}
+        {approveError && <p role="alert" className="mt-2 text-red-700">{approveError}</p>}
       </div>
 
       {/* Presets */}

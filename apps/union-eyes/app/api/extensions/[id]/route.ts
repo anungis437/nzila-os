@@ -9,12 +9,14 @@ import { db } from '@/db/db';
 import { apiIntegrations } from '@/db/schema/integration-schema';
 import { eq, and } from 'drizzle-orm';
 import { z } from 'zod';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 const updateIntegrationSchema = z.object({
   name: z.string().min(1).max(255).optional(),
   enabled: z.boolean().optional(),
   syncFrequency: z.string().max(50).optional(),
-  fieldMapping: z.record(z.unknown()).optional(),
+  fieldMapping: z.record(z.string(), z.unknown()).optional(),
   apiEndpoint: z.string().url().max(2000).optional(),
 });
 
@@ -57,7 +59,7 @@ export const PATCH = withApi(
       description: 'Updates an integration configuration.',
     },
   },
-  async ({ params, request, organizationId }) => {
+  async ({ params, request, organizationId, userId }) => {
     const raw = await request.json();
     const { name, enabled, syncFrequency, fieldMapping, apiEndpoint } = updateIntegrationSchema.parse(raw);
 
@@ -68,21 +70,32 @@ export const PATCH = withApi(
     if (fieldMapping !== undefined) updates.fieldMapping = fieldMapping;
     if (apiEndpoint !== undefined) updates.apiEndpoint = apiEndpoint;
 
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
-    const [updated] = await db
-      .update(apiIntegrations)
-      .set(updates)
-      .where(
-        and(
-          eq(apiIntegrations.id, params.id),
-          eq(apiIntegrations.organizationId, organizationId),
-        ),
-      )
-      .returning();
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    return withRLSContext({ organizationId }, async (tx) => {
+      const [updated] = await tx
+        .update(apiIntegrations)
+        .set(updates)
+        .where(
+          and(
+            eq(apiIntegrations.id, params.id),
+            eq(apiIntegrations.organizationId, organizationId),
+          ),
+        )
+        .returning();
 
-    if (!updated) throw ApiError.notFound('Integration');
+      if (!updated) throw ApiError.notFound('Integration');
 
-    return updated;
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'integration.update',
+        resourceType: 'api_integrations',
+        resourceId: params.id,
+        details: { fields: Object.keys(updates).filter((k) => k !== 'updatedAt') },
+      });
+
+      return updated;
+    });
   },
 );
 
@@ -95,20 +108,31 @@ export const DELETE = withApi(
       description: 'Removes an integration configuration.',
     },
   },
-  async ({ params, organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
-    const [deleted] = await db
-      .delete(apiIntegrations)
-      .where(
-        and(
-          eq(apiIntegrations.id, params.id),
-          eq(apiIntegrations.organizationId, organizationId),
-        ),
-      )
-      .returning({ id: apiIntegrations.id });
+  async ({ params, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    return withRLSContext({ organizationId }, async (tx) => {
+      const [deleted] = await tx
+        .delete(apiIntegrations)
+        .where(
+          and(
+            eq(apiIntegrations.id, params.id),
+            eq(apiIntegrations.organizationId, organizationId),
+          ),
+        )
+        .returning({ id: apiIntegrations.id, name: apiIntegrations.name });
 
-    if (!deleted) throw ApiError.notFound('Integration');
+      if (!deleted) throw ApiError.notFound('Integration');
 
-    return { id: deleted.id, deleted: true };
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'integration.delete',
+        resourceType: 'api_integrations',
+        resourceId: deleted.id,
+        details: { name: deleted.name },
+      });
+
+      return { id: deleted.id, deleted: true };
+    });
   },
 );

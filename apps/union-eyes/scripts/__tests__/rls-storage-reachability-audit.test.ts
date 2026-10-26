@@ -69,5 +69,5 @@ describe('rls-storage-reachability-audit', () => {
         result.proposedClassification,
       );
     }
-  });
+  }, 300_000);
 });

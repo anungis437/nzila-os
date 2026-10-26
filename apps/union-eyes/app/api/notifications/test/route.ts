@@ -3,8 +3,9 @@
  * Creates a test notification for the authenticated user. Steward-only.
  * Backed by inAppNotifications table (Drizzle ORM).
  */
-import { withApi } from '@/lib/api/framework';
-import { db } from '@/db/db';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { inAppNotifications } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
@@ -19,19 +20,31 @@ export const POST = withApi(
     },
   },
   async ({ userId, organizationId }) => {
-    const [notification] = await db
-      .insert(inAppNotifications)
-      .values({
-        userId: userId!,
-        organizationId: organizationId!,
-        title: 'Test Notification',
-        message: 'This is a test notification to verify your notification setup is working correctly.',
-        type: 'info',
-        actionLabel: 'Dismiss',
-      })
-      .returning();
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
-    return notification;
+    return withRLSContext({ organizationId }, async (tx) => {
+      const [notification] = await tx
+        .insert(inAppNotifications)
+        .values({
+          userId,
+          organizationId,
+          title: 'Test Notification',
+          message: 'This is a test notification to verify your notification setup is working correctly.',
+          type: 'info',
+          actionLabel: 'Dismiss',
+        })
+        .returning();
+
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'notification.test_create',
+        resourceType: 'in_app_notifications',
+        resourceId: notification.id,
+        details: {},
+      });
+      return notification;
+    });
   },
 );
 

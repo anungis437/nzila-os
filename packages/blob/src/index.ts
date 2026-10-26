@@ -23,6 +23,21 @@ function requiredEnv(name: string): string {
 let _service: BlobServiceClient | null = null
 let _credential: StorageSharedKeyCredential | null = null
 
+/**
+ * Optional emulator endpoint (e.g. Azurite). Never honoured in production, so a stray variable
+ * cannot redirect real document storage.
+ */
+function blobEndpoint(): string {
+  const override = process.env.AZURE_STORAGE_BLOB_ENDPOINT
+  if (override) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('AZURE_STORAGE_BLOB_ENDPOINT is not permitted in production')
+    }
+    return override.replace(/\/+$/, '')
+  }
+  return `https://${requiredEnv('AZURE_STORAGE_ACCOUNT_NAME')}.blob.core.windows.net`
+}
+
 function getCredential(): StorageSharedKeyCredential {
   if (!_credential) {
     _credential = new StorageSharedKeyCredential(
@@ -36,10 +51,7 @@ function getCredential(): StorageSharedKeyCredential {
 function getService(): BlobServiceClient {
   if (!_service) {
     const cred = getCredential()
-    _service = new BlobServiceClient(
-      `https://${requiredEnv('AZURE_STORAGE_ACCOUNT_NAME')}.blob.core.windows.net`,
-      cred,
-    )
+    _service = new BlobServiceClient(blobEndpoint(), cred)
   }
   return _service
 }
@@ -89,7 +101,7 @@ export function generateSasUrl(
     cred,
   ).toString()
 
-  return `https://${requiredEnv('AZURE_STORAGE_ACCOUNT_NAME')}.blob.core.windows.net/${containerName}/${blobPath}?${sas}`
+  return `${blobEndpoint()}/${containerName}/${blobPath}?${sas}`
 }
 
 /** Compute SHA-256 hex digest of a buffer. */

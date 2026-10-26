@@ -1,7 +1,7 @@
 # Union-Eyes
 
 > Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.
-> Auth authority: `@nzila/platform-auth` is canonical. Clerk is legacy compatibility only and not the system of record for new authentication work.
+> Auth authority: `@nzila/platform-auth` is canonical (Microsoft Entra ID).
 
 [![CI](https://github.com/anungis437/nzila-os/actions/workflows/ci.yml/badge.svg)](https://github.com/anungis437/nzila-os/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](apps/union-eyes/tsconfig.json)
@@ -297,16 +297,15 @@ See [`.env.example`](.env.example) for the full variable reference.
 ### 3. Set up the database
 
 ```bash
-# Run Drizzle migrations (TypeScript schema)
+# Run Drizzle migrations (TypeScript schema) through the approved bootstrap
 pnpm --filter @nzila/union-eyes db:migrate
-
-# Or push schema directly (development)
-pnpm --filter @nzila/union-eyes db:push
 
 # Django migrations
 cd apps/union-eyes/backend
 python manage.py migrate
 ```
+
+There is no schema-push entrypoint: `drizzle-kit push` bypasses the migration ledger and was removed.
 
 ### 4. Run
 

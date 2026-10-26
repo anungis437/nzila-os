@@ -14,6 +14,7 @@ import {
   documentVersions,
 } from '@/db/schema/documents-schema';
 import { hasMinRole } from '@/lib/api-auth-guard';
+import { grievances } from '@/db/schema/domains/claims/grievances';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import {
@@ -21,16 +22,26 @@ import {
   normalizeDocumentTitle,
   toGovernanceLabel,
 } from '@/lib/services/document-governance-service';
-import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
-import { resolveStoredBlob } from '@/lib/services/document-blob-integrity-service';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { hasDocumentContextAccess } from '@/lib/services/document-member-scope';
+import { resolveStoredBlob, storedBlobFailure } from '@/lib/services/document-blob-integrity-service';
+import { bindIntakeInTx, checkIntakeForAcceptance, IntakeConflictError } from '@/lib/documents/intake-lifecycle';
+import { blobIntakeStorage } from '@/lib/documents/intake-storage';
+import { intakeRefusal } from '@/lib/documents/intake-acceptance';
+import { generateSasUrl } from '@/lib/blob-client';
 
 const uploadDocumentSchema = z.object({
   title: z.string().min(1).max(300),
   filename: z.string().min(1).max(500),
   fileUrl: z.string().url().optional(),
   blobPath: z.string().min(1).optional(),
+  // The server-issued handle for an uploaded file (POST /api/documents/intakes). Preferred; consumed exactly once.
+  intakeId: z.guid().optional(),
+  // A claim, not a fact: when supplied it must equal the SHA-256 the server computes from storage.
+  contentHash: z.string().regex(/^[0-9a-fA-F]{64}$/, 'contentHash must be a SHA-256 hex digest').optional(),
   documentType: z.string().min(1).max(120),
-  mimeType: z.string().min(1).max(120),
+  // Required unless an intakeId is given: the server then uses the type it recorded when it received the file.
+  mimeType: z.string().min(1).max(120).optional(),
   privacyLabel: z.enum([
     'public_internal',
     'team_confidential',
@@ -41,16 +52,19 @@ const uploadDocumentSchema = z.object({
   ]),
   fileSize: z.number().int().nonnegative().optional(),
   linkedEntityType: z.enum(['case', 'grievance', 'member', 'policy_library', 'template_library', 'collective_agreement', 'other']).optional(),
-  linkedEntityId: z.string().uuid().optional(),
+  linkedEntityId: z.guid().optional(),
   containsPii: z.boolean().optional(),
   containsMedicalSensitive: z.boolean().optional(),
   containsLegalPrivilege: z.boolean().optional(),
   memberPii: z.boolean().optional(),
   medicalSensitive: z.boolean().optional(),
   disciplinarySensitive: z.boolean().optional(),
-}).refine((value) => Boolean(value.blobPath || value.fileUrl), {
-  message: 'blobPath or fileUrl is required',
-  path: ['blobPath'],
+}).refine((value) => [value.intakeId, value.blobPath, value.fileUrl].filter(Boolean).length === (value.fileUrl && value.blobPath ? 2 : 1), {
+  message: 'intakeId, blobPath or fileUrl is required (intakeId cannot be combined with a storage reference)',
+  path: ['intakeId'],
+}).refine((value) => Boolean(value.intakeId || value.mimeType), {
+  message: 'mimeType is required without an intakeId',
+  path: ['mimeType'],
 });
 
 export const GET = withOrganizationAuth(async (request, context) => {
@@ -123,7 +137,9 @@ export const GET = withOrganizationAuth(async (request, context) => {
     .where(and(...conditions))
     .orderBy(desc(documents.updatedAt));
 
-  const isStewardPlus = await hasMinRole('steward');
+  // Representative-level role: eligibility for organization-level (unlinked) documents and the uploader
+  // projection only, never case content.
+  const isStaff = await hasMinRole('steward');
 
   const visible = await Promise.all(
     rows.map(async (row) => {
@@ -150,9 +166,16 @@ export const GET = withOrganizationAuth(async (request, context) => {
         toGovernanceLabel({ privacyLabel: row.privacyLabel ?? undefined }),
         {
           isOrgMember: true,
-          isStewardPlus,
           isPrimaryOwner: caseAccess.isPrimaryOwner,
-          hasCaseAccess: isStewardPlus || caseAccess.canViewCase || !row.linkedEntityId,
+          hasCaseAccess: hasDocumentContextAccess({
+            isStaff,
+            canViewCase: caseAccess.canViewCase,
+            hasExplicitGrant: false,
+            linkedEntityId: row.linkedEntityId,
+            privacyLabel: row.privacyLabel,
+            uploadedBy: row.uploadedBy,
+            userId,
+          }),
           canViewPrivateDocuments: caseAccess.canViewPrivateDocuments,
           hasExplicitDocumentGrant: false,
         },
@@ -166,8 +189,11 @@ export const GET = withOrganizationAuth(async (request, context) => {
         return null;
       }
 
+      // Uploader identity is staff-only; members see their documents without other users' ids.
+      const { uploadedBy: uploaderId, ...withoutUploader } = row;
+
       return {
-        ...row,
+        ...(isStaff ? { ...withoutUploader, uploadedBy: uploaderId } : withoutUploader),
         title: normalizeDocumentTitle(row),
       };
     }),
@@ -191,21 +217,79 @@ export const POST = withOrganizationAuth(async (request, context) => {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid document payload', parsed.error.flatten());
   }
 
+  // Filing a document against a case is a case action: the kernel must allow this principal to add evidence to it.
+  if ((parsed.data.linkedEntityType === 'grievance' || parsed.data.linkedEntityType === 'case') && parsed.data.linkedEntityId) {
+    const access = await getEffectiveCaseAccess({ organizationId, grievanceId: parsed.data.linkedEntityId, userId });
+    if (!access.canViewCase || !access.canUploadDocuments) return standardErrorResponse(ErrorCode.NOT_FOUND, 'Case not found');
+  } else if (parsed.data.linkedEntityId) {
+    // A different link type must not be a way around the case check: an id that names a case of this organization is
+    // filed against that case, so the same kernel decision applies. Any other id is a non-case target.
+    const [namedCase] = await db
+      .select({ id: grievances.id })
+      .from(grievances)
+      .where(and(eq(grievances.id, parsed.data.linkedEntityId), eq(grievances.organizationId, organizationId)))
+      .limit(1);
+    if (namedCase) {
+      const access = await getEffectiveCaseAccess({ organizationId, grievanceId: namedCase.id, userId });
+      if (!access.canViewCase || !access.canUploadDocuments) return standardErrorResponse(ErrorCode.NOT_FOUND, 'Case not found');
+    }
+  }
+
+  let intakeId: string | null = null;
+  let intakeMeta: { mimeType: string; size: number } | null = null;
   let resolvedBlob;
   try {
-    resolvedBlob = await resolveStoredBlob({
-      organizationId,
-      blobPath: parsed.data.blobPath,
-      fileUrl: parsed.data.fileUrl,
-    });
+    if (parsed.data.intakeId) {
+      const check = await checkIntakeForAcceptance(
+        { organizationId, userId, intakeId: parsed.data.intakeId, operation: 'create_document' },
+        blobIntakeStorage,
+      );
+      if (!check.ok) return intakeRefusal(check);
+      if (check.replay) {
+        // The same principal asking again gets the original result; nothing is written twice.
+        const [existing] = await db
+          .select()
+          .from(documents)
+          .where(and(eq(documents.id, check.intake.acceptedDocumentId ?? ''), eq(documents.organizationId, organizationId)))
+          .limit(1);
+        return existing ? standardSuccessResponse({ ...existing, replay: true }) : standardErrorResponse(ErrorCode.CONFLICT, 'The intake was already used');
+      }
+      intakeId = check.intake.id;
+      intakeMeta = { mimeType: check.intake.mimeType, size: Number(check.intake.sizeBytes) };
+      resolvedBlob = {
+        blobPath: check.intake.storageKey,
+        contentHash: check.intake.contentHash,
+        fileUrl: await generateSasUrl(process.env.AZURE_BLOB_CONTAINER ?? 'union-eyes', check.intake.storageKey),
+      };
+    } else {
+      resolvedBlob = await resolveStoredBlob({
+        organizationId,
+        blobPath: parsed.data.blobPath,
+        fileUrl: parsed.data.fileUrl,
+        expectedContentHash: parsed.data.contentHash,
+      });
+    }
   } catch (error) {
+    const failure = storedBlobFailure(error);
     return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      error instanceof Error ? error.message : 'Invalid storage payload',
+      failure.status === 'conflict' ? ErrorCode.CONFLICT : ErrorCode.VALIDATION_ERROR,
+      failure.message,
     );
   }
 
-  const created = await withRLSContext({ organizationId }, async (tx) => {
+  let created;
+  try {
+  created = await withRLSContext({ organizationId }, async (tx) => {
+    // A stored file belongs to one document version; one another document already holds cannot be claimed again.
+    const inUse = (
+      await tx
+        .select({ id: documentVersions.id })
+        .from(documentVersions)
+        .where(and(eq(documentVersions.organizationId, organizationId), eq(documentVersions.storageKey, resolvedBlob.blobPath)))
+        .limit(1)
+    )[0];
+    if (inUse) return null;
+
     const [insertedDocument] = await tx
       .insert(documents)
       .values({
@@ -216,8 +300,9 @@ export const POST = withOrganizationAuth(async (request, context) => {
         fileUrl: resolvedBlob.fileUrl,
         fileType: parsed.data.documentType,
         documentType: parsed.data.documentType,
-        mimeType: parsed.data.mimeType,
-        fileSize: parsed.data.fileSize,
+        // From an intake, the server's own record of the file wins over anything the client says about it.
+        mimeType: intakeMeta?.mimeType ?? parsed.data.mimeType,
+        fileSize: intakeMeta?.size ?? parsed.data.fileSize,
         uploadedBy: userId,
         privacyLabel: parsed.data.privacyLabel,
         containsPii: parsed.data.containsPii ?? false,
@@ -229,14 +314,20 @@ export const POST = withOrganizationAuth(async (request, context) => {
       })
       .returning();
 
-    await tx.insert(documentVersions).values({
-      organizationId,
-      documentId: insertedDocument.id,
-      versionNo: 1,
-      storageKey: resolvedBlob.blobPath,
-      contentHash: resolvedBlob.contentHash,
-      uploadedBy: userId,
-    });
+    const [firstVersion] = await tx
+      .insert(documentVersions)
+      .values({
+        organizationId,
+        documentId: insertedDocument.id,
+        versionNo: 1,
+        storageKey: resolvedBlob.blobPath,
+        contentHash: resolvedBlob.contentHash,
+        uploadedBy: userId,
+      })
+      .returning({ id: documentVersions.id });
+
+    // Taking the intake and creating the document are one transaction: a lost race or a refused audit undoes both.
+    if (intakeId) await bindIntakeInTx(tx, { organizationId, userId, intakeId, documentId: insertedDocument.id, versionId: firstVersion.id });
 
     if (parsed.data.linkedEntityType && parsed.data.linkedEntityId) {
       await tx.insert(documentLinks).values({
@@ -248,25 +339,31 @@ export const POST = withOrganizationAuth(async (request, context) => {
       });
     }
 
+    // The document, its version, its link and the audit record commit together.
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId,
+      action: 'document.upload',
+      resourceType: 'documents',
+      resourceId: insertedDocument.id,
+      details: {
+        privacyLabel: insertedDocument.privacyLabel,
+        documentType: insertedDocument.documentType,
+        ...(parsed.data.linkedEntityType && parsed.data.linkedEntityId
+          ? { linkedEntityType: parsed.data.linkedEntityType, linkedEntityId: parsed.data.linkedEntityId }
+          : {}),
+      },
+    });
+
     return insertedDocument;
   });
+  } catch (error) {
+    if (error instanceof IntakeConflictError) return standardErrorResponse(ErrorCode.CONFLICT, 'The intake is no longer open');
+    throw error;
+  }
 
-  if (parsed.data.linkedEntityType && parsed.data.linkedEntityId) {
-
-    if (parsed.data.linkedEntityType === 'grievance') {
-      await auditCaseMutation({
-        event: CaseAuditEvent.CASE_ATTACHMENT_UPLOADED,
-        userId,
-        organizationId,
-        caseId: parsed.data.linkedEntityId,
-        action: 'create',
-        newState: { documentId: created.id },
-        details: {
-          privacyLabel: created.privacyLabel,
-          documentType: created.documentType,
-        },
-      });
-    }
+  if (!created) {
+    return standardErrorResponse(ErrorCode.CONFLICT, 'That stored file is already attached to a document version');
   }
 
   return standardSuccessResponse(created);

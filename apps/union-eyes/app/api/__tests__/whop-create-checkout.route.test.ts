@@ -79,10 +79,51 @@ describe('whop/create-checkout route', () => {
     const response = await POST(new Request('http://localhost/api/whop/create-checkout', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ planId: 'bad-plan' }),
+      body: JSON.stringify({ planId: 'plan_monthly' }),
     }));
 
     expect(response.status).toBe(422);
+  });
+
+  it('refuses a plan id that is not one of the configured plans, without calling Whop', async () => {
+    const { POST } = await loadRoute();
+
+    const response = await POST(new Request('http://localhost/api/whop/create-checkout', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ planId: 'plan_someone_elses' }),
+    }));
+
+    expect(response.status).toBe(400);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('never sends an absolute redirect to a foreign origin to Whop', async () => {
+    const { POST } = await loadRoute();
+
+    await POST(new Request('http://localhost/api/whop/create-checkout', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ planId: 'plan_monthly', redirectUrl: 'https://evil.example/steal' }),
+    }));
+
+    const sent = JSON.parse((fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0][1].body);
+    expect(sent.redirect_url).not.toContain('evil.example');
+  });
+
+  it('keeps an absolute redirect that points back at the application origin', async () => {
+    const { POST } = await loadRoute();
+    process.env.NEXT_PUBLIC_APP_URL = 'https://app.example';
+
+    await POST(new Request('http://localhost/api/whop/create-checkout', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ planId: 'plan_monthly', redirectUrl: 'https://app.example/billing/done' }),
+    }));
+
+    delete process.env.NEXT_PUBLIC_APP_URL;
+    const sent = JSON.parse((fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0][1].body);
+    expect(sent.redirect_url).toContain('https://app.example/billing/done');
   });
 
   it('creates checkout successfully and returns session metadata', async () => {
@@ -100,5 +141,18 @@ describe('whop/create-checkout route', () => {
       sessionId: 'session_1',
       planDuration: 'yearly',
     });
+  });
+
+  it('sends the authenticated principal under both the new and the legacy metadata key, never a client-supplied one', async () => {
+    const { POST } = await loadRoute();
+    await POST(new Request('http://localhost/api/whop/create-checkout', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ planId: 'plan_yearly', userId: 'attacker', clerkUserId: 'attacker' }),
+    }));
+
+    const sent = JSON.parse((fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0][1].body);
+    expect(sent.metadata).toMatchObject({ userId: 'user_1', clerkUserId: 'user_1' });
+    expect(JSON.stringify(sent)).not.toContain('attacker');
   });
 });

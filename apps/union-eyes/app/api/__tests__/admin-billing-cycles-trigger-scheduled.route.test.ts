@@ -7,11 +7,17 @@ const m = vi.hoisted(() => ({
   hasMinRole: vi.fn(),
   BillingScheduler: { manualTrigger: vi.fn() },
   logger: { info: vi.fn(), error: vi.fn() },
+  performAuditedOperation: vi.fn(),
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({ withApiAuth: m.withApiAuth, getCurrentUser: m.getCurrentUser, hasMinRole: m.hasMinRole }));
 vi.mock('@/lib/jobs/billing-scheduler', () => ({ BillingScheduler: m.BillingScheduler }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: m.performAuditedOperation,
+  operationAuditResponse: () => null,
+}));
+
 vi.mock('@/lib/api/standardized-responses', () => ({
   ErrorCode: { AUTH_REQUIRED: 'AUTH_REQUIRED', FORBIDDEN: 'FORBIDDEN', VALIDATION_ERROR: 'VALIDATION_ERROR', INTERNAL_ERROR: 'INTERNAL_ERROR' },
   standardErrorResponse: vi.fn((code: string, message: string) => new Response(JSON.stringify({ message }), { status: code === 'AUTH_REQUIRED' ? 401 : code === 'FORBIDDEN' ? 403 : code === 'INTERNAL_ERROR' ? 500 : 400 })),
@@ -26,7 +32,8 @@ describe('admin/billing-cycles/trigger-scheduled route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.withApiAuth.mockImplementation((handler: any) => (request: NextRequest) => handler(request));
-    m.getCurrentUser.mockResolvedValue({ id: 'u1' });
+    m.getCurrentUser.mockResolvedValue({ id: 'u1', organizationId: 'org-1' });
+    m.performAuditedOperation.mockImplementation((_op: unknown, run: () => unknown) => run());
     m.hasMinRole.mockResolvedValue(true);
     m.BillingScheduler.manualTrigger.mockResolvedValue({ totalOrganizations: 3, successful: 2, failed: 1 });
   });
@@ -67,6 +74,10 @@ describe('admin/billing-cycles/trigger-scheduled route', () => {
     expect(response.status).toBe(200);
     expect(payload).toMatchObject({ totalOrganizations: 3, successful: 2, failed: 1 });
     expect(m.BillingScheduler.manualTrigger).toHaveBeenCalledWith('weekly');
+    expect(m.performAuditedOperation).toHaveBeenCalledWith(
+      expect.objectContaining({ organizationId: 'org-1', userId: 'u1', action: 'platform.billing_cycle.trigger_scheduled' }),
+      expect.any(Function),
+    );
   });
 
   it('returns 500 when manual trigger fails', async () => {

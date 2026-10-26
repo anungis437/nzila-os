@@ -19,6 +19,7 @@ import { eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
 import { ALL_QUESTIONS } from '@/lib/icra/questions';
 import type { OrganizationalContinuityProfile } from '@/lib/icra/types';
@@ -90,6 +91,7 @@ export async function POST(request: Request, { params }: RouteContext) {
         id: icraAssessments.id,
         organizationContext: icraAssessments.organizationContext,
         locale: icraAssessments.locale,
+        claimedOrgId: icraAssessments.claimedOrgId,
       })
       .from(icraAssessments)
       .where(eq(icraAssessments.id, assessmentId))
@@ -142,6 +144,20 @@ export async function POST(request: Request, { params }: RouteContext) {
       .update(icraAssessments)
       .set({ organizationContext: updatedOrganizationContext })
       .where(eq(icraAssessments.id, assessmentId));
+
+    // The decision itself (reviewer role, status, summary, time) is stored in the assessment row above. An assessment
+    // that a tenant has claimed also gets a canonical audit record in the same transaction, so the decision cannot
+    // commit without it. An unclaimed prospect assessment has no tenant to audit against.
+    if (assessment.claimedOrgId) {
+      await persistAtomicAudit(tx, {
+        organizationId: assessment.claimedOrgId,
+        userId: 'system:icra-report-review',
+        action: 'icra.report.review',
+        resourceType: 'icra_assessments',
+        resourceId: assessmentId,
+        details: { decision: action, reviewerRole: normalizeReviewerRole(parsed.reviewerRole), reviewStatus: updated.reviewWorkflow.status },
+      });
+    }
 
     logger.info('icra.report.review_recorded', {
       assessmentId,

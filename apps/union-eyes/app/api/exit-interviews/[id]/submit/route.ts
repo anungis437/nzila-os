@@ -2,6 +2,8 @@
 import { and, eq } from 'drizzle-orm';
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { exitInterviews, exitInterviewEvents } from '@/db/schema';
 import { ROLE_HIERARCHY, normalizeRole } from '@/lib/api-auth-guard';
 
@@ -45,19 +47,31 @@ export const POST = withApi(
     }
 
     const now = new Date();
-    const [updated] = await db
-      .update(exitInterviews)
-      .set({ status: 'submitted', submittedAt: now, updatedAt: now, updatedBy: userId! })
-      .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!)))
-      .returning();
+    const updated = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
+      const [row] = await tx
+        .update(exitInterviews)
+        .set({ status: 'submitted', submittedAt: now, updatedAt: now, updatedBy: userId! })
+        .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!), eq(exitInterviews.status, 'draft')))
+        .returning();
+      if (!row) throw ApiError.conflict('Only draft interviews can be submitted');
 
-    await db.insert(exitInterviewEvents).values({
-      interviewId: params.id,
-      organizationId: organizationId!,
-      eventType: 'submitted',
-      actorUserId: userId!,
-      notes: 'Exit interview submitted for review',
-      payload: { fromStatus: existing.status, toStatus: 'submitted' },
+      await tx.insert(exitInterviewEvents).values({
+        interviewId: params.id,
+        organizationId: organizationId!,
+        eventType: 'submitted',
+        actorUserId: userId!,
+        notes: 'Exit interview submitted for review',
+        payload: { fromStatus: 'draft', toStatus: 'submitted' },
+      });
+      await persistAtomicAudit(tx, {
+        organizationId: organizationId!,
+        userId: userId!,
+        action: 'exit_interview.submit',
+        resourceType: 'exit_interviews',
+        resourceId: params.id,
+        details: { from: 'draft', to: 'submitted' },
+      });
+      return row;
     });
 
     return { data: updated };

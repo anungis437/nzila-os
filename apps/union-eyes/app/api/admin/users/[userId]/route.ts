@@ -82,6 +82,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
         membershipId,
         authUserId: memberRecord.authUserId,
         organizationId: memberRecord.organizationId,
+        actorUserId: callerId,
       });
 
       if (!result.success) {
@@ -99,6 +100,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
       membershipId,
       authUserId: memberRecord.authUserId,
       organizationId: memberRecord.organizationId,
+      actorUserId: callerId,
       newLocalStatus: 'inactive',
     });
 
@@ -149,6 +151,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
       membershipId,
       authUserId: memberRecord.authUserId,
       organizationId: memberRecord.organizationId,
+      actorUserId: callerId,
       newLocalStatus: 'deleted',
     });
 

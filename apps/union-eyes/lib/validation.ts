@@ -13,10 +13,10 @@ import { NextResponse } from 'next/server';
 
 // Common validation schemas
 export const commonSchemas = {
-  uuid: z.string().uuid('Invalid UUID format'),
+  uuid: z.guid('Invalid UUID format'),
   email: z.string().email('Invalid email format'),
   url: z.string().url('Invalid URL format'),
-  organizationId: z.string().uuid('Invalid organization ID'),
+  organizationId: z.guid('Invalid organization ID'),
   userId: z.string().min(1, 'User ID is required'),
   
   // Pagination
@@ -67,10 +67,10 @@ export const bodySchemas = {
     title: z.string().min(3, 'Title must be at least 3 characters').max(200, 'Title too long'),
     description: z.string().max(5000, 'Description too long').optional(),
     type: z.enum(['convention', 'ratification', 'special_vote'], {
-      errorMap: () => ({ message: 'Invalid type. Must be convention, ratification, or special_vote' })
+      error: 'Invalid type. Must be convention, ratification, or special_vote'
     }),
     meetingType: z.enum(['convention', 'ratification', 'emergency', 'special'], {
-      errorMap: () => ({ message: 'Invalid meeting type' })
+      error: 'Invalid meeting type'
     }),
     organizationId: commonSchemas.organizationId,
     startTime: z.string().datetime('Invalid start time format'),
@@ -78,7 +78,7 @@ export const bodySchemas = {
     allowAnonymous: z.boolean().default(false),
     requiresQuorum: z.boolean().default(false),
     quorumThreshold: z.number().int().min(1).max(100).optional(),
-    settings: z.record(z.unknown()).optional(),
+    settings: z.record(z.string(), z.unknown()).optional(),
     options: z.array(z.string().min(1, 'Option text required').max(500, 'Option text too long'))
       .min(2, 'At least 2 options required')
       .max(20, 'Maximum 20 options allowed')
@@ -125,7 +125,7 @@ export const bodySchemas = {
       'retaliation',
       'other',
     ], {
-      errorMap: () => ({ message: 'Invalid claim type' })
+      error: 'Invalid claim type'
     }),
     incidentDate: z.string().datetime('Invalid incident date format'),
     location: z.string().min(1, 'Location is required').max(500, 'Location too long'),
@@ -143,7 +143,7 @@ export const bodySchemas = {
       timestamp: z.string().datetime(),
       duration: z.number().positive(),
     })).max(5, 'Maximum 5 voice transcriptions').optional(),
-    metadata: z.record(z.unknown()).optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
   }).refine(
     (data) => {
       if (data.witnessesPresent && !data.witnessDetails) {
@@ -174,7 +174,7 @@ export const bodySchemas = {
     name: z.string().min(2, 'Organization name must be at least 2 characters').max(200, 'Name too long'),
     slug: z.string().min(1, 'Slug required').max(100, 'Slug too long').regex(/^[a-z0-9-_]+$/, 'Slug must contain only lowercase letters, numbers, hyphens, and underscores'),
     type: z.enum(['platform', 'congress', 'federation', 'union', 'local', 'region', 'district'], {
-      errorMap: () => ({ message: 'Invalid organization type' })
+      error: 'Invalid organization type'
     }),
     parentId: commonSchemas.uuid.optional().nullable(),
     description: z.string().max(2000, 'Description too long').optional(),
@@ -182,19 +182,19 @@ export const bodySchemas = {
     jurisdiction: z.enum(['federal', 'AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT']).optional(),
     contactEmail: commonSchemas.email.optional(),
     contactPhone: z.string().max(20).optional(),
-    address: z.record(z.unknown()).optional(),
+    address: z.record(z.string(), z.unknown()).optional(),
     website: z.string().url('Invalid website URL').optional(),
     logo: z.string().url('Invalid logo URL').optional(),
     primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Invalid color format (use #RRGGBB)').optional(),
     isActive: z.boolean().default(true),
-    metadata: z.record(z.unknown()).optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
   }),
   
   // Add organization member
   addOrganizationMember: z.object({
     userId: commonSchemas.userId,
     role: z.enum(['member', 'steward', 'officer', 'admin'], {
-      errorMap: () => ({ message: 'Invalid role. Must be member, steward, officer, or admin' })
+      error: 'Invalid role. Must be member, steward, officer, or admin'
     }),
     isPrimary: z.boolean().default(false),
     effectiveDate: z.string().datetime('Invalid effective date').optional(),
@@ -253,7 +253,7 @@ export const querySchemas = {
  * Validation error response formatter
  */
 export function formatValidationError(error: ZodError): NextResponse {
-  const errors = error.errors.map((err) => ({
+  const errors = error.issues.map((err) => ({
     field: err.path.join('.'),
     message: err.message,
     code: err.code,

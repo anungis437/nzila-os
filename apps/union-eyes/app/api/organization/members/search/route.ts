@@ -1,12 +1,15 @@
 /**
- * GET /api/organization/members/search?organization=<orgId>&q=<query>
- * Direct DB query — replaces Django proxy
+ * GET /api/organization/members/search?q=<query>
+ * Direct DB query — replaces Django proxy. Organization comes from the session; the rows a
+ * caller may see come from the member-directory policy (case-context for stewards).
  */
+import { NextResponse } from 'next/server';
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { organizationMembers } from '@/db/schema-organizations';
-import { eq, and, isNull, or, ilike } from 'drizzle-orm';
+import { eq, and, isNull, or, ilike, sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { memberDirectoryAccess } from '@/lib/members/directory-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,10 +19,10 @@ export const GET = withApi(
     openapi: {
       tags: ['Organization', 'Members'],
       summary: 'Search organization members',
-      description: 'Search members by name or email within an organization',
+      description: 'Search the members the caller is authorized to see by name or email within the active organization',
     },
   },
-  async ({ request, organizationId }) => {
+  async ({ request, organizationId, userId, user }) => {
     const url = new URL(request.url);
     const q = url.searchParams.get('q') || '';
 
@@ -31,11 +34,33 @@ export const GET = withApi(
       return { members: [] };
     }
 
+    const access = memberDirectoryAccess(user?.role);
+    if (access.scope === 'none' || !userId) {
+      return NextResponse.json(
+        { error: 'Forbidden', message: 'Member directory access is not part of your current mandate.' },
+        { status: 403 },
+      );
+    }
+
     return withRLSContext(async () => {
       const conditions = [
         eq(organizationMembers.organizationId, organizationId),
         isNull(organizationMembers.deletedAt),
       ];
+
+      if (access.scope === 'case-context') {
+        conditions.push(
+          or(
+            eq(organizationMembers.userId, userId),
+            sql`EXISTS (
+              SELECT 1 FROM claims c
+              WHERE c.member_id = ${organizationMembers.userId}
+                AND c.organization_id::text = ${organizationMembers.organizationId}::text
+                AND c.assigned_to = ${userId}
+            )`,
+          )!,
+        );
+      }
 
       if (q) {
         conditions.push(
@@ -66,4 +91,3 @@ export const GET = withApi(
     });
   },
 );
-

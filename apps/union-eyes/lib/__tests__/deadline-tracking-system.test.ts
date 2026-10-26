@@ -268,6 +268,7 @@ describe("deadline-tracking-system", () => {
   describe("requestDeadlineExtension", () => {
     it("returns error if deadline not found", async () => {
       const r = await requestDeadlineExtension({
+        organizationId: "org-1",
         deadlineId: "dl-1",
         requestedBy: "user-1",
         newDate: new Date(),
@@ -283,6 +284,7 @@ describe("deadline-tracking-system", () => {
         .mockResolvedValueOnce({ id: "dl-1", reminderDays: [7, 3, 1] })
         .mockResolvedValueOnce({ id: "dl-1" }); // scheduleReminders
       const r = await requestDeadlineExtension({
+        organizationId: "org-1",
         deadlineId: "dl-1",
         requestedBy: "user-1",
         newDate: new Date(),
@@ -295,6 +297,7 @@ describe("deadline-tracking-system", () => {
     it("saves note when approval required", async () => {
       mocks.mockFindFirstDeadlines.mockResolvedValueOnce({ id: "dl-1" });
       const r = await requestDeadlineExtension({
+        organizationId: "org-1",
         deadlineId: "dl-1",
         requestedBy: "user-1",
         newDate: new Date(),
@@ -308,7 +311,7 @@ describe("deadline-tracking-system", () => {
   // ── approveDeadlineExtension ──────────────────────────────────────
   describe("approveDeadlineExtension", () => {
     it("returns error if deadline not found", async () => {
-      const r = await approveDeadlineExtension("dl-1", "admin-1");
+      const r = await approveDeadlineExtension("dl-1", "org-1", "admin-1");
       expect(r.success).toBe(false);
       expect(r.error).toContain("Deadline not found");
     });
@@ -318,7 +321,7 @@ describe("deadline-tracking-system", () => {
         id: "dl-1",
         notes: "Some other note",
       });
-      const r = await approveDeadlineExtension("dl-1", "admin-1");
+      const r = await approveDeadlineExtension("dl-1", "org-1", "admin-1");
       expect(r.success).toBe(false);
       expect(r.error).toContain("No pending extension");
     });
@@ -332,7 +335,7 @@ describe("deadline-tracking-system", () => {
           reminderDays: [7, 3, 1],
         })
         .mockResolvedValueOnce({ id: "dl-1" }); // scheduleReminders
-      const r = await approveDeadlineExtension("dl-1", "admin-1");
+      const r = await approveDeadlineExtension("dl-1", "org-1", "admin-1");
       expect(r.success).toBe(true);
     });
   });
@@ -491,7 +494,7 @@ describe("deadline-tracking-system", () => {
         })
         .mockResolvedValueOnce({ id: "dl-1" }); // scheduleReminders
 
-      const r = await approveDeadlineExtension("dl-1", "admin-1");
+      const r = await approveDeadlineExtension("dl-1", "org-1", "admin-1");
       
       expect(r.success).toBe(true);
       // Verify the update was called (mocked)
@@ -503,7 +506,7 @@ describe("deadline-tracking-system", () => {
         id: "dl-1",
         notes: "Some random note without extension keyword",
       });
-      const r = await approveDeadlineExtension("dl-1", "admin-1");
+      const r = await approveDeadlineExtension("dl-1", "org-1", "admin-1");
       expect(r.success).toBe(false);
       expect(r.error).toContain("No pending extension");
     });
@@ -513,7 +516,7 @@ describe("deadline-tracking-system", () => {
         id: "dl-1",
         notes: null,
       });
-      const r = await approveDeadlineExtension("dl-1", "admin-1");
+      const r = await approveDeadlineExtension("dl-1", "org-1", "admin-1");
       expect(r.success).toBe(false);
     });
 
@@ -524,7 +527,7 @@ describe("deadline-tracking-system", () => {
         newDeadline: new Date(),
       });
       mocks.mockUpdateWhere.mockRejectedValueOnce(new Error("update failed"));
-      const r = await approveDeadlineExtension("dl-1", "admin-1");
+      const r = await approveDeadlineExtension("dl-1", "org-1", "admin-1");
       expect(r.success).toBe(false);
       expect(r.error).toContain("update failed");
     });
@@ -552,6 +555,7 @@ describe("deadline-tracking-system", () => {
 
       const newDate = new Date(Date.now() + 7 * 86400000);
       const r = await requestDeadlineExtension({
+        organizationId: "org-1",
         deadlineId: "dl-1",
         requestedBy: "user-1",
         newDate,
@@ -721,6 +725,7 @@ describe("deadline-tracking-system", () => {
       mocks.mockFindFirstDeadlines.mockResolvedValueOnce({ id: "dl-1", reminderDays: [7] });
       mocks.mockUpdateWhere.mockRejectedValueOnce(new Error("update err"));
       const r = await requestDeadlineExtension({
+        organizationId: "org-1",
         deadlineId: "dl-1",
         requestedBy: "user-1",
         newDate: new Date(),
@@ -805,6 +810,7 @@ describe("deadline-tracking-system", () => {
       mocks.mockFindFirstDeadlines.mockRejectedValueOnce("boom");
 
       const r = await requestDeadlineExtension({
+        organizationId: "org-1",
         deadlineId: "dl-1",
         requestedBy: "user-1",
         newDate: new Date(),
@@ -830,6 +836,7 @@ describe("deadline-tracking-system", () => {
       mocks.mockFindFirstDeadlines.mockResolvedValueOnce({ id: "dl-1", reminderDays: [7] });
 
       const r = await requestDeadlineExtension({
+        organizationId: "org-1",
         deadlineId: "dl-1",
         requestedBy: "user-1",
         newDate: new Date(),
@@ -845,6 +852,7 @@ describe("deadline-tracking-system", () => {
         .mockResolvedValueOnce({ id: "dl-1" }); // scheduleReminders lookup
 
       const r = await requestDeadlineExtension({
+        organizationId: "org-1",
         deadlineId: "dl-1",
         requestedBy: "user-1",
         newDate: new Date(),
@@ -860,6 +868,7 @@ describe("deadline-tracking-system", () => {
         .mockResolvedValueOnce({ id: "dl-1" }); // scheduleReminders
 
       const r = await requestDeadlineExtension({
+        organizationId: "org-1",
         deadlineId: "dl-1",
         requestedBy: "user-1",
         newDate: new Date(),

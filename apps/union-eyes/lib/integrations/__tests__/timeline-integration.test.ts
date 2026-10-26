@@ -48,7 +48,7 @@ describe('timeline-integration — addTimelineEntry', () => {
   it('appends to existing timeline and updates grievance', async () => {
     push([{ id: 'c1', timeline: [{ status: 'old', timestamp: new Date(), metadata: {} }] }]); // select
     push({}); // update
-    const r = await t.addTimelineEntry('c1', 'open' as never, 'investigating' as never, 'u1', 'steward', 'notes', {
+    const r = await t.addTimelineEntry('c1', 'org-1', 'open' as never, 'investigating' as never, 'u1', 'steward', 'notes', {
       slaCompliant: true,
       daysInState: 2,
     });
@@ -57,19 +57,19 @@ describe('timeline-integration — addTimelineEntry', () => {
   it('handles null timeline (defaults to empty history)', async () => {
     push([{ id: 'c1', timeline: null }]);
     push({});
-    expect(await t.addTimelineEntry('c1', 'open' as never, 'closed' as never, 'u1', 'admin')).toEqual({
+    expect(await t.addTimelineEntry('c1', 'org-1', 'open' as never, 'closed' as never, 'u1', 'admin')).toEqual({
       success: true,
     });
   });
   it('returns failure when grievance not found', async () => {
     push([]);
-    const r = await t.addTimelineEntry('cX', 'open' as never, 'closed' as never, 'u1', 'admin');
+    const r = await t.addTimelineEntry('cX', 'org-1', 'open' as never, 'closed' as never, 'u1', 'admin');
     expect(r.success).toBe(false);
     expect(r.error).toMatch(/not found/i);
   });
   it('returns failure on db error', async () => {
     push(new Error('write failed'));
-    const r = await t.addTimelineEntry('c1', 'open' as never, 'closed' as never, 'u1', 'admin');
+    const r = await t.addTimelineEntry('c1', 'org-1', 'open' as never, 'closed' as never, 'u1', 'admin');
     expect(r.success).toBe(false);
     expect(r.error).toBe('write failed');
   });

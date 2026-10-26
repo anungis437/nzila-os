@@ -245,7 +245,7 @@ export const assistantRequestSchema = z.object({
 })
 
 export const auditLogEntrySchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   userId: z.string().min(1),
   orgId: z.string().min(1),
   role: z.enum(Object.values(UEAssistantRoles) as [string, ...string[]]),

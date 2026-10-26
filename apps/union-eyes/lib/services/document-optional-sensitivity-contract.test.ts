@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { isDocumentVisibleByPolicy, toGovernanceLabel } from './document-governance-service';
 
 describe('unclassified optional sensitivity metadata does not authorize restricted documents', () => {
-  const context = { isOrgMember: true, isStewardPlus: false, isPrimaryOwner: false,
+  const context = { isOrgMember: true, isPrimaryOwner: false,
     hasCaseAccess: true, canViewPrivateDocuments: false, hasExplicitDocumentGrant: false };
 
   it.each(['privileged', 'highly_sensitive', 'lro_confidential'] as const)(

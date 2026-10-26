@@ -11,10 +11,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, gt, isNull, or } from 'drizzle-orm';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { icraAssessments } from '@/db/schema/icra-schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { isClaimExpired } from '@/lib/icra/claim-tokens';
 import { logger } from '@/lib/logger';
@@ -64,6 +65,42 @@ export async function POST(
 
   try {
     return await withSystemContext(async (tx) => {
+    const claimedAt = new Date();
+    // One conditional write decides the claim, so two concurrent holders of the token cannot both win.
+    const [claimed] = await tx
+      .update(icraAssessments)
+      .set({
+        claimedByUserId: userId,
+        claimedOrgId: orgId,
+        claimedAt,
+        claimToken: null,
+        claimTokenExpiresAt: null,
+      })
+      .where(
+        and(
+          eq(icraAssessments.id, assessmentId),
+          eq(icraAssessments.claimToken, claimToken),
+          isNull(icraAssessments.claimedAt),
+          or(isNull(icraAssessments.claimTokenExpiresAt), gt(icraAssessments.claimTokenExpiresAt, claimedAt)),
+        ),
+      )
+      .returning({ id: icraAssessments.id });
+
+    if (claimed) {
+      await persistAtomicAudit(tx, {
+        organizationId: orgId,
+        userId,
+        action: 'icra.assessment.claim',
+        resourceType: 'icra_assessments',
+        resourceId: assessmentId,
+        details: { claimedAt: claimedAt.toISOString() },
+      });
+
+      logger.info('[icra-claim] Assessment claimed', { assessmentId, userId, orgId });
+
+      return NextResponse.json({ ok: true, assessmentId, organizationId: orgId });
+    }
+
     const [row] = await tx
       .select({
         id: icraAssessments.id,
@@ -89,20 +126,8 @@ export async function POST(
       return NextResponse.json({ error: 'Claim token expired' }, { status: 410 });
     }
 
-    await tx
-      .update(icraAssessments)
-      .set({
-        claimedByUserId: userId,
-        claimedOrgId: orgId,
-        claimedAt: new Date(),
-        claimToken: null,
-        claimTokenExpiresAt: null,
-      })
-      .where(eq(icraAssessments.id, assessmentId));
-
-    logger.info('[icra-claim] Assessment claimed', { assessmentId, userId, orgId });
-
-    return NextResponse.json({ ok: true, assessmentId, organizationId: orgId });
+    // Lost a race with a concurrent claim that consumed the token between the write and this read.
+    return NextResponse.json({ error: 'Assessment not found or token invalid' }, { status: 404 });
     });
   } catch (err) {
     logger.error('[icra-claim] Claim failed', { assessmentId, err });

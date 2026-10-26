@@ -8,6 +8,7 @@ const m = vi.hoisted(() => ({
   updateQueue: [] as unknown[][],
   selectQueue: [] as unknown[][],
   withSystemContext: vi.fn(),
+  persistAtomicAudit: vi.fn(),
 }));
 
 function makeSelectChain(rows: unknown[]) {
@@ -36,6 +37,7 @@ const mockTx: any = {
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/db/schema/workbook-schema', () => ({ workbooks: {} }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('drizzle-orm', async (importOriginal) => {
@@ -74,6 +76,45 @@ describe('workbook/[id]/claim route', () => {
     m.auth.mockResolvedValue({ userId: 'u1' });
     m.getOrganizationIdForUser.mockResolvedValue('org_1');
     m.withSystemContext.mockImplementation((fn: (tx: any) => Promise<unknown>) => fn(mockTx));
+    m.persistAtomicAudit.mockResolvedValue(undefined);
+  });
+
+  it('records the claim audit on the same transaction, attributed to the claimant organization', async () => {
+    m.updateQueue.push([{ id: 'w1' }]);
+
+    const response = await postClaim();
+
+    expect(response.status).toBe(200);
+    expect(m.persistAtomicAudit).toHaveBeenCalledTimes(1);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      mockTx,
+      expect.objectContaining({
+        organizationId: 'org_1',
+        userId: 'u1',
+        action: 'workbook.claim',
+        resourceType: 'workbooks',
+        resourceId: 'w1',
+      }),
+    );
+  });
+
+  it('fails the claim when its audit record cannot be written', async () => {
+    m.updateQueue.push([{ id: 'w1' }]);
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
+
+    const response = await postClaim();
+
+    expect(response.status).toBe(500);
+  });
+
+  it('writes no audit when nothing was claimed', async () => {
+    m.updateQueue.push([]);
+    m.selectQueue.push([]);
+
+    const response = await postClaim();
+
+    expect(response.status).toBe(404);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('returns 401 when unauthenticated', async () => {

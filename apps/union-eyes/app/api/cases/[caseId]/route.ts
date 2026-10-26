@@ -6,9 +6,10 @@ import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
 import { sql } from 'drizzle-orm';
 import { claims } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { getCaseActor, caseReadScope, findReadableCase, requireCaseAction } from '@/lib/cases/case-authorization';
+import { getCaseActor, findReadableCase, redactCaseRow } from '@/lib/cases/case-authorization';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,9 +26,11 @@ export const GET = withApi(
     const id = params.caseId;
 
     const actor = await getCaseActor();
-    const orgFilter = sql`AND ${caseReadScope(actor, 'c')}`;
 
-    const rows = await withRLSContext(async (tx) => tx.execute(sql`
+    const found = await withRLSContext(async (tx) => {
+      const readable = await findReadableCase(tx, actor, id, false, 'case:read');
+      if (!readable) return null;
+      const rows = await tx.execute(sql`
       SELECT c.claim_id        AS "claimId",
              c.claim_number    AS "claimNumber",
              c.organization_id AS "organizationId",
@@ -67,13 +70,14 @@ export const GET = withApi(
       LEFT JOIN organization_members m
         ON m.user_id = c.member_id
        AND m.organization_id::text = c.organization_id::text
-      WHERE (c.claim_number = ${id} OR c.claim_id::text = ${id})
-        ${orgFilter}
+      WHERE c.claim_id = ${readable.claimId}::uuid AND c.organization_id = ${actor.organizationId}::uuid
       LIMIT 1
-    `));
-    const row = rows[0];
-    if (!row) throw ApiError.notFound('Case not found');
-    return row;
+    `);
+      return { row: rows[0], visibility: readable.visibility };
+    });
+    if (!found?.row) throw ApiError.notFound('Case not found');
+    // The member sees the case they filed, not the handlers' internal assessment of it.
+    return redactCaseRow(found.row, found.visibility);
   },
 );
 
@@ -99,7 +103,6 @@ export const PATCH = withApi(
     const body = (parsedBody ?? {}) as Record<string, unknown>;
 
     const actor = await getCaseActor();
-    await requireCaseAction(actor, 'case_transition', id);
     // Assignment and status updates must use the audited, validated endpoints.
     // The workbench already uses those endpoints; generic PATCH cannot bypass them.
     if ('assignedTo' in body || 'status' in body) {
@@ -120,9 +123,17 @@ export const PATCH = withApi(
     updates.updatedAt = new Date();
 
     const claimId = await withRLSContext(async (tx) => {
-      const claim = await findReadableCase(tx, actor, id, true);
+      const claim = await findReadableCase(tx, actor, id, true, 'case:transition');
       if (!claim) throw ApiError.notFound('Case');
-      await tx.update(claims).set(updates).where(eq(claims.claimId, claim.claimId));
+      await tx.update(claims).set(updates).where(and(eq(claims.claimId, claim.claimId), eq(claims.organizationId, actor.organizationId)));
+      await persistAtomicAudit(tx, {
+        organizationId: actor.organizationId,
+        userId: actor.userId,
+        action: 'case.update',
+        resourceType: 'claims',
+        resourceId: claim.claimId,
+        details: { fields: Object.keys(updates).filter((f) => f !== 'updatedAt') },
+      });
       return claim.claimId;
     });
 

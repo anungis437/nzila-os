@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   auth: vi.fn(),
   getOrganizationIdForUser: vi.fn(),
   isClaimExpired: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   logger: { info: vi.fn(), error: vi.fn() },
   selectQueue: [] as unknown[][],
   updateQueue: [] as unknown[][],
@@ -21,22 +22,33 @@ function makeSelectChain(rows: unknown[]) {
 
 const mockTx: any = {
   select: vi.fn(() => makeSelectChain((m.selectQueue.shift() ?? []) as unknown[])),
-  update: vi.fn(() => ({
-    set: vi.fn(() => ({
-      where: vi.fn(async () => undefined),
-    })),
-  })),
+  update: vi.fn(() => {
+    const chain: any = {
+      set: vi.fn(() => chain),
+      where: vi.fn(() => chain),
+      returning: vi.fn(async () => (m.updateQueue.shift() ?? []) as unknown[]),
+    };
+    return chain;
+  }),
 };
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser }));
 vi.mock('@/lib/icra/claim-tokens', () => ({ isClaimExpired: m.isClaimExpired }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: (fn: (tx: any) => Promise<unknown>) => fn(mockTx) }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/db/schema/icra-schema', () => ({ icraAssessments: {} }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
-  return { ...actual, and: vi.fn(() => 'and'), eq: vi.fn(() => 'eq') };
+  return {
+    ...actual,
+    and: vi.fn(() => 'and'),
+    eq: vi.fn(() => 'eq'),
+    gt: vi.fn(() => 'gt'),
+    isNull: vi.fn(() => 'isNull'),
+    or: vi.fn(() => 'or'),
+  };
 });
 
 async function loadRoute() {
@@ -51,6 +63,7 @@ describe('icra/[assessmentId]/claim route', () => {
     m.auth.mockResolvedValue({ userId: 'u1' });
     m.getOrganizationIdForUser.mockResolvedValue('org_1');
     m.isClaimExpired.mockReturnValue(false);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
   });
 
   it('returns 401 when unauthenticated', async () => {
@@ -106,6 +119,7 @@ describe('icra/[assessmentId]/claim route', () => {
 
   it('returns 409 when assessment is already claimed', async () => {
     const { POST } = await loadRoute();
+    m.updateQueue.push([]);
     m.selectQueue.push([{ id: 'a1', claimToken: 'valid_token_xxxx', claimedAt: new Date(), claimTokenExpiresAt: new Date() }]);
 
     const response = await POST(new NextRequest('http://localhost/api/icra/a1/claim', {
@@ -113,10 +127,12 @@ describe('icra/[assessmentId]/claim route', () => {
     }), { params: Promise.resolve({ assessmentId: 'a1' }) });
 
     expect(response.status).toBe(409);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('returns 410 when claim token is expired', async () => {
     const { POST } = await loadRoute();
+    m.updateQueue.push([]);
     m.selectQueue.push([{ id: 'a1', claimToken: 'valid_token_xxxx', claimedAt: null, claimTokenExpiresAt: new Date() }]);
     m.isClaimExpired.mockReturnValueOnce(true);
 
@@ -125,11 +141,12 @@ describe('icra/[assessmentId]/claim route', () => {
     }), { params: Promise.resolve({ assessmentId: 'a1' }) });
 
     expect(response.status).toBe(410);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
-  it('claims assessment successfully', async () => {
+  it('claims assessment successfully with the audit on the same transaction', async () => {
     const { POST } = await loadRoute();
-    m.selectQueue.push([{ id: 'a1', claimToken: 'valid_token_xxxx', claimedAt: null, claimTokenExpiresAt: new Date(Date.now() + 3600000) }]);
+    m.updateQueue.push([{ id: 'a1' }]);
 
     const response = await POST(new NextRequest('http://localhost/api/icra/a1/claim', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ claimToken: 'valid_token_xxxx' }),
@@ -140,11 +157,32 @@ describe('icra/[assessmentId]/claim route', () => {
     expect(json.ok).toBe(true);
     expect(json.organizationId).toBe('org_1');
     expect(m.logger.info).toHaveBeenCalled();
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      mockTx,
+      expect.objectContaining({
+        organizationId: 'org_1',
+        userId: 'u1',
+        action: 'icra.assessment.claim',
+        resourceType: 'icra_assessments',
+        resourceId: 'a1',
+      }),
+    );
+  });
+
+  it('fails the claim when its audit record cannot be written', async () => {
+    const { POST } = await loadRoute();
+    m.updateQueue.push([{ id: 'a1' }]);
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
+
+    const response = await POST(new NextRequest('http://localhost/api/icra/a1/claim', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ claimToken: 'valid_token_xxxx' }),
+    }), { params: Promise.resolve({ assessmentId: 'a1' }) });
+
+    expect(response.status).toBe(500);
   });
 
   it('returns 500 on database error during claim', async () => {
     const { POST } = await loadRoute();
-    m.selectQueue.push([{ id: 'a1', claimToken: 'valid_token_xxxx', claimedAt: null, claimTokenExpiresAt: new Date(Date.now() + 3600000) }]);
     mockTx.update.mockImplementationOnce(() => {
       throw new Error('db error');
     });

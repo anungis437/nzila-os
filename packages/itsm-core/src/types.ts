@@ -76,19 +76,19 @@ export type SlaTargets = z.infer<typeof slaTargetsSchema>
 // ── Ticket intake ─────────────────────────────────────────────────────────────
 
 export const createTicketInputSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   type: z.enum(TICKET_TYPES),
   priority: z.enum(PRIORITIES).default('p3_medium'),
   title: z.string().min(3).max(256),
   description: z.string().optional(),
   reportedById: z.string().min(1),
   channel: z.string().default('portal'),
-  queueId: z.string().uuid().optional(),
-  slaId: z.string().uuid().optional(),
-  contractId: z.string().uuid().optional(),
-  assetId: z.string().uuid().optional(),
+  queueId: z.guid().optional(),
+  slaId: z.guid().optional(),
+  contractId: z.guid().optional(),
+  assetId: z.guid().optional(),
   tags: z.array(z.string()).default([]),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).prefault({}),
 })
 export type CreateTicketInput = z.infer<typeof createTicketInputSchema>
 
@@ -113,15 +113,15 @@ export const ticketEventTypeValues = [
 export type TicketEventType = (typeof ticketEventTypeValues)[number]
 
 export const createTicketEventInputSchema = z.object({
-  orgId: z.string().uuid(),
-  ticketId: z.string().uuid(),
+  orgId: z.guid(),
+  ticketId: z.guid(),
   eventType: z.enum(ticketEventTypeValues),
   actorId: z.string().min(1),
   fromValue: z.string().optional(),
   toValue: z.string().optional(),
   body: z.string().optional(),
   internal: z.boolean().default(false),
-  payload: z.record(z.unknown()).default({}),
+  payload: z.record(z.string(), z.unknown()).prefault({}),
 })
 export type CreateTicketEventInput = z.infer<typeof createTicketEventInputSchema>
 
@@ -142,7 +142,7 @@ export const ASSET_TYPES = [
 export type AssetType = (typeof ASSET_TYPES)[number]
 
 export const createAssetInputSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   type: z.enum(ASSET_TYPES),
   name: z.string().min(1).max(128),
   manufacturer: z.string().optional(),
@@ -154,7 +154,7 @@ export const createAssetInputSchema = z.object({
   purchaseCost: z.string().optional(),
   location: z.string().optional(),
   tags: z.array(z.string()).default([]),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).prefault({}),
 })
 export type CreateAssetInput = z.infer<typeof createAssetInputSchema>
 
@@ -232,7 +232,7 @@ export const CLIENT_HEALTH_VALUES = ['healthy', 'needs_attention', 'at_risk', 'c
 export type ClientHealth = (typeof CLIENT_HEALTH_VALUES)[number]
 
 export const createOpsClientSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   companyName: z.string().min(1).max(128),
   contactName: z.string().optional(),
   contactEmail: z.string().email().optional(),

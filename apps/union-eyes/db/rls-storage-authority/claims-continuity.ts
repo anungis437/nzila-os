@@ -111,6 +111,7 @@ export const claimsContinuityEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "deadline_extensions",
@@ -122,6 +123,7 @@ export const claimsContinuityEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "deadline_rules",
@@ -254,6 +256,7 @@ export const claimsContinuityEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "external_insurance_claims",
@@ -408,6 +411,7 @@ export const claimsContinuityEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "wcb_claims",
@@ -430,6 +434,7 @@ export const claimsContinuityEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "workflow_executions",
@@ -441,6 +446,7 @@ export const claimsContinuityEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "arbitration_decisions",
@@ -705,6 +711,7 @@ export const claimsContinuityEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "grievance_timeline",

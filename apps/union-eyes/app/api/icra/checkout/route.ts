@@ -26,6 +26,7 @@ import {
 } from '@/lib/icra/assessment-capability';
 import { getStripeClient } from '@nzila/payments-stripe';
 import { logger } from '@/lib/logger';
+import { guardPublicIntake } from '@/lib/public-intake/guard';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -33,7 +34,7 @@ export const runtime = 'nodejs';
 // ── Validation ──────────────────────────────────────────────────────────────
 
 const bodySchema = z.object({
-  assessmentId: z.string().uuid('Invalid assessment ID'),
+  assessmentId: z.guid('Invalid assessment ID'),
   tierId: z.enum(['executive_continuity_brief', 'institutional_continuity_diagnostic']),
   locale: z.enum(['en-CA', 'fr-CA']).default('en-CA'),
 });
@@ -85,14 +86,10 @@ function buildLineItems(
 // ── Handler ─────────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  let body: any;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
-  }
+  const intake = await guardPublicIntake(request, { bucket: 'checkout' });
+  if (!intake.ok) return intake.response;
 
-  const parse = bodySchema.safeParse(body);
+  const parse = bodySchema.safeParse(intake.json);
   if (!parse.success) {
     return NextResponse.json(
       { error: 'Validation failed', details: parse.error.flatten().fieldErrors },

@@ -19,11 +19,12 @@ import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders as _createRateLimit
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { enforceAISafety } from '@nzila/policies';
 import { auditAIInvocation } from '@/lib/audit-logger';
+import { operationAuditResponse } from '@/lib/audit/operation-audit';
 
 const copilotSchema = z.object({
   actionType: z.enum(['timeline_summary', 'suggest_action', 'draft_response', 'explain_clause', 'risk_brief', 'custom_query']),
   relatedEntityType: z.string().optional(),
-  relatedEntityId: z.string().uuid().optional(),
+  relatedEntityId: z.guid().optional(),
   query: z.string().max(5000).optional(),
 });
 
@@ -76,7 +77,9 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
         timestamp: new Date().toISOString(),
         auditRefId,
       });
-  } catch (_error) {
+  } catch (error) {
+    const refused = operationAuditResponse(error);
+    if (refused) return standardErrorResponse(ErrorCode.CONFLICT, refused.body.error.message);
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Copilot query failed',

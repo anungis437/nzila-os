@@ -21,6 +21,12 @@ export interface ProofRequestHeaders {
 }
 
 export interface ProofEnvironment {
+  /**
+   * The application environment this image was BUILT for (NEXT_PUBLIC_APP_ENV, inlined at build time). Runtime
+   * variables can be misconfigured on a running container; a production build carries "production" and can never
+   * answer a proof request, whatever its runtime settings say.
+   */
+  BUILD_APP_ENV?: string;
   TARGET_ENVIRONMENT?: string;
   STAGING_PROOFS_ENABLED?: string;
   UNION_EYES_RUNTIME_ID?: string;
@@ -32,7 +38,8 @@ export type ProofAuthorization =
   | { authorized: false };
 
 export function isAuthorizedStagingProofEnvironment(env: ProofEnvironment): boolean {
-  return env.TARGET_ENVIRONMENT === 'staging'
+  return env.BUILD_APP_ENV === 'staging'
+    && env.TARGET_ENVIRONMENT === 'staging'
     && env.STAGING_PROOFS_ENABLED === 'true'
     && env.UNION_EYES_RUNTIME_ID === 'union-eyes-staging'
     && Boolean(env.STAGING_PROOF_SECRET);

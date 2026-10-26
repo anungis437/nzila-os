@@ -38,8 +38,8 @@ export type RecipientSnapshot = z.infer<typeof RecipientSnapshotSchema>;
 // ---------------------------------------------------------------------------
 export const ScheduleRemindersInputSchema = z.object({
   sourceTable: z.enum(['grievance_deadlines', 'claim_deadlines']),
-  sourceDeadlineId: z.string().uuid(),
-  organizationId: z.string().uuid(),
+  sourceDeadlineId: z.guid(),
+  organizationId: z.guid(),
   dueDate: z.date(),
   timezone: z.string().min(3).max(64).default('UTC'),
   reminderOffsetsInDays: z.array(z.number().int().min(0).max(365)).min(1),

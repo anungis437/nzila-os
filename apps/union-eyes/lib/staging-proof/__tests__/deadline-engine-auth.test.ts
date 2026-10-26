@@ -10,6 +10,7 @@ const NOW = new Date('2026-07-21T12:00:00.000Z');
 const TIMESTAMP = NOW.toISOString();
 const NONCE = 'proof_nonce_abcdefghijklmnopqrstuvwxyz';
 const ENV = {
+  BUILD_APP_ENV: 'staging',
   TARGET_ENVIRONMENT: 'staging',
   STAGING_PROOFS_ENABLED: 'true',
   UNION_EYES_RUNTIME_ID: 'union-eyes-staging',
@@ -38,6 +39,10 @@ describe('deadline-engine staging proof authorization', () => {
       `v1\n2026-07-21T12:00:00.000Z\n${NONCE}\nschedule-basic`,
     );
   });
+  it.each(['production', 'pilot', 'demo', '', 'unknown', undefined])('rejects an image built for %s, whatever its runtime settings say', (built) => {
+    expect(request({ env: { ...ENV, BUILD_APP_ENV: built } }).authorized).toBe(false);
+  });
+
   it.each(['production', 'pilot', 'demo', '', 'unknown'])('rejects %s environment identity', (environment) => {
     expect(request({ env: { ...ENV, TARGET_ENVIRONMENT: environment } }).authorized).toBe(false);
   });

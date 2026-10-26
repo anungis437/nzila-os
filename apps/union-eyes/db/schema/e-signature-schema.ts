@@ -112,8 +112,12 @@ export const signatureDocuments = pgTable(
       .references(() => profiles.userId),
     sentAt: timestamp("sent_at"),
     
-    // Completion
+    // Completion. completedAt is the event time a provider reported, or the platform's own time for a document signed
+    // entirely inside the platform; a provider's status received now is never stamped as a completion time.
     completedAt: timestamp("completed_at"),
+    // The event time the provider itself reported (immutable once set), and when this system last received a status.
+    providerAcknowledgedAt: timestamp("provider_acknowledged_at", { withTimezone: true }),
+    providerStatusObservedAt: timestamp("provider_status_observed_at", { withTimezone: true }),
     voidedAt: timestamp("voided_at"),
     voidedBy: text("voided_by"),
     voidReason: text("void_reason"),

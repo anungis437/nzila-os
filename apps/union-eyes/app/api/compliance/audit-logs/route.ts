@@ -2,8 +2,10 @@
  * GET POST /api/compliance/audit-logs
  * Compliance audit logs backed by PostgreSQL.
  */
-import { withApi, z } from '@/lib/api/framework';
+import { withApi, ApiError, z } from '@/lib/api/framework';
 import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { auditLogs } from '@/db/schema/audit-security-schema';
 import { eq, desc } from 'drizzle-orm';
 
@@ -28,22 +30,32 @@ export const POST = withApi(
     body: z.object({
       action: z.string().min(1).max(100),
       resourceType: z.string().min(1).max(50),
-      resourceId: z.string().uuid().optional(),
+      resourceId: z.guid().optional(),
       severity: z.enum(['debug', 'info', 'warning', 'error', 'critical']).default('info'),
       outcome: z.enum(['success', 'failure', 'error']).default('success'),
-      metadata: z.record(z.unknown()).optional(),
+      metadata: z.record(z.string(), z.unknown()).optional(),
     }),
   },
   async ({ body, organizationId, userId }) => {
-    const [row] = await db
-      .insert(auditLogs)
-      .values({
-        ...body,
-        organizationId: organizationId!,
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    // A manual entry is recorded as exactly that: attributed to the administrator who wrote it, with the declared
+    // fields kept as details, so it cannot pass for a system-generated record of another action.
+    return withRLSContext({ organizationId }, async (tx) => {
+      await persistAtomicAudit(tx, {
+        organizationId,
         userId,
-      })
-      .returning();
-    return row;
+        action: 'compliance.manual_entry',
+        resourceType: body.resourceType,
+        resourceId: body.resourceId,
+        details: {
+          ...(body.metadata ?? {}),
+          declaredAction: body.action,
+          declaredSeverity: body.severity,
+          declaredOutcome: body.outcome,
+        },
+      });
+      return { recorded: true };
+    });
   },
 );
 

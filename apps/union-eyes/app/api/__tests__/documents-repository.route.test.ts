@@ -7,6 +7,7 @@ const TEST_USER_ID = 'user_test_001';
 const m = vi.hoisted(() => {
   const state = {
     selectQueue: [] as unknown[][],
+    blobInUse: false,
   };
 
   const nextSelect = () => Promise.resolve((state.selectQueue.shift() ?? []) as unknown[]);
@@ -17,6 +18,7 @@ const m = vi.hoisted(() => {
       leftJoin: vi.fn(() => chain),
       where: vi.fn(() => chain),
       orderBy: vi.fn(() => chain),
+      limit: vi.fn(() => chain),
       then: (resolve: (value: unknown[]) => unknown) => nextSelect().then(resolve),
     };
     return chain;
@@ -31,7 +33,7 @@ const m = vi.hoisted(() => {
     normalizeDocumentTitle: vi.fn(),
     toGovernanceLabel: vi.fn(),
     resolveStoredBlob: vi.fn(),
-    auditCaseMutation: vi.fn(),
+    persistAtomicAudit: vi.fn(),
     withRLSContext: vi.fn(),
     queueSelect: (...results: unknown[][]) => state.selectQueue.push(...results),
     resetQueues: () => {
@@ -66,11 +68,12 @@ vi.mock('@/lib/services/document-governance-service', () => ({
 }));
 vi.mock('@/lib/services/document-blob-integrity-service', () => ({
   resolveStoredBlob: m.resolveStoredBlob,
+  storedBlobFailure: (error: { code?: string; message?: string }) => ({
+    status: error?.code === 'CONTENT_HASH_MISMATCH' ? 'conflict' : 'validation',
+    message: error?.message ?? 'Invalid storage payload',
+  }),
 }));
-vi.mock('@/lib/audited-case-mutations', () => ({
-  auditCaseMutation: m.auditCaseMutation,
-  CaseAuditEvent: { CASE_ATTACHMENT_UPLOADED: 'CASE_ATTACHMENT_UPLOADED' },
-}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: m.withRLSContext,
 }));
@@ -83,12 +86,14 @@ describe('documents/repository route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.resetQueues();
+    m.state.blobInUse = false;
     m.requireEntitlement.mockResolvedValue(undefined);
     m.hasMinRole.mockResolvedValue(true);
     m.getEffectiveCaseAccess.mockResolvedValue({
       isPrimaryOwner: true,
       canViewCase: true,
       canViewPrivateDocuments: true,
+      canUploadDocuments: true,
     });
     m.toGovernanceLabel.mockImplementation(({ privacyLabel }: { privacyLabel?: string }) => privacyLabel ?? 'team_confidential');
     m.isDocumentVisibleByPolicy.mockReturnValue(true);
@@ -98,11 +103,12 @@ describe('documents/repository route', () => {
       blobPath: 'org/documents/test.pdf',
       contentHash: 'sha256:test',
     });
-    m.auditCaseMutation.mockResolvedValue(undefined);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
 
     m.withRLSContext.mockImplementation(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => {
       let insertCall = 0;
       const tx = {
+        select: vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => m.state.blobInUse ? [{ id: 'v-other' }] : []) })) })) })),
         insert: vi.fn(() => ({
           values: vi.fn(() => {
             insertCall += 1;
@@ -110,6 +116,9 @@ describe('documents/repository route', () => {
               return {
                 returning: vi.fn(async () => [{ id: 'doc-1', privacyLabel: 'team_confidential', documentType: 'policy' }]),
               };
+            }
+            if (insertCall === 2) {
+              return { returning: vi.fn(async () => [{ id: 'version-1' }]) };
             }
             return Promise.resolve(undefined);
           }),
@@ -131,7 +140,7 @@ describe('documents/repository route', () => {
 
   it('returns only visible documents after policy checks', async () => {
     const { GET } = await loadRoute();
-    m.hasMinRole.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+    m.hasMinRole.mockResolvedValueOnce(true);
     m.queueSelect([
       {
         id: 'doc-1',
@@ -169,6 +178,10 @@ describe('documents/repository route', () => {
     expect(payload.success).toBe(true);
     expect(payload.data).toHaveLength(1);
     expect(payload.data[0]).toMatchObject({ id: 'doc-1', title: 'Doc One' });
+    // Role seniority is not an input to document visibility.
+    for (const call of m.isDocumentVisibleByPolicy.mock.calls) {
+      expect(call[1]).not.toHaveProperty('isStewardPlus');
+    }
   });
 
   it('returns forbidden on POST when caller lacks upload role', async () => {
@@ -218,6 +231,33 @@ describe('documents/repository route', () => {
     await expect(response.json()).resolves.toMatchObject({ code: 'VALIDATION_ERROR', message: 'Blob does not exist' });
   });
 
+  it('answers 409 and creates nothing when the stored file is already attached to another document version', async () => {
+    const { POST } = await loadRoute();
+    m.state.blobInUse = true;
+    const response = await POST(new NextRequest('http://localhost/api/documents/repository', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Doc One', filename: 'doc1.pdf', blobPath: 'documents/x/doc1.pdf', documentType: 'policy', mimeType: 'application/pdf', privacyLabel: 'team_confidential',
+      }),
+    }));
+    expect(response.status).toBe(409);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('rejects a claimed content hash that is not a SHA-256 digest before touching storage', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/documents/repository', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Doc One', filename: 'doc1.pdf', blobPath: 'documents/x/doc1.pdf', contentHash: 'manual:123', documentType: 'policy', mimeType: 'application/pdf', privacyLabel: 'team_confidential',
+      }),
+    }));
+    expect(response.status).toBe(400);
+    expect(m.resolveStoredBlob).not.toHaveBeenCalled();
+  });
+
   it('creates linked grievance documents and emits case audit event', async () => {
     const { POST } = await loadRoute();
 
@@ -240,9 +280,60 @@ describe('documents/repository route', () => {
     expect(response.status).toBe(200);
     expect(payload.success).toBe(true);
     expect(payload.data).toMatchObject({ id: 'doc-1' });
-    expect(m.auditCaseMutation).toHaveBeenCalledWith(expect.objectContaining({
-      caseId: '00000000-0000-0000-0000-0000000000aa',
-      action: 'create',
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      action: 'document.upload',
+      resourceId: 'doc-1',
+      details: expect.objectContaining({ linkedEntityType: 'grievance', linkedEntityId: '00000000-0000-0000-0000-0000000000aa' }),
     }));
+  });
+
+  it('does not file a document against a case the kernel does not let the principal add evidence to', async () => {
+    const { POST } = await loadRoute();
+    m.getEffectiveCaseAccess.mockResolvedValue({ isPrimaryOwner: false, canViewCase: true, canViewPrivateDocuments: false, canUploadDocuments: false });
+    const response = await POST(new NextRequest('http://localhost/api/documents/repository', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Doc One', filename: 'doc1.pdf', fileUrl: 'https://blob.example/doc1.pdf', documentType: 'policy', mimeType: 'application/pdf',
+        privacyLabel: 'team_confidential', linkedEntityType: 'grievance', linkedEntityId: '00000000-0000-0000-0000-0000000000aa',
+      }),
+    }));
+    expect(response.status).toBe(404);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.resolveStoredBlob).not.toHaveBeenCalled();
+  });
+
+  const CASE_ID = '00000000-0000-0000-0000-0000000000aa';
+  const filed = (linkedEntityType: string, linkedEntityId: string) =>
+    new NextRequest('http://localhost/api/documents/repository', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Doc One', filename: 'doc1.pdf', fileUrl: 'https://blob.example/doc1.pdf', documentType: 'policy', mimeType: 'application/pdf',
+        privacyLabel: 'team_confidential', linkedEntityType, linkedEntityId,
+      }),
+    });
+
+  it('applies the case decision when another link type names a case of the organization', async () => {
+    const { POST } = await loadRoute();
+    m.getEffectiveCaseAccess.mockResolvedValue({ isPrimaryOwner: false, canViewCase: true, canViewPrivateDocuments: false, canUploadDocuments: false });
+    for (const type of ['member', 'other', 'policy_library', 'template_library', 'collective_agreement']) {
+      m.queueSelect([{ id: CASE_ID }]);
+      const response = await POST(filed(type, CASE_ID));
+      expect(response.status, type).toBe(404);
+    }
+    expect(m.getEffectiveCaseAccess).toHaveBeenCalledWith({ organizationId: TEST_ORG_ID, grievanceId: CASE_ID, userId: TEST_USER_ID });
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.resolveStoredBlob).not.toHaveBeenCalled();
+  });
+
+  it('files under another link type when the id is not a case, or when the principal may add evidence to the case', async () => {
+    const { POST } = await loadRoute();
+    m.queueSelect([]);
+    expect((await POST(filed('policy_library', '00000000-0000-0000-0000-0000000000bb'))).status).toBe(200);
+    expect(m.getEffectiveCaseAccess).not.toHaveBeenCalled();
+    m.queueSelect([{ id: CASE_ID }]);
+    expect((await POST(filed('other', CASE_ID))).status).toBe(200);
+    expect(m.getEffectiveCaseAccess).toHaveBeenCalledTimes(1);
   });
 });

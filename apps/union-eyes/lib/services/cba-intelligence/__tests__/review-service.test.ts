@@ -33,6 +33,7 @@ function makeUpdateChain(result: any) {
   const chain: Record<string, unknown> = {
     set: vi.fn(() => chain),
     where: vi.fn(() => chain),
+    returning: vi.fn(() => Promise.resolve(result)),
   };
   chain.then = (resolve: (value: any) => unknown) => Promise.resolve(resolve(result));
   return chain;
@@ -87,7 +88,7 @@ describe("review-service", () => {
   it("submits review and writes audit decision", async () => {
     mocks.selectQueue.push([{ id: "f1", reviewStatus: "pending_review" }]);
     mocks.insertQueue.push([{ id: "d1", decision: "approved" }]);
-    mocks.updateQueue.push([]);
+    mocks.updateQueue.push([{ id: "f1" }]);
     const { submitReview } = await import("../review-service");
     const result = await submitReview({
       targetType: "finding",
@@ -101,10 +102,20 @@ describe("review-service", () => {
     expect(mocks.mockLoggerInfo).toHaveBeenCalled();
   });
 
+  it("does not overwrite a status that changed after it was read", async () => {
+    mocks.selectQueue.push([{ id: "f1", reviewStatus: "pending_review" }]);
+    mocks.insertQueue.push([{ id: "d1", decision: "approved" }]);
+    mocks.updateQueue.push([]);
+    const { submitReview } = await import("../review-service");
+    await expect(
+      submitReview({ targetType: "finding", targetId: "f1", decision: "approved", reviewerId: "u1", reviewerRole: "steward" }),
+    ).rejects.toThrow("Review target changed concurrently");
+  });
+
   it("defaults previousStatus to pending_review when missing", async () => {
     mocks.selectQueue.push([{ id: "f2", reviewStatus: null }]);
     mocks.insertQueue.push([{ id: "d3", decision: "approved" }]);
-    mocks.updateQueue.push([]);
+    mocks.updateQueue.push([{ id: "f1" }]);
     const { submitReview } = await import("../review-service");
     await expect(
       submitReview({ targetType: "finding", targetId: "f2", decision: "approved", reviewerId: "u1", reviewerRole: "steward" }),
@@ -114,7 +125,7 @@ describe("review-service", () => {
   it("flags followup using system defaults", async () => {
     mocks.selectQueue.push([{ id: "c1", reviewStatus: "pending_review" }]);
     mocks.insertQueue.push([{ id: "d2", decision: "needs_followup" }]);
-    mocks.updateQueue.push([]);
+    mocks.updateQueue.push([{ id: "f1" }]);
     const { flagForFollowupReview } = await import("../review-service");
     const result = await flagForFollowupReview({ targetType: "clause", targetId: "c1", reason: "low confidence" });
     expect(result.decision).toBe("needs_followup");

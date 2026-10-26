@@ -15,7 +15,7 @@ import { z } from 'zod'
 import { requireOrgAccess } from '@/lib/api-guards'
 
 const VerifyChainSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   chainType: z.enum(['audit', 'ledger']),
 })
 

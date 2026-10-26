@@ -21,7 +21,13 @@ const m = vi.hoisted(() => ({
     debug: vi.fn(),
   },
   eventEmit: vi.fn(),
+  requireCaseFilingCapacity: vi.fn(),
   selectClaimRows: [] as unknown[][],
+}));
+
+vi.mock('@/lib/cases/case-authorization', async (original) => ({
+  ...(await original<typeof import('@/lib/cases/case-authorization')>()),
+  requireCaseFilingCapacity: m.requireCaseFilingCapacity,
 }));
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
@@ -82,11 +88,12 @@ describe('cases/intake route', () => {
     m.auth.mockResolvedValue({ userId: 'user_1' });
     m.getOrganizationIdForUser.mockResolvedValue('org_1');
     m.requireEntitlement.mockResolvedValue(undefined);
+    m.requireCaseFilingCapacity.mockResolvedValue(undefined);
     m.getCaseTypeById.mockReturnValue({ defaultSeverity: 'moderate' });
     m.validateIntakeRequest.mockReturnValue({
       success: true,
       data: {
-        memberId: 'member_1',
+        memberId: 'user_1',
         caseType: 'discipline',
         incidentDate: '2026-01-01',
         title: 'Discipline concern title',
@@ -207,6 +214,8 @@ describe('cases/intake route', () => {
   it('normalizes only the verified native Entra actor to its platform id before every write and proof', async () => {
     m.canonical.mockReturnValue(true);
     m.auth.mockResolvedValue({ userId: 'platform-uuid', identityProvider: 'entra', providerSubject: 'tenant:member_1' });
+    // The client sends its verified Entra object id rather than the platform id.
+    m.validateIntakeRequest().data.memberId = 'member_1';
     const { POST } = await loadRoute();
     const response = await POST(new Request('http://localhost/api/cases/intake', { method: 'POST', body: '{}' }));
     expect(response.status).toBe(201);
@@ -236,11 +245,39 @@ describe('cases/intake route', () => {
 
   it('accepts the platform self id and fails closed when canonical proof persistence fails', async () => {
     m.canonical.mockReturnValue(true);
-    m.auth.mockResolvedValue({ userId: 'member_1' });
+    m.auth.mockResolvedValue({ userId: 'user_1' });
     m.enforceDecision.mockRejectedValueOnce(new Error('audit unavailable'));
     const { POST } = await loadRoute();
     const response = await POST(new Request('http://localhost/api/cases/intake', { method: 'POST', body: '{}' }));
     expect(response.status).toBe(500);
     expect(m.createClaim).not.toHaveBeenCalled();
+  });
+
+  it('rejects a caller-supplied member id in every deployment mode, not only canonical', async () => {
+    m.canonical.mockReturnValue(false);
+    m.auth.mockResolvedValue({ userId: 'user_1' });
+    m.validateIntakeRequest().data.memberId = 'someone-else';
+    const { POST } = await loadRoute();
+    const response = await POST(new Request('http://localhost/api/cases/intake', { method: 'POST', body: '{}' }));
+    expect(response.status).toBe(403);
+    expect((await response.json()).error).toBe('MEMBER_IDENTITY_MISMATCH');
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.enforceDecision).not.toHaveBeenCalled();
+    expect(m.createClaim).not.toHaveBeenCalled();
+    expect(m.auditDataMutation).not.toHaveBeenCalled();
+  });
+
+  it('files nothing when the canonical membership is refused member filing capacity', async () => {
+    const { ApiError } = await import('@/lib/api/errors');
+    m.selectClaimRows.push([]);
+    m.requireCaseFilingCapacity.mockRejectedValueOnce(ApiError.forbidden());
+    const { POST } = await loadRoute();
+    const response = await POST(new Request('http://localhost/api/cases/intake', { method: 'POST', body: '{}' }));
+    expect(response.status).toBe(403);
+    expect((await response.json()).error).toBe('FORBIDDEN');
+    expect(m.requireCaseFilingCapacity).toHaveBeenCalledWith(expect.anything(), { userId: 'user_1', organizationId: 'org_1' }, 'member');
+    expect(m.createClaim).not.toHaveBeenCalled();
+    expect(m.auditDataMutation).not.toHaveBeenCalled();
+    expect(m.eventEmit).not.toHaveBeenCalled();
   });
 });

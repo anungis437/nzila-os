@@ -1,0 +1,51 @@
+{
+  "mode": "untrusted-tls",
+  "nodeEnvironment": "production",
+  "sourceDigest": "0e7d048a2c0ccbe801210531a126e0913a5f368d93a8c23179f71715440c4847",
+  "exitCode": 0,
+  "sdkMocked": false,
+  "certificateValidationDisabled": false,
+  "fallbackKeyPresent": false,
+  "productionCustodyProvisioning": "NOT_QUALIFIED_BY_LOCAL_FIXTURE",
+  "observations": {
+    "identityAccepted": 0,
+    "identityDenied": 0,
+    "challenges": 0,
+    "keysAccepted": 0,
+    "keysDenied": 0,
+    "wrapsAccepted": 0,
+    "unwrapsAccepted": 0,
+    "rotationsAccepted": 0
+  },
+  "networkObservations": [
+    {
+      "pid": 43752,
+      "transport": "PIPE",
+      "targetDigest": "eb292fbe7b63546d93980f03d8183bb7e1752d3d5729e4435631f890e736ce1d",
+      "targetClass": "NON_LOOPBACK",
+      "port": null,
+      "allowed": false
+    },
+    {
+      "pid": 43752,
+      "transport": "TCP",
+      "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
+      "targetClass": "LOOPBACK",
+      "port": 60092,
+      "allowed": true
+    },
+    {
+      "pid": 43752,
+      "transport": "DNS_LOOKUP",
+      "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
+      "targetClass": "LOOPBACK",
+      "port": null,
+      "allowed": true
+    }
+  ],
+  "cleanup": {
+    "ownedIdentityExited": true,
+    "ownedVaultExited": true,
+    "ownedStateRemoved": true
+  }
+}

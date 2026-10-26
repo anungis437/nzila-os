@@ -5,10 +5,10 @@ import { getNavigationForExperience, getRoleLandingPath } from './role-experienc
 
 describe('getRoleLandingPath', () => {
   it.each([
-    [UserRole.MEMBER, '/dashboard/workspace'],
+    [UserRole.MEMBER, '/dashboard'],
     [UserRole.STEWARD, '/dashboard/workbench'],
-    [UserRole.COO, '/dashboard/intelligence'],
-    [UserRole.OFFICER, '/dashboard/governance'],
+    [UserRole.COO, '/dashboard/executive'],
+    [UserRole.OFFICER, '/dashboard/executive'],
     [UserRole.ADMIN, '/dashboard/admin/organizations'],
   ])('maps %s to a real dashboard landing route', (role, expected) => {
     expect(getRoleLandingPath(role)).toBe(expected);

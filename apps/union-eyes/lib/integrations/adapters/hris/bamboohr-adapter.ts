@@ -237,9 +237,7 @@ export class BambooHRAdapter extends BaseIntegration {
 
           if (existing) {
             // Update existing employee
-            await db
-              .update(externalEmployees)
-              .set({
+            const employeeUpdate = {
                 employeeId: bambooEmployee.employeeNumber,
                 firstName: bambooEmployee.firstName,
                 lastName: bambooEmployee.lastName,
@@ -254,8 +252,11 @@ export class BambooHRAdapter extends BaseIntegration {
                 supervisorName: bambooEmployee.supervisor,
                 lastSyncedAt: new Date(),
                 updatedAt: new Date(),
-              })
-              .where(eq(externalEmployees.id, existing.id));
+              };
+            await db
+              .update(externalEmployees)
+              .set(employeeUpdate)
+              .where(and(eq(externalEmployees.id, existing.id), eq(externalEmployees.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             // Create new employee
@@ -331,7 +332,7 @@ export class BambooHRAdapter extends BaseIntegration {
                 lastSyncedAt: new Date(),
                 updatedAt: new Date(),
               })
-              .where(eq(externalDepartments.id, existing.id));
+              .where(and(eq(externalDepartments.id, existing.id), eq(externalDepartments.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalDepartments).values({

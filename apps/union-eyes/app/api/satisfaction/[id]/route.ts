@@ -3,14 +3,25 @@
  * GET  /api/satisfaction/[id] — get survey details
  * POST /api/satisfaction/[id] — submit ratings
  */
-import { withApi, z } from '@/lib/api/framework';
+import { withApi, ApiError, z } from '@/lib/api/framework';
 import {
-  getSatisfactionSurvey,
+  getOwnSatisfactionSurvey,
   submitSatisfactionRatings,
   declineSurvey,
 } from '@/lib/services/satisfaction-service';
 
 export const dynamic = 'force-dynamic';
+
+// The service reports its refusals as plain errors; they are answered as the right client errors, not as a failure.
+function surveyRefusal(error: unknown): never {
+  const message = error instanceof Error ? error.message : '';
+  if (message === 'Survey not found') throw ApiError.notFound('Satisfaction survey');
+  if (message.startsWith('Not authorized')) throw ApiError.notFound('Satisfaction survey');
+  if (message === 'Survey already completed' || message === 'Survey can no longer be declined') {
+    throw ApiError.conflict(message);
+  }
+  throw error;
+}
 
 export const GET = withApi(
   {
@@ -18,13 +29,13 @@ export const GET = withApi(
     openapi: {
       tags: ['Satisfaction'],
       summary: 'Get satisfaction survey',
-      description: 'Returns a single satisfaction survey with its details.',
+      description: 'Returns one of the caller\u2019s own satisfaction surveys.',
     },
   },
-  async ({ params }) => {
-    const survey = await getSatisfactionSurvey(params.id);
+  async ({ params, userId, organizationId }) => {
+    if (!userId || !organizationId) throw ApiError.badRequest('Organization context required');
+    const survey = await getOwnSatisfactionSurvey(params.id, userId, organizationId);
     if (!survey) {
-      const { ApiError } = await import('@/lib/api/errors');
       throw ApiError.notFound('Satisfaction survey');
     }
     return survey;
@@ -52,9 +63,10 @@ export const POST = withApi(
       description: 'Submit ratings for a satisfaction survey or decline to participate.',
     },
   },
-  async ({ params, body, userId }) => {
+  async ({ params, body, userId, organizationId }) => {
+    if (!userId || !organizationId) throw ApiError.badRequest('Organization context required');
     if (body.action === 'decline') {
-      return await declineSurvey(params.id, userId!);
+      return await declineSurvey(params.id, userId, organizationId).catch(surveyRefusal);
     }
 
     // Validate all ratings are present for submission
@@ -67,11 +79,10 @@ export const POST = withApi(
       body.outcomeRating,
     ];
     if (required.some((r) => r === undefined || r === null)) {
-      const { ApiError } = await import('@/lib/api/errors');
       throw ApiError.badRequest('All six ratings are required when submitting');
     }
 
-    return await submitSatisfactionRatings(params.id, userId!, {
+    return await submitSatisfactionRatings(params.id, userId, {
       communicationRating: body.communicationRating!,
       responsivenessRating: body.responsivenessRating!,
       knowledgeRating: body.knowledgeRating!,
@@ -81,6 +92,6 @@ export const POST = withApi(
       feedback: body.feedback,
       wouldRecommend: body.wouldRecommend,
       isAnonymous: body.isAnonymous,
-    });
+    }, organizationId).catch(surveyRefusal);
   }
 );

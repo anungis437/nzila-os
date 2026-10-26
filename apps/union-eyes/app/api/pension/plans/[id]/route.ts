@@ -1,4 +1,7 @@
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { PENSION_ADMIN_ROLES } from '@/lib/pension/pension-authority';
 import { db } from '@/db/db';
 import { pensionPlans } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
@@ -33,32 +36,57 @@ export const GET = withApi(
 
 export const PATCH = withApi(
   {
-    auth: { required: true, minRole: 'steward' },
+    auth: { required: true, roles: PENSION_ADMIN_ROLES },
     openapi: { tags: ['Pension'], summary: 'Update pension plan', description: 'Update an existing pension plan' },
   },
-  async ({ params, body, organizationId }) => {
+  async ({ params, body, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const id = params.id;
-    const [plan] = await db
-      .update(pensionPlans)
-      .set({ ...updatePlanSchema.parse(body), updatedAt: new Date() })
-      .where(and(eq(pensionPlans.id, id), eq(pensionPlans.organizationId, organizationId!)))
-      .returning();
-    return plan ?? null;
+    const changes = updatePlanSchema.parse(body);
+    return withRLSContext({ organizationId }, async (tx) => {
+      const [plan] = await tx
+        .update(pensionPlans)
+        .set({ ...changes, updatedAt: new Date() })
+        .where(and(eq(pensionPlans.id, id), eq(pensionPlans.organizationId, organizationId)))
+        .returning();
+      if (!plan) throw ApiError.notFound('Pension plan');
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'pension.plan.update',
+        resourceType: 'pension_plans',
+        resourceId: id,
+        details: { fields: Object.keys(changes), status: changes.status },
+      });
+      return plan;
+    });
   },
 );
 
 export const DELETE = withApi(
   {
-    auth: { required: true, minRole: 'steward' },
+    auth: { required: true, roles: PENSION_ADMIN_ROLES },
     openapi: { tags: ['Pension'], summary: 'Delete pension plan', description: 'Delete a pension plan' },
   },
-  async ({ params, organizationId }) => {
+  async ({ params, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const id = params.id;
-    const [plan] = await db
-      .delete(pensionPlans)
-      .where(and(eq(pensionPlans.id, id), eq(pensionPlans.organizationId, organizationId!)))
-      .returning();
-    return plan ?? null;
+    return withRLSContext({ organizationId }, async (tx) => {
+      const [plan] = await tx
+        .delete(pensionPlans)
+        .where(and(eq(pensionPlans.id, id), eq(pensionPlans.organizationId, organizationId)))
+        .returning();
+      if (!plan) throw ApiError.notFound('Pension plan');
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'pension.plan.delete',
+        resourceType: 'pension_plans',
+        resourceId: id,
+        details: { planName: plan.planName },
+      });
+      return plan;
+    });
   },
 );
 

@@ -2,6 +2,7 @@ import { createHash, randomBytes } from 'node:crypto'
 import { and, asc, desc, eq, sql } from 'drizzle-orm'
 import { authOrganizationUsers, authUserSessions, authUsers } from '@nzila/db/schema'
 import { authDb, withAuthContext } from './auth-db'
+import { AUTH_BRIDGE_PURPOSE } from '@nzila/db/auth-storage-authority'
 import { SESSION_COOKIE_NAME, validateSession, type SessionData } from './password/session'
 
 export class AuthOrgBindingError extends Error {
@@ -174,16 +175,11 @@ async function withResolvedOrgBinding<T>(
       if (!user || !membership) throw new AuthOrgBindingError('MEMBERSHIP_REQUIRED')
       if (options.requiredRoles && !options.requiredRoles.includes(membership.role))
         throw new AuthOrgBindingError('ROLE_REQUIRED')
-      if (session && cookie)
-        return {
-          userId,
-          organizationId: membership.organizationId,
-          role: membership.role,
-          isSystemAdmin: user.isSystemAdmin === true,
-          sessionToken: cookie,
-          expiresAt: session.expiresAt,
-          authority: 'pg-session',
-        }
+      // The caller's own session cookie is a long-lived bearer: it is validated above and then never forwarded to
+      // PostgreSQL. Every binding, whatever authenticated the principal, carries a 30-second single-purpose token that
+      // is revoked when the callback ends. `authority` records how the principal was authenticated, not what is sent.
+      const authority: AuthenticatedOrgBinding['authority'] =
+        session && cookie ? 'pg-session' : 'verified-provider-bridge'
       const token = randomBytes(32).toString('base64url')
       const hash = createHash('sha256').update(token).digest('hex')
       const [created] = await authDb
@@ -196,7 +192,13 @@ async function withResolvedOrgBinding<T>(
           createdAt: sql`statement_timestamp()`,
           expiresAt: sql`statement_timestamp()+interval '30 seconds'`,
           isActive: true,
-          deviceInfo: { purpose: 'business-org-binding', provider: actor.identityProvider },
+          // The bridge is a request-scoped child of the validated parent session. The business predicate
+          // re-reads the parent on every statement, so revoking it ends the bridge's authority at once.
+          deviceInfo: {
+            purpose: AUTH_BRIDGE_PURPOSE,
+            provider: actor.identityProvider,
+            ...(session && cookie ? { parentSessionId: session.sessionId } : {}),
+          },
         })
         .returning({ expiresAt: authUserSessions.expiresAt })
       if (!created) throw new Error('Canonical business session authority was not created')
@@ -207,7 +209,7 @@ async function withResolvedOrgBinding<T>(
         isSystemAdmin: user.isSystemAdmin === true,
         sessionToken: token,
         expiresAt: created.expiresAt,
-        authority: 'verified-provider-bridge',
+        authority,
       }
     },
   )
@@ -220,7 +222,7 @@ async function withResolvedOrgBinding<T>(
     callbackError = error
     throw error
   } finally {
-    if (binding.authority === 'verified-provider-bridge') {
+    {
       const hash = createHash('sha256').update(binding.sessionToken).digest('hex')
       try {
         await withAuthContext({ phase: 'identity', userId }, () =>

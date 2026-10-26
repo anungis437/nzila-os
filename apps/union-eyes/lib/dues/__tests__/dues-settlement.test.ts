@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { PgDialect } from 'drizzle-orm/pg-core'
 
 const { audit } = vi.hoisted(() => ({ audit: vi.fn(async () => true) }))
-vi.mock('@/lib/audit/mandatory-audit', () => ({ appendMandatoryAudit: audit }))
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: audit }))
 
 import {
   DuesSettlementError,

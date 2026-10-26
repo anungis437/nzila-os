@@ -76,6 +76,7 @@ const push = (...items: unknown[]) => h.queue.push(...items);
 function makeNotif(overrides: Record<string, unknown> = {}) {
   return {
     id: 'n1',
+    organizationId: 'org1',
     title: 'Title',
     body: 'Body',
     imageUrl: 'https://x/img.png',
@@ -165,6 +166,14 @@ describe('sendToDevice', () => {
     push([], [makeDevice()]);
     const r = await fcm.sendToDevice('n1', 'd1');
     expect(r.error?.code).toBe('not-found');
+  });
+
+  it('refuses to deliver a notification to a device of another organization', async () => {
+    push([makeNotif({ organizationId: 'org-other' })], [makeDevice()]);
+    const r = await fcm.sendToDevice('n1', 'd1');
+    expect(r.success).toBe(false);
+    expect(r.error?.code).toBe('not-found');
+    expect(h.messagingMock.send).not.toHaveBeenCalled();
   });
 
   it('returns disabled when the device is disabled', async () => {

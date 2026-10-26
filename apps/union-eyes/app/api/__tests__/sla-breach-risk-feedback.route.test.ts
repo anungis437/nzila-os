@@ -6,7 +6,7 @@ const m = vi.hoisted(() => ({
   guardAiFeature: vi.fn(),
   enforceAISafety: vi.fn(),
   trackPilotEvent: vi.fn(),
-  auditLog: vi.fn(),
+  audit: vi.fn(),
   selectQueue: [] as unknown[][],
   updateQueue: [] as unknown[][],
 }));
@@ -32,6 +32,7 @@ vi.mock('@/lib/api/framework', () => ({
   RATE_LIMITS: { ML_PREDICTIONS: { limit: 10 } },
   z: {
     object: () => ({}),
+    guid: () => ({ min: () => ({ default: () => ({}) }), optional: () => ({}) }),
     string: () => ({ uuid: () => ({ min: () => ({ default: () => ({}) }) }), min: () => ({ default: () => ({}) }), max: () => ({ optional: () => ({}) }), optional: () => ({}) }),
     boolean: () => ({}),
     number: () => ({ nonnegative: () => ({ optional: () => ({}) }) }),
@@ -47,7 +48,10 @@ vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return { ...actual, and: vi.fn(() => 'and'), desc: vi.fn(() => 'desc'), eq: vi.fn(() => 'eq') };
 });
-vi.mock('@/lib/audit-logger', () => ({ auditLog: m.auditLog, AuditEventType: { DATA_UPDATE: 'DATA_UPDATE' }, AuditSeverity: { HIGH: 'HIGH', MEDIUM: 'MEDIUM' } }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(mockDb),
+}));
 vi.mock('@/lib/services/pilot-tracking', () => ({ trackPilotEvent: m.trackPilotEvent }));
 
 async function loadRoute() {
@@ -61,7 +65,7 @@ describe('ml/predictions/sla-breach-risk/feedback route', () => {
     m.updateQueue = [];
     m.guardAiFeature.mockResolvedValue(null);
     m.trackPilotEvent.mockResolvedValue(undefined);
-    m.auditLog.mockResolvedValue(undefined);
+    m.audit.mockResolvedValue(undefined);
     m.withApi.mockImplementation((_cfg: unknown, handler: any) =>
       async (_req: NextRequest, ctx: any = { organizationId: 'org_1', userId: 'u1', body: {}, query: {} }) => {
         try {
@@ -87,6 +91,7 @@ describe('ml/predictions/sla-breach-risk/feedback route', () => {
       organizationId: 'org_1', userId: 'u1', body: { predictionId: 'p1', modelVersion: 'v1', actualBreach: true },
     });
     expect(response.status).toBe(404);
+    expect(m.audit).not.toHaveBeenCalled();
   });
 
   it('POST ingests feedback and returns metrics', async () => {
@@ -104,6 +109,27 @@ describe('ml/predictions/sla-breach-risk/feedback route', () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.metrics.observations).toBeGreaterThanOrEqual(1);
+    expect(m.audit).toHaveBeenCalledWith(
+      mockDb,
+      expect.objectContaining({ organizationId: 'org_1', userId: 'u1', action: 'ml.sla_breach.feedback', resourceId: 'model_1' }),
+    );
+  });
+
+  it('POST fails and records no pilot event when the audit record cannot be written', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue.push(
+      [{ id: 'p1', predictionDate: '2026-01-01', predictedValue: '0.8' }],
+      [{ id: 'model_1', version: 'v1', parameters: {} }],
+    );
+    m.updateQueue.push([{ id: 'model_1', version: 'v1' }]);
+    m.audit.mockRejectedValueOnce(new Error('audit down'));
+
+    const response = await POST(new NextRequest('http://localhost/api/ml/predictions/sla-breach-risk/feedback', { method: 'POST' }), {
+      organizationId: 'org_1', userId: 'u1', body: { predictionId: 'p1', modelVersion: 'v1', actualBreach: true },
+    });
+
+    expect(response.status).toBe(500);
+    expect(m.trackPilotEvent).not.toHaveBeenCalled();
   });
 
   it('GET returns model feedback summary', async () => {

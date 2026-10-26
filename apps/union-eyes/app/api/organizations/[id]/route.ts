@@ -4,7 +4,8 @@ import { db } from '@/db/db'
 import { organizations } from '@/db/schema-organizations'
 import { eq, sql } from 'drizzle-orm'
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context'
-import { requireUserForOrganization, ROLE_HIERARCHY } from '@/lib/api-auth-guard'
+import { requireUserForOrganization, requireSystemAdmin, ROLE_HIERARCHY } from '@/lib/api-auth-guard'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 
 export const dynamic = 'force-dynamic'
 
@@ -111,6 +112,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   }
 
   const body = await req.json()
+
   const updates: Record<string, unknown> = {}
   if (body.name !== undefined) updates.name = body.name
   if (body.slug !== undefined) updates.slug = body.slug
@@ -124,9 +126,43 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (body.settings !== undefined) updates.settings = body.settings
   updates.updatedAt = new Date()
 
-  const [updated] = await withRLSContext(async () =>
-    db.update(organizations).set(updates).where(eq(organizations.id, id)).returning(),
-  )
+  const updated = await withRLSContext(async (tx) => {
+    const [current] = await tx.select().from(organizations).where(eq(organizations.id, id))
+    if (!current) return null
+
+    // Parent affiliation and lifecycle status define the federation boundary and the institution's standing: an
+    // organization's own administrator may resubmit the current values but may not change them.
+    const parentChanged = body.parent_id !== undefined && (body.parent_id ?? null) !== (current.parentId ?? null)
+    const statusChanged = body.status !== undefined && body.status !== current.status
+    if (parentChanged || statusChanged) {
+      try {
+        await requireSystemAdmin()
+      } catch {
+        return 'forbidden' as const
+      }
+    } else {
+      delete updates.parentId
+      delete updates.status
+    }
+
+    const [row] = await tx.update(organizations).set(updates).where(eq(organizations.id, id)).returning()
+    if (!row) return null
+    await persistAtomicAudit(tx, {
+      organizationId: id,
+      userId: userCtx.userId,
+      action: 'organization.update',
+      resourceType: 'organizations',
+      resourceId: id,
+      details: { fields: Object.keys(updates).filter((k) => k !== 'updatedAt') },
+    })
+    return row
+  })
+  if (updated === 'forbidden') {
+    return NextResponse.json(
+      { error: 'Forbidden: changing parent affiliation or status requires platform governance' },
+      { status: 403 },
+    )
+  }
   if (!updated) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   return NextResponse.json({ data: mapOrg(updated) })
 }
@@ -150,13 +186,23 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Forbidden: requires admin role' }, { status: 403 })
   }
 
-  const [archived] = await withRLSContext(async () =>
-    db
+  const archived = await withRLSContext(async (tx) => {
+    const [row] = await tx
       .update(organizations)
       .set({ status: 'archived', updatedAt: new Date() })
       .where(eq(organizations.id, id))
-      .returning(),
-  )
+      .returning()
+    if (!row) return null
+    await persistAtomicAudit(tx, {
+      organizationId: id,
+      userId: userCtx.userId,
+      action: 'organization.archive',
+      resourceType: 'organizations',
+      resourceId: id,
+      details: { status: 'archived' },
+    })
+    return row
+  })
   if (!archived) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   return NextResponse.json({ data: mapOrg(archived) })
 }

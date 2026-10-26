@@ -55,12 +55,12 @@ export const POST = withApi(
     entitlement: 'union_knowledge_suite',
     body: CreateSessionSchema,
   },
-  async ({ organizationId, body }) => {
+  async ({ organizationId, userId, body }) => {
     const session = await createReasoningSession(organizationId!, {
       title: body.title,
       focus: body.focus,
       contextDescription: body.contextDescription,
-    });
+    }, userId!);
     return { data: session };
   },
 );

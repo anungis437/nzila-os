@@ -113,6 +113,104 @@
       "when": 1758710000000,
       "tag": "0012_knowledge_transfer_runtime_relations",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1758720000000,
+      "tag": "0013_authority_kernel_storage",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1758730000000,
+      "tag": "0014_message_thread_triage",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1758740000000,
+      "tag": "0015_payments_transaction_source",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1758750000000,
+      "tag": "0016_documents_org_id_mirror",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1758760000000,
+      "tag": "0017_dues_transactions_ledger_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1758770000000,
+      "tag": "0018_declared_shape_tranche_1",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1758780000000,
+      "tag": "0019_declared_shape_tranche_2",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1758790000000,
+      "tag": "0020_declared_shape_tranche_3",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1758800000000,
+      "tag": "0021_employer_execution_integrity",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1758810000000,
+      "tag": "0022_document_intake_and_transcription",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1758820000000,
+      "tag": "0023_signature_provider_acknowledgment",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1758830000000,
+      "tag": "0025_message_thread_lifecycle_and_retention",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1758840000000,
+      "tag": "0027_workaid_union_side_disclosure",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1758850000000,
+      "tag": "0028_location_deletion_log_shape",
+      "breakpoints": true
     }
   ]
 }

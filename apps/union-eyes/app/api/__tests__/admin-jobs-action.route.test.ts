@@ -1,15 +1,23 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
+const audit = vi.hoisted(() => ({
+  run: vi.fn(async (_op: unknown, fn: () => Promise<unknown>) => fn()),
+}));
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: audit.run,
+  operationAuditResponse: () => null,
+}));
+
 const m = vi.hoisted(() => ({
-  withAdminAuth: vi.fn(),
+  withSystemAdminAuth: vi.fn(),
   pauseQueue: vi.fn(),
   resumeQueue: vi.fn(),
   cleanCompletedJobs: vi.fn(),
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({
-  withAdminAuth: m.withAdminAuth,
+  withSystemAdminAuth: m.withSystemAdminAuth,
 }));
 
 vi.mock('@/lib/job-queue', () => ({
@@ -40,9 +48,9 @@ async function loadRoute() {
 describe('admin/jobs/[action] route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withAdminAuth.mockImplementation(
+    m.withSystemAdminAuth.mockImplementation(
       (handler: (request: NextRequest, context: any) => Promise<Response>) =>
-        (request: NextRequest, context: any = {}) => handler(request, context),
+        (request: NextRequest, context: any = {}) => handler(request, { organizationId: 'org_1', userId: 'u1', ...context }),
     );
     m.pauseQueue.mockResolvedValue(undefined);
     m.resumeQueue.mockResolvedValue(undefined);
@@ -129,5 +137,25 @@ describe('admin/jobs/[action] route', () => {
       { params: { action: 'pause' } },
     );
     expect(response.status).toBe(500);
+  });
+
+  it('records each queue action as an audited platform operation', async () => {
+    const { POST } = await loadRoute();
+    for (const action of ['pause', 'resume', 'clean']) {
+      await POST(
+        new NextRequest(`http://localhost/api/admin/jobs/${action}`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ queue: 'critical' }),
+        }),
+        { params: { action } },
+      );
+    }
+    expect(audit.run.mock.calls.map((c) => (c[0] as { action: string }).action)).toEqual([
+      'platform.job_queue.pause',
+      'platform.job_queue.resume',
+      'platform.job_queue.clean',
+    ]);
+    expect(audit.run.mock.calls[0][0]).toMatchObject({ organizationId: 'org_1', userId: 'u1', resourceId: 'critical' });
   });
 });

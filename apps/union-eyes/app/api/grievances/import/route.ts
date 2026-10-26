@@ -5,13 +5,18 @@ import { grievances } from '@/db/schema/domains/claims/grievances';
 import { grievanceEvents } from '@/db/schema/domains/claims/grievance-lifecycle';
 import { ingestionBatches, ingestionRecords } from '@/db/schema/ingestion-schema';
 import { withOrganizationAuth } from '@/lib/organization-middleware';
-import { hasMinRole } from '@/lib/api-auth-guard';
-import { auditDataMutation, auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { hasCaseFilingCapacity } from '@/lib/cases/case-authorization';
+import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
 import { ErrorCode, standardErrorResponse, standardSuccessResponse } from '@/lib/api/standardized-responses';
 import { randomBytes, createHash } from 'crypto';
 import { and, eq, sql } from 'drizzle-orm';
+
+// ingestion_records has no organization column: a record belongs to its batch, and the batch to an organization.
+const recordInOrganization = (organizationId: string) =>
+  sql`${ingestionRecords.batchId} IN (SELECT id FROM ingestion_batches WHERE organization_id = ${organizationId})`;
 
 const grievanceTypeValues = [
   'individual', 'group', 'policy', 'contract', 'harassment',
@@ -38,7 +43,7 @@ const importRequestSchema = z.object({
   format: z.enum(['json', 'csv']),
   payload: z.union([z.string(), z.array(z.record(z.string(), z.unknown()))]),
   sourceSystem: z.string().min(2).max(100).default('unioneyes_manual_import'),
-  importSessionId: z.string().uuid().optional(),
+  importSessionId: z.guid().optional(),
   resumeFailedOnly: z.boolean().optional(),
   defaultCreateOfficialCase: z.boolean().optional(),
 });
@@ -149,9 +154,10 @@ export const POST = withOrganizationAuth(async (request, context) => {
   const { organizationId, userId } = context;
   await requireEntitlement(organizationId, 'grievance_case_suite');
 
-  const canImport = await hasMinRole('steward');
+  // Importing many cases is an office-bearer capacity on the canonical membership, not a role rank.
+  const canImport = await hasCaseFilingCapacity({ userId, organizationId }, 'bulk');
   if (!canImport) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Only steward or above can import cases');
+    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Importing cases requires an officer or executive capacity');
   }
 
   let rawBody: any;
@@ -308,7 +314,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
           resolvedId: duplicate.resolved_id,
           processedAt: new Date(),
         })
-        .where(eq(ingestionRecords.id, record.id));
+        .where(and(eq(ingestionRecords.id, record.id), recordInOrganization(organizationId)));
 
       continue;
     }
@@ -328,7 +334,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
           errorDetails: { issues: validated.error.issues },
           processedAt: new Date(),
         })
-        .where(eq(ingestionRecords.id, record.id));
+        .where(and(eq(ingestionRecords.id, record.id), recordInOrganization(organizationId)));
 
       await trackPilotEvent({
         userId,
@@ -344,9 +350,9 @@ export const POST = withOrganizationAuth(async (request, context) => {
     const row = validated.data;
     const mode = row.createOfficialCase ? 'official_case' : 'intake';
 
-    const [created] = await withRLSContext(async () => {
+    const [created] = await withRLSContext(async (tx) => {
       const grievanceNumber = `GRV-IMP-${Date.now()}-${randomBytes(3).toString('hex')}`;
-      const [g] = await db.insert(grievances).values({
+      const [g] = await tx.insert(grievances).values({
         grievanceNumber,
         type: row.type,
         title: row.title,
@@ -367,28 +373,24 @@ export const POST = withOrganizationAuth(async (request, context) => {
         isGroupGrievance: row.type === 'group',
       }).returning();
 
-      await db.insert(grievanceEvents).values({
+      await tx.insert(grievanceEvents).values({
         grievanceId: g.id,
         eventType: row.createOfficialCase ? 'created' : 'intake_submitted',
         actorUserId: userId,
         notes: row.createOfficialCase ? 'Case imported via governed ingestion' : 'Intake imported via governed ingestion',
       });
 
-      return [g];
-    });
+      // Each imported row commits together with its audit record.
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'grievance.import_row',
+        resourceType: 'grievances',
+        resourceId: g.id,
+        details: { operation: 'bulk_import', grievanceNumber: g.grievanceNumber, status: g.status, mode },
+      });
 
-    await auditDataMutation({
-      userId,
-      organizationId,
-      resource: 'grievances',
-      action: 'create',
-      resourceId: created.id,
-      details: { operation: 'bulk_import' },
-      newState: {
-        grievanceNumber: created.grievanceNumber,
-        status: created.status,
-        mode,
-      },
+      return [g];
     });
 
     await trackPilotEvent({
@@ -426,7 +428,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
         resolvedId: created.id,
         processedAt: new Date(),
       })
-      .where(eq(ingestionRecords.id, record.id));
+      .where(and(eq(ingestionRecords.id, record.id), recordInOrganization(organizationId)));
 
     processedCount++;
     succeededCount++;
@@ -450,7 +452,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
       completedAt: new Date(),
       errorSummary: failed.map((f) => ({ rowIndex: f.rowIndex, reason: f.reason })),
     })
-    .where(eq(ingestionBatches.id, batchId));
+    .where(and(eq(ingestionBatches.id, batchId), eq(ingestionBatches.organizationId, organizationId)));
 
   await auditLog({
     eventType: AuditEventType.DATA_CREATE,
@@ -484,12 +486,12 @@ export const POST = withOrganizationAuth(async (request, context) => {
 });
 
 export const GET = withOrganizationAuth(async (request, context) => {
-  const { organizationId } = context;
+  const { organizationId, userId } = context;
   await requireEntitlement(organizationId, 'grievance_case_suite');
 
-  const canImport = await hasMinRole('steward');
+  const canImport = await hasCaseFilingCapacity({ userId, organizationId }, 'bulk');
   if (!canImport) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Only steward or above can view import sessions');
+    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Viewing import sessions requires an officer or executive capacity');
   }
 
   const sessionId = new URL(request.url).searchParams.get('importSessionId');

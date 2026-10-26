@@ -7,8 +7,11 @@ import { db } from '@/db/db';
 import { collectiveAgreements } from '@/db/schema';
 import { eq, ilike, and, or, sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
+
+const AGREEMENT_STATUSES = ['active', 'expired', 'under_negotiation', 'ratified_pending', 'archived'];
 
 export const GET = withApi(
   {
@@ -98,9 +101,13 @@ export const POST = withApi(
     }
 
     const body = await request.json();
+    const status = body.status ?? 'active';
+    if (!AGREEMENT_STATUSES.includes(status)) {
+      throw ApiError.badRequest('Invalid agreement status.');
+    }
 
-    return await withRLSContext({ organizationId }, async () => {
-      const [created] = await db
+    return await withRLSContext({ organizationId }, async (tx) => {
+      const [created] = await tx
         .insert(collectiveAgreements)
         .values({
           organizationId,
@@ -122,12 +129,22 @@ export const POST = withApi(
           employeeCoverage: body.employeeCoverage ?? null,
           bargainingUnitDescription: body.bargainingUnitDescription ?? null,
           documentUrl: body.documentUrl ?? null,
-          status: body.status ?? 'active',
-          isPublic: body.isPublic ?? false,
+          status,
+          // Publishing an agreement beyond the organization is not decided at creation time.
+          isPublic: false,
           createdBy: userId,
           lastModifiedBy: userId,
         })
         .returning();
+
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'agreement.create',
+        resourceType: 'collective_agreements',
+        resourceId: created.id,
+        details: { cbaNumber: created.cbaNumber, status: created.status },
+      });
 
       return { data: created };
     });

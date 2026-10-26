@@ -29,7 +29,6 @@
     "db:migrate:legacy": "node ../../tooling/scripts/run-union-eyes-drizzle-migrate.mjs",
     "db:restore": "node ../../tooling/scripts/restore-union-eyes-snapshot.mjs",
     "db:validate": "node ../../tooling/scripts/validate-orm-legitimacy.mjs",
-    "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "evidence:collect": "tsx scripts/evidence/collect.mjs",
     "evidence:seal": "tsx scripts/evidence/seal.mjs",
@@ -240,7 +239,6 @@
     "react-chartjs-2": "^5.3.1",
     "react-day-picker": "^9.12.0",
     "react-dom": "19.3.1",
-    "react-dropzone": "^14.4.0",
     "react-email": "^5.0.8",
     "react-hook-form": "^7.68.0",
     "react-markdown": "^10.1.0",
@@ -263,7 +261,7 @@
     "twilio": "^6.2.0",
     "uuid": "^14.0.3",
     "vaul": "^1.1.2",
-    "zod": "^3.23.8"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@asteasolutions/zod-to-openapi": "^8.4.0",

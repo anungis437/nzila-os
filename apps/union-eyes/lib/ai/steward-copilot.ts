@@ -18,8 +18,12 @@
  * @module lib/ai/steward-copilot
  */
 
+import { randomUUID } from 'crypto';
 import { db } from '@/db/db';
 import { eq, and, desc } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { performAuditedOperation } from '@/lib/audit/operation-audit';
 import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { aiCopilotSessions, type AiCopilotSessionInsert } from '@/db/schema/domains/ml/ai-copilot-sessions';
 import { grievances } from '@/db/schema/domains/claims/grievances';
@@ -63,16 +67,28 @@ export async function executeCopilotAction(
   // 1. Build context-aware prompt
   const prompt = await buildCopilotPrompt(input);
 
-  // 2. Call AI
+  // 2. Call AI. The provider call cannot share a database transaction: its intent is recorded first and the call is
+  // skipped if that record cannot be written.
   const ai = getAiClient();
-  const aiResult = await ai.generate({
-    orgId: UE_SYSTEM_ORG_ID,
-    trace: buildOrgAiTrace(organizationId),
-    appKey: UE_APP_KEY,
-    profileKey: UE_PROFILES.STEWARD_COPILOT,
-    input: prompt,
-    dataClass: 'internal',
-  });
+  const aiResult = await performAuditedOperation(
+    {
+      organizationId,
+      userId,
+      action: 'ai.copilot.generate',
+      resourceType: relatedEntityType ?? 'ai_copilot_sessions',
+      resourceId: relatedEntityId,
+      details: { actionType },
+    },
+    () =>
+      ai.generate({
+        orgId: UE_SYSTEM_ORG_ID,
+        trace: buildOrgAiTrace(organizationId),
+        appKey: UE_APP_KEY,
+        profileKey: UE_PROFILES.STEWARD_COPILOT,
+        input: prompt,
+        dataClass: 'internal',
+      }),
+  );
 
   // 3. Parse
   const parsed = parseCopilotResponse(aiResult.content ?? '');
@@ -90,7 +106,9 @@ export async function executeCopilotAction(
   });
 
   // 5. Persist session
+  const sessionId = randomUUID();
   const insert: AiCopilotSessionInsert = {
+    id: sessionId,
     organizationId,
     userId,
     userRole,
@@ -109,7 +127,17 @@ export async function executeCopilotAction(
     outcome: 'pending',
   };
 
-  await db.insert(aiCopilotSessions).values(insert);
+  await withRLSContext({ organizationId }, async (tx) => {
+    await tx.insert(aiCopilotSessions).values(insert);
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId,
+      action: 'ai.copilot.session.create',
+      resourceType: 'ai_copilot_sessions',
+      resourceId: sessionId,
+      details: { actionType, relatedEntityType: relatedEntityType ?? null, auditRef },
+    });
+  });
 
   return buildAiEnvelope(parsed.result, {
     confidence: parsed.confidence,
@@ -176,25 +204,56 @@ export async function draftResponse(
 /**
  * Record outcome for a copilot session.
  */
+export type CopilotOutcomeResult = 'recorded' | 'not_found' | 'already_decided';
+
+/**
+ * Record the human outcome of a copilot session. Only the steward the session was produced for may decide it, and only
+ * once: a session of another user or organization is not found, and a decided session is never overwritten. The
+ * outcome and its audit record commit together.
+ */
 export async function recordCopilotOutcome(
   sessionId: string,
   organizationId: string,
+  userId: string,
   outcome: 'accepted' | 'edited' | 'rejected',
   editedResponse?: string,
   feedbackRating?: number,
   feedbackNotes?: string,
-) {
-  await db
-    .update(aiCopilotSessions)
-    .set({
-      outcome,
-      editedResponse: editedResponse ?? null,
-      feedbackRating: feedbackRating?.toFixed(2) ?? null,
-      feedbackNotes: feedbackNotes ?? null,
-      humanApproved: outcome === 'accepted' || outcome === 'edited',
-      completedAt: new Date(),
-    })
-    .where(and(eq(aiCopilotSessions.id, sessionId), eq(aiCopilotSessions.organizationId, organizationId)));
+): Promise<CopilotOutcomeResult> {
+  return withRLSContext({ organizationId }, async (tx): Promise<CopilotOutcomeResult> => {
+    const inOrganizationAsOwner = and(
+      eq(aiCopilotSessions.id, sessionId),
+      eq(aiCopilotSessions.organizationId, organizationId),
+      eq(aiCopilotSessions.userId, userId),
+    );
+    const [decided] = await tx
+      .update(aiCopilotSessions)
+      .set({
+        outcome,
+        editedResponse: editedResponse ?? null,
+        feedbackRating: feedbackRating?.toFixed(2) ?? null,
+        feedbackNotes: feedbackNotes ?? null,
+        humanApproved: outcome === 'accepted' || outcome === 'edited',
+        completedAt: new Date(),
+      })
+      .where(and(inOrganizationAsOwner, eq(aiCopilotSessions.outcome, 'pending')))
+      .returning({ id: aiCopilotSessions.id });
+
+    if (!decided) {
+      const [existing] = await tx.select({ id: aiCopilotSessions.id }).from(aiCopilotSessions).where(inOrganizationAsOwner).limit(1);
+      return existing ? 'already_decided' : 'not_found';
+    }
+
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId,
+      action: 'ai.copilot.session.outcome',
+      resourceType: 'ai_copilot_sessions',
+      resourceId: sessionId,
+      details: { outcome, humanApproved: outcome === 'accepted' || outcome === 'edited' },
+    });
+    return 'recorded';
+  });
 }
 
 /**

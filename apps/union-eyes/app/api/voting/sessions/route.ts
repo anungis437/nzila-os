@@ -13,6 +13,8 @@ import { votingOptions, votes as votesTable } from '@/db/schema';
 import { inArray, count } from 'drizzle-orm';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -95,10 +97,11 @@ export const GET = withApi(
               text: o.text,
               description: o.description,
               orderIndex: o.orderIndex,
-              votes: voteCountMap[o.id] || 0,
-              percentage: totalVotes > 0 ? Math.round(((voteCountMap[o.id] || 0) / totalVotes) * 100) : 0,
             })),
+            // Participation only. Per-option tallies are an officer-level view of a closed session
+            // (GET /api/voting/sessions/[id]/results); no live or final count is disclosed here.
             totalVotes,
+            resultsWithheld: true,
           };
         });
 
@@ -138,12 +141,23 @@ export const POST = withApi(
     successStatus: 201,
   },
   async ({ body, userId, organizationId }) => {
-    const session = await createVotingSession({
-      ...body,
-      organizationId: organizationId!,
-      createdBy: userId!,
-      startTime: body.startTime ? new Date(body.startTime) : undefined,
-      endTime: body.endTime ? new Date(body.endTime) : undefined,
+    const session = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
+      const created = await createVotingSession({
+        ...body,
+        organizationId: organizationId!,
+        createdBy: userId!,
+        startTime: body.startTime ? new Date(body.startTime) : undefined,
+        endTime: body.endTime ? new Date(body.endTime) : undefined,
+      });
+      await persistAtomicAudit(tx, {
+        organizationId: organizationId!,
+        userId: userId!,
+        action: 'voting_session.create',
+        resourceType: 'voting_sessions',
+        resourceId: created.id,
+        details: { type: body.type, meetingType: body.meetingType },
+      });
+      return created;
     });
 
     // Evidence: democratic governance audit trail

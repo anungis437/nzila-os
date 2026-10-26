@@ -10,28 +10,35 @@ import { NextRequest } from 'next/server'
  * read another organization's feedback summary (cross-org IDOR).
  */
 
-const mocks = vi.hoisted(() => ({
-  insertValues: vi.fn(),
-  trackPilotEvent: vi.fn(),
-  dbExecute: vi.fn(),
-  dbSelectWhere: vi.fn(),
-}))
+const mocks = vi.hoisted(() => {
+  const tx = {
+    insert: vi.fn(),
+  }
+  return {
+    tx,
+    feedbackValues: vi.fn(),
+    eventValues: vi.fn(),
+    persistAtomicAudit: vi.fn(),
+    withRLSContext: vi.fn(),
+    dbExecute: vi.fn(),
+    dbSelectWhere: vi.fn(),
+  }
+})
 
 vi.mock('@/lib/api-auth-guard', () => ({
   withRoleAuth: vi.fn((_requiredRole: string, handler: (...args: any[]) => unknown) => handler),
 }))
 
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: vi.fn((fn: () => unknown) => fn()),
+  withRLSContext: mocks.withRLSContext,
 }))
 
-vi.mock('@/lib/services/pilot-tracking', () => ({
-  trackPilotEvent: mocks.trackPilotEvent,
+vi.mock('@/lib/audit/atomic-audit', () => ({
+  persistAtomicAudit: mocks.persistAtomicAudit,
 }))
 
 vi.mock('@/db', () => ({
   db: {
-    insert: () => ({ values: mocks.insertValues }),
     execute: mocks.dbExecute,
     select: () => ({
       from: () => ({
@@ -46,7 +53,8 @@ vi.mock('@/db', () => ({
 }))
 
 vi.mock('@/db/schema', () => ({
-  pilotFeedback: { organizationId: 'organization_id' },
+  pilotFeedback: { organizationId: 'organization_id', id: 'id' },
+  pilotEvents: { table: 'pilot_events' },
 }))
 
 const { POST, GET } = await import('@/app/api/pilot/feedback/route')
@@ -54,7 +62,16 @@ const { POST, GET } = await import('@/app/api/pilot/feedback/route')
 describe('pilot/feedback route (round 56 — cross-user/cross-org IDOR fix)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.insertValues.mockResolvedValue(undefined)
+    mocks.withRLSContext.mockImplementation(async (ctxOrFn: unknown, fn?: (tx: unknown) => unknown) =>
+      typeof ctxOrFn === 'function' ? (ctxOrFn as () => unknown)() : fn!(mocks.tx),
+    )
+    mocks.tx.insert.mockImplementation((table: { table?: string }) =>
+      table.table === 'pilot_events'
+        ? { values: mocks.eventValues }
+        : { values: (v: unknown) => ({ returning: async () => (mocks.feedbackValues(v), [{ id: 'fb-1' }]) }) },
+    )
+    mocks.eventValues.mockResolvedValue(undefined)
+    mocks.persistAtomicAudit.mockResolvedValue(undefined)
     mocks.dbExecute.mockResolvedValue([{ total_responses: 0 }])
     mocks.dbSelectWhere.mockResolvedValue([])
   })
@@ -73,12 +90,62 @@ describe('pilot/feedback route (round 56 — cross-user/cross-org IDOR fix)', ()
     const res = await POST(req, { userId: 'caller-own-id', organizationId: 'caller-org' })
     expect(res.status).toBe(200)
 
-    expect(mocks.insertValues).toHaveBeenCalledWith(
+    expect(mocks.withRLSContext).toHaveBeenCalledWith({ organizationId: 'caller-org' }, expect.any(Function))
+    expect(mocks.feedbackValues).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 'caller-own-id', organizationId: 'caller-org' })
     )
-    expect(mocks.trackPilotEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: 'caller-own-id', organizationId: 'caller-org' })
+    expect(mocks.eventValues).toHaveBeenCalledWith([
+      expect.objectContaining({ userId: 'caller-own-id', organizationId: 'caller-org', eventType: 'feedback_submitted' }),
+      expect.objectContaining({ userId: 'caller-own-id', organizationId: 'caller-org', eventType: 'feature_used' }),
+    ])
+  })
+
+  it('POST records the audit on the same transaction as the feedback and its events', async () => {
+    const req = new NextRequest('http://localhost/api/pilot/feedback', {
+      method: 'POST',
+      body: JSON.stringify({ easeRating: 2, category: 'slow', comment: 'private words', trigger: 'milestone_usage' }),
+    })
+
+    const res = await POST(req, { userId: 'caller-own-id', organizationId: 'caller-org' })
+
+    expect(res.status).toBe(200)
+    expect(mocks.persistAtomicAudit).toHaveBeenCalledWith(
+      mocks.tx,
+      expect.objectContaining({
+        organizationId: 'caller-org',
+        userId: 'caller-own-id',
+        action: 'pilot.feedback.submit',
+        resourceType: 'pilot_feedback',
+        resourceId: 'fb-1',
+        details: { easeRating: 2, category: 'slow', trigger: 'milestone_usage' },
+      }),
     )
+  })
+
+  it('POST fails when the audit cannot be written, so the feedback does not commit', async () => {
+    mocks.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'))
+    const req = new NextRequest('http://localhost/api/pilot/feedback', {
+      method: 'POST',
+      body: JSON.stringify({ easeRating: 4, trigger: 'first_case' }),
+    })
+
+    const res = await POST(req, { userId: 'caller-own-id', organizationId: 'caller-org' })
+
+    expect(res.status).toBe(500)
+  })
+
+  it('POST rejects a non-integer or out-of-range rating before opening a transaction', async () => {
+    for (const easeRating of [0, 6, 2.5, '3']) {
+      const res = await POST(
+        new NextRequest('http://localhost/api/pilot/feedback', {
+          method: 'POST',
+          body: JSON.stringify({ easeRating, trigger: 'first_case' }),
+        }),
+        { userId: 'caller-own-id', organizationId: 'caller-org' },
+      )
+      expect(res.status).toBe(400)
+    }
+    expect(mocks.withRLSContext).not.toHaveBeenCalled()
   })
 
   it('POST rejects when the authenticated context has no resolved organization', async () => {
@@ -89,7 +156,7 @@ describe('pilot/feedback route (round 56 — cross-user/cross-org IDOR fix)', ()
 
     const res = await POST(req, { userId: 'caller-own-id' })
     expect(res.status).toBe(400)
-    expect(mocks.insertValues).not.toHaveBeenCalled()
+    expect(mocks.withRLSContext).not.toHaveBeenCalled()
   })
 
   it('GET scopes the feedback summary to the caller\'s own organization, ignoring any client-supplied organizationId query param', async () => {

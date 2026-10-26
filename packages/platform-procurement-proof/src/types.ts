@@ -197,7 +197,7 @@ export const procurementManifestSchema = z.object({
   sectionCount: z.number().int().positive(),
   artifactCount: z.number().int().nonnegative(),
   generatedAt: z.string().datetime(),
-  checksums: z.record(z.string()),
+  checksums: z.record(z.string(), z.string()),
 })
 
 export const packSignatureSchema = z.object({

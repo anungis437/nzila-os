@@ -94,7 +94,7 @@ export const abTestAssignments = pgTable(
     variantId: uuid('variant_id')
       .references(() => abTestVariants.id, { onDelete: 'cascade' })
       .notNull(),
-    userId: text('user_id').notNull(), // Clerk user ID
+    userId: text('user_id').notNull(), // Auth user ID
     assignedAt: timestamp('assigned_at').defaultNow().notNull(),
   },
   (table) => ({

@@ -14,8 +14,10 @@
  */
 
 import { and, eq } from 'drizzle-orm';
-import { db } from '@/db/db';
-import { exitInterviews, knowledgeBase } from '@/db/schema';
+import { exitInterviews, exitInterviewEvents, knowledgeBase } from '@/db/schema';
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { performAuditedOperation } from '@/lib/audit/operation-audit';
 import {
   getAiClient,
   UE_APP_KEY,
@@ -75,24 +77,45 @@ export type IndexResult =
 /**
  * Index a single exit interview into the vector knowledge base.
  * Idempotent — will upsert if knowledgeBaseId already set.
+ *
+ * The embedding call sends interview content to the AI provider, which cannot share a database transaction, so its
+ * intent is recorded first and the call is skipped if that record cannot be written. Every state change (skipped,
+ * indexed, failed) commits with its audit record in the same transaction.
  */
 export async function indexExitInterview(
   interviewId: string,
   orgId: string,
   userId: string,
+  options: { eventNotes?: string } = {},
 ): Promise<IndexResult> {
-  try {
-    // Mark as indexing early to prevent concurrent duplicate attempts
-    await db
-      .update(exitInterviews)
-      .set({ indexingStatus: 'indexing', updatedAt: new Date() })
-      .where(and(eq(exitInterviews.id, interviewId), eq(exitInterviews.organizationId, orgId)));
+  const audit = (
+    tx: RLSTx,
+    action: string,
+    details: Record<string, unknown>,
+    outcome: 'success' | 'failure' = 'success',
+  ) =>
+    persistAtomicAudit(
+      tx,
+      { organizationId: orgId, userId, action, resourceType: 'exit_interviews', resourceId: interviewId, details },
+      outcome,
+    );
+  const ownInterview = and(eq(exitInterviews.id, interviewId), eq(exitInterviews.organizationId, orgId));
 
-    const [interview] = await db
-      .select()
-      .from(exitInterviews)
-      .where(and(eq(exitInterviews.id, interviewId), eq(exitInterviews.organizationId, orgId)))
-      .limit(1);
+  const markSkipped = (reason: string): Promise<IndexResult> =>
+    withRLSContext({ organizationId: orgId }, async (tx) => {
+      await tx
+        .update(exitInterviews)
+        .set({ indexingStatus: 'skipped', updatedAt: new Date() })
+        .where(and(eq(exitInterviews.id, interviewId), eq(exitInterviews.organizationId, orgId)));
+      await audit(tx, 'exit_interview.index.skipped', { reason });
+      return { indexed: false, reason };
+    });
+
+  try {
+    const interview = await withRLSContext({ organizationId: orgId }, async (tx) => {
+      const [row] = await tx.select().from(exitInterviews).where(ownInterview).limit(1);
+      return row ?? null;
+    });
 
     if (!interview) {
       return { indexed: false, reason: 'Interview not found' };
@@ -100,91 +123,111 @@ export async function indexExitInterview(
 
     // Governance gate
     if (INDEXING_BLOCKED_SENSITIVITY.has(interview.sensitivityLevel as never)) {
-      await db
-        .update(exitInterviews)
-        .set({ indexingStatus: 'skipped', updatedAt: new Date() })
-        .where(eq(exitInterviews.id, interviewId));
-      return { indexed: false, reason: `Sensitivity level '${interview.sensitivityLevel}' blocks indexing` };
+      return markSkipped(`Sensitivity level '${interview.sensitivityLevel}' blocks indexing`);
     }
 
     // Consent gate
     if (!interview.consentGranted) {
-      await db
-        .update(exitInterviews)
-        .set({ indexingStatus: 'skipped', updatedAt: new Date() })
-        .where(eq(exitInterviews.id, interviewId));
-      return { indexed: false, reason: 'Retiree consent not granted' };
+      return markSkipped('Retiree consent not granted');
     }
 
     const content = buildIndexableContent(interview);
-    const embedding = await generateEmbedding(content, orgId);
+    const embedding = await performAuditedOperation(
+      {
+        organizationId: orgId,
+        userId,
+        action: 'exit_interview.index.embed',
+        resourceType: 'exit_interviews',
+        resourceId: interviewId,
+        details: { sensitivityLevel: interview.sensitivityLevel },
+      },
+      () => generateEmbedding(content, orgId),
+    );
     const now = new Date();
 
-    if (interview.knowledgeBaseId) {
-      // Upsert
-      await db
-        .update(knowledgeBase)
-        .set({
-          content,
-          embedding: embedding as never,
-          embeddingModel: 'text-embedding-3-small',
-          embeddingModelVersion: 'text-embedding-3-small@v1',
-          tags: interview.topics ?? [],
-          keywords: interview.expertiseTags ?? [],
-          updatedAt: now,
-        })
-        .where(eq(knowledgeBase.id, interview.knowledgeBaseId));
+    return await withRLSContext({ organizationId: orgId }, async (tx): Promise<IndexResult> => {
+      let knowledgeBaseId: string;
 
-      await db
+      if (interview.knowledgeBaseId) {
+        // Upsert
+        const [kb] = await tx
+          .update(knowledgeBase)
+          .set({
+            content,
+            embedding: embedding as never,
+            embeddingModel: 'text-embedding-3-small',
+            embeddingModelVersion: 'text-embedding-3-small@v1',
+            tags: interview.topics ?? [],
+            keywords: interview.expertiseTags ?? [],
+            updatedAt: now,
+          })
+          .where(and(eq(knowledgeBase.id, interview.knowledgeBaseId), eq(knowledgeBase.organizationId, orgId)))
+          .returning({ id: knowledgeBase.id });
+        if (!kb) throw new Error('Knowledge base record not found');
+        knowledgeBaseId = kb.id;
+      } else {
+        // First index — create kb record
+        const [kbRecord] = await tx
+          .insert(knowledgeBase)
+          .values({
+            organizationId: orgId,
+            title: interview.title,
+            documentType: 'guide',
+            content,
+            summary: interview.summary ?? undefined,
+            sourceType: 'exit_interview',
+            sourceId: interview.id,
+            embedding: embedding as never,
+            embeddingModel: 'text-embedding-3-small',
+            embeddingModelVersion: 'text-embedding-3-small@v1',
+            tags: interview.topics ?? [],
+            keywords: interview.expertiseTags ?? [],
+            isPublic: false,
+            isActive: true,
+            createdBy: userId,
+            createdAt: now,
+            updatedAt: now,
+          })
+          .returning();
+        knowledgeBaseId = kbRecord.id;
+      }
+
+      const [marked] = await tx
         .update(exitInterviews)
-        .set({ indexingStatus: 'indexed', indexedAt: now, updatedAt: now })
-        .where(eq(exitInterviews.id, interviewId));
+        .set({ knowledgeBaseId, indexingStatus: 'indexed', indexedAt: now, updatedAt: now })
+        .where(
+          and(
+            eq(exitInterviews.id, interviewId),
+            eq(exitInterviews.organizationId, orgId),
+            eq(exitInterviews.status, 'published'),
+          ),
+        )
+        .returning({ id: exitInterviews.id });
+      if (!marked) throw new Error('Interview is no longer published');
 
-      return { indexed: true, knowledgeBaseId: interview.knowledgeBaseId };
-    }
+      if (options.eventNotes) {
+        await tx.insert(exitInterviewEvents).values({
+          interviewId,
+          organizationId: orgId,
+          eventType: 'indexed',
+          actorUserId: userId,
+          notes: options.eventNotes,
+          payload: { knowledgeBaseId },
+        });
+      }
 
-    // First index — create kb record
-    const [kbRecord] = await db
-      .insert(knowledgeBase)
-      .values({
-        organizationId: orgId,
-        title: interview.title,
-        documentType: 'guide',
-        content,
-        summary: interview.summary ?? undefined,
-        sourceType: 'exit_interview',
-        sourceId: interview.id,
-        embedding: embedding as never,
-        embeddingModel: 'text-embedding-3-small',
-        embeddingModelVersion: 'text-embedding-3-small@v1',
-        tags: interview.topics ?? [],
-        keywords: interview.expertiseTags ?? [],
-        isPublic: false,
-        isActive: true,
-        createdBy: userId,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
-
-    await db
-      .update(exitInterviews)
-      .set({
-        knowledgeBaseId: kbRecord.id,
-        indexingStatus: 'indexed',
-        indexedAt: now,
-        updatedAt: now,
-      })
-      .where(eq(exitInterviews.id, interviewId));
-
-    return { indexed: true, knowledgeBaseId: kbRecord.id };
+      await audit(tx, 'exit_interview.index', { knowledgeBaseId, reindexed: Boolean(interview.knowledgeBaseId) });
+      return { indexed: true, knowledgeBaseId };
+    });
   } catch (err) {
     logger?.error('Semantic indexing failed', { interviewId, error: String(err) });
-    await db
-      .update(exitInterviews)
-      .set({ indexingStatus: 'failed', updatedAt: new Date() })
-      .where(eq(exitInterviews.id, interviewId))
-      .catch(() => {});
+    await withRLSContext({ organizationId: orgId }, async (tx) => {
+      await tx
+        .update(exitInterviews)
+        .set({ indexingStatus: 'failed', updatedAt: new Date() })
+        .where(and(eq(exitInterviews.id, interviewId), eq(exitInterviews.organizationId, orgId)));
+      await audit(tx, 'exit_interview.index.failed', { error: err instanceof Error ? err.message : String(err) }, 'failure');
+    }).catch(() => {});
     return { indexed: false, reason: String(err) };
   }
 }

@@ -6,6 +6,7 @@ import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { isolationDefects } from './union-eyes-staging-proof.mjs'
 import { evaluateLedgerIntegrity, ledgerDigest } from './union-eyes-migration-ledger.mjs'
+import { expectedLineageCounts, loadApprovedLineage } from './ue-migration-lineage-certification.mjs'
 
 export const DOMAIN = 'UE_STAGING_CLONE_QUALIFICATION_V1\n'
 export const TRUST_SHA256 = 'f641898c7f07971b975155d0e8c82e97b21e2908ee0cc4424fdfc5b04d22825a'
@@ -21,6 +22,26 @@ const SHA = /^[a-f0-9]{40}$/
 const targets = new WeakMap()
 const sha256 = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex')
 const fail = (message) => { throw new Error(`Clone qualification refused: ${message}`) }
+
+/**
+ * The lineage a receipt may cover is the APPROVED lineage (pinned tag by tag in
+ * ue-approved-migration-lineage.json, content verified from git blobs by the
+ * certification tool and its test) plus ADDITIONS registered there. Counts and tags
+ * are derived from that record. An unregistered migration, a reordered or renamed
+ * approved one, or a missing registered one is refused. A registered addition is still
+ * unqualified: the receipt's own ledger evidence must cover it (checked below).
+ */
+const APPROVED_LINEAGE = loadApprovedLineage()
+function lineageProblem(scoped, platform) {
+  const counts = expectedLineageCounts(APPROVED_LINEAGE)
+  for (const [key, list] of [['scoped', scoped], ['platform', platform]]) {
+    const expected = [...APPROVED_LINEAGE[key], ...APPROVED_LINEAGE.registeredAdditions[key]].map((entry) => entry.tag)
+    if (!Array.isArray(list) || list.length !== counts[key]) return `${key} must have exactly ${counts[key]} migrations`
+    const unexpected = list.findIndex((entry, index) => entry?.tag !== expected[index])
+    if (unexpected !== -1) return `${key}[${unexpected}] is ${list[unexpected]?.tag}, expected ${expected[unexpected]}`
+  }
+  return null
+}
 const exact = (object, keys) => {
   if (!object || typeof object !== 'object' || Array.isArray(object) || Object.keys(object).sort().join('|') !== keys.slice().sort().join('|')) fail('Unexpected schema fields')
 }
@@ -59,7 +80,7 @@ export function validateQualification(m, proofs, { now = Date.now(), sourceSha, 
   const issued = Date.parse(m.issuedAt), expires = Date.parse(m.expiresAt)
   if (![issued, expires, now].every(Number.isFinite) || issued > now || expires <= now || expires <= issued || expires - issued > 24 * 60 * 60 * 1000 ||
       now - issued > 24 * 60 * 60 * 1000 || expires > Date.parse('2026-10-27T13:16:59Z')) fail('Expired or invalid validity window')
-  if (scoped?.length !== 20 || platform?.length !== 16 || JSON.stringify(m.scoped) !== JSON.stringify(scoped) || JSON.stringify(m.platform) !== JSON.stringify(platform)) fail('Exact 20 scoped/16 platform hashes required')
+  if (lineageProblem(scoped, platform) || JSON.stringify(m.scoped) !== JSON.stringify(scoped) || JSON.stringify(m.platform) !== JSON.stringify(platform)) fail('Exact approved lineage plus registered additions required: ' + (lineageProblem(scoped, platform) ?? 'receipt does not list the exact source hashes'))
   exact(m.proofs, ['schema','authority','isolation','preservation','restore','images','lineage','ownershipAdapter'])
   if (!proofs || Object.keys(m.proofs).some((kind) => !proofs[kind])) fail('Linked proof missing')
   for (const [kind, proof] of Object.entries(proofs)) {
@@ -75,7 +96,7 @@ export function validateQualification(m, proofs, { now = Date.now(), sourceSha, 
   const historical = ['806d257e54f400b3c6aebb44f87d1d187b95867fb01290d29e8e39c9a57965ea','6fe35fcf28c5c7eb6526cc6fc9f8fc0caea211e517d277f46c7b83851f29bef3','79ccce73f37552b45fff57726d7c00f1e5ebe11acd7305f30b74b4583dddad90']
   if (proofs.lineage.bindings?.some((binding, index) => binding.historical !== historical[index]) || ledgerDigest((schema.ledger ?? []).slice(0,15)) !== BASELINE_LEDGER ||
       !evaluateLedgerIntegrity({ rows: schema.ledger ?? [], journals: [{ name: 'scoped', entries: scoped.map((entry,index) => ({ ...entry, hash: index>=10 && index<=12 ? historical[index-10] : entry.hash })) }, { name: 'platform', entries: platform }], attested: schema.attestationAnchors }).ok) fail('Historical ledger/prefix/anchors invalid')
-  if (schema.ledger?.length !== 36 || ledgerHashes.size !== 36 || !platform.every((entry) => ledgerHashes.has(entry.hash)) ||
+  if (schema.ledger?.length !== scoped.length + platform.length || ledgerHashes.size !== scoped.length + platform.length || !platform.every((entry) => ledgerHashes.has(entry.hash)) ||
       !scoped.every((entry, index) => ledgerHashes.has(index >= 10 && index <= 12 ? proofs.lineage.bindings?.[index - 10]?.historical : entry.hash))) fail('Actual shared ledger coverage invalid')
   const authority = proofs.authority
   for (const name of ['union_eyes_runtime', 'union_eyes_system']) {

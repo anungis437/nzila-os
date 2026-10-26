@@ -163,7 +163,7 @@ describe('Error code stability', () => {
     } catch (error) {
       expect(error).toBeInstanceOf(z.ZodError);
       const zodError = error as z.ZodError;
-      expect(zodError.errors[0].code).toBe('invalid_string');
+      expect(zodError.issues[0].code).toBe('invalid_format');
     }
   });
 });

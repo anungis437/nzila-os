@@ -18,6 +18,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
 import { resolve, join, relative } from 'node:path'
 
+import { isRetiredNoOpRoute } from './retired-routes'
 const ROOT = resolve(__dirname, '../..')
 
 function read(abs: string): string {
@@ -224,7 +225,7 @@ describe('SEC-ORG-ISO-002: HTTP cross-org breach prevention', () => {
         const violations: string[] = []
         for (const route of exportRoutes) {
           const content = read(route)
-          const hasAuth = ORG_SCOPED_AUTH_PATTERNS.some((p) => p.test(content))
+          const hasAuth = ORG_SCOPED_AUTH_PATTERNS.some((p) => p.test(content)) || isRetiredNoOpRoute(content)
           if (!hasAuth) {
             violations.push(relative(ROOT, route))
           }

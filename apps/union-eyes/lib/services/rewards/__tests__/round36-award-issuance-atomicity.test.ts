@@ -101,6 +101,11 @@ vi.mock('drizzle-orm', () => ({
   relations: vi.fn(() => ({})),
 }));
 
+vi.mock('../audit', () => ({
+  auditRewards: vi.fn(async () => undefined),
+  rewardsActor: (userId?: string | null, fallback = 'system:rewards') => (userId && userId !== 'system' ? userId : fallback),
+}));
+
 vi.mock('@/db/schema', () => ({
   rewardBudgetEnvelopes: {
     id: 'id', orgId: 'orgId', programId: 'programId', scopeType: 'scopeType',

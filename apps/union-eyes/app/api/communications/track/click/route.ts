@@ -92,6 +92,7 @@ export async function GET(request: NextRequest) {
     const [existing] = await db
       .select({
         id: messageLog.id,
+        organizationId: messageLog.organizationId,
         clickedAt: messageLog.clickedAt,
         openedAt: messageLog.openedAt,
         status: messageLog.status,
@@ -126,12 +127,12 @@ export async function GET(request: NextRequest) {
       await db
         .update(messageLog)
         .set(updatePayload)
-        .where(eq(messageLog.id, existing.id));
+        .where(and(eq(messageLog.id, existing.id), eq(messageLog.organizationId, existing.organizationId)));
 
       const [campaign] = await db
         .select({ stats: campaigns.stats })
         .from(campaigns)
-        .where(eq(campaigns.id, campaignId))
+        .where(and(eq(campaigns.id, campaignId), eq(campaigns.organizationId, existing.organizationId)))
         .limit(1);
 
       if (campaign) {
@@ -146,7 +147,7 @@ export async function GET(request: NextRequest) {
             stats: nextStats,
             updatedAt: new Date(),
           })
-          .where(eq(campaigns.id, campaignId));
+          .where(and(eq(campaigns.id, campaignId), eq(campaigns.organizationId, existing.organizationId)));
       }
     }
   });

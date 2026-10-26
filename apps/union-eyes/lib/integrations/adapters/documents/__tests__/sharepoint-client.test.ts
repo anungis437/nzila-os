@@ -37,6 +37,14 @@ describe('SharePointClient', () => {
     vi.unstubAllGlobals();
   });
 
+  it('reports missing credentials without calling Microsoft', async () => {
+    const client = new SharePointClient({ clientId: '', clientSecret: '', tenantId: '' });
+    const health = await client.healthCheck();
+    expect(health.status).toBe('error');
+    expect(health.message).toMatch(/not configured/);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('getSites authenticates then returns sites', async () => {
     const client = makeClient();
     pushResp(tokenResponse());

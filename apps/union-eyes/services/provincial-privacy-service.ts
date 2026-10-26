@@ -1,4 +1,5 @@
 import { db } from "@/db";
+import type { RLSTx } from "@/lib/db/with-rls-context";
 import {
   provincialPrivacyConfig,
   provincialConsent,
@@ -161,7 +162,7 @@ export class ProvincialPrivacyService {
   /**
    * Record user consent
    */
-  static async recordConsent(request: ConsentRequest) {
+  static async recordConsent(request: ConsentRequest, tx: RLSTx = db) {
     const config = await this.getProvinceConfig(request.province);
 
     // Validate Quebec explicit consent requirement
@@ -192,7 +193,7 @@ export class ProvincialPrivacyService {
       expiresAt.setFullYear(expiresAt.getFullYear() + 1);
     }
 
-    const [consent] = await db
+    const [consent] = await tx
       .insert(provincialConsent)
       .values({
         userId: request.userId,
@@ -246,17 +247,19 @@ export class ProvincialPrivacyService {
   /**
    * Revoke user consent
    */
-  static async revokeConsent(userId: string, province: Province, consentType: string) {
-    await db
+  static async revokeConsent(userId: string, province: Province, consentType: string, tx: RLSTx = db) {
+    return tx
       .update(provincialConsent)
       .set({ revokedAt: new Date() })
       .where(
         and(
           eq(provincialConsent.userId, userId),
           eq(provincialConsent.province, province),
-          eq(provincialConsent.consentType, consentType)
+          eq(provincialConsent.consentType, consentType),
+          isNull(provincialConsent.revokedAt)
         )
-      );
+      )
+      .returning({ id: provincialConsent.id });
   }
 
   /**
@@ -393,44 +396,6 @@ export class ProvincialPrivacyService {
       .returning();
 
     return dsar;
-  }
-
-  /**
-   * Update DSAR status
-   */
-  static async updateDSARStatus(
-    dsarId: string,
-    status: "in_progress" | "completed" | "denied",
-    assignedTo?: string
-  ) {
-    const updateData: {
-      status: "in_progress" | "completed" | "denied";
-      updatedAt: Date;
-      assignedTo?: string;
-      respondedAt?: Date;
-      deadlineMet?: boolean;
-    } = { status, updatedAt: new Date() };
-    if (assignedTo) updateData.assignedTo = assignedTo;
-
-    if (status === "completed") {
-      updateData.respondedAt = new Date();
-
-      // Check if deadline was met
-      const dsar = await db
-        .select()
-        .from(dataSubjectAccessRequests)
-        .where(eq(dataSubjectAccessRequests.id, dsarId))
-        .limit(1);
-
-      if (dsar[0]) {
-        updateData.deadlineMet = new Date() <= dsar[0].responseDeadline;
-      }
-    }
-
-    await db
-      .update(dataSubjectAccessRequests)
-      .set(updateData)
-      .where(eq(dataSubjectAccessRequests.id, dsarId));
   }
 
   /**

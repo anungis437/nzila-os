@@ -1,7 +1,7 @@
 import { and, desc, eq, or, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
-import { grievanceCaseAccessAssignments } from '@/db/schema/domains/claims/grievance-lifecycle';
+import { assignedCaseRepresentativeIds } from '@/lib/services/case-access-service';
 import { documents, documentLinks } from '@/db/schema/documents-schema';
 import { logger } from '@/lib/logger';
 import {
@@ -30,8 +30,7 @@ async function getCaseSnapshot(caseId: string, orgId: string) {
       workplaceName: grievances.workplaceName,
       cbaId: grievances.cbaId,
       cbaArticle: grievances.cbaArticle,
-      unionRepId: grievances.unionRepId,
-      createdBy: grievances.createdBy,
+          createdBy: grievances.createdBy,
       awardSummary: grievances.background,
       organizationId: grievances.organizationId,
       createdAt: grievances.createdAt,
@@ -43,22 +42,8 @@ async function getCaseSnapshot(caseId: string, orgId: string) {
   return (caseRow ?? null) as CaseSnapshot | null;
 }
 
-async function getAssignedLroIds(params: { organizationId: string; caseId: string; primaryLroId: string | null | undefined }) {
-  const collaboratorRows = await db
-    .select({ userId: grievanceCaseAccessAssignments.userId })
-    .from(grievanceCaseAccessAssignments)
-    .where(
-      and(
-        eq(grievanceCaseAccessAssignments.organizationId, params.organizationId),
-        eq(grievanceCaseAccessAssignments.grievanceId, params.caseId),
-        eq(grievanceCaseAccessAssignments.status, 'active'),
-      ),
-    );
-
-  const ids = new Set<string>();
-  if (params.primaryLroId) ids.add(params.primaryLroId);
-  for (const row of collaboratorRows) ids.add(row.userId);
-  return ids;
+async function getAssignedLroIds(params: { organizationId: string; caseId: string }) {
+  return new Set(await assignedCaseRepresentativeIds(params.organizationId, params.caseId));
 }
 
 function titleForDocument(row: DocumentCandidate) {
@@ -203,7 +188,6 @@ export async function getRelatedDocuments(params: {
   const assignedLroIds = await getAssignedLroIds({
     organizationId: params.context.orgId,
     caseId: params.context.caseId,
-    primaryLroId: currentCase.unionRepId,
   });
 
   const ranked = [] as RelatedDocumentRankResult[];

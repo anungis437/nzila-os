@@ -9,6 +9,7 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { socialCampaigns, socialPosts } from '@/db/schema/social-media-schema';
 import { eq, and, ilike, or, gte, lte, desc, count, SQL } from 'drizzle-orm';
 import { z } from "zod";
@@ -149,7 +150,7 @@ const socialMediaCampaignsSchema = z.object({
   status: z.unknown().optional(),
 });
 
-export const POST = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
+export const POST = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
   try {
       const { userId, organizationId } = context;
 
@@ -187,7 +188,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
     
@@ -238,9 +239,9 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         }
       }
 
-      // Create campaign
-      const [campaign] = await withRLSContext(async () =>
-        db
+      // Create campaign and record the audit together
+      const campaign = await withRLSContext({ organizationId }, async (tx) => {
+        const [row] = await tx
           .insert(socialCampaigns)
           .values({
             organizationId,
@@ -254,8 +255,17 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
             status: 'active',
             createdBy: userId,
           })
-          .returning()
-      );
+          .returning();
+        await persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: 'social.campaign.create',
+          resourceType: 'social_campaigns',
+          resourceId: row.id,
+          details: { name, platforms },
+        });
+        return row;
+      });
 
       return standardSuccessResponse(
       {  campaign  }
@@ -270,9 +280,16 @@ return NextResponse.json(
     }
 });
 
-export const PUT = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
+export const PUT = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
   try {
-      const { _userId, organizationId } = context;
+      const { userId, organizationId } = context;
+
+      if (!organizationId || !userId) {
+        return standardErrorResponse(
+          ErrorCode.FORBIDDEN,
+          'No organization found'
+        );
+      }
 
       // Get campaign ID from query params
       const searchParams = request.nextUrl.searchParams;
@@ -289,7 +306,7 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
       const [campaign] = await db
         .select()
         .from(socialCampaigns)
-        .where(eq(socialCampaigns.id, campaignId))
+        .where(and(eq(socialCampaigns.id, campaignId), eq(socialCampaigns.organizationId, organizationId)))
         .limit(1);
 
       if (!campaign) {
@@ -297,13 +314,6 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
       ErrorCode.RESOURCE_NOT_FOUND,
       'Campaign not found'
     );
-      }
-
-      if (organizationId !== campaign.organizationId) {
-        return standardErrorResponse(
-          ErrorCode.FORBIDDEN,
-          'Unauthorized'
-        );
       }
 
       const body = await request.json();
@@ -334,13 +344,26 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
       if (target_audience !== undefined) updateData.targetAudience = target_audience;
       if (status !== undefined) updateData.status = status;
 
-      const [updatedCampaign] = await withRLSContext(async () =>
-        db
+      const updatedCampaign = await withRLSContext({ organizationId }, async (tx) => {
+        const [row] = await tx
           .update(socialCampaigns)
           .set(updateData)
-          .where(eq(socialCampaigns.id, campaignId))
-          .returning()
-      );
+          .where(and(eq(socialCampaigns.id, campaignId), eq(socialCampaigns.organizationId, organizationId)))
+          .returning();
+        if (!row) return null;
+        await persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: 'social.campaign.update',
+          resourceType: 'social_campaigns',
+          resourceId: campaignId,
+          details: { fields: Object.keys(updateData).filter((key) => key !== 'updatedAt') },
+        });
+        return row;
+      });
+      if (!updatedCampaign) {
+        return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Campaign not found');
+      }
 
       return NextResponse.json({ campaign: updatedCampaign });
     } catch (_error) {
@@ -353,9 +376,16 @@ return NextResponse.json(
     }
 });
 
-export const DELETE = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
+export const DELETE = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
   try {
-      const { _userId, organizationId } = context;
+      const { userId, organizationId } = context;
+
+      if (!organizationId || !userId) {
+        return standardErrorResponse(
+          ErrorCode.FORBIDDEN,
+          'No organization found'
+        );
+      }
 
       // Get campaign ID from query params
       const searchParams = request.nextUrl.searchParams;
@@ -372,7 +402,7 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
       const [campaign] = await db
         .select()
         .from(socialCampaigns)
-        .where(eq(socialCampaigns.id, campaignId))
+        .where(and(eq(socialCampaigns.id, campaignId), eq(socialCampaigns.organizationId, organizationId)))
         .limit(1);
 
       if (!campaign) {
@@ -380,13 +410,6 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
       ErrorCode.RESOURCE_NOT_FOUND,
       'Campaign not found'
     );
-      }
-
-      if (organizationId !== campaign.organizationId) {
-        return standardErrorResponse(
-          ErrorCode.FORBIDDEN,
-          'Unauthorized'
-        );
       }
 
       // Check if campaign has posts
@@ -406,10 +429,26 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
         );
       }
 
-      // Delete campaign
-      await withRLSContext(async () =>
-        db.delete(socialCampaigns).where(eq(socialCampaigns.id, campaignId))
-      );
+      // Delete campaign and record the audit together
+      const removed = await withRLSContext({ organizationId }, async (tx) => {
+        const rows = await tx
+          .delete(socialCampaigns)
+          .where(and(eq(socialCampaigns.id, campaignId), eq(socialCampaigns.organizationId, organizationId)))
+          .returning({ id: socialCampaigns.id });
+        if (rows.length === 0) return false;
+        await persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: 'social.campaign.delete',
+          resourceType: 'social_campaigns',
+          resourceId: campaignId,
+          details: { name: campaign.name },
+        });
+        return true;
+      });
+      if (!removed) {
+        return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Campaign not found');
+      }
 
       return NextResponse.json({
         message: 'Campaign deleted successfully',

@@ -49,14 +49,13 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
     return standardErrorResponse(ErrorCode.NOT_FOUND, 'Grievance not found');
   }
 
-  const isStewardPlus = await hasMinRole('steward');
   const access = await getEffectiveCaseAccess({
     organizationId,
     grievanceId: params.id,
     userId,
   });
 
-  if (!isStewardPlus && grievance.createdBy !== userId && !access.canViewCase) {
+  if (grievance.createdBy !== userId && !access.canViewCase) {
     return standardErrorResponse(ErrorCode.FORBIDDEN, 'You do not have access to this grievance');
   }
 
@@ -73,7 +72,6 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
     orgId: organizationId,
     actor: {
       userId,
-      isStewardPlus,
     },
     limit: query.data.limit ?? 20,
   });
@@ -94,7 +92,6 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
         orgId: organizationId,
         actor: {
           userId,
-          isStewardPlus,
         },
       })
     : undefined;

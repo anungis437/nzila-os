@@ -27,8 +27,8 @@ function getAuthUser(req: Request): AuthUser {
 
 // Validation schemas
 const createArrearsCaseSchema = z.object({
-  memberId: z.string().uuid(),
-  transactionIds: z.array(z.string().uuid()).min(1),
+  memberId: z.guid(),
+  transactionIds: z.array(z.guid()).min(1),
   totalAmount: z.coerce.number().positive(),
   daysOverdue: z.number().int().positive(),
   notes: z.string().optional(),
@@ -127,7 +127,7 @@ router.post('/detect', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     res.status(500).json({
@@ -300,7 +300,7 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     res.status(500).json({
@@ -398,7 +398,7 @@ router.post('/:id/payment-plan', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     res.status(500).json({
@@ -468,7 +468,7 @@ router.put('/:id/status', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     res.status(500).json({
@@ -537,7 +537,7 @@ router.post('/:id/contact', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     res.status(500).json({
@@ -622,7 +622,7 @@ router.post('/:id/payment', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     res.status(500).json({

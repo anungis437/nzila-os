@@ -9,6 +9,7 @@ const m = vi.hoisted(() => ({
   },
   selectQueue: [] as unknown[][],
   updateReturningQueue: [] as unknown[][],
+  audit: vi.fn(),
 }));
 
 const mockDb = {
@@ -37,6 +38,8 @@ vi.mock('@/lib/api/framework', () => ({
   ApiError: m.ApiError,
 }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (_o: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(mockDb) }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/lib/knowledge-transfer/governance/consent-controls', () => ({
   SENSITIVITY_LEVELS: {
     public_internal: { indexingAllowed: true, description: 'Internal' },
@@ -62,6 +65,7 @@ async function loadRoute() {
 describe('exit-interviews/[id]/governance route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.audit.mockResolvedValue(undefined);
     m.selectQueue = [];
     m.updateReturningQueue = [];
     m.withApi.mockImplementation(

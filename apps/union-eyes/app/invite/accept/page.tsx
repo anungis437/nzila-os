@@ -35,7 +35,7 @@ export default function InviteAcceptPage() {
         setError(data.error || 'Could not accept invite');
         return;
       }
-      router.replace('/en-CA/dashboard/priorities');
+      router.replace('/en-CA/dashboard');
     } catch {
       setError('Something went wrong. Please try again.');
     } finally {

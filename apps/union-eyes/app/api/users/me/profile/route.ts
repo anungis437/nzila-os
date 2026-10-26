@@ -21,8 +21,23 @@ export async function GET() {
       const active = choices.activeOrganizationId;
       const organization = choices.organizations.find((entry) => entry.id === active) ?? null;
       const membership = choices.memberships.find((entry) => entry.organizationId === active) ?? null;
+      // The caller's own session identity only; this is not an email-based lookup of any profile row.
+      const sessionUser = await currentUser().catch(() => null);
+      const sessionEmail =
+        sessionUser?.primaryEmailAddress?.emailAddress?.trim()
+        || sessionUser?.emailAddresses?.[0]?.emailAddress?.trim()
+        || '';
+      const sessionName =
+        sessionUser?.fullName
+        || `${sessionUser?.firstName || ''} ${sessionUser?.lastName || ''}`.trim()
+        || (sessionEmail ? sessionEmail.split('@')[0] : '');
       return NextResponse.json({
-        user: { id: membership?.userId ?? null, name: '', email: '', phone: '' },
+        user: {
+          id: membership?.userId ?? null,
+          name: sessionName,
+          email: sessionEmail,
+          phone: sessionUser?.primaryPhoneNumber?.phoneNumber ?? '',
+        },
         profile: null,
         organization: organization
           ? {

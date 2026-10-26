@@ -31,10 +31,14 @@
 import { withApi } from './with-api';
 import { ApiError } from './errors';
 import { db } from '@/db/db';
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { eq, and, desc, count, sql, type SQL } from 'drizzle-orm';
 import type { PgTable, PgColumn } from 'drizzle-orm/pg-core';
 import type { NextRequest } from 'next/server';
 import type { UserRole } from '@/lib/api-auth-guard';
+import { lowRoleModeFor, ownRowsScope, resolveLowRoleScope } from './crud-low-role-guard';
+import { assertCrudRead, assertCrudWrite, crudGovernanceFor } from './crud-governance';
 
 // crud-factory's readRole/writeRole accept the full canonical role hierarchy
 // (same set withApi's auth.minRole already enforces via ROLE_HIERARCHY), not
@@ -318,6 +322,43 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
   const orgCol = orgScoped ? getColumn(table, 'organizationId') : undefined;
   const ownerCol = opts.ownerColumn ? getColumn(table, opts.ownerColumn) : undefined;
   const orderCol = getColumn(table, orderBy);
+  const lowRoleMode = lowRoleModeFor(table, Boolean(opts.ownerColumn));
+  const governance = { ...crudGovernanceFor(table), hasOwnerColumn: Boolean(opts.ownerColumn) };
+  const ownRowsMode = lowRoleModeFor(table, false);
+
+  /**
+   * Runs a generic write and its durable audit record in one tenant transaction. The audit names the fields written,
+   * never their values. A write without an organization and an acting user cannot be attributed, so it is refused.
+   */
+  async function audited<T extends Record<string, unknown>>(
+    organizationId: string | null | undefined,
+    userId: string | null | undefined,
+    action: 'create' | 'update' | 'delete',
+    fields: string[],
+    operation: (tx: RLSTx) => Promise<T | undefined>,
+  ): Promise<T | undefined> {
+    if (!organizationId || !userId) throw ApiError.forbidden();
+    return withRLSContext({ organizationId }, async (tx) => {
+      const row = await operation(tx);
+      if (row) {
+        await persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: `crud.${governance.name}.${action}`,
+          resourceType: governance.name,
+          resourceId: String(row[resolvedPk] ?? ''),
+          details: { fields, route: 'generic-crud' },
+        });
+      }
+      return row;
+    });
+  }
+
+  async function readScope(userId: string | null | undefined, organizationId: string | null | undefined) {
+    assertCrudRead(governance);
+    if (governance.class === 'OWN_ROWS_READ') return ownRowsScope(ownRowsMode, userId);
+    return resolveLowRoleScope(lowRoleMode, userId, organizationId);
+  }
 
   if (itemRoute) {
     return buildItemHandlers();
@@ -349,6 +390,8 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         if (ownerCol && userId) {
           conditions.push(eq(ownerCol, userId));
         }
+        const lowRole = await readScope(userId, organizationId);
+        if (lowRole.condition) conditions.push(lowRole.condition);
 
         const whereClause = conditions.length > 0
           ? and(...conditions)
@@ -414,6 +457,9 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           values.createdBy = userId;
         }
 
+        assertCrudWrite(governance);
+        const lowRole = await resolveLowRoleScope(lowRoleMode, userId, organizationId);
+
         const transformed = opts.beforeCreate
           ? await opts.beforeCreate(values, { organizationId, userId })
           : values;
@@ -430,7 +476,10 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           hasCreatedByColumn: Boolean(createdByCol),
         });
 
-        const [row] = await db.insert(table).values(finalValues).returning();
+        // A below-staff caller can only create rows about themselves.
+        if (lowRole.forcedOwner) finalValues[lowRole.forcedOwner.name] = lowRole.forcedOwner.value;
+
+        const row = await audited(organizationId, userId, 'create', Object.keys(finalValues), async (tx) => (await tx.insert(table).values(finalValues).returning())[0] as Record<string, unknown> | undefined);
         return { data: row };
       },
     );
@@ -463,6 +512,8 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         if (ownerCol && userId) {
           conditions.push(eq(ownerCol, userId));
         }
+        const lowRole = await readScope(userId, organizationId);
+        if (lowRole.condition) conditions.push(lowRole.condition);
 
         const [row] = await db.select().from(table).where(and(...conditions));
         if (!row) throw ApiError.notFound(`${resourceName} not found`);
@@ -482,6 +533,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         },
       },
       async ({ body, params, organizationId, userId }) => {
+        assertCrudWrite(governance);
         const id = params[paramName];
         let updates = stripBlockedPatchFields(body, { pk, orgScoped, blockedPatchFields });
 
@@ -500,6 +552,8 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         if (ownerCol && userId) {
           conditions.push(eq(ownerCol, userId));
         }
+        const lowRole = await resolveLowRoleScope(lowRoleMode, userId, organizationId);
+        if (lowRole.condition) conditions.push(lowRole.condition);
 
         if (opts.beforeUpdate || mergeJsonColumns.length > 0) {
           // Locked read-then-write: the row cannot change between the hook
@@ -509,7 +563,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           // merge (`col || value`) rather than a full-column replace, so a
           // concurrent write to a key the merge fragment doesn't mention
           // can never be reverted by this PATCH.
-          const [row] = await db.transaction(async (tx) => {
+          const row = await audited(organizationId, userId, 'update', Object.keys(updates), (outer) => outer.transaction(async (tx) => {
             const [existingRow] = await tx
               .select()
               .from(table)
@@ -548,8 +602,8 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
 
             const setValues = buildMergeSetValues(updates, table, mergeJsonColumns);
 
-            return tx.update(table).set(setValues).where(and(...conditions)).returning();
-          });
+            return (await tx.update(table).set(setValues).where(and(...conditions)).returning())[0] as Record<string, unknown> | undefined;
+          }));
 
           if (!row) throw ApiError.notFound(`${resourceName} not found`);
           return { data: row };
@@ -561,10 +615,10 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           updates.updatedAt = new Date();
         }
 
-        const [row] = await db.update(table)
+        const row = await audited(organizationId, userId, 'update', Object.keys(updates), async (tx) => (await tx.update(table)
           .set(updates)
           .where(and(...conditions))
-          .returning();
+          .returning())[0] as Record<string, unknown> | undefined);
 
         if (!row) throw ApiError.notFound(`${resourceName} not found`);
         return { data: row };
@@ -583,6 +637,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         },
       },
       async ({ params, organizationId, userId }) => {
+        assertCrudWrite(governance);
         const id = params[paramName];
         const conditions: SQL[] = [eq(pkCol, id)];
         if (orgScoped && orgCol && organizationId) {
@@ -595,18 +650,18 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         // Try soft delete first (status → archived), fall back to hard delete
         const statusCol = getColumn(table, 'status');
         if (statusCol) {
-          const [row] = await db.update(table)
+          const row = await audited(organizationId, userId, 'delete', ['status'], async (tx) => (await tx.update(table)
             .set({ status: 'archived', updatedAt: new Date() } as Record<string, unknown>)
             .where(and(...conditions))
-            .returning();
+            .returning())[0] as Record<string, unknown> | undefined);
           if (!row) throw ApiError.notFound(`${resourceName} not found`);
           return { data: row };
         }
 
         // Hard delete for tables without a status column
-        const [deleted] = await db.delete(table)
+        const deleted = await audited(organizationId, userId, 'delete', [], async (tx) => (await tx.delete(table)
           .where(and(...conditions))
-          .returning();
+          .returning())[0] as Record<string, unknown> | undefined);
         if (!deleted) throw ApiError.notFound(`${resourceName} not found`);
         return { data: deleted };
       },

@@ -14,18 +14,18 @@ export const eventMetadataSchema = z.object({
 export type EventMetadata = z.infer<typeof eventMetadataSchema>
 
 export const canonicalEventSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   eventType: z.string().min(1),
   eventVersion: z.number().int().positive().default(1),
   sourceModule: z.string().min(1),
   orgId: z.string().min(1),
   actorId: z.string().min(1),
   timestamp: z.string().datetime(),
-  entityId: z.string().uuid().optional(),
+  entityId: z.guid().optional(),
   entityType: z.string().optional(),
   correlationId: z.string().optional(),
   causationId: z.string().optional(),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   schemaVersion: z.string().default('1.0.0'),
 })
 export type CanonicalEvent = z.infer<typeof canonicalEventSchema>

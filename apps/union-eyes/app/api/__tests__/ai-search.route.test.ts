@@ -12,11 +12,12 @@ const m = vi.hoisted(() => ({
   withRLSContext: vi.fn(),
   buildCanonicalAiOutput: vi.fn(),
   getAiClient: vi.fn(),
+  hasMinRole: vi.fn(),
   dbExecuteQueue: [] as unknown[][],
   logger: { error: vi.fn(), warn: vi.fn() },
 }));
 
-vi.mock('@/lib/api-auth-guard', () => ({ withRoleAuth: m.withRoleAuth }));
+vi.mock('@/lib/api-auth-guard', () => ({ withRoleAuth: m.withRoleAuth, hasMinRole: m.hasMinRole }));
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: m.checkRateLimit,
   RATE_LIMITS: { AI_COMPLETION: { limit: 10 } },
@@ -58,6 +59,7 @@ describe('ai/search route', () => {
     m.createRateLimitHeaders.mockReturnValue({});
     m.checkEntitlement.mockResolvedValue({ allowed: true });
     m.guardAiFeature.mockResolvedValue(null);
+    m.hasMinRole.mockResolvedValue(true);
     m.generateEmbedding.mockResolvedValue([0.1, 0.2]);
     m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
     m.buildCanonicalAiOutput.mockImplementation((x: unknown) => x);

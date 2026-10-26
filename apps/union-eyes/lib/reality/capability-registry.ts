@@ -95,6 +95,91 @@ export interface Capability {
  */
 export const CAPABILITY_REGISTRY: readonly Capability[] = [
   // ------------------------------------------------------------------------
+  // Generated scaffold actions (UE-FINAL-CONVERGENCE-2026-10: 200 "accepted" → HTTP 501)
+  //
+  // These handlers read the request body and returned { status: 'accepted' } (and an empty list as a "status")
+  // without performing or recording any work. They are now honest 501s. Implementing each is tracked in
+  // docs/union-eyes/convergence/register/ue-convergence-register.json (UE-CONV-STUB-*). Anti-theatre rule R-9
+  // fails the build if the scaffold shape reappears.
+  // ------------------------------------------------------------------------
+  {
+    id: 'UE-ACTION-MEMBERS-MERGE-BULK-EXPORT',
+    title: 'Member merge, bulk and export actions',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/members/merge/route.ts', 'app/api/members/bulk/route.ts', 'app/api/members/export/route.ts', 'app/api/admin/members/export/route.ts'],
+    evidence: [
+      'each route.ts throws ApiError.notImplemented → HTTP 501 on both POST and the status GET',
+      'tooling/reality/anti-theatre-scan.ts — rule R-9 rejects the previous 200 { status: "accepted" } scaffold',
+    ],
+    targetWave: 5,
+    notes: 'Member export and merge are consequential (member PII, record integrity) and need kernel authorization, classification and audit before implementation.',
+  },
+  {
+    id: 'UE-ACTION-CLAIMS-BULK',
+    title: 'Bulk claim actions',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/claims/bulk/route.ts'],
+    evidence: ['app/api/claims/bulk/route.ts — throws ApiError.notImplemented → HTTP 501', 'rule R-9 in tooling/reality/anti-theatre-scan.ts'],
+    targetWave: 5,
+  },
+  {
+    id: 'UE-ACTION-CLC-REMITTANCE-SUBMIT-EXPORT',
+    title: 'CLC remittance submission and export',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: [
+      'app/api/admin/clc/remittances/[id]/submit/route.ts',
+      'app/api/admin/clc/remittances/[id]/export/route.ts',
+      'app/api/admin/clc/remittances/export/route.ts',
+    ],
+    evidence: [
+      'each route.ts throws ApiError.notImplemented → HTTP 501',
+      'previously POST .../submit returned 200 { status: "accepted" } and submitted nothing to the CLC',
+    ],
+    targetWave: 5,
+    notes: 'Financial submission: requires a governed remittance approval record (see the finance source findings) and an external acknowledgement before it may report success.',
+  },
+  {
+    id: 'UE-ACTION-TAX-CRA-EXPORT',
+    title: 'CRA tax export',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/tax/cra/export/route.ts'],
+    evidence: ['app/api/tax/cra/export/route.ts — throws ApiError.notImplemented → HTTP 501', 'rule R-9 in tooling/reality/anti-theatre-scan.ts'],
+    targetWave: 5,
+  },
+  {
+    id: 'UE-ACTION-COMMUNICATIONS-EXPORTS',
+    title: 'Campaign, distribution-list and survey exports',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: [
+      'app/api/communications/campaigns/[id]/analytics/export/route.ts',
+      'app/api/communications/distribution-lists/[id]/export/route.ts',
+      'app/api/communications/surveys/[surveyId]/export/route.ts',
+    ],
+    evidence: ['each route.ts throws ApiError.notImplemented → HTTP 501', 'rule R-9 in tooling/reality/anti-theatre-scan.ts'],
+    targetWave: 5,
+  },
+  {
+    id: 'UE-ACTION-ALERT-TEST-EXECUTION',
+    title: 'Alert test execution',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/admin/alerts/executions/test/route.ts'],
+    evidence: ['app/api/admin/alerts/executions/test/route.ts — throws ApiError.notImplemented → HTTP 501', 'rule R-9 in tooling/reality/anti-theatre-scan.ts'],
+    targetWave: 5,
+  },
+  {
+    id: 'UE-ACTION-ORG-HIERARCHY-SEED',
+    title: 'Organization hierarchy seeding',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/admin/seed-test-data/route.ts'],
+    evidence: [
+      'app/api/admin/seed-test-data/route.ts — throws ApiError.notImplemented → HTTP 501 on GET and POST',
+      'the former seeders were empty stubs that created nothing while the route reported success; the SQL replay seeds targeted the superseded replay schema and were retired (UE-CONV-H-005)',
+    ],
+    targetWave: 5,
+    notes: 'A canonical, schema-checked seed does not exist; the development seed button in the union dashboard reports the 501.',
+  },
+
+  // ------------------------------------------------------------------------
   // Cron endpoints (Wave 0 P0 fix: 200-no-op → HTTP 501)
   // ------------------------------------------------------------------------
   {
@@ -730,6 +815,251 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'sample-data fallback, per the same class of defect closed for Health & Safety in #717. Whether ' +
       'app/api/reports/scheduled/route.ts (the non-v2 path the OTHER, live page calls) is itself backed by ' +
       'real cron delivery depends on UE-CRON-SCHEDULED-REPORTS above, which remains NOT_IMPLEMENTED.',
+  },
+
+  // ------------------------------------------------------------------------
+  // Governance Officer 2.1 (UE-GOVERNANCE-OFFICER-CANONICAL-2.1) — containment
+  // ------------------------------------------------------------------------
+  {
+    id: 'UE-PRIVACY-INCIDENT-WORKFLOW',
+    title: 'Privacy incident (breach) management',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/privacy/breach/route.ts'],
+    evidence: [
+      'app/api/privacy/breach/route.ts — throws ApiError.notImplemented → HTTP 501 (previously generic CRUD over dataClassificationPolicy)',
+      'app/api/privacy/__tests__/data-classification-policy-writerole.test.ts — asserts the route no longer imports the CRUD factory or the policy table',
+    ],
+    targetWave: 9,
+    notes:
+      'Platform classification doctrine now lives at app/api/compliance/data-classification-policy/route.ts. A real incident ' +
+      'workflow needs dedicated storage, jurisdiction determination, human legal review and a separate dispatch step.',
+  },
+  {
+    id: 'UE-PRIVACY-DSAR-WORKFLOW',
+    title: 'Information-rights (DSAR) request handling',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/privacy/dsar/route.ts'],
+    evidence: ['app/api/privacy/dsar/route.ts — throws ApiError.notImplemented → HTTP 501'],
+    targetWave: 9,
+  },
+  {
+    id: 'UE-PRIVACY-PROVINCIAL-CASES',
+    title: 'Provincial / jurisdictional privacy cases',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/privacy/provincial/route.ts'],
+    evidence: ['app/api/privacy/provincial/route.ts — throws ApiError.notImplemented → HTTP 501'],
+    targetWave: 9,
+  },
+  {
+    id: 'UE-PRIVACY-BREACH-ASSESSMENT',
+    title: 'Breach notification determination (PIPEDA / provincial)',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/emergency/pipeda/route.ts'],
+    evidence: [
+      'app/api/emergency/pipeda/route.ts — returns LEGAL_REVIEW_REQUIRED / legalDetermination NOT_MADE; no threshold, deadline or channel is computed',
+      'app/api/__tests__/emergency-pipeda-legal-review.route.test.ts',
+    ],
+    targetWave: 9,
+    notes:
+      'The route only acknowledges reported facts. It makes no legal determination, persists nothing and dispatches no notification.',
+  },
+  {
+    id: 'UE-EMERGENCY-DECLARATION',
+    title: 'Emergency declaration, break-glass activation, recovery and preparedness reporting',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/emergency/activate/route.ts', 'app/api/emergency/recovery/route.ts', 'app/api/emergency/dashboard/route.ts'],
+    evidence: [
+      'app/api/emergency/{activate,recovery,dashboard}/route.ts — return HTTP 501 through lib/emergency/not-implemented.ts',
+      'app/api/__tests__/emergency-not-implemented.route.test.ts',
+    ],
+    targetWave: 9,
+    notes:
+      'The routes previously returned 200 with an invented declaration, an "activated" break-glass state, audit and notification ' +
+      'claims and fabricated preparedness and compliance figures, with nothing persisted. Emergency access in the authority kernel ' +
+      'requires explicit, time-bound, justified and audited grants; no emergency route may exist before that lifecycle does.',
+  },
+  {
+    id: 'UE-GOV-INDEPENDENT-REVIEW',
+    title: 'Independent governance review workflow (intake → finding → verified remediation)',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['lib/governance-officer/review-engine.ts'],
+    evidence: [
+      'lib/governance-officer/__tests__/review-engine.test.ts — pure domain core only (TEST_PROVEN); no persistence, HTTP surface or UI',
+    ],
+    targetWave: 9,
+    notes:
+      'Domain decision core exists; the capability is not operational until persisted state, server routes, audit trail and ' +
+      'native acceptance exist (UE-GOVERNANCE-OFFICER-CANONICAL-2.1 §XV).',
+  },
+
+  // ------------------------------------------------------------------------
+  // Financial Officer 2.1 containment (UE-FINANCIAL-OFFICER-2.1-CONVERGENCE).
+  // Source-level evidence only: state is NOT_IMPLEMENTED, never operational.
+  // ------------------------------------------------------------------------
+  {
+    id: 'UE-FIN-UNION-BUDGETS-EXPENSES-VENDORS',
+    title: 'Union budgets, expenses and vendors',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: [
+      'app/api/financial/budgets/route.ts',
+      'app/api/financial/expenses/route.ts',
+      'app/api/financial/vendors/route.ts',
+      'lib/finance/retired-financial-route.ts',
+    ],
+    evidence: [
+      'app/api/financial/{budgets,expenses,vendors}/** — all methods answer HTTP 501 via lib/finance/retired-financial-route.ts; previously a 200 deprecation payload.',
+      'The budgets, expenses and vendors tables were never created (see lib/api/deprecation.ts registry).',
+      'app/api/__tests__/financial-officer-containment.test.ts — asserts 501 and absence of any pointer to Nzila billing reports.',
+    ],
+    targetWave: 8,
+    notes:
+      'Nzila billing reports are not a union budget or expense record. A qualified union-finance record store, ' +
+      'policy and migration are required before any replacement; do not create a generic schema to satisfy the UI.',
+  },
+  {
+    id: 'UE-FIN-STRIKE-FUNDS',
+    title: 'Strike funds, stipends, disbursements, eligibility, picket lines',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: [
+      'app/api/strike/funds/route.ts',
+      'app/api/strike/disbursements/route.ts',
+      'app/api/strike/stipends/route.ts',
+      'app/api/strike/eligibility/route.ts',
+      'app/api/strike/picket-lines/route.ts',
+    ],
+    evidence: [
+      'These routes were bound to votingSessions via crudRoutes, serving voting records as fund data; they now answer HTTP 501 and import no database table.',
+      'app/api/__tests__/financial-officer-containment.test.ts — asserts no votingSessions/crudRoutes import and a 501 result.',
+    ],
+    targetWave: 8,
+    notes:
+      'Only strike_fund_payment_audit exists in the schema; there is no qualified strike-fund balance, stipend or ' +
+      'eligibility model. The strike-fund dashboard pages render an explicit not-available state.',
+  },
+  {
+    id: 'UE-FIN-AFFILIATE-REMITTANCES',
+    title: 'CLC / National / federation affiliate remittances',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/admin/clc/remittances/route.ts'],
+    evidence: [
+      'app/api/admin/clc/remittances/** — previously bound to organizationMembers (membership rows served/mutated as remittances; export/submit stubs answered "accepted"); all now answer HTTP 501.',
+      'app/api/__tests__/financial-officer-containment.test.ts — asserts no organizationMembers/crudRoutes import and no "accepted" stub.',
+    ],
+    targetWave: 8,
+    notes:
+      'Affiliate (per-capita) remittances are distinct from employer payroll-deduction remittances. A qualified model ' +
+      'with institutional recipients, payable/receivable recognition and acknowledgment is required.',
+  },
+  {
+    id: 'UE-FIN-PENSION-TRUSTEE-ADMIN',
+    title: 'Pension trustee appointment and administration',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/pension/trustees/route.ts', 'app/api/pension/trustees/[id]/route.ts'],
+    evidence: [
+      'POST/PATCH/DELETE previously required only minRole steward; they now fail closed with HTTP 501 for every role.',
+      'app/api/__tests__/financial-officer-containment.test.ts — asserts 501 for trustee create/update/delete.',
+    ],
+    targetWave: 8,
+    notes:
+      'Trustee administration requires an independently verified trustee-administration authority and approval ' +
+      'workflow. Secretary-Treasurer status does not imply it. GET (read) is unchanged.',
+  },
+  {
+    id: 'UE-FIN-EMPLOYER-REMITTANCE-INGESTION',
+    title: 'Employer remittance upload (source preservation only)',
+    state: 'LIMITED',
+    ownedBy: ['app/api/dues/remittances/upload/route.ts'],
+    evidence: [
+      'app/api/dues/remittances/upload/route.ts — SHA-256 hashes and preserves the original bytes in blob storage before creating a record; a failed store creates no record; duplicate hashes are rejected.',
+      'app/api/__tests__/dues-remittances-upload.route.test.ts — mocked storage/db only; no live storage was exercised.',
+    ],
+    targetWave: 8,
+    notes:
+      'Records are SOURCE_PRESERVED_UNPARSED: no parsing, member matching, employer-ownership validation or ' +
+      'reconciliation occurs; zero totals are placeholders. PATCH /api/dues/remittances/[id] can no longer set ' +
+      'reconciliation, completion or result fields (strict schema), so no remittance can become reconciled until ' +
+      'an engine-driven transition exists.',
+  },
+
+  // ------------------------------------------------------------------------
+  // Representative 2.2 convergence (UE-REP-2.2-CONVERGENCE). Source- and
+  // test-level state only; none of this has runtime acceptance evidence.
+  // ------------------------------------------------------------------------
+  {
+    id: 'UE-REP-CASE-AUTHORITY-SCOPING',
+    title: 'Representative case, member-directory and document authority scoping',
+    state: 'LIMITED',
+    ownedBy: [
+      'apps/union-eyes/lib/cases/grievance-list-scope.ts',
+      'apps/union-eyes/lib/cases/workbench-projection.ts',
+      'apps/union-eyes/lib/members/directory-access.ts',
+    ],
+    evidence: [
+      'lib/cases/grievance-list-scope.pglite.test.ts and lib/cases/case-mandate-changes.pglite.test.ts — assignment, reassignment, expiry/revocation, demotion and cross-organization scoping asserted against PostgreSQL semantics (PGlite)',
+      'app/api/__tests__/grievances-access.route.test.ts, grievances-status.route.test.ts, workbench-authorization.route.test.ts, members-directory-authorization.route.test.ts, claims-evidence-authorization.route.test.ts — route-level negative and positive authorization with mocked persistence',
+    ],
+    targetWave: 1,
+    notes:
+      'LIMITED, not REAL: an ordinary steward holds case-resource authority only through assignment, ownership, ' +
+      'creation, or an explicit collaborator grant. Representative 2.2 also gave chief steward and above a ' +
+      'role-derived supervisory read over every grievance; that cross-case read was deliberately NOT ' +
+      'integrated (a supervisory scope needs an issued mandate with territory and expiry, UE-CONV-E-001). Proven ' +
+      'only at source, unit and PGlite level — no deployed RLS probe, no native browser ' +
+      'acceptance. Intake conversion still makes the converting steward the owner (an implicit self-assignment ' +
+      'whose protocol per operating model needs stakeholder validation).',
+  },
+  {
+    id: 'UE-REP-MANDATE-RECUSAL-DELEGATION',
+    title: 'Representative mandate model: recusal, territory, privileged-matter restriction, temporary delegation',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['apps/union-eyes/lib/cases/case-authorization.ts'],
+    evidence: [
+      'lib/cases/case-authorization.ts caseReadScope — chief_steward, business_agent, officer and admin read every case in the organization; no recusal, conflict-of-interest, territory or privileged-matter predicate exists',
+      'db/schema — no recusal, territory-mandate or temporary-delegation table for claims or grievances (document privacy labels and the retired pre-kernel collaborator table do not model these)',
+    ],
+    targetWave: 2,
+    notes:
+      'A business agent territory or a chief steward oversight mandate currently implies read access to every ' +
+      'confidential matter in the organization. A recusal and territory model needs a schema decision and ' +
+      'stakeholder-validated policy per operating model (CAPE, CUPE, LIUNA); it is deliberately not simulated.',
+  },
+  {
+    id: 'UE-WORKAID-SPECIALIST-REFERRAL',
+    title: 'WorkAid specialist referral, acknowledgement and milestone integration',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: [],
+    evidence: [
+      'Union-side referral, consent and disclosure records exist (see UE-WORKAID-UNION-SIDE-DISCLOSURE); no counsel-side connector, transmission, acknowledgement, WSIB/WSIAT filing or Clio code exists',
+      'No navigation entry, route or component presents WorkAid progress; the representative experience shows no specialist status feed',
+    ],
+    targetWave: 3,
+    readinessImpact: 'non_blocking',
+    disposition: 'OPTIONAL_NATIVE_CAPABILITY',
+    notes:
+      'WorkAid is an independent professional service with its own engagement, acceptance and filing authority. ' +
+      'Prerequisites before any live progress is shown: an operational connector, referral authorization and ' +
+      'member sharing consent, secure transmission with actual acknowledgement, WorkAid acceptance or rejection, ' +
+      'purpose-limited document exchange, revocation and closure. Direct WorkAid engagement must not be ' +
+      'visible to the union by membership alone. No Clio record, professional note or filing validity may be ' +
+      'invented. Design reference only: the WorkAid v0.3 contracts under docs/union-eyes/workaid on the ' +
+      'agents/workaid-prep-20261023 branch.',
+  },
+  {
+    id: 'UE-WORKAID-UNION-SIDE-DISCLOSURE',
+    title: 'WorkAid union-side consent, referral record, document authorisation and revocation',
+    state: 'LIMITED',
+    ownedBy: ['lib/authority/store/workaid-disclosure.ts', 'app/api/workaid/consents/route.ts', 'app/api/workaid/referrals/route.ts'],
+    evidence: [
+      'db/__tests__/workaid-union-side.pglite.test.ts — consent scope, per-document authorisation, revocation, recusal and removed-representative denial, audit-fault rollback, cross-tenant isolation (PGlite on the real kernel storage; not a native or credentialed run)',
+      'Counsel reads fail closed (COUNSEL_NOT_VERIFIABLE) because no CounselAssertionVerifier is configured',
+    ],
+    targetWave: 3,
+    readinessImpact: 'non_blocking',
+    disposition: 'OPTIONAL_NATIVE_CAPABILITY',
+    notes:
+      'A union-side record only: a referral is not delivery to counsel, no counsel HTTP route or UI exists, and no consent text has been authored ' +
+      '(consent capture is refused until a legally approved wording version is recorded). Two external gates stay separate and closed: ' +
+      'counsel-side activation (a counsel-side system and its issuer allow-list) and key custody (UE-CONV-G-003).',
   },
 ] as const;
 

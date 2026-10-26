@@ -26,7 +26,7 @@ import {
   type ReconciliationRun,
   type ReconciliationException,
 } from '@/db/schema';
-import { eq, and, gte, lte, inArray } from 'drizzle-orm';
+import { eq, and, gte, lte, inArray, isNull } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { addMoney, subtractMoney, absMoney, toCents } from '@/lib/decimal-safe';
 
@@ -281,7 +281,14 @@ export async function runReconciliation(
         varianceCad,
         completedAt: new Date(),
       })
-      .where(eq(reconciliationRuns.id, run.id));
+      .where(
+        and(
+          eq(reconciliationRuns.id, run.id),
+          run.organizationId
+            ? eq(reconciliationRuns.organizationId, run.organizationId)
+            : isNull(reconciliationRuns.organizationId),
+        ),
+      );
 
     await auditLog({
       eventType: AuditEventType.DATA_CREATE,
@@ -342,6 +349,7 @@ export async function runReconciliation(
  */
 export async function resolveException(
   exceptionId: string,
+  organizationId: string,
   resolution: {
     status: 'resolved' | 'written_off';
     resolvedBy: string;
@@ -360,6 +368,7 @@ export async function resolveException(
     .where(
       and(
         eq(reconciliationExceptions.id, exceptionId),
+        eq(reconciliationExceptions.organizationId, organizationId),
         inArray(reconciliationExceptions.status, ['open', 'under_review']),
       ),
     )

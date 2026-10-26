@@ -78,7 +78,7 @@ describe('case-intelligence precedent-matching-service', () => {
     const { findPrecedentDocuments } = await import('./precedent-matching-service');
     const result = await findPrecedentDocuments({
       context: { caseId: 'case-root', orgId: 'org-1', actorId: 'user-1' },
-      actor: { userId: 'user-1', isStewardPlus: false },
+      actor: { userId: 'user-1' },
       similarCases: [{ caseId: 'case-similar', score: 70, matchReasons: ['Same agreement'], matchedDimensions: { agreement: true } }],
       limit: 10,
     });
@@ -116,7 +116,7 @@ describe('case-intelligence precedent-matching-service', () => {
     const { findPrecedentDocuments } = await import('./precedent-matching-service');
     const result = await findPrecedentDocuments({
       context: { caseId: 'case-root', orgId: 'org-1', actorId: 'user-1' },
-      actor: { userId: 'user-1', isStewardPlus: false },
+      actor: { userId: 'user-1' },
       similarCases: [{ caseId: 'case-similar', score: 70, matchReasons: ['Same agreement'], matchedDimensions: { agreement: true } }],
       limit: 10,
     });

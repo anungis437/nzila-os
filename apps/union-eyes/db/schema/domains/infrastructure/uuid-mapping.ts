@@ -3,13 +3,14 @@ import { pgTable, text, timestamp, uuid, index } from "drizzle-orm/pg-core";
 /**
  * User UUID Mapping Table
  * Maps auth provider user IDs to internal UUIDs for foreign key relationships.
- * Supports both legacy Clerk IDs (clerk_user_id) and Entra Object IDs (entra_oid).
+ * Stores the provider user ID (authUserId) and the Entra Object ID (entra_oid).
+ * The physical column keeps its historical name (clerk_user_id); renaming it requires a governed data migration.
  */
 export const userUuidMapping = pgTable(
   "user_uuid_mapping",
   {
     userUuid: uuid("user_uuid").defaultRandom().primaryKey(),
-    clerkUserId: text("clerk_user_id").notNull().unique(),
+    authUserId: text("clerk_user_id").notNull().unique(),
     entraOid: text("entra_oid"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -19,7 +20,7 @@ export const userUuidMapping = pgTable(
       .defaultNow(),
   },
   (table) => ({
-    clerkUserIdIdx: index("idx_user_uuid_mapping_clerk_id").on(table.clerkUserId),
+    authUserIdIdx: index("idx_user_uuid_mapping_clerk_id").on(table.authUserId),
   })
 );
 

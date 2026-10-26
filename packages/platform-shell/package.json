@@ -21,7 +21,7 @@
     "@nzila/org": "workspace:*",
     "@nzila/platform-contracts": "workspace:*",
     "@nzila/ui": "workspace:*",
-    "zod": "^3.24.0"
+    "zod": "^4.6.7"
   },
   "peerDependencies": {
     "@nzila/platform-auth": "workspace:*",

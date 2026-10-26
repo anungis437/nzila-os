@@ -16,7 +16,7 @@
  *   - intelligence/artifacts/reference-profile's POST handlers ran
  *     `enforcePilotOwnership()` against an UNLOCKED read and then, entirely
  *     separately (no transaction, no lock at all), issued a plain
- *     `.update(pilotApplications).set({responses: fullReplace})` — the
+ *     plain full-replace write of the `responses` column ({responses: fullReplace}) — the
  *     same rebind TOCTOU, PLUS an independent "server writer vs server
  *     writer" lost-update race against commercial-transition (which DOES
  *     lock the row): whichever of these un-locked routes read `responses`
@@ -34,7 +34,7 @@
  * list.
  */
 import { NextResponse } from 'next/server';
-import { eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { pilotApplications } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { hasMinRole, type UserRole } from '@/lib/api-auth-guard';
@@ -125,7 +125,19 @@ export async function withLockedPilotMutation<T>(
 
       if (responsesPatch && Object.keys(responsesPatch).length > 0) {
         const setValues = buildMergeSetValues({ responses: responsesPatch }, pilotApplications, ['responses']);
-        await tx.update(pilotApplications).set(setValues).where(eq(pilotApplications.id, pilotId));
+        // The write is bound to the owner that was just authorized under the lock, so a rebind can never slip in between.
+        const organizationId = application.verifiedOrganizationId;
+        await tx
+          .update(pilotApplications)
+          .set(setValues)
+          .where(
+            and(
+              eq(pilotApplications.id, pilotId),
+              organizationId
+                ? eq(pilotApplications.verifiedOrganizationId, organizationId)
+                : isNull(pilotApplications.verifiedOrganizationId),
+            ),
+          );
       }
 
       return { application: application as PilotApplicationRow, data };

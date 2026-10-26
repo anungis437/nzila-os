@@ -22,7 +22,7 @@ import { generateDuesAlignmentReport } from '@/services/platform-economics/dues-
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withMinRole('officer', async (request, context: BaseAuthContext) => {
+export const GET = withMinRole('secretary_treasurer', async (request, context: BaseAuthContext) => {
   const { organizationId, userId } = context;
   if (!organizationId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
@@ -49,6 +49,8 @@ export const GET = withMinRole('officer', async (request, context: BaseAuthConte
     );
 
     return standardSuccessResponse({
+      domain: 'NZILA_PLATFORM_BILLING',
+      notUnionFinancialRecords: true,
       billingAccount,
       ledgerSummary,
       recentInvoices,

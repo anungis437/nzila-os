@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 const processSchema = z.object({
   periodStart: z.coerce.date(),
   periodEnd: z.coerce.date(),
-  billingPeriodId: z.string().uuid().optional(),
+  billingPeriodId: z.guid().optional(),
 });
 
 export const POST = withApi(

@@ -7,7 +7,7 @@
  * @module app/api/admin/billing-cycles
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { BillingCycleService } from '@/lib/services/billing-cycle-service';
 import { withApiAuth, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
 import {
@@ -17,6 +17,7 @@ import {
 } from '@/lib/api/standardized-responses';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
+import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 
 export const runtime = 'nodejs';
 
@@ -25,7 +26,7 @@ export const runtime = 'nodejs';
 // =============================================================================
 
 const billingCycleSchema = z.object({
-  organizationId: z.string().uuid(),
+  organizationId: z.guid(),
   frequency: z.enum(['monthly', 'bi_weekly', 'weekly', 'quarterly', 'annual']),
   periodStart: z.string().optional(), // ISO date string
   periodEnd: z.string().optional(), // ISO date string
@@ -62,7 +63,7 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
 
@@ -90,15 +91,31 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       userId: user.id,
     });
 
-    // Generate billing cycle
-    const result = await BillingCycleService.generateBillingCycle({
-      organizationId,
-      periodStart: start,
-      periodEnd: end,
-      frequency,
-      dryRun,
-      executedBy: user.id,
-    });
+    const generate = () =>
+      BillingCycleService.generateBillingCycle({
+        organizationId,
+        periodStart: start,
+        periodEnd: end,
+        frequency,
+        dryRun,
+        executedBy: user.id,
+      });
+
+    // A real cycle creates dues charges for every member of the target organization. The intent is recorded against
+    // that organization before anything is created; a preview writes nothing and is not audited.
+    const result = dryRun
+      ? await generate()
+      : await performAuditedOperation(
+          {
+            organizationId,
+            userId: user.id,
+            scope: 'system',
+            action: 'platform.billing_cycle.generate',
+            resourceType: 'billing_cycle',
+            details: { frequency, periodStart: start.toISOString(), periodEnd: end.toISOString() },
+          },
+          generate,
+        );
 
     if (dryRun) {
       logger.info('Billing cycle preview completed', {
@@ -126,6 +143,8 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       message: `Billing cycle generated successfully. Created ${result.transactionsCreated} transactions totaling $${result.totalAmount}.`,
     });
   } catch (error) {
+    const refused = operationAuditResponse(error);
+    if (refused) return NextResponse.json(refused.body, { status: refused.status });
     logger.error('Error generating billing cycle', { error });
 
     return standardErrorResponse(

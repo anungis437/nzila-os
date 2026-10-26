@@ -11,7 +11,7 @@ import { z } from 'zod'
 export const CommandContextSchema = z.object({
   org_id: z.string().min(1),
   actor_id: z.string().min(1).optional(),
-  correlation_id: z.string().uuid().optional(),
+  correlation_id: z.guid().optional(),
   environment: z.enum(['local', 'dev', 'staging', 'prod']).optional(),
   request_source: z.string().optional(),
 })
@@ -21,7 +21,7 @@ export const CommandContextSchema = z.object({
 const baseFields = {
   org_id: z.string().min(1),
   actor_id: z.string().min(1),
-  correlation_id: z.string().uuid().optional(),
+  correlation_id: z.guid().optional(),
   reason: z.string().optional(),
   notes: z.string().optional(),
 }
@@ -31,7 +31,7 @@ const baseFields = {
 export const CreateQuoteCommand = z.object({
   ...baseFields,
   type: z.literal('create_quote'),
-  customer_id: z.string().uuid(),
+  customer_id: z.guid(),
   title: z.string().min(1),
   currency: z.enum(['CAD', 'USD', 'EUR', 'GBP', 'XAF']),
   lines: z.array(z.object({
@@ -47,14 +47,14 @@ export type CreateQuoteCommand = z.infer<typeof CreateQuoteCommand>
 export const SendQuoteCommand = z.object({
   ...baseFields,
   type: z.literal('send_quote'),
-  quote_id: z.string().uuid(),
+  quote_id: z.guid(),
 })
 export type SendQuoteCommand = z.infer<typeof SendQuoteCommand>
 
 export const AcceptQuoteCommand = z.object({
   ...baseFields,
   type: z.literal('accept_quote'),
-  quote_id: z.string().uuid(),
+  quote_id: z.guid(),
   customer_name: z.string().min(1).optional(),
   customer_email: z.string().email().optional(),
   message: z.string().optional(),
@@ -64,7 +64,7 @@ export type AcceptQuoteCommand = z.infer<typeof AcceptQuoteCommand>
 export const RequestQuoteRevisionCommand = z.object({
   ...baseFields,
   type: z.literal('request_quote_revision'),
-  quote_id: z.string().uuid(),
+  quote_id: z.guid(),
   request_message: z.string().min(1),
 })
 export type RequestQuoteRevisionCommand = z.infer<typeof RequestQuoteRevisionCommand>
@@ -72,7 +72,7 @@ export type RequestQuoteRevisionCommand = z.infer<typeof RequestQuoteRevisionCom
 export const ConvertQuoteToOrderCommand = z.object({
   ...baseFields,
   type: z.literal('convert_quote_to_order'),
-  quote_id: z.string().uuid(),
+  quote_id: z.guid(),
 })
 export type ConvertQuoteToOrderCommand = z.infer<typeof ConvertQuoteToOrderCommand>
 
@@ -81,35 +81,35 @@ export type ConvertQuoteToOrderCommand = z.infer<typeof ConvertQuoteToOrderComma
 export const ConfirmOrderCommand = z.object({
   ...baseFields,
   type: z.literal('confirm_order'),
-  order_id: z.string().uuid(),
+  order_id: z.guid(),
 })
 export type ConfirmOrderCommand = z.infer<typeof ConfirmOrderCommand>
 
 export const StartFulfillmentCommand = z.object({
   ...baseFields,
   type: z.literal('start_fulfillment'),
-  order_id: z.string().uuid(),
+  order_id: z.guid(),
 })
 export type StartFulfillmentCommand = z.infer<typeof StartFulfillmentCommand>
 
 export const CompleteOrderCommand = z.object({
   ...baseFields,
   type: z.literal('complete_order'),
-  order_id: z.string().uuid(),
+  order_id: z.guid(),
 })
 export type CompleteOrderCommand = z.infer<typeof CompleteOrderCommand>
 
 export const CancelOrderCommand = z.object({
   ...baseFields,
   type: z.literal('cancel_order'),
-  order_id: z.string().uuid(),
+  order_id: z.guid(),
 })
 export type CancelOrderCommand = z.infer<typeof CancelOrderCommand>
 
 export const RequireDepositCommand = z.object({
   ...baseFields,
   type: z.literal('require_deposit'),
-  order_id: z.string().uuid(),
+  order_id: z.guid(),
   deposit_required: z.boolean(),
   deposit_percent: z.number().min(0).max(100).optional(),
   deposit_amount: z.number().nonnegative().optional(),
@@ -122,7 +122,7 @@ export type RequireDepositCommand = z.infer<typeof RequireDepositCommand>
 export const RecordPaymentCommand = z.object({
   ...baseFields,
   type: z.literal('record_payment'),
-  order_id: z.string().uuid(),
+  order_id: z.guid(),
   amount: z.number().positive(),
   currency: z.enum(['CAD', 'USD', 'EUR', 'GBP', 'XAF']),
   method: z.enum(['BANK_TRANSFER', 'CREDIT_CARD', 'CHECK', 'CASH', 'OTHER']),
@@ -133,8 +133,8 @@ export type RecordPaymentCommand = z.infer<typeof RecordPaymentCommand>
 export const ConfirmPaymentCommand = z.object({
   ...baseFields,
   type: z.literal('confirm_payment'),
-  payment_id: z.string().uuid(),
-  order_id: z.string().uuid(),
+  payment_id: z.guid(),
+  order_id: z.guid(),
 })
 export type ConfirmPaymentCommand = z.infer<typeof ConfirmPaymentCommand>
 
@@ -143,8 +143,8 @@ export type ConfirmPaymentCommand = z.infer<typeof ConfirmPaymentCommand>
 export const CreatePurchaseOrderCommand = z.object({
   ...baseFields,
   type: z.literal('create_purchase_order'),
-  order_id: z.string().uuid(),
-  vendor_id: z.string().uuid(),
+  order_id: z.guid(),
+  vendor_id: z.guid(),
   expected_delivery: z.coerce.date().optional(),
 })
 export type CreatePurchaseOrderCommand = z.infer<typeof CreatePurchaseOrderCommand>
@@ -152,14 +152,14 @@ export type CreatePurchaseOrderCommand = z.infer<typeof CreatePurchaseOrderComma
 export const SendPurchaseOrderCommand = z.object({
   ...baseFields,
   type: z.literal('send_purchase_order'),
-  purchase_order_id: z.string().uuid(),
+  purchase_order_id: z.guid(),
 })
 export type SendPurchaseOrderCommand = z.infer<typeof SendPurchaseOrderCommand>
 
 export const ConfirmPurchaseOrderCommand = z.object({
   ...baseFields,
   type: z.literal('confirm_purchase_order'),
-  purchase_order_id: z.string().uuid(),
+  purchase_order_id: z.guid(),
 })
 export type ConfirmPurchaseOrderCommand = z.infer<typeof ConfirmPurchaseOrderCommand>
 
@@ -168,17 +168,17 @@ export type ConfirmPurchaseOrderCommand = z.infer<typeof ConfirmPurchaseOrderCom
 export const StartProductionCommand = z.object({
   ...baseFields,
   type: z.literal('start_production'),
-  order_id: z.string().uuid(),
-  purchase_order_id: z.string().uuid(),
-  vendor_id: z.string().uuid(),
+  order_id: z.guid(),
+  purchase_order_id: z.guid(),
+  vendor_id: z.guid(),
 })
 export type StartProductionCommand = z.infer<typeof StartProductionCommand>
 
 export const CompleteProductionCommand = z.object({
   ...baseFields,
   type: z.literal('complete_production'),
-  production_job_id: z.string().uuid(),
-  order_id: z.string().uuid(),
+  production_job_id: z.guid(),
+  order_id: z.guid(),
 })
 export type CompleteProductionCommand = z.infer<typeof CompleteProductionCommand>
 
@@ -187,7 +187,7 @@ export type CompleteProductionCommand = z.infer<typeof CompleteProductionCommand
 export const CreateShipmentCommand = z.object({
   ...baseFields,
   type: z.literal('create_shipment'),
-  order_id: z.string().uuid(),
+  order_id: z.guid(),
   carrier: z.string().optional(),
   tracking_number: z.string().optional(),
 })
@@ -196,8 +196,8 @@ export type CreateShipmentCommand = z.infer<typeof CreateShipmentCommand>
 export const MarkShipmentShippedCommand = z.object({
   ...baseFields,
   type: z.literal('mark_shipment_shipped'),
-  shipment_id: z.string().uuid(),
-  order_id: z.string().uuid(),
+  shipment_id: z.guid(),
+  order_id: z.guid(),
   carrier: z.string().min(1),
   tracking_number: z.string().min(1),
   tracking_url: z.string().url().optional(),
@@ -207,8 +207,8 @@ export type MarkShipmentShippedCommand = z.infer<typeof MarkShipmentShippedComma
 export const MarkShipmentDeliveredCommand = z.object({
   ...baseFields,
   type: z.literal('mark_shipment_delivered'),
-  shipment_id: z.string().uuid(),
-  order_id: z.string().uuid(),
+  shipment_id: z.guid(),
+  order_id: z.guid(),
 })
 export type MarkShipmentDeliveredCommand = z.infer<typeof MarkShipmentDeliveredCommand>
 
@@ -217,7 +217,7 @@ export type MarkShipmentDeliveredCommand = z.infer<typeof MarkShipmentDeliveredC
 export const SubmitForReviewCommand = z.object({
   ...baseFields,
   type: z.literal('submit_for_review'),
-  quote_id: z.string().uuid(),
+  quote_id: z.guid(),
 })
 export type SubmitForReviewCommand = z.infer<typeof SubmitForReviewCommand>
 
@@ -226,7 +226,7 @@ export type SubmitForReviewCommand = z.infer<typeof SubmitForReviewCommand>
 export const CreateInvoiceCommand = z.object({
   ...baseFields,
   type: z.literal('create_invoice'),
-  order_id: z.string().uuid(),
+  order_id: z.guid(),
   due_date: z.coerce.date(),
 })
 export type CreateInvoiceCommand = z.infer<typeof CreateInvoiceCommand>
@@ -234,14 +234,14 @@ export type CreateInvoiceCommand = z.infer<typeof CreateInvoiceCommand>
 export const IssueInvoiceCommand = z.object({
   ...baseFields,
   type: z.literal('issue_invoice'),
-  invoice_id: z.string().uuid(),
+  invoice_id: z.guid(),
 })
 export type IssueInvoiceCommand = z.infer<typeof IssueInvoiceCommand>
 
 export const VoidInvoiceCommand = z.object({
   ...baseFields,
   type: z.literal('void_invoice'),
-  invoice_id: z.string().uuid(),
+  invoice_id: z.guid(),
 })
 export type VoidInvoiceCommand = z.infer<typeof VoidInvoiceCommand>
 
@@ -250,7 +250,7 @@ export type VoidInvoiceCommand = z.infer<typeof VoidInvoiceCommand>
 export const TriggerSalesToProcurementCommand = z.object({
   ...baseFields,
   type: z.literal('trigger_sales_to_procurement'),
-  quote_id: z.string().uuid(),
+  quote_id: z.guid(),
 })
 export type TriggerSalesToProcurementCommand = z.infer<typeof TriggerSalesToProcurementCommand>
 
@@ -259,14 +259,14 @@ export type TriggerSalesToProcurementCommand = z.infer<typeof TriggerSalesToProc
 export const ShipOrderCommand = z.object({
   ...baseFields,
   type: z.literal('ship_order'),
-  order_id: z.string().uuid(),
+  order_id: z.guid(),
 })
 export type ShipOrderCommand = z.infer<typeof ShipOrderCommand>
 
 export const MarkOrderDeliveredCommand = z.object({
   ...baseFields,
   type: z.literal('mark_order_delivered'),
-  order_id: z.string().uuid(),
+  order_id: z.guid(),
 })
 export type MarkOrderDeliveredCommand = z.infer<typeof MarkOrderDeliveredCommand>
 
@@ -275,8 +275,8 @@ export type MarkOrderDeliveredCommand = z.infer<typeof MarkOrderDeliveredCommand
 export const ReceivePOLineCommand = z.object({
   ...baseFields,
   type: z.literal('receive_po_line'),
-  line_id: z.string().uuid(),
-  purchase_order_id: z.string().uuid(),
+  line_id: z.guid(),
+  purchase_order_id: z.guid(),
   quantity_received: z.number().int().nonnegative(),
 })
 export type ReceivePOLineCommand = z.infer<typeof ReceivePOLineCommand>
@@ -284,7 +284,7 @@ export type ReceivePOLineCommand = z.infer<typeof ReceivePOLineCommand>
 export const CancelPurchaseOrderCommand = z.object({
   ...baseFields,
   type: z.literal('cancel_purchase_order'),
-  purchase_order_id: z.string().uuid(),
+  purchase_order_id: z.guid(),
 })
 export type CancelPurchaseOrderCommand = z.infer<typeof CancelPurchaseOrderCommand>
 
@@ -293,7 +293,7 @@ export type CancelPurchaseOrderCommand = z.infer<typeof CancelPurchaseOrderComma
 export const CheckProductionReadinessCommand = z.object({
   ...baseFields,
   type: z.literal('check_production_readiness'),
-  order_id: z.string().uuid(),
+  order_id: z.guid(),
 })
 export type CheckProductionReadinessCommand = z.infer<typeof CheckProductionReadinessCommand>
 

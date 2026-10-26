@@ -33,8 +33,6 @@ db/                          # 🎯 Source of Truth
 │   ├── claims-schema.ts    # Claims system
 │   ├── strike-fund-tax-schema.ts  # Tax compliance
 │   └── ... (50+ schema files)
-├── seeds/                   # Seed data scripts
-│   └── clc-chart-of-accounts.sql
 ├── migrations/              # Drizzle-generated migrations (if any)
 ├── db.ts                    # Database client & connection
 ├── index.ts                 # Schema re-exports
@@ -156,12 +154,11 @@ UnionEyes uses **Drizzle Kit** for type-safe schema migrations:
 # Generate migration from schema changes
 pnpm db:generate
 
-# Apply migrations to database
+# Apply migrations through the approved bootstrap (db:migrate runs run-union-eyes-drizzle-bootstrap.mjs)
 pnpm db:migrate
-
-# Push schema directly (dev only)
-pnpm db:push
 ```
+
+There is no schema-push entrypoint; `drizzle-kit push` bypasses the migration ledger and was removed.
 
 ### Historical Migrations (Archived)
 
@@ -169,12 +166,12 @@ The `database/migrations-archive-raw-sql/` directory contains 70+ raw SQL migrat
 
 ## Seeds
 
-Seed data files are in `db/seeds/`:
-
-```bash
-# Run seeds (if seed script exists)
-psql $DATABASE_URL < db/seeds/clc-chart-of-accounts.sql
-```
+There is no supported seed. `db/seeds/` and `db/replay.ps1` were retired: the SQL seeds and the replay script
+targeted the superseded Drizzle replay schema (they could not run on the canonical Django plus platform-migration
+schema, which has no column defaults), the replay script carried hard-coded credentials, and the TypeScript seeders
+behind `/api/admin/seed-test-data` created nothing while reporting success (that route now returns HTTP 501).
+Organizations, users and memberships are created through the canonical application paths. A canonical,
+schema-checked seed is a separate piece of work tracked as `UE-CONV-H-005`.
 
 ## Environment Variables
 

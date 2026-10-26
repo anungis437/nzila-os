@@ -3,7 +3,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 // Round 55 — clause_library_tags inherits parent clause READ visibility and
 // OWNER-only WRITE authority. DELETE-by-tagId additionally requires the tag
 // to belong to the given clause id (tag parent-injection fix). Zero-row
-// deletes stay idempotent success; they are not a cross-org grant.
+// deletes 404 and are never audited; they are not a cross-org grant. Every
+// successful mutation persists its audit row on the same tx handle.
 //
 // TBS-02 mock contract: withSystemContext is not a stand-in for tenant
 // write success. Tenant SELECT matches ue_shared_library_select. Tenant
@@ -88,7 +89,7 @@ const h = vi.hoisted(() => {
       return makeChain('delete');
     },
   };
-  const bindContext = (mode: 'system' | 'tenant', organizationId: string, fn: () => unknown) => {
+  const bindContext = (mode: 'system' | 'tenant', organizationId: string, fn: (tx?: unknown) => unknown) => {
     const prevMode = session.mode;
     const prevOrg = session.organizationId;
     session.mode = mode;
@@ -98,7 +99,7 @@ const h = vi.hoisted(() => {
       session.organizationId = prevOrg;
     };
     try {
-      const result = fn();
+      const result = fn(db);
       if (result && typeof (result as { then?: unknown }).then === 'function') {
         return Promise.resolve(result).finally(restore);
       }
@@ -115,13 +116,14 @@ const h = vi.hoisted(() => {
   const canReadSharedClause = vi.fn();
   const isSharedClauseOwner = vi.fn();
   const whereSpy = vi.fn();
+  const persistAtomicAudit = vi.fn();
   const withSystemContext = vi.fn((fn: () => unknown) => {
     if (!allowPrivilegedRead.current) {
       throw new Error('withSystemContext is not tenant mutation authority');
     }
     return bindContext('system', '', fn);
   });
-  const withRLSContext = vi.fn((context: { organizationId?: string }, fn: () => unknown) => {
+  const withRLSContext = vi.fn((context: { organizationId?: string }, fn: (tx?: unknown) => unknown) => {
     if (
       typeof context?.organizationId !== 'string' ||
       context.organizationId.trim() === '' ||
@@ -145,6 +147,7 @@ const h = vi.hoisted(() => {
     canReadSharedClause,
     isSharedClauseOwner,
     whereSpy,
+    persistAtomicAudit,
     withSystemContext,
     withRLSContext,
   };
@@ -157,6 +160,7 @@ vi.mock('@/db/schema/domains/agreements/shared-library', () => ({
 }));
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((col: unknown, val: unknown) => ({ op: 'eq', col, val })),
+  sql: vi.fn((_strings: TemplateStringsArray, ...values: unknown[]) => ({ op: 'sql', values })),
   and: vi.fn((...args: unknown[]) => {
     h.whereSpy(...args);
     return { op: 'and', args };
@@ -167,6 +171,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: h.withRLSContext,
 }));
 vi.mock('@/lib/api/framework', () => ({ withApi: h.withApi, ApiError: { notFound: h.notFound, badRequest: h.badRequest } }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.persistAtomicAudit }));
 vi.mock('@/lib/clause-library/sharing-authority', () => ({
   canReadSharedClause: h.canReadSharedClause,
   isSharedClauseOwner: h.isSharedClauseOwner,
@@ -200,6 +205,7 @@ describe('clause-library/[id]/tags route (round 55)', () => {
     h.applied.deletes = 0;
     h.allowPrivilegedRead.current = false;
     h.witnessedParentOrg.current = null;
+    h.persistAtomicAudit.mockReset().mockResolvedValue(undefined);
     vi.resetModules();
   });
 
@@ -266,6 +272,11 @@ describe('clause-library/[id]/tags route (round 55)', () => {
     expect(h.applied.inserts).toBe(1);
     expect(h.insertedValues[0].createdBy).toBe('user-1');
     expect(h.insertedValues[0].createdBy).not.toBe('system');
+    expect(h.persistAtomicAudit).toHaveBeenCalledTimes(1);
+    expect(h.persistAtomicAudit).toHaveBeenCalledWith(
+      h.db,
+      expect.objectContaining({ organizationId: 'org-a', userId: 'user-1', action: 'clause_library.tag.add', resourceId: 'tag-1' }),
+    );
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-a' }, expect.any(Function));
     expect(h.withSystemContext).not.toHaveBeenCalled();
   });
@@ -285,18 +296,23 @@ describe('clause-library/[id]/tags route (round 55)', () => {
   it('DELETE by tagId requires BOTH tagId and clauseId to match (tag parent-injection fix)', async () => {
     pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a' }]);
     h.isSharedClauseOwner.mockReturnValue(true);
-    pushSel([]); // delete resolves
+    pushSel([{ id: 'tag-from-another-clause', tagName: 'wages' }]); // delete returns the removed row
     const { DELETE } = await loadHandlers();
 
-    await DELETE({ request: req('clause-1', { tagId: 'tag-from-another-clause' }), organizationId: 'org-a' });
+    await DELETE({ request: req('clause-1', { tagId: 'tag-from-another-clause' }), organizationId: 'org-a', userId: 'user-1' });
 
-    // and(eq(id, tagId), eq(clauseId, id)) — both predicates present, not tagId alone.
+    // and(eq(clauseId, id), <tag belongs to a clause owned by the caller's organization>, eq(id, tagId)).
     expect(h.whereSpy).toHaveBeenCalledWith(
-      { op: 'eq', col: 'clt.id', val: 'tag-from-another-clause' },
       { op: 'eq', col: 'clt.clauseId', val: 'clause-1' },
+      { op: 'sql', values: ['clt.clauseId', 'clause-1', 'org-a'] },
+      { op: 'eq', col: 'clt.id', val: 'tag-from-another-clause' },
     );
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-a' }, expect.any(Function));
     expect(h.withSystemContext).not.toHaveBeenCalled();
+    expect(h.persistAtomicAudit).toHaveBeenCalledWith(
+      h.db,
+      expect.objectContaining({ action: 'clause_library.tag.remove', resourceId: 'tag-from-another-clause' }),
+    );
   });
 
   it('DELETE 404s a non-owner attempting to remove a tag', async () => {
@@ -305,11 +321,12 @@ describe('clause-library/[id]/tags route (round 55)', () => {
     const { DELETE } = await loadHandlers();
 
     await expect(
-      DELETE({ request: req('clause-1', { tagId: 'tag-1' }), organizationId: 'org-b' }),
+      DELETE({ request: req('clause-1', { tagId: 'tag-1' }), organizationId: 'org-b', userId: 'user-b' }),
     ).rejects.toMatchObject({ status: 404 });
     expect(h.isSharedClauseOwner).toHaveBeenCalled();
     expect(h.calls.delete).toBe(0);
     expect(h.applied.deletes).toBe(0);
+    expect(h.persistAtomicAudit).not.toHaveBeenCalled();
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
     expect(h.withSystemContext).not.toHaveBeenCalled();
   });
@@ -359,14 +376,16 @@ describe('clause-library/[id]/tags route (round 55)', () => {
     h.isSharedClauseOwner.mockReturnValue(true);
     const { DELETE } = await loadHandlers();
 
-    // Zero-row child deletes stay { success: true } (idempotent, including
-    // the parent-injection no-op). The tenant write filter still applies
-    // nothing; system context would have applied the queued delete.
-    const result = (await DELETE({
-      request: req('clause-1', { tagId: 'tag-1' }),
-      organizationId: 'org-b',
-    })) as { success: boolean };
-    expect(result.success).toBe(true);
+    // A zero-row child delete (tenant write filter applies nothing) is a 404
+    // and is not audited; system context would have applied the queued delete.
+    await expect(
+      DELETE({
+        request: req('clause-1', { tagId: 'tag-1' }),
+        organizationId: 'org-b',
+        userId: 'user-b',
+      }),
+    ).rejects.toMatchObject({ status: 404 });
+    expect(h.persistAtomicAudit).not.toHaveBeenCalled();
     expect(h.isSharedClauseOwner).toHaveBeenCalled();
     expect(h.calls.delete).toBe(1);
     expect(h.applied.deletes).toBe(0);

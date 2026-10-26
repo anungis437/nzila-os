@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 1,
+  "rules": [
+    {
+      "id": "RETIRED-CLERK-PROVIDER",
+      "description": "The Clerk identity provider is retired; only the listed compatibility, historical-column and unrelated-meaning references may remain (UE-CONV-A-006)",
+      "pattern": "clerk",
+      "ignoreCase": true,
+      "paths": ["apps/union-eyes"],
+      "exclude": [
+        "**/__tests__/**", "**/*.test.*", "**/tests*.py", "**/tests/**", "**/docs/**", "**/node_modules/**", "**/reports/**",
+        "apps/union-eyes/db/migrations/**", "apps/union-eyes/db/migrations-audit/**", "apps/union-eyes/services/financial-service/drizzle/meta/**",
+        "apps/union-eyes/services/financial-service/drizzle/0000_*.sql", "apps/union-eyes/backend/**/migrations/**"
+      ],
+      "allowed": [
+        { "file": "apps/union-eyes/app/[locale]/dashboard/committees/[id]/committee-workspace.tsx", "reason": "Admin Clerk office role label; not the identity provider" },
+        { "file": "apps/union-eyes/app/[locale]/dashboard/committees/committees-page.tsx", "reason": "Admin Clerk office role label; not the identity provider" },
+        { "file": "apps/union-eyes/app/[locale]/dashboard/correspondence/correspondence-dashboard.tsx", "reason": "Admin Clerk office role label; not the identity provider" },
+        { "file": "apps/union-eyes/db/schema/domains/documents/correspondence.ts", "reason": "Admin Clerk office role description; not the identity provider" },
+        { "file": "apps/union-eyes/lib/auth/platform-org-role.ts", "reason": "Maps the Admin Clerk office role; not the identity provider" },
+        { "file": "apps/union-eyes/lib/auth/roles.ts", "reason": "Defines the Admin Clerk office role; not the identity provider" },
+        { "file": "apps/union-eyes/lib/dashboard/role-experience.ts", "reason": "Admin Clerk office role; not the identity provider" },
+        { "file": "apps/union-eyes/app/api/whop/create-checkout/route.ts", "reason": "Whop metadata still emits the legacy clerkUserId key beside userId until the external consumer is confirmed (UE-CONV-A-007)" },
+        { "file": "apps/union-eyes/backend/auth_core/authentication.py", "reason": "Detects and ignores the legacy X-Clerk-Secret-Key header with a logged warning; never accepted" },
+        { "file": "apps/union-eyes/backend/auth_core/middleware.py", "reason": "Exempts the deprecated webhook alias path pending sender discovery (UE-CONV-A-007)" },
+        { "file": "apps/union-eyes/backend/auth_core/urls.py", "reason": "Deprecated webhook alias route pending sender discovery (UE-CONV-A-007)" },
+        { "file": "apps/union-eyes/backend/auth_core/views.py", "reason": "Deprecated webhook alias view and admin search on the historical column name (UE-CONV-A-006)" },
+        { "file": "apps/union-eyes/backend/auth_core/admin.py", "reason": "Admin search on the historical physical column clerk_user_id (UE-CONV-A-006)" },
+        { "file": "apps/union-eyes/backend/auth_core/models.py", "reason": "Physical column clerk_user_id awaits a governed rename (UE-CONV-A-006)" },
+        { "file": "apps/union-eyes/backend/config/settings.py", "reason": "Detection-only list of legacy CLERK_* environment names; they are never read" },
+        { "file": "apps/union-eyes/db/schema/domains/infrastructure/uuid-mapping.ts", "reason": "Physical column clerk_user_id awaits a governed rename (UE-CONV-A-006)" },
+        { "file": "apps/union-eyes/db/schema/user-uuid-mapping-schema.ts", "reason": "Physical column clerk_user_id awaits a governed rename (UE-CONV-A-006)" },
+        { "file": "apps/union-eyes/lib/utils/user-uuid-helpers.ts", "reason": "Comment on the historical physical column name (UE-CONV-A-006)" },
+        { "file": "apps/union-eyes/services/financial-service/drizzle/schema.ts", "reason": "Physical column clerk_user_id in the undeployed financial-service snapshot (UE-CONV-A-006, UE-CONV-D-002)" },
+        { "file": "apps/union-eyes/services/financial-service/src/db/schema.ts", "reason": "Physical column clerk_user_id in the undeployed financial-service schema (UE-CONV-A-006, UE-CONV-D-002)" },
+        { "file": "apps/union-eyes/db/rls-storage-authority/finance.ts", "reason": "Authority-registry rationale text names the retired provider as history" },
+        { "file": "apps/union-eyes/scripts/p4-authority-state.ts", "reason": "References the migration name auth_core.0003_rename_clerk_organization_id" },
+        { "file": "apps/union-eyes/scripts/rls-enforcement/generate-rls-enforcement-migration.ts", "reason": "References the historical column name when generating policies" },
+        { "file": "apps/union-eyes/scripts/rls-enforcement/p4-disposable-fixture.ts", "reason": "References the migration name auth_core.0003_rename_clerk_organization_id" }
+      ]
+    },
+    {
+      "id": "RETIRED-KERNEL-RESOLVERS",
+      "description": "The kernel-owned provider resolver was removed; identity comes from the verified platform binding",
+      "pattern": "resolveInternalPrincipal|resolveAuthorityPrincipal|listActiveOrganizations",
+      "paths": ["apps/union-eyes"],
+      "exclude": ["**/docs/**", "**/node_modules/**", "apps/union-eyes/db/__tests__/authority-kernel-combined.postgres.test.ts"],
+      "mode": "zero"
+    },
+    {
+      "id": "BINDING-TABLE-ACCESS",
+      "description": "platform_identity_bindings may be referenced only by the catalog admission contract and explanatory comments; no application code reads it",
+      "pattern": "platform_identity_bindings",
+      "paths": ["apps/union-eyes/lib", "apps/union-eyes/app", "apps/union-eyes/backend", "apps/union-eyes/services", "apps/union-eyes/db"],
+      "exclude": ["**/__tests__/**", "**/*.test.*", "**/docs/**", "**/node_modules/**"],
+      "allowed": [
+        { "file": "apps/union-eyes/lib/operations/canonical-catalog-admission.ts", "reason": "Catalog admission contract declares the dedicated execution context for the relation" },
+        { "file": "apps/union-eyes/lib/authority/store/identity.ts", "reason": "Header comment only: states that provider resolution is owned by platform-auth" },
+        { "file": "apps/union-eyes/lib/authority/store/platform-identity.ts", "reason": "Header comment only: documents where the binding lives and who may read it" },
+        { "file": "apps/union-eyes/db/migrations-platform/0013_authority_kernel_storage.sql", "reason": "Comment only in the registered kernel migration" }
+      ]
+    },
+    {
+      "id": "BEARER-SETTING-CONSUMERS",
+      "description": "app.current_session_token carries a session bearer into PostgreSQL; no new consumer may be added until the exposure in UE-CONV-A-004 is remediated",
+      "pattern": "current_session_token",
+      "paths": ["apps/union-eyes", "packages", "tooling/scripts"],
+      "exclude": ["**/__tests__/**", "**/*.test.*", "**/*.pglite.test.ts", "**/node_modules/**", "**/docs/**"],
+      "allowed": [
+        { "file": "apps/union-eyes/backend/auth_core/canonical_context.py", "reason": "Django writer of the setting" },
+        { "file": "apps/union-eyes/db/migrations-cache/0017_snapshot_authority_reconciliation.sql", "reason": "Registered migration; predicate reads the setting" },
+        { "file": "apps/union-eyes/lib/authority/store/executor.ts", "reason": "Kernel transaction writer of the setting for a verified binding" },
+        { "file": "apps/union-eyes/scripts/bootstrap-v2/auth-org-runtime.ts", "reason": "v2 bootstrap predicate" },
+        { "file": "apps/union-eyes/scripts/bootstrap-v2/framework-runtime.ts", "reason": "v2 bootstrap predicate" },
+        { "file": "apps/union-eyes/scripts/bootstrap-v2/framework-sql.ts", "reason": "v2 bootstrap predicate" },
+        { "file": "apps/union-eyes/scripts/bootstrap-v2/framework_application.py", "reason": "v2 bootstrap predicate" },
+        { "file": "apps/union-eyes/scripts/bootstrap-v2/runtime-security.ts", "reason": "v2 bootstrap predicate" },
+        { "file": "packages/db/src/auth-storage-authority/org-session-authority.ts", "reason": "Canonical predicate source" },
+        { "file": "packages/platform-auth/README.md", "reason": "Documents the setting" },
+        { "file": "packages/platform-auth/src/org-binding.ts", "reason": "TypeScript writer of the setting" },
+        { "file": "tooling/scripts/prove-snapshot-authority-reconciliation.mjs", "reason": "Proof script exercising the predicate" }
+      ]
+    },
+    {
+      "id": "SCHEMA-PUSH-SCRIPT",
+      "description": "drizzle-kit push bypasses the migration ledger; the union-eyes package must not expose it (UE-CONV-H-003)",
+      "pattern": "drizzle-kit push",
+      "paths": ["apps/union-eyes/package.json"],
+      "exclude": [],
+      "mode": "zero"
+    },
+    {
+      "id": "PLATFORM-ROLE-CASE-PROMOTION",
+      "description": "Platform administration must never be promoted into customer-organization case authority (UE-CONV-E-001)",
+      "pattern": "systemAdministrator|'app_owner','system_admin','platform_lead'",
+      "paths": ["apps/union-eyes/lib/cases"],
+      "exclude": ["**/*.test.*", "**/__tests__/**"],
+      "mode": "zero"
+    },
+    {
+      "id": "RANK-DERIVED-CASE-ACCESS",
+      "description": "isStewardPlus / case_read_any derive case access from seniority. The grievance document, search and intelligence paths no longer do; the remaining files are the separate CUPE claims module (UE-CONV-E-001)",
+      "pattern": "isStewardPlus|case_read_any",
+      "paths": ["apps/union-eyes"],
+      "exclude": ["**/__tests__/**", "**/*.test.*", "**/docs/**", "**/node_modules/**", "apps/union-eyes/lib/documents/UE_CURSOR_DOCUMENT_CONSUMER_MATRIX.json"],
+      "allowed": [
+        { "file": "apps/union-eyes/lib/action-enforcer.ts", "reason": "CUPE claims RBAC matrix (numeric levels) still defines the case_read_any action; it no longer scopes any case read and is used only by the member-directory scope. Retire with the claims migration" },
+        { "file": "apps/union-eyes/lib/authority/policies/case.ts", "reason": "Comment only: states that the kernel policy replaces these shortcuts" },
+        { "file": "apps/union-eyes/lib/members/directory-access.ts", "reason": "Member-directory scope (names, contacts; sensitive attributes only for officer and above) uses the claims policy level matrix; exposes no case content, platform roles receive nothing. Replace with a membership-administration mandate" }
+      ]
+    },
+    {
+      "id": "MUTABLE-REP-IDENTIFIER",
+      "description": "grievances.union_rep_id is a mutable identifier with no foreign key and is not an authority source; a new consumer must use kernel assignments (UE-CONV-B-001)",
+      "pattern": "union_rep_id|unionRepId",
+      "paths": ["apps/union-eyes"],
+      "exclude": ["**/__tests__/**", "**/*.test.*", "**/docs/**", "**/node_modules/**", "apps/union-eyes/db/migrations*/**", "**/reports/**", "apps/union-eyes/backend/**/migrations/**", "apps/union-eyes/lib/documents/UE_CURSOR_DOCUMENT_CONSUMER_MATRIX.json"],
+      "allowed": [
+        { "file": "apps/union-eyes/app/api/grievances/[id]/assign/route.ts", "reason": "Writes the legacy column with the deadline convergence task; migrate to assignCase" },
+        { "file": "apps/union-eyes/app/api/grievances/[id]/convert/route.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
+        { "file": "apps/union-eyes/app/api/grievances/[id]/status/route.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
+        { "file": "apps/union-eyes/backend/grievances/models.py", "reason": "Column definition (the record being retired as an authority source)" },
+        { "file": "apps/union-eyes/backend/grievances/views.py", "reason": "Legacy consumer; migrate to kernel assignments" },
+        { "file": "apps/union-eyes/components/grievances/grievance-detail-console.tsx", "reason": "Legacy display consumer" },
+        { "file": "apps/union-eyes/db/schema/deadline-engine-schema.ts", "reason": "Deadline convergence task references the legacy column" },
+        { "file": "apps/union-eyes/db/schema/domains/claims/grievance-lifecycle.ts", "reason": "Comment: primary LRO ownership remains on the legacy column" },
+        { "file": "apps/union-eyes/db/schema/domains/claims/grievances.ts", "reason": "Column definition (the record being retired as an authority source)" },
+        { "file": "apps/union-eyes/db/schema/domains/health-safety/cnesst-schema.ts", "reason": "Separate health-and-safety record with its own representative field" },
+        { "file": "apps/union-eyes/db/schema/domains/health-safety/provincial-wcb-schema.ts", "reason": "Separate health-and-safety record with its own representative field" },
+        { "file": "apps/union-eyes/lib/authority/store/case-ownership.ts", "reason": "The read-only reconciler that reports drift for a governed backfill" },
+        { "file": "apps/union-eyes/lib/cognition/ue-adapter.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
+        { "file": "apps/union-eyes/lib/deadline-engine/assignment-sync.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
+        { "file": "apps/union-eyes/lib/deadline-engine/recipient-resolver.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
+        { "file": "apps/union-eyes/lib/deadline-engine/reminder-worker.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
+        { "file": "apps/union-eyes/lib/reality/capability-registry.ts", "reason": "Evidence text describing the legacy behaviour" },
+        { "file": "apps/union-eyes/lib/services/case-knowledge-graph-service.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
+        { "file": "apps/union-eyes/lib/cases/creator-access.ts", "reason": "Representative 2.2 creator-retains-access rule keyed on the legacy primary-owner column, migrate with the kernel assignments" },
+        { "file": "apps/union-eyes/lib/services/dashboard-kpi-service.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
+        { "file": "apps/union-eyes/scripts/reconcile-case-ownership.ts", "reason": "The read-only reconciliation CLI over the reconciler in lib/authority/store/case-ownership.ts: reports drift between the legacy column and kernel assignments and emits a governed backfill plan, never converting an ambiguous value into authority" },
+        { "file": "apps/union-eyes/services/case-intelligence/case-knowledge-graph-service.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
+        { "file": "apps/union-eyes/services/case-intelligence/precedent-matching-service.ts", "reason": "Legacy consumer; migrate to kernel assignments" },
+        { "file": "apps/union-eyes/services/case-intelligence/types.ts", "reason": "Legacy type carrying the column" }
+      ]
+    },
+    {
+      "id": "GOVERNANCE-APPROVAL-BEST-EFFORT-AUDIT",
+      "description": "Governance approvals must audit inside the mutation transaction (lib/audit/atomic-audit). The separate-connection writers are best-effort and not atomic (UE-CONV-I-001)",
+      "pattern": "auditDataMutation|auditSecurityEvent|auditLog[(]",
+      "paths": ["apps/union-eyes/app/api/governance/lifecycle/policies"],
+      "exclude": ["**/__tests__/**", "**/*.test.*", "**/node_modules/**"],
+      "mode": "zero"
+    },
+    {
+      "id": "CASE-MUTATION-BEST-EFFORT-AUDIT",
+      "description": "Case, grievance, collaborator-access, workbench, representation-authority and external-grant mutations audit inside their own transaction (lib/audit/atomic-audit). The separate-connection writers cannot roll the mutation back (UE-CONV-K-005). Denial-path auditLog calls are permitted.",
+      "pattern": "auditDataMutation|auditCaseMutation|auditSecurityEvent",
+      "paths": [
+        "apps/union-eyes/app/api/cases/[caseId]/assign",
+        "apps/union-eyes/app/api/cases/[caseId]/notes",
+        "apps/union-eyes/app/api/cases/[caseId]/transition",
+        "apps/union-eyes/app/api/cases/[caseId]/escalate",
+        "apps/union-eyes/app/api/grievances/route.ts",
+        "apps/union-eyes/app/api/grievances/import",
+        "apps/union-eyes/app/api/grievances/[id]/assign",
+        "apps/union-eyes/app/api/grievances/[id]/status",
+        "apps/union-eyes/app/api/grievances/[id]/priority-override",
+        "apps/union-eyes/app/api/grievances/[id]/convert",
+        "apps/union-eyes/app/api/grievances/[id]/documents",
+        "apps/union-eyes/app/api/workbench/assign",
+        "apps/union-eyes/app/api/dispatch/assign",
+        "apps/union-eyes/app/api/dispatch/requests",
+        "apps/union-eyes/app/api/cases/[caseId]/evidence",
+        "apps/union-eyes/app/api/grievances/[id]/suggest-clauses",
+        "apps/union-eyes/app/api/notifications/preferences",
+        "apps/union-eyes/app/api/cba-intelligence/sources",
+        "apps/union-eyes/app/api/employers/communications",
+        "apps/union-eyes/app/api/documents/repository",
+        "apps/union-eyes/app/api/admin/duplicates",
+        "apps/union-eyes/app/api/admin/ingest/retry",
+        "apps/union-eyes/lib/services/deadline-confirmation-service.ts",
+        "apps/union-eyes/lib/services/case-access-service.ts",
+        "apps/union-eyes/lib/services/representation-authority-service.ts",
+        "apps/union-eyes/lib/services/external-document-grant-service.ts"
+      ],
+      "exclude": ["**/__tests__/**", "**/*.test.*", "**/node_modules/**"],
+      "mode": "zero"
+    },
+    {
+      "id": "RETIRED-CASE-ACCESS-TABLE",
+      "description": "Case access is decided by the authority kernel's governed relationships. The pre-kernel grievance_case_access_assignments table and its Drizzle declaration must not be read or written by application code (UE-CONV-E-001, UE-CONV-B-001)",
+      "pattern": "grievanceCaseAccessAssignments|grievance_case_access_assignments",
+      "paths": ["apps/union-eyes/app", "apps/union-eyes/lib", "apps/union-eyes/services"],
+      "exclude": ["**/__tests__/**", "**/*.test.*", "**/node_modules/**", "apps/union-eyes/lib/operations/catalog-authority-contract.json", "apps/union-eyes/lib/authority/subordinate-authority-register.ts"],
+      "mode": "zero"
+    },
+    {
+      "id": "RETIRED-REPLAY-SEEDS",
+      "description": "The replay script and its SQL seeds were retired; the canonical schema has no seed (UE-CONV-H-005)",
+      "pattern": "seed-master\\.sql|replay\\.ps1|seed-org-hierarchy|seed-child-orgs",
+      "paths": ["apps/union-eyes/app", "apps/union-eyes/lib", "apps/union-eyes/db", "apps/union-eyes/scripts", "apps/union-eyes/components", "tooling/scripts"],
+      "exclude": ["**/*.md", "**/node_modules/**"],
+      "mode": "zero"
+    },
+    {
+      "id": "COOKIE-FORWARDED-AS-DATABASE-BEARER",
+      "description": "The caller's long-lived session cookie must never be placed in a PostgreSQL setting; the binding carries a 30-second bridge token (UE-CONV-A-004)",
+      "pattern": "sessionToken: cookie",
+      "paths": ["packages/platform-auth/src/org-binding.ts"],
+      "exclude": ["**/__tests__/**", "**/*.test.*"],
+      "mode": "zero"
+    },
+    {
+      "id": "DIRECT-MANDATORY-AUDIT-IMPORT",
+      "description": "appendMandatoryAudit returns false outside Canonical V2 and leaves the caller unaudited. Mutations use persistAtomicAudit; the listed modules own an explicit non-canonical atomic branch",
+      "pattern": "audit/mandatory-audit",
+      "paths": ["apps/union-eyes"],
+      "exclude": ["**/__tests__/**", "**/*.test.*", "**/docs/**", "**/node_modules/**", "apps/union-eyes/lib/documents/UE_CURSOR_DOCUMENT_CONSUMER_MATRIX.json"],
+      "allowed": [
+        { "file": "apps/union-eyes/lib/audit/atomic-audit.ts", "reason": "The atomic helper: appends canonically, otherwise inserts into audit_logs in the same transaction" },
+        { "file": "apps/union-eyes/lib/data-export-import.ts", "reason": "Branches explicitly: canonical ledger, else its own in-transaction audit_logs insert" },
+        { "file": "apps/union-eyes/lib/deadline-engine/audit.ts", "reason": "Writes deadline_audit_events on the caller executor, then the canonical record; failure is rethrown" },
+        { "file": "apps/union-eyes/lib/member-employment/durable-employment-audit.ts", "reason": "Branches explicitly: canonical ledger, else in-transaction audit_logs insert" },
+        { "file": "apps/union-eyes/lib/member-integrity/durable-member-audit.ts", "reason": "Branches explicitly: canonical ledger, else in-transaction audit_logs insert" },
+        { "file": "apps/union-eyes/lib/member-segments/durable-segment-audit.ts", "reason": "Branches explicitly: canonical ledger, else in-transaction audit_logs insert" }
+      ]
+    }
+  ]
+}

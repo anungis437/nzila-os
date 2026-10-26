@@ -12,6 +12,7 @@ import {
 import { eq, and, inArray, desc } from 'drizzle-orm';
 import { applyLedgerEntry } from './wallet-service';
 import { applyBudgetUsage, applyBudgetUsageChecked } from './budget-service';
+import { auditRewards, rewardsActor } from './audit';
 
 export interface CreateAwardOptions {
   orgId: string;
@@ -67,24 +68,34 @@ export async function createAwardRequest(
   // Determine initial status
   const initialStatus = awardType.requiresApproval ? 'pending' : 'approved';
 
-  const [award] = await db
-    .insert(recognitionAwards)
-    .values({
-      orgId,
-      programId: awardType.programId,
-      awardTypeId,
-      recipientUserId,
-      issuerUserId,
-      reason,
-      status: initialStatus,
-      approvedAt: initialStatus === 'approved' ? new Date() : undefined,
-      approvedByUserId: initialStatus === 'approved' ? issuerUserId : undefined,
-      metadataJson,
-      updatedAt: new Date(),
-    })
-    .returning();
+  return await db.transaction(async (tx) => {
+    const [award] = await tx
+      .insert(recognitionAwards)
+      .values({
+        orgId,
+        programId: awardType.programId,
+        awardTypeId,
+        recipientUserId,
+        issuerUserId,
+        reason,
+        status: initialStatus,
+        approvedAt: initialStatus === 'approved' ? new Date() : undefined,
+        approvedByUserId: initialStatus === 'approved' ? issuerUserId : undefined,
+        metadataJson,
+        updatedAt: new Date(),
+      })
+      .returning();
 
-  return award;
+    await auditRewards(tx, {
+      organizationId: orgId,
+      userId: rewardsActor(issuerUserId, 'system:rewards-automation'),
+      action: 'rewards.award.create',
+      resourceType: 'recognition_awards',
+      resourceId: award.id,
+      details: { awardTypeId, recipientUserId, status: initialStatus },
+    });
+    return award;
+  });
 }
 
 /**
@@ -111,23 +122,35 @@ export async function approveAward(
     throw new Error(`Cannot approve award with status: ${award.status}`);
   }
 
-  const [updated] = await db
-    .update(recognitionAwards)
-    .set({
-      status: 'approved',
-      approvedByUserId,
-      approvedAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .where(
-      and(
-        eq(recognitionAwards.id, awardId),
-        eq(recognitionAwards.orgId, orgId)
+  return await db.transaction(async (tx) => {
+    const [updated] = await tx
+      .update(recognitionAwards)
+      .set({
+        status: 'approved',
+        approvedByUserId,
+        approvedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(recognitionAwards.id, awardId),
+          eq(recognitionAwards.orgId, orgId),
+          eq(recognitionAwards.status, 'pending')
+        )
       )
-    )
-    .returning();
+      .returning();
+    if (!updated) throw new Error('Cannot approve award: it was changed concurrently');
 
-  return updated;
+    await auditRewards(tx, {
+      organizationId: orgId,
+      userId: approvedByUserId,
+      action: 'rewards.award.approve',
+      resourceType: 'recognition_awards',
+      resourceId: awardId,
+      details: { recipientUserId: award.recipientUserId },
+    });
+    return updated;
+  });
 }
 
 /**
@@ -199,8 +222,24 @@ export async function issueAward(
         issuedAt: new Date(),
         updatedAt: new Date(),
       })
-      .where(eq(recognitionAwards.id, awardId))
+      .where(
+        and(
+          eq(recognitionAwards.id, awardId),
+          eq(recognitionAwards.orgId, orgId),
+          eq(recognitionAwards.status, 'approved')
+        )
+      )
       .returning();
+    if (!updatedAward) throw new Error('Cannot issue award: it was changed concurrently');
+
+    await auditRewards(tx, {
+      organizationId: orgId,
+      userId: rewardsActor(options.approvedByUserId, 'system:rewards-automation'),
+      action: 'rewards.award.issue',
+      resourceType: 'recognition_awards',
+      resourceId: awardId,
+      details: { recipientUserId: award.recipientUserId, credits: creditAmount },
+    });
 
     return {
       award: updatedAward,
@@ -272,8 +311,24 @@ export async function revokeAward(
           revokedAt: new Date().toISOString(),
         },
       })
-      .where(eq(recognitionAwards.id, awardId))
+      .where(
+        and(
+          eq(recognitionAwards.id, awardId),
+          eq(recognitionAwards.orgId, orgId),
+          eq(recognitionAwards.status, 'issued')
+        )
+      )
       .returning();
+    if (!updatedAward) throw new Error('Cannot revoke award: it was changed concurrently');
+
+    await auditRewards(tx, {
+      organizationId: orgId,
+      userId: rewardsActor(revokedByUserId),
+      action: 'rewards.award.revoke',
+      resourceType: 'recognition_awards',
+      resourceId: awardId,
+      details: { recipientUserId: award.recipientUserId, credits: creditAmount, reason },
+    });
 
     return {
       award: updatedAward,
@@ -291,31 +346,41 @@ export async function rejectAward(
   rejectedByUserId: string,
   reason: string
 ): Promise<RecognitionAward> {
-  const [updated] = await db
-    .update(recognitionAwards)
-    .set({
-      status: 'rejected',
-      updatedAt: new Date(),
-      metadataJson: {
-        rejectedBy: rejectedByUserId,
-        rejectedReason: reason,
-        rejectedAt: new Date().toISOString(),
-      },
-    })
-    .where(
-      and(
-        eq(recognitionAwards.id, awardId),
-        eq(recognitionAwards.orgId, orgId),
-        eq(recognitionAwards.status, 'pending')
+  return await db.transaction(async (tx) => {
+    const [updated] = await tx
+      .update(recognitionAwards)
+      .set({
+        status: 'rejected',
+        updatedAt: new Date(),
+        metadataJson: {
+          rejectedBy: rejectedByUserId,
+          rejectedReason: reason,
+          rejectedAt: new Date().toISOString(),
+        },
+      })
+      .where(
+        and(
+          eq(recognitionAwards.id, awardId),
+          eq(recognitionAwards.orgId, orgId),
+          eq(recognitionAwards.status, 'pending')
+        )
       )
-    )
-    .returning();
+      .returning();
 
-  if (!updated) {
-    throw new Error('Award not found or cannot be rejected');
-  }
+    if (!updated) {
+      throw new Error('Award not found or cannot be rejected');
+    }
 
-  return updated;
+    await auditRewards(tx, {
+      organizationId: orgId,
+      userId: rewardsActor(rejectedByUserId),
+      action: 'rewards.award.reject',
+      resourceType: 'recognition_awards',
+      resourceId: awardId,
+      details: { reason },
+    });
+    return updated;
+  });
 }
 
 /**

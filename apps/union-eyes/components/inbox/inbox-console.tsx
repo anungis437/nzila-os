@@ -66,15 +66,19 @@ function claimToSignal(c: Record<string, unknown>, defaults: { newSubmission: st
 }
 
 function notificationToSignal(n: Record<string, unknown>, defaults: { defaultNotification: string }): Signal {
+  // A secure-conversation notice (assignment, waiting in the queue, new message) opens the staff conversation workspace.
+  const data = (n.data ?? {}) as { event?: unknown; threadId?: unknown };
+  const threadId = typeof data.threadId === "string" && String(data.event ?? "").startsWith("thread_") ? data.threadId : undefined;
   return {
     id: `alert-${n.id}`,
-    type: n.type === "message" ? "message" : "alert",
+    type: threadId || n.type === "message" ? "message" : "alert",
     title: (n.title as string) || defaults.defaultNotification,
     preview: (n.message as string)?.slice(0, 120) || "",
     status: n.read ? "read" : "unread",
     urgency: n.priority === "high" ? "high" : "normal",
     createdAt: (n.createdAt as string) || new Date().toISOString(),
     actor: n.actor as string | undefined,
+    ...(threadId ? { relatedEntityId: data.event === "thread_triage_waiting" ? "queue" : threadId, relatedEntityType: "message" as const } : {}),
   };
 }
 
@@ -148,6 +152,13 @@ export function InboxConsole() {
     if (action === "review" && signal.relatedEntityId) {
       if (signal.relatedEntityType === "case") {
         router.push(`/${locale}/dashboard/claims/${signal.relatedEntityId}`);
+      } else if (signal.relatedEntityType === "message") {
+        // A conversation still waiting for assignment is metadata in the queue; it has no page of its own yet.
+        router.push(
+          signal.relatedEntityId === "queue"
+            ? `/${locale}/dashboard/messages/staff`
+            : `/${locale}/dashboard/messages/staff?thread=${encodeURIComponent(signal.relatedEntityId)}`,
+        );
       } else {
         router.push(`/${locale}/dashboard/inbox?type=message`);
       }

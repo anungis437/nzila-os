@@ -60,6 +60,22 @@ export const SENSITIVITY_MIN_ROLE: Record<ExitInterviewSensitivityLevel, string>
 };
 
 /**
+ * The sensitivity levels a caller may read, given a role check. A level the caller does not hold the role for is left
+ * out, so anything built from an interview of that level is not disclosed.
+ */
+export async function readableSensitivityLevels(
+  hasMinRole: (role: string) => Promise<boolean>,
+): Promise<ExitInterviewSensitivityLevel[]> {
+  const levels: ExitInterviewSensitivityLevel[] = [];
+  const decisions = new Map<string, boolean>();
+  for (const [level, minRole] of Object.entries(SENSITIVITY_MIN_ROLE) as Array<[ExitInterviewSensitivityLevel, string]>) {
+    if (!decisions.has(minRole)) decisions.set(minRole, await hasMinRole(minRole));
+    if (decisions.get(minRole)) levels.push(level);
+  }
+  return levels;
+}
+
+/**
  * Returns true if the given sensitivity level permits semantic indexing.
  */
 export function isIndexingAllowed(

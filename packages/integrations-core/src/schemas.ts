@@ -33,37 +33,37 @@ export const HealthStatusSchema = z.enum(['ok', 'degraded', 'down'])
 // ── Config CRUD schemas ─────────────────────────────────────────────────────
 
 export const CreateIntegrationConfigSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   type: IntegrationTypeSchema,
   provider: IntegrationProviderSchema,
   credentialsRef: z.string().min(1),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).prefault({}),
 })
 
 export const UpdateIntegrationConfigSchema = z.object({
   status: IntegrationStatusSchema.optional(),
   credentialsRef: z.string().min(1).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 // ── Send message schema ─────────────────────────────────────────────────────
 
 export const SendMessageSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   channel: IntegrationTypeSchema,
   to: z.string().min(1),
   templateId: z.string().optional(),
   subject: z.string().optional(),
   body: z.string().optional(),
-  variables: z.record(z.unknown()).optional(),
-  correlationId: z.string().uuid(),
-  metadata: z.record(z.unknown()).optional(),
+  variables: z.record(z.string(), z.unknown()).optional(),
+  correlationId: z.guid(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 // ── Webhook schemas ─────────────────────────────────────────────────────────
 
 export const CreateWebhookSubscriptionSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   url: z.string().url(),
   events: z.array(z.string()).min(1),
   secret: z.string().min(16),

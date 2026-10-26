@@ -15,6 +15,16 @@ const mocks = vi.hoisted(() => ({
   mockRenderToBuffer: vi.fn(),
   mockGetEmailService: vi.fn(),
   mockMoneyToNumber: vi.fn(),
+  mockAudit: vi.fn(),
+  tx: {} as Record<string, unknown>,
+}));
+
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: vi.fn(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(mocks.tx)),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mocks.mockAudit }));
+vi.mock('@/db/schema/organization-members-schema', () => ({
+  organizationMembers: { userId: 'user_id', organizationId: 'organization_id', email: 'email', deletedAt: 'deleted_at' },
 }));
 
 vi.mock('@/db', () => ({
@@ -33,6 +43,9 @@ vi.mock('@/db/schema/board-packet-schema', () => ({
 
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((a, b) => ({ field: a, value: b })),
+  and: vi.fn((...args: unknown[]) => args),
+  inArray: vi.fn((a, b) => ({ field: a, values: b })),
+  isNull: vi.fn((a) => ({ isNull: a })),
   sql: vi.fn((...args: any[]) => args),
 }));
 
@@ -154,7 +167,7 @@ describe('BoardPacketGenerator', () => {
 
   describe('finalizePacket', () => {
     it('updates packet status to finalized', async () => {
-      const result = await generator.finalizePacket('pkt-1', 'user-1');
+      const result = await generator.finalizePacket('pkt-1', 'org-1', 'user-1');
       expect(result).toBeDefined();
       expect(mocks.mockUpdate).toHaveBeenCalled();
     });
@@ -167,23 +180,88 @@ describe('BoardPacketGenerator', () => {
           }),
         }),
       });
-      await expect(generator.finalizePacket('pkt-1', 'user-1')).rejects.toThrow('Update failed');
+      await expect(generator.finalizePacket('pkt-1', 'org-1', 'user-1')).rejects.toThrow('Update failed');
     });
   });
 
   describe('distributePacket', () => {
+    const context = { organizationId: 'org-1', userId: 'admin-1' };
     const recipients = [
-      { recipientId: 'u1', recipientName: 'Alice', recipientEmail: 'alice@test.com', recipientRole: 'board_member' },
+      { recipientId: 'u1', recipientName: 'Alice', recipientEmail: 'forged@elsewhere.test', recipientRole: 'board_member' },
     ];
+    let send: ReturnType<typeof vi.fn>;
+    let txInsertValues: ReturnType<typeof vi.fn>;
+    let txUpdateReturning: ReturnType<typeof vi.fn>;
+    let members: Array<{ userId: string; email: string }>;
 
-    it('distributes packet to recipients', async () => {
-      await generator.distributePacket('pkt-1', recipients);
-      expect(mocks.mockSelect).toHaveBeenCalled();
+    beforeEach(() => {
+      members = [{ userId: 'u1', email: 'alice@union.test' }];
+      send = vi.fn().mockResolvedValue({ id: 'email-1' });
+      mocks.mockGetEmailService.mockReturnValue({ send });
+      mocks.mockLimit.mockResolvedValue([{ id: 'pkt-1', title: 'Test Packet', status: 'finalized' }]);
+      mocks.mockAudit.mockResolvedValue(undefined);
+
+      txInsertValues = vi.fn((rows: Array<Record<string, unknown>>) => ({ returning: async () => rows.map((row, i) => ({ id: `d${i}`, ...row })) }));
+      txUpdateReturning = vi.fn(async () => [{ id: 'pkt-1' }]);
+      mocks.tx.select = vi.fn(() => ({ from: () => ({ where: async () => members }) }));
+      mocks.tx.insert = vi.fn(() => ({ values: txInsertValues }));
+      mocks.tx.update = vi.fn(() => ({ set: vi.fn(() => ({ where: () => ({ returning: txUpdateReturning }) })) }));
     });
 
-    it('throws if packet not found', async () => {
+    it('records the distribution, the status change and the audit on one transaction, then emails the member address on file', async () => {
+      const result = await generator.distributePacket('pkt-1', recipients, context);
+
+      expect(mocks.tx.insert).toHaveBeenCalledTimes(1);
+      expect(mocks.tx.update).toHaveBeenCalledTimes(1);
+      expect(mocks.mockAudit).toHaveBeenCalledWith(
+        mocks.tx,
+        expect.objectContaining({ organizationId: 'org-1', userId: 'admin-1', action: 'board_packet.distribute', resourceId: 'pkt-1' }),
+      );
+      expect(txInsertValues).toHaveBeenCalledWith([expect.objectContaining({ recipientEmail: 'alice@union.test' })]);
+      expect(send).toHaveBeenCalledWith(expect.objectContaining({ to: 'alice@union.test' }));
+      expect(result).toMatchObject({ delivered: 1, failed: 0 });
+    });
+
+    it('refuses a recipient who is not a member of the organization, and distributes nothing', async () => {
+      members = [];
+      await expect(generator.distributePacket('pkt-1', recipients, context)).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+      expect(mocks.tx.insert).not.toHaveBeenCalled();
+      expect(mocks.mockAudit).not.toHaveBeenCalled();
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    it('refuses a packet that is not finalized', async () => {
+      mocks.mockLimit.mockResolvedValue([{ id: 'pkt-1', title: 'Test Packet', status: 'draft' }]);
+      await expect(generator.distributePacket('pkt-1', recipients, context)).rejects.toMatchObject({ code: 'CONFLICT' });
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    it('answers a conflict, sends nothing and writes no audit when the packet changed concurrently', async () => {
+      txUpdateReturning.mockResolvedValueOnce([]);
+      await expect(generator.distributePacket('pkt-1', recipients, context)).rejects.toMatchObject({ code: 'CONFLICT' });
+      expect(mocks.mockAudit).not.toHaveBeenCalled();
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    it('sends nothing when the audit cannot be written', async () => {
+      mocks.mockAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+      await expect(generator.distributePacket('pkt-1', recipients, context)).rejects.toThrow('audit unavailable');
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    it('reports and audits a failed delivery without undoing the recorded distribution', async () => {
+      send.mockRejectedValueOnce(new Error('smtp down'));
+      const result = await generator.distributePacket('pkt-1', recipients, context);
+      expect(result).toMatchObject({ delivered: 0, failed: 1 });
+      expect(mocks.mockAudit).toHaveBeenCalledWith(
+        mocks.tx,
+        expect.objectContaining({ action: 'board_packet.distribute.delivery_failed', details: { failedRecipientIds: ['u1'] } }),
+      );
+    });
+
+    it('throws if packet not found (or belongs to another organization)', async () => {
       mocks.mockLimit.mockResolvedValue([]);
-      await expect(generator.distributePacket('pkt-999', recipients)).rejects.toThrow();
+      await expect(generator.distributePacket('pkt-999', recipients, context)).rejects.toThrow('Board packet not found');
     });
   });
 });

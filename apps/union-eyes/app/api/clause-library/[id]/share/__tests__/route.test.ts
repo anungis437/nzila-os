@@ -80,7 +80,7 @@ const h = vi.hoisted(() => {
       return makeChain('update');
     },
   };
-  const bindContext = (mode: 'system' | 'tenant', organizationId: string, fn: () => unknown) => {
+  const bindContext = (mode: 'system' | 'tenant', organizationId: string, fn: (tx?: unknown) => unknown) => {
     const prevMode = session.mode;
     const prevOrg = session.organizationId;
     session.mode = mode;
@@ -90,7 +90,7 @@ const h = vi.hoisted(() => {
       session.organizationId = prevOrg;
     };
     try {
-      const result = fn();
+      const result = fn(db);
       if (result && typeof (result as { then?: unknown }).then === 'function') {
         return Promise.resolve(result).finally(restore);
       }
@@ -105,13 +105,16 @@ const h = vi.hoisted(() => {
   const notFound = vi.fn((resource: string, id?: string) => ({ apiError: true, status: 404, resource, id }));
   const badRequest = vi.fn((msg: string) => ({ apiError: true, status: 400, msg }));
   const isSharedClauseOwner = vi.fn();
+  const sharingChangeDenial = vi.fn();
+  const persistAtomicAudit = vi.fn();
+  const forbidden = vi.fn((msg: string) => ({ apiError: true, status: 403, msg }));
   const withSystemContext = vi.fn((fn: () => unknown) => {
     if (!allowPrivilegedRead.current) {
       throw new Error('withSystemContext is not tenant mutation authority');
     }
     return bindContext('system', '', fn);
   });
-  const withRLSContext = vi.fn((context: { organizationId?: string }, fn: () => unknown) => {
+  const withRLSContext = vi.fn((context: { organizationId?: string }, fn: (tx?: unknown) => unknown) => {
     if (
       typeof context?.organizationId !== 'string' ||
       context.organizationId.trim() === '' ||
@@ -133,6 +136,9 @@ const h = vi.hoisted(() => {
     notFound,
     badRequest,
     isSharedClauseOwner,
+    sharingChangeDenial,
+    persistAtomicAudit,
+    forbidden,
     withSystemContext,
     withRLSContext,
   };
@@ -149,17 +155,22 @@ vi.mock('@/db/schema/domains/agreements/shared-library', () => ({
     sourceOrganizationId: 'scl.sourceOrganizationId',
   },
 }));
-vi.mock('drizzle-orm', () => ({ eq: vi.fn((col: unknown, val: unknown) => ({ op: 'eq', col, val })) }));
+vi.mock('drizzle-orm', () => ({
+  eq: vi.fn((col: unknown, val: unknown) => ({ op: 'eq', col, val })),
+  and: vi.fn((...parts: unknown[]) => ({ op: 'and', parts })),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.persistAtomicAudit }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: h.withSystemContext,
   withRLSContext: h.withRLSContext,
 }));
 vi.mock('@/lib/api/framework', () => ({
   withApi: h.withApi,
-  ApiError: { notFound: h.notFound, badRequest: h.badRequest },
+  ApiError: { notFound: h.notFound, badRequest: h.badRequest, forbidden: h.forbidden },
 }));
 vi.mock('@/lib/clause-library/sharing-authority', () => ({
   isSharedClauseOwner: h.isSharedClauseOwner,
+  sharingChangeDenial: h.sharingChangeDenial,
 }));
 
 const pushSel = (...items: unknown[]) => h.queue.push(...items);
@@ -187,6 +198,8 @@ describe('clause-library/[id]/share route', () => {
     h.applied.updates = 0;
     h.allowPrivilegedRead.current = false;
     h.witnessedParentOrg.current = null;
+    h.sharingChangeDenial.mockReset().mockResolvedValue(null);
+    h.persistAtomicAudit.mockReset().mockResolvedValue(undefined);
     vi.resetModules();
   });
 
@@ -227,16 +240,17 @@ describe('clause-library/[id]/share route', () => {
   it('POST 404s a non-owner and does not update sharing', async () => {
     pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'public' }]);
     h.isSharedClauseOwner.mockReturnValue(false);
+    h.allowPrivilegedRead.current = true; // system role is only used for the sharing-authority check
     const { POST } = await loadHandlers();
 
     await expect(
-      POST({ request: req('clause-1', { sharingLevel: 'public' }), organizationId: 'org-b' }),
+      POST({ request: req('clause-1', { sharingLevel: 'public' }), organizationId: 'org-b', userId: 'user-1' }),
     ).rejects.toMatchObject({ status: 404 });
     expect(h.isSharedClauseOwner).toHaveBeenCalled();
     expect(h.calls.update).toBe(0);
     expect(h.applied.updates).toBe(0);
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
-    expect(h.withSystemContext).not.toHaveBeenCalled();
+    expect(h.sharingChangeDenial).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
   });
 
   it('POST updates sharing for the owner and ignores a body organization id', async () => {
@@ -249,6 +263,7 @@ describe('clause-library/[id]/share route', () => {
       isAnonymized: true,
       anonymizedEmployerName: 'Employer',
     }]);
+    h.allowPrivilegedRead.current = true; // system role is only used for the sharing-authority check
     const { POST } = await loadHandlers();
 
     const result = (await POST({
@@ -258,6 +273,7 @@ describe('clause-library/[id]/share route', () => {
         sourceOrganizationId: 'attacker-controlled-org',
       }),
       organizationId: 'org-a',
+    userId: 'user-1',
     })) as { sharing: { sharingLevel: string } };
 
     expect(result.sharing.sharingLevel).toBe('federation');
@@ -265,14 +281,32 @@ describe('clause-library/[id]/share route', () => {
     expect(h.updatePayloads[0].sharingLevel).toBe('federation');
     expect(h.updatePayloads[0].sharedWithOrgIds).toEqual(['org-c']);
     expect(h.updatePayloads[0].sourceOrganizationId).toBeUndefined();
+    expect(h.persistAtomicAudit).toHaveBeenCalledTimes(1);
+    expect(h.persistAtomicAudit).toHaveBeenCalledWith(
+      h.db,
+      expect.objectContaining({ organizationId: 'org-a', userId: 'user-1', action: 'clause_library.sharing.update', resourceId: 'clause-1' }),
+    );
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-a' }, expect.any(Function));
-    expect(h.withSystemContext).not.toHaveBeenCalled();
+    expect(h.sharingChangeDenial).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
+  });
+
+  it('POST 403s an unauthorized sharing change before any tenant read, write, or audit', async () => {
+    h.allowPrivilegedRead.current = true;
+    h.sharingChangeDenial.mockResolvedValue({ status: 403, message: 'not allowed to share' });
+    const { POST } = await loadHandlers();
+
+    await expect(
+      POST({ request: req('clause-1', { sharingLevel: 'public' }), organizationId: 'org-a', userId: 'user-1' }),
+    ).rejects.toMatchObject({ status: 403 });
+    expect(h.withRLSContext).not.toHaveBeenCalled();
+    expect(h.calls.update).toBe(0);
+    expect(h.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('POST rejects an empty sharing update before opening a tenant transaction', async () => {
     const { POST } = await loadHandlers();
 
-    await expect(POST({ request: req('clause-1', {}), organizationId: 'org-a' })).rejects.toMatchObject({ status: 400 });
+    await expect(POST({ request: req('clause-1', {}), organizationId: 'org-a', userId: 'user-1' })).rejects.toMatchObject({ status: 400 });
     expect(h.calls.update).toBe(0);
     expect(h.withRLSContext).not.toHaveBeenCalled();
     expect(h.withSystemContext).not.toHaveBeenCalled();
@@ -282,33 +316,35 @@ describe('clause-library/[id]/share route', () => {
     pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'private', sharedWithOrgIds: [] }]);
     pushSel([{ id: 'clause-1', sharingLevel: 'public' }]);
     h.isSharedClauseOwner.mockReturnValue(true);
+    h.allowPrivilegedRead.current = true; // system role is only used for the sharing-authority check
     const { POST } = await loadHandlers();
 
     await expect(
-      POST({ request: req('clause-1', { sharingLevel: 'public' }), organizationId: 'org-b' }),
+      POST({ request: req('clause-1', { sharingLevel: 'public' }), organizationId: 'org-b', userId: 'user-1' }),
     ).rejects.toMatchObject({ status: 404 });
     expect(h.isSharedClauseOwner).not.toHaveBeenCalled();
     expect(h.calls.update).toBe(0);
     expect(h.applied.updates).toBe(0);
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
-    expect(h.withSystemContext).not.toHaveBeenCalled();
+    expect(h.sharingChangeDenial).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
   });
 
   it('POST does not apply a cross-org share update when the row is publicly readable and the owner predicate is stubbed open', async () => {
     pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'public' }]);
     pushSel([{ id: 'clause-1', sharingLevel: 'congress' }]);
     h.isSharedClauseOwner.mockReturnValue(true);
+    h.allowPrivilegedRead.current = true; // system role is only used for the sharing-authority check
     const { POST } = await loadHandlers();
 
     await expect(
-      POST({ request: req('clause-1', { sharingLevel: 'congress' }), organizationId: 'org-b' }),
+      POST({ request: req('clause-1', { sharingLevel: 'congress' }), organizationId: 'org-b', userId: 'user-1' }),
     ).rejects.toMatchObject({ status: 404 });
     expect(h.isSharedClauseOwner).toHaveBeenCalled();
     expect(h.calls.update).toBe(1);
     expect(h.applied.updates).toBe(0);
     expect(h.updatePayloads).toHaveLength(0);
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
-    expect(h.withSystemContext).not.toHaveBeenCalled();
+    expect(h.sharingChangeDenial).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
   });
 
   it('does not treat a system-context share write as tenant success', async () => {

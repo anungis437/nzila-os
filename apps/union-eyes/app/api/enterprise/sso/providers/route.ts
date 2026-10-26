@@ -8,6 +8,9 @@ import { db } from '@/db/db';
 import { ssoProviders } from '@/db/schema/sso-scim-schema';
 import { eq } from 'drizzle-orm';
 import { encryptSecret } from '@/lib/encryption';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { AUTH_TENANT_ASSIGNABLE_ROLES } from '@nzila/db/auth-storage-authority';
 
 export const dynamic = 'force-dynamic';
 
@@ -83,6 +86,20 @@ export const POST = withApi(
       throw ApiError.badRequest('name, providerType, and attributeMapping are required');
     }
 
+    // An identity provider may only map its groups to roles a tenant administrator can already assign; a mapping to a
+    // platform or federation role would otherwise let an external directory mint authority the tenant cannot grant.
+    const assignable: readonly string[] = AUTH_TENANT_ASSIGNABLE_ROLES;
+    if (roleMapping !== undefined) {
+      if (!roleMapping || typeof roleMapping !== 'object' || Array.isArray(roleMapping)) {
+        throw ApiError.badRequest('roleMapping must be an object of group to role');
+      }
+      for (const role of Object.values(roleMapping)) {
+        if (typeof role !== 'string' || !assignable.includes(role)) {
+          throw ApiError.badRequest(`roleMapping may only assign: ${assignable.join(', ')}`);
+        }
+      }
+    }
+
     // SECURITY (Round 59B): oidcClientSecret must never be persisted in
     // plaintext — the schema column's "// Encrypted" comment previously
     // did not match reality (no encrypt/decrypt call existed anywhere for
@@ -93,7 +110,8 @@ export const POST = withApi(
       ? await encryptSecret(oidcClientSecret)
       : oidcClientSecret;
 
-    const [created] = await db
+    const created = await withRLSContext(async (tx) => {
+    const [row] = await tx
       .insert(ssoProviders)
       .values({
         organizationId: organizationId!,
@@ -112,6 +130,16 @@ export const POST = withApi(
         enabled: enabled ?? true,
       })
       .returning();
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId,
+      action: 'sso.provider.create',
+      resourceType: 'sso_providers',
+      resourceId: row.id,
+      details: { providerType, autoProvision: autoProvision ?? true, enabled: enabled ?? true, roleMapping: roleMapping ?? null },
+    });
+    return row;
+    });
 
     // Never echo raw credential material back to the client (same
     // redaction as GET — round 53: the create response previously

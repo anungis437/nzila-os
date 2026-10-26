@@ -467,7 +467,7 @@ describe('formatValidationError', () => {
 // validateParams
 // ---------------------------------------------------------------------------
 describe('validateParams', () => {
-  const schema = z.object({ id: z.string().uuid() });
+  const schema = z.object({ id: z.guid() });
 
   it('returns parsed value for valid params', () => {
     const result = validateParams({ id: '550e8400-e29b-41d4-a716-446655440000' }, schema);

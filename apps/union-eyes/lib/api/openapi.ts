@@ -178,7 +178,7 @@ export function zodToOpenAPI(schema: z.ZodType<any>): SchemaObject {
   if (schema instanceof z.ZodArray) {
     return {
       type: 'array',
-      items: zodToOpenAPI(schema.element),
+      items: zodToOpenAPI(schema.element as z.ZodType<any>),
     };
   }
   
@@ -188,7 +188,7 @@ export function zodToOpenAPI(schema: z.ZodType<any>): SchemaObject {
     
     const shape = schema.shape;
     for (const key in shape) {
-      properties[key] = zodToOpenAPI(shape[key]);
+      properties[key] = zodToOpenAPI(shape[key] as z.ZodType<any>);
       const def = shape[key];
       if (def instanceof z.ZodOptional) {
         // optional
@@ -205,7 +205,7 @@ export function zodToOpenAPI(schema: z.ZodType<any>): SchemaObject {
   }
   
   if (schema instanceof z.ZodOptional) {
-    return zodToOpenAPI(schema.unwrap());
+    return zodToOpenAPI(schema.unwrap() as z.ZodType<any>);
   }
   
   if (schema instanceof z.ZodEnum) {

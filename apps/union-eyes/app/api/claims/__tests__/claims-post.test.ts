@@ -12,6 +12,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // Capture inserted values for assertions
 let capturedInsertValues: Record<string, unknown> | null = null;
 
+const filing = vi.hoisted(() => ({ requireCaseFilingCapacity: vi.fn() }));
+
+vi.mock('@/lib/cases/case-authorization', () => ({ requireCaseFilingCapacity: filing.requireCaseFilingCapacity }));
+
 vi.mock('@/db/db', () => ({
   db: {
     execute: vi.fn().mockResolvedValue([{ max_num: null }]),
@@ -41,6 +45,8 @@ vi.mock('@/db/db', () => ({
 vi.mock('@/db/schema', () => ({
   claims: { name: 'claims' },
 }));
+
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
 
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: vi.fn().mockImplementation((fn: () => Promise<any>) => fn()),
@@ -124,6 +130,21 @@ describe('POST /api/claims', () => {
   beforeEach(() => {
     capturedInsertValues = null;
     vi.clearAllMocks();
+    filing.requireCaseFilingCapacity.mockResolvedValue(undefined);
+  });
+
+  it('writes nothing when the canonical membership lacks handler filing capacity', async () => {
+    const handler = POST as any as (ctx: Record<string, unknown>) => Promise<any>;
+    filing.requireCaseFilingCapacity.mockRejectedValueOnce(Object.assign(new Error('Insufficient permissions'), { code: 'FORBIDDEN' }));
+
+    await expect(handler(makeCtx())).rejects.toMatchObject({ code: 'FORBIDDEN' });
+
+    expect(filing.requireCaseFilingCapacity).toHaveBeenCalledWith(
+      expect.anything(),
+      { userId: 'user_3BP6IlC0zg9MwHJDDNn7KCcR0MV', organizationId: '9210418f-6a4f-4dab-a7d2-4450d581dc81' },
+      'handler',
+    );
+    expect(capturedInsertValues).toBeNull();
   });
 
   it('converts incidentDate string to Date before insert', async () => {

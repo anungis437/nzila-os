@@ -5,6 +5,8 @@
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { mobileDevices } from '@/db/schema/mobile-devices-schema';
 import { eq, and } from 'drizzle-orm';
 
@@ -86,37 +88,50 @@ export const POST = withApi(
       throw ApiError.badRequest('deviceToken, deviceId, and platform are required');
     }
 
-    const [existing] = await db
-      .select({ userId: mobileDevices.userId })
-      .from(mobileDevices)
-      .where(eq(mobileDevices.deviceId, deviceId))
-      .limit(1);
-    assertDeviceNotOwnedByAnotherUser(existing?.userId, userId);
+    return withRLSContext({ organizationId }, async (tx) => {
+      const [existing] = await tx
+        .select({ userId: mobileDevices.userId })
+        .from(mobileDevices)
+        .where(eq(mobileDevices.deviceId, deviceId))
+        .limit(1);
+      assertDeviceNotOwnedByAnotherUser(existing?.userId, userId);
 
-    const [created] = await db
-      .insert(mobileDevices)
-      .values({
-        deviceToken,
-        deviceId,
-        userId,
-        organizationId,
-        platform,
-        deviceName,
-        deviceModel,
-        osVersion,
-        appVersion,
-      })
-      .onConflictDoUpdate({
-        target: mobileDevices.deviceId,
-        set: {
+      // The ownership predicate on the update closes the window between the check above and the write.
+      const [created] = await tx
+        .insert(mobileDevices)
+        .values({
           deviceToken,
-          appVersion,
+          deviceId,
+          userId,
+          organizationId,
+          platform,
+          deviceName,
+          deviceModel,
           osVersion,
-          lastActiveAt: new Date(),
-        },
-      })
-      .returning();
+          appVersion,
+        })
+        .onConflictDoUpdate({
+          target: mobileDevices.deviceId,
+          set: {
+            deviceToken,
+            appVersion,
+            osVersion,
+            lastActiveAt: new Date(),
+          },
+          setWhere: eq(mobileDevices.userId, userId),
+        })
+        .returning();
+      if (!created) throw ApiError.conflict('This device is already registered to another account');
 
-    return created;
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'mobile.device.register',
+        resourceType: 'mobile_devices',
+        resourceId: created.id,
+        details: { platform, deviceId },
+      });
+      return created;
+    });
   },
 );

@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { DuesCalculationEngine } from '@/lib/dues-calculation-engine';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
-import { withRoleAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
+import { withApiAuth, hasRole, type BaseAuthContext } from '@/lib/api-auth-guard';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 
@@ -12,13 +13,13 @@ import {
 } from '@/lib/api/standardized-responses';
 // Validation schema for dues calculation
 const calculateDuesSchema = z.object({
-  memberId: z.string().uuid('Invalid member ID format'),
+  memberId: z.guid('Invalid member ID format'),
   periodStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Period start must be in YYYY-MM-DD format'),
   periodEnd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Period end must be in YYYY-MM-DD format'),
-  memberData: z.record(z.any()).optional(),
+  memberData: z.record(z.string(), z.any()).optional(),
 });
 
-export const POST = withRoleAuth('steward', async (request, context: BaseAuthContext) => {
+export const POST = withApiAuth(async (request, context: BaseAuthContext) => {
   let rawBody: any;
   try {
     rawBody = await request.json();
@@ -43,6 +44,17 @@ export const POST = withRoleAuth('steward', async (request, context: BaseAuthCon
   const { userId, organizationId } = context;
   if (!userId || !organizationId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
+  }
+
+  // A member's dues are financial data about that member: the member may calculate their own, and anyone else's
+  // needs the financial authority. Stewardship (a rank) is not a financial duty.
+  const isOwnRecord = body.memberId === userId;
+  let isFinancialAuthority = false;
+  for (const role of FINANCIAL_MEMBER_DATA_ROLES) {
+    if (await hasRole(role)) { isFinancialAuthority = true; break; }
+  }
+  if (!isOwnRecord && !isFinancialAuthority) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Forbidden');
   }
   try {
     await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);

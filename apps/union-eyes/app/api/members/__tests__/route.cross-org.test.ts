@@ -109,7 +109,6 @@ describe('GET /api/members — cross-org access control', () => {
     mockDbSelect.mockImplementation(() => ({
       from: vi.fn().mockReturnThis(),
       where: vi.fn().mockReturnThis(),
-      // Membership check for foreign org returns empty → no access
       limit: vi.fn().mockResolvedValue([]),
       offset: vi.fn().mockResolvedValue([]),
     }));
@@ -118,34 +117,51 @@ describe('GET /api/members — cross-org access control', () => {
     const res = await GET(req, { params: {} });
 
     expect(res.status).toBe(403);
-    const body = await res.json();
-    expect(body.error).toBe('Forbidden');
+    expect(mockDbSelect).not.toHaveBeenCalled();
   });
 
-  it('allows access when a regular member requests their own org', async () => {
+  it('denies a regular member the member directory even for their own organization', async () => {
     mockGetCurrentUser.mockResolvedValue(regularMember);
-
-    mockDbSelect.mockImplementation(() => ({
-      from: vi.fn().mockReturnThis(),
-      where: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue([{ id: 'm1' }]),
-      offset: vi.fn().mockResolvedValue([{
-        id: 'm1', name: 'Alice', email: 'a@test.com',
-        role: 'member', status: 'active', metadata: null,
-        phone: null, department: null, position: null,
-        hireDate: null, seniority: 0, membershipNumber: null,
-        unionJoinDate: null, createdAt: null, deletedAt: null,
-        organizationId: CALLER_ORG, userId: CALLER_USER_ID,
-      }]),
-    }));
 
     const req = makeRequest({ organizationId: CALLER_ORG });
     const res = await GET(req, { params: {} });
 
-    expect(res.status).not.toBe(403);
+    expect(res.status).toBe(403);
+    expect(mockDbSelect).not.toHaveBeenCalled();
   });
 
-  it('allows a system admin to access a foreign org without a membership check', async () => {
+  it('lets a steward list case-context members of their own organization', async () => {
+    mockGetCurrentUser.mockResolvedValue({ ...regularMember, role: 'steward', roles: ['steward'] });
+
+    mockDbSelect.mockImplementation(() => {
+      const chain: Record<string, unknown> = {};
+      chain.from = vi.fn(() => chain);
+      chain.where = vi.fn(() => chain);
+      chain.limit = vi.fn(() => chain);
+      chain.offset = vi.fn(async () => [{
+        id: 'm1', name: 'Alice', email: 'a@test.com',
+        role: 'member', status: 'active', metadata: { compensation: 1 },
+        phone: null, department: null, position: null,
+        hireDate: new Date('2020-01-01'), seniority: 5, membershipNumber: null,
+        unionJoinDate: null, createdAt: null, deletedAt: null,
+        organizationId: CALLER_ORG, userId: 'member-1',
+      }]);
+      return chain;
+    });
+
+    const res = await GET(makeRequest({ organizationId: CALLER_ORG }), { params: {} });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    const members = body.data?.members ?? body.members;
+    expect(members).toHaveLength(1);
+    // A steward does not receive sensitive employment attributes or metadata.
+    expect(members[0]).toMatchObject({ hireDate: null, seniority: null, metadata: {} });
+    expect(mockAuditDataAccess).toHaveBeenCalledWith(expect.objectContaining({
+      organizationId: CALLER_ORG, details: expect.objectContaining({ scope: 'case-context' }),
+    }));
+  });
+
+  it('does not let a system admin read a foreign organization: platform administration is not tenant authority', async () => {
     mockGetCurrentUser.mockResolvedValue(systemAdmin);
 
     mockDbSelect.mockImplementation(() => ({
@@ -158,7 +174,7 @@ describe('GET /api/members — cross-org access control', () => {
     const req = makeRequest({ organizationId: FOREIGN_ORG });
     const res = await GET(req, { params: {} });
 
-    expect(res.status).not.toBe(403);
+    expect(res.status).toBe(403);
   });
 
   it('returns 403 when a steward in org-a requests org-b', async () => {

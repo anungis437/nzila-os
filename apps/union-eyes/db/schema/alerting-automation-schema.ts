@@ -165,87 +165,6 @@ export const alertRules = pgTable('alert_rules', {
   executionIdx: index('idx_alert_rules_next_execution').on(table.lastExecutedAt),
 }));
 
-export const alertConditions = pgTable('alert_conditions', {
-  // Identity
-  id: uuid('id').primaryKey().defaultRandom(),
-  alertRuleId: uuid('alert_rule_id').notNull().references(() => alertRules.id, { onDelete: 'cascade' }),
-  
-  // Condition Definition
-  fieldPath: varchar('field_path', { length: 255 }).notNull(),
-  operator: alertConditionOperator('operator').notNull(),
-  value: jsonb('value'),
-  
-  // Logical Grouping
-  conditionGroup: integer('condition_group').notNull().default(1),
-  isOrCondition: boolean('is_or_condition').notNull().default(false),
-  
-  // Execution Order
-  orderIndex: integer('order_index').notNull().default(0),
-  
-  // Metadata
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-}, (table) => ({
-  ruleIdx: index('idx_alert_conditions_rule').on(table.alertRuleId, table.orderIndex),
-}));
-
-export const alertActions = pgTable('alert_actions', {
-  // Identity
-  id: uuid('id').primaryKey().defaultRandom(),
-  alertRuleId: uuid('alert_rule_id').notNull().references(() => alertRules.id, { onDelete: 'cascade' }),
-  
-  // Action Definition
-  actionType: alertActionType('action_type').notNull(),
-  actionConfig: jsonb('action_config').notNull(),
-  
-  // Execution Order
-  orderIndex: integer('order_index').notNull().default(0),
-  
-  // Conditional Execution
-  executeIfCondition: jsonb('execute_if_condition'),
-  
-  // Retry Configuration
-  maxRetries: integer('max_retries').notNull().default(3),
-  retryDelaySeconds: integer('retry_delay_seconds').notNull().default(60),
-  
-  // Metadata
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-}, (table) => ({
-  ruleIdx: index('idx_alert_actions_rule').on(table.alertRuleId, table.orderIndex),
-}));
-
-export const alertEscalations = pgTable('alert_escalations', {
-  // Identity
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
-  alertRuleId: uuid('alert_rule_id').notNull().references(() => alertRules.id, { onDelete: 'cascade' }),
-  
-  // Escalation Definition
-  name: varchar('name', { length: 255 }).notNull(),
-  description: text('description'),
-  escalationLevels: jsonb('escalation_levels').notNull(),
-  
-  // Current State
-  currentLevel: integer('current_level').notNull().default(1),
-  status: escalationStatus('status').notNull().default('pending'),
-  
-  // Timing
-  startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
-  nextEscalationAt: timestamp('next_escalation_at', { withTimezone: true }),
-  resolvedAt: timestamp('resolved_at', { withTimezone: true }),
-  
-  // Resolution
-  resolvedBy: text('resolved_by').references(() => profiles.userId),
-  resolutionNotes: text('resolution_notes'),
-  
-  // Metadata
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-}, (table) => ({
-  organizationIdx: index('idx_alert_escalations_organization').on(table.organizationId),
-  ruleIdx: index('idx_alert_escalations_rule').on(table.alertRuleId),
-  statusIdx: index('idx_alert_escalations_status').on(table.status, table.nextEscalationAt),
-}));
-
 export const alertExecutions = pgTable('alert_executions', {
   // Identity
   id: uuid('id').primaryKey().defaultRandom(),
@@ -278,85 +197,6 @@ export const alertExecutions = pgTable('alert_executions', {
   ruleIdx: index('idx_alert_executions_rule').on(table.alertRuleId, table.createdAt),
   statusIdx: index('idx_alert_executions_status').on(table.status, table.startedAt),
   createdIdx: index('idx_alert_executions_created').on(table.createdAt),
-}));
-
-export const workflowDefinitions = pgTable('workflow_definitions', {
-  // Identity
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
-  
-  // Workflow Definition
-  name: varchar('name', { length: 255 }).notNull(),
-  description: text('description'),
-  category: varchar('category', { length: 100 }),
-  
-  // Trigger Configuration
-  triggerType: workflowTriggerType('trigger_type').notNull(),
-  triggerConfig: jsonb('trigger_config').notNull(),
-  
-  // Workflow Steps
-  workflowSteps: jsonb('workflow_steps').notNull(),
-  
-  // Status
-  isEnabled: boolean('is_enabled').notNull().default(true),
-  isDeleted: boolean('is_deleted').notNull().default(false),
-  version: integer('version').notNull().default(1),
-  
-  // Execution Tracking
-  lastExecutedAt: timestamp('last_executed_at', { withTimezone: true }),
-  executionCount: integer('execution_count').notNull().default(0),
-  successCount: integer('success_count').notNull().default(0),
-  failureCount: integer('failure_count').notNull().default(0),
-  
-  // Metadata
-  createdBy: text('created_by').references(() => profiles.userId),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-}, (table) => ({
-  organizationIdx: index('idx_workflow_definitions_organization').on(table.organizationId),
-  triggerIdx: index('idx_workflow_definitions_trigger').on(table.triggerType),
-  categoryIdx: index('idx_workflow_definitions_category').on(table.category),
-}));
-
-export const workflowExecutions = pgTable('workflow_executions', {
-  // Identity
-  id: uuid('id').primaryKey().defaultRandom(),
-  workflowDefinitionId: uuid('workflow_definition_id').notNull().references(() => workflowDefinitions.id, { onDelete: 'cascade' }),
-  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
-  
-  // Execution Context
-  triggeredBy: workflowTriggerType('triggered_by').notNull(),
-  triggerData: jsonb('trigger_data'),
-  
-  // Execution Status
-  status: workflowExecutionStatus('status').notNull().default('pending'),
-  currentStep: integer('current_step').notNull().default(1),
-  
-  // Timing
-  startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
-  completedAt: timestamp('completed_at', { withTimezone: true }),
-  pausedAt: timestamp('paused_at', { withTimezone: true }),
-  resumedAt: timestamp('resumed_at', { withTimezone: true }),
-  
-  // Results
-  stepResults: jsonb('step_results'),
-  variables: jsonb('variables'),
-  
-  // Error Handling
-  errorMessage: text('error_message'),
-  errorDetails: jsonb('error_details'),
-  failedStep: integer('failed_step'),
-  
-  // Performance
-  totalExecutionTimeMs: integer('total_execution_time_ms'),
-  
-  // Metadata
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-}, (table) => ({
-  workflowIdx: index('idx_workflow_executions_workflow').on(table.workflowDefinitionId, table.createdAt),
-  organizationIdx: index('idx_workflow_executions_organization').on(table.organizationId, table.status),
-  statusIdx: index('idx_workflow_executions_status').on(table.status, table.startedAt),
 }));
 
 export const alertRecipients = pgTable('alert_recipients', {
@@ -394,69 +234,14 @@ export const alertRulesRelations = relations(alertRules, ({ one, many }) => ({
     fields: [alertRules.createdBy],
     references: [profiles.userId],
   }),
-  conditions: many(alertConditions),
-  actions: many(alertActions),
-  escalations: many(alertEscalations),
   executions: many(alertExecutions),
   recipients: many(alertRecipients),
-}));
-
-export const alertConditionsRelations = relations(alertConditions, ({ one }) => ({
-  alertRule: one(alertRules, {
-    fields: [alertConditions.alertRuleId],
-    references: [alertRules.id],
-  }),
-}));
-
-export const alertActionsRelations = relations(alertActions, ({ one }) => ({
-  alertRule: one(alertRules, {
-    fields: [alertActions.alertRuleId],
-    references: [alertRules.id],
-  }),
-}));
-
-export const alertEscalationsRelations = relations(alertEscalations, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [alertEscalations.organizationId],
-    references: [organizations.id],
-  }),
-  alertRule: one(alertRules, {
-    fields: [alertEscalations.alertRuleId],
-    references: [alertRules.id],
-  }),
-  resolver: one(profiles, {
-    fields: [alertEscalations.resolvedBy],
-    references: [profiles.userId],
-  }),
 }));
 
 export const alertExecutionsRelations = relations(alertExecutions, ({ one }) => ({
   alertRule: one(alertRules, {
     fields: [alertExecutions.alertRuleId],
     references: [alertRules.id],
-  }),
-}));
-
-export const workflowDefinitionsRelations = relations(workflowDefinitions, ({ one, many }) => ({
-  organization: one(organizations, {
-    fields: [workflowDefinitions.organizationId],
-    references: [organizations.id],
-  }),
-  creator: one(profiles, {
-    fields: [workflowDefinitions.createdBy],
-    references: [profiles.userId],
-  }),
-  executions: many(workflowExecutions),
-}));
-
-export const workflowExecutionsRelations = relations(workflowExecutions, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [workflowExecutions.organizationId],
-    references: [organizations.id],
-  }),
-  workflowDefinition: one(workflowDefinitions, {
-    fields: [workflowExecutions.workflowDefinitionId],
-    references: [workflowDefinitions.id],
   }),
 }));
 
@@ -474,23 +259,13 @@ export const alertRecipientsRelations = relations(alertRecipients, ({ one }) => 
 export type AlertRule = typeof alertRules.$inferSelect;
 export type NewAlertRule = typeof alertRules.$inferInsert;
 
-export type AlertCondition = typeof alertConditions.$inferSelect;
-export type NewAlertCondition = typeof alertConditions.$inferInsert;
 
-export type AlertAction = typeof alertActions.$inferSelect;
-export type NewAlertAction = typeof alertActions.$inferInsert;
 
-export type AlertEscalation = typeof alertEscalations.$inferSelect;
-export type NewAlertEscalation = typeof alertEscalations.$inferInsert;
 
 export type AlertExecution = typeof alertExecutions.$inferSelect;
 export type NewAlertExecution = typeof alertExecutions.$inferInsert;
 
-export type WorkflowDefinition = typeof workflowDefinitions.$inferSelect;
-export type NewWorkflowDefinition = typeof workflowDefinitions.$inferInsert;
 
-export type WorkflowExecution = typeof workflowExecutions.$inferSelect;
-export type NewWorkflowExecution = typeof workflowExecutions.$inferInsert;
 
 export type AlertRecipient = typeof alertRecipients.$inferSelect;
 export type NewAlertRecipient = typeof alertRecipients.$inferInsert;

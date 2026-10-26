@@ -8,14 +8,13 @@
 import { withApi, ApiError } from '@/lib/api/framework';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { NextResponse } from 'next/server';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { recordUnionEyesCaseCreated } from '@/lib/pilot-metrics';
 import { z } from 'zod';
-import { getCaseActor, caseReadScope } from '@/lib/cases/case-authorization';
+import { getCaseActor, caseReadScope, caseTriageQueueScope, requireCaseFilingCapacity } from '@/lib/cases/case-authorization';
 
 const caseCreateSchema = z.object({
   claimType: z.enum([
@@ -35,7 +34,7 @@ const caseCreateSchema = z.object({
   priority: z.enum(["low", "medium", "high", "critical"]).optional().default("medium"),
   isAnonymous: z.boolean().optional().default(false),
   claimAmount: z.union([z.string(), z.number()]).optional().nullable(),
-  sourceIntakeId: z.string().uuid().optional().nullable(),
+  sourceIntakeId: z.guid().optional().nullable(),
 });
 
 export const dynamic = 'force-dynamic';
@@ -104,7 +103,22 @@ export const GET = withApi(
       `),
     );
 
-    return { data: Array.from(rows) };
+    // A live `cases` triage designation adds the unassigned queue as metadata only (never the description, analysis,
+    // evidence or amounts), and only for cases the caller cannot already read in full.
+    const queue = await withRLSContext(async (tx) =>
+      tx.execute(sql`
+        SELECT c.claim_id AS "claimId", c.claim_number AS "claimNumber", c.claim_type AS "claimType", c.status, c.priority,
+               c.created_at AS "createdAt", c.filed_date AS "filedDate", true AS "triageOnly"
+        FROM claims c
+        WHERE ${caseTriageQueueScope(actor, 'c')}
+          ${statusFilter} ${typeFilter} ${priorityFilter}
+        ORDER BY c.created_at DESC
+        LIMIT 200
+      `),
+    );
+    const full = Array.from(rows) as Array<{ claimId: string }>;
+    const seen = new Set(full.map((r) => r.claimId));
+    return { data: [...full, ...(Array.from(queue) as Array<{ claimId: string }>).filter((r) => !seen.has(r.claimId))] };
   },
 );
 
@@ -125,7 +139,7 @@ export const POST = withApi(
     const body = await request.json();
     const parsed = caseCreateSchema.safeParse(body);
     if (!parsed.success) {
-      throw ApiError.badRequest(parsed.error.errors.map(e => e.message).join('; '));
+      throw ApiError.badRequest(parsed.error.issues.map(e => e.message).join('; '));
     }
     const {
       claimType,
@@ -141,8 +155,9 @@ export const POST = withApi(
       sourceIntakeId,
     } = parsed.data;
 
-    let audited = false;
     const rows = await withRLSContext(async (tx) => {
+      // Opening a case is a capacity (staff), checked on the canonical membership, not a role rank.
+      await requireCaseFilingCapacity(tx, { userId: userId!, organizationId }, 'handler');
       const result = await tx.execute(sql`
         INSERT INTO claims (
           organization_id, member_id, claim_type, description,
@@ -172,36 +187,25 @@ export const POST = withApi(
                   created_at AS "createdAt"
       `);
       const created = result[0] as Record<string, unknown> | undefined;
-      // Mandatory canonical audit shares this transaction: an audit failure rolls the case back.
-      audited = await appendMandatoryAudit(tx, {
+      // The audit record shares this transaction in every deployment mode: an audit failure rolls the case back.
+      await persistAtomicAudit(tx, {
         organizationId,
         action: 'claim.create',
         resourceType: 'claims',
         resourceId: created?.claimId as string | undefined,
         userId,
-        details: { route: '/api/cases', claimType, priority, claimNumber: created?.claimNumber ?? null },
+        details: {
+          route: '/api/cases',
+          claimType,
+          priority,
+          claimNumber: created?.claimNumber ?? null,
+          sourceIntakeId: sourceIntakeId ?? null,
+        },
       });
       return result;
     });
 
     const inserted = rows[0];
-
-    // Audit: log case creation with intake provenance (legacy best-effort writer outside V2)
-    if (!audited) await auditLog({
-      eventType: AuditEventType.CASE_CREATED,
-      severity: AuditSeverity.MEDIUM,
-      userId: userId ?? 'unknown',
-      organizationId,
-      resource: 'cases',
-      action: 'create_official_case',
-      resourceId: (inserted as Record<string, unknown>)?.claimId as string,
-      details: {
-        claimType,
-        priority,
-        sourceIntakeId: sourceIntakeId ?? null,
-      },
-      outcome: 'success',
-    });
 
     // Evidence: tamper-proof audit trail for case creation
     buildUnionEvidencePack({
@@ -217,21 +221,6 @@ export const POST = withApi(
       recordUnionEyesCaseCreated(organizationId, createdClaimId, userId ?? 'system:ue-case-create', traceId).catch((err) =>
         logger.warn('Pilot metric emit failed', { error: String(err), metric: 'cases_created' }),
       );
-    }
-
-    // Audit: initial priority set on case creation
-    if (priority) {
-      await auditLog({
-        eventType: AuditEventType.CASE_PRIORITY_SET,
-        severity: AuditSeverity.LOW,
-        userId: userId ?? 'unknown',
-        organizationId,
-        resource: 'cases',
-        action: 'set_initial_priority',
-        resourceId: (inserted as Record<string, unknown>)?.claimId as string,
-        details: { priority },
-        outcome: 'success',
-      });
     }
 
     return NextResponse.json({ data: inserted }, { status: 201 });

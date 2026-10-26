@@ -29,6 +29,7 @@ vi.mock('@/lib/api/framework', () => {
     z: {
       object: () => ({}),
       string: () => zString,
+      guid: () => zString,
       enum: () => ({ default: () => ({}) }),
     },
     ApiError: {

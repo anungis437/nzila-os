@@ -24,7 +24,7 @@ import {
 } from '@/lib/api/standardized-responses';
 
 const onboardingSuggestClausesSchema = z.object({
-  organizationId: z.string().uuid('Invalid organizationId'),
+  organizationId: z.guid('Invalid organizationId'),
 });
 
 export const POST = withRoleAuth('officer' as MemberRole, async (request, context) => {
@@ -50,7 +50,7 @@ export const POST = withRoleAuth('officer' as MemberRole, async (request, contex
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
     

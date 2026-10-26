@@ -11,7 +11,7 @@ test.describe('UE E2E - admin assignment', () => {
     await cleanupDatabaseConnections(request)
   })
 
-  test('admin can assign and member cannot assign', async ({ request }) => {
+  test('assignment needs governed authority: neither an admin without a mandate nor a member can assign', async ({ request }) => {
     await loginAsTestUser(request, UE_E2E_USERS.admin)
 
     const assignAsAdmin = await request.post('/api/workbench/assign', {
@@ -21,7 +21,8 @@ test.describe('UE E2E - admin assignment', () => {
       },
     })
 
-    expect([200, 403, 409, 422]).toContain(assignAsAdmin.status())
+    // Case assignment is a kernel action (adopted issuance rule and issuer authority); the admin role is not one.
+    assertPermissionDenied(assignAsAdmin.status())
 
     await loginAsTestUser(request, UE_E2E_USERS.member)
 

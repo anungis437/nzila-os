@@ -10,6 +10,7 @@ import {
   recordMinutes,
   approveMinutes,
   getMeeting,
+  requireCommitteeScope,
 } from "@/lib/services/committee-workspace-service";
 
 const minutesSchema = z.object({
@@ -18,15 +19,19 @@ const minutesSchema = z.object({
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "steward" },
     body: minutesSchema,
     openapi: { tags: ["Committees"], summary: "Record meeting minutes" },
   },
-  async ({ body, userId, params }) => {
-    const { meetingId } = params as { id: string; meetingId: string };
+  async ({ body, userId, organizationId, params }) => {
+    if (!organizationId) throw ApiError.badRequest("Organization context required");
+    const { id: committeeId, meetingId } = params as { id: string; meetingId: string };
+    await requireCommitteeScope(organizationId, committeeId, { meetingId });
 
-    const updated = await recordMinutes(meetingId, body.minutes, userId!);
-    if (!updated) throw ApiError.notFound("Meeting");
+    const updated = await recordMinutes(meetingId, organizationId, body.minutes, userId!);
+    // Scope is already proven, so no row means the minutes were approved in the meantime.
+    if (!updated) throw ApiError.conflict("Approved minutes cannot be changed");
 
     return updated;
   }
@@ -34,11 +39,14 @@ export const POST = withApi(
 
 export const PATCH = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "officer" },
     openapi: { tags: ["Committees"], summary: "Approve meeting minutes" },
   },
-  async ({ userId, params }) => {
-    const { meetingId } = params as { id: string; meetingId: string };
+  async ({ userId, organizationId, params }) => {
+    if (!organizationId) throw ApiError.badRequest("Organization context required");
+    const { id: committeeId, meetingId } = params as { id: string; meetingId: string };
+    await requireCommitteeScope(organizationId, committeeId, { meetingId });
 
     const meeting = await getMeeting(meetingId);
     if (!meeting) throw ApiError.notFound("Meeting");
@@ -46,8 +54,8 @@ export const PATCH = withApi(
       throw ApiError.badRequest("Cannot approve — no minutes recorded yet");
     }
 
-    const updated = await approveMinutes(meetingId, userId!);
-    if (!updated) throw ApiError.notFound("Meeting");
+    const updated = await approveMinutes(meetingId, organizationId, userId!);
+    if (!updated) throw ApiError.conflict("The minutes have already been approved");
 
     return updated;
   }

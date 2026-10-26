@@ -12,7 +12,8 @@ import { NextResponse } from 'next/server';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
 import { GOVERNANCE_SYSTEM_ROLES } from '@/lib/api-auth-guard';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,8 +69,9 @@ export const POST = withApi(
       throw ApiError.badRequest('electionYear, electionDate, and positionsAvailable are required');
     }
 
-    const [election] = await withSystemContext(async (_tx) =>
-      db
+    // The election record and its audit record commit together in one system transaction.
+    const election = await withSystemContext(async () => {
+      const [row] = await db
         .insert(councilElections)
         .values({
           electionYear,
@@ -83,8 +85,17 @@ export const POST = withApi(
           verificationDate,
           contestedResults,
         })
-        .returning()
-    );
+        .returning();
+      await persistAtomicAudit(db as unknown as RLSTx, {
+        organizationId: organizationId!,
+        userId: userId!,
+        action: 'governance.council_election.create',
+        resourceType: 'council_elections',
+        resourceId: row.id,
+        details: { electionYear, positionsAvailable, totalVotes, route: '/api/elections' },
+      });
+      return row;
+    });
 
     // Evidence: election record creation audit trail
     buildUnionEvidencePack({

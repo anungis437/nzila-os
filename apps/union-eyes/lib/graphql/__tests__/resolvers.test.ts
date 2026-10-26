@@ -128,6 +128,7 @@ const Q = resolvers.Query as any;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const M = resolvers.Mutation as any;
 const ctx = {} as never;
+const orgCtx = { organizationId: 'org-1' } as never;
 
 const remRow = {
   id: 'r1',
@@ -290,13 +291,24 @@ describe('Mutation resolvers', () => {
 
   it('updateClaim updates and returns the row', async () => {
     h.q.push([{ claimId: 'c1', status: 'closed' }]);
-    const r = await M.updateClaim(null, { id: 'c1', input: { status: 'closed' } }, ctx);
+    const r = await M.updateClaim(null, { id: 'c1', input: { status: 'closed' } }, orgCtx);
     expect(r.status).toBe('closed');
+  });
+
+  it('claim mutations are denied without an organization context and never take the owner from the payload', async () => {
+    await expect(M.updateClaim(null, { id: 'c1', input: { status: 'closed' } }, ctx)).rejects.toThrow('Organization context required');
+    await expect(M.deleteClaim(null, { id: 'c1' }, ctx)).rejects.toThrow('Organization context required');
+    h.q.push([{ claimId: 'c1' }]);
+    const { eq } = await import('drizzle-orm');
+    vi.mocked(eq).mockClear();
+    await M.updateClaim(null, { id: 'c1', input: { organizationId: 'attacker-org', status: 'closed' } }, orgCtx);
+    const bound = vi.mocked(eq).mock.calls.filter((c) => (c[0] as { __col?: string })?.__col === 'organizationId').map((c) => c[1]);
+    expect(bound).toEqual(['org-1']);
   });
 
   it('deleteClaim returns true', async () => {
     h.q.push([]);
-    expect(await M.deleteClaim(null, { id: 'c1' }, ctx)).toBe(true);
+    expect(await M.deleteClaim(null, { id: 'c1' }, orgCtx)).toBe(true);
   });
 
   it('castVote returns true', async () => {

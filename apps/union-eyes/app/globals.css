@@ -351,29 +351,6 @@ html {
 }
 
 /* ═══════════════════════════════════════════════════════
-   Clerk Auth Component Overrides
-   ═══════════════════════════════════════════════════════ */
-
-.cl-card {
-  box-shadow: none !important;
-  border: 1px solid rgba(214, 220, 228, 0.6) !important;
-}
-.cl-headerTitle,
-.cl-headerSubtitle {
-  font-family: var(--font-poppins), system-ui, sans-serif !important;
-}
-.cl-formButtonPrimary {
-  background: var(--electric) !important;
-  font-family: var(--font-poppins), system-ui, sans-serif !important;
-}
-.cl-formButtonPrimary:hover {
-  background: #1d4ed8 !important;
-}
-.cl-footerActionLink {
-  color: var(--electric) !important;
-}
-
-/* ═══════════════════════════════════════════════════════
    Component Utilities
    ═══════════════════════════════════════════════════════ */
 

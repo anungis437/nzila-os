@@ -38,6 +38,7 @@ const m = vi.hoisted(() => ({
   localReturning: vi.fn(),
   auth: vi.fn(),
   withAuthContext: vi.fn(),
+  audit: vi.fn(),
 }));
 
 vi.mock('@nzila/platform-auth/password', () => ({
@@ -82,6 +83,8 @@ vi.mock('@/db/schema/domains/claims/grievance-lifecycle', () => ({
 
 vi.mock('@/db/db', () => ({
   db: {
+    // The live kernel relationships are counted with one raw query; ending them is the membership disable.
+    execute: async () => (await m.caseAccessSelectWhere()).length === 0 ? [{ n: 0 }] : [{ n: (await m.caseAccessSelectWhere()).length }],
     select: () => ({ from: () => ({ where: m.caseAccessSelectWhere }) }),
     update: () => {
       m.updateCallCount.n += 1;
@@ -99,8 +102,9 @@ vi.mock('@/db/schema', () => ({
 }));
 
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withSystemContext: async (operation: () => Promise<unknown>) => operation(),
+  withSystemContext: async (operation: (tx: unknown) => Promise<unknown>) => operation((await import('@/db/db')).db),
 }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
@@ -115,12 +119,14 @@ const baseInput = {
   authUserId: 'auth-user-1',
   organizationId: '10000000-0000-4000-8000-000000000001',
   newLocalStatus: 'inactive' as const,
+  actorUserId: 'admin-1',
 };
 
 describe('revokeMemberAccess — fail-closed offboarding enforcement', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.auth.mockResolvedValue({ userId: 'admin-1' });
+    m.audit.mockResolvedValue(undefined);
     m.withAuthContext.mockImplementation(async (_context, callback) => callback());
     m.updateCallCount.n = 0;
     m.failNthUpdate.n = 0;
@@ -223,7 +229,7 @@ describe('revokeMemberAccess — fail-closed offboarding enforcement', () => {
     }), expect.any(Function));
   });
 
-  it('revokes every active case-access assignment returned for the user/org and reports the count', async () => {
+  it('reports the live kernel case relationships the membership disable ends', async () => {
     m.caseAccessSelectWhere.mockResolvedValue([{ id: 'assignment-1' }, { id: 'assignment-2' }]);
     const { revokeMemberAccess } = await loadService();
 
@@ -231,9 +237,8 @@ describe('revokeMemberAccess — fail-closed offboarding enforcement', () => {
 
     expect(result.success).toBe(true);
     expect(result.caseAccessRevokedCount).toBe(2);
-    // 2 case-access revocation updates + 1 local status update = 3 total
-    // db.update() calls, all routed through the same mocked `where`.
-    expect(m.membersUpdateWhere).toHaveBeenCalledTimes(3);
+    // Kernel relationships are not rewritten: the membership disable ends them. Only the local status update runs.
+    expect(m.membersUpdateWhere).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -241,12 +246,14 @@ const reactivateBaseInput = {
   membershipId: 'membership-1',
   authUserId: 'auth-user-1',
   organizationId: '10000000-0000-4000-8000-000000000001',
+  actorUserId: 'admin-1',
 };
 
 describe('reactivateMemberAccess — atomic, fail-closed reactivation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.auth.mockResolvedValue({ userId: 'admin-1' });
+    m.audit.mockResolvedValue(undefined);
     m.withAuthContext.mockImplementation(async (_context, callback) => callback());
     m.updateCallCount.n = 0;
     m.failNthUpdate.n = 0;
@@ -353,5 +360,80 @@ describe('reactivateMemberAccess — atomic, fail-closed reactivation', () => {
     expect(m.withAuthContext).not.toHaveBeenCalled();
     expect(m.authReturning).not.toHaveBeenCalled();
     expect(m.localReturning).not.toHaveBeenCalled();
+  });
+});
+
+describe('durable audit of access changes', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    m.auth.mockResolvedValue({ userId: 'admin-1' });
+    m.audit.mockResolvedValue(undefined);
+    m.withAuthContext.mockImplementation(async (_context, callback) => callback());
+    m.updateCallCount.n = 0;
+    m.failNthUpdate.n = 0;
+    m.revokeAllUserSessions.mockResolvedValue(undefined);
+    m.authUpdateWhere.mockResolvedValue(undefined);
+    m.caseAccessSelectWhere.mockResolvedValue([]);
+    m.membersUpdateWhere.mockResolvedValue(undefined);
+    m.authReturning.mockResolvedValue([{ organizationUserId: 'ou-1' }]);
+    m.localReturning.mockResolvedValue([{ id: 'membership-1' }]);
+  });
+
+  it('records the deactivation on the same transaction as the local status change, attributed to the administrator', async () => {
+    const { revokeMemberAccess } = await loadService();
+    const { db } = await import('@/db/db');
+    const result = await revokeMemberAccess(baseInput);
+
+    expect(result.success).toBe(true);
+    expect(m.audit).toHaveBeenCalledWith(
+      db,
+      expect.objectContaining({ userId: 'admin-1', action: 'member.access.deactivate', resourceId: 'membership-1' }),
+      'success',
+    );
+  });
+
+  it('audits an incomplete offboarding as a failure while still applying the local denial', async () => {
+    m.revokeAllUserSessions.mockRejectedValue(new Error('redis down'));
+    const { revokeMemberAccess } = await loadService();
+    const result = await revokeMemberAccess({ ...baseInput, newLocalStatus: 'deleted' });
+
+    expect(result.success).toBe(false);
+    expect(result.localStatusUpdated).toBe(true);
+    expect(m.audit).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'member.access.delete' }),
+      'failure',
+    );
+  });
+
+  it('does not report the local status as updated when the audit write fails', async () => {
+    m.audit.mockRejectedValue(new Error('audit down'));
+    const { revokeMemberAccess } = await loadService();
+    const result = await revokeMemberAccess(baseInput);
+
+    expect(result.success).toBe(false);
+    expect(result.localStatusUpdated).toBe(false);
+  });
+
+  it('refuses to reactivate, granting nothing, when the attempt cannot be recorded', async () => {
+    m.audit.mockRejectedValue(new Error('audit down'));
+    const { reactivateMemberAccess } = await loadService();
+    const result = await reactivateMemberAccess(reactivateBaseInput);
+
+    expect(result.success).toBe(false);
+    expect(result.authMembershipReenabled).toBe(false);
+    expect(result.errors[0]).toMatch(/^audit_unavailable/);
+    expect(m.authReturning).not.toHaveBeenCalled();
+  });
+
+  it('records the attempt before the grant and the outcome after it', async () => {
+    const { reactivateMemberAccess } = await loadService();
+    const result = await reactivateMemberAccess(reactivateBaseInput);
+
+    expect(result.success).toBe(true);
+    expect(m.audit.mock.calls.map((c) => c[1].action)).toEqual([
+      'member.access.reactivate_attempt',
+      'member.access.reactivate',
+    ]);
   });
 });

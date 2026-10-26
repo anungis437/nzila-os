@@ -56,6 +56,7 @@ const ORG_ENFORCEMENT_PATTERNS = [
   /withApiAuth\b/,        // UE auth guard wrapper (api-auth-guard)
   /withRoleAuth\b/,       // UE role-based auth guard wrapper
   /withOrganizationAuth/, // legacy wrapper
+  /retiredFinancialRoute\b/, // authenticates (withApi, auth.required), touches no tenant data and answers 501 NOT_IMPLEMENTED
   /sourceOrganizationId/, // explicit cross-org reference (e.g. clause library search)
   // Workbook claimed-access boundary (lib/workbook/access-control.ts):
   // resolves auth() + claimant/same-org checks, then runs the handler under the

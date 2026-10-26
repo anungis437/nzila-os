@@ -66,6 +66,7 @@ vi.mock('@/db/schema', () => {
 });
 
 vi.mock('drizzle-orm', () => ({
+  inArray: vi.fn(() => 'inArray'),
   eq: vi.fn(() => 'eq'),
   and: vi.fn(() => 'and'),
   desc: vi.fn(() => 'desc'),
@@ -108,9 +109,9 @@ describe('ConsentManager', () => {
 
   it('withdrawConsent returns true/false', async () => {
     h.chainQueue = [[{ id: 'c1' }]];
-    expect(await ConsentManager.withdrawConsent('u', 'c1')).toBe(true);
+    expect(await ConsentManager.withdrawConsent('u', 'c1', 'o1')).toBe(true);
     h.chainQueue = [[]];
-    expect(await ConsentManager.withdrawConsent('u', 'c1')).toBe(false);
+    expect(await ConsentManager.withdrawConsent('u', 'c1', 'o1')).toBe(false);
   });
 
   it('getUserConsents queries active consents', async () => {
@@ -133,8 +134,19 @@ describe('CookieConsentManager', () => {
   };
 
   it('updates when consent exists', async () => {
-    h.chainQueue = [[{ id: 'existing' }], [{ id: 'updated' }]];
+    h.chainQueue = [[{ id: 'existing', organizationId: 'o', userId: null }], [{ id: 'updated' }]];
     expect(await CookieConsentManager.saveCookieConsent(data)).toEqual({ id: 'updated' });
+  });
+
+  it('refuses to change a record that belongs to another organization or to another signed-in member', async () => {
+    h.chainQueue = [[{ id: 'existing', organizationId: 'other-org', userId: null }]];
+    await expect(CookieConsentManager.saveCookieConsent(data)).rejects.toThrow('belongs to another');
+
+    h.chainQueue = [[{ id: 'existing', organizationId: 'o', userId: 'owner' }]];
+    await expect(CookieConsentManager.saveCookieConsent({ ...data, userId: 'someone-else' })).rejects.toThrow('belongs to another');
+
+    h.chainQueue = [[{ id: 'existing', organizationId: 'o', userId: 'owner' }]];
+    await expect(CookieConsentManager.saveCookieConsent(data)).rejects.toThrow('belongs to another');
   });
 
   it('inserts when consent is new', async () => {
@@ -158,16 +170,25 @@ describe('CookieConsentManager', () => {
 });
 
 describe('GdprRequestManager', () => {
+  const created = { id: 'r1', userId: 'u', organizationId: 'o', deadline: new Date('2026-12-01') };
+
   it('requestDataAccess inserts and notifies', async () => {
-    h.chainQueue = [[{ id: 'r1' }]];
-    expect(await GdprRequestManager.requestDataAccess({ userId: 'u', organizationId: 'o' })).toEqual({ id: 'r1' });
+    h.chainQueue = [[created]];
+    expect(await GdprRequestManager.requestDataAccess({ userId: 'u', organizationId: 'o' })).toEqual(created);
     expect(h.notifySend).toHaveBeenCalled();
+  });
+
+  it('createDataAccessRequest inserts without notifying, so a caller can notify after its own commit', async () => {
+    h.notifySend.mockClear();
+    h.chainQueue = [[created]];
+    expect(await GdprRequestManager.createDataAccessRequest({ userId: 'u', organizationId: 'o' })).toEqual(created);
+    expect(h.notifySend).not.toHaveBeenCalled();
   });
 
   it('requestDataAccess tolerates notification failure', async () => {
     h.notifySend.mockRejectedValue(new Error('notify fail'));
-    h.chainQueue = [[{ id: 'r2' }]];
-    expect(await GdprRequestManager.requestDataAccess({ userId: 'u', organizationId: 'o' })).toEqual({ id: 'r2' });
+    h.chainQueue = [[{ ...created, id: 'r2' }]];
+    expect(await GdprRequestManager.requestDataAccess({ userId: 'u', organizationId: 'o' })).toEqual({ ...created, id: 'r2' });
   });
 
   it('requestDataErasure and requestDataPortability insert', async () => {
@@ -186,11 +207,11 @@ describe('GdprRequestManager', () => {
 
   it('updateRequestStatus handles each status', async () => {
     h.chainQueue = [[{ id: 'a' }]];
-    expect(await GdprRequestManager.updateRequestStatus('r', 'in_progress')).toEqual({ id: 'a' });
+    expect(await GdprRequestManager.updateRequestStatus('r', 'o1', 'in_progress')).toEqual({ id: 'a' });
     h.chainQueue = [[{ id: 'b' }]];
-    expect(await GdprRequestManager.updateRequestStatus('r', 'completed', { processedBy: 'admin' })).toEqual({ id: 'b' });
+    expect(await GdprRequestManager.updateRequestStatus('r', 'o1', 'completed', { processedBy: 'admin' })).toEqual({ id: 'b' });
     h.chainQueue = [[{ id: 'c' }]];
-    expect(await GdprRequestManager.updateRequestStatus('r', 'rejected', { rejectionReason: 'x' })).toEqual({ id: 'c' });
+    expect(await GdprRequestManager.updateRequestStatus('r', 'o1', 'rejected', { rejectionReason: 'x' })).toEqual({ id: 'c' });
   });
 });
 
@@ -229,6 +250,16 @@ describe('DataErasureService', () => {
       [{ id: 'req' }], // updateRequestStatus returning
     ];
     await expect(DataErasureService.eraseUserData('u', 'o', 'req1', 'admin')).resolves.toBeUndefined();
+  });
+
+  it('eraseUserData confines message and claim-update erasure to the erasing organization via the parent row', async () => {
+    const { inArray, eq } = await import('drizzle-orm');
+    vi.mocked(inArray).mockClear();
+    vi.mocked(eq).mockClear();
+    await DataErasureService.eraseUserData('u', 'org-erasing', 'req1', 'admin');
+    expect(inArray).toHaveBeenCalledWith('messages.threadId', expect.anything());
+    expect(inArray).toHaveBeenCalledWith('claimUpdates.claimId', expect.anything());
+    expect(vi.mocked(eq).mock.calls.filter((c) => c[1] === 'org-erasing').length).toBeGreaterThanOrEqual(2);
   });
 
   it('eraseUserData throws on failure', async () => {

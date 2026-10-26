@@ -112,7 +112,7 @@ export default async function DebugPage({ params }: PageProps) {
             <p className="text-sm font-medium">{t("dbCard.step2")}</p>
             <code className="block mt-1 p-3 bg-muted rounded text-xs font-mono whitespace-pre">
 {`UPDATE users 
-SET user_id = 'your_clerk_user_id_here'
+SET user_id = 'your_user_id_here'
 WHERE email = 'your.email@example.com';`}
             </code>
           </div>
@@ -121,7 +121,7 @@ WHERE email = 'your.email@example.com';`}
             <p className="text-sm font-medium">{t("dbCard.step3")}</p>
             <code className="block mt-1 p-3 bg-muted rounded text-xs font-mono whitespace-pre">
 {`UPDATE claims 
-SET assigned_to = 'your_clerk_user_id_here'
+SET assigned_to = 'your_user_id_here'
 WHERE claim_number = 'CLM-2025-004';`}
             </code>
           </div>

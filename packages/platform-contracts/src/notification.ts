@@ -25,7 +25,7 @@ export type NotificationPriority = (typeof notificationPriorityValues)[number]
 
 export const notificationSchema = z.object({
   /** Unique notification ID. */
-  id: z.string().uuid(),
+  id: z.guid(),
   /** Recipient user ID. */
   recipientId: z.string().min(1),
   /** Org scope context. */
@@ -51,7 +51,7 @@ export const notificationSchema = z.object({
   /** Notification category for grouping/filtering. */
   category: z.string().optional(),
   /** Arbitrary metadata. */
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export type Notification = z.infer<typeof notificationSchema>
@@ -60,8 +60,8 @@ export type Notification = z.infer<typeof notificationSchema>
 
 export const unreadCountSchema = z.object({
   total: z.number().int().nonnegative(),
-  byModule: z.record(z.number().int().nonnegative()).optional(),
-  byPriority: z.record(z.number().int().nonnegative()).optional(),
+  byModule: z.record(z.string(), z.number().int().nonnegative()).optional(),
+  byPriority: z.record(z.string(), z.number().int().nonnegative()).optional(),
 })
 
 export type UnreadCount = z.infer<typeof unreadCountSchema>

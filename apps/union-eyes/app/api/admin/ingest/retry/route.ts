@@ -10,16 +10,17 @@
 import { withApi, z, ApiError } from '@/lib/api/framework';
 import { withOrgOwnedContext as withSystemContext } from '@/lib/db/org-owned-context';
 import { db } from '@/db/db';
-import { eq, and, inArray } from 'drizzle-orm';
+import { eq, and, inArray, sql } from 'drizzle-orm';
 import {
   ingestionBatches,
   ingestionRecords,
 } from '@/db/schema/ingestion-schema';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 const retryBodySchema = z.object({
-  batch_id: z.string().uuid(),
-  record_ids: z.array(z.string().uuid()).min(1).max(500).optional(),
+  batch_id: z.guid(),
+  record_ids: z.array(z.guid()).min(1).max(500).optional(),
 });
 
 export const POST = withApi(
@@ -80,45 +81,29 @@ export const POST = withApi(
       };
     }
 
-    // Audit the retry attempt
-    await auditLog({
-      eventType: AuditEventType.DATA_BULK_UPDATE,
-      severity: AuditSeverity.MEDIUM,
-      userId: userId ?? undefined,
-      organizationId,
-      resource: 'ingestion_batch',
-      resourceId: body.batch_id,
-      action: 'retry',
-      details: {
-        recordCount: failedRecords.length,
-        recordIds: body.record_ids ?? 'all_failed',
-      },
-      outcome: 'success',
-    });
-
-    // Mark records as pending for retry
-    let retrySucceeded = 0;
-    let retryFailed = 0;
-
-    for (const record of failedRecords) {
-      try {
-        // Reset to pending
-        await withSystemContext(async () =>
-          db
-            .update(ingestionRecords)
-            .set({
-              status: 'pending',
-              errorMessage: null,
-              errorDetails: null,
-              processedAt: null,
-            })
-            .where(eq(ingestionRecords.id, record.id)),
+    // Every reset and the audit record commit together: all failed records are re-queued or none are.
+    await withRLSContext({ organizationId }, async (tx) => {
+      await tx
+        .update(ingestionRecords)
+        .set({ status: 'pending', errorMessage: null, errorDetails: null, processedAt: null })
+        .where(
+          and(
+            eq(ingestionRecords.batchId, body.batch_id),
+            sql`${ingestionRecords.batchId} IN (SELECT id FROM ingestion_batches WHERE organization_id = ${organizationId})`,
+            inArray(ingestionRecords.id, failedRecords.map((record) => record.id)),
+          ),
         );
-        retrySucceeded++;
-      } catch {
-        retryFailed++;
-      }
-    }
+      await persistAtomicAudit(tx, {
+        userId: userId ?? 'system:ingest-retry',
+        organizationId,
+        resourceType: 'ingestion_batch',
+        resourceId: body.batch_id,
+        action: 'ingest.retry',
+        details: { recordCount: failedRecords.length, recordIds: body.record_ids ?? 'all_failed' },
+      });
+    });
+    const retrySucceeded = failedRecords.length;
+    const retryFailed = 0;
 
     return {
       retried: failedRecords.length,

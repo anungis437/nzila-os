@@ -123,7 +123,7 @@ export type NotificationRecipient = z.infer<typeof NotificationRecipientSchema>;
  * Defines monitoring rules and alerting behavior
  */
 export const AlertRuleSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   name: z.string().min(1).max(200),
   description: z.string().max(1000).optional(),
   
@@ -148,7 +148,7 @@ export const AlertRuleSchema = z.object({
   // Metadata
   runbook_url: z.string().url().optional().describe('Link to incident response runbook'),
   tags: z.array(z.string()).default([]),
-  org_id: z.string().uuid().optional().describe('Org-specific rule'),
+  org_id: z.guid().optional().describe('Org-specific rule'),
   
   // Audit fields
   created_by: z.string(),
@@ -163,8 +163,8 @@ export type AlertRule = z.infer<typeof AlertRuleSchema>;
  * Actual fired alert with instance data
  */
 export const AlertInstanceSchema = z.object({
-  id: z.string().uuid(),
-  rule_id: z.string().uuid(),
+  id: z.guid(),
+  rule_id: z.guid(),
   
   // Alert state
   status: z.nativeEnum(AlertStatus),
@@ -174,10 +174,10 @@ export const AlertInstanceSchema = z.object({
   // Alert details
   title: z.string(),
   message: z.string(),
-  details: z.record(z.unknown()).optional().describe('Additional context (metric values, stack traces, etc.)'),
+  details: z.record(z.string(), z.unknown()).optional().describe('Additional context (metric values, stack traces, etc.)'),
   
   // Instance metadata
-  org_id: z.string().uuid().optional(),
+  org_id: z.guid().optional(),
   resource_id: z.string().optional().describe('ID of affected resource (user, org, etc.)'),
   resource_type: z.string().optional().describe('Type of resource'),
   
@@ -208,8 +208,8 @@ export type AlertInstance = z.infer<typeof AlertInstanceSchema>;
  * Tracks notification delivery attempts
  */
 export const NotificationDeliverySchema = z.object({
-  id: z.string().uuid(),
-  alert_id: z.string().uuid(),
+  id: z.guid(),
+  alert_id: z.guid(),
   
   // Delivery details
   channel: z.nativeEnum(NotificationChannel),
@@ -280,7 +280,7 @@ export interface AlertDashboardStats {
  */
 export const NotificationPreferencesSchema = z.object({
   user_id: z.string(),
-  org_id: z.string().uuid().optional(),
+  org_id: z.guid().optional(),
   
   // Channel preferences
   email_enabled: z.boolean().default(true),

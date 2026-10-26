@@ -27,7 +27,7 @@ export const GET = withApi(
       const claim = await findReadableCase(tx, actor, caseId)
       if (!claim) throw ApiError.notFound('Case')
       const updates = await tx.select().from(claimUpdates)
-        .where(and(eq(claimUpdates.claimId, claimHistoryReference(claim.claimId)), caseHistoryVisibility(actor)))
+        .where(and(eq(claimUpdates.claimId, claimHistoryReference(claim.claimId)), caseHistoryVisibility(claim.visibility)))
         .orderBy(desc(claimUpdates.createdAt))
       return { data: updates.map(update => ({
         id: update.updateId,

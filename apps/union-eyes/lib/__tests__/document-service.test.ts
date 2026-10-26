@@ -130,7 +130,6 @@ import {
   createDocumentVersion,
   getDocumentVersions,
   processDocumentOCR,
-  bulkProcessOCR,
   searchDocuments,
   bulkMoveDocuments,
   bulkUpdateTags,
@@ -279,32 +278,32 @@ describe('document-service', () => {
     it('updates and returns document', async () => {
       const updated = { ...DOC, name: 'Renamed.pdf' };
       mocks.mockUpdate.mockReturnValue(chain([updated]));
-      const result = await updateDocument('d1', { name: 'Renamed.pdf' } as never);
+      const result = await updateDocument('d1', 'org-1', { name: 'Renamed.pdf' } as never);
       expect(result).toEqual(updated);
     });
 
     it('returns null when not found', async () => {
       mocks.mockUpdate.mockReturnValue(chain([undefined]));
-      expect(await updateDocument('missing', {} as never)).toBeNull();
+      expect(await updateDocument('missing', 'org-1', {} as never)).toBeNull();
     });
   });
 
   describe('deleteDocument', () => {
     it('soft deletes and returns true', async () => {
       mocks.mockUpdate.mockReturnValue(chain([DOC]));
-      expect(await deleteDocument('d1')).toBe(true);
+      expect(await deleteDocument('d1', 'org-1')).toBe(true);
     });
 
     it('returns false when not found', async () => {
       mocks.mockUpdate.mockReturnValue(chain([undefined]));
-      expect(await deleteDocument('missing')).toBe(false);
+      expect(await deleteDocument('missing', 'org-1')).toBe(false);
     });
   });
 
   describe('permanentlyDeleteDocument', () => {
     it('hard deletes and returns true', async () => {
       mocks.mockDelete.mockReturnValue(chain());
-      expect(await permanentlyDeleteDocument('d1')).toBe(true);
+      expect(await permanentlyDeleteDocument('d1', 'org-1')).toBe(true);
     });
   });
 
@@ -389,13 +388,13 @@ describe('document-service', () => {
     it('updates and returns folder', async () => {
       const updated = { ...FOLDER, name: 'Renamed' };
       mocks.mockUpdate.mockReturnValue(chain([updated]));
-      const result = await updateFolder('f1', { name: 'Renamed' } as never);
+      const result = await updateFolder('f1', 'org-1', { name: 'Renamed' } as never);
       expect(result).toEqual(updated);
     });
 
     it('returns null when update yields no row', async () => {
       mocks.mockUpdate.mockReturnValue(chain([undefined]));
-      const result = await updateFolder('missing', { name: 'Nope' } as never);
+      const result = await updateFolder('missing', 'org-1', { name: 'Nope' } as never);
       expect(result).toBeNull();
     });
   });
@@ -403,7 +402,7 @@ describe('document-service', () => {
   describe('deleteFolder', () => {
     it('soft deletes folder without contents', async () => {
       mocks.mockUpdate.mockReturnValue(chain([FOLDER]));
-      expect(await deleteFolder('f1')).toBe(true);
+      expect(await deleteFolder('f1', 'org-1')).toBe(true);
     });
 
     it('deletes folder with contents (recursive)', async () => {
@@ -415,7 +414,7 @@ describe('document-service', () => {
         .mockReturnValueOnce(chain([FOLDER])); // delete main folder
       mocks.mockSelect.mockReturnValue(chain([])); // no subfolders
 
-      expect(await deleteFolder('f1', true)).toBe(true);
+      expect(await deleteFolder('f1', 'org-1', true)).toBe(true);
     });
   });
 
@@ -519,57 +518,21 @@ describe('document-service', () => {
     });
   });
 
-  describe('bulkProcessOCR', () => {
-    it('processes all documents', async () => {
+  describe('OCR persistence', () => {
+    it('never persists extracted text through the service: transcripts are written only by the governed transcript module', async () => {
       mocks.mockFindFirstDoc.mockResolvedValue({
         ...DOC,
         organizationId: 'org-1',
         mimeType: 'image/png',
         metadata: { blobKey: 'documents/org-1/test.png' },
       });
-      mocks.mockUpdate.mockReturnValue(chain([DOC]));
-      const result = await bulkProcessOCR(['d1', 'd2'], 'org-1');
-      expect(result.success).toBe(true);
-      expect(result.processed).toBe(2);
+      await expect(processDocumentOCR('d1', 'org-1', { persistExtractedText: true })).rejects.toThrow('OCR_PERSISTENCE_NOT_PERMITTED');
+      expect(mocks.mockUpdate).not.toHaveBeenCalled();
     });
 
-    it('collects errors for failed documents', async () => {
-      mocks.mockFindFirstDoc
-        .mockResolvedValueOnce({
-          ...DOC,
-          organizationId: 'org-1',
-          mimeType: 'image/png',
-          metadata: { blobKey: 'documents/org-1/test-1.png' },
-        })
-        .mockResolvedValueOnce({
-          ...DOC,
-          organizationId: 'org-1',
-          mimeType: 'image/png',
-          metadata: { blobKey: 'documents/org-1/test-2.png' },
-        });
-      mocks.mockProcessImageOCR
-        .mockResolvedValueOnce({ text: 'ok', confidence: 90 })
-        .mockRejectedValueOnce(new Error('ocr-fail'));
-      mocks.mockUpdate.mockReturnValue(chain([DOC]));
-
-      const result = await bulkProcessOCR(['d1', 'd2'], 'org-1');
-      expect(result.success).toBe(false);
-      expect(result.processed).toBe(1);
-      expect(result.failed).toBe(1);
-    });
-
-    it('uses fallback message when non-Error is thrown during OCR', async () => {
-      mocks.mockFindFirstDoc.mockResolvedValue({
-        ...DOC,
-        organizationId: 'org-1',
-        mimeType: 'image/png',
-        metadata: { blobKey: 'documents/org-1/test.png' },
-      });
-      mocks.mockProcessImageOCR.mockImplementationOnce(() => { throw 'bad-ocr'; });
-
-      const result = await bulkProcessOCR(['d1'], 'org-1');
-      expect(result.success).toBe(false);
-      expect(result.errors?.[0].error).toBe('Failed to process document OCR');
+    it('has no bulk OCR entry point: processing is authorized per document', async () => {
+      const service = await import('@/lib/services/document-service');
+      expect((service as Record<string, unknown>).bulkProcessOCR).toBeUndefined();
     });
   });
 

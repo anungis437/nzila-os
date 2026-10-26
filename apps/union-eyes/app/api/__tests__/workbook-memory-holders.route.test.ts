@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 const m = vi.hoisted(() => ({
   auth: vi.fn(),
   getOrganizationIdForUser: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   runStewardshipCartography: vi.fn(() => ({ density: { index: 0 } })),
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   selectQueue: [] as unknown[][],
@@ -45,10 +46,11 @@ vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/db', () => ({ db: mockDb }));
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/workbook/engines/stewardshipCartography', () => ({
   runStewardshipCartography: m.runStewardshipCartography,
 }));
-vi.mock('drizzle-orm', () => ({ eq: vi.fn(), and: vi.fn() }));
+vi.mock('drizzle-orm', async (importOriginal) => ({ ...(await importOriginal<typeof import('drizzle-orm')>()), eq: vi.fn(), and: vi.fn() }));
 // Pass-through RLS context helpers so the real authority boundary runs; the
 // ownership lookup is fed the mock db as its system-context `tx`.
 vi.mock('@/lib/db/with-rls-context', () => ({
@@ -78,6 +80,7 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
     m.updateQueue = [];
     m.deleteQueue = [];
     m.runStewardshipCartography.mockReturnValue({ density: { index: 0 } });
+    m.persistAtomicAudit.mockResolvedValue(undefined);
   });
 
   describe('GET', () => {
@@ -143,6 +146,45 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
       expect(response.status).toBe(201);
       const json = await response.json();
       expect(json.id).toBe('holder_new');
+      expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+        mockDb,
+        expect.objectContaining({
+          organizationId: 'org_1',
+          userId: 'user_1',
+          action: 'workbook.memory_holder.create',
+          resourceId: 'holder_new',
+        }),
+      );
+    });
+
+    it('rolls back the insert path when the claimed-workbook audit fails', async () => {
+      const { POST } = await loadListRoute();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+      m.insertQueue.push([{ id: 'holder_new' }]);
+      m.auth.mockResolvedValueOnce({ userId: 'user_1' });
+      m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
+
+      const response = await POST(
+        req({ role: 'Treasurer', responsibility: 'Signs cheques' }),
+        { params: Promise.resolve({ id: 'w1' }) },
+      );
+
+      expect(response.status).toBe(503);
+    });
+
+    it('refuses an identity-linked write that has no organization to attribute', async () => {
+      const { POST } = await loadListRoute();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: null }]);
+      m.insertQueue.push([{ id: 'holder_new' }]);
+      m.auth.mockResolvedValueOnce({ userId: 'user_1' });
+
+      const response = await POST(
+        req({ role: 'Treasurer', responsibility: 'Signs cheques' }),
+        { params: Promise.resolve({ id: 'w1' }) },
+      );
+
+      expect(response.status).toBe(503);
+      expect(m.persistAtomicAudit).not.toHaveBeenCalled();
     });
 
     it('rejects invalid bodies with 422 before touching authorization', async () => {

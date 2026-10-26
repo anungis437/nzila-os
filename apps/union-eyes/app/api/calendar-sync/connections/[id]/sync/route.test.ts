@@ -24,11 +24,18 @@ const mocks = vi.hoisted(() => {
     exportEventToGoogle: vi.fn(),
     importMicrosoftEvents: vi.fn(),
     exportEventToMicrosoft: vi.fn(),
+    performAuditedOperation: vi.fn(),
+    operationAuditResponse: vi.fn(),
   }
 })
 
 vi.mock('@/lib/organization-middleware', () => ({
   withOrganizationAuth: vi.fn((handler: (...args: any[]) => unknown) => handler),
+}))
+
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: mocks.performAuditedOperation,
+  operationAuditResponse: mocks.operationAuditResponse,
 }))
 
 vi.mock('@/db/db', () => ({ db: mocks.db }))
@@ -57,6 +64,81 @@ describe('POST /api/calendar-sync/connections/[id]/sync', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.db._selectQueue.length = 0
+    mocks.performAuditedOperation.mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn())
+    mocks.operationAuditResponse.mockReturnValue(null)
+  })
+
+  const conn = { id: 'conn-1', provider: 'google', syncDirection: 'import', isActive: true, organizationId: 'org-1' }
+  const ids = { localCalendarId: '11111111-1111-1111-1111-111111111111', externalCalendarId: 'google-cal-1' }
+  const actor = { organizationId: 'org-1', userId: 'user-1', memberId: 'member-1' }
+
+  it('records the intent first under the caller organization and actor, then runs the provider sync', async () => {
+    mocks.importGoogleEvents.mockResolvedValue({ imported: 1 })
+    mocks.db._selectQueue.push([conn], [{ id: 'cal-1' }])
+
+    const res = await POST(makePostRequest(ids), actor, { id: 'conn-1' })
+
+    expect(res.status).toBe(200)
+    expect(mocks.performAuditedOperation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        organizationId: 'org-1',
+        userId: 'user-1',
+        action: 'calendar_sync.connection.sync',
+        resourceType: 'external_calendar_connections',
+        resourceId: 'conn-1',
+      }),
+      expect.any(Function),
+    )
+    expect(mocks.importGoogleEvents).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not call the provider when the audit boundary refuses the operation', async () => {
+    mocks.db._selectQueue.push([conn], [{ id: 'cal-1' }])
+    const refusal = new Error('audit unavailable')
+    mocks.performAuditedOperation.mockRejectedValueOnce(refusal)
+    mocks.operationAuditResponse.mockReturnValueOnce({ status: 409, body: { error: { code: 'OPERATION_AUDIT_UNAVAILABLE', message: 'not performed' } } })
+
+    const res = await POST(makePostRequest(ids), actor, { id: 'conn-1' })
+
+    expect(res.status).toBe(409)
+    expect(mocks.importGoogleEvents).not.toHaveBeenCalled()
+  })
+
+  it('refuses to export an event that is not in the caller organization, before any audit or provider call', async () => {
+    mocks.db._selectQueue.push([{ ...conn, syncDirection: 'export' }], [{ id: 'cal-1' }], [])
+
+    const res = await POST(
+      makePostRequest({ ...ids, mode: 'export', localEventId: '22222222-2222-2222-2222-222222222222' }),
+      actor,
+      { id: 'conn-1' },
+    )
+
+    expect(res.status).toBe(404)
+    expect(mocks.performAuditedOperation).not.toHaveBeenCalled()
+    expect(mocks.exportEventToGoogle).not.toHaveBeenCalled()
+  })
+
+  it('exports an event that belongs to the caller organization', async () => {
+    mocks.exportEventToGoogle.mockResolvedValue({ id: 'g1' })
+    mocks.db._selectQueue.push([{ ...conn, syncDirection: 'export' }], [{ id: 'cal-1' }], [{ id: 'evt-1' }])
+
+    const res = await POST(
+      makePostRequest({ ...ids, mode: 'export', localEventId: '22222222-2222-2222-2222-222222222222' }),
+      actor,
+      { id: 'conn-1' },
+    )
+
+    expect(res.status).toBe(200)
+    expect(mocks.exportEventToGoogle).toHaveBeenCalledWith('conn-1', '22222222-2222-2222-2222-222222222222', 'google-cal-1')
+  })
+
+  it('answers 501 for an unsupported provider with no audit and no sync', async () => {
+    mocks.db._selectQueue.push([{ ...conn, provider: 'caldav' }], [{ id: 'cal-1' }])
+
+    const res = await POST(makePostRequest(ids), actor, { id: 'conn-1' })
+
+    expect(res.status).toBe(501)
+    expect(mocks.performAuditedOperation).not.toHaveBeenCalled()
   })
 
   it('runs provider import when connection and calendar are org-scoped', async () => {

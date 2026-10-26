@@ -2,36 +2,71 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
-  db: { update: vi.fn() },
+  tx: { update: vi.fn() },
+  persistAtomicAudit: vi.fn(),
+  returned: [] as unknown[],
 }));
 
-vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError: { notFound: (msg: string) => Object.assign(new Error(msg), { status: 404 }) }, z: require('zod') }));
-vi.mock('@/db/db', () => ({ db: m.db }));
+vi.mock('@/lib/api/framework', () => ({
+  withApi: m.withApi,
+  ApiError: {
+    notFound: (msg: string) => Object.assign(new Error(msg), { status: 404 }),
+    badRequest: (msg: string) => Object.assign(new Error(msg), { status: 400 }),
+  },
+  z: require('zod'),
+}));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: vi.fn(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(m.tx)),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/db/schema', () => ({ kpiConfigurations: { id: 'id', organizationId: 'organizationId' } }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
-  return { ...actual, eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and'), sql: Object.assign(vi.fn(() => 'sql'), { mapWith: vi.fn() }) };
+  return { ...actual, eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and') };
 });
 
 async function loadRoute() {
   return import('../targets/[id]/route');
 }
 
+const ctx = { body: { isActive: true }, organizationId: 'org_1', userId: 'u1', params: { id: 't1' } };
+
 describe('targets/[id] route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
-    m.db.update.mockReturnValue({
+    m.returned = [{ id: 't1', isActive: true }];
+    m.persistAtomicAudit.mockResolvedValue(undefined);
+    m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (c: any) => handler(c));
+    m.tx.update.mockReturnValue({
       set: vi.fn(() => ({
-        where: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 't1', isActive: true }]) })),
+        where: vi.fn(() => ({ returning: vi.fn(async () => m.returned) })),
       })),
     });
   });
 
-  it('updates the target active state', async () => {
+  it('updates the target active state and audits it on the same transaction', async () => {
     const { PATCH } = await loadRoute();
-    const result = await PATCH({ body: { isActive: true }, organizationId: 'org_1', params: { id: 't1' } });
+    const result = await PATCH(ctx);
 
     expect(result).toEqual({ id: 't1', isActive: true });
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      m.tx,
+      expect.objectContaining({ organizationId: 'org_1', userId: 'u1', action: 'target.activate', resourceId: 't1' }),
+    );
+  });
+
+  it('answers 404 and writes no audit when the target is not in the caller\u2019s organization', async () => {
+    const { PATCH } = await loadRoute();
+    m.returned = [];
+
+    await expect(PATCH(ctx)).rejects.toMatchObject({ status: 404 });
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('fails the update when its audit cannot be written', async () => {
+    const { PATCH } = await loadRoute();
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+
+    await expect(PATCH(ctx)).rejects.toThrow('audit unavailable');
   });
 });

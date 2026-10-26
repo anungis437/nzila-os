@@ -74,6 +74,13 @@ describe('SharePointAdapter', () => {
     vi.clearAllMocks();
   });
 
+  it('does not call Graph until the adapter is connected', async () => {
+    const adapter = new SharePointAdapter('org-1', { clientId: 'c', clientSecret: 's', organizationId: 'tenant' });
+    await adapter.initialize(initConfig);
+    await expect(adapter.sync({ type: SyncType.FULL, orgs: ['sites'] })).rejects.toThrow(/not connected/i);
+    expect(h.client.getSites).not.toHaveBeenCalled();
+  });
+
   it('connect succeeds when health is ok and healthCheck reports healthy', async () => {
     const adapter = await makeReady();
     expect((await adapter.healthCheck()).healthy).toBe(true);

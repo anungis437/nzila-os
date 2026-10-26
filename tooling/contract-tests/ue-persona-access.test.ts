@@ -110,6 +110,13 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'structure/page.tsx',                          minRole: 'member',               description: 'Structure management' },
   { path: 'leadership/page.tsx',                         minRole: 'member',               description: 'Leadership view (API gates officer)' },
   { path: 'settings/communications/page.tsx',            minRole: 'member',               description: 'Notification preferences' },
+  { path: 'executive/page.tsx',                          minRole: 'officer',              description: 'Executive destination (page requires officer)' },
+  { path: 'help/page.tsx',                               minRole: 'member',               description: 'Help (any authenticated user)' },
+  { path: 'messages/page.tsx',                           minRole: 'member',               description: 'Member messages (participant-scoped by the API)' },
+  { path: 'messages/staff/page.tsx',                     minRole: 'steward',              description: 'Staff conversation workspace (case-policy staff guard; every API call decides again from live membership, designation and assignment)' },
+  { path: 'preferences/page.tsx',                        minRole: 'member',               description: 'Personal preferences' },
+  { path: 'privacy/page.tsx',                            minRole: 'member',               description: 'Personal privacy and information rights' },
+  { path: 'union/page.tsx',                              minRole: 'member',               description: 'Union destination (member experience; API gates by authority)' },
 
   // ── Dues & receipts (any authenticated member) ─────────────────────────
   { path: 'dues/page.tsx',                               minRole: 'member',               description: 'Member dues dashboard' },
@@ -191,6 +198,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   // ── Member-facing pages (any authenticated member) ─────────────────────
   { path: 'cases/page.tsx',                              minRole: 'member',               description: 'Cases alias — server redirect to /dashboard/claims (requireUser)' },
   { path: 'documents/page.tsx',                          minRole: 'member',               description: 'Document library root — auth by layout, API routes gate per-op (read→member, write→steward)' },
+  { path: 'documents/portal/page.tsx',                   minRole: 'member',               description: 'Member document portal over the canonical repository — auth by layout; every read, download and upload is authorized per document by the repository routes' },
   { path: 'inbox/page.tsx',                              minRole: 'member',               description: 'Unified signal feed — auth by layout, InboxConsole uses Suspense for useSearchParams' },
   { path: 'priorities/page.tsx',                         minRole: 'member',               description: 'Priorities console — auth by layout, PrioritiesConsole uses Suspense for useSearchParams' },
   { path: 'work/page.tsx',                               minRole: 'member',               description: 'Wave 3 casework alias — auth by layout, renders WorkbenchConsole or InboxConsole by role' },
@@ -375,7 +383,7 @@ const API_ROUTE_MATRIX: ApiRouteRule[] = [
   { apiPath: 'messaging/preferences',expectedAuthPattern: 'crudRoutes',           expectedMinRole: 'member',               backingPage: 'settings/communications' },
   { apiPath: 'organizing/notes',     expectedAuthPattern: 'crudRoutes',           expectedMinRole: 'member',               backingPage: 'organizing/notes' },
   { apiPath: 'activities',           expectedAuthPattern: 'withApi',              expectedMinRole: 'member',               backingPage: 'admin (audit log)' },
-  { apiPath: 'dues/calculate',       expectedAuthPattern: 'withRoleAuth',         expectedMinRole: 'steward',              backingPage: 'admin/dues' },
+  { apiPath: 'dues/calculate',       expectedAuthPattern: 'withApiAuth',          expectedMinRole: 'member',               backingPage: 'admin/dues (own record; any other member needs the named financial role)' },
   { apiPath: 'analytics/cross-org',  expectedAuthPattern: 'withApi',              expectedMinRole: 'platform_lead',        backingPage: 'cross-org analytics (platform)' },
 ]
 

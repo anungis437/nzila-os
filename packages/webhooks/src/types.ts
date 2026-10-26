@@ -49,7 +49,7 @@ export interface InboundWebhookResult {
 // ── Schemas ─────────────────────────────────────────────────────────────────
 
 export const CreateWebhookSubscriptionSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   url: z.string().url(),
   events: z.array(z.string().min(1)).min(1),
   secret: z.string().min(16),
@@ -58,8 +58,8 @@ export const CreateWebhookSubscriptionSchema = z.object({
 
 export const WebhookEventPayloadSchema = z.object({
   event: z.string().min(1),
-  payload: z.record(z.unknown()),
-  idempotencyKey: z.string().uuid(),
+  payload: z.record(z.string(), z.unknown()),
+  idempotencyKey: z.guid(),
   timestamp: z.string().datetime(),
 })
 

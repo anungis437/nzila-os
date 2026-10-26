@@ -97,7 +97,7 @@ export class FailedPaymentRetryService {
           if (!shouldRetry.retry) {
             if (shouldRetry.maxAttemptsReached) {
               // Mark for admin intervention
-              await this.markForAdminIntervention(txn.id, failureCount);
+              await this.markForAdminIntervention(txn.id, txn.organizationId, failureCount);
               result.markedForAdmin++;
               result.results.push({
                 transactionId: txn.id,
@@ -263,6 +263,7 @@ export class FailedPaymentRetryService {
    */
   private static async markForAdminIntervention(
     transactionId: string,
+    organizationId: string,
     failureCount: number
   ): Promise<void> {
     try {
@@ -283,7 +284,7 @@ export class FailedPaymentRetryService {
           notes: sql`COALESCE(${duesTransactions.notes}, '') || E'\n' || ${`[${new Date().toISOString()}] Max payment retry attempts (${failureCount}) reached. Requires admin intervention.`}`,
           updatedAt: new Date(),
         })
-        .where(eq(duesTransactions.id, transactionId));
+        .where(and(eq(duesTransactions.id, transactionId), eq(duesTransactions.organizationId, organizationId)));
 
       // Send admin intervention notification
       await sendAdminIntervention(transactionId);

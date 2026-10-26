@@ -6,23 +6,25 @@
  * Sends a dues arrears reminder notification to the member.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import { db } from '@/db';
 import { memberArrears } from '@/db/schema/dues-finance-schema';
 import { organizationMembers } from '@/db/schema-organizations';
 import { eq, and } from 'drizzle-orm';
 import { getNotificationService } from '@/lib/services/notification-service';
 import { logger } from '@/lib/logger';
+import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 
 export const dynamic = 'force-dynamic';
 
 export const POST = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Dues'], summary: 'Send arrears reminder to a member' },
   },
   async ({ params, organizationId, userId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
     const memberId = params.id;
 
@@ -57,7 +59,11 @@ export const POST = withApi(
     const notificationService = getNotificationService();
     const amountOwed = parseFloat(arrears.totalOwed ?? '0').toFixed(2);
 
-    await notificationService.send({
+    // A message is an effect outside the database: the intent is recorded before it is sent, the outcome after.
+    try {
+      await performAuditedOperation(
+        { organizationId, userId, action: 'dues.arrears.reminder', resourceType: 'member_arrears', resourceId: arrears.id, details: { memberId } },
+        () => notificationService.send({
       organizationId,
       recipientId: memberId,
       recipientEmail: member.email,
@@ -67,7 +73,13 @@ export const POST = withApi(
       title: 'Dues Arrears Reminder',
       body: `Hi ${member.name ?? 'Member'},\n\nThis is a reminder that you have outstanding union dues of $${amountOwed}.\n\nPlease contact your local to arrange payment or a payment plan.\n\nThank you.`,
       userId: userId ?? undefined,
-    });
+        }),
+      );
+    } catch (error) {
+      const refused = operationAuditResponse(error);
+      if (refused) throw ApiError.conflict(refused.body.error.message);
+      throw error;
+    }
 
     logger.info('Arrears reminder sent', { memberId, amountOwed });
 

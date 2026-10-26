@@ -6,7 +6,7 @@ export const eventPayloadSchema = z.object({
     .min(1)
     .max(64)
     .regex(/^[a-z0-9_:.\-]+$/i, 'Invalid event format'),
-  properties: z.record(z.union([z.string().max(256), z.number(), z.boolean()])).optional(),
+  properties: z.record(z.string(), z.union([z.string().max(256), z.number(), z.boolean()])).optional(),
   ts: z.string().datetime().optional(),
   page: z.string().max(512).optional(),
 })

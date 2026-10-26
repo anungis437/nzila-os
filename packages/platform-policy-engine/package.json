@@ -19,7 +19,7 @@
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-events": "workspace:*",
     "yaml": "^2.7.0",
-    "zod": "^3.25.0"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "vitest": "^5.0.5"

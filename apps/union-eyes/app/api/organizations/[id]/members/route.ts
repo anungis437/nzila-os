@@ -6,7 +6,7 @@ import { eq } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { z } from 'zod';
 import { requireUserForOrganization, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
-import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -103,7 +103,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     })
       .returning();
     // Membership/role change is a launch-critical audited event; failure rolls the insert back.
-    await appendMandatoryAudit(tx, {
+    await persistAtomicAudit(tx, {
       organizationId: id,
       action: 'membership.create',
       resourceType: 'organization_members',

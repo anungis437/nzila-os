@@ -11,6 +11,7 @@ import { z } from "zod";
 import { withRoleAuth } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { checkEntitlement } from '@/lib/services/entitlements';
+import { operationAuditResponse } from '@/lib/audit/operation-audit';
 
 import {
   ErrorCode,
@@ -20,17 +21,24 @@ import {
   import { AI_FEATURES } from '@/lib/services/feature-flags';
   import { enforceAISafety } from '@nzila/policies';
 
+// Extraction stores clauses on an agreement and rewrites its text, so it is a steward-level action on the caller's own
+// organization; the organization is never taken from the body.
 const aiExtractClausesSchema = z.object({
   pdfUrl: z.string().url('Invalid URL'),
-  cbaId: z.string().uuid('Invalid cbaId'),
-  organizationId: z.string().uuid('Invalid organizationId'),
-  autoSave: z.boolean().default(true).optional(),
-  batch: z.boolean().default(false).optional(),
-  cbas: z.array(z.any()).default([]).optional(),
+  cbaId: z.guid('Invalid cbaId'),
+  organizationId: z.guid('Invalid organizationId').optional(),
+  autoSave: z.boolean().optional(),
+  batch: z.boolean().optional(),
+  cbas: z
+    .array(z.object({ id: z.guid('Invalid cba id'), documentUrl: z.string().url('Invalid URL') }))
+    .max(25)
+    .optional(),
 });
 
-export const POST = withRoleAuth('member', async (request, context) => {
-  const _user = { id: context.userId, organizationId: context.organizationId };
+export const POST = withRoleAuth('steward', async (request, context) => {
+  if (!context.organizationId || !context.userId) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
+  }
 
     // CRITICAL: Rate limit AI calls (expensive OpenAI API)
     const rateLimitResult = await checkRateLimit(
@@ -74,11 +82,13 @@ export const POST = withRoleAuth('member', async (request, context) => {
         return standardErrorResponse(
           ErrorCode.VALIDATION_ERROR,
           'Invalid request data',
-          validation.error.errors
+          validation.error.issues
         );
       }
       
-      const { pdfUrl, cbaId, organizationId, autoSave = true, batch = false, cbas = [] } = validation.data;
+      const { pdfUrl, cbaId, organizationId: requestedOrganizationId, autoSave = true, batch = false, cbas = [] } = validation.data;
+      const organizationId = context.organizationId;
+      const userId = context.userId;
       // DUPLICATE REMOVED (Phase 2): Multi-line destructuring of body
       // const {
       // pdfUrl,
@@ -88,7 +98,7 @@ export const POST = withRoleAuth('member', async (request, context) => {
       // batch = false,
       // cbas = [],
       // } = body;
-      if (organizationId && organizationId !== context.organizationId) {
+      if (requestedOrganizationId && requestedOrganizationId !== organizationId) {
         return standardErrorResponse(
           ErrorCode.FORBIDDEN,
           'Forbidden'
@@ -99,6 +109,8 @@ export const POST = withRoleAuth('member', async (request, context) => {
       // Batch extraction
       if (batch && cbas.length > 0) {
         const results = await batchExtractClauses(cbas, {
+          organizationId,
+          userId,
           autoSave,
           concurrency: 3,
         });
@@ -127,6 +139,7 @@ export const POST = withRoleAuth('member', async (request, context) => {
 
       const result = await extractClausesFromPDF(pdfUrl, cbaId, {
         organizationId,
+        userId,
         autoSave,
       });
 
@@ -138,6 +151,8 @@ export const POST = withRoleAuth('member', async (request, context) => {
         errors: result.errors,
       });
     } catch (error) {
+      const refused = operationAuditResponse(error);
+      if (refused) return standardErrorResponse(ErrorCode.CONFLICT, refused.body.error.message);
       return standardErrorResponse(
         ErrorCode.INTERNAL_ERROR,
         'Failed to extract clauses',

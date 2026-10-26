@@ -235,9 +235,7 @@ export class WorkdayAdapter extends BaseIntegration {
 
           if (existing) {
             // Update existing employee
-            await db
-              .update(externalEmployees)
-              .set({
+            const employeeUpdate = {
                 firstName: workdayEmployee.firstName,
                 lastName: workdayEmployee.lastName,
                 email: workdayEmployee.email,
@@ -252,8 +250,11 @@ export class WorkdayAdapter extends BaseIntegration {
                 supervisorName: workdayEmployee.supervisor?.name,
                 lastSyncedAt: new Date(),
                 updatedAt: new Date(),
-              })
-              .where(eq(externalEmployees.id, existing.id));
+              };
+            await db
+              .update(externalEmployees)
+              .set(employeeUpdate)
+              .where(and(eq(externalEmployees.id, existing.id), eq(externalEmployees.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             // Create new employee
@@ -344,7 +345,7 @@ export class WorkdayAdapter extends BaseIntegration {
                 lastSyncedAt: new Date(),
                 updatedAt: new Date(),
               })
-              .where(eq(externalPositions.id, existing.id));
+              .where(and(eq(externalPositions.id, existing.id), eq(externalPositions.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalPositions).values({
@@ -421,7 +422,7 @@ export class WorkdayAdapter extends BaseIntegration {
                 lastSyncedAt: new Date(),
                 updatedAt: new Date(),
               })
-              .where(eq(externalDepartments.id, existing.id));
+              .where(and(eq(externalDepartments.id, existing.id), eq(externalDepartments.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalDepartments).values({

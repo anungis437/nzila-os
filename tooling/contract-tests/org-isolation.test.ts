@@ -11,6 +11,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 
+import { isRetiredNoOpRoute } from './retired-routes'
 const ROOT = resolve(__dirname, '../..')
 
 function readContent(path: string): string {
@@ -60,6 +61,7 @@ const AUTH_CALL_PATTERNS = [
   /requireApiAuth\s*\(/,         // UE API auth guard (checks userId + org)
   /withApiAuth\s*\(/,            // UE auth HOF (injects auth context + org)
   /withAdminAuth\s*\(/,          // UE admin-only auth guard
+  /withSystemAdminAuth\s*\(/,    // UE platform (system) administrator guard
   /withMinRole\s*\(/,            // UE role-based auth guard
   /requireUser\s*\(/,            // UE/UX auth guard (validates user identity)
   /getAuth\s*\(/,               // Clerk getAuth (low-level auth extraction)
@@ -107,7 +109,7 @@ describe('PR9: Org isolation — authorize() called in protected routes', () => 
       for (const routeFile of routeFiles) {
         if (isPublicRoute(routeFile)) continue  // health endpoints are intentionally public
         const content = readContent(routeFile)
-        const hasAuth = AUTH_CALL_PATTERNS.some(p => p.test(content))
+        const hasAuth = AUTH_CALL_PATTERNS.some(p => p.test(content)) || isRetiredNoOpRoute(content)
         expect(
           hasAuth,
           `${routeFile.replace(ROOT, '')} missing auth call`

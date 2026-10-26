@@ -5,6 +5,7 @@
 import { withApi } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db/db';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { governancePolicies } from '@/db/schema';
 import { eq, desc, count } from 'drizzle-orm';
 import { z } from 'zod';
@@ -45,11 +46,20 @@ export const POST = withApi(
     entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Create governance policy' },
   },
-  async ({ body, organizationId }) => {
+  async ({ body, organizationId, userId }) => {
     const parsed = createPolicySchema.parse(body);
-    const [policy] = await withRLSContext(async () =>
-      db.insert(governancePolicies).values({ ...parsed, organizationId: organizationId! }).returning()
-    );
+    const policy = await withRLSContext(async (tx) => {
+      const [created] = await tx.insert(governancePolicies).values({ ...parsed, organizationId: organizationId! }).returning();
+      await persistAtomicAudit(tx, {
+        organizationId: organizationId!,
+        userId: userId!,
+        action: 'governance.policy_rule.create',
+        resourceType: 'governance_policies',
+        resourceId: created.id,
+        details: { title: parsed.title, category: parsed.category, status: parsed.status },
+      });
+      return created;
+    });
     return policy;
   },
 );

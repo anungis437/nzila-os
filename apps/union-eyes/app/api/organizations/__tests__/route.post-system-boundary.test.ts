@@ -46,6 +46,7 @@ vi.mock('@/db/db', () => ({
 }));
 
 vi.mock('@/db/schema', () => ({ organizations: {} }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn().mockResolvedValue(undefined) }));
 vi.mock('@/lib/utils/hierarchy-validation', () => ({ MAX_HIERARCHY_DEPTH: 10 }));
 
 describe('POST /api/organizations — creation authority + execution boundary (PR #752 round 7)', () => {

@@ -35,7 +35,7 @@ vi.mock('@/db', () => ({
 }));
 
 vi.mock('@/db/schema', () => ({
-  cbaClause: { id: 'id', clauseType: 'clause_type' },
+  cbaClause: { id: 'id', clauseType: 'clause_type', organizationId: 'organization_id' },
 }));
 
 vi.mock('drizzle-orm', () => ({
@@ -58,6 +58,9 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 import { generateEmbedding, semanticClauseSearch, findSimilarClauses } from '../vector-search-service';
+
+const ORG = { filters: { organizationId: 'org-1' } };
+const ORG_ONLY = { organizationId: 'org-1' };
 
 describe('generateEmbedding', () => {
   beforeEach(() => {
@@ -122,7 +125,7 @@ describe('semanticClauseSearch', () => {
   });
 
   it('returns search results above threshold', async () => {
-    const results = await semanticClauseSearch('wage rates');
+    const results = await semanticClauseSearch('wage rates', ORG);
     expect(results).toHaveLength(1);
     expect(results[0].id).toBe('clause-1');
     expect(results[0].similarity).toBe(0.85);
@@ -132,25 +135,37 @@ describe('semanticClauseSearch', () => {
     mocks.mockDbExecute.mockResolvedValue([
       { id: 'c1', content: 'Low match', similarity: 0.5, hybrid_score: 0.5, clause_number: '2.01', title: 'Other', clause_type: 'other', article_number: '2', tags: [] },
     ]);
-    const results = await semanticClauseSearch('wage rates', { threshold: 0.7 });
+    const results = await semanticClauseSearch('wage rates', { ...ORG, threshold: 0.7 });
     expect(results).toHaveLength(0);
   });
 
   it('respects limit option', async () => {
-    await semanticClauseSearch('wages', { limit: 5 });
+    await semanticClauseSearch('wages', { ...ORG, limit: 5 });
     expect(mocks.mockDbExecute).toHaveBeenCalled();
   });
 
   it('supports filter by clause type', async () => {
     await semanticClauseSearch('wages', {
-      filters: { clauseType: ['wages', 'overtime'] },
+      filters: { organizationId: 'org-1', clauseType: ['wages', 'overtime'] },
     });
     expect(mocks.mockDbExecute).toHaveBeenCalled();
   });
 
   it('throws on error', async () => {
     mocks.mockDbExecute.mockRejectedValue(new Error('DB error'));
-    await expect(semanticClauseSearch('test')).rejects.toThrow('Semantic search failed');
+    await expect(semanticClauseSearch('test', ORG)).rejects.toThrow('Semantic search failed');
+  });
+
+  it('searches the clauses of the given organization only', async () => {
+    await semanticClauseSearch('wages', ORG);
+    const flattened = JSON.stringify(mocks.mockDbExecute.mock.calls[0][0]);
+    expect(flattened).toContain('organization_id');
+    expect(flattened).toContain('org-1');
+  });
+
+  it('reads no clauses when the organization is not given', async () => {
+    await expect(semanticClauseSearch('wages')).rejects.toThrow('organizationId is required');
+    expect(mocks.mockDbExecute).not.toHaveBeenCalled();
   });
 });
 
@@ -184,18 +199,23 @@ describe('findSimilarClauses', () => {
   });
 
   it('finds similar clauses', async () => {
-    const results = await findSimilarClauses('clause-1');
+    const results = await findSimilarClauses('clause-1', ORG_ONLY);
     expect(results).toHaveLength(1);
     expect(results[0].similarity).toBe(0.9);
   });
 
+  it('looks the source clause up in the given organization', async () => {
+    await findSimilarClauses('clause-1', ORG_ONLY);
+    expect(JSON.stringify(mocks.mockDbQuery.mock.calls[0][0])).toContain('org-1');
+  });
+
   it('throws if source clause not found', async () => {
     mocks.mockDbQuery.mockResolvedValue(null);
-    await expect(findSimilarClauses('clause-999')).rejects.toThrow('Failed to find similar clauses');
+    await expect(findSimilarClauses('clause-999', ORG_ONLY)).rejects.toThrow('Failed to find similar clauses');
   });
 
   it('respects sameTypeOnly option', async () => {
-    await findSimilarClauses('clause-1', { sameTypeOnly: true });
+    await findSimilarClauses('clause-1', { ...ORG_ONLY, sameTypeOnly: true });
     expect(mocks.mockDbExecute).toHaveBeenCalled();
   });
 
@@ -203,7 +223,7 @@ describe('findSimilarClauses', () => {
     mocks.mockDbExecute.mockResolvedValue([
       { id: 'c2', content: 'Low match', similarity: 0.5, clause_number: '2.01', title: 'Other', clause_type: 'other', cba_id: 'cba-2', tags: [] },
     ]);
-    const results = await findSimilarClauses('clause-1', { threshold: 0.75 });
+    const results = await findSimilarClauses('clause-1', { ...ORG_ONLY, threshold: 0.75 });
     expect(results).toHaveLength(0);
   });
 });

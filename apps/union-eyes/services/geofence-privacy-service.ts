@@ -1,4 +1,5 @@
 import { db } from "@/db";
+import type { RLSTx } from "@/lib/db/with-rls-context";
 import {
   memberLocationConsent,
   locationTracking,
@@ -8,7 +9,7 @@ import {
   locationDeletionLog,
   locationTrackingConfig,
 } from "@/db/schema/geofence-privacy-schema";
-import { eq, and, lte } from "drizzle-orm";
+import { eq, and, lte, ne, or } from "drizzle-orm";
 
 /**
  * Geofence Privacy Service
@@ -53,28 +54,39 @@ export interface GeofenceDefinition {
   strikeId?: string;
 }
 
+export class LocationConsentConflictError extends Error {
+  constructor(message = "User already has active location consent") {
+    super(message);
+    this.name = "LocationConsentConflictError";
+  }
+}
+
+export class LocationConsentNotFoundError extends Error {
+  constructor(message = "No active location consent") {
+    super(message);
+    this.name = "LocationConsentNotFoundError";
+  }
+}
+
 export class GeofencePrivacyService {
   private static readonly MAX_RETENTION_HOURS = 24;
   private static readonly CONSENT_VERSION = "1.0";
 
   /**
-   * Request explicit location tracking consent from user
+   * Request explicit location tracking consent from user.
+   * Pass the caller's transaction so the consent, its privacy audit row and the platform audit commit together.
    */
-  static async requestLocationConsent(request: LocationConsentRequest) {
+  static async requestLocationConsent(request: LocationConsentRequest, tx: RLSTx = db) {
     // Check if user already has active consent
-    const existing = await db
+    const existing = await tx
       .select()
       .from(memberLocationConsent)
       .where(eq(memberLocationConsent.userId, request.userId))
       .limit(1);
 
     if (existing.length > 0 && existing[0].consentStatus === "opted_in") {
-      // Check if expired
-      if (existing[0].expiresAt && new Date() > existing[0].expiresAt) {
-        // Mark as expired
-        await this.expireConsent(existing[0].id);
-      } else {
-        throw new Error("User already has active location consent");
+      if (!existing[0].expiresAt || new Date() <= existing[0].expiresAt) {
+        throw new LocationConsentConflictError();
       }
     }
 
@@ -82,59 +94,80 @@ export class GeofencePrivacyService {
     const expiresAt = new Date();
     expiresAt.setMonth(expiresAt.getMonth() + 6);
 
-    const [consent] = await db
-      .insert(memberLocationConsent)
-      .values({
-        userId: request.userId,
-        consentStatus: "opted_in",
-        optedInAt: new Date(),
-        consentPurpose: request.purpose,
-        purposeDescription: request.purposeDescription,
-        foregroundOnly: true, // ALWAYS true - no background tracking
-        allowedDuringStrike: request.allowedDuringStrike || false,
-        allowedDuringEvents: request.allowedDuringEvents || false,
-        dataRetentionHours: this.MAX_RETENTION_HOURS.toString(),
-        expiresAt,
-        consentText: request.consentText,
-        consentVersion: this.CONSENT_VERSION,
-        ipAddress: request.ipAddress,
-        userAgent: request.userAgent,
-      })
-      .returning();
-
-    // Audit log
-    await this.logAuditAction({
+    const grant = {
       userId: request.userId,
-      actionType: "consent_granted",
-      actionDescription: `Location tracking consent granted for: ${request.purpose}`,
+      consentStatus: "opted_in",
+      optedInAt: new Date(),
+      optedOutAt: null,
+      consentPurpose: request.purpose,
+      purposeDescription: request.purposeDescription,
+      foregroundOnly: true, // ALWAYS true - no background tracking
+      allowedDuringStrike: request.allowedDuringStrike || false,
+      allowedDuringEvents: request.allowedDuringEvents || false,
+      dataRetentionHours: this.MAX_RETENTION_HOURS.toString(),
+      expiresAt,
+      consentText: request.consentText,
+      consentVersion: this.CONSENT_VERSION,
       ipAddress: request.ipAddress,
       userAgent: request.userAgent,
-    });
+    };
+
+    // user_id is unique, so a returning member's withdrawn or expired consent row is renewed in place by the upsert.
+    // Its predicate keeps a concurrent grant from being overwritten: if the consent is active, nothing is returned.
+    const [consent] = await tx
+      .insert(memberLocationConsent)
+      .values(grant)
+      .onConflictDoUpdate({
+        target: memberLocationConsent.userId,
+        set: { ...grant, updatedAt: new Date() },
+        setWhere: or(ne(memberLocationConsent.consentStatus, "opted_in"), lte(memberLocationConsent.expiresAt, new Date())),
+      })
+      .returning();
+    if (!consent) throw new LocationConsentConflictError();
+
+    // Audit log
+    await this.logAuditAction(
+      {
+        userId: request.userId,
+        actionType: "consent_granted",
+        actionDescription: `Location tracking consent granted for: ${request.purpose}`,
+        ipAddress: request.ipAddress,
+        userAgent: request.userAgent,
+      },
+      tx,
+    );
 
     return consent;
   }
 
   /**
-   * Revoke location tracking consent
+   * Revoke location tracking consent and delete the member's location data in the same transaction.
+   * Throws LocationConsentNotFoundError when there is no consent to revoke.
    */
-  static async revokeLocationConsent(userId: string, reason?: string) {
-    await db
+  static async revokeLocationConsent(userId: string, reason?: string, tx: RLSTx = db) {
+    const revoked = await tx
       .update(memberLocationConsent)
       .set({
         consentStatus: "opted_out",
         optedOutAt: new Date(),
       })
-      .where(eq(memberLocationConsent.userId, userId));
+      .where(and(eq(memberLocationConsent.userId, userId), ne(memberLocationConsent.consentStatus, "opted_out")))
+      .returning({ id: memberLocationConsent.id });
+    if (revoked.length === 0) throw new LocationConsentNotFoundError();
 
     // Delete all existing location data immediately
-    await this.deleteAllUserLocationData(userId, "consent_revoked");
+    const deleted = await this.deleteAllUserLocationData(userId, "consent_revoked", tx);
 
     // Audit log
-    await this.logAuditAction({
-      userId,
-      actionType: "consent_revoked",
-      actionDescription: `Location tracking consent revoked. Reason: ${reason || "User request"}`,
-    });
+    await this.logAuditAction(
+      {
+        userId,
+        actionType: "consent_revoked",
+        actionDescription: `Location tracking consent revoked. Reason: ${reason || "User request"}`,
+      },
+      tx,
+    );
+    return { consentId: revoked[0].id, ...deleted };
   }
 
   /**
@@ -158,7 +191,7 @@ export class GeofencePrivacyService {
 
     // Check expiry
     if (userConsent.expiresAt && new Date() > userConsent.expiresAt) {
-      await this.expireConsent(userConsent.id);
+      await this.expireConsent(userConsent.id, userId);
       return false;
     }
 
@@ -178,8 +211,14 @@ export class GeofencePrivacyService {
    * Track user location (foreground only, 24-hour retention)
    */
   static async trackLocation(tracking: LocationTrackingRequest) {
-    // Verify consent
-    const hasConsent = await this.hasValidConsent(tracking.userId);
+    // Verify consent, including the strike/event permission the member granted
+    const consentContext =
+      tracking.purpose === "strike" || tracking.purpose === "picket"
+        ? "strike"
+        : tracking.purpose === "event"
+          ? "event"
+          : undefined;
+    const hasConsent = await this.hasValidConsent(tracking.userId, consentContext);
     if (!hasConsent) {
       throw new Error("Location tracking requires explicit opt-in consent");
     }
@@ -219,8 +258,8 @@ export class GeofencePrivacyService {
   /**
    * Create geofence (strike line, union hall, etc.)
    */
-  static async createGeofence(geofence: GeofenceDefinition, trustedUnionLocalId: string) {
-    const [created] = await db
+  static async createGeofence(geofence: GeofenceDefinition, trustedUnionLocalId: string, tx: RLSTx = db) {
+    const [created] = await tx
       .insert(geofences)
       .values({
         name: geofence.name,
@@ -339,27 +378,28 @@ export class GeofencePrivacyService {
   }
 
   /**
-   * Delete expired location data (auto-cleanup job)
-   * Should run hourly via cron
+   * Delete expired location data (auto-cleanup job).
+   * Runs hourly from app/api/cron/location-retention under the system role: the 24-hour retention covers every
+   * member's rows, which an ordinary user-scoped session cannot see. Deletion and its evidence commit together.
    */
-  static async deleteExpiredLocationData() {
+  static async deleteExpiredLocationData(tx: RLSTx = db) {
     const now = new Date();
 
     // Delete expired location tracking records
-    const deletedTracking = await db
+    const deletedTracking = await tx
       .delete(locationTracking)
       .where(lte(locationTracking.expiresAt, now))
       .returning({ id: locationTracking.id });
 
     // Delete expired geofence events
-    const deletedEvents = await db
+    const deletedEvents = await tx
       .delete(geofenceEvents)
       .where(lte(geofenceEvents.expiresAt, now))
       .returning({ id: geofenceEvents.id });
 
     // Log deletion
     if (deletedTracking.length > 0 || deletedEvents.length > 0) {
-      await db.insert(locationDeletionLog).values({
+      await tx.insert(locationDeletionLog).values({
         deletionType: "auto_24hr",
         deletionReason: "24-hour retention policy (automatic cleanup)",
         recordCount: (deletedTracking.length + deletedEvents.length).toString(),
@@ -377,21 +417,21 @@ export class GeofencePrivacyService {
   /**
    * Delete all location data for a specific user
    */
-  private static async deleteAllUserLocationData(userId: string, reason: string) {
+  private static async deleteAllUserLocationData(userId: string, reason: string, tx: RLSTx = db) {
     // Delete tracking records
-    const deletedTracking = await db
+    const deletedTracking = await tx
       .delete(locationTracking)
       .where(eq(locationTracking.userId, userId))
       .returning({ id: locationTracking.id });
 
     // Delete geofence events
-    const deletedEvents = await db
+    const deletedEvents = await tx
       .delete(geofenceEvents)
       .where(eq(geofenceEvents.userId, userId))
       .returning({ id: geofenceEvents.id });
 
     // Log deletion
-    await db.insert(locationDeletionLog).values({
+    await tx.insert(locationDeletionLog).values({
       deletionType: "user_request",
       deletionReason: reason,
       recordCount: (deletedTracking.length + deletedEvents.length).toString(),
@@ -406,31 +446,34 @@ export class GeofencePrivacyService {
   /**
    * Expire consent (after 6 months)
    */
-  private static async expireConsent(consentId: string) {
+  private static async expireConsent(consentId: string, userId: string) {
     await db
       .update(memberLocationConsent)
       .set({
         consentStatus: "expired",
         updatedAt: new Date(),
       })
-      .where(eq(memberLocationConsent.id, consentId));
+      .where(and(eq(memberLocationConsent.id, consentId), eq(memberLocationConsent.userId, userId)));
   }
 
   /**
    * Log audit action
    */
-  private static async logAuditAction(params: {
-    userId: string;
-    actionType: string;
-    actionDescription: string;
-    performedBy?: string;
-    performedByRole?: string;
-    ipAddress?: string;
-    userAgent?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metadata?: any;
-  }) {
-    await db.insert(locationTrackingAudit).values({
+  private static async logAuditAction(
+    params: {
+      userId: string;
+      actionType: string;
+      actionDescription: string;
+      performedBy?: string;
+      performedByRole?: string;
+      ipAddress?: string;
+      userAgent?: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      metadata?: any;
+    },
+    tx: RLSTx = db,
+  ) {
+    await tx.insert(locationTrackingAudit).values({
       userId: params.userId,
       actionType: params.actionType,
       actionDescription: params.actionDescription,

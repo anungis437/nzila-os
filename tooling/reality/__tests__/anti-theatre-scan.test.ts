@@ -254,6 +254,66 @@ describe('anti-theatre scanner — R-8 (empty authoritative success)', () => {
   });
 });
 
+describe('anti-theatre scanner — R-9 (scaffold fake-success)', () => {
+  let root: string;
+  beforeEach(async () => { root = await seedRoot(); });
+  afterEach(async () => { await cleanup(root); });
+
+  const scaffold = (action: string) => `import { withApi } from '@/lib/api/framework';
+export const POST = withApi(
+  { auth: { required: true, minRole: 'steward' } },
+  async ({ request }) => {
+    await request.json().catch(() => ({}));
+    return { action: '${action}', status: 'accepted' };
+  },
+);
+export const GET = withApi(
+  { auth: { required: true, minRole: 'member' } },
+  async () => {
+    return [];
+  },
+);
+`;
+
+  it('flags the exact generated scaffold: the accepted action and the empty status', async () => {
+    await seedRegistry(root, [{ id: 'S', ownedBy: ['app/api/members/merge/route.ts'] }]);
+    await mkdir(resolve(root, 'apps/union-eyes/app/api/members/merge'), { recursive: true });
+    await writeFile(resolve(root, 'apps/union-eyes/app/api/members/merge/route.ts'), scaffold('merge'), 'utf8');
+    const res = await runScan({ root });
+    const r9 = res.findings.filter((f) => f.rule === 'R-9');
+    expect(r9).toHaveLength(2);
+    expect(r9.every((f) => f.severity === 'error')).toBe(true);
+  });
+
+  it('does NOT flag an honest 501 handler', async () => {
+    await seedRegistry(root, [{ id: 'S', ownedBy: ['app/api/members/merge/route.ts'] }]);
+    await mkdir(resolve(root, 'apps/union-eyes/app/api/members/merge'), { recursive: true });
+    await writeFile(
+      resolve(root, 'apps/union-eyes/app/api/members/merge/route.ts'),
+      `import { withApi, ApiError } from '@/lib/api/framework';\nexport const POST = withApi({ auth: { required: true } }, async () => {\n  throw ApiError.notImplemented('Member merge is not implemented');\n});\n`,
+      'utf8',
+    );
+    expect((await runScan({ root })).findings.filter((f) => f.rule === 'R-9')).toHaveLength(0);
+  });
+
+  it('does NOT flag a handler that records work before accepting it', async () => {
+    await seedRegistry(root, [{ id: 'S', ownedBy: ['app/api/members/merge/route.ts'] }]);
+    await mkdir(resolve(root, 'apps/union-eyes/app/api/members/merge'), { recursive: true });
+    await writeFile(
+      resolve(root, 'apps/union-eyes/app/api/members/merge/route.ts'),
+      `import { withApi } from '@/lib/api/framework';\nexport const POST = withApi({ auth: { required: true } }, async ({ request }) => {\n  const body = await request.json();\n  const job = await enqueueMerge(body);\n  return { action: 'merge', status: 'accepted', jobId: job.id };\n});\n`,
+      'utf8',
+    );
+    expect((await runScan({ root })).findings.filter((f) => f.rule === 'R-9')).toHaveLength(0);
+  });
+
+  it('ignores files outside app/api route handlers', async () => {
+    await seedRegistry(root, []);
+    await writeFile(resolve(root, 'apps/union-eyes/services/scaffold.ts'), scaffold('merge'), 'utf8');
+    expect((await runScan({ root })).findings.filter((f) => f.rule === 'R-9')).toHaveLength(0);
+  });
+});
+
 // ---------------------------------------------------------------------------
 // §6 Anti-theatre scanner expansion — 12 additional R-3 boundary scenarios
 //

@@ -10,7 +10,7 @@ import { ArrowLeft, Calendar, MapPin, FileText, Clock, AlertCircle } from 'lucid
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileUpload } from '@/components/file-upload';
 import { Button } from '@/components/ui/button';
-import { ClaimJurisdictionInfo } from '@/components/claims/claim-jurisdiction-info';
+import { ClaimDeadlineUnavailable } from '@/components/claims/claim-deadline-unavailable';
 import { usePilotTracking } from '@/lib/hooks/use-pilot-tracking';
 import Link from 'next/link';
 
@@ -23,12 +23,10 @@ interface ClaimAttachment {
   uploadedBy: string;
 }
 
-interface WorkflowUpdate {
-  id?: string;
-  newStatus: string;
-  previousStatus?: string | null;
-  changedAt: string;
-  notes?: string | null;
+interface CaseActivity {
+  id: string;
+  timestamp: string | null;
+  description: string | null;
 }
 
 interface Claim {
@@ -98,13 +96,20 @@ export default function ClaimDetailPage() {
   const [claim, setClaim] = useState<Claim | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [workflowHistory, setWorkflowHistory] = useState<WorkflowUpdate[]>([]);
+  const [unavailable, setUnavailable] = useState(false);
+  const [activity, setActivity] = useState<CaseActivity[]>([]);
 
   useEffect(() => {
     const fetchClaim = async () => {
       try {
         setLoading(true);
         const response = await fetch(`/api/claims/${claimId}`);
+
+        // A missing case and one the user may not read are intentionally indistinguishable.
+        if (response.status === 404 || response.status === 403) {
+          setUnavailable(true);
+          return;
+        }
         
         if (!response.ok) {
           const body = await response.json().catch(() => ({}));
@@ -117,14 +122,15 @@ export default function ClaimDetailPage() {
         setClaim(claimData);
         trackCaseViewed(claimData?.claimId ?? claimId);
         
-        // Fetch workflow history
+        // Member-visible case activity from the canonical timeline (visibility-scoped server side)
         try {
-          const historyResponse = await fetch(`/api/claims/${claimData?.claimId ?? claimId}/workflow/history`);
-          if (historyResponse.ok) {
-            const historyData = await historyResponse.json();
-            setWorkflowHistory(historyData.history || []);
+          const timelineResponse = await fetch(`/api/cases/${claimData?.claimId ?? claimId}/timeline`);
+          if (timelineResponse.ok) {
+            const timelineBody = await timelineResponse.json();
+            const items = timelineBody?.data?.data ?? timelineBody?.data ?? [];
+            setActivity(Array.isArray(items) ? items : []);
           }
-        } catch (_histErr) {
+        } catch (_timelineErr) {
 }
       } catch (err) {
 setError(err instanceof Error ? err.message : 'Failed to load claim');
@@ -175,9 +181,13 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
         <Card className="max-w-md">
           <CardContent className="p-6 text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-gray-900 mb-2">{t('errors.loadingError')}</h2>
-            <p className="text-gray-600 mb-4">{error || t('claims.notFound')}</p>
-            <Link href={`/${locale}/dashboard/inbox?type=intake`}>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">
+              {unavailable ? t('claimsPage.notAvailableTitle') : t('errors.loadingError')}
+            </h2>
+            <p className="text-gray-600 mb-4">
+              {unavailable ? t('claimsPage.notAvailableBody') : (error || t('claims.notFound'))}
+            </p>
+            <Link href={`/${locale}/dashboard/claims`}>
               <Button>{t('claims.backToClaims')}</Button>
             </Link>
           </CardContent>
@@ -198,7 +208,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <Link href={`/${locale}/dashboard/inbox?type=intake`}>
+          <Link href={`/${locale}/dashboard/claims`}>
             <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors">
               <ArrowLeft size={20} />
               {t('claims.backToClaims')}
@@ -289,17 +299,11 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
             >
-              <ClaimJurisdictionInfo
-                claimId={claim.claimId}
-                organizationId={claim.organizationId}
-                claimType={claim.claimType}
-                status={claim.status}
-                filedDate={claim.filedDate}
-              />
+              <ClaimDeadlineUnavailable />
             </motion.div>
 
-            {/* Workflow History */}
-            {workflowHistory.length > 0 && (
+            {/* Case activity */}
+            {activity.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -310,24 +314,16 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
                     <CardTitle className="text-lg">{t('claims.statusHistory')}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      {workflowHistory.map((update, index: number) => (
-                        <div key={update.id || index} className="border-l-2 border-gray-200 pl-4 pb-4 last:pb-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm font-medium text-gray-900">
-                              {statusLabels[update.newStatus]?.label || update.newStatus}
-                            </span>
+                    <div className="space-y-4" data-testid="case-activity">
+                      {activity.map((item, index: number) => (
+                        <div key={item.id || index} className="border-l-2 border-gray-200 pl-4 pb-4 last:pb-0">
+                          {item.timestamp && (
                             <span className="text-xs text-gray-500">
-                              {new Date(update.changedAt).toLocaleDateString()}
+                              {new Date(item.timestamp).toLocaleDateString(locale)}
                             </span>
-                          </div>
-                          {update.previousStatus && (
-                            <p className="text-xs text-gray-500 mb-1">
-                              {t('claims.from')}: {statusLabels[update.previousStatus]?.label || update.previousStatus}
-                            </p>
                           )}
-                          {update.notes && (
-                            <p className="text-sm text-gray-600 mt-1">{update.notes}</p>
+                          {item.description && (
+                            <p className="text-sm text-gray-700 mt-1">{item.description}</p>
                           )}
                         </div>
                       ))}

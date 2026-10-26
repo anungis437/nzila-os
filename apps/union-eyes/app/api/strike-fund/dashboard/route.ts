@@ -4,14 +4,14 @@
  * GET /api/strike-fund/dashboard
  *
  * Returns summary statistics for the strike fund dashboard.
- * CONTAINMENT (PR #752 round 30): strike_fund_disbursements has no
- * organization_id column, so the balance/payment query below cannot be
- * scoped to the caller's organization — it would otherwise sum every
- * organization's strike-fund activity into one number. Until an
- * organization-bound schema/backfill lands (see
- * db/rls-storage-authority/finance.ts's strike_fund_disbursements entry),
- * this route returns the same safe zeroed state used for metrics without a
- * backing table, rather than leaking a cross-organization aggregate.
+ *
+ * NOT IMPLEMENTED. This route previously returned a constant zeroed payload
+ * (totalBalance: 0, ...), which asserted a $0 balance that no source supports.
+ * strike_fund_disbursements is organization-scoped (migration
+ * 20260909_strike_fund_disbursements_organization_id.sql) but records
+ * disbursements only: there is no fund-balance source and no applications
+ * table, so the figures this route advertised cannot be computed. It answers
+ * 501 until those sources exist, and is limited to Secretary-Treasurer and above.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 
@@ -19,20 +19,17 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { minRole: 'member' },
-    openapi: { tags: ['StrikeFund'], summary: 'Strike fund dashboard stats' },
+    // Fund-specific financial data: matches the /dashboard/strike-fund layout guard.
+    auth: { minRole: 'secretary_treasurer' },
+    openapi: { tags: ['StrikeFund'], summary: 'Strike fund dashboard stats (not implemented)' },
   },
   async ({ organizationId }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
-    // strike_fund_disbursements has no organization_id — see containment note above.
-    return {
-      totalBalance: 0,
-      weeklyDisbursements: 0,
-      activeRecipients: 0,
-      // No applications table exists yet — return zero
-      pendingApplications: 0,
-    };
+    // Unknown is not zero (UE-OFFICER-EXECUTIVE-CANONICAL-2.1 §VII).
+    throw ApiError.notImplemented(
+      'Strike fund balances are not available: no fund-balance source or applications table exists.',
+    );
   },
 );
 

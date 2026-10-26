@@ -300,44 +300,6 @@ export const paymentDisputes = pgTable(
   })
 );
 
-/**
- * Stripe webhook events - for reconciliation and audit trail
- */
-export const stripeWebhookEvents = pgTable(
-  "stripe_webhook_events",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    organizationId: uuid("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
-    
-    // Event details
-    stripeEventId: varchar("stripe_event_id").notNull().unique(),
-    eventType: varchar("event_type", { length: 100 }).notNull(),
-    
-    // Associated objects
-    stripePaymentIntentId: varchar("stripe_payment_intent_id"),
-    stripeCustomerId: varchar("stripe_customer_id"),
-    
-    // Event data
-    eventData: jsonb("event_data").notNull(),
-    processed: boolean("processed").default(false),
-    
-    // Processing
-    processedAt: timestamp("processed_at"),
-    processingError: text("processing_error"),
-    
-    // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  },
-  (t) => ({
-    orgIdx: index("stripe_webhook_events_org_idx").on(t.organizationId),
-    stripeEventIdx: index("stripe_webhook_events_stripe_idx").on(t.stripeEventId),
-    processedIdx: index("stripe_webhook_events_processed_idx").on(t.processed),
-  })
-);
-
 // ============================================================================
 // RELATIONS
 // ============================================================================
@@ -392,13 +354,6 @@ export const paymentDisputesRelations = relations(paymentDisputes, ({ one }) => 
   payment: one(payments, {
     fields: [paymentDisputes.paymentId],
     references: [payments.id],
-  }),
-}));
-
-export const stripeWebhookEventsRelations = relations(stripeWebhookEvents, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [stripeWebhookEvents.organizationId],
-    references: [organizations.id],
   }),
 }));
 

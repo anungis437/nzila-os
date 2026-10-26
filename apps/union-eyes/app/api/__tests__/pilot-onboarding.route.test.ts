@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 const m = vi.hoisted(() => ({
   hasMinRole: vi.fn(),
   emitCapeAuditEvent: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   withRLSContext: vi.fn(),
   getDemoDatasetSummary: vi.fn(),
   selectQueue: [] as unknown[][],
@@ -19,10 +20,14 @@ const mockDb = {
     };
     return chain;
   }),
-  insert: vi.fn(() => ({ values: vi.fn(async () => undefined) })),
-  update: vi.fn(() => ({
-    set: vi.fn(() => ({ where: vi.fn(async () => undefined) })),
-  })),
+  insert: vi.fn(() => {
+    const chain: any = {
+      values: vi.fn(() => chain),
+      onConflictDoUpdate: vi.fn(() => chain),
+      returning: vi.fn(async () => [{ id: 'item-row-1' }]),
+    };
+    return chain;
+  }),
 };
 
 vi.mock('@/lib/organization-middleware', () => ({
@@ -34,8 +39,8 @@ vi.mock('@/lib/audit/cape-audit-events', () => ({
     PILOT_CHECKLIST_ITEM_COMPLETED: 'PILOT_CHECKLIST_ITEM_COMPLETED',
     PILOT_CHECKLIST_COMPLETED: 'PILOT_CHECKLIST_COMPLETED',
   },
-  emitCapeAuditEvent: m.emitCapeAuditEvent,
 }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/lib/pilot/cape-demo-data', () => ({ getDemoDatasetSummary: m.getDemoDatasetSummary }));
@@ -44,13 +49,25 @@ async function loadRoute() {
   return import('../pilot/onboarding/route');
 }
 
+const patch = async (body: unknown) => {
+  const { PATCH } = await loadRoute();
+  return PATCH(
+    new NextRequest('http://localhost/api/pilot/onboarding/checklist', {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    }),
+    { organizationId: 'org_1', userId: 'u1' },
+  );
+};
+
 describe('pilot/onboarding route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.selectQueue = [];
     m.hasMinRole.mockResolvedValue(true);
-    m.emitCapeAuditEvent.mockResolvedValue(undefined);
-    m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.persistAtomicAudit.mockResolvedValue(undefined);
+    m.withRLSContext.mockImplementation(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(mockDb));
     m.getDemoDatasetSummary.mockReturnValue({ members: 10, employers: 2, grievances: 3, timelines: 1, resolutions: 1 });
   });
 
@@ -92,24 +109,61 @@ describe('pilot/onboarding route', () => {
   });
 
   it('PATCH updates checklist item and returns recomputed status', async () => {
-    const { PATCH } = await loadRoute();
-    m.selectQueue.push(
-      [],
-      [{ itemId: 'org-seeded', completed: true }],
-    );
+    m.selectQueue.push([{ itemId: 'org-seeded', completed: true }]);
 
-    const response = await PATCH(
-      new NextRequest('http://localhost/api/pilot/onboarding/checklist', {
-        method: 'PATCH',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ itemId: 'org-seeded', completed: true }),
-      }),
-      { organizationId: 'org_1', userId: 'u1' },
-    );
+    const response = await patch({ itemId: 'org-seeded', completed: true });
     const payload = await response.json();
 
     expect(response.status).toBe(200);
     expect(payload.success).toBe(true);
-    expect(m.emitCapeAuditEvent).toHaveBeenCalled();
+    expect(payload.data.items['org-seeded']).toBe(true);
+    expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org_1' }, expect.any(Function));
+  });
+
+  it('PATCH records the audit on the same transaction as the toggle', async () => {
+    m.selectQueue.push([{ itemId: 'org-seeded', completed: true }]);
+
+    await patch({ itemId: 'org-seeded', completed: true });
+
+    expect(m.persistAtomicAudit).toHaveBeenCalledTimes(1);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      mockDb,
+      expect.objectContaining({
+        organizationId: 'org_1',
+        userId: 'u1',
+        action: 'PILOT_CHECKLIST_ITEM_COMPLETED',
+        resourceType: 'pilot_checklist_items',
+        resourceId: 'item-row-1',
+        details: { itemId: 'org-seeded', completed: true, checklistComplete: false },
+      }),
+    );
+  });
+
+  it('PATCH also records the checklist completion when the last item is ticked', async () => {
+    const all = ['org-seeded', 'users-invited', 'roles-assigned', 'contracts-uploaded', 'employers-imported', 'integrations-configured', 'export-verified'];
+    m.selectQueue.push(all.map((itemId) => ({ itemId, completed: true })));
+
+    await patch({ itemId: 'export-verified', completed: true });
+
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockDb, expect.objectContaining({ action: 'PILOT_CHECKLIST_COMPLETED' }));
+  });
+
+  it('PATCH fails when the audit cannot be written, so the toggle does not commit', async () => {
+    m.selectQueue.push([{ itemId: 'org-seeded', completed: true }]);
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
+
+    const response = await patch({ itemId: 'org-seeded', completed: true });
+
+    expect(response.status).toBe(500);
+  });
+
+  it('PATCH writes no audit for an unknown item or a caller below officer', async () => {
+    await patch({ itemId: 'not-real', completed: true });
+    m.hasMinRole.mockResolvedValueOnce(false);
+    const forbidden = await patch({ itemId: 'org-seeded', completed: true });
+
+    expect(forbidden.status).toBe(403);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.withRLSContext).not.toHaveBeenCalled();
   });
 });

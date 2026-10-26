@@ -32,7 +32,7 @@ type LoginFormProps = {
 
 export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormProps) {
   const router = useRouter();
-  const postLoginPath = configuredPostLoginPath ?? '/en-CA/dashboard/priorities';
+  const postLoginPath = configuredPostLoginPath ?? '/en-CA/dashboard';
   const [mode, setMode] = useState<Mode>('password');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

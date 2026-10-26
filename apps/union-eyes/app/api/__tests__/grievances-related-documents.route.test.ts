@@ -77,4 +77,23 @@ describe('grievances/[id]/related-documents route', () => {
 
     expect([200, 400, 403, 404, 500]).toContain(response.status);
   });
+
+  it('denies a steward-level user with no case relationship before any document or graph lookup', async () => {
+    m.hasMinRole.mockResolvedValue(true);
+    m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: false });
+    m.db.select = vi.fn(() => ({
+      from: vi.fn(() => ({
+        where: vi.fn(() => ({
+          limit: vi.fn(async () => [{ id: 'g1', createdBy: 'someone-else' }]),
+        })),
+      })),
+    }));
+
+    const { GET } = await loadRoute();
+    const response = await GET(new Request('http://localhost/api/grievances/g1/related-documents?includeGraph=true'));
+
+    expect(response.status).toBe(403);
+    expect(m.getRelatedDocuments).not.toHaveBeenCalled();
+    expect(m.buildCaseGraph).not.toHaveBeenCalled();
+  });
 });

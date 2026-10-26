@@ -1,103 +1,32 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { describe, expect, it } from 'vitest';
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { collaboratorPermissions, validateCaseAccessGrantTerms } from './case-access-service';
 
-const m = vi.hoisted(() => {
-  const selectQueue: unknown[][] = [];
+// Grant terms are pure policy. Who may grant, read or revoke is decided by the authority kernel and proven against real
+// kernel storage in case-access-service.pglite.test.ts.
+describe('case-access grant terms', () => {
+  const inDays = (days: number) => new Date(Date.now() + days * 86_400_000);
 
-  const createSelectChain = () => {
-    const chain = {
-      from: vi.fn(() => chain),
-      where: vi.fn(() => chain),
-      limit: vi.fn(async () => selectQueue.shift() ?? []),
-    };
-    return chain;
-  };
+  it('enforces expiry and role-scope terms', async () => {
+    const { validateCaseAccessGrantTerms } = await import('./case-access-service');
 
-  return {
-    selectQueue,
-    db: {
-      select: vi.fn(() => createSelectChain()),
-    },
-  };
-});
-
-vi.mock('@/db/db', () => ({ db: m.db }));
-
-describe('case-access-service', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    m.selectQueue.length = 0;
+    expect(validateCaseAccessGrantTerms({ accessRole: 'reviewer' })).toMatchObject({ code: 'EXPIRY_REQUIRED' });
+    expect(validateCaseAccessGrantTerms({ accessRole: 'secondary_lro', canViewPrivateDocuments: true })).toMatchObject({ code: 'EXPIRY_REQUIRED' });
+    expect(validateCaseAccessGrantTerms({ accessRole: 'secondary_lro' })).toBeNull();
+    expect(validateCaseAccessGrantTerms({ accessRole: 'reviewer', expiresAt: inDays(-1) })).toMatchObject({ code: 'INVALID_EXPIRY' });
+    expect(validateCaseAccessGrantTerms({ accessRole: 'reviewer', expiresAt: inDays(400) })).toMatchObject({ code: 'INVALID_EXPIRY' });
+    expect(validateCaseAccessGrantTerms({ accessRole: 'reviewer', expiresAt: inDays(10), canEditCaseNotes: true })).toMatchObject({ code: 'SCOPE_EXCEEDS_ROLE' });
+    expect(validateCaseAccessGrantTerms({ accessRole: 'read_only', expiresAt: inDays(10) })).toBeNull();
   });
 
-  it('grants full owner-only access only to the primary owner', async () => {
-    m.selectQueue.push([{ unionRepId: 'outgoing-owner' }]);
-    const { getEffectiveCaseAccess } = await import('./case-access-service');
 
-    const access = await getEffectiveCaseAccess({
-      organizationId: 'org-liuna-synthetic',
-      grievanceId: 'matter-1',
-      userId: 'outgoing-owner',
-    });
-
-    expect(access.canViewCase).toBe(true);
-    expect(access.isPrimaryOwner).toBe(true);
-    expect(access.canViewPrivateDocuments).toBe(true);
-    expect(access.ownerOnly.canReassignPrimary).toBe(true);
-    expect(access.ownerOnly.canExportSealedEvidence).toBe(true);
-  });
-
-  it('denies successor access when no active assignment exists', async () => {
-    m.selectQueue.push([{ unionRepId: 'outgoing-owner' }], []);
-    const { getEffectiveCaseAccess } = await import('./case-access-service');
-
-    const access = await getEffectiveCaseAccess({
-      organizationId: 'org-liuna-synthetic',
-      grievanceId: 'matter-1',
-      userId: 'former-successor',
-    });
-
-    expect(access.canViewCase).toBe(false);
-    expect(access.isSecondaryCollaborator).toBe(false);
-    expect(access.canViewPrivateDocuments).toBe(false);
-    expect(access.ownerOnly.canReassignPrimary).toBe(false);
-    expect(access.ownerOnly.canExportSealedEvidence).toBe(false);
-  });
-
-  it('allows active successor review without owner-only powers', async () => {
-    m.selectQueue.push(
-      [{ unionRepId: 'outgoing-owner' }],
-      [{
-        accessRole: 'reviewer',
-        canComment: true,
-        canUploadDocuments: false,
-        canEditCaseNotes: false,
-        canDraftActions: true,
-        canViewPrivateDocuments: false,
-      }],
-    );
-    const { getEffectiveCaseAccess } = await import('./case-access-service');
-
-    const access = await getEffectiveCaseAccess({
-      organizationId: 'org-liuna-synthetic',
-      grievanceId: 'matter-1',
-      userId: 'incoming-reviewer',
-    });
-
-    expect(access.canViewCase).toBe(true);
-    expect(access.accessRole).toBe('reviewer');
-    expect(access.canDraftActions).toBe(true);
-    expect(access.canViewPrivateDocuments).toBe(false);
-    expect(access.ownerOnly.canCloseCase).toBe(false);
-    expect(access.ownerOnly.canExportSealedEvidence).toBe(false);
-  });
-
-  it('keeps the active-and-unexpired assignment predicate in source', () => {
-    const source = readFileSync(resolve(__dirname, './case-access-service.ts'), 'utf8');
-
-    expect(source).toContain("eq(grievanceCaseAccessAssignments.status, 'active')");
-    expect(source).toContain('grievanceCaseAccessAssignments.expiresAt');
-    expect(source).toContain('> NOW()');
+  it('maps a role and scope to kernel permissions without exceeding the role', () => {
+    expect(collaboratorPermissions({ accessRole: 'read_only' })).toEqual(['read', 'read_internal']);
+    expect(collaboratorPermissions({ accessRole: 'reviewer' })).toEqual(['read', 'read_internal', 'comment']);
+    expect(collaboratorPermissions({ accessRole: 'reviewer', canEditCaseNotes: true })).not.toContain('write_notes');
+    expect(collaboratorPermissions({ accessRole: 'secondary_lro', canEditCaseNotes: true, canViewPrivateDocuments: true })).toEqual(['read', 'read_internal', 'comment', 'write_notes', 'read_third_party_restricted']);
+    // Each editing capability is its own permission; naming one grants only that one.
+    expect(collaboratorPermissions({ accessRole: 'secondary_lro', canUploadDocuments: true })).toEqual(['read', 'read_internal', 'comment', 'upload_evidence']);
+    expect(collaboratorPermissions({ accessRole: 'secondary_lro', canDraftActions: true, canModifyDocuments: true })).toEqual(['read', 'read_internal', 'comment', 'draft_action', 'modify_document']);
   });
 });

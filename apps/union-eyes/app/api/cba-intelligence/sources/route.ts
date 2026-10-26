@@ -4,7 +4,8 @@ import {
   createSource,
   type NewCbaIntelSource,
 } from "@/lib/services/cba-intelligence/source-registry-service";
-import { auditDataMutation } from "@/lib/audit-logger";
+import { withRLSContext } from "@/lib/db/with-rls-context";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 
 // ---------------------------------------------------------------------------
 // GET /api/cba-intelligence/sources — List CBA intelligence sources
@@ -61,9 +62,9 @@ const createSourceSchema = z.object({
   robotsNotes: z.string().max(2000).optional(),
   termsUrl: z.string().url().optional(),
   redistributionNotes: z.string().max(2000).optional(),
-  provenanceRules: z.record(z.unknown()).optional(),
+  provenanceRules: z.record(z.string(), z.unknown()).optional(),
   adapterKey: z.string().max(100).optional(),
-  config: z.record(z.unknown()).optional(),
+  config: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const POST = withApi(
@@ -78,13 +79,18 @@ export const POST = withApi(
     },
   },
   async ({ body, userId, organizationId }) => {
-    const source = await createSource(body as any as NewCbaIntelSource);
-    await auditDataMutation({
-      userId: userId!,
-      organizationId: organizationId!,
-      resource: 'cba_intel_sources',
-      action: 'create',
-      details: { slug: body.slug, nameEn: body.nameEn, sourceType: body.sourceType },
+    // The source and its audit record commit together.
+    const source = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
+      const created = await createSource(body as any as NewCbaIntelSource, tx);
+      await persistAtomicAudit(tx, {
+        userId: userId!,
+        organizationId: organizationId!,
+        resourceType: 'cba_intel_sources',
+        resourceId: created.id,
+        action: 'cba_source.create',
+        details: { slug: body.slug, nameEn: body.nameEn, sourceType: body.sourceType },
+      });
+      return created;
     });
     return { data: source };
   },

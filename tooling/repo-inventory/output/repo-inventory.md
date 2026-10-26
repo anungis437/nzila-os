@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-10-23 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-10-26 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -10,8 +10,8 @@
 | Packages (packages/*) | 225 |
 | Workspace Packages (apps|packages|services|tooling) | 260 |
 | GitHub Workflows | 60 |
-| Contract Test Files | 300 |
-| TS/JS Test Files | 2856 |
+| Contract Test Files | 302 |
+| TS/JS Test Files | 3043 |
 | Python Test Files | 43 |
 
 ## Apps
@@ -33,12 +33,12 @@
 | nzila-hq | Next.js | 3020 | ✅ | ✅ | ❌ | ✅ | 106 |  |
 | orchestrator-api | Fastify | — | ✅ | ✅ | ❌ | ❌ | 36 | Fastify-based API server for workflow orchestration, job dispatch, and platform  |
 | partners | Next.js | 3004 | ✅ | ✅ | ✅ | ✅ | 110 | Partner portal for managing deals, commissions, certifications, and go-to-market |
-| platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 190 | Internal admin console for managing platform services — events, knowledge, ontol |
+| platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 191 | Internal admin console for managing platform services — events, knowledge, ontol |
 | test-scaffold-gp | Next.js | — | ✅ | ✅ | ❌ | ✅ | 8 |  |
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 56 | Cross-border trade infrastructure: deals, financing states, listings, |
 | trustcore | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 98 |  |
 | trustcore-trustops | Next.js | 3018 | ✅ | ✅ | ✅ | ✅ | 20 |  |
-| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 5497 | Full-stack union case management platform — grievance lifecycle, collective barg |
+| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 5828 | Full-stack union case management platform — grievance lifecycle, collective barg |
 | union-eyes-demo | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 80 |  |
 | veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 23 |  |
 | veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 26 |  |

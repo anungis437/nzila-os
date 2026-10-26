@@ -31,8 +31,8 @@ export const ShareLinkStatus = z.enum(['ACTIVE', 'EXPIRED', 'REVOKED', 'USED'])
 export type ShareLinkStatus = z.infer<typeof ShareLinkStatus>
 
 export const QuoteShareLinkSchema = z.object({
-  id: z.string().uuid(),
-  quoteId: z.string().uuid(),
+  id: z.guid(),
+  quoteId: z.guid(),
   tokenHash: z.string().min(1),
   expiresAt: z.coerce.date(),
   createdAt: z.coerce.date(),
@@ -44,7 +44,7 @@ export const QuoteShareLinkSchema = z.object({
 export type QuoteShareLink = z.infer<typeof QuoteShareLinkSchema>
 
 export const CreateShareLinkInput = z.object({
-  quoteId: z.string().uuid(),
+  quoteId: z.guid(),
   expiresInDays: z.number().int().min(1).max(90).default(7),
   createdBy: z.string().min(1),
 })
@@ -56,15 +56,15 @@ export const ApprovalAction = z.enum(['ACCEPT', 'REQUEST_REVISION'])
 export type ApprovalAction = z.infer<typeof ApprovalAction>
 
 export const QuoteApprovalSchema = z.object({
-  id: z.string().uuid(),
-  quoteId: z.string().uuid(),
+  id: z.guid(),
+  quoteId: z.guid(),
   action: ApprovalAction,
   customerName: z.string().min(1),
   customerEmail: z.string().email(),
   message: z.string().max(2000).optional().default(''),
   createdAt: z.coerce.date(),
   sourceIpHash: z.string().nullable().default(null),
-  shareLinkId: z.string().uuid(),
+  shareLinkId: z.guid(),
 })
 export type QuoteApproval = z.infer<typeof QuoteApprovalSchema>
 
@@ -82,8 +82,8 @@ export const RevisionStatus = z.enum(['OPEN', 'ADDRESSED', 'CLOSED'])
 export type RevisionStatus = z.infer<typeof RevisionStatus>
 
 export const QuoteRevisionSchema = z.object({
-  id: z.string().uuid(),
-  quoteId: z.string().uuid(),
+  id: z.guid(),
+  quoteId: z.guid(),
   requestedBy: z.string().min(1),
   requestMessage: z.string().min(1).max(2000),
   createdAt: z.coerce.date(),
@@ -95,8 +95,8 @@ export type QuoteRevision = z.infer<typeof QuoteRevisionSchema>
 // ── Payment Requirements ───────────────────────────────────────────────────
 
 export const QuotePaymentRequirementSchema = z.object({
-  id: z.string().uuid(),
-  quoteId: z.string().uuid(),
+  id: z.guid(),
+  quoteId: z.guid(),
   depositRequired: z.boolean(),
   depositPercent: z.number().min(0).max(100).nullable().default(null),
   depositAmount: z.number().min(0).nullable().default(null),
@@ -106,7 +106,7 @@ export const QuotePaymentRequirementSchema = z.object({
 export type QuotePaymentRequirement = z.infer<typeof QuotePaymentRequirementSchema>
 
 export const SetPaymentRequirementInput = z.object({
-  quoteId: z.string().uuid(),
+  quoteId: z.guid(),
   depositRequired: z.boolean(),
   depositPercent: z.number().min(0).max(100).optional(),
   depositAmount: z.number().min(0).optional(),
@@ -126,8 +126,8 @@ export const PaymentStatusValue = z.enum([
 export type PaymentStatusValue = z.infer<typeof PaymentStatusValue>
 
 export const QuotePaymentStatusSchema = z.object({
-  id: z.string().uuid(),
-  quoteId: z.string().uuid(),
+  id: z.guid(),
+  quoteId: z.guid(),
   status: PaymentStatusValue,
   amountDue: z.number().min(0),
   amountPaid: z.number().min(0).default(0),
@@ -146,22 +146,22 @@ export const PaymentEventType = z.enum([
 export type PaymentEventType = z.infer<typeof PaymentEventType>
 
 export const PaymentEventSchema = z.object({
-  id: z.string().uuid(),
-  quoteId: z.string().uuid(),
+  id: z.guid(),
+  quoteId: z.guid(),
   eventType: PaymentEventType,
   amount: z.number().min(0),
   providerRef: z.string().nullable().default(null),
-  metadataJson: z.record(z.unknown()).nullable().default(null),
+  metadataJson: z.record(z.string(), z.unknown()).nullable().default(null),
   createdAt: z.coerce.date(),
 })
 export type PaymentEvent = z.infer<typeof PaymentEventSchema>
 
 export const RecordPaymentEventInput = z.object({
-  quoteId: z.string().uuid(),
+  quoteId: z.guid(),
   eventType: PaymentEventType,
   amount: z.number().min(0),
   providerRef: z.string().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 export type RecordPaymentEventInput = z.infer<typeof RecordPaymentEventInput>
 
@@ -174,7 +174,7 @@ export const TimelineEventSchema = z.object({
   description: z.string(),
   actor: z.string().optional(),
   timestamp: z.coerce.date(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 export type TimelineEvent = z.infer<typeof TimelineEventSchema>
 

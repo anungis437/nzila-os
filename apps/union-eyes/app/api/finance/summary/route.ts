@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { minRole: 'officer' },
+    auth: { minRole: 'secretary_treasurer' },
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Finance'], summary: 'Executive financial summary' },
   },

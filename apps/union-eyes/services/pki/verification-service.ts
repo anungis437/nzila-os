@@ -58,13 +58,18 @@ export interface DocumentIntegrityResult {
  */
 export async function verifySignature(
   signatureId: string,
-  documentContent?: Buffer | string
+  documentContent?: Buffer | string,
+  organizationId?: string
 ): Promise<VerificationResult> {
-  // Fetch signature record
+  // Fetch signature record; a caller acting for an organization sees only that organization's signatures.
   const [signature] = await db
     .select()
     .from(digitalSignatures)
-    .where(eq(digitalSignatures.id, signatureId))
+    .where(
+      organizationId
+        ? and(eq(digitalSignatures.id, signatureId), eq(digitalSignatures.organizationId, organizationId))
+        : eq(digitalSignatures.id, signatureId),
+    )
     .limit(1);
 
   if (!signature) {
@@ -216,7 +221,7 @@ export async function verifyDocumentIntegrity(
   let invalidCount = 0;
 
   for (const sig of signatures) {
-    const result = await verifySignature(sig.id, documentContent);
+    const result = await verifySignature(sig.id, documentContent, organizationId);
     verificationResults.push(result);
     
     if (result.isValid) {

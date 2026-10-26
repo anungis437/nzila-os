@@ -7,6 +7,7 @@
  */
 
 import { db } from "@/db/db";
+import type { RLSTx } from "@/lib/db/with-rls-context";
 import {
   dispatchRequests,
   dispatchAssignments,
@@ -94,8 +95,9 @@ export function calculateDispatchPriority(
  */
 export async function createDispatchRequest(
   data: DispatchRequestInsert,
+  exec: RLSTx = db,
 ) {
-  const [row] = await db
+  const [row] = await exec
     .insert(dispatchRequests)
     .values(data)
     .returning();
@@ -178,15 +180,16 @@ export async function assignWorkersToDispatch(
   orgId: string,
   requestId: string,
   memberIds: string[],
+  exec: RLSTx = db,
 ) {
-  const [request] = await db
+  const [request] = await exec
     .select()
     .from(dispatchRequests)
     .where(and(eq(dispatchRequests.id, requestId), eq(dispatchRequests.orgId, orgId)));
 
   if (!request) throw new Error("Dispatch request not found.");
 
-  const assignments = await db
+  const assignments = await exec
     .insert(dispatchAssignments)
     .values(
       memberIds.map((memberId) => ({
@@ -198,13 +201,13 @@ export async function assignWorkersToDispatch(
     .returning();
 
   const filled = memberIds.length >= request.requestedWorkers;
-  await db
+  await exec
     .update(dispatchRequests)
     .set({
       status: filled ? "filled" : "partially_filled",
       updatedAt: new Date(),
     })
-    .where(eq(dispatchRequests.id, requestId));
+    .where(and(eq(dispatchRequests.id, requestId), eq(dispatchRequests.orgId, request.orgId)));
 
   return assignments;
 }

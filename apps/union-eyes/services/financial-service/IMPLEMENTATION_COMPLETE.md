@@ -255,7 +255,7 @@ cp .env.example .env
 # - DATABASE_URL (canonical Union Eyes Azure PostgreSQL)
 # - STRIPE_SECRET_KEY (test key)
 # - STRIPE_WEBHOOK_SECRET (from Stripe CLI)
-# - CLERK_SECRET_KEY (authentication)
+# - AUTH_SECRET (authentication)
 ```
 
 ### 3. Run Database Migrations

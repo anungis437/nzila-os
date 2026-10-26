@@ -9,12 +9,14 @@ const m = vi.hoisted(() => ({
   guardAiFeature: vi.fn(),
   enforceAISafety: vi.fn(),
   findFirst: vi.fn(),
+  selectRows: vi.fn(),
+  hasMinRole: vi.fn(),
   getAiClient: vi.fn(),
   buildCanonicalAiOutput: vi.fn(),
   logger: { error: vi.fn() },
 }));
 
-vi.mock('@/lib/api-auth-guard', () => ({ withRoleAuth: m.withRoleAuth }));
+vi.mock('@/lib/api-auth-guard', () => ({ withRoleAuth: m.withRoleAuth, hasMinRole: m.hasMinRole }));
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: m.checkRateLimit,
   RATE_LIMITS: { AI_COMPLETION: { limit: 10 } },
@@ -24,8 +26,13 @@ vi.mock('@/lib/services/entitlements', () => ({ checkEntitlement: m.checkEntitle
 vi.mock('@/lib/ai/ai-feature-guard', () => ({ guardAiFeature: m.guardAiFeature }));
 vi.mock('@/lib/services/feature-flags', () => ({ AI_FEATURES: { AI_SUMMARIZE: 'AI_SUMMARIZE' } }));
 vi.mock('@nzila/policies', () => ({ enforceAISafety: m.enforceAISafety }));
-vi.mock('@/db/db', () => ({ db: { query: { knowledgeBase: { findFirst: m.findFirst } } } }));
-vi.mock('@/db/schema', () => ({ knowledgeBase: { id: {}, isActive: {} } }));
+vi.mock('@/db/db', () => ({
+  db: {
+    query: { knowledgeBase: { findFirst: m.findFirst } },
+    select: () => ({ from: () => ({ where: () => ({ limit: async () => m.selectRows() }) }) }),
+  },
+}));
+vi.mock('@/db/schema', () => ({ knowledgeBase: { id: {}, isActive: {} }, exitInterviews: { id: {}, organizationId: {}, sensitivityLevel: {} } }));
 vi.mock('@/lib/ai/ai-client', () => ({
   buildOrgAiTrace: vi.fn(() => ({})),
   getAiClient: m.getAiClient,
@@ -89,6 +96,35 @@ describe('ai/summarize route', () => {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ document_id: '11111111-1111-1111-1111-111111111111' }),
     }));
     expect(response.status).toBe(404);
+  });
+
+  it('does not summarize an exit-interview asset for a caller below the interview sensitivity role', async () => {
+    const { POST } = await loadRoute();
+    m.findFirst.mockResolvedValue({ content: 'privileged text', title: 'T', organizationId: 'org_1', isPublic: false, sourceType: 'exit_interview', sourceId: 'int-1' });
+    m.selectRows.mockReturnValue([{ sensitivityLevel: 'legal_sensitive' }]);
+    m.hasMinRole.mockResolvedValue(false);
+
+    const response = await POST(new NextRequest('http://localhost/api/ai/summarize', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ document_id: '11111111-1111-1111-1111-111111111111' }),
+    }));
+
+    expect(response.status).toBe(404);
+    expect(m.hasMinRole).toHaveBeenCalledWith('admin');
+    expect(m.getAiClient).not.toHaveBeenCalled();
+  });
+
+  it('summarizes an exit-interview asset for a caller who holds the required role', async () => {
+    const { POST } = await loadRoute();
+    m.findFirst.mockResolvedValue({ content: 'internal text', title: 'T', organizationId: 'org_1', isPublic: false, sourceType: 'exit_interview', sourceId: 'int-1' });
+    m.selectRows.mockReturnValue([{ sensitivityLevel: 'public_internal' }]);
+    m.hasMinRole.mockResolvedValue(true);
+
+    const response = await POST(new NextRequest('http://localhost/api/ai/summarize', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ document_id: '11111111-1111-1111-1111-111111111111' }),
+    }));
+
+    expect(response.status).toBe(200);
+    expect(m.hasMinRole).toHaveBeenCalledWith('member');
   });
 
   it('summarizes raw content successfully', async () => {

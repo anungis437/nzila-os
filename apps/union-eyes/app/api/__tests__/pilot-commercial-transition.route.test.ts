@@ -40,6 +40,8 @@ const m = vi.hoisted(() => {
       state.lockCalls = [];
     },
     hasMinRole: vi.fn(),
+    getCurrentUser: vi.fn(),
+    persistAtomicAudit: vi.fn(),
     authorizePilotAccess: vi.fn(async () => ({ ok: true, reason: 'platform', actorOrganizationId: null })),
     getPilotEffectiveOrganizationId: vi.fn(() => 'test-org'),
     getPilotVerifiedOrganizationId: vi.fn(() => TEST_ORG_ID),
@@ -84,12 +86,14 @@ vi.mock('@/lib/pilot/pilot-ownership', () => ({
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: m.withSystemContext,
 }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 
 vi.mock('@/lib/api-auth-guard', async (orig) => {
   const actual = await orig<typeof import('@/lib/api-auth-guard')>();
   return {
     ...actual,
     hasMinRole: m.hasMinRole,
+    getCurrentUser: m.getCurrentUser,
     withApiAuth: vi.fn(
       (handler: (req: NextRequest, ctx?: { params?: { id: string } }) => Promise<Response>) =>
         (req: NextRequest, ctx?: { params?: { id: string } }) => handler(req, ctx)
@@ -132,6 +136,8 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
     vi.clearAllMocks();
     m.resetQueues();
     m.hasMinRole.mockResolvedValue(true);
+    m.getCurrentUser.mockResolvedValue({ id: 'platform-admin-1', role: 'system_admin' });
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.authorizePilotAccess.mockResolvedValue({ ok: true, reason: 'platform', actorOrganizationId: null });
     m.getPilotEffectiveOrganizationId.mockReturnValue('test-org');
     m.getPilotVerifiedOrganizationId.mockReturnValue(TEST_ORG_ID);
@@ -357,6 +363,86 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
 
     expect(response.status).toBe(200);
     expect(m.state.lockCalls).toContainEqual({ limit: 1, mode: 'update' });
+  });
+
+  describe('atomic audit', () => {
+    const lockedRow = {
+      id: 'app-1',
+      organizationName: 'Union Eyes',
+      organizationType: 'local',
+      contactName: 'Casey',
+      contactEmail: 'casey@example.com',
+      memberCount: 250,
+      jurisdictions: [],
+      sectors: [],
+      currentSystem: 'legacy',
+      challenges: [],
+      goals: [],
+      readinessScore: 65,
+      reviewedAt: null,
+      approvedAt: null,
+      verifiedMemberCount: 250,
+      verifiedPilotAmount: '12000.00',
+      verifiedSubscriptionPlanId: null,
+      commercialTermsApprovedBy: 'admin-1',
+      commercialTermsApprovedAt: new Date('2026-01-01T00:00:00.000Z'),
+      responses: { commercialState: 'proposal_ready' },
+    };
+    const call = async () => {
+      const { POST } = await loadRoute();
+      return POST(new NextRequest('http://localhost/api/pilot/apply/app-1/commercial-transition', {
+        method: 'POST',
+        body: JSON.stringify({ targetState: 'contract_sent', reason: 'sent to the union' }),
+        headers: { 'content-type': 'application/json' },
+      }), { params: { id: 'app-1' } });
+    };
+
+    it('records the transition on the same transaction under the verified organization, attributed to the actor', async () => {
+      m.queueSelect([{ id: 'app-1' }], [lockedRow], []);
+
+      const response = await call();
+
+      expect(response.status).toBe(200);
+      expect(m.persistAtomicAudit).toHaveBeenCalledTimes(1);
+      expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+        mockDb,
+        expect.objectContaining({
+          organizationId: TEST_ORG_ID,
+          userId: 'platform-admin-1',
+          action: 'pilot.commercial_transition',
+          resourceType: 'pilot_applications',
+          resourceId: 'app-1',
+          details: expect.objectContaining({ fromState: 'proposal_ready', targetState: 'contract_sent', reason: 'sent to the union' }),
+        }),
+      );
+    });
+
+    it('fails the transition when its audit cannot be written, so no contract or state change commits', async () => {
+      m.queueSelect([{ id: 'app-1' }], [lockedRow], []);
+      m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
+
+      const response = await call();
+
+      expect(response.status).toBe(500);
+    });
+
+    it('writes no audit for a rejected transition', async () => {
+      m.queueSelect([{ id: 'app-1' }], [{ ...lockedRow, verifiedMemberCount: null }], []);
+
+      const response = await call();
+
+      expect(response.status).toBe(409);
+      expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    });
+
+    it('refuses an unauthenticated actor before touching the database', async () => {
+      m.getCurrentUser.mockResolvedValueOnce(null);
+
+      const response = await call();
+
+      expect(response.status).toBe(401);
+      expect(m.withSystemContext).not.toHaveBeenCalled();
+    });
   });
 
   it('round 23: derives fromState from the row read INSIDE the lock, not the pre-check snapshot', async () => {

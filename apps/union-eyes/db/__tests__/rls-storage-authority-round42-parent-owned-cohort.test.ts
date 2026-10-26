@@ -149,12 +149,25 @@ describe('round 42 defect fix: tentative_agreements no longer uses the crud-fact
     expect(src).toMatch(
       /and\(eq\(negotiations\.id,\s*negotiationId\),\s*eq\(negotiations\.organizationId,\s*organizationId\)\)/,
     );
-    expect(src).toMatch(/negotiationId does not belong to this organization/);
-    const checkIndex = src.indexOf('negotiationId does not belong to this organization');
+    // A foreign or unknown negotiationId is rejected (not-found) before any insert.
+    expect(src).toMatch(/ApiError\.notFound\('Negotiation',\s*negotiationId\)/);
+    const checkIndex = src.indexOf("ApiError.notFound('Negotiation', negotiationId)");
     const insertIndex = src.indexOf('.insert(tentativeAgreements)');
     expect(checkIndex).toBeGreaterThan(-1);
     expect(insertIndex).toBeGreaterThan(-1);
     expect(checkIndex).toBeLessThan(insertIndex);
+    // The ownership check and the insert run on the same tenant-scoped transaction handle.
+    expect(src).toMatch(/withRLSContext\(\{ organizationId \}, async \(tx\)/);
+    expect(src).toMatch(/tx\s*\.select\(\{ id: negotiations\.id \}\)/);
+    expect(src).toMatch(/tx\s*\.insert\(tentativeAgreements\)/);
+  });
+
+  it('POST only accepts whitelisted fields (no ratification/sign-off/organization injection) and audits atomically', () => {
+    expect(src).toMatch(/createTentativeAgreementSchema\.safeParse\(body\)/);
+    const schema = src.slice(src.indexOf('const createTentativeAgreementSchema'), src.indexOf('export const GET'));
+    expect(schema).toMatch(/negotiationId:\s*z\.guid\(\)/);
+    expect(schema).not.toMatch(/organizationId|ratif(ied|icationStatus)|signedOff|approvedBy|createdBy/);
+    expect(src).toMatch(/persistAtomicAudit\(tx,/);
   });
 });
 

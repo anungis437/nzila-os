@@ -12,11 +12,14 @@ import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from "@/lib/rate-
 import { putBlob, deleteBlob } from "@/lib/blob-client";
 import { db } from "@/db/db";
 import { documents } from "@/db/schema";
-import { appendMandatoryAudit } from "@/lib/audit/mandatory-audit";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
+import { requireCaseFilingCapacity, hasCaseFilingCapacity } from "@/lib/cases/case-authorization";
 import type { RLSTx } from "@/lib/db/with-rls-context";
 import { withOrgOwnedContext } from "@/lib/db/org-owned-context";
 import { logger } from "@/lib/logger";
 import { isMalwareScanError } from "@/lib/security/clamav";
+import { openIntake } from "@/lib/documents/intake-lifecycle";
+import { blobIntakeStorage } from "@/lib/documents/intake-storage";
 
 const ALLOWED_MIME_TYPES_LIST = [
   'application/pdf',
@@ -52,11 +55,11 @@ const _documentUploadSchema = z.object({
     name: z.string().min(1, "File name is required"),
     size: z.number().max(MAX_FILE_SIZE, "File size exceeds 50MB limit"),
     type: z.enum(ALLOWED_MIME_TYPES_LIST as any as [string, ...string[]], {
-      errorMap: () => ({ message: "Invalid file type" })
+      error: "Invalid file type"
     })
   }),
-  organizationId: z.string().uuid("Invalid organization ID"),
-  folderId: z.string().uuid("Invalid folder ID").optional(),
+  organizationId: z.guid("Invalid organization ID"),
+  folderId: z.guid("Invalid folder ID").optional(),
   name: z.string().max(255, "Name too long").optional(),
   description: z.string().max(1000, "Description too long").optional(),
   tags: z.array(z.string().max(50)).max(20, "Too many tags").optional(),
@@ -117,6 +120,11 @@ export const POST = withRoleAuth('member', async (request, context) => {
       );
     }
 
+    // Refused before any bytes are read or stored: filing needs an active canonical membership.
+    if (!(await hasCaseFilingCapacity({ userId, organizationId }, 'member'))) {
+      return NextResponse.json({ error: 'FORBIDDEN', message: 'Uploading a document requires an active membership.' }, { status: 403 });
+    }
+
     // Parse form data
     const formData = await request.formData();
     const file = formData.get("file") as File;
@@ -139,6 +147,16 @@ export const POST = withRoleAuth('member', async (request, context) => {
     const category = formData.get("category") as string | null;
     const isConfidential = formData.get("isConfidential") === "true";
     const accessLevel = (formData.get("accessLevel") as string) || "standard";
+    const discardBlobPath = formData.get('discardBlobPath');
+
+    // Client discard stays closed until an authoritative intake row can prove
+    // the object key, the principal, and that the blob is still unattached.
+    if (discardBlobPath != null && String(discardBlobPath).length > 0) {
+      return standardErrorResponse(
+        ErrorCode.FORBIDDEN,
+        'Unfinished uploads cannot be deleted from this request',
+      );
+    }
 
     // Validation
     if (!file) {
@@ -208,6 +226,8 @@ export const POST = withRoleAuth('member', async (request, context) => {
     );
     }
 
+    const canonicalIntake = formData.get('canonicalIntake') === '1';
+
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
       logApiAuditEvent({
@@ -251,6 +271,33 @@ export const POST = withRoleAuth('member', async (request, context) => {
       );
     }
 
+    // Canonical intake: the server records the object under a key it issues and returns only an intake id. The
+    // storage path is never returned or accepted, and an unused intake lapses and is cleaned up by exact identity.
+    if (canonicalIntake) {
+      const opened = await openIntake(
+        {
+          organizationId,
+          userId,
+          operation: 'create_document',
+          filename: file.name,
+          mimeType: file.type,
+          bytes: Buffer.from(await file.arrayBuffer()),
+        },
+        blobIntakeStorage,
+      );
+      if (!opened.ok) {
+        if (opened.kind === 'upload_failed' && isMalwareScanError(opened.error)) {
+          return opened.error.result.status === 'infected'
+            ? standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'File blocked by malware scan')
+            : standardErrorResponse(ErrorCode.SERVICE_UNAVAILABLE, 'Malware scanner unavailable; upload blocked by policy');
+        }
+        return opened.kind === 'invalid'
+          ? standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid intake request')
+          : standardErrorResponse(ErrorCode.EXTERNAL_SERVICE_ERROR, 'The file could not be stored');
+      }
+      return NextResponse.json({ success: true, data: opened.intake }, { status: 201 });
+    }
+
     // Upload to Vercel Blob Storage
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const checksum = createHash('sha256').update(fileBuffer).digest('hex');
@@ -267,6 +314,9 @@ export const POST = withRoleAuth('member', async (request, context) => {
     try {
       // The document row and its mandatory canonical audit record commit together.
       document = await withOrgOwnedContext(() => db.transaction(async (tx) => {
+        // Filing a document into the organization's repository needs an active canonical membership; it grants no
+        // access to anyone else's document, and its label is the canonical default (team_confidential) until governed.
+        await requireCaseFilingCapacity(tx as unknown as RLSTx, { userId, organizationId }, 'member');
         const [created] = await tx.insert(documents).values({
           organizationId,
           folderId: folderId || null,
@@ -290,7 +340,7 @@ export const POST = withRoleAuth('member', async (request, context) => {
             malwareScan: blob.malwareScan,
           },
         }).returning();
-        await appendMandatoryAudit(tx as unknown as RLSTx, {
+        await persistAtomicAudit(tx as unknown as RLSTx, {
           organizationId,
           action: 'document.upload',
           resourceType: 'documents',

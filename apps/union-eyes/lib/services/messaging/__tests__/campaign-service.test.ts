@@ -251,7 +251,7 @@ describe('CampaignService', () => {
       const updated = { id: 'c1', status: 'cancelled' };
       mocks.mockUpdate.mockReturnValue(chain([updated]));
 
-      const result = await service.cancelCampaign('c1', 'u1');
+      const result = await service.cancelCampaign('c1', 'org-1', 'u1');
       expect(result).toEqual(updated);
       expect(mocks.mockUpdate).toHaveBeenCalled();
     });

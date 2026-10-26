@@ -308,7 +308,7 @@ export async function sendSms(options: SendSmsOptions): Promise<SmsServiceResult
         status: 'sent',
         sentAt: new Date(),
       })
-      .where(eq(smsMessages.id, dbMessage.id));
+      .where(and(eq(smsMessages.id, dbMessage.id), eq(smsMessages.organizationId, organizationId)));
 
     // Increment rate limit
     await incrementRateLimit(organizationId);
@@ -463,13 +463,13 @@ export async function handleTwilioWebhook(data: TwilioWebhookData): Promise<void
       updateData.errorMessage = ErrorMessage;
     }
 
-    await db.update(smsMessages).set(updateData).where(eq(smsMessages.id, message.id));
+    await db.update(smsMessages).set(updateData).where(and(eq(smsMessages.id, message.id), eq(smsMessages.organizationId, message.organizationId)));
 
     logger.info('Updated message status', { MessageSid, status: newStatus });
 
     // Update campaign statistics if this is a campaign message
     if (message.campaignId) {
-      await updateCampaignStatistics(message.campaignId);
+      await updateCampaignStatistics(message.campaignId, message.organizationId);
     }
   } catch (error) {
     logger.error('Failed to handle Twilio webhook', { error, MessageSid });
@@ -479,7 +479,7 @@ export async function handleTwilioWebhook(data: TwilioWebhookData): Promise<void
 /**
  * Update campaign statistics after message status changes
  */
-async function updateCampaignStatistics(campaignId: string): Promise<void> {
+async function updateCampaignStatistics(campaignId: string, organizationId: string): Promise<void> {
   const stats = await db
     .select({
       sent: sql<number>`count(*) filter (where status in ('sent', 'delivered'))`,
@@ -488,7 +488,7 @@ async function updateCampaignStatistics(campaignId: string): Promise<void> {
       totalCost: sql<number>`sum(CAST(price_amount as DECIMAL))`,
     })
     .from(smsMessages)
-    .where(eq(smsMessages.campaignId, campaignId));
+    .where(and(eq(smsMessages.campaignId, campaignId), eq(smsMessages.organizationId, organizationId)));
 
   if (stats[0]) {
     await db
@@ -499,7 +499,7 @@ async function updateCampaignStatistics(campaignId: string): Promise<void> {
         failedCount: Number(stats[0].failed) || 0,
         totalCost: (stats[0].totalCost || 0).toString(),
       })
-      .where(eq(smsCampaigns.id, campaignId));
+      .where(and(eq(smsCampaigns.id, campaignId), eq(smsCampaigns.organizationId, organizationId)));
   }
 }
 

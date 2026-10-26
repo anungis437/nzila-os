@@ -11,6 +11,7 @@
  */
 
 import { db } from "@/db";
+import type { RLSTx } from "@/lib/db/with-rls-context";
 import {
   userConsents,
   cookieConsents,
@@ -27,7 +28,7 @@ import {
   smsMessages,
   smsCampaignRecipients,
 } from "@/db/schema";
-import { eq, and, desc, sql, or } from "drizzle-orm";
+import { eq, and, desc, sql, or, inArray } from "drizzle-orm";
 import { createHash } from "crypto";
 import { NotificationService } from "@/lib/services/notification-service";
 import { logger } from "@/lib/logger";
@@ -72,7 +73,8 @@ export class ConsentManager {
    */
   static async withdrawConsent(
     userId: string,
-    consentId: string
+    consentId: string,
+    organizationId: string
   ): Promise<boolean> {
     const result = await db
       .update(userConsents)
@@ -84,7 +86,8 @@ export class ConsentManager {
       .where(
         and(
           eq(userConsents.id, consentId),
-          eq(userConsents.userId, userId)
+          eq(userConsents.userId, userId),
+          eq(userConsents.organizationId, organizationId)
         )
       )
       .returning();
@@ -138,9 +141,17 @@ export class ConsentManager {
 /**
  * Cookie Consent Management
  */
+export class CookieConsentOwnershipError extends Error {
+  constructor() {
+    super("This cookie consent record belongs to another account or organization");
+    this.name = "CookieConsentOwnershipError";
+  }
+}
+
 export class CookieConsentManager {
   /**
-   * Save cookie preferences
+   * Save cookie preferences. A record created by a signed-in member can only be changed by that member, and a record
+   * never moves to another organization; an anonymous record is held by whoever holds the browser-side consent id.
    */
   static async saveCookieConsent(data: {
     userId?: string;
@@ -152,21 +163,23 @@ export class CookieConsentManager {
     marketing: boolean;
     ipAddress?: string;
     userAgent?: string;
-  }): Promise<typeof cookieConsents.$inferSelect> {
+  }, tx: RLSTx = db): Promise<typeof cookieConsents.$inferSelect> {
     const expiresAt = new Date();
     expiresAt.setFullYear(expiresAt.getFullYear() + 1); // 12 months
 
     // Check if consent already exists
-    const existing = await db
+    const existing = await tx
       .select()
       .from(cookieConsents)
       .where(eq(cookieConsents.consentId, data.consentId))
       .limit(1);
 
     if (existing.length > 0) {
+      if (existing[0].organizationId !== data.organizationId) throw new CookieConsentOwnershipError();
+      if (existing[0].userId && existing[0].userId !== data.userId) throw new CookieConsentOwnershipError();
       // Update existing
       const { organizationId: _tid, ...updateFields } = data;
-      const [updated] = await db
+      const [updated] = await tx
         .update(cookieConsents)
         .set({
           ...updateFields,
@@ -175,14 +188,14 @@ export class CookieConsentManager {
           expiresAt,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any)
-        .where(eq(cookieConsents.consentId, data.consentId))
+        .where(and(eq(cookieConsents.consentId, data.consentId), eq(cookieConsents.organizationId, data.organizationId)))
         .returning();
 
       return updated;
     } else {
       // Insert new
       const { organizationId: _tid2, ...insertFields } = data;
-      const [consent] = await db
+      const [consent] = await tx
         .insert(cookieConsents)
         .values({
           ...insertFields,
@@ -233,11 +246,26 @@ export class GdprRequestManager {
     organizationId: string;
     requestDetails?: any;
     verificationMethod?: string;
-  }): Promise<typeof gdprDataRequests.$inferSelect> {
+  }, tx: RLSTx = db): Promise<typeof gdprDataRequests.$inferSelect> {
+    const request = await this.createDataAccessRequest(data, tx);
+    // The notification is an external effect: callers working inside a transaction send it after the commit.
+    await this.notifyDataAccessRequest(request);
+    return request;
+  }
+
+  /**
+   * Record the data access request row only, on the caller's transaction.
+   */
+  static async createDataAccessRequest(data: {
+    userId: string;
+    organizationId: string;
+    requestDetails?: any;
+    verificationMethod?: string;
+  }, tx: RLSTx = db): Promise<typeof gdprDataRequests.$inferSelect> {
     const deadline = new Date();
     deadline.setDate(deadline.getDate() + 30); // 30 days to respond
 
-    const [request] = await db
+    const [request] = await tx
       .insert(gdprDataRequests)
       .values({
         userId: data.userId,
@@ -250,7 +278,15 @@ export class GdprRequestManager {
         verificationMethod: data.verificationMethod,
       })
       .returning();
+    return request;
+  }
 
+  /**
+   * Notify the DPO/admin of a new access request. Failure to notify never fails the request.
+   */
+  static async notifyDataAccessRequest(request: typeof gdprDataRequests.$inferSelect): Promise<void> {
+    const data = { userId: request.userId, organizationId: request.organizationId };
+    const deadline = request.deadline;
     // Send notification to admin/DPO
     try {
       const notificationService = new NotificationService();
@@ -282,7 +318,6 @@ export class GdprRequestManager {
       logger.error("Failed to send GDPR request notification", { error });
       // Don&apos;t fail the request creation if notification fails
     }
-    return request;
   }
 
   /**
@@ -382,12 +417,14 @@ export class GdprRequestManager {
    */
   static async updateRequestStatus(
     requestId: string,
+    organizationId: string,
     status: "in_progress" | "completed" | "rejected",
     data?: {
       processedBy?: string;
       responseData?: any;
       rejectionReason?: string;
-    }
+    },
+    tx: RLSTx = db,
   ) {
     const updateData: Record<string, unknown> = {
       status,
@@ -403,11 +440,11 @@ export class GdprRequestManager {
       updateData.completedAt = new Date();
     }
 
-    const [updated] = await db
+    const [updated] = await tx
       .update(gdprDataRequests)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .set(updateData as any)
-      .where(eq(gdprDataRequests.id, requestId))
+      .where(and(eq(gdprDataRequests.id, requestId), eq(gdprDataRequests.organizationId, organizationId)))
       .returning();
 
     return updated;
@@ -704,7 +741,7 @@ export class DataErasureService {
       });
 
       // 6. Update the GDPR request status
-      await GdprRequestManager.updateRequestStatus(requestId, "completed", {
+      await GdprRequestManager.updateRequestStatus(requestId, organizationId, "completed", {
         processedBy: executedBy,
         responseData: {
           tablesAffected: tablesAffected.length,
@@ -775,10 +812,18 @@ export class DataErasureService {
       )
       .returning();
 
-    // Delete individual messages sent by user
+    // Delete individual messages sent by user, within this organization's threads only
     const deletedMessages = await db
       .delete(messages)
-      .where(eq(messages.senderId, userId))
+      .where(
+        and(
+          eq(messages.senderId, userId),
+          inArray(
+            messages.threadId,
+            db.select({ id: messageThreads.id }).from(messageThreads).where(eq(messageThreads.organizationId, organizationId))
+          )
+        )
+      )
       .returning();
 
     // Delete SMS message records
@@ -853,7 +898,13 @@ export class DataErasureService {
         message: "[Update removed per GDPR data erasure request]",
       })
       .where(
-        eq(claimUpdates.createdBy, userId)
+        and(
+          eq(claimUpdates.createdBy, userId),
+          inArray(
+            claimUpdates.claimId,
+            db.select({ id: claims.id }).from(claims).where(eq(claims.organizationId, organizationId))
+          )
+        )
       )
       .returning();
 

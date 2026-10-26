@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { Metadata } from "next";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -36,15 +37,25 @@ export default async function AuditsPage({ params }: PageProps) {
 
   // Fetch audit data from API
   let audits: { id: string; title: string; type: string; status: string; dateCompleted?: string; dateScheduled?: string; auditor: string; findings: number; hasReport: boolean; }[] = [];
+  // A retrieval failure must never be rendered as an empty (clean) audit posture.
+  let retrieval: "ok" | "unavailable" | "forbidden" = "unavailable";
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || '';
-    const res = await fetch(`${baseUrl}/api/v2/audits`, { cache: 'no-store' });
+    const cookie = (await headers()).get("cookie") ?? "";
+    const res = await fetch(`${baseUrl}/api/audits`, { cache: 'no-store', headers: { cookie } });
     if (res.ok) {
       const json = await res.json();
-      audits = Array.isArray(json) ? json : json?.audits ?? json?.data ?? [];
+      const payload = json?.data ?? json;
+      const list = Array.isArray(payload) ? payload : payload?.audits;
+      if (Array.isArray(list)) {
+        audits = list;
+        retrieval = "ok";
+      }
+    } else if (res.status === 401 || res.status === 403) {
+      retrieval = "forbidden";
     }
   } catch {
-    // API not available — empty state
+    retrieval = "unavailable";
   }
 
   const getStatusColor = (status: string) => {
@@ -110,7 +121,26 @@ export default async function AuditsPage({ params }: PageProps) {
         </Button>
       </div>
 
+      {retrieval !== "ok" && (
+        <div role="alert" className="rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-800">
+          <p className="font-medium">
+            {retrieval === "forbidden" ? t("forbiddenTitle") : t("unavailableTitle")}
+          </p>
+          <p className="mt-1">
+            {retrieval === "forbidden" ? t("forbiddenBody") : t("unavailableBody")}
+          </p>
+        </div>
+      )}
+
+      {retrieval === "ok" && audits.length === 0 && (
+        <div role="status" className="rounded-md border p-4 text-sm text-muted-foreground">
+          <p className="font-medium text-foreground">{t("emptyTitle")}</p>
+          <p className="mt-1">{t("emptyBody")}</p>
+        </div>
+      )}
+
       {/* Summary Cards */}
+      {retrieval === "ok" && (
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -132,7 +162,7 @@ export default async function AuditsPage({ params }: PageProps) {
             <div className="text-2xl font-bold">
               {audits.filter(a => a.status === "completed").length}
             </div>
-            <p className="text-xs text-green-500">{t("summary.allClear")}</p>
+            <p className="text-xs text-muted-foreground">{t("summary.recordedOutcomes")}</p>
           </CardContent>
         </Card>
 
@@ -162,6 +192,7 @@ export default async function AuditsPage({ params }: PageProps) {
           </CardContent>
         </Card>
       </div>
+      )}
 
       {/* Audits List */}
       <div className="grid gap-4">

@@ -37,7 +37,10 @@ const m = vi.hoisted(() => {
 
   const createUpdateChain = () => ({
     set: vi.fn(() => ({
-      where: vi.fn(() => nextUpdateWhere()),
+      where: vi.fn(() => {
+        const rows = nextUpdateWhere();
+        return Object.assign(rows, { returning: () => rows.then((r) => (r.length ? r : [{ id: 'row' }])) });
+      }),
     })),
   });
 
@@ -46,6 +49,7 @@ const m = vi.hoisted(() => {
     cookieStore,
     checkRateLimit: vi.fn(),
     logApiAuditEvent: vi.fn(),
+    persistAtomicAudit: vi.fn(),
     createMetaClient: vi.fn(),
     createTwitterClient: vi.fn(),
     createLinkedInClient: vi.fn(),
@@ -73,9 +77,14 @@ const mockDb = {
   select: vi.fn(() => m.createSelectChain()),
   update: vi.fn(() => m.createUpdateChain()),
   delete: vi.fn(() => ({
-    where: vi.fn(() => m.nextDeleteWhere()),
+    where: vi.fn(() => {
+      const rows = m.nextDeleteWhere();
+      return Object.assign(rows, { returning: () => rows.then((r) => (r.length ? r : [{ id: 'row' }])) });
+    }),
   })),
 };
+
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 
 vi.mock('@/lib/middleware/api-security', () => ({
   logApiAuditEvent: m.logApiAuditEvent,
@@ -309,7 +318,24 @@ describe('social-media/accounts route', () => {
     expect(response.status).toBe(200);
     expect(payload).toMatchObject({ account_id: 'acct-1' });
     expect(revokeToken).toHaveBeenCalled();
-    expect(m.logApiAuditEvent).toHaveBeenCalledWith(expect.objectContaining({ action: 'DISCONNECT_SOCIAL_ACCOUNT' }));
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      mockDb,
+      expect.objectContaining({ action: 'social.account.disconnect', resourceId: 'acct-1', userId: TEST_USER.userId }),
+    );
+  });
+
+  it('does not report a disconnect, and writes no audit, when its audit cannot be written', async () => {
+    const { DELETE } = await loadRoute();
+    m.createTwitterClient.mockReturnValueOnce({ revokeToken: vi.fn(async () => undefined) });
+    m.queueSelect([
+      { id: 'acct-1', organizationId: TEST_USER.organizationId, platform: 'twitter', accessToken: 'a', refreshToken: 'r' },
+    ]);
+    m.queueDeleteWhere([]);
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+
+    const response = await DELETE(new NextRequest('http://localhost/api/social-media/accounts?id=acct-1', { method: 'DELETE' }));
+
+    expect(response.status).toBe(500);
   });
 
   it('returns not found when refreshing a missing account', async () => {

@@ -148,7 +148,7 @@ describe('platform-economics/reconciliation-service', () => {
   describe('resolveException', () => {
     it('resolves an open exception', async () => {
       pushSel([{ id: 'ex1', organizationId: 'o1' }]); // update returning
-      const updated = await resolveException('ex1', {
+      const updated = await resolveException('ex1', 'o1', {
         status: 'resolved',
         resolvedBy: 'user-1',
         notes: 'fixed',
@@ -160,7 +160,7 @@ describe('platform-economics/reconciliation-service', () => {
     it('throws when the exception is already resolved', async () => {
       pushSel([]); // update returning empty
       await expect(
-        resolveException('ex1', { status: 'written_off', resolvedBy: 'user-1', notes: 'n' }),
+        resolveException('ex1', 'o1', { status: 'written_off', resolvedBy: 'user-1', notes: 'n' }),
       ).rejects.toThrow('not found or already resolved');
     });
   });

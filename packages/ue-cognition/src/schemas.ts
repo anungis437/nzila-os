@@ -35,7 +35,7 @@ const trajectoryFeaturesSchema = z.object({
   windowEnd: z.string(),
   eventCount: z.number().nonnegative(),
   distinctTypes: z.number().nonnegative(),
-  meanGapDays: z.number(),
+  meanGapDays: z.union([z.number(), z.literal(Number.POSITIVE_INFINITY)]), // zod 4 rejects Infinity; it means "fewer than two events"
   frequencySlope: z.number(),
   recencyDays: z.number(),
   negativeSignal: z.number(),
@@ -223,6 +223,6 @@ export const ueCognitionAuditSchema: z.ZodType<UECognitionAudit> = z.object({
   action: z.enum(['compute', 'view', 'override', 'recommend', 'redact']),
   actorId: z.string().nullable(),
   resourceId: z.string(),
-  details: z.record(z.unknown()),
+  details: z.record(z.string(), z.unknown()),
   occurredAt: z.string(),
 })

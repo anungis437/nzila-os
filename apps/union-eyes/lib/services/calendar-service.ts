@@ -190,13 +190,14 @@ export async function createCalendar(data: NewCalendar): Promise<Calendar> {
  */
 export async function updateCalendar(
   id: string,
+  organizationId: string,
   data: Partial<NewCalendar>
 ): Promise<Calendar | null> {
   try {
     const [updated] = await db
       .update(calendars)
       .set(data)
-      .where(eq(calendars.id, id))
+      .where(and(eq(calendars.id, id), eq(calendars.organizationId, organizationId)))
       .returning();
 
     return updated || null;
@@ -209,11 +210,11 @@ export async function updateCalendar(
 /**
  * Delete calendar
  */
-export async function deleteCalendar(id: string): Promise<boolean> {
+export async function deleteCalendar(id: string, organizationId: string): Promise<boolean> {
   try {
     await db
       .delete(calendars)
-      .where(eq(calendars.id, id));
+      .where(and(eq(calendars.id, id), eq(calendars.organizationId, organizationId)));
 
     return true;
   } catch (error) {
@@ -746,11 +747,12 @@ export async function findCommonAvailability(
  */
 export async function syncExternalCalendar(
   calendarId: string,
+  organizationId: string,
   provider: "google" | "outlook" | "apple"
 ): Promise<{ success: boolean; syncedEvents: number; errors?: string[] }> {
   try {
     const calendar = await getCalendarById(calendarId);
-    if (!calendar) {
+    if (!calendar || calendar.organizationId !== organizationId) {
       throw new Error("Calendar not found");
     }
 
@@ -760,7 +762,7 @@ export async function syncExternalCalendar(
     // 3. Synchronize bidirectionally
     // 4. Update sync status and token
 
-    await updateCalendar(calendarId, {
+    await updateCalendar(calendarId, organizationId, {
       lastSyncAt: new Date(),
       syncStatus: "synced",
     });
@@ -772,7 +774,7 @@ export async function syncExternalCalendar(
   } catch (error) {
     logger.error("Error syncing external calendar", { error, calendarId, provider });
 
-    await updateCalendar(calendarId, {
+    await updateCalendar(calendarId, organizationId, {
       syncStatus: "failed",
     });
 
@@ -785,12 +787,13 @@ export async function syncExternalCalendar(
  */
 export async function enableCalendarSync(
   calendarId: string,
+  organizationId: string,
   provider: "google" | "outlook" | "apple",
   externalCalendarId: string,
   syncToken?: string
 ): Promise<Calendar | null> {
   try {
-    const updated = await updateCalendar(calendarId, {
+    const updated = await updateCalendar(calendarId, organizationId, {
       externalProvider: provider,
       externalCalendarId,
       syncEnabled: true,
@@ -800,7 +803,7 @@ export async function enableCalendarSync(
 
     // Perform initial sync
     if (updated) {
-      await syncExternalCalendar(calendarId, provider);
+      await syncExternalCalendar(calendarId, organizationId, provider);
     }
 
     return updated;
@@ -813,9 +816,9 @@ export async function enableCalendarSync(
 /**
  * Disable calendar sync
  */
-export async function disableCalendarSync(calendarId: string): Promise<Calendar | null> {
+export async function disableCalendarSync(calendarId: string, organizationId: string): Promise<Calendar | null> {
   try {
-    return await updateCalendar(calendarId, {
+    return await updateCalendar(calendarId, organizationId, {
       syncEnabled: false,
       syncStatus: "disconnected",
     });

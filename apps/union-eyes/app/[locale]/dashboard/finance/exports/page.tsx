@@ -40,6 +40,7 @@ interface ExportJob {
 
 export default function ExportsPage() {
   const t = useTranslations('financeExportsPage');
+  const tBilling = useTranslations('financeDashboardPage');
   const [exportType, setExportType] = useState<ExportType>('gl_journal');
   const [periodId, setPeriodId] = useState('');
   const [invoiceId, setInvoiceId] = useState('');
@@ -114,6 +115,10 @@ export default function ExportsPage() {
       <h1 className="text-2xl font-bold flex items-center gap-2">
         <Download className="h-6 w-6" /> {t('title')}
       </h1>
+
+      <p role="note" className="rounded-md border bg-muted p-3 text-sm text-muted-foreground">
+        {tBilling('platformBillingNotice')}
+      </p>
 
       <Card className="p-6">
         <h2 className="text-lg font-semibold mb-4">{t('generate.title')}</h2>

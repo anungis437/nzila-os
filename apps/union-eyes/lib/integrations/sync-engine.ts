@@ -121,7 +121,7 @@ export class SyncEngine {
       const result = await integration.sync(syncOptions);
 
       // Update sync log
-      await this.updateSyncLog(logId, {
+      await this.updateSyncLog(logId, organizationId, {
         status: result.success ? SyncStatus.SUCCESS : SyncStatus.FAILED,
         recordsProcessed: result.recordsProcessed,
         recordsCreated: result.recordsCreated,
@@ -342,6 +342,7 @@ export class SyncEngine {
    */
   private async updateSyncLog(
     logId: string,
+    organizationId: string,
     updates: {
       status: SyncStatus;
       recordsProcessed?: number;
@@ -356,7 +357,7 @@ export class SyncEngine {
     await db
       .update(integrationSyncLog)
       .set({ ...updates, status: updates.status as DbSyncStatus })
-      .where(eq(integrationSyncLog.id, logId));
+      .where(and(eq(integrationSyncLog.id, logId), eq(integrationSyncLog.organizationId, organizationId)));
   }
 
   /**

@@ -13,6 +13,7 @@ import { validateIntakeRequest } from '@nzila/cupe-vocabulary';
 import { getCaseTypeById } from '@nzila/cupe-vocabulary';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { createClaim, getClaimsByMember } from '@/db/queries/claims-queries';
+import { requireCaseFilingCapacity, caseAuthorizationResponse } from '@/lib/cases/case-authorization';
 import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
@@ -114,9 +115,9 @@ export async function POST(request: Request) {
 
     const data = validation.data!;
     const canonical = currentStateContextEnabled();
-    if (canonical) {
-      // The client may still send its verified Entra object id. Resolve only that
-      // actor's alias; a caller-supplied member id cannot select another principal.
+    {
+      // Self-service intake always files for the authenticated member, in every deployment mode. The client may still
+      // send its verified Entra object id; a caller-supplied member id can never select another principal.
       const ownEntraObjectId = identityProvider === 'entra'
         ? providerSubject?.split(':')[1] : undefined;
       if (data.memberId !== userId && (!ownEntraObjectId || data.memberId !== ownEntraObjectId)) {
@@ -196,6 +197,8 @@ export async function POST(request: Request) {
 
     // 5. Create claim with RLS context (audit inside transaction for atomicity)
     const { claim, canonicalDecision } = await withRLSContext(async (tx) => {
+      // Filing is open to any active member of the organization; it opens a case for themselves and grants nothing else.
+      await requireCaseFilingCapacity(tx, { userId, organizationId: orgId }, 'member');
       const newClaim = await createClaim(
         {
           organizationId: orgId,
@@ -281,6 +284,8 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error) {
+    const refused = caseAuthorizationResponse(error);
+    if (refused) return refused;
     logger.error('Case intake failed', error as Error);
     return NextResponse.json(
       { error: 'INTERNAL_ERROR', message: 'An unexpected error occurred.' },

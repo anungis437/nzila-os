@@ -21,6 +21,7 @@ import {
 } from '@/db/schema/workbook-schema';
 import { runStewardshipCartography } from '@/lib/workbook/engines/stewardshipCartography';
 import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
+import { auditClaimedWorkbookWrite } from '@/lib/workbook/claimed-write-audit';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -118,7 +119,7 @@ export async function POST(
     // then run inside the DB execution context that matches the authority.
     const access = await withClaimedWorkbookAccess(
       { workbookId, operation: 'write' },
-      async () => {
+      async (authority) => {
         const [inserted] = await db
           .insert(workbookMemoryHolders)
           .values({
@@ -132,6 +133,13 @@ export async function POST(
             notes: parse.data.notes ?? null,
           })
           .returning({ id: workbookMemoryHolders.id });
+
+        await auditClaimedWorkbookWrite(authority, {
+          action: 'workbook.memory_holder.create',
+          resourceType: 'workbook_memory_holders',
+          resourceId: inserted?.id ?? workbookId,
+          details: { role: parse.data.role },
+        });
 
         const cartography = await loadCartography(workbookId);
         return { id: inserted?.id, ...cartography };

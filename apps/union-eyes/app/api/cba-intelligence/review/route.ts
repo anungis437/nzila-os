@@ -1,4 +1,6 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
+import { withRLSContext } from "@/lib/db/with-rls-context";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import {
   getReviewQueue,
   getReviewQueueCounts,
@@ -48,7 +50,7 @@ export const GET = withApi(
 
 const reviewDecisionSchema = z.object({
   targetType: z.enum(["finding", "agreement", "wage_adjustment", "clause"]),
-  targetId: z.string().uuid(),
+  targetId: z.guid(),
   decision: z.enum(["approved", "rejected", "needs_followup", "superseded"]),
   reason: z.string().max(1000).optional(),
   comment: z.string().max(5000).optional(),
@@ -65,13 +67,26 @@ export const POST = withApi(
       summary: "Submit a review decision",
     },
   },
-  async ({ body, userId }) => {
+  async ({ body, userId, organizationId }) => {
     if (!userId) throw ApiError.unauthorized("User context required");
+    if (!organizationId) throw ApiError.badRequest("Organization context required");
 
-    return submitReview({
-      ...body,
-      reviewerId: userId,
-      reviewerRole: "steward", // Could be enriched from user context
+    // The decision, the status it sets on its target and the audit record commit together.
+    return withRLSContext({ organizationId }, async (tx) => {
+      const decision = await submitReview({
+        ...body,
+        reviewerId: userId,
+        reviewerRole: "steward", // Could be enriched from user context
+      }, tx);
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: "cba_review.decide",
+        resourceType: `cba_intel_${body.targetType}`,
+        resourceId: body.targetId,
+        details: { decision: body.decision, reviewDecisionId: decision.id },
+      });
+      return decision;
     });
   },
 );

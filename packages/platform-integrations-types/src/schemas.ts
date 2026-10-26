@@ -7,7 +7,7 @@ import { z } from 'zod'
 
 // ─── Shared ──────────────────────────────────────────────────────────────────
 
-export const uuidSchema = z.string().uuid()
+export const uuidSchema = z.guid()
 
 export const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -55,14 +55,14 @@ export const createConnectionSchema = z.object({
   appScope: appScopeSchema,
   connectorType: connectorTypeSchema,
   name: z.string().min(1).max(255),
-  configJson: z.record(z.unknown()).default({}),
+  configJson: z.record(z.string(), z.unknown()).prefault({}),
   credentialRef: z.string().min(1).max(512).optional(),
 })
 
 export const updateConnectionSchema = z.object({
   name: z.string().min(1).max(255).optional(),
   status: connectionStatusSchema.optional(),
-  configJson: z.record(z.unknown()).optional(),
+  configJson: z.record(z.string(), z.unknown()).optional(),
   credentialRef: z.string().min(1).max(512).optional(),
 })
 
@@ -77,7 +77,7 @@ export const createSubscriptionSchema = z.object({
   ),
   targetEndpoint: z.string().url().max(2048).optional(),
   targetAction: z.string().min(1).max(255).optional(),
-  filterRules: z.record(z.unknown()).optional(),
+  filterRules: z.record(z.string(), z.unknown()).optional(),
 })
 
 // ─── Inbound Payload Schema ──────────────────────────────────────────────────
@@ -90,7 +90,7 @@ export const inboundPayloadSchema = z.object({
   sourceSystem: z.string().min(1).max(128),
   actorId: z.string().min(1).max(255),
   actorType: z.enum(['user', 'service', 'connector', 'system']).default('service'),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   signature: z.string().optional(),
 })
 
@@ -105,14 +105,14 @@ export const fieldMappingSchema = z.object({
   sourceField: z.string().min(1),
   targetField: z.string().min(1),
   operation: mappingOperationSchema,
-  config: z.record(z.unknown()).default({}),
+  config: z.record(z.string(), z.unknown()).prefault({}),
   required: z.boolean().default(false),
 })
 
 export const validationRuleSchema = z.object({
   field: z.string().min(1),
   rule: z.enum(['required', 'min_length', 'max_length', 'pattern', 'enum', 'range', 'type', 'custom']),
-  params: z.record(z.unknown()).default({}),
+  params: z.record(z.string(), z.unknown()).prefault({}),
   message: z.string().min(1),
 })
 
@@ -142,7 +142,7 @@ export const createIdentityLinkSchema = z.object({
   internalId: z.string().min(1).max(255),
   externalId: z.string().min(1).max(255),
   externalSystem: z.string().min(1).max(128),
-  metadataJson: z.record(z.unknown()).optional(),
+  metadataJson: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const resolveIdentitySchema = z.object({

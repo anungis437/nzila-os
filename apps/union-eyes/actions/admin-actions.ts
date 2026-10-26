@@ -16,7 +16,7 @@ import { organizations, orgConfigurations, orgUsage } from "@/db/schema";
 import { eq, and, desc, sql, count, like, or, ne, sum as _sum } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { auth } from '@nzila/platform-auth/entra/server';
-import { appendMandatoryAudit } from "@/lib/audit/mandatory-audit";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import type { RLSTx } from "@/lib/db/with-rls-context";
 import { revalidatePath } from "next/cache";
 import type {
@@ -135,8 +135,8 @@ export async function getAdminUsers(
 
     return results.map(u => ({
       id: u.userId,
-      name: u.userId.split('_')[0] || "User", // Extract from Clerk ID
-      email: u.userId, // Temporary - need to fetch from Clerk
+      name: u.userId.split('_')[0] || "User", // Derived from the auth user ID
+      email: u.userId, // Temporary - need to fetch from the auth provider
       role: u.role as UserRole,
       organizationId: u.organizationId,
       orgName: u.orgName,
@@ -249,7 +249,7 @@ export async function updateUserRole(
       ));
 
     // Role change is a mandatory audited event in the same transaction as the update.
-    await appendMandatoryAudit(tx as unknown as RLSTx, {
+    await persistAtomicAudit(tx as unknown as RLSTx, {
       organizationId,
       action: 'membership.role_change',
       resourceType: 'organization_users',
@@ -305,7 +305,7 @@ export async function toggleUserStatus(
         eq(organizationUsers.organizationId, organizationId)
       ));
 
-    await appendMandatoryAudit(tx as unknown as RLSTx, {
+    await persistAtomicAudit(tx as unknown as RLSTx, {
       organizationId,
       action: 'membership.status_change',
       resourceType: 'organization_users',
@@ -344,7 +344,7 @@ export async function deleteUserFromOrg(
         eq(organizationUsers.organizationId, organizationId)
       ));
 
-    await appendMandatoryAudit(tx as unknown as RLSTx, {
+    await persistAtomicAudit(tx as unknown as RLSTx, {
       organizationId,
       action: 'membership.remove',
       resourceType: 'organization_users',

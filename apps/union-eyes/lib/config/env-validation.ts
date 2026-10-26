@@ -47,37 +47,37 @@ const envSchema = z.object({
   NZILA_MODE: z.enum(['development', 'test', 'staging', 'internal', 'pilot', 'demo', 'production']).optional(),
 
   // ============== CRITICAL - Database ==============
-  DATABASE_TYPE: z.enum(['postgresql', 'azure-sql', 'mssql']).default('postgresql').optional(),
+  DATABASE_TYPE: z.enum(['postgresql', 'azure-sql', 'mssql']).optional(),
   DATABASE_URL: z.string()
     .startsWith('postgresql://', 'Database must be PostgreSQL')
     .describe('PostgreSQL connection string (required in all environments)'),
   DB_POOL_MAX: z.string()
     .transform((val) => parseInt(val || '20'))
     .refine((val) => val >= 1 && val <= 200, 'DB_POOL_MAX must be between 1 and 200')
-    .default('20')
+    .prefault('20')
     .optional()
     .describe('Maximum database connection pool size (default: 20, production: 50-100)'),
   DB_IDLE_TIMEOUT: z.string()
     .transform((val) => parseInt(val || '30'))
     .refine((val) => val >= 5 && val <= 300, 'DB_IDLE_TIMEOUT must be between 5 and 300 seconds')
-    .default('30')
+    .prefault('30')
     .optional()
     .describe('Connection idle timeout in seconds (default: 30)'),
   DB_CONNECTION_TIMEOUT: z.string()
     .transform((val) => parseInt(val || '10'))
     .refine((val) => val >= 1 && val <= 60, 'DB_CONNECTION_TIMEOUT must be between 1 and 60 seconds')
-    .default('10')
+    .prefault('10')
     .optional()
     .describe('Connection timeout in seconds (default: 10)'),
   DB_QUERY_TIMEOUT: z.string()
     .transform((val) => parseInt(val || '30000'))
     .refine((val) => val >= 1000 && val <= 300000, 'DB_QUERY_TIMEOUT must be between 1000 and 300000 ms')
-    .default('30000')
+    .prefault('30000')
     .optional()
     .describe('Query timeout in milliseconds (default: 30000ms / 30s)'),
   DB_SSL: z.string()
     .transform((val) => val === 'true')
-    .default('false')
+    .prefault('false')
     .optional()
     .describe('Enable SSL for database connection (required for production)'),
   
@@ -114,7 +114,7 @@ const envSchema = z.object({
   WHOP_API_KEY: z.string().optional(),
   NEXT_PUBLIC_WHOP_REDIRECT_URL: z.string().url('Invalid WHOP_REDIRECT_URL').optional(),
   NEXT_PUBLIC_WHOP_PORTAL_LINK: z.string().url('Invalid WHOP_PORTAL_LINK').optional(),
-  ACTIVE_PAYMENT_PROVIDER: z.enum(['stripe', 'whop']).default('whop').optional(),
+  ACTIVE_PAYMENT_PROVIDER: z.enum(['stripe', 'whop']).optional(),
 
   // ============== HIGH - Notification Services ==============
   SENDGRID_API_KEY: z.string()
@@ -156,7 +156,7 @@ const envSchema = z.object({
     .describe('Document storage backend: s3, r2, azure, or disk'),
 
   // AWS S3
-  AWS_REGION: z.string().default('us-east-1').optional(),
+  AWS_REGION: z.string().optional(),
   AWS_SIGNATURES_BUCKET: z.string().optional(),
   AWS_ACCESS_KEY_ID: z.string().optional(),
   AWS_SECRET_ACCESS_KEY: z.string().optional(),
@@ -173,12 +173,12 @@ const envSchema = z.object({
   AZURE_STORAGE_CONTAINER: z.string().optional(),
 
   // ============== HIGH - DNS Automation (Provider-Neutral) ==============
-  DNS_AUTOMATION_ENABLED: z.string().transform(val => val === 'true').default('false').optional(),
+  DNS_AUTOMATION_ENABLED: z.string().transform(val => val === 'true').prefault('false').optional(),
   DNS_PROVIDER: z.enum(['cloudflare', 'route53', 'azure_dns']).optional(),
   DNS_API_TOKEN: z.string().optional(),
   DNS_ZONE_ID: z.string().optional(),
   DNS_ZONE_NAME: z.string().optional(),
-  DNS_TTL: z.string().transform(val => parseInt(val, 10)).default('600').optional(),
+  DNS_TTL: z.string().transform(val => parseInt(val, 10)).prefault('600').optional(),
   DNS_PROD_ORIGIN: z.string().optional(),
   DNS_STAGING_ORIGIN: z.string().optional(),
 
@@ -201,8 +201,8 @@ const envSchema = z.object({
   ADOBE_CLIENT_SECRET: z.string().optional(),
 
   // ============== MEDIUM - Redis Cache ==============
-  REDIS_HOST: z.string().default('localhost').optional(),
-  REDIS_PORT: z.string().default('6379').optional(),
+  REDIS_HOST: z.string().optional(),
+  REDIS_PORT: z.string().optional(),
   REDIS_PASSWORD: z.string().optional(),
 
   // ============== HIGH - Upstash Redis (Required for Rate Limiting) ==============
@@ -219,11 +219,11 @@ const envSchema = z.object({
     .describe('Secret for authenticating cron job requests'),
 
   // ============== MEDIUM - Reporting & Storage ==============
-  REPORTS_DIR: z.string().default('./reports').optional(),
-  TEMP_DIR: z.string().default('./temp').optional(),
+  REPORTS_DIR: z.string().optional(),
+  TEMP_DIR: z.string().optional(),
 
   // ============== MEDIUM - Email Templates ==============
-  ORGANIZATION_NAME: z.string().default('UnionEyes').optional(),
+  ORGANIZATION_NAME: z.string().optional(),
 
   // ============== MEDIUM - Analytics & Monitoring ==============
   SENTRY_DSN: z.string().optional(),
@@ -266,33 +266,33 @@ const envSchema = z.object({
 
   // ============== CRITICAL - Canadian Compliance ==============
   // Provincial Privacy Laws (Quebec Law 25, BC PIPA, etc.)
-  PROVINCIAL_PRIVACY_ENABLED: z.string().transform(val => val === 'true').default('true').optional(),
-  QUEBEC_PRIVACY_LEVEL: z.enum(['strict', 'moderate', 'minimal']).default('strict').optional(),
-  QUEBEC_DATA_RESIDENCY_REQUIRED: z.string().transform(val => val === 'true').default('true').optional(),
-  BC_PRIVACY_LEVEL: z.enum(['strict', 'moderate', 'minimal']).default('strict').optional(),
-  ALBERTA_PRIVACY_LEVEL: z.enum(['strict', 'moderate', 'minimal']).default('moderate').optional(),
+  PROVINCIAL_PRIVACY_ENABLED: z.string().transform(val => val === 'true').prefault('true').optional(),
+  QUEBEC_PRIVACY_LEVEL: z.enum(['strict', 'moderate', 'minimal']).optional(),
+  QUEBEC_DATA_RESIDENCY_REQUIRED: z.string().transform(val => val === 'true').prefault('true').optional(),
+  BC_PRIVACY_LEVEL: z.enum(['strict', 'moderate', 'minimal']).optional(),
+  ALBERTA_PRIVACY_LEVEL: z.enum(['strict', 'moderate', 'minimal']).optional(),
 
   // Indigenous Data Sovereignty (FNIGC OCAP® Principles)
-  INDIGENOUS_DATA_ENABLED: z.string().transform(val => val === 'true').default('true').optional(),
-  BAND_COUNCIL_CONSENT_REQUIRED: z.string().transform(val => val === 'true').default('true').optional(),
-  TRADITIONAL_KNOWLEDGE_PROTECTION: z.string().transform(val => val === 'true').default('true').optional(),
-  FNIGC_COMPLIANCE_ENABLED: z.string().transform(val => val === 'true').default('true').optional(),
+  INDIGENOUS_DATA_ENABLED: z.string().transform(val => val === 'true').prefault('true').optional(),
+  BAND_COUNCIL_CONSENT_REQUIRED: z.string().transform(val => val === 'true').prefault('true').optional(),
+  TRADITIONAL_KNOWLEDGE_PROTECTION: z.string().transform(val => val === 'true').prefault('true').optional(),
+  FNIGC_COMPLIANCE_ENABLED: z.string().transform(val => val === 'true').prefault('true').optional(),
 
   // Strike Fund Tax Reporting (CRA T4A, Quebec RL-1)
-  STRIKE_FUND_TAX_REPORTING_ENABLED: z.string().transform(val => val === 'true').default('true').optional(),
-  T4A_REPORTING_ENABLED: z.string().transform(val => val === 'true').default('true').optional(),
-  T4A_THRESHOLD: z.string().transform(val => parseInt(val, 10)).default('500').optional(),
-  RL1_REPORTING_ENABLED: z.string().transform(val => val === 'true').default('true').optional(),
-  TAX_YEAR_END: z.string().default('12-31').optional(),
+  STRIKE_FUND_TAX_REPORTING_ENABLED: z.string().transform(val => val === 'true').prefault('true').optional(),
+  T4A_REPORTING_ENABLED: z.string().transform(val => val === 'true').prefault('true').optional(),
+  T4A_THRESHOLD: z.string().transform(val => parseInt(val, 10)).prefault('500').optional(),
+  RL1_REPORTING_ENABLED: z.string().transform(val => val === 'true').prefault('true').optional(),
+  TAX_YEAR_END: z.string().optional(),
   UNION_BN: z.string()
     .regex(/^\d{9}RC\d{4}$/, 'UNION_BN must be in format 123456789RC0001')
     .optional()
     .describe('Union Business Number for CRA filing'),
 
   // Break Glass / Emergency Access
-  BREAK_GLASS_ENABLED: z.string().transform(val => val === 'true').default('true').optional(),
-  BREAK_GLASS_MAX_DURATION: z.string().transform(val => parseInt(val, 10)).default('24').optional(),
-  FORCE_MAJEURE_48H_COMMITMENT: z.string().transform(val => val === 'true').default('true').optional(),
+  BREAK_GLASS_ENABLED: z.string().transform(val => val === 'true').prefault('true').optional(),
+  BREAK_GLASS_MAX_DURATION: z.string().transform(val => parseInt(val, 10)).prefault('24').optional(),
+  FORCE_MAJEURE_48H_COMMITMENT: z.string().transform(val => val === 'true').prefault('true').optional(),
 
   // Swiss Cold Storage for Force Majeure
   SWISS_COLD_STORAGE_ENABLED: z.string().transform(val => val === 'true').optional(),
@@ -311,37 +311,37 @@ const envSchema = z.object({
     .optional()
     .describe('Anthropic API key for Claude features'),
   GOOGLE_AI_API_KEY: z.string().optional(),
-  AI_CHATBOT_DEFAULT_PROVIDER: z.enum(['openai', 'anthropic', 'google']).default('openai').optional(),
-  AI_CHATBOT_DEFAULT_MODEL: z.string().default('gpt-4').optional(),
-  AI_CHATBOT_TEMPERATURE: z.string().transform(val => parseFloat(val)).default('0.7').optional(),
-  CHATBOT_RAG_ENABLED: z.string().transform(val => val === 'true').default('true').optional(),
-  CONTENT_SAFETY_ENABLED: z.string().transform(val => val === 'true').default('true').optional(),
+  AI_CHATBOT_DEFAULT_PROVIDER: z.enum(['openai', 'anthropic', 'google']).optional(),
+  AI_CHATBOT_DEFAULT_MODEL: z.string().optional(),
+  AI_CHATBOT_TEMPERATURE: z.string().transform(val => parseFloat(val)).prefault('0.7').optional(),
+  CHATBOT_RAG_ENABLED: z.string().transform(val => val === 'true').prefault('true').optional(),
+  CONTENT_SAFETY_ENABLED: z.string().transform(val => val === 'true').prefault('true').optional(),
 
   // LLM Observability (Langfuse)
   LANGFUSE_PUBLIC_KEY: z.string().optional(),
   LANGFUSE_SECRET_KEY: z.string().optional(),
   LANGFUSE_HOST: z.string().url('Invalid LANGFUSE_HOST').optional(),
-  LANGFUSE_ENABLED: z.string().transform(val => val === 'true').default('true').optional(),
+  LANGFUSE_ENABLED: z.string().transform(val => val === 'true').prefault('true').optional(),
 
   // ============== MEDIUM - Feature Flags ==============
-  REWARDS_ENABLED: z.string().transform(val => val === 'true').default('false').optional(),
-  SHOPIFY_ENABLED: z.string().transform(val => val === 'true').default('false').optional(),
-  GEOFENCE_PRIVACY_ENABLED: z.string().transform(val => val === 'true').default('true').optional(),
-  LOCATION_TRACKING_ENABLED: z.string().transform(val => val === 'true').default('false').optional(),
-  LOCATION_TRACKING_CONSENT_REQUIRED: z.string().transform(val => val === 'true').default('true').optional(),
-  CURRENCY_ENFORCEMENT_ENABLED: z.string().transform(val => val === 'true').default('true').optional(),
-  DEFAULT_CURRENCY: z.enum(['CAD', 'USD']).default('CAD').optional(),
+  REWARDS_ENABLED: z.string().transform(val => val === 'true').prefault('false').optional(),
+  SHOPIFY_ENABLED: z.string().transform(val => val === 'true').prefault('false').optional(),
+  GEOFENCE_PRIVACY_ENABLED: z.string().transform(val => val === 'true').prefault('true').optional(),
+  LOCATION_TRACKING_ENABLED: z.string().transform(val => val === 'true').prefault('false').optional(),
+  LOCATION_TRACKING_CONSENT_REQUIRED: z.string().transform(val => val === 'true').prefault('true').optional(),
+  CURRENCY_ENFORCEMENT_ENABLED: z.string().transform(val => val === 'true').prefault('true').optional(),
+  DEFAULT_CURRENCY: z.enum(['CAD', 'USD']).optional(),
   
   // GDPR Compliance
-  NEXT_PUBLIC_GDPR_ENABLED: z.string().transform(val => val === 'true').default('true').optional(),
-  NEXT_PUBLIC_COOKIE_POLICY_URL: z.string().default('/cookie-policy').optional(),
-  NEXT_PUBLIC_PRIVACY_POLICY_URL: z.string().default('/privacy-policy').optional(),
+  NEXT_PUBLIC_GDPR_ENABLED: z.string().transform(val => val === 'true').prefault('true').optional(),
+  NEXT_PUBLIC_COOKIE_POLICY_URL: z.string().optional(),
+  NEXT_PUBLIC_PRIVACY_POLICY_URL: z.string().optional(),
   GDPR_DPO_EMAIL: z.string().email('Invalid GDPR_DPO_EMAIL').optional(),
   GDPR_DPO_NAME: z.string().optional(),
 
   // Address Validation
   GOOGLE_MAPS_API_KEY: z.string().optional(),
-  ADDRESS_VALIDATION_ENABLED: z.string().transform(val => val === 'true').default('true').optional(),
+  ADDRESS_VALIDATION_ENABLED: z.string().transform(val => val === 'true').prefault('true').optional(),
 
   // Shopify Integration
   SHOPIFY_SHOP_DOMAIN: z.string().optional(),
@@ -350,17 +350,17 @@ const envSchema = z.object({
   SHOPIFY_WEBHOOK_SECRET: z.string().optional(),
 
   // Accessibility Testing
-  ACCESSIBILITY_AXE_ENABLED: z.string().transform(val => val === 'true').default('true').optional(),
-  ACCESSIBILITY_LIGHTHOUSE_ENABLED: z.string().transform(val => val === 'true').default('true').optional(),
-  ACCESSIBILITY_MIN_SCORE: z.string().transform(val => parseInt(val, 10)).default('80').optional(),
+  ACCESSIBILITY_AXE_ENABLED: z.string().transform(val => val === 'true').prefault('true').optional(),
+  ACCESSIBILITY_LIGHTHOUSE_ENABLED: z.string().transform(val => val === 'true').prefault('true').optional(),
+  ACCESSIBILITY_MIN_SCORE: z.string().transform(val => parseInt(val, 10)).prefault('80').optional(),
 
   // ============== HIGH - OpenTelemetry Distributed Tracing ==============
-  OTEL_ENABLED: z.string().transform(val => val === 'true').default('true').optional()
+  OTEL_ENABLED: z.string().transform(val => val === 'true').prefault('true').optional()
     .describe('Enable/disable OpenTelemetry distributed tracing'),
-  OTEL_SERVICE_NAME: z.string().default('unioneyes').optional()
+  OTEL_SERVICE_NAME: z.string().optional()
     .describe('Service name for tracing'),
   OTEL_EXPORTER_OTLP_PROTOCOL: z.enum(['grpc', 'http/protobuf', 'http/json'])
-    .default('http/protobuf').optional()
+    .optional()
     .describe('OTLP export protocol (http/protobuf for Honeycomb)'),
   OTEL_EXPORTER_OTLP_ENDPOINT: z.string().url('Invalid OTLP endpoint').optional()
     .describe('OTLP exporter endpoint (e.g., https://api.honeycomb.io)'),
@@ -373,7 +373,7 @@ const envSchema = z.object({
     'parentbased_always_on',
     'parentbased_always_off',
     'parentbased_traceidratio'
-  ]).default('parentbased_always_on').optional()
+  ]).optional()
     .describe('OpenTelemetry sampling strategy'),
   OTEL_TRACES_SAMPLER_ARG: z.string().optional()
     .describe('Sampling rate for probabilistic sampling (0.0 to 1.0)'),

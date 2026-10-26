@@ -10,7 +10,8 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
-import { hasMinRole } from "@/lib/api-auth-guard";
+import { requireKernelCaseAction } from '@/lib/cases/case-authorization';
+import { ApiError } from '@/lib/api/errors';
 import { auditLog, AuditEventType, AuditSeverity } from "@/lib/audit-logger";
 import {
   ErrorCode,
@@ -19,7 +20,7 @@ import {
 } from "@/lib/api/standardized-responses";
 import { eq, and } from "drizzle-orm";
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
-import { getAuditedDb } from '@/lib/api-guards';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 const overrideSchema = z.object({
   newPriority: z.enum(["low", "medium", "high", "urgent"]),
@@ -32,23 +33,6 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
 
   try {
     if (!params?.id) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Missing ID");
-
-    // Only chief_steward+ can override priorities
-    const isChiefSteward = await hasMinRole("chief_steward");
-    if (!isChiefSteward) {
-      await auditLog({
-        eventType: AuditEventType.AUTHORITY_VIOLATION,
-        severity: AuditSeverity.HIGH,
-        userId,
-        organizationId,
-        resource: 'grievances',
-        action: 'priority_override',
-        resourceId: params.id,
-        details: { reason: 'Insufficient role for priority override' },
-        outcome: 'failure',
-      });
-      return standardErrorResponse(ErrorCode.FORBIDDEN, "Only a chief steward or above can override priorities.");
-    }
 
     const body = await request.json();
     const parsed = overrideSchema.safeParse(body);
@@ -79,48 +63,40 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "New priority must differ from current priority");
     }
 
-    const auditedDbResult = await getAuditedDb(organizationId);
-    if (!auditedDbResult.ok) {
-      return auditedDbResult.response;
-    }
-
-    // Apply the override
-    const [updated] = await withRLSContext(async () => {
-      const [u] = await db
+    // The override, its event and its audit record commit together.
+    const [updated] = await withRLSContext(async (tx) => {
+      // The kernel decides this actor may move this case: a live assignment or mandate, never a role rank.
+      await requireKernelCaseAction(tx, { userId, organizationId }, params.id, 'case:transition');
+      const [u] = await tx
         .update(grievances)
         .set({ priority: newPriority, updatedAt: new Date() })
-        .where(eq(grievances.id, params.id))
+        .where(and(eq(grievances.id, params.id), eq(grievances.organizationId, organizationId)))
         .returning();
 
-      await auditedDbResult.db.insert(grievanceEvents, {
+      await tx.insert(grievanceEvents).values({
         grievanceId: params.id,
         eventType: 'priority_overridden',
         actorUserId: userId,
         notes: `Priority overridden: ${previousPriority} → ${newPriority}. Reason: ${reason}`,
       });
 
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'grievance.priority_override',
+        resourceType: 'grievances',
+        resourceId: params.id,
+        details: { previousPriority, newPriority, reason },
+      });
+
       return [u];
     });
-
-    // Audit: priority overridden
-    await auditLog({
-      eventType: AuditEventType.CASE_PRIORITY_OVERRIDDEN,
-      severity: AuditSeverity.HIGH,
-      userId,
-      organizationId,
-      resource: 'grievances',
-      action: 'priority_override',
-      resourceId: params.id,
-      details: {
-        previousPriority,
-        newPriority,
-        reason,
-      },
-      outcome: 'success',
-    });
-
     return standardSuccessResponse(updated);
-  } catch (_error) {
+  } catch (error) {
+    if (error instanceof ApiError && error.code === 'FORBIDDEN') {
+      await auditLog({ eventType: AuditEventType.AUTHORITY_VIOLATION, severity: AuditSeverity.HIGH, userId, organizationId, resource: 'grievances', action: 'priority_override', resourceId: params?.id ?? '', details: { reason: 'The authority kernel did not authorize this override' }, outcome: 'failure' });
+      return standardErrorResponse(ErrorCode.FORBIDDEN, "The authority kernel did not authorize this override.");
+    }
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Failed to override priority");
   }
 });

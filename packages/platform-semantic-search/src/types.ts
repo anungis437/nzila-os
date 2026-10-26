@@ -90,7 +90,7 @@ export interface EmbeddingProvider {
 // ── Zod Schemas ─────────────────────────────────────────────────────────────
 
 export const SearchQuerySchema = z.object({
-  tenantId: z.string().uuid(),
+  tenantId: z.guid(),
   query: z.string().min(1),
   mode: z.enum(Object.values(SearchModes) as [string, ...string[]]),
   entityTypes: z.array(z.string()).optional(),
@@ -102,12 +102,12 @@ export const SearchQuerySchema = z.object({
 })
 
 export const IndexDocumentSchema = z.object({
-  tenantId: z.string().uuid(),
+  tenantId: z.guid(),
   entityType: z.string().min(1),
-  entityId: z.string().uuid(),
+  entityId: z.guid(),
   title: z.string().min(1),
   content: z.string().min(1),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).prefault({}),
   tags: z.array(z.string()).default([]),
 })
 

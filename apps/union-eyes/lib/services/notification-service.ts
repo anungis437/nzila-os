@@ -9,6 +9,7 @@
 import { db } from "@/db";
 import { v4 as uuid } from "uuid";
 import { logger } from "@/lib/logger";
+import { stripMarkup } from "@/lib/utils/strip-markup";
 import { getFromEmail, sendResendEmail } from "@/lib/email-service";
 import { createAuditLog } from "./audit-service";
 import {
@@ -152,12 +153,8 @@ export const notifications = pgTable('notifications', {
 // ============================================================================
 
 function stripHtml(html: string): string {
-  return html
-    // codeql[js/incomplete-multi-character-sanitization] - used for plain-text conversion, not security sanitization
-    .replace(/<style[^>]*>.*<\/style>/gm, '')
-    .replace(/<[^>]+>/gm, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+  // Plain-text conversion for the email fallback; the result never contains markup.
+  return stripMarkup(html).replace(/\s+/g, ' ').trim();
 }
 
 export class ResendEmailProvider implements NotificationProvider {
@@ -855,7 +852,7 @@ export class NotificationService {
               processedAt: new Date(),
               completedAt: new Date(),
               resultNotificationId: response.id,
-            }).where(eq(notificationQueue.id, queuedItem.id));
+            }).where(and(eq(notificationQueue.id, queuedItem.id), eq(notificationQueue.organizationId, queuedItem.organizationId)));
             succeeded++;
           } else {
             // Schedule next retry with exponential backoff
@@ -867,7 +864,7 @@ export class NotificationService {
               attemptCount: `${currentAttempt + 1}`,
               nextRetryAt: nextRetryAt,
               errorMessage: response.failureReason,
-            }).where(eq(notificationQueue.id, queuedItem.id));
+            }).where(and(eq(notificationQueue.id, queuedItem.id), eq(notificationQueue.organizationId, queuedItem.organizationId)));
             failedCount++;
           }
           retried++;
@@ -883,7 +880,7 @@ export class NotificationService {
               await db.update(notificationQueue).set({
                 status: 'failed',
                 errorMessage: error instanceof Error ? error.message : 'Unknown error',
-              }).where(eq(notificationQueue.id, queuedItem.id));
+              }).where(and(eq(notificationQueue.id, queuedItem.id), eq(notificationQueue.organizationId, queuedItem.organizationId)));
             } else {
               const delaySeconds = 300 * Math.pow(2, currentAttempt);
               const nextRetryAt = new Date(Date.now() + delaySeconds * 1000);
@@ -893,7 +890,7 @@ export class NotificationService {
                 attemptCount: `${currentAttempt + 1}`,
                 nextRetryAt: nextRetryAt,
                 errorMessage: error instanceof Error ? error.message : 'Unknown error',
-              }).where(eq(notificationQueue.id, queuedItem.id));
+              }).where(and(eq(notificationQueue.id, queuedItem.id), eq(notificationQueue.organizationId, queuedItem.organizationId)));
             }
           } catch (updateError) {
             logger.error("Failed to update queue entry on error", { updateError });

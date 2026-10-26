@@ -2,6 +2,8 @@
 import { and, asc, eq } from 'drizzle-orm';
 import { withApi, z, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { exitInterviews, exitInterviewEvents, exitInterviewDocuments } from '@/db/schema';
 import { ROLE_HIERARCHY, normalizeRole } from '@/lib/api-auth-guard';
 
@@ -110,22 +112,35 @@ export const PATCH = withApi(
       throw ApiError.conflict('Only draft interviews can be edited');
     }
 
-    const [updated] = await db
-      .update(exitInterviews)
-      .set({
-        ...body,
-        updatedBy: userId!,
-        updatedAt: new Date(),
-      })
-      .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!)))
-      .returning();
+    // The edit, its event and its audit commit together, and only while the interview is still a draft.
+    const updated = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
+      const [row] = await tx
+        .update(exitInterviews)
+        .set({
+          ...body,
+          updatedBy: userId!,
+          updatedAt: new Date(),
+        })
+        .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!), eq(exitInterviews.status, 'draft')))
+        .returning();
+      if (!row) throw ApiError.conflict('Only draft interviews can be edited');
 
-    await db.insert(exitInterviewEvents).values({
-      interviewId: params.id,
-      organizationId: organizationId!,
-      eventType: 'updated',
-      actorUserId: userId!,
-      notes: 'Exit interview draft updated',
+      await tx.insert(exitInterviewEvents).values({
+        interviewId: params.id,
+        organizationId: organizationId!,
+        eventType: 'updated',
+        actorUserId: userId!,
+        notes: 'Exit interview draft updated',
+      });
+      await persistAtomicAudit(tx, {
+        organizationId: organizationId!,
+        userId: userId!,
+        action: 'exit_interview.update',
+        resourceType: 'exit_interviews',
+        resourceId: params.id,
+        details: { fields: Object.keys(body) },
+      });
+      return row;
     });
 
     return { data: updated };

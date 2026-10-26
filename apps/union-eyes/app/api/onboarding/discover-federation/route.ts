@@ -54,7 +54,7 @@ export const POST = withRoleAuth('officer' as MemberRole, async (request, contex
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
     

@@ -31,6 +31,7 @@ const mocks = vi.hoisted(() => {
     getEffectiveCaseAccess: vi.fn(),
     isDocumentVisibleByPolicy: vi.fn(),
     generateSasUrl: vi.fn(),
+    persistAtomicAudit: vi.fn(async () => undefined),
   };
 });
 
@@ -63,6 +64,10 @@ vi.mock('@/lib/blob-client', () => ({
   generateSasUrl: mocks.generateSasUrl,
 }));
 
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mocks.persistAtomicAudit }));
+
+const DOCUMENT_ID = '11111111-1111-4111-8111-111111111111';
+
 const { GET } = await import('@/app/api/documents/[id]/download/route');
 
 describe('GET /api/documents/[id]/download', () => {
@@ -76,12 +81,13 @@ describe('GET /api/documents/[id]/download', () => {
       canViewPrivateDocuments: false,
     });
     mocks.generateSasUrl.mockResolvedValue('https://storage/documents/org-1/file.pdf?sig=1');
+    mocks.persistAtomicAudit.mockResolvedValue(undefined);
   });
 
   it('denies download when governance policy denies access', async () => {
     mocks.db._selectQueue.push(
       [{
-        id: 'doc-1',
+        id: DOCUMENT_ID,
         title: 'A',
         name: 'A',
         filename: 'a.pdf',
@@ -96,10 +102,10 @@ describe('GET /api/documents/[id]/download', () => {
     );
     mocks.isDocumentVisibleByPolicy.mockReturnValue(false);
 
-    const res = await GET(new Request('https://example.com/api/documents/doc-1/download'), {
+    const res = await GET(new Request(`https://example.com/api/documents/${DOCUMENT_ID}/download`), {
       organizationId: 'org-1',
       userId: 'user-1',
-    }, { id: 'doc-1' });
+    }, { id: DOCUMENT_ID });
 
     expect(res.status).toBe(403);
   });
@@ -107,7 +113,7 @@ describe('GET /api/documents/[id]/download', () => {
   it('denies download when an explicit grant allows view but not download', async () => {
     mocks.db._selectQueue.push(
       [{
-        id: 'doc-1',
+        id: DOCUMENT_ID,
         title: 'A',
         name: 'A',
         filename: 'a.pdf',
@@ -122,10 +128,10 @@ describe('GET /api/documents/[id]/download', () => {
     );
     mocks.isDocumentVisibleByPolicy.mockReturnValue(true);
 
-    const res = await GET(new Request('https://example.com/api/documents/doc-1/download'), {
+    const res = await GET(new Request(`https://example.com/api/documents/${DOCUMENT_ID}/download`), {
       organizationId: 'org-1',
       userId: 'user-1',
-    }, { id: 'doc-1' });
+    }, { id: DOCUMENT_ID });
 
     expect(res.status).toBe(403);
     expect(mocks.generateSasUrl).not.toHaveBeenCalled();
@@ -134,7 +140,7 @@ describe('GET /api/documents/[id]/download', () => {
   it('returns signed download url when access is allowed', async () => {
     mocks.db._selectQueue.push(
       [{
-        id: 'doc-1',
+        id: DOCUMENT_ID,
         title: 'A',
         name: 'A',
         filename: 'a.pdf',
@@ -149,13 +155,114 @@ describe('GET /api/documents/[id]/download', () => {
     );
     mocks.isDocumentVisibleByPolicy.mockReturnValue(true);
 
+    const res = await GET(new Request(`https://example.com/api/documents/${DOCUMENT_ID}/download`), {
+      organizationId: 'org-1',
+      userId: 'user-1',
+    }, { id: DOCUMENT_ID });
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.data.downloadUrl).toContain('https://storage/documents/org-1/file.pdf');
+    expect(mocks.persistAtomicAudit).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'document.download', resourceId: DOCUMENT_ID }),
+    );
+  });
+
+  it('rejects a malformed document id before querying storage', async () => {
     const res = await GET(new Request('https://example.com/api/documents/doc-1/download'), {
       organizationId: 'org-1',
       userId: 'user-1',
     }, { id: 'doc-1' });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(400);
+    expect(mocks.db.select).not.toHaveBeenCalled();
+    expect(mocks.generateSasUrl).not.toHaveBeenCalled();
+  });
+
+  it('does not issue a url when storage fails', async () => {
+    mocks.db._selectQueue.push(
+      [{
+        id: DOCUMENT_ID,
+        title: 'A',
+        name: 'A',
+        filename: 'a.pdf',
+        fileUrl: 'https://old',
+        mimeType: 'application/pdf',
+        privacyLabel: 'team_confidential',
+        linkedEntityType: null,
+        linkedEntityId: null,
+      }],
+      [],
+      [{ storageKey: 'documents/org-1/file.pdf' }],
+    );
+    mocks.isDocumentVisibleByPolicy.mockReturnValue(true);
+    mocks.generateSasUrl.mockRejectedValue(new Error('blob unavailable'));
+
+    const res = await GET(new Request(`https://example.com/api/documents/${DOCUMENT_ID}/download`), {
+      organizationId: 'org-1',
+      userId: 'user-1',
+    }, { id: DOCUMENT_ID });
     const body = await res.json();
-    expect(body.data.downloadUrl).toContain('https://storage/documents/org-1/file.pdf');
+
+    expect(res.status).toBe(502);
+    expect(JSON.stringify(body)).not.toContain('https://');
+    expect(mocks.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('does not issue a url when the mandatory audit write throws', async () => {
+    mocks.db._selectQueue.push(
+      [{
+        id: DOCUMENT_ID,
+        title: 'A',
+        name: 'A',
+        filename: 'a.pdf',
+        fileUrl: 'https://old',
+        mimeType: 'application/pdf',
+        privacyLabel: 'team_confidential',
+        linkedEntityType: null,
+        linkedEntityId: null,
+      }],
+      [],
+      [{ storageKey: 'documents/org-1/file.pdf' }],
+    );
+    mocks.isDocumentVisibleByPolicy.mockReturnValue(true);
+    mocks.persistAtomicAudit.mockRejectedValue(new Error('audit down'));
+
+    const res = await GET(new Request(`https://example.com/api/documents/${DOCUMENT_ID}/download`), {
+      organizationId: 'org-1',
+      userId: 'user-1',
+    }, { id: DOCUMENT_ID });
+    const body = await res.json();
+
+    expect(res.status).toBe(503);
+    expect(JSON.stringify(body)).not.toContain('https://storage');
+  });
+
+  it('records exactly one canonical access record per issued url, and none for a denial', async () => {
+    mocks.db._selectQueue.push(
+      [{
+        id: DOCUMENT_ID,
+        title: 'A',
+        name: 'A',
+        filename: 'a.pdf',
+        fileUrl: 'https://old',
+        mimeType: 'application/pdf',
+        privacyLabel: 'team_confidential',
+        linkedEntityType: null,
+        linkedEntityId: null,
+      }],
+      [],
+      [{ storageKey: 'documents/org-1/file.pdf' }],
+    );
+    mocks.isDocumentVisibleByPolicy.mockReturnValue(false);
+
+    const denied = await GET(new Request(`https://example.com/api/documents/${DOCUMENT_ID}/download`), {
+      organizationId: 'org-1',
+      userId: 'user-1',
+    }, { id: DOCUMENT_ID });
+
+    expect(denied.status).toBe(403);
+    expect(mocks.persistAtomicAudit).not.toHaveBeenCalled();
   });
 });

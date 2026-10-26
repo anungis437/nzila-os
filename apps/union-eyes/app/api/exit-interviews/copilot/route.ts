@@ -48,14 +48,14 @@ export const POST = withApi(
     entitlement: 'union_knowledge_suite',
     body: CopilotQuerySchema,
   },
-  async ({ organizationId, body }) => {
+  async ({ organizationId, userId, body }) => {
     const result = await processCopilotQuery(organizationId!, {
       query: body.query,
       sessionId: body.sessionId,
       conversationId: body.conversationId,
       priorMessages: body.priorMessages,
       graphContext: body.graphContext,
-    });
+    }, userId!);
     return { data: result };
   },
 );

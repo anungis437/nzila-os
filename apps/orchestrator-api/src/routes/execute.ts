@@ -40,11 +40,11 @@ const narProofAdapter = createExecutionProofAdapter()
 const ExecuteBodySchema = WorkflowTriggerRequestSchema.extend({
   workflowId: PlaybookName,
   /** Decision ID from Control Plane authorization (required for live execution) */
-  authorizationDecisionId: z.string().uuid().optional(),
+  authorizationDecisionId: z.guid().optional(),
 })
 
 const ListQuerySchema = z.object({
-  orgId: z.string().uuid().optional(),
+  orgId: z.guid().optional(),
   workflowId: z.string().optional(),
   status: ExecutionStatusSchema.optional(),
   limit: z.coerce.number().int().min(1).max(200).default(50),

@@ -11,10 +11,10 @@ import { recordAuditEvent } from '@/lib/audit-db'
 const logger = createLogger('api:integrations:connect')
 
 const ConnectRequestSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   provider: z.string().min(1),
-  secrets: z.record(z.string()),
-  metadata: z.record(z.unknown()).optional(),
+  secrets: z.record(z.string(), z.string()),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export async function POST(req: NextRequest) {

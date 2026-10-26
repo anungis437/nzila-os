@@ -1,4 +1,5 @@
-import { withApi, z } from "@/lib/api/framework";
+import { withApi, ApiError, z } from "@/lib/api/framework";
+import { performAuditedOperation, operationAuditResponse } from "@/lib/audit/operation-audit";
 import {
   runFullIngestion,
   runSourceIngestion,
@@ -10,7 +11,7 @@ import {
 
 const bodySchema = z
   .object({
-    sourceId: z.string().uuid().optional(),
+    sourceId: z.guid().optional(),
   })
   .optional();
 
@@ -25,10 +26,26 @@ export const POST = withApi(
         "Run ingestion pipeline — single source or all active sources",
     },
   },
-  async ({ body }) => {
-    if (body?.sourceId) {
-      return { data: await runSourceIngestion(body.sourceId) };
+  async ({ body, userId, organizationId }) => {
+    // The pipeline fetches external sources and writes jobs and documents across many statements, so it cannot share
+    // one transaction: its intent is recorded first and nothing runs if that record cannot be written.
+    try {
+      return await performAuditedOperation(
+        {
+          organizationId,
+          userId,
+          action: body?.sourceId ? "cba_intel.ingestion.run_source" : "cba_intel.ingestion.run_full",
+          resourceType: "cba_intel_sources",
+          resourceId: body?.sourceId,
+        },
+        async () => ({
+          data: body?.sourceId ? await runSourceIngestion(body.sourceId) : await runFullIngestion(),
+        }),
+      );
+    } catch (error) {
+      const refused = operationAuditResponse(error);
+      if (refused) throw ApiError.conflict(refused.body.error.message);
+      throw error;
     }
-    return { data: await runFullIngestion() };
   },
 );

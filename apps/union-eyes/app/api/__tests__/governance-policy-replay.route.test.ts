@@ -14,6 +14,7 @@ vi.mock('@/lib/api/framework', () => ({
   },
 }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn().mockResolvedValue(undefined) }));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@nzila/db/schema', () => ({ governedPolicies: { id: 'id', semver: 'semver', policyFamilyId: 'policyFamilyId', createdAt: 'createdAt' }, policyReplaySessions: { sourcePolicyId: 'sourcePolicyId', createdAt: 'createdAt' } }));
 vi.mock('drizzle-orm', async (importOriginal) => {
@@ -58,7 +59,7 @@ describe('governance/lifecycle/policies/[id]/replay route', () => {
 
   it('creates a replay session', async () => {
     const { POST } = await loadRoute();
-    const result = await POST({ params: { id: 'p1' }, request: { json: async () => ({ actorRole: 'admin' }) }, user: { id: 'u1' } });
+    const result = await POST({ params: { id: 'p1' }, request: { json: async () => ({ actorRole: 'admin' }) }, user: { id: 'u1' }, organizationId: 'org_1' });
 
     expect(result).toEqual({ session: { id: 's2' } });
     expect(m.insertedValues[0]?.initiatorUserId).toBe('u1');

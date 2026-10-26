@@ -23,21 +23,21 @@ export type CostCategory = (typeof COST_CATEGORIES)[number]
 // ── Schemas ─────────────────────────────────────────────────────────────────
 
 export const CostEventSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   appId: z.string().min(1),
   category: z.enum(COST_CATEGORIES),
   units: z.number().nonnegative(),
   estCostUsd: z.number().nonnegative(),
   ts: z.coerce.date(),
-  correlationId: z.string().uuid().optional(),
+  correlationId: z.guid().optional(),
   route: z.string().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export type CostEvent = z.infer<typeof CostEventSchema>
 
 export const CostRollupSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   appId: z.string().min(1),
   category: z.enum(COST_CATEGORIES),
   day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),

@@ -12,15 +12,17 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { grievances, GrievanceStatus } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
-import { hasMinRole } from "@/lib/api-auth-guard";
-import { auditDataMutation, auditLog, AuditEventType } from "@/lib/audit-logger";
+import { hasCaseFilingCapacity } from "@/lib/cases/case-authorization";
+import { auditLog, AuditEventType } from "@/lib/audit-logger";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { emitCapeAuditEvent, CAPE_AUDIT_EVENTS } from "@/lib/audit/cape-audit-events";
 import {
   ErrorCode,
   standardErrorResponse,
   standardSuccessResponse,
 } from "@/lib/api/standardized-responses";
-import { eq, desc, inArray, and } from "drizzle-orm";
+import { eq, desc, inArray, and, type SQL } from "drizzle-orm";
+import { grievanceRelationshipScope, unassignedIntakeTriageScope } from '@/lib/services/grievance-read-scope';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
@@ -38,8 +40,8 @@ const createGrievanceSchema = z.object({
   title: z.string().min(5).max(500),
   description: z.string().min(10),
   priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
-  employerId: z.string().uuid().optional(),
-  contractId: z.string().uuid().optional(),
+  employerId: z.guid().optional(),
+  contractId: z.guid().optional(),
   category: z.string().optional(),
 
   // Member details (from intake form)
@@ -80,7 +82,7 @@ const createGrievanceSchema = z.object({
    * is created until a rep converts it.
    */
   createOfficialCase: z.boolean().optional(),
-  sourceIntakeId: z.string().uuid().optional(),
+  sourceIntakeId: z.guid().optional(),
 });
 
 // ── POST ────────────────────────────────────────────────────────────────────
@@ -103,7 +105,8 @@ export const POST = withOrganizationAuth(async (request, context) => {
     // Only steward+ can create official cases.
     // Members can only submit intakes (status = "draft").
     if (isOfficialCase) {
-      const isSteward = await hasMinRole("steward");
+      // Opening an official case is a staff capacity on the canonical membership, not a role rank.
+      const isSteward = await hasCaseFilingCapacity({ userId, organizationId }, "handler");
       if (!isSteward) {
         await auditLog({
           eventType: AuditEventType.AUTHORITY_VIOLATION,
@@ -122,7 +125,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
 
     const initialStatus = isOfficialCase ? "filed" : "draft";
 
-    const grievance = await withRLSContext(async () => {
+    const grievance = await withRLSContext(async (tx) => {
       // Collision-safe grievance number: timestamp + 6-char random hex
       const grievanceNumber = `GRV-${Date.now()}-${randomBytes(3).toString('hex')}`;
 
@@ -130,7 +133,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
       const isGroupGrievance = data.type === "group";
       const isConfidential = !!(data.harassmentFlag || data.discriminationFlag);
 
-      const [g] = await db
+      const [g] = await tx
         .insert(grievances)
         .values({
           grievanceNumber,
@@ -175,40 +178,29 @@ export const POST = withOrganizationAuth(async (request, context) => {
         ? `Official case created: ${data.title}`
         : `Intake submitted by member: ${data.title}`;
 
-      await db.insert(grievanceEvents).values({
+      await tx.insert(grievanceEvents).values({
         grievanceId: g.id,
         eventType,
         actorUserId: userId,
         notes,
       });
 
-      return g;
-    });
+      // The case or intake, its first event and its audit record commit together.
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: isOfficialCase ? 'grievance.create_official_case' : 'grievance.submit_intake',
+        resourceType: 'grievances',
+        resourceId: g.id,
+        details: {
+          grievanceNumber: g.grievanceNumber,
+          type: data.type,
+          priority: g.priority,
+          sourceIntakeId: data.sourceIntakeId,
+        },
+      });
 
-    // Audit
-    const auditEventType = isOfficialCase
-      ? AuditEventType.CASE_CREATED
-      : AuditEventType.INTAKE_SUBMITTED;
-    await auditDataMutation({
-      userId,
-      organizationId,
-      resource: "grievances",
-      action: 'create',
-      resourceId: grievance.id,
-      newState: grievance,
-    });
-    await auditLog({
-      eventType: auditEventType,
-      userId,
-      organizationId,
-      resource: "grievances",
-      action: isOfficialCase ? "create_official_case" : "submit_intake",
-      resourceId: grievance.id,
-      details: {
-        grievanceNumber: grievance.grievanceNumber,
-        type: data.type,
-        sourceIntakeId: data.sourceIntakeId,
-      },
+      return g;
     });
 
     // CAPE audit event
@@ -220,19 +212,6 @@ export const POST = withOrganizationAuth(async (request, context) => {
       resourceId: grievance.id,
       details: { grievanceNumber: grievance.grievanceNumber, type: data.type },
     });
-
-    // Audit: initial priority assignment on official case
-    if (isOfficialCase && grievance.priority) {
-      await auditLog({
-        eventType: AuditEventType.CASE_PRIORITY_SET,
-        userId,
-        organizationId,
-        resource: "grievances",
-        action: "set_initial_priority",
-        resourceId: grievance.id,
-        details: { priority: grievance.priority },
-      });
-    }
 
     // Evidence: tamper-proof filing trail
     buildUnionEvidencePack({
@@ -285,11 +264,11 @@ export const POST = withOrganizationAuth(async (request, context) => {
 // ── GET ─────────────────────────────────────────────────────────────────────
 
 export const GET = withOrganizationAuth(async (request, context) => {
-  const { organizationId } = context;
+  const { organizationId, userId } = context;
   await requireEntitlement(organizationId, 'grievance_case_suite');
 
   try {
-    const canAccess = await hasMinRole("steward");
+    const canAccess = await hasCaseFilingCapacity({ userId, organizationId }, "handler");
     if (!canAccess) {
       return standardErrorResponse(ErrorCode.FORBIDDEN, "Requires steward role or above");
     }
@@ -302,27 +281,57 @@ export const GET = withOrganizationAuth(async (request, context) => {
 
     // Push status filter to DB layer to avoid loading unbounded result sets into memory.
     // Safety limit of 500: steward workbenches don't need more; paginate at API level if needed.
-    let scopedFilter;
+    let statusFilter: SQL | undefined;
     if (status === 'active') {
-      scopedFilter = and(eq(grievances.organizationId, organizationId), inArray(grievances.status, ACTIVE_STATUSES));
+      statusFilter = inArray(grievances.status, ACTIVE_STATUSES);
     } else if (status === 'intakes') {
-      scopedFilter = and(eq(grievances.organizationId, organizationId), inArray(grievances.status, INTAKE_STATUSES));
+      statusFilter = inArray(grievances.status, INTAKE_STATUSES);
     } else if (status) {
-      scopedFilter = and(eq(grievances.organizationId, organizationId), eq(grievances.status, status as GrievanceStatus));
-    } else {
-      scopedFilter = eq(grievances.organizationId, organizationId);
+      statusFilter = eq(grievances.status, status as GrievanceStatus);
     }
+    const scoped = (...extra: (SQL | undefined)[]) =>
+      and(eq(grievances.organizationId, organizationId), statusFilter, ...extra);
 
-    const filtered = await withRLSContext({ organizationId }, async () =>
-      db
+    // Seniority does not open case files. Full records are limited to matters this user created, owns,
+    // or holds an active unexpired case-access grant for.
+    const relationship = grievanceRelationshipScope(userId);
+
+    const { owned, triage } = await withRLSContext({ organizationId }, async () => {
+      const ownedRows = await db
         .select()
         .from(grievances)
-        .where(scopedFilter)
+        .where(scoped(relationship))
         .orderBy(desc(grievances.createdAt))
-        .limit(500),
-    );
+        .limit(500);
 
-    return standardSuccessResponse(filtered);
+      // Unassigned, non-confidential intakes are visible as triage metadata only (no narrative,
+      // member identity or employer detail) so the intake queue can be worked without opening files.
+      const triageRows = await db
+        .select({
+          id: grievances.id,
+          grievanceNumber: grievances.grievanceNumber,
+          type: grievances.type,
+          status: grievances.status,
+          priority: grievances.priority,
+          createdAt: grievances.createdAt,
+        })
+        .from(grievances)
+        .where(scoped(unassignedIntakeTriageScope()))
+        .orderBy(desc(grievances.createdAt))
+        .limit(200);
+
+      return { owned: ownedRows, triage: triageRows };
+    });
+
+    const ownedIds = new Set(owned.map((row) => row.id));
+    const visible = [
+      ...owned.map((row) => ({ ...row, accessScope: 'case' as const })),
+      ...triage
+        .filter((row) => !ownedIds.has(row.id))
+        .map((row) => ({ ...row, accessScope: 'intake_triage' as const })),
+    ];
+
+    return standardSuccessResponse(visible);
   } catch (_error) {
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Failed to list grievances");
   }

@@ -20,7 +20,7 @@ export const dynamic = 'force-dynamic';
 
 const approveCommercialTermsBodySchema = z.object({
   memberCount: z.number().int().positive(),
-  subscriptionPlanId: z.string().uuid().optional().nullable(),
+  subscriptionPlanId: z.guid().optional().nullable(),
   pilotAmount: z.union([z.string(), z.number()]).optional().nullable(),
 });
 

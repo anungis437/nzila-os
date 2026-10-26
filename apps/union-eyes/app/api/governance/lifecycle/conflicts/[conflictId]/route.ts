@@ -3,7 +3,8 @@
  */
 import { withApi, ApiError } from '@/lib/api/framework'
 import { db } from '@/db/db'
-import { withSystemContext } from '@/lib/db/with-rls-context'
+import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { policyConflicts } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 
@@ -14,10 +15,13 @@ export const PATCH = withApi(
     auth: { required: true, minRole: 'admin' },
     entitlement: 'governance_suite',
   },
-  async ({ request, params, user }) => {
+  async ({ request, params, user, organizationId }) => {
     const actorId = user?.id
     if (!actorId) {
       throw ApiError.badRequest('Authenticated user is required to resolve a policy conflict.')
+    }
+    if (!organizationId) {
+      throw ApiError.badRequest('An organization context is required so the resolution can be audited.')
     }
 
     const conflictId = (params as Record<string, string>).conflictId
@@ -34,6 +38,15 @@ export const PATCH = withApi(
         })
         .where(eq(policyConflicts.id, conflictId))
         .returning()
+      if (!resolved) throw ApiError.notFound('Policy conflict')
+      await persistAtomicAudit(db as unknown as RLSTx, {
+        organizationId,
+        userId: actorId,
+        action: 'governance.policy_conflict.resolve',
+        resourceType: 'policy_conflicts',
+        resourceId: conflictId,
+        details: { resolutionNotes: body.resolutionNotes },
+      })
       return { conflict: resolved }
     })
   },

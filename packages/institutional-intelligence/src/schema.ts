@@ -29,14 +29,14 @@ export const lineageNodeSchema = z.object({
   nodeType: lineageNodeTypeSchema,
   title: z.string().min(1),
   refId: z.string().min(1),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).prefault({}),
   createdAt: z.string().datetime(),
 })
 
 export type LineageNode = z.infer<typeof lineageNodeSchema>
 
 export const lineageEdgeSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   orgId: z.string().min(1),
   fromNodeId: z.string().min(1),
   toNodeId: z.string().min(1),
@@ -68,7 +68,7 @@ export const dependencyOwnershipSchema = z.object({
 export type DependencyOwnership = z.infer<typeof dependencyOwnershipSchema>
 
 export const dependencyNodeSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   orgId: z.string().min(1),
   domain: z.string().min(1),
   criticalProcesses: z.array(z.string()),

@@ -334,10 +334,10 @@ class ClauseLibraryTagsModelTest(TestCase):
 
 class ClauseComparisonsHistoryModelTest(TestCase):
     def test_create(self):
-        obj = ClauseComparisonsHistory.objects.create(user_id="clerk_user_600")
+        obj = ClauseComparisonsHistory.objects.create(user_id="user_600")
         self.assertIsNotNone(obj.id)
-        self.assertEqual(obj.user_id, "clerk_user_600")
+        self.assertEqual(obj.user_id, "user_600")
 
     def test_str(self):
-        obj = ClauseComparisonsHistory.objects.create(user_id="clerk_user_601")
+        obj = ClauseComparisonsHistory.objects.create(user_id="user_601")
         self.assertIsInstance(str(obj), str)

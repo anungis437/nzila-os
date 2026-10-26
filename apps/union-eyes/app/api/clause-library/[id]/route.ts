@@ -19,14 +19,15 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sharedClauseLibrary, clauseLibraryTags } from '@/db/schema/domains/agreements/shared-library';
 import { organizations } from '@/db/schema-organizations';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
-import { canReadSharedClause, isSharedClauseOwner } from '@/lib/clause-library/sharing-authority';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { canReadSharedClause, isSharedClauseOwner, sharingChangeDenial } from '@/lib/clause-library/sharing-authority';
 
 export const dynamic = 'force-dynamic';
 
-async function getClauseRow(id: string) {
-  const rows = await db
+async function getClauseRow(id: string, executor: typeof db = db) {
+  const rows = await executor
     .select({
       id: sharedClauseLibrary.id,
       clauseNumber: sharedClauseLibrary.clauseNumber,
@@ -117,14 +118,19 @@ export const PATCH = withApi(
     auth: { required: true, minRole: 'steward' },
     openapi: { tags: ['Clause-library'], summary: 'Update a shared clause' },
   },
-  async ({ request, organizationId }) => {
+  async ({ request, userId, organizationId }) => {
     const url = new URL(request.url);
     const id = url.pathname.split('/').filter(Boolean).pop()!;
     const body = await request.json();
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
-    return withRLSContext({ organizationId }, async () => {
-      const existing = await getClauseRow(id);
+    const denial = await withSystemContext(() => sharingChangeDenial(organizationId, body));
+    if (denial) {
+      throw denial.status === 403 ? ApiError.forbidden(denial.message) : ApiError.badRequest(denial.message);
+    }
+
+    return withRLSContext({ organizationId }, async (tx) => {
+      const existing = await getClauseRow(id, tx);
       // Fail closed identically whether the row is missing or the caller
       // simply isn't its owner — broad reader visibility never implies
       // write authority (round 55). Tenant RLS hides non-visible rows;
@@ -148,15 +154,28 @@ export const PATCH = withApi(
       if (body.anonymizedEmployerName !== undefined) updateData.anonymizedEmployerName = body.anonymizedEmployerName;
       if (body.sharedWithOrgIds !== undefined) updateData.sharedWithOrgIds = body.sharedWithOrgIds;
 
-      const [updated] = await db
+      const [updated] = await tx
         .update(sharedClauseLibrary)
         .set(updateData)
-        .where(eq(sharedClauseLibrary.id, id))
+        .where(and(eq(sharedClauseLibrary.id, id), eq(sharedClauseLibrary.sourceOrganizationId, organizationId)))
         .returning();
 
       if (!updated) {
         throw ApiError.notFound('clause', id);
       }
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'clause_library.update',
+        resourceType: 'shared_clause_library',
+        resourceId: id,
+        details: {
+          fields: Object.keys(updateData).filter((k) => k !== 'updatedAt'),
+          ...(updateData.sharingLevel !== undefined
+            ? { fromSharingLevel: existing.sharingLevel, toSharingLevel: updateData.sharingLevel }
+            : {}),
+        },
+      });
       return { success: true, clause: updated };
     });
   },
@@ -167,25 +186,33 @@ export const DELETE = withApi(
     auth: { required: true, minRole: 'steward' },
     openapi: { tags: ['Clause-library'], summary: 'Delete a shared clause' },
   },
-  async ({ request, organizationId }) => {
+  async ({ request, userId, organizationId }) => {
     const url = new URL(request.url);
     const id = url.pathname.split('/').filter(Boolean).pop()!;
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
-    return withRLSContext({ organizationId }, async () => {
-      const existing = await getClauseRow(id);
+    return withRLSContext({ organizationId }, async (tx) => {
+      const existing = await getClauseRow(id, tx);
       if (!existing || !isSharedClauseOwner(organizationId, existing)) {
         throw ApiError.notFound('clause', id);
       }
 
-      const [deleted] = await db
+      const [deleted] = await tx
         .delete(sharedClauseLibrary)
-        .where(eq(sharedClauseLibrary.id, id))
+        .where(and(eq(sharedClauseLibrary.id, id), eq(sharedClauseLibrary.sourceOrganizationId, organizationId)))
         .returning({ id: sharedClauseLibrary.id });
 
       if (!deleted) {
         throw ApiError.notFound('clause', id);
       }
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'clause_library.delete',
+        resourceType: 'shared_clause_library',
+        resourceId: id,
+        details: { clauseNumber: existing.clauseNumber, sharingLevel: existing.sharingLevel },
+      });
       return { success: true };
     });
   },

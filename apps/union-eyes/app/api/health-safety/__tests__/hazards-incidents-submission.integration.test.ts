@@ -32,7 +32,6 @@ vi.mock('@nzila/platform-auth/entra/server', () => ({
   currentUser: async () => null,
   getAuth: m.platformAuth,
   authMiddleware: () => async () => {},
-  clerkMiddleware: () => async () => {},
   createRouteMatcher: () => () => false,
 }));
 vi.mock('@/lib/api-auth-guard', async (importOriginal) => {
@@ -55,10 +54,12 @@ vi.mock('@/db/db', () => ({
     // Real withRLSContext opens a transaction and set_config()s on tx.execute
     // before running the handler. The fake client must provide that boundary;
     // the handler still queries through the module-level insert/select mocks.
-    transaction: async (fn: (tx: { execute: typeof m.dbExecute }) => Promise<unknown>) =>
-      fn({ execute: m.dbExecute }),
+    transaction: async (fn: (tx: { execute: typeof m.dbExecute; insert: typeof m.dbInsert; select: typeof m.dbSelect }) => Promise<unknown>) =>
+      fn({ execute: m.dbExecute, insert: m.dbInsert, select: m.dbSelect }),
   },
 }));
+// The durable audit write is proven against real PostgreSQL elsewhere.
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   // Wrap (not replace) the real eq() so WHERE-clause construction behaves

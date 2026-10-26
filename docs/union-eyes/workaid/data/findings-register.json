@@ -1,0 +1,3345 @@
+{
+  "schema": "workaid-findings-register/1",
+  "generatedFromTestRun": {
+    "baseCommit": "023712d6ab3b40b43ef7f487183315e846de21fc",
+    "command": "node --test --test-reporter=junit test\\authorization.test.ts test\\claims.test.ts test\\cross-persona.test.ts test\\deadlines.test.ts test\\filing.test.ts test\\followup.test.ts test\\integration-contracts.test.ts test\\isolation.test.ts test\\journey-a-domenic.test.ts test\\journey-b-angelo.test.ts test\\journey-c-union.test.ts test\\journey-d-member.test.ts test\\pack-integrity.test.ts test\\platform-repro.test.ts test\\publication-revocation.test.ts test\\referral.test.ts test\\slice-c-contracts.test.ts test\\submission.test.ts test\\write-isolation.test.ts"
+  },
+  "totals": {
+    "entries": 94,
+    "byRound": {
+      "R1": 22,
+      "R2": 9,
+      "R3": 26,
+      "R4": 12,
+      "R5": 10,
+      "R6": 9,
+      "INT": 3,
+      "C": 3
+    },
+    "bySeverity": {
+      "P0": 22,
+      "P1": 55,
+      "P2": 16,
+      "P3": 1
+    },
+    "byDisposition": {
+      "PARTIALLY_MITIGATED": 59,
+      "OPEN": 33,
+      "BLOCKED_EXTERNAL_EVIDENCE": 1,
+      "OUT_OF_SCOPE_WITH_BOUNDARY": 1
+    }
+  },
+  "entries": [
+    {
+      "id": "WA-R1-01",
+      "round": "R1",
+      "severity": "P0",
+      "sourceSeverity": "CRITICAL",
+      "title": "One statutory deadline assumed for every WSIB decision",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "DEADLINE-HUMAN",
+      "overlaps": [
+        "WA-R2-03",
+        "WA-R5-09"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T028",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T029",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T030",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T074",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T075",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-12",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-33",
+        "B-15",
+        "B-16",
+        "B-20"
+      ],
+      "gap": "Rule-source registry is empty by design; reviewer and rule content are Angelo/Domenic decisions (D-11)."
+    },
+    {
+      "id": "WA-R1-02",
+      "round": "R1",
+      "severity": "P0",
+      "sourceSeverity": "CRITICAL",
+      "title": "Cross-tenant leak by object id, header or claim number",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM",
+        "SECURITY_PRIVACY_LEGAL"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": "TENANT-ISOLATION",
+      "overlaps": [
+        "WA-R3-002",
+        "WA-R3-003",
+        "WA-R3-004",
+        "WA-R3-018"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-ADV-01",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-02",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T019",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T099",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-50",
+        "X-51",
+        "X-52",
+        "D-04",
+        "X-53",
+        "X-54",
+        "X-55",
+        "X-56",
+        "X-57",
+        "X-58",
+        "D-21",
+        "A-32",
+        "D-22",
+        "A-33a",
+        "A-33",
+        "D-25",
+        "C-06",
+        "C-19",
+        "C-20",
+        "C-21",
+        "B-14"
+      ],
+      "gap": "Runtime RLS and tenant isolation on staging are unproven; this contract denies by construction but is not runtime evidence."
+    },
+    {
+      "id": "WA-R1-03",
+      "round": "R1",
+      "severity": "P0",
+      "sourceSeverity": "CRITICAL",
+      "title": "Professional or restricted documents visible to the wrong audience",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP",
+        "SECURITY_PRIVACY_LEGAL"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "DISCLOSURE-SURFACES",
+      "overlaps": [
+        "WA-R3-005",
+        "WA-R3-011",
+        "WA-R3-013",
+        "WA-R3-016"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-ADV-04",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-13",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T023",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T049",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T051",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T085",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-41",
+        "X-42",
+        "X-43",
+        "X-44",
+        "X-46",
+        "D-07",
+        "D-20",
+        "D-23",
+        "D-24",
+        "D-26",
+        "D-27",
+        "C-11",
+        "B-05",
+        "C-12",
+        "B-06",
+        "B-08",
+        "B-09",
+        "B-10",
+        "C-16",
+        "B-12"
+      ],
+      "gap": "Publication rights and the lawful records-access channel need legal and privacy review (D-03, D-10); platform search, export and preview surfaces unproven."
+    },
+    {
+      "id": "WA-R1-04",
+      "round": "R1",
+      "severity": "P0",
+      "sourceSeverity": "CRITICAL",
+      "title": "Sent or generated treated as received by WSIB",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "RECEIPT-SEMANTICS",
+      "overlaps": [
+        "WA-R4-04",
+        "WA-R5-08"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T039",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T040",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T041",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-09",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-01",
+        "X-04",
+        "X-28",
+        "X-29",
+        "A-15",
+        "D-12"
+      ],
+      "gap": "No persistence or UI. Accepted receipt methods need Domenic confirmation."
+    },
+    {
+      "id": "WA-R1-05",
+      "round": "R1",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "View grant mistaken for professional acceptance or authority",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP",
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "AUTHORITY-SEPARATION",
+      "overlaps": [
+        "WA-R3-007",
+        "WA-R3-009",
+        "WA-R4-09"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T016",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T017",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T077",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T083",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T092",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-25",
+        "A-04",
+        "A-05",
+        "B-03",
+        "B-04",
+        "C-14"
+      ],
+      "gap": "Who formally accepts representation is an open WorkAid decision; the production schema has no acceptance record."
+    },
+    {
+      "id": "WA-R1-06",
+      "round": "R1",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "One worker, several claims and letters, mislinked ITOs",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "CLAIM-GRAPH",
+      "overlaps": [
+        "WA-R2-02",
+        "WA-R4-01",
+        "WA-R4-02"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T007",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T008",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T027",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T073",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-06",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-07",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-08",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "A-06"
+      ],
+      "gap": "No schema or migration; ITO grouping within one claim is a professional choice (D-05)."
+    },
+    {
+      "id": "WA-R1-07",
+      "round": "R1",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Reminder dispatch fails or runs twice",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP",
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "REMINDER-RELIABILITY",
+      "overlaps": [
+        "WA-R4-05",
+        "WA-R4-06",
+        "WA-R4-12"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T038",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T045",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T046",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-10",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "A-30"
+      ],
+      "gap": "Durable outbox, real delivery sink and worker restart (T059) are not executed; platform worker is NO_GO."
+    },
+    {
+      "id": "WA-R1-08",
+      "round": "R1",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Intake succeeds although persistence or audit failed",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": null,
+      "overlaps": [],
+      "disposition": "OPEN",
+      "proofLevel": "NONE",
+      "tests": [],
+      "journeySteps": [
+        "X-59"
+      ],
+      "gap": "Needs database and object-store failure injection (T057); not possible in the isolated harness."
+    },
+    {
+      "id": "WA-R1-09",
+      "round": "R1",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Release or authorization form read as blanket medical access",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP",
+        "SECURITY_PRIVACY_LEGAL"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": null,
+      "overlaps": [
+        "WA-R3-009"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T003",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T005",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T077",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T092",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Per-purpose, recipient and data-class grant model is not in the production schema; legal review required."
+    },
+    {
+      "id": "WA-R1-10",
+      "round": "R1",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Clio and Union Eyes both own the task (dual master)",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "CLIO-ARCHITECTURE",
+      "overlaps": [
+        "WA-R4-10",
+        "WA-R6-01",
+        "WA-R3-024"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T054",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T056",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T096",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-15",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-30",
+        "X-31",
+        "X-32",
+        "A-14",
+        "A-31"
+      ],
+      "gap": "Task-of-record is deliberately UNRESOLVED pending Domenic (D-02). No connector exists."
+    },
+    {
+      "id": "WA-R1-11",
+      "round": "R1",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Next-day rule creates a weekend or midnight deadline",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "DATE-RULES",
+      "overlaps": [
+        "WA-R4-07"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T042",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T043",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Business day versus calendar day (D-01) and the holiday calendar are unresolved; the rule is left unconfigured by design."
+    },
+    {
+      "id": "WA-R1-12",
+      "round": "R1",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Document poisoning and sensitive data in telemetry",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM",
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": "UPLOAD-AND-LOGGING",
+      "overlaps": [
+        "WA-R3-014",
+        "WA-R3-020",
+        "WA-R3-021"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T010",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T066",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T098",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-19",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "D-05",
+        "C-13",
+        "C-18"
+      ],
+      "gap": "No platform malware scan, AI/OCR deny or log-redaction canary run (T066 runtime, T093)."
+    },
+    {
+      "id": "WA-R1-13",
+      "round": "R1",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Revoked or expired grant still works through a link or cache",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP",
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "REVOCATION",
+      "overlaps": [
+        "WA-R3-008",
+        "WA-R3-015",
+        "WA-R4-09"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T018",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T025",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T047",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T084",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T100",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-03",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-05",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-13",
+        "X-14",
+        "X-15",
+        "X-35",
+        "X-36"
+      ],
+      "gap": "Platform revokeRepresentationAuthority has no grant or session cascade (source confirmed at 38a824918); sessions and links unproven at runtime."
+    },
+    {
+      "id": "WA-R1-14",
+      "round": "R1",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Member sees a milestone that is only a draft",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "PUBLICATION",
+      "overlaps": [
+        "WA-R3-011",
+        "WA-R4-08"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T085",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-14",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-01",
+        "X-02",
+        "X-03",
+        "X-29",
+        "X-49",
+        "D-09",
+        "D-10",
+        "A-25",
+        "D-12",
+        "A-26",
+        "D-16"
+      ],
+      "gap": "Stage vocabulary and plain-language text need Angelo approval (D-06)."
+    },
+    {
+      "id": "WA-R1-15",
+      "round": "R1",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Aggregate dashboards expose small cohorts",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP",
+        "SECURITY_PRIVACY_LEGAL"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": null,
+      "overlaps": [
+        "WA-R3-026"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T052",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T095",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Cohort threshold is a policy decision; platform export paths unproven."
+    },
+    {
+      "id": "WA-R1-16",
+      "round": "R1",
+      "severity": "P2",
+      "sourceSeverity": "MEDIUM",
+      "title": "Intake gate blocks an urgent objection",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "URGENT-PATH",
+      "overlaps": [
+        "WA-R2-04",
+        "WA-R4-03"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T011",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T016",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T076",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-16",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-20",
+        "X-21",
+        "X-22",
+        "X-23",
+        "X-24"
+      ],
+      "gap": "Which deficiencies may be waived (D-04) is unresolved; the test policy is synthetic and not a proposed default."
+    },
+    {
+      "id": "WA-R1-17",
+      "round": "R1",
+      "severity": "P2",
+      "sourceSeverity": "MEDIUM",
+      "title": "Deadline confirmation becomes a rubber stamp",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": null,
+      "overlaps": [],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T028",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "B-25",
+        "B-29"
+      ],
+      "gap": "Actor, source document, rule version and reasoning are enforced in the contract; the UI forcing function is unproven."
+    },
+    {
+      "id": "WA-R1-18",
+      "round": "R1",
+      "severity": "P2",
+      "sourceSeverity": "MEDIUM",
+      "title": "Partner-reported figures presented as verified baselines",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "PILOT_MEASUREMENT"
+      ],
+      "primaryOwner": "PILOT_MEASUREMENT",
+      "group": "CLAIMS-HONESTY",
+      "overlaps": [
+        "WA-R2-09",
+        "WA-R6-03",
+        "WA-R6-05"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "NONE",
+      "tests": [],
+      "journeySteps": [],
+      "gap": "Measurement design only; no pilot cohort exists."
+    },
+    {
+      "id": "WA-R1-19",
+      "round": "R1",
+      "severity": "P2",
+      "sourceSeverity": "MEDIUM",
+      "title": "Accessibility blocks distressed or disabled claimants",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "UX_ACCESSIBILITY"
+      ],
+      "primaryOwner": "UX_ACCESSIBILITY",
+      "group": null,
+      "overlaps": [
+        "WA-R6-04",
+        "WA-R6-07"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "NONE",
+      "tests": [],
+      "journeySteps": [
+        "D-28"
+      ],
+      "gap": "No UI exists; accessibility evidence requires built flows."
+    },
+    {
+      "id": "WA-R1-20",
+      "round": "R1",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Compromised or replayed external connector",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP",
+        "SECURITY_PRIVACY_LEGAL"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "CLIO-ARCHITECTURE",
+      "overlaps": [],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T055",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "No connector exists by design; only an event-admissibility contract is proven."
+    },
+    {
+      "id": "WA-R1-21",
+      "round": "R1",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Identity collision links the wrong person or claim",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP",
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": null,
+      "overlaps": [
+        "WA-R3-003"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T015",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06"
+      ],
+      "gap": "Identity binding and duplicate review workflow are unspecified; only claim-number conflict detection exists."
+    },
+    {
+      "id": "WA-R1-22",
+      "round": "R1",
+      "severity": "P2",
+      "sourceSeverity": "MEDIUM",
+      "title": "Notifications and events carry clinical text",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP",
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "NOTIFICATION-CONTENT",
+      "overlaps": [
+        "WA-R3-010",
+        "WA-R3-022",
+        "WA-R4-12"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T053",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T055",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T091",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-14",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-45"
+      ],
+      "gap": "Platform notification templates are free-form; a purpose-limited schema needs platform work."
+    },
+    {
+      "id": "WA-R2-01",
+      "round": "R2",
+      "severity": "P0",
+      "sourceSeverity": "P0",
+      "title": "Intake claim history copied into an ITO discloses another employer",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R2.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "CROSS-EMPLOYER",
+      "overlaps": [
+        "WA-R4-01",
+        "WA-R5-02"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T071",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T072",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-06",
+        "X-07",
+        "X-08",
+        "X-10",
+        "A-09"
+      ],
+      "gap": "Which prior-claim numbers may appear on which form (D-12) is unresolved."
+    },
+    {
+      "id": "WA-R2-02",
+      "round": "R2",
+      "severity": "P0",
+      "sourceSeverity": "P0",
+      "title": "One ITO per letter assumed; WSIB requires one per claim",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R2.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "ITO-GROUPING",
+      "overlaps": [
+        "WA-R1-06",
+        "WA-R4-02",
+        "WA-R5-01"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T027",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T073",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "A-10"
+      ],
+      "gap": "Grouping within one claim is a WorkAid professional choice (D-05)."
+    },
+    {
+      "id": "WA-R2-03",
+      "round": "R2",
+      "severity": "P0",
+      "sourceSeverity": "P0",
+      "title": "Mixed-issue and exception-window deadlines treated uniformly",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R2.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "DEADLINE-HUMAN",
+      "overlaps": [
+        "WA-R1-01",
+        "WA-R5-09"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T028",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T030",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T074",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T075",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-33",
+        "B-15",
+        "B-17"
+      ],
+      "gap": "Rule registry unpopulated; D-11."
+    },
+    {
+      "id": "WA-R2-04",
+      "round": "R2",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "Waiting for evidence delays an urgent ITO",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R2.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "URGENT-PATH",
+      "overlaps": [
+        "WA-R1-16",
+        "WA-R4-03"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T011",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T076",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-20"
+      ],
+      "gap": "D-04."
+    },
+    {
+      "id": "WA-R2-05",
+      "round": "R2",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "WorkAid forms confused with the WSIB Direction of Authorization",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R2.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "AUTHORITY-SEPARATION",
+      "overlaps": [
+        "WA-R3-009"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T017",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T077",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T092",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-19"
+      ],
+      "gap": "Production schema has no typed instrument classes (WA-R3-009)."
+    },
+    {
+      "id": "WA-R2-06",
+      "round": "R2",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "ARF treated as always available",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R2.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": null,
+      "overlaps": [
+        "WA-R5-03",
+        "WA-R5-04"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T078",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "A-23"
+      ],
+      "gap": "ARF readiness checklist content (WA-R5-04) needs Domenic; only an attested gate exists."
+    },
+    {
+      "id": "WA-R2-07",
+      "round": "R2",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "WSIAT Notice of Appeal confused with the WSIB ARF",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R2.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "TRIBUNAL",
+      "overlaps": [
+        "WA-R5-05",
+        "WA-R5-06",
+        "WA-R5-07"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T079",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-48",
+        "B-21",
+        "B-23"
+      ],
+      "gap": "No Tribunal appeal entity is implemented; NOA readiness is an attested boolean gate only (Angelo)."
+    },
+    {
+      "id": "WA-R2-08",
+      "round": "R2",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "WSIAT confirmation stage ignored (and later renamed)",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R2.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "PROFESSIONAL_VALIDATION",
+      "group": "TRIBUNAL",
+      "overlaps": [
+        "WA-R5-06"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "NONE",
+      "tests": [],
+      "journeySteps": [],
+      "gap": "Angelo to confirm the current Hearing Ready Form / COA workflow. T080 not implemented."
+    },
+    {
+      "id": "WA-R2-09",
+      "round": "R2",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "4-6 week wait presented as a legal clock",
+      "sourceFile": "baseline-pack-v0.1/WORKAID_ADVERSARIAL_REVIEW_R2.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP",
+        "PILOT_MEASUREMENT"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": null,
+      "overlaps": [
+        "WA-R5-10",
+        "WA-R6-05"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T031",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T032",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "A-21",
+        "A-22"
+      ],
+      "gap": "No empirical baseline has been collected."
+    },
+    {
+      "id": "WA-R3-001",
+      "round": "R3",
+      "severity": "P0",
+      "sourceSeverity": "P0",
+      "title": "Org-scope CI detector skips double-quoted \"use server\"",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "OPEN",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": "SERVER-ACTION-GOVERNANCE",
+      "overlaps": [],
+      "disposition": "OPEN",
+      "proofLevel": "SYNTHETIC_REPRO_OF_PLATFORM_DEFECT",
+      "tests": [
+        {
+          "tag": "WA-T081",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Platform detector unchanged; reference detector and negative fixture handed to Codex."
+    },
+    {
+      "id": "WA-R3-002",
+      "round": "R3",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "Member-segment actions trust a caller-supplied organizationId",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "PARTIALLY_MITIGATED",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": null,
+      "overlaps": [
+        "WA-R1-02"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "NONE",
+      "tests": [],
+      "journeySteps": [],
+      "gap": "Mocked unit tests only; runtime isolation unproven."
+    },
+    {
+      "id": "WA-R3-003",
+      "round": "R3",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "External claim number never proven not to be an authorization key",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "OPEN",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP",
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": null,
+      "overlaps": [
+        "WA-R1-02",
+        "WA-R1-21"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T015",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T099",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Platform read paths unproven; contract proves keys are internal ids and org scope."
+    },
+    {
+      "id": "WA-R3-004",
+      "round": "R3",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "Multi-organization specialist could blend tenants",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "PARTIALLY_MITIGATED",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM",
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": null,
+      "overlaps": [
+        "WA-R1-02"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "NONE",
+      "tests": [],
+      "journeySteps": [
+        "X-50",
+        "X-51",
+        "X-52",
+        "X-53",
+        "X-54",
+        "X-55",
+        "X-56",
+        "A-32"
+      ],
+      "gap": "T089 not executed; active-membership selection is a platform concern."
+    },
+    {
+      "id": "WA-R3-005",
+      "round": "R3",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "Universal search matches titles before authorization",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "OPEN",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": "SEARCH-AUTHZ",
+      "overlaps": [
+        "WA-R3-013"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "SYNTHETIC_REPRO_OF_PLATFORM_DEFECT",
+      "tests": [
+        {
+          "tag": "WA-T090",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Platform route unchanged; reference ordering handed to Codex."
+    },
+    {
+      "id": "WA-R3-006",
+      "round": "R3",
+      "severity": "P0",
+      "sourceSeverity": "P0",
+      "title": "Pre-signed URLs issued for one year",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "OPEN",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": "STORAGE",
+      "overlaps": [
+        "WA-INT-002",
+        "WA-INT-003",
+        "WA-R1-13"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "SYNTHETIC_REPRO_OF_PLATFORM_DEFECT",
+      "tests": [
+        {
+          "tag": "WA-T082",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Platform unchanged; one-year exposure itself unproven (unsafe intent confirmed)."
+    },
+    {
+      "id": "WA-R3-007",
+      "round": "R3",
+      "severity": "P0",
+      "sourceSeverity": "P0",
+      "title": "Demo handoff states are not production acceptance",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "PARTIALLY_MITIGATED",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "AUTHORITY-SEPARATION",
+      "overlaps": [
+        "WA-R1-05",
+        "WA-R4-09"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T016",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T083",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-25",
+        "A-05"
+      ],
+      "gap": "Production schema has no acceptance record."
+    },
+    {
+      "id": "WA-R3-008",
+      "round": "R3",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "Authority revocation does not cascade to grants",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "OPEN",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM",
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": "REVOCATION",
+      "overlaps": [
+        "WA-R1-13",
+        "WA-R3-015",
+        "WA-R4-09"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T084",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-03",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-12",
+        "X-13",
+        "X-14",
+        "X-16"
+      ],
+      "gap": "Platform function unchanged (source confirmed); reference cascade proven synthetically."
+    },
+    {
+      "id": "WA-R3-009",
+      "round": "R3",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "Instrument classes (DOA, retainer, medical) not typed",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "OPEN",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP",
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "AUTHORITY-SEPARATION",
+      "overlaps": [
+        "WA-R2-05"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T077",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T092",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Production schema allows an untyped evidence document."
+    },
+    {
+      "id": "WA-R3-010",
+      "round": "R3",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "Notification title and body are free-form",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "PARTIALLY_MITIGATED",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": "NOTIFICATION-CONTENT",
+      "overlaps": [
+        "WA-R1-22",
+        "WA-R3-022"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T053",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T091",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-45"
+      ],
+      "gap": "Platform templates unchanged."
+    },
+    {
+      "id": "WA-R3-011",
+      "round": "R3",
+      "severity": "P0",
+      "sourceSeverity": "P0",
+      "title": "Member publication model is only proposed",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "OPEN",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "PUBLICATION",
+      "overlaps": [
+        "WA-R1-03",
+        "WA-R1-14"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T023",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T049",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T051",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T085",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "D-01",
+        "C-15",
+        "C-16"
+      ],
+      "gap": "Contract proven synthetically; no persistence, no UI."
+    },
+    {
+      "id": "WA-R3-012",
+      "round": "R3",
+      "severity": "P2",
+      "sourceSeverity": "P2",
+      "title": "Object metadata carries the human document name",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "OPEN",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": "STORAGE",
+      "overlaps": [
+        "WA-INT-001"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "SYNTHETIC_REPRO_OF_PLATFORM_DEFECT",
+      "tests": [
+        {
+          "tag": "WA-T097",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Platform unchanged."
+    },
+    {
+      "id": "WA-R3-013",
+      "round": "R3",
+      "severity": "P2",
+      "sourceSeverity": "P2",
+      "title": "Search scores filenames and widens steward visibility",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "OPEN",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": "SEARCH-AUTHZ",
+      "overlaps": [
+        "WA-R3-005"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "SYNTHETIC_REPRO_OF_PLATFORM_DEFECT",
+      "tests": [
+        {
+          "tag": "WA-T090",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Platform unchanged."
+    },
+    {
+      "id": "WA-R3-014",
+      "round": "R3",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "Logging and AI paths not proven free of medical content",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "PARTIALLY_MITIGATED",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": null,
+      "overlaps": [
+        "WA-R1-12"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T066",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-59"
+      ],
+      "gap": "Platform log scrub unproven."
+    },
+    {
+      "id": "WA-R3-015",
+      "round": "R3",
+      "severity": "P0",
+      "sourceSeverity": "P0",
+      "title": "Revocation does not invalidate sessions",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "OPEN",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": "REVOCATION",
+      "overlaps": [
+        "WA-R3-008"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T084",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-13"
+      ],
+      "gap": "Identity runtime blocked; scoped invalidation requests specified only."
+    },
+    {
+      "id": "WA-R3-016",
+      "round": "R3",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "Hiding a title in the UI is not authorization",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "PARTIALLY_MITIGATED",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM",
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": null,
+      "overlaps": [
+        "WA-R1-03"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T100",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-04",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Exports, thumbnails, caches, mobile unproven on the platform."
+    },
+    {
+      "id": "WA-R3-017",
+      "round": "R3",
+      "severity": "P0",
+      "sourceSeverity": "P0",
+      "title": "Production readiness remains NO_GO",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "OPEN",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": "PLATFORM-GATE",
+      "overlaps": [
+        "WA-R3-025"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "NONE",
+      "tests": [],
+      "journeySteps": [],
+      "gap": "Codex owns staging qualification."
+    },
+    {
+      "id": "WA-R3-018",
+      "round": "R3",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "Real Entra MFA and offboarding unproven",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "BLOCKED_EXTERNAL_EVIDENCE",
+      "triage": "BLOCKED",
+      "routes": [
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": null,
+      "overlaps": [
+        "WA-R1-02"
+      ],
+      "disposition": "BLOCKED_EXTERNAL_EVIDENCE",
+      "proofLevel": "NONE",
+      "tests": [],
+      "journeySteps": [],
+      "gap": "External authority required."
+    },
+    {
+      "id": "WA-R3-019",
+      "round": "R3",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "Server-action exceptions expire 2026-11-17 without migration",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "OPEN",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": "SERVER-ACTION-GOVERNANCE",
+      "overlaps": [
+        "WA-R3-001"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "SYNTHETIC_REPRO_OF_PLATFORM_DEFECT",
+      "tests": [
+        {
+          "tag": "WA-T094",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Platform ledger unchanged."
+    },
+    {
+      "id": "WA-R3-020",
+      "round": "R3",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "AI safety is regex-based and unproven on sensitive documents",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "OPEN",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": null,
+      "overlaps": [
+        "WA-R1-12"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "NONE",
+      "tests": [],
+      "journeySteps": [],
+      "gap": "T093 not executed; platform AI path unchanged."
+    },
+    {
+      "id": "WA-R3-021",
+      "round": "R3",
+      "severity": "P2",
+      "sourceSeverity": "P2",
+      "title": "Password-protected and polyglot uploads lack a quarantine path",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "PARTIALLY_MITIGATED",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM",
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": null,
+      "overlaps": [
+        "WA-R1-12"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T010",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T098",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "C-18"
+      ],
+      "gap": "No platform malware scan run; contract assessment proven synthetically."
+    },
+    {
+      "id": "WA-R3-022",
+      "round": "R3",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "Notification templates accept arbitrary body text",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "OPEN",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": "NOTIFICATION-CONTENT",
+      "overlaps": [
+        "WA-R1-22",
+        "WA-R3-010"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T091",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Platform unchanged."
+    },
+    {
+      "id": "WA-R3-023",
+      "round": "R3",
+      "severity": "P0",
+      "sourceSeverity": "P0",
+      "title": "Grievance deadline resolver might be reused for WSIB obligations",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "OPEN",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP",
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "DEADLINE-REUSE",
+      "overlaps": [
+        "WA-R4-06",
+        "WA-R4-11"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_REPRO_OF_PLATFORM_DEFECT",
+      "tests": [
+        {
+          "tag": "WA-T086",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Resolver correctly fails loud today; separation proven by contract and a source tripwire."
+    },
+    {
+      "id": "WA-R3-024",
+      "round": "R3",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "No Clio connector exists",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "OUT_OF_SCOPE_WITH_BOUNDARY",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "CLIO-ARCHITECTURE",
+      "overlaps": [
+        "WA-R1-10",
+        "WA-R6-09"
+      ],
+      "disposition": "OUT_OF_SCOPE_WITH_BOUNDARY",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T054",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T096",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Must remain true for any pilot candidate; boundary enforced by copy check."
+    },
+    {
+      "id": "WA-R3-025",
+      "round": "R3",
+      "severity": "P0",
+      "sourceSeverity": "P0",
+      "title": "UE production promotion restricted; staging probes in maintenance",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "OPEN",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": "PLATFORM-GATE",
+      "overlaps": [
+        "WA-R3-017"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "NONE",
+      "tests": [],
+      "journeySteps": [],
+      "gap": "Codex owns staging qualification."
+    },
+    {
+      "id": "WA-R3-026",
+      "round": "R3",
+      "severity": "P1",
+      "sourceSeverity": "P1",
+      "title": "Cross-union aggregates lack small-cell suppression",
+      "sourceFile": "grok-redteam-01/WA_GROK_R3_ADVERSARIAL_FINDINGS.md",
+      "sourceDisposition": "OPEN",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP",
+        "SECURITY_PRIVACY_LEGAL"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": null,
+      "overlaps": [
+        "WA-R1-15"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T052",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T095",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Threshold is a policy decision; platform exports unproven."
+    },
+    {
+      "id": "WA-R4-01",
+      "round": "R4",
+      "severity": "P0",
+      "sourceSeverity": "CRITICAL",
+      "title": "Multi-claim, multi-employer member flattened to one claim",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "CLAIM-GRAPH",
+      "overlaps": [
+        "WA-R1-06",
+        "WA-R2-01",
+        "WA-R2-02",
+        "WA-R5-02"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T007",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T008",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T071",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T072",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T073",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-06",
+        "X-07",
+        "D-23"
+      ],
+      "gap": "No schema; D-05 and D-12."
+    },
+    {
+      "id": "WA-R4-02",
+      "round": "R4",
+      "severity": "P0",
+      "sourceSeverity": "CRITICAL",
+      "title": "ITO count derived from letter count",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "ITO-GROUPING",
+      "overlaps": [
+        "WA-R2-02",
+        "WA-R5-01"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T027",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T073",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-07",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-08",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "D-05."
+    },
+    {
+      "id": "WA-R4-03",
+      "round": "R4",
+      "severity": "P0",
+      "sourceSeverity": "CRITICAL",
+      "title": "Missing authorization documents burn time on urgent appeals",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "URGENT-PATH",
+      "overlaps": [
+        "WA-R1-16",
+        "WA-R2-04",
+        "WA-R2-05"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T011",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T017",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T076",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T077",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-20"
+      ],
+      "gap": "D-04."
+    },
+    {
+      "id": "WA-R4-04",
+      "round": "R4",
+      "severity": "P0",
+      "sourceSeverity": "CRITICAL",
+      "title": "Generated-not-sent and sent-not-received",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "RECEIPT-SEMANTICS",
+      "overlaps": [
+        "WA-R1-04",
+        "WA-R5-08"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T039",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T040",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T041",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-09",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "No persistence or UI."
+    },
+    {
+      "id": "WA-R4-05",
+      "round": "R4",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Duplicate referral, submission or follow-up creation",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": null,
+      "overlaps": [
+        "WA-R1-07"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T038",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-07",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "A-08"
+      ],
+      "gap": "Referral double-submit concurrency (T009) needs persistence."
+    },
+    {
+      "id": "WA-R4-06",
+      "round": "R4",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Reminders not delivered or double-processed; resolver reuse",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP",
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "REMINDER-RELIABILITY",
+      "overlaps": [
+        "WA-R1-07",
+        "WA-R3-023"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T038",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T045",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T046",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-10",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-35",
+        "X-38",
+        "X-39",
+        "B-14b"
+      ],
+      "gap": "Real delivery sink unproven."
+    },
+    {
+      "id": "WA-R4-07",
+      "round": "R4",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Friday, weekend, holiday and DST edge cases",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "DATE-RULES",
+      "overlaps": [
+        "WA-R1-11"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T042",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T043",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "D-01 unresolved."
+    },
+    {
+      "id": "WA-R4-08",
+      "round": "R4",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Long ARO wait treated as a clock or published from a draft",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "PUBLICATION",
+      "overlaps": [
+        "WA-R1-14"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T031",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-14",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-47",
+        "X-49",
+        "A-27",
+        "A-28",
+        "D-16",
+        "D-18"
+      ],
+      "gap": "ARO event attestation source needs Angelo."
+    },
+    {
+      "id": "WA-R4-09",
+      "round": "R4",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Representation change: WSIB DOA, engagement and grant are distinct",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP",
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "REVOCATION",
+      "overlaps": [
+        "WA-R1-05",
+        "WA-R1-13",
+        "WA-R3-008"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T017",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T084",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-13",
+        "X-18",
+        "X-19",
+        "X-37"
+      ],
+      "gap": "Platform has no cascade (WA-R3-008)."
+    },
+    {
+      "id": "WA-R4-10",
+      "round": "R4",
+      "severity": "P0",
+      "sourceSeverity": "CRITICAL",
+      "title": "Clio and Union Eyes task conflict",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "CLIO-ARCHITECTURE",
+      "overlaps": [
+        "WA-R1-10"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T056",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-ADV-15",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-30"
+      ],
+      "gap": "D-02."
+    },
+    {
+      "id": "WA-R4-11",
+      "round": "R4",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Reusing the grievance deadline engine for WSIB",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "DEADLINE-REUSE",
+      "overlaps": [
+        "WA-R3-023"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_REPRO_OF_PLATFORM_DEFECT",
+      "tests": [
+        {
+          "tag": "WA-T086",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Separation enforced by contract and tripwire."
+    },
+    {
+      "id": "WA-R4-12",
+      "round": "R4",
+      "severity": "P2",
+      "sourceSeverity": "MEDIUM",
+      "title": "Outbox poison and notification authorization",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP",
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "NOTIFICATION-CONTENT",
+      "overlaps": [
+        "WA-R1-22"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T047",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T053",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T091",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Durable outbox unproven."
+    },
+    {
+      "id": "WA-R5-01",
+      "round": "R5",
+      "severity": "P0",
+      "sourceSeverity": "CRITICAL",
+      "title": "ITO grouping preference frozen as law",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "ITO-GROUPING",
+      "overlaps": [
+        "WA-R2-02",
+        "WA-R4-02"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T027",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T073",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "D-05."
+    },
+    {
+      "id": "WA-R5-02",
+      "round": "R5",
+      "severity": "P0",
+      "sourceSeverity": "CRITICAL",
+      "title": "Cross-employer disclosure in ITO",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "CROSS-EMPLOYER",
+      "overlaps": [
+        "WA-R2-01"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T071",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T072",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-08",
+        "X-10",
+        "A-09"
+      ],
+      "gap": "D-12."
+    },
+    {
+      "id": "WA-R5-03",
+      "round": "R5",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "DOA, forms, WRF, ITO, ARF and NOA are different instruments",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": null,
+      "overlaps": [
+        "WA-R2-05",
+        "WA-R2-06",
+        "WA-R2-07"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T026",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T077",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T078",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T079",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Typed submission kinds proven; stage content needs professional review."
+    },
+    {
+      "id": "WA-R5-04",
+      "round": "R5",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "ARF readiness criteria ignored",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "PROFESSIONAL_VALIDATION",
+      "group": null,
+      "overlaps": [
+        "WA-R2-06"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T078",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Checklist content is a professional decision; only an attested gate exists."
+    },
+    {
+      "id": "WA-R5-05",
+      "round": "R5",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "ARO is not WSIAT; a final decision copy is required",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "PROFESSIONAL_VALIDATION",
+      "group": "TRIBUNAL",
+      "overlaps": [
+        "WA-R2-07"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T079",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "D-19",
+        "B-21",
+        "B-23"
+      ],
+      "gap": "No Tribunal assessment entity."
+    },
+    {
+      "id": "WA-R5-06",
+      "round": "R5",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "NOA, COA and Hearing Ready Form naming drift",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "PROFESSIONAL_VALIDATION",
+      "group": "TRIBUNAL",
+      "overlaps": [
+        "WA-R2-08"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "NONE",
+      "tests": [],
+      "journeySteps": [],
+      "gap": "Angelo must confirm current forms."
+    },
+    {
+      "id": "WA-R5-07",
+      "round": "R5",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Worker signature and disclosure obligations",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "PROFESSIONAL_VALIDATION",
+      "group": "TRIBUNAL",
+      "overlaps": [
+        "WA-R2-07"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T079",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Checklist items attested by humans; no entity yet."
+    },
+    {
+      "id": "WA-R5-08",
+      "round": "R5",
+      "severity": "P2",
+      "sourceSeverity": "MEDIUM",
+      "title": "Receipt definition confusion",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "RECEIPT-SEMANTICS",
+      "overlaps": [
+        "WA-R1-04"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T040",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Glossary in the product not yet written."
+    },
+    {
+      "id": "WA-R5-09",
+      "round": "R5",
+      "severity": "P2",
+      "sourceSeverity": "MEDIUM",
+      "title": "Exception windows applied universally",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "DEADLINE-HUMAN",
+      "overlaps": [
+        "WA-R2-03"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T030",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T075",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-33"
+      ],
+      "gap": "Rule registry unpopulated."
+    },
+    {
+      "id": "WA-R5-10",
+      "round": "R5",
+      "severity": "P2",
+      "sourceSeverity": "MEDIUM",
+      "title": "ARF has no submit deadline; waiting can become indefinite",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP",
+        "PILOT_MEASUREMENT"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": null,
+      "overlaps": [
+        "WA-R2-09"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T031",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-47",
+        "A-22"
+      ],
+      "gap": "Dependency aging proven; SLA values are operational and unmeasured."
+    },
+    {
+      "id": "WA-R6-01",
+      "round": "R6",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Value is receipt ergonomics, not AI; dual queues raise load",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "PILOT_MEASUREMENT",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "PILOT_MEASUREMENT",
+      "group": "CLIO-ARCHITECTURE",
+      "overlaps": [
+        "WA-R1-10",
+        "WA-R4-10"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "NONE",
+      "tests": [],
+      "journeySteps": [],
+      "gap": "Time-motion study not designed in detail."
+    },
+    {
+      "id": "WA-R6-02",
+      "round": "R6",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "WSIAT path needs supervisory gates",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "PROFESSIONAL_VALIDATION",
+      "group": "TRIBUNAL",
+      "overlaps": [],
+      "disposition": "OPEN",
+      "proofLevel": "NONE",
+      "tests": [],
+      "journeySteps": [
+        "B-24"
+      ],
+      "gap": "Angelo approvals undefined."
+    },
+    {
+      "id": "WA-R6-03",
+      "round": "R6",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Incomplete-referral rate unverified",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "PILOT_MEASUREMENT"
+      ],
+      "primaryOwner": "PILOT_MEASUREMENT",
+      "group": "CLAIMS-HONESTY",
+      "overlaps": [
+        "WA-R1-18"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "NONE",
+      "tests": [],
+      "journeySteps": [],
+      "gap": "No measured denominator."
+    },
+    {
+      "id": "WA-R6-04",
+      "round": "R6",
+      "severity": "P1",
+      "sourceSeverity": "HIGH",
+      "title": "Member jargon, mobile, notification fatigue, exposure",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "UX_ACCESSIBILITY"
+      ],
+      "primaryOwner": "UX_ACCESSIBILITY",
+      "group": null,
+      "overlaps": [
+        "WA-R1-19"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "NONE",
+      "tests": [],
+      "journeySteps": [
+        "D-28"
+      ],
+      "gap": "No UI."
+    },
+    {
+      "id": "WA-R6-05",
+      "round": "R6",
+      "severity": "P2",
+      "sourceSeverity": "MEDIUM",
+      "title": "Economics claims from unverified baselines",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "PILOT_MEASUREMENT"
+      ],
+      "primaryOwner": "PILOT_MEASUREMENT",
+      "group": "CLAIMS-HONESTY",
+      "overlaps": [
+        "WA-R1-18",
+        "WA-R2-09"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "NONE",
+      "tests": [],
+      "journeySteps": [],
+      "gap": "No baseline."
+    },
+    {
+      "id": "WA-R6-06",
+      "round": "R6",
+      "severity": "P2",
+      "sourceSeverity": "MEDIUM",
+      "title": "Kernel primitives versus WorkAid specialization config",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": null,
+      "overlaps": [],
+      "disposition": "OPEN",
+      "proofLevel": "NONE",
+      "tests": [],
+      "journeySteps": [],
+      "gap": "Module boundary exists but an explicit kernel/specialization split is not yet enforced in code."
+    },
+    {
+      "id": "WA-R6-07",
+      "round": "R6",
+      "severity": "P2",
+      "sourceSeverity": "MEDIUM",
+      "title": "Mobile and assistive-technology failures",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "UX_ACCESSIBILITY"
+      ],
+      "primaryOwner": "UX_ACCESSIBILITY",
+      "group": null,
+      "overlaps": [
+        "WA-R1-19"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "NONE",
+      "tests": [],
+      "journeySteps": [],
+      "gap": "No UI."
+    },
+    {
+      "id": "WA-R6-08",
+      "round": "R6",
+      "severity": "P3",
+      "sourceSeverity": "LOW",
+      "title": "Notification fatigue",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "UX_ACCESSIBILITY"
+      ],
+      "primaryOwner": "UX_ACCESSIBILITY",
+      "group": null,
+      "overlaps": [],
+      "disposition": "OPEN",
+      "proofLevel": "NONE",
+      "tests": [],
+      "journeySteps": [],
+      "gap": "No UI; priority tiers unspecified."
+    },
+    {
+      "id": "WA-R6-09",
+      "round": "R6",
+      "severity": "P2",
+      "sourceSeverity": "MEDIUM",
+      "title": "Forbidden theatre: \"Clio integrated\", \"pilot ready\", composite scores",
+      "sourceFile": "grok-redteam-01/WA_GROK_REVIEW_EXTENSION.md",
+      "sourceDisposition": "OPEN_FOR_EXECUTABLE_PROOF",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "CLIO-ARCHITECTURE",
+      "overlaps": [
+        "WA-R3-024"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T096",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Copy check proven; commercial material not reviewed."
+    },
+    {
+      "id": "WA-INT-001",
+      "round": "INT",
+      "severity": "P1",
+      "sourceSeverity": "P1 (triage)",
+      "title": "Blob key embeds document name; name logged",
+      "sourceFile": "grok-redteam-01/WorkAid_Grok_R3-R6_Triage_2026-10-23.md",
+      "sourceDisposition": "HYPOTHESIS",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": "STORAGE",
+      "overlaps": [
+        "WA-R3-012"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "SYNTHETIC_REPRO_OF_PLATFORM_DEFECT",
+      "tests": [
+        {
+          "tag": "WA-INT-001",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T097",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Platform unchanged; canary reproduction handed to Codex."
+    },
+    {
+      "id": "WA-INT-002",
+      "round": "INT",
+      "severity": "P1",
+      "sourceSeverity": "P1 (triage)",
+      "title": "Azure branch claims SAS but returns an unsigned URL",
+      "sourceFile": "grok-redteam-01/WorkAid_Grok_R3-R6_Triage_2026-10-23.md",
+      "sourceDisposition": "HYPOTHESIS",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": "STORAGE",
+      "overlaps": [
+        "WA-R3-006"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "SYNTHETIC_REPRO_OF_PLATFORM_DEFECT",
+      "tests": [
+        {
+          "tag": "WA-INT-002",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Container ACL and real access behaviour unproven."
+    },
+    {
+      "id": "WA-INT-003",
+      "round": "INT",
+      "severity": "P1",
+      "sourceSeverity": "P1 (triage)",
+      "title": "Put-then-sign leaves an orphan when signing fails",
+      "sourceFile": "grok-redteam-01/WorkAid_Grok_R3-R6_Triage_2026-10-23.md",
+      "sourceDisposition": "HYPOTHESIS",
+      "triage": "ACCEPTED",
+      "routes": [
+        "CODEX_PLATFORM"
+      ],
+      "primaryOwner": "CODEX_PLATFORM",
+      "group": "STORAGE",
+      "overlaps": [
+        "WA-R3-006"
+      ],
+      "disposition": "OPEN",
+      "proofLevel": "SYNTHETIC_REPRO_OF_PLATFORM_DEFECT",
+      "tests": [
+        {
+          "tag": "WA-INT-003",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "Platform unchanged."
+    },
+    {
+      "id": "WA-C-001",
+      "round": "C",
+      "severity": "P1",
+      "sourceSeverity": "P1 (engineering review)",
+      "title": "Receipt confirmation treated as a filed submission",
+      "sourceFile": "Slice C mission §2 (engineering review of v0.2)",
+      "sourceDisposition": "SELF_IDENTIFIED_V0_2",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "RECEIPT-SEMANTICS",
+      "overlaps": [
+        "WA-R1-04",
+        "WA-R4-04",
+        "WA-R5-08"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T102",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T103",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T104",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T105",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T106",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T107",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T108",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "X-04",
+        "X-34a",
+        "X-34",
+        "A-17",
+        "A-18",
+        "A-19",
+        "D-13",
+        "D-14",
+        "D-15"
+      ],
+      "gap": "Requirement sources are an empty registry; who may determine valid filing and whether receipt is a prerequisite (F-01) are Angelo decisions (D-19). Receipt is still not persisted or surfaced in any UI."
+    },
+    {
+      "id": "WA-C-002",
+      "round": "C",
+      "severity": "P1",
+      "sourceSeverity": "P1 (engineering review)",
+      "title": "Preparation tooling could write into another checkout",
+      "sourceFile": "Slice C mission §2 (engineering review of v0.2)",
+      "sourceDisposition": "SELF_IDENTIFIED_V0_2",
+      "triage": "ACCEPTED",
+      "routes": [
+        "WORKAID_PREP"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": null,
+      "overlaps": [],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T109",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T110",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [],
+      "gap": "The guard governs this harness only. The typecheck still reads TypeScript from another checkout read-only; a future clean install in this worktree would remove that."
+    },
+    {
+      "id": "WA-C-003",
+      "round": "C",
+      "severity": "P1",
+      "sourceSeverity": "P1 (self-identified)",
+      "title": "Status wording can misrepresent procedural progress",
+      "sourceFile": "Slice C mission §3 Journey D and §4 (member status updates that would misrepresent progress)",
+      "sourceDisposition": "SELF_IDENTIFIED_SLICE_C",
+      "triage": "NEEDS_VALIDATION",
+      "routes": [
+        "WORKAID_PREP",
+        "PROFESSIONAL_VALIDATION",
+        "UX_ACCESSIBILITY"
+      ],
+      "primaryOwner": "WORKAID_PREP",
+      "group": "CLAIMS-HONESTY",
+      "overlaps": [
+        "WA-R2-09"
+      ],
+      "disposition": "PARTIALLY_MITIGATED",
+      "proofLevel": "SYNTHETIC_CONTRACT",
+      "tests": [
+        {
+          "tag": "WA-T111",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T112",
+          "status": "PASS"
+        },
+        {
+          "tag": "WA-T113",
+          "status": "PASS"
+        }
+      ],
+      "journeySteps": [
+        "D-09",
+        "D-13",
+        "D-17"
+      ],
+      "gap": "The lint is a backstop over fixed patterns, not a proof of meaning; the approved plain-language and French wording is a content decision (D-20) and no translation or accessibility testing has run."
+    }
+  ]
+}

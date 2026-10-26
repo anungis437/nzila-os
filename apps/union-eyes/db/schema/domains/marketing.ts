@@ -71,36 +71,6 @@ export const testimonialTypeEnum = pgEnum('testimonial_type', [
 ]);
 
 // ============================================================================
-// IMPACT METRICS
-// ============================================================================
-
-export const impactMetrics = pgTable(
-  'impact_metrics',
-  {
-    id: uuid('id').defaultRandom().primaryKey(),
-    organizationId: uuid('organization_id')
-      .references(() => organizations.id, { onDelete: 'cascade' })
-      .notNull(),
-    metricType: metricTypeEnum('metric_type').notNull(),
-    value: numeric('value', { precision: 10, scale: 2 }).notNull(),
-    comparisonValue: numeric('comparison_value', { precision: 10, scale: 2 }),
-    unit: text('unit').notNull(),
-    period: text('period').notNull(), // ISO date range string
-    visibility: metricVisibilityEnum('visibility').notNull().default('internal'),
-    anonymized: boolean('anonymized').notNull().default(false),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
-  },
-  (table) => ({
-    orgMetricTypeIdx: index('impact_metrics_org_metric_type_idx').on(
-      table.organizationId,
-      table.metricType
-    ),
-    visibilityIdx: index('impact_metrics_visibility_idx').on(table.visibility),
-  })
-);
-
-// ============================================================================
 // CASE STUDIES
 // ============================================================================
 
@@ -275,55 +245,6 @@ export const pilotMetrics = pgTable(
 );
 
 // ============================================================================
-// ORGANIZER RECOGNITION
-// ============================================================================
-
-export const organizerImpacts = pgTable(
-  'organizer_impacts',
-  {
-    id: uuid('id').defaultRandom().primaryKey(),
-    userId: uuid('user_id').notNull(), // references auth.users
-    organizationId: uuid('organization_id')
-      .references(() => organizations.id, { onDelete: 'cascade' })
-      .notNull(),
-    casesHandled: integer('cases_handled').notNull().default(0),
-    casesWon: integer('cases_won').notNull().default(0),
-    avgResolutionTime: numeric('avg_resolution_time', {
-      precision: 10,
-      scale: 2,
-    }).notNull(),
-    memberSatisfactionAvg: numeric('member_satisfaction_avg', {
-      precision: 3,
-      scale: 2,
-    }).notNull(),
-    escalationsAvoided: integer('escalations_avoided').notNull().default(0),
-    democraticParticipationRate: numeric('democratic_participation_rate', {
-      precision: 5,
-      scale: 2,
-    }).notNull(),
-    recognitionEvents: jsonb('recognition_events').notNull().$type<Array<{
-      type: string;
-      description: string;
-      date: string;
-      relatedCaseId?: string;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      metadata?: Record<string, any>;
-    }>>(),
-    periodStart: timestamp('period_start').notNull(),
-    periodEnd: timestamp('period_end').notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
-  },
-  (table) => ({
-    userOrgIdx: index('organizer_impacts_user_org_idx').on(
-      table.userId,
-      table.organizationId
-    ),
-    periodIdx: index('organizer_impacts_period_idx').on(table.periodStart, table.periodEnd),
-  })
-);
-
-// ============================================================================
 // MOVEMENT INSIGHTS
 // ============================================================================
 
@@ -377,13 +298,6 @@ export const movementTrends = pgTable(
 // RELATIONS
 // ============================================================================
 
-export const impactMetricsRelations = relations(impactMetrics, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [impactMetrics.organizationId],
-    references: [organizations.id],
-  }),
-}));
-
 export const caseStudiesRelations = relations(caseStudies, ({ one }) => ({
   organization: one(organizations, {
     fields: [caseStudies.organizationId],
@@ -406,13 +320,6 @@ export const pilotMetricsRelations = relations(pilotMetrics, ({ one }) => ({
   }),
 }));
 
-export const organizerImpactsRelations = relations(organizerImpacts, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [organizerImpacts.organizationId],
-    references: [organizations.id],
-  }),
-}));
-
 export const dataAggregationConsentRelations = relations(
   dataAggregationConsent,
   ({ one }) => ({
@@ -427,8 +334,6 @@ export const dataAggregationConsentRelations = relations(
 // TYPE EXPORTS
 // ============================================================================
 
-export type ImpactMetric = typeof impactMetrics.$inferSelect;
-export type NewImpactMetric = typeof impactMetrics.$inferInsert;
 
 export type CaseStudy = typeof caseStudies.$inferSelect;
 export type NewCaseStudy = typeof caseStudies.$inferInsert;
@@ -442,8 +347,6 @@ export type NewPilotApplication = typeof pilotApplications.$inferInsert;
 export type PilotMetric = typeof pilotMetrics.$inferSelect;
 export type NewPilotMetric = typeof pilotMetrics.$inferInsert;
 
-export type OrganizerImpact = typeof organizerImpacts.$inferSelect;
-export type NewOrganizerImpact = typeof organizerImpacts.$inferInsert;
 
 export type DataAggregationConsent = typeof dataAggregationConsent.$inferSelect;
 export type NewDataAggregationConsent = typeof dataAggregationConsent.$inferInsert;

@@ -11,7 +11,9 @@
 export const dynamic = "force-dynamic";
 
 import { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { requireUser, getUserRole } from "@/lib/api-auth-guard";
+import { canManageOrganizationSettings } from "@/lib/auth/org-settings-access";
 import { db } from "@/db/db";
 import { sql } from "drizzle-orm";
 import { getTranslations } from "next-intl/server";
@@ -120,11 +122,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function SettingsPage() {
+export default async function SettingsPage({ params }: PageProps) {
+  const { locale } = await params;
   const user = await requireUser();
 
   const organizationId = user.organizationId;
   const userRole = await getUserRole(user.userId, organizationId);
+
+  // Organization configuration is for administrators only. Everyone else (including members)
+  // goes to their own Profile & Settings, which holds only personal information and preferences.
+  if (!canManageOrganizationSettings(userRole)) {
+    redirect(`/${locale}/dashboard/profile`);
+  }
 
   if (userRole && PLATFORM_ROLES.has(userRole)) {
     const data = await withSystemContext(() => loadPlatformSettings());

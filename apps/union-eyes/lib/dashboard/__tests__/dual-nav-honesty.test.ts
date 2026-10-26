@@ -28,8 +28,8 @@ describe('EC-G03 landing × experience', () => {
       {
         role: 'member',
         experience: 'member',
-        roleHomeHref: '/dashboard/workspace',
-        roleHomeIsOrientationHub: true,
+        roleHomeHref: '/dashboard',
+        roleHomeIsOrientationHub: false,
       },
       {
         role: 'steward',
@@ -46,11 +46,17 @@ describe('EC-G03 landing × experience', () => {
       {
         role: 'president',
         experience: 'executive',
-        roleHomeHref: '/dashboard/intelligence',
+        roleHomeHref: '/dashboard/executive',
         roleHomeIsOrientationHub: false,
       },
       {
         role: 'officer',
+        experience: 'executive',
+        roleHomeHref: '/dashboard/executive',
+        roleHomeIsOrientationHub: false,
+      },
+      {
+        role: 'clc_executive',
         experience: 'governance',
         roleHomeHref: '/dashboard/governance',
         roleHomeIsOrientationHub: false,
@@ -74,19 +80,26 @@ describe('EC-G03 landing × experience', () => {
       expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE[row.experience]).toBe(row.roleHomeHref);
     }
 
-    expect(getRoleLandingPath(undefined)).toBe('/dashboard/workspace');
-    expect(getRoleLandingPath('unknown')).toBe('/dashboard/workspace');
+    expect(getRoleLandingPath(undefined)).toBe('/dashboard');
+    expect(getRoleLandingPath('unknown')).toBe('/dashboard');
   });
 
-  it('keeps Workspace first in the sidebar while staff, executive, governance, and admin land elsewhere', () => {
-    for (const experience of ['member', 'staff', 'executive', 'governance', 'admin'] as const) {
+  it('keeps Workspace first in the sidebar for governance and admin; members start at their own Home; staff and executives have no competing hub entry (frozen persona navigation)', () => {
+    for (const experience of ['governance', 'admin'] as const) {
       expect(getNavigationForExperience(experience)[0]).toMatchObject({
         label: 'Workspace',
         href: WORKSPACE_ORIENTATION_HUB_PATH,
       });
     }
+    expect(getNavigationForExperience('executive').some((i) => i.href === WORKSPACE_ORIENTATION_HUB_PATH)).toBe(false);
+    // Representative 2.2 freezes seven destinations; Workspace stays reachable via the hub cue.
+    expect(getNavigationForExperience('staff').some((item) => item.href === WORKSPACE_ORIENTATION_HUB_PATH)).toBe(false);
+    expect(roleHomeHubCue(getDualNavHomes('steward')).show).toBe(true);
 
-    expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.member).toBe(WORKSPACE_ORIENTATION_HUB_PATH);
+    const memberNav = getNavigationForExperience('member');
+    expect(memberNav[0]).toMatchObject({ label: 'Home', href: '/dashboard' });
+    expect(memberNav.map((item) => item.label)).not.toContain('Workspace');
+    expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.member).toBe('/dashboard');
     expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.staff).not.toBe(WORKSPACE_ORIENTATION_HUB_PATH);
     expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.executive).not.toBe(WORKSPACE_ORIENTATION_HUB_PATH);
     expect(ROLE_EXECUTION_HOME_BY_EXPERIENCE.governance).not.toBe(WORKSPACE_ORIENTATION_HUB_PATH);
@@ -109,12 +122,12 @@ describe('EC-G03 landing × experience', () => {
       accessibleName: 'Workspace, orientation hub',
     });
 
-    const executiveHome = honestyForNavigationItem(
+    const intelligenceHome = honestyForNavigationItem(
       { label: 'Institutional Intelligence Reports', href: '/dashboard/intelligence' },
       '/dashboard/intelligence',
     );
-    expect(executiveHome.navRole).toBe('role-home');
-    expect(executiveHome.visibleQualifier).toContain('Not a Workspace tab');
+    expect(intelligenceHome.navRole).toBe('role-home');
+    expect(intelligenceHome.visibleQualifier).toContain('Not a Workspace tab');
 
     const executiveOverview = honestyForNavigationItem(
       {
@@ -126,11 +139,12 @@ describe('EC-G03 landing × experience', () => {
     expect(executiveOverview.navRole).toBe('legacy-side');
     expect(executiveOverview.visibleQualifier).toBe('Not a Workspace tab');
 
-    const cue = roleHomeHubCue(getDualNavHomes('president'));
-    expect(cue.show).toBe(true);
-    expect(cue.hubHref).toBe(WORKSPACE_ORIENTATION_HUB_PATH);
-    expect(cue.hubHref).not.toBe(getRoleLandingPath('president'));
-    expect(cue.intelligenceNote).toMatch(/not a Workspace tab/i);
+    // Staff still reach the hub; executives no longer advertise it because their allow-list rejects it.
+    const staffCue = roleHomeHubCue(getDualNavHomes('steward'));
+    expect(staffCue.show).toBe(true);
+    expect(staffCue.hubHref).toBe(WORKSPACE_ORIENTATION_HUB_PATH);
+    expect(roleHomeHubCue(getDualNavHomes('president')).show).toBe(false);
+    expect(roleHomeHubCue(getDualNavHomes('president')).intelligenceNote).toBeNull();
     expect(roleHomeHubCue(getDualNavHomes('member')).show).toBe(false);
   });
 });
@@ -198,16 +212,19 @@ describe('EC-G03 guards', () => {
 
   it('does not widen canAccessDashboardPath allow-lists', () => {
     expect(getAllowedPrefixesByExperience()).toEqual({
+      // Widened only by the frozen UE-MEMBER-CANONICAL-2.1 destinations; each has a member page.
       member: [
         '/dashboard',
-        '/dashboard/workspace',
-        '/dashboard/inbox',
         '/dashboard/claims',
         '/dashboard/claims/new',
         '/dashboard/documents',
+        '/dashboard/messages',
+        '/dashboard/union',
+        '/dashboard/help',
         '/dashboard/settings',
         '/dashboard/profile',
-        '/dashboard/support',
+        '/dashboard/preferences',
+        '/dashboard/privacy',
       ],
       staff: [
         '/dashboard',
@@ -220,20 +237,27 @@ describe('EC-G03 guards', () => {
         '/dashboard/members',
         '/dashboard/documents',
         '/dashboard/correspondence',
+        '/dashboard/clause-library',
         '/dashboard/notifications',
+        '/dashboard/messages/staff',
         '/dashboard/settings',
         '/dashboard/profile',
       ],
       executive: [
         '/dashboard',
-        '/dashboard/workspace',
-        '/dashboard/intelligence',
+        '/dashboard/executive',
+        '/dashboard/leadership',
+        '/dashboard/governance',
+        '/dashboard/bargaining',
+        '/dashboard/finance',
+        '/dashboard/correspondence',
         '/dashboard/continuity-intelligence',
+        '/dashboard/priorities',
+        '/dashboard/committees',
+        '/dashboard/intelligence',
         '/dashboard/executive-operating-intelligence',
-        '/dashboard/operations',
         '/dashboard/governance-center',
         '/dashboard/outcomes',
-        '/dashboard/leadership',
         '/dashboard/trust',
         '/dashboard/settings',
         '/dashboard/profile',

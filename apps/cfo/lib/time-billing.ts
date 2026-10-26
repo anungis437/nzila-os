@@ -86,12 +86,12 @@ export const DEFAULT_BILLING_RATES: Record<StaffLevel, number> = {
 // ── Schemas ─────────────────────────────────────────────────────────────────
 
 export const TimeEntrySchema = z.object({
-  id: z.string().uuid(),
-  orgId: z.string().uuid(),
-  staffId: z.string().uuid(),
+  id: z.guid(),
+  orgId: z.guid(),
+  staffId: z.guid(),
   staffLevel: z.nativeEnum(StaffLevel as unknown as Record<string, string>),
-  clientId: z.string().uuid(),
-  engagementId: z.string().uuid(),
+  clientId: z.guid(),
+  engagementId: z.guid(),
   activityCode: z.nativeEnum(ActivityCode as unknown as Record<string, string>),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   hours: z.number().min(0).max(24),
@@ -104,7 +104,7 @@ export const TimeEntrySchema = z.object({
 export type TimeEntry = z.infer<typeof TimeEntrySchema>
 
 export const EngagementBudgetSchema = z.object({
-  engagementId: z.string().uuid(),
+  engagementId: z.guid(),
   budgetHours: z.number().min(0),
   budgetFees: z.number().min(0),
   fixedFee: z.number().min(0).optional(),

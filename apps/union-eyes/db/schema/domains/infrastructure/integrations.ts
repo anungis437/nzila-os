@@ -195,29 +195,6 @@ export const integrationWebhooks = pgTable(
   })
 );
 
-/**
- * Webhook Delivery Log - audit trail of webhook deliveries
- */
-export const webhookDeliveries = pgTable(
-  'webhook_deliveries',
-  {
-    id: uuid('id').primaryKey().defaultRandom(),
-    webhookId: uuid('webhook_id').notNull().references(() => integrationWebhooks.id, { onDelete: 'cascade' }),
-    eventType: varchar('event_type', { length: 100 }).notNull(),
-    payload: jsonb('payload').notNull(),
-    statusCode: integer('status_code'),
-    responseBody: text('response_body'),
-    error: text('error'),
-    attemptNumber: integer('attempt_number').default(1),
-    deliveredAt: timestamp('delivered_at').defaultNow(),
-    duration: integer('duration'), // milliseconds
-  },
-  (table) => ({
-    webhookIdx: index('webhook_deliveries_webhook_idx').on(table.webhookId),
-    deliveredAtIdx: index('webhook_deliveries_delivered_at_idx').on(table.deliveredAt),
-  })
-);
-
 // Type exports
 export type IntegrationConfig = typeof integrationConfigs.$inferSelect;
 export type NewIntegrationConfig = typeof integrationConfigs.$inferInsert;
@@ -231,8 +208,6 @@ export type IntegrationApiKey = typeof integrationApiKeys.$inferSelect;
 export type NewIntegrationApiKey = typeof integrationApiKeys.$inferInsert;
 export type IntegrationWebhook = typeof integrationWebhooks.$inferSelect;
 export type NewIntegrationWebhook = typeof integrationWebhooks.$inferInsert;
-export type WebhookDelivery = typeof webhookDeliveries.$inferSelect;
-export type NewWebhookDelivery = typeof webhookDeliveries.$inferInsert;
 
 // ============================================================================
 // INTEGRATION PARTNERS (console dashboard)

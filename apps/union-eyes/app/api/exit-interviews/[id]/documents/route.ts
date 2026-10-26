@@ -15,6 +15,8 @@ import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { exitInterviews, exitInterviewDocuments } from '@/db/schema';
 import { ROLE_HIERARCHY, normalizeRole } from '@/lib/api-auth-guard';
 
@@ -70,8 +72,9 @@ export const POST = withApi(
       throw ApiError.forbidden('Only the interview owner or steward-level users can attach documents');
     }
 
-    if (interview.status === 'archived') {
-      throw ApiError.conflict('Cannot attach documents to archived interviews');
+    // A published or archived interview is a finished record; material is attached while it is being prepared.
+    if (interview.status === 'published' || interview.status === 'archived') {
+      throw ApiError.conflict('Cannot attach documents to a published or archived interview');
     }
 
     // Validate fileUrl is within allowed domains (no SSRF)
@@ -81,23 +84,34 @@ export const POST = withApi(
       'localhost',
       '127.0.0.1',
     ];
-    if (!allowedHosts.some((h) => parsedUrl.hostname.endsWith(h))) {
+    if (!allowedHosts.some((h) => parsedUrl.hostname === h || parsedUrl.hostname.endsWith(`.${h}`))) {
       throw ApiError.badRequest('fileUrl must point to an authorized storage host');
     }
 
-    const [doc] = await db
-      .insert(exitInterviewDocuments)
-      .values({
-        interviewId: params.id,
+    const doc = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
+      const [row] = await tx
+        .insert(exitInterviewDocuments)
+        .values({
+          interviewId: params.id,
+          organizationId: organizationId!,
+          title: body!.title,
+          fileUrl: body!.fileUrl,
+          mimeType: body!.mimeType,
+          sizeBytes: body!.sizeBytes,
+          transcriptText: body!.transcriptText,
+          createdBy: userId!,
+        })
+        .returning();
+      await persistAtomicAudit(tx, {
         organizationId: organizationId!,
-        title: body!.title,
-        fileUrl: body!.fileUrl,
-        mimeType: body!.mimeType,
-        sizeBytes: body!.sizeBytes,
-        transcriptText: body!.transcriptText,
-        createdBy: userId!,
-      })
-      .returning();
+        userId: userId!,
+        action: 'exit_interview.document_attach',
+        resourceType: 'exit_interview_documents',
+        resourceId: row.id,
+        details: { interviewId: params.id, mimeType: body!.mimeType },
+      });
+      return row;
+    });
 
     return { data: doc };
   },
@@ -113,15 +127,22 @@ export const GET = withApi(
       description: 'Returns all document artifacts attached to an exit interview.',
     },
   },
-  async ({ params, organizationId }) => {
+  async ({ params, organizationId, userId, user }) => {
     // Ensure interview is in this org
     const [interview] = await db
-      .select({ id: exitInterviews.id, status: exitInterviews.status })
+      .select({ id: exitInterviews.id, status: exitInterviews.status, createdBy: exitInterviews.createdBy })
       .from(exitInterviews)
       .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!)))
       .limit(1);
 
     if (!interview) throw ApiError.notFound('Exit interview');
+
+    // The attachments (including transcripts) of a draft are as private as the draft: the interview route shows an
+    // unpublished interview only to its owner and to steward-level users, and so does this one.
+    const isPublished = interview.status === 'published' || interview.status === 'archived';
+    if (!isPublished && interview.createdBy !== userId && !hasStewardPrivileges(user?.role ?? null)) {
+      throw ApiError.forbidden('You do not have permission to access this interview');
+    }
 
     const docs = await db
       .select()

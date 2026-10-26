@@ -34,7 +34,7 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
     

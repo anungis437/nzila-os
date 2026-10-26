@@ -3,66 +3,27 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Target, Calendar, Users, CheckCircle, Loader2 } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { Target, Calendar, Users, CheckCircle } from "lucide-react";
 
-interface StrategicGoal {
+/** Row shape returned by /api/executive/dashboard (strategic_goals). */
+export interface StrategicGoalRecord {
   id: string;
   title: string;
-  description: string;
-  category: "membership" | "financial" | "advocacy" | "operations";
+  description?: string | null;
+  category: string;
   progress: number;
-  dueDate: string;
-  owner: string;
-  status: "on-track" | "at-risk" | "delayed" | "completed";
+  dueDate?: string | null;
+  owner?: string | null;
+  status: string;
 }
 
 interface StrategicPlanningBoardProps {
-  goals?: StrategicGoal[];
+  goals: StrategicGoalRecord[];
 }
 
+/** Renders recorded strategic goals only. Nothing is fetched, defaulted or invented here. */
 export default function StrategicPlanningBoard({ goals }: StrategicPlanningBoardProps) {
-  const [fetchedGoals, setFetchedGoals] = useState<StrategicGoal[]>([]);
-  const [loading, setLoading] = useState(!goals);
-
-  const fetchGoals = useCallback(async () => {
-    if (goals) return;
-    try {
-      setLoading(true);
-      const res = await fetch("/api/v2/executive/strategic-goals");
-      if (res.ok) {
-        const json = await res.json();
-        const items = Array.isArray(json) ? json : json?.goals ?? json?.data ?? [];
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setFetchedGoals(items.map((g: any) => ({
-          id: g.id ?? "",
-          title: g.title ?? "",
-          description: g.description ?? "",
-          category: g.category ?? "operations",
-          progress: g.progress ?? 0,
-          dueDate: g.due_date ?? g.dueDate ?? "",
-          owner: g.owner ?? "",
-          status: g.status ?? "on-track",
-        })));
-      }
-    } catch {
-      // API not available — empty state
-    } finally {
-      setLoading(false);
-    }
-  }, [goals]);
-
-  useEffect(() => { fetchGoals(); }, [fetchGoals]);
-
-  const activeGoals = goals || fetchedGoals;
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
+  const activeGoals = goals;
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -96,6 +57,9 @@ export default function StrategicPlanningBoard({ goals }: StrategicPlanningBoard
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
+          {activeGoals.length === 0 && (
+            <p className="text-sm text-muted-foreground">No strategic goals are recorded for this organization.</p>
+          )}
           {activeGoals.map((goal) => (
             <Card key={goal.id} className="border-l-4 border-l-primary">
               <CardHeader className="pb-3">
@@ -106,7 +70,7 @@ export default function StrategicPlanningBoard({ goals }: StrategicPlanningBoard
                       <CardTitle className="text-base">{goal.title}</CardTitle>
                     </div>
                     <CardDescription className="text-sm">
-                      {goal.description}
+                      {goal.description ?? ""}
                     </CardDescription>
                   </div>
                   <Badge 
@@ -132,11 +96,11 @@ export default function StrategicPlanningBoard({ goals }: StrategicPlanningBoard
                   <div className="flex items-center gap-4 text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      <span>Due: {new Date(goal.dueDate).toLocaleDateString()}</span>
+                      <span>Due: {goal.dueDate ? new Date(goal.dueDate).toLocaleDateString() : "no due date recorded"}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Users className="h-3 w-3" />
-                      <span>{goal.owner}</span>
+                      <span>{goal.owner ?? "no owner recorded"}</span>
                     </div>
                   </div>
                 </div>

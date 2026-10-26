@@ -11,7 +11,7 @@ vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/db/schema/board-packet-schema', () => ({ boardPackets: { createdAt: 'createdAt', organizationId: 'organizationId' } }));
-vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.auditDataMutation }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return { ...actual, desc: vi.fn(() => 'desc'), count: vi.fn(() => 'count'), eq: vi.fn(() => 'eq'), sql: Object.assign(vi.fn(() => 'sql'), { mapWith: vi.fn() }) };

@@ -80,10 +80,10 @@ export interface FriendsListening {
 // ── Schemas ─────────────────────────────────────────────────────────────────
 
 export const ShareIntentSchema = z.object({
-  orgId: z.string().uuid(),
-  sharerId: z.string().uuid(),
+  orgId: z.guid(),
+  sharerId: z.guid(),
   shareType: z.enum(['track', 'playlist', 'event', 'artist']),
-  contentId: z.string().uuid(),
+  contentId: z.guid(),
   platform: z
     .enum([
       'whatsapp',

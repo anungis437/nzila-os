@@ -8,7 +8,8 @@
 import { NextRequest } from 'next/server'
 import { and, eq, isNull, lte, or } from 'drizzle-orm'
 import { withApiAuth } from '@/lib/api-auth-guard'
-import { db } from '@/db/db'
+import { withSystemContext } from '@/lib/db/with-rls-context'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { calendars, externalCalendarConnections } from '@/db/schema/calendar-schema'
 import { importGoogleEvents } from '@/lib/external-calendar-sync/google-calendar-service'
 import { importMicrosoftEvents } from '@/lib/external-calendar-sync/microsoft-calendar-service'
@@ -88,91 +89,143 @@ function getMappingPairs(calendarMappings: any): CalendarMappingPair[] {
   return Array.from(deduped.values())
 }
 
+const CRON_ACTOR = 'system:cron:calendar-sync'
+
+// One connection is one system transaction: its imported events, its sync state and its audit record commit together,
+// and a failure rolls the lot back before the failure itself is recorded separately.
 async function processConnection(connection: SyncConnection) {
-  const mappings = getMappingPairs(connection.calendarMappings)
-  if (mappings.length === 0) {
-    throw new Error('No calendar mappings configured')
-  }
+  return withSystemContext(async (tx) => {
+    const mappings = getMappingPairs(connection.calendarMappings)
+    if (mappings.length === 0) {
+      throw new Error('No calendar mappings configured')
+    }
 
-  const now = new Date()
-  const timeMin = new Date(now.getTime() - (connection.syncPastDays ?? 30) * 24 * 60 * 60 * 1000)
-  const timeMax = new Date(now.getTime() + (connection.syncFutureDays ?? 365) * 24 * 60 * 60 * 1000)
+    const now = new Date()
+    const timeMin = new Date(now.getTime() - (connection.syncPastDays ?? 30) * 24 * 60 * 60 * 1000)
+    const timeMax = new Date(now.getTime() + (connection.syncFutureDays ?? 365) * 24 * 60 * 60 * 1000)
 
-  let imported = 0
-  let updated = 0
-  let deleted = 0
-  let skippedMappings = 0
+    let imported = 0
+    let updated = 0
+    let deleted = 0
+    let skippedMappings = 0
 
-  for (const mapping of mappings) {
-    const [localCalendar] = await db
-      .select({ id: calendars.id })
-      .from(calendars)
+    for (const mapping of mappings) {
+      const [localCalendar] = await tx
+        .select({ id: calendars.id })
+        .from(calendars)
+        .where(
+          and(
+            eq(calendars.id, mapping.localCalendarId),
+            eq(calendars.organizationId, connection.organizationId),
+          ),
+        )
+        .limit(1)
+
+      if (!localCalendar) {
+        skippedMappings += 1
+        continue
+      }
+
+      if (connection.provider === 'google') {
+        const result = await importGoogleEvents(
+          connection.id,
+          mapping.localCalendarId,
+          mapping.externalId,
+          { timeMin, timeMax },
+        )
+        imported += Number(result.imported || 0)
+        updated += Number(result.updated || 0)
+        deleted += Number(result.deleted || 0)
+        continue
+      }
+
+      if (connection.provider === 'microsoft') {
+        const result = await importMicrosoftEvents(
+          connection.id,
+          mapping.localCalendarId,
+          mapping.externalId,
+          { timeMin, timeMax },
+        )
+        imported += Number(result.imported || 0)
+        updated += Number(result.updated || 0)
+        deleted += Number(result.deleted || 0)
+        continue
+      }
+
+      throw new Error(`Unsupported calendar provider: ${connection.provider}`)
+    }
+
+    if (skippedMappings === mappings.length) {
+      throw new Error('No valid local calendar mappings found for this organization')
+    }
+
+    await tx
+      .update(externalCalendarConnections)
+      .set({
+        lastSyncAt: now,
+        nextSyncAt: new Date(now.getTime() + getSyncIntervalMinutes() * 60 * 1000),
+        syncStatus: 'synced',
+        syncError: null,
+        updatedAt: now,
+      })
       .where(
         and(
-          eq(calendars.id, mapping.localCalendarId),
-          eq(calendars.organizationId, connection.organizationId),
+          eq(externalCalendarConnections.id, connection.id),
+          eq(externalCalendarConnections.organizationId, connection.organizationId),
         ),
       )
-      .limit(1)
 
-    if (!localCalendar) {
-      skippedMappings += 1
-      continue
-    }
-
-    if (connection.provider === 'google') {
-      const result = await importGoogleEvents(
-        connection.id,
-        mapping.localCalendarId,
-        mapping.externalId,
-        { timeMin, timeMax },
-      )
-      imported += Number(result.imported || 0)
-      updated += Number(result.updated || 0)
-      deleted += Number(result.deleted || 0)
-      continue
-    }
-
-    if (connection.provider === 'microsoft') {
-      const result = await importMicrosoftEvents(
-        connection.id,
-        mapping.localCalendarId,
-        mapping.externalId,
-        { timeMin, timeMax },
-      )
-      imported += Number(result.imported || 0)
-      updated += Number(result.updated || 0)
-      deleted += Number(result.deleted || 0)
-      continue
-    }
-
-    throw new Error(`Unsupported calendar provider: ${connection.provider}`)
-  }
-
-  if (skippedMappings === mappings.length) {
-    throw new Error('No valid local calendar mappings found for this organization')
-  }
-
-  await db
-    .update(externalCalendarConnections)
-    .set({
-      lastSyncAt: now,
-      nextSyncAt: new Date(now.getTime() + getSyncIntervalMinutes() * 60 * 1000),
-      syncStatus: 'synced',
-      syncError: null,
-      updatedAt: now,
+    await persistAtomicAudit(tx, {
+      organizationId: connection.organizationId,
+      userId: CRON_ACTOR,
+      action: 'calendar_sync.connection.sync',
+      resourceType: 'external_calendar_connections',
+      resourceId: connection.id,
+      details: { provider: connection.provider, mappings: mappings.length, skippedMappings, imported, updated, deleted },
     })
-    .where(eq(externalCalendarConnections.id, connection.id))
 
-  return {
-    connectionId: connection.id,
-    provider: connection.provider,
-    mappings: mappings.length,
-    skippedMappings,
-    imported,
-    updated,
-    deleted,
-  }
+    return {
+      connectionId: connection.id,
+      provider: connection.provider,
+      mappings: mappings.length,
+      skippedMappings,
+      imported,
+      updated,
+      deleted,
+    }
+  })
+}
+
+async function recordFailure(connection: SyncConnection, message: string) {
+  await withSystemContext(async (tx) => {
+    await tx
+      .update(externalCalendarConnections)
+      .set({
+        syncStatus: 'failed',
+        syncError: message,
+        nextSyncAt: new Date(Date.now() + getRetryDelayMinutes() * 60 * 1000),
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(externalCalendarConnections.id, connection.id),
+          eq(externalCalendarConnections.organizationId, connection.organizationId),
+        ),
+      )
+
+    await persistAtomicAudit(
+      tx,
+      {
+        organizationId: connection.organizationId,
+        userId: CRON_ACTOR,
+        action: 'calendar_sync.connection.sync_failed',
+        resourceType: 'external_calendar_connections',
+        resourceId: connection.id,
+        details: { provider: connection.provider, error: message },
+      },
+      'failure',
+    )
+  })
 }
 
 export const POST = withApiAuth(async (request: NextRequest) => {
@@ -180,31 +233,34 @@ export const POST = withApiAuth(async (request: NextRequest) => {
     const limit = parseLimit(request)
     const now = new Date()
 
-    const dueConnections = await db
-      .select({
-        id: externalCalendarConnections.id,
-        provider: externalCalendarConnections.provider,
-        organizationId: externalCalendarConnections.organizationId,
-        syncPastDays: externalCalendarConnections.syncPastDays,
-        syncFutureDays: externalCalendarConnections.syncFutureDays,
-        calendarMappings: externalCalendarConnections.calendarMappings,
-      })
-      .from(externalCalendarConnections)
-      .where(
-        and(
-          eq(externalCalendarConnections.isActive, true),
-          eq(externalCalendarConnections.syncEnabled, true),
-          or(
-            isNull(externalCalendarConnections.nextSyncAt),
-            lte(externalCalendarConnections.nextSyncAt, now),
+    // The due list spans every organization, which only system authority may read.
+    const dueConnections = await withSystemContext(async (tx) =>
+      tx
+        .select({
+          id: externalCalendarConnections.id,
+          provider: externalCalendarConnections.provider,
+          organizationId: externalCalendarConnections.organizationId,
+          syncPastDays: externalCalendarConnections.syncPastDays,
+          syncFutureDays: externalCalendarConnections.syncFutureDays,
+          calendarMappings: externalCalendarConnections.calendarMappings,
+        })
+        .from(externalCalendarConnections)
+        .where(
+          and(
+            eq(externalCalendarConnections.isActive, true),
+            eq(externalCalendarConnections.syncEnabled, true),
+            or(
+              isNull(externalCalendarConnections.nextSyncAt),
+              lte(externalCalendarConnections.nextSyncAt, now),
+            ),
+            or(
+              eq(externalCalendarConnections.provider, 'google'),
+              eq(externalCalendarConnections.provider, 'microsoft'),
+            ),
           ),
-          or(
-            eq(externalCalendarConnections.provider, 'google'),
-            eq(externalCalendarConnections.provider, 'microsoft'),
-          ),
-        ),
-      )
-      .limit(limit)
+        )
+        .limit(limit),
+    )
 
     const results = [] as Array<Record<string, unknown>>
     const failures = [] as Array<Record<string, unknown>>
@@ -215,15 +271,7 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown sync error'
 
-        await db
-          .update(externalCalendarConnections)
-          .set({
-            syncStatus: 'failed',
-            syncError: message,
-            nextSyncAt: new Date(Date.now() + getRetryDelayMinutes() * 60 * 1000),
-            updatedAt: new Date(),
-          })
-          .where(eq(externalCalendarConnections.id, connection.id))
+        await recordFailure(connection, message)
 
         failures.push({ connectionId: connection.id, provider: connection.provider, error: message })
       }

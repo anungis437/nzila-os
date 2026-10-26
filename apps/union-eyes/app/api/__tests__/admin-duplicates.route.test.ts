@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   withSystemContext: vi.fn(),
   auditLog: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   selectQueue: [] as unknown[][],
 }));
 
@@ -34,6 +35,7 @@ vi.mock('@/lib/api/framework', () => {
     z: {
       object: () => ({}),
       string: () => zString,
+      guid: () => zString,
       enum: () => ({ optional: () => ({}) }),
       coerce: { number: () => zNumber },
     },
@@ -44,7 +46,11 @@ vi.mock('@/lib/api/framework', () => {
   };
 });
 
-vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: m.withSystemContext,
+  withRLSContext: async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(mockDb),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/lib/audit-logger', () => ({
   auditLog: m.auditLog,
@@ -71,6 +77,7 @@ describe('admin/duplicates route', () => {
     vi.clearAllMocks();
     m.selectQueue = [];
     m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.withApi.mockImplementation(
       (_cfg: unknown, handler: (ctx: any) => Promise<unknown>) =>
         async (request: NextRequest, ctx: any = { organizationId: 'org_1', userId: 'u1', query: {}, body: {} }) => {
@@ -138,6 +145,16 @@ describe('admin/duplicates route', () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.status).toBe('merged');
-    expect(m.auditLog).toHaveBeenCalled();
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'duplicate.merge', organizationId: 'org_1', userId: 'u1', resourceId: 'g1' }));
+  });
+
+  it('POST fails and reports no resolution when the in-transaction audit cannot be written', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue.push([{ id: 'g1', groupType: 'member', status: 'pending' }]);
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit write failed'));
+    const response = await POST(new NextRequest('http://localhost/api/admin/duplicates', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ group_id: 'g1', action: 'merge' }),
+    }), { organizationId: 'org_1', userId: 'u1' });
+    expect(response.status).toBe(500);
   });
 });

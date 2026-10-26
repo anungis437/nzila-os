@@ -25,8 +25,8 @@ function getAuthUser(req: Request): AuthUser {
 // ============================================================================
 
 const createAssignmentSchema = z.object({
-  memberId: z.string().uuid(),
-  ruleId: z.string().uuid(),
+  memberId: z.guid(),
+  ruleId: z.guid(),
   effectiveDate: z.coerce.date(),
   endDate: z.coerce.date().optional(),
   overrideAmount: z.coerce.number().positive().optional(),
@@ -159,7 +159,7 @@ router.post('/', async (req: Request, res: Response) => {
     res.status(201).json({ success: true, data: newAssignment });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ success: false, error: 'Validation error', details: error.errors });
+      return res.status(400).json({ success: false, error: 'Validation error', details: error.issues });
     }
     logger.error('Error creating dues assignment', { error });
     res.status(500).json({ success: false, error: 'Failed to create dues assignment' });
@@ -213,7 +213,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     res.json({ success: true, data: updatedAssignment });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ success: false, error: 'Validation error', details: error.errors });
+      return res.status(400).json({ success: false, error: 'Validation error', details: error.issues });
     }
     logger.error('Error updating dues assignment', { error });
     res.status(500).json({ success: false, error: 'Failed to update dues assignment' });

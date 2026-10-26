@@ -13,7 +13,8 @@ import { claims } from '@/db/schema'
 import { sql } from 'drizzle-orm'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { allocateClaimNumber } from '@/lib/claims/claim-number'
-import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
+import { requireCaseFilingCapacity } from '@/lib/cases/case-authorization'
 import { z } from 'zod'
 
 const claimCreateSchema = z
@@ -98,7 +99,7 @@ export const POST = withApi(
   async ({ body, organizationId, userId }) => {
     const parsed = claimCreateSchema.safeParse(body ?? {})
     if (!parsed.success) {
-      throw ApiError.badRequest(parsed.error.errors.map((e) => e.message).join('; '))
+      throw ApiError.badRequest(parsed.error.issues.map((e) => e.message).join('; '))
     }
     const validatedBody = parsed.data
 
@@ -111,6 +112,8 @@ export const POST = withApi(
     // Ordinary same-organization create uses the tenant runtime role.
     // System context is reserved for background, webhook, and maintenance work.
     return withRLSContext({ organizationId }, async (tx) => {
+      // Opening a case is a capacity (staff), checked on the canonical membership, not a role rank.
+      await requireCaseFilingCapacity(tx, { userId: userId!, organizationId }, 'handler')
       const claimNumber = await allocateClaimNumber(tx, organizationId)
 
       // Extract incidentDate separately — Drizzle's PgTimestamp.mapToDriverValue
@@ -126,7 +129,7 @@ export const POST = withApi(
 
       const [row] = await tx.insert(claims).values(values).returning()
       // Mandatory canonical audit shares this transaction: an audit failure rolls the claim back.
-      await appendMandatoryAudit(tx, {
+      await persistAtomicAudit(tx, {
         organizationId,
         action: 'claim.create',
         resourceType: 'claims',

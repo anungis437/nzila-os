@@ -31,7 +31,7 @@ const ACTIVE_MEMBER_EXCLUDE = new Set(["inactive", "archived", "deleted", "disab
 const LEADERSHIP_CACHE_TTL_SECONDS = 600;
 const EXECUTIVE_CACHE_TTL_SECONDS = 600;
 const CACHE_NAMESPACE = "dashboard-kpis";
-const CACHE_VERSION = "v2";
+const CACHE_VERSION = "v3";
 
 type DateInput = Date | string | null | undefined;
 
@@ -123,11 +123,14 @@ export interface LeadershipDashboardPayload {
 export interface ExecutiveMetricsPayload {
   totalMembers: number;
   activeGrievances: number;
-  pendingApprovals: number;
-  upcomingMeetings: number;
-  monthlyBudget: {
-    allocated: number;
-    spent: number;
+  /** Strategic goals whose status is at-risk or delayed. This is NOT an approval queue. */
+  atRiskStrategicGoals: number;
+  /** Grievance meeting dates in the next 30 days. These are case meetings, not governance meetings. */
+  grievanceMeetingsNext30Days: number;
+  /** Employer dues remittances for the current month. This is NOT a budget or expenditure. */
+  duesRemittances: {
+    expectedAmount: number;
+    receivedAmount: number;
     currency: string;
   };
   membershipTrend: number;
@@ -414,18 +417,17 @@ export function buildExecutiveMetrics(
 
   const totalMembers = memberRows.filter((member) => !ACTIVE_MEMBER_EXCLUDE.has((member.status ?? "").toLowerCase())).length;
 
-  const pendingApprovals = goalRows.filter((goal) => goal.status === "at-risk" || goal.status === "delayed").length;
+  const atRiskStrategicGoals = goalRows.filter((goal) => goal.status === "at-risk" || goal.status === "delayed").length;
 
-  const upcomingMeetings = grievanceRows.filter((g) => {
+  const grievanceMeetingsNext30Days = grievanceRows.filter((g) => {
     const meetingDate = asDate(g.meetingDate);
     if (!meetingDate) return false;
     const days = diffDays(now, meetingDate);
     return days >= 0 && days <= 30;
   }).length;
 
-  const spent = remittanceRows.reduce((sum, row) => sum + asNumber(row.totalAmount), 0);
-  const allocatedFromExpected = remittanceRows.reduce((sum, row) => sum + asNumber(row.expectedAmount), 0);
-  const allocated = Math.max(allocatedFromExpected, spent);
+  const receivedAmount = remittanceRows.reduce((sum, row) => sum + asNumber(row.totalAmount), 0);
+  const expectedAmount = remittanceRows.reduce((sum, row) => sum + asNumber(row.expectedAmount), 0);
 
   const thisMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
   const prevMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1));
@@ -447,11 +449,11 @@ export function buildExecutiveMetrics(
   return {
     totalMembers,
     activeGrievances,
-    pendingApprovals,
-    upcomingMeetings,
-    monthlyBudget: {
-      allocated,
-      spent,
+    atRiskStrategicGoals,
+    grievanceMeetingsNext30Days,
+    duesRemittances: {
+      expectedAmount,
+      receivedAmount,
       currency: "CAD",
     },
     membershipTrend,

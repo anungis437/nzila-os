@@ -5,9 +5,11 @@
 
 import { z } from "zod";
 import { withApi } from "@/lib/api/with-api";
+import { ApiError } from "@/lib/api/errors";
 import {
   recordAttendance,
   getMeetingAttendees,
+  requireCommitteeScope,
 } from "@/lib/services/committee-workspace-service";
 
 const attendanceSchema = z.object({
@@ -25,24 +27,30 @@ const attendanceSchema = z.object({
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "member" },
     openapi: { tags: ["Committees"], summary: "Get meeting attendance" },
   },
-  async ({ params }) => {
-    const { meetingId } = params as { id: string; meetingId: string };
+  async ({ organizationId, params }) => {
+    if (!organizationId) throw ApiError.badRequest("Organization context required");
+    const { id: committeeId, meetingId } = params as { id: string; meetingId: string };
+    await requireCommitteeScope(organizationId, committeeId, { meetingId });
     return getMeetingAttendees(meetingId);
   }
 );
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "steward" },
     body: attendanceSchema,
     openapi: { tags: ["Committees"], summary: "Record meeting attendance" },
   },
-  async ({ body, params }) => {
-    const { meetingId } = params as { id: string; meetingId: string };
-    await recordAttendance(meetingId, body.attendees);
+  async ({ body, userId, organizationId, params }) => {
+    if (!organizationId) throw ApiError.badRequest("Organization context required");
+    const { id: committeeId, meetingId } = params as { id: string; meetingId: string };
+    await requireCommitteeScope(organizationId, committeeId, { meetingId });
+    await recordAttendance(meetingId, organizationId, body.attendees, userId ?? undefined);
     return { success: true };
   }
 );

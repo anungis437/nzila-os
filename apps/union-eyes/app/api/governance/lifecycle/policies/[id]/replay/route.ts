@@ -4,7 +4,8 @@
  */
 import { withApi, ApiError } from '@/lib/api/framework'
 import { db } from '@/db/db'
-import { withSystemContext } from '@/lib/db/with-rls-context'
+import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { policyReplaySessions, governedPolicies } from '@nzila/db/schema'
 import { eq, desc } from 'drizzle-orm'
 
@@ -38,10 +39,13 @@ export const POST = withApi(
     auth: { required: true, minRole: 'admin' },
     entitlement: 'governance_suite',
   },
-  async ({ request, params, user }) => {
+  async ({ request, params, user, organizationId }) => {
     const actorId = user?.id
     if (!actorId) {
       throw ApiError.badRequest('Authenticated user is required to start a policy replay.')
+    }
+    if (!organizationId) {
+      throw ApiError.badRequest('An organization context is required so the replay can be audited.')
     }
 
     const id = (params as Record<string, string>).id
@@ -80,6 +84,14 @@ export const POST = withApi(
           driftDetected: false,
         })
         .returning()
+      await persistAtomicAudit(db as unknown as RLSTx, {
+        organizationId,
+        userId: actorId,
+        action: 'governance.policy_replay.start',
+        resourceType: 'policy_replay_sessions',
+        resourceId: session.id,
+        details: { sourcePolicyId: id, replayType: body.replayType ?? 'historical' },
+      })
       return { session }
     })
   },

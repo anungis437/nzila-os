@@ -36,7 +36,7 @@ const createSchema = z.object({
   netTermsDays: z.number().int().min(1).max(120).optional(),
 });
 
-export const GET = withMinRole('officer', async (_request, context: BaseAuthContext) => {
+export const GET = withMinRole('secretary_treasurer', async (_request, context: BaseAuthContext) => {
   const { organizationId, userId } = context;
   if (!organizationId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');

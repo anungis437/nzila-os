@@ -2,8 +2,9 @@ import { withApi, RATE_LIMITS, ApiError } from '@/lib/api/framework';
 import { db } from '@/db';
 import { insightRecommendations } from '@/db/schema';
 import { sql } from 'drizzle-orm';
-import { auditLog, AuditEventType, AuditSeverity, auditAIInvocation } from '@/lib/audit-logger';
+import { auditAIInvocation } from '@/lib/audit-logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const POST = withApi(
   {
@@ -75,52 +76,52 @@ export const POST = withApi(
       dataClass: 'internal',
     });
 
-    const [insight] = await db
-      .insert(insightRecommendations)
-      .values({
+    const insight = await withRLSContext({ organizationId }, async (tx) => {
+      const [created] = await tx
+        .insert(insightRecommendations)
+        .values({
+          organizationId,
+          insightType: 'optimization',
+          category: 'operations',
+          priority: topFrictionPoints.length > 0 ? 'high' : 'medium',
+          title: 'Weekly Engagement and Friction Summary',
+          description: 'Automated weekly synthesis of adoption, usage intensity, and feedback friction points.',
+          aiReferenceId: aiRefId,
+          dataSource: {
+            source: 'pilot_events + pilot_feedback',
+            window: '7d',
+          },
+          metrics: {
+            totalEvents: Number(eventRollup?.total_events ?? 0),
+            sessionsStarted: Number(eventRollup?.sessions_started ?? 0),
+            casesCreated: Number(eventRollup?.cases_created ?? 0),
+            documentsUploaded: Number(eventRollup?.documents_uploaded ?? 0),
+            activeUsers: Number(eventRollup?.active_users ?? 0),
+            engagementScore,
+          },
+          recommendations,
+          confidenceScore: '0.83',
+          relatedEntities: {
+            topFrictionPoints,
+          },
+          actionRequired: topFrictionPoints.length > 0,
+          estimatedBenefit: 'Improved activation and reduced support burden through targeted UX remediation.',
+        })
+        .returning();
+
+      await persistAtomicAudit(tx, {
         organizationId,
-        insightType: 'optimization',
-        category: 'operations',
-        priority: topFrictionPoints.length > 0 ? 'high' : 'medium',
-        title: 'Weekly Engagement and Friction Summary',
-        description: 'Automated weekly synthesis of adoption, usage intensity, and feedback friction points.',
-        aiReferenceId: aiRefId,
-        dataSource: {
-          source: 'pilot_events + pilot_feedback',
-          window: '7d',
-        },
-        metrics: {
-          totalEvents: Number(eventRollup?.total_events ?? 0),
-          sessionsStarted: Number(eventRollup?.sessions_started ?? 0),
-          casesCreated: Number(eventRollup?.cases_created ?? 0),
-          documentsUploaded: Number(eventRollup?.documents_uploaded ?? 0),
-          activeUsers: Number(eventRollup?.active_users ?? 0),
+        userId: userId ?? null,
+        action: 'insight.weekly_summary.generate',
+        resourceType: 'insight_recommendations',
+        resourceId: created.id,
+        details: {
           engagementScore,
-        },
-        recommendations,
-        confidenceScore: '0.83',
-        relatedEntities: {
           topFrictionPoints,
         },
-        actionRequired: topFrictionPoints.length > 0,
-        estimatedBenefit: 'Improved activation and reduced support burden through targeted UX remediation.',
-      })
-      .returning();
-
-    await auditLog({
-      eventType: AuditEventType.DATA_CREATE,
-      severity: AuditSeverity.MEDIUM,
-      userId: userId ?? undefined,
-      organizationId,
-      resource: 'insight_recommendations',
-      resourceId: insight.id,
-      action: 'weekly_insight_generated',
-      details: {
-        engagementScore,
-        topFrictionPoints,
-      },
+      });
+      return created;
     });
-
     return {
       window: '7d',
       engagement: {

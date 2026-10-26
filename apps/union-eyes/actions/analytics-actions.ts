@@ -8,6 +8,7 @@
  */
 
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import {
   analyticsMetrics,
@@ -48,6 +49,14 @@ async function getCurrentUserOrgId(): Promise<string> {
   return getOrganizationIdForUser(userId);
 }
 
+/** The acting user and the organization verified for them; every write is audited to this pair. */
+async function getActor(): Promise<{ userId: string; orgId: string }> {
+  const { userId } = await auth();
+  if (!userId) throw new Error('Unauthorized');
+
+  return { userId, orgId: await getOrganizationIdForUser(userId) };
+}
+
 /**
  * Calculate and store metrics for a given period
  */
@@ -59,7 +68,7 @@ export async function calculateMetrics(params: {
   periodEnd: Date;
 }) {
   try {
-    const orgId = await getCurrentUserOrgId();
+    const { userId, orgId } = await getActor();
     
     // Calculate metric value based on type
     let metricValue: number;
@@ -156,7 +165,7 @@ export async function calculateMetrics(params: {
     
     // Store metric with RLS context
     const [metric] = await withRLSContext({ organizationId: orgId }, async (db) => {
-      return db.insert(analyticsMetrics).values({
+      const stored = await db.insert(analyticsMetrics).values({
         organizationId: orgId,
         metricType: params.metricType,
         metricName: params.metricName,
@@ -169,6 +178,15 @@ export async function calculateMetrics(params: {
         comparisonValue: comparisonValue?.toString(),
         trend
       }).returning();
+      await persistAtomicAudit(db, {
+        organizationId: orgId,
+        userId,
+        action: 'analytics.metric.calculate',
+        resourceType: 'analytics_metrics',
+        resourceId: stored[0].id,
+        details: { metricType: params.metricType, metricName: params.metricName, periodType: params.periodType },
+      });
+      return stored;
     });
     
     revalidatePath('/dashboard/analytics');
@@ -189,7 +207,7 @@ export async function generatePredictions(params: {
   modelName?: 'linear_regression' | 'moving_average' | 'ensemble';
 }) {
   try {
-    const orgId = await getCurrentUserOrgId();
+    const { userId, orgId } = await getActor();
     
     // Get historical data based on prediction type with RLS context
     const historicalMetrics = await withRLSContext({ organizationId: orgId }, async (db) =>
@@ -229,15 +247,17 @@ export async function generatePredictions(params: {
     
     // Store predictions in database
     const lastDate = timeSeriesData[timeSeriesData.length - 1].date;
-    const storedPredictions: any[] = [];
-    
-    for (let i = 0; i < predictions.length; i++) {
-      const pred = predictions[i];
-      const targetDate = new Date(lastDate);
-      targetDate.setDate(targetDate.getDate() + i + 1);
-      
-      const [stored] = await withRLSContext({ organizationId: orgId }, async (db) =>
-        db.insert(mlPredictions).values({
+
+    // Every prediction and their audit record commit together
+    const storedPredictions = await withRLSContext({ organizationId: orgId }, async (db) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rows: any[] = [];
+      for (let i = 0; i < predictions.length; i++) {
+        const pred = predictions[i];
+        const targetDate = new Date(lastDate);
+        targetDate.setDate(targetDate.getDate() + i + 1);
+
+        const [stored] = await db.insert(mlPredictions).values({
           organizationId: orgId,
           predictionType: params.predictionType,
           predictionDate: targetDate,
@@ -245,11 +265,19 @@ export async function generatePredictions(params: {
           lowerBound: pred.confidenceInterval.lower.toString(),
           upperBound: pred.confidenceInterval.upper.toString(),
           confidence: pred.confidenceScore.toString(),
-        }).returning()
-      );
-      
-      storedPredictions.push(stored);
-    }
+        }).returning();
+
+        rows.push(stored);
+      }
+      await persistAtomicAudit(db, {
+        organizationId: orgId,
+        userId,
+        action: 'analytics.predictions.generate',
+        resourceType: 'ml_predictions',
+        details: { predictionType: params.predictionType, count: rows.length, model: modelName },
+      });
+      return rows;
+    });
     
     revalidatePath('/dashboard/analytics');
     
@@ -268,7 +296,7 @@ export async function detectMetricTrends(params: {
   daysBack?: number;
 }) {
   try {
-    const orgId = await getCurrentUserOrgId();
+    const { userId, orgId } = await getActor();
     const daysBack = params.daysBack || 30;
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - daysBack);
@@ -300,8 +328,8 @@ export async function detectMetricTrends(params: {
     const trendResult = detectTrend(timeSeriesData);
     
     // Store trend analysis with RLS context
-    const [storedTrend] = await withRLSContext({ organizationId: orgId }, async (db) =>
-      db.insert(trendAnalyses).values({
+    const [storedTrend] = await withRLSContext({ organizationId: orgId }, async (db) => {
+      const stored = await db.insert(trendAnalyses).values({
         organizationId: orgId,
         analysisType: 'trend',
         dataSource: params.metricType,
@@ -318,8 +346,17 @@ export async function detectMetricTrends(params: {
         insights: generateTrendInsights(trendResult),
         recommendations: generateTrendRecommendations(trendResult),
         confidence: trendResult.confidence.toString()
-      }).returning()
-    );
+      }).returning();
+      await persistAtomicAudit(db, {
+        organizationId: orgId,
+        userId,
+        action: 'analytics.trend.detect',
+        resourceType: 'trend_analyses',
+        resourceId: stored[0].id,
+        details: { metricType: params.metricType, daysBack },
+      });
+      return stored;
+    });
     
     revalidatePath('/dashboard/analytics');
     
@@ -352,8 +389,8 @@ export async function createKPI(params: {
     
     const orgId = await getCurrentUserOrgId();
     
-    const [kpi] = await withRLSContext({ organizationId: orgId }, async (db) =>
-      db.insert(kpiConfigurations).values({
+    const [kpi] = await withRLSContext({ organizationId: orgId }, async (db) => {
+      const stored = await db.insert(kpiConfigurations).values({
         organizationId: orgId,
         createdBy: userId,
         name: params.name,
@@ -367,8 +404,17 @@ export async function createKPI(params: {
         criticalThreshold: params.criticalThreshold?.toString(),
         alertEnabled: params.alertEnabled || false,
         alertRecipients: params.alertRecipients || []
-      }).returning()
-    );
+      }).returning();
+      await persistAtomicAudit(db, {
+        organizationId: orgId,
+        userId,
+        action: 'analytics.kpi.create',
+        resourceType: 'kpi_configurations',
+        resourceId: stored[0].id,
+        details: { name: params.name, metricType: params.metricType, alertEnabled: params.alertEnabled || false },
+      });
+      return stored;
+    });
     
     revalidatePath('/dashboard/analytics/kpis');
     

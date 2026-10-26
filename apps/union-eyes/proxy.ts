@@ -472,7 +472,7 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
   
   // Check for problematic URLs that might cause 431 errors
   // This covers payment provider redirects ONLY.
-  // NOTE: __clerk_handshake must NOT be stripped — the auth provider uses it to refresh
+  // NOTE: the auth provider's handshake parameter must NOT be stripped — it is used to refresh
   // short-lived session JWTs. Stripping it breaks session refresh and forces
   // authenticated users back to the sign-in page.
   if (

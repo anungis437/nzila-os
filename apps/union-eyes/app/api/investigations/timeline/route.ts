@@ -1,37 +1,10 @@
-import { z } from 'zod';
+/**
+ * Retired. This route only forwarded to a generic stub that has itself been retired; it performed no governed operation.
+ */
+import { withApiAuth } from '@/lib/api-auth-guard'
+import { retiredHandler } from '@/lib/api/retired-route'
 
-import { GET as DelegateGET, POST as DelegatePOST } from '../../cases/timeline/route';
+export const dynamic = 'force-dynamic'
 
-const MutationBoundarySchema = z.object({ method: z.string() });
-
-function requireOrgAccess(_request: Request): boolean {
-  return true;
-}
-
-function validateMutationBoundary(request: Request): boolean {
-  return MutationBoundarySchema.safeParse({ method: request.method }).success;
-}
-
-function unauthorized(): Response {
-  return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-    status: 401,
-    headers: { 'content-type': 'application/json' },
-  });
-}
-
-export async function GET(request: Request, context: any) {
-  if (!requireOrgAccess(request)) {
-    return unauthorized();
-  }
-  return DelegateGET(request as never, context as never);
-}
-
-export async function POST(request: Request, context: any) {
-  if (!requireOrgAccess(request)) {
-    return unauthorized();
-  }
-  if (!validateMutationBoundary(request)) {
-    return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
-  }
-  return DelegatePOST(request as never, context as never);
-}
+export const GET = withApiAuth(retiredHandler("/api/cases/{caseId}/timeline"))
+export const POST = withApiAuth(retiredHandler("/api/cases/{caseId}/timeline"))

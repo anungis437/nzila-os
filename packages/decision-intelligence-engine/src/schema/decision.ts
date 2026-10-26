@@ -45,7 +45,7 @@ export type WeightedCriterion = z.infer<typeof weightedCriterionSchema>
 // ─── Alternative ──────────────────────────────────────────────────────────────
 
 export const alternativeSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   name: z.string().min(1).max(200),
   description: z.string(),
   mustScores: z.record(z.string(), z.boolean()).describe('criterionId → pass/fail'),
@@ -62,7 +62,7 @@ export type Alternative = z.infer<typeof alternativeSchema>
 // ─── Risk Acceptance ──────────────────────────────────────────────────────────
 
 export const riskAcceptanceSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   risk: z.string().min(1),
   severity: severityScale,
   probability: severityScale,
@@ -77,7 +77,7 @@ export type RiskAcceptance = z.infer<typeof riskAcceptanceSchema>
 // ─── Mitigation Commitment ────────────────────────────────────────────────────
 
 export const mitigationCommitmentSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   commitment: z.string().min(1),
   ownerId: z.string().min(1),
   targetDate: z.string().datetime().nullable(),
@@ -90,7 +90,7 @@ export type MitigationCommitment = z.infer<typeof mitigationCommitmentSchema>
 // ─── Approver ─────────────────────────────────────────────────────────────────
 
 export const approverSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   actorId: z.string().min(1),
   role: z.string().min(1),
   approvedAt: z.string().datetime().nullable(),
@@ -103,7 +103,7 @@ export type Approver = z.infer<typeof approverSchema>
 // ─── Rejected Alternative ─────────────────────────────────────────────────────
 
 export const rejectedAlternativeSchema = z.object({
-  alternativeId: z.string().uuid(),
+  alternativeId: z.guid(),
   rejectionReason: z.string().min(1),
   failedMustCriteria: z.array(z.string()),
 })
@@ -124,7 +124,7 @@ export type ConfidenceSemantics = z.infer<typeof confidenceSemanticsSchema>
 // ─── Decision Analysis ────────────────────────────────────────────────────────
 
 export const decisionAnalysisSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   orgId: z.string().min(1),
 
   title: z.string().min(1).max(500),
@@ -140,7 +140,7 @@ export const decisionAnalysisSchema = z.object({
   rejectedAlternatives: z.array(rejectedAlternativeSchema),
 
   // Outcome
-  selectedAlternativeId: z.string().uuid().nullable(),
+  selectedAlternativeId: z.guid().nullable(),
   rationale: z.string(),
   rationaleEvidenceRefs: z.array(z.string()),
 
@@ -163,8 +163,8 @@ export const decisionAnalysisSchema = z.object({
   unresolvedUnknowns: z.number().int().nonnegative(),
   dependencyVolatility: z.enum(['low', 'moderate', 'high']),
 
-  supersededBy: z.string().uuid().nullable(),
-  supersedes: z.string().uuid().nullable(),
+  supersededBy: z.guid().nullable(),
+  supersedes: z.guid().nullable(),
 
   status: z.enum(['drafting', 'under-review', 'decided', 'implemented', 'superseded']),
   ownerId: z.string().min(1),
@@ -203,7 +203,7 @@ export const decisionAnalysisInputSchema = decisionAnalysisSchema.omit({
   assumptionDensity: z.number().min(0).optional().default(0),
   unresolvedUnknowns: z.number().int().nonnegative().optional().default(0),
   dependencyVolatility: z.enum(['low', 'moderate', 'high']).optional().default('moderate'),
-  supersedes: z.string().uuid().nullable().optional().default(null),
+  supersedes: z.guid().nullable().optional().default(null),
 })
 
 /**
@@ -217,25 +217,25 @@ export type DecisionAnalysisInput = z.input<typeof decisionAnalysisInputSchema>
 // ─── Score Result ─────────────────────────────────────────────────────────────
 
 export const decisionScoringResultSchema = z.object({
-  decisionId: z.string().uuid(),
+  decisionId: z.guid(),
   viableAlternatives: z.array(alternativeSchema),
   eliminatedAlternatives: z.array(
     z.object({
-      alternativeId: z.string().uuid(),
+      alternativeId: z.guid(),
       name: z.string(),
       failedCriteria: z.array(z.string()),
     }),
   ),
-  recommendedAlternativeId: z.string().uuid().nullable(),
+  recommendedAlternativeId: z.guid().nullable(),
   scoringMatrix: z.array(
     z.object({
-      alternativeId: z.string().uuid(),
+      alternativeId: z.guid(),
       name: z.string(),
       weightedScore: z.number(),
       mustPass: z.boolean(),
       criterionScores: z.array(
         z.object({
-          criterionId: z.string().uuid(),
+          criterionId: z.guid(),
           label: z.string(),
           weight: z.number(),
           score: z.number(),

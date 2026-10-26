@@ -1,135 +1,114 @@
 /**
  * GET PUT /api/notifications/preferences
- * Notification preferences for the authenticated user.
- * Backed by userNotificationPreferences table (Drizzle ORM).
+ * The authenticated user's own notification preferences (user_notification_preferences; RLS is
+ * user- and organization-scoped). Writes are validated: unknown fields are rejected.
  */
-import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db/db';
+import { and, eq } from 'drizzle-orm';
+import { z } from 'zod';
+import { withApi } from '@/lib/api/with-api';
+import { ApiError } from '@/lib/api/errors';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { userNotificationPreferences } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
+
+const DEFAULT_PREFERENCES = {
+  emailEnabled: true,
+  smsEnabled: false,
+  pushEnabled: true,
+  inAppEnabled: true,
+  digestFrequency: 'daily',
+  quietHoursStart: null,
+  quietHoursEnd: null,
+  claimUpdates: true,
+  documentUpdates: true,
+  deadlineAlerts: true,
+  systemAnnouncements: true,
+  securityAlerts: true,
+} as const;
+
+const hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).nullable();
+
+const updateSchema = z
+  .object({
+    email: z.string().email().max(320),
+    phone: z.string().max(40).nullable(),
+    emailEnabled: z.boolean(),
+    smsEnabled: z.boolean(),
+    pushEnabled: z.boolean(),
+    inAppEnabled: z.boolean(),
+    digestFrequency: z.enum(['immediate', 'daily', 'weekly', 'never']),
+    quietHoursStart: hhmm,
+    quietHoursEnd: hhmm,
+    claimUpdates: z.boolean(),
+    documentUpdates: z.boolean(),
+    deadlineAlerts: z.boolean(),
+    systemAnnouncements: z.boolean(),
+    securityAlerts: z.boolean(),
+  })
+  .partial()
+  .strict();
 
 export const GET = withApi(
   {
     auth: { required: true, minRole: 'member' },
-    openapi: {
-      tags: ['Notifications'],
-      summary: 'Get notification preferences',
-      description: 'Returns notification preferences for the current user.',
-    },
+    openapi: { tags: ['Notifications'], summary: 'Get notification preferences', description: 'Returns notification preferences for the current user; defaults are returned (not stored) until first saved.' },
   },
   async ({ userId, organizationId }) => {
-    const [prefs] = await db
-      .select()
-      .from(userNotificationPreferences)
-      .where(
-        and(
-          eq(userNotificationPreferences.userId, userId!),
-          eq(userNotificationPreferences.organizationId, organizationId!),
-        ),
-      )
-      .limit(1);
-
-    if (!prefs) {
-      return {
-        emailEnabled: true,
-        smsEnabled: false,
-        pushEnabled: true,
-        inAppEnabled: true,
-        digestFrequency: 'daily',
-        quietHoursStart: null,
-        quietHoursEnd: null,
-        claimUpdates: true,
-        documentUpdates: true,
-        deadlineAlerts: true,
-        systemAnnouncements: true,
-        securityAlerts: true,
-      };
-    }
-
-    return prefs;
+    const [prefs] = await withRLSContext(async (tx) =>
+      tx
+        .select()
+        .from(userNotificationPreferences)
+        .where(and(eq(userNotificationPreferences.userId, userId!), eq(userNotificationPreferences.organizationId, organizationId!)))
+        .limit(1),
+    );
+    return prefs ? { ...prefs, saved: true } : { ...DEFAULT_PREFERENCES, saved: false };
   },
 );
 
 export const PUT = withApi(
   {
     auth: { required: true, minRole: 'member' },
-    openapi: {
-      tags: ['Notifications'],
-      summary: 'Update notification preferences',
-      description: 'Creates or updates notification preferences for the current user.',
-    },
+    body: updateSchema,
+    openapi: { tags: ['Notifications'], summary: 'Update notification preferences', description: 'Creates or updates notification preferences for the current user.' },
   },
-  async ({ body, userId, organizationId }) => {
-    const {
-      email,
-      phone,
-      emailEnabled,
-      smsEnabled,
-      pushEnabled,
-      inAppEnabled,
-      digestFrequency,
-      quietHoursStart,
-      quietHoursEnd,
-      claimUpdates,
-      documentUpdates,
-      deadlineAlerts,
-      systemAnnouncements,
-      securityAlerts,
-    } = body as Record<string, unknown>;
-
-    const [existing] = await db
-      .select()
-      .from(userNotificationPreferences)
-      .where(
-        and(
-          eq(userNotificationPreferences.userId, userId!),
-          eq(userNotificationPreferences.organizationId, organizationId!),
-        ),
-      )
-      .limit(1);
-
-    const data: Record<string, unknown> = { updatedAt: new Date() };
-    if (email !== undefined) data.email = email;
-    if (phone !== undefined) data.phone = phone;
-    if (emailEnabled !== undefined) data.emailEnabled = emailEnabled;
-    if (smsEnabled !== undefined) data.smsEnabled = smsEnabled;
-    if (pushEnabled !== undefined) data.pushEnabled = pushEnabled;
-    if (inAppEnabled !== undefined) data.inAppEnabled = inAppEnabled;
-    if (digestFrequency !== undefined) data.digestFrequency = digestFrequency;
-    if (quietHoursStart !== undefined) data.quietHoursStart = quietHoursStart;
-    if (quietHoursEnd !== undefined) data.quietHoursEnd = quietHoursEnd;
-    if (claimUpdates !== undefined) data.claimUpdates = claimUpdates;
-    if (documentUpdates !== undefined) data.documentUpdates = documentUpdates;
-    if (deadlineAlerts !== undefined) data.deadlineAlerts = deadlineAlerts;
-    if (systemAnnouncements !== undefined) data.systemAnnouncements = systemAnnouncements;
-    if (securityAlerts !== undefined) data.securityAlerts = securityAlerts;
-
-    if (existing) {
-      const [updated] = await db
-        .update(userNotificationPreferences)
-        .set(data)
-        .where(eq(userNotificationPreferences.id, existing.id))
+  async ({ body, user, userId, organizationId }) => {
+    const values = { ...body, updatedAt: new Date() };
+    // The preference change and its audit record commit together.
+    const saved = await withRLSContext(async (tx) => {
+      const auditPreferences = (handle: typeof tx, id: string) =>
+        persistAtomicAudit(handle, {
+          userId: userId!,
+          organizationId: organizationId!,
+          resourceType: 'user_notification_preferences',
+          resourceId: id,
+          action: 'notification_preferences.update',
+          details: { fields: Object.keys(body) },
+        });
+      const [existing] = await tx
+        .select({ id: userNotificationPreferences.id })
+        .from(userNotificationPreferences)
+        .where(and(eq(userNotificationPreferences.userId, userId!), eq(userNotificationPreferences.organizationId, organizationId!)))
+        .limit(1);
+      if (existing) {
+        const [updated] = await tx
+          .update(userNotificationPreferences)
+          .set(values)
+          .where(and(eq(userNotificationPreferences.id, existing.id), eq(userNotificationPreferences.organizationId, organizationId!), eq(userNotificationPreferences.userId, userId!)))
+          .returning();
+        await auditPreferences(tx, updated.id);
+        return updated;
+      }
+      const email = body.email ?? user?.email;
+      if (!email) throw ApiError.badRequest('email is required for new preferences');
+      const [created] = await tx
+        .insert(userNotificationPreferences)
+        .values({ ...values, email, userId: userId!, organizationId: organizationId! })
         .returning();
-      return updated;
-    }
-
-    if (!email) {
-      throw ApiError.badRequest('email is required for new preferences');
-    }
-
-    const [created] = await db
-      .insert(userNotificationPreferences)
-      .values({
-        userId: userId!,
-        organizationId: organizationId!,
-        email: email as string,
-        ...(data as Record<string, unknown>),
-      })
-      .returning();
-
-    return created;
+      await auditPreferences(tx, created.id);
+      return created;
+    });
+    return { ...saved, saved: true };
   },
 );
-

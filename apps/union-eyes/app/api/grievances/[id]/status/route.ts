@@ -11,7 +11,10 @@ import { grievances } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
-import { auditDataMutation, auditLog, AuditEventType, AuditSeverity } from "@/lib/audit-logger";
+import { canTransitionGrievance } from "@/lib/cases/grievance-transition-authority";
+import { getEffectiveCaseAccess } from "@/lib/services/case-access-service";
+import { auditLog, AuditEventType, AuditSeverity } from "@/lib/audit-logger";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
@@ -74,6 +77,28 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
       return standardErrorResponse(ErrorCode.NOT_FOUND, "Grievance not found");
     }
 
+    // Role level is necessary but not sufficient: the actor needs authority over this matter.
+    const caseAccess = await getEffectiveCaseAccess({ organizationId, grievanceId: params.id, userId });
+    const mayTransition = canTransitionGrievance({
+      isPrimaryOwner: caseAccess.isPrimaryOwner,
+      accessRole: caseAccess.isSecondaryCollaborator ? caseAccess.accessRole : null,
+      grievanceStatus: grievance.status as string,
+      primaryRepresentativeId: grievance.unionRepId,
+    });
+    if (!mayTransition) {
+      await auditLog({
+        eventType: AuditEventType.AUTHORITY_VIOLATION,
+        severity: AuditSeverity.HIGH,
+        userId,
+        organizationId,
+        resource: "grievances",
+        action: "status_transition",
+        resourceId: params.id,
+        details: { reason: "Representative has no authority over this matter", requestedStatus: newStatus },
+        outcome: "failure",
+      });
+      return standardErrorResponse(ErrorCode.FORBIDDEN, "You do not have authority to change the status of this matter");
+    }
     // Map existing status to unified FSM status via state bridge
     const currentStatus = grievance.status as string;
     const isAdmin = await hasMinRole("admin");
@@ -109,8 +134,8 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
     const previousState = { status: grievance.status };
 
     // Apply update
-    const [updated] = await withRLSContext(async () => {
-      const [u] = await db
+    const [updated] = await withRLSContext(async (tx) => {
+      const [u] = await tx
         .update(grievances)
         .set({
           status: newStatus,
@@ -118,57 +143,32 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
           ...(newStatus === "settled" ? { resolvedAt: new Date() } : {}),
           ...(newStatus === "closed" ? { closedAt: new Date() } : {}),
         })
-        .where(eq(grievances.id, params.id))
+        .where(and(eq(grievances.id, params.id), eq(grievances.organizationId, organizationId)))
         .returning();
 
       // Emit event
-      await db.insert(grievanceEvents).values({
+      await tx.insert(grievanceEvents).values({
         grievanceId: params.id,
         eventType: "status_changed",
         actorUserId: userId,
         notes: notes ?? `Status changed: ${currentStatus} → ${newStatus}`,
       });
 
+      // The status change, its event and its audit record commit together.
+      const intakeAction = newStatus === 'closed_no_case'
+        ? 'close_intake_no_case'
+        : currentStatus === 'draft' && newStatus !== 'draft' ? 'review_intake' : null;
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'grievance.status_change',
+        resourceType: 'grievances',
+        resourceId: params.id,
+        details: { previousState, newState: { status: newStatus }, ...(intakeAction ? { intakeAction } : {}) },
+      });
+
       return [u];
     });
-
-    // Audit
-    await auditDataMutation({
-      userId,
-      organizationId,
-      resource: "grievances",
-      action: "update",
-      resourceId: params.id,
-      previousState,
-      newState: { status: newStatus },
-    });
-
-    // Emit specific audit events for intake/case lifecycle transitions
-    if (newStatus === 'closed_no_case') {
-      await auditLog({
-        eventType: AuditEventType.INTAKE_CLOSED,
-        severity: AuditSeverity.MEDIUM,
-        userId,
-        organizationId,
-        resource: 'grievances',
-        action: 'close_intake_no_case',
-        resourceId: params.id,
-        details: { previousStatus: currentStatus },
-        outcome: 'success',
-      });
-    } else if (currentStatus === 'draft' && newStatus !== 'draft') {
-      await auditLog({
-        eventType: AuditEventType.INTAKE_REVIEWED,
-        severity: AuditSeverity.MEDIUM,
-        userId,
-        organizationId,
-        resource: 'grievances',
-        action: 'review_intake',
-        resourceId: params.id,
-        details: { newStatus },
-        outcome: 'success',
-      });
-    }
 
     buildUnionEvidencePack({
       actionType: 'GRIEVANCE_STATUS_CHANGED',

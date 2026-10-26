@@ -96,11 +96,11 @@ export const webhookPayloadSchema = z.object({
 })
 
 export const dlqReplayRequestSchema = z.object({
-  entryIds: z.array(z.string().uuid()).min(1).max(100),
+  entryIds: z.array(z.guid()).min(1).max(100),
 })
 
 export const rateLimitConfigSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   provider: z.string().min(1),
   maxRequestsPerMinute: z.number().int().positive().max(10_000),
   maxRequestsPerHour: z.number().int().positive().max(100_000),

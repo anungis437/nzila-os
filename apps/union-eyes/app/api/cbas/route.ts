@@ -4,8 +4,9 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { listCBAs, createCBA, type CBAFilters } from '@/lib/services/cba-service';
-import { getCurrentUser, requireUserForOrganization, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
+import { listCBAs, type CBAFilters } from '@/lib/services/cba-service';
+import { createCbaAudited } from '@/lib/services/cba-audited-service';
+import { withRoleAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
@@ -16,29 +17,43 @@ const JURISDICTIONS = [
   'newfoundland', 'northwest_territories', 'yukon', 'nunavut',
 ] as const;
 
+// The organization, creator, visibility and counters are never accepted from the body.
 const createCBASchema = z.object({
-  organizationId: z.string().uuid(),
+  organizationId: z.guid().optional(),
   cbaNumber: z.string().min(1).max(100),
   title: z.string().min(1).max(500),
   jurisdiction: z.enum(JURISDICTIONS),
+  language: z.enum(['en', 'fr', 'bilingual']).optional(),
   employerName: z.string().min(1).max(300),
+  employerId: z.string().max(100).optional(),
   unionName: z.string().min(1).max(300),
+  unionLocal: z.string().max(100).optional(),
+  unionId: z.string().max(100).optional(),
   effectiveDate: z.coerce.date(),
   expiryDate: z.coerce.date(),
+  signedDate: z.coerce.date().optional(),
+  ratificationDate: z.coerce.date().optional(),
   industrySector: z.string().min(1).max(200),
-}).passthrough();
+  sector: z.string().max(200).optional(),
+  employeeCoverage: z.number().int().optional(),
+  bargainingUnitDescription: z.string().optional(),
+  documentUrl: z.string().url().optional(),
+  status: z.enum(['active', 'expired', 'under_negotiation', 'ratified_pending', 'archived']).optional(),
+});
 
-export async function GET(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+export const GET = withRoleAuth('member', async (req: NextRequest, context: BaseAuthContext) => {
+  const organizationId = context.organizationId;
+  if (!organizationId) {
+    return NextResponse.json({ error: 'No active organization' }, { status: 400 });
   }
 
   const url = new URL(req.url);
-  const filters: CBAFilters = {};
+  const requestedOrg = url.searchParams.get('organizationId');
+  if (requestedOrg && requestedOrg !== organizationId) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
-  const orgId = url.searchParams.get('organizationId');
-  if (orgId) filters.organizationId = orgId;
+  const filters: CBAFilters = { organizationId };
 
   const status = url.searchParams.getAll('status');
   if (status.length) filters.status = status;
@@ -53,47 +68,40 @@ export async function GET(req: NextRequest) {
   const limit = parseInt(url.searchParams.get('limit') || '20', 10);
 
   try {
-    const result = await withRLSContext(async () => listCBAs(filters, { page, limit }));
+    const result = await withRLSContext({ organizationId }, async () => listCBAs(filters, { page, limit }));
     return NextResponse.json(result);
   } catch {
     return NextResponse.json({ error: 'Failed to list CBAs' }, { status: 500 });
   }
-}
+});
 
-export async function POST(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+export const POST = withRoleAuth('steward', async (req: NextRequest, context: BaseAuthContext) => {
+  const { organizationId, userId } = context;
+  if (!organizationId || !userId) {
+    return NextResponse.json({ error: 'No active organization' }, { status: 400 });
   }
 
   const body = await req.json();
   const validation = createCBASchema.safeParse(body);
   if (!validation.success) {
     return NextResponse.json(
-      { error: 'Invalid request data', details: validation.error.errors },
+      { error: 'Invalid request data', details: validation.error.issues },
       { status: 400 }
     );
   }
 
-  try {
-    // Validate caller belongs to the target organization with steward+ role
-    let userCtx;
-    try {
-      userCtx = await requireUserForOrganization(validation.data.organizationId);
-    } catch {
-      return NextResponse.json({ error: 'Forbidden: not a member of target organization' }, { status: 403 });
-    }
-    const userRole = userCtx.roles[0] || 'member';
-    if ((ROLE_HIERARCHY[userRole as keyof typeof ROLE_HIERARCHY] ?? 0) < ROLE_HIERARCHY.steward) {
-      return NextResponse.json({ error: 'Forbidden: requires steward role' }, { status: 403 });
-    }
+  const { organizationId: requestedOrg, ...data } = validation.data;
+  if (requestedOrg && requestedOrg !== organizationId) {
+    return NextResponse.json({ error: 'Forbidden: not the active organization' }, { status: 403 });
+  }
 
-    const cba = await withRLSContext({ organizationId: validation.data.organizationId }, async () =>
-      createCBA(validation.data),
-    );
+  try {
+    const cba = await createCbaAudited({ organizationId, userId }, data);
     return NextResponse.json(cba, { status: 201 });
-  } catch {
+  } catch (error) {
+    if ((error as { code?: string })?.code === '23505') {
+      return NextResponse.json({ error: 'CBA number already exists' }, { status: 409 });
+    }
     return NextResponse.json({ error: 'Failed to create CBA' }, { status: 500 });
   }
-}
-
+});

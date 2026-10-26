@@ -9,7 +9,7 @@
 import { DataAggregationConsent as BaseDataAggregationConsent } from '@/types/marketing';
 import { db } from '@/db';
 import { dataAggregationConsent } from '@/db/schema/domains/marketing';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 /**
  * Extended consent type that includes DB-managed fields used throughout this module.
@@ -114,6 +114,7 @@ export async function createConsentRecord(
  */
 export async function revokeConsent(
   consentId: string,
+  organizationId: string,
   _revokedBy: string,
   _reason?: string
 ): Promise<DataAggregationConsent> {
@@ -123,7 +124,7 @@ export async function revokeConsent(
       consentGiven: false,
       updatedAt: new Date(),
     })
-    .where(eq(dataAggregationConsent.id, consentId))
+    .where(and(eq(dataAggregationConsent.id, consentId), eq(dataAggregationConsent.organizationId, organizationId)))
     .returning();
 
   return consent as unknown as DataAggregationConsent;
@@ -134,6 +135,7 @@ export async function revokeConsent(
  */
 export async function updateConsentPreferences(
   consentId: string,
+  organizationId: string,
   newPreferences: Partial<ConsentPreferences>,
   _updatedBy: string
 ): Promise<DataAggregationConsent> {
@@ -141,7 +143,7 @@ export async function updateConsentPreferences(
   const [current] = await db
     .select()
     .from(dataAggregationConsent)
-    .where(eq(dataAggregationConsent.id, consentId))
+    .where(and(eq(dataAggregationConsent.id, consentId), eq(dataAggregationConsent.organizationId, organizationId)))
     .limit(1);
 
   if (!current) {
@@ -160,7 +162,7 @@ export async function updateConsentPreferences(
     .set({
       updatedAt: new Date(),
     })
-    .where(eq(dataAggregationConsent.id, consentId))
+    .where(and(eq(dataAggregationConsent.id, consentId), eq(dataAggregationConsent.organizationId, organizationId)))
     .returning();
 
   return consent as unknown as DataAggregationConsent;

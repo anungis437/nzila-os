@@ -9,10 +9,12 @@ import {
   signatureDocuments,
   documentSigners,
   signatureAuditTrail,
-  organizationMembers,
 } from "@/db/schema";
 import SignatureProviderFactory from "./providers";
-import { eq, and, or, desc } from "drizzle-orm";
+import { decideProviderSync, mayAdvanceSigner } from "./provider-sync";
+import { eq, and, or, desc, inArray, notInArray, isNull } from "drizzle-orm";
+import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { createHash } from "crypto";
 import { NotificationService } from "@/lib/services/notification-service";
 import DocumentStorageService from "@/lib/services/document-storage-service";
@@ -20,6 +22,23 @@ import DocumentStorageService from "@/lib/services/document-storage-service";
 type SignatureDocumentInsert = typeof signatureDocuments.$inferInsert;
 type SignatureAuditTrailInsert = typeof signatureAuditTrail.$inferInsert;
 type DocumentSignerInsert = typeof documentSigners.$inferInsert;
+
+/** A refusal the route can report as a 403 (not permitted) or 409 (not in a state that allows it). */
+export class SignatureAuthorityError extends Error {
+  constructor(readonly code: "FORBIDDEN" | "CONFLICT", message: string) {
+    super(message);
+    this.name = "SignatureAuthorityError";
+  }
+}
+
+/** Document states in which no signature or void can be applied any more. */
+const FINAL_DOCUMENT_STATES = ["completed", "voided", "declined", "expired"] as const;
+/** Signer states that are settled: a signature is not applied over them. */
+const SETTLED_SIGNER_STATES = ["signed", "declined", "authentication_failed", "expired"] as const;
+
+/** Signer rows carry no organization of their own: their ownership is proven through the organization of their document. */
+const documentsOfOrganization = (tx: RLSTx, organizationId: string) =>
+  tx.select({ id: signatureDocuments.id }).from(signatureDocuments).where(eq(signatureDocuments.organizationId, organizationId));
 
 /**
  * Signature Document Service
@@ -132,52 +151,52 @@ export class SignatureService {
         metadata: (data.metadata ?? null) as SignatureDocumentInsert['metadata'],
       };
 
-    const [document] = await db
-      .insert(signatureDocuments)
-      .values(documentInsert)
-      .returning();
+    // The document, its signers, its trail and the platform audit commit together. The envelope and the stored file
+    // above are external effects and happen first.
+    const document = await withRLSContext({ organizationId: data.organizationId }, async (tx) => {
+      const [created] = await tx
+        .insert(signatureDocuments)
+        .values(documentInsert)
+        .returning();
 
-    // Create signer records
-    const _signerRecords = await Promise.all(
-      data.signers.map(async (signer, index) => {
-        const providerSigner = envelope.signers[index];
+      for (const [index, signer] of data.signers.entries()) {
+        await tx.insert(documentSigners).values({
+          documentId: created.id,
+          userId: signer.userId,
+          email: signer.email,
+          name: signer.name,
+          role: signer.role,
+          signingOrder: signer.signingOrder || index + 1,
+          status: "sent",
+          sentAt: new Date(),
+          providerSignerId: envelope.signers[index].signerId,
+        });
+      }
 
-        const [signerRecord] = await db
-          .insert(documentSigners)
-          .values({
-            documentId: document.id,
-            userId: signer.userId,
-            email: signer.email,
-            name: signer.name,
-            role: signer.role,
-            signingOrder: signer.signingOrder || index + 1,
-            status: "sent",
-            sentAt: new Date(),
-            providerSignerId: providerSigner.signerId,
-          })
-          .returning();
+      await AuditTrailService.log({
+        documentId: created.id,
+        eventType: "document_created",
+        eventDescription: `Document "${data.title}" created and sent for signature`,
+        actorUserId: data.sentBy,
+        metadata: { provider: provider.name, signerCount: data.signers.length },
+      }, tx);
 
-        return signerRecord;
-      })
-    );
+      await AuditTrailService.log({
+        documentId: created.id,
+        eventType: "document_sent",
+        eventDescription: `Document sent to ${data.signers.length} signer(s)`,
+        actorUserId: data.sentBy,
+      }, tx);
 
-    // Create audit trail entry
-    await AuditTrailService.log({
-      documentId: document.id,
-      eventType: "document_created",
-      eventDescription: `Document "${data.title}" created and sent for signature`,
-      actorUserId: data.sentBy,
-      metadata: {
-        provider: provider.name,
-        signerCount: data.signers.length,
-      },
-    });
-
-    await AuditTrailService.log({
-      documentId: document.id,
-      eventType: "document_sent",
-      eventDescription: `Document sent to ${data.signers.length} signer(s)`,
-      actorUserId: data.sentBy,
+      await persistAtomicAudit(tx, {
+        organizationId: data.organizationId,
+        userId: data.sentBy,
+        action: "signature.document.send",
+        resourceType: "signature_documents",
+        resourceId: created.id,
+        details: { provider: provider.name, signerCount: data.signers.length, fileHash },
+      });
+      return created;
     });
 
     return document;
@@ -201,43 +220,12 @@ export class SignatureService {
       return false;
     }
 
-    // SECURITY: User has access if they:
-    // 1. Sent the document
-    // 2. Are a signer on the document
-    // 3. Share the same organizationId (organization member)
-    
+    // A signature document is visible to the person who sent it and to its signers, which is also what the user's
+    // own document list shows. Membership of the organization is not a relationship to the document.
     const isSender = document.sentBy === userId;
     const isSigner = document.signers.some((s) => s.userId === userId);
-    
-    // Verify organization-based access (prevents IDOR attacks)
-    const isOrgMember = await this.checkOrgMembership(userId, document.organizationId);
-    
-    return isSender || isSigner || isOrgMember;
-  }
 
-  /**
-   * Check if user is a member of the organization
-   * 
-   * SECURITY: Prevents unauthorized access to documents by verifying
-   * that the user belongs to the same organization as the document.
-   */
-  private static async checkOrgMembership(
-    userId: string,
-    organizationId: string
-  ): Promise<boolean> {
-    try {
-      const membership = await db.query.organizationMembers.findFirst({
-        where: and(
-          eq(organizationMembers.userId, userId),
-          eq(organizationMembers.organizationId, organizationId),
-          eq(organizationMembers.status, 'active')
-        ),
-      });
-      
-      return !!membership;
-    } catch (_error) {
-return false;
-    }
+    return isSender || isSigner;
   }
 
   /**
@@ -264,84 +252,129 @@ return false;
   }
 
   /**
-   * Sync document status with provider
+   * Sync document status with provider.
+   *
+   * A provider's report is an observation, judged by decideProviderSync: only an external provider reports, a terminal
+   * state is final, a stale or repeated observation changes nothing, and the completion time is the provider's own
+   * event time when it supplied one. The local clock is never stamped as a completion or signing time; when it was
+   * received is kept separately (providerStatusObserved). The change, the signer updates and the audit records commit
+   * together, and the update is conditional on the status that was judged, so two concurrent syncs or a replay cannot
+   * apply twice.
    */
-  static async syncDocumentStatus(documentId: string) {
+  static async syncDocumentStatus(documentId: string): Promise<{ synced: boolean; reason?: string }> {
     const document = await db.query.signatureDocuments.findFirst({
       where: eq(signatureDocuments.id, documentId),
     });
 
     if (!document || !document.providerEnvelopeId) {
-      return;
+      return { synced: false, reason: "no_envelope" };
     }
 
+    let status;
     try {
       const provider = SignatureProviderFactory.getProvider(
         document.provider as "docusign" | "hellosign" | "internal"
       );
-      const status = await provider.getEnvelopeStatus(
-        document.providerEnvelopeId
-      );
+      status = await provider.getEnvelopeStatus(document.providerEnvelopeId);
+    } catch (_error) {
+      // A provider outage leaves the stored state exactly as it was.
+      return { synced: false, reason: "provider_unavailable" };
+    }
 
-      // Update document status
-      if (status.status !== document.status) {
-        await db
-          .update(signatureDocuments)
+    const observedAt = new Date();
+    const decision = decideProviderSync(
+      {
+        status: document.status,
+        provider: document.provider,
+        providerEnvelopeId: document.providerEnvelopeId,
+        providerAcknowledgedAt: document.providerAcknowledgedAt ?? null,
+      },
+      { status: status.status, completedAt: status.completedAt },
+      observedAt,
+    );
+    if (decision.action === "ignore") return { synced: false, reason: decision.reason };
+
+    return withRLSContext({ organizationId: document.organizationId }, async (tx) => {
+      const conditions = [eq(signatureDocuments.id, documentId), eq(signatureDocuments.status, document.status)];
+      if (!decision.statusChanged) conditions.push(isNull(signatureDocuments.providerAcknowledgedAt));
+      const [updated] = await tx
+        .update(signatureDocuments)
+        .set({
+          status: decision.status as SignatureDocumentInsert["status"],
+          providerStatusObservedAt: observedAt,
+          ...(decision.providerAcknowledgedAt
+            ? { providerAcknowledgedAt: decision.providerAcknowledgedAt, completedAt: decision.providerAcknowledgedAt }
+            : {}),
+          updatedAt: observedAt,
+        })
+        .where(and(...conditions, eq(signatureDocuments.organizationId, document.organizationId)))
+        .returning({ id: signatureDocuments.id });
+      // Another sync already applied this observation.
+      if (!updated) return { synced: false, reason: "already_applied" };
+
+      await AuditTrailService.log({
+        documentId,
+        eventType: "status_changed",
+        eventDescription: decision.statusChanged
+          ? `Provider reported status ${decision.status}`
+          : "Provider acknowledged completion",
+        metadata: {
+          previousStatus: document.status,
+          newStatus: decision.status,
+          providerAcknowledgedAt: decision.providerAcknowledgedAt?.toISOString() ?? null,
+          observedAt: observedAt.toISOString(),
+        },
+      }, tx);
+      await persistAtomicAudit(tx, {
+        organizationId: document.organizationId,
+        userId: "system:signature-provider-sync",
+        action: "signature.provider_status_sync",
+        resourceType: "signature_documents",
+        resourceId: documentId,
+        details: {
+          provider: document.provider,
+          from: document.status,
+          to: decision.status,
+          providerAcknowledgedAt: decision.providerAcknowledgedAt?.toISOString() ?? null,
+          observedAt: observedAt.toISOString(),
+        },
+      });
+
+      // Signer updates move forward only, use the provider's own event times, and never overwrite a settled signer.
+      for (const signer of status.signers ?? []) {
+        const next = this.mapProviderSignerStatus(signer.status);
+        const [row] = await tx
+          .select({ id: documentSigners.id, status: documentSigners.status, email: documentSigners.email })
+          .from(documentSigners)
+          .where(
+            and(
+              eq(documentSigners.documentId, documentId),
+              or(eq(documentSigners.providerSignerId, signer.signerId), eq(documentSigners.email, signer.email))
+            )
+          )
+          .limit(1);
+        if (!row || !mayAdvanceSigner(row.status, next)) continue;
+        const [advanced] = await tx
+          .update(documentSigners)
           .set({
-            status: status.status as SignatureDocumentInsert['status'],
-            updatedAt: new Date(),
-            completedAt:
-              status.status === "completed" ? new Date() : undefined,
+            status: next,
+            ...(next === "signed" && signer.signedAt ? { signedAt: signer.signedAt } : {}),
+            ...(signer.viewedAt ? { viewedAt: signer.viewedAt } : {}),
+            updatedAt: observedAt,
           })
-          .where(eq(signatureDocuments.id, documentId));
-
+          .where(and(eq(documentSigners.id, row.id), eq(documentSigners.status, row.status), inArray(documentSigners.documentId, documentsOfOrganization(tx, document.organizationId))))
+          .returning({ id: documentSigners.id });
+        if (!advanced) continue;
         await AuditTrailService.log({
           documentId,
-          eventType: "status_changed",
-          eventDescription: `Document status changed to ${status.status}`,
-          metadata: { previousStatus: document.status, newStatus: status.status },
-        });
+          signerId: row.id,
+          eventType: "signer_status_updated",
+          eventDescription: `Signer ${row.email} status updated to ${next}`,
+          metadata: { signerStatus: next, providerSignedAt: signer.signedAt?.toISOString() ?? null },
+        }, tx);
       }
-
-      // Update signer statuses
-      if (status.signers?.length) {
-        for (const signer of status.signers) {
-          const signerStatus = this.mapProviderSignerStatus(signer.status);
-          const updateData: Partial<DocumentSignerInsert> = {
-            status: signerStatus,
-            signedAt: signer.signedAt,
-            viewedAt: signer.viewedAt,
-            declinedAt: signer.status === "declined" ? new Date() : undefined,
-            updatedAt: new Date(),
-          };
-
-          const updated = await db
-            .update(documentSigners)
-            .set(updateData)
-            .where(
-              and(
-                eq(documentSigners.documentId, documentId),
-                or(
-                  eq(documentSigners.providerSignerId, signer.signerId),
-                  eq(documentSigners.email, signer.email)
-                )
-              )
-            )
-            .returning();
-
-          if (updated.length > 0) {
-            await AuditTrailService.log({
-              documentId,
-              signerId: updated[0].id,
-              eventType: "signer_status_updated",
-              eventDescription: `Signer ${signer.email} status updated to ${signerStatus}`,
-              metadata: { signerStatus },
-            });
-          }
-        }
-      }
-    } catch (_error) {
-}
+      return { synced: true };
+    });
   }
 
   private static mapProviderSignerStatus(status: string):
@@ -404,75 +437,101 @@ return false;
       throw new Error("You are not authorized to sign as this signer");
     }
 
-    const [updated] = await db
-      .update(documentSigners)
-      .set({
-        status: "signed",
-        signedAt: new Date(),
-        signatureType: data.signatureType,
-        signatureImageUrl: data.signatureImageUrl,
+    const document = await db.query.signatureDocuments.findFirst({
+      where: eq(signatureDocuments.id, existingSigner.documentId),
+    });
+    if (!document) throw new Error("Document not found");
+
+    return withRLSContext({ organizationId: document.organizationId }, async (tx) => {
+      // A signature lands only on a document that is still open and a signer who has not already settled: a voided
+      // or completed document is not signed, and a signature already given is not overwritten.
+      const [open] = await tx
+        .select({ id: signatureDocuments.id })
+        .from(signatureDocuments)
+        .where(and(eq(signatureDocuments.id, document.id), notInArray(signatureDocuments.status, [...FINAL_DOCUMENT_STATES])));
+      if (!open) throw new SignatureAuthorityError("CONFLICT", "This document is no longer open for signing");
+
+      const [updated] = await tx
+        .update(documentSigners)
+        .set({
+          status: "signed",
+          signedAt: new Date(),
+          signatureType: data.signatureType,
+          signatureImageUrl: data.signatureImageUrl,
+          ipAddress: data.ipAddress,
+          userAgent: data.userAgent,
+          geolocation: (data.geolocation ?? null) as DocumentSignerInsert['geolocation'],
+          updatedAt: new Date(),
+        })
+        .where(and(eq(documentSigners.id, data.signerId), inArray(documentSigners.documentId, documentsOfOrganization(tx, document.organizationId)), notInArray(documentSigners.status, [...SETTLED_SIGNER_STATES])))
+        .returning();
+      if (!updated) throw new SignatureAuthorityError("CONFLICT", "This signer has already completed signing");
+
+      await AuditTrailService.log({
+        documentId: updated.documentId,
+        signerId: updated.id,
+        eventType: "document_signed",
+        eventDescription: `${updated.name} signed the document`,
+        actorEmail: updated.email,
+        actorUserId: data.actorUserId,
         ipAddress: data.ipAddress,
         userAgent: data.userAgent,
-        geolocation: (data.geolocation ?? null) as DocumentSignerInsert['geolocation'],
-        updatedAt: new Date(),
-      })
-      .where(eq(documentSigners.id, data.signerId))
-      .returning();
+        geolocation: data.geolocation,
+        metadata: { signatureType: data.signatureType },
+      }, tx);
+      await persistAtomicAudit(tx, {
+        organizationId: document.organizationId,
+        userId: data.actorUserId,
+        action: "signature.document.sign",
+        resourceType: "signature_documents",
+        resourceId: updated.documentId,
+        details: { signerId: updated.id, signatureType: data.signatureType },
+      });
 
-    if (!updated) {
-      throw new Error("Signer not found");
-    }
-
-    await AuditTrailService.log({
-      documentId: updated.documentId,
-      signerId: updated.id,
-      eventType: "document_signed",
-      eventDescription: `${updated.name} signed the document`,
-      actorEmail: updated.email,
-      ipAddress: data.ipAddress,
-      userAgent: data.userAgent,
-      geolocation: data.geolocation,
-      metadata: {
-        signatureType: data.signatureType,
-      },
+      await this.checkCompletion(updated.documentId, document.organizationId, tx);
+      return updated;
     });
-
-    // Check if all signers have signed
-    await this.checkCompletion(updated.documentId);
-
-    return updated;
   }
 
   /**
    * Check if document is complete
    */
-  private static async checkCompletion(documentId: string) {
-    const signers = await db.query.documentSigners.findMany({
+  private static async checkCompletion(documentId: string, organizationId: string, tx: RLSTx) {
+    const signers = await tx.query.documentSigners.findMany({
       where: eq(documentSigners.documentId, documentId),
     });
 
     const allSigned = signers.every((s) => s.status === "signed");
 
     if (allSigned) {
-      await db
+      await tx
         .update(signatureDocuments)
         .set({
           status: "completed",
           completedAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(eq(signatureDocuments.id, documentId));
+        .where(and(eq(signatureDocuments.id, documentId), notInArray(signatureDocuments.status, [...FINAL_DOCUMENT_STATES]), eq(signatureDocuments.organizationId, organizationId)));
 
       await AuditTrailService.log({
         documentId,
         eventType: "document_completed",
         eventDescription: "All signers have completed signing",
+      }, tx);
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId: "system:signature-completion",
+        action: "signature.document.complete",
+        resourceType: "signature_documents",
+        resourceId: documentId,
+        details: { signers: signers.length },
       });
     }
   }
 
   /**
-   * Void document
+   * Void document. Only the person who sent it may void it: a signer or another member of the organization has no
+   * such relationship to the document. A completed or already voided document cannot be voided.
    */
   static async voidDocument(
     documentId: string,
@@ -486,6 +545,12 @@ return false;
     if (!document) {
       throw new Error("Document not found");
     }
+    if (document.sentBy !== voidedBy) {
+      throw new SignatureAuthorityError("FORBIDDEN", "Only the sender of a document can void it");
+    }
+    if ((FINAL_DOCUMENT_STATES as readonly string[]).includes(document.status)) {
+      throw new SignatureAuthorityError("CONFLICT", `A ${document.status} document cannot be voided`);
+    }
 
     // Void with provider
     if (document.providerEnvelopeId) {
@@ -495,27 +560,38 @@ return false;
         );
         await provider.voidEnvelope(document.providerEnvelopeId, reason);
       } catch (_error) {
-}
+      }
     }
 
-    // Update document
-    await db
-      .update(signatureDocuments)
-      .set({
-        status: "voided",
-        voidedAt: new Date(),
-        voidedBy,
-        voidReason: reason,
-        updatedAt: new Date(),
-      })
-      .where(eq(signatureDocuments.id, documentId));
+    await withRLSContext({ organizationId: document.organizationId }, async (tx) => {
+      const [voided] = await tx
+        .update(signatureDocuments)
+        .set({
+          status: "voided",
+          voidedAt: new Date(),
+          voidedBy,
+          voidReason: reason,
+          updatedAt: new Date(),
+        })
+        .where(and(eq(signatureDocuments.id, documentId), notInArray(signatureDocuments.status, [...FINAL_DOCUMENT_STATES]), eq(signatureDocuments.organizationId, document.organizationId)))
+        .returning({ id: signatureDocuments.id });
+      if (!voided) throw new SignatureAuthorityError("CONFLICT", "The document can no longer be voided");
 
-    await AuditTrailService.log({
-      documentId,
-      eventType: "document_voided",
-      eventDescription: `Document voided: ${reason}`,
-      actorUserId: voidedBy,
-      metadata: { reason },
+      await AuditTrailService.log({
+        documentId,
+        eventType: "document_voided",
+        eventDescription: `Document voided: ${reason}`,
+        actorUserId: voidedBy,
+        metadata: { reason },
+      }, tx);
+      await persistAtomicAudit(tx, {
+        organizationId: document.organizationId,
+        userId: voidedBy,
+        action: "signature.document.void",
+        resourceType: "signature_documents",
+        resourceId: documentId,
+        details: { reason, from: document.status },
+      });
     });
   }
 
@@ -633,12 +709,12 @@ export class AuditTrailService {
     userAgent?: string;
     geolocation?: any;
     metadata?: any;
-  }) {
+  }, exec: RLSTx = db) {
     const auditData: SignatureAuditTrailInsert = {
       ...data,
       timestamp: new Date(),
     };
-    await db.insert(signatureAuditTrail).values(auditData);
+    await exec.insert(signatureAuditTrail).values(auditData);
   }
 
   static async getDocumentAudit(documentId: string) {

@@ -14,7 +14,8 @@ import {
   duplicateGroups,
   duplicateGroupMembers,
 } from '@/db/schema/ingestion-schema';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 // ─── GET: List duplicate groups ─────────────────────────────────────────────
 
@@ -97,7 +98,7 @@ export const GET = withApi(
 // ─── POST: Update group status ──────────────────────────────────────────────
 
 const updateBodySchema = z.object({
-  group_id: z.string().uuid(),
+  group_id: z.guid(),
   action: z.enum(['confirm', 'dismiss', 'merge']),
 });
 
@@ -140,32 +141,24 @@ export const POST = withApi(
 
     const newStatus = statusMap[body.action];
 
-    await withSystemContext(async () =>
-      db
+    // The resolution and its audit record commit together.
+    await withRLSContext({ organizationId }, async (tx) => {
+      await tx
         .update(duplicateGroups)
         .set({
           status: newStatus,
           reviewedBy: userId,
           reviewedAt: new Date(),
         })
-        .where(eq(duplicateGroups.id, body.group_id)),
-    );
-
-    // Audit the resolution
-    await auditLog({
-      eventType: AuditEventType.DATA_UPDATE,
-      severity: AuditSeverity.MEDIUM,
-      userId: userId ?? undefined,
-      organizationId,
-      resource: 'duplicate_group',
-      resourceId: body.group_id,
-      action: `duplicate.${body.action}`,
-      details: {
-        groupType: group.groupType,
-        previousStatus: group.status,
-        newStatus,
-      },
-      outcome: 'success',
+        .where(and(eq(duplicateGroups.id, body.group_id), eq(duplicateGroups.organizationId, organizationId)));
+      await persistAtomicAudit(tx, {
+        userId: userId ?? 'system:duplicate-review',
+        organizationId,
+        resourceType: 'duplicate_group',
+        resourceId: body.group_id,
+        action: `duplicate.${body.action}`,
+        details: { groupType: group.groupType, previousStatus: group.status, newStatus },
+      });
     });
 
     return {

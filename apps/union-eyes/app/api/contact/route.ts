@@ -8,6 +8,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import { upsertContact, createDeal } from '@/lib/services/crm-service';
+import { guardPublicIntake } from '@/lib/public-intake/guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +24,9 @@ const contactSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const raw = await request.json();
+    const intake = await guardPublicIntake(request, { bucket: 'write' });
+    if (!intake.ok) return intake.response;
+    const raw = intake.json;
     const body = contactSchema.parse(raw);
     const { firstName, lastName, email, organization, role, inquiryType, message } = body;
 

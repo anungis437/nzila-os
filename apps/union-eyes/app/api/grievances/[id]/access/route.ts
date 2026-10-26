@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { and, desc, eq } from 'drizzle-orm';
 import { withOrganizationAuth } from '@/lib/organization-middleware';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { hasMinRole } from '@/lib/api-auth-guard';
@@ -8,14 +7,13 @@ import {
   standardErrorResponse,
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
-import { db } from '@/db/db';
-import { grievances } from '@/db/schema/domains/claims/grievances';
-import { grievanceCaseAccessAssignments } from '@/db/schema/domains/claims/grievance-lifecycle';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import {
-  grantCaseAccess,
-  updateCaseAccessStatus,
+  grantCaseAccessGuarded,
+  revokeCaseAccessGuarded,
   getEffectiveCaseAccess,
-  expireElapsedCaseAccessAssignments,
+  listCaseCollaborators,
+  type CaseAccessMutationFailure,
 } from '@/lib/services/case-access-service';
 import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
 
@@ -30,24 +28,18 @@ const accessInputSchema = z.object({
   canViewPrivateDocuments: z.boolean().optional(),
 });
 
+// Re-activating a grant would bypass grantee, scope and expiry validation; only revocation is a status change.
 const updateStatusSchema = z.object({
-  assignmentId: z.string().uuid(),
-  status: z.enum(['active', 'revoked', 'expired']),
+  assignmentId: z.guid(),
+  status: z.literal('revoked'),
 });
 
-async function canManageAccess(organizationId: string, grievanceId: string, userId: string) {
-  const isStewardPlus = await hasMinRole('steward');
-  if (isStewardPlus) {
-    return true;
-  }
-
-  const access = await getEffectiveCaseAccess({
-    organizationId,
-    grievanceId,
-    userId,
-  });
-
-  return access.isPrimaryOwner;
+function accessMutationFailure(failure: CaseAccessMutationFailure) {
+  return standardErrorResponse(
+    failure.status === 403 ? ErrorCode.FORBIDDEN : failure.status === 404 ? ErrorCode.NOT_FOUND : ErrorCode.VALIDATION_ERROR,
+    failure.message,
+    { code: failure.code },
+  );
 }
 
 export const GET = withOrganizationAuth(async (_request, context, params?: { id: string }) => {
@@ -63,39 +55,23 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     return standardErrorResponse(ErrorCode.FORBIDDEN, 'Unauthorized');
   }
 
-  await expireElapsedCaseAccessAssignments();
-
   const effective = await getEffectiveCaseAccess({
     organizationId,
     grievanceId: params.id,
     userId,
   });
 
-  const isStewardPlus = await hasMinRole('steward');
-  const effectiveAccessForResponse = {
-    ...effective,
-    canManageAssignments: isStewardPlus || effective.canManageAssignments,
-  };
-
-  if (!isStewardPlus && !effective.canViewCase) {
+  // The grant roster discloses who may see a case; it is limited to people with a relationship to this case.
+  if (!effective.canViewCase) {
     return standardErrorResponse(ErrorCode.FORBIDDEN, 'You do not have access to this grievance');
   }
 
-  const assignments = await db
-    .select()
-    .from(grievanceCaseAccessAssignments)
-    .where(
-      and(
-        eq(grievanceCaseAccessAssignments.organizationId, organizationId),
-        eq(grievanceCaseAccessAssignments.grievanceId, params.id),
-      ),
-    )
-    .orderBy(desc(grievanceCaseAccessAssignments.grantedAt));
+  const assignments = await withRLSContext({ organizationId }, (tx) => listCaseCollaborators(tx, organizationId, params.id!));
 
   return standardSuccessResponse({
-    primaryLroId: (await db.select({ unionRepId: grievances.unionRepId }).from(grievances).where(eq(grievances.id, params.id)).limit(1))[0]?.unionRepId ?? null,
+    primaryLroId: assignments.find((c) => c.relation !== 'collaborator')?.userId ?? null,
     assignments,
-    effectiveAccess: effectiveAccessForResponse,
+    effectiveAccess: effective,
   });
 });
 
@@ -107,18 +83,18 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing grievance ID');
   }
 
-  const canManage = await canManageAccess(organizationId, params.id, userId);
-  if (!canManage) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Only primary LRO or steward+ can grant collaborator access');
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Request body must be valid JSON');
   }
-
-  const body = await request.json();
   const parsed = accessInputSchema.safeParse(body);
   if (!parsed.success) {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid access payload', parsed.error.flatten());
   }
 
-  const access = await grantCaseAccess({
+  const granted = await grantCaseAccessGuarded({
     organizationId,
     grievanceId: params.id,
     userId: parsed.data.userId,
@@ -132,26 +108,18 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
     canViewPrivateDocuments: parsed.data.canViewPrivateDocuments,
   });
 
-  await auditCaseMutation({
-    event: CaseAuditEvent.CASE_ACCESS_GRANTED,
-    userId,
-    organizationId,
-    caseId: params.id,
-    action: 'update',
-    newState: { assignmentId: access.id, status: access.status },
-    details: {
-      targetUserId: access.userId,
-      accessRole: access.accessRole,
-      scope: {
-        canComment: access.canComment,
-        canUploadDocuments: access.canUploadDocuments,
-        canEditCaseNotes: access.canEditCaseNotes,
-        canDraftActions: access.canDraftActions,
-        canViewPrivateDocuments: access.canViewPrivateDocuments,
-      },
-      expiresAt: access.expiresAt,
-    },
-  });
+  if (!granted.ok) {
+    await auditCaseMutation({
+      event: CaseAuditEvent.CASE_ACCESS_DENIED,
+      userId,
+      organizationId,
+      caseId: params.id,
+      action: 'update',
+      details: { denied: true, reason: granted.code, targetUserId: parsed.data.userId },
+    });
+    return accessMutationFailure(granted);
+  }
+  const access = granted.access;
 
   return standardSuccessResponse(access);
 });
@@ -164,67 +132,35 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing grievance ID');
   }
 
-  const canManage = await canManageAccess(organizationId, params.id, userId);
-  if (!canManage) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Only primary LRO or steward+ can modify collaborator access');
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Request body must be valid JSON');
   }
-
-  const body = await request.json();
   const parsed = updateStatusSchema.safeParse(body);
   if (!parsed.success) {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid status payload', parsed.error.flatten());
   }
 
-  const before = (
-    await db
-      .select()
-      .from(grievanceCaseAccessAssignments)
-      .where(
-        and(
-          eq(grievanceCaseAccessAssignments.id, parsed.data.assignmentId),
-          eq(grievanceCaseAccessAssignments.organizationId, organizationId),
-          eq(grievanceCaseAccessAssignments.grievanceId, params.id),
-        ),
-      )
-      .limit(1)
-  )[0];
-
-  if (!before) {
-    return standardErrorResponse(ErrorCode.NOT_FOUND, 'Access assignment not found');
-  }
-
-  const updated = await updateCaseAccessStatus(parsed.data.assignmentId, parsed.data.status);
-  if (!updated) {
-    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to update access assignment');
-  }
-
-  const event =
-    parsed.data.status === 'revoked'
-      ? CaseAuditEvent.CASE_ACCESS_REVOKED
-      : parsed.data.status === 'expired'
-        ? CaseAuditEvent.CASE_ACCESS_EXPIRED
-        : CaseAuditEvent.CASE_ACCESS_UPDATED;
-
-  await auditCaseMutation({
-    event,
-    userId,
+  const revoked = await revokeCaseAccessGuarded({
     organizationId,
-    caseId: params.id,
-    action: 'update',
-    previousState: { status: before.status },
-    newState: { status: updated.status },
-    details: {
-      assignmentId: updated.id,
-      targetUserId: updated.userId,
-      scope: {
-        canComment: updated.canComment,
-        canUploadDocuments: updated.canUploadDocuments,
-        canEditCaseNotes: updated.canEditCaseNotes,
-        canDraftActions: updated.canDraftActions,
-        canViewPrivateDocuments: updated.canViewPrivateDocuments,
-      },
-    },
+    grievanceId: params.id,
+    assignmentId: parsed.data.assignmentId,
+    actorId: userId,
   });
+  if (!revoked.ok) {
+    await auditCaseMutation({
+      event: CaseAuditEvent.CASE_ACCESS_DENIED,
+      userId,
+      organizationId,
+      caseId: params.id,
+      action: 'update',
+      details: { denied: true, reason: revoked.code, assignmentId: parsed.data.assignmentId },
+    });
+    return accessMutationFailure(revoked);
+  }
+  const { updated } = revoked;
 
   return standardSuccessResponse(updated);
 });

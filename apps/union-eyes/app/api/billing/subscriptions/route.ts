@@ -12,7 +12,7 @@ import { pauseSubscription, resumeSubscription } from '@/services/platform-econo
 export const dynamic = 'force-dynamic';
 
 const actionSchema = z.object({
-  subscriptionId: z.string().uuid(),
+  subscriptionId: z.guid(),
   action: z.enum(['pause', 'resume']),
   reason: z.string().optional(),
 });

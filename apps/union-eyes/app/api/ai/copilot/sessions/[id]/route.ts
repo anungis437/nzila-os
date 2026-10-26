@@ -48,14 +48,21 @@ export const PATCH = withRoleAuth('steward', async (request: NextRequest, contex
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid outcome', parsed.error.flatten());
   }
 
-  await recordCopilotOutcome(
+  const recorded = await recordCopilotOutcome(
     id,
     context.organizationId!,
+    context.userId!,
     parsed.data.outcome,
     parsed.data.editedResponse,
     parsed.data.feedbackRating,
     parsed.data.feedbackNotes,
   );
+  if (recorded === 'not_found') {
+    return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Copilot session not found');
+  }
+  if (recorded === 'already_decided') {
+    return standardErrorResponse(ErrorCode.CONFLICT, 'An outcome has already been recorded for this session');
+  }
 
   // Emit AI_ACTION_TAKEN for full user→AI output traceability chain
   await logAiActionTaken({

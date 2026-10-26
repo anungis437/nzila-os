@@ -69,9 +69,9 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context) 
 
 export const POST = withRoleAuth('member', async (request: NextRequest, context) => {
   try {
-    const { userId: _userId, organizationId } = context as { userId: string; organizationId: string };
+    const { userId, organizationId } = context as { userId: string; organizationId: string };
 
-    if (!organizationId) {
+    if (!organizationId || !userId) {
       return standardErrorResponse(
         ErrorCode.MISSING_REQUIRED_FIELD,
         'Organization context required'
@@ -104,10 +104,12 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context)
       );
     }
 
+    // A member cancels only their own redemption; the credits go back to the member who spent them.
     const cancelledRedemption = await cancelRedemption(
       redemptionId,
       organizationId,
-      'member_cancelled'
+      'member_cancelled',
+      { userId, mustOwn: true }
     );
 
     return standardSuccessResponse({

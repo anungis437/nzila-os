@@ -19,10 +19,10 @@ import {
 export const dynamic = 'force-dynamic';
 
 const generateSchema = z.object({
-  billingPeriodId: z.string().uuid(),
+  billingPeriodId: z.guid(),
 });
 
-export const GET = withMinRole('officer', async (request, context: BaseAuthContext) => {
+export const GET = withMinRole('secretary_treasurer', async (request, context: BaseAuthContext) => {
   const { organizationId } = context;
   if (!organizationId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');

@@ -10,8 +10,10 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
-import { hasMinRole } from "@/lib/api-auth-guard";
+import { requireKernelCaseAction } from '@/lib/cases/case-authorization';
+import { ApiError } from '@/lib/api/errors';
 import { auditLog, AuditEventType, AuditSeverity } from "@/lib/audit-logger";
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import {
@@ -39,23 +41,6 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
 
   try {
     if (!params?.id) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Missing ID");
-
-    // Only steward+ can convert intakes to official cases
-    const isSteward = await hasMinRole("steward");
-    if (!isSteward) {
-      await auditLog({
-        eventType: AuditEventType.AUTHORITY_VIOLATION,
-        severity: AuditSeverity.HIGH,
-        userId,
-        organizationId,
-        resource: 'grievances',
-        action: 'convert_intake',
-        resourceId: params.id,
-        details: { reason: 'Member attempted to convert intake to case' },
-        outcome: 'failure',
-      });
-      return standardErrorResponse(ErrorCode.FORBIDDEN, "Only a steward or LRO can convert an intake to an official case.");
-    }
 
     const body = await request.json();
     const parsed = convertSchema.safeParse(body);
@@ -107,15 +92,17 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
 
     const { priority, notes } = parsed.data;
 
-    const result = await withRLSContext(async () => {
+    const result = await withRLSContext(async (tx) => {
+      // The kernel decides this actor may move this intake: a live assignment or mandate, never a role rank.
+      await requireKernelCaseAction(tx, { userId, organizationId }, params.id, 'case:transition');
       // Mark the intake as converted
-      await db
+      await tx
         .update(grievances)
         .set({ status: 'converted', updatedAt: new Date() })
-        .where(eq(grievances.id, params.id));
+        .where(and(eq(grievances.id, params.id), eq(grievances.organizationId, organizationId)));
 
       // Create the official case, linked back to the intake via relatedGrievanceIds
-      const [officialCase] = await db
+      const [officialCase] = await tx
         .insert(grievances)
         .values({
           grievanceNumber: `GRV-${Date.now()}-${randomBytes(3).toString('hex')}`,
@@ -128,14 +115,13 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
           cbaId: intake.cbaId ?? null,
           organizationId,
           createdBy: userId,
-          unionRepId: userId,
           filedDate: new Date(),
           relatedGrievanceIds: [params.id],
         })
         .returning();
 
       // Emit lifecycle events
-      await db.insert(grievanceEvents).values([
+      await tx.insert(grievanceEvents).values([
         {
           grievanceId: params.id,
           eventType: 'converted_to_case',
@@ -150,57 +136,31 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
         },
       ]);
 
+      // Conversion, the new case and both audit records commit together.
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'grievance.convert_intake',
+        resourceType: 'grievances',
+        resourceId: params.id,
+        details: { intakeId: params.id, newCaseId: officialCase.id, newCaseNumber: officialCase.grievanceNumber },
+      });
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'grievance.create_official_case',
+        resourceType: 'grievances',
+        resourceId: officialCase.id,
+        details: {
+          caseNumber: officialCase.grievanceNumber,
+          sourceIntakeId: params.id,
+          sourceIntakeNumber: intake.grievanceNumber,
+          initialPriority: officialCase.priority ?? null,
+        },
+      });
+
       return officialCase;
     });
-
-    // Audit: intake converted
-    await auditLog({
-      eventType: AuditEventType.INTAKE_CONVERTED,
-      severity: AuditSeverity.HIGH,
-      userId,
-      organizationId,
-      resource: 'grievances',
-      action: 'convert_intake',
-      resourceId: params.id,
-      details: {
-        intakeId: params.id,
-        newCaseId: result.id,
-        newCaseNumber: result.grievanceNumber,
-      },
-      outcome: 'success',
-    });
-
-    // Audit: official case created
-    await auditLog({
-      eventType: AuditEventType.CASE_CREATED,
-      severity: AuditSeverity.HIGH,
-      userId,
-      organizationId,
-      resource: 'grievances',
-      action: 'create_official_case',
-      resourceId: result.id,
-      details: {
-        caseNumber: result.grievanceNumber,
-        sourceIntakeId: params.id,
-        sourceIntakeNumber: intake.grievanceNumber,
-      },
-      outcome: 'success',
-    });
-
-    // Audit: initial priority on new case
-    if (result.priority) {
-      await auditLog({
-        eventType: AuditEventType.CASE_PRIORITY_SET,
-        severity: AuditSeverity.LOW,
-        userId,
-        organizationId,
-        resource: 'grievances',
-        action: 'set_initial_priority',
-        resourceId: result.id,
-        details: { priority: result.priority },
-        outcome: 'success',
-      });
-    }
 
     // Evidence pack
     buildUnionEvidencePack({
@@ -213,7 +173,11 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'INTAKE_CONVERTED' }));
 
     return standardSuccessResponse(result);
-  } catch (_error) {
+  } catch (error) {
+    if (error instanceof ApiError && error.code === 'FORBIDDEN') {
+      await auditLog({ eventType: AuditEventType.AUTHORITY_VIOLATION, severity: AuditSeverity.HIGH, userId, organizationId, resource: 'grievances', action: 'convert_intake', resourceId: params?.id ?? '', details: { reason: 'The authority kernel did not authorize this conversion' }, outcome: 'failure' });
+      return standardErrorResponse(ErrorCode.FORBIDDEN, "The authority kernel did not authorize this conversion.");
+    }
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Failed to convert intake");
   }
 });

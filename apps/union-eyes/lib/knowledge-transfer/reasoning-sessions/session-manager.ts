@@ -11,6 +11,8 @@
 
 import { sql } from 'drizzle-orm';
 import { randomUUID } from 'crypto';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { inOrganization, isUuid } from '../org-scope';
 import {
   type ReasoningSession,
@@ -20,6 +22,27 @@ import {
   type SessionSimulationRef,
   type SessionStatus,
 } from './session-models';
+
+function auditSession(
+  tx: RLSTx,
+  orgId: string,
+  userId: string,
+  action: string,
+  sessionId: string,
+  details: Record<string, unknown> = {},
+) {
+  return persistAtomicAudit(tx, {
+    organizationId: orgId,
+    userId,
+    action,
+    resourceType: 'ue_reasoning_sessions',
+    resourceId: sessionId,
+    details,
+  });
+}
+
+/** Rows an UPDATE ... RETURNING produced; a statement that matched nothing produces none. */
+const matched = (rows: unknown) => (rows as unknown as unknown[]).length > 0;
 
 function rowToSession(row: Record<string, unknown>): ReasoningSession {
   return {
@@ -44,19 +67,21 @@ function rowToSession(row: Record<string, unknown>): ReasoningSession {
 export async function createReasoningSession(
   orgId: string,
   input: CreateSessionInput,
+  userId: string,
 ): Promise<ReasoningSession> {
   const id = randomUUID();
   const now = new Date().toISOString();
-  await inOrganization(orgId, (tx) =>
-    tx.execute(sql`
+  await inOrganization(orgId, async (tx) => {
+    await tx.execute(sql`
       INSERT INTO ue_reasoning_sessions
         (id, organization_id, title, focus, context_description, created_at, updated_at)
       VALUES (
         ${id}, ${orgId}, ${input.title}, ${input.focus ?? 'general_continuity'},
         ${input.contextDescription ?? ''}, ${now}::timestamptz, ${now}::timestamptz
       )
-    `),
-  );
+    `);
+    await auditSession(tx, orgId, userId, 'reasoning_session.create', id, { focus: input.focus ?? 'general_continuity' });
+  });
   return {
     id,
     organizationId: orgId,
@@ -110,17 +135,21 @@ export async function getReasoningSession(
   return rowToSession(result[0]);
 }
 
-/** Update session metadata and state. A malformed id matches nothing. */
+/**
+ * Update session metadata and state. Returns false — writing and auditing nothing — when the id is malformed or the
+ * session is not in the organization.
+ */
 export async function updateReasoningSession(
   orgId: string,
   sessionId: string,
   input: UpdateSessionInput,
-): Promise<void> {
-  if (!isUuid(sessionId)) return;
+  userId: string,
+): Promise<boolean> {
+  if (!isUuid(sessionId)) return false;
   const now = new Date().toISOString();
   const graphState = input.graphState !== undefined ? JSON.stringify(input.graphState) : null;
-  await inOrganization(orgId, (tx) =>
-    tx.execute(sql`
+  return inOrganization(orgId, async (tx) => {
+    const rows = await tx.execute(sql`
       UPDATE ue_reasoning_sessions SET
         title = COALESCE(${input.title ?? null}, title),
         context_description = COALESCE(${input.contextDescription ?? null}, context_description),
@@ -129,33 +158,44 @@ export async function updateReasoningSession(
         latest_resilience_score = COALESCE(${input.latestResilienceScore ?? null}, latest_resilience_score),
         updated_at = ${now}::timestamptz
       WHERE id = ${sessionId} AND organization_id = ${orgId}
-    `),
-  );
+      RETURNING id
+    `);
+    if (!matched(rows)) return false;
+    await auditSession(tx, orgId, userId, 'reasoning_session.update', sessionId, {
+      fields: Object.keys(input).filter((k) => (input as Record<string, unknown>)[k] !== undefined),
+    });
+    return true;
+  });
 }
 
-/** Add an annotation to a session. */
+/** Add an annotation to a session; null when the session is not in the organization. */
 export async function addSessionAnnotation(
   orgId: string,
   sessionId: string,
   text: string,
-  targetRef: string | null = null,
-): Promise<SessionAnnotation> {
+  targetRef: string | null,
+  userId: string,
+): Promise<SessionAnnotation | null> {
   const annotation: SessionAnnotation = {
     id: randomUUID(),
     text,
     createdAt: new Date().toISOString(),
     targetRef,
   };
-  if (!isUuid(sessionId)) return annotation;
-  await inOrganization(orgId, (tx) =>
-    tx.execute(sql`
+  if (!isUuid(sessionId)) return null;
+  const added = await inOrganization(orgId, async (tx) => {
+    const rows = await tx.execute(sql`
       UPDATE ue_reasoning_sessions
       SET annotations = annotations || ${JSON.stringify([annotation])}::jsonb,
           updated_at = now()
       WHERE id = ${sessionId} AND organization_id = ${orgId}
-    `),
-  );
-  return annotation;
+      RETURNING id
+    `);
+    if (!matched(rows)) return false;
+    await auditSession(tx, orgId, userId, 'reasoning_session.annotate', sessionId, { annotationId: annotation.id });
+    return true;
+  });
+  return added ? annotation : null;
 }
 
 /** Link a cognition memory entry to a session. */
@@ -163,16 +203,21 @@ export async function linkMemoryToSession(
   orgId: string,
   sessionId: string,
   memoryEntryId: string,
-): Promise<void> {
-  if (!isUuid(sessionId)) return;
-  await inOrganization(orgId, (tx) =>
-    tx.execute(sql`
+  userId: string,
+): Promise<boolean> {
+  if (!isUuid(sessionId)) return false;
+  return inOrganization(orgId, async (tx) => {
+    const rows = await tx.execute(sql`
       UPDATE ue_reasoning_sessions
       SET linked_memory_ids = linked_memory_ids || ${JSON.stringify([memoryEntryId])}::jsonb,
           updated_at = now()
       WHERE id = ${sessionId} AND organization_id = ${orgId}
-    `),
-  );
+      RETURNING id
+    `);
+    if (!matched(rows)) return false;
+    await auditSession(tx, orgId, userId, 'reasoning_session.link_memory', sessionId, { memoryEntryId });
+    return true;
+  });
 }
 
 /** Add a simulation reference to a session. */
@@ -180,14 +225,19 @@ export async function addSessionSimulation(
   orgId: string,
   sessionId: string,
   sim: SessionSimulationRef,
-): Promise<void> {
-  if (!isUuid(sessionId)) return;
-  await inOrganization(orgId, (tx) =>
-    tx.execute(sql`
+  userId: string,
+): Promise<boolean> {
+  if (!isUuid(sessionId)) return false;
+  return inOrganization(orgId, async (tx) => {
+    const rows = await tx.execute(sql`
       UPDATE ue_reasoning_sessions
       SET active_simulations = active_simulations || ${JSON.stringify([sim])}::jsonb,
           updated_at = now()
       WHERE id = ${sessionId} AND organization_id = ${orgId}
-    `),
-  );
+      RETURNING id
+    `);
+    if (!matched(rows)) return false;
+    await auditSession(tx, orgId, userId, 'reasoning_session.add_simulation', sessionId, { scenarioType: sim.scenarioType, label: sim.label });
+    return true;
+  });
 }

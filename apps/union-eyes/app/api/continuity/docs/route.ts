@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { GET as DelegateGET, POST as DelegatePOST } from '../../documents/route';
+import { GET as DelegateGET, POST as DelegatePOST } from '../../documents/repository/route';
 
 const MutationBoundarySchema = z.object({ method: z.string() });
 

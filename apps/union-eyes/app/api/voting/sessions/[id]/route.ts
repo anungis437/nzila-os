@@ -5,6 +5,7 @@
  * DELETE /api/voting/sessions/[id] — delete session
  */
 import { withApi, z } from '@/lib/api/framework';
+import { ApiError } from '@/lib/api/errors';
 import {
   getVotingSessionById,
   updateVotingSession,
@@ -12,8 +13,21 @@ import {
 } from '@/lib/services/voting-service';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { checkSessionDeletion, checkSessionUpdate } from '@/lib/voting/session-lifecycle';
 
 export const dynamic = 'force-dynamic';
+
+// A session outside the caller's organization is indistinguishable from a
+// missing one, so cross-union callers cannot probe for session ids.
+async function getOwnedSession(id: string, organizationId: string | null, includeOptions = false) {
+  const session = await getVotingSessionById(id, includeOptions);
+  if (!session || !organizationId || session.organizationId !== organizationId) {
+    throw ApiError.notFound('Voting session');
+  }
+  return session;
+}
 
 export const GET = withApi(
   {
@@ -24,12 +38,8 @@ export const GET = withApi(
       description: 'Returns a single voting session with its options.',
     },
   },
-  async ({ params }) => {
-    const session = await getVotingSessionById(params.id, true);
-    if (!session) {
-      const { ApiError } = await import('@/lib/api/errors');
-      throw ApiError.notFound('Voting session');
-    }
+  async ({ params, organizationId }) => {
+    const session = await getOwnedSession(params.id, organizationId, true);
     return { ...session };
   }
 );
@@ -47,19 +57,30 @@ export const PATCH = withApi(
     openapi: {
       tags: ['Governance'],
       summary: 'Update voting session',
-      description: 'Update a voting session. Requires steward role.',
+      description: 'Update a voting session. Requires steward role. Opened sessions cannot change terms or reopen once closed.',
     },
   },
   async ({ params, body, organizationId, userId }) => {
-    const updated = await updateVotingSession(params.id, {
-      ...body,
-      startTime: body.startTime ? new Date(body.startTime) : undefined,
-      endTime: body.endTime ? new Date(body.endTime) : undefined,
+    const updated = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
+      const session = await getOwnedSession(params.id, organizationId);
+      const decision = checkSessionUpdate(session.status, body);
+      if (!decision.ok) throw ApiError.conflict(decision.message, { code: decision.code });
+      const row = await updateVotingSession(params.id, organizationId!, {
+        ...body,
+        startTime: body.startTime ? new Date(body.startTime) : undefined,
+        endTime: body.endTime ? new Date(body.endTime) : undefined,
+      });
+      if (!row) throw ApiError.notFound('Voting session');
+      await persistAtomicAudit(tx, {
+        organizationId: organizationId!,
+        userId: userId!,
+        action: 'voting_session.update',
+        resourceType: 'voting_sessions',
+        resourceId: params.id,
+        details: { fields: Object.keys(body), from: session.status, to: row.status },
+      });
+      return row;
     });
-    if (!updated) {
-      const { ApiError } = await import('@/lib/api/errors');
-      throw ApiError.notFound('Voting session');
-    }
 
     buildUnionEvidencePack({
       actionType: 'VOTING_SESSION_UPDATED',
@@ -78,11 +99,24 @@ export const DELETE = withApi(
     openapi: {
       tags: ['Governance'],
       summary: 'Delete voting session',
-      description: 'Delete a voting session. Requires steward role.',
+      description: 'Delete a draft voting session with no ballots. Requires steward role.',
     },
   },
   async ({ params, organizationId, userId }) => {
-    await deleteVotingSession(params.id);
+    await withRLSContext({ organizationId: organizationId! }, async (tx) => {
+      const session = await getOwnedSession(params.id, organizationId, true);
+      const decision = checkSessionDeletion(session.status, session.voteCount ?? 0);
+      if (!decision.ok) throw ApiError.conflict(decision.message, { code: decision.code });
+      await deleteVotingSession(params.id, organizationId!);
+      await persistAtomicAudit(tx, {
+        organizationId: organizationId!,
+        userId: userId!,
+        action: 'voting_session.delete',
+        resourceType: 'voting_sessions',
+        resourceId: params.id,
+        details: { status: session.status },
+      });
+    });
 
     buildUnionEvidencePack({
       actionType: 'VOTING_SESSION_DELETED',

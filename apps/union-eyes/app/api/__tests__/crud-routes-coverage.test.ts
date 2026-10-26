@@ -1938,14 +1938,6 @@ describe('members/segments', () => {
   });
 })
 
-describe('messages/notifications', () => {
-  it('exports route handlers', async () => {
-    const mod = await import('../messages/notifications/route');
-    const handlers = [mod.GET, mod.POST, mod.PUT, mod.PATCH, mod.DELETE].filter(Boolean);
-    expect(handlers.length).toBeGreaterThan(0);
-  });
-})
-
 describe('messages/threads/[threadId]/messages', () => {
   it('exports route handlers', async () => {
     const mod = await import('../messages/threads/[threadId]/messages/route');

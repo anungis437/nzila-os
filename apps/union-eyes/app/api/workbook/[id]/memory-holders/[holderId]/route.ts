@@ -7,14 +7,24 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { db } from '@/db';
 import { workbookMemoryHolders } from '@/db/schema/workbook-schema';
 import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
+import { auditClaimedWorkbookWrite } from '@/lib/workbook/claimed-write-audit';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// A memory holder belongs to its workbook, and a workbook to the organization it was claimed into. The statement
+// itself proves that ownership: the holder's workbook must carry the organization the authority resolved. A workbook
+// with no stamped organization (pre-claim authoring, legacy claims) matches only while its stamp is still empty.
+function holderInOrgWorkbook(workbookId: string, orgId: string | null) {
+  return orgId
+    ? sql`${workbookMemoryHolders.workbookId} IN (SELECT id FROM workbooks WHERE id = ${workbookId} AND (claimed_org_id = ${orgId} OR claimed_org_id IS NULL))`
+    : sql`${workbookMemoryHolders.workbookId} IN (SELECT id FROM workbooks WHERE id = ${workbookId} AND claimed_org_id IS NULL)`;
+}
 
 const TENURE_BANDS = ['0_3y', '3_7y', '7_15y', '15y_plus'] as const;
 const CRITICALITIES = ['routine', 'important', 'load_bearing', 'institution_critical'] as const;
@@ -60,17 +70,29 @@ export async function PATCH(
     // the DB execution context that matches the resolved authority.
     const access = await withClaimedWorkbookAccess(
       { workbookId, operation: 'write' },
-      async () =>
-        db
+      async (authority) => {
+        const orgId = authority.claimedOrgId;
+        const updated = await db
           .update(workbookMemoryHolders)
           .set(patch)
           .where(
             and(
               eq(workbookMemoryHolders.id, holderId),
               eq(workbookMemoryHolders.workbookId, workbookId),
+              holderInOrgWorkbook(workbookId, orgId),
             ),
           )
-          .returning({ id: workbookMemoryHolders.id }),
+          .returning({ id: workbookMemoryHolders.id });
+        if (updated.length > 0) {
+          await auditClaimedWorkbookWrite(authority, {
+            action: 'workbook.memory_holder.update',
+            resourceType: 'workbook_memory_holders',
+            resourceId: holderId,
+            details: { fields: Object.keys(parse.data).filter((k) => parse.data[k as keyof typeof parse.data] !== undefined) },
+          });
+        }
+        return updated;
+      },
     );
 
     if (!access.ok) {
@@ -99,16 +121,28 @@ export async function DELETE(
     // the DB execution context that matches the resolved authority.
     const access = await withClaimedWorkbookAccess(
       { workbookId, operation: 'write' },
-      async () =>
-        db
+      async (authority) => {
+        const orgId = authority.claimedOrgId;
+        const removed = await db
           .delete(workbookMemoryHolders)
           .where(
             and(
               eq(workbookMemoryHolders.id, holderId),
               eq(workbookMemoryHolders.workbookId, workbookId),
+              holderInOrgWorkbook(workbookId, orgId),
             ),
           )
-          .returning({ id: workbookMemoryHolders.id }),
+          .returning({ id: workbookMemoryHolders.id });
+        if (removed.length > 0) {
+          await auditClaimedWorkbookWrite(authority, {
+            action: 'workbook.memory_holder.delete',
+            resourceType: 'workbook_memory_holders',
+            resourceId: holderId,
+            details: {},
+          });
+        }
+        return removed;
+      },
     );
 
     if (!access.ok) {

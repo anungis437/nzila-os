@@ -1,4 +1,7 @@
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { PENSION_ADMIN_ROLES } from '@/lib/pension/pension-authority';
 import { db } from '@/db/db';
 import { pensionTrusteeMeetings } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
@@ -33,32 +36,57 @@ export const GET = withApi(
 
 export const PATCH = withApi(
   {
-    auth: { required: true, minRole: 'steward' },
+    auth: { required: true, roles: PENSION_ADMIN_ROLES },
     openapi: { tags: ['Pension'], summary: 'Update trustee meeting', description: 'Update an existing trustee meeting' },
   },
-  async ({ params, body, organizationId }) => {
+  async ({ params, body, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const id = params.id;
-    const [meeting] = await db
-      .update(pensionTrusteeMeetings)
-      .set({ ...updateMeetingSchema.parse(body), updatedAt: new Date() })
-      .where(and(eq(pensionTrusteeMeetings.id, id), eq(pensionTrusteeMeetings.organizationId, organizationId!)))
-      .returning();
-    return meeting ?? null;
+    const changes = updateMeetingSchema.parse(body);
+    return withRLSContext({ organizationId }, async (tx) => {
+      const [meeting] = await tx
+        .update(pensionTrusteeMeetings)
+        .set({ ...changes, updatedAt: new Date() })
+        .where(and(eq(pensionTrusteeMeetings.id, id), eq(pensionTrusteeMeetings.organizationId, organizationId)))
+        .returning();
+      if (!meeting) throw ApiError.notFound('Trustee meeting');
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'pension.trustee_meeting.update',
+        resourceType: 'pension_trustee_meetings',
+        resourceId: id,
+        details: { fields: Object.keys(changes), status: changes.status },
+      });
+      return meeting;
+    });
   },
 );
 
 export const DELETE = withApi(
   {
-    auth: { required: true, minRole: 'steward' },
+    auth: { required: true, roles: PENSION_ADMIN_ROLES },
     openapi: { tags: ['Pension'], summary: 'Delete trustee meeting', description: 'Delete a trustee meeting' },
   },
-  async ({ params, organizationId }) => {
+  async ({ params, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const id = params.id;
-    const [meeting] = await db
-      .delete(pensionTrusteeMeetings)
-      .where(and(eq(pensionTrusteeMeetings.id, id), eq(pensionTrusteeMeetings.organizationId, organizationId!)))
-      .returning();
-    return meeting ?? null;
+    return withRLSContext({ organizationId }, async (tx) => {
+      const [meeting] = await tx
+        .delete(pensionTrusteeMeetings)
+        .where(and(eq(pensionTrusteeMeetings.id, id), eq(pensionTrusteeMeetings.organizationId, organizationId)))
+        .returning();
+      if (!meeting) throw ApiError.notFound('Trustee meeting');
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'pension.trustee_meeting.delete',
+        resourceType: 'pension_trustee_meetings',
+        resourceId: id,
+        details: { title: meeting.title },
+      });
+      return meeting;
+    });
   },
 );
 

@@ -2,6 +2,9 @@ import { z } from 'zod';
 import { NextRequest, NextResponse } from "next/server";
 import { ProvincialPrivacyService, type Province } from "@/services/provincial-privacy-service";
 import { requireApiAuth } from '@/lib/api-auth-guard';
+import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 import {
   ErrorCode,
@@ -10,7 +13,7 @@ import {
 
 const consentSchema = z.object({
   province: z.enum(['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'], {
-    errorMap: () => ({ message: 'Invalid province code' })
+    error: 'Invalid province code'
   }),
   consentType: z.string().min(1, 'Consent type is required'),
   consentGiven: z.boolean(),
@@ -40,7 +43,7 @@ export async function POST(request: NextRequest) {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid consent data',
-        validation.error.errors
+        validation.error.issues
       );
     }
 
@@ -57,16 +60,31 @@ export async function POST(request: NextRequest) {
     const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined;
     const userAgent = request.headers.get("user-agent") || undefined;
 
-    const consent = await ProvincialPrivacyService.recordConsent({
-      userId,
-      province: province as Province,
-      consentType,
-      consentGiven,
-      consentMethod,
-      consentText,
-      consentLanguage,
-      ipAddress,
-      userAgent,
+    const organizationId = await getOrganizationIdForUser(userId);
+    const consent = await withRLSContext({ organizationId }, async (tx) => {
+      const recorded = await ProvincialPrivacyService.recordConsent(
+        {
+          userId,
+          province: province as Province,
+          consentType,
+          consentGiven,
+          consentMethod,
+          consentText,
+          consentLanguage,
+          ipAddress,
+          userAgent,
+        },
+        tx,
+      );
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'privacy.consent.record',
+        resourceType: 'provincial_consent',
+        resourceId: recorded.id,
+        details: { province, consentType, consentGiven, consentMethod },
+      });
+      return recorded;
     });
 
     return NextResponse.json({ 
@@ -146,11 +164,23 @@ export async function DELETE(request: NextRequest) {
     );
     }
 
-    await ProvincialPrivacyService.revokeConsent(
-      userId,
-      province as Province,
-      consentType
-    );
+    const organizationId = await getOrganizationIdForUser(userId);
+    const revoked = await withRLSContext({ organizationId }, async (tx) => {
+      const rows = await ProvincialPrivacyService.revokeConsent(userId, province as Province, consentType, tx);
+      if (rows.length === 0) return null;
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'privacy.consent.revoke',
+        resourceType: 'provincial_consent',
+        resourceId: rows[0].id,
+        details: { province, consentType, revokedCount: rows.length },
+      });
+      return rows;
+    });
+    if (!revoked) {
+      return NextResponse.json({ error: "No active consent to revoke" }, { status: 404 });
+    }
 
     return NextResponse.json({ 
       success: true,

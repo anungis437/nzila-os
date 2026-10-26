@@ -44,7 +44,7 @@ const unionEyesHosts = {
 //
 // SECURITY IMPROVEMENTS IMPLEMENTED (Feb 2026):
 // ✅ Removed 'unsafe-eval' from script-src (XSS attack vector eliminated)
-// ✅ Migrated from Clerk to Microsoft Entra ID (Jun 2026)
+// ✅ Authentication provider: Microsoft Entra ID
 //
 // REMAINING SECURITY TRADEOFFS:
 // 1. script-src 'unsafe-inline' - Required by NextAuth/Entra redirect flows

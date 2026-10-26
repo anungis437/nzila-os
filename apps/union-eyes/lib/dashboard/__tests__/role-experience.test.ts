@@ -13,7 +13,8 @@ describe('lib/dashboard/role-experience', () => {
   describe('getDashboardExperience', () => {
     it('maps roles to experiences with member default', () => {
       expect(getDashboardExperience('system_admin')).toBe('admin');
-      expect(getDashboardExperience('officer')).toBe('governance');
+      expect(getDashboardExperience('officer')).toBe('executive');
+      expect(getDashboardExperience('clc_executive')).toBe('governance');
       expect(getDashboardExperience('president')).toBe('executive');
       expect(getDashboardExperience('steward')).toBe('staff');
       expect(getDashboardExperience(undefined)).toBe('member');
@@ -23,10 +24,11 @@ describe('lib/dashboard/role-experience', () => {
 
   describe('getRoleLandingPath', () => {
     it('routes by experience', () => {
-      expect(getRoleLandingPath('member')).toBe('/dashboard/workspace');
+      expect(getRoleLandingPath('member')).toBe('/dashboard');
       expect(getRoleLandingPath('steward')).toBe('/dashboard/workbench');
-      expect(getRoleLandingPath('president')).toBe('/dashboard/intelligence');
-      expect(getRoleLandingPath('officer')).toBe('/dashboard/governance');
+      expect(getRoleLandingPath('president')).toBe('/dashboard/executive');
+      expect(getRoleLandingPath('officer')).toBe('/dashboard/executive');
+      expect(getRoleLandingPath('clc_executive')).toBe('/dashboard/governance');
       expect(getRoleLandingPath('system_admin')).toBe('/dashboard/admin/organizations');
     });
   });
@@ -47,7 +49,9 @@ describe('lib/dashboard/role-experience', () => {
     });
     it('allows in-scope paths and blocks out-of-scope ones', () => {
       expect(canAccessDashboardPath('/dashboard', 'member', false)).toBe(true);
-      expect(canAccessDashboardPath('/dashboard/inbox', 'member', false)).toBe(true);
+      expect(canAccessDashboardPath('/dashboard/inbox', 'member', false)).toBe(false);
+      expect(canAccessDashboardPath('/dashboard/claims', 'member', false)).toBe(true);
+      expect(canAccessDashboardPath('/dashboard/workspace', 'member', false)).toBe(false);
       expect(canAccessDashboardPath('/dashboard/security', 'member', false)).toBe(false);
     });
     it('blocks excluded surfaces in pilot mode', () => {
@@ -57,36 +61,17 @@ describe('lib/dashboard/role-experience', () => {
   });
 
   describe('getVisibleNavigationForExperience', () => {
-    it('shows Operations Continuity for executives outside pilot mode', () => {
-      const nav = getVisibleNavigationForExperience('executive', false);
-      expect(nav.some((i) => i.href === '/dashboard/executive-operating-intelligence')).toBe(true);
+    it('does not advertise Operations Continuity (pilot-excluded) to executives in or out of pilot mode', () => {
+      for (const pilot of [false, true]) {
+        const nav = getVisibleNavigationForExperience('executive', pilot);
+        expect(nav.some((i) => i.href === '/dashboard/executive-operating-intelligence')).toBe(false);
+      }
     });
 
-    it('hides Operations Continuity for executives in pilot mode', () => {
-      const nav = getVisibleNavigationForExperience('executive', true);
-      expect(nav.some((i) => i.href === '/dashboard/executive-operating-intelligence')).toBe(false);
-    });
-
-    it('does not over-filter the rest of the executive nav in pilot mode', () => {
+    it('does not over-filter the frozen executive navigation in pilot mode', () => {
       const fullNav = getNavigationForExperience('executive');
       const pilotNav = getVisibleNavigationForExperience('executive', true);
-      // Only the pilot-excluded entry should be removed; every other entry
-      // from the full SOT nav must still be present.
-      const stillAllowedHrefs = fullNav
-        .map((i) => i.href)
-        .filter((href) => href !== '/dashboard/executive-operating-intelligence');
-      for (const href of stillAllowedHrefs) {
-        expect(pilotNav.some((i) => i.href === href)).toBe(true);
-      }
-      expect(pilotNav.length).toBe(fullNav.length - 1);
-    });
-
-    it('evaluates query-param routes against the correct pathname', () => {
-      // /dashboard/intelligence?scope=executive is not itself pilot-excluded
-      // (only /dashboard/executive-operating-intelligence is); it must remain
-      // visible even though its href carries a query string.
-      const nav = getVisibleNavigationForExperience('executive', true);
-      expect(nav.some((i) => i.href === '/dashboard/intelligence?scope=executive')).toBe(true);
+      expect(pilotNav).toEqual(fullNav);
     });
 
     it('leaves member and staff navigation unchanged outside pilot mode', () => {
@@ -128,10 +113,26 @@ describe('lib/dashboard/role-experience', () => {
     });
 
     it('routes staff priorities to the priorities console and omits member support operations', () => {
-      const priorities = getVisibleNavigationForExperience('staff', false, 'steward').find(item => item.label === 'Operations Priorities (Commitments & Deadlines)');
+      const priorities = getVisibleNavigationForExperience('staff', false, 'steward').find(item => item.label === 'Tasks & Deadlines');
       expect(priorities?.href).toBe('/dashboard/priorities');
       expect(canAccessDashboardPath(priorities!.href, 'staff', false)).toBe(true);
       expect(getVisibleNavigationForExperience('member', false, 'member').some(item => item.href === '/dashboard/support')).toBe(false);
+    });
+
+    it('offers exactly the seven Representative 2.2 destinations plus account settings to a steward', () => {
+      const nav = getVisibleNavigationForExperience('staff', false, 'steward');
+      expect(nav.filter(item => item.group !== 'Settings').map(item => item.label)).toEqual([
+        'Today', 'Representation', 'Members & Workplaces', 'Communications',
+        'Documents & Evidence', 'Tasks & Deadlines', 'Knowledge & Guidance',
+      ]);
+      expect(nav.filter(item => item.group === 'Settings').map(item => item.label)).toEqual(['Profile & Settings']);
+      for (const item of nav) expect(canAccessDashboardPath(item.href.split('?')[0], 'staff', false)).toBe(true);
+    });
+
+    it('does not advertise the knowledge destination to staff roles below steward', () => {
+      for (const role of ['bargaining_committee', 'health_safety_rep']) {
+        expect(getVisibleNavigationForExperience('staff', false, role).some(item => item.href === '/dashboard/clause-library')).toBe(false);
+      }
     });
   });
 });

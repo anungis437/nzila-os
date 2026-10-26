@@ -110,17 +110,26 @@ async function logEvent(
     metadata?: Record<string, unknown>
   },
   executor: typeof db = db,
+  /** A required record is part of the operation: if it cannot be written the operation fails and rolls back. */
+  required = false,
 ): Promise<void> {
-  try {
-    const write = async () => executor.insert(authAuditLog).values({
-      userId: opts.userId ?? null,
-      eventType,
-      ipAddress: opts.ipAddress ?? null,
-      userAgent: opts.userAgent ?? null,
-      metadata: opts.metadata ?? {},
-    })
+  const write = async () => executor.insert(authAuditLog).values({
+    userId: opts.userId ?? null,
+    eventType,
+    ipAddress: opts.ipAddress ?? null,
+    userAgent: opts.userAgent ?? null,
+    metadata: opts.metadata ?? {},
+  })
+  const run = async () => {
     if (executor === authDb) await withAuthSavepoint(write)
     else await write()
+  }
+  if (required) {
+    await run()
+    return
+  }
+  try {
+    await run()
   } catch {
     // best-effort
   }
@@ -198,7 +207,7 @@ async function enrollMfaWithContext(input: EnrollInput): Promise<EnrollResult> {
     })
   }
 
-  await logEvent('mfa_enroll_started', { userId: input.userId })
+  await logEvent('mfa_enroll_started', { userId: input.userId }, db, true)
   return { success: true, secret, otpAuthUri, recoveryCodes }
 }
 
@@ -240,7 +249,7 @@ async function verifyEnrollmentWithContext(input: VerifyEnrollInput): Promise<{ 
     .update(authUsers)
     .set({ twoFactorEnabled: true })
     .where(eq(authUsers.userId, input.userId))
-  await logEvent('mfa_enrolled', { userId: input.userId })
+  await logEvent('mfa_enrolled', { userId: input.userId }, db, true)
   return { success: true }
 }
 
@@ -273,7 +282,7 @@ async function disableMfaWithContext(userId: string, actorUserId: string, reason
   await logEvent('mfa_disabled', {
     userId,
     metadata: { actorUserId, reason: reason ?? null },
-  })
+  }, db, true)
   return { success: true }
 }
 
@@ -342,6 +351,18 @@ async function consumeMfaChallengeWithContext(input: ConsumeChallengeInput, toke
 
   if ((challenge.attempts ?? 0) >= MAX_CHALLENGE_ATTEMPTS) {
     return { success: false, error: 'Too many attempts — request a new sign-in' }
+  }
+
+  // The challenge outlives the account state it was issued under: a user suspended or deprovisioned in the meantime
+  // must not be handed a session by a challenge that was valid when it was issued.
+  const [account] = await db
+    .select({ active: authUsers.isActive, lifecycle: authUsers.lifecycleState })
+    .from(authUsers)
+    .where(eq(authUsers.userId, challenge.userId))
+    .limit(1)
+  if (!account?.active || account.lifecycle !== 'active') {
+    await logEvent('mfa_challenge_failed', { userId: challenge.userId, ipAddress: input.ipAddress, metadata: { reason: 'account_not_active' } })
+    return { success: false, error: 'Invalid or expired challenge' }
   }
 
   const [totpRow] = await db

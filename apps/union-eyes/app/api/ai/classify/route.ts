@@ -27,7 +27,7 @@ import {
 const aiClassifySchema = z.object({
   action: z.enum(['classify-clause', 'generate-tags', 'detect-refs', 'classify-precedent', 'enrich', 'batch-classify']).default('classify-clause'),
   content: z.string().max(50000, 'Content too long').optional(),
-  context: z.record(z.string(), z.unknown()).default({}),
+  context: z.record(z.string(), z.unknown()).prefault({}),
   clauses: z.array(z.any()).default([]),
   caseTitle: z.string().optional(),
   facts: z.string().optional(),
@@ -73,7 +73,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         return standardErrorResponse(
           ErrorCode.VALIDATION_ERROR,
           'Invalid classification request',
-          validation.error.errors
+          validation.error.issues
         );
       }
 

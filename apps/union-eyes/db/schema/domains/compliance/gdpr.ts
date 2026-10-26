@@ -235,113 +235,6 @@ export const gdprDataRequests = pgTable(
 );
 
 /**
- * Data Processing Records
- * Article 30: Records of processing activities
- */
-export const dataProcessingRecords = pgTable(
-  "data_processing_records",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    organizationId: uuid("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
-    
-    // Processing activity
-    activityName: text("activity_name").notNull(),
-    processingPurpose: processingPurposeEnum("processing_purpose").notNull(),
-    legalBasis: text("legal_basis").notNull(),
-    
-    // Data details
-    dataCategories: jsonb("data_categories").$type<string[]>().notNull(),
-    dataSubjects: jsonb("data_subjects").$type<string[]>().notNull(),
-    
-    // Recipients
-    recipients: jsonb("recipients").$type<
-      Array<{
-        name: string;
-        type: "internal" | "processor" | "third_party" | "international";
-        country?: string;
-        safeguards?: string;
-      }>
-    >(),
-    
-    // Retention
-    retentionPeriod: text("retention_period").notNull(),
-    deletionProcedure: text("deletion_procedure"),
-    
-    // Security measures
-    securityMeasures: jsonb("security_measures").$type<string[]>(),
-    
-    // DPO (Data Protection Officer)
-    dpoContact: text("dpo_contact"),
-    
-    // Dates
-    lastReviewed: timestamp("last_reviewed").notNull().defaultNow(),
-    nextReviewDue: timestamp("next_review_due").notNull(),
-    
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  },
-  (table) => ({
-    organizationIdIdx: index("data_processing_organization_id_idx").on(
-      table.organizationId
-    ),
-    nextReviewIdx: index("data_processing_next_review_idx").on(
-      table.nextReviewDue
-    ),
-  })
-);
-
-/**
- * Data Retention Policies
- * Define how long data is kept before automatic deletion
- */
-export const dataRetentionPolicies = pgTable(
-  "data_retention_policies",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    organizationId: uuid("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
-    
-    // Policy details
-    policyName: text("policy_name").notNull(),
-    dataType: text("data_type").notNull(), // table or category name
-    retentionPeriodDays: text("retention_period_days").notNull(),
-    
-    // Conditions
-    conditions: jsonb("conditions").$type<{
-      userStatus?: string[];
-      membershipStatus?: string[];
-      excludeActiveRecords?: boolean;
-    }>(),
-    
-    // Actions
-    actionOnExpiry: text("action_on_expiry").notNull(), // delete, archive, anonymize
-    archiveLocation: text("archive_location"),
-    
-    // Legal basis
-    legalRequirement: text("legal_requirement"),
-    
-    // Status
-    isActive: boolean("is_active").notNull().default(true),
-    lastExecuted: timestamp("last_executed"),
-    nextExecution: timestamp("next_execution"),
-    
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  },
-  (table) => ({
-    organizationIdIdx: index("retention_policies_organization_id_idx").on(
-      table.organizationId
-    ),
-    nextExecutionIdx: index("retention_policies_next_execution_idx").on(
-      table.nextExecution
-    ),
-  })
-);
-
-/**
  * Data Anonymization Log
  * Track anonymization/pseudonymization operations
  */
@@ -400,10 +293,6 @@ export type CookieConsent = typeof cookieConsents.$inferSelect;
 export type NewCookieConsent = typeof cookieConsents.$inferInsert;
 export type GdprDataRequest = typeof gdprDataRequests.$inferSelect;
 export type NewGdprDataRequest = typeof gdprDataRequests.$inferInsert;
-export type DataProcessingRecord = typeof dataProcessingRecords.$inferSelect;
-export type NewDataProcessingRecord = typeof dataProcessingRecords.$inferInsert;
-export type DataRetentionPolicy = typeof dataRetentionPolicies.$inferSelect;
-export type NewDataRetentionPolicy = typeof dataRetentionPolicies.$inferInsert;
 export type DataAnonymizationLog = typeof dataAnonymizationLog.$inferSelect;
 export type NewDataAnonymizationLog = typeof dataAnonymizationLog.$inferInsert;
 

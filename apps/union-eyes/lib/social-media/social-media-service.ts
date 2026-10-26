@@ -440,7 +440,7 @@ export class SocialMediaService {
         status: 'deleted',
         deletedAt: new Date(),
         updatedAt: new Date(),
-      }).where(eq(socialPosts.id, postId));
+      }).where(and(eq(socialPosts.id, postId), eq(socialPosts.organizationId, organizationId)));
     } catch (error) {
       throw new Error(`Failed to delete post: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }

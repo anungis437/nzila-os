@@ -78,15 +78,13 @@ export async function findSimilarCases(params: {
 
   const results: SimilarCaseResult[] = [];
   for (const candidate of candidates as CaseSnapshot[]) {
-    const access = params.actor.isStewardPlus
-      ? { canViewCase: true }
-      : await getEffectiveCaseAccess({
-          organizationId: params.context.orgId,
-          grievanceId: candidate.id,
-          userId: params.actor.userId,
-        });
+    const access = await getEffectiveCaseAccess({
+      organizationId: params.context.orgId,
+      grievanceId: candidate.id,
+      userId: params.actor.userId,
+    });
 
-    if (!params.actor.isStewardPlus && candidate.createdBy !== params.actor.userId && !access.canViewCase) {
+    if (candidate.createdBy !== params.actor.userId && !access.canViewCase) {
       continue;
     }
 

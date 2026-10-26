@@ -11,7 +11,7 @@ import { eq } from 'drizzle-orm';
 export const dynamic = 'force-dynamic';
 
 const bodySchema = z.object({
-  billingPeriodId: z.string().uuid(),
+  billingPeriodId: z.guid(),
 });
 
 export const POST = withApi(

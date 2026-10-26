@@ -18,10 +18,10 @@ import { runAllocation } from '@/services/platform-economics';
 export const dynamic = 'force-dynamic';
 
 const simulationSchema = z.object({
-  billingPeriodId: z.string().uuid(),
-  ruleId: z.string().uuid(),
+  billingPeriodId: z.guid(),
+  ruleId: z.guid(),
   localBasisData: z.array(z.object({
-    localId: z.string().uuid(),
+    localId: z.guid(),
     memberCount: z.number().int().min(0),
     revenue: z.string().optional(),
     budgetWeight: z.string().optional(),
@@ -29,7 +29,7 @@ const simulationSchema = z.object({
   })),
 });
 
-export const POST = withMinRole('officer', async (request, context: BaseAuthContext) => {
+export const POST = withMinRole('secretary_treasurer', async (request, context: BaseAuthContext) => {
   const { userId, organizationId } = context;
   if (!organizationId || !userId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');

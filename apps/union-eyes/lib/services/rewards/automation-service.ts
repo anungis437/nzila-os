@@ -391,7 +391,7 @@ export async function createAutomationRule(rule: {
 /**
  * Update automation rule
  */
-export async function updateAutomationRule(ruleId: string, updates: Partial<{
+export async function updateAutomationRule(ruleId: string, organizationId: string, updates: Partial<{
   name: string;
   description: string;
   conditions: Record<string, unknown>;
@@ -406,7 +406,7 @@ export async function updateAutomationRule(ruleId: string, updates: Partial<{
         ...updates,
         updatedAt: new Date(),
       })
-      .where(eq(automationRules.id, ruleId))
+      .where(and(eq(automationRules.id, ruleId), eq(automationRules.orgId, organizationId)))
       .returning();
 
     if (!updatedRule) {
@@ -424,11 +424,11 @@ export async function updateAutomationRule(ruleId: string, updates: Partial<{
 /**
  * Delete automation rule
  */
-export async function deleteAutomationRule(ruleId: string) {
+export async function deleteAutomationRule(ruleId: string, organizationId: string) {
   try {
     const _result = await db
       .delete(automationRules)
-      .where(eq(automationRules.id, ruleId));
+      .where(and(eq(automationRules.id, ruleId), eq(automationRules.orgId, organizationId)));
 
     logger.info('[Automation] Rule deleted successfully', { ruleId });
     return { success: true };

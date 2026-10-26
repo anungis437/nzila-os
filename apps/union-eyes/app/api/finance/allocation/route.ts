@@ -30,11 +30,11 @@ const createRuleSchema = z.object({
     'manual_override',
     'subsidized',
   ]),
-  parameters: z.record(z.unknown()).optional(),
+  parameters: z.record(z.string(), z.unknown()).optional(),
   effectiveFrom: z.string().datetime().optional(),
 });
 
-export const GET = withMinRole('officer', async (_request, context: BaseAuthContext) => {
+export const GET = withMinRole('secretary_treasurer', async (_request, context: BaseAuthContext) => {
   const { organizationId, userId } = context;
   if (!organizationId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');

@@ -56,6 +56,7 @@ function malformedRequest() {
 describe('deadline-engine staging proof route boundary', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.NEXT_PUBLIC_APP_ENV = 'staging';
     process.env.TARGET_ENVIRONMENT = 'staging';
     process.env.STAGING_PROOFS_ENABLED = 'true';
     process.env.UNION_EYES_RUNTIME_ID = 'union-eyes-staging';
@@ -78,6 +79,8 @@ describe('deadline-engine staging proof route boundary', () => {
   });
 
   it.each([
+    ['built for production', () => { process.env.NEXT_PUBLIC_APP_ENV = 'production'; }],
+    ['build environment unset', () => { delete process.env.NEXT_PUBLIC_APP_ENV; }],
     ['missing target environment', () => { delete process.env.TARGET_ENVIRONMENT; }],
     ['disabled proof switch', () => { process.env.STAGING_PROOFS_ENABLED = 'false'; }],
     ['missing runtime identity', () => { delete process.env.UNION_EYES_RUNTIME_ID; }],

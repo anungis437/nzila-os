@@ -1,12 +1,15 @@
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { PENSION_ADMIN_ROLES } from '@/lib/pension/pension-authority';
 import { db } from '@/db/db';
 import { pensionMembers } from '@/db/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 const createMemberSchema = z.object({
-  planId: z.string().uuid(),
-  userId: z.string().uuid().optional(),
+  planId: z.guid(),
+  userId: z.guid().optional(),
   name: z.string().max(255),
   planName: z.string().max(255),
   enrollmentDate: z.coerce.date().optional(),
@@ -54,16 +57,27 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { required: true, minRole: 'steward' },
+    auth: { required: true, roles: PENSION_ADMIN_ROLES },
     openapi: { tags: ['Pension'], summary: 'Enroll pension member', description: 'Enroll a new member in a pension plan' },
   },
-  async ({ body, organizationId }) => {
+  async ({ body, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const parsed = createMemberSchema.parse(body);
-    const [member] = await db
-      .insert(pensionMembers)
-      .values({ ...parsed, organizationId: organizationId! })
-      .returning();
-    return member;
+    return withRLSContext({ organizationId }, async (tx) => {
+      const [member] = await tx
+        .insert(pensionMembers)
+        .values({ ...parsed, organizationId })
+        .returning();
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'pension.member.enroll',
+        resourceType: 'pension_members',
+        resourceId: member.id,
+        details: { planId: parsed.planId },
+      });
+      return member;
+    });
   },
 );
 

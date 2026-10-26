@@ -15,7 +15,7 @@ import {
 
 const precedentSearchSchema = z.object({
   query: z.string().min(1, 'Query is required').max(500, 'Query too long'),
-  filters: z.record(z.string(), z.unknown()).default({}),
+  filters: z.record(z.string(), z.unknown()).prefault({}),
   limit: z.number().int().min(1).max(100).default(50),
 });
 export const POST = withRoleAuth('steward', async (request, _context) => {
@@ -28,7 +28,7 @@ export const POST = withRoleAuth('steward', async (request, _context) => {
         return standardErrorResponse(
           ErrorCode.VALIDATION_ERROR,
           'Invalid search request',
-          validation.error.errors
+          validation.error.issues
         );
       }
 

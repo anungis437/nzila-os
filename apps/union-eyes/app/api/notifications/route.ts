@@ -5,7 +5,9 @@
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
-import { inAppNotifications } from '@/db/schema';
+import { inAppNotifications, organizationMembers } from '@/db/schema';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { eq, and, desc, count, isNull, or, gte } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -102,7 +104,8 @@ export const POST = withApi(
       description: 'Creates a new in-app notification for a specific user.',
     },
   },
-  async ({ body, organizationId }) => {
+  async ({ body, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const { userId: targetUserId, title, message, type, actionLabel, actionUrl, data, expiresAt } =
       body as {
         userId: string;
@@ -119,22 +122,46 @@ export const POST = withApi(
       throw ApiError.badRequest('userId, title, and message are required');
     }
 
-    const [notification] = await db
-      .insert(inAppNotifications)
-      .values({
-        userId: targetUserId,
-        organizationId: organizationId!,
-        title,
-        message,
-        type: type || 'info',
-        actionLabel,
-        actionUrl,
-        data,
-        expiresAt: expiresAt ? new Date(expiresAt) : undefined,
-      })
-      .returning();
+    return withRLSContext({ organizationId }, async (tx) => {
+      // A notification can only be addressed to a member of the acting organization.
+      const [recipient] = await tx
+        .select({ userId: organizationMembers.userId })
+        .from(organizationMembers)
+        .where(
+          and(
+            eq(organizationMembers.organizationId, organizationId),
+            eq(organizationMembers.userId, targetUserId),
+            isNull(organizationMembers.deletedAt),
+          ),
+        )
+        .limit(1);
+      if (!recipient) throw ApiError.notFound('Recipient');
 
-    return notification;
+      const [notification] = await tx
+        .insert(inAppNotifications)
+        .values({
+          userId: targetUserId,
+          organizationId,
+          title,
+          message,
+          type: type || 'info',
+          actionLabel,
+          actionUrl,
+          data,
+          expiresAt: expiresAt ? new Date(expiresAt) : undefined,
+        })
+        .returning();
+
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'notification.create',
+        resourceType: 'in_app_notifications',
+        resourceId: notification.id,
+        details: { recipientUserId: targetUserId, type: type || 'info' },
+      });
+      return notification;
+    });
   },
 );
 

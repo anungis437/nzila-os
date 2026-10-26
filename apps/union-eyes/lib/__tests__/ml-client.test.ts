@@ -36,7 +36,7 @@ describe('ml-client', () => {
   it('makeMlClient creates a client-side ML client with token', async () => {
     process.env.NEXT_PUBLIC_CONSOLE_URL = 'http://console:3001';
     const { makeMlClient } = await import('../ml-client');
-    const getToken = vi.fn().mockResolvedValue('clerk-token');
+    const getToken = vi.fn().mockResolvedValue('auth-token');
 
     makeMlClient(getToken);
 

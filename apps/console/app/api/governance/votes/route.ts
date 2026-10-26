@@ -17,8 +17,8 @@ import { votes } from '@nzila/db/schema'
 const logger = createLogger('api:governance:votes')
 
 const CastVoteSchema = z.object({
-  orgId: z.string().uuid(),
-  motionId: z.string().uuid(),
+  orgId: z.guid(),
+  motionId: z.guid(),
   motionType: z.string().min(1),
   vote: z.enum(['for', 'against', 'abstain']),
   /** Current quorum percentage (0-100) — provided by client from live tally */

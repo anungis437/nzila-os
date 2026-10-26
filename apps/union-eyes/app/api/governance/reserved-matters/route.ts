@@ -6,7 +6,8 @@ import { withApi, z } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
-import { auditDataMutation } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { GOVERNANCE_SYSTEM_ROLES } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
@@ -35,10 +36,10 @@ export const POST = withApi(
       matterType: z.string().min(1),
       title: z.string().min(1),
       description: z.string().min(1),
-      proposedBy: z.string().min(1),
+      proposedBy: z.string().optional(), // ignored: the proposer is always the session user
       votingDeadline: z.string().optional(),
       classATotalVotes: z.number().int().optional(),
-      matterDetails: z.record(z.unknown()).optional(),
+      matterDetails: z.record(z.string(), z.unknown()).optional(),
     }),
   },
   async ({ body, userId, organizationId }) => {
@@ -50,22 +51,22 @@ export const POST = withApi(
           proposed_by, voting_deadline, class_a_total_votes, matter_details, status
         ) VALUES (
           ${id}::uuid, NOW(), NOW(), ${body.matterType}, ${body.title},
-          ${body.description}, ${body.proposedBy},
+          ${body.description}, ${userId!},
           ${body.votingDeadline ? body.votingDeadline : null}::timestamptz,
           ${body.classATotalVotes ?? 0},
           ${JSON.stringify(body.matterDetails ?? {})}::jsonb,
           'pending'
         )
       `);
+      await persistAtomicAudit(db as unknown as RLSTx, {
+        userId: userId!,
+        organizationId: organizationId!,
+        action: 'governance.reserved_matter.create',
+        resourceType: 'reserved_matter_votes',
+        resourceId: id,
+        details: { matterType: body.matterType, title: body.title, proposedBy: userId },
+      });
       return id;
-    });
-    await auditDataMutation({
-      userId: userId!,
-      organizationId: organizationId!,
-      resource: 'reserved_matter_votes',
-      resourceId: id,
-      action: 'create',
-      details: { matterType: body.matterType, title: body.title, proposedBy: body.proposedBy },
     });
     return { id };
   },

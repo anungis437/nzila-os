@@ -15,7 +15,7 @@ vi.mock('@/lib/api-auth-guard', () => ({
   requireUserForOrganization: m.requireUserForOrganization,
   ROLE_HIERARCHY: { member: 1, steward: 2, admin: 3 },
 }))
-vi.mock('@/lib/audit/mandatory-audit', () => ({ appendMandatoryAudit: m.appendMandatoryAudit }))
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.appendMandatoryAudit }))
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (_ctx: unknown, fn: (tx: unknown) => unknown) =>
     fn({

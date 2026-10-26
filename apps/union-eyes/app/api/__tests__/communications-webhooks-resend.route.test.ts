@@ -22,6 +22,7 @@ const m = vi.hoisted(() => {
     state,
     verifyWebhook: vi.fn(),
     withSystemContext: vi.fn(),
+    persistAtomicAudit: vi.fn(),
     logger: {
       info: vi.fn(),
       warn: vi.fn(),
@@ -58,6 +59,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: m.withSystemContext,
 }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 
 async function loadRoute() {
   return import('../communications/webhooks/resend/route');
@@ -80,7 +82,8 @@ describe('communications/webhooks/resend route', () => {
     m.resetQueues();
     process.env.RESEND_API_KEY = 'key_1';
     process.env.RESEND_WEBHOOK_SECRET = 'secret_1';
-    m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.withSystemContext.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => fn(mockDb));
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.verifyWebhook.mockReturnValue({
       type: 'email.delivered',
       created_at: '2026-01-01T00:00:00.000Z',
@@ -219,6 +222,72 @@ describe('communications/webhooks/resend route', () => {
     expect(response.status).toBe(200);
     expect(payload).toMatchObject({ received: true, eventType: 'email.suppressed' });
     expect(mockDb.update).toHaveBeenCalledTimes(3);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      mockDb,
+      expect.objectContaining({
+        organizationId: 'org_2',
+        userId: 'system:resend-webhook',
+        action: 'communications.email_suppression.apply',
+        resourceId: 'user_3',
+      }),
+    );
+  });
+
+  it('does not audit plain delivery telemetry', async () => {
+    const { POST } = await loadRoute();
+    m.queueSelect(
+      [{
+        id: 'msg_4',
+        campaignId: null,
+        organizationId: 'org_1',
+        recipientId: 'user_5',
+        sentAt: null,
+        deliveredAt: null,
+        openedAt: null,
+        clickedAt: null,
+        bouncedAt: null,
+        status: 'sent',
+        errorMessage: null,
+      }],
+    );
+
+    const response = await POST(webhookRequest('{}', {
+      'svix-id': 'id4',
+      'svix-timestamp': 'ts4',
+      'svix-signature': 'sig4',
+    }));
+
+    expect(response.status).toBe(200);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('fails the webhook (so the provider retries) when the suppression audit cannot be written', async () => {
+    const { POST } = await loadRoute();
+    m.verifyWebhook.mockReturnValueOnce({
+      type: 'email.complained',
+      created_at: '2026-01-01T00:00:00.000Z',
+      data: { email_id: 'provider_5', to: ['u@example.com'] },
+    });
+    m.queueSelect(
+      [{
+        id: 'msg_5',
+        campaignId: null,
+        organizationId: 'org_2',
+        recipientId: 'user_6',
+        sentAt: null,
+        deliveredAt: null,
+        openedAt: null,
+        clickedAt: null,
+        bouncedAt: null,
+        status: 'sent',
+        errorMessage: null,
+      }],
+    );
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+
+    await expect(
+      POST(webhookRequest('{}', { 'svix-id': 'id5', 'svix-timestamp': 'ts5', 'svix-signature': 'sig5' })),
+    ).rejects.toThrow('audit unavailable');
   });
 
   it('stores failed delivery reasons on the message log', async () => {

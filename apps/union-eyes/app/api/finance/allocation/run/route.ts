@@ -15,10 +15,10 @@ import { runAllocation } from '@/services/platform-economics';
 export const dynamic = 'force-dynamic';
 
 const runSchema = z.object({
-  billingPeriodId: z.string().uuid(),
-  ruleId: z.string().uuid(),
+  billingPeriodId: z.guid(),
+  ruleId: z.guid(),
   localBasisData: z.array(z.object({
-    localId: z.string().uuid(),
+    localId: z.guid(),
     memberCount: z.number().int().min(0),
     revenue: z.string().optional(),
     budgetWeight: z.string().optional(),

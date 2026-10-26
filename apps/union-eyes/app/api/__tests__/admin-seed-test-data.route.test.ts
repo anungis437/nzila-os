@@ -1,49 +1,31 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
-  withRoleAuth: vi.fn(),
-  seedOrganizationHierarchy: vi.fn(),
-  seedChildOrganizations: vi.fn(),
-  logger: { info: vi.fn(), error: vi.fn() },
+  withApi: vi.fn(),
 }));
 
-vi.mock('@/lib/role-middleware', () => ({ withRoleAuth: m.withRoleAuth }));
-vi.mock('@/db/seeds/seed-org-hierarchy', () => ({ seedOrganizationHierarchy: m.seedOrganizationHierarchy }));
-vi.mock('@/db/seeds/seed-child-orgs', () => ({ seedChildOrganizations: m.seedChildOrganizations }));
-vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+vi.mock('@/lib/api/framework', async () => {
+  const { ApiError, ErrorCode } = await import('@/lib/api/errors');
+  return { withApi: m.withApi, ApiError, ErrorCode };
+});
 
 async function loadRoute() {
   return import('../admin/seed-test-data/route');
 }
 
-describe('admin/seed-test-data route', () => {
+describe('admin/seed-test-data route (retired)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withRoleAuth.mockImplementation(
-      (_role: string, handler: (request: Request, context: any) => Promise<Response>) =>
-        (_request: Request, context: any = {}) => handler(_request, context),
-    );
-    m.seedOrganizationHierarchy.mockResolvedValue({ federationsCreated: 2, affiliatesCreated: 3, skipped: [] });
-    m.seedChildOrganizations.mockResolvedValue({ localsCreated: 4, districtsCreated: 1, skipped: [] });
+    m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: unknown) => Promise<unknown>) => (ctx: unknown) => handler(ctx));
   });
 
-  it('seeds the hierarchy with GET', async () => {
+  it('GET refuses with NOT_IMPLEMENTED instead of reporting a seeded hierarchy', async () => {
     const { GET } = await loadRoute();
-    const response = await GET(new Request('http://localhost/api/admin/seed-test-data'), { userId: 'u1' });
-    const json = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(json.success).toBe(true);
-    expect(json.data.hierarchy.federationsCreated).toBe(2);
+    await expect(GET({})).rejects.toMatchObject({ code: 'NOT_IMPLEMENTED' });
   });
 
-  it('seeds the hierarchy with POST', async () => {
+  it('POST refuses with NOT_IMPLEMENTED instead of reporting a seeded hierarchy', async () => {
     const { POST } = await loadRoute();
-    const response = await POST(new Request('http://localhost/api/admin/seed-test-data', { method: 'POST' }), { userId: 'u1' });
-    const json = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(json.success).toBe(true);
-    expect(m.seedChildOrganizations).toHaveBeenCalled();
+    await expect(POST({})).rejects.toMatchObject({ code: 'NOT_IMPLEMENTED' });
   });
 });

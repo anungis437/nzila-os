@@ -16,13 +16,12 @@ import {
 } from "@/db/schema/documents-schema";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
-import { auditDataMutation } from "@/lib/audit-logger";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
 import { recordUsage } from '@/services/platform-economics';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
-import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -91,7 +90,6 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       return standardErrorResponse(ErrorCode.NOT_FOUND, "Grievance not found");
     }
 
-    const isStewardPlus = await hasMinRole('steward');
     const effectiveAccess = await getEffectiveCaseAccess({
       organizationId,
       grievanceId: params.id,
@@ -99,7 +97,6 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
     });
 
     const canUpload =
-      isStewardPlus ||
       grievance.createdBy === userId ||
       effectiveAccess.isPrimaryOwner ||
       effectiveAccess.canUploadDocuments;
@@ -108,8 +105,8 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       return standardErrorResponse(ErrorCode.FORBIDDEN, 'You do not have permission to upload documents to this case');
     }
 
-    const result = await withRLSContext(async () => {
-      const [governedDoc] = await db
+    const result = await withRLSContext(async (tx) => {
+      const [governedDoc] = await tx
         .insert(documents)
         .values({
           organizationId,
@@ -132,7 +129,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
         })
         .returning();
 
-      await db.insert(documentVersions).values({
+      await tx.insert(documentVersions).values({
         organizationId,
         documentId: governedDoc.id,
         versionNo: 1,
@@ -141,7 +138,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
         uploadedBy: userId,
       });
 
-      await db.insert(documentLinks).values({
+      await tx.insert(documentLinks).values({
         organizationId,
         documentId: governedDoc.id,
         linkedEntityType: 'grievance',
@@ -150,43 +147,28 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       });
 
       // Emit event
-      await db.insert(grievanceEvents).values({
+      await tx.insert(grievanceEvents).values({
         grievanceId: params.id,
         eventType: "document_uploaded",
         actorUserId: userId,
         notes: `Document uploaded: ${parsed.data.documentType}`,
       });
 
+      // The document, its link, the case event and the audit record commit together.
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'grievance.document_upload',
+        resourceType: 'grievance_documents',
+        resourceId: governedDoc.id,
+        details: {
+          grievanceId: params.id,
+          privacyLabel: governedDoc.privacyLabel,
+          documentType: governedDoc.documentType,
+        },
+      });
+
       return { governedDoc };
-    });
-
-    // Audit
-    await auditDataMutation({
-      userId,
-      organizationId,
-      resource: "grievance_documents",
-      action: "create",
-      resourceId: result.governedDoc.id,
-      newState: {
-        id: result.governedDoc.id,
-        privacyLabel: result.governedDoc.privacyLabel,
-        documentType: result.governedDoc.documentType,
-      },
-    });
-
-    await auditCaseMutation({
-      event: CaseAuditEvent.CASE_ATTACHMENT_UPLOADED,
-      userId,
-      organizationId,
-      caseId: params.id,
-      action: 'create',
-      newState: {
-        documentId: result.governedDoc.id,
-      },
-      details: {
-        privacyLabel: result.governedDoc.privacyLabel,
-        documentType: parsed.data.documentType,
-      },
     });
 
     buildUnionEvidencePack({

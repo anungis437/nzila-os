@@ -10,6 +10,7 @@ import {
   getMeeting,
   updateMeeting,
   getMeetingAttendees,
+  requireCommitteeScope,
 } from "@/lib/services/committee-workspace-service";
 
 const updateSchema = z.object({
@@ -63,11 +64,14 @@ const updateSchema = z.object({
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "member" },
     openapi: { tags: ["Committees"], summary: "Get meeting details" },
   },
-  async ({ params }) => {
-    const { meetingId } = params as { id: string; meetingId: string };
+  async ({ organizationId, params }) => {
+    if (!organizationId) throw ApiError.badRequest("Organization context required");
+    const { id: committeeId, meetingId } = params as { id: string; meetingId: string };
+    await requireCommitteeScope(organizationId, committeeId, { meetingId });
     const meeting = await getMeeting(meetingId);
     if (!meeting) throw ApiError.notFound("Meeting");
 
@@ -78,15 +82,18 @@ export const GET = withApi(
 
 export const PATCH = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "steward" },
     body: updateSchema,
     openapi: { tags: ["Committees"], summary: "Update meeting" },
   },
-  async ({ body, userId, params }) => {
-    const { meetingId } = params as { id: string; meetingId: string };
+  async ({ body, userId, organizationId, params }) => {
+    if (!organizationId) throw ApiError.badRequest("Organization context required");
+    const { id: committeeId, meetingId } = params as { id: string; meetingId: string };
+    await requireCommitteeScope(organizationId, committeeId, { meetingId });
     const { meetingDate, endTime, nextMeetingDate, ...rest } = body;
 
-    const updated = await updateMeeting(meetingId, {
+    const updated = await updateMeeting(meetingId, organizationId, {
       ...rest,
       ...(meetingDate && { meetingDate: new Date(meetingDate) }),
       ...(endTime && { endTime: new Date(endTime) }),

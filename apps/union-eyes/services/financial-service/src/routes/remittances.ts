@@ -57,7 +57,7 @@ const upload = multer({
 
 // Validation schemas
 const createRemittanceSchema = z.object({
-  employerId: z.string().uuid(),
+  employerId: z.guid(),
   employerName: z.string().min(1).max(255),
   batchNumber: z.string().min(1).max(50),
   billingPeriodStart: z.coerce.date(),
@@ -73,7 +73,7 @@ const createRemittanceSchema = z.object({
 });
 
 const reconcileSchema = z.object({
-  transactionIds: z.array(z.string().uuid()).optional(),
+  transactionIds: z.array(z.guid()).optional(),
   autoMatch: z.boolean().default(true),
 });
 
@@ -85,8 +85,7 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     const { organizationId, tenantId } = getAuthUser(req);
     const scopedOrgId = organizationId ?? tenantId;
-    // codeql[js/sensitive-get-query] - standard filter params on authenticated employer data endpoint
-    const { employerId, status, _batchNumber } = req.query;
+    const { employerId, status } = req.query;
 
     if (!scopedOrgId) {
       return res.status(401).json({ success: false, error: 'Missing organization context' });
@@ -230,7 +229,7 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     res.status(500).json({
@@ -383,7 +382,7 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     res.status(500).json({
@@ -452,7 +451,7 @@ router.put('/:id', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     res.status(500).json({

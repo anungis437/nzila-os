@@ -1,7 +1,10 @@
 import { z } from 'zod';
 import { NextRequest, NextResponse } from "next/server";
-import { GeofencePrivacyService } from "@/services/geofence-privacy-service";
+import { GeofencePrivacyService, LocationConsentConflictError, LocationConsentNotFoundError } from "@/services/geofence-privacy-service";
 import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
+import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 import {
   ErrorCode,
@@ -35,6 +38,7 @@ export const POST = withApiAuth(async (req: NextRequest) => {
       return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
     }
     const userId = user.id;
+    const organizationId = await getOrganizationIdForUser(userId);
 
     const body = await req.json();
     const { purpose, purposeDescription, consentText, allowedDuringStrike, allowedDuringEvents } = body;
@@ -50,22 +54,39 @@ export const POST = withApiAuth(async (req: NextRequest) => {
     const ipAddress = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
     const userAgent = req.headers.get("user-agent") || "unknown";
 
-    const consent = await GeofencePrivacyService.requestLocationConsent({
-      userId,
-      purpose,
-      purposeDescription,
-      consentText,
-      allowedDuringStrike,
-      allowedDuringEvents,
-      ipAddress,
-      userAgent,
+    const consent = await withRLSContext({ organizationId }, async (tx) => {
+      const granted = await GeofencePrivacyService.requestLocationConsent(
+        {
+          userId,
+          purpose,
+          purposeDescription,
+          consentText,
+          allowedDuringStrike,
+          allowedDuringEvents,
+          ipAddress,
+          userAgent,
+        },
+        tx,
+      );
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'location.consent.grant',
+        resourceType: 'member_location_consent',
+        resourceId: granted.id,
+        details: { purpose, allowedDuringStrike: !!allowedDuringStrike, allowedDuringEvents: !!allowedDuringEvents },
+      });
+      return granted;
     });
 
     return standardSuccessResponse(
       { consent,
         message: "Location tracking consent granted. Data will be retained for 24 hours maximum." }
     );
-  } catch (_error) {
+  } catch (error) {
+    if (error instanceof LocationConsentConflictError) {
+      return NextResponse.json({ error: error.message }, { status: 409 });
+    }
     return NextResponse.json(
       { error: "Failed to request location consent" },
       { status: 500 }
@@ -106,17 +127,31 @@ export const DELETE = withApiAuth(async (req: NextRequest) => {
       return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
     }
     const userId = user.id;
+    const organizationId = await getOrganizationIdForUser(userId);
 
     const { searchParams } = new URL(req.url);
     const reason = searchParams.get("reason");
 
-    await GeofencePrivacyService.revokeLocationConsent(userId, reason || undefined);
+    await withRLSContext({ organizationId }, async (tx) => {
+      const revoked = await GeofencePrivacyService.revokeLocationConsent(userId, reason || undefined, tx);
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'location.consent.revoke',
+        resourceType: 'member_location_consent',
+        resourceId: revoked.consentId,
+        details: { reason: reason || 'User request' },
+      });
+    });
 
     return NextResponse.json({
       success: true,
       message: "Location tracking consent revoked. All location data has been deleted.",
     });
-  } catch (_error) {
+  } catch (error) {
+    if (error instanceof LocationConsentNotFoundError) {
+      return NextResponse.json({ error: error.message }, { status: 404 });
+    }
     return NextResponse.json(
       { error: "Failed to revoke consent" },
       { status: 500 }

@@ -29,10 +29,10 @@ export const memberSegmentFiltersSchema = z.object({
   membershipType: z.array(z.string()).optional(),
   
   // Organization structure
-  employerId: z.array(z.string().uuid()).optional(),
-  worksiteId: z.array(z.string().uuid()).optional(),
-  bargainingUnitId: z.array(z.string().uuid()).optional(),
-  committeeId: z.array(z.string().uuid()).optional(),
+  employerId: z.array(z.guid()).optional(),
+  worksiteId: z.array(z.guid()).optional(),
+  bargainingUnitId: z.array(z.guid()).optional(),
+  committeeId: z.array(z.guid()).optional(),
   
   // Employment attributes (Phase 1.2 integration)
   employmentStatus: z.array(z.enum(["active", "terminated", "on_leave", "probation"])).optional(),
@@ -52,7 +52,7 @@ export const memberSegmentFiltersSchema = z.object({
   seniorityYearsMax: z.number().min(0).optional(),
   
   // Custom fields (extensible)
-  customFields: z.record(z.any()).optional(),
+  customFields: z.record(z.string(), z.any()).optional(),
 }).strict();
 
 export type MemberSegmentFilters = z.infer<typeof memberSegmentFiltersSchema>;
@@ -65,7 +65,7 @@ export type MemberSegmentFilters = z.infer<typeof memberSegmentFiltersSchema>;
  * Create Member Segment Schema
  */
 export const createMemberSegmentSchema = z.object({
-  organizationId: z.string().uuid("Invalid organization ID"),
+  organizationId: z.guid("Invalid organization ID"),
   name: z.string().min(1, "Segment name is required").max(200, "Segment name too long"),
   description: z.string().max(1000, "Description too long").optional(),
   filters: memberSegmentFiltersSchema,
@@ -97,14 +97,14 @@ export type UpdateMemberSegment = z.infer<typeof updateMemberSegmentSchema>;
  * Used for ad-hoc searches (not saved as segments).
  */
 export const executeMemberSearchSchema = z.object({
-  organizationId: z.string().uuid("Invalid organization ID"),
+  organizationId: z.guid("Invalid organization ID"),
   filters: memberSegmentFiltersSchema,
   pagination: z.object({
     page: z.number().int().positive().default(1),
     limit: z.number().int().positive().max(1000).default(50),
   }).optional(),
-  sortBy: z.enum(["name", "joinDate", "seniority", "relevance"]).default("name").optional(),
-  sortOrder: z.enum(["asc", "desc"]).default("asc").optional(),
+  sortBy: z.enum(["name", "joinDate", "seniority", "relevance"]).optional(),
+  sortOrder: z.enum(["asc", "desc"]).optional(),
 });
 
 export type ExecuteMemberSearch = z.infer<typeof executeMemberSearchSchema>;
@@ -115,7 +115,7 @@ export type ExecuteMemberSearch = z.infer<typeof executeMemberSearchSchema>;
  * Run a saved segment by ID.
  */
 export const executeSegmentSchema = z.object({
-  segmentId: z.string().uuid("Invalid segment ID"),
+  segmentId: z.guid("Invalid segment ID"),
   pagination: z.object({
     page: z.number().int().positive().default(1),
     limit: z.number().int().positive().max(1000).default(50),
@@ -134,8 +134,8 @@ export type ExecuteSegment = z.infer<typeof executeSegmentSchema>;
  * Request to export member data with watermarking and audit.
  */
 export const exportMembersSchema = z.object({
-  organizationId: z.string().uuid("Invalid organization ID"),
-  segmentId: z.string().uuid("Invalid segment ID").optional(), // Optional: export from ad-hoc search
+  organizationId: z.guid("Invalid organization ID"),
+  segmentId: z.guid("Invalid segment ID").optional(), // Optional: export from ad-hoc search
   filters: memberSegmentFiltersSchema.optional(), // Required if no segmentId
   
   // Export configuration

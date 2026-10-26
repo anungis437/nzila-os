@@ -9,7 +9,8 @@ import { db } from "@/db/db";
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
-import { auditDataMutation } from "@/lib/audit-logger";
+import { withRLSContext } from "@/lib/db/with-rls-context";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import {
   findRelevantClauses,
   linkClauseToGrievance,
@@ -21,9 +22,10 @@ import {
 } from "@/lib/api/standardized-responses";
 import { eq, and } from "drizzle-orm";
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 
 const _linkSchema = z.object({
-  clauseId: z.string().uuid(),
+  clauseId: z.guid(),
 }).optional();
 
 export const POST = withOrganizationAuth(async (request, context, params?: { id: string }) => {
@@ -52,19 +54,31 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       return standardErrorResponse(ErrorCode.NOT_FOUND, "Grievance not found");
     }
 
+    // Seniority does not open a case: the matter's content feeds this analysis, so a case relationship is required.
+    const relationship = await getEffectiveCaseAccess({ organizationId, grievanceId: params.id, userId });
+    if (grievance.createdBy !== userId && !relationship.canViewCase) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, "You do not have access to this grievance");
+    }
+
     const body = await request.json().catch(() => ({}));
 
     // If clauseId provided, link it
     if (body?.clauseId) {
-      const result = await linkClauseToGrievance(params.id, body.clauseId);
-
-      await auditDataMutation({
-        userId,
-        organizationId,
-        resource: "clause_link",
-        action: "create",
-        resourceId: params.id,
-        newState: result,
+      if (!relationship.isPrimaryOwner && !relationship.canDraftActions) {
+        return standardErrorResponse(ErrorCode.FORBIDDEN, "You do not have permission to change this case");
+      }
+      // The CBA link and its audit record commit together.
+      const result = await withRLSContext({ organizationId }, async (tx) => {
+        const linked = await linkClauseToGrievance(params.id!, body.clauseId, organizationId, tx);
+        await persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: 'grievance.link_clause',
+          resourceType: 'grievances',
+          resourceId: params.id!,
+          details: { clauseId: body.clauseId },
+        });
+        return linked;
       });
 
       return standardSuccessResponse(result);

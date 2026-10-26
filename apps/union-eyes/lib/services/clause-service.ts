@@ -53,6 +53,8 @@ export interface ClauseSearchOptions {
 export interface ClauseComparisonRequest {
   clauseIds: string[];
   analysisType: "similarities" | "differences" | "best_practices" | "all";
+  /** When set, only clauses of this organization are compared. */
+  organizationId?: string;
 }
 
 export interface ClauseComparisonResult {
@@ -88,7 +90,7 @@ export async function getClauseById(
         viewCount: sql`${cbaClause.viewCount} + 1`,
         updatedAt: new Date()
       })
-      .where(eq(cbaClause.id, id));
+      .where(and(eq(cbaClause.id, id), eq(cbaClause.organizationId, clause.organizationId)));
 
     return clause;
   } catch (error) {
@@ -236,6 +238,7 @@ export async function bulkCreateClauses(clauses: NewClause[]): Promise<Clause[]>
  */
 export async function updateClause(
   id: string,
+  organizationId: string,
   data: Partial<NewClause>
 ): Promise<Clause | null> {
   try {
@@ -245,7 +248,7 @@ export async function updateClause(
         ...data,
         updatedAt: new Date(),
       })
-      .where(eq(cbaClause.id, id))
+      .where(and(eq(cbaClause.id, id), eq(cbaClause.organizationId, organizationId)))
       .returning();
 
     return updated || null;
@@ -258,11 +261,11 @@ export async function updateClause(
 /**
  * Delete a clause
  */
-export async function deleteClause(id: string): Promise<boolean> {
+export async function deleteClause(id: string, organizationId: string): Promise<boolean> {
   try {
     await db
       .delete(cbaClause)
-      .where(eq(cbaClause.id, id));
+      .where(and(eq(cbaClause.id, id), eq(cbaClause.organizationId, organizationId)));
 
     return true;
   } catch (error) {
@@ -390,7 +393,11 @@ export async function compareClauses(
     const clauses = await db
       .select()
       .from(cbaClause)
-      .where(inArray(cbaClause.id, request.clauseIds));
+      .where(
+        request.organizationId
+          ? and(inArray(cbaClause.id, request.clauseIds), eq(cbaClause.organizationId, request.organizationId))
+          : inArray(cbaClause.id, request.clauseIds),
+      );
 
     if (clauses.length === 0) {
       throw new Error("No clauses found for comparison");

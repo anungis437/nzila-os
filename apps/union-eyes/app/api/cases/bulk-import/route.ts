@@ -16,7 +16,7 @@ import { createClaim } from '@/db/queries/claims-queries';
 import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
-import { hasMinRole } from '@/lib/api-auth-guard';
+import { requireCaseFilingCapacity } from '@/lib/cases/case-authorization';
 import { createHash } from 'crypto';
 import { eq, and } from 'drizzle-orm';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
@@ -74,10 +74,12 @@ export async function POST(request: Request) {
 
     await requireEntitlement(orgId, 'grievance_case_suite');
 
-    const isAdmin = await hasMinRole('admin');
-    if (!isAdmin) {
+    // Importing on behalf of many members is an office-bearer capacity on the canonical membership, not a role rank.
+    try {
+      await withRLSContext(async (tx) => requireCaseFilingCapacity(tx, { userId, organizationId: orgId }, 'bulk'));
+    } catch {
       return NextResponse.json(
-        { error: 'FORBIDDEN', message: 'Bulk import requires admin role or above.' },
+        { error: 'FORBIDDEN', message: 'Bulk import requires an officer or executive capacity.' },
         { status: 403 },
       );
     }

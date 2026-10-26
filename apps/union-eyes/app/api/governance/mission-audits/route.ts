@@ -5,7 +5,8 @@
 import { withApi, z } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { GOVERNANCE_SYSTEM_ROLES } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
@@ -43,7 +44,7 @@ export const POST = withApi(
       auditorOpinion: z.string().optional(),
     }),
   },
-  async ({ body }) => {
+  async ({ body, userId, organizationId }) => {
     return withSystemContext(async () => {
     const id = crypto.randomUUID();
     const revenuePass = body.unionRevenuePercent >= 50;
@@ -70,6 +71,14 @@ export const POST = withApi(
         ${body.auditorOpinion ?? ''}
       )
     `);
+    await persistAtomicAudit(db as unknown as RLSTx, {
+      organizationId: organizationId!,
+      userId: userId!,
+      action: 'governance.mission_audit.record',
+      resourceType: 'mission_audits',
+      resourceId: id,
+      details: { auditYear: body.auditYear, auditorFirm: body.auditorFirm, overallPass },
+    });
     return { id, overallPass };
     });
   },

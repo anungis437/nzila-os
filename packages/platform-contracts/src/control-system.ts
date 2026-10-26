@@ -121,7 +121,7 @@ export const DEFAULT_RETRY_POLICY: RetryPolicy = {
 // ── Org Scope Identity ───────────────────────────────────────────────────────
 
 export const OrgScopeIdentitySchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   orgName: z.string().optional(),
   tier: z.string().optional(),
 })
@@ -132,7 +132,7 @@ export type OrgScopeIdentity = z.infer<typeof OrgScopeIdentitySchema>
 export const ActorIdentitySchema = z.object({
   actorId: z.string().min(1),
   actorType: z.enum(['user', 'service', 'system', 'break_glass']),
-  orgId: z.string().uuid().optional(),
+  orgId: z.guid().optional(),
   displayName: z.string().optional(),
 })
 export type ActorIdentity = z.infer<typeof ActorIdentitySchema>
@@ -140,10 +140,10 @@ export type ActorIdentity = z.infer<typeof ActorIdentitySchema>
 // ── Correlation Envelope ─────────────────────────────────────────────────────
 
 export const CorrelationEnvelopeSchema = z.object({
-  requestId: z.string().uuid(),
-  correlationId: z.string().uuid(),
+  requestId: z.guid(),
+  correlationId: z.guid(),
   workflowId: z.string().optional(),
-  orgId: z.string().uuid().optional(),
+  orgId: z.guid().optional(),
   actorId: z.string().min(1).optional(),
   traceId: z.string().optional(),
   spanId: z.string().optional(),
@@ -158,9 +158,9 @@ export const PolicyEvalRequestSchema = z.object({
   action: z.string().min(1),
   resource: z.string().min(1),
   resourceId: z.string().optional(),
-  orgId: z.string().uuid(),
-  context: z.record(z.unknown()).default({}),
-  correlationId: z.string().uuid().optional(),
+  orgId: z.guid(),
+  context: z.record(z.string(), z.unknown()).prefault({}),
+  correlationId: z.guid().optional(),
 })
 export type PolicyEvalRequest = z.infer<typeof PolicyEvalRequestSchema>
 
@@ -178,7 +178,7 @@ export const PolicyEvalResponseSchema = z.object({
   ),
   approverRoles: z.array(z.string()).default([]),
   requiredApprovers: z.number().int().min(0).default(0),
-  decisionId: z.string().uuid().optional(),
+  decisionId: z.guid().optional(),
   evaluatedAt: z.string().datetime(),
 })
 export type PolicyEvalResponse = z.infer<typeof PolicyEvalResponseSchema>
@@ -187,10 +187,10 @@ export type PolicyEvalResponse = z.infer<typeof PolicyEvalResponseSchema>
 
 export const WorkflowTriggerRequestSchema = z.object({
   workflowId: z.string().min(1),
-  orgId: z.string().uuid(),
-  requestId: z.string().uuid(),
+  orgId: z.guid(),
+  requestId: z.guid(),
   initiatedBy: ActorIdentitySchema,
-  payload: z.record(z.unknown()).default({}),
+  payload: z.record(z.string(), z.unknown()).prefault({}),
   executionContext: z
     .object({
       dryRun: z.boolean().default(false),
@@ -198,16 +198,16 @@ export const WorkflowTriggerRequestSchema = z.object({
       timeoutMs: z.number().int().min(0).optional(),
       idempotencyKey: z.string().optional(),
     })
-    .default({}),
+    .prefault({}),
   correlationEnvelope: CorrelationEnvelopeSchema.optional(),
 })
 export type WorkflowTriggerRequest = z.infer<typeof WorkflowTriggerRequestSchema>
 
 export const WorkflowAuthorizationSchema = z.object({
   authorized: z.boolean(),
-  decisionId: z.string().uuid(),
+  decisionId: z.guid(),
   workflowId: z.string(),
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   authorizedBy: z.string(),
   reason: z.string().optional(),
   requiresApproval: z.boolean().default(false),
@@ -219,9 +219,9 @@ export type WorkflowAuthorization = z.infer<typeof WorkflowAuthorizationSchema>
 // ── Decision Event ───────────────────────────────────────────────────────────
 
 export const DecisionEventSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   type: DecisionEventTypeSchema,
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   actorId: z.string().min(1),
   action: z.string().min(1),
   resource: z.string().min(1),
@@ -230,9 +230,9 @@ export const DecisionEventSchema = z.object({
   reason: z.string().optional(),
   policyIds: z.array(z.string()).default([]),
   workflowId: z.string().optional(),
-  correlationId: z.string().uuid().optional(),
-  requestId: z.string().uuid().optional(),
-  metadata: z.record(z.unknown()).default({}),
+  correlationId: z.guid().optional(),
+  requestId: z.guid().optional(),
+  metadata: z.record(z.string(), z.unknown()).prefault({}),
   recordedAt: z.string().datetime(),
   /** SHA-256 hash chaining immutability marker */
   entryHash: z.string().optional(),
@@ -243,11 +243,11 @@ export type DecisionEvent = z.infer<typeof DecisionEventSchema>
 // ── Execution Run Record ─────────────────────────────────────────────────────
 
 export const ExecutionRunSchema = z.object({
-  runId: z.string().uuid(),
+  runId: z.guid(),
   workflowId: z.string().min(1),
-  orgId: z.string().uuid(),
-  requestId: z.string().uuid(),
-  correlationId: z.string().uuid(),
+  orgId: z.guid(),
+  requestId: z.guid(),
+  correlationId: z.guid(),
   idempotencyKey: z.string().optional(),
   initiatedBy: ActorIdentitySchema,
   status: ExecutionStatusSchema,
@@ -255,9 +255,9 @@ export const ExecutionRunSchema = z.object({
   retryCount: z.number().int().min(0).default(0),
   failureClass: FailureClassSchema.optional(),
   failureMessage: z.string().optional(),
-  decisionId: z.string().uuid().optional(),
-  payload: z.record(z.unknown()).default({}),
-  result: z.record(z.unknown()).optional(),
+  decisionId: z.guid().optional(),
+  payload: z.record(z.string(), z.unknown()).prefault({}),
+  result: z.record(z.string(), z.unknown()).optional(),
   startedAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   completedAt: z.string().datetime().optional(),
@@ -268,9 +268,9 @@ export type ExecutionRun = z.infer<typeof ExecutionRunSchema>
 // ── Audit Reference ──────────────────────────────────────────────────────────
 
 export const AuditReferenceSchema = z.object({
-  decisionId: z.string().uuid().optional(),
-  runId: z.string().uuid().optional(),
-  governanceActionId: z.string().uuid().optional(),
+  decisionId: z.guid().optional(),
+  runId: z.guid().optional(),
+  governanceActionId: z.guid().optional(),
   policyIds: z.array(z.string()).default([]),
   entryHash: z.string().optional(),
   auditTrailUrl: z.string().optional(),
@@ -284,7 +284,7 @@ export const ControlActionResultSchema = z.discriminatedUnion('ok', [
     ok: z.literal(true),
     data: z.unknown(),
     auditRef: AuditReferenceSchema.optional(),
-    correlationId: z.string().uuid().optional(),
+    correlationId: z.guid().optional(),
   }),
   z.object({
     ok: z.literal(false),
@@ -294,7 +294,7 @@ export const ControlActionResultSchema = z.discriminatedUnion('ok', [
       failureClass: FailureClassSchema.optional(),
       retryable: z.boolean().default(false),
     }),
-    correlationId: z.string().uuid().optional(),
+    correlationId: z.guid().optional(),
   }),
 ])
 export type ControlActionResult = z.infer<typeof ControlActionResultSchema>
@@ -302,9 +302,9 @@ export type ControlActionResult = z.infer<typeof ControlActionResultSchema>
 // ── Break-Glass Action ───────────────────────────────────────────────────────
 
 export const BreakGlassActionSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   actorId: z.string().min(1),
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   reason: z.string().min(10),
   resourceType: z.string(),
   resourceId: z.string().optional(),

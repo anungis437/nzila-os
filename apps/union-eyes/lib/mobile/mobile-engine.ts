@@ -718,7 +718,7 @@ export class MobileDeviceManager {
     const [existing] = await db
       .select()
       .from(mobileDevices)
-      .where(eq(mobileDevices.deviceId, data.deviceId))
+      .where(and(eq(mobileDevices.deviceId, data.deviceId), eq(mobileDevices.organizationId, data.organizationId)))
       .limit(1);
 
     if (existing) {
@@ -736,7 +736,7 @@ export class MobileDeviceManager {
           isActive: true,
           lastActiveAt: new Date(),
         })
-        .where(eq(mobileDevices.id, existing.id))
+        .where(and(eq(mobileDevices.id, existing.id), eq(mobileDevices.organizationId, data.organizationId)))
         .returning();
 
       return {
@@ -812,6 +812,7 @@ export class MobileDeviceManager {
    */
   async updateDevice(
     deviceId: string,
+    organizationId: string,
     updates: Partial<Pick<MobileDevice, 'deviceName' | 'osVersion' | 'appVersion' | 'timezone'>>
   ): Promise<void> {
     await db
@@ -820,13 +821,13 @@ export class MobileDeviceManager {
         ...updates,
         lastActiveAt: new Date(),
       })
-      .where(eq(mobileDevices.id, deviceId));
+      .where(and(eq(mobileDevices.id, deviceId), eq(mobileDevices.organizationId, organizationId)));
   }
 
   /**
    * Deactivate device (logout/wipe)
    */
-  async deactivateDevice(deviceId: string, reason: string): Promise<void> {
+  async deactivateDevice(deviceId: string, organizationId: string, reason: string): Promise<void> {
     await db
       .update(mobileDevices)
       .set({
@@ -835,7 +836,7 @@ export class MobileDeviceManager {
         archivedAt: new Date(),
         metadata: { reason, deactivatedAt: new Date().toISOString() },
       })
-      .where(eq(mobileDevices.id, deviceId));
+      .where(and(eq(mobileDevices.id, deviceId), eq(mobileDevices.organizationId, organizationId)));
   }
 
   /**
@@ -909,7 +910,7 @@ export class MobileDeviceManager {
   /**
    * Send remote wipe command
    */
-  async remoteWipe(deviceId: string): Promise<void> {
+  async remoteWipe(deviceId: string, organizationId: string): Promise<void> {
     await db
       .update(mobileDevices)
       .set({
@@ -918,7 +919,7 @@ export class MobileDeviceManager {
         archivedAt: new Date(),
         metadata: { remoteWipeRequestedAt: new Date().toISOString() },
       })
-      .where(eq(mobileDevices.id, deviceId));
+      .where(and(eq(mobileDevices.id, deviceId), eq(mobileDevices.organizationId, organizationId)));
   }
 }
 

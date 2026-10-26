@@ -65,50 +65,6 @@ export const webhookSubscriptions = pgTable("webhook_subscriptions", {
 });
 
 /**
- * Webhook Deliveries Table
- * Log of webhook delivery attempts
- */
-export const webhookDeliveries = pgTable("webhook_deliveries", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  
-  // Subscription reference
-  subscriptionId: uuid("subscription_id").notNull().references(() => webhookSubscriptions.id, { onDelete: "cascade" }),
-  
-  // Event details
-  eventType: varchar("event_type", { length: 100 }).notNull(),
-  eventId: uuid("event_id").notNull(), // Reference to source event
-  
-  // Request
-  requestUrl: varchar("request_url", { length: 500 }).notNull(),
-  requestMethod: varchar("request_method", { length: 10 }).default('POST'),
-  requestHeaders: jsonb("request_headers"),
-  requestBody: jsonb("request_body").notNull(),
-  
-  // Response
-  responseStatus: integer("response_status"),
-  responseHeaders: jsonb("response_headers"),
-  responseBody: text("response_body"),
-  
-  // Timing
-  sentAt: timestamp("sent_at", { withTimezone: true }).defaultNow(),
-  responseTime: integer("response_time_ms"), // Response time in milliseconds
-  
-  // Retry tracking
-  attemptNumber: integer("attempt_number").default(1),
-  isRetry: boolean("is_retry").default(false),
-  
-  // Status
-  status: varchar("status", { length: 50 }).notNull(), // 'success' | 'failed' | 'pending'
-  errorMessage: text("error_message"),
-  
-  // Audit trail
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  
-  // Metadata
-  metadata: jsonb("metadata").default(sql`'{}'::jsonb`),
-});
-
-/**
  * API Integrations Table
  * Third-party integrations (HR, Payroll, etc.)
  */
@@ -264,8 +220,6 @@ export const apiAccessTokens = pgTable("api_access_tokens", {
 // Export types
 export type WebhookSubscription = typeof webhookSubscriptions.$inferSelect;
 export type NewWebhookSubscription = typeof webhookSubscriptions.$inferInsert;
-export type WebhookDelivery = typeof webhookDeliveries.$inferSelect;
-export type NewWebhookDelivery = typeof webhookDeliveries.$inferInsert;
 export type APIIntegration = typeof apiIntegrations.$inferSelect;
 export type NewAPIIntegration = typeof apiIntegrations.$inferInsert;
 export type IntegrationSyncLog = typeof integrationSyncLogs.$inferSelect;

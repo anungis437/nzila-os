@@ -201,6 +201,7 @@ export async function createVotingSession(
  */
 export async function updateVotingSession(
   id: string,
+  organizationId: string,
   data: Partial<NewVotingSession>
 ): Promise<VotingSession | null> {
   try {
@@ -210,7 +211,7 @@ export async function updateVotingSession(
         ...data,
         updatedAt: new Date(),
       })
-      .where(eq(votingSessions.id, id))
+      .where(and(eq(votingSessions.id, id), eq(votingSessions.organizationId, organizationId)))
       .returning();
 
     return updated || null;
@@ -223,11 +224,11 @@ export async function updateVotingSession(
 /**
  * Delete voting session
  */
-export async function deleteVotingSession(id: string): Promise<boolean> {
+export async function deleteVotingSession(id: string, organizationId: string): Promise<boolean> {
   try {
     await db
       .delete(votingSessions)
-      .where(eq(votingSessions.id, id));
+      .where(and(eq(votingSessions.id, id), eq(votingSessions.organizationId, organizationId)));
 
     return true;
   } catch (error) {
@@ -262,15 +263,23 @@ export async function addVotingOption(
 /**
  * Update voting option
  */
+/**
+ * Voting options and eligibility rows carry no organization of their own: ownership is proven in the statement
+ * through the organization of the voting session they belong to.
+ */
+const sessionsOfOrganization = (organizationId: string) =>
+  db.select({ id: votingSessions.id }).from(votingSessions).where(eq(votingSessions.organizationId, organizationId));
+
 export async function updateVotingOption(
   id: string,
+  organizationId: string,
   data: Partial<NewVotingOption>
 ): Promise<VotingOption | null> {
   try {
     const [updated] = await db
       .update(votingOptions)
       .set(data)
-      .where(eq(votingOptions.id, id))
+      .where(and(eq(votingOptions.id, id), inArray(votingOptions.sessionId, sessionsOfOrganization(organizationId))))
       .returning();
 
     return updated || null;
@@ -283,11 +292,11 @@ export async function updateVotingOption(
 /**
  * Delete voting option
  */
-export async function deleteVotingOption(id: string): Promise<boolean> {
+export async function deleteVotingOption(id: string, organizationId: string): Promise<boolean> {
   try {
     await db
       .delete(votingOptions)
-      .where(eq(votingOptions.id, id));
+      .where(and(eq(votingOptions.id, id), inArray(votingOptions.sessionId, sessionsOfOrganization(organizationId))));
 
     return true;
   } catch (error) {
@@ -377,6 +386,7 @@ export async function checkVoterEligibility(
  */
 export async function updateVoterEligibility(
   id: string,
+  organizationId: string,
   data: Partial<NewVoterEligibility>
 ): Promise<VoterEligibility | null> {
   try {
@@ -386,7 +396,7 @@ export async function updateVoterEligibility(
         ...data,
         updatedAt: new Date(),
       })
-      .where(eq(voterEligibility.id, id))
+      .where(and(eq(voterEligibility.id, id), inArray(voterEligibility.sessionId, sessionsOfOrganization(organizationId))))
       .returning();
 
     return updated || null;
@@ -458,7 +468,17 @@ function generateAnonymousVoterId(
 }
 
 /**
- * Cast vote
+ * Ids under which a member's ballot in a session may be stored: the anonymous voter id, and the member id itself for
+ * identified ballots cast before ballots were made secret. Both count as "already voted".
+ */
+function ballotIdentities(sessionId: string, memberId: string): string[] {
+  return [generateAnonymousVoterId(sessionId, memberId).voterId, memberId];
+}
+
+/**
+ * Cast vote. Ballots are secret: the stored voter id is always the anonymous one. An identified (open-roll) ballot is
+ * refused, because it discloses the choice, and because it was never counted by the one-vote check, which let a member
+ * vote once identified and once anonymously.
  */
 export async function castVote(
   sessionId: string,
@@ -467,6 +487,10 @@ export async function castVote(
   isAnonymous = true
 ): Promise<Vote> {
   try {
+    if (!isAnonymous) {
+      throw new Error("Open-roll voting is not available: ballots are secret");
+    }
+
     // Check eligibility
     const eligibility = await checkVoterEligibility(sessionId, memberId);
     if (!eligibility || !eligibility.isEligible) {
@@ -486,12 +510,11 @@ export async function castVote(
       throw new Error("Option does not belong to this voting session");
     }
 
-    // Check if already voted
-    const { voterId } = generateAnonymousVoterId(sessionId, memberId);
+    // Check if already voted, under either identity
     const existingVote = await db.query.votes.findFirst({
       where: and(
         eq(votes.sessionId, sessionId),
-        eq(votes.voterId, voterId)
+        inArray(votes.voterId, ballotIdentities(sessionId, memberId))
       ),
     });
 
@@ -499,10 +522,7 @@ export async function castVote(
       throw new Error("Vote already cast");
     }
 
-    // Generate anonymous voter ID if needed
-    const { voterId: finalVoterId, voterHash } = isAnonymous
-      ? generateAnonymousVoterId(sessionId, memberId)
-      : { voterId: memberId, voterHash: "" };
+    const { voterId: finalVoterId, voterHash } = generateAnonymousVoterId(sessionId, memberId);
 
     // Cast vote
     const [vote] = await db
@@ -512,14 +532,15 @@ export async function castVote(
         optionId,
         voterId: finalVoterId,
         voterHash,
-        isAnonymous,
+        isAnonymous: true,
         castAt: new Date(),
       })
       .returning();
 
     return vote;
   } catch (error) {
-    logger.error("Error casting vote", { error, sessionId, optionId, memberId });
+    // Neither the member nor the option is logged: together they would disclose a secret ballot.
+    logger.error("Error casting vote", { error, sessionId });
     throw new Error(error instanceof Error ? error.message : "Failed to cast vote");
   }
 }
@@ -532,11 +553,10 @@ export async function hasVoted(
   memberId: string
 ): Promise<boolean> {
   try {
-    const { voterId } = generateAnonymousVoterId(sessionId, memberId);
     const vote = await db.query.votes.findFirst({
       where: and(
         eq(votes.sessionId, sessionId),
-        eq(votes.voterId, voterId)
+        inArray(votes.voterId, ballotIdentities(sessionId, memberId))
       ),
     });
 
@@ -752,7 +772,8 @@ export async function calculateRankedChoiceResults(
 export async function setProxyVoter(
   sessionId: string,
   memberId: string,
-  proxyMemberId: string
+  proxyMemberId: string,
+  organizationId: string
 ): Promise<VoterEligibility | null> {
   try {
     const eligibility = await checkVoterEligibility(sessionId, memberId);
@@ -764,7 +785,7 @@ export async function setProxyVoter(
       throw new Error("Voter cannot delegate");
     }
 
-    const updated = await updateVoterEligibility(eligibility.id, {
+    const updated = await updateVoterEligibility(eligibility.id, organizationId, {
       delegatedTo: proxyMemberId,
     });
 
@@ -780,7 +801,8 @@ export async function setProxyVoter(
  */
 export async function removeProxyVoter(
   sessionId: string,
-  memberId: string
+  memberId: string,
+  organizationId: string
 ): Promise<VoterEligibility | null> {
   try {
     const eligibility = await checkVoterEligibility(sessionId, memberId);
@@ -788,7 +810,7 @@ export async function removeProxyVoter(
       throw new Error("Voter eligibility not found");
     }
 
-    const updated = await updateVoterEligibility(eligibility.id, {
+    const updated = await updateVoterEligibility(eligibility.id, organizationId, {
       delegatedTo: null,
     });
 

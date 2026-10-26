@@ -166,7 +166,6 @@ export function withCSRFProtection(
 
     // Extract session ID (from auth session or custom auth)
     const sessionId = req.headers.get('x-session-id') || 
-                     req.cookies.get('__clerk_db_jwt')?.value ||
                      'anonymous';
 
     // Get CSRF token from header
@@ -326,7 +325,6 @@ export async function csrfMiddleware(request: NextRequest): Promise<NextResponse
 
   // Validate CSRF token
   const sessionId = request.headers.get('x-session-id') || 
-                   request.cookies.get('__clerk_db_jwt')?.value ||
                    'anonymous';
 
   const csrfToken = request.headers.get(CSRF_HEADER_NAME);

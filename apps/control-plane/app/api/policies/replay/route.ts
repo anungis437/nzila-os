@@ -14,7 +14,7 @@ const HistoricalDecisionSchema = z.object({
   action: z.string().min(1),
   resource: z.string().min(1),
   environment: z.enum(['dev', 'staging', 'production']).default('production'),
-  payload: z.record(z.string(), z.unknown()).default({}),
+  payload: z.record(z.string(), z.unknown()).prefault({}),
   previousDecision: z.object({
     level: z.enum(['ALLOW', 'WARN', 'CHALLENGE', 'BLOCK']),
     reason: z.string().min(1),

@@ -109,10 +109,13 @@ function privilegeSet(value, table, side) {
 
 export function loadAuthorityManifest(repoRoot) {
   const script = path.join(repoRoot, 'tooling/scripts/export-union-eyes-authority-contract.ts')
-  const result = spawnSync('pnpm', ['exec', 'tsx', script], {
+  // On Windows pnpm is a .cmd shim, which Node can only start through a shell.
+  const windows = process.platform === 'win32'
+  const result = spawnSync(windows ? 'pnpm.cmd' : 'pnpm', ['exec', 'tsx', windows ? `"${script}"` : script], {
     cwd: path.join(repoRoot, 'apps/union-eyes'),
     encoding: 'utf8',
     maxBuffer: 32 * 1024 * 1024,
+    shell: windows,
   })
   if (result.status !== 0) {
     throw new Error(`Storage-authority manifest export failed: ${result.stderr || result.stdout}`)
@@ -341,6 +344,8 @@ export async function remediateCatalogAuthority(client, { repoRoot }) {
     '0017_snapshot_authority_reconciliation.sql',
     '0018_knowledge_transfer_rls_closure.sql',
     '0019_deadline_reassignment_convergence.sql',
+    '0020_authority_kernel_rls_closure.sql',
+    '0021_message_thread_triage_rls_closure.sql',
   ]) {
     const migration = fs.readFileSync(
       path.join(repoRoot, 'apps/union-eyes/db/migrations-cache', fileName),

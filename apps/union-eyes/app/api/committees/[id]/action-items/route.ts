@@ -5,9 +5,11 @@
 
 import { z } from "zod";
 import { withApi } from "@/lib/api/with-api";
+import { ApiError } from "@/lib/api/errors";
 import {
   createActionItem,
   listActionItems,
+  requireCommitteeScope,
 } from "@/lib/services/committee-workspace-service";
 
 const createSchema = z.object({
@@ -16,16 +18,19 @@ const createSchema = z.object({
   priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
   assignedTo: z.string().optional(),
   dueDate: z.string().optional(),
-  meetingId: z.string().uuid().optional(),
+  meetingId: z.guid().optional(),
 });
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "member" },
     openapi: { tags: ["Committees"], summary: "List action items" },
   },
-  async ({ organizationId: _organizationId, params, request }) => {
+  async ({ organizationId, params, request }) => {
+    if (!organizationId) throw ApiError.badRequest("Organization context required");
     const { id: committeeId } = params as { id: string };
+    await requireCommitteeScope(organizationId, committeeId);
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get("status") ?? undefined;
     const assignedTo = searchParams.get("assignedTo") ?? undefined;
@@ -37,17 +42,20 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "steward" },
     body: createSchema,
     openapi: { tags: ["Committees"], summary: "Create action item" },
   },
   async ({ body, organizationId, userId, params }) => {
+    if (!organizationId) throw ApiError.badRequest("Organization context required");
     const { id: committeeId } = params as { id: string };
+    await requireCommitteeScope(organizationId, committeeId, { meetingId: body.meetingId });
 
     return createActionItem({
       ...body,
       committeeId,
-      organizationId: organizationId!,
+      organizationId,
       createdBy: userId,
     });
   }

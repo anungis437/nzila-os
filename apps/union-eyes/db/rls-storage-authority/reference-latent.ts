@@ -68,6 +68,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "accessibility_user_testing",
@@ -79,6 +80,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "alert_escalations",
@@ -90,6 +92,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "alert_rules",
@@ -178,6 +181,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "calendars",
@@ -200,6 +204,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
     {
     table: "chargeback_statements",
@@ -233,6 +238,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "clc_api_config",
@@ -244,6 +250,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "clc_per_capita_benchmarks",
@@ -266,6 +273,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "cms_navigation_menus",
@@ -277,6 +285,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "cms_pages",
@@ -310,6 +319,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "compliance_alerts",
@@ -409,6 +419,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
     {
     table: "data_quality_warnings",
@@ -442,6 +453,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "defensibility_packs",
@@ -563,6 +575,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "employer_timesheet_entries",
@@ -618,6 +631,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "event_registrations",
@@ -629,6 +643,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "event_reminders",
@@ -706,6 +721,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "field_organizer_activities",
@@ -717,6 +733,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
     {
     table: "gdpr_data_requests",
@@ -816,6 +833,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "knowledge_base",
@@ -915,6 +933,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "organizer_impacts",
@@ -926,6 +945,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "organizer_tasks",
@@ -948,6 +968,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "outreach_enrollments",
@@ -959,6 +980,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "outreach_sequences",
@@ -970,6 +992,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "outreach_steps_log",
@@ -981,6 +1004,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "pack_download_log",
@@ -992,6 +1016,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "pay_equity_exercises",
@@ -1014,6 +1039,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "pci_dss_encryption_keys",
@@ -1179,6 +1205,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
     {
     table: "public_content",
@@ -1201,6 +1228,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "push_devices",
@@ -1256,6 +1284,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "report_executions",
@@ -1267,6 +1296,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "report_shares",
@@ -1278,6 +1308,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "reports",
@@ -1355,6 +1386,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "scim_configurations",
@@ -1432,6 +1464,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "social_feeds",
@@ -1443,6 +1476,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "social_posts",
@@ -1575,6 +1609,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "training_courses",
@@ -1641,6 +1676,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
     {
     table: "user_signatures",
@@ -1685,6 +1721,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "worksites",
@@ -1773,6 +1810,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "alert_conditions",
@@ -1784,6 +1822,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "alert_executions",
@@ -1872,6 +1911,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "automation_schedules",
@@ -1883,6 +1923,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
     {
     table: "autopay_settings",
@@ -1938,6 +1979,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "benchmark_categories",
@@ -1960,6 +2002,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "benefit_comparisons",
@@ -2114,6 +2157,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
     {
     table: "continuing_education",
@@ -2128,6 +2172,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
   },
   {
     table: "contract_amendments",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
     classification: "LATENT_UNREACHABLE",
     reason: "Round-7 scope-expansion scan: zero references to the 'contractAmendments' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files via a combined ripgrep pass across app/, actions/, lib/, services/. No known application code path queries this table today. NOT yet individually checked for raw-SQL (non-Drizzle-symbol) references to the physical table name — see the raw-SQL LATENT fixture test for why that check matters before this can be treated as final.",
     supportingCapability: [],
@@ -2161,6 +2206,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
   },
   {
     table: "contract_rate_cards",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
     classification: "LATENT_UNREACHABLE",
     reason: "Round-7 scope-expansion scan: zero references to the 'contractRateCards' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files via a combined ripgrep pass across app/, actions/, lib/, services/. No known application code path queries this table today. NOT yet individually checked for raw-SQL (non-Drizzle-symbol) references to the physical table name — see the raw-SQL LATENT fixture test for why that check matters before this can be treated as final.",
     supportingCapability: [],
@@ -2273,7 +2319,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     table: "data_classification_policy",
     classification: "GLOBAL_REFERENCE_DATA",
     reason: "CLOSED round 52 (NON_FINANCE_SCOPE_EXCEPTION_REMEDIATION, PRIVACY_AND_JURISDICTION family): db/schema/domains/compliance/employer-interference.ts's dataClassificationPolicy has no organizationId column — a single platform-wide 'Employer Data Firewall Policy' doctrine (effectiveDate/expiryDate versioned, approvedBy is just the approving user, not a tenant). The 3 real routes (app/api/privacy/{breach,dsar,provincial}/route.ts) all wire the SAME crudRoutes({table: dataClassificationPolicy, orgScoped: true, readRole: 'member', writeRole: ...}) — orgScoped is a no-op since the table has no org column. DEFECT FOUND AND FIXED THIS ROUND: writeRole was 'admin' (an ORDINARY per-organization role) gating a mutation to platform-wide compliance doctrine — any single org's own admin could rewrite what employer/union data-firewall rules apply platform-wide, the exact same defect class as round 51's feature_flags fix. Fixed: writeRole changed to 'compliance_manager' (a genuine PLATFORM_ELEVATED_ROLES member, see lib/api-auth-guard.ts — never tenant-self-service-assignable). readRole stays 'member' (global readability does not require platform authority, only global writability does). Regression test added (app/api/privacy/__tests__/data-classification-policy-writerole.test.ts) proving all 3 routes pass writeRole:'compliance_manager', never 'admin'. Django: backend/compliance/views.py DataClassificationPolicyViewSet was a separate unscoped IsAuthenticated-only duplicate surface with no legitimate consumer of its own — contained via DenyAllPermission (the crudRoutes path above is the sole legitimate surface).",
-    supportingCapability: ["app/api/privacy/breach/route.ts","app/api/privacy/dsar/route.ts","app/api/privacy/provincial/route.ts","app/api/privacy/__tests__/data-classification-policy-writerole.test.ts","backend/compliance/views.py"],
+    supportingCapability: ["app/api/compliance/data-classification-policy/route.ts","app/api/privacy/__tests__/data-classification-policy-writerole.test.ts","backend/compliance/views.py"],
     requiredRuntimePrivileges: ["SELECT","INSERT"],
     requiredSystemPrivileges: [],
     invocationAuthority: "MIXED",
@@ -2422,6 +2468,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "federation_meetings",
@@ -2433,6 +2480,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "federation_resources",
@@ -2444,6 +2492,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "firewall_access_rules",
@@ -2504,9 +2553,9 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     table: "geofence_events",
     classification: "USER_RLS_REQUIRED",
     reason: "CLOSED round 56 (PRIVACY_SENSITIVE archetype): user_id NOT NULL. Reachable via app/api/location/{track,geofence,consent}/route.ts and app/api/emergency/{recovery,activate}/route.ts. app/api/location/track/route.ts is explicitly documented as \"strictly self-service: userId is always the [authenticated caller's] user.id\" via getCurrentUser() — never a client-supplied value.",
-    supportingCapability: ["services/geofence-privacy-service.ts"],
+    supportingCapability: ["services/geofence-privacy-service.ts","app/api/cron/location-retention/route.ts"],
     requiredRuntimePrivileges: ["SELECT", "INSERT", "DELETE"],
-    requiredSystemPrivileges: ["SELECT"],
+    requiredSystemPrivileges: ["SELECT", "DELETE"],
     invocationAuthority: "TENANT_USER",
     dbExecutionPrincipal: "TENANT_RUNTIME",
     reviewPriority: "NORMAL",
@@ -2565,6 +2614,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
     {
     table: "key_holder_registry",
@@ -2635,10 +2685,10 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
   {
     table: "location_deletion_log",
     classification: "GLOBAL_REFERENCE_DATA",
-    reason: "CLOSED round 52 (NON_FINANCE_SCOPE_EXCEPTION_REMEDIATION, LOCATION_AND_GEOFENCE family): write-only compliance evidence with no organization/user column and no legitimate TypeScript reader anywhere (git-grep confirmed zero routes read this table). Two writers exist: (1) deleteAllUserLocationData, invoked from DELETE /api/location/consent (self-service consent revocation, already correctly self-scoped to the caller's own id per the round-49/round-17 fix — no cross-user defect here); (2) deleteExpiredLocationData, documented as 'should run hourly via cron' but has ZERO real callers anywhere (no cron route wires it up) — a latent/unwired path per round-46 doctrine, not a live SYSTEM_SCHEDULE invocation. Since it stores only counts/date-ranges/deletion-type (no raw location data) and has no read surface, this is global append-only evidence rather than tenant-partitioned data.",
-    supportingCapability: ["app/api/location/consent/route.ts","services/geofence-privacy-service.ts"],
+    reason: "CLOSED round 52 (NON_FINANCE_SCOPE_EXCEPTION_REMEDIATION, LOCATION_AND_GEOFENCE family): write-only compliance evidence with no organization/user column and no legitimate TypeScript reader anywhere (git-grep confirmed zero routes read this table). Two writers exist: (1) deleteAllUserLocationData, invoked from DELETE /api/location/consent (self-service consent revocation, already correctly self-scoped to the caller's own id per the round-49/round-17 fix — no cross-user defect here); (2) deleteExpiredLocationData, the 24-hour retention sweep, now wired to app/api/cron/location-retention/route.ts, which runs it under the system role in one transaction with its deletion-log row. Since it stores only counts/date-ranges/deletion-type (no raw location data) and has no read surface, this is global append-only evidence rather than tenant-partitioned data.",
+    supportingCapability: ["app/api/location/consent/route.ts","services/geofence-privacy-service.ts","app/api/cron/location-retention/route.ts"],
     requiredRuntimePrivileges: ["INSERT"],
-    requiredSystemPrivileges: [],
+    requiredSystemPrivileges: ["INSERT"],
     invocationAuthority: "TENANT_USER",
     dbExecutionPrincipal: "TENANT_RUNTIME",
     reviewPriority: "NONE",
@@ -2647,9 +2697,9 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     table: "location_tracking",
     classification: "USER_RLS_REQUIRED",
     reason: "CLOSED round 56 (PRIVACY_SENSITIVE archetype): user_id NOT NULL. Reachable via app/api/location/{track,geofence,consent}/route.ts, same self-service userId derivation (getCurrentUser().id) verified for geofence_events — both tables are written by the same route family.",
-    supportingCapability: ["lib/services/geofence-privacy-service.ts","lib/services/location-tracking-service.ts","services/geofence-privacy-service.ts"],
+    supportingCapability: ["lib/services/geofence-privacy-service.ts","lib/services/location-tracking-service.ts","services/geofence-privacy-service.ts","app/api/cron/location-retention/route.ts"],
     requiredRuntimePrivileges: ["SELECT", "INSERT", "DELETE"],
-    requiredSystemPrivileges: ["SELECT"],
+    requiredSystemPrivileges: ["SELECT", "DELETE"],
     invocationAuthority: "TENANT_USER",
     dbExecutionPrincipal: "TENANT_RUNTIME",
     reviewPriority: "NORMAL",
@@ -2686,6 +2736,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "lrb_unions",
@@ -2697,6 +2748,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "mentorships",
@@ -2741,6 +2793,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "policy_evaluations",

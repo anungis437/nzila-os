@@ -10,7 +10,7 @@
 This document validates the end-to-end user journeys for each role persona in UnionEyes. Validation was performed through:
 
 1. **Code analysis** — route definitions in `app/[locale]/(dashboard)/`, role-permission mappings in `lib/auth/roles.ts`, FSM enforcement in `lib/case-fsm-enforcement.ts` and `lib/workflow/case-lifecycle.ts`, and sidebar/navigation configuration in `lib/dashboard/role-experience.ts`.
-2. **Fixture tracing** — cross-referencing `tests/fixtures/test-users.ts` against `db/seeds/seed-master.sql` to verify test accounts exist in known seed orgs.
+2. **Fixture tracing** — cross-referencing `tests/fixtures/test-users.ts` against the organizations created by the canonical bootstrap (the retired `db/seeds/seed-master.sql` no longer exists; UE-CONV-H-005) to verify test accounts exist in known orgs.
 3. **Playwright spec audit** — each e2e spec was read and each test was mapped to the journey step it covers.
 4. **Negative-path analysis** — `authenticated-role-navigation.spec.ts` leakage-attempt table was used to enumerate the permission boundary tests.
 
@@ -46,7 +46,7 @@ This document validates the end-to-end user journeys for each role persona in Un
 
 *Role: `president` (executive experience); also applies to `vice_president`, `secretary_treasurer`, `national_officer`, `app_owner`*
 *Test account: `ue.qa.executive.primary@nzila.test` — userId `ue-qa-executive-primary` — org CAPE-ACEP (`063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6`)*
-*Seed password: `NzilaTest2026!`*
+*Test-account password: held in the team secret store — never recorded in the repository*
 
 ### 1.1 Log in and reach Executive Overview dashboard
 
@@ -126,7 +126,7 @@ This document validates the end-to-end user journeys for each role persona in Un
 
 *Role: `steward` (staff experience)*
 *Test account: `ue.qa.steward.primary@nzila.test` — userId `ue-qa-steward-primary` — org CAPE-ACEP*
-*Seed password: `NzilaTest2026!`*
+*Test-account password: held in the team secret store — never recorded in the repository*
 
 ### 2.1 Log in and view assigned work queue
 
@@ -206,7 +206,7 @@ This document validates the end-to-end user journeys for each role persona in Un
 
 *Role: `member` (member experience)*
 *Test account: `ue.qa.member.primary@nzila.test` — userId `ue-qa-member-primary` — org CAPE-ACEP*
-*Seed password: `NzilaTest2026!`*
+*Test-account password: held in the team secret store — never recorded in the repository*
 
 ### 3.1 Log in to member portal
 
@@ -272,7 +272,7 @@ This document validates the end-to-end user journeys for each role persona in Un
 
 *Role: `compliance_manager` (governance experience); metadata: `readOnly: true, auditPersona: true`*
 *Test account: `ue.qa.auditor.readonly@nzila.test` — userId `ue-qa-auditor-readonly` — org CAPE-ACEP*
-*Seed password: `NzilaTest2026!`*
+*Test-account password: held in the team secret store — never recorded in the repository*
 
 ### 4.1 Log in
 
@@ -394,7 +394,7 @@ This document validates the end-to-end user journeys for each role persona in Un
 
 *Role: `admin` (admin experience) — org-level admin. For cross-tenant platform admin, use `app_owner` or `system_admin`.*
 *Test account: `ue.qa.admin.primary@nzila.test` — userId `ue-qa-admin-primary` — org CAPE-ACEP*
-*Seed password: `NzilaTest2026!`*
+*Test-account password: held in the team secret store — never recorded in the repository*
 
 ### 6.1 Log in with platform admin access
 

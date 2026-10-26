@@ -15,7 +15,7 @@
 "use client";
 
 import * as React from "react";
-import { sanitizeHtml } from '@/lib/utils/sanitize';
+import { sanitizeHtml, safeAttributeUrl } from '@/lib/utils/sanitize';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -72,7 +72,7 @@ const emailTemplateSchema = z.object({
       id: z.string(),
       type: z.enum(["text", "heading", "image", "button", "divider", "html"]),
       content: z.string(),
-      styles: z.record(z.string()).optional(),
+      styles: z.record(z.string(), z.string()).optional(),
     })
   ),
 });
@@ -215,24 +215,29 @@ export function EmailTemplateBuilder({
         case "text":
           return <p className="mb-4 text-gray-700">{block.content}</p>;
         case "button":
-          const [label, url] = block.content.split("|");
-          return (
-            <div className="mb-4">
-              <a
-                href={url}
-                className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
-              >
-                {label}
-              </a>
-            </div>
-          );
-        case "image":
+          {
+            const [label, url] = block.content.split("|");
+            const href = safeAttributeUrl(url ?? "", ["http:", "https:", "mailto:"]);
+            return (
+              <div className="mb-4">
+                <a
+                  href={href}
+                  rel="noopener noreferrer"
+                  className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
+                >
+                  {label}
+                </a>
+              </div>
+            );
+          }
+        case "image": {
+          const src = safeAttributeUrl(block.content);
           // eslint-disable-next-line @next/next/no-img-element
-          return <img src={block.content} alt="" className="mb-4 w-full" />;
+          return src ? <img src={src} alt="" className="mb-4 w-full" /> : null;
+        }
         case "divider":
           return <hr className="my-6 border-gray-300" />;
         case "html":
-          {/* codeql[js/xss-through-dom] - content sanitized by DOMPurify via sanitizeHtml() */}
           return <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content) }} className="mb-4" />;
         default:
           return null;

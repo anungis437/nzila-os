@@ -260,13 +260,13 @@ describe('Permission grants — union roles', () => {
   });
 
   // -- Steward
-  it('STEWARD can assign claims and view all claims', () => {
+  it('STEWARD has no organization-wide claim view/edit/assign grant', () => {
     for (const p of [
       Permission.ASSIGN_CLAIMS,
       Permission.VIEW_ALL_CLAIMS,
       Permission.EDIT_ALL_CLAIMS,
     ]) {
-      expect(hasPermission(UserRole.STEWARD, p)).toBe(true);
+      expect(hasPermission(UserRole.STEWARD, p)).toBe(false);
     }
   });
 

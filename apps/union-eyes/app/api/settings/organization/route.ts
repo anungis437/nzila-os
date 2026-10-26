@@ -7,12 +7,14 @@ import { organizations } from '@/db/schema-organizations';
 import { organizationMembers } from '@/db/schema';
 import { eq, sql, count } from 'drizzle-orm';
 import { withApi } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
 
 /* ── GET ──────────────────────────────────────────────────────────────────── */
 export const GET = withApi(
-  { auth: { required: true } },
+  { auth: { required: true, minRole: 'admin' } },
   async (ctx) => {
     const orgId = ctx.organizationId;
     if (!orgId) {
@@ -92,10 +94,20 @@ export const PUT = withApi(
 
     updates.updatedAt = new Date();
 
-    await db
-      .update(organizations)
-      .set(updates)
-      .where(eq(sql`${organizations.id}::text`, orgId));
+    await withRLSContext(async (tx) => {
+      await tx
+        .update(organizations)
+        .set(updates)
+        .where(eq(sql`${organizations.id}::text`, orgId));
+      await persistAtomicAudit(tx, {
+        organizationId: orgId,
+        userId: ctx.userId!,
+        action: 'organization.settings_update',
+        resourceType: 'organizations',
+        resourceId: orgId,
+        details: { fields: Object.keys(updates).filter((k) => k !== 'updatedAt') },
+      });
+    });
 
     return { updated: true };
   },

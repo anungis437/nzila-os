@@ -5,7 +5,7 @@ import { z } from 'zod'
  * Every cross-app entity must extend this base.
  */
 export const canonicalEntityBaseSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   entityType: z.string().min(1),
   orgId: z.string().min(1),
   sourceModule: z.string().min(1),
@@ -16,7 +16,7 @@ export const canonicalEntityBaseSchema = z.object({
   createdBy: z.string().min(1),
   updatedBy: z.string().optional(),
   schemaVersion: z.string().default('1.0.0'),
-  extensions: z.record(z.unknown()).optional(),
+  extensions: z.record(z.string(), z.unknown()).optional(),
 })
 
 export type CanonicalEntityBase = z.infer<typeof canonicalEntityBaseSchema>

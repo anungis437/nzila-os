@@ -18,9 +18,10 @@ import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders as _createRateLimitHeaders } from '@/lib/rate-limiter';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { enforceAISafety } from '@nzila/policies';
+import { operationAuditResponse } from '@/lib/audit/operation-audit';
 
 const triageSchema = z.object({
-  grievanceId: z.string().uuid(),
+  grievanceId: z.guid(),
 });
 
 export const POST = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
@@ -62,7 +63,9 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
       userId: context.userId!,
     });
     return standardSuccessResponse(result);
-  } catch (_error) {
+  } catch (error) {
+    const refused = operationAuditResponse(error);
+    if (refused) return standardErrorResponse(ErrorCode.CONFLICT, refused.body.error.message);
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Triage analysis failed',

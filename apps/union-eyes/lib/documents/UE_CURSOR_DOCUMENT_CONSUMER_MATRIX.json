@@ -1,0 +1,1298 @@
+{
+  "record": "UE_CURSOR_DOCUMENT_CONSUMER_MATRIX",
+  "tranche": 1,
+  "developmentBaselineSha": "fde81a81a088a1c8c4aa6d498b2b3a52e0dea298",
+  "cursorBranch": "agents/ue-cursor-documents-convergence",
+  "integrationBranch": "agents/ue-final-convergence",
+  "journey": "dashboard document list -> authorized download -> repository upload -> persisted canonical row -> download audit -> UI refresh",
+  "canonicalContractGaps": [
+    {
+      "id": "document-share-disclosure",
+      "owner": "integrator",
+      "detail": "No canonical share, member disclosure, export, or WorkAid counsel route. The console fails closed. Do not implement sharing as a privacy-label PATCH.",
+      "status": "OPEN_FAIL_CLOSED",
+      "integratorNote": "Sharing, member disclosure, export and counsel disclosure remain separate governed actions that are not implemented. Every surface fails closed. They need an institutional disclosure policy (who may disclose what, to whom, with consent) before an action can be authorised; viewing, downloading and processing never imply them."
+    },
+    {
+      "id": "document-retention-execution",
+      "owner": "integrator",
+      "detail": "No canonical document retention contract or per-document legal-hold record exists (legal_holds is scoped by data type and date range, not by document). The console presents hold and retention status as unavailable and offers no save, release or execute action. A privacy label is never a hold. Metadata flags that the versioning guard reads are not an authoritative hold record.",
+      "status": "OPEN_FAIL_CLOSED",
+      "integratorNote": "No per-document legal-hold or retention-execution record exists. Hold status is shown as unavailable and no release or execute action exists. Needs the institutional retention contract."
+    },
+    {
+      "id": "download-audit-when-canonical-v2-disabled",
+      "owner": "integrator",
+      "detail": "Resolved. The route no longer calls appendMandatoryAudit. All downloads go through lib/documents/download-issuance.ts, which calls persistAtomicAudit: it records the access (hash-chained under Canonical V2, audit_logs otherwise) or throws, and has no \"skipped\" result. A URL is issued only after the record is written. Proven against PostgreSQL semantics with V2 on and off, with injected audit faults.",
+      "status": "RESOLVED"
+    }
+  ],
+  "paths": [
+    {
+      "path": "apps/union-eyes/app/[locale]/dashboard/documents/layout.tsx",
+      "methods": [],
+      "operation": "Authenticated session gate for /dashboard/documents. Links the staff library and the portal document page. Does not grant document permissions.",
+      "consumers": [
+        "app/[locale]/dashboard/documents/page.tsx",
+        "app/[locale]/dashboard/documents/portal/page.tsx"
+      ],
+      "authorization": "requireUser(); redirect to /login. Organization and document checks stay on the API.",
+      "canonicalReplacement": "none — session gate only",
+      "kernelAction": "requireUser",
+      "classificationRules": "No classification decision.",
+      "storage": "none",
+      "audit": "none",
+      "migrationStatus": "RETAINED_REQUIRED_CONSUMER",
+      "regressionTests": [
+        "apps/union-eyes/components/documents/documents-console.journey.test.tsx"
+      ],
+      "retirementDisposition": "Keep. Document authority is not inferred from this layout.",
+      "disposition": "RETAIN_CANONICAL"
+    },
+    {
+      "path": "apps/union-eyes/app/[locale]/dashboard/documents/page.tsx",
+      "methods": [],
+      "operation": "Document library page. Mounts DocumentsConsole.",
+      "consumers": [
+        "dashboard documents navigation"
+      ],
+      "authorization": "Layout session gate. Operations call canonical repository and audited download.",
+      "canonicalReplacement": "GET/POST /api/documents/repository and GET /api/documents/[id]/download",
+      "kernelAction": "isDocumentVisibleByPolicy via those routes",
+      "classificationRules": "UI does not grant share, disclosure, export, or classification changes.",
+      "storage": "Upload posts fileUrl to the canonical repository route.",
+      "audit": "Download audit is performed by the download route.",
+      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
+      "regressionTests": [
+        "apps/union-eyes/components/documents/documents-console.journey.test.tsx"
+      ],
+      "retirementDisposition": "Stub page replaced by the console. No legacy list call remains on this page.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cba-intelligence/documents/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "operation": "List CBA intelligence source documents.",
+      "consumers": [
+        "cba intelligence ingestion callers via document-service"
+      ],
+      "authorization": "withApi member, entitlement commercial_reporting. Shared public source registry, not tenant case files.",
+      "canonicalReplacement": "lib/services/cba-intelligence/document-service listDocuments",
+      "kernelAction": "listDocuments",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "IMPLEMENTED_TESTED",
+      "regressionTests": [],
+      "retirementDisposition": "Distinct from the case-document repository. Do not fold it into grievance documents.",
+      "disposition": "RETAIN_CANONICAL"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/[id]/download/route.test.ts",
+      "methods": [],
+      "operation": "Unit coverage for the download route.",
+      "consumers": [
+        "vitest"
+      ],
+      "authorization": "n/a",
+      "canonicalReplacement": "n/a",
+      "kernelAction": "n/a",
+      "classificationRules": "n/a",
+      "storage": "mocked blob failure",
+      "audit": "mocked thrown and false audit",
+      "migrationStatus": "IMPLEMENTED_TESTED",
+      "regressionTests": [
+        "apps/union-eyes/app/api/documents/[id]/download/route.test.ts"
+      ],
+      "retirementDisposition": "Keep beside the route.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/[id]/download/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "operation": "Authorized document download URL.",
+      "consumers": [
+        "components/documents/documents-console.tsx",
+        "components/pension/pension-member-console.tsx href"
+      ],
+      "authorization": "withOrganizationAuth, grievance_case_suite, member role, organization match, isDocumentVisibleByPolicy, explicit canDownload grant, case access when linked to a grievance.",
+      "canonicalReplacement": "This route is the audited download boundary. It consumes document-governance-service and appendMandatoryAudit.",
+      "kernelAction": "isDocumentVisibleByPolicy + documentAccessGrants.canDownload + getEffectiveCaseAccess for grievance links",
+      "classificationRules": "Privileged and highly_sensitive require an explicit grant, primary ownership, or canViewPrivateDocuments. Steward role alone is not enough. A grievance read is not a document read.",
+      "storage": "generateSasUrl for the latest document_versions.storage_key. Missing storage returns 502 and no URL.",
+      "audit": "appendMandatoryAudit action document.download. A thrown audit write returns 503 and no URL. A false return means canonical V2 is off.",
+      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
+      "regressionTests": [
+        "apps/union-eyes/app/api/documents/[id]/download/route.test.ts",
+        "apps/union-eyes/app/api/documents/[id]/download/route.pglite.test.ts"
+      ],
+      "retirementDisposition": "Keep. Console download and bulk download now call this route instead of opening list fileUrl.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "operation": "Authorized OCR extraction. Text is returned for review only after a durable audit write and is not written onto the document.",
+      "consumers": [
+        "components/documents/ocr-upload.tsx"
+      ],
+      "authorization": "withRoleAuth steward is the member floor. Case access comes from getEffectiveCaseAccess with isStewardPlus false. A view grant is not processing authority.",
+      "canonicalReplacement": "Consume repository visibility. Do not persist OCR into contentText.",
+      "kernelAction": "isDocumentVisibleByPolicy and processDocumentOCR persistExtractedText false",
+      "classificationRules": "Privileged and highly sensitive documents require a grant, primary ownership, or private-document access.",
+      "storage": "The processor reads the stored blob. The response omits blob paths.",
+      "audit": "appendMandatoryAudit action document.ocr.extract. A throw or a false result returns 503 and no text. Details omit the text.",
+      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
+      "regressionTests": [
+        "apps/union-eyes/app/api/documents/[id]/ocr/route.test.ts",
+        "apps/union-eyes/app/api/documents/[id]/ocr/route.pglite.test.ts",
+        "apps/union-eyes/lib/documents/ocr-processing.test.ts"
+      ],
+      "retirementDisposition": "Keep. Unsupported types return 501. Processor failures return 502.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/[id]/route.ts",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "operation": "Legacy document detail, update, and delete. Returns 501 unless the legacy flag is set.",
+      "consumers": [
+        "no remaining ocr-upload call"
+      ],
+      "authorization": "Legacy flag or role check. Not the canonical document policy.",
+      "canonicalReplacement": "GET/POST /api/documents/repository",
+      "kernelAction": "Use isDocumentVisibleByPolicy through the repository and download routes.",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "RETAINED_REQUIRED_CONSUMER",
+      "regressionTests": [],
+      "retirementDisposition": "ocr-upload no longer patches this route. Other callers may remain. Do not switch it to a new 501 from this tranche.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/bulk/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "operation": "Legacy bulk move, tag, delete, and OCR. Returns 501 unless the legacy flag is set.",
+      "consumers": [
+        "app/api/__tests__/documents-bulk.route.test.ts"
+      ],
+      "authorization": "Legacy flag or role check. Not the canonical document policy.",
+      "canonicalReplacement": "GET/POST /api/documents/repository",
+      "kernelAction": "Use isDocumentVisibleByPolicy through the repository and download routes.",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "RETAINED_REQUIRED_CONSUMER",
+      "regressionTests": [],
+      "retirementDisposition": "No product caller found. Keep the existing 501 gate. Deletion waits on the flag and its tests.",
+      "disposition": "RETIRE_UNUSED"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/categories/route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "operation": "Generated CRUD on the documents table.",
+      "consumers": [],
+      "authorization": "crudRoutes orgScoped, read member, write steward. Bypasses document governance.",
+      "canonicalReplacement": "No canonical category route.",
+      "kernelAction": "Missing: governed category read/write that does not use the generic CRUD factory.",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "BLOCKED_CANONICAL_CONTRACT",
+      "regressionTests": [],
+      "retirementDisposition": "No in-repo caller. Do not delete until the integrator confirms the generated CRUD surface can close.",
+      "disposition": "BLOCKED_CANONICAL_CONTRACT"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/folders/route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "operation": "Legacy folders. Returns 501 unless the legacy flag is set.",
+      "consumers": [
+        "app/api/__tests__/documents-folders.route.test.ts",
+        "lib/documents/batch-operations-service.ts reads folder rows, not this route"
+      ],
+      "authorization": "Legacy flag or role check. Not the canonical document policy.",
+      "canonicalReplacement": "GET/POST /api/documents/repository",
+      "kernelAction": "Use isDocumentVisibleByPolicy through the repository and download routes.",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "RETAINED_REQUIRED_CONSUMER",
+      "regressionTests": [],
+      "retirementDisposition": "No product HTTP caller found. Do not delete while the flag and batch service still describe folders.",
+      "disposition": "RETIRE_UNUSED"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "operation": "Legacy list and create. Returns 501 unless LEGACY_DOCUMENT_API_ENABLED.",
+      "consumers": [
+        "components/documents/document-browser.tsx",
+        "components/pension/pension-member-console.tsx",
+        "lib/mobile/background-sync.ts",
+        "scripts/bootstrap-v2/next-http-smoke.ts"
+      ],
+      "authorization": "Legacy flag or role check. Not the canonical document policy.",
+      "canonicalReplacement": "GET/POST /api/documents/repository",
+      "kernelAction": "Use isDocumentVisibleByPolicy through the repository and download routes.",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "RETAINED_REQUIRED_CONSUMER",
+      "regressionTests": [],
+      "retirementDisposition": "Still has supported callers. Do not switch it to a new 501.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/upload/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "operation": "Multipart upload. canonicalIntake=1 stores an organization-prefixed blob and does not insert a document. discardBlobPath is refused and does not delete.",
+      "consumers": [
+        "components/documents/ocr-upload.tsx",
+        "scripts/production/go-live-smoke.ts"
+      ],
+      "authorization": "withRoleAuth member. Form organization must match the server organization.",
+      "canonicalReplacement": "GET/POST /api/documents/repository",
+      "kernelAction": "Use isDocumentVisibleByPolicy through the repository and download routes.",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "putBlob under documents/${organizationId}/. Intake response has blobPath, checksum, size, mimeType, and filename.",
+      "audit": "The legacy insert still writes document.upload. Intake does not write a document row, so it has no document audit.",
+      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
+      "regressionTests": [
+        "apps/union-eyes/app/api/__tests__/documents-upload.route.test.ts"
+      ],
+      "retirementDisposition": "Default upload remains because go-live-smoke.ts calls it. Do not return 501.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/app/api/external/documents/[id]/download/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "operation": "Authorized external download. A missing version storage key returns 404. A present key calls generateSasUrl. The route and its middleware do not write a durable audit row.",
+      "consumers": [
+        "app/api/external/__tests__/external-routes.test.ts"
+      ],
+      "authorization": "requiredPermission download_documents plus authorizeExternalDocumentAccess download.",
+      "canonicalReplacement": "Same external authorization service. SAS after the decision.",
+      "kernelAction": "authorizeExternalDocumentAccess requiredPermission download",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
+      "regressionTests": [],
+      "retirementDisposition": "Leave the external route intact this tranche.",
+      "disposition": "BLOCKED_CANONICAL_CONTRACT"
+    },
+    {
+      "path": "apps/union-eyes/app/api/external/documents/[id]/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "operation": "External matter document detail.",
+      "consumers": [
+        "app/api/external/__tests__/external-routes.test.ts"
+      ],
+      "authorization": "withExternalMatterResourceAuth and authorizeExternalDocumentAccess.",
+      "canonicalReplacement": "external-resource-authorization-service",
+      "kernelAction": "authorizeExternalDocumentAccess is protected and already consumed. No further share/disclosure contract.",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
+      "regressionTests": [],
+      "retirementDisposition": "Do not weaken external download permission into a case-read grant.",
+      "disposition": "BLOCKED_CANONICAL_CONTRACT"
+    },
+    {
+      "path": "apps/union-eyes/app/api/portal/documents/route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "operation": "Generated CRUD bound to cmsPages, not the document repository.",
+      "consumers": [],
+      "authorization": "crudRoutes orgScoped, member read, steward write.",
+      "canonicalReplacement": "No document canonical equivalent. This is CMS.",
+      "kernelAction": "none for documents",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "RETAINED_REQUIRED_CONSUMER",
+      "regressionTests": [],
+      "retirementDisposition": "No in-repo caller. Misnamed CMS CRUD. Do not retarget it at documents and do not delete this tranche.",
+      "disposition": "RETIRE_UNUSED"
+    },
+    {
+      "path": "apps/union-eyes/app/api/portal/documents/upload/route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "operation": "Generated CMS upload CRUD, same cmsPages binding.",
+      "consumers": [],
+      "authorization": "crudRoutes orgScoped.",
+      "canonicalReplacement": "GET/POST /api/documents/repository",
+      "kernelAction": "none for documents",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "RETAINED_REQUIRED_CONSUMER",
+      "regressionTests": [],
+      "retirementDisposition": "No in-repo caller. Do not delete this tranche.",
+      "disposition": "RETIRE_UNUSED"
+    },
+    {
+      "path": "apps/union-eyes/app/api/signatures/documents/[id]/route.ts",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "operation": "Signature document detail and void.",
+      "consumers": [
+        "components/signatures callers of the collection route",
+        "app/api/signatures/audit/[documentId]/route.ts comment"
+      ],
+      "authorization": "verifyDocumentAccess before read or mutation.",
+      "canonicalReplacement": "lib/signature/signature-service.ts",
+      "kernelAction": "SignatureService.verifyDocumentAccess",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
+      "regressionTests": [],
+      "retirementDisposition": "Keep the IDOR checks. Out of tranche 1.",
+      "disposition": "RETAIN_CANONICAL"
+    },
+    {
+      "path": "apps/union-eyes/app/api/signatures/documents/route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "operation": "Signature request list and create.",
+      "consumers": [
+        "components/signatures/documents-list.tsx",
+        "components/signatures/signature-request-form.tsx"
+      ],
+      "authorization": "withApiAuth. organizationId comes from the authenticated user. SignatureService.verifyDocumentAccess on read paths.",
+      "canonicalReplacement": "lib/signature/signature-service.ts",
+      "kernelAction": "SignatureService organization binding",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
+      "regressionTests": [],
+      "retirementDisposition": "Signature workflow is not the repository journey. Do not merge the two.",
+      "disposition": "RETAIN_CANONICAL"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/cba-intelligence-documents.route.test.ts",
+      "methods": [],
+      "operation": "Regression coverage for an owned document path.",
+      "consumers": [
+        "vitest"
+      ],
+      "authorization": "n/a",
+      "canonicalReplacement": "n/a",
+      "kernelAction": "n/a",
+      "classificationRules": "n/a",
+      "storage": "n/a",
+      "audit": "n/a",
+      "migrationStatus": "IMPLEMENTED_TESTED",
+      "regressionTests": [
+        "apps/union-eyes/app/api/__tests__/cba-intelligence-documents.route.test.ts"
+      ],
+      "retirementDisposition": "Keep with the subject under test.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/documents-bulk.route.test.ts",
+      "methods": [],
+      "operation": "Regression coverage for an owned document path.",
+      "consumers": [
+        "vitest"
+      ],
+      "authorization": "n/a",
+      "canonicalReplacement": "n/a",
+      "kernelAction": "n/a",
+      "classificationRules": "n/a",
+      "storage": "n/a",
+      "audit": "n/a",
+      "migrationStatus": "RETAINED_REQUIRED_CONSUMER",
+      "regressionTests": [
+        "apps/union-eyes/app/api/__tests__/documents-bulk.route.test.ts"
+      ],
+      "retirementDisposition": "Keep with the subject under test.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/documents-folders.route.test.ts",
+      "methods": [],
+      "operation": "Regression coverage for an owned document path.",
+      "consumers": [
+        "vitest"
+      ],
+      "authorization": "n/a",
+      "canonicalReplacement": "n/a",
+      "kernelAction": "n/a",
+      "classificationRules": "n/a",
+      "storage": "n/a",
+      "audit": "n/a",
+      "migrationStatus": "RETAINED_REQUIRED_CONSUMER",
+      "regressionTests": [
+        "apps/union-eyes/app/api/__tests__/documents-folders.route.test.ts"
+      ],
+      "retirementDisposition": "Keep with the subject under test.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/documents-id.route.test.ts",
+      "methods": [],
+      "operation": "Regression coverage for an owned document path.",
+      "consumers": [
+        "vitest"
+      ],
+      "authorization": "n/a",
+      "canonicalReplacement": "n/a",
+      "kernelAction": "n/a",
+      "classificationRules": "n/a",
+      "storage": "n/a",
+      "audit": "n/a",
+      "migrationStatus": "RETAINED_REQUIRED_CONSUMER",
+      "regressionTests": [
+        "apps/union-eyes/app/api/__tests__/documents-id.route.test.ts"
+      ],
+      "retirementDisposition": "Keep with the subject under test.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/documents-legacy.route.test.ts",
+      "methods": [],
+      "operation": "Regression coverage for an owned document path.",
+      "consumers": [
+        "vitest"
+      ],
+      "authorization": "n/a",
+      "canonicalReplacement": "n/a",
+      "kernelAction": "n/a",
+      "classificationRules": "n/a",
+      "storage": "n/a",
+      "audit": "n/a",
+      "migrationStatus": "RETAINED_REQUIRED_CONSUMER",
+      "regressionTests": [
+        "apps/union-eyes/app/api/__tests__/documents-legacy.route.test.ts"
+      ],
+      "retirementDisposition": "Keep with the subject under test.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/documents-upload.route.test.ts",
+      "methods": [],
+      "operation": "Upload route tests, including canonical intake and refused client discard.",
+      "consumers": [
+        "vitest"
+      ],
+      "authorization": "n/a",
+      "canonicalReplacement": "n/a",
+      "kernelAction": "n/a",
+      "classificationRules": "n/a",
+      "storage": "n/a",
+      "audit": "n/a",
+      "migrationStatus": "IMPLEMENTED_TESTED",
+      "regressionTests": [
+        "apps/union-eyes/app/api/__tests__/documents-upload.route.test.ts"
+      ],
+      "retirementDisposition": "Keep with the subject under test.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/documents.route.test.ts",
+      "methods": [],
+      "operation": "Regression coverage for an owned document path.",
+      "consumers": [
+        "vitest"
+      ],
+      "authorization": "n/a",
+      "canonicalReplacement": "n/a",
+      "kernelAction": "n/a",
+      "classificationRules": "n/a",
+      "storage": "n/a",
+      "audit": "n/a",
+      "migrationStatus": "RETAINED_REQUIRED_CONSUMER",
+      "regressionTests": [
+        "apps/union-eyes/app/api/__tests__/documents.route.test.ts"
+      ],
+      "retirementDisposition": "Keep with the subject under test.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/signatures-documents.route.test.ts",
+      "methods": [],
+      "operation": "Regression coverage for an owned document path.",
+      "consumers": [
+        "vitest"
+      ],
+      "authorization": "n/a",
+      "canonicalReplacement": "n/a",
+      "kernelAction": "n/a",
+      "classificationRules": "n/a",
+      "storage": "n/a",
+      "audit": "n/a",
+      "migrationStatus": "IMPLEMENTED_TESTED",
+      "regressionTests": [
+        "apps/union-eyes/app/api/__tests__/signatures-documents.route.test.ts"
+      ],
+      "retirementDisposition": "Keep with the subject under test.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/advanced-search.tsx",
+      "methods": [],
+      "operation": "Document UI surface.",
+      "consumers": [
+        "/api/documents/filters",
+        "/api/documents/saved-searches"
+      ],
+      "authorization": "Legacy flag or role check. Not the canonical document policy.",
+      "canonicalReplacement": "Repository and audited download routes",
+      "kernelAction": "Consume repository authorization; do not decide locally",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "BLOCKED_CANONICAL_CONTRACT",
+      "regressionTests": [],
+      "retirementDisposition": "Migrate callers before removing the component.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/document-approval-workflow.tsx",
+      "methods": [],
+      "operation": "Document UI surface.",
+      "consumers": [
+        "local approval state in DocumentsConsole"
+      ],
+      "authorization": "Legacy flag or role check. Not the canonical document policy.",
+      "canonicalReplacement": "Repository and audited download routes",
+      "kernelAction": "Consume repository authorization; do not decide locally",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
+      "regressionTests": [],
+      "retirementDisposition": "Migrate callers before removing the component.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/document-browser.tsx",
+      "methods": [],
+      "operation": "Canonical repository browser. Bulk download authorizes every selected id and reports permitted, denied, and failed counts. A partial batch is not a complete success.",
+      "consumers": [
+        "GET /api/documents/repository",
+        "GET /api/documents/[id]/download",
+        "components/documents/ocr-upload.tsx"
+      ],
+      "authorization": "Repository list and detail plus requestAuthorizedDownload. A row does not grant download.",
+      "canonicalReplacement": "GET /api/documents/repository and GET /api/documents/[id]/download",
+      "kernelAction": "isDocumentVisibleByPolicy on the repository and download routes",
+      "classificationRules": "Share and delete fail closed. Client sort and extra type filters apply only to the authorized result.",
+      "storage": "fileUrl, storage keys, and extracted text are dropped before render.",
+      "audit": "Download and OCR audits stay on their routes.",
+      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
+      "regressionTests": [
+        "apps/union-eyes/lib/documents/browser-repository.test.ts",
+        "apps/union-eyes/components/documents/document-browser.journey.test.tsx"
+      ],
+      "retirementDisposition": "Legacy /api/documents list and batch download, delete, and tag calls removed from this component.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/document-bulk-operations.tsx",
+      "methods": [],
+      "operation": "Document UI surface.",
+      "consumers": [
+        "callback props from DocumentsConsole"
+      ],
+      "authorization": "Legacy flag or role check. Not the canonical document policy.",
+      "canonicalReplacement": "Repository and audited download routes",
+      "kernelAction": "Consume repository authorization; do not decide locally",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "RETAINED_REQUIRED_CONSUMER",
+      "regressionTests": [],
+      "retirementDisposition": "Migrate callers before removing the component.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/document-library-browser.tsx",
+      "methods": [],
+      "operation": "Document UI surface.",
+      "consumers": [
+        "callback props from DocumentsConsole"
+      ],
+      "authorization": "Legacy flag or role check. Not the canonical document policy.",
+      "canonicalReplacement": "Repository and audited download routes",
+      "kernelAction": "Consume repository authorization; do not decide locally",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "RETAINED_REQUIRED_CONSUMER",
+      "regressionTests": [],
+      "retirementDisposition": "Migrate callers before removing the component.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/document-preview-modal.tsx",
+      "methods": [],
+      "operation": "Document UI surface.",
+      "consumers": [
+        "/api/documents/${id}/versions"
+      ],
+      "authorization": "Legacy flag or role check. Not the canonical document policy.",
+      "canonicalReplacement": "Repository and audited download routes",
+      "kernelAction": "Consume repository authorization; do not decide locally",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
+      "regressionTests": [],
+      "retirementDisposition": "Migrate callers before removing the component.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/document-retention-policy.tsx",
+      "methods": [],
+      "operation": "Document UI surface.",
+      "consumers": [
+        "callback props; console no longer PATCHes labels"
+      ],
+      "authorization": "Legacy flag or role check. Not the canonical document policy.",
+      "canonicalReplacement": "Repository and audited download routes",
+      "kernelAction": "Consume repository authorization; do not decide locally",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "BLOCKED_CANONICAL_CONTRACT",
+      "regressionTests": [],
+      "retirementDisposition": "Migrate callers before removing the component.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/document-search-advanced.tsx",
+      "methods": [],
+      "operation": "Document UI surface.",
+      "consumers": [
+        "callback props from DocumentsConsole"
+      ],
+      "authorization": "Legacy flag or role check. Not the canonical document policy.",
+      "canonicalReplacement": "Repository and audited download routes",
+      "kernelAction": "Consume repository authorization; do not decide locally",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "RETAINED_REQUIRED_CONSUMER",
+      "regressionTests": [],
+      "retirementDisposition": "Migrate callers before removing the component.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/document-sharing-controls.tsx",
+      "methods": [],
+      "operation": "Document UI surface.",
+      "consumers": [
+        "sharing controls without a canonical share route"
+      ],
+      "authorization": "Legacy flag or role check. Not the canonical document policy.",
+      "canonicalReplacement": "No canonical share, disclosure, or WorkAid counsel route.",
+      "kernelAction": "Missing share/disclosure/export contract",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "BLOCKED_CANONICAL_CONTRACT",
+      "regressionTests": [],
+      "retirementDisposition": "Migrate callers before removing the component.",
+      "disposition": "BLOCKED_CANONICAL_CONTRACT"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/document-template-manager.tsx",
+      "methods": [],
+      "operation": "Document UI surface.",
+      "consumers": [
+        "callback props from DocumentsConsole"
+      ],
+      "authorization": "Legacy flag or role check. Not the canonical document policy.",
+      "canonicalReplacement": "Repository and audited download routes",
+      "kernelAction": "Consume repository authorization; do not decide locally",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "RETAINED_REQUIRED_CONSUMER",
+      "regressionTests": [],
+      "retirementDisposition": "Migrate callers before removing the component.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/document-version-control.tsx",
+      "methods": [],
+      "operation": "Document UI surface.",
+      "consumers": [
+        "onDownload callback; storage keys are not opened directly"
+      ],
+      "authorization": "Legacy flag or role check. Not the canonical document policy.",
+      "canonicalReplacement": "Repository and audited download routes",
+      "kernelAction": "Consume repository authorization; do not decide locally",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "RETAINED_REQUIRED_CONSUMER",
+      "regressionTests": [],
+      "retirementDisposition": "Migrate callers before removing the component.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/documents-console.tsx",
+      "methods": [],
+      "operation": "Document list, detail, upload, version, and download UI.",
+      "consumers": [
+        "app/[locale]/dashboard/documents/page.tsx"
+      ],
+      "authorization": "Browser calls only. Authority is rechecked on the repository and download routes.",
+      "canonicalReplacement": "GET/POST /api/documents/repository, GET /api/documents/repository/[id], POST versions, GET /api/documents/[id]/download",
+      "kernelAction": "requestAuthorizedDownload and submitRepositoryDocument",
+      "classificationRules": "Share, hold release, and retention execution do not PATCH privacy labels.",
+      "storage": "Create and version payloads go to the canonical repository routes. Fail closed unless response.ok.",
+      "audit": "No client-side audit. Download relies on the route audit.",
+      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
+      "regressionTests": [
+        "apps/union-eyes/components/documents/documents-console.journey.test.tsx",
+        "apps/union-eyes/lib/documents/document-repository-client.test.ts"
+      ],
+      "retirementDisposition": "Legacy fileUrl open and label-rewrite share removed from this console.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/ocr-upload.tsx",
+      "methods": [],
+      "operation": "OCR intake. Canonical blob intake, repository create, authorized extraction, and review.",
+      "consumers": [
+        "POST /api/documents/upload?canonicalIntake=1",
+        "POST /api/documents/repository",
+        "POST /api/documents/[id]/ocr"
+      ],
+      "authorization": "The upload, repository, and OCR routes decide. The component does not grant access.",
+      "canonicalReplacement": "POST /api/documents/repository after organization-scoped blob intake",
+      "kernelAction": "repository create and processDocumentOCR persistExtractedText false",
+      "classificationRules": "The user selects a privacy label. OCR text is not evidence and cannot be saved.",
+      "storage": "canonicalIntake returns blobPath only. Repository refusal does not delete that object.",
+      "audit": "Create audit for unlinked rows is an integrator gap. Extract audit is on the OCR route.",
+      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
+      "regressionTests": [
+        "apps/union-eyes/lib/documents/ocr-intake.test.ts",
+        "apps/union-eyes/components/documents/ocr-upload.journey.test.tsx"
+      ],
+      "retirementDisposition": "Legacy multipart document insert and PATCH ocrText removed from this component.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/lib/documents/batch-operations-service.ts",
+      "methods": [],
+      "operation": "Legacy batch zip/move/tag helper.",
+      "consumers": [
+        "no current route import found in the console path"
+      ],
+      "authorization": "Legacy flag or role check. Not the canonical document policy.",
+      "canonicalReplacement": "GET/POST /api/documents/repository",
+      "kernelAction": "none",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "BLOCKED_CANONICAL_CONTRACT",
+      "regressionTests": [],
+      "retirementDisposition": "No tranche-1 caller. Do not delete until a repo-wide import check is repeated in a later tranche.",
+      "disposition": "RETIRE_UNUSED"
+    },
+    {
+      "path": "apps/union-eyes/lib/integrations/adapters/documents/__tests__/sharepoint-adapter.test.ts",
+      "methods": [],
+      "operation": "SharePoint adapter unit test.",
+      "consumers": [
+        "vitest"
+      ],
+      "authorization": "n/a",
+      "canonicalReplacement": "n/a",
+      "kernelAction": "n/a",
+      "classificationRules": "n/a",
+      "storage": "n/a",
+      "audit": "n/a",
+      "migrationStatus": "IMPLEMENTED_TESTED",
+      "regressionTests": [
+        "apps/union-eyes/lib/integrations/adapters/documents/__tests__/sharepoint-adapter.test.ts"
+      ],
+      "retirementDisposition": "Keep while the adapter file remains.",
+      "disposition": "RETIRE_UNUSED"
+    },
+    {
+      "path": "apps/union-eyes/lib/integrations/adapters/documents/__tests__/sharepoint-client.test.ts",
+      "methods": [],
+      "operation": "SharePoint client unit test.",
+      "consumers": [
+        "vitest"
+      ],
+      "authorization": "n/a",
+      "canonicalReplacement": "n/a",
+      "kernelAction": "n/a",
+      "classificationRules": "n/a",
+      "storage": "n/a",
+      "audit": "n/a",
+      "migrationStatus": "IMPLEMENTED_TESTED",
+      "regressionTests": [
+        "apps/union-eyes/lib/integrations/adapters/documents/__tests__/sharepoint-client.test.ts"
+      ],
+      "retirementDisposition": "Keep while the adapter file remains.",
+      "disposition": "RETIRE_UNUSED"
+    },
+    {
+      "path": "apps/union-eyes/lib/integrations/adapters/documents/index.ts",
+      "methods": [],
+      "operation": "SharePoint adapter. Factory can construct it; the provider is not approved.",
+      "consumers": [
+        "lib/integrations/factory.ts"
+      ],
+      "authorization": "assertKnownProvider rejects sharepoint before adapter code runs.",
+      "canonicalReplacement": "No approved SharePoint canonical provider.",
+      "kernelAction": "PROVIDER_NOT_APPROVED",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "BLOCKED_EXTERNAL_ACTIVATION",
+      "regressionTests": [],
+      "retirementDisposition": "Do not delete. factory.ts is outside this lane and still imports the adapter.",
+      "disposition": "RETIRE_UNUSED"
+    },
+    {
+      "path": "apps/union-eyes/lib/integrations/adapters/documents/sharepoint-adapter.ts",
+      "methods": [],
+      "operation": "SharePoint adapter. Factory can construct it; the provider is not approved.",
+      "consumers": [
+        "lib/integrations/factory.ts"
+      ],
+      "authorization": "assertKnownProvider rejects sharepoint before adapter code runs.",
+      "canonicalReplacement": "No approved SharePoint canonical provider.",
+      "kernelAction": "PROVIDER_NOT_APPROVED",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "BLOCKED_EXTERNAL_ACTIVATION",
+      "regressionTests": [],
+      "retirementDisposition": "Do not delete. factory.ts is outside this lane and still imports the adapter.",
+      "disposition": "RETIRE_UNUSED"
+    },
+    {
+      "path": "apps/union-eyes/lib/integrations/adapters/documents/sharepoint-client.ts",
+      "methods": [],
+      "operation": "SharePoint adapter. Factory can construct it; the provider is not approved.",
+      "consumers": [
+        "lib/integrations/factory.ts"
+      ],
+      "authorization": "assertKnownProvider rejects sharepoint before adapter code runs.",
+      "canonicalReplacement": "No approved SharePoint canonical provider.",
+      "kernelAction": "PROVIDER_NOT_APPROVED",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "BLOCKED_EXTERNAL_ACTIVATION",
+      "regressionTests": [],
+      "retirementDisposition": "Do not delete. factory.ts is outside this lane and still imports the adapter.",
+      "disposition": "RETIRE_UNUSED"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/cba-intelligence/document-service.ts",
+      "methods": [],
+      "operation": "CBA source document list and ingestion helpers.",
+      "consumers": [
+        "app/api/cba-intelligence/documents/route.ts"
+      ],
+      "authorization": "Legacy flag or role check. Not the canonical document policy.",
+      "canonicalReplacement": "This service is the CBA read model, separate from case documents.",
+      "kernelAction": "listDocuments",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "IMPLEMENTED_TESTED",
+      "regressionTests": [],
+      "retirementDisposition": "Do not merge with the grievance repository.",
+      "disposition": "RETAIN_CANONICAL"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/cba-intelligence/__tests__/document-service.test.ts",
+      "methods": [],
+      "operation": "Regression coverage for an owned document path.",
+      "consumers": [
+        "vitest"
+      ],
+      "authorization": "n/a",
+      "canonicalReplacement": "n/a",
+      "kernelAction": "n/a",
+      "classificationRules": "n/a",
+      "storage": "n/a",
+      "audit": "n/a",
+      "migrationStatus": "IMPLEMENTED_TESTED",
+      "regressionTests": [
+        "apps/union-eyes/app/api/__tests__/documents.route.test.ts"
+      ],
+      "retirementDisposition": "Keep with the subject under test.",
+      "disposition": "MIGRATE"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/document-service.ts",
+      "methods": [],
+      "operation": "Legacy document service. processDocumentOCR returns unpersisted text, checks the organization blob prefix, and dispatches from file bytes.",
+      "consumers": [
+        "app/api/documents/route.ts",
+        "folders",
+        "bulk",
+        "ocr",
+        "lib/__tests__/document-service.test.ts"
+      ],
+      "authorization": "Legacy flag or role check. Not the canonical document policy.",
+      "canonicalReplacement": "GET/POST /api/documents/repository",
+      "kernelAction": "Replace call sites with repository routes",
+      "classificationRules": "Do not infer document rights from role seniority or case read access.",
+      "storage": "Legacy document-service or crud factory. Not the tranche-1 path.",
+      "audit": "Not the canonical download audit.",
+      "migrationStatus": "IMPLEMENTED_PENDING_RUNTIME_PROOF",
+      "regressionTests": [
+        "apps/union-eyes/lib/documents/ocr-processing.test.ts"
+      ],
+      "retirementDisposition": "OCR no longer writes contentText unless persistExtractedText is true. Other service methods remain for later tranches.",
+      "disposition": "MIGRATE"
+    }
+  ],
+  "tranche2ContractGaps": [
+    {
+      "id": "repository-create-audit-for-unlinked-documents",
+      "owner": "integrator",
+      "behavior": "POST /api/documents/repository must append a mandatory document-create audit for every accepted row. Today auditCaseMutation runs only when linkedEntityType is grievance.",
+      "security": "An unlinked OCR intake can persist a classified document with no durable create audit. Cursor must not add a second audit writer on the protected route.",
+      "files": [
+        "apps/union-eyes/app/api/documents/repository/route.ts"
+      ],
+      "tests": [
+        "repository create audit assertion for an unlinked document, including audit failure rolling back the row"
+      ],
+      "status": "RESOLVED",
+      "resolution": "POST /api/documents/repository audits every create (linked or not) with persistAtomicAudit in the same transaction as the document, its first version, its link and the intake binding. An audit that cannot be written rolls all of it back. The legacy upload route uses the same atomic audit.",
+      "evidence": [
+        "lib/documents/document-intake.pglite.test.ts",
+        "db/__tests__/document-intake.postgres.test.ts"
+      ]
+    },
+    {
+      "id": "ocr-transcript-persistence",
+      "owner": "integrator",
+      "behavior": "Add a governed transcript write that keeps six records distinct: immutable original bytes, raw machine text, human-reviewed transcription, reviewer identity and timestamp, transcription revisions, and published evidence. The write needs explicit authority, optimistic concurrency, provenance, classification at least as strong as the source, and a mandatory audit in the same transaction.",
+      "security": "Reject unauthorized corrections, cross-document ids, stale revisions, and audit failure without changing the document. Do not copy OCR text into contentText or grievance evidence. No shadow table. The upload screen stays fail-closed until this contract exists.",
+      "files": [
+        "apps/union-eyes/app/api/documents/repository/[id]/route.ts"
+      ],
+      "tests": [
+        "authorized correction persists as a distinct transcript; unauthorized, cross-tenant, and audit-failure writes leave the document unchanged"
+      ],
+      "status": "RESOLVED",
+      "resolution": "document_transcript_revisions (append-only machine extraction, human draft and human-reviewed revisions with provenance, reviewer identity, classification, contiguous revisions and optimistic concurrency) and document_transcript_publications (a separate, once-only publication as evidence of the head reviewed revision), written by lib/documents/transcripts.ts with mandatory audit. The original document version is never changed.",
+      "evidence": [
+        "lib/documents/transcripts.pglite.test.ts",
+        "db/__tests__/document-intake.postgres.test.ts"
+      ]
+    },
+    {
+      "id": "ocr-member-visibility-role-gate",
+      "owner": "integrator",
+      "behavior": "Decide whether a member who already passes isDocumentVisibleByPolicy may request OCR. The route currently requires steward before that policy runs.",
+      "security": "Do not infer OCR rights from role seniority alone. A member grant or case assignment should be explicit if the steward minimum is relaxed.",
+      "files": [
+        "apps/union-eyes/app/api/documents/[id]/ocr/route.ts"
+      ],
+      "tests": [
+        "member with document visibility is allowed only after the contract change; unassigned and foreign callers stay denied"
+      ],
+      "status": "RESOLVED",
+      "resolution": "Processing is its own authority (lib/documents/ocr-authority.ts): the kernel case:process_ocr on a live case relationship, an explicit can_process_ocr grant, or the uploader under an ADOPTED institutional member policy. Role seniority and the legacy representative-identifier column are not inputs. No member policy is adopted by default; adopting one is an institutional decision.",
+      "evidence": [
+        "lib/documents/ocr-authority.test.ts",
+        "app/api/documents/[id]/ocr/route.canonical.pglite.test.ts"
+      ]
+    },
+    {
+      "id": "ocr-audit-when-canonical-v2-disabled",
+      "owner": "integrator",
+      "behavior": "appendMandatoryAudit returns false when UE_CANONICAL_BOOTSTRAP_V2 is not 1. The OCR route now withholds extracted text when the helper throws or returns false. The helper is unchanged.",
+      "security": "OCR text is unavailable until canonical audit is enabled and the insert succeeds. Document download keeps its existing helper contract. Cursor does not fork the helper.",
+      "files": [
+        "apps/union-eyes/lib/audit/mandatory-audit.ts"
+      ],
+      "tests": [
+        "V2 enabled writes document.ocr.extract without the extracted text; V2 disabled and a thrown audit write each return 503 and no text under the doc_runtime role"
+      ],
+      "status": "RESOLVED",
+      "resolution": "OCR extraction audits through persistAtomicAudit in the transaction that stores the machine revision; the text is withheld when the write or the audit fails.",
+      "evidence": [
+        "app/api/documents/[id]/ocr/route.canonical.pglite.test.ts"
+      ]
+    },
+    {
+      "id": "ocr-processor-and-blob-activation",
+      "owner": "operations",
+      "behavior": "Image and PDF extraction call processImageOCR or processPDFOCR after an organization-prefixed downloadBuffer. Byte signatures override a lying MIME. Unsupported containers return 501. Processor and storage failures return 502 and no text.",
+      "security": "No successful OCR result is manufactured when the processor, blob credentials, or callback is unavailable. Temporary text is not written to contentText. Live tesseract and blob credentials are still an operations dependency.",
+      "files": [
+        "apps/union-eyes/lib/services/ocr-service.ts",
+        "apps/union-eyes/lib/blob-client.ts"
+      ],
+      "tests": [
+        "live processor fixture with organization-scoped blob bytes; provider failure returns 502 and writes no contentText"
+      ],
+      "status": "OPEN_EXTERNAL_ACTIVATION",
+      "integratorNote": "Real OCR bytes against a live processor and object store have not been exercised. Prerequisite: a non-production environment with the processor and blob credentials, and a corpus of approved test files."
+    },
+    {
+      "id": "temporary-intake-lifecycle",
+      "owner": "integrator",
+      "behavior": "Add an authoritative intake record with a server-generated unpredictable id bound to the principal, organization, exact object key, checksum, content type, size, createdAt, expiresAt, and state open|accepted|expired|cancelled. Cancellation is limited to that principal or a cleanup service. Refuse a key referenced by a document or document version. Flip state in the same transaction before deleteBlob of the stored key only. Record create, accept, expire, and delete audits. A cleanup job expires abandoned open intakes. Replay is idempotent.",
+      "security": "Until that table exists, POST /api/documents/upload returns 403 for any discardBlobPath and does not call deleteBlob. Legacy upload without the field still inserts. canonicalIntake still stores an object. A failed repository create can leave an orphan. Cursor must not add a shadow table or migration.",
+      "files": [
+        "apps/union-eyes/db/schema/documents-schema.ts",
+        "apps/union-eyes/app/api/documents/upload/route.ts"
+      ],
+      "tests": [
+        "same-organization cross-user deletion, attached objects, forged identifiers, replay, parallel races, expired intake, foreign tenants, and cleanup failure against the intake table"
+      ],
+      "status": "RESOLVED",
+      "resolution": "document_intakes (open to accepted, expired or cancelled) bound to the principal, organization, exact server-issued storage key, server checksum, MIME type, size, timestamps and intended operation. Acceptance binds atomically with the document or version; an accepted object can never be cancelled or deleted; abandoned uploads are expired and their exact objects deleted by a retrying reaper. Request and response contract: POST /api/documents/intakes (or /api/documents/upload with canonicalIntake=1) returns { success, data: { intakeId, status, operation, targetDocumentId, filename, mimeType, size, checksum, createdAt, expiresAt } } and never a storage path; POST /api/documents/repository and /api/documents/repository/[id]/versions take intakeId; POST /api/documents/intakes/[id]/cancel cancels.",
+      "evidence": [
+        "lib/documents/document-intake.pglite.test.ts",
+        "db/__tests__/document-intake.postgres.test.ts"
+      ]
+    },
+    {
+      "id": "ocr-case-processing-authority",
+      "owner": "integrator",
+      "behavior": "getEffectiveCaseAccess must return relationship status active|revoked|expired|recused even when unionRepId matches the actor, plus canProcessOcr distinct from canViewCase, canUploadDocuments, and a document view grant. Viewing, downloading, OCR extraction, transcript correction, and evidence publication stay separate decisions.",
+      "security": "The OCR route does not treat steward seniority as case access. Linked extraction currently requires primary ownership or canUploadDocuments because canProcessOcr does not exist. Revoked and expired assignments are denied because the kernel returns canViewCase false. Recusal of a primary owner cannot be represented until the kernel reports it. Do not add the enum in this tranche.",
+      "files": [
+        "apps/union-eyes/lib/services/case-access-service.ts",
+        "apps/union-eyes/db/schema/domains/claims/grievance-lifecycle.ts"
+      ],
+      "tests": [
+        "unassigned, revoked, expired, recused primary owner, foreign organization, member, view-only assignment, and privileged document without classification authority"
+      ],
+      "status": "RESOLVED",
+      "resolution": "The kernel action case:process_ocr (effective permission canProcessOcr), distinct from view, upload and download, resolved from relationship status, document classification, recusal, expiry and valid document grants.",
+      "evidence": [
+        "lib/documents/ocr-authority.test.ts"
+      ]
+    }
+  ],
+  "tranche3ContractGaps": [
+    {
+      "id": "legacy-list-unowned-callers",
+      "owner": "integrator",
+      "behavior": "GET and POST /api/documents stay 501 unless LEGACY_DOCUMENT_API_ENABLED is true. Unowned callers still target that route: components/pension/pension-member-console.tsx, lib/mobile/background-sync.ts, and scripts/bootstrap-v2/next-http-smoke.ts which expects 501.",
+      "security": "Do not enable the legacy flag. The enabled handler returns full rows, including fileUrl, and uses role seniority for confidential documents.",
+      "files": [
+        "apps/union-eyes/app/api/documents/route.ts",
+        "apps/union-eyes/components/pension/pension-member-console.tsx",
+        "apps/union-eyes/lib/mobile/background-sync.ts"
+      ],
+      "status": "RESOLVED",
+      "resolution": "The pension console now lists pension documents from the canonical repository; the offline sync queue refuses document operations (a document needs a server-issued intake) and fails any already queued; the smoke script still expects the retired endpoint to answer 501."
+    },
+    {
+      "id": "document-folders",
+      "owner": "integrator",
+      "behavior": "No canonical folder route. /api/documents/folders remains behind LEGACY_DOCUMENT_API_ENABLED because RLS evidence cites it as the live document_folders path.",
+      "security": "Do not delete the route or answer 501 while the flag is off beyond the existing gate. Do not infer folder visibility from role seniority.",
+      "files": [
+        "apps/union-eyes/app/api/documents/folders/route.ts"
+      ],
+      "status": "OPEN_NO_CANONICAL_CONTRACT",
+      "integratorNote": "No canonical folder model exists. The route stays retired (501) and is retained until one does."
+    },
+    {
+      "id": "document-categories",
+      "owner": "integrator",
+      "behavior": "The categories route is generated CRUD on the documents table. No canonical category action exists.",
+      "security": "Do not retarget the route at repository documents and do not delete it to shrink the inventory.",
+      "files": [
+        "apps/union-eyes/app/api/documents/categories/route.ts"
+      ],
+      "status": "OPEN_NO_CANONICAL_CONTRACT",
+      "integratorNote": "Generated CRUD with no caller; no canonical category action. Retained, not retargeted."
+    },
+    {
+      "id": "portal-cms-routes-are-not-the-document-repository",
+      "owner": "integrator",
+      "behavior": "app/api/portal/documents and its upload route are cmsPages CRUD. The member and staff document journey is /[locale]/dashboard/documents/portal, which reads the canonical repository.",
+      "security": "Do not retarget the CMS routes at case documents. RLS evidence cites them as the live CMS path.",
+      "files": [
+        "apps/union-eyes/app/api/portal/documents/route.ts",
+        "apps/union-eyes/app/[locale]/dashboard/documents/portal/page.tsx"
+      ],
+      "status": "RESOLVED",
+      "resolution": "Classification only: the CMS routes are not the repository and are retained as retired stubs."
+    },
+    {
+      "id": "signature-provider-activation",
+      "owner": "operations",
+      "behavior": "Signature list and detail responses drop storage locations and extracted text. Historical status fields remain. No provider completion, signatory, or acknowledgment is created here.",
+      "security": "Do not fabricate DocuSign or HelloSign events. A view of a historical signed document stays a view.",
+      "files": [
+        "apps/union-eyes/app/api/signatures/documents/route.ts",
+        "apps/union-eyes/lib/signature/signature-service.ts"
+      ],
+      "status": "OPEN_EXTERNAL_ACTIVATION",
+      "integratorNote": "No provider credentials were used. Prerequisite: sandbox provider accounts, signed webhook secrets and an approved test envelope set. Status handling is implemented and proven without a provider (lib/signature/signature-sync.pglite.test.ts)."
+    },
+    {
+      "id": "sharepoint-credentials",
+      "owner": "operations",
+      "behavior": "SharePoint healthCheck returns an error before any network call when client id, secret, or tenant id is missing. Live Graph sync is not activated.",
+      "security": "Do not report a successful sync without credentials and a recorded provider response.",
+      "files": [
+        "apps/union-eyes/lib/integrations/adapters/documents/sharepoint-client.ts"
+      ],
+      "status": "OPEN_EXTERNAL_ACTIVATION",
+      "integratorNote": "Needs tenant, client id and secret for a non-production SharePoint site."
+    },
+    {
+      "id": "staff-console-bulk-download",
+      "owner": "cursor-frozen-tranche-1",
+      "behavior": "DocumentsConsole.handleBulkDownload still opens permitted URLs before a later denial and returns. That file is tranche 1 and was not edited. The portal DocumentBrowser uses authorizeBulkDownload and reports partial outcomes.",
+      "security": "Do not describe the staff console bulk action as an atomic batch. Do not rewrite the tranche 1 console in this tranche.",
+      "files": [
+        "apps/union-eyes/components/documents/documents-console.tsx",
+        "apps/union-eyes/components/documents/document-browser.tsx"
+      ],
+      "status": "RESOLVED",
+      "resolution": "The console calls POST /api/documents/repository/downloads, which authorizes and audits per document and reports partial success; only issued links are opened."
+    },
+    {
+      "id": "external-download-sas-activation",
+      "owner": "operations",
+      "behavior": "External download no longer returns documents.fileUrl. A missing version storage key returns 404. A present key still calls generateSasUrl. Live blob credentials were not exercised.",
+      "security": "The SAS URL is an authorized retrieval reference, not a list-field leak. Provider failure must not fall back to the stored file address.",
+      "files": [
+        "apps/union-eyes/app/api/external/documents/[id]/download/route.ts"
+      ],
+      "status": "OPEN_EXTERNAL_ACTIVATION",
+      "integratorNote": "Audit-before-link is proven against PostgreSQL with the authorization chain stood in. Live blob credentials have not been exercised."
+    }
+  ],
+  "qualificationContractGaps": [
+    {
+      "id": "external-download-durable-audit",
+      "owner": "integrator",
+      "behavior": "GET /api/external/documents/[id]/download calls authorizeExternalDocumentAccess, selects the latest documentVersions.storageKey for that organization and document, then calls generateSasUrl. withExternalMatterResourceAuth and the route write no audit row. appendMandatoryAudit is not called.",
+      "correction": "Add a canonical external-download audit that records the actor, organizationId, matterType, matterId, documentId, and version identity, and withhold the SAS URL when that write throws or returns false. Do not store the SAS URL or documents.fileUrl in the audit payload. Do not fall back to fileUrl. appendMandatoryAudit returns false when UE_CANONICAL_BOOTSTRAP_V2 is not 1. Choose that helper or a matter-scoped audit that stays durable when V2 is off. Cursor will not edit lib/audit/mandatory-audit.ts.",
+      "files": [
+        "apps/union-eyes/app/api/external/documents/[id]/download/route.ts",
+        "apps/union-eyes/lib/external-resource-middleware.ts",
+        "apps/union-eyes/lib/audit/mandatory-audit.ts"
+      ],
+      "status": "RESOLVED",
+      "resolution": "GET /api/external/documents/[id]/download records principal, representative organization, authority, matter grant, matter, document and version durably with persistAtomicAudit before the link is returned. The link and its signature are never recorded; the link is withheld when the audit or signing fails.",
+      "evidence": [
+        "app/api/external/documents/[id]/download/route.pglite.test.ts"
+      ]
+    },
+    {
+      "id": "signature-provider-acknowledgment-timestamp",
+      "owner": "integrator",
+      "behavior": "SignatureService.syncDocumentStatus sets completedAt to the local clock when a provider status is completed. The projection labels a stored completed row as historical_evidence unless providerAcknowledgedAt is already present. verified_completed is not created from that local clock.",
+      "correction": "Persist the provider completion timestamp and provider event id on the signature row. Do not treat a locally stamped completedAt as a verified provider acknowledgment.",
+      "files": [
+        "apps/union-eyes/lib/signature/signature-service.ts"
+      ],
+      "status": "RESOLVED",
+      "resolution": "SignatureService.syncDocumentStatus judges a provider report with decideProviderSync: only external providers report, terminal states are final, observations move forward only, and a completion time is the provider's own event time (provider_acknowledged_at, immutable, platform 0023) or none; the local receipt time is kept separately as provider_status_observed_at. The change, signer updates and audit commit together and are conditional on the judged status, so a replay or concurrent sync applies once.",
+      "evidence": [
+        "lib/signature/provider-sync.test.ts",
+        "lib/signature/signature-sync.pglite.test.ts",
+        "db/__tests__/document-intake.postgres.test.ts"
+      ]
+    }
+  ],
+  "integratorResolutions": [
+    {
+      "id": "legacy-file-url-fallback",
+      "resolution": "A legacy row is served only if its file URL validates as a reference into this organization's own storage (host, container, organization folder, no relative segments) and is re-signed from the verified path; a stored external or foreign URL is never returned. lib/documents/legacy-storage-backfill.ts and POST /api/admin/documents/legacy-backfill give verified legacy rows a real version and report the rest."
+    },
+    {
+      "id": "bulk-download",
+      "resolution": "POST /api/documents/repository/downloads: per-document authorization and audit, per-document outcomes, atomic:false. The console reports partial success and opens only issued links. The old sequential stop-on-first-failure loop is gone."
+    },
+    {
+      "id": "version-and-create-verification",
+      "resolution": "resolveStoredBlob accepts only this organization's own storage references, computes the SHA-256 itself, and rejects a claimed hash that differs (409). Versions refuse a stale expectedVersionNo, a file another version already holds, a deleted document, and a legal hold re-read under a row lock. The console no longer invents a \"manual:\" hash and no longer offers external URL import."
+    },
+    {
+      "id": "retention-semantics",
+      "resolution": "Legal hold and retention figures are unavailable (null), not derived from privacy labels; no simulated release, execute or save."
+    },
+    {
+      "id": "temporary-intake-contract",
+      "resolution": "document_intakes (open to accepted, expired or cancelled) bound to the principal, organization, exact server-issued storage key, server checksum, MIME type, size, timestamps and intended operation. Acceptance binds atomically with the document or version; an accepted object can never be cancelled or deleted; abandoned uploads are expired and their exact objects deleted by a retrying reaper. Request and response contract: POST /api/documents/intakes (or /api/documents/upload with canonicalIntake=1) returns { success, data: { intakeId, status, operation, targetDocumentId, filename, mimeType, size, checksum, createdAt, expiresAt } } and never a storage path; POST /api/documents/repository and /api/documents/repository/[id]/versions take intakeId; POST /api/documents/intakes/[id]/cancel cancels."
+    },
+    {
+      "id": "governed-ocr-and-transcripts",
+      "resolution": "Canonical OCR processing authority (case:process_ocr / can_process_ocr), machine and human-reviewed transcript revisions kept apart from the immutable original, evidence publication as a separate act. Cursor's parallel lib/documents/ocr-authorization.ts was removed; the OCR route, transcript routes and the upload consumer use the canonical modules."
+    },
+    {
+      "id": "external-download-audit",
+      "resolution": "GET /api/external/documents/[id]/download records principal, representative organization, authority, matter grant, matter, document and version durably with persistAtomicAudit before the link is returned. The link and its signature are never recorded; the link is withheld when the audit or signing fails."
+    },
+    {
+      "id": "signature-provider-status",
+      "resolution": "SignatureService.syncDocumentStatus judges a provider report with decideProviderSync: only external providers report, terminal states are final, observations move forward only, and a completion time is the provider's own event time (provider_acknowledged_at, immutable, platform 0023) or none; the local receipt time is kept separately as provider_status_observed_at. The change, signer updates and audit commit together and are conditional on the judged status, so a replay or concurrent sync applies once."
+    }
+  ],
+  "integratorCorrectedPaths": [
+    "apps/union-eyes/components/documents/documents-console.tsx",
+    "apps/union-eyes/components/documents/document-retention-policy.tsx",
+    "apps/union-eyes/lib/documents/canonical-journey.ts",
+    "apps/union-eyes/lib/documents/document-repository-client.ts",
+    "apps/union-eyes/app/api/documents/[id]/download/route.ts",
+    "apps/union-eyes/app/api/documents/upload/route.ts",
+    "apps/union-eyes/app/api/external/documents/[id]/download/route.ts",
+    "apps/union-eyes/app/api/documents/[id]/ocr/route.ts",
+    "apps/union-eyes/lib/documents/ocr-intake.ts",
+    "apps/union-eyes/lib/documents/ocr-intake.test.ts",
+    "apps/union-eyes/components/documents/ocr-upload.tsx",
+    "apps/union-eyes/components/documents/ocr-upload.journey.test.tsx",
+    "apps/union-eyes/lib/documents/canonical-journey.test.ts"
+  ]
+}

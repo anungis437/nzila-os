@@ -7,11 +7,10 @@
 
 import { NextResponse } from "next/server";
 import { 
-  getCBAById, 
-  updateCBA, 
-  deleteCBA,
-  updateCBAStatus 
-} from "@/lib/services/cba-service";
+  getCbaForOrganization,
+  updateCbaAudited,
+  archiveCbaAudited,
+} from "@/lib/services/cba-audited-service";
 import { getClausesByCBAId } from "@/lib/services/clause-service";
 import { getBargainingNotesByCBA } from "@/lib/services/bargaining-notes-service";
 import { z } from "zod";
@@ -25,20 +24,20 @@ import {
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
 export const GET = withRoleAuth('member', async (request, context) => {
-  const { params } = context as { params: { id: string } };
+  const { params, organizationId, userId } = context as { params: { id: string } | Promise<{ id: string }>; organizationId?: string; userId?: string };
+  if (!organizationId) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, 'No active organization');
+  }
   try {
-      const { id } = params;
+      const { id } = await params;
       const { searchParams } = new URL(request.url);
 
       const includeClauses = searchParams.get("includeClauses") === "true";
       const includeNotes = searchParams.get("includeNotes") === "true";
       const includeAnalytics = searchParams.get("includeAnalytics") === "true";
 
-      // Fetch CBA
-      const cba = await getCBAById(id, { 
-        includeClauses, 
-        includeAnalytics 
-      });
+      // Fetch CBA within the caller's organization
+      const cba = await getCbaForOrganization(organizationId, id, { countView: includeAnalytics });
 
       if (!cba) {
         return standardErrorResponse(
@@ -56,9 +55,14 @@ export const GET = withRoleAuth('member', async (request, context) => {
         response.clauseCount = clauses.length;
       }
 
-      // Optionally fetch bargaining notes
+      // Optionally fetch bargaining notes; privileged session notes are not embedded for every member.
       if (includeNotes) {
-        const notes = await getBargainingNotesByCBA(id);
+        const notes = (await getBargainingNotesByCBA(id)).filter(
+          (note) =>
+            !note.confidentialityLevel ||
+            ['public', 'internal'].includes(note.confidentialityLevel) ||
+            note.createdBy === userId,
+        );
         response.bargainingNotes = notes;
         response.noteCount = notes.length;
       }
@@ -94,55 +98,47 @@ const cbasSchema = z.object({
   employeeCoverage: z.number().int().optional(),
   bargainingUnitDescription: z.string().optional(),
   documentUrl: z.string().url().optional(),
-  isPublic: z.boolean().optional(),
 });
 
 export const PATCH = withRoleAuth('steward', async (request, context) => {
-    const { userId, organizationId: _organizationId, params } = context as { userId: string; organizationId: string; params: { id: string } };
+    const { userId, organizationId, params } = context as { userId: string; organizationId?: string; params: { id: string } | Promise<{ id: string }> };
+    if (!organizationId || !userId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'No active organization');
+    }
 
   try {
-      const { id } = params;
+      const { id } = await params;
       const body = await request.json();
+    // Publishing an agreement outside the organization is not a steward-level decision.
+    if (body && typeof body === 'object' && 'isPublic' in body) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Changing agreement visibility is not permitted here');
+    }
     // Validate request body
     const validation = cbasSchema.safeParse(body);
     if (!validation.success) {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
-    
-    const { status: _status } = validation.data;
 
-      // If only updating status, use specialized function
-      if (body.status && Object.keys(body).length === 1) {
-        const updatedCba = await updateCBAStatus(id, body.status);
-        
-        if (!updatedCba) {
-          return standardErrorResponse(
-      ErrorCode.RESOURCE_NOT_FOUND,
-      'CBA not found'
-    );
-        }
+    const result = await updateCbaAudited({ organizationId, userId }, id, validation.data);
 
-        return NextResponse.json({ cba: updatedCba });
-      }
+    if (result.kind === 'not_found') {
+      return standardErrorResponse(
+        ErrorCode.RESOURCE_NOT_FOUND,
+        'CBA not found'
+      );
+    }
+    if (result.kind === 'conflict') {
+      return standardErrorResponse(
+        ErrorCode.CONFLICT,
+        'CBA status changed concurrently; reload and retry'
+      );
+    }
 
-      // Update CBA
-      const updatedCba = await updateCBA(id, {
-        ...validation.data,
-        lastModifiedBy: userId,
-      });
-
-      if (!updatedCba) {
-        return standardErrorResponse(
-      ErrorCode.RESOURCE_NOT_FOUND,
-      'CBA not found'
-    );
-      }
-
-      return NextResponse.json({ cba: updatedCba });
+    return NextResponse.json({ cba: result.cba });
     } catch (error) {
       logger.error("Error updating CBA", error as Error);
       
@@ -164,45 +160,31 @@ export const PATCH = withRoleAuth('steward', async (request, context) => {
     }
 });
 
-export const DELETE = withRoleAuth('steward', async (request, context) => {
-  const { params } = context as { params: { id: string } };
+export const DELETE = withRoleAuth('steward', async (_request, context) => {
+  const { params, userId, organizationId } = context as { params: { id: string } | Promise<{ id: string }>; userId?: string; organizationId?: string };
+  if (!organizationId || !userId) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, 'No active organization');
+  }
   try {
-      const { id } = params;
-      const { searchParams } = new URL(request.url);
-      const hardDelete = searchParams.get("hard") === "true";
+      const { id } = await params;
+      // A "hard" delete request is not honoured: an agreement is only ever archived, so its clauses and notes survive.
 
-      if (hardDelete) {
-        // Hard delete - this will cascade delete all related clauses
-        // Only allow for admins/authorized users
-        const success = await deleteCBA(id); // This does soft delete by default
-        
-        if (!success) {
-          return standardErrorResponse(
-      ErrorCode.RESOURCE_NOT_FOUND,
-      'CBA not found'
-    );
-        }
+      const result = await archiveCbaAudited({ organizationId, userId }, id);
 
-        return NextResponse.json({ 
-          message: "CBA archived successfully",
-          deleted: true 
-        });
-      } else {
-        // Soft delete - set status to archived
-        const success = await deleteCBA(id);
-        
-        if (!success) {
-          return standardErrorResponse(
-      ErrorCode.RESOURCE_NOT_FOUND,
-      'CBA not found'
-    );
-        }
-
-        return NextResponse.json({ 
-          message: "CBA archived successfully",
-          deleted: true 
-        });
+      if (result === 'not_found') {
+        return standardErrorResponse(
+          ErrorCode.RESOURCE_NOT_FOUND,
+          'CBA not found'
+        );
       }
+      if (result === 'already_archived') {
+        return standardErrorResponse(ErrorCode.CONFLICT, 'CBA is already archived');
+      }
+
+      return NextResponse.json({ 
+        message: "CBA archived successfully",
+        deleted: true 
+      });
     } catch (error) {
       logger.error("Error deleting CBA", error as Error);
       return standardErrorResponse(

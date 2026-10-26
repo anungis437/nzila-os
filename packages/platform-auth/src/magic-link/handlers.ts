@@ -26,7 +26,7 @@ function extractUserAgent(request: NextRequest): string | undefined {
 
 const requestSchema = z.object({
   email: z.string().email('Invalid email address'),
-  organizationId: z.string().uuid().optional(),
+  organizationId: z.guid().optional(),
 })
 
 const verifySchema = z.object({

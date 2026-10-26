@@ -62,10 +62,9 @@ vi.mock('drizzle-orm', async (orig) => ({
   sql: (): Predicate => () => true,
 }));
 
-vi.mock('@/lib/audit-logger', () => ({
-  auditLog: h.auditLog,
-  AuditEventType: { DATA_UPDATE: 'data_update' },
-  AuditSeverity: { HIGH: 'high', MEDIUM: 'medium' },
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.auditLog }));
+vi.mock('@/lib/db/with-rls-context', async () => ({
+  withRLSContext: async (_org: unknown, fn: (tx: unknown) => Promise<unknown>) => fn((await import('@/db')).db),
 }));
 vi.mock('../contract-service', () => ({ getActiveContract: h.getActiveContract }));
 
@@ -90,6 +89,7 @@ beforeEach(() => {
   h.state.subs = [];
   h.state.eventsLog = [];
   h.auditLog.mockReset();
+  h.auditLog.mockResolvedValue(undefined);
   h.getActiveContract.mockReset();
 });
 
@@ -166,6 +166,12 @@ describe('platform-economics/subscription-lifecycle-service', () => {
       const action = await pauseSubscription(ORG_A, 'sub-1', 'user-1', 'maintenance');
       expect(action.action).toBe('paused');
       expect(h.auditLog).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not pause when its audit record cannot be written', async () => {
+      h.auditLog.mockRejectedValue(new Error('audit down'));
+      setSubs([{ id: 'sub-1', organizationId: ORG_A, status: 'active' }]);
+      await expect(pauseSubscription(ORG_A, 'sub-1', 'user-1')).rejects.toThrow('audit down');
     });
 
     it('an org A caller cannot pause an org B subscription by supplying its id (IDOR)', async () => {

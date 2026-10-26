@@ -12,9 +12,9 @@ const evaluateSchema = z.object({
   ruleType: z.string(),
   category: z.string(),
   subjectType: z.enum(['member', 'user', 'organization', 'action']),
-  subjectId: z.string().uuid(),
-  inputData: z.record(z.any()),
-  context: z.record(z.any()).optional(),
+  subjectId: z.guid(),
+  inputData: z.record(z.string(), z.any()),
+  context: z.record(z.string(), z.any()).optional(),
 });
 
 /**
@@ -27,7 +27,7 @@ export const POST = withApi(
     entitlement: 'governance_suite',
     body: evaluateSchema,
   },
-  async ({ body, organizationId }) => {
+  async ({ body, organizationId, userId }) => {
     if (!organizationId) {
       return NextResponse.json({ error: 'Organization context required' }, { status: 400 });
     }
@@ -42,7 +42,8 @@ export const POST = withApi(
         subjectId: validatedData.subjectId,
         inputData: validatedData.inputData,
         context: validatedData.context,
-      }
+      },
+      userId ?? undefined
     );
 
     return NextResponse.json({

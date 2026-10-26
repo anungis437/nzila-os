@@ -132,7 +132,7 @@ export async function uploadDocument(
       file.type === "application/pdf" ||
       file.type.startsWith("image/")
     ) {
-      await queueOCRProcessing(document.id, blob.url);
+      await queueOCRProcessing(document.id, organizationId, blob.url);
     }
 
     return { success: true, documentId: document.id };
@@ -189,9 +189,12 @@ export async function uploadDocumentVersion(
       .update(grievanceDocuments)
       .set({ isLatestVersion: false })
       .where(
-        or(
-          eq(grievanceDocuments.id, parentDocumentId),
-          eq(grievanceDocuments.parentDocumentId, parentDocumentId)
+        and(
+          or(
+            eq(grievanceDocuments.id, parentDocumentId),
+            eq(grievanceDocuments.parentDocumentId, parentDocumentId)
+          ),
+          eq(grievanceDocuments.organizationId, organizationId)
         )
       );
 
@@ -231,7 +234,7 @@ export async function uploadDocumentVersion(
       file.type === "application/pdf" ||
       file.type.startsWith("image/")
     ) {
-      await queueOCRProcessing(newVersion.id, blob.url);
+      await queueOCRProcessing(newVersion.id, organizationId, blob.url);
     }
 
     return { success: true, documentId: newVersion.id };
@@ -314,9 +317,12 @@ export async function restoreDocumentVersion(
       .update(grievanceDocuments)
       .set({ isLatestVersion: false })
       .where(
-        or(
-          eq(grievanceDocuments.id, parentId),
-          eq(grievanceDocuments.parentDocumentId, parentId)
+        and(
+          or(
+            eq(grievanceDocuments.id, parentId),
+            eq(grievanceDocuments.parentDocumentId, parentId)
+          ),
+          eq(grievanceDocuments.organizationId, organizationId)
         )
       );
 
@@ -327,7 +333,7 @@ export async function restoreDocumentVersion(
         isLatestVersion: true,
         versionStatus: "approved",
       })
-      .where(eq(grievanceDocuments.id, versionId));
+      .where(and(eq(grievanceDocuments.id, versionId), eq(grievanceDocuments.organizationId, organizationId)));
 
     return { success: true };
   } catch (error) {
@@ -552,7 +558,7 @@ export async function requestESignature(
         signatureStatus: request.provider === 'docusign' ? 'sent' : 'pending',
         signatureData,
       })
-      .where(eq(grievanceDocuments.id, request.documentId));
+      .where(and(eq(grievanceDocuments.id, request.documentId), eq(grievanceDocuments.organizationId, document.organizationId as string)));
 
     // Send notification to signer
     await sendSignatureRequestNotification(request, document.organizationId as string);
@@ -602,7 +608,7 @@ export async function markDocumentSigned(
         } as SignatureData,
         versionStatus: "approved", // Auto-approve signed documents
       })
-      .where(eq(grievanceDocuments.id, documentId));
+      .where(and(eq(grievanceDocuments.id, documentId), eq(grievanceDocuments.organizationId, organizationId)));
 
     return { success: true };
   } catch (error) {
@@ -677,7 +683,7 @@ export async function applyRetentionPolicy(
         await db
           .update(grievanceDocuments)
           .set({ archivedAt: new Date() })
-          .where(eq(grievanceDocuments.id, doc.id));
+          .where(and(eq(grievanceDocuments.id, doc.id), eq(grievanceDocuments.organizationId, organizationId)));
         archivedCount++;
       }
 
@@ -685,7 +691,7 @@ export async function applyRetentionPolicy(
         // Only delete if already archived
         await db
           .delete(grievanceDocuments)
-          .where(eq(grievanceDocuments.id, doc.id));
+          .where(and(eq(grievanceDocuments.id, doc.id), eq(grievanceDocuments.organizationId, organizationId)));
         deletedCount++;
       }
     }
@@ -771,7 +777,7 @@ return [];
 // OCR PROCESSING
 // ============================================================================
 
-async function queueOCRProcessing(documentId: string, fileUrl: string): Promise<void> {
+async function queueOCRProcessing(documentId: string, organizationId: string, fileUrl: string): Promise<void> {
   try {
     const response = await fetch(fileUrl);
     if (!response.ok) {
@@ -792,7 +798,7 @@ async function queueOCRProcessing(documentId: string, fileUrl: string): Promise<
     }
 
     if (ocrText.trim().length > 0) {
-      await updateDocumentOCR(documentId, ocrText);
+      await updateDocumentOCR(documentId, organizationId, ocrText);
     }
   } catch (_error) {
 }
@@ -803,6 +809,7 @@ async function queueOCRProcessing(documentId: string, fileUrl: string): Promise<
  */
 export async function updateDocumentOCR(
   documentId: string,
+  organizationId: string,
   ocrText: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
@@ -812,7 +819,7 @@ export async function updateDocumentOCR(
         ocrText,
         indexed: true,
       })
-      .where(eq(grievanceDocuments.id, documentId));
+      .where(and(eq(grievanceDocuments.id, documentId), eq(grievanceDocuments.organizationId, organizationId)));
 
     return { success: true };
   } catch (error) {

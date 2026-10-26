@@ -13,8 +13,28 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { tentativeAgreements, negotiations } from '@/db/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
+import { z } from 'zod';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
+
+// Ratification, costing approval and sign-off are outcomes of their own processes and are never accepted at creation.
+const createTentativeAgreementSchema = z.object({
+  negotiationId: z.guid(),
+  agreementNumber: z.string().min(1).max(50),
+  title: z.string().min(1).max(500),
+  clauseCategory: z.string().min(1).max(100),
+  agreedLanguage: z.string().min(1),
+  previousLanguage: z.string().optional(),
+  relatedProposalIds: z.array(z.string()).optional(),
+  relatedClauseId: z.guid().optional(),
+  requiresRatification: z.boolean().optional(),
+  annualCost: z.string().optional(),
+  implementationCost: z.string().optional(),
+  agreedDate: z.coerce.date().optional(),
+  effectiveDate: z.coerce.date().optional(),
+});
 
 export const GET = withApi(
   {
@@ -69,30 +89,38 @@ export const POST = withApi(
     },
   },
   async ({ body, organizationId, userId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
-    const values =
-      body && typeof body === 'object' && !Array.isArray(body)
-        ? { ...(body as Record<string, unknown>) }
-        : {};
-
-    const negotiationId = values.negotiationId;
-    if (typeof negotiationId !== 'string' || !negotiationId) {
-      throw ApiError.badRequest('negotiationId is required');
+    const parsed = createTentativeAgreementSchema.safeParse(body);
+    if (!parsed.success) {
+      throw ApiError.badRequest(parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '));
     }
+    const { negotiationId, ...fields } = parsed.data;
 
-    const [negotiation] = await db
-      .select({ id: negotiations.id })
-      .from(negotiations)
-      .where(and(eq(negotiations.id, negotiationId), eq(negotiations.organizationId, organizationId)));
-    if (!negotiation) {
-      throw ApiError.badRequest('negotiationId does not belong to this organization');
-    }
+    return withRLSContext({ organizationId }, async (tx) => {
+      const [negotiation] = await tx
+        .select({ id: negotiations.id })
+        .from(negotiations)
+        .where(and(eq(negotiations.id, negotiationId), eq(negotiations.organizationId, organizationId)));
+      if (!negotiation) {
+        throw ApiError.notFound('Negotiation', negotiationId);
+      }
 
-    if (userId) values.createdBy = userId;
+      const [row] = await tx
+        .insert(tentativeAgreements)
+        .values({ ...fields, negotiationId, createdBy: userId, lastModifiedBy: userId })
+        .returning();
 
-    const [row] = await db.insert(tentativeAgreements).values(values as typeof tentativeAgreements.$inferInsert).returning();
-    return { data: row };
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'bargaining.tentative_agreement.create',
+        resourceType: 'tentative_agreements',
+        resourceId: row.id,
+        details: { negotiationId, agreementNumber: row.agreementNumber },
+      });
+      return { data: row };
+    });
   },
 );
 

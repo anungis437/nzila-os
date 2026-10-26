@@ -8,17 +8,19 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { claims, claimUpdates } from '@/db/schema/claims-schema';
 import { claimHistoryReference } from '@/lib/cases/claim-history-reference';
-import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { recordUnionEyesCaseAssigned } from '@/lib/pilot-metrics';
-import { getCaseActor, requireCaseAction, findReadableCase, caseAssigneeEligible, denyCaseAction, caseAuthorizationResponse } from '@/lib/cases/case-authorization';
+import { getCaseActor, findReadableCase, caseAssigneeEligible, denyCaseAction, caseAuthorizationResponse } from '@/lib/cases/case-authorization';
 import { authorizationDenialResponse } from '@/lib/api/authorization-denial';
+import { assignPrimaryRepresentative } from '@/lib/services/case-access-service';
+import { AuthorityStoreError } from '@/lib/authority/store/executor';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +41,6 @@ export async function POST(
 
     const actor = await getCaseActor();
     const {userId,organizationId:orgId} = actor;
-    await requireCaseAction(actor,'case_assign',caseId);
     await requireEntitlement(orgId, 'grievance_case_suite');
 
     let body: any;
@@ -70,25 +71,39 @@ export async function POST(
     const { assigneeId, reason } = parsed.data;
 
     const result = await withRLSContext(async (tx) => {
-      const claim = await findReadableCase(tx,actor,caseId,true);
+      // The kernel decides the caller may assign this case (a mandate or delegation naming assignment).
+      const claim = await findReadableCase(tx,actor,caseId,true,'case:assign');
 
       if (!claim) return null;
       if (!(await caseAssigneeEligible(tx,actor,assigneeId)))
         return {denied:true as const,claimId:claim.claimId};
 
-      const previousAssignee = claim.assignedTo;
+      // The kernel owns the assignment: it re-decides the issuer's authority, the assignee's capacity and conflicts, and
+      // records the governed relationship. The claims column below is only a compatibility mirror.
+      let previousAssignee = claim.assignedTo;
 
-      // Update assignment
-      await tx
+      // A person cannot route their own matter, or give a member their own matter.
+      if (claim.memberId === userId || claim.memberId === assigneeId)
+        return {denied:true as const,conflict:true as const,claimId:claim.claimId};
+
+      const kernel = await assignPrimaryRepresentative(tx, { organizationId: orgId, grievanceId: claim.claimId, issuerUserId: userId, assigneeUserId: assigneeId });
+      // The kernel is the record of who holds the case; the mirror may be stale or empty.
+      previousAssignee = kernel.previousUserId;
+      if (previousAssignee === assigneeId) return {unchanged:true as const,claimId:claim.claimId,assignedTo:assigneeId};
+
+      // Compare-and-set against the row locked above, so a concurrent reassignment cannot be overwritten silently.
+      const [changed] = await tx
         .update(claims)
         .set({
           assignedTo: assigneeId,
           assignedAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(eq(claims.claimId, claim.claimId));
+        .where(and(eq(claims.claimId, claim.claimId), eq(claims.organizationId, orgId)))
+        .returning({ claimId: claims.claimId });
+      if (!changed) return {conflicted:true as const,claimId:claim.claimId};
 
-      // Add assignment note
+      // Durable in-transaction history of the transfer.
       const [update] = await tx
         .insert(claimUpdates)
         .values({
@@ -103,6 +118,24 @@ export async function POST(
         })
         .returning();
 
+      // The audit record shares this transaction in every deployment mode: if it cannot be written the assignment
+      // rolls back, so a transfer never commits unaudited.
+      await persistAtomicAudit(tx, {
+        organizationId: orgId,
+        action: 'case.assign',
+        resourceType: 'claims',
+        resourceId: claim.claimId,
+        userId,
+        details: {
+          event: 'CASE_ASSIGNED',
+          caseId: claim.claimId,
+          fromAssignee: previousAssignee,
+          toAssignee: assigneeId,
+          reason: reason ?? null,
+          updatedBy: userId,
+        },
+      });
+
       return { denied:false as const,claimId:claim.claimId,previousAssignee, updateId: update.updateId };
     });
 
@@ -112,23 +145,21 @@ export async function POST(
         { status: 404 },
       );
     }
-    if(result.denied) return await denyCaseAction(actor,'case_assign',result.claimId,'Assignee is not an active canonical representative in this organization');
-
-    await auditDataMutation({
-      userId,
-      organizationId: orgId,
-      resource: 'claims',
-      resourceId: result.claimId,
-      action: 'update',
-      details: {
-        event: 'CASE_ASSIGNED',
-        caseId: result.claimId,
-        fromAssignee: result.previousAssignee,
-        toAssignee: assigneeId,
-        reason: reason ?? null,
-        updatedBy: userId,
-      },
-    });
+    if ('unchanged' in result) {
+      // Idempotent repeat: the requested state already holds, so nothing is written or re-audited.
+      return NextResponse.json(
+        { success: true, transferred: false, caseId: result.claimId, assignedTo: result.assignedTo },
+        { status: 200 },
+      );
+    }
+    if ('conflicted' in result) {
+      return NextResponse.json(
+        { error: 'ASSIGNMENT_CONFLICT', message: 'The case assignment changed concurrently. Reload the case and retry.', caseId: result.claimId },
+        { status: 409 },
+      );
+    }
+    if(result.denied) return await denyCaseAction(actor,'case_assign',result.claimId,
+      'conflict' in result ? 'Case parties cannot assign or receive their own case' : 'Assignee is not an active canonical representative in this organization');
 
     logger.info('Case assigned', {
       caseId: result.claimId,
@@ -160,6 +191,9 @@ export async function POST(
       { status: 200 },
     );
   } catch (error) {
+    if (error instanceof AuthorityStoreError && (error.code === 'DENIED' || error.code === 'PRECONDITION' || error.code === 'NOT_FOUND')) {
+      return NextResponse.json({ error: 'FORBIDDEN', message: 'The authority kernel did not authorize this assignment.' }, { status: 403 });
+    }
     const denied=caseAuthorizationResponse(error)??authorizationDenialResponse(error);
     if(denied) return denied;
     logger.error('Failed to assign case', error as Error);
