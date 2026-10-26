@@ -99,7 +99,8 @@ describe('sanitizeHtml', () => {
     delete globalThis.window;
     try {
       const result = sanitizeHtml('<p>Hello</p><script>bad</script>');
-      expect(result).toBe('Hellobad');
+      // Script content is dropped with its tags, never left behind as text.
+      expect(result).toBe('Hello');
     } finally {
       globalThis.window = origWindow;
     }
