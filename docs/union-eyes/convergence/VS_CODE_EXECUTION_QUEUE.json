@@ -94,17 +94,17 @@
       "risk": "P0",
       "dependsOn": ["auth-native-pg16"],
       "convergenceRegister": ["UE-CONV-I-002"],
-      "sourceCommit": "b5caa1a1abea738cc7589e6010e99c70bef2324b",
-      "sourceCommitCommand": "git log -1 --format=%H -- apps/union-eyes/lib/messaging/thread-lifecycle.ts apps/union-eyes/db/__tests__/message-lifecycle.postgres.test.ts",
+      "sourceCommit": "c72d863d817facf62f672c688a99688eb6fb5b1a",
+      "sourceCommitCommand": "git log -1 --format=%H -- apps/union-eyes/lib/messaging/thread-lifecycle.ts apps/union-eyes/db/__tests__/message-lifecycle.postgres.test.ts apps/union-eyes/lib/messaging/thread-access.ts",
       "test": "apps/union-eyes/db/__tests__/message-lifecycle.postgres.test.ts",
       "command": "UE_AUTHORITY_COMBINED_URL=<admin-url-of-a-fresh-disposable-combined-database> pnpm exec vitest run apps/union-eyes/db/__tests__/message-lifecycle.postgres.test.ts",
-      "workingDirectory": "repository root of agents/ue-cursor-final-closure at b5caa1a1abea738cc7589e6010e99c70bef2324b or later",
+      "workingDirectory": "repository root of agents/ue-cursor-final-closure at c72d863d817facf62f672c688a99688eb6fb5b1a or later",
       "environment": {
         "UE_AUTHORITY_COMBINED_URL": "admin connection to a fresh disposable database prepared the same way as thread-assignment.postgres.test.ts: Django migrate plus the approved Drizzle bootstrap, including platform 0013, 0014, 0025, 0029 and 0030, and RLS 0020, 0021 and 0024",
         "docker": "not started by this file",
         "role": "the suite sets union_eyes_runtime and union_eyes_system under forced RLS; the hold-row insert that proves retention uses the admin connection and is not an authorization success"
       },
-      "fixtureSetup": "Same combined-schema preparation as apps/union-eyes/db/__tests__/thread-assignment.postgres.test.ts. Apply platform 0029 and 0030 before the run. Do not insert a governance_review mandate by SQL. The ceremony describe adopts the governance_review issue and revoke rules and issues two mandates through the store. The earlier tests still expect an administrator denial because those actors hold no mandate.",
+      "fixtureSetup": "Same combined-schema preparation as apps/union-eyes/db/__tests__/thread-assignment.postgres.test.ts. Apply platform 0029 and 0030 before the run. Do not insert a governance_review mandate by SQL. The ceremony describe adopts the governance_review issue and revoke rules and issues two mandates through the store. The earlier tests still expect an administrator denial because those actors hold no mandate. The Canonical V2 conversation test skips unless public.ue_conversation_assignee_authorized is installed. Install that function with compileConversationAssigneePredicateSql on the canonical auth topology. ue_case_assignee_authorized is not this predicate.",
       "cleanup": "Drop the disposable database. The suite installs a fault trigger on the audit tables of that database and removes it in afterEach; if the process is killed during a fault test, drop that trigger before retrying.",
       "expect": {
         "success": [
@@ -112,7 +112,8 @@
           "An administrator receives kind forbidden from adoptRetentionPolicy for a valid period, and kind invalid for a period outside 1..36500. No retention row is written by those calls.",
           "A hold_place and hold_release inserted by the admin connection, with acted_via organization_administrator, make retention report legal_hold and then retention_elapsed. The member view does not reveal the hold. The administrator still cannot read the thread.",
           "The ceremony describe adopts governance_review issue and revoke rules, issues a hold mandate naming one conversation and a retention mandate naming the organization, then the holder places and releases a hold and adopts a 30-day policy. An executive title is still forbidden. Revoking each mandate ends that power. An injected audit fault on hold_release leaves only hold_place. An injected audit fault on the second adoption leaves Policy issued as the only live policy.",
-          "Cursor ran apps/union-eyes/db/__tests__/message-authority-issuance.pglite.test.ts in process at b5caa1a1abea738cc7589e6010e99c70bef2324b: 4 passed. That run is not this proof."
+          "Cursor ran apps/union-eyes/db/__tests__/message-authority-issuance.pglite.test.ts in process at b5caa1a1abea738cc7589e6010e99c70bef2324b: 4 passed. That run is not this proof.",
+          "An assignee whose organization_members.role is admin cannot read the thread. A steward assignee can. That behavior is proved in process at c72d863d8 and is part of this file only when the file is actually run."
         ],
         "denial": [
           "The file is skipped unless UE_AUTHORITY_COMBINED_URL is set. A skipped run is not evidence. Status stays READY_FOR_VS_EXECUTION.",
@@ -130,7 +131,7 @@
     "Do not start Docker and do not set AUTH_NATIVE_PROOF or UE_AUTH_CONCURRENCY_PROOF in Cursor.",
     "Legal hold is a kernel decision as of 6ce6e945406b693a948601aecadf99e27b6b09dc. Retention read and adoption are kernel decisions as of b4dde796fbee63291d4d96896692ad869071dc2c. The scanner still labels both routes THREAD_POLICY because they call lib/messaging/thread-lifecycle. Do not edit the scanner. An administrator title is denied. The powers sit on the inactive governance_review issuance template and confer nothing until a live rule naming them is adopted. Platform 0029 and 0030 refuse stored delegations and allow recusals. Both migrations are UNQUALIFIED.",
     "In-process issuance proof is apps/union-eyes/db/__tests__/message-authority-issuance.pglite.test.ts at b5caa1a1abea738cc7589e6010e99c70bef2324b. Cursor ran it: 4 passed. The same ceremony is in message-lifecycle.postgres.test.ts and stays READY_FOR_VS_EXECUTION. Do not mock the kernel. Do not mark the combined file PASS from the in-process run.",
-    "Message read, reply, assign and close still use thread participation. staffActing still uses caseActionAllowed('note_add_internal'). external/grievances/[id]/documents/upload is EXTERNAL_AUTHORITY. Each still needs operative action-level authority, tenant binding, mandate limits, privacy classification, revocation, one transaction, durable audit and negative tests.",
+    "Message read, reply, close and archive are kernel decisions as of c72d863d8. staffActing reads the stored role through conversation-assignee capacity and ignores the actor role label. An administrator title is denied. A legal-hold mandate does not confer a read. Canonical V2 calls public.ue_conversation_assignee_authorized and denies assignees when that function is absent. The scanner still labels the routes THREAD_POLICY. Do not edit the scanner. external/grievances/[id]/documents/upload remains EXTERNAL_AUTHORITY.",
     "Schema census on this branch is 231 entries in docs/union-eyes/convergence/register/ue-canonical-schema-census.json. The mutation-scope baseline sums to 13. Checkpoint 5 recorded 351 and 276 before those shrinks. Continue only entries that lack a machine-verifiable engineering disposition. Do not regenerate either baseline to change the count.",
     "Finance stays fail-closed until a governed issuance and activation workflow exists. Do not invent mandate holders.",
     "CURSOR_IMPLEMENTATION_COMPLETE remains false."

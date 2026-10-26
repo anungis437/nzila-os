@@ -6,7 +6,7 @@ Machine-readable copy: `docs/union-eyes/convergence/VS_CODE_EXECUTION_QUEUE.json
 
 Preserved commit: `960a88481aa1f5a9db2ddfaa6f3da510b743a1bc`. Pull request: #1014. Branch: `agents/ue-cursor-final-closure`. Base: `agents/ue-final-convergence`.
 
-Invitation items are source commit `215b21e6cc37276ba08d9f37c26bb7d504eff452`. The conversation-lifecycle item is source commit `b4dde796fbee63291d4d96896692ad869071dc2c`. A skipped Vitest run is not evidence.
+Invitation items are source commit `215b21e6cc37276ba08d9f37c26bb7d504eff452`. Retention adoption is `b4dde796fbee63291d4d96896692ad869071dc2c`. The conversation-lifecycle suite file is source commit `c72d863d817facf62f672c688a99688eb6fb5b1a`. A skipped Vitest run is not evidence.
 
 ## auth-native-pg16
 
@@ -51,11 +51,11 @@ Invitation items are source commit `215b21e6cc37276ba08d9f37c26bb7d504eff452`. T
 | Status | `READY_FOR_VS_EXECUTION` |
 | Risk | P0. Depends on `auth-native-pg16` only for environment order. The suite itself is independent. |
 | Register | `UE-CONV-I-002` |
-| Source | `b5caa1a1abea738cc7589e6010e99c70bef2324b` |
+| Source | `c72d863d817facf62f672c688a99688eb6fb5b1a` |
 | Test | `apps/union-eyes/db/__tests__/message-lifecycle.postgres.test.ts` |
 | Command | `UE_AUTHORITY_COMBINED_URL=<admin-url-of-a-fresh-disposable-combined-database> pnpm exec vitest run apps/union-eyes/db/__tests__/message-lifecycle.postgres.test.ts` |
 | Environment | Fresh disposable combined schema: Django migrate, approved Drizzle bootstrap, platform `0013`, `0014`, `0025`, `0029` and `0030`, RLS `0020`, `0021` and `0024`. This file does not start Docker. |
-| Fixture | Same preparation as `thread-assignment.postgres.test.ts`. Do not insert a governance mandate by SQL. The ceremony describe adopts the rules and issues two mandates through the store. Earlier tests still expect an administrator denial. |
+| Fixture | Same preparation as `thread-assignment.postgres.test.ts`. Do not insert a governance mandate by SQL. The ceremony describe adopts the rules and issues two mandates through the store. Earlier tests still expect an administrator denial. The Canonical V2 conversation test skips unless `public.ue_conversation_assignee_authorized` is installed. `ue_case_assignee_authorized` is not that predicate. |
 | Cleanup | Drop the database. If a fault test is killed, drop the audit fault trigger it installed. |
 | Success | Administrator, steward and foreign actors do not write a hold. An administrator receives `forbidden` from `adoptRetentionPolicy` for a valid period and `invalid` outside 1..36500. The ceremony describe then lets the issued mandate holder place and release a hold and adopt a 30-day policy. Revocation ends each power. An audit fault rolls the release and the second adoption back. |
 | Denial | Skipped unless `UE_AUTHORITY_COMBINED_URL` is set. Cursor ran `message-authority-issuance.pglite.test.ts` in process (4 passed). That run is not this proof. |
@@ -69,7 +69,7 @@ Legal hold is a kernel decision as of `6ce6e945406b693a948601aecadf99e27b6b09dc`
 
 The in-process issuance proof is `apps/union-eyes/db/__tests__/message-authority-issuance.pglite.test.ts` at `b5caa1a1abea738cc7589e6010e99c70bef2324b`. Cursor ran it: 4 passed. The same ceremony is in `message-lifecycle.postgres.test.ts` and stays `READY_FOR_VS_EXECUTION`. Do not mock the kernel. Do not mark the combined file PASS from the in-process run.
 
-Message read, reply, assign and close still use thread participation. `staffActing` still uses `caseActionAllowed('note_add_internal')`. `external/grievances/[id]/documents/upload` remains `EXTERNAL_AUTHORITY`. Each still needs operative action-level authority. The route-coverage baseline's empty `kernelPending` does not change that.
+Message read, reply, close, and archive are kernel decisions as of `c72d863d8`. `staffActing` reads the stored role through a conversation-assignee capacity and ignores the actor role label. An administrator title is denied. A legal-hold mandate does not confer a read. Canonical V2 calls `public.ue_conversation_assignee_authorized` and denies assignees when that function is absent. The scanner still labels the routes `THREAD_POLICY`. Do not edit the scanner. `external/grievances/[id]/documents/upload` remains `EXTERNAL_AUTHORITY`. The route-coverage baseline's empty `kernelPending` does not change that.
 
 Schema census on this branch is 231 entries. The mutation-scope baseline sums to 13. Checkpoint 5 recorded 351 and 276 before those later shrinks. Continue entries that still lack a machine-verifiable disposition. Do not regenerate either baseline to change the count.
 
