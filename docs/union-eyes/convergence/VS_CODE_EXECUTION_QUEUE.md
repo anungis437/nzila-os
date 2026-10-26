@@ -6,7 +6,7 @@ Machine-readable copy: `docs/union-eyes/convergence/VS_CODE_EXECUTION_QUEUE.json
 
 Preserved commit: `960a88481aa1f5a9db2ddfaa6f3da510b743a1bc`. Pull request: #1014. Branch: `agents/ue-cursor-final-closure`. Base: `agents/ue-final-convergence`.
 
-Invitation items are source commit `215b21e6cc37276ba08d9f37c26bb7d504eff452`. Retention adoption is `b4dde796fbee63291d4d96896692ad869071dc2c`. The conversation-lifecycle suite file is source commit `c72d863d817facf62f672c688a99688eb6fb5b1a`. External grievance upload derivation is `31fc3e339750466b4661182f14476750db9dae68`. Grievance import session completion is `75538d09a18fd183fb4954abae6221e932a439d6`. Case intake and bulk-import audits are `db6934b0d8cf700442286b248a439ab5c7668799`. A skipped Vitest run is not evidence.
+Invitation items are source commit `215b21e6cc37276ba08d9f37c26bb7d504eff452`. Retention adoption is `b4dde796fbee63291d4d96896692ad869071dc2c`. The conversation-lifecycle suite file is source commit `c72d863d817facf62f672c688a99688eb6fb5b1a`. External grievance upload derivation is `31fc3e339750466b4661182f14476750db9dae68`. Grievance import session completion is `75538d09a18fd183fb4954abae6221e932a439d6`. Case intake and bulk-import audits are `db6934b0d8cf700442286b248a439ab5c7668799`. Platform ledger appends are `f44ed6276778f3900e42ef7f158b531816da3320`. A skipped Vitest run is not evidence.
 
 ## auth-native-pg16
 
@@ -75,7 +75,9 @@ External grievance document upload copies the live matter grant as of `31fc3e339
 
 Grievance import session completion commits its status and `grievance.import_batch` together as of `75538d09a18fd183fb4954abae6221e932a439d6`. A failed audit leaves the session running and does not report success. Each imported row already committed with `grievance.import_row`.
 
-Case intake commits `case.intake_submitted` in the claim transaction as of `db6934b0d8cf700442286b248a439ab5c7668799`. A failed audit rolls the intake back. Each bulk-import row commits with `case.bulk_import_row`. The batch summary `case.bulk_import` is its own durable write, and a failed summary withholds the success response. Both routes are `ATOMIC` on the route-coverage manifest. The scanner was not edited. Denial-path audits and `recommend-steward` stay on the separate-connection writer. The platform-economics services still call `auditLog` after their writes.
+Case intake commits `case.intake_submitted` in the claim transaction as of `db6934b0d8cf700442286b248a439ab5c7668799`. A failed audit rolls the intake back. Each bulk-import row commits with `case.bulk_import_row`. The batch summary `case.bulk_import` is its own durable write, and a failed summary withholds the success response. Both routes are `ATOMIC` on the route-coverage manifest. The scanner was not edited. Denial-path audits and `recommend-steward` stay on the separate-connection writer.
+
+Platform ledger appends commit `ledger_entry_appended` in the same transaction as the entry as of `f44ed6276778f3900e42ef7f158b531816da3320`. A batch append audits every entry in that transaction. A failed audit leaves no new entry. This does not issue a financial mandate. Billing accounts, invoices, payments, contracts, dunning, pricing, reconciliation, allocation, fees, and usage metering still call `auditLog` after their writes.
 
 Schema census stays 231 entries. The mutation-scope baseline stays 13. Finance issuance stays fail-closed. WorkAid, voting, `union_rep_id` reconciliation, and persona journeys remain open. The route-coverage baseline's empty `kernelPending` does not close those.
 
