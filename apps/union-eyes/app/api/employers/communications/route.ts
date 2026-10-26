@@ -25,15 +25,15 @@ import { eq, desc, and } from 'drizzle-orm'
 // ── Validation ──────────────────────────────────────────────────────────────
 
 const createCommunicationSchema = z.object({
-  employerId: z.string().uuid(),
-  grievanceId: z.string().uuid().optional(),
+  employerId: z.guid(),
+  grievanceId: z.guid().optional(),
   type: z.enum(['email', 'phone', 'meeting', 'letter', 'other']),
   subject: z.string().min(1).max(500),
   body: z.string().min(1),
-  recipientContactId: z.string().uuid().optional(),
+  recipientContactId: z.guid().optional(),
   recipientName: z.string().optional(),
   status: z.enum(['draft', 'sent', 'received', 'acknowledged']).default('draft'),
-  templateId: z.string().uuid().optional(),
+  templateId: z.guid().optional(),
 })
 
 // ── POST — Log communication ────────────────────────────────────────────────

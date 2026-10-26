@@ -8,7 +8,7 @@ export const DOCUMENT_ACCESS_LEVELS = ['private', 'org', 'public'] as const
 export type DocumentAccessLevel = (typeof DOCUMENT_ACCESS_LEVELS)[number]
 
 export const documentMetadataSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   orgId: z.string().min(1),
   fileName: z.string().min(1),
   mimeType: z.string().min(1),
@@ -20,12 +20,12 @@ export const documentMetadataSchema = z.object({
   category: z.string().optional(),
   contentHash: z.string().optional(),
   accessLevel: z.enum(DOCUMENT_ACCESS_LEVELS).default('org'),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 export type DocumentMetadata = z.infer<typeof documentMetadataSchema>
 
 export const documentChainOfCustodySchema = z.object({
-  documentId: z.string().uuid(),
+  documentId: z.guid(),
   entries: z.array(z.object({
     action: z.string().min(1),
     actorId: z.string().min(1),

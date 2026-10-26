@@ -35,6 +35,7 @@ vi.mock('@/lib/api/framework', () => {
     z: {
       object: () => ({}),
       string: () => zString,
+      guid: () => zString,
       enum: () => ({ optional: () => ({}) }),
       coerce: { number: () => zNumber },
     },

@@ -40,9 +40,9 @@ async function rejectExportRequest(requestId: string, organizationId: string, us
  */
 
 const gdprDataExportSchema = z.object({
-  organizationId: z.string().uuid('Invalid organizationId'),
+  organizationId: z.guid('Invalid organizationId'),
   preferredFormat: z.string().optional(),
-  requestDetails: z.record(z.unknown()).optional(),
+  requestDetails: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const POST = withApiAuth(async (request: NextRequest, context: { organizationId?: string }) => {
@@ -63,7 +63,7 @@ export const POST = withApiAuth(async (request: NextRequest, context: { organiza
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
     

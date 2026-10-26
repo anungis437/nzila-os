@@ -15,7 +15,7 @@ import { emitWorkflowAuditEvent } from '@/lib/services/workflow-audit-service'
 import { recordTimelineEvent } from '@/lib/repositories/workflow-repository'
 
 const ReviewInput = z.object({
-  quoteId: z.string().uuid(),
+  quoteId: z.guid(),
 })
 
 export async function POST(request: NextRequest) {

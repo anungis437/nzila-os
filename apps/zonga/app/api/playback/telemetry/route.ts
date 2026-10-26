@@ -7,7 +7,7 @@ import { withSpan } from '@nzila/os-core/telemetry'
 
 const PlaybackTelemetrySchema = z.object({
   eventName: z.enum(['play_start_latency', 'buffer_event', 'completion', 'skip', 'device_browser_failure']),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
 })
 
 export async function POST(request: Request) {

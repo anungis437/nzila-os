@@ -9,7 +9,7 @@ import { z } from 'zod';
 // Filing or amending a tax record with the tax authority is a separate act that is not implemented; a generated
 // record is a draft or a generated slip, never marked as filed.
 const createT4aSchema = z.object({
-  memberId: z.string().uuid(),
+  memberId: z.guid(),
   memberName: z.string().max(255),
   taxYear: z.number().int().min(1900).max(2100),
   pensionIncome: z.string(),

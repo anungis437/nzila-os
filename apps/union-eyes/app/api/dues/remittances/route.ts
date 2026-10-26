@@ -36,7 +36,7 @@ export const GET = withApi(
 );
 
 const createSchema = z.object({
-  employerId: z.string().uuid(),
+  employerId: z.guid(),
   periodStart: z.coerce.date(),
   periodEnd: z.coerce.date(),
   fiscalYear: z.number().int(),
@@ -46,7 +46,7 @@ const createSchema = z.object({
   memberCount: z.number().int().min(0),
   remittanceNumber: z.string().optional(),
   notes: z.string().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const POST = withApi(

@@ -27,8 +27,8 @@ const locationTrackSchema = z.object({
   altitude: z.number().optional(),
   purpose: z.enum(["strike", "picket", "meeting", "event", "organizing"]),
   activityType: z.string().max(100).optional(),
-  strikeId: z.string().uuid("Invalid strikeId").optional(),
-  eventId: z.string().uuid("Invalid eventId").optional(),
+  strikeId: z.guid("Invalid strikeId").optional(),
+  eventId: z.guid("Invalid eventId").optional(),
 });
 
 export const POST = withApiAuth(async (req: NextRequest) => {
@@ -45,7 +45,7 @@ export const POST = withApiAuth(async (req: NextRequest) => {
     if (!validation.success) {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
-        validation.error.errors[0]?.message || "Validation failed"
+        validation.error.issues[0]?.message || "Validation failed"
       );
     }
 

@@ -9,7 +9,7 @@ import { z } from 'zod'
 
 export const fileMetadataSchema = z.object({
   /** Unique file ID. */
-  id: z.string().uuid(),
+  id: z.guid(),
   /** Org scope owner. */
   orgId: z.string().min(1),
   /** Original file name. */
@@ -33,7 +33,7 @@ export const fileMetadataSchema = z.object({
   /** Access level. */
   accessLevel: z.enum(['private', 'org', 'public']).default('org'),
   /** Arbitrary metadata. */
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export type FileMetadata = z.infer<typeof fileMetadataSchema>

@@ -32,6 +32,7 @@ vi.mock('@/lib/api/framework', () => ({
   RATE_LIMITS: { ML_PREDICTIONS: { limit: 10 } },
   z: {
     object: () => ({}),
+    guid: () => ({ min: () => ({ default: () => ({}) }), optional: () => ({}) }),
     string: () => ({ uuid: () => ({ min: () => ({ default: () => ({}) }) }), min: () => ({ default: () => ({}) }), max: () => ({ optional: () => ({}) }), optional: () => ({}) }),
     boolean: () => ({}),
     number: () => ({ nonnegative: () => ({ optional: () => ({}) }) }),

@@ -43,7 +43,7 @@ export async function submitForReviewAction(
 // ── Send Quote to Client ───────────────────────────────────────────────────
 
 const SendQuoteInput = z.object({
-  quoteId: z.string().uuid(),
+  quoteId: z.guid(),
   expiresInDays: z.number().int().min(1).max(90).default(SHOPMOICA_SETTINGS.shareLinkExpiryDays),
 })
 

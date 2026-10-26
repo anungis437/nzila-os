@@ -41,7 +41,7 @@ export const GET = withApi(
 // commercial transition and the pause/resume operation, never by the customer: a steward who could edit them could
 // grant their own organization a discount or modules. Only the free-form metadata is the customer's, and unknown
 // fields are refused rather than ignored so a refused change is not mistaken for an applied one.
-const patchSchema = z.object({ metadata: z.record(z.unknown()).optional() }).strict();
+const patchSchema = z.object({ metadata: z.record(z.string(), z.unknown()).optional() }).strict();
 
 // PR #752 round 28: commercial-transition (app/api/pilot/apply/[id]/
 // commercial-transition/route.ts) stamps these 2 keys into a subscription's

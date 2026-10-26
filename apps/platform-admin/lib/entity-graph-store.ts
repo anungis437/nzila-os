@@ -39,7 +39,7 @@ export const createEntityNodeSchema = z.object({
   entityId: z.string().min(1).max(200),
   canonicalName: z.string().min(1).max(400),
   status: z.string().min(1).max(64).default('active'),
-  metadata: z.record(z.string(), z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).prefault({}),
 })
 export type CreateEntityNodeInput = z.infer<typeof createEntityNodeSchema>
 
@@ -50,7 +50,7 @@ export const createEntityEdgeSchema = z.object({
   targetEntityType: z.enum(ENTITY_TYPE_VALUES),
   targetEntityId: z.string().min(1).max(200),
   relationshipType: z.enum(RELATIONSHIP_TYPE_VALUES),
-  metadata: z.record(z.string(), z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).prefault({}),
 })
 export type CreateEntityEdgeInput = z.infer<typeof createEntityEdgeSchema>
 

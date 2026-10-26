@@ -11,7 +11,7 @@ export const sharedLeadCaptureSchema = z.object({
   phone: z.string().min(5).optional(),
   campaign: z.string().min(1).optional(),
   locale: z.string().min(2).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export type SharedLeadCaptureInput = z.infer<typeof sharedLeadCaptureSchema>
@@ -27,10 +27,10 @@ export const sharedCrmEventSchema = z.object({
   ]),
   occurredAt: z.string().datetime(),
   appId: z.enum(['flow', 'zonga', 'weekone']),
-  orgId: z.string().uuid().optional(),
+  orgId: z.guid().optional(),
   actorId: z.string().min(1).optional(),
   lead: sharedLeadCaptureSchema.partial().optional(),
-  payload: z.record(z.unknown()).default({}),
+  payload: z.record(z.string(), z.unknown()).prefault({}),
 })
 
 export type SharedCrmEventInput = z.infer<typeof sharedCrmEventSchema>

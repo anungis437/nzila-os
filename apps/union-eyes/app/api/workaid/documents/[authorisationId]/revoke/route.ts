@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic'
 export async function POST(_request: Request, { params }: { params: Promise<{ authorisationId: string }> }) {
   try {
     const { authorisationId } = await params
-    if (!z.string().uuid().safeParse(authorisationId).success) return NextResponse.json({ error: 'VALIDATION_ERROR', message: 'Invalid authorisation id.' }, { status: 400 })
+    if (!z.guid().safeParse(authorisationId).success) return NextResponse.json({ error: 'VALIDATION_ERROR', message: 'Invalid authorisation id.' }, { status: 400 })
     const actor = await getCaseActor()
     const result = await withRLSContext(async (tx) =>
       revokeWorkAidDocumentAuthorisation(drizzleExecutor(tx), kernelDeps, { organizationId: actor.organizationId, revokerUserId: actor.userId, authorisationId }),

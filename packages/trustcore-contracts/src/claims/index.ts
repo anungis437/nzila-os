@@ -12,14 +12,14 @@ export const ProofOfClaimStatusSchema = z.enum([
 export type ProofOfClaimStatus = z.infer<typeof ProofOfClaimStatusSchema>
 
 export const ProofOfClaimInputSchema = z.object({
-  orgId: z.string().uuid(),
-  mandateId: z.string().uuid(),
-  creditorId: z.string().uuid(),
+  orgId: z.guid(),
+  mandateId: z.guid(),
+  creditorId: z.guid(),
   submittedAt: z.string().datetime().optional(),
   /** FK → @nzila/audit evidence event id. */
-  evidenceEventId: z.string().uuid().optional(),
+  evidenceEventId: z.guid().optional(),
   /** FK → @nzila/platform-decision-engine decision id. */
-  classificationDecisionId: z.string().uuid().optional(),
+  classificationDecisionId: z.guid().optional(),
   status: ProofOfClaimStatusSchema.default('submitted'),
   amountClaimed: z.number().nonnegative().optional(),
   amountAdmitted: z.number().nonnegative().optional(),
@@ -29,7 +29,7 @@ export const ProofOfClaimInputSchema = z.object({
 export type ProofOfClaimInput = z.infer<typeof ProofOfClaimInputSchema>
 
 export const ProofOfClaimRecordSchema = ProofOfClaimInputSchema.extend({
-  id: z.string().uuid(),
+  id: z.guid(),
   submittedAt: z.string().datetime(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),

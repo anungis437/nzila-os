@@ -165,7 +165,7 @@ describe('round 42 defect fix: tentative_agreements no longer uses the crud-fact
   it('POST only accepts whitelisted fields (no ratification/sign-off/organization injection) and audits atomically', () => {
     expect(src).toMatch(/createTentativeAgreementSchema\.safeParse\(body\)/);
     const schema = src.slice(src.indexOf('const createTentativeAgreementSchema'), src.indexOf('export const GET'));
-    expect(schema).toMatch(/negotiationId:\s*z\.string\(\)\.uuid\(\)/);
+    expect(schema).toMatch(/negotiationId:\s*z\.guid\(\)/);
     expect(schema).not.toMatch(/organizationId|ratif(ied|icationStatus)|signedOff|approvedBy|createdBy/);
     expect(src).toMatch(/persistAtomicAudit\(tx,/);
   });

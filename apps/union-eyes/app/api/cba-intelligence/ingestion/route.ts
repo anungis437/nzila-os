@@ -15,7 +15,7 @@ import type { IngestionJobFilters } from "@/lib/services/cba-intelligence/ingest
 const listQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional(),
   limit: z.coerce.number().int().positive().max(100).optional(),
-  sourceId: z.string().uuid().optional(),
+  sourceId: z.guid().optional(),
   status: z.string().optional(),
 });
 
@@ -40,7 +40,7 @@ export const GET = withApi(
 // ---------------------------------------------------------------------------
 
 const triggerIngestionSchema = z.object({
-  sourceId: z.string().uuid(),
+  sourceId: z.guid(),
   triggerType: z.enum(["manual", "scheduled", "retry"]).default("manual"),
 });
 

@@ -7,7 +7,7 @@ const log = createLogger('weekone.analytics')
 
 const schema = z.object({
   eventName: z.string().min(1),
-  context: z.record(z.unknown()).optional(),
+  context: z.record(z.string(), z.unknown()).optional(),
 })
 
 export async function POST(request: Request) {

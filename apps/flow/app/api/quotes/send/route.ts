@@ -17,7 +17,7 @@ import { recordTimelineEvent } from '@/lib/repositories/workflow-repository'
 import { getOrgSettings } from '@nzila/platform-commerce-org/service'
 
 const SendInput = z.object({
-  quoteId: z.string().uuid(),
+  quoteId: z.guid(),
   expiresInDays: z.number().int().min(1).max(90).optional(),
 })
 

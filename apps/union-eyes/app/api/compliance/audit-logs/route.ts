@@ -30,10 +30,10 @@ export const POST = withApi(
     body: z.object({
       action: z.string().min(1).max(100),
       resourceType: z.string().min(1).max(50),
-      resourceId: z.string().uuid().optional(),
+      resourceId: z.guid().optional(),
       severity: z.enum(['debug', 'info', 'warning', 'error', 'critical']).default('info'),
       outcome: z.enum(['success', 'failure', 'error']).default('success'),
-      metadata: z.record(z.unknown()).optional(),
+      metadata: z.record(z.string(), z.unknown()).optional(),
     }),
   },
   async ({ body, organizationId, userId }) => {

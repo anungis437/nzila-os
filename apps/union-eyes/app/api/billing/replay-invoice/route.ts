@@ -8,7 +8,7 @@ import { replayInvoiceDeterministically } from '@/services/platform-economics';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 
 const bodySchema = z.object({
-  invoiceId: z.string().uuid(),
+  invoiceId: z.guid(),
 });
 
 export const POST = withApi(

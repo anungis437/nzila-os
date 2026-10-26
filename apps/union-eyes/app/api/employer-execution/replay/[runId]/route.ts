@@ -30,7 +30,7 @@ const LEGACY_TARGET_ID_COLUMN = "entityId" as const;
 const replaySchema = z.object({
   mode: z.enum(["exact", "new_engine", "new_rule"]).default("exact"),
   replayEngineVersion: z.string().optional(),
-  replayRuleVersionId: z.string().uuid().optional(),
+  replayRuleVersionId: z.guid().optional(),
 });
 
 export const POST = withApi(

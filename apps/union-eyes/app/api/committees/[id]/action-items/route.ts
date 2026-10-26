@@ -18,7 +18,7 @@ const createSchema = z.object({
   priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
   assignedTo: z.string().optional(),
   dueDate: z.string().optional(),
-  meetingId: z.string().uuid().optional(),
+  meetingId: z.guid().optional(),
 });
 
 export const GET = withApi(

@@ -36,7 +36,7 @@ export const POST = async (request: NextRequest, { params: pendingParams }: { pa
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
     

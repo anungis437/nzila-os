@@ -48,7 +48,7 @@ const defaultFormatter: RemittanceFormatter = {
 };
 
 const createSchema = z.object({
-  payrollRunId: z.string().uuid(),
+  payrollRunId: z.guid(),
 });
 
 export const GET = withApi(

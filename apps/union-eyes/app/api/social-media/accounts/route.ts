@@ -95,7 +95,7 @@ return standardErrorResponse(
 
 const socialMediaAccountsSchema = z.object({
   platform: z.enum(['facebook', 'instagram', 'twitter', 'linkedin'], {
-    errorMap: () => ({ message: 'Unsupported platform' }),
+    error: 'Unsupported platform',
   }),
 });
 
@@ -117,7 +117,7 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
     

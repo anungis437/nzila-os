@@ -25,7 +25,7 @@ const adminPkiSignaturesSignSchema = z.object({
   userName: z.string().min(1, 'userName is required'),
   userTitle: z.string().min(1, 'userTitle is required'),
   userEmail: z.string().email('Invalid email address'),
-  workflowId: z.string().uuid('Invalid workflowId'),
+  workflowId: z.guid('Invalid workflowId'),
 })
 
 export const POST = withRoleAuth('admin', async (request, context: BaseAuthContext) => {
@@ -47,7 +47,7 @@ export const POST = withRoleAuth('admin', async (request, context: BaseAuthConte
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors,
+        validation.error.issues,
       )
     }
 

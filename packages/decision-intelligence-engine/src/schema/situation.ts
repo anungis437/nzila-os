@@ -40,7 +40,7 @@ export type SituationTrend = z.infer<typeof situationTrendSchema>
 // ─── Situation Assessment ────────────────────────────────────────────────────
 
 export const situationAssessmentSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   orgId: z.string().min(1),
 
   category: situationCategorySchema,

@@ -13,7 +13,7 @@
   "dependencies": {
     "@nzila/zonga-economics": "workspace:*",
     "@nzila/zonga-rights": "workspace:*",
-    "zod": "^3.23.0"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "typescript": "^6.0.2",

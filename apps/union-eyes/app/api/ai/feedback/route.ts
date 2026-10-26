@@ -27,7 +27,7 @@ import { enforceAISafety } from '@nzila/policies';
 export const dynamic = 'force-dynamic';
 
 const feedbackPostSchema = z.object({
-  query_id: z.string().uuid('query_id must be a valid UUID'),
+  query_id: z.guid('query_id must be a valid UUID'),
   rating: z.enum(['good', 'bad']),
   comment: z.string().max(2000).optional(),
 });
@@ -60,7 +60,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid feedback request',
-        validation.error.errors,
+        validation.error.issues,
       );
     }
 

@@ -24,7 +24,7 @@ import { z } from 'zod'
 
 export const warehouseProductMetricSchema = z.object({
   /** UUID */
-  id: z.string().uuid(),
+  id: z.guid(),
   /** Nzila product (union-eyes, flow, zonga, etc.) */
   domain: z.enum(['union-eyes', 'flow', 'zonga', 'faircase', 'agrimo', 'mobility', 'cfo', 'platform']),
   /** Organization/tenant ID */
@@ -51,7 +51,7 @@ export type WarehouseProductMetric = z.infer<typeof warehouseProductMetricSchema
 // lh_deal_pipeline: augmented deal view including non-commercial agreements
 
 export const warehouseDealEntrySchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   /** Deal or agreement name */
   name: z.string(),
   /** Source system (deal-engine, manual, hubspot) */
@@ -120,7 +120,7 @@ export type WarehouseDealEntry = z.infer<typeof warehouseDealEntrySchema>
 // lh_funding_applications: tracks all funding applications in flight or planned
 
 export const warehouseFundingApplicationSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   /** Reference to a FundingProgram.id in the funding-radar catalog */
   programId: z.string(),
   programName: z.string(),
@@ -164,7 +164,7 @@ export type WarehouseFundingApplication = z.infer<typeof warehouseFundingApplica
 // lh_partner_map: strategic partners, sponsors, resellers, research orgs
 
 export const warehousePartnerSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   name: z.string(),
   /** Partner type */
   partnerType: z.enum([
@@ -221,7 +221,7 @@ export type WarehousePartner = z.infer<typeof warehousePartnerSchema>
 // lh_data_source_syncs: metadata catalog — tracks what was ingested and when
 
 export const warehouseDataSourceSyncSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   /** Reference to DataSourceDescriptor.id in the catalog */
   sourceId: z.string(),
   sourceName: z.string(),
@@ -256,7 +256,7 @@ export type WarehouseDataSourceSync = z.infer<typeof warehouseDataSourceSyncSche
 // lh_public_data_documents: document index for public data ingested
 
 export const warehousePublicDataDocSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   /** Source the document came from */
   sourceId: z.string(),
   sourceName: z.string(),

@@ -39,7 +39,7 @@ export const POST = withApi(
       proposedBy: z.string().optional(), // ignored: the proposer is always the session user
       votingDeadline: z.string().optional(),
       classATotalVotes: z.number().int().optional(),
-      matterDetails: z.record(z.unknown()).optional(),
+      matterDetails: z.record(z.string(), z.unknown()).optional(),
     }),
   },
   async ({ body, userId, organizationId }) => {

@@ -6,12 +6,12 @@ import { employerExecutionComplianceEvents, employerPayrollRuns, employerRemitta
 import { and, desc, eq } from "drizzle-orm";
 
 const createSchema = z.object({
-  payrollRunId: z.string().uuid().optional(),
-  remittanceRunId: z.string().uuid().optional(),
+  payrollRunId: z.guid().optional(),
+  remittanceRunId: z.guid().optional(),
   eventCode: z.string(),
   severity: z.enum(["info", "warning", "error", "critical"]).default("warning"),
   summary: z.string(),
-  details: z.record(z.unknown()).default({}),
+  details: z.record(z.string(), z.unknown()).default({}),
   blocking: z.enum(["yes", "no"]).default("no"),
 });
 

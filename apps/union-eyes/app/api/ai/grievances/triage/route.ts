@@ -21,7 +21,7 @@ import { enforceAISafety } from '@nzila/policies';
 import { operationAuditResponse } from '@/lib/audit/operation-audit';
 
 const triageSchema = z.object({
-  grievanceId: z.string().uuid(),
+  grievanceId: z.guid(),
 });
 
 export const POST = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {

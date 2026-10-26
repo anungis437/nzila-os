@@ -62,9 +62,9 @@ const createSourceSchema = z.object({
   robotsNotes: z.string().max(2000).optional(),
   termsUrl: z.string().url().optional(),
   redistributionNotes: z.string().max(2000).optional(),
-  provenanceRules: z.record(z.unknown()).optional(),
+  provenanceRules: z.record(z.string(), z.unknown()).optional(),
   adapterKey: z.string().max(100).optional(),
-  config: z.record(z.unknown()).optional(),
+  config: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const POST = withApi(

@@ -18,7 +18,7 @@ export const UsageRecordSchema = z.object({
   quantity: z.number().nonnegative(),
   unit: z.string().min(1),
   timestamp: z.string().datetime(),
-  metadata: z.record(z.string()).optional(),
+  metadata: z.record(z.string(), z.string()).optional(),
 });
 
 export type UsageRecord = z.infer<typeof UsageRecordSchema>;

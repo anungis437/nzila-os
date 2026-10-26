@@ -15,11 +15,11 @@ import { createLogger } from '@nzila/os-core'
 const logger = createLogger('api.audit.events')
 
 const QuerySchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   actorId: z.string().min(1).optional(),
   action: z.string().min(1).max(100).optional(),
   targetType: z.string().min(1).max(100).optional(),
-  targetId: z.string().uuid().optional(),
+  targetId: z.guid().optional(),
   startTime: z.coerce.date().optional(),
   endTime: z.coerce.date().optional(),
   limit: z.coerce.number().int().min(1).max(200).optional(),

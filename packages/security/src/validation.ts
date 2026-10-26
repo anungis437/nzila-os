@@ -47,7 +47,7 @@ export function strictValidate<T>(schema: ZodType<T>, input: unknown): T {
 
 // ── Common reusable schemas ─────────────────────────────────
 
-export const UUIDSchema = z.string().uuid();
+export const UUIDSchema = z.guid();
 
 export const OrgIdSchema = z.string().min(1).max(128);
 

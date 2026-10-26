@@ -48,7 +48,7 @@ const recordSchema = z.object({
   description: z.string().min(1),
   grievant_name: z.string().optional(),
   grievant_email: z.string().email().optional(),
-  organization_id: z.string().uuid(),
+  organization_id: z.guid(),
   incident_date: z.string().optional(),
   filed_date: z.string().optional(),
   assigned_to: z.string().optional(),

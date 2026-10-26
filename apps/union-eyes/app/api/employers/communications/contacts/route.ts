@@ -24,7 +24,7 @@ import { eq, desc, and } from 'drizzle-orm'
 // ── Validation ──────────────────────────────────────────────────────────────
 
 const createContactSchema = z.object({
-  employerId: z.string().uuid(),
+  employerId: z.guid(),
   name: z.string().min(1).max(200),
   role: z.enum(['main', 'hr', 'labour_relations', 'legal', 'supervisor', 'other']),
   title: z.string().max(200).optional(),

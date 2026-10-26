@@ -49,7 +49,7 @@ import { useToast } from "@/components/ui/use-toast";
 const incidentSchema = z.object({
   claimType: z.string().min(1, "Claim type is required"),
   incidentDate: z.date({
-    required_error: "Incident date is required",
+    error: "Incident date is required",
   }),
   location: z.string().min(1, "Location is required"),
   description: z.string().min(20, "Description must be at least 20 characters"),

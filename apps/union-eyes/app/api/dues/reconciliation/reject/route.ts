@@ -15,7 +15,7 @@ import { eq, and } from 'drizzle-orm';
 export const dynamic = 'force-dynamic';
 
 const schema = z.object({
-  remittanceId: z.string().uuid(),
+  remittanceId: z.guid(),
   reason: z.string().min(1).max(500),
 });
 

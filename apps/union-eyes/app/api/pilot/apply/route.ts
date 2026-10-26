@@ -76,7 +76,7 @@ const pilotApplicationBodySchema = z.object({
   // assertion (`responses.organizationId`, if present, is a claim from this
   // unauthenticated submitter — see getPilotClaimedOrganizationId's doc
   // comment in lib/pilot/pilot-ownership.ts).
-  responses: z.record(z.unknown()).optional(),
+  responses: z.record(z.string(), z.unknown()).optional(),
   assessment: z.object({ score: z.union([z.number(), z.string()]).optional() }).passthrough().optional(),
 });
 

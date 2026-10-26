@@ -15,7 +15,7 @@ import { eq, and } from 'drizzle-orm';
 import { z } from 'zod';
 
 const castVoteSchema = z.object({
-  optionId: z.string().uuid(),
+  optionId: z.guid(),
   isAnonymous: z.boolean().default(true),
 });
 

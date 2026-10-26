@@ -20,7 +20,7 @@ import { logger } from '@/lib/logger';
 export const runtime = 'nodejs';
 
 const previewSchema = z.object({
-  organizationId: z.string().uuid(),
+  organizationId: z.guid(),
   frequency: z.enum(['monthly', 'bi_weekly', 'weekly', 'quarterly', 'annual']),
   periodStart: z.string().optional(),
   periodEnd: z.string().optional(),
@@ -51,7 +51,7 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
 

@@ -17,7 +17,7 @@ export const sendNotificationInputSchema = z.object({
   priority: z.enum(['low', 'normal', 'high', 'urgent']).default('normal'),
   category: z.string().optional(),
   actionUrl: z.string().url().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type SendNotificationInput = z.infer<typeof sendNotificationInputSchema>;

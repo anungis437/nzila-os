@@ -17,10 +17,10 @@ import {
 } from '@/lib/api/standardized-responses';
 
 const signatureSchema = z.object({
-  signerId: z.string().uuid('Invalid signerId'),
+  signerId: z.guid('Invalid signerId'),
   signatureImageUrl: z.string().url('Invalid signature image URL'),
   signatureType: z.enum(['electronic', 'digital', 'wet'], { 
-    errorMap: () => ({ message: 'Invalid signature type' }) 
+    error: 'Invalid signature type' 
   }),
   geolocation: z.object({
     latitude: z.number().min(-90).max(90),
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
 

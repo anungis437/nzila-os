@@ -225,8 +225,8 @@ export class RequestValidator {
   static formatZodErrors(error: ZodError): Record<string, string[]> {
     const errors: Record<string, string[]> = {};
 
-    error.errors.forEach(err => {
-      const path = err.path.join('.');
+    error.issues.forEach((err) => {
+      const path = err.path.map(String).join('.');
       const message = err.message;
 
       if (!errors[path]) {
@@ -303,7 +303,7 @@ export const createValidator = {
   /**
    * UUID validation
    */
-  uuid: () => z.string().uuid('Invalid UUID format'),
+  uuid: () => z.guid('Invalid UUID format'),
 
   /**
    * URL validation
@@ -345,8 +345,8 @@ export const createValidator = {
    * Pagination parameters
    */
   pagination: () => z.object({
-    page: z.coerce.number().int().positive().default(1).optional(),
-    limit: z.coerce.number().int().min(1).max(100).default(10).optional(),
+    page: z.coerce.number().int().positive().optional(),
+    limit: z.coerce.number().int().min(1).max(100).optional(),
     sort: z.string().regex(/^[a-zA-Z_]+:(asc|desc)$/, 'Invalid sort format').optional(),
   }),
 

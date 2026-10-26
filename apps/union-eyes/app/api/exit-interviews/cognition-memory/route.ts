@@ -35,13 +35,13 @@ const SaveMemorySchema = z.object({
   ]),
   title: z.string().min(1).max(200),
   contextSummary: z.string().max(2000).optional(),
-  payload: z.record(z.unknown()).optional(),
+  payload: z.record(z.string(), z.unknown()).optional(),
   resilienceScoreAtCapture: z.number().int().min(0).max(100).optional(),
   tags: z.array(z.string()).optional(),
   keyInsights: z.array(z.string()).optional(),
   sessionId: z.string().optional(),
   /** Archive an existing entry by ID */
-  archiveId: z.string().uuid().optional(),
+  archiveId: z.guid().optional(),
 });
 
 export const GET = withApi(

@@ -26,7 +26,7 @@ export const dynamic = 'force-dynamic';
 
 const summarizeSchema = z.object({
   content: z.string().min(1).max(50_000).optional(),
-  document_id: z.string().uuid().optional(),
+  document_id: z.guid().optional(),
   type: z.enum(['brief', 'detailed']).default('brief'),
   max_length: z.number().int().min(50).max(2000).default(300),
 }).refine(
@@ -68,7 +68,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid summarize request',
-        validation.error.errors,
+        validation.error.issues,
       );
     }
 

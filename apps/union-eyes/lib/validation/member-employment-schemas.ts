@@ -12,6 +12,7 @@
  */
 
 import { z } from "zod";
+import { partialWithoutDefaults } from './partial-without-defaults';
 
 // =============================================================================
 // ENUM SCHEMAS
@@ -77,16 +78,16 @@ export const leaveTypeSchema = z.enum([
 
 export const createMemberEmploymentSchema = z.object({
   // Required fields
-  organizationId: z.string().uuid(),
-  memberId: z.string().uuid(),
+  organizationId: z.guid(),
+  memberId: z.guid(),
   hireDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Must be valid date (YYYY-MM-DD)"),
   seniorityDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Must be valid date (YYYY-MM-DD)"),
   jobTitle: z.string().min(1, "Job title is required").max(255),
   
   // Employment context
-  employerId: z.string().uuid().optional(),
-  worksiteId: z.string().uuid().optional(),
-  bargainingUnitId: z.string().uuid().optional(),
+  employerId: z.guid().optional(),
+  worksiteId: z.guid().optional(),
+  bargainingUnitId: z.guid().optional(),
   
   // Status & Type
   employmentStatus: employmentStatusSchema.default("active"),
@@ -125,7 +126,7 @@ export const createMemberEmploymentSchema = z.object({
   
   // Supervisor
   supervisorName: z.string().max(255).optional(),
-  supervisorId: z.string().uuid().optional(),
+  supervisorId: z.guid().optional(),
   
   // Probation
   isProbationary: z.boolean().default(false),
@@ -137,7 +138,7 @@ export const createMemberEmploymentSchema = z.object({
   randExempt: z.boolean().default(false),
   
   // Custom fields
-  customFields: z.record(z.unknown()).optional(),
+  customFields: z.record(z.string(), z.unknown()).optional(),
   
   // Notes
   notes: z.string().optional(),
@@ -145,8 +146,8 @@ export const createMemberEmploymentSchema = z.object({
   updatedBy: z.string().max(255).optional(),
 });
 
-export const updateMemberEmploymentSchema = createMemberEmploymentSchema.partial().extend({
-  id: z.string().uuid(),
+export const updateMemberEmploymentSchema = partialWithoutDefaults(createMemberEmploymentSchema).extend({
+  id: z.guid(),
 });
 
 // =============================================================================
@@ -154,9 +155,9 @@ export const updateMemberEmploymentSchema = createMemberEmploymentSchema.partial
 // =============================================================================
 
 export const createEmploymentHistorySchema = z.object({
-  organizationId: z.string().uuid(),
-  memberId: z.string().uuid(),
-  memberEmploymentId: z.string().uuid().optional(),
+  organizationId: z.guid(),
+  memberId: z.guid(),
+  memberEmploymentId: z.guid().optional(),
   
   changeType: z.enum([
     "hire",
@@ -177,8 +178,8 @@ export const createEmploymentHistorySchema = z.object({
   
   effectiveDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   
-  previousValues: z.record(z.unknown()).optional(),
-  newValues: z.record(z.unknown()).optional(),
+  previousValues: z.record(z.string(), z.unknown()).optional(),
+  newValues: z.record(z.string(), z.unknown()).optional(),
   
   reason: z.string().optional(),
   notes: z.string().optional(),
@@ -190,9 +191,9 @@ export const createEmploymentHistorySchema = z.object({
 // =============================================================================
 
 export const createMemberLeaveSchema = z.object({
-  organizationId: z.string().uuid(),
-  memberId: z.string().uuid(),
-  memberEmploymentId: z.string().uuid().optional(),
+  organizationId: z.guid(),
+  memberId: z.guid(),
+  memberEmploymentId: z.guid().optional(),
   
   leaveType: leaveTypeSchema,
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -211,12 +212,12 @@ export const createMemberLeaveSchema = z.object({
   
   reason: z.string().optional(),
   notes: z.string().optional(),
-  documents: z.array(z.record(z.unknown())).optional(),
+  documents: z.array(z.record(z.string(), z.unknown())).optional(),
   createdBy: z.string().max(255).optional(),
 });
 
-export const updateMemberLeaveSchema = createMemberLeaveSchema.partial().extend({
-  id: z.string().uuid(),
+export const updateMemberLeaveSchema = partialWithoutDefaults(createMemberLeaveSchema).extend({
+  id: z.guid(),
 });
 
 // =============================================================================
@@ -224,8 +225,8 @@ export const updateMemberLeaveSchema = createMemberLeaveSchema.partial().extend(
 // =============================================================================
 
 export const createJobClassificationSchema = z.object({
-  organizationId: z.string().uuid(),
-  bargainingUnitId: z.string().uuid().optional(),
+  organizationId: z.guid(),
+  bargainingUnitId: z.guid().optional(),
   
   jobCode: z.string().min(1).max(100),
   jobTitle: z.string().min(1).max(255),
@@ -238,7 +239,7 @@ export const createJobClassificationSchema = z.object({
   standardRate: z.number().min(0).max(9999.99).optional(),
   
   description: z.string().optional(),
-  requirements: z.record(z.unknown()).optional(),
+  requirements: z.record(z.string(), z.unknown()).optional(),
   
   isActive: z.boolean().default(true),
   effectiveDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
@@ -246,8 +247,8 @@ export const createJobClassificationSchema = z.object({
   createdBy: z.string().max(255).optional(),
 });
 
-export const updateJobClassificationSchema = createJobClassificationSchema.partial().extend({
-  id: z.string().uuid(),
+export const updateJobClassificationSchema = partialWithoutDefaults(createJobClassificationSchema).extend({
+  id: z.guid(),
 });
 
 // =============================================================================
@@ -271,7 +272,7 @@ export const duesCalculationDataSchema = z.object({
  * Schema for bulk employment import
  */
 export const bulkEmploymentImportSchema = z.object({
-  organizationId: z.string().uuid(),
+  organizationId: z.guid(),
   employees: z.array(createMemberEmploymentSchema),
   validateOnly: z.boolean().default(false),
   skipDuplicates: z.boolean().default(true),

@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
 const createSchema = z.object({
   subject: z.string().trim().min(1).max(MAX_SUBJECT),
   body: z.string().trim().min(1).max(MAX_BODY),
-  clientRequestId: z.string().uuid().optional(),
+  clientRequestId: z.guid().optional(),
 });
 
 export const GET = withApi(

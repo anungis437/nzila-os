@@ -71,7 +71,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid search request',
-        validation.error.errors,
+        validation.error.issues,
       );
     }
 

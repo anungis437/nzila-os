@@ -13,7 +13,7 @@ import {
 
 const consentSchema = z.object({
   province: z.enum(['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'], {
-    errorMap: () => ({ message: 'Invalid province code' })
+    error: 'Invalid province code'
   }),
   consentType: z.string().min(1, 'Consent type is required'),
   consentGiven: z.boolean(),
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid consent data',
-        validation.error.errors
+        validation.error.issues
       );
     }
 

@@ -16,7 +16,7 @@ const updateIntegrationSchema = z.object({
   name: z.string().min(1).max(255).optional(),
   enabled: z.boolean().optional(),
   syncFrequency: z.string().max(50).optional(),
-  fieldMapping: z.record(z.unknown()).optional(),
+  fieldMapping: z.record(z.string(), z.unknown()).optional(),
   apiEndpoint: z.string().url().max(2000).optional(),
 });
 

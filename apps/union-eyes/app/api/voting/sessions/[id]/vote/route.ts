@@ -25,7 +25,7 @@ export const POST = withApi(
   {
     auth: { required: true, minRole: 'member' },
     body: z.object({
-      optionId: z.string().uuid(),
+      optionId: z.guid(),
       isAnonymous: z.boolean().optional().default(true),
     }),
     openapi: {

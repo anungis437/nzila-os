@@ -72,7 +72,7 @@ const emailTemplateSchema = z.object({
       id: z.string(),
       type: z.enum(["text", "heading", "image", "button", "divider", "html"]),
       content: z.string(),
-      styles: z.record(z.string()).optional(),
+      styles: z.record(z.string(), z.string()).optional(),
     })
   ),
 });

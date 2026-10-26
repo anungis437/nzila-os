@@ -33,7 +33,7 @@ export type ContinuityScale = z.infer<typeof continuityScale>
 // ─── Continuity Risk Signal ───────────────────────────────────────────────────
 
 export const continuityRiskSignalSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   orgId: z.string().min(1),
   category: continuityRiskCategorySchema,
   description: z.string().min(1),
@@ -139,7 +139,7 @@ export type ContinuityAssessmentInput = z.infer<typeof continuityAssessmentInput
 // ─── Continuity Drift Event ───────────────────────────────────────────────────
 
 export const continuityDriftEventSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   orgId: z.string().min(1),
   driftType: continuityRiskCategorySchema,
   description: z.string().min(1),

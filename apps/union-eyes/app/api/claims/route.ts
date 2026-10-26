@@ -99,7 +99,7 @@ export const POST = withApi(
   async ({ body, organizationId, userId }) => {
     const parsed = claimCreateSchema.safeParse(body ?? {})
     if (!parsed.success) {
-      throw ApiError.badRequest(parsed.error.errors.map((e) => e.message).join('; '))
+      throw ApiError.badRequest(parsed.error.issues.map((e) => e.message).join('; '))
     }
     const validatedBody = parsed.data
 

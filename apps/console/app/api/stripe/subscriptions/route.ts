@@ -20,12 +20,12 @@ import { createLogger } from '@nzila/os-core'
 const logger = createLogger('stripe:subscriptions')
 
 const CreateSubscriptionSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   ventureId: z.string().optional(),
   customerId: z.string().min(1),
   priceId: z.string().min(1),
   trialDays: z.number().int().min(0).optional(),
-  metadata: z.record(z.string()).optional(),
+  metadata: z.record(z.string(), z.string()).optional(),
 })
 
 export async function POST(req: NextRequest): Promise<NextResponse> {

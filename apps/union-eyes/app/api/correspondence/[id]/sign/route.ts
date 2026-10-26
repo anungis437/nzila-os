@@ -11,7 +11,7 @@ import {
 } from "@/lib/services/correspondence-service";
 
 const signSchema = z.object({
-  signatureId: z.string().uuid(),
+  signatureId: z.guid(),
 });
 
 export const POST = withApi(

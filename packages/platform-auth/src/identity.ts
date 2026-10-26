@@ -28,7 +28,7 @@ export const authenticatedIdentitySchema = z.object({
   /** Org role from auth provider. */
   orgRole: z.string().optional(),
   /** Session claims. */
-  sessionClaims: z.record(z.unknown()).optional(),
+  sessionClaims: z.record(z.string(), z.unknown()).optional(),
   /** Whether this is a service account. */
   isService: z.boolean().default(false),
 })

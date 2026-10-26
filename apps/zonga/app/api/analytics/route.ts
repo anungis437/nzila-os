@@ -23,8 +23,8 @@ import { recordZongaPlaybackWatch } from '@/lib/pilot-metrics'
 
 const IngestSchema = z.object({
   type: z.enum(['play', 'skip', 'search', 'share', 'session']),
-  userId: z.string().uuid(),
-  data: z.record(z.unknown()),
+  userId: z.guid(),
+  data: z.record(z.string(), z.unknown()),
 })
 
 function parsePeriod(period: string): number {

@@ -23,7 +23,7 @@ import { withRequiredRole } from '@/lib/rbac/requireRole'
 const NotifySchema = z.object({
   event: z.enum(['lead_captured', 'onboarding_completed_no_upgrade']),
   email: z.string().email(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const POST = withRequiredRole(

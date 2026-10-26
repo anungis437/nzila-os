@@ -15,7 +15,7 @@ import { authenticateUser, requireOrgAccess } from '@/lib/api-guards'
 import { recordAuditEvent } from '@/lib/audit-db'
 
 const Schema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   priceId: z.string().min(1),
   customerId: z.string().optional(),
   ventureId: z.string().optional(),

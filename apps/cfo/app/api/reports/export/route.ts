@@ -13,7 +13,7 @@ import { z } from 'zod'
 import { logger } from '@/lib/logger'
 
 const ExportQuerySchema = z.object({
-  reportId: z.string().uuid().optional(),
+  reportId: z.guid().optional(),
   format: z.enum(['csv', 'pdf']).default('csv'),
 })
 

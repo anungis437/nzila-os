@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod'
+import { partialWithoutDefaults } from './partial-without-defaults'
 import {
   TradePartyRole,
   TradePartyStatus,
@@ -18,7 +19,7 @@ import {
 
 // ── Shared ──────────────────────────────────────────────────────────────────
 
-export const uuidSchema = z.string().uuid()
+export const uuidSchema = z.guid()
 
 export const paginationSchema = z.object({
   limit: z.number().int().min(1).max(100).default(20),
@@ -41,10 +42,10 @@ export const createPartySchema = z.object({
   contactPhone: z.string().max(30).nullable().optional(),
   companyName: z.string().min(1).max(200),
   country: z.string().length(3),
-  metadata: z.record(z.unknown()).optional().default({}),
+  metadata: z.record(z.string(), z.unknown()).optional().prefault({}),
 })
 
-export const updatePartySchema = createPartySchema.partial().extend({
+export const updatePartySchema = partialWithoutDefaults(createPartySchema).extend({
   id: uuidSchema,
   status: z
     .enum([TradePartyStatus.ACTIVE, TradePartyStatus.SUSPENDED, TradePartyStatus.ARCHIVED])
@@ -61,10 +62,10 @@ export const createListingSchema = z.object({
   currency: currencySchema,
   askingPrice: z.string().regex(/^\d+(\.\d{1,2})?$/),
   quantity: z.number().int().min(1).default(1),
-  metadata: z.record(z.unknown()).optional().default({}),
+  metadata: z.record(z.string(), z.unknown()).optional().prefault({}),
 })
 
-export const updateListingSchema = createListingSchema.partial().extend({
+export const updateListingSchema = partialWithoutDefaults(createListingSchema).extend({
   id: uuidSchema,
   status: z
     .enum([
@@ -95,7 +96,7 @@ export const createDealSchema = z.object({
   totalValue: z.string().regex(/^\d+(\.\d{1,2})?$/),
   currency: currencySchema,
   notes: z.string().max(5_000).nullable().optional(),
-  metadata: z.record(z.unknown()).optional().default({}),
+  metadata: z.record(z.string(), z.unknown()).optional().prefault({}),
 })
 
 export const transitionDealSchema = z.object({
@@ -111,14 +112,14 @@ export const transitionDealSchema = z.object({
     TradeDealStage.CLOSED,
     TradeDealStage.CANCELLED,
   ]),
-  metadata: z.record(z.unknown()).optional().default({}),
+  metadata: z.record(z.string(), z.unknown()).optional().prefault({}),
 })
 
 // ── Quote ───────────────────────────────────────────────────────────────────
 
 export const createQuoteSchema = z.object({
   dealId: uuidSchema,
-  terms: z.record(z.unknown()),
+  terms: z.record(z.string(), z.unknown()),
   unitPrice: z.string().regex(/^\d+(\.\d{1,2})?$/),
   quantity: z.number().int().min(1),
   currency: currencySchema,
@@ -135,14 +136,14 @@ export const transitionQuoteSchema = z.object({
     TradeQuoteStatus.EXPIRED,
     TradeQuoteStatus.REVISED,
   ]),
-  metadata: z.record(z.unknown()).optional().default({}),
+  metadata: z.record(z.string(), z.unknown()).optional().prefault({}),
 })
 
 // ── Financing ───────────────────────────────────────────────────────────────
 
 export const createFinancingSchema = z.object({
   dealId: uuidSchema,
-  terms: z.record(z.unknown()),
+  terms: z.record(z.string(), z.unknown()),
   provider: z.string().max(200).nullable().optional(),
 })
 
@@ -191,7 +192,7 @@ export const uploadDocumentSchema = z.object({
 export const createCommissionSchema = z.object({
   dealId: uuidSchema,
   partyId: uuidSchema,
-  policy: z.record(z.unknown()),
+  policy: z.record(z.string(), z.unknown()),
   currency: currencySchema,
 })
 

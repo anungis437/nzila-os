@@ -18,11 +18,11 @@ import {
 } from '@/lib/api/standardized-responses';
 
 const clausesCompareSchema = z.object({
-  clauseIds: z.array(z.string().uuid('Invalid clauseId')),
+  clauseIds: z.array(z.guid('Invalid clauseId')),
   analysisType: z.enum(['all', 'similarities', 'differences', 'best_practices']).optional().default("all"),
   save: z.boolean().optional().default(false),
   comparisonName: z.string().optional(),
-  organizationId: z.string().uuid('Invalid organizationId').optional(),
+  organizationId: z.guid('Invalid organizationId').optional(),
 });
 
 export const POST = withRoleAuth('member', async (request, context: BaseAuthContext) => {
@@ -42,7 +42,7 @@ export const POST = withRoleAuth('member', async (request, context: BaseAuthCont
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
     

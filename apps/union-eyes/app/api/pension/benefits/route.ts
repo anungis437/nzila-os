@@ -9,7 +9,7 @@ import { z } from 'zod';
 // A member submits a claim for themselves. The state of a claim (approved, denied, paid) is decided by the plan's
 // trustees, which is not implemented, so a submission is always filed as pending and cannot carry a decision.
 const createBenefitClaimSchema = z.object({
-  memberId: z.string().uuid(),
+  memberId: z.guid(),
   memberName: z.string().max(255),
   claimType: z.string().max(100),
   amount: z.string(),

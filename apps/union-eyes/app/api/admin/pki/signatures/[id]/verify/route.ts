@@ -33,7 +33,7 @@ export const POST = withRoleAuth('admin', async (request, context) => {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors,
+        validation.error.issues,
       )
     }
 

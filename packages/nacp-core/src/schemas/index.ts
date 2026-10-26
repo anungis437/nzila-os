@@ -22,7 +22,7 @@ const enumValues = <T extends Record<string, string>>(e: T) =>
 export const CreateExamSchema = z.object({
   title: z.string().min(1).max(255),
   code: z.string().min(1).max(50),
-  subjectId: z.string().uuid(),
+  subjectId: z.guid(),
   level: z.enum(enumValues(SubjectLevel)),
   year: z.number().int().min(2000).max(2100),
   durationMinutes: z.number().int().min(1).max(720),
@@ -35,8 +35,8 @@ export type CreateExamInput = z.infer<typeof CreateExamSchema>
 // ── Exam Session ────────────────────────────────────────────────────────────
 
 export const CreateExamSessionSchema = z.object({
-  examId: z.string().uuid(),
-  centerId: z.string().uuid(),
+  examId: z.guid(),
+  centerId: z.guid(),
   scheduledAt: z.string().datetime(),
 })
 
@@ -73,7 +73,7 @@ export const CreateCandidateSchema = z.object({
   lastName: z.string().min(1).max(255),
   dateOfBirth: z.string().date(),
   gender: z.enum(['male', 'female']),
-  centerId: z.string().uuid(),
+  centerId: z.guid(),
 })
 
 export type CreateCandidateInput = z.infer<typeof CreateCandidateSchema>
@@ -81,9 +81,9 @@ export type CreateCandidateInput = z.infer<typeof CreateCandidateSchema>
 // ── Submission ──────────────────────────────────────────────────────────────
 
 export const RecordSubmissionSchema = z.object({
-  sessionId: z.string().uuid(),
-  candidateId: z.string().uuid(),
-  examId: z.string().uuid(),
+  sessionId: z.guid(),
+  candidateId: z.guid(),
+  examId: z.guid(),
 })
 
 export type RecordSubmissionInput = z.infer<typeof RecordSubmissionSchema>
@@ -103,8 +103,8 @@ export type ModerateSubmissionInput = z.infer<typeof ModerateSubmissionSchema>
 // ── Org Context ─────────────────────────────────────────────────────────────
 
 export const NacpOrgContextSchema = z.object({
-  orgId: z.string().uuid(),
-  actorId: z.string().uuid(),
+  orgId: z.guid(),
+  actorId: z.guid(),
   role: z.enum(enumValues(NacpRole)),
   permissions: z.array(z.string()),
   requestId: z.string().min(1),

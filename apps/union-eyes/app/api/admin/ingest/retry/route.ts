@@ -19,8 +19,8 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 const retryBodySchema = z.object({
-  batch_id: z.string().uuid(),
-  record_ids: z.array(z.string().uuid()).min(1).max(500).optional(),
+  batch_id: z.guid(),
+  record_ids: z.array(z.guid()).min(1).max(500).optional(),
 });
 
 export const POST = withApi(

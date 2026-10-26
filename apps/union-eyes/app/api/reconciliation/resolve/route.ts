@@ -8,7 +8,7 @@ import { resolveException } from '@/services/platform-economics';
 export const dynamic = 'force-dynamic';
 
 const resolveSchema = z.object({
-  exceptionId: z.string().uuid(),
+  exceptionId: z.guid(),
   resolution: z.enum(['resolved', 'written_off']),
   notes: z.string().max(2000),
 });

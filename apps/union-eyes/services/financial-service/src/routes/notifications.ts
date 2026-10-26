@@ -25,7 +25,7 @@ const getOrganizationIdFromHeaders = (req: Request): string | undefined =>
 // ============================================================================
 
 const QueueNotificationSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.guid(),
   type: z.enum([
     'payment_confirmation',
     'payment_failed',
@@ -40,12 +40,12 @@ const QueueNotificationSchema = z.object({
   ]),
   channels: z.array(z.enum(['email', 'sms', 'push', 'in_app'])).min(1),
   priority: z.enum(['low', 'normal', 'high', 'urgent']).optional(),
-  data: z.record(z.any()),
+  data: z.record(z.string(), z.any()),
   scheduledFor: z.string().datetime().optional(),
 });
 
 const UpdatePreferencesSchema = z.object({
-  preferences: z.record(z.boolean()),
+  preferences: z.record(z.string(), z.boolean()),
 });
 
 // ============================================================================

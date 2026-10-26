@@ -20,7 +20,7 @@ import { logger } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 const schema = z.object({
-  paymentId: z.string().uuid(),
+  paymentId: z.guid(),
   amount: z.number().positive(),
   notes: z.string().max(500).optional(),
 });

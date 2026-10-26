@@ -145,8 +145,8 @@ return standardErrorResponse(
 
 
 const bargainingNotesSchema = z.object({
-  organizationId: z.string().uuid('Invalid organizationId').optional(),
-  cbaId: z.string().uuid().optional(),
+  organizationId: z.guid('Invalid organizationId').optional(),
+  cbaId: z.guid().optional(),
   sessionDate: z.coerce.date(),
   sessionType: z.string().max(100),
   sessionNumber: z.number().int().optional(),
@@ -157,8 +157,8 @@ const bargainingNotesSchema = z.object({
     role: z.string(),
     organization: z.string(),
   })).optional(),
-  relatedClauseIds: z.array(z.string().uuid()).optional(),
-  relatedDecisionIds: z.array(z.string().uuid()).optional(),
+  relatedClauseIds: z.array(z.guid()).optional(),
+  relatedDecisionIds: z.array(z.guid()).optional(),
   tags: z.array(z.string()).optional(),
   confidentialityLevel: z.enum(['public', 'internal', 'restricted', 'confidential']).optional(),
 });
@@ -177,7 +177,7 @@ export const POST = withRoleAuth('steward', async (request, context) => {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
 

@@ -7,7 +7,7 @@ import { isPensionAdministrator, ownPensionIdentities, PENSION_ADMIN_ROLES } fro
 import { z } from 'zod';
 
 const createContributionSchema = z.object({
-  memberId: z.string().uuid(),
+  memberId: z.guid(),
   memberName: z.string().max(255),
   period: z.string().max(20),
   amount: z.string(),

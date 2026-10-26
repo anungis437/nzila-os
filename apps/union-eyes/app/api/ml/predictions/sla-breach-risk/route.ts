@@ -9,7 +9,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 const bodySchema = z.object({
-  caseId: z.string().uuid(),
+  caseId: z.guid(),
   features: z.object({
     hoursRemaining: z.number(),
     transitionCount: z.number().int().nonnegative(),

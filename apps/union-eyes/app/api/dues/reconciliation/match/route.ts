@@ -15,8 +15,8 @@ import { eq, and } from 'drizzle-orm';
 export const dynamic = 'force-dynamic';
 
 const schema = z.object({
-  remittanceId: z.string().uuid(),
-  memberId: z.string().uuid(),
+  remittanceId: z.guid(),
+  memberId: z.guid(),
 });
 
 export const POST = withApi(

@@ -22,9 +22,9 @@ const createSchema = z.object({
     .optional(),
   priority: z.enum(["low", "normal", "high", "urgent"]).optional(),
   assignedSignerId: z.string().optional(),
-  templateId: z.string().uuid().optional(),
-  templateVariables: z.record(z.string()).optional(),
-  grievanceId: z.string().uuid().optional(),
+  templateId: z.guid().optional(),
+  templateVariables: z.record(z.string(), z.string()).optional(),
+  grievanceId: z.guid().optional(),
   recipients: z
     .array(
       z.object({

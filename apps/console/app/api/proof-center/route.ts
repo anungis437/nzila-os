@@ -23,7 +23,7 @@ const logger = createLogger('api:proof-center')
 const PostBodySchema = z.object({
   /** When true, include RFP answers alongside the pack */
   includeRfp: z.boolean().default(false),
-}).default({})
+}).prefault({})
 
 export async function GET(_req: NextRequest) {
   try {

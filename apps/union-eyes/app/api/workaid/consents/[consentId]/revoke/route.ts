@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic'
 export async function POST(_request: Request, { params }: { params: Promise<{ consentId: string }> }) {
   try {
     const { consentId } = await params
-    if (!z.string().uuid().safeParse(consentId).success) return NextResponse.json({ error: 'VALIDATION_ERROR', message: 'Invalid consent id.' }, { status: 400 })
+    if (!z.guid().safeParse(consentId).success) return NextResponse.json({ error: 'VALIDATION_ERROR', message: 'Invalid consent id.' }, { status: 400 })
     const actor = await getCaseActor()
     const result = await withRLSContext(async (tx) => revokeWorkAidConsent(drizzleExecutor(tx), kernelDeps, { organizationId: actor.organizationId, revokerUserId: actor.userId, consentId }))
     return NextResponse.json({ success: true, ...result })

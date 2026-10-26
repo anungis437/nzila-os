@@ -20,7 +20,7 @@
   "dependencies": {
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-observability": "workspace:*",
-    "zod": "^3.23.0"
+    "zod": "^4.6.7"
   },
   "optionalDependencies": {
     "@fastify/otel": "0.18.0",

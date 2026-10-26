@@ -7,7 +7,7 @@ import { generateRemittancePackage } from "../services/employer-execution";
 const router = Router();
 
 const createSchema = z.object({
-  payrollRunId: z.string().uuid(),
+  payrollRunId: z.guid(),
   periodEnd: z.string(),
 });
 
@@ -98,7 +98,7 @@ router.post("/", async (req: Request, res: Response) => {
     return res.status(201).json({ success: true, data: { remittanceRunId, package: pkg } });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ success: false, error: "Validation failed", details: error.errors });
+      return res.status(400).json({ success: false, error: "Validation failed", details: error.issues });
     }
     return res.status(500).json({ success: false, error: error instanceof Error ? error.message : "Unexpected failure" });
   }

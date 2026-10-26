@@ -23,7 +23,7 @@ import {
 
 /* ── Primitives ───────────────────────────────────────────── */
 
-export const uuidSchema = z.string().uuid()
+export const uuidSchema = z.guid()
 
 export const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -107,7 +107,7 @@ export const createComplianceEventSchema = z.object({
   caseId: uuidSchema,
   eventType: z.enum(COMPLIANCE_EVENT_TYPES),
   severity: z.enum(SEVERITY_LEVELS),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).prefault({}),
 })
 
 /* ── Communication ────────────────────────────────────────── */

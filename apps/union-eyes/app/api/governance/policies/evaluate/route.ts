@@ -12,9 +12,9 @@ const evaluateSchema = z.object({
   ruleType: z.string(),
   category: z.string(),
   subjectType: z.enum(['member', 'user', 'organization', 'action']),
-  subjectId: z.string().uuid(),
-  inputData: z.record(z.any()),
-  context: z.record(z.any()).optional(),
+  subjectId: z.guid(),
+  inputData: z.record(z.string(), z.any()),
+  context: z.record(z.string(), z.any()).optional(),
 });
 
 /**

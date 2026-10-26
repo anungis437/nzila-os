@@ -13,7 +13,7 @@ export const POST = withApi(
       description: z.string().max(1000).optional(),
       metricType: z.string().min(1).max(100),
       dataSource: z.enum(['claims', 'members', 'financial', 'custom_query']),
-      calculation: z.record(z.unknown()).default({ aggregation: 'sum' }),
+      calculation: z.record(z.string(), z.unknown()).default({ aggregation: 'sum' }),
       visualizationType: z.enum(['line', 'bar', 'pie', 'gauge', 'number']).default('gauge'),
       targetValue: z.number().optional(),
       warningThreshold: z.number().optional(),

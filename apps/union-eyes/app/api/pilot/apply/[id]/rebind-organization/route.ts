@@ -23,7 +23,7 @@ import { rebindPilotOrganization } from '@/lib/pilot/pilot-ownership';
 export const dynamic = 'force-dynamic';
 
 const rebindOrganizationBodySchema = z.object({
-  organizationId: z.string().uuid(),
+  organizationId: z.guid(),
   reason: z.string().trim().min(10, 'A reason of at least 10 characters is required to rebind a verified organization'),
 });
 

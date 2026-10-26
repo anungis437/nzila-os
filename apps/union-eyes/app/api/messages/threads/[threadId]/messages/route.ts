@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
 
 const postSchema = z.object({
   body: z.string().trim().min(1).max(MAX_BODY),
-  clientRequestId: z.string().uuid().optional(),
+  clientRequestId: z.guid().optional(),
 });
 
 export const GET = withApi(

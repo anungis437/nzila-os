@@ -29,7 +29,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 const bodySchema = z.object({
-  workbookId: z.string().uuid('Invalid workbook ID'),
+  workbookId: z.guid('Invalid workbook ID'),
 });
 
 const SELF_GUIDED_TIER_ID = 'workbook_self_guided' as const;

@@ -12,7 +12,7 @@ const LEGACY_TARGET_ID_COLUMN = "entityId" as const;
 
 const transitionSchema = z.object({
   action: z.enum(["approve", "seal"]),
-  acknowledgedEventIds: z.array(z.string().uuid()).default([]),
+  acknowledgedEventIds: z.array(z.guid()).default([]),
 });
 
 export const GET = withApi(

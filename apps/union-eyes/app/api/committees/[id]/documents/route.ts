@@ -17,8 +17,8 @@ const linkSchema = z.object({
   fileUrl: z.string().url().optional(),
   fileType: z.string().optional(),
   fileSize: z.number().optional(),
-  documentId: z.string().uuid().optional(),
-  meetingId: z.string().uuid().optional(),
+  documentId: z.guid().optional(),
+  meetingId: z.guid().optional(),
   category: z.string().optional(),
 });
 

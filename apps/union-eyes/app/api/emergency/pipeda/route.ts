@@ -22,7 +22,7 @@ import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-respons
  */
 
 const emergencyPipedaSchema = z.object({
-  memberId: z.string().uuid('Invalid memberId'),
+  memberId: z.guid('Invalid memberId'),
   breachDate: z.string().datetime().optional(),
   affectedDataTypes: z.array(z.string()).optional(),
   // Informational only. A count never decides reportability.
@@ -62,7 +62,7 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
 

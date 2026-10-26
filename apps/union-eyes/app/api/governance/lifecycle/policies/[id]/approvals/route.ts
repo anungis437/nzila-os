@@ -44,7 +44,7 @@ const bodySchema = z.discriminatedUnion('op', [
   }),
   z.object({
     op: z.literal('record_action'),
-    chainId: z.string().uuid(),
+    chainId: z.guid(),
     action: z.enum(['approved', 'rejected', 'delegated', 'withdrawn']),
     rationale: z.string().max(4000).optional(),
     delegatedToUserId: z.string().optional(),

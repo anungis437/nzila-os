@@ -195,7 +195,7 @@ export const GET = withRoleAuth('officer', async (request, _context) => {
 
 
 const mlPredictionsChurnRiskSchema = z.object({
-  memberId: z.string().uuid('Invalid memberId'),
+  memberId: z.guid('Invalid memberId'),
 });
 
 export const POST = withRoleAuth('officer', async (request, _context) => {
@@ -229,7 +229,7 @@ export const POST = withRoleAuth('officer', async (request, _context) => {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
     

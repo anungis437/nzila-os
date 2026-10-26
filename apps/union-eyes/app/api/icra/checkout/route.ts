@@ -34,7 +34,7 @@ export const runtime = 'nodejs';
 // ── Validation ──────────────────────────────────────────────────────────────
 
 const bodySchema = z.object({
-  assessmentId: z.string().uuid('Invalid assessment ID'),
+  assessmentId: z.guid('Invalid assessment ID'),
   tierId: z.enum(['executive_continuity_brief', 'institutional_continuity_diagnostic']),
   locale: z.enum(['en-CA', 'fr-CA']).default('en-CA'),
 });

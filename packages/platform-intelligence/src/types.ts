@@ -13,13 +13,13 @@ export interface AggregatedEvent {
 }
 
 export const aggregatedEventSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   source: z.string(),
   eventType: z.string(),
   timestamp: z.string().datetime(),
   app: z.string(),
   orgId: z.string(),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
 })
 
 // ── Cross-App Insights ──────────────────────────────────
@@ -45,14 +45,14 @@ export interface CrossAppInsight {
 }
 
 export const crossAppInsightSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   timestamp: z.string().datetime(),
   category: z.enum(['performance', 'usage', 'anomaly', 'compliance', 'cost']),
   severity: z.enum(['info', 'warning', 'critical']),
   apps: z.array(z.string()),
   title: z.string(),
   description: z.string(),
-  dataPoints: z.record(z.unknown()),
+  dataPoints: z.record(z.string(), z.unknown()),
   recommendations: z.array(z.string()),
 })
 
@@ -78,7 +78,7 @@ export interface OperationalSignal {
 }
 
 export const operationalSignalSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   timestamp: z.string().datetime(),
   signalType: z.enum([
     'spike',

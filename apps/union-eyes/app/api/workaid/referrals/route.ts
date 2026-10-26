@@ -17,14 +17,14 @@ import { COUNSEL_SIDE_NOTICE, parseBody, workAidErrorResponse } from '@/lib/work
 export const dynamic = 'force-dynamic'
 
 const referSchema = z.object({
-  matterId: z.string().uuid(),
+  matterId: z.guid(),
   categories: z.array(z.string().min(1).max(64)).min(1).max(8).optional(),
 })
 
 export async function GET(request: Request) {
   try {
     const caseId = new URL(request.url).searchParams.get('caseId')
-    if (!z.string().uuid().safeParse(caseId).success) return NextResponse.json({ error: 'VALIDATION_ERROR', message: 'caseId must be a uuid.' }, { status: 400 })
+    if (!z.guid().safeParse(caseId).success) return NextResponse.json({ error: 'VALIDATION_ERROR', message: 'caseId must be a uuid.' }, { status: 400 })
     const actor = await getCaseActor()
     const referable = await withRLSContext(async (tx) =>
       listReferableWorkAidConsents(drizzleExecutor(tx), kernelDeps, { organizationId: actor.organizationId, actorUserId: actor.userId, caseId: caseId as string }),

@@ -162,7 +162,7 @@ return NextResponse.json(
 
 const socialMediaAnalyticsSchema = z.object({
   platform: z.unknown().optional(),
-  campaign_id: z.string().uuid('Invalid campaign_id'),
+  campaign_id: z.guid('Invalid campaign_id'),
   start_date: z.string().datetime().optional(),
   end_date: z.string().datetime().optional(),
   limit: z.number().optional().default(50),
@@ -200,7 +200,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
     

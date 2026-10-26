@@ -25,13 +25,13 @@ import { z } from 'zod'
 const logger = createLogger('ai:actions:propose')
 
 const ProposeBodySchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   appKey: z.string().min(1).max(60),
   profileKey: z.string().min(1).max(120),
   actionType: z.string().min(1).max(120),
-  proposalJson: z.record(z.unknown()),
+  proposalJson: z.record(z.string(), z.unknown()),
   relatedDomainType: z.string().max(60).optional(),
-  relatedDomainId: z.string().uuid().optional(),
+  relatedDomainId: z.guid().optional(),
   evidencePackEligible: z.boolean().optional(),
 })
 

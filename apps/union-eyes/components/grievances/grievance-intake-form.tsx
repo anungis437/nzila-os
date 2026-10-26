@@ -82,7 +82,7 @@ const employerSchema = z.object({
 
 const issueSchema = z.object({
   grievanceType: z.string().min(1, "Grievance type is required"),
-  issueDate: z.date({ required_error: "Issue date is required" }),
+  issueDate: z.date({ error: "Issue date is required" }),
   urgency: z.string().min(1, "Urgency level is required"),
   cbaArticle: z.string().optional().default(""),
   cbaSection: z.string().optional().default(""),

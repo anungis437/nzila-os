@@ -19,7 +19,7 @@ export const orgScopeSchema = z.object({
   enabledModules: z.array(z.string()).default([]),
   jurisdiction: z.string().optional(),
   createdAt: z.string().datetime(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 export type OrgScope = z.infer<typeof orgScopeSchema>
 

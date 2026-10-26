@@ -17,7 +17,7 @@ import {
 } from "@/lib/api/standardized-responses";
 
 const requestSchema = z.object({
-  employerId: z.string().uuid(),
+  employerId: z.guid(),
   jobTitle: z.string().min(2).max(255),
   requiredSkills: z.array(z.string()).optional(),
   requestedWorkers: z.number().int().min(1).default(1),

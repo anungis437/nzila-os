@@ -34,7 +34,7 @@ const caseCreateSchema = z.object({
   priority: z.enum(["low", "medium", "high", "critical"]).optional().default("medium"),
   isAnonymous: z.boolean().optional().default(false),
   claimAmount: z.union([z.string(), z.number()]).optional().nullable(),
-  sourceIntakeId: z.string().uuid().optional().nullable(),
+  sourceIntakeId: z.guid().optional().nullable(),
 });
 
 export const dynamic = 'force-dynamic';
@@ -139,7 +139,7 @@ export const POST = withApi(
     const body = await request.json();
     const parsed = caseCreateSchema.safeParse(body);
     if (!parsed.success) {
-      throw ApiError.badRequest(parsed.error.errors.map(e => e.message).join('; '));
+      throw ApiError.badRequest(parsed.error.issues.map(e => e.message).join('; '));
     }
     const {
       claimType,

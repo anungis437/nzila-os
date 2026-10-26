@@ -106,7 +106,7 @@ const socialMediaPostsSchema = z.object({
   hashtags: z.array(z.string().regex(/^[a-zA-Z0-9_]+$/, "Invalid hashtag format")).max(30, "Maximum 30 hashtags").optional(),
   mentions: z.array(z.string().max(100)).max(20, "Maximum 20 mentions").optional(),
   scheduled_for: z.string().datetime().optional(),
-  campaign_id: z.string().uuid("Invalid campaign_id").optional(),
+  campaign_id: z.guid("Invalid campaign_id").optional(),
 });
 
 export const POST = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
@@ -147,7 +147,7 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
       if (!validation.success) {
         return standardErrorResponse(
           ErrorCode.VALIDATION_ERROR,
-          validation.error.errors[0]?.message || "Invalid request data"
+          validation.error.issues[0]?.message || "Invalid request data"
         );
       }
       

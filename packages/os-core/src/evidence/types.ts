@@ -75,7 +75,7 @@ export const EvidencePackRequest = z.object({
   /** Unique pack identifier (e.g. IR-2026-001, RES-2026-042) */
   packId: z.string().min(1),
   /** Entity UUID */
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   /** Control family for this evidence */
   controlFamily: ControlFamily,
   /** Type of triggering event */

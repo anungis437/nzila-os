@@ -25,7 +25,7 @@ const appendVersionSchema = z.object({
   fileUrl: z.string().url().optional(),
   blobPath: z.string().min(1).optional(),
   // The server-issued handle for an uploaded file (POST /api/documents/intakes, operation append_version).
-  intakeId: z.string().uuid().optional(),
+  intakeId: z.guid().optional(),
   contentHash: z.string().regex(/^[0-9a-fA-F]{64}$/, 'contentHash must be a SHA-256 hex digest').optional(),
   expectedVersionNo: z.number().int().positive().optional(),
 }).strict().refine((value) => Boolean(value.intakeId) !== Boolean(value.blobPath || value.fileUrl), {

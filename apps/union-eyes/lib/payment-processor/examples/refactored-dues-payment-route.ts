@@ -37,7 +37,7 @@ import {
 } from '@/lib/payment-processor';
 
 const portalDuesPaySchema = z.object({
-  transactionIds: z.array(z.string().uuid()),
+  transactionIds: z.array(z.guid()),
   paymentMethodId: z.string(),
   processorType: z.enum(['stripe', 'whop', 'paypal', 'square', 'manual']).optional(),
 });
@@ -83,7 +83,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, _context
         return standardErrorResponse(
           ErrorCode.VALIDATION_ERROR,
           'Invalid request data',
-          validation.error.errors
+          validation.error.issues
         );
       }
       

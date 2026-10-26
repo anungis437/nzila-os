@@ -15,7 +15,7 @@ export const EvidenceTraceContextSchema = z.object({
   spanId: z.string().length(16),
   traceFlags: z.number().int().nonnegative(),
   traceparent: z.string(),
-  evidencePackId: z.string().uuid().optional(),
+  evidencePackId: z.guid().optional(),
   hashChainPosition: z.number().int().nonnegative().optional(),
 });
 

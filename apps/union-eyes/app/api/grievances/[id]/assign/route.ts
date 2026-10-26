@@ -28,7 +28,7 @@ import { eq, and } from "drizzle-orm";
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 const assignSchema = z.object({
-  stewardId: z.string().uuid(),
+  stewardId: z.guid(),
 });
 
 export const PATCH = withOrganizationAuth(async (request, context, params?: { id: string }) => {

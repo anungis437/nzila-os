@@ -25,7 +25,7 @@ export const dynamic = 'force-dynamic';
 
 const fieldsSchema = z.object({
   operation: z.enum(['create_document', 'append_version']),
-  targetDocumentId: z.string().uuid().optional(),
+  targetDocumentId: z.guid().optional(),
 });
 
 export const POST = withOrganizationAuth(async (request, context) => {

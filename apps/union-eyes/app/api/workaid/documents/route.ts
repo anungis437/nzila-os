@@ -14,8 +14,8 @@ import { COUNSEL_SIDE_NOTICE, parseBody, workAidErrorResponse } from '@/lib/work
 export const dynamic = 'force-dynamic'
 
 const schema = z.object({
-  matterId: z.string().uuid(),
-  documentId: z.string().uuid(),
+  matterId: z.guid(),
+  documentId: z.guid(),
   expiresAt: z.string().datetime().optional(),
 })
 

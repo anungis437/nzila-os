@@ -19,7 +19,7 @@ import { operationAuditResponse } from '@/lib/audit/operation-audit';
 export const dynamic = 'force-dynamic';
 
 const bodySchema = z.object({
-  sessionId: z.string().uuid(),
+  sessionId: z.guid(),
   content: z.string().min(1).max(10_000),
   useRAG: z.boolean().optional().default(true),
 });

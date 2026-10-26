@@ -44,14 +44,14 @@ import { cn } from "@/lib/utils";
 
 const incidentSchema = z.object({
   incidentDate: z.date({
-    required_error: "Incident date is required",
+    error: "Incident date is required",
   }),
   incidentTime: z.string().min(1, "Incident time is required"),
   location: z.string().min(1, "Location is required"),
   department: z.string().optional(),
   incidentType: z.string().min(1, "Incident type is required"),
   severity: z.enum(["minor", "major", "critical"], {
-    required_error: "Severity is required",
+    error: "Severity is required",
   }),
   description: z.string().min(50, "Description must be at least 50 characters"),
   immediateCause: z.string().min(20, "Immediate cause must be at least 20 characters"),

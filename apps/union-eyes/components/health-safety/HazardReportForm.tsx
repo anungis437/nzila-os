@@ -37,7 +37,7 @@ import { AlertTriangle, Send, Camera } from "lucide-react";
 const hazardSchema = z.object({
   hazardType: z.string().min(1, "Hazard type is required"),
   priority: z.enum(["low", "medium", "high", "critical"], {
-    required_error: "Priority is required",
+    error: "Priority is required",
   }),
   location: z.string().min(1, "Location is required"),
   description: z.string().min(30, "Description must be at least 30 characters"),

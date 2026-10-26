@@ -72,7 +72,7 @@ const dashboardSchema = z.object({
         width: z.number(),
         height: z.number(),
       }),
-      config: z.record(z.any()).optional(),
+      config: z.record(z.string(), z.any()).optional(),
     })
   ),
 });

@@ -55,11 +55,11 @@ const _documentUploadSchema = z.object({
     name: z.string().min(1, "File name is required"),
     size: z.number().max(MAX_FILE_SIZE, "File size exceeds 50MB limit"),
     type: z.enum(ALLOWED_MIME_TYPES_LIST as any as [string, ...string[]], {
-      errorMap: () => ({ message: "Invalid file type" })
+      error: "Invalid file type"
     })
   }),
-  organizationId: z.string().uuid("Invalid organization ID"),
-  folderId: z.string().uuid("Invalid folder ID").optional(),
+  organizationId: z.guid("Invalid organization ID"),
+  folderId: z.guid("Invalid folder ID").optional(),
   name: z.string().max(255, "Name too long").optional(),
   description: z.string().max(1000, "Description too long").optional(),
   tags: z.array(z.string().max(50)).max(20, "Too many tags").optional(),

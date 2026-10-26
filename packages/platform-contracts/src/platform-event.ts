@@ -35,7 +35,7 @@ export type PlatformEventType = (typeof platformEventTypeValues)[number]
 
 export const platformEventSchema = z.object({
   /** Unique event ID. */
-  id: z.string().uuid(),
+  id: z.guid(),
   /** Event type. */
   type: z.enum(platformEventTypeValues),
   /** ISO-8601 timestamp. */
@@ -49,7 +49,7 @@ export const platformEventSchema = z.object({
   /** Request correlation ID. */
   correlationId: z.string().optional(),
   /** Event-specific payload. */
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   /** Event schema version. */
   version: z.number().int().positive().default(1),
 })

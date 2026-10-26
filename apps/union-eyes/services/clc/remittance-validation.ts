@@ -36,11 +36,11 @@ export interface ValidationResult {
  * Remittance record schema for validation
  */
 export const RemittanceRecordSchema = z.object({
-  id: z.string().uuid('Invalid remittance ID format'),
-  fromOrgId: z.string().uuid('Invalid from organization ID'),
+  id: z.guid('Invalid remittance ID format'),
+  fromOrgId: z.guid('Invalid from organization ID'),
   fromOrgName: z.string().min(1, 'From organization name required'),
   fromOrgCode: z.string().regex(/^[A-Z0-9-]+$/, 'Invalid organization code format'),
-  toOrgId: z.string().uuid('Invalid to organization ID'),
+  toOrgId: z.guid('Invalid to organization ID'),
   toOrgName: z.string().min(1, 'To organization name required'),
   toOrgCode: z.string().regex(/^[A-Z0-9-]+$/, 'Invalid parent organization code format'),
   periodStart: z.date(),

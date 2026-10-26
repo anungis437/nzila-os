@@ -25,14 +25,13 @@ import {
 // organization; the organization is never taken from the body.
 const aiExtractClausesSchema = z.object({
   pdfUrl: z.string().url('Invalid URL'),
-  cbaId: z.string().uuid('Invalid cbaId'),
-  organizationId: z.string().uuid('Invalid organizationId').optional(),
-  autoSave: z.boolean().default(true).optional(),
-  batch: z.boolean().default(false).optional(),
+  cbaId: z.guid('Invalid cbaId'),
+  organizationId: z.guid('Invalid organizationId').optional(),
+  autoSave: z.boolean().optional(),
+  batch: z.boolean().optional(),
   cbas: z
-    .array(z.object({ id: z.string().uuid('Invalid cba id'), documentUrl: z.string().url('Invalid URL') }))
+    .array(z.object({ id: z.guid('Invalid cba id'), documentUrl: z.string().url('Invalid URL') }))
     .max(25)
-    .default([])
     .optional(),
 });
 
@@ -83,7 +82,7 @@ export const POST = withRoleAuth('steward', async (request, context) => {
         return standardErrorResponse(
           ErrorCode.VALIDATION_ERROR,
           'Invalid request data',
-          validation.error.errors
+          validation.error.issues
         );
       }
       

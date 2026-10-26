@@ -12,7 +12,7 @@ const createEventSchema = z.object({
   entityId: z.string().min(1),
   action: z.string().min(1),
   summary: z.string().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const GET = withRequiredRole(

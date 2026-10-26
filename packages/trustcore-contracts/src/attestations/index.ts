@@ -18,7 +18,7 @@ export const AttestationSubjectSchema = z.object({
     'distribution',
     'compliance_program',
   ]),
-  id: z.string().uuid(),
+  id: z.guid(),
 })
 export type AttestationSubject = z.infer<typeof AttestationSubjectSchema>
 
@@ -28,7 +28,7 @@ export const AttestationContractSchema = z.object({
   version: z.string().min(1).max(32),
   subject: AttestationSubjectSchema,
   attesterUserId: z.string().min(1),
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   /** Severity of the underlying claim being attested. */
   severity: TrustSeveritySchema.default('medium'),
   /** Hash of the canonical payload that was signed. */

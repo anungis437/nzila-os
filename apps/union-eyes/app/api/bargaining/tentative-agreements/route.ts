@@ -21,14 +21,14 @@ export const dynamic = 'force-dynamic';
 
 // Ratification, costing approval and sign-off are outcomes of their own processes and are never accepted at creation.
 const createTentativeAgreementSchema = z.object({
-  negotiationId: z.string().uuid(),
+  negotiationId: z.guid(),
   agreementNumber: z.string().min(1).max(50),
   title: z.string().min(1).max(500),
   clauseCategory: z.string().min(1).max(100),
   agreedLanguage: z.string().min(1),
   previousLanguage: z.string().optional(),
   relatedProposalIds: z.array(z.string()).optional(),
-  relatedClauseId: z.string().uuid().optional(),
+  relatedClauseId: z.guid().optional(),
   requiresRatification: z.boolean().optional(),
   annualCost: z.string().optional(),
   implementationCost: z.string().optional(),

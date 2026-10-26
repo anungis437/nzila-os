@@ -33,7 +33,7 @@ export const POST = withApi(
   {
     auth: { required: true, minRole: 'steward' },
     body: z.object({
-      claimId: z.string().uuid(),
+      claimId: z.guid(),
       memberId: z.string().min(1),
       lroId: z.string().min(1),
     }),

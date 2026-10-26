@@ -20,13 +20,13 @@ const LineItemSchema = z.object({
 })
 
 const CreateCheckoutSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   ventureId: z.string().optional(),
   customerId: z.string().optional(),
   lineItems: z.array(LineItemSchema).min(1),
   successUrl: z.string().url(),
   cancelUrl: z.string().url(),
-  metadata: z.record(z.string()).optional(),
+  metadata: z.record(z.string(), z.string()).optional(),
 })
 
 export async function POST(req: NextRequest): Promise<NextResponse> {

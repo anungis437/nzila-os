@@ -14,7 +14,7 @@ export const auditInputSchema = z.object({
   action: z.string().min(1),
   resource: z.string().min(1),
   resourceId: z.string().optional(),
-  payload: z.record(z.unknown()).default({}),
+  payload: z.record(z.string(), z.unknown()).prefault({}),
   correlationId: z.string().optional(),
   severity: z.enum(AUDIT_SEVERITY_VALUES).default('info'),
   evidenceGrade: z.boolean().default(false),
@@ -22,7 +22,7 @@ export const auditInputSchema = z.object({
 export type AuditInput = z.infer<typeof auditInputSchema>
 
 export const canonicalAuditRecordSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   timestamp: z.string().datetime(),
   action: z.string().min(1),
   actorId: z.string().min(1),
@@ -30,8 +30,8 @@ export const canonicalAuditRecordSchema = z.object({
   sourceModule: z.string().min(1),
   resourceType: z.string().min(1),
   resourceId: z.string().optional(),
-  before: z.record(z.unknown()).optional(),
-  after: z.record(z.unknown()).optional(),
+  before: z.record(z.string(), z.unknown()).optional(),
+  after: z.record(z.string(), z.unknown()).optional(),
   severity: z.enum(AUDIT_SEVERITY_VALUES),
   evidenceGrade: z.boolean().default(false),
   hash: z.string().optional(),

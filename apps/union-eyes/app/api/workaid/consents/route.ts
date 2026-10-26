@@ -15,7 +15,7 @@ import { COUNSEL_SIDE_NOTICE, parseBody, workAidErrorResponse } from '@/lib/work
 export const dynamic = 'force-dynamic'
 
 const grantSchema = z.object({
-  caseId: z.string().uuid(),
+  caseId: z.guid(),
   categories: z.array(z.string().min(1).max(64)).min(1).max(8),
   purpose: z.string().trim().min(1).max(500),
   textVersion: z.string().min(1).max(64),

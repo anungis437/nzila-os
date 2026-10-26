@@ -30,7 +30,7 @@ const accessInputSchema = z.object({
 
 // Re-activating a grant would bypass grantee, scope and expiry validation; only revocation is a status change.
 const updateStatusSchema = z.object({
-  assignmentId: z.string().uuid(),
+  assignmentId: z.guid(),
   status: z.literal('revoked'),
 });
 

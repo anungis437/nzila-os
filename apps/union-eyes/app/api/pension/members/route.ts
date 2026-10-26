@@ -8,8 +8,8 @@ import { eq, and, desc, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 const createMemberSchema = z.object({
-  planId: z.string().uuid(),
-  userId: z.string().uuid().optional(),
+  planId: z.guid(),
+  userId: z.guid().optional(),
   name: z.string().max(255),
   planName: z.string().max(255),
   enrollmentDate: z.coerce.date().optional(),

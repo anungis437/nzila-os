@@ -17,7 +17,7 @@ const generateSchema = z.object({
   title: z.string().min(3).max(500),
   periodStart: z.string().datetime(),
   periodEnd: z.string().datetime(),
-  committeeIds: z.array(z.string().uuid()).optional(),
+  committeeIds: z.array(z.guid()).optional(),
 });
 
 export const GET = withApi(

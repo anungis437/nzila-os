@@ -36,7 +36,7 @@ const uploadDocumentSchema = z.object({
   fileUrl: z.string().url().optional(),
   blobPath: z.string().min(1).optional(),
   // The server-issued handle for an uploaded file (POST /api/documents/intakes). Preferred; consumed exactly once.
-  intakeId: z.string().uuid().optional(),
+  intakeId: z.guid().optional(),
   // A claim, not a fact: when supplied it must equal the SHA-256 the server computes from storage.
   contentHash: z.string().regex(/^[0-9a-fA-F]{64}$/, 'contentHash must be a SHA-256 hex digest').optional(),
   documentType: z.string().min(1).max(120),
@@ -52,7 +52,7 @@ const uploadDocumentSchema = z.object({
   ]),
   fileSize: z.number().int().nonnegative().optional(),
   linkedEntityType: z.enum(['case', 'grievance', 'member', 'policy_library', 'template_library', 'collective_agreement', 'other']).optional(),
-  linkedEntityId: z.string().uuid().optional(),
+  linkedEntityId: z.guid().optional(),
   containsPii: z.boolean().optional(),
   containsMedicalSensitive: z.boolean().optional(),
   containsLegalPrivilege: z.boolean().optional(),

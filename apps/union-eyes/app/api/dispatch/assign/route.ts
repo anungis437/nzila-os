@@ -17,8 +17,8 @@ import {
 } from "@/lib/api/standardized-responses";
 
 const assignSchema = z.object({
-  requestId: z.string().uuid(),
-  memberIds: z.array(z.string().uuid()).min(1),
+  requestId: z.guid(),
+  memberIds: z.array(z.guid()).min(1),
 });
 
 export const POST = withOrganizationAuth(async (request, context) => {

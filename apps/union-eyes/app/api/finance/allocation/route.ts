@@ -30,7 +30,7 @@ const createRuleSchema = z.object({
     'manual_override',
     'subsidized',
   ]),
-  parameters: z.record(z.unknown()).optional(),
+  parameters: z.record(z.string(), z.unknown()).optional(),
   effectiveFrom: z.string().datetime().optional(),
 });
 

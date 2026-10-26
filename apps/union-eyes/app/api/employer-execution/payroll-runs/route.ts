@@ -18,7 +18,7 @@ import { and, asc, desc, eq, gte, isNull, lte, or } from "drizzle-orm";
 import { calculatePayroll, resolvePayrollRules, sha256 } from "../_lib";
 
 const createSchema = z.object({
-  timesheetBatchId: z.string().uuid(),
+  timesheetBatchId: z.guid(),
   periodStart: z.string(),
   periodEnd: z.string(),
   runType: z.enum(["preview", "official"]),

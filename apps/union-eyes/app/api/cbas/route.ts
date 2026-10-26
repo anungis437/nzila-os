@@ -19,7 +19,7 @@ const JURISDICTIONS = [
 
 // The organization, creator, visibility and counters are never accepted from the body.
 const createCBASchema = z.object({
-  organizationId: z.string().uuid().optional(),
+  organizationId: z.guid().optional(),
   cbaNumber: z.string().min(1).max(100),
   title: z.string().min(1).max(500),
   jurisdiction: z.enum(JURISDICTIONS),
@@ -85,7 +85,7 @@ export const POST = withRoleAuth('steward', async (req: NextRequest, context: Ba
   const validation = createCBASchema.safeParse(body);
   if (!validation.success) {
     return NextResponse.json(
-      { error: 'Invalid request data', details: validation.error.errors },
+      { error: 'Invalid request data', details: validation.error.issues },
       { status: 400 }
     );
   }

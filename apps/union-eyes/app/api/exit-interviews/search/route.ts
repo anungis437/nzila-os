@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 const searchSchema = z.object({
   q: z.string().min(2),
   /** 0–1 weight for semantic vs keyword. Default 0.6. */
-  semanticWeight: z.number().min(0).max(1).default(0.6).optional(),
+  semanticWeight: z.number().min(0).max(1).optional(),
   limit: z.number().int().min(1).max(50).default(20),
 });
 

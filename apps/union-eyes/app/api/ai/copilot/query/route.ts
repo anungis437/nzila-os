@@ -24,7 +24,7 @@ import { operationAuditResponse } from '@/lib/audit/operation-audit';
 const copilotSchema = z.object({
   actionType: z.enum(['timeline_summary', 'suggest_action', 'draft_response', 'explain_clause', 'risk_brief', 'custom_query']),
   relatedEntityType: z.string().optional(),
-  relatedEntityId: z.string().uuid().optional(),
+  relatedEntityId: z.guid().optional(),
   query: z.string().max(5000).optional(),
 });
 

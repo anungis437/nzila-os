@@ -10,7 +10,7 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
 
 const bodySchema = z.object({
-  predictionId: z.string().uuid(),
+  predictionId: z.guid(),
   modelVersion: z.string().min(1).default('sla-risk-v1'),
   actualBreach: z.boolean(),
   comment: z.string().max(1000).optional(),

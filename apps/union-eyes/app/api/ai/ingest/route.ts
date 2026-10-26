@@ -125,7 +125,7 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
     const validation = ingestSchema.safeParse(metadata);
     if (!validation.success) {
       return NextResponse.json(
-        { error: 'Invalid metadata', details: validation.error.errors },
+        { error: 'Invalid metadata', details: validation.error.issues },
         { status: 400 }
       );
     }

@@ -5,6 +5,7 @@
 
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
+import { partialWithoutDefaults } from './partial-without-defaults';
 import { db, schema } from '../db';
 import { eq, and, desc } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
@@ -151,7 +152,7 @@ router.post('/', async (req: Request, res: Response) => {
     res.status(201).json({ success: true, data: newRule });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ success: false, error: 'Validation error', details: error.errors });
+      return res.status(400).json({ success: false, error: 'Validation error', details: error.issues });
     }
     logger.error('Error creating dues rule', { error });
     res.status(500).json({ success: false, error: 'Failed to create dues rule' });
@@ -173,7 +174,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     }
 
     // Validate input
-    const validatedData = createDuesRuleSchema.partial().parse(req.body);
+    const validatedData = partialWithoutDefaults(createDuesRuleSchema).parse(req.body);
 
     // Convert numeric fields to strings for database
     const updateData: Record<string, unknown> = { ...validatedData };
@@ -199,7 +200,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     res.json({ success: true, data: updatedRule });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ success: false, error: 'Validation error', details: error.errors });
+      return res.status(400).json({ success: false, error: 'Validation error', details: error.issues });
     }
     logger.error('Error updating dues rule', { error });
     res.status(500).json({ success: false, error: 'Failed to update dues rule' });

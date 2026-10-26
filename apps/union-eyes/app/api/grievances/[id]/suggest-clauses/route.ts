@@ -25,7 +25,7 @@ import { requireEntitlement } from '@/services/platform-economics/entitlement-gu
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 
 const _linkSchema = z.object({
-  clauseId: z.string().uuid(),
+  clauseId: z.guid(),
 }).optional();
 
 export const POST = withOrganizationAuth(async (request, context, params?: { id: string }) => {

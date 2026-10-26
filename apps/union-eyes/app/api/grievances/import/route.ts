@@ -43,7 +43,7 @@ const importRequestSchema = z.object({
   format: z.enum(['json', 'csv']),
   payload: z.union([z.string(), z.array(z.record(z.string(), z.unknown()))]),
   sourceSystem: z.string().min(2).max(100).default('unioneyes_manual_import'),
-  importSessionId: z.string().uuid().optional(),
+  importSessionId: z.guid().optional(),
   resumeFailedOnly: z.boolean().optional(),
   defaultCreateOfficialCase: z.boolean().optional(),
 });

@@ -34,7 +34,7 @@ const _locationGeofenceSchema = z.object({
   centerLatitude: z.string().min(1, 'centerLatitude is required'),
   centerLongitude: z.string().min(1, 'centerLongitude is required'),
   radiusMeters: z.unknown().optional(),
-  strikeId: z.string().uuid('Invalid strikeId'),
+  strikeId: z.guid('Invalid strikeId'),
 });
 
 

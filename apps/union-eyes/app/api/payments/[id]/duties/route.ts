@@ -24,7 +24,7 @@ export const dynamic = 'force-dynamic';
 const stepSchema = z
   .object({
     step: z.enum(['registered', 'prepared', 'approved', 'executed', 'reconciled']),
-    accountId: z.string().uuid().optional(),
+    accountId: z.guid().optional(),
     requiredApprovals: z.number().int().min(1).max(10).optional(),
   })
   .strict();

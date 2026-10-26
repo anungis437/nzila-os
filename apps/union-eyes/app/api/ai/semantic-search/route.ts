@@ -31,10 +31,10 @@ import {
 const semanticSearchSchema = z.object({
   query: z.string().max(1000, 'Query too long').optional(),
   searchType: z.enum(['clauses', 'precedents', 'unified', 'similar']).default('unified'),
-  clauseId: z.string().uuid().optional(),
+  clauseId: z.guid().optional(),
   limit: z.number().int().min(1).max(100).default(10),
   threshold: z.number().min(0).max(1).default(0.7),
-  filters: z.record(z.string(), z.unknown()).default({}),
+  filters: z.record(z.string(), z.unknown()).prefault({}),
   hybridSearch: z.object({
     enabled: z.boolean().default(false),
     keywordWeight: z.number().min(0).max(1).default(0.3),
@@ -90,7 +90,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         return standardErrorResponse(
           ErrorCode.VALIDATION_ERROR,
           'Invalid semantic search request',
-          validation.error.errors
+          validation.error.issues
         );
       }
 

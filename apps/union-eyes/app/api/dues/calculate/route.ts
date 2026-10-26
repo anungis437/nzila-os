@@ -13,10 +13,10 @@ import {
 } from '@/lib/api/standardized-responses';
 // Validation schema for dues calculation
 const calculateDuesSchema = z.object({
-  memberId: z.string().uuid('Invalid member ID format'),
+  memberId: z.guid('Invalid member ID format'),
   periodStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Period start must be in YYYY-MM-DD format'),
   periodEnd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Period end must be in YYYY-MM-DD format'),
-  memberData: z.record(z.any()).optional(),
+  memberData: z.record(z.string(), z.any()).optional(),
 });
 
 export const POST = withApiAuth(async (request, context: BaseAuthContext) => {

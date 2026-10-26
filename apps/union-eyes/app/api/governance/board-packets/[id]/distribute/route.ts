@@ -13,7 +13,7 @@ import { and, eq } from 'drizzle-orm';
 
 const distributePacketSchema = z.object({
   recipients: z.array(z.object({
-    recipientId: z.string().uuid(),
+    recipientId: z.guid(),
     recipientName: z.string(),
     recipientEmail: z.string().email(),
     recipientRole: z.string(),

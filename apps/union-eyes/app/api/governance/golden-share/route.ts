@@ -38,7 +38,7 @@ export const POST = withApi(
     body: z.object({
       certificateNumber: z.string().min(1),
       issueDate: z.string().min(1),
-      councilMembers: z.array(z.record(z.unknown())),
+      councilMembers: z.array(z.record(z.string(), z.unknown())),
     }),
   },
   async ({ body, userId, organizationId }) => {

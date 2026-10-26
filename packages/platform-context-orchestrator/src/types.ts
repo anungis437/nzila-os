@@ -140,12 +140,12 @@ export interface ContextRequest {
 // ── Zod Schema ──────────────────────────────────────────────────────────────
 
 export const ContextRequestSchema = z.object({
-  tenantId: z.string().uuid(),
+  tenantId: z.guid(),
   purpose: z.enum(
     Object.values(ContextPurposes) as [string, ...string[]],
   ),
   entityType: z.string().min(1),
-  entityId: z.string().uuid(),
+  entityId: z.guid(),
   caller: z.object({
     userId: z.string().optional(),
     role: z.string().optional(),

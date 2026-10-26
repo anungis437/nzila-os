@@ -50,7 +50,7 @@ export const GET = withApi(
 
 const reviewDecisionSchema = z.object({
   targetType: z.enum(["finding", "agreement", "wage_adjustment", "clause"]),
-  targetId: z.string().uuid(),
+  targetId: z.guid(),
   decision: z.enum(["approved", "rejected", "needs_followup", "superseded"]),
   reason: z.string().max(1000).optional(),
   comment: z.string().max(5000).optional(),

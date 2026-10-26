@@ -57,7 +57,7 @@ const authorizationBasisEnum = z.enum(
   ],
 )
 
-const targetIdField = z.string().trim().uuid().optional()
+const targetIdField = z.string().trim().pipe(z.guid()).optional()
 
 // The author MAY request a stricter (more restrictive) authorization level; the
 // server floors it to the derived minimum and REJECTS any downgrade. The browser
@@ -114,8 +114,8 @@ export const CreateDecisionRecordRequest = z
       .trim()
       .min(1, 'An uncertainty / limitations statement is required')
       .max(20_000),
-    referencedEvidenceItemIds: z.array(z.string().trim().uuid()).max(500).optional(),
-    referencedBoundaryFlagIds: z.array(z.string().trim().uuid()).max(500).optional(),
+    referencedEvidenceItemIds: z.array(z.string().trim().pipe(z.guid())).max(500).optional(),
+    referencedBoundaryFlagIds: z.array(z.string().trim().pipe(z.guid())).max(500).optional(),
     requestedAuthorizationLevel: requestedAuthorizationLevelField,
   })
   .strict()

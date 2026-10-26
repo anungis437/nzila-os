@@ -11,7 +11,7 @@ import {
 
 const bodySchema = z
   .object({
-    documentId: z.string().uuid().optional(),
+    documentId: z.guid().optional(),
   })
   .optional();
 

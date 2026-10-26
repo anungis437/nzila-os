@@ -34,10 +34,10 @@ function getNextSyncAt(): Date {
 }
 
 const syncRequestSchema = z.object({
-  localCalendarId: z.string().uuid(),
+  localCalendarId: z.guid(),
   externalCalendarId: z.string().min(1),
   mode: z.enum(['import', 'export', 'both']).optional(),
-  localEventId: z.string().uuid().optional(),
+  localEventId: z.guid().optional(),
   since: z.string().datetime().optional(),
 })
 

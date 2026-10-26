@@ -25,7 +25,7 @@ export const runtime = 'nodejs';
 export const maxDuration = 30;
 
 const checkoutSchema = z.object({
-  transactionId: z.string().uuid('Invalid transaction ID'),
+  transactionId: z.guid('Invalid transaction ID'),
   returnUrl: z.string().url('Invalid return URL'),
   cancelUrl: z.string().url('Invalid cancel URL'),
   processorType: z.enum(['stripe', 'paypal']).optional().default('stripe'),
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
 

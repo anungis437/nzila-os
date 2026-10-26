@@ -28,21 +28,21 @@ function getAuthUser(req: Request): AuthUser {
 
 // Validation schemas
 const CreateDuesPaymentSchema = z.object({
-  memberId: z.string().uuid(),
+  memberId: z.guid(),
   amount: z.number().min(0.50).max(100000),
   currency: z.string().length(3).default('usd'),
   paymentMethod: z.enum(['card', 'bank_account', 'us_bank_account']),
   description: z.string().optional(),
-  metadata: z.record(z.string()).optional(),
+  metadata: z.record(z.string(), z.string()).optional(),
 });
 
 const ConfirmDuesPaymentSchema = z.object({
   paymentIntentId: z.string(),
-  transactionId: z.string().uuid(),
+  transactionId: z.guid(),
 });
 
 const CreateStipendPayoutSchema = z.object({
-  disbursementId: z.string().uuid(),
+  disbursementId: z.guid(),
   amount: z.number().min(1).max(100000),
   recipientBankAccount: z.object({
     accountNumber: z.string(),
@@ -54,12 +54,12 @@ const CreateStipendPayoutSchema = z.object({
 });
 
 const BatchStipendPayoutSchema = z.object({
-  strikeFundId: z.string().uuid(),
-  disbursementIds: z.array(z.string().uuid()).min(1),
+  strikeFundId: z.guid(),
+  disbursementIds: z.array(z.guid()).min(1),
 });
 
 const CreateDonationSchema = z.object({
-  strikeFundId: z.string().uuid(),
+  strikeFundId: z.guid(),
   amount: z.number().min(1).max(100000),
   currency: z.string().length(3).default('usd'),
   donorEmail: z.string().email().optional(),
@@ -74,7 +74,7 @@ const ConfirmDonationSchema = z.object({
 });
 
 const PaymentSummaryQuerySchema = z.object({
-  strikeFundId: z.string().uuid(),
+  strikeFundId: z.guid(),
   startDate: z.string().datetime().optional(),
   endDate: z.string().datetime().optional(),
 });

@@ -571,8 +571,8 @@ export function withApi<
 
         const result = options.body.safeParse(rawBody);
         if (!result.success) {
-          const fields = result.error.errors.map((e: { path: (string | number)[]; message: string }) => ({
-            path: e.path.join('.'),
+          const fields = result.error.issues.map((e) => ({
+            path: e.path.map(String).join('.'),
             message: e.message,
           }));
           return standardErrorResponse(
@@ -582,12 +582,12 @@ export function withApi<
             traceId,
           );
         }
-        body = result.data;
+        body = result.data as z.infer<TBody>;
       } else if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
         // No Zod schema provided — still parse JSON body so handlers can
         // access it via ctx.body without calling request.json() themselves.
         try {
-          body = await bodyReader(request).json();
+          body = (await bodyReader(request).json()) as z.infer<TBody>;
         } catch {
           // Body may be empty or non-JSON — leave as undefined
         }
@@ -602,8 +602,8 @@ export function withApi<
         });
         const result = options.query.safeParse(raw);
         if (!result.success) {
-          const fields = result.error.errors.map((e: { path: (string | number)[]; message: string }) => ({
-            path: e.path.join('.'),
+          const fields = result.error.issues.map((e) => ({
+            path: e.path.map(String).join('.'),
             message: e.message,
           }));
           return standardErrorResponse(

@@ -389,7 +389,7 @@ export default async function CLCStaffDashboardPage() {
               const { revalidatePath } = await import('next/cache');
               const { logger: log } = await import('@/lib/logger');
               const { z } = await import('zod');
-              const safeId = z.string().uuid().parse(id);
+              const safeId = z.guid().parse(id);
               try {
                 const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL ?? ''}/api/v2/clc/remittances/${safeId}/approve`, { method: 'POST' });
                 if (!res.ok) throw new Error(`Approve failed: ${res.status}`);
@@ -405,7 +405,7 @@ export default async function CLCStaffDashboardPage() {
               const { revalidatePath } = await import('next/cache');
               const { logger: log } = await import('@/lib/logger');
               const { z } = await import('zod');
-              const safeId = z.string().uuid().parse(id);
+              const safeId = z.guid().parse(id);
               try {
                 const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL ?? ''}/api/v2/clc/remittances/${safeId}/reject`, { method: 'POST' });
                 if (!res.ok) throw new Error(`Reject failed: ${res.status}`);

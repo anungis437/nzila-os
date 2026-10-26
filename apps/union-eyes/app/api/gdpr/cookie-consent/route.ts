@@ -16,8 +16,8 @@ import { logger } from '@/lib/logger';
 import { guardPublicIntake } from '@/lib/public-intake/guard';
 
 const gdprCookieConsentSchema = z.object({
-  consentId: z.string().uuid('Invalid consentId'),
-  organizationId: z.string().uuid('Invalid organizationId'),
+  consentId: z.guid('Invalid consentId'),
+  organizationId: z.guid('Invalid organizationId'),
   essential: z.boolean().optional(),
   functional: z.boolean().optional(),
   analytics: z.boolean().optional(),

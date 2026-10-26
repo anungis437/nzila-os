@@ -10,7 +10,7 @@ import {
 
 // ─── Shared ───
 
-export const uuidSchema = z.string().uuid()
+export const uuidSchema = z.guid()
 export const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(200).default(50),
@@ -31,7 +31,7 @@ export const createProducerSchema = z.object({
   contactEmail: z.string().email().nullable().default(null),
   location: locationSchema.nullable().default(null),
   cooperativeId: uuidSchema.nullable().default(null),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).prefault({}),
 })
 export type CreateProducerInput = z.infer<typeof createProducerSchema>
 
@@ -43,7 +43,7 @@ export const updateProducerSchema = z.object({
   location: locationSchema.nullable().optional(),
   cooperativeId: uuidSchema.nullable().optional(),
   status: z.enum([ProducerStatus.ACTIVE, ProducerStatus.INACTIVE, ProducerStatus.SUSPENDED]).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 export type UpdateProducerInput = z.infer<typeof updateProducerSchema>
 
@@ -54,7 +54,7 @@ export const createCropSchema = z.object({
   cropType: z.enum([CropType.COFFEE, CropType.COCOA, CropType.CASHEW, CropType.COTTON, CropType.SESAME, CropType.SOY, CropType.PALM_OIL, CropType.SPICE, CropType.OTHER]),
   unitOfMeasure: z.enum([UnitOfMeasure.KG, UnitOfMeasure.LB, UnitOfMeasure.MT, UnitOfMeasure.BAG_60KG, UnitOfMeasure.BAG_69KG, UnitOfMeasure.LITER]),
   baselineYieldPerHectare: z.number().nonnegative().nullable().default(null),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).prefault({}),
 })
 export type CreateCropInput = z.infer<typeof createCropSchema>
 
@@ -84,7 +84,7 @@ export type CreateLotInput = z.infer<typeof createLotSchema>
 
 export const inspectLotSchema = z.object({
   lotId: uuidSchema,
-  defects: z.record(z.unknown()).default({}),
+  defects: z.record(z.string(), z.unknown()).prefault({}),
   notes: z.string().max(2000).nullable().default(null),
 })
 export type InspectLotInput = z.infer<typeof inspectLotSchema>
@@ -105,7 +105,7 @@ export const certifyLotSchema = z.object({
     CertificationType.INTERNAL_QUALITY, CertificationType.EXPORT_GRADE,
   ]),
   certificateRef: z.string().max(200).nullable().default(null),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).prefault({}),
 })
 export type CertifyLotInput = z.infer<typeof certifyLotSchema>
 
@@ -196,7 +196,7 @@ export const createFieldSchema = z.object({
   areaHectares: z.number().positive(),
   cropType: z.enum([CropType.COFFEE, CropType.COCOA, CropType.CASHEW, CropType.COTTON, CropType.SESAME, CropType.SOY, CropType.PALM_OIL, CropType.SPICE, CropType.OTHER]),
   soilType: z.string().max(100).nullable().default(null),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).prefault({}),
 })
 export type CreateFieldInput = z.infer<typeof createFieldSchema>
 

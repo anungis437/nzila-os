@@ -15,17 +15,17 @@ const updateBoardPacketSchema = z.object({
   description: z.string().max(5000).optional(),
   // 'distributed' is reached only through POST .../distribute, which records the recipients.
   status: z.enum(['draft', 'finalized', 'archived']).optional(),
-  financialSummary: z.record(z.unknown()).optional(),
-  membershipStats: z.record(z.unknown()).optional(),
-  caseSummary: z.record(z.unknown()).optional(),
-  motionsAndVotes: z.record(z.unknown()).optional(),
-  auditExceptions: z.record(z.unknown()).optional(),
-  complianceStatus: z.record(z.unknown()).optional(),
-  actionItems: z.record(z.unknown()).optional(),
+  financialSummary: z.record(z.string(), z.unknown()).optional(),
+  membershipStats: z.record(z.string(), z.unknown()).optional(),
+  caseSummary: z.record(z.string(), z.unknown()).optional(),
+  motionsAndVotes: z.record(z.string(), z.unknown()).optional(),
+  auditExceptions: z.record(z.string(), z.unknown()).optional(),
+  complianceStatus: z.record(z.string(), z.unknown()).optional(),
+  actionItems: z.record(z.string(), z.unknown()).optional(),
   recipientRoles: z.array(z.string().max(100)).optional(),
-  distributionList: z.record(z.unknown()).optional(),
+  distributionList: z.record(z.string(), z.unknown()).optional(),
   pdfUrl: z.string().url().max(2000).optional(),
-  attachments: z.record(z.unknown()).optional(),
+  attachments: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const dynamic = 'force-dynamic';

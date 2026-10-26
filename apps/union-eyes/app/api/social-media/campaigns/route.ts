@@ -188,7 +188,7 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
     

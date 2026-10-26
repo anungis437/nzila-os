@@ -19,7 +19,7 @@ const grantSchema = z.object({
   userId: z.string().trim().min(1).max(255),
   expiresAt: z.string().datetime(),
 });
-const revokeSchema = z.object({ designationId: z.string().uuid() });
+const revokeSchema = z.object({ designationId: z.guid() });
 
 export const GET = withApi(
   { auth: { required: true, minRole: 'admin' }, openapi: { tags: ['Triage'], summary: 'List triage designations' } },

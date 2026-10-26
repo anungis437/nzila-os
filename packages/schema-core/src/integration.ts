@@ -11,7 +11,7 @@ export const INTEGRATION_DIRECTION_VALUES = ['inbound', 'outbound', 'bidirection
 export type IntegrationDirection = (typeof INTEGRATION_DIRECTION_VALUES)[number]
 
 export const integrationRecordSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   provider: z.string().min(1),
   direction: z.enum(INTEGRATION_DIRECTION_VALUES),
   operation: z.string().min(1),

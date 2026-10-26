@@ -28,7 +28,7 @@ export const TrustOpsDebtorSchema = z.object({
 export type TrustOpsDebtor = z.infer<typeof TrustOpsDebtorSchema>
 
 export const TrustOpsMandateInputSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   mandateNumber: z.string().min(1).max(64),
   mandateType: TrustOpsMandateTypeSchema,
   debtor: TrustOpsDebtorSchema,
@@ -38,7 +38,7 @@ export const TrustOpsMandateInputSchema = z.object({
 export type TrustOpsMandateInput = z.infer<typeof TrustOpsMandateInputSchema>
 
 export const TrustOpsMandateRecordSchema = TrustOpsMandateInputSchema.extend({
-  id: z.string().uuid(),
+  id: z.guid(),
   status: TrustOpsMandateStageSchema,
   openedAt: z.string().datetime(),
   closedAt: z.string().datetime().nullable().optional(),

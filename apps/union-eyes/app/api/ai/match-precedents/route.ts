@@ -30,9 +30,9 @@ const matchPrecedentsSchema = z.object({
     facts: z.string().min(10, 'Facts must be at least 10 characters'),
     issueType: z.string().min(1, 'Issue type is required'),
     jurisdiction: z.string().optional(),
-    memberId: z.string().uuid().optional(),
+    memberId: z.guid().optional(),
   }),
-  options: z.record(z.string(), z.unknown()).default({}),
+  options: z.record(z.string(), z.unknown()).prefault({}),
 });
 export const POST = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
     const _user = { id: context.userId, organizationId: context.organizationId };
@@ -80,7 +80,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         return standardErrorResponse(
           ErrorCode.VALIDATION_ERROR,
           'Invalid precedent matching request',
-          validation.error.errors
+          validation.error.issues
         );
       }
 

@@ -210,7 +210,7 @@ return standardErrorResponse(
  */
 
 const mlMonitoringAlertsSchema = z.object({
-  alertId: z.string().uuid('Invalid alertId'),
+  alertId: z.guid('Invalid alertId'),
 });
 
 // Acknowledging a monitoring alert changes its shared state, so it is a steward action and is always attributed to an
@@ -230,7 +230,7 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
     

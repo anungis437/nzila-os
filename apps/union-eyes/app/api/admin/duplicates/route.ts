@@ -98,7 +98,7 @@ export const GET = withApi(
 // ─── POST: Update group status ──────────────────────────────────────────────
 
 const updateBodySchema = z.object({
-  group_id: z.string().uuid(),
+  group_id: z.guid(),
   action: z.enum(['confirm', 'dismiss', 'merge']),
 });
 

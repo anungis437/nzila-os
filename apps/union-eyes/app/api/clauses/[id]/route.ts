@@ -103,7 +103,7 @@ export const PATCH = async (request: NextRequest, { params: pendingParams }: { p
         return standardErrorResponse(
           ErrorCode.VALIDATION_ERROR,
           'Invalid request data',
-          validation.error.errors
+          validation.error.issues
         );
       }
 

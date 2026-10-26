@@ -43,7 +43,7 @@ const patchSchema = z
   .object({
     processingStatus: z.enum(['requires_review', 'failed']).optional(),
     notes: z.string().optional(),
-    metadata: z.record(z.unknown()).optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
   })
   .strict();
 

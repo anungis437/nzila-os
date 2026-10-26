@@ -7,9 +7,9 @@ import { and, desc, eq, ne } from "drizzle-orm";
 import { normalizeCsv, sha256 } from "../_lib";
 
 const createSchema = z.object({
-  employerId: z.string().uuid(),
-  worksiteId: z.string().uuid().optional(),
-  bargainingUnitId: z.string().uuid().optional(),
+  employerId: z.guid(),
+  worksiteId: z.guid().optional(),
+  bargainingUnitId: z.guid().optional(),
   periodStart: z.string(),
   periodEnd: z.string(),
   sourceFileName: z.string(),

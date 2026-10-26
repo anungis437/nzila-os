@@ -20,7 +20,7 @@ import { issueDocumentDownload, type DownloadOutcome } from '@/lib/documents/dow
 const MAX_BULK_DOWNLOADS = 25;
 
 const bulkSchema = z.object({
-  documentIds: z.array(z.string().uuid()).min(1).max(MAX_BULK_DOWNLOADS),
+  documentIds: z.array(z.guid()).min(1).max(MAX_BULK_DOWNLOADS),
 });
 
 type ItemResult = {

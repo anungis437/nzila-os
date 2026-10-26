@@ -16,7 +16,7 @@ import {
 
 const adminJobsRetrySchema = z.object({
   queue: z.string().optional(),
-  jobId: z.string().uuid('Invalid jobId'),
+  jobId: z.guid('Invalid jobId'),
 });
 
 // Job queues are platform-wide, so retrying a job needs platform authority.
@@ -31,7 +31,7 @@ export const POST = withSystemAdminAuth(async (request, context) => {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
     

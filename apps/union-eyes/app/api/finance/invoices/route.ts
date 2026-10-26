@@ -19,7 +19,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 const generateSchema = z.object({
-  billingPeriodId: z.string().uuid(),
+  billingPeriodId: z.guid(),
 });
 
 export const GET = withMinRole('secretary_treasurer', async (request, context: BaseAuthContext) => {

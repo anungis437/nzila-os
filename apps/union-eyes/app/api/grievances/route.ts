@@ -40,8 +40,8 @@ const createGrievanceSchema = z.object({
   title: z.string().min(5).max(500),
   description: z.string().min(10),
   priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
-  employerId: z.string().uuid().optional(),
-  contractId: z.string().uuid().optional(),
+  employerId: z.guid().optional(),
+  contractId: z.guid().optional(),
   category: z.string().optional(),
 
   // Member details (from intake form)
@@ -82,7 +82,7 @@ const createGrievanceSchema = z.object({
    * is created until a rep converts it.
    */
   createOfficialCase: z.boolean().optional(),
-  sourceIntakeId: z.string().uuid().optional(),
+  sourceIntakeId: z.guid().optional(),
 });
 
 // ── POST ────────────────────────────────────────────────────────────────────
