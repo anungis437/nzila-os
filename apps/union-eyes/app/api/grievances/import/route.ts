@@ -6,7 +6,6 @@ import { grievanceEvents } from '@/db/schema/domains/claims/grievance-lifecycle'
 import { ingestionBatches, ingestionRecords } from '@/db/schema/ingestion-schema';
 import { withOrganizationAuth } from '@/lib/organization-middleware';
 import { hasCaseFilingCapacity } from '@/lib/cases/case-authorization';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
@@ -440,35 +439,37 @@ export const POST = withOrganizationAuth(async (request, context) => {
       ? 'completed_with_errors'
       : 'completed';
 
-  await db
-    .update(ingestionBatches)
-    .set({
-      status: batchStatus,
-      totalRecords: sourceRows.length,
-      processed: processedCount,
-      succeeded: succeededCount,
-      failed: failedCount,
-      skipped: skippedCount,
-      completedAt: new Date(),
-      errorSummary: failed.map((f) => ({ rowIndex: f.rowIndex, reason: f.reason })),
-    })
-    .where(and(eq(ingestionBatches.id, batchId), eq(ingestionBatches.organizationId, organizationId)));
+  // The session status and its audit commit together. A failed audit leaves the session running.
+  await withRLSContext(async (tx) => {
+    await tx
+      .update(ingestionBatches)
+      .set({
+        status: batchStatus,
+        totalRecords: sourceRows.length,
+        processed: processedCount,
+        succeeded: succeededCount,
+        failed: failedCount,
+        skipped: skippedCount,
+        completedAt: new Date(),
+        errorSummary: failed.map((f) => ({ rowIndex: f.rowIndex, reason: f.reason })),
+      })
+      .where(and(eq(ingestionBatches.id, batchId), eq(ingestionBatches.organizationId, organizationId)));
 
-  await auditLog({
-    eventType: AuditEventType.DATA_CREATE,
-    severity: failed.length ? AuditSeverity.HIGH : AuditSeverity.MEDIUM,
-    userId,
-    organizationId,
-    resource: 'grievances',
-    action: 'bulk_import',
-    details: {
-      importSessionId: batchId,
-      sourceSystem,
-      totalRows: sourceRows.length,
-      importedRows: imported.length,
-      skippedRows: skipped.length,
-      failedRows: failed.length,
-    },
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId,
+      action: 'grievance.import_batch',
+      resourceType: 'ingestion_batches',
+      resourceId: batchId,
+      details: {
+        importSessionId: batchId,
+        sourceSystem,
+        totalRows: sourceRows.length,
+        importedRows: imported.length,
+        skippedRows: skipped.length,
+        failedRows: failed.length,
+      },
+    });
   });
 
   return standardSuccessResponse({

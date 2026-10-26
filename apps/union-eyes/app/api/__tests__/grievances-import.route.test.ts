@@ -234,8 +234,47 @@ describe('grievances/import route', () => {
       failedRows: 1,
     });
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockDb, expect.objectContaining({ action: 'grievance.import_row', organizationId: TEST_ORG_ID, userId: TEST_USER_ID }));
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockDb, expect.objectContaining({
+      action: 'grievance.import_batch',
+      resourceType: 'ingestion_batches',
+      resourceId: 'batch-1',
+      organizationId: TEST_ORG_ID,
+      userId: TEST_USER_ID,
+    }));
     expect(m.trackPilotEvent).toHaveBeenCalled();
-    expect(m.auditLog).toHaveBeenCalled();
+    expect(m.auditLog).not.toHaveBeenCalled();
+  });
+
+  it('does not report a completed import when the batch audit write fails', async () => {
+    const { POST } = await loadRoute();
+    m.queueInsert([
+      { id: 'batch-1' },
+      { id: 'record-1' },
+      { id: 'grievance-1', grievanceNumber: 'GRV-IMP-1', status: 'filed' },
+    ]);
+    m.queueExecute([]);
+    m.persistAtomicAudit.mockImplementation(async (_tx: unknown, entry: { action?: string }) => {
+      if (entry.action === 'grievance.import_batch') throw new Error('audit failed');
+    });
+
+    const response = POST(new NextRequest('http://localhost/api/grievances/import', {
+      method: 'POST',
+      body: JSON.stringify({
+        format: 'json',
+        payload: [
+          {
+            type: 'individual',
+            title: 'Valid grievance title',
+            description: 'Valid grievance description with sufficient details for schema checks.',
+            createOfficialCase: true,
+          },
+        ],
+        sourceSystem: 'test-suite-import',
+      }),
+      headers: { 'content-type': 'application/json' },
+    }));
+
+    await expect(response).rejects.toThrow('audit failed');
   });
 
   it('lists recent sessions when GET has no importSessionId', async () => {
