@@ -14,18 +14,18 @@ Status: **progress, not completion. `UE_ENGINEERING_CONVERGENCE` is NOT ACHIEVED
 | `location_deletion_log` shape | **defect found by the native proof:** the Django stub (id, created_at, updated_at, deletion_type; no defaults) made every evidence insert fail, so the sweep could not record evidence and **self-service consent revocation (`DELETE /api/location/consent`) would have failed outright** | platform migration `0028_location_deletion_log_shape` (additive, idempotent), journal + README + approved lineage (UNQUALIFIED, sha256-bound) | census entry (COLUMNS_MISSING + REQUIRED_UNDECLARED) cleared |
 | Unscoped-mutation baseline | 26 | **15** | scanner now matches organization identifiers case-insensitively and accepts the owning user as the scope of `USER_RLS_REQUIRED` relations; an uncalled id-only privileged writer (`updateDSARStatus`) was retired; baseline can only shrink |
 | Canonical schema census | 235 | **231** | 3 unreferenced declarations retired (`contract_rate_cards`, `contract_amendments`, `document_search_index`); `location_deletion_log` evolved. Regenerated on a fresh Django-first PG16 + bootstrap (`UE_CENSUS_WRITE`); exactly those entries leave, none added |
-| CodeQL | 12 new alerts (10 high) in files the PR touched, with ineffective inline `codeql[...]` suppressions | 10 of 12 fixed in code (see below); no suppression added | `26cf529e0`, `ec0773035` |
+| CodeQL | 12 new alerts (10 high) in files the PR touched, with ineffective inline `codeql[...]` suppressions | fixed in code (see below); no suppression added | `26cf529e0`, `ec0773035`, `b842d8432` |
 | Schema drift / Schema Integrity (CI) | failing: the committed runtime-schema oracle and canonical manifest were stale (332 published tables vs 366 declared) and the old check passed only by text-matching `updated_at` anywhere in a file | oracle and manifest republished from the current declarations; all four CI steps pass locally | `fd067a562` |
 | Convergence check | `MUTABLE-REP-IDENTIFIER` failing since `scripts/reconcile-case-ownership.ts` was added in Continuation 7 | allowlisted with its reason (read-only CLI over the already-allowlisted reconciler) | `e289e0e70` |
 
 ### CodeQL fixes (real weaknesses, not suppressions)
 
 - `email-template-builder.tsx`: a button `href` and an image `src` came verbatim from user block content, so a `javascript:` or `data:` value reached the DOM. New `safeAttributeUrl()` allows only `http(s)` (and `mailto` for links); an unsafe image is dropped; links gain `rel="noopener noreferrer"`.
-- `request-validation` html rule, `notification-service` `stripHtml`, server fallback of `sanitizeHtml`: a single regex pass could reassemble `<script`/`<style` from nested fragments. They are now one chain ending in removal of every angle bracket, so the output cannot contain markup.
+- `request-validation` html rule, `notification-service` `stripHtml`, server fallback of `sanitizeHtml`: a single regex pass could reassemble `<script`/`<style` from nested fragments. CodeQL rejects every `<[^>]*>` strip regardless of what follows (the single-pass and loop forms both kept alerting), so they now share `stripMarkup()` (`lib/utils/strip-markup.ts`), a linear scanner that drops tags, comments and script/style content and never emits `<` or `>`. A test caught the first draft being quadratic on 200k `<`; it is now linear. The old `sanitize.test.ts` expectation (`Hellobad`) encoded script text leaking into the output and was updated to `Hello`.
 - `deterministicReportGuardrails`: the email-detection regex was polynomial on long runs of `%`; quantifiers are bounded.
 - `provision-entra-test-users.mjs`, `build-baseline.ts`: backslash is escaped before the characters it escapes.
 - Django JWT authentication returned the verifier's exception text to the caller; the detail stays in the log and the response is generic.
-- Remaining at the last remote run: one medium `js/sensitive-get-query` warning on a financial-service remittance filter. It is warning-level; the check is driven by the two high alerts fixed in `ec0773035`.
+- Remaining at the last remote run: one medium `js/sensitive-get-query` warning on a financial-service remittance filter. It is warning-level; the check is driven by the two high alerts fixed in `f27b7ff8b`.
 
 ## The 15 remaining mutation sites (reachability and reason)
 
@@ -50,17 +50,17 @@ Status: **progress, not completion. `UE_ENGINEERING_CONVERGENCE` is NOT ACHIEVED
 
 ## Exact SHAs tested
 
-Final code SHA for the gate run below: `ec07730357faf967e5666df67cafc1b970320fe3`. The commit that adds this record changes documentation and one register only.
+Final code SHA for the gate run below: `f27b7ff8b81f8d95a51786873926053a08d87505`. The commit that adds this record changes documentation and one register only.
 
 | Suite | SHA | Result |
 | --- | --- | --- |
 | Native PostgreSQL 16 and 15, fresh databases, runtime role: combined 10/10, thread-assignment 3/3, atomic-audit 6/6, census 4/4, documents 10/10, **location retention 5/5**, finance-duties 21/21, message-lifecycle 22 (+1 skipped), WorkAid 5/5 | `fd067a562` (no database code changed afterwards) | pass on both |
 | Native auth proof (pinned `pgvector/pgvector:0.8.1-pg16@sha256:33198da2…`, `AUTH_NATIVE_PROOF=1`) | `fd067a562` | 19/19 |
-| Contract tests (`--project contract-tests`, Git bash + `python3` shim) | `ec0773035` | 302/302 (10,274 tests) |
-| `pnpm lint` | `ec0773035` | exit 0 (0 errors) |
-| `turbo typecheck` (workspace) | `ec0773035` | 238/238 tasks, exit 0 |
-| Root `pnpm test:fast` | `ec0773035` | 2,440 files passed, 31 skipped, 0 failed (33,483 tests passed, 681 skipped) |
-| `apps/union-eyes` `tsc --noEmit` | `26cf529e0` + simplification in `ec0773035` (UE vitest over the touched areas 79 files / 1,678 tests) | exit 0 |
+| Contract tests (`--project contract-tests`, Git bash + `python3` shim) | `f27b7ff8b` | 302/302 (10,274 tests) |
+| `pnpm lint` | `f27b7ff8b` | exit 0 (0 errors) |
+| `turbo typecheck` (workspace) | `f27b7ff8b` | 238/238 tasks, exit 0 |
+| Root `pnpm test:fast` | `f27b7ff8b` | 2,441 files passed, 31 skipped, 0 failed (33,488 tests passed, 681 skipped) |
+| `apps/union-eyes` `tsc --noEmit` | `b842d8432` (the last commit touching typed source; later commits change tests only) | exit 0 |
 | `pnpm validate:docs`, `pnpm governance:audit`, `check-ue-convergence`, migration lineage (incl. 0028) | `fd067a562` | pass |
 | Trivy filesystem scan, CI parameters, local | `3f485c81f` | 0 HIGH/CRITICAL |
 | Browser acceptance (member, representative, staff) | — | **not run** with credentials. The synthetic Playwright E2E (4 shards) passes in CI; it is not credentialed acceptance. |
@@ -69,9 +69,9 @@ Not run: the Windows-incompatible `rls:check-enforcement` (spawns `npx` without 
 
 ## Remote CI on PR #996
 
-At `fd067a562`: 118 checks pass, 8 skipped, 2 fail. After `26cf529e0`: CodeQL 12 → 3 alerts (2 high); `ec0773035` addresses those; the PR page carries the current result. The two failures at `fd067a562` were:
+At `fd067a562`: 118 checks pass, 8 skipped, 2 fail. At `26cf529e0`: CodeQL 12 → 3 alerts; at `ec0773035`: 6 (the loop form was rejected too), which led to `stripMarkup()`. At `f27b7ff8b`: Unit Tests pass; `Analyze (javascript-typescript)`, `Publish required checks` and `Reconcile Secret Scan frozen head` failed with **GitHub API rate-limit 403s** (infrastructure, not code); the latter two were re-run, the CodeQL run is not re-runnable and needs a new push or a maintainer re-run. The PR page carries the current result. The two failures at `fd067a562` were:
 
-1. **CodeQL** — engineering, fixed above (12 → 3 → the two high alerts addressed in `ec0773035`).
+1. **CodeQL** — engineering, fixed above (12 → 3 → the two high alerts addressed in `f27b7ff8b`).
 2. **Governance Gates** — **needs a maintainer, not an engineering change.** `validate-tier-focus` requires the `approved-experiment` label because the zod 4 migration necessarily touches Tier 3/4 apps (`agrimo`, `console`, `control-plane`, `cora`, `mobility`, `nacp-exams`, `nzila-hq`, `orchestrator-api`, `trade`, `trustcore`, `trustcore-trustops`, `union-eyes-demo`, `web`, `weekone`, `zonga`) through their `package.json` ranges and call sites. The existing `owner-approved` and `security-design-reviewed` labels were applied by a maintainer account; this label is the same kind of human approval and I did not apply it. Alternatives that avoid it would leave those apps declaring `zod ^3` while resolving 4.6.7, which I judged worse than asking.
 
 ## Readiness verdicts (independent)
@@ -107,3 +107,8 @@ Finance mandates, thresholds and duty holders; member OCR policy adoption; docum
 ## External activation gates
 
 Credentialed signed-in browser journeys; OCR processor with real bytes; signature provider and its event receiver; SharePoint; live SAS issuance; WorkAid counsel-side activation and key custody (UE-CONV-G-003); the maintainer `approved-experiment` label.
+
+## Stabilisation found by the final gate runs
+
+- `lib/auth/__tests__/clc-national-role-boundary.test.ts` ran `grep -r` over `app lib actions services`, descending into `services/financial-service/node_modules`: 64 s measured with it, 3 s without; in the full root run it took ~147 s, exceeded the test timeout and failed two of three runs while passing alone. It now excludes `node_modules` and `.next`; assertions and scanned source are unchanged.
+- Gate runs: `ec0773035` passed everything locally; `b842d8432` and `5eaee35a5` each failed one root `test:fast` file (the stale `Hellobad` expectation, then the CLC timeout); `f27b7ff8b` is fully green. An earlier gate run was stopped and restarted because source was edited during it.
