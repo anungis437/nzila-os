@@ -176,6 +176,85 @@
       "evidenceOutput": "docs/union-eyes/convergence/evidence/notification-delivery-native.json",
       "failureInterpretation": "Two claim updates both returning a row means the status predicate is not held across the row lock. A second delivered insert committing means the unique index is absent. A second organization being stored means the owner trigger did not run. A processing row that is claimed means a crash between state changes can be resent.",
       "recovery": "docker rm --force the suite container. Do not apply 0032 to a shared database. Do not weaken a unique violation into a second successful insert."
+    },
+    {
+      "id": "election-certificate-succession-native",
+      "status": "READY_FOR_VS_EXECUTION",
+      "risk": "P0",
+      "dependsOn": [],
+      "convergenceRegister": [
+        "UE-CONV-K-009"
+      ],
+      "sourceCommit": "f44afbbe325dd16516e83e252de35edcb6e0d7ae",
+      "sourceCommitCommand": "git log -1 --format=%H -- apps/union-eyes/db/__tests__/election-certificate-succession.native.test.ts apps/union-eyes/db/migrations-platform/0033_election_certificate_successions.sql",
+      "test": "apps/union-eyes/db/__tests__/election-certificate-succession.native.test.ts",
+      "command": "UE_ELECTION_SUCCESSION_NATIVE_PROOF=1 pnpm exec vitest run apps/union-eyes/db/__tests__/election-certificate-succession.native.test.ts",
+      "workingDirectory": "repository root of agents/ue-cursor-final-closure",
+      "environment": {
+        "UE_ELECTION_SUCCESSION_NATIVE_PROOF": "1",
+        "docker": "required; the suite starts and removes its own container",
+        "image": "pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337",
+        "role": "postgres superuser inside the disposable container; Cursor does not run this"
+      },
+      "fixtureSetup": "beforeAll starts the pinned image, creates minimal council_elections and public.audit_logs tables, and applies apps/union-eyes/db/migrations-platform/0033_election_certificate_successions.sql. 0033 stays UNQUALIFIED.",
+      "cleanup": "afterAll closes the pool and runs docker rm --force on the container it created. If the process is killed first, remove any container named ue-election-succession-*.",
+      "expect": {
+        "success": [
+          "Two concurrent kernel grants for the same certified election and the same decision produce one succession row and one uncertified successor.",
+          "The predecessor verified_by value remains the original certifier.",
+          "0033 stays UNQUALIFIED. Do not record PASS from a skipped run."
+        ],
+        "denial": [
+          "The file is skipped unless UE_ELECTION_SUCCESSION_NATIVE_PROOF=1. A skipped run is not evidence.",
+          "Do not point the suite at a shared or production database.",
+          "Do not apply 0033 to a shared database.",
+          "The HTTP succession route supplies no grant. A passing native file does not make that route return 200.",
+          "The council vote route stays 501."
+        ]
+      },
+      "evidenceOutput": "docs/union-eyes/convergence/evidence/election-certificate-succession-native.json",
+      "failureInterpretation": "Two succession rows means the predecessor lock or the unique successor key did not hold. A changed verified_by means the certified row was rewritten. A skipped run is not a pass.",
+      "recovery": "docker rm --force the suite container. Do not apply 0033 to a shared database. Do not rewrite the certified predecessor to make the suite pass."
+    },
+    {
+      "id": "ownership-backfill-native",
+      "status": "READY_FOR_VS_EXECUTION",
+      "risk": "P0",
+      "dependsOn": [],
+      "convergenceRegister": [
+        "UE-CONV-B-001"
+      ],
+      "sourceCommit": "f44afbbe325dd16516e83e252de35edcb6e0d7ae",
+      "sourceCommitCommand": "git log -1 --format=%H -- apps/union-eyes/db/__tests__/authority-kernel-case-backfill.native.test.ts apps/union-eyes/lib/authority/store/case-ownership-backfill.ts",
+      "test": "apps/union-eyes/db/__tests__/authority-kernel-case-backfill.native.test.ts",
+      "command": "UE_OWNERSHIP_NATIVE_PROOF=1 pnpm exec vitest run apps/union-eyes/db/__tests__/authority-kernel-case-backfill.native.test.ts",
+      "workingDirectory": "repository root of agents/ue-cursor-final-closure",
+      "environment": {
+        "UE_OWNERSHIP_NATIVE_PROOF": "1",
+        "docker": "required; the suite starts and removes its own container",
+        "image": "pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337",
+        "role": "postgres superuser for schema install, then union_eyes_runtime for execution; Cursor does not run this"
+      },
+      "fixtureSetup": "beforeAll starts the pinned image and installs the authority-kernel fixture schema used by the PGlite harness, then seeds two synthetic grievances. This is not an institutional backfill.",
+      "cleanup": "afterAll closes the admin client and runs docker rm --force on the container it created. If the process is killed first, remove any container named ue-ownership-backfill-*.",
+      "expect": {
+        "success": [
+          "Two concurrent executions of the same approved plan and source revision produce exactly two live assignee relationships.",
+          "One execution reports replayed false and the other replayed true, and each receipt names both cases.",
+          "A later execution of the same approval returns replayed true and does not add a relationship.",
+          "Do not record PASS from a skipped run or from the PGlite file."
+        ],
+        "denial": [
+          "The file is skipped unless UE_OWNERSHIP_NATIVE_PROOF=1. A skipped run is not evidence.",
+          "Do not point the suite at a shared or production database.",
+          "Do not execute a protected institutional backfill. The fixture is synthetic.",
+          "A stale source revision must fail rather than assign.",
+          "Deferred findings are not assigned."
+        ]
+      },
+      "evidenceOutput": "docs/union-eyes/convergence/evidence/ownership-backfill-native.json",
+      "failureInterpretation": "More than two live assignee rows means both transactions assigned. Two replayed results with zero rows means neither assigned. A thrown unique violation means the advisory lock did not serialize the two executions.",
+      "recovery": "docker rm --force the suite container. Do not insert relationships by hand to satisfy the count. Do not run the reconciler with --execute against an institutional database."
     }
   ],
   "nextEngineeringAction": [
@@ -190,6 +269,7 @@
     "Platform ledger appends commit ledger_entry_appended in the same transaction as the entry as of f44ed6276778f3900e42ef7f158b531816da3320. A batch append audits every entry in that transaction. A failed audit leaves no new entry. This does not issue a financial mandate.",
     "Schema and mutation work is the batch program docs/union-eyes/convergence/register/ue-schema-mutation-batches.json. It assigns all 231 census entries and the original 13 mutation-scope statements. Program applyNow stays false. The five mutation batches are implemented. mutation-finance-latent is 61487bc5c7b81084e8f59c27fb2ba0e6c4cb9fbe: the seven statements bind the caller tenant and do not issue a financial mandate. mutation-clc-sync-log is fdae2e3abe3abb5a302ff6b76dc12c14d693122c: the partnership service no longer writes the tenant table, and the relation is not dropped. mutation-pilot-rebind is 8e99a08a08d2ff91553ed8a75f2bb250b2e3647a: comments no longer hide or fake a predicate. mutation-workbook-unclaimed is 2443ef34ec0f68d7a2b5c76d3efed8035a9fee4c. mutation-location-retention is 922e8e14a73da3055c10b29e8398ed2674a44f1d. The live mutation scan counts 0. The source count stays 13. Workbook two-session proof and location combined-schema proof stay READY_FOR_VS_EXECUTION. The census is still 231. The next batch is schema-retire-declaration. schema-retire-declaration is source-retired at 08e1d4e185e310124337ff1b8d1e696ad21baf1e: org_usage, signature_templates, and signature_webhooks_log are no longer Drizzle declarations. Django SignatureTemplates and SignatureWebhooksLog stay. No DROP was added. The census file still lists the three tables. Census regeneration is READY_FOR_VS_EXECUTION. The census is still 231. UE-CONV-H-007 stays IN_PROGRESS. schema-live-unreferenced is source-retired at ad8a2c05b97d0b2bc8a13e57a991b79350569854. bank_accounts, bank_reconciliations, erp_invoices, clc_remittance_mapping, and grievance_timeline are no longer union-eyes Drizzle declarations. Django still defines them. packages/db exec-data.ts still declares erp_invoices. No DROP was added. The census file still lists them. Census regeneration is READY_FOR_VS_EXECUTION. budget_pool, dues_rates, gl_account_mappings, grievance_settlements, integration_webhooks, payment_cycles, payment_disputes, and safety_training_records stay declared. The unwired admin-actions reader no longer returns a storage figure. signature_documents.template_id stays, and a schema diff must not drop signature_documents_template_id_signature_templates_id_fk. The census is still 231. 0031_reachable_stub_shape was revised in place at d4f67bc1b177da3adc2b663cb6e7c951211627c0 before any apply. The previous unqualified bytes were never executed. It still covers data_anonymization_log, employment_history, job_classifications, and member_leaves. An existing column of the wrong type, length, or numeric precision fails the transaction. Constraint counts and row security must be unchanged at the end. NOT NULL only when the relation is empty. Populated tables keep the new columns nullable. No keys, no RLS change, no destructive statement. It is registered UNQUALIFIED. Do not apply it here. Native role, grant, and RLS proof is READY_FOR_VS_EXECUTION. Census regeneration after apply is READY_FOR_VS_EXECUTION. notification_history is no longer a union-eyes Drizzle declaration. The financial-service shadow schema still declares it. The BullMQ email, SMS, and notification workers are removed. They had no production importer. The live sender is lib/services/notification-service.ts. It writes notification_delivery_log for queued, attempted, accepted, retried, delivered, failed, and suppressed communications. Provider acceptance is accepted. Confirmed delivery is delivered. A user-preference suppression is not a successful send. A rejected ledger write does not report success. bfb81cae6816acb45b4e1825ebbde62ff0d6c8d8 holds an attempt with no outcome, a provider acceptance, a bounce, and a suppression instead of sending again. A confirmed failure may be retried under the same idempotency key. A provider acceptance that fails to record returns uncertain, and a later send with that key does not call the provider. Duplicate callbacks and a callback that matches more than one tenant are not written. Confirmed delivery is still only the delivered event. 0031 now compares constraint, index, policy, and grant definitions. A second worker loses the retry when the queue row is no longer pending, failed, or retrying, and does not send. 0032_notification_callback_identity is an UNQUALIFIED forward migration. It adds a partial unique index on (external_event_id, event) and a locked owner check so one provider message belongs to one organization. It refuses existing duplicates and does not delete a row. A unique callback insert is treated as a duplicate. A cross-tenant constraint is treated as ambiguous. Native execution of 0031, 0032, concurrent sends, simultaneous callbacks, a crashed processing row, uncertain acceptance, retry competition, and cross-tenant identity is notification-delivery-native and stays READY_FOR_VS_EXECUTION. No DROP was added. The sixteen dependency holds and the six service-imported declarations are schema-verify-dead-required. accessibility_audits, accessibility_issues, financial_audit_log, gss_applications, indigenous_member_data, and member_addresses stay because their services read or write them. Accessibility, indigenous data, and LMBP immigration compatibility files re-export the domain declaration. None of those six services is reached from an App Router entry. Census column gaps are not evolved here. The only remaining schema-verify-dead-module row is notification_history, whose union-eyes declaration is already removed. The census is still 231. Do not execute a hold batch by shrinking a ratchet. Do not edit the route-coverage scanner. Do not hand-edit the census. Do not DROP a relation. UE-CONV-H-007 and UE-CONV-K-006 stay IN_PROGRESS.",
     "Finance stays fail-closed until a governed issuance and activation workflow exists. Do not invent mandate holders.",
+    "Election successor persistence and the live-mandate gate on remittance and payroll-list reads are source commit f44afbbe325dd16516e83e252de35edcb6e0d7ae. Platform 0033 is UNQUALIFIED and unapplied. Native succession and ownership concurrency stay READY_FOR_VS_EXECUTION. Cursor does not set UE_ELECTION_SUCCESSION_NATIVE_PROOF or UE_OWNERSHIP_NATIVE_PROOF. UE-CONV-K-009, UE-CONV-H-007 and UE-CONV-K-006 stay IN_PROGRESS. WorkAid screens and the remaining persona journeys stay open. CURSOR_IMPLEMENTATION_COMPLETE remains false.",
     "CURSOR_IMPLEMENTATION_COMPLETE remains false."
   ]
 }
