@@ -144,7 +144,7 @@
       "convergenceRegister": [
         "UE-CONV-H-007"
       ],
-      "sourceCommit": "PENDING_COMMIT_HASH",
+      "sourceCommit": "d00d6b9a95a8532387d200db3ebd6c82766b36a3",
       "sourceCommitCommand": "git log -1 --format=%H -- apps/union-eyes/db/__tests__/notification-delivery-native.test.ts apps/union-eyes/db/migrations-platform/0032_notification_callback_identity.sql",
       "test": "apps/union-eyes/db/__tests__/notification-delivery-native.test.ts",
       "command": "UE_DELIVERY_NATIVE_PROOF=1 pnpm exec vitest run apps/union-eyes/db/__tests__/notification-delivery-native.test.ts",
