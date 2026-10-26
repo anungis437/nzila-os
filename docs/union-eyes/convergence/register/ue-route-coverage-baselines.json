@@ -1,7 +1,5 @@
 {
  "register": "UE-CONV-K-008",
- "auditGap": [
-  "icra/report/[assessmentId]/review/route.ts"
- ],
+ "auditGap": [],
  "kernelPending": []
 }

@@ -36,14 +36,14 @@
    "WITH_API": 169
   },
   "mutatingByAudit": {
-   "ATOMIC": 140,
+   "ATOMIC": 141,
    "ATOMIC_SERVICE": 141,
    "COMPUTE_ONLY": 34,
    "CRUD_ATOMIC": 299,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 22,
    "NO_WRITES_FOUND": 14,
-   "NONE": 61
+   "NONE": 60
   },
   "mutatingByData": {
    "AMBIENT_DB": 14,
@@ -8413,7 +8413,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "NONE"
+   "audit": "ATOMIC"
   },
   {
    "route": "icra/report/[assessmentId]/route.ts",

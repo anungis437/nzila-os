@@ -9,6 +9,7 @@ const m = vi.hoisted(() => ({
   embedPersistedAdaptiveReportAISlot: vi.fn(),
   selectQueue: [] as unknown[][],
   updateThrow: false,
+  persistAtomicAudit: vi.fn(),
 }));
 
 function makeSelectChain(rows: unknown[]) {
@@ -33,6 +34,7 @@ const mockDb: any = {
 
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: (fn: (tx: any) => Promise<unknown>) => fn(mockDb) }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/icra/questions', () => ({ ALL_QUESTIONS: [] }));
 vi.mock('@/lib/icra/adaptation', () => ({
   extractPersistedAdaptiveReportAISlot: m.extractPersistedAdaptiveReportAISlot,
@@ -54,6 +56,7 @@ describe('icra/report/[assessmentId]/review route', () => {
     vi.clearAllMocks();
     m.selectQueue = [];
     m.updateThrow = false;
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     process.env.CRON_SECRET_KEY = 'secret';
     m.extractPersistedAdaptiveReportAISlot.mockReturnValue(null);
     m.resolveAdaptiveReportAISlot.mockReturnValue({ reviewWorkflow: { status: 'pending' } });
@@ -123,5 +126,43 @@ describe('icra/report/[assessmentId]/review route', () => {
     const json = await response.json();
     expect(json.success).toBe(true);
     expect(json.reviewStatus).toBe('approved');
+    // An unclaimed prospect assessment has no tenant to audit against; the decision lives in its own row.
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  const ORG = '22222222-2222-4222-8222-222222222222';
+  const review = (summary = 'approved by governance') =>
+    new NextRequest('http://localhost/api/icra/report/a/review', {
+      method: 'POST', headers: { 'content-type': 'application/json', 'x-cron-secret': 'secret' }, body: JSON.stringify({ action: 'approve', summary, reviewerRole: 'exec_sponsor' }),
+    });
+  const context = { params: Promise.resolve({ assessmentId: '11111111-1111-1111-1111-111111111111' }) };
+
+  it('audits the decision of a claimed assessment in the same transaction, without the summary text', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue.push([{ id: 'a1', organizationContext: {}, locale: 'en-CA', claimedOrgId: ORG }], [{ profilePayload: { generatedAt: '2026-01-01' } }]);
+
+    const response = await POST(review('PRIVATE REVIEW SUMMARY'), context);
+
+    expect(response.status).toBe(200);
+    expect(m.persistAtomicAudit).toHaveBeenCalledTimes(1);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockDb, expect.objectContaining({
+      organizationId: ORG,
+      userId: 'system:icra-report-review',
+      action: 'icra.report.review',
+      resourceId: '11111111-1111-1111-1111-111111111111',
+      details: expect.objectContaining({ decision: 'approve', reviewerRole: 'exec_sponsor', reviewStatus: 'approved' }),
+    }));
+    expect(JSON.stringify(m.persistAtomicAudit.mock.calls)).not.toContain('PRIVATE REVIEW SUMMARY');
+  });
+
+  it('fails the request, and reports no success, when the audit cannot be written', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue.push([{ id: 'a1', organizationContext: {}, locale: 'en-CA', claimedOrgId: ORG }], [{ profilePayload: { generatedAt: '2026-01-01' } }]);
+    m.persistAtomicAudit.mockRejectedValue(new Error('audit sink unavailable'));
+
+    const response = await POST(review(), context);
+
+    expect(response.status).toBe(500);
+    expect((await response.json()).success).toBeUndefined();
   });
 });
