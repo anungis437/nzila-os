@@ -99,4 +99,40 @@ describe('WorkAidJourney', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Record referral' }))
     expect(await screen.findByRole('status')).toHaveTextContent('Nothing was sent to counsel')
   })
+
+  it('lets a member refer a live consent only when the server says nothing was delivered', async () => {
+    const calls: string[] = []
+    vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
+      calls.push(`${init?.method ?? 'GET'} ${url}`)
+      if (String(url).includes('consent-text') && !String(url).includes('proposals')) return Response.json({ success: false, code: 'CONSENT_TEXT_UNAVAILABLE' }, { status: 409 })
+      if ((init?.method ?? 'GET') === 'POST') return Response.json({ success: true, delivered: false, counselAcknowledged: false }, { status: 201 })
+      return Response.json({ success: true, consents: calls.some((call) => call.startsWith('POST')) ? [{ ...consent, referred: true }] : [consent] })
+    }))
+    renderJourney('member')
+    fireEvent.click(await screen.findByRole('button', { name: 'Refer this matter' }))
+    expect(await screen.findByRole('status')).toHaveTextContent('Nothing was sent to counsel')
+    expect(calls.some((call) => call.startsWith('POST /api/workaid/referrals'))).toBe(true)
+  })
+
+  it('starts with an empty wording form and adopts only a proposal the server stored', async () => {
+    const proposal = { id: '66666666-6666-4666-8666-666666666666', version: 'fixture-1', body: 'TEST FIXTURE WORDING ONLY', bodySha256: 'ab', ownProposal: false, proposedAt: '2026-10-26T00:00:00.000Z' }
+    vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
+      if ((init?.method ?? 'GET') === 'POST' && String(url).endsWith('/proposals')) {
+        const sent = JSON.parse(String(init?.body))
+        expect(sent).toEqual({ version: 'fixture-2', body: 'caller supplied text' })
+        return Response.json({ success: true, proposalId: proposal.id, adopted: false }, { status: 201 })
+      }
+      if (String(url).endsWith('/adopt')) return Response.json({ success: true, current: true })
+      return Response.json({ success: true, proposals: [proposal], referable: [] })
+    }))
+    renderJourney('staff', 'fr')
+    expect(await screen.findByTestId('wording-adoption')).toBeInTheDocument()
+    expect(screen.getByLabelText('Texte')).toHaveValue('')
+    fireEvent.change(screen.getByLabelText('Version'), { target: { value: 'fixture-2' } })
+    fireEvent.change(screen.getByLabelText('Texte'), { target: { value: 'caller supplied text' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Proposer le texte' }))
+    expect(await screen.findByRole('status')).toHaveTextContent("n'est pas un texte de consentement")
+    fireEvent.click(await screen.findByRole('button', { name: 'Adopter ce texte' }))
+    expect(await screen.findByRole('status')).toHaveTextContent('texte de consentement en vigueur')
+  })
 })

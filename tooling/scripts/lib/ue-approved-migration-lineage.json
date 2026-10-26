@@ -186,6 +186,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-final-convergence",
         "note": "FORCE RLS for the union-side WorkAid relations created by platform 0027. Not yet applied to any clone or live database."
+      },
+      {
+        "tag": "0028_workaid_consent_wording_proposal_rls",
+        "sha256": "0ea16935edf9683ecbe5e81c7e0c9466e78fde435d784e21e06e31f556a13a5c",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "FORCE RLS for consent-wording proposals created by platform 0036. Does not insert wording. Has not been applied to a native or live database."
       }
     ],
     "platform": [
@@ -335,6 +342,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Lets a recusal name a council election and refuses a stored delegation of governance:supersede_certified_result. Does not issue that power. Has not been applied to a native or live database."
+      },
+      {
+        "tag": "0036_workaid_consent_wording_proposals",
+        "sha256": "8eb7b651928314e4e632f5e09f0cd2bfa0904aa8408c1cac2f2d6c0556e9702a",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Stores a proposed consent text until a different executive adopts it. Does not insert approved wording. Has not been applied to a native or live database."
       }
     ]
   }

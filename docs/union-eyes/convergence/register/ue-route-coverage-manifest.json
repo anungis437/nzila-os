@@ -1,9 +1,9 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 990,
-  "mutating": 715,
-  "kernel": 58,
+  "routes": 993,
+  "mutating": 718,
+  "kernel": 61,
   "byGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 12,
@@ -15,7 +15,7 @@
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 67,
    "ROLE_AUTH": 125,
-   "SESSION_AUTH": 59,
+   "SESSION_AUTH": 62,
    "WEBHOOK_SIGNATURE": 4,
    "WITH_API": 278,
    "WITH_API_PUBLIC": 2
@@ -31,13 +31,13 @@
    "PLATFORM_AUTH_HANDLER": 7,
    "RETIRED": 60,
    "ROLE_AUTH": 74,
-   "SESSION_AUTH": 29,
+   "SESSION_AUTH": 32,
    "WEBHOOK_SIGNATURE": 4,
    "WITH_API": 171
   },
   "mutatingByAudit": {
    "ATOMIC": 143,
-   "ATOMIC_SERVICE": 140,
+   "ATOMIC_SERVICE": 143,
    "COMPUTE_ONLY": 34,
    "CRUD_ATOMIC": 299,
    "EXEMPT_BALLOT_SECRECY": 2,
@@ -50,7 +50,7 @@
    "CRUD_TENANT_TX": 299,
    "NONE": 195,
    "SYSTEM_CONTEXT": 58,
-   "TENANT_TX": 149
+   "TENANT_TX": 152
   }
  },
  "routes": [
@@ -12335,6 +12335,43 @@
    "subordinate": null,
    "data": "NONE",
    "audit": "NO_WRITES_FOUND"
+  },
+  {
+   "route": "workaid/consent-text/proposals/[proposalId]/adopt/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "SESSION_AUTH",
+   "kernel": true,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
+   "route": "workaid/consent-text/proposals/[proposalId]/withdraw/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "SESSION_AUTH",
+   "kernel": true,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
+   "route": "workaid/consent-text/proposals/route.ts",
+   "methods": [
+    "GET",
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "SESSION_AUTH",
+   "kernel": true,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "workaid/consent-text/route.ts",

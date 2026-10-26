@@ -14,9 +14,12 @@ import { insertRelationship, revokeRelationship } from '../../lib/authority/stor
 import { declareOwnRecusal } from '../../lib/authority/store/lifecycle'
 import { recordCounselAcceptance, referToWorkAid } from '../../lib/authority/store/workflow'
 import {
+  adoptConsentWording,
   authoriseWorkAidDocument,
   createWorkAidShare,
   grantWorkAidConsent,
+  listOpenConsentWordingProposals,
+  proposeConsentWording,
   listMemberWorkAidConsents,
   listReferableWorkAidConsents,
   loadCurrentConsentText,
@@ -24,6 +27,7 @@ import {
   recordConsentText,
   referMatterToWorkAid,
   retireConsentText,
+  withdrawConsentWordingProposal,
   revokeWorkAidConsent,
   revokeWorkAidDocumentAuthorisation,
 } from '../../lib/authority/store/workaid-disclosure'
@@ -617,5 +621,38 @@ describe('storage is append-only, actor-bound and tenant-isolated', () => {
     const other = await k.as(U.member2)((t) => listMemberWorkAidConsents(t, k.deps, { organizationId: ORG, memberUserId: U.member2 }))
     expect(other.find((x) => x.consentId === f.consentId)).toBeUndefined()
     await expect(k.as(U.member2)((t) => listMemberWorkAidConsents(t, k.deps, { organizationId: ORG, memberUserId: U.member }))).rejects.toThrow(/ACTOR_NOT_SESSION/)
+  })
+})
+
+describe('consent wording adoption requires a second executive', () => {
+  const version = 'fixture-adoption-1'
+  const body = 'TEST FIXTURE WORDING ONLY (not approved legal text): second-executive adoption sample.'
+
+  it('keeps capture closed until a different executive adopts the stored text', async () => {
+    const propose = (user: string) => k.as(user)((t) => proposeConsentWording(t, k.deps, { organizationId: ORG, proposerUserId: user, version, body }))
+    await expect(propose(U.steward)).rejects.toThrow(/CONSENT_TEXT_NOT_AUTHORIZED/)
+    await expect(propose(U.president)).rejects.toThrow(/CONSENT_TEXT_NOT_AUTHORIZED/)
+    const proposalId = await propose(U.vp)
+    await expect(k.as(U.vp)((t) => adoptConsentWording(t, k.deps, { organizationId: ORG, adopterUserId: U.vp, proposalId }))).rejects.toThrow(/WORDING_ADOPTION_SEGREGATION/)
+    await expect(k.as(U.treasurer)((t) => adoptConsentWording(t, k.deps, { organizationId: ORG, adopterUserId: U.treasurer, proposalId }))).rejects.toThrow(/CONSENT_TEXT_NOT_AUTHORIZED/)
+    expect(await k.as(U.member)((t) => loadCurrentConsentText(t, ORG))).toMatchObject({ version: 'v1' })
+
+    await k.grantOffice(U.treasurer, U.president, U.vp)
+    const open = await k.as(U.treasurer)((t) => listOpenConsentWordingProposals(t, k.deps, { organizationId: ORG, reviewerUserId: U.treasurer }))
+    expect(open.find((row) => row.id === proposalId)).toMatchObject({ version, body, ownProposal: false })
+    const own = await k.as(U.vp)((t) => listOpenConsentWordingProposals(t, k.deps, { organizationId: ORG, reviewerUserId: U.vp }))
+    expect(own.find((row) => row.id === proposalId)?.ownProposal).toBe(true)
+
+    const adopted = await k.as(U.treasurer)((t) => adoptConsentWording(t, k.deps, { organizationId: ORG, adopterUserId: U.treasurer, proposalId }))
+    expect(adopted.version).toBe(version)
+    expect(await k.as(U.member)((t) => loadCurrentConsentText(t, ORG))).toMatchObject({ version, bodySha256: adopted.bodySha256 })
+    const caseId = await newCase()
+    const granted = await grant(caseId, { textVersion: version, acknowledgedTextSha256: adopted.bodySha256 })
+    expect(granted.matterId).toMatch(/^[0-9a-f-]{36}$/)
+
+    expect((await k.as(U.member, ORG_B)((t) => t.query<{ n: string }>(`SELECT count(*)::text n FROM ue_authority_workaid_consent_text_proposals`))).rows[0].n).toBe('0')
+    await expect(k.as(U.treasurer, ORG_B)((t) => adoptConsentWording(t, k.deps, { organizationId: ORG_B, adopterUserId: U.treasurer, proposalId }))).rejects.toThrow(/CONSENT_TEXT_NOT_AUTHORIZED/)
+    await expect(k.as(U.treasurer)((t) => adoptConsentWording(t, k.deps, { organizationId: ORG, adopterUserId: U.treasurer, proposalId: newUuid() }))).rejects.toThrow(/NOT_FOUND|no consent wording proposal/)
+    await expect(k.as(U.vp)((t) => withdrawConsentWordingProposal(t, k.deps, { organizationId: ORG, proposerUserId: U.vp, proposalId }))).rejects.toMatchObject({ code: 'ALREADY_TERMINAL' })
   })
 })

@@ -260,6 +260,13 @@
       "when": 1758920000000,
       "tag": "0035_election_supersession_authority_scope",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1758930000000,
+      "tag": "0036_workaid_consent_wording_proposals",
+      "breakpoints": true
     }
   ]
 }

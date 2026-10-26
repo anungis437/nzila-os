@@ -40,6 +40,9 @@ const CODE = /\b([A-Z][A-Z0-9_]{3,})\b/
 
 /** Maps a store refusal to a status. Anything that is not a deliberate refusal is rethrown (a 500, never a guess). */
 export function workAidErrorResponse(error: unknown): NextResponse {
+  if (error instanceof AuthorityStoreError && error.message.startsWith('STORE_UNAPPLIED')) {
+    return NextResponse.json({ success: false, error: error.code, code: 'STORE_UNAPPLIED' }, { status: 501 })
+  }
   if (error instanceof AuthorityStoreError) {
     const code = CODE.exec(error.message)?.[1] ?? error.code
     const status: Record<AuthorityStoreError['code'], number> = {

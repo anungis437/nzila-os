@@ -122,6 +122,181 @@ export async function loadCurrentConsentText(exec: SqlExecutor, organizationId: 
   return r ? { id: String(r.id), version: String(r.version), body: String(r.body), bodySha256: String(r.body_sha256), effectiveAt: toDate(r.effective_at) } : null
 }
 
+const WORDING_VERSION = /^[A-Za-z0-9._-]{1,64}$/
+
+function assertWordingInput(version: string, body: string): { version: string; body: string } {
+  const trimmedVersion = typeof version === 'string' ? version.trim() : ''
+  const trimmedBody = typeof body === 'string' ? body.trim() : ''
+  if (!WORDING_VERSION.test(trimmedVersion) || trimmedBody.length === 0 || trimmedBody.length > 8000) {
+    throw new AuthorityStoreError('INVALID_CONTEXT', 'WORDING_INVALID: a version and the institution-supplied wording are required')
+  }
+  return { version: trimmedVersion, body: trimmedBody }
+}
+
+async function requireProposalStore(exec: SqlExecutor): Promise<void> {
+  const rel = (await exec.query<{ rel: string | null }>(`SELECT to_regclass('public.ue_authority_workaid_consent_text_proposals') AS rel`)).rows[0]?.rel
+  if (!rel) throw new AuthorityStoreError('PRECONDITION', 'STORE_UNAPPLIED: consent wording proposals are not installed')
+}
+
+function isProposalVersionTaken(error: unknown): boolean {
+  const code = typeof error === 'object' && error && 'code' in error ? String((error as { code?: string }).code) : ''
+  const message = error instanceof Error ? error.message : String(error)
+  return code === '23505' || message.includes('ue_authority_wa_proposal_open_uq')
+}
+
+export interface ConsentWordingProposalView {
+  id: string
+  version: string
+  body: string
+  bodySha256: string
+  ownProposal: boolean
+  proposedAt: Date
+}
+
+/**
+ * Records institution-supplied wording as a proposal. It is not current consent text.
+ * The body is the caller's text. This function does not author wording.
+ */
+export async function proposeConsentWording(
+  exec: SqlExecutor,
+  deps: Deps,
+  i: { organizationId: string; proposerUserId: string; version: string; body: string },
+): Promise<string> {
+  await requireProposalStore(exec)
+  requireUuids(i.organizationId)
+  requirePrincipals(i.proposerUserId)
+  await bindSessionActor(exec, i.proposerUserId, 'consent wording proposer')
+  await requireExecutiveOffice(exec, deps, i.organizationId, i.proposerUserId, 'propose')
+  const wording = assertWordingInput(i.version, i.body)
+  let id: string
+  try {
+    id = String(
+      (
+        await exec.query<Row>(
+          `INSERT INTO ue_authority_workaid_consent_text_proposals (organization_id, version, body, body_sha256, proposed_by)
+           VALUES ($1,$2,$3,encode(sha256(convert_to($3, 'UTF8')), 'hex'),$4) RETURNING id::text AS id`,
+          [i.organizationId, wording.version, wording.body, i.proposerUserId],
+        )
+      ).rows[0].id,
+    )
+  } catch (error) {
+    if (isProposalVersionTaken(error)) throw new AuthorityStoreError('PRECONDITION', 'WORDING_ALREADY_PROPOSED: an open proposal already uses this version')
+    throw error
+  }
+  await auditAuthorityMutation(exec, { organizationId: i.organizationId, action: 'workaid.consent_text_propose', resourceType: 'ue_authority_workaid_consent_text_proposals', resourceId: id, details: { version: wording.version } })
+  return id
+}
+
+/** Open proposals in this organization. The other executive's identity is not returned. */
+export async function listOpenConsentWordingProposals(
+  exec: SqlExecutor,
+  deps: Deps,
+  i: { organizationId: string; reviewerUserId: string },
+): Promise<ConsentWordingProposalView[]> {
+  await requireProposalStore(exec)
+  requireUuids(i.organizationId)
+  requirePrincipals(i.reviewerUserId)
+  await bindSessionActor(exec, i.reviewerUserId, 'consent wording reviewer')
+  await requireExecutiveOffice(exec, deps, i.organizationId, i.reviewerUserId, 'review')
+  const rows = (
+    await exec.query<Row>(
+      `SELECT id::text AS id, version, body, body_sha256, proposed_by, proposed_at
+         FROM ue_authority_workaid_consent_text_proposals
+        WHERE organization_id = $1 AND adopted_at IS NULL AND withdrawn_at IS NULL
+        ORDER BY proposed_at ASC, created_at ASC`,
+      [i.organizationId],
+    )
+  ).rows
+  return rows.map((r) => ({
+    id: String(r.id),
+    version: String(r.version),
+    body: String(r.body),
+    bodySha256: String(r.body_sha256),
+    ownProposal: String(r.proposed_by) === i.reviewerUserId,
+    proposedAt: toDate(r.proposed_at),
+  }))
+}
+
+/**
+ * Adopts a proposal by inserting the stored body as current consent wording.
+ * The adopter cannot change the text, and cannot be the proposer.
+ */
+export async function adoptConsentWording(
+  exec: SqlExecutor,
+  deps: Deps,
+  i: { organizationId: string; adopterUserId: string; proposalId: string },
+): Promise<{ textId: string; version: string; bodySha256: string }> {
+  await requireProposalStore(exec)
+  requireUuids(i.organizationId, i.proposalId)
+  requirePrincipals(i.adopterUserId)
+  await bindSessionActor(exec, i.adopterUserId, 'consent wording adopter')
+  await requireExecutiveOffice(exec, deps, i.organizationId, i.adopterUserId, 'adopt')
+  const row = (
+    await exec.query<Row>(
+      `SELECT version, body, body_sha256, proposed_by, adopted_at, withdrawn_at
+         FROM ue_authority_workaid_consent_text_proposals
+        WHERE organization_id = $1 AND id = $2`,
+      [i.organizationId, i.proposalId],
+    )
+  ).rows[0]
+  if (!row) throw new AuthorityStoreError('NOT_FOUND', 'no consent wording proposal with this id in this organization')
+  if (row.adopted_at || row.withdrawn_at) throw new AuthorityStoreError('ALREADY_TERMINAL', 'the consent wording proposal is already adopted or withdrawn')
+  if (String(row.proposed_by) === i.adopterUserId) throw new AuthorityStoreError('DENIED', 'WORDING_ADOPTION_SEGREGATION: the proposer cannot adopt the wording')
+  const now = clock(deps)
+  const textId = await recordConsentText(exec, deps, {
+    organizationId: i.organizationId,
+    recorderUserId: i.adopterUserId,
+    version: String(row.version),
+    body: String(row.body),
+    effectiveAt: now,
+  })
+  const updated = await exec.query(
+    `UPDATE ue_authority_workaid_consent_text_proposals
+        SET adopted_by = $3, adopted_at = $4, adopted_text_id = $5
+      WHERE organization_id = $1 AND id = $2 AND adopted_at IS NULL AND withdrawn_at IS NULL
+      RETURNING id`,
+    [i.organizationId, i.proposalId, i.adopterUserId, now, textId],
+  )
+  if (updated.rows.length !== 1) throw new AuthorityStoreError('ALREADY_TERMINAL', 'the consent wording proposal is already adopted or withdrawn')
+  await auditAuthorityMutation(exec, {
+    organizationId: i.organizationId,
+    action: 'workaid.consent_text_adopt',
+    resourceType: 'ue_authority_workaid_consent_text_proposals',
+    resourceId: i.proposalId,
+    details: { version: String(row.version), textId },
+  })
+  return { textId, version: String(row.version), bodySha256: String(row.body_sha256) }
+}
+
+/** The proposer withdraws an open proposal. It never becomes consent wording. */
+export async function withdrawConsentWordingProposal(
+  exec: SqlExecutor,
+  deps: Deps,
+  i: { organizationId: string; proposerUserId: string; proposalId: string },
+): Promise<void> {
+  await requireProposalStore(exec)
+  requireUuids(i.organizationId, i.proposalId)
+  requirePrincipals(i.proposerUserId)
+  await bindSessionActor(exec, i.proposerUserId, 'consent wording proposer')
+  await requireExecutiveOffice(exec, deps, i.organizationId, i.proposerUserId, 'withdraw')
+  const row = (
+    await exec.query<Row>(
+      `SELECT proposed_by, adopted_at, withdrawn_at FROM ue_authority_workaid_consent_text_proposals WHERE organization_id = $1 AND id = $2`,
+      [i.organizationId, i.proposalId],
+    )
+  ).rows[0]
+  if (!row) throw new AuthorityStoreError('NOT_FOUND', 'no consent wording proposal with this id in this organization')
+  if (row.adopted_at || row.withdrawn_at) throw new AuthorityStoreError('ALREADY_TERMINAL', 'the consent wording proposal is already adopted or withdrawn')
+  if (String(row.proposed_by) !== i.proposerUserId) throw new AuthorityStoreError('DENIED', 'WORDING_WITHDRAWAL_NOT_PROPOSER: only the proposer may withdraw this wording')
+  const updated = await exec.query(
+    `UPDATE ue_authority_workaid_consent_text_proposals SET withdrawn_at = now(), withdrawn_by = $3
+      WHERE organization_id = $1 AND id = $2 AND adopted_at IS NULL AND withdrawn_at IS NULL RETURNING id`,
+    [i.organizationId, i.proposalId, i.proposerUserId],
+  )
+  if (updated.rows.length !== 1) throw new AuthorityStoreError('ALREADY_TERMINAL', 'the consent wording proposal is already adopted or withdrawn')
+  await auditAuthorityMutation(exec, { organizationId: i.organizationId, action: 'workaid.consent_text_withdraw_proposal', resourceType: 'ue_authority_workaid_consent_text_proposals', resourceId: i.proposalId })
+}
+
 // ── Internal loaders ─────────────────────────────────────────────────────────
 
 interface GrantRow {
