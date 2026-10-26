@@ -1,9 +1,9 @@
 /**
  * Batch program for the schema census (UE-CONV-H-007) and the mutation-scope baseline (UE-CONV-K-006).
  *
- * Preparation only. `applyNow` is false. This module does not edit either ratchet, does not emit SQL,
- * and does not start a database. A later batch may shrink a ratchet only after its own code change;
- * a hold batch never does.
+ * Program `applyNow` stays false. A mutation batch sets `applyNow` only when the live scan no longer
+ * counts its source statements. This module does not edit either ratchet file, does not emit SQL,
+ * and does not start a database. A hold batch never shrinks a ratchet.
  */
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
@@ -31,7 +31,7 @@ export interface DispositionEntry {
   registryClass: string
 }
 
-type Execution = 'cursor' | 'cursor-then-vs' | 'prepared-evolve' | 'baseline-rewrite' | 'hold'
+type Execution = 'cursor' | 'cursor-then-vs' | 'prepared-evolve' | 'baseline-rewrite' | 'implemented' | 'hold'
 
 export interface BatchSpec {
   id: string
@@ -72,17 +72,19 @@ export interface BatchProgram {
   applyNow: false
   note: string
   censusCount: number
+  sourceMutationBaselineSum: number
   mutationBaselineSum: number
   mutationLiveSum: number
   graphComplete: boolean
   unresolvedCount: number
   unresolvedSample: string[]
-  batches: Array<BatchSpec & { entryCount: number; statementCount: number }>
+  batches: Array<BatchSpec & { applyNow: boolean; entryCount: number; statementCount: number; liveStatementCount: number }>
   schema: SchemaAssignment[]
+  sourceMutations: MutationAssignment[]
   mutations: MutationAssignment[]
 }
 
-const NOTE = 'Derived batch program for every remaining schema-census entry and every mutation-scope baseline key. applyNow is false: this file does not remove a census entry or a baseline key. Hold batches do not shrink either ratchet. Do not edit the mutation scanner or the route-coverage scanner to change a count. Do not regenerate either baseline to change its count. Finance issuance stays fail-closed. services/financial-service is not an approval path.'
+const NOTE = 'Derived batch program for every remaining schema-census entry and the original mutation-scope statements. Program applyNow stays false. A mutation batch sets applyNow only when the live scan no longer counts every source statement in that batch, and the baseline file then shrinks to that scan. This file does not remove a census entry. Hold batches do not shrink either ratchet. Do not edit the mutation scanner or the route-coverage scanner to change a count. Do not regenerate a baseline except to record statements the live scan no longer counts. Finance issuance stays fail-closed. services/financial-service is not an approval path.'
 
 const BATCHES: BatchSpec[] = [
   {
@@ -276,6 +278,20 @@ const BATCHES: BatchSpec[] = [
   },
 ]
 
+/** Counts at preparation. The baseline file may shrink. These counts stay. */
+export const SOURCE_MUTATION_COUNTS: Record<string, number> = {
+  'app/api/payments/webhooks/stripe/route.ts|workbooks': 1,
+  'app/api/workbook/[id]/claim/route.ts|workbooks': 1,
+  'lib/pilot/pilot-ownership.ts|pilot_applications': 1,
+  'lib/services/external-data/clc-partnership-service.ts|clc_sync_log': 1,
+  'services/financial-service/src/jobs/arrears-management-workflow.ts|dues_transactions': 1,
+  'services/financial-service/src/jobs/payment-collection-workflow.ts|dues_transactions': 1,
+  'services/financial-service/src/jobs/payment-collection-workflow.ts|payments': 3,
+  'services/financial-service/src/services/notification-service.ts|notification_queue': 2,
+  'services/geofence-privacy-service.ts|geofence_events': 1,
+  'services/geofence-privacy-service.ts|location_tracking': 1,
+}
+
 const MUTATION_BATCH: Record<string, string> = {
   'app/api/payments/webhooks/stripe/route.ts|workbooks': 'mutation-workbook-unclaimed',
   'app/api/workbook/[id]/claim/route.ts|workbooks': 'mutation-workbook-unclaimed',
@@ -376,9 +392,32 @@ function schemaBatch(entry: CensusEntry, disposition: string, index: ReachIndex,
   }
 }
 
-function mutationExecution(batchId: string, liveCount: number, spec: BatchSpec): Execution {
-  if (liveCount === 0) return 'baseline-rewrite'
-  return spec.execution
+function mutationEntry(key: string, baselineCount: number, live: Record<string, number>, clcReachable: boolean, byId: Map<string, BatchSpec>): MutationAssignment {
+  const [file, table] = [key.slice(0, key.lastIndexOf('|')), key.slice(key.lastIndexOf('|') + 1)]
+  const batchId = MUTATION_BATCH[key]
+  const spec = byId.get(batchId)
+  if (!spec) throw new Error(`missing batch spec ${batchId}`)
+  const liveCount = live[key] ?? 0
+  let action = spec.action
+  if (batchId === 'mutation-clc-sync-log' && liveCount > 0) {
+    action = clcReachable
+      ? 'A production entry reaches clc-partnership-service.ts. Add the caller organizationId to the clc_sync_log update WHERE and to the insert that creates the row.'
+      : 'No production entry reaches clc-partnership-service.ts. Prove there is no dynamic import, worker, or test-only caller, then delete the uncalled update or add the caller organizationId. Unreachable alone is not enough to delete it.'
+  }
+  if (liveCount === 0) {
+    action = 'The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads.'
+  }
+  return {
+    key,
+    file,
+    table,
+    batchId,
+    baselineCount,
+    liveCount,
+    execution: liveCount === 0 ? 'implemented' : spec.execution,
+    shrink: 'mutation-baseline',
+    action,
+  }
 }
 
 export function buildSchemaMutationBatches(live: Record<string, number> = scanUnscopedMutations()): BatchProgram {
@@ -411,33 +450,8 @@ export function buildSchemaMutationBatches(live: Record<string, number> = scanUn
 
   const byId = new Map(BATCHES.map((batch) => [batch.id, batch]))
   const clcReachable = index.reachable.has('lib/services/external-data/clc-partnership-service.ts')
-  const mutations: MutationAssignment[] = Object.entries(baseline).sort(([a], [b]) => a.localeCompare(b)).map(([key, baselineCount]) => {
-    const [file, table] = [key.slice(0, key.lastIndexOf('|')), key.slice(key.lastIndexOf('|') + 1)]
-    const batchId = MUTATION_BATCH[key]
-    const spec = byId.get(batchId)
-    if (!spec) throw new Error(`missing batch spec ${batchId}`)
-    const liveCount = live[key] ?? 0
-    let action = spec.action
-    if (batchId === 'mutation-clc-sync-log') {
-      action = clcReachable
-        ? 'A production entry reaches clc-partnership-service.ts. Add the caller organizationId to the clc_sync_log update WHERE and to the insert that creates the row.'
-        : 'No production entry reaches clc-partnership-service.ts. Delete the uncalled clc_sync_log update. Do not leave a caller.'
-    }
-    if (liveCount === 0) {
-      action = 'The live scan no longer counts this statement. Do not edit it. Shrink the baseline only through a reviewed regeneration after the scan stays clear.'
-    }
-    return {
-      key,
-      file,
-      table,
-      batchId,
-      baselineCount,
-      liveCount,
-      execution: mutationExecution(batchId, liveCount, spec),
-      shrink: 'mutation-baseline',
-      action,
-    }
-  })
+  const sourceMutations = Object.entries(SOURCE_MUTATION_COUNTS).sort(([a], [b]) => a.localeCompare(b)).map(([key, count]) => mutationEntry(key, count, live, clcReachable, byId))
+  const mutations: MutationAssignment[] = Object.entries(baseline).sort(([a], [b]) => a.localeCompare(b)).map(([key, baselineCount]) => mutationEntry(key, baselineCount, live, clcReachable, byId))
 
   const createRelation = schema.filter((entry) => entry.batchId === 'schema-create-relation').map((entry) => entry.table).sort()
   const excluded = [...(JSON.parse(readFileSync(ORACLE, 'utf8')).dispositionExcluded as string[])].sort()
@@ -445,18 +459,19 @@ export function buildSchemaMutationBatches(live: Record<string, number> = scanUn
     throw new Error(`CREATE_RELATION_REQUIRED drifted from dispositionExcluded: ${createRelation.join(', ')} vs ${excluded.join(', ')}`)
   }
 
-  const used = new Set([...schema.map((entry) => entry.batchId), ...mutations.map((entry) => entry.batchId)])
+  const used = new Set([...schema.map((entry) => entry.batchId), ...sourceMutations.map((entry) => entry.batchId)])
   const batches = BATCHES.filter((batch) => used.has(batch.id)).map((batch) => {
     const schemaEntries = schema.filter((entry) => entry.batchId === batch.id)
-    const mutationEntries = mutations.filter((entry) => entry.batchId === batch.id)
-    const execution = mutationEntries.length && mutationEntries.every((entry) => entry.execution === 'baseline-rewrite')
-      ? 'baseline-rewrite' as Execution
-      : batch.execution
+    const sourceEntries = sourceMutations.filter((entry) => entry.batchId === batch.id)
+    const implemented = sourceEntries.length > 0 && sourceEntries.every((entry) => entry.liveCount === 0)
+    const execution: Execution = implemented ? 'implemented' : batch.execution
     return {
       ...batch,
       execution,
-      entryCount: schemaEntries.length + mutationEntries.length,
-      statementCount: mutationEntries.reduce((sum, entry) => sum + entry.baselineCount, 0),
+      applyNow: implemented,
+      entryCount: schemaEntries.length + sourceEntries.length,
+      statementCount: sourceEntries.reduce((sum, entry) => sum + entry.baselineCount, 0),
+      liveStatementCount: sourceEntries.reduce((sum, entry) => sum + entry.liveCount, 0),
     }
   })
 
@@ -466,13 +481,15 @@ export function buildSchemaMutationBatches(live: Record<string, number> = scanUn
     applyNow: false,
     note: NOTE,
     censusCount: census.length,
+    sourceMutationBaselineSum: Object.values(SOURCE_MUTATION_COUNTS).reduce((sum, count) => sum + count, 0),
     mutationBaselineSum: Object.values(baseline).reduce((sum, count) => sum + count, 0),
-    mutationLiveSum: mutations.reduce((sum, entry) => sum + entry.liveCount, 0),
+    mutationLiveSum: sourceMutations.reduce((sum, entry) => sum + entry.liveCount, 0),
     graphComplete: index.graphComplete,
     unresolvedCount: index.unresolved.length,
     unresolvedSample: index.unresolved.slice(0, 30),
     batches,
     schema,
+    sourceMutations,
     mutations,
   }
 }

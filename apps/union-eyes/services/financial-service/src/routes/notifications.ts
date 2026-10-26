@@ -195,9 +195,16 @@ router.get('/history', async (req: Request, res: Response) => {
  */
 router.post('/process', async (req: Request, res: Response) => {
   try {
+    const organizationId = getOrganizationIdFromHeaders(req);
+    if (!organizationId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing x-organization-id header',
+      });
+    }
     const batchSize = parseInt(req.body.batchSize as string) || 50;
 
-    const processed = await processPendingNotifications(batchSize);
+    const processed = await processPendingNotifications(organizationId, batchSize);
 
     res.json({
       success: true,
@@ -219,9 +226,16 @@ router.post('/process', async (req: Request, res: Response) => {
  */
 router.post('/retry-failed', async (req: Request, res: Response) => {
   try {
+    const organizationId = getOrganizationIdFromHeaders(req);
+    if (!organizationId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing x-organization-id header',
+      });
+    }
     const maxAttempts = parseInt(req.body.maxAttempts as string) || 3;
 
-    const retried = await retryFailedNotifications(maxAttempts);
+    const retried = await retryFailedNotifications(organizationId, maxAttempts);
 
     res.json({
       success: true,
@@ -268,7 +282,7 @@ router.post('/test', async (req: Request, res: Response) => {
     });
 
     // Process immediately
-    await processPendingNotifications(1);
+    await processPendingNotifications(organizationId, 1);
 
     res.json({
       success: true,

@@ -6,10 +6,6 @@
     "app/api/workbook/[id]/claim/route.ts|workbooks": 1,
     "lib/pilot/pilot-ownership.ts|pilot_applications": 1,
     "lib/services/external-data/clc-partnership-service.ts|clc_sync_log": 1,
-    "services/financial-service/src/jobs/arrears-management-workflow.ts|dues_transactions": 1,
-    "services/financial-service/src/jobs/payment-collection-workflow.ts|dues_transactions": 1,
-    "services/financial-service/src/jobs/payment-collection-workflow.ts|payments": 3,
-    "services/financial-service/src/services/notification-service.ts|notification_queue": 2,
     "services/geofence-privacy-service.ts|geofence_events": 1,
     "services/geofence-privacy-service.ts|location_tracking": 1
   }

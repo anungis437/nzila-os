@@ -23,6 +23,8 @@ describe('schema and mutation batch program', () => {
     const disposition = JSON.parse(readFileSync(path.join(REGISTER, 'ue-canonical-schema-disposition.json'), 'utf8')).entries as Record<string, { disposition: string }>
     const baseline = JSON.parse(readFileSync(path.join(REGISTER, 'ue-mutation-scope-baseline.json'), 'utf8')).entries as Record<string, number>
     expect(program.applyNow).toBe(false)
+    expect(program.sourceMutationBaselineSum).toBe(13)
+    expect(program.mutationLiveSum).toBeLessThanOrEqual(13)
     expect(program.censusCount).toBe(census.length)
     expect(program.schema.map((entry) => entry.table)).toEqual(census.map((entry) => entry.table).sort())
     expect(new Set(program.schema.map((entry) => entry.table)).size).toBe(census.length)
@@ -47,6 +49,10 @@ describe('schema and mutation batch program', () => {
     const finance = program.batches.find((batch) => batch.id === 'mutation-finance-latent')
     expect(finance?.action).toContain('Do not issue a financial mandate')
     expect(finance?.action).toContain('not an approval path')
+    expect(finance?.statementCount).toBe(7)
+    expect(finance?.liveStatementCount).toBe(0)
+    expect(finance?.execution).toBe('implemented')
+    expect(finance?.applyNow).toBe(true)
     expect(program.schema.filter((entry) => entry.table === 'grievance_communications').map((entry) => entry.batchId)).toEqual(['schema-django-defined'])
   })
 })

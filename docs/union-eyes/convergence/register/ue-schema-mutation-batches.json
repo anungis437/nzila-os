@@ -2,10 +2,11 @@
   "schemaVersion": 1,
   "mission": "UE-CURSOR-FINAL-CLOSURE",
   "applyNow": false,
-  "note": "Derived batch program for every remaining schema-census entry and every mutation-scope baseline key. applyNow is false: this file does not remove a census entry or a baseline key. Hold batches do not shrink either ratchet. Do not edit the mutation scanner or the route-coverage scanner to change a count. Do not regenerate either baseline to change its count. Finance issuance stays fail-closed. services/financial-service is not an approval path.",
+  "note": "Derived batch program for every remaining schema-census entry and the original mutation-scope statements. Program applyNow stays false. A mutation batch sets applyNow only when the live scan no longer counts every source statement in that batch, and the baseline file then shrinks to that scan. This file does not remove a census entry. Hold batches do not shrink either ratchet. Do not edit the mutation scanner or the route-coverage scanner to change a count. Do not regenerate a baseline except to record statements the live scan no longer counts. Finance issuance stays fail-closed. services/financial-service is not an approval path.",
   "censusCount": 231,
-  "mutationBaselineSum": 13,
-  "mutationLiveSum": 13,
+  "sourceMutationBaselineSum": 13,
+  "mutationBaselineSum": 6,
+  "mutationLiveSum": 6,
   "graphComplete": true,
   "unresolvedCount": 0,
   "unresolvedSample": [],
@@ -14,12 +15,14 @@
       "id": "mutation-finance-latent",
       "order": 1,
       "ratchet": "mutation-scope",
-      "execution": "cursor",
+      "execution": "implemented",
       "shrink": "mutation-baseline",
       "action": "Before any financial-service job is mounted, put the job tenant into the WHERE of each flagged update. dues_transactions uses eq(organizationId, tenantId) with the tenantId argument, not the id just loaded. payments and notification_queue declare tenantId; call inOrganization(row.tenantId, callerTenantId), implemented as equality on that column. The caller tenant comes from the job argument. Do not copy the tenant off the row loaded by the same id. Do not insert an unused organization identifier to satisfy the scanner. Do not issue a financial mandate. services/financial-service is not an approval path. Do not edit the mutation scanner.",
       "proof": "apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts and apps/union-eyes/lib/finance/__tests__/finance-canonical.test.ts",
+      "applyNow": true,
       "entryCount": 4,
-      "statementCount": 7
+      "statementCount": 7,
+      "liveStatementCount": 0
     },
     {
       "id": "mutation-clc-sync-log",
@@ -29,8 +32,10 @@
       "shrink": "mutation-baseline",
       "action": "The clc_sync_log update matches syncId only. If no production entry reaches the file, delete the uncalled update and do not leave a caller. If an entry reaches the file, add the caller organizationId to that WHERE and to the insert that creates the row. Do not edit the mutation scanner.",
       "proof": "apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts",
+      "applyNow": false,
       "entryCount": 1,
-      "statementCount": 1
+      "statementCount": 1,
+      "liveStatementCount": 1
     },
     {
       "id": "mutation-pilot-rebind",
@@ -40,8 +45,10 @@
       "shrink": "mutation-baseline",
       "action": "The first pilot bind already names verifiedOrganizationId. The rebind compares that column with the previous organization. Comments inside set() place .where( outside the scanner window of 600 characters, so the live scan still counts the statement. Keep the compare-and-set and put that predicate where the scanner reads it. Do not widen the scanner window and do not edit the mutation scanner.",
       "proof": "apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts",
+      "applyNow": false,
       "entryCount": 1,
-      "statementCount": 1
+      "statementCount": 1,
+      "liveStatementCount": 1
     },
     {
       "id": "mutation-workbook-unclaimed",
@@ -51,8 +58,10 @@
       "shrink": "mutation-baseline",
       "action": "A workbook has no organization until it is claimed. Add isNull(claimedByUserId) beside the existing credential guards on the Stripe fulfilment update and the claim update. Fulfilment still requires a null payment reference and a null claim token. Claim still requires the single-use token, a null claimedAt, and an unexpired token. Do not invent an organization column.",
       "proof": "apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts",
+      "applyNow": false,
       "entryCount": 2,
-      "statementCount": 2
+      "statementCount": 2,
+      "liveStatementCount": 2
     },
     {
       "id": "mutation-location-retention",
@@ -62,8 +71,10 @@
       "shrink": "mutation-baseline",
       "action": "Rewrite the system retention sweep so each delete names the owning userId and expiresAt. Take the user ids from the expired rows, then delete that user inside the same transaction as the deletion-log insert. Do not use userId IS NOT NULL as the only predicate. The system role still removes every member expired row. The native retention proof stays READY_FOR_VS_EXECUTION.",
       "proof": "apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts",
+      "applyNow": false,
       "entryCount": 2,
-      "statementCount": 2
+      "statementCount": 2,
+      "liveStatementCount": 2
     },
     {
       "id": "schema-retire-declaration",
@@ -73,8 +84,10 @@
       "shrink": "census",
       "action": "Delete the Drizzle declaration and the schema-folder relations that only name it. Do not DROP the database relation. Do not hand-delete the census row. The census shrinks only when VS Code regenerates it with UE_CENSUS_WRITE=1 on a disposable database after the declaration is gone.",
       "proof": "apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts and apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts",
+      "applyNow": false,
       "entryCount": 3,
-      "statementCount": 0
+      "statementCount": 0,
+      "liveStatementCount": 0
     },
     {
       "id": "schema-live-unreferenced",
@@ -84,8 +97,10 @@
       "shrink": "census",
       "action": "The registry class is live and the reference scan finds no production file. Retire the Drizzle declaration only. Do not DROP the live relation and do not hand-delete the census row.",
       "proof": "apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts",
+      "applyNow": false,
       "entryCount": 13,
-      "statementCount": 0
+      "statementCount": 0,
+      "liveStatementCount": 0
     },
     {
       "id": "schema-live-unreferenced-blocked",
@@ -95,8 +110,10 @@
       "shrink": "none",
       "action": "A production file names this relation. Reclassify it before any retirement.",
       "proof": "apps/union-eyes/db/__tests__/schema-mutation-batches.test.ts",
+      "applyNow": false,
       "entryCount": 2,
-      "statementCount": 0
+      "statementCount": 0,
+      "liveStatementCount": 0
     },
     {
       "id": "schema-verify-dead-module",
@@ -106,8 +123,10 @@
       "shrink": "census",
       "action": "No production entry reaches a file that names this relation, and the import graph resolved every relative and @/ import. Retire the app Drizzle declaration together with dead importers and their tests. Do not delete a shadow pgTable file and do not DROP the relation. grievance_communications is not in this batch.",
       "proof": "apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts",
+      "applyNow": false,
       "entryCount": 23,
-      "statementCount": 0
+      "statementCount": 0,
+      "liveStatementCount": 0
     },
     {
       "id": "schema-django-defined",
@@ -117,8 +136,10 @@
       "shrink": "none",
       "action": "Django still defines this relation. Do not retire the declaration and do not generate a stub-evolution migration for it.",
       "proof": "apps/union-eyes/db/__tests__/schema-mutation-batches.test.ts",
+      "applyNow": false,
       "entryCount": 1,
-      "statementCount": 0
+      "statementCount": 0,
+      "liveStatementCount": 0
     },
     {
       "id": "schema-evolve-reachable",
@@ -128,8 +149,10 @@
       "shrink": "census",
       "action": "A production entry reaches the relation and the stub-evolution rules accept it: additive nullable columns, declared defaults, and Django id/created_at/updated_at defaults only. No keys and no RLS from that generator. Generate SQL only for this list, review it, and commit it as the next platform migration. Do not apply it here. VS Code proves the shrink on a disposable database.",
       "proof": "apps/union-eyes/scripts/generate-stub-evolution.ts and apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts",
+      "applyNow": false,
       "entryCount": 4,
-      "statementCount": 0
+      "statementCount": 0,
+      "liveStatementCount": 0
     },
     {
       "id": "schema-verify-reachable-blocked",
@@ -139,8 +162,10 @@
       "shrink": "none",
       "action": "A production entry reaches the relation and the stub generator refuses it (enum collision, pgvector, a required column without a Django base default, or an absent table). Do not generate a tranche for it.",
       "proof": "apps/union-eyes/scripts/generate-stub-evolution.ts",
+      "applyNow": false,
       "entryCount": 12,
-      "statementCount": 0
+      "statementCount": 0,
+      "liveStatementCount": 0
     },
     {
       "id": "schema-contained-deny-all",
@@ -150,8 +175,10 @@
       "shrink": "none",
       "action": "No runtime authority is granted. Do not evolve the stub and do not grant the runtime role access. The census entry stays until a capability is enabled and a reviewed migration lands, or the declaration is retired under a later decision.",
       "proof": "apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts",
+      "applyNow": false,
       "entryCount": 116,
-      "statementCount": 0
+      "statementCount": 0,
+      "liveStatementCount": 0
     },
     {
       "id": "schema-global-reference",
@@ -161,8 +188,10 @@
       "shrink": "none",
       "action": "Global reference data. Shape and seed need an owner decision. Do not emit a tenant migration.",
       "proof": "apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts",
+      "applyNow": false,
       "entryCount": 22,
-      "statementCount": 0
+      "statementCount": 0,
+      "liveStatementCount": 0
     },
     {
       "id": "schema-system-only",
@@ -172,8 +201,10 @@
       "shrink": "none",
       "action": "System-only shape. Do not emit a tenant migration.",
       "proof": "apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts",
+      "applyNow": false,
       "entryCount": 12,
-      "statementCount": 0
+      "statementCount": 0,
+      "liveStatementCount": 0
     },
     {
       "id": "schema-create-relation",
@@ -183,8 +214,10 @@
       "shrink": "none",
       "action": "The declared relation is absent. Do not invent a CREATE. These names stay equal to tooling/db/canonical-schema/oracle-binding.json dispositionExcluded. Keys and RLS need a reviewed design.",
       "proof": "tooling/db/canonical-schema/oracle-binding.json",
+      "applyNow": false,
       "entryCount": 10,
-      "statementCount": 0
+      "statementCount": 0,
+      "liveStatementCount": 0
     },
     {
       "id": "schema-individual-decision",
@@ -194,8 +227,10 @@
       "shrink": "none",
       "action": "Enum-name collision, pgvector, or a missing runtime privilege. The stub generator already refuses these. Do not evolve them in a tranche.",
       "proof": "apps/union-eyes/scripts/generate-stub-evolution.ts",
+      "applyNow": false,
       "entryCount": 7,
-      "statementCount": 0
+      "statementCount": 0,
+      "liveStatementCount": 0
     },
     {
       "id": "schema-registry-gap",
@@ -205,8 +240,10 @@
       "shrink": "none",
       "action": "No storage-authority entry. Classify the relation before any evolution.",
       "proof": "apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts",
+      "applyNow": false,
       "entryCount": 4,
-      "statementCount": 0
+      "statementCount": 0,
+      "liveStatementCount": 0
     },
     {
       "id": "schema-separate-database",
@@ -216,8 +253,10 @@
       "shrink": "none",
       "action": "The relation belongs to another database. Do not evolve it on this lineage.",
       "proof": "apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts",
+      "applyNow": false,
       "entryCount": 2,
-      "statementCount": 0
+      "statementCount": 0,
+      "liveStatementCount": 0
     }
   ],
   "schema": [
@@ -3182,6 +3221,118 @@
       "blockers": []
     }
   ],
+  "sourceMutations": [
+    {
+      "key": "app/api/payments/webhooks/stripe/route.ts|workbooks",
+      "file": "app/api/payments/webhooks/stripe/route.ts",
+      "table": "workbooks",
+      "batchId": "mutation-workbook-unclaimed",
+      "baselineCount": 1,
+      "liveCount": 1,
+      "execution": "cursor",
+      "shrink": "mutation-baseline",
+      "action": "A workbook has no organization until it is claimed. Add isNull(claimedByUserId) beside the existing credential guards on the Stripe fulfilment update and the claim update. Fulfilment still requires a null payment reference and a null claim token. Claim still requires the single-use token, a null claimedAt, and an unexpired token. Do not invent an organization column."
+    },
+    {
+      "key": "app/api/workbook/[id]/claim/route.ts|workbooks",
+      "file": "app/api/workbook/[id]/claim/route.ts",
+      "table": "workbooks",
+      "batchId": "mutation-workbook-unclaimed",
+      "baselineCount": 1,
+      "liveCount": 1,
+      "execution": "cursor",
+      "shrink": "mutation-baseline",
+      "action": "A workbook has no organization until it is claimed. Add isNull(claimedByUserId) beside the existing credential guards on the Stripe fulfilment update and the claim update. Fulfilment still requires a null payment reference and a null claim token. Claim still requires the single-use token, a null claimedAt, and an unexpired token. Do not invent an organization column."
+    },
+    {
+      "key": "lib/pilot/pilot-ownership.ts|pilot_applications",
+      "file": "lib/pilot/pilot-ownership.ts",
+      "table": "pilot_applications",
+      "batchId": "mutation-pilot-rebind",
+      "baselineCount": 1,
+      "liveCount": 1,
+      "execution": "cursor",
+      "shrink": "mutation-baseline",
+      "action": "The first pilot bind already names verifiedOrganizationId. The rebind compares that column with the previous organization. Comments inside set() place .where( outside the scanner window of 600 characters, so the live scan still counts the statement. Keep the compare-and-set and put that predicate where the scanner reads it. Do not widen the scanner window and do not edit the mutation scanner."
+    },
+    {
+      "key": "lib/services/external-data/clc-partnership-service.ts|clc_sync_log",
+      "file": "lib/services/external-data/clc-partnership-service.ts",
+      "table": "clc_sync_log",
+      "batchId": "mutation-clc-sync-log",
+      "baselineCount": 1,
+      "liveCount": 1,
+      "execution": "cursor",
+      "shrink": "mutation-baseline",
+      "action": "No production entry reaches clc-partnership-service.ts. Prove there is no dynamic import, worker, or test-only caller, then delete the uncalled update or add the caller organizationId. Unreachable alone is not enough to delete it."
+    },
+    {
+      "key": "services/financial-service/src/jobs/arrears-management-workflow.ts|dues_transactions",
+      "file": "services/financial-service/src/jobs/arrears-management-workflow.ts",
+      "table": "dues_transactions",
+      "batchId": "mutation-finance-latent",
+      "baselineCount": 1,
+      "liveCount": 0,
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
+    },
+    {
+      "key": "services/financial-service/src/jobs/payment-collection-workflow.ts|dues_transactions",
+      "file": "services/financial-service/src/jobs/payment-collection-workflow.ts",
+      "table": "dues_transactions",
+      "batchId": "mutation-finance-latent",
+      "baselineCount": 1,
+      "liveCount": 0,
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
+    },
+    {
+      "key": "services/financial-service/src/jobs/payment-collection-workflow.ts|payments",
+      "file": "services/financial-service/src/jobs/payment-collection-workflow.ts",
+      "table": "payments",
+      "batchId": "mutation-finance-latent",
+      "baselineCount": 3,
+      "liveCount": 0,
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
+    },
+    {
+      "key": "services/financial-service/src/services/notification-service.ts|notification_queue",
+      "file": "services/financial-service/src/services/notification-service.ts",
+      "table": "notification_queue",
+      "batchId": "mutation-finance-latent",
+      "baselineCount": 2,
+      "liveCount": 0,
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
+    },
+    {
+      "key": "services/geofence-privacy-service.ts|geofence_events",
+      "file": "services/geofence-privacy-service.ts",
+      "table": "geofence_events",
+      "batchId": "mutation-location-retention",
+      "baselineCount": 1,
+      "liveCount": 1,
+      "execution": "cursor",
+      "shrink": "mutation-baseline",
+      "action": "Rewrite the system retention sweep so each delete names the owning userId and expiresAt. Take the user ids from the expired rows, then delete that user inside the same transaction as the deletion-log insert. Do not use userId IS NOT NULL as the only predicate. The system role still removes every member expired row. The native retention proof stays READY_FOR_VS_EXECUTION."
+    },
+    {
+      "key": "services/geofence-privacy-service.ts|location_tracking",
+      "file": "services/geofence-privacy-service.ts",
+      "table": "location_tracking",
+      "batchId": "mutation-location-retention",
+      "baselineCount": 1,
+      "liveCount": 1,
+      "execution": "cursor",
+      "shrink": "mutation-baseline",
+      "action": "Rewrite the system retention sweep so each delete names the owning userId and expiresAt. Take the user ids from the expired rows, then delete that user inside the same transaction as the deletion-log insert. Do not use userId IS NOT NULL as the only predicate. The system role still removes every member expired row. The native retention proof stays READY_FOR_VS_EXECUTION."
+    }
+  ],
   "mutations": [
     {
       "key": "app/api/payments/webhooks/stripe/route.ts|workbooks",
@@ -3225,51 +3376,7 @@
       "liveCount": 1,
       "execution": "cursor",
       "shrink": "mutation-baseline",
-      "action": "No production entry reaches clc-partnership-service.ts. Delete the uncalled clc_sync_log update. Do not leave a caller."
-    },
-    {
-      "key": "services/financial-service/src/jobs/arrears-management-workflow.ts|dues_transactions",
-      "file": "services/financial-service/src/jobs/arrears-management-workflow.ts",
-      "table": "dues_transactions",
-      "batchId": "mutation-finance-latent",
-      "baselineCount": 1,
-      "liveCount": 1,
-      "execution": "cursor",
-      "shrink": "mutation-baseline",
-      "action": "Before any financial-service job is mounted, put the job tenant into the WHERE of each flagged update. dues_transactions uses eq(organizationId, tenantId) with the tenantId argument, not the id just loaded. payments and notification_queue declare tenantId; call inOrganization(row.tenantId, callerTenantId), implemented as equality on that column. The caller tenant comes from the job argument. Do not copy the tenant off the row loaded by the same id. Do not insert an unused organization identifier to satisfy the scanner. Do not issue a financial mandate. services/financial-service is not an approval path. Do not edit the mutation scanner."
-    },
-    {
-      "key": "services/financial-service/src/jobs/payment-collection-workflow.ts|dues_transactions",
-      "file": "services/financial-service/src/jobs/payment-collection-workflow.ts",
-      "table": "dues_transactions",
-      "batchId": "mutation-finance-latent",
-      "baselineCount": 1,
-      "liveCount": 1,
-      "execution": "cursor",
-      "shrink": "mutation-baseline",
-      "action": "Before any financial-service job is mounted, put the job tenant into the WHERE of each flagged update. dues_transactions uses eq(organizationId, tenantId) with the tenantId argument, not the id just loaded. payments and notification_queue declare tenantId; call inOrganization(row.tenantId, callerTenantId), implemented as equality on that column. The caller tenant comes from the job argument. Do not copy the tenant off the row loaded by the same id. Do not insert an unused organization identifier to satisfy the scanner. Do not issue a financial mandate. services/financial-service is not an approval path. Do not edit the mutation scanner."
-    },
-    {
-      "key": "services/financial-service/src/jobs/payment-collection-workflow.ts|payments",
-      "file": "services/financial-service/src/jobs/payment-collection-workflow.ts",
-      "table": "payments",
-      "batchId": "mutation-finance-latent",
-      "baselineCount": 3,
-      "liveCount": 3,
-      "execution": "cursor",
-      "shrink": "mutation-baseline",
-      "action": "Before any financial-service job is mounted, put the job tenant into the WHERE of each flagged update. dues_transactions uses eq(organizationId, tenantId) with the tenantId argument, not the id just loaded. payments and notification_queue declare tenantId; call inOrganization(row.tenantId, callerTenantId), implemented as equality on that column. The caller tenant comes from the job argument. Do not copy the tenant off the row loaded by the same id. Do not insert an unused organization identifier to satisfy the scanner. Do not issue a financial mandate. services/financial-service is not an approval path. Do not edit the mutation scanner."
-    },
-    {
-      "key": "services/financial-service/src/services/notification-service.ts|notification_queue",
-      "file": "services/financial-service/src/services/notification-service.ts",
-      "table": "notification_queue",
-      "batchId": "mutation-finance-latent",
-      "baselineCount": 2,
-      "liveCount": 2,
-      "execution": "cursor",
-      "shrink": "mutation-baseline",
-      "action": "Before any financial-service job is mounted, put the job tenant into the WHERE of each flagged update. dues_transactions uses eq(organizationId, tenantId) with the tenantId argument, not the id just loaded. payments and notification_queue declare tenantId; call inOrganization(row.tenantId, callerTenantId), implemented as equality on that column. The caller tenant comes from the job argument. Do not copy the tenant off the row loaded by the same id. Do not insert an unused organization identifier to satisfy the scanner. Do not issue a financial mandate. services/financial-service is not an approval path. Do not edit the mutation scanner."
+      "action": "No production entry reaches clc-partnership-service.ts. Prove there is no dynamic import, worker, or test-only caller, then delete the uncalled update or add the caller organizationId. Unreachable alone is not enough to delete it."
     },
     {
       "key": "services/geofence-privacy-service.ts|geofence_events",
