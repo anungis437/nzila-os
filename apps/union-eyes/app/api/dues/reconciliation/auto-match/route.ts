@@ -6,7 +6,6 @@
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
-import { db } from '@/db';
 import { remittanceLineItems } from '@/db/schema/dues-finance-schema';
 import { eq, and, isNull, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
