@@ -86,15 +86,15 @@ Invitation items are source commit `215b21e6cc37276ba08d9f37c26bb7d504eff452`. R
 | Field | Value |
 | --- | --- |
 | Status | `READY_FOR_VS_EXECUTION` |
-| Risk | P0. Source persistence is `f44afbbe325dd16516e83e252de35edcb6e0d7ae`. A skipped run is not a pass. |
+| Risk | P0. Source persistence is `889880502664e125023d7ed7972963d6ac337937`. A skipped run is not a pass. |
 | Register | `UE-CONV-K-009` |
 | Test | `apps/union-eyes/db/__tests__/election-certificate-succession.native.test.ts` |
 | Command | `UE_ELECTION_SUCCESSION_NATIVE_PROOF=1 pnpm exec vitest run apps/union-eyes/db/__tests__/election-certificate-succession.native.test.ts` |
 | Environment | Docker. Image `pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337`. The file starts and removes `ue-election-succession-*`. Cursor does not run this. |
-| Fixture | Minimal `council_elections` and `public.audit_logs`, then unqualified platform `0033_election_certificate_successions`. No shared database. |
+| Fixture | Minimal `council_elections` and `public.audit_logs`, then unqualified platform `0033_election_certificate_successions` and `0034_election_organization_ownership`, plus an ownership row for the seeded election. No shared database. |
 | Cleanup | `afterAll` closes the pool and runs `docker rm --force` on the container it created. |
 | Success | Two concurrent kernel grants for one certified election and one decision store one succession row and one uncertified successor. `verified_by` on the predecessor stays `Auditor`. |
-| Denial | Do not record PASS from a skipped run. Do not apply `0033` to a shared database. The HTTP succession route supplies no grant, and the council vote route stays 501. |
+| Denial | Do not record PASS from a skipped run. Do not apply `0033` or `0034` to a shared database. The HTTP route returns 200 only when the kernel loads a grant. A native pass does not prove that HTTP path. The council vote route stays 501. |
 | Evidence | `docs/union-eyes/convergence/evidence/election-certificate-succession-native.json` |
 | Failure | Two succession rows, or a rewritten `verified_by`, means the lock or the immutability check failed. |
 | Recovery | Remove the suite container. Do not rewrite the certified predecessor. |
@@ -137,6 +137,6 @@ Schema and mutation work is the batch program `docs/union-eyes/convergence/regis
 
 Member and staff WorkAid screens call the union-side consent, document and referral routes. Counsel execution stays closed. Consent capture stays disabled until recorded wording exists. Credentialed browser acceptance stays `READY_FOR_VS_EXECUTION` and was not run here.
 
-Certified election succession and the remittance and payroll-list live-mandate gate are source commit `f44afbbe325dd16516e83e252de35edcb6e0d7ae`. Platform `0033` is UNQUALIFIED and unapplied. `election-certificate-succession-native` and `ownership-backfill-native` stay `READY_FOR_VS_EXECUTION`. The HTTP succession route supplies no grant. The council vote route stays 501. `UE-CONV-K-009` stays `IN_PROGRESS`. Finance issuance still does nothing until a live issuance rule exists. Payroll run detail and creation refuse without a live financial mandate. Persona journeys remain open. The route-coverage baseline's empty `kernelPending` does not close those.
+Certified election succession now requires organization ownership and a kernel grant for the authenticated principal. Source commit `889880502664e125023d7ed7972963d6ac337937`. Platform `0033`, `0034` and `0035` are UNQUALIFIED and unapplied. `election-certificate-succession-native` and `ownership-backfill-native` stay `READY_FOR_VS_EXECUTION`. The HTTP route returns 200 only when that grant loads. The council vote route stays 501. Remittance, payroll, reconciliation and the union financial reads require the caller's own mandate. `UE-CONV-K-009`, `UE-CONV-H-007` and `UE-CONV-K-006` stay `IN_PROGRESS`. Finance issuance still does nothing until a live issuance rule exists. Platform billing routes stay on the role floor. Persona journeys remain open. The route-coverage baseline's empty `kernelPending` does not close those.
 
 `CURSOR_IMPLEMENTATION_COMPLETE` is false. `VS_NATIVE_VALIDATION_COMPLETE`, `CREDENTIALED_PERSONA_ACCEPTANCE_COMPLETE`, `INSTITUTIONAL_POLICY_ADOPTED`, `STAGING_RELEASE_AUTHORIZED` and `PRODUCTION_RELEASE_AUTHORIZED` are false.
