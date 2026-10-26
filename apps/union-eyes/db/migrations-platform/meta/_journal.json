@@ -211,6 +211,13 @@
       "when": 1758850000000,
       "tag": "0028_location_deletion_log_shape",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1758860000000,
+      "tag": "0029_message_thread_authority_scope",
+      "breakpoints": true
     }
   ]
 }

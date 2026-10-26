@@ -66,6 +66,7 @@ export type ResourceType =
   | 'approval_request'
   | 'governance_review'
   | 'workaid_matter'
+  | 'message_thread'
 
 export interface ResourceRef {
   type: ResourceType
@@ -295,6 +296,16 @@ export interface WorkAidMatterFacts {
   counselControlled: true
 }
 
+/** A member conversation. Content is private: a legal-hold mandate does not confer a read. */
+export interface MessageThreadFacts {
+  kind: 'message_thread'
+  id: Uuid
+  organizationId: Uuid
+  memberUserId: Uuid
+  assigneeUserId: Uuid | null
+  status: 'open' | 'closed'
+}
+
 export type ResourceFacts =
   | CaseFacts
   | FinancialTransactionFacts
@@ -302,6 +313,7 @@ export type ResourceFacts =
   | ApprovalRequestFacts
   | GovernanceReviewFacts
   | WorkAidMatterFacts
+  | MessageThreadFacts
 
 // ── Actions ────────────────────────────────────────────────────────────────
 
@@ -340,6 +352,9 @@ export const ACTIONS = [
   'workaid:refer',
   'workaid:receive_disclosure',
   'workaid:read_counsel_material',
+  // Distinct from reading or replying. Neither action discloses message content.
+  'message:place_legal_hold',
+  'message:release_legal_hold',
 ] as const
 
 export type Action = (typeof ACTIONS)[number]

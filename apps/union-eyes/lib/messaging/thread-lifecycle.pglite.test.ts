@@ -340,7 +340,7 @@ describe('notifications never carry message text', () => {
     await inTx((t) => assignThread(t, actor('triager-1'), { threadId: created.id, action: 'assign', toStaffId: 'steward-1', reason: 'dues file' }, deps))
     await postThreadMessage(tx(), steward, created.id, { body: BODY })
     await inTx((t) => markThreadRead(t, member, created.id))
-    await inTx((t) => setLegalHold(t, admin, created.id, 'place', 'HOLD-REF-9921'))
+    expect(await inTx((t) => setLegalHold(t, admin, created.id, 'place', 'HOLD-REF-9921'))).toEqual({ kind: 'forbidden' })
     await inTx((t) => changeThreadLifecycle(t, member, created.id, 'close'))
     await inTx((t) => changeThreadLifecycle(t, member, created.id, 'archive'))
     await inTx((t) => adoptRetentionPolicy(t, admin, { retentionDays: 365, policyReference: 'POLICY-REF-1', authorityReference: 'AUTH-REF-1' }))
@@ -356,7 +356,6 @@ describe('notifications never carry message text', () => {
         'messages.thread.assign',
         'messages.thread.close',
         'messages.thread.create',
-        'messages.thread.hold_place',
         'messages.thread.read',
       ].sort(),
     )
@@ -424,7 +423,7 @@ describe('retention is policy-parameterised, hold-aware and never deletes', () =
     expect(await count(`SELECT count(*) AS n FROM message_retention_policies`)).toBe(0)
   })
 
-  it('a legal hold overrides every other position, is administrator-only, and is hidden from the member', async () => {
+  it('a legal hold is not an administrator role, and a recorded hold still overrides retention without granting a read', async () => {
     const id = await closed({ staffId: 'steward-1' })
     await inTx((t) => adoptRetentionPolicy(t, admin, { retentionDays: 1, policyReference: 'p', authorityReference: 'a' }))
     const later = new Date(Date.now() + 10 * DAY)
@@ -434,20 +433,26 @@ describe('retention is policy-parameterised, hold-aware and never deletes', () =
     expect(await inTx((t) => setLegalHold(t, admin, id, 'place', '  '))).toEqual({ kind: 'invalid_reference' })
     expect(await inTx((t) => setLegalHold(t, admin, 'not-a-uuid', 'place', 'MATTER-1'))).toEqual({ kind: 'not_found' })
     expect(await inTx((t) => setLegalHold(t, actor('admin-9', 'admin', foreignOrg), id, 'place', 'MATTER-1'))).toEqual({ kind: 'not_found' })
-    expect(await inTx((t) => setLegalHold(t, admin, id, 'release', 'MATTER-1'))).toEqual({ kind: 'conflict', code: 'NOT_HELD' })
-    expect(await inTx((t) => setLegalHold(t, admin, id, 'place', 'MATTER-1'))).toEqual({ kind: 'ok', held: true })
-    expect(await inTx((t) => setLegalHold(t, admin, id, 'place', 'MATTER-1'))).toEqual({ kind: 'conflict', code: 'ALREADY_HELD' })
+    expect(await inTx((t) => setLegalHold(t, admin, id, 'place', 'MATTER-1'))).toEqual({ kind: 'forbidden' })
+    expect(await inTx((t) => setLegalHold(t, admin, id, 'release', 'MATTER-1'))).toEqual({ kind: 'forbidden' })
+    expect(await count(`SELECT count(*) AS n FROM message_thread_lifecycle WHERE action LIKE 'hold%'`)).toBe(0)
 
+    await pg.query(
+      `INSERT INTO message_thread_lifecycle(organization_id,thread_id,action,acted_by,acted_via,reference) VALUES($1,$2,'hold_place',$3,'organization_administrator','MATTER-1')`,
+      [org, id, admin.userId],
+    )
     expect(await retentionOf(id, later)).toEqual({ state: 'legal_hold' })
     expect(await getThreadDetail(tx(), steward, id, later)).toMatchObject({ viewerRole: 'assignee', retention: { audience: 'staff', state: 'legal_hold' } })
     const memberDetail = JSON.stringify(await getThreadDetail(tx(), member, id, later))
     expect(memberDetail).toContain('"state":"retained"')
     expect(memberDetail).not.toMatch(/legal|hold|MATTER-1/)
-    // A hold grants the administrator no read of the conversation.
     expect(await findReadableThread(tx(), admin, id)).toBeNull()
     expect(await listThreadMessages(tx(), admin, id)).toBeNull()
 
-    expect(await inTx((t) => setLegalHold(t, admin, id, 'release', 'MATTER-1 closed'))).toEqual({ kind: 'ok', held: false })
+    await pg.query(
+      `INSERT INTO message_thread_lifecycle(organization_id,thread_id,action,acted_by,acted_via,reference) VALUES($1,$2,'hold_release',$3,'organization_administrator','MATTER-1 closed')`,
+      [org, id, admin.userId],
+    )
     expect(await retentionOf(id, later)).toMatchObject({ state: 'retention_elapsed' })
     expect((await pg.query<{ action: string }>(`SELECT action FROM message_thread_lifecycle WHERE action LIKE 'hold%' ORDER BY seq`)).rows.map((r) => r.action)).toEqual(['hold_place', 'hold_release'])
   })
@@ -458,7 +463,7 @@ describe('retention is policy-parameterised, hold-aware and never deletes', () =
     await asOwner(async () => {
       await pg.exec('REVOKE INSERT ON audit_security.audit_logs FROM rt')
     })
-    await expect(inTx((t) => setLegalHold(t, admin, id, 'place', 'MATTER-1'))).rejects.toThrow()
+    expect(await inTx((t) => setLegalHold(t, admin, id, 'place', 'MATTER-1'))).toEqual({ kind: 'forbidden' })
     expect(await count(`SELECT count(*) AS n FROM message_thread_lifecycle`)).toBe(0)
   })
 

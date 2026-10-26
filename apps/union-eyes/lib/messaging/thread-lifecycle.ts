@@ -4,6 +4,7 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import type { CaseActor } from '@/lib/cases/case-authorization'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import { findReadableThread } from '@/lib/messaging/thread-access'
+import { decideMessageHold } from '@/lib/authority/store/route-adapter'
 
 /**
  * Conversation lifecycle, legal hold and retention.
@@ -100,11 +101,12 @@ export type HoldResult =
   | { kind: 'conflict'; code: 'ALREADY_HELD' | 'NOT_HELD' }
 
 /**
- * An organization administrator places or releases a legal hold. The administrator learns that the conversation exists and
- * nothing of its content; a hold neither grants a read nor stops participants from using the conversation.
+ * A live governance mandate naming this conversation places or releases a legal hold.
+ * The caller learns that the conversation exists and nothing of its content. The
+ * organization-administrator role is not authority. A hold neither grants a read nor
+ * stops participants from using the conversation.
  */
 export async function setLegalHold(tx: RLSTx, actor: CaseActor, threadId: string, action: 'place' | 'release', reference: string): Promise<HoldResult> {
-  if (actor.role !== 'admin') return { kind: 'forbidden' }
   const trimmed = reference.trim()
   if (!trimmed || trimmed.length > MAX_HOLD_REFERENCE) return { kind: 'invalid_reference' }
   if (!UUID.test(threadId)) return { kind: 'not_found' }
@@ -114,6 +116,13 @@ export async function setLegalHold(tx: RLSTx, actor: CaseActor, threadId: string
     .where(and(eq(messageThreads.id, threadId), eq(messageThreads.organizationId, actor.organizationId)))
     .limit(1)
   if (!thread) return { kind: 'not_found' }
+  const decision = await decideMessageHold(tx, {
+    userId: actor.userId,
+    organizationId: actor.organizationId,
+    threadId: thread.id,
+    action: action === 'place' ? 'message:place_legal_hold' : 'message:release_legal_hold',
+  })
+  if (decision.effect !== 'allow') return { kind: 'forbidden' }
 
   const held = (await threadLifecycleFacts(tx, actor.organizationId, thread.id)).held
   if (action === 'place' && held) return { kind: 'conflict', code: 'ALREADY_HELD' }

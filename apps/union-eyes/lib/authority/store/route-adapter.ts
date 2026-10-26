@@ -53,7 +53,25 @@ export interface KernelCaseRequest {
   action: Action
 }
 
-/** A full kernel decision for one action on one case, for the authenticated principal of `tx`. */
+/** A full kernel decision for a legal hold on one conversation, for the authenticated principal of `tx`. */
+export function decideMessageHold(
+  tx: RLSTx,
+  input: { userId: string; organizationId: string; threadId: string; action: 'message:place_legal_hold' | 'message:release_legal_hold' },
+  deps: EnforcementDeps = kernelDeps,
+): Promise<Decision> {
+  return enforceAuthority(
+    drizzleExecutor(tx),
+    deps,
+    {
+      principalUserId: input.userId,
+      organizationId: input.organizationId,
+      action: input.action,
+      resource: { type: 'message_thread', id: input.threadId, organizationId: input.organizationId },
+    },
+    { authenticated: true },
+  )
+}
+
 export function decideCase(tx: RLSTx, input: KernelCaseRequest, deps: EnforcementDeps = kernelDeps): Promise<Decision> {
   return enforceAuthority(
     drizzleExecutor(tx),

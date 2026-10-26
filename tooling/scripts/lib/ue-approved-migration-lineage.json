@@ -286,6 +286,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-final-convergence",
         "note": "Additive evolution of the Django-created location_deletion_log stub: the evidence columns the application writes plus defaults on id, created_at and updated_at. Proven on native PostgreSQL 15 and 16; not applied to any live database."
+      },
+      {
+        "tag": "0029_message_thread_authority_scope",
+        "sha256": "c3edaa1ed46d700eb5ccb44a90e7c80fbc5b2e1b62e0d7f769901b0fe9289c01",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Extends the recusal resource check to message_thread and the non-delegable action check to message:place_legal_hold and message:release_legal_hold. Does not issue either power and has not been applied to a native or live database."
       }
     ]
   }

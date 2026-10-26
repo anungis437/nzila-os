@@ -14,6 +14,7 @@
  *   financial     public.payments (amount, currency) + ue_authority_financial_steps
  *   review        ue_authority_reviews
  *   workaid       ue_authority_workaid_matters (union-side references only)
+ *   message       message_threads (identity of the conversation only; never its subject or body)
  * No authoritative source exists for: case unit/territory, case respondents,
  * member financial records keyed to a principal, or WorkAid counsel content.
  */
@@ -23,6 +24,7 @@ import type {
   CaseFacts,
   FinancialTransactionFacts,
   GovernanceReviewFacts,
+  MessageThreadFacts,
   ResourceFacts,
   ResourceRelationship,
   WorkAidMatterFacts,
@@ -336,7 +338,28 @@ export async function loadWorkAidMatter(exec: SqlExecutor, req: AuthorityRequest
   return { resource: facts }
 }
 
-/** The default loader bound to the canonical sources above. */
+export async function loadMessageThread(exec: SqlExecutor, req: AuthorityRequest): Promise<LoadedResource | null> {
+  const org = req.resource.organizationId
+  if (!isUuid(org) || !isUuid(req.resource.id)) return null
+  const r = (
+    await exec.query<Row>(
+      `SELECT id::text AS id, organization_id::text AS organization_id, member_id, staff_id, status
+         FROM message_threads WHERE organization_id = $1::uuid AND id = $2::uuid`,
+      [org, req.resource.id],
+    )
+  ).rows[0]
+  if (!r) return null
+  const facts: MessageThreadFacts = {
+    kind: 'message_thread',
+    id: String(r.id),
+    organizationId: String(r.organization_id),
+    memberUserId: String(r.member_id),
+    assigneeUserId: r.staff_id == null ? null : String(r.staff_id),
+    status: r.status === 'closed' ? 'closed' : 'open',
+  }
+  return { resource: facts }
+}
+
 /** The canonical loaders under the document classification policy in force (provisional default unless an institution supplies one). */
 export const createCanonicalResourceLoader = (policy: DocumentClassPolicy = DEFAULT_DOCUMENT_CLASS_POLICY): ResourceLoader => async (exec, req, now) => {
   switch (req.resource.type) {
@@ -348,6 +371,8 @@ export const createCanonicalResourceLoader = (policy: DocumentClassPolicy = DEFA
       return loadReview(exec, req)
     case 'workaid_matter':
       return loadWorkAidMatter(exec, req)
+    case 'message_thread':
+      return loadMessageThread(exec, req)
     default:
       // member_financial_record has no authoritative principal-keyed source; approval_request is loaded by the store.
       return null

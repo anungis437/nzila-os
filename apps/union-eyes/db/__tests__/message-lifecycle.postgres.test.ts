@@ -468,7 +468,7 @@ describe.skipIf(!URL)('conversation lifecycle, retention and read markers on the
       expect(await liveCount()).toBe(liveBefore)
     })
 
-    it('a legal hold overrides every other position, is administrator-only, hidden from the member, and rolls back with its audit', async () => {
+    it('a legal hold is not an administrator role, and a recorded hold still overrides retention without granting a read', async () => {
       const id = await closedThread({ staffId: U.steward })
       const elapsed = new Date(Date.now() + 1000 * DAY)
       expect(await retentionOf(id, elapsed)).toMatchObject({ state: 'retention_elapsed' })
@@ -478,25 +478,26 @@ describe.skipIf(!URL)('conversation lifecycle, retention and read markers on the
       expect(await as(adminActor, (tx) => lifecycle!.setLegalHold(tx, adminActor, 'not-a-uuid', 'place', 'MATTER-1'))).toEqual({ kind: 'not_found' })
       const foreignAdmin = actor(U.foreign, 'admin', ORG_B)
       expect(await as(foreignAdmin, (tx) => lifecycle!.setLegalHold(tx, foreignAdmin, id, 'place', 'MATTER-1'))).toEqual({ kind: 'not_found' })
-      expect(await as(adminActor, (tx) => lifecycle!.setLegalHold(tx, adminActor, id, 'release', 'MATTER-1'))).toEqual({ kind: 'conflict', code: 'NOT_HELD' })
-
-      await failAudit('messages.thread.hold_place')
-      await rejectsWith(as(adminActor, (tx) => lifecycle!.setLegalHold(tx, adminActor, id, 'place', 'MATTER-1')), /injected audit fault/)
+      expect(await as(adminActor, (tx) => lifecycle!.setLegalHold(tx, adminActor, id, 'place', 'MATTER-1'))).toEqual({ kind: 'forbidden' })
+      expect(await as(adminActor, (tx) => lifecycle!.setLegalHold(tx, adminActor, id, 'release', 'MATTER-1'))).toEqual({ kind: 'forbidden' })
       expect(await count(`SELECT count(*) AS n FROM message_thread_lifecycle WHERE thread_id = $1 AND action LIKE 'hold%'`, [id])).toBe(0)
-      await clearFaults()
 
-      expect(await as(adminActor, (tx) => lifecycle!.setLegalHold(tx, adminActor, id, 'place', 'MATTER-1'))).toEqual({ kind: 'ok', held: true })
-      expect(await as(adminActor, (tx) => lifecycle!.setLegalHold(tx, adminActor, id, 'place', 'MATTER-1'))).toEqual({ kind: 'conflict', code: 'ALREADY_HELD' })
+      await admin.query(
+        `INSERT INTO message_thread_lifecycle(organization_id,thread_id,action,acted_by,acted_via,reference) VALUES($1,$2,'hold_place',$3,'organization_administrator','MATTER-1')`,
+        [ORG_A, id, adminActor.userId],
+      )
       expect(await retentionOf(id, elapsed)).toEqual({ state: 'legal_hold' })
       expect(await as(steward, (tx) => readState!.getThreadDetail(tx, steward, id, elapsed))).toMatchObject({ viewerRole: 'assignee', retention: { audience: 'staff', state: 'legal_hold' } })
       const memberDetail = JSON.stringify(await as(member, (tx) => readState!.getThreadDetail(tx, member, id, elapsed)))
       expect(memberDetail).toContain('"state":"retained"')
       expect(memberDetail).not.toMatch(/legal|hold|MATTER-1/)
-      // A hold grants the administrator no read of the conversation.
       expect(await as(adminActor, (tx) => access!.findReadableThread(tx, adminActor, id))).toBeNull()
       expect(await as(adminActor, (tx) => access!.listThreadMessages(tx, adminActor, id))).toBeNull()
 
-      expect(await as(adminActor, (tx) => lifecycle!.setLegalHold(tx, adminActor, id, 'release', 'MATTER-1 closed'))).toEqual({ kind: 'ok', held: false })
+      await admin.query(
+        `INSERT INTO message_thread_lifecycle(organization_id,thread_id,action,acted_by,acted_via,reference) VALUES($1,$2,'hold_release',$3,'organization_administrator','MATTER-1 closed')`,
+        [ORG_A, id, adminActor.userId],
+      )
       expect(await retentionOf(id, elapsed)).toMatchObject({ state: 'retention_elapsed' })
       expect((await admin.query(`SELECT action FROM message_thread_lifecycle WHERE thread_id = $1 AND action LIKE 'hold%' ORDER BY seq`, [id])).rows.map((r) => r.action)).toEqual(['hold_place', 'hold_release'])
     })
