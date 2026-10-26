@@ -110,6 +110,21 @@ describe('employer-execution/payroll-runs route', () => {
     expect(json.data).toHaveLength(1);
   });
 
+  it('POST refuses before reading a timesheet batch when no live financial mandate exists', async () => {
+    const { POST } = await loadRoute();
+    m.requireLiveFinancialMandate.mockRejectedValue(Object.assign(new Error('financial mandate'), { status: 403 }));
+    m.selectQueue.push([{ id: 'batch_1' }]);
+
+    const response = await POST(new NextRequest('http://localhost/api/employer-execution/payroll-runs', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({
+        timesheetBatchId: '11111111-1111-4111-8111-111111111111', periodStart: '2026-01-01', periodEnd: '2026-01-31', runType: 'preview', engineVersion: 'v1',
+      }),
+    }), { organizationId: 'org_1', userId: 'u1' });
+
+    expect(response.status).toBe(403);
+    expect(m.selectQueue).toHaveLength(1);
+  });
+
   it('POST returns 404 when source timesheet batch is missing', async () => {
     const { POST } = await loadRoute();
     m.selectQueue.push([]);

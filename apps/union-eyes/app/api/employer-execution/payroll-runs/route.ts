@@ -61,6 +61,10 @@ export const POST = withApi(
       await requireEntitlement(organizationId, PLATFORM_MODULES.EMPLOYER_PAYROLL_OFFICIAL, userId ?? undefined);
     }
 
+    await withRLSContext({ organizationId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, organizationId);
+    });
+
     const [sourceBatch] = await db
       .select()
       .from(employerTimesheetBatches)

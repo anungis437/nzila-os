@@ -201,7 +201,8 @@ describe('employer-execution/payroll-runs route', () => {
       userId: 'u1',
       body: validRequest,
     })).rejects.toMatchObject({ status: 404 });
-    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.requireLiveFinancialMandate).toHaveBeenCalledTimes(1);
+    expect(m.withRLSContext).toHaveBeenCalledTimes(1);
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
@@ -214,7 +215,8 @@ describe('employer-execution/payroll-runs route', () => {
       userId: 'u1',
       body: validRequest,
     })).rejects.toMatchObject({ status: 400 });
-    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.requireLiveFinancialMandate).toHaveBeenCalledTimes(1);
+    expect(m.withRLSContext).toHaveBeenCalledTimes(1);
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
@@ -230,7 +232,9 @@ describe('employer-execution/payroll-runs route', () => {
       userId: 'u1',
       body: { ...validRequest, runType: 'official' },
     })).rejects.toMatchObject({ status: 400 });
-    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.requireLiveFinancialMandate).toHaveBeenCalledTimes(1);
+    expect(m.withRLSContext).toHaveBeenCalledTimes(1);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('POST prepares a preview run, records the preparer and audits on the same transaction', async () => {
