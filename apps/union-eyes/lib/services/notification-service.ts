@@ -9,6 +9,7 @@
 import { db } from "@/db";
 import { v4 as uuid } from "uuid";
 import { logger } from "@/lib/logger";
+import { stripMarkup } from "@/lib/utils/strip-markup";
 import { getFromEmail, sendResendEmail } from "@/lib/email-service";
 import { createAuditLog } from "./audit-service";
 import {
@@ -152,14 +153,8 @@ export const notifications = pgTable('notifications', {
 // ============================================================================
 
 function stripHtml(html: string): string {
-  // Plain-text conversion for the email fallback: drop style blocks and tags, then every remaining angle bracket so
-  // no fragment can reassemble into markup.
-  return html
-    .replace(/<style\b[\s\S]*?<\/style\s*>/gi, '')
-    .replace(/<[^>]*>/g, '')
-    .replace(/[<>]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+  // Plain-text conversion for the email fallback; the result never contains markup.
+  return stripMarkup(html).replace(/\s+/g, ' ').trim();
 }
 
 export class ResendEmailProvider implements NotificationProvider {

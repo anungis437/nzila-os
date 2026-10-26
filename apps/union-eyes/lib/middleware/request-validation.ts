@@ -22,6 +22,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z, ZodSchema, ZodError } from 'zod';
+import { stripMarkup } from '@/lib/utils/strip-markup';
 
 /**
  * Validation result union type
@@ -70,13 +71,8 @@ export const sanitizationRules = {
    */
   html: (value: unknown): string => {
     if (typeof value !== 'string') return '';
-    // Plain text only: drop script/style blocks and tags, then every remaining angle bracket, so no fragment can
-    // reassemble into markup (the output contains neither `<` nor `>`).
-    return value
-      .replace(/<(script|style)\b[\s\S]*?<\/\1\s*>/gi, '')
-      .replace(/<[^>]*>/g, '')
-      .replace(/[<>]/g, '')
-      .trim();
+    // Plain text only: tags and script/style blocks are dropped and the result never contains `<` or `>`.
+    return stripMarkup(value).trim();
   },
 
   /**

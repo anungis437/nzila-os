@@ -3,6 +3,7 @@
  * Use this to sanitize any HTML before rendering with dangerouslySetInnerHTML
  */
 import DOMPurify from 'dompurify';
+import { stripMarkup } from './strip-markup';
 
 /** Trusted external domains for payment/OAuth redirects */
 const TRUSTED_REDIRECT_DOMAINS = [
@@ -58,9 +59,8 @@ export function safeAttributeUrl(value: string, protocols: readonly string[] = [
  */
 export function sanitizeHtml(dirty: string): string {
   if (typeof window === 'undefined') {
-    // Server-side: reduce to plain text (never rendered on the server). Remove tags, then every remaining angle
-    // bracket, so no fragment can reassemble into markup.
-    return dirty.replace(/<[^>]*>/g, '').replace(/[<>]/g, '');
+    // Server-side: reduce to plain text (never rendered on the server); the result never contains markup.
+    return stripMarkup(dirty);
   }
   return DOMPurify.sanitize(dirty, {
     USE_PROFILES: { html: true },
