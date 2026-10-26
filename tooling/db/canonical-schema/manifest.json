@@ -3,7 +3,7 @@
   "description": "Published from Union Eyes runtime-schema authority oracle (disposition-adjusted REQUIRED). Not an independent table list.",
   "authoritySource": "reports/union-eyes-runtime-schema-authority-oracle.json",
   "publisherSecondSchemaAuthority": false,
-  "generatedAt": "2026-10-25T23:29:46.282Z",
+  "generatedAt": "2026-10-26T06:06:17.914Z",
   "tables": {
     "account_mappings": {
       "source": "apps/union-eyes/db/schema/domains/financial/chart-of-accounts.ts",
@@ -761,8 +761,7 @@
       "requiredColumns": [
         "id",
         "organization_id",
-        "created_at",
-        "updated_at"
+        "created_at"
       ],
       "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
     },
@@ -902,6 +901,26 @@
       ],
       "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
     },
+    "deadline_reassignment_convergence": {
+      "source": "apps/union-eyes/db/schema/deadline-engine-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "deadline_reminder_executions": {
+      "source": "apps/union-eyes/db/schema/deadline-engine-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
     "deadline_reminders": {
       "source": "apps/union-eyes/db/schema/deadline-engine-schema.ts",
       "requiredColumns": [
@@ -973,6 +992,17 @@
       ],
       "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
     },
+    "document_intakes": {
+      "source": "apps/union-eyes/db/schema/documents-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
     "document_links": {
       "source": "apps/union-eyes/db/schema/documents-schema.ts",
       "requiredColumns": [
@@ -989,6 +1019,28 @@
       "requiredColumns": [
         "id",
         "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "document_transcript_publications": {
+      "source": "apps/union-eyes/db/schema/documents-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "document_transcript_revisions": {
+      "source": "apps/union-eyes/db/schema/documents-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "org_id",
         "created_at",
         "updated_at"
       ],
@@ -2037,8 +2089,48 @@
       ],
       "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
     },
+    "message_retention_policies": {
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
     "message_templates": {
       "source": "apps/union-eyes/db/schema/domains/communications/campaigns.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "message_thread_assignments": {
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "message_thread_lifecycle": {
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "message_thread_reads": {
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
       "requiredColumns": [
         "id",
         "organization_id",
@@ -3125,6 +3217,235 @@
     },
     "trend_analyses": {
       "source": "apps/union-eyes/db/schema/analytics.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "triage_designations": {
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_acceptances": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_approval_decisions": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_approval_requests": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_counsel_engagements": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_counsel_nonces": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_delegations": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_disclosure_consents": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_events": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_financial_steps": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_issuance_rules": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_mandates": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_recusals": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_requests": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_resource_relationships": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_reviews": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_workaid_consent_grants": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_workaid_consent_texts": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_workaid_counsel_access": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_workaid_document_auths": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_workaid_matters": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_authority_workaid_shares": {
+      "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_cognition_memory": {
+      "source": "apps/union-eyes/db/schema/domains/ml/knowledge-transfer-runtime.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_copilot_conversations": {
+      "source": "apps/union-eyes/db/schema/domains/ml/knowledge-transfer-runtime.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ue_reasoning_sessions": {
+      "source": "apps/union-eyes/db/schema/domains/ml/knowledge-transfer-runtime.ts",
       "requiredColumns": [
         "id",
         "organization_id",

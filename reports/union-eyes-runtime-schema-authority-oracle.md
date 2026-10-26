@@ -1,6 +1,6 @@
 # Union Eyes Runtime Schema Authority Oracle
 
-Generated: 2026-09-23T15:17:00.751Z
+Generated: 2026-10-26T06:06:15.569Z
 
 This report treats the storage-authority registry as the runtime-storage universe and reconciles it against repository migration history. It does not mutate Azure, does not generate migrations, and does not claim the current fresh bootstrap is complete.
 
@@ -13,18 +13,18 @@ This report treats the storage-authority registry as the runtime-storage univers
 
 ## Counts
 
-- storageAuthorityEntries: 805
-- runtimeUniverseTables: 349
-- tenantOrMixedRuntimePrincipalTables: 349
-- tablesWithNonEmptyRuntimePrivileges: 346
-- rlsRequiredTables: 326
-- runtimeTablesWithExistingCreationMigration: 339
+- storageAuthorityEntries: 862
+- runtimeUniverseTables: 387
+- tenantOrMixedRuntimePrincipalTables: 387
+- tablesWithNonEmptyRuntimePrivileges: 383
+- rlsRequiredTables: 363
+- runtimeTablesWithExistingCreationMigration: 377
 - runtimeTablesWithoutCreationMigration: 10
-- runtimeTablesWithOwner: 339
+- runtimeTablesWithOwner: 377
 - runtimeTablesWithoutSchemaOwner: 10
-- runtimeTablesWithMultipleSchemaOwners: 233
-- bootstrapParticipatingCreationTables: 64
-- bootstrapMissingCreationTables: 285
+- runtimeTablesWithMultipleSchemaOwners: 236
+- bootstrapParticipatingCreationTables: 161
+- bootstrapMissingCreationTables: 226
 
 ## Lineages
 
@@ -47,10 +47,10 @@ This report treats the storage-authority registry as the runtime-storage univers
 | table | owner | creation lineage | creating migration | current bootstrap participates | readers | writers |
 |---|---|---|---|---|---|---|
 | ai_grievance_triages | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql | YES | 1 | 1 |
-| billing_accounts | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql | NO | 3 | 1 |
-| billing_periods | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql | NO | 5 | 1 |
+| billing_accounts | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql | YES | 3 | 1 |
+| billing_periods | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql | YES | 5 | 1 |
 | billing_subscriptions | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations-platform/0001_billing_subscriptions.sql | YES | 1 | 0 |
-| document_versions | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql | NO | 5 | 5 |
+| document_versions | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql | YES | 10 | 6 |
 | org_subscriptions | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql | YES | 7 | 5 |
 | pension_plans | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql | YES | 3 | 2 |
 | platform_invoices | PLATFORM_SQL_OWNED | ACTIVE_SQL_PLATFORM_LINEAGE | apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql | YES | 5 | 2 |
