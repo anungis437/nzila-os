@@ -2,8 +2,10 @@
  * Batch program for the schema census (UE-CONV-H-007) and the mutation-scope baseline (UE-CONV-K-006).
  *
  * Program `applyNow` stays false. A mutation batch sets `applyNow` only when the live scan no longer
- * counts its source statements. This module does not edit either ratchet file, does not emit SQL,
- * and does not start a database. A hold batch never shrinks a ratchet.
+ * counts its source statements. A schema retirement batch sets `sourceRetired` when those Drizzle
+ * declarations are gone from the schema barrel. The census file stays until VS Code regenerates it.
+ * This module does not edit either ratchet file, does not emit SQL, and does not start a database.
+ * A hold batch never shrinks a ratchet.
  */
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
@@ -78,7 +80,7 @@ export interface BatchProgram {
   graphComplete: boolean
   unresolvedCount: number
   unresolvedSample: string[]
-  batches: Array<BatchSpec & { applyNow: boolean; entryCount: number; statementCount: number; liveStatementCount: number }>
+  batches: Array<BatchSpec & { applyNow: boolean; entryCount: number; statementCount: number; liveStatementCount: number; sourceRetired?: boolean }>
   schema: SchemaAssignment[]
   sourceMutations: MutationAssignment[]
   mutations: MutationAssignment[]
@@ -139,7 +141,7 @@ const BATCHES: BatchSpec[] = [
     execution: 'cursor-then-vs',
     shrink: 'census',
     action: 'Delete the Drizzle declaration and the schema-folder relations that only name it. Do not DROP the database relation. Do not hand-delete the census row. The census shrinks only when VS Code regenerates it with UE_CENSUS_WRITE=1 on a disposable database after the declaration is gone.',
-    proof: 'apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts and apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts',
+    proof: 'apps/union-eyes/db/__tests__/schema-retire-declaration.test.ts',
   },
   {
     id: 'schema-retire-blocked',
@@ -465,14 +467,22 @@ export function buildSchemaMutationBatches(live: Record<string, number> = scanUn
     const sourceEntries = sourceMutations.filter((entry) => entry.batchId === batch.id)
     const implemented = sourceEntries.length > 0 && sourceEntries.every((entry) => entry.liveCount === 0)
     const execution: Execution = implemented ? 'implemented' : batch.execution
-    return {
+    const sourceRetired = batch.id === 'schema-retire-declaration'
+      && schemaEntries.length > 0
+      && schemaEntries.every((entry) => !declared.has(entry.table))
+    const row: BatchSpec & { applyNow: boolean; entryCount: number; statementCount: number; liveStatementCount: number; sourceRetired?: boolean } = {
       ...batch,
+      action: sourceRetired
+        ? 'org_usage, signature_templates, and signature_webhooks_log are no longer Drizzle declarations. signature_documents.template_id stays a column without a Drizzle foreign key. Django SignatureTemplates and SignatureWebhooksLog stay, and their view sets stay. The unwired admin-actions reader no longer selects org_usage. No DROP was added. The census file still lists the three tables. Census regeneration is READY_FOR_VS_EXECUTION. Do not hand-delete the census row. Do not DROP the relation.'
+        : batch.action,
       execution,
       applyNow: implemented,
       entryCount: schemaEntries.length + sourceEntries.length,
       statementCount: sourceEntries.reduce((sum, entry) => sum + entry.baselineCount, 0),
       liveStatementCount: sourceEntries.reduce((sum, entry) => sum + entry.liveCount, 0),
     }
+    if (sourceRetired) row.sourceRetired = true
+    return row
   })
 
   return {

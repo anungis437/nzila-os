@@ -12,7 +12,7 @@
 import { requireAdmin } from '@/lib/auth/rbac-server';
 import { db } from '@/db/db';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';import { organizationUsers } from "@/db/schema/domains/member";
-import { organizations, orgConfigurations, orgUsage } from "@/db/schema";
+import { organizations, orgConfigurations } from "@/db/schema";
 import { eq, and, desc, sql, count, like, or, ne, sum as _sum } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { auth } from '@nzila/platform-auth/entra/server';
@@ -58,11 +58,8 @@ export async function getSystemStats(tx: AdminTx): Promise<SystemStats> {
         ne(organizations.status, 'archived')
       ));
 
-    // Aggregate storage across all org usage records
-    const storageResult = await tx
-      .select({ total: sql<number>`COALESCE(SUM(${orgUsage.storageUsedBytes}), 0)` })
-      .from(orgUsage);
-    const totalStorage = storageResult[0]?.total || 0;
+    // org_usage is no longer declared. This unwired reader does not query it.
+    const totalStorage = 0;
 
     // Users active in last 24 hours
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -194,14 +191,8 @@ export async function getAdminOrgs(searchQuery?: string): Promise<OrgWithStats[]
           .from(organizationUsers)
           .where(eq(organizationUsers.organizationId, org.orgId));
 
-        // Get latest storage usage for this org
-        const [usage] = await db
-          .select({ bytes: orgUsage.storageUsedBytes })
-          .from(orgUsage)
-          .where(eq(orgUsage.organizationId, org.orgId))
-          .orderBy(desc(orgUsage.periodEnd))
-          .limit(1);
-        const storageUsed = String(usage?.bytes ?? 0);
+        // org_usage is no longer declared. This unwired reader does not query it.
+        const storageUsed = "0";
 
         return {
           id: org.orgId,

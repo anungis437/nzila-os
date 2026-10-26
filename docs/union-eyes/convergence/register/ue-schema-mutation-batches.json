@@ -82,12 +82,13 @@
       "ratchet": "census",
       "execution": "cursor-then-vs",
       "shrink": "census",
-      "action": "Delete the Drizzle declaration and the schema-folder relations that only name it. Do not DROP the database relation. Do not hand-delete the census row. The census shrinks only when VS Code regenerates it with UE_CENSUS_WRITE=1 on a disposable database after the declaration is gone.",
-      "proof": "apps/union-eyes/db/__tests__/canonical-schema-disposition.test.ts and apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts",
+      "action": "org_usage, signature_templates, and signature_webhooks_log are no longer Drizzle declarations. signature_documents.template_id stays a column without a Drizzle foreign key. Django SignatureTemplates and SignatureWebhooksLog stay, and their view sets stay. The unwired admin-actions reader no longer selects org_usage. No DROP was added. The census file still lists the three tables. Census regeneration is READY_FOR_VS_EXECUTION. Do not hand-delete the census row. Do not DROP the relation.",
+      "proof": "apps/union-eyes/db/__tests__/schema-retire-declaration.test.ts",
       "applyNow": false,
       "entryCount": 3,
       "statementCount": 0,
-      "liveStatementCount": 0
+      "liveStatementCount": 0,
+      "sourceRetired": true
     },
     {
       "id": "schema-live-unreferenced",
@@ -2153,6 +2154,7 @@
       "reachable": false,
       "djangoDefined": false,
       "blockers": [
+        "no-declaration",
         "table-absent"
       ]
     },
@@ -2675,7 +2677,7 @@
       "reachable": false,
       "djangoDefined": true,
       "blockers": [
-        "enum-collision:signature_provider"
+        "no-declaration"
       ]
     },
     {
@@ -2703,7 +2705,7 @@
       "reachable": false,
       "djangoDefined": true,
       "blockers": [
-        "enum-collision:signature_provider"
+        "no-declaration"
       ]
     },
     {

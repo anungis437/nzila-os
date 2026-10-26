@@ -30,7 +30,7 @@ function setResults(...results: unknown[]) {
 
 vi.mock('@/db/db', () => ({ db: mocks.chain }));
 vi.mock('@/db/schema/domains/member', () => ({ organizationUsers: {} }));
-vi.mock('@/db/schema', () => ({ organizations: {}, orgConfigurations: {}, orgUsage: {} }));
+vi.mock('@/db/schema', () => ({ organizations: {}, orgConfigurations: {} }));
 vi.mock('drizzle-orm/node-postgres', () => ({}));
 vi.mock('drizzle-orm', () => ({
   eq: () => ({}),
@@ -73,13 +73,13 @@ describe('admin-actions', () => {
 
   describe('getSystemStats', () => {
     it('aggregates system-wide statistics', async () => {
-      setResults([{ count: 5 }], [{ count: 3 }], [{ count: 2 }], [{ total: 1000 }], [{ count: 1 }]);
+      setResults([{ count: 5 }], [{ count: 3 }], [{ count: 2 }], [{ count: 1 }]);
       const stats = await getSystemStats(tx);
       expect(stats).toEqual({
         totalMembers: 5,
         totalOrgs: 3,
         activeOrgs: 2,
-        totalStorage: 1000,
+        totalStorage: 0,
         activeToday: 1,
       });
     });
