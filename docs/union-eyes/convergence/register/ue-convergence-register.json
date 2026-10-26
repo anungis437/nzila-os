@@ -1041,7 +1041,7 @@
         "apps/union-eyes/lib/services/grievance-read-scope.ts"
       ],
       "securityImplications": "Merging the remaining branches as-is would reintroduce rank-derived authority; Officer/Executive and Financial Officer define different thresholds for the same financial endpoints.",
-      "requiredImplementation": "Integrate the remaining personas one at a time against the kernel with route-level positive and negative tests; do not select by recency. Move governance approvals and case ownership onto kernel records with recusal.",
+      "requiredImplementation": "Integrate the remaining personas one at a time against the kernel with route-level positive and negative tests; do not select by recency. Move governance approvals and case ownership onto kernel records with recusal. Member review intake is now a route and screen: an active member opens a complaint, appeal or reconsideration as themselves; the list returns reviews they opened or filed, and an oversight row only when review:monitor allows that exact review. A stranger, a foreign organization, an adverse party and a recused monitor do not receive the row. No review-notification policy is adopted, so no notice is sent. This does not close the persona matrix.",
       "evidence": [
         {
           "type": "test",
