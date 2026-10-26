@@ -1,4 +1,4 @@
-# Gate 0 scope lock (adversarial rework)
+# Gate 0 scope lock (adversarial rework and Gate 0A)
 
 Mission: `UE-FINAL-CONVERGENCE-2026-10`. Verdict: `IN_PROGRESS`.
 
@@ -13,6 +13,9 @@ The earlier verdict, `READY_FOR_ADVERSARIAL_REVIEW`, is withdrawn. The adversari
 | First executed-evidence recording | `8c40e84d6` |
 | Validator, persona, ownership, lock, and test rework | `b3a7f4046` |
 | Regenerated matrix, route ownership, lock, and evidence | `489f16277` |
+| Starting HEAD for Gate 0A (second review: rework accepted, Gate 0 still open) | `f39828e97837afa73cf2a03f40c841b3b2699dad` |
+| Gate 0A validator, recovery verifier, and tests | `1f182b2a3` |
+| Gate 0A recovery file and regenerated matrix | `66eac06d7` |
 | This report | the next commit; a file cannot contain its own SHA |
 
 The capability lock is anchored to the reviewed HEAD. It reads that commit's matrix with `git show`, so editing the working-tree matrix cannot rewrite the anchor.
@@ -40,21 +43,85 @@ The register has 41 entries: CLOSED 8, OPEN 12, IN_PROGRESS 17, EXTERNAL_GATE 4.
 | --- | --- | --- | --- | --- | --- | --- |
 | Member | `UE_MEMBER_CANONICAL_2_1.md` | 10 | 10 | 0 | 0 | yes |
 | Steward | no canonical file in the repository | 0 | 0 | 0 | 0 | no |
-| Representative | `UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md` (canonical 2.2 file absent) | 56 | 32 | 14 | 10 | no |
+| Representative | `UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md` and its first version at `571784d58` (canonical 2.2 file absent) | 56 | 39 | 17 | 0 | no |
 | Senior representative | `32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md` | 22 | 22 | 0 | 0 | yes |
 | Officer / executive | `apps/union-eyes/lib/executive/capability-matrix.ts` | 26 | 26 | 0 | 0 | yes |
 | Financial officer | `UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md` (canonical file absent) | 38 | 4 | 6 | 28 | no |
 | Governance officer | `UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md` | 30 | 30 | 0 | 0 | yes |
 
-Total: 182 identifiers, 124 individually defined.
+Total: 182 identifiers, 131 individually defined. Gate 0A moved 7 Representative identifiers to individually defined and 4 from unspecified to grouped only. The Financial Officer and Steward counts did not change.
 
 Unresolved detail:
 
 - Steward: no action universe exists. `UE-OMIT-STEWARD-CANONICAL-ABSENT` (gate 10, `SOURCE_UNSPECIFIED`) owns the gap. The earlier out-of-scope record for the Steward was removed, because absent specs are debt and not an exclusion.
-- Representative: individually defined `REP-NAV-1..7` and `REP-ACT-01..25`. Grouped only `R03 R04 R05 R06 R10 R16 R17 R18 R19 R20 R21 R22 R23 R24`. Unspecified `R01 R02 R07 R08 R09 R11 R12 R13 R14 R15`. Owner `UE-OMIT-REP-CANONICAL-ABSENT`. Two source findings are tracked separately: `UE-OMIT-REP-CORRESPONDENCE` (gate 11, `PARTIAL`) and `UE-OMIT-REP-TRANSITION-REASON-LEAK` (gate 10, `NOT_IMPLEMENTED`).
-- Financial officer: individually defined `F08 F09 F10 F19`. Grouped only `F11 F12 F13 F14 F17 F18`. Unspecified `F01–F07 F15 F16 F20–F28 FJ01–FJ10`. Owner `UE-OMIT-FINANCE-RANGE-UNSPECIFIED`. No title or action text was invented for any unspecified identifier.
+- Representative: individually defined `REP-NAV-1..7`, `REP-ACT-01..25`, and (Gate 0A) `R01 R02 R09 R13 R14 R15 R18`. Grouped only `R03 R04 R05 R06 R07 R08 R10 R11 R12 R16 R17 R19 R20 R21 R22 R23 R24`. Unspecified: none. One unresolved source conflict (`R18`). Two references with no identifier (Journeys A–G, institutional scenarios). Owner `UE-OMIT-REP-CANONICAL-ABSENT`. Two source findings are tracked separately: `UE-OMIT-REP-CORRESPONDENCE` (gate 11, `PARTIAL`) and `UE-OMIT-REP-TRANSITION-REASON-LEAK` (gate 10, `NOT_IMPLEMENTED`).
+- Financial officer: individually defined `F08 F09 F10 F19`. Grouped only `F11 F12 F13 F14 F17 F18`. Unspecified `F01–F07 F15 F16 F20–F28 FJ01–FJ10`. Three references with no identifier (seven navigation destinations of which three are named, organization scenarios and related acceptance topics). Owner `UE-OMIT-FINANCE-RANGE-UNSPECIFIED`. No title or action text was invented for any unspecified identifier.
 
-No canonical source was invented. The three unresolved personas make Gate 0 `IN_PROGRESS` until the repository contains those sources.
+No canonical source was invented. The three unresolved personas make Gate 0 `IN_PROGRESS` until the repository contains those sources or an institutional owner decides each open question below.
+
+## Gate 0A: persona source recovery
+
+Gate 0A searched for the three missing canonicals and reconciled what exists. It added no persona identifier, no capability, and no requirement. The consolidation is `docs/union-eyes/convergence/register/ue-gate0a-persona-source-recovery.json`. It declares itself an `EVIDENCE_CONSOLIDATION`, and the validator rejects any other kind.
+
+### Search
+
+All 526 refs (every local branch and every `origin` head) and the full history were searched at the starting HEAD. The commands and the result are in the recovery file under `searchProtocol`.
+
+| Canonical | Recovered | What exists |
+| --- | --- | --- |
+| Steward | no | No document names a Steward canonical identifier. |
+| `UE-REPRESENTATIVE-CANONICAL-2.2` | no | Cited as FROZEN in the disposition (first at `571784d58`) and in code comments. Never committed as a file. |
+| `UE-FINANCIAL-OFFICER-CANONICAL-2.1` | no | Cited as FROZEN, design only, in the disposition (first at `ee9ecbb51`) and in the `financial-authority.ts` header. Never committed as a file. |
+
+### What was recovered
+
+The first version of the Representative 2.2 disposition (`571784d58f93ed6939438422534c63b83d77c7ed`) carried an R01–R24 table that the rewrite at `a0e7753fd` dropped. It survives only in git history. Source class: frozen disposition. It gives a title to seven identifiers:
+
+| Identifier | Title (verbatim) | Status in the first version |
+| --- | --- | --- |
+| `R01` | identity/mandates | LIMITED |
+| `R02` | daily workload | LIMITED |
+| `R09` | member relationships | LIMITED |
+| `R13` | evidence/records | UNAVAILABLE (unverified) |
+| `R14` | tasks/deadlines | LIMITED |
+| `R15` | agreements | LIMITED |
+| `R18` | WorkAid/specialists | BLOCKED |
+
+These are titles. No required behavior was recovered for any of them. Each maps to one existing capability (`UE-CAP-I-001`, `UE-CAP-F-002`, `UE-OMIT-DEADLINE-OVERDUE`, `UE-CAP-G-002`).
+
+Not promoted, because the source joins identifiers: `R07/R08` (one cell, two labels; reading them in order is an inference), `R11/R12` (one label), `R03–R06` (four labels in one parenthetical), `F11–F14` (four identifiers, three labels, so no pairing exists), `F17/F18` (one label phrase). A machine check rejects individual definition for any identifier joined to a sibling by a slash, comma, or dash in its quote.
+
+### Conflict
+
+`R18` is BLOCKED in the first version and MISSING in the current one. Gate 0A recorded both and settled neither. The validator fails if two sources disagree and no unresolved conflict is recorded, and fails if a conflict is marked resolved.
+
+### Steward
+
+Authoritative Steward actions recovered: 0. Eight evidence items are recorded and each is marked as defining no action. They show that the Representative 2.2 record treats one combined steward and staff experience, places the steward at level 1, lists what a steward must not hold or see, and that a `STEWARD` role exists in code. The reading that the Steward is the level-1 role inside Representative 2.2 is an unverified inference. It is recorded as an inference and does not define any action.
+
+Open questions: is the Steward a distinct frozen persona or the level-1 role in Representative 2.2; who supplies the canonical if it is distinct; which Representative actions a steward holds without an assignment, and by what mandate.
+
+### Financial authority separation
+
+The recovery file records, for viewing, preparation, approval, payment execution, reconciliation, mandate administration, and audit, what the dispositions and the code say. Every row carries `institutionallyRequired: false`. The code names six powers (view, prepare, approve, execute, reconcile, audit) and a three-person mandate rule. The disposition states gaps for approval, payment execution, reconciliation, and the mandate store. No row states an institutional requirement, so none is presented as one. The validator rejects a row marked required without a canonical-class source.
+
+### Guards added
+
+- A recovered source must be a git object at a full commit SHA, its blob hash is re-derived, and each quote is re-found in it.
+- Only a canonical or a frozen disposition can define an identifier. An executable contract, supporting evidence, or an inference cannot.
+- Recovery cannot add an identifier to a universe or remove one.
+- The universe recorded before Gate 0A is read from `f39828e97` with `git show`. An identifier there must stay in the extracted universe and in the matrix.
+- A persona stays unresolved while it has a source conflict or a reference with no identifier.
+
+### Can the three blockers be cleared?
+
+No.
+
+- Steward: no authoritative action exists and the persona question is open.
+- Representative: 17 identifiers have no individual definition, `R18` is in conflict, two references have no identifier, and the canonical is absent.
+- Financial Officer: 34 of 38 identifiers have no individual definition, three references have no identifier, and the canonical is absent. F08 and F09 carry a status statement and no domain title.
+
+Each needs an original canonical or an institutional decision. A reconstructed document would not satisfy that.
 
 ## Route and method ownership
 
@@ -137,23 +204,26 @@ The checker's global failure is unresolved debt, not a pass. The stale allowlist
 
 ## Tests
 
-Run from `/home/ubuntu/ue-cursor-final-closure` on Monday, October 26, 2026, America/Toronto, against the tree at `489f16277`.
+Run from `/home/ubuntu/ue-cursor-final-closure` on Monday, October 26, 2026, America/Toronto, against the tree at `66eac06d7`.
 
 | Command | Result |
 | --- | --- |
 | `node --test tooling/scripts/lib/ue-gate0-scope-lock.test.mjs` | 33 passed, 0 failed |
+| `node --test tooling/scripts/lib/ue-gate0a-persona-recovery.test.mjs` | 10 passed, 0 failed |
 | `node --test tooling/scripts/lib/ue-convergence-check.test.mjs` | 12 passed, 0 failed |
 | `node tooling/scripts/check-ue-convergence.mjs` | exit 1. Register valid (41 entries). Migration lineage verified. Two ratchet failures, above. |
 
 The 33 Gate 0 tests are the 14 original tests plus 19 new tests. The new negative tests cover: a missing Steward, a missing Representative, a Financial Officer marked complete while specs are unresolved, an existing route with no capability owner, an unrelated or invalid owner, deleted ownership with an unchanged route hash, `SOURCE_VERIFIED` backed by a test file with no execution evidence, a capability removed from both the matrix and its in-matrix lock array, and global convergence failures omitted from tracked debt. Further cases cover orphan, conflicting, and unclassified entries, an uninventoried route, stale or tampered evidence, a lock retirement without a reason, a capability added without a lock entry, a single owner per ratchet defect, and a verdict that disagrees with the blockers.
 
+The 10 Gate 0A tests cover: exact recovered counts and provenance; a missing persona specification marked resolved, and loss of the recovery file; a grouped-only identifier promoted without a solitary quote; an executable-only, inferred, or steward-evidence item presented as a requirement; the Financial Officer range completed by endpoint counting, by an invented identifier, or by an unsupported quote; a hidden or settled source conflict; an identifier removed from the previously recorded universe in the matrix and in the source; a tampered quote, blob, short commit, or kind; a dropped reference with no identifier; and a canonical claimed without a canonical-class source. The Gate 0A suite does not run any application test.
+
 The matrix validator returns 0 problems and 5 blocker groups. A problem is a rule violation. A blocker is unfinished Gate 0 scope.
 
 ## Remaining Gate 0 blockers
 
-1. Steward action universe is absent from the repository.
-2. Representative canonical 2.2 file is absent; 10 identifiers are unspecified and 14 are grouped only.
-3. Financial Officer canonical file is absent; 28 identifiers are unspecified and 6 are grouped only.
+1. Steward: no canonical and no action universe. Open decision: distinct persona or the level-1 role in Representative 2.2.
+2. Representative: canonical 2.2 file absent. 17 identifiers grouped only, `R18` in source conflict, 2 references with no identifier.
+3. Financial Officer: canonical file absent. 28 identifiers unspecified, 6 grouped only, 3 references with no identifier.
 4. 1152 route operations are `SCOPE_UNDECIDED`.
 5. `reviews/route.ts` is on disk and not in the route-coverage manifest.
 
