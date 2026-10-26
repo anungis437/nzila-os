@@ -1,0 +1,402 @@
+{
+  "schemaVersion": 1,
+  "recordedAtRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+  "records": [
+    {
+      "capabilityId": "UE-CAP-F-001",
+      "suiteFamily": "authority-kernel PGlite (resources, lifecycle)",
+      "assertionFamily": "internal-file read, edit, and disclosure grants stay separate kernel actions",
+      "command": "npx vitest run db/__tests__/authority-kernel-resources.pglite.test.ts db/__tests__/authority-kernel-lifecycle.pglite.test.ts --reporter=json --outputFile=<report>",
+      "workingDirectory": "apps/union-eyes",
+      "testedRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+      "testFiles": [
+        "apps/union-eyes/db/__tests__/authority-kernel-resources.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts"
+      ],
+      "testFileBlobs": {
+        "apps/union-eyes/db/__tests__/authority-kernel-resources.pglite.test.ts": "ea1f7fbb996c097578c1cd8c7c206c2211405c0f",
+        "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts": "94098e3ff629869954ace747f00ddb427aa51db5"
+      },
+      "executedAt": "2026-10-26T20:08:17.011Z",
+      "exitCode": 0,
+      "durationMs": 7075,
+      "totals": {
+        "total": 69,
+        "passed": 69,
+        "failed": 0,
+        "skipped": 0
+      },
+      "files": [
+        {
+          "path": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
+          "suiteStatus": "passed",
+          "passed": 28,
+          "failed": 0,
+          "skipped": 0,
+          "suiteError": null
+        },
+        {
+          "path": "apps/union-eyes/db/__tests__/authority-kernel-resources.pglite.test.ts",
+          "suiteStatus": "passed",
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0,
+          "suiteError": null
+        }
+      ],
+      "exclusions": [
+        "PGlite is not native PostgreSQL 15 or 16.",
+        "No credentialed browser journey is exercised."
+      ],
+      "logFile": "docs/union-eyes/convergence/evidence/gate0-source-verification/UE-CAP-F-001.log",
+      "logSha256": "432c66902d3e2101b526666ac3e7d4b27da9e65ba798e2af358582de3a1d09ab"
+    },
+    {
+      "capabilityId": "UE-CAP-G-001",
+      "suiteFamily": "counsel boundary (unit, PGlite resources, PGlite counsel engagement register)",
+      "assertionFamily": "counsel engagement stays on the kernel boundary",
+      "command": "npx vitest run lib/authority/__tests__/counsel-boundary.test.ts db/__tests__/authority-kernel-resources.pglite.test.ts db/__tests__/authority-kernel-counsel.pglite.test.ts --reporter=json --outputFile=<report>",
+      "workingDirectory": "apps/union-eyes",
+      "testedRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+      "testFiles": [
+        "apps/union-eyes/lib/authority/__tests__/counsel-boundary.test.ts",
+        "apps/union-eyes/db/__tests__/authority-kernel-resources.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/authority-kernel-counsel.pglite.test.ts"
+      ],
+      "testFileBlobs": {
+        "apps/union-eyes/lib/authority/__tests__/counsel-boundary.test.ts": "1f835b8ca7164f1b305b8d071230fd0e1e21f86b",
+        "apps/union-eyes/db/__tests__/authority-kernel-resources.pglite.test.ts": "ea1f7fbb996c097578c1cd8c7c206c2211405c0f",
+        "apps/union-eyes/db/__tests__/authority-kernel-counsel.pglite.test.ts": "5b89d45e9cb1e615ee96be08d794a32a8e778352"
+      },
+      "executedAt": "2026-10-26T20:08:21.776Z",
+      "exitCode": 1,
+      "durationMs": 4756,
+      "totals": {
+        "total": 66,
+        "passed": 53,
+        "failed": 0,
+        "skipped": 13
+      },
+      "files": [
+        {
+          "path": "apps/union-eyes/db/__tests__/authority-kernel-counsel.pglite.test.ts",
+          "suiteStatus": "failed",
+          "passed": 0,
+          "failed": 0,
+          "skipped": 13,
+          "suiteError": "REFERRAL_SCOPE_REQUIRED: a referral must record the categories that were referred"
+        },
+        {
+          "path": "apps/union-eyes/db/__tests__/authority-kernel-resources.pglite.test.ts",
+          "suiteStatus": "passed",
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0,
+          "suiteError": null
+        },
+        {
+          "path": "apps/union-eyes/lib/authority/__tests__/counsel-boundary.test.ts",
+          "suiteStatus": "passed",
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0,
+          "suiteError": null
+        }
+      ],
+      "exclusions": [
+        "PGlite is not native PostgreSQL.",
+        "Counsel-side verification is UE-CONV-G-003 and stays an external gate."
+      ],
+      "logFile": "docs/union-eyes/convergence/evidence/gate0-source-verification/UE-CAP-G-001.log",
+      "logSha256": "c07f74f3421a45a3f74aab52cbce3aef3926778702dd8b28fec9ff73bb84197c"
+    },
+    {
+      "capabilityId": "UE-CAP-H-001",
+      "suiteFamily": "anti-theatre scanner",
+      "assertionFamily": "retired scaffold detection (rule R-9) against a synthetic tree",
+      "command": "npx vitest run --root tooling/reality __tests__/anti-theatre-scan.test.ts --reporter=json --outputFile=<report>",
+      "workingDirectory": "tooling/reality",
+      "testedRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+      "testFiles": [
+        "tooling/reality/__tests__/anti-theatre-scan.test.ts"
+      ],
+      "testFileBlobs": {
+        "tooling/reality/__tests__/anti-theatre-scan.test.ts": "f0951ac870504c57c20656fe96b6b40b0448c4af"
+      },
+      "executedAt": "2026-10-26T20:08:22.526Z",
+      "exitCode": 0,
+      "durationMs": 747,
+      "totals": {
+        "total": 33,
+        "passed": 33,
+        "failed": 0,
+        "skipped": 0
+      },
+      "files": [
+        {
+          "path": "tooling/reality/__tests__/anti-theatre-scan.test.ts",
+          "suiteStatus": "passed",
+          "passed": 33,
+          "failed": 0,
+          "skipped": 0,
+          "suiteError": null
+        }
+      ],
+      "exclusions": [
+        "The suite scans a synthetic tree, not the live route set.",
+        "It does not implement the thirteen stubbed operations."
+      ],
+      "logFile": "docs/union-eyes/convergence/evidence/gate0-source-verification/UE-CAP-H-001.log",
+      "logSha256": "7b9db5d6cfb5fbc334634045e9861bfb2c9e257ce05eb9cfdfc05aa45b09f6be"
+    },
+    {
+      "capabilityId": "UE-CAP-K-002",
+      "suiteFamily": "anti-theatre scanner",
+      "assertionFamily": "stub and fake-success detection against a synthetic tree",
+      "command": "npx vitest run --root tooling/reality __tests__/anti-theatre-scan.test.ts --reporter=json --outputFile=<report>",
+      "workingDirectory": "tooling/reality",
+      "testedRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+      "testFiles": [
+        "tooling/reality/__tests__/anti-theatre-scan.test.ts"
+      ],
+      "testFileBlobs": {
+        "tooling/reality/__tests__/anti-theatre-scan.test.ts": "f0951ac870504c57c20656fe96b6b40b0448c4af"
+      },
+      "executedAt": "2026-10-26T20:08:23.243Z",
+      "exitCode": 0,
+      "durationMs": 714,
+      "totals": {
+        "total": 33,
+        "passed": 33,
+        "failed": 0,
+        "skipped": 0
+      },
+      "files": [
+        {
+          "path": "tooling/reality/__tests__/anti-theatre-scan.test.ts",
+          "suiteStatus": "passed",
+          "passed": 33,
+          "failed": 0,
+          "skipped": 0,
+          "suiteError": null
+        }
+      ],
+      "exclusions": [
+        "The suite scans a synthetic tree, not the live route set."
+      ],
+      "logFile": "docs/union-eyes/convergence/evidence/gate0-source-verification/UE-CAP-K-002.log",
+      "logSha256": "7b9db5d6cfb5fbc334634045e9861bfb2c9e257ce05eb9cfdfc05aa45b09f6be"
+    },
+    {
+      "capabilityId": "UE-CAP-H-005",
+      "suiteFamily": "admin seed route",
+      "assertionFamily": "retired seed route answers HTTP 501",
+      "command": "npx vitest run app/api/__tests__/admin-seed-test-data.route.test.ts --reporter=json --outputFile=<report>",
+      "workingDirectory": "apps/union-eyes",
+      "testedRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+      "testFiles": [
+        "apps/union-eyes/app/api/__tests__/admin-seed-test-data.route.test.ts"
+      ],
+      "testFileBlobs": {
+        "apps/union-eyes/app/api/__tests__/admin-seed-test-data.route.test.ts": "c3ef25002e6a5f2875917e6d07c08fc89cb037ae"
+      },
+      "executedAt": "2026-10-26T20:08:23.920Z",
+      "exitCode": 0,
+      "durationMs": 675,
+      "totals": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0
+      },
+      "files": [
+        {
+          "path": "apps/union-eyes/app/api/__tests__/admin-seed-test-data.route.test.ts",
+          "suiteStatus": "passed",
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0,
+          "suiteError": null
+        }
+      ],
+      "exclusions": [
+        "A canonical seed is not a committed obligation."
+      ],
+      "logFile": "docs/union-eyes/convergence/evidence/gate0-source-verification/UE-CAP-H-005.log",
+      "logSha256": "ea4b35e6c450e28cfcf0d718f6656cfdd1bf1490c7b01508d97498681c64fd47"
+    },
+    {
+      "capabilityId": "UE-CAP-K-001",
+      "suiteFamily": "migration lineage certification",
+      "assertionFamily": "approved migration lineage verification",
+      "command": "node --test --test-reporter=tap tooling/scripts/lib/ue-migration-lineage-certification.test.mjs",
+      "workingDirectory": ".",
+      "testedRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+      "testFiles": [
+        "tooling/scripts/lib/ue-migration-lineage-certification.test.mjs"
+      ],
+      "testFileBlobs": {
+        "tooling/scripts/lib/ue-migration-lineage-certification.test.mjs": "573ab6436e3dd0244b3f60a38be3fd72a8c662c3"
+      },
+      "executedAt": "2026-10-26T20:08:24.119Z",
+      "exitCode": 0,
+      "durationMs": 196,
+      "totals": {
+        "total": 9,
+        "passed": 9,
+        "failed": 0,
+        "skipped": 0
+      },
+      "files": [
+        {
+          "path": "tooling/scripts/lib/ue-migration-lineage-certification.test.mjs",
+          "suiteStatus": "passed",
+          "passed": 9,
+          "failed": 0,
+          "skipped": 0,
+          "suiteError": null
+        }
+      ],
+      "exclusions": [
+        "Source lineage only. No migration is applied and no native database is touched."
+      ],
+      "logFile": "docs/union-eyes/convergence/evidence/gate0-source-verification/UE-CAP-K-001.log",
+      "logSha256": "6f17e0aec106af10a99b488e9e5f3d606add7cfefae7bf9fc20eb151e93e0e44"
+    },
+    {
+      "capabilityId": "UE-CAP-K-003",
+      "suiteFamily": "convergence register checker",
+      "assertionFamily": "register integrity and allowlist ratchet evaluation",
+      "command": "node --test --test-reporter=tap tooling/scripts/lib/ue-convergence-check.test.mjs",
+      "workingDirectory": ".",
+      "testedRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+      "testFiles": [
+        "tooling/scripts/lib/ue-convergence-check.test.mjs"
+      ],
+      "testFileBlobs": {
+        "tooling/scripts/lib/ue-convergence-check.test.mjs": "5b5f73f15c22d6ef8a303ed69ed4a4cdc4664f57"
+      },
+      "executedAt": "2026-10-26T20:08:24.224Z",
+      "exitCode": 0,
+      "durationMs": 103,
+      "totals": {
+        "total": 12,
+        "passed": 12,
+        "failed": 0,
+        "skipped": 0
+      },
+      "files": [
+        {
+          "path": "tooling/scripts/lib/ue-convergence-check.test.mjs",
+          "suiteStatus": "passed",
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0,
+          "suiteError": null
+        }
+      ],
+      "exclusions": [
+        "The checker CLI currently fails two ratchets. This suite does not run the CLI."
+      ],
+      "logFile": "docs/union-eyes/convergence/evidence/gate0-source-verification/UE-CAP-K-003.log",
+      "logSha256": "20f45ddf845580fc4d03f43c7a98c9ec97bad76d83a6c94102a1afb062ba1baa"
+    },
+    {
+      "capabilityId": "UE-CAP-REVIEW-INTAKE",
+      "suiteFamily": "review intake (PGlite, route, component)",
+      "assertionFamily": "member review intake and oversight listing",
+      "command": "npx vitest run db/__tests__/review-intake.pglite.test.ts app/api/__tests__/reviews-intake.route.test.ts components/reviews/review-intake.test.tsx --reporter=json --outputFile=<report>",
+      "workingDirectory": "apps/union-eyes",
+      "testedRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+      "testFiles": [
+        "apps/union-eyes/db/__tests__/review-intake.pglite.test.ts",
+        "apps/union-eyes/app/api/__tests__/reviews-intake.route.test.ts",
+        "apps/union-eyes/components/reviews/review-intake.test.tsx"
+      ],
+      "testFileBlobs": {
+        "apps/union-eyes/db/__tests__/review-intake.pglite.test.ts": "331a4f83f3d6d14b00b20c843bf2b0e6e1e24d48",
+        "apps/union-eyes/app/api/__tests__/reviews-intake.route.test.ts": "8eb06e0d00e6aaf15867300fed7a3992fb54baae",
+        "apps/union-eyes/components/reviews/review-intake.test.tsx": "316152a548df262a07652a792b061021a107b832"
+      },
+      "executedAt": "2026-10-26T20:08:27.316Z",
+      "exitCode": 0,
+      "durationMs": 3084,
+      "totals": {
+        "total": 12,
+        "passed": 12,
+        "failed": 0,
+        "skipped": 0
+      },
+      "files": [
+        {
+          "path": "apps/union-eyes/components/reviews/review-intake.test.tsx",
+          "suiteStatus": "passed",
+          "passed": 5,
+          "failed": 0,
+          "skipped": 0,
+          "suiteError": null
+        },
+        {
+          "path": "apps/union-eyes/db/__tests__/review-intake.pglite.test.ts",
+          "suiteStatus": "passed",
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0,
+          "suiteError": null
+        },
+        {
+          "path": "apps/union-eyes/app/api/__tests__/reviews-intake.route.test.ts",
+          "suiteStatus": "passed",
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0,
+          "suiteError": null
+        }
+      ],
+      "exclusions": [
+        "PGlite is not native PostgreSQL.",
+        "No credentialed browser journey is exercised."
+      ],
+      "logFile": "docs/union-eyes/convergence/evidence/gate0-source-verification/UE-CAP-REVIEW-INTAKE.log",
+      "logSha256": "7a1d5c6e742dba6fbc56831a914d7b22f0c2900e00ce46a83db0140c158550bf"
+    },
+    {
+      "capabilityId": "UE-OMIT-DELIVERY-EVIDENCE",
+      "suiteFamily": "delivery reconciliation (unit)",
+      "assertionFamily": "notification delivery ledger arithmetic",
+      "command": "npx vitest run lib/services/__tests__/delivery-reconciliation.test.ts --reporter=json --outputFile=<report>",
+      "workingDirectory": "apps/union-eyes",
+      "testedRevision": "e9b8cbe6a78f39c1a7594fd54dd792af7d41eccd",
+      "testFiles": [
+        "apps/union-eyes/lib/services/__tests__/delivery-reconciliation.test.ts"
+      ],
+      "testFileBlobs": {
+        "apps/union-eyes/lib/services/__tests__/delivery-reconciliation.test.ts": "c5dcc75b5313809345143467810278c65494cc2c"
+      },
+      "executedAt": "2026-10-26T20:08:28.275Z",
+      "exitCode": 0,
+      "durationMs": 956,
+      "totals": {
+        "total": 9,
+        "passed": 9,
+        "failed": 0,
+        "skipped": 0
+      },
+      "files": [
+        {
+          "path": "apps/union-eyes/lib/services/__tests__/delivery-reconciliation.test.ts",
+          "suiteStatus": "passed",
+          "passed": 9,
+          "failed": 0,
+          "skipped": 0,
+          "suiteError": null
+        }
+      ],
+      "exclusions": [
+        "apps/union-eyes/db/__tests__/notification-delivery-native.test.ts requires UE_DELIVERY_NATIVE_PROOF=1 and is not run here."
+      ],
+      "logFile": "docs/union-eyes/convergence/evidence/gate0-source-verification/UE-OMIT-DELIVERY-EVIDENCE.log",
+      "logSha256": "cba185bafba816566126b5c022ac18d00a816c0d56095068dcec57ff61965176"
+    }
+  ]
+}
