@@ -181,18 +181,25 @@ export const SUBORDINATE_AUTHORITY_REGISTER: readonly SubordinateAuthorityRecord
     status: 'ENFORCED',
     proof: BINDING_PROOF,
     residual:
-      'A bridge outlives revocation of its parent session by at most 30 seconds (the definer predicates check the bridge row, not its parent); closing that needs a parent link and a predicate migration. Suspension does not revoke sessions; the binder refuses them regardless.',
+      'A bridge that records parentSessionId is denied on the same statement its parent is revoked, expired, or no longer that user. A bridge with no parentSessionId has no parent to revoke and stays bounded by its own expiry plus the live user and membership checks. Suspension does not revoke sessions; the binder refuses them regardless.',
   },
   {
     id: 'invite-tokens',
     record: 'Admin-issued invite tokens',
     storage: ['user_management.invites'],
-    consumers: ['packages/platform-auth/src/invites/service.ts'],
-    gate: 'Single use, 7 days, hashed, role fixed by the row and capped to the tenant-assignable roles; the new session is minted only for an active, lifecycle-active user.',
+    consumers: [
+      'packages/platform-auth/src/invites/service.ts',
+      'packages/db/src/auth-client.ts',
+      'packages/db/src/auth-inviter-lock.ts',
+    ],
+    gate: 'Single use, 7 days, hashed, role fixed by the row. Every redemption statement requires auth_invite_inviter_live(). The redemption transaction locks the inviter and re-reads that predicate before any membership or session write. The conferred role is a tenant role, never a kernel authority.',
     status: 'OPEN',
-    proof: [],
+    proof: [
+      'packages/db/src/auth-inviter-lock.test.ts',
+      'packages/platform-auth/src/invites/accept-invite-serialization.test.ts',
+    ],
     residual:
-      'An invite survives the INVITER’s removal: acceptance does not re-check that the inviter is still an active administrator of the organization. Under the deployed auth policies the redemption role cannot read the inviter’s membership, so the check cannot be added in application code; it needs the `inviteLive` predicate in packages/db/src/auth-storage-authority/bootstrap-sql.ts to join the inviter’s live admin membership (governed migration, proven on the native auth suite). The role an invite can confer is a plain tenant role, never a kernel authority.',
+      'Redemption and the lifecycle or membership writes that end inviter authority take one transaction advisory lock, then redemption re-reads the invite, so an offboarding that commits first cannot leave a membership or session. An inviter who is later reactivated still revives that inviter’s unexpired pending invitations: the system role has no invites UPDATE grant, and adding one changes the hash-locked auth manifest. A superuser role change that bypasses those writers is still denied by the next statement’s inviter predicate, and it does not take this lock.',
   },
   {
     id: 'mfa-challenges',
