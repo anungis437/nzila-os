@@ -257,6 +257,50 @@ describe('external resource routes', () => {
     expect(mocks.generateSasUrl).not.toHaveBeenCalled();
   });
 
+  const uploadActor = '11111111-1111-1111-1111-111111111111';
+  const uploadMatter = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+  const uploadOrg = '99999999-9999-9999-9999-999999999999';
+
+  function seedMatterGrant(over: Record<string, unknown> = {}) {
+    mocks.selectQueue.push([{
+      id: '44444444-4444-4444-4444-444444444444',
+      authorityId: '33333333-3333-3333-3333-333333333333',
+      organizationId: uploadOrg,
+      userId: uploadActor,
+      representativeOrganizationId: '22222222-2222-2222-2222-222222222222',
+      matterType: 'grievance',
+      matterId: uploadMatter,
+      status: 'active',
+      revokedAt: null,
+      expiresAt: null,
+      canUploadDocuments: true,
+      canViewDocuments: true,
+      canDownloadDocuments: false,
+      grantedBy: 'union-issuer',
+      ...over,
+    }]);
+  }
+
+  async function postUpload(body: Record<string, unknown>) {
+    const { POST } = await import('@/app/api/external/grievances/[id]/documents/upload/route');
+    return POST(
+      new Request(`https://example.test/api/external/grievances/${uploadMatter}/documents/upload?organizationId=${uploadOrg}`, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+      { params: { id: uploadMatter } },
+    );
+  }
+
+  const uploadBody = {
+    title: 'Specialist upload',
+    filename: 'specialist-upload.pdf',
+    blobPath: 'documents/99999999-9999-9999-9999-999999999999/external-upload.pdf',
+    documentType: 'evidence',
+    mimeType: 'application/pdf',
+    fileSize: 1234,
+  };
+
   it('populates the live document org id compatibility column for external uploads', async () => {
     const insertedDocument = {
       id: 'dddddddd-dddd-dddd-dddd-dddddddddddd',
@@ -273,39 +317,51 @@ describe('external resource routes', () => {
       })),
     };
     mocks.db.insert.mockImplementation(tx.insert);
+    seedMatterGrant();
 
-    const { POST } = await import('@/app/api/external/grievances/[id]/documents/upload/route');
-    const response = await POST(
-      new Request('https://example.test/api/external/grievances/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/documents/upload?organizationId=99999999-9999-9999-9999-999999999999', {
-        method: 'POST',
-        body: JSON.stringify({
-          title: 'Specialist upload',
-          filename: 'specialist-upload.pdf',
-          blobPath: 'documents/99999999-9999-9999-9999-999999999999/external-upload.pdf',
-          documentType: 'evidence',
-          mimeType: 'application/pdf',
-          fileSize: 1234,
-        }),
-      }),
-      { params: { id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' } },
-    );
+    const response = await postUpload(uploadBody);
 
     expect(response.status).toBe(201);
     expect(mocks.withExplicitUserContext).toHaveBeenCalledWith(
-      '11111111-1111-1111-1111-111111111111',
+      uploadActor,
       expect.any(Function),
-      '99999999-9999-9999-9999-999999999999',
+      uploadOrg,
     );
     expect(valuesByTable[0]).toMatchObject({
-      organizationId: '99999999-9999-9999-9999-999999999999',
-      orgId: '99999999-9999-9999-9999-999999999999',
+      organizationId: uploadOrg,
+      orgId: uploadOrg,
       category: 'other',
       blobContainer: 'union-eyes',
       blobPath: 'documents/99999999-9999-9999-9999-999999999999/external-upload.pdf',
       contentType: 'application/pdf',
       sizeBytes: 1234,
       sha256: '0'.repeat(64),
-      uploadedBy: '11111111-1111-1111-1111-111111111111',
+      uploadedBy: uploadActor,
+      privacyLabel: 'case_restricted',
     });
+    expect(valuesByTable[3]).toMatchObject({
+      grantedBy: 'union-issuer',
+      canView: true,
+      canDownload: false,
+      canShare: false,
+      userId: uploadActor,
+      matterGrantId: '44444444-4444-4444-4444-444444444444',
+    });
+  });
+
+  it('rejects a privilege label before any external upload insert', async () => {
+    const response = await postUpload({ ...uploadBody, privacyLabel: 'privileged' });
+    expect(response.status).toBe(400);
+    expect(mocks.db.insert).not.toHaveBeenCalled();
+    expect(mocks.db.select).not.toHaveBeenCalled();
+  });
+
+  it('refuses an external upload when the representative issued the matter grant', async () => {
+    seedMatterGrant({ grantedBy: uploadActor });
+    const response = await postUpload(uploadBody);
+    expect(response.status).toBe(403);
+    const body = await response.json();
+    expect(body).toEqual({ error: 'Forbidden' });
+    expect(mocks.db.insert).not.toHaveBeenCalled();
   });
 });

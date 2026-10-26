@@ -137,12 +137,17 @@ export const SUBORDINATE_AUTHORITY_REGISTER: readonly SubordinateAuthorityRecord
     id: 'external-representation',
     record: 'Representation authorities and external matter / document access grants',
     storage: ['representation_authorities', 'external_matter_access_grants', 'external_document_access_grants'],
-    consumers: ['apps/union-eyes/lib/services/external-resource-authorization-service.ts', 'apps/union-eyes/lib/external-resource-middleware.ts'],
-    gate: 'The authorisation evaluator judges the records only; it is reachable only through withRLSContext({ organizationId }) in the middleware, whose V2 binder requires a live session AND an active membership in the matter’s organization.',
+    consumers: [
+      'apps/union-eyes/lib/services/external-resource-authorization-service.ts',
+      'apps/union-eyes/lib/external-resource-middleware.ts',
+      'apps/union-eyes/lib/services/external-upload-authority.ts',
+      'apps/union-eyes/app/api/external/grievances/[id]/documents/upload/route.ts',
+    ],
+    gate: 'The authorisation evaluator judges the records only; it is reachable only through withRLSContext({ organizationId }) in the middleware, whose V2 binder requires a live session AND an active membership in the matter’s organization. An external grievance upload re-reads that matter grant inside the write and copies its document permissions; the representative cannot issue the document grant.',
     status: 'LAYERED',
     proof: BINDING_PROOF,
     residual:
-      'In V2 an external representative therefore needs an active membership in the matter organization (the feature is as narrow as the guard). The evaluator does not check the representative’s own lifecycle; the legacy lineage relies on session revocation.',
+      'In V2 an external representative therefore needs an active membership in the matter organization (the feature is as narrow as the guard). The evaluator does not check the representative’s own lifecycle; the legacy lineage relies on session revocation. The upload copies canViewDocuments and canDownloadDocuments, forces canShare false, and refuses a grantedBy equal to the representative. Privilege labels are rejected before any insert. The route stays EXTERNAL_AUTHORITY.',
   },
   {
     id: 'document-grants',

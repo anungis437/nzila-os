@@ -1,13 +1,15 @@
 import { z } from 'zod';
+import { and, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { documentLinks, documents, documentVersions } from '@/db/schema/documents-schema';
-import { externalDocumentAccessGrants } from '@/db/schema/representation-authority-schema';
+import { externalDocumentAccessGrants, externalMatterAccessGrants } from '@/db/schema/representation-authority-schema';
 import { withExplicitUserContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { withExternalMatterResourceAuth } from '@/lib/external-resource-middleware';
 import { resolveExternalGrievanceResource } from '@/lib/external-resource-route-utils';
 import { resolveStoredBlob } from '@/lib/services/document-blob-integrity-service';
+import { deriveExternalUploadGrant, EXTERNAL_UPLOAD_LABELS } from '@/lib/services/external-upload-authority';
 
 const documentBlobContainer = process.env.AZURE_BLOB_CONTAINER ?? 'union-eyes';
 
@@ -18,13 +20,7 @@ const externalUploadSchema = z.object({
   blobPath: z.string().min(1).optional(),
   documentType: z.string().min(1).max(120),
   mimeType: z.string().min(1).max(120),
-  privacyLabel: z.enum([
-    'team_confidential',
-    'lro_confidential',
-    'privileged',
-    'case_restricted',
-    'highly_sensitive',
-  ]).default('case_restricted'),
+  privacyLabel: z.enum(EXTERNAL_UPLOAD_LABELS).default('case_restricted'),
   fileSize: z.number().int().nonnegative().optional(),
 }).refine((value) => Boolean(value.blobPath || value.fileUrl), {
   message: 'blobPath or fileUrl is required',
@@ -55,6 +51,31 @@ export const POST = withExternalMatterResourceAuth(
     });
 
     const created = await withExplicitUserContext(context.actor.userId, async () => {
+      const [matterGrant] = await db
+        .select()
+        .from(externalMatterAccessGrants)
+        .where(and(
+          eq(externalMatterAccessGrants.id, context.matterGrantId),
+          eq(externalMatterAccessGrants.authorityId, context.authorityId),
+          eq(externalMatterAccessGrants.organizationId, context.organizationId),
+          eq(externalMatterAccessGrants.userId, context.actor.userId),
+          eq(externalMatterAccessGrants.representativeOrganizationId, representativeOrganizationId),
+          eq(externalMatterAccessGrants.matterType, matterType),
+          eq(externalMatterAccessGrants.matterId, context.matterId),
+        ))
+        .limit(1);
+      const derived = deriveExternalUploadGrant({
+        actorUserId: context.actor.userId,
+        grant: matterGrant,
+        authorityId: context.authorityId,
+        matterGrantId: context.matterGrantId,
+        organizationId: context.organizationId,
+        representativeOrganizationId,
+        matterType,
+        matterId: context.matterId,
+      });
+      if (!derived.ok) return { forbidden: true as const };
+
       const [insertedDocument] = await db
         .insert(documents)
         .values({
@@ -110,14 +131,14 @@ export const POST = withExternalMatterResourceAuth(
         matterId: context.matterId,
         documentId: insertedDocument.id,
         status: 'active',
-        canView: true,
-        canDownload: true,
-        canShare: false,
-        grantedBy: context.actor.userId,
+        canView: derived.grant.canView,
+        canDownload: derived.grant.canDownload,
+        canShare: derived.grant.canShare,
+        grantedBy: derived.grant.grantedBy,
       });
 
-      // The document, its version, its link, the external grant and this record commit together; the external
-      // representative's authority was verified by the matter middleware (a live grant naming upload_documents).
+      // The document, its version, its link, the copied matter grant and this record commit together.
+      // Upload permission does not let the representative issue a download or a privilege label.
       await persistAtomicAudit(db as unknown as RLSTx, {
         organizationId: context.organizationId,
         userId: context.actor.userId,
@@ -127,9 +148,12 @@ export const POST = withExternalMatterResourceAuth(
         details: { matterType, matterId: context.matterId, authorityId: context.authorityId, privacyLabel: parsed.data.privacyLabel },
       });
 
-      return insertedDocument;
+      return { forbidden: false as const, document: insertedDocument };
     }, context.organizationId);
 
-    return NextResponse.json({ data: { id: created.id, title: created.title ?? created.name } }, { status: 201 });
+    if (created.forbidden) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+    return NextResponse.json({ data: { id: created.document.id, title: created.document.title ?? created.document.name } }, { status: 201 });
   },
 );
