@@ -191,10 +191,9 @@ class OIDCAuthentication(authentication.BaseAuthentication):
             raise exceptions.AuthenticationFailed("Token expired. Please log in again.")
 
         except jwt.InvalidTokenError as e:
+            # The verifier's message (algorithm, claim or key detail) is logged, never returned to the caller.
             logger.error(f"Invalid token: {e}")
-            raise exceptions.AuthenticationFailed(
-                f"Invalid authentication token: {str(e)}"
-            )
+            raise exceptions.AuthenticationFailed("Invalid authentication token.")
 
         except exceptions.AuthenticationFailed:
             # Re-raise as-is (e.g. resolve_organization_context's "Organization

@@ -43,7 +43,7 @@ interface _ValidationErrorDetail {
 /**
  * Sanitization rules
  */
-const sanitizationRules = {
+export const sanitizationRules = {
   /**
    * Trim whitespace and truncate to max length
    */
@@ -70,11 +70,17 @@ const sanitizationRules = {
    */
   html: (value: unknown): string => {
     if (typeof value !== 'string') return '';
-    // Remove HTML tags
-    return value
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // codeql[js/bad-tag-filter] - input sanitization for server-side; not used for rendering
-      .replace(/<[^>]+>/g, '') // codeql[js/bad-tag-filter, js/incomplete-multi-character-sanitization]
-      .trim();
+    // Strip script/style blocks, then tags, repeating until stable so nested fragments such as `<scr<script>ipt>`
+    // cannot reassemble, and drop any leftover angle bracket. The result is plain text, never rendered as markup.
+    let previous: string;
+    let out = value;
+    do {
+      previous = out;
+      out = out
+        .replace(/<(script|style)\b[\s\S]*?<\/\1\s*>/gi, '')
+        .replace(/<[^>]*>/g, '');
+    } while (out !== previous);
+    return out.replace(/[<>]/g, '').trim();
   },
 
   /**

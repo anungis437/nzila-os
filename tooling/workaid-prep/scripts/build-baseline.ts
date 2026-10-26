@@ -250,7 +250,7 @@ safeWrite(
 );
 
 /* ---------------- markdown: 09 findings register ---------------- */
-const esc = (s: string) => s.replace(/\|/g, '\\|');
+const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/\|/g, '\\|');
 const sevOrder: Record<string, number> = { P0: 0, P1: 1, P2: 2, P3: 3 };
 const open = register.filter((e) => e.disposition !== 'OUT_OF_SCOPE_WITH_BOUNDARY');
 const openP0 = open.filter((e) => e.severity === 'P0');

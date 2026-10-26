@@ -85,8 +85,7 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     const { organizationId, tenantId } = getAuthUser(req);
     const scopedOrgId = organizationId ?? tenantId;
-    // codeql[js/sensitive-get-query] - standard filter params on authenticated employer data endpoint
-    const { employerId, status, _batchNumber } = req.query;
+    const { employerId, status } = req.query;
 
     if (!scopedOrgId) {
       return res.status(401).json({ success: false, error: 'Missing organization context' });
