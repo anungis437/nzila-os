@@ -60,6 +60,14 @@ vi.mock('@/db/schema/domains/communications', () => ({
   },
   notificationDeliveryLog: { id: 'id' },
   notificationTemplates: { id: 'id', templateKey: 'template_key' },
+  userNotificationPreferences: {
+    userId: 'preference_user_id',
+    organizationId: 'preference_organization_id',
+    emailEnabled: 'email_enabled',
+    smsEnabled: 'sms_enabled',
+    pushEnabled: 'push_enabled',
+    inAppEnabled: 'in_app_enabled',
+  },
 }));
 
 vi.mock('@/db/schema', () => ({
@@ -810,53 +818,49 @@ describe('NotificationService', () => {
       );
     });
 
-    it('executes persistence and audit catch callbacks without failing send', async () => {
+    it('does not call the provider when the delivery ledger rejects the attempt', async () => {
+      const send = vi.fn().mockResolvedValue({ id: 'msg-catch', status: 'sent', sentAt: new Date() });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (service as any).providers.set('email', {
-        name: 'mock',
-        send: vi.fn().mockResolvedValue({ id: 'msg-catch', status: 'sent', sentAt: new Date() }),
-      });
-
+      (service as any).providers.set('email', { name: 'mock', send });
       mocks.mockInsert.mockReturnValue({
-        values: vi.fn(() => Promise.reject(new Error('insert catch path'))),
-      });
-      mocks.mockCreateAuditLog.mockRejectedValue(new Error('audit catch path'));
-
-      await expect(service.send({ ...emailPayload, userId: 'user-2' })).resolves.toEqual(
-        expect.objectContaining({ status: 'sent' }),
-      );
-    });
-    it('handles non-Error catch values from persistence and audit callbacks', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (service as any).providers.set('email', {
-        name: 'mock',
-        send: vi.fn().mockResolvedValue({ id: 'msg-catch-string', status: 'sent', sentAt: new Date() }),
+        values: vi.fn(() => Promise.reject(new Error('ledger down'))),
       });
 
-      mocks.mockInsert.mockReturnValue({
-        values: vi.fn(() => Promise.reject('insert string failure')),
-      });
-      mocks.mockCreateAuditLog.mockRejectedValue('audit string failure');
-
-      await expect(service.send({ ...emailPayload, userId: 'user-2' })).resolves.toEqual(
-        expect.objectContaining({ status: 'sent' }),
-      );
+      await expect(service.send(emailPayload)).rejects.toThrow('ledger down');
+      expect(send).not.toHaveBeenCalled();
     });
 
-    it('handles synchronous database persistence errors and still returns provider response', async () => {
+    it('records provider submission as accepted and confirmed delivery as delivered', async () => {
+      const send = vi.fn().mockResolvedValue({ id: 'msg-accepted', status: 'sent', sentAt: new Date() });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (service as any).providers.set('email', {
-        name: 'mock',
-        send: vi.fn().mockResolvedValue({ id: 'msg-sync-db', status: 'sent', sentAt: new Date() }),
-      });
+      (service as any).providers.set('email', { name: 'mock', send });
 
-      mocks.mockInsert.mockImplementation(() => {
-        throw new Error('sync insert failure');
-      });
+      await service.send(emailPayload);
 
-      await expect(service.send({ ...emailPayload })).resolves.toEqual(
-        expect.objectContaining({ id: 'msg-sync-db', status: 'sent' }),
-      );
+      const events = mocks.mockValues.mock.calls.map((call) => call[0]?.event);
+      expect(events).toContain('attempted');
+      expect(events).toContain('accepted');
+      expect(events).not.toContain('sent');
+      expect(send).toHaveBeenCalledOnce();
+    });
+
+    it('does not record a preference suppression as a successful send', async () => {
+      const send = vi.fn().mockResolvedValue({ id: 'msg-pref', status: 'sent', sentAt: new Date() });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+      mocks.mockLimit.mockResolvedValue([
+        { emailEnabled: false, smsEnabled: false, pushEnabled: true, inAppEnabled: true },
+      ]);
+      mocks.mockWhere.mockReturnValue({ limit: mocks.mockLimit });
+      mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });
+      mocks.mockSelect.mockReturnValue({ from: mocks.mockFrom });
+
+      const result = await service.send({ ...emailPayload, recipientId: 'user-1' });
+
+      expect(result.status).not.toBe('sent');
+      expect(result.failureReason).toContain('suppressed');
+      expect(send).not.toHaveBeenCalled();
+      expect(mocks.mockValues.mock.calls.map((call) => call[0]?.event)).toContain('suppressed');
     });
   });
 
@@ -871,31 +875,27 @@ describe('NotificationService', () => {
       expect(mocks.mockInsert).toHaveBeenCalled();
     });
 
-    it('handles queued insert rejection callback and still returns ID', async () => {
+    it('does not return a queue id when the queue insert is rejected', async () => {
       mocks.mockInsert.mockReturnValue({
         values: vi.fn(() => Promise.reject(new Error('queue catch path'))),
       });
 
-      const id = await service.queue({
+      await expect(service.queue({
         organizationId: 'org-1',
         type: 'email',
         body: 'Queued notification',
-      });
-
-      expect(id).toBe('notif-uuid');
+      })).rejects.toThrow('queue catch path');
     });
-    it('handles queue insert callback rejection with non-Error reason', async () => {
+    it('does not return a queue id when the queue insert rejects with a non-Error', async () => {
       mocks.mockInsert.mockReturnValue({
         values: vi.fn(() => Promise.reject('queue string failure')),
       });
 
-      const id = await service.queue({
+      await expect(service.queue({
         organizationId: 'org-1',
         type: 'email',
         body: 'Queued notification',
-      });
-
-      expect(id).toBe('notif-uuid');
+      })).rejects.toBe('queue string failure');
     });
 
     it('throws when queue insert fails synchronously', async () => {

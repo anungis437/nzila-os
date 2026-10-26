@@ -16,6 +16,7 @@ import {
   notificationQueue,
   notificationDeliveryLog,
   notificationTemplates,
+  userNotificationPreferences,
 } from "@/db/schema/domains/communications";
 import { organizationMembers } from "@/db/schema";
 import { eq, and, or, lt, isNull } from "drizzle-orm";
@@ -101,6 +102,77 @@ export interface NotificationProvider {
   name: string;
   send(payload: NotificationPayload): Promise<NotificationResponse>;
   trackDelivery?(messageId: string): Promise<NotificationStatus>;
+}
+
+type DeliveryLedgerEvent =
+  | "queued"
+  | "attempted"
+  | "accepted"
+  | "failed"
+  | "retried"
+  | "delivered"
+  | "suppressed"
+  | "bounced";
+
+/** Provider status `sent` is submission acceptance. Confirmed delivery stays `delivered`. */
+function providerSubmissionEvent(status: NotificationStatus): DeliveryLedgerEvent {
+  if (status === "delivered") return "delivered";
+  if (status === "bounced") return "bounced";
+  if (status === "sent") return "accepted";
+  return "failed";
+}
+
+async function recordDeliveryEvent(input: {
+  organizationId: string;
+  notificationId: string;
+  event: DeliveryLedgerEvent;
+  providerId?: string;
+  externalEventId?: string;
+  statusCode?: string;
+  errorMessage?: string;
+  details?: Record<string, unknown>;
+}): Promise<void> {
+  await db.insert(notificationDeliveryLog).values({
+    id: uuid(),
+    organizationId: input.organizationId,
+    notificationId: input.notificationId,
+    event: input.event,
+    eventTimestamp: new Date(),
+    providerId: input.providerId,
+    externalEventId: input.externalEventId,
+    statusCode: input.statusCode,
+    errorMessage: input.errorMessage,
+    details: input.details,
+  });
+}
+
+async function channelSuppression(payload: NotificationPayload): Promise<string | null> {
+  if (!payload.recipientId) return null;
+  const rows = await db
+    .select({
+      emailEnabled: userNotificationPreferences.emailEnabled,
+      smsEnabled: userNotificationPreferences.smsEnabled,
+      pushEnabled: userNotificationPreferences.pushEnabled,
+      inAppEnabled: userNotificationPreferences.inAppEnabled,
+    })
+    .from(userNotificationPreferences)
+    .where(
+      and(
+        eq(userNotificationPreferences.userId, payload.recipientId),
+        eq(userNotificationPreferences.organizationId, payload.organizationId),
+      ),
+    )
+    .limit(1);
+  const prefs = Array.isArray(rows) ? rows[0] : undefined;
+  if (!prefs || typeof prefs.emailEnabled !== "boolean") return null;
+  const enabled = {
+    email: prefs.emailEnabled,
+    sms: prefs.smsEnabled,
+    push: prefs.pushEnabled,
+    in_app: prefs.inAppEnabled,
+  }[payload.type];
+  if (enabled === false) return `suppressed: ${payload.type} disabled by user preference`;
+  return null;
 }
 
 interface TwilioMessageResponse {
@@ -537,10 +609,35 @@ export class NotificationService {
     try {
       const recipientActive = await isNotificationRecipientActive(payload);
       if (!recipientActive) {
+        const id = uuid();
+        await recordDeliveryEvent({
+          organizationId: payload.organizationId,
+          notificationId: id,
+          event: "suppressed",
+          errorMessage: "Recipient is not active in organization",
+          details: { type: payload.type, channel: payload.type },
+        });
         return {
-          id: uuid(),
+          id,
           status: "failed",
           failureReason: "Recipient is not active in organization",
+        };
+      }
+
+      const suppression = await channelSuppression(payload);
+      if (suppression) {
+        const id = uuid();
+        await recordDeliveryEvent({
+          organizationId: payload.organizationId,
+          notificationId: id,
+          event: "suppressed",
+          errorMessage: suppression,
+          details: { type: payload.type, channel: payload.type },
+        });
+        return {
+          id,
+          status: "failed",
+          failureReason: suppression,
         };
       }
 
@@ -550,47 +647,50 @@ export class NotificationService {
         throw new Error(`No provider configured for notification type: ${payload.type}`);
       }
 
-      const response = await provider.send(payload);
+      const attemptId = uuid();
+      await recordDeliveryEvent({
+        organizationId: payload.organizationId,
+        notificationId: attemptId,
+        event: "attempted",
+        providerId: provider.name,
+        details: { type: payload.type, channel: payload.type },
+      });
 
-      // Store notification in queue table (acts as notification delivery log)
+      const response = await provider.send(payload);
+      const ledgerEvent = providerSubmissionEvent(response.status);
+      await recordDeliveryEvent({
+        organizationId: payload.organizationId,
+        notificationId: response.id,
+        event: ledgerEvent,
+        providerId: provider.name,
+        externalEventId: response.id,
+        statusCode: ledgerEvent === "failed" || ledgerEvent === "bounced" ? "500" : "202",
+        errorMessage: response.failureReason,
+        details: {
+          type: payload.type,
+          channel: payload.type,
+          providerStatus: response.status,
+        },
+      });
+
       try {
         await db.insert(notificationQueue).values({
           id: response.id,
           organizationId: payload.organizationId,
-          status: 'completed',
-          priority: payload.priority || 'normal',
+          status: ledgerEvent === "failed" || ledgerEvent === "bounced" ? "failed" : "completed",
+          priority: payload.priority || "normal",
           payload: {
             ...payload,
           },
-          attemptCount: '1',
-          maxAttempts: '1',
+          attemptCount: "1",
+          maxAttempts: "1",
           processedAt: new Date(),
           completedAt: response.sentAt,
           resultNotificationId: response.id,
-        }).catch((err: unknown) => logger.warn("Failed to store notification in queue", {
-          error: err instanceof Error ? err.message : String(err)
-        }));
-
-        // Also log delivery event
-        await db.insert(notificationDeliveryLog).values({
-          id: uuid(),
-          organizationId: payload.organizationId,
-          notificationId: response.id,
-          event: response.status === 'sent' ? 'sent' : 'failed',
-          eventTimestamp: response.sentAt || new Date(),
-          providerId: provider.name,
-          externalEventId: response.id,
-          statusCode: response.status === 'sent' ? '200' : '500',
           errorMessage: response.failureReason,
-          details: {
-            type: payload.type,
-            channel: payload.type,
-          },
-        }).catch((err: unknown) => logger.warn("Failed to log delivery event", {
-          error: err instanceof Error ? err.message : String(err)
-        }));
+        });
       } catch (dbError) {
-        logger.warn("Database persistence failed but notification was sent", { dbError, responseId: response.id });
+        logger.warn("Queue mirror failed after the delivery ledger was written", { dbError, responseId: response.id });
       }
 
       // Create audit log
@@ -624,26 +724,24 @@ export class NotificationService {
   async queue(payload: NotificationPayload): Promise<string> {
     const notificationId = uuid();
 
-    // Store in queue table for persistence
-    try {
-      await db.insert(notificationQueue).values({
-        id: notificationId,
-        organizationId: payload.organizationId,
-        status: 'pending',
-        priority: payload.priority || 'normal',
-        payload,
-        attemptCount: '0',
-        maxAttempts: '3',
-        nextRetryAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }).catch((err: unknown) => logger.warn("Failed to queue notification in database", {
-        error: err instanceof Error ? err.message : String(err)
-      }));
-    } catch (dbError) {
-      logger.error("Failed to queue notification", { dbError });
-      throw dbError;
-    }
+    await db.insert(notificationQueue).values({
+      id: notificationId,
+      organizationId: payload.organizationId,
+      status: 'pending',
+      priority: payload.priority || 'normal',
+      payload,
+      attemptCount: '0',
+      maxAttempts: '3',
+      nextRetryAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    await recordDeliveryEvent({
+      organizationId: payload.organizationId,
+      notificationId,
+      event: 'queued',
+      details: { type: payload.type, channel: payload.type },
+    });
 
     return notificationId;
   }
@@ -841,8 +939,13 @@ export class NotificationService {
           if (!payload) continue;
 
           const currentAttempt = parseInt(queuedItem.attemptCount?.toString() || '0', 10);
-          
-          // Send the notification
+          await recordDeliveryEvent({
+            organizationId: payload.organizationId,
+            notificationId: queuedItem.id,
+            event: 'retried',
+            details: { type: payload.type, channel: payload.type, attempt: currentAttempt + 1 },
+          });
+
           const response = await this.send(payload);
           
           // Update queue entry with new status

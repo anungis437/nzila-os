@@ -244,7 +244,7 @@ const BATCHES: BatchSpec[] = [
     ratchet: 'census',
     execution: 'prepared-evolve',
     shrink: 'census',
-    action: 'Platform migration 0031_reachable_stub_shape evolves data_anonymization_log, employment_history, job_classifications, and member_leaves. Additive columns and defaults only. NOT NULL only when the relation is empty. No keys, no RLS, no DROP. It is registered UNQUALIFIED. Do not apply it here. Census regeneration after apply is READY_FOR_VS_EXECUTION.',
+    action: 'Platform migration 0031_reachable_stub_shape evolves data_anonymization_log, employment_history, job_classifications, and member_leaves. Additive columns and defaults only. NOT NULL only when the relation is empty. No keys, no RLS, no DROP. Revised in place before any apply: existing columns must match the expected type, and the migration refuses to lose a constraint or change row security. It is registered UNQUALIFIED. Do not apply it here. Census regeneration after apply is READY_FOR_VS_EXECUTION.',
     proof: 'apps/union-eyes/scripts/generate-stub-evolution.ts and apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts',
   },
   {

@@ -7,10 +7,109 @@
 -- Missing columns are added nullable, with a declared default where the declaration has one.
 -- NOT NULL is applied only when the relation is empty, so a populated stub is not backfilled
 -- with invented values. id, created_at, and updated_at gain defaults only when they have none.
--- No foreign keys, indexes, RLS, or DROP. Each relation must already exist.
--- Registered UNQUALIFIED. Do not apply it on this lane. Census regeneration after apply is
--- READY_FOR_VS_EXECUTION.
-
+-- No foreign keys, indexes, RLS changes, or destructive statements. Each relation must already exist
+-- in schema public. An existing column of a different type, length, or numeric precision fails the
+-- transaction. A populated table keeps new columns nullable; consumers must accept that null until a
+-- later qualified backfill. Constraint counts and row security are recorded before the alters and
+-- must be unchanged after them. The platform runner commits the file as one transaction and rolls
+-- it back when any statement fails. Idempotent when the shape already matches.
+-- Revised in place before any apply. The previous unqualified hash is superseded. Still registered
+-- UNQUALIFIED. Do not apply it on this lane. Native role, grant, and RLS proof is
+-- READY_FOR_VS_EXECUTION. Census regeneration after apply is READY_FOR_VS_EXECUTION.
+--> statement-breakpoint
+DO $preflight$
+DECLARE
+  spec jsonb;
+  col record;
+  expected jsonb := $json$[
+    {"table":"employment_history","column":"effective_date","data_type":"date"},
+    {"table":"employment_history","column":"previous_values","data_type":"jsonb"},
+    {"table":"employment_history","column":"new_values","data_type":"jsonb"},
+    {"table":"employment_history","column":"reason","data_type":"text"},
+    {"table":"employment_history","column":"notes","data_type":"text"},
+    {"table":"employment_history","column":"created_by","data_type":"character varying","max_length":255},
+    {"table":"job_classifications","column":"job_title","data_type":"character varying","max_length":255},
+    {"table":"job_classifications","column":"job_family","data_type":"character varying","max_length":255},
+    {"table":"job_classifications","column":"job_level","data_type":"integer"},
+    {"table":"job_classifications","column":"minimum_rate","data_type":"numeric","precision":10,"scale":2},
+    {"table":"job_classifications","column":"maximum_rate","data_type":"numeric","precision":10,"scale":2},
+    {"table":"job_classifications","column":"standard_rate","data_type":"numeric","precision":10,"scale":2},
+    {"table":"job_classifications","column":"description","data_type":"text"},
+    {"table":"job_classifications","column":"requirements","data_type":"jsonb"},
+    {"table":"job_classifications","column":"is_active","data_type":"boolean"},
+    {"table":"job_classifications","column":"effective_date","data_type":"date"},
+    {"table":"job_classifications","column":"expiry_date","data_type":"date"},
+    {"table":"job_classifications","column":"created_by","data_type":"character varying","max_length":255},
+    {"table":"member_leaves","column":"approved_at","data_type":"timestamp with time zone"},
+    {"table":"member_leaves","column":"affects_seniority","data_type":"boolean"},
+    {"table":"member_leaves","column":"seniority_adjustment_days","data_type":"integer"},
+    {"table":"member_leaves","column":"affects_dues","data_type":"boolean"},
+    {"table":"member_leaves","column":"dues_waiver_approved","data_type":"boolean"},
+    {"table":"member_leaves","column":"reason","data_type":"text"},
+    {"table":"member_leaves","column":"notes","data_type":"text"},
+    {"table":"member_leaves","column":"documents","data_type":"jsonb"},
+    {"table":"member_leaves","column":"created_by","data_type":"character varying","max_length":255},
+    {"table":"data_anonymization_log","column":"operation_type","data_type":"text"},
+    {"table":"data_anonymization_log","column":"reason","data_type":"text"},
+    {"table":"data_anonymization_log","column":"request_id","data_type":"uuid"},
+    {"table":"data_anonymization_log","column":"tables_affected","data_type":"jsonb"},
+    {"table":"data_anonymization_log","column":"executed_at","data_type":"timestamp without time zone"},
+    {"table":"data_anonymization_log","column":"executed_by","data_type":"text"},
+    {"table":"data_anonymization_log","column":"verified_at","data_type":"timestamp without time zone"},
+    {"table":"data_anonymization_log","column":"verified_by","data_type":"text"},
+    {"table":"data_anonymization_log","column":"can_reverse","data_type":"boolean"},
+    {"table":"data_anonymization_log","column":"backup_location","data_type":"text"}
+  ]$json$;
+BEGIN
+  CREATE TEMP TABLE IF NOT EXISTS reachable_stub_shape_guard (
+    relation_name text PRIMARY KEY,
+    constraint_count integer NOT NULL,
+    row_security boolean NOT NULL
+  ) ON COMMIT DROP;
+  DELETE FROM reachable_stub_shape_guard;
+  INSERT INTO reachable_stub_shape_guard (relation_name, constraint_count, row_security)
+  SELECT c.relname,
+         (SELECT count(*) FROM pg_constraint k WHERE k.conrelid = c.oid),
+         c.relrowsecurity
+  FROM pg_class c
+  JOIN pg_namespace n ON n.oid = c.relnamespace
+  WHERE n.nspname = 'public'
+    AND c.relname IN ('employment_history', 'job_classifications', 'member_leaves', 'data_anonymization_log');
+  IF (SELECT count(*) FROM reachable_stub_shape_guard) <> 4 THEN
+    RAISE EXCEPTION 'platform stub evolution fail-closed: expected four public relations before altering shape.';
+  END IF;
+  FOR spec IN SELECT value FROM jsonb_array_elements(expected) LOOP
+    IF to_regclass('public.' || (spec->>'table')) IS NULL THEN
+      RAISE EXCEPTION 'platform stub evolution fail-closed: public.% does not exist.', spec->>'table';
+    END IF;
+    SELECT c.data_type, c.character_maximum_length, c.numeric_precision, c.numeric_scale
+      INTO col
+      FROM information_schema.columns c
+     WHERE c.table_schema = 'public'
+       AND c.table_name = spec->>'table'
+       AND c.column_name = spec->>'column';
+    IF NOT FOUND THEN
+      CONTINUE;
+    END IF;
+    IF col.data_type IS DISTINCT FROM spec->>'data_type' THEN
+      RAISE EXCEPTION 'platform stub evolution fail-closed: public.%.% has type %; expected %.',
+        spec->>'table', spec->>'column', col.data_type, spec->>'data_type';
+    END IF;
+    IF spec ? 'max_length' AND col.character_maximum_length IS DISTINCT FROM (spec->>'max_length')::integer THEN
+      RAISE EXCEPTION 'platform stub evolution fail-closed: public.%.% length is %; expected %.',
+        spec->>'table', spec->>'column', col.character_maximum_length, spec->>'max_length';
+    END IF;
+    IF spec ? 'precision' AND (
+      col.numeric_precision IS DISTINCT FROM (spec->>'precision')::integer
+      OR col.numeric_scale IS DISTINCT FROM (spec->>'scale')::integer
+    ) THEN
+      RAISE EXCEPTION 'platform stub evolution fail-closed: public.%.% numeric precision does not match.',
+        spec->>'table', spec->>'column';
+    END IF;
+  END LOOP;
+END
+$preflight$;
+--> statement-breakpoint
 DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type t JOIN pg_namespace s ON s.oid = t.typnamespace WHERE t.typname = 'leave_type' AND s.nspname = 'public') THEN CREATE TYPE public."leave_type" AS ENUM ('vacation', 'sick', 'maternity', 'paternity', 'parental', 'bereavement', 'medical', 'disability', 'union_business', 'unpaid', 'lwop', 'other'); END IF; END $$;
 --> statement-breakpoint
 -- employment_history
@@ -145,3 +244,26 @@ BEGIN
         ALTER COLUMN "can_reverse" SET NOT NULL;
     END IF;
 END $$;
+--> statement-breakpoint
+DO $postflight$
+DECLARE
+  prior record;
+  current_count integer;
+  current_rls boolean;
+BEGIN
+  FOR prior IN SELECT relation_name, constraint_count, row_security FROM reachable_stub_shape_guard LOOP
+    SELECT (SELECT count(*) FROM pg_constraint k WHERE k.conrelid = c.oid), c.relrowsecurity
+      INTO current_count, current_rls
+      FROM pg_class c
+      JOIN pg_namespace n ON n.oid = c.relnamespace
+     WHERE n.nspname = 'public' AND c.relname = prior.relation_name;
+    IF current_count IS DISTINCT FROM prior.constraint_count THEN
+      RAISE EXCEPTION 'platform stub evolution fail-closed: public.% constraint count changed from % to %.',
+        prior.relation_name, prior.constraint_count, current_count;
+    END IF;
+    IF current_rls IS DISTINCT FROM prior.row_security THEN
+      RAISE EXCEPTION 'platform stub evolution fail-closed: public.% row security changed.', prior.relation_name;
+    END IF;
+  END LOOP;
+END
+$postflight$;

@@ -1882,7 +1882,7 @@
     "apps/union-eyes/app/api/notifications/count/route.ts": "8e2d2b1bffe7909473977b06bd92bdaae7c5a7ae36d08d5a24cd5415a61596f3",
     "apps/union-eyes/app/api/notifications/device/route.ts": "3d943e696dc87f94d82f79d3e33694267284331468edc593b7d7daf3de91484f",
     "apps/union-eyes/app/api/notifications/mark-all-read/route.ts": "f40b424b70bfd670efd05c7e0c5c706adf39a9af2902ac97e6784c2319eb1476",
-    "apps/union-eyes/app/api/notifications/preferences/route.ts": "cad548183713f545a9ef290ed3d2ca4da5d997124c7f0dbc4cd57e73510501b4",
+    "apps/union-eyes/app/api/notifications/preferences/route.ts": "1326d448b633654beb47dc6d97cb257f1cc5c260b0098c46d88c7b505b7d2883",
     "apps/union-eyes/app/api/notifications/test/route.ts": "08df762ed463734244dbf4a3ff81a8c1ade4b7ff6d3eac6b9898343d9028075f",
     "apps/union-eyes/app/api/ocra/submit/route.ts": "a9798abf2625aa29d5b9b66d9c3cefa50478bb78b91ad22798132794cb1e7863",
     "apps/union-eyes/app/api/oci/assessment/route.ts": "13ffeb2ff39bea0adf7ac49c11ff80b5619cc8e786697b3e1e26c82ca155c2cb",
@@ -113215,7 +113215,7 @@
       "kind": "NEXT_HTTP",
       "export": "GET",
       "sourcePath": "apps/union-eyes/app/api/notifications/preferences/route.ts",
-      "sourceSha256": "cad548183713f545a9ef290ed3d2ca4da5d997124c7f0dbc4cd57e73510501b4",
+      "sourceSha256": "1326d448b633654beb47dc6d97cb257f1cc5c260b0098c46d88c7b505b7d2883",
       "roots": [
         "apps/union-eyes/app/api/notifications/preferences/route.ts#GET"
       ],
@@ -113398,7 +113398,7 @@
       "kind": "NEXT_HTTP",
       "export": "PUT",
       "sourcePath": "apps/union-eyes/app/api/notifications/preferences/route.ts",
-      "sourceSha256": "cad548183713f545a9ef290ed3d2ca4da5d997124c7f0dbc4cd57e73510501b4",
+      "sourceSha256": "1326d448b633654beb47dc6d97cb257f1cc5c260b0098c46d88c7b505b7d2883",
       "roots": [
         "apps/union-eyes/app/api/notifications/preferences/route.ts#PUT"
       ],
