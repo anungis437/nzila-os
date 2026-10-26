@@ -30,6 +30,72 @@ import type {
 } from '../ontology'
 
 const HOLD_CAPACITIES: readonly Capacity[] = ['governance_reviewer']
+const PARTICIPATION_ACTIONS = ['message:read', 'message:reply', 'message:close', 'message:archive'] as const
+const ASSIGNEE_CAPACITIES: readonly Capacity[] = ['steward', 'chief_steward', 'officer', 'executive']
+
+/**
+ * Reading, replying, closing, and archiving follow the conversation row: the member, or the
+ * assignee when that membership carries an assignee capacity. A governance mandate, including one
+ * that may place a legal hold, is not a source. A delegation id is refused here. These actions are
+ * not in the non-delegable catalog constraint; a later migration can lock storage. This decision
+ * already ignores a delegation.
+ */
+export function decideMessageParticipation(
+  req: AuthorityRequest,
+  facts: AuthorityFacts,
+  thread: MessageThreadFacts,
+  now: Date,
+): Decision {
+  if (!PARTICIPATION_ACTIONS.includes(req.action as (typeof PARTICIPATION_ACTIONS)[number])) {
+    return deny(req, now, { code: 'ACTION_NOT_COVERED', detail: `${req.action} is not conversation participation` })
+  }
+  if (req.delegationId) {
+    return deny(req, now, { code: 'DELEGATION_INVALID', detail: 'conversation participation is the thread relationship and is not delegable' })
+  }
+  if (req.action === 'message:reply' && thread.status !== 'open') {
+    return deny(req, now, { code: 'ACTION_NOT_COVERED', detail: 'a closed conversation accepts no reply' })
+  }
+  const membership = activeMembership(facts, req.organizationId)
+  if (!membership) return deny(req, now, { code: 'NOT_AN_ACTIVE_MEMBER' })
+  const recusal = activeRecusal(facts.recusals, req.principalUserId, req.resource, req.organizationId)
+  if (recusal) return deny(req, now, { code: 'RECUSED', ref: recusal.id })
+
+  if (req.principalUserId === thread.memberUserId) {
+    if (!hasCapacity(membership, ['member'])) {
+      return deny(req, now, { code: 'CAPACITY_NOT_ELIGIBLE', detail: 'the conversation member needs the member capacity' })
+    }
+    return build({
+      req,
+      now,
+      effect: 'allow',
+      reasons: [{ code: 'ALLOWED_AS_SUBJECT', ref: thread.id }],
+      authority: [{ kind: 'subject', id: thread.id, instrument: 'member of this conversation' }],
+      obligations: ['audit_required'],
+    })
+  }
+
+  if (thread.assigneeUserId !== null && req.principalUserId === thread.assigneeUserId) {
+    if (!hasCapacity(membership, ASSIGNEE_CAPACITIES)) {
+      return deny(req, now, {
+        code: 'CAPACITY_NOT_ELIGIBLE',
+        detail: 'an assignee needs a steward, chief steward, officer, or executive capacity; an administrator title is not one',
+      })
+    }
+    return build({
+      req,
+      now,
+      effect: 'allow',
+      reasons: [{ code: 'ALLOWED_BY_RELATIONSHIP', ref: thread.id }],
+      authority: [{ kind: 'relationship', id: thread.id, instrument: 'assignee of this conversation' }],
+      obligations: ['audit_required'],
+    })
+  }
+
+  return deny(req, now, {
+    code: 'NO_SOURCE_OF_AUTHORITY',
+    detail: 'no conversation relationship covers this action; a legal-hold mandate does not confer it',
+  })
+}
 
 export function decideMessageThread(
   req: AuthorityRequest,
@@ -37,6 +103,9 @@ export function decideMessageThread(
   thread: MessageThreadFacts,
   now: Date,
 ): Decision {
+  if (PARTICIPATION_ACTIONS.includes(req.action as (typeof PARTICIPATION_ACTIONS)[number])) {
+    return decideMessageParticipation(req, facts, thread, now)
+  }
   if (req.action !== 'message:place_legal_hold' && req.action !== 'message:release_legal_hold') {
     return deny(req, now, { code: 'ACTION_NOT_COVERED', detail: `${req.action} is not a conversation legal-hold action` })
   }

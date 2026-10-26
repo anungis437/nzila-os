@@ -2,7 +2,7 @@ import { and, desc, eq, gt, isNull, lte, sql, type SQL } from 'drizzle-orm'
 import { triageDesignations } from '@/db/schema/messages-schema'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
-import { CASE_ASSIGNEE_MEMBERSHIP_ROLES } from '@/lib/cases/case-permissions'
+import { CONVERSATION_ASSIGNEE_ROLES } from '@/lib/authority/capacity'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 
 /**
@@ -57,18 +57,19 @@ export async function hasLiveDesignation(tx: RLSTx, actor: TriageActor, scope: T
 }
 
 /**
- * The designation holder must still hold a live staff membership. A designation is a grant on top of membership, never
- * a substitute for it: a removed, suspended or demoted holder loses the queue at once, without waiting for the
- * designation to be revoked. Canonical V2 asks the deployed predicate; the legacy lineage reads the compatibility
- * projection with the same eligible roles the assignment path uses.
+ * The designation holder must still hold a live conversation-assignee membership. A designation is a grant on top of
+ * membership, never a substitute for it: a removed, suspended or demoted holder loses the queue at once, without
+ * waiting for the designation to be revoked. An administrator title is not an assignee capacity. Canonical V2 asks
+ * public.ue_conversation_assignee_authorized; the legacy lineage reads the compatibility projection with the same
+ * stored roles.
  */
 function membershipStillEligible(organizationId: SQL | string, userId: SQL | string): SQL {
-  if (currentStateContextEnabled()) return sql`public.ue_case_assignee_authorized(${userId}, ${organizationId}::uuid) IS TRUE`
+  if (currentStateContextEnabled()) return sql`public.ue_conversation_assignee_authorized(${userId}, ${organizationId}::uuid) IS TRUE`
   return sql`EXISTS (
     SELECT 1 FROM public.organization_members om
     WHERE om.organization_id = ${organizationId}::uuid AND om.user_id = ${userId}
       AND om.status = 'active' AND om.deleted_at IS NULL
-      AND om.role IN (${sql.join(CASE_ASSIGNEE_MEMBERSHIP_ROLES.map((role) => sql`${role}`), sql`, `)})
+      AND lower(om.role) IN (${sql.join(CONVERSATION_ASSIGNEE_ROLES.map((role) => sql`${role}`), sql`, `)})
   )`
 }
 

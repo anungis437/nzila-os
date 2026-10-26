@@ -127,7 +127,7 @@ export const SUBORDINATE_AUTHORITY_REGISTER: readonly SubordinateAuthorityRecord
     record: 'Triage designations (messages and cases)',
     storage: ['triage_designations'],
     consumers: ['apps/union-eyes/lib/triage/designations.ts', 'apps/union-eyes/lib/messaging/thread-assignment.ts', 'apps/union-eyes/lib/cases/case-authorization.ts'],
-    gate: 'A designation is only ever consulted for the AUTHENTICATED actor (td.user_id = actor.userId), and that actor exists only if the route guard produced a binding (live session + active membership + active lifecycle). The designation predicates themselves also require the holder\'s live eligible staff membership (Canonical V2: public.ue_case_assignee_authorized; legacy lineage: the organization_members compatibility projection with the assignment-eligible roles), so a removed, suspended, deleted or demoted holder loses the queue and the notifications at once.',
+    gate: 'A designation is only ever consulted for the AUTHENTICATED actor (td.user_id = actor.userId), and that actor exists only if the route guard produced a binding (live session + active membership + active lifecycle). The designation predicates themselves also require the holder\'s live conversation-assignee membership (Canonical V2: public.ue_conversation_assignee_authorized; legacy lineage: the organization_members compatibility projection with the conversation-assignee roles, which exclude an administrator title), so a removed, suspended, deleted or demoted holder loses the queue and the notifications at once.',
     status: 'LAYERED',
     proof: BINDING_PROOF,
     residual:

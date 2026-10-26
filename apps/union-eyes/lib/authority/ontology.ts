@@ -362,6 +362,11 @@ export const ACTIONS = [
   'workaid:refer',
   'workaid:receive_disclosure',
   'workaid:read_counsel_material',
+  // The conversation relationship (owner or eligible assignee). Not a mandate power.
+  'message:read',
+  'message:reply',
+  'message:close',
+  'message:archive',
   // Distinct from reading or replying. Neither action discloses message content.
   'message:place_legal_hold',
   'message:release_legal_hold',

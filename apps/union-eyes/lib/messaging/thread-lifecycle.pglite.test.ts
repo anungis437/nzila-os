@@ -220,20 +220,96 @@ describe('revocation: staff lose the conversation the moment their authority end
     expect(await count(`SELECT count(*) AS n FROM message_thread_assignments`)).toBe(0)
   })
 
-  it('reads the membership through the canonical predicate when canonical bootstrap is on', async () => {
+  it('reads assignee eligibility through the conversation predicate when canonical bootstrap is on', async () => {
     const id = await thread('member-1', { staffId: 'steward-1' })
+    const adminThread = await thread('member-1', { staffId: 'admin-1' })
     await asOwner(async () => {
-      await pg.exec(`CREATE OR REPLACE FUNCTION public.ue_case_assignee_authorized(target text, row_org uuid) RETURNS boolean LANGUAGE sql STABLE AS
-        $$ SELECT EXISTS (SELECT 1 FROM organization_members WHERE user_id = target AND organization_id = row_org AND status = 'active') $$`)
+      await pg.exec(`CREATE OR REPLACE FUNCTION public.ue_conversation_assignee_authorized(target text, row_org uuid) RETURNS boolean LANGUAGE sql STABLE AS
+        $$ SELECT EXISTS (
+             SELECT 1 FROM organization_members
+             WHERE user_id = target AND organization_id = row_org AND status = 'active' AND deleted_at IS NULL
+               AND lower(role) IN ('bargaining_committee','chief_steward','health_safety_rep','officer','president','secretary_treasurer','steward','vice_president')
+           ) $$`)
     })
     vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')
     try {
       expect(await findReadableThread(tx(), steward, id)).not.toBeNull()
+      expect(await findReadableThread(tx(), admin, adminThread)).toBeNull()
       await setMembership('steward-1', { status: 'inactive' })
       expect(await findReadableThread(tx(), steward, id)).toBeNull()
     } finally {
       vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '0')
     }
+  })
+
+  it('a missing conversation predicate denies the assignee and still lets the member read', async () => {
+    const id = await thread('member-1', { staffId: 'steward-1' })
+    await asOwner(async () => {
+      await pg.exec('DROP FUNCTION IF EXISTS public.ue_conversation_assignee_authorized(text, uuid)')
+    })
+    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')
+    try {
+      expect(await findReadableThread(tx(), member, id)).not.toBeNull()
+      expect(await findReadableThread(tx(), steward, id)).toBeNull()
+      expect(await inTx((t) => findReadableThread(t, member, id))).not.toBeNull()
+      expect(await inTx((t) => findReadableThread(t, steward, id))).toBeNull()
+    } finally {
+      vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '0')
+    }
+  })
+
+  it('ignores the actor role label and the administrator title', async () => {
+    const id = await thread('member-1', { staffId: 'steward-1' })
+    await setMembership('steward-1', { role: 'admin' })
+    expect(await findReadableThread(tx(), actor('steward-1', 'steward'), id)).toBeNull()
+    const assignedAdmin = await thread('member-1', { staffId: 'admin-1' })
+    expect(await findReadableThread(tx(), actor('admin-1', 'admin'), assignedAdmin)).toBeNull()
+    expect(await listThreads(tx(), actor('admin-1', 'admin'))).toEqual([])
+  })
+
+  it('lets a health and safety representative read only the conversation assigned to them', async () => {
+    await asOwner(async () => {
+      await pg.query(`INSERT INTO organization_members(organization_id,user_id,role) VALUES($1,'safety-1','health_safety_rep')`, [org])
+    })
+    const own = await thread('member-1', { staffId: 'safety-1' })
+    const other = await thread('member-2', { staffId: 'steward-1' })
+    const safety = actor('safety-1')
+    expect((await listThreads(tx(), safety)).map((t) => t.id)).toEqual([own])
+    expect(await findReadableThread(tx(), safety, other)).toBeNull()
+  })
+
+  it('a stored union representative role confers no conversation', async () => {
+    await asOwner(async () => {
+      await pg.query(`INSERT INTO organization_members(organization_id,user_id,role) VALUES($1,'rep-1','union_rep')`, [org])
+    })
+    const id = await thread('member-1', { staffId: 'rep-1' })
+    expect(await findReadableThread(tx(), actor('rep-1', 'steward'), id)).toBeNull()
+  })
+
+  it('an inactive membership denies the conversation owner', async () => {
+    const id = await thread('member-1')
+    await asOwner(async () => {
+      await pg.query(`INSERT INTO organization_members(organization_id,user_id,role,status) VALUES($1,'member-1','member','inactive')`, [org])
+    })
+    expect(await listThreads(tx(), member)).toEqual([])
+    expect(await findReadableThread(tx(), member, id)).toBeNull()
+  })
+
+  it('a recorded recusal denies that conversation and leaves another assignment readable', async () => {
+    const blocked = await thread('member-1', { staffId: 'steward-1' })
+    const open = await thread('member-2', { staffId: 'steward-1' })
+    await asOwner(async () => {
+      await pg.exec(`CREATE TABLE IF NOT EXISTS ue_authority_recusals (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, principal_user_id text NOT NULL,
+        resource_type text NOT NULL, resource_id uuid NOT NULL, reason text NOT NULL, declared_at timestamptz NOT NULL DEFAULT now(),
+        lifted_at timestamptz, lifted_by text);
+        GRANT SELECT ON ue_authority_recusals TO rt;`)
+      await pg.query(`DELETE FROM ue_authority_recusals`)
+      await pg.query(`INSERT INTO ue_authority_recusals(organization_id,principal_user_id,resource_type,resource_id,reason) VALUES($1,'steward-1','message_thread',$2,'conflict')`, [org, blocked])
+    })
+    expect(await findReadableThread(tx(), steward, blocked)).toBeNull()
+    expect(await findReadableThread(tx(), steward, open)).not.toBeNull()
+    expect(await findReadableThread(tx(), member, blocked)).not.toBeNull()
   })
 })
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
+import { capacitiesForRole } from '../capacity'
 import { decide } from '../kernel'
-import type { MessageRetentionFacts, MessageThreadFacts } from '../ontology'
+import type { Capacity, MessageRetentionFacts, MessageThreadFacts } from '../ontology'
 import { NOW, ORG, U, facts, mandate, recusal, ref, request } from './fixtures'
 
 const THREAD = '00000000-0000-4000-8000-000000000258'
@@ -67,6 +68,60 @@ describe('conversation legal hold', () => {
     const holder = governed(U.reviewer)
     holder.recusals = [recusal({ principalUserId: U.reviewer, resource })]
     expect(decide(request(U.reviewer, 'message:place_legal_hold', resource), holder, thread(), NOW).reasons.map((reason) => reason.code)).toContain('RECUSED')
+  })
+})
+
+describe('conversation participation', () => {
+  const read = (userId: string, capacities: readonly Capacity[] = ['member']) =>
+    decide(request(userId, 'message:read', resource), facts(userId, [...capacities]), thread(), NOW)
+
+  it('lets the member and an eligible assignee read, reply, close, and archive, and denies everyone else', () => {
+    expect(read(U.member).effect).toBe('allow')
+    expect(read(U.member).authority[0]).toMatchObject({ kind: 'subject', instrument: 'member of this conversation' })
+    const assignee = read(U.steward, capacitiesForRole('steward'))
+    expect(assignee.effect).toBe('allow')
+    expect(assignee.authority[0]).toMatchObject({ kind: 'relationship', instrument: 'assignee of this conversation' })
+    for (const action of ['message:reply', 'message:close', 'message:archive'] as const) {
+      expect(decide(request(U.member, action, resource), facts(U.member, ['member']), thread(), NOW).effect).toBe('allow')
+      expect(decide(request(U.steward, action, resource), facts(U.steward, [...capacitiesForRole('health_safety_rep')]), thread(), NOW).effect).toBe('allow')
+    }
+    expect(read(U.other).effect).toBe('deny')
+  })
+
+  it('denies an administrator title, an unknown role, and a national officer even when they are the assignee', () => {
+    const assigned = (): MessageThreadFacts => ({ ...thread(), assigneeUserId: U.admin })
+    for (const role of ['admin', 'union_rep', 'national_officer', 'business_agent']) {
+      const decision = decide(request(U.admin, 'message:read', resource), facts(U.admin, [...capacitiesForRole(role)]), assigned(), NOW)
+      expect(decision.effect, role).toBe('deny')
+      expect(decision.reasons.map((reason) => reason.code)).toContain(role === 'admin' ? 'CAPACITY_NOT_ELIGIBLE' : 'CAPACITY_NOT_ELIGIBLE')
+    }
+  })
+
+  it('does not let a legal-hold mandate read the conversation, and refuses a delegation', () => {
+    const holder = governed(U.reviewer)
+    expect(decide(request(U.reviewer, 'message:place_legal_hold', resource), holder, thread(), NOW).effect).toBe('allow')
+    expect(decide(request(U.reviewer, 'message:read', resource), holder, thread(), NOW).reasons.map((reason) => reason.code)).toContain('NO_SOURCE_OF_AUTHORITY')
+    const delegated = decide(
+      request(U.member, 'message:read', resource, { delegationId: '00000000-0000-4000-8000-000000000261' }),
+      facts(U.member, ['member']),
+      thread(),
+      NOW,
+    )
+    expect(delegated.reasons.map((reason) => reason.code)).toContain('DELEGATION_INVALID')
+  })
+
+  it('allows a read of a closed conversation and refuses a reply', () => {
+    const closed = (): MessageThreadFacts => ({ ...thread(), status: 'closed' })
+    expect(decide(request(U.member, 'message:read', resource), facts(U.member, ['member']), closed(), NOW).effect).toBe('allow')
+    expect(decide(request(U.member, 'message:reply', resource), facts(U.member, ['member']), closed(), NOW).reasons.map((reason) => reason.code)).toContain('ACTION_NOT_COVERED')
+  })
+
+  it('denies a recused participant and a principal with no membership', () => {
+    const member = facts(U.member, ['member'])
+    member.recusals = [recusal({ principalUserId: U.member, resource })]
+    expect(decide(request(U.member, 'message:read', resource), member, thread(), NOW).reasons.map((reason) => reason.code)).toContain('RECUSED')
+    const absent = facts(U.member, ['member'], { memberships: [] })
+    expect(decide(request(U.member, 'message:read', resource), absent, thread(), NOW).reasons.map((reason) => reason.code)).toContain('NOT_AN_ACTIVE_MEMBER')
   })
 })
 

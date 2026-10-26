@@ -260,10 +260,10 @@ describe.skipIf(!URL)('conversation lifecycle, retention and read markers on the
       expect(await count(`SELECT count(*) AS n FROM message_thread_assignments WHERE thread_id = $1`, [id])).toBe(0)
     })
 
-    it('reads the membership through the canonical predicate when Canonical V2 is on, as the runtime role', async (ctx) => {
-      // The predicate belongs to the Canonical V2 auth topology (db/auth/case-assignee-predicate.ts), which the combined
-      // Django + legacy-bootstrap database does not install. Without it this path is NOT proven here: skip, do not pass.
-      const installed = await admin.query(`SELECT 1 FROM pg_proc WHERE proname = 'ue_case_assignee_authorized'`)
+    it('reads the membership through the conversation predicate when Canonical V2 is on, as the runtime role', async (ctx) => {
+      // The predicate belongs to the Canonical V2 auth topology (db/auth/conversation-assignee-predicate.ts), which the
+      // combined Django + legacy-bootstrap database does not install. Without it this path is NOT proven here: skip, do not pass.
+      const installed = await admin.query(`SELECT 1 FROM pg_proc WHERE proname = 'ue_conversation_assignee_authorized'`)
       if (installed.rows.length === 0) return ctx.skip()
       const id = await mkThread(U.member, { staffId: U.steward })
       vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')

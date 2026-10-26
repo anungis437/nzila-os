@@ -8,6 +8,7 @@ import {
 import baseContract from './catalog-authority-contract.json'
 import { catalogContractDigest, type CatalogRow } from './catalog-admission-core.mjs'
 import { CASE_ASSIGNEE_CATALOG_QUERY, CASE_ASSIGNEE_PREDICATE_OWNER, caseAssigneePredicateViolations } from '@/db/auth/case-assignee-predicate'
+import { CONVERSATION_ASSIGNEE_CATALOG_QUERY, CONVERSATION_ASSIGNEE_PREDICATE_OWNER, conversationAssigneePredicateViolations } from '@/db/auth/conversation-assignee-predicate'
 
 type Execute = (statement: string) => Promise<CatalogRow[]>
 const roles = [...Object.values(AUTH_EXECUTION_ROLES), 'union_eyes_runtime', 'union_eyes_system']
@@ -43,6 +44,7 @@ export function canonicalCatalogContract(base = baseContract) {
   const canonical = { ...payload, approvedRuntimeDefiners: [
     ...runtimeFunctions.map(entry => ({ schema: 'user_management', name: entry.name, owner: entry.owner })),
     {schema:'public',name:'ue_case_assignee_authorized',owner:CASE_ASSIGNEE_PREDICATE_OWNER},
+    {schema:'public',name:'ue_conversation_assignee_authorized',owner:CONVERSATION_ASSIGNEE_PREDICATE_OWNER},
   ] }
   return { payload: canonical, digest: catalogContractDigest(canonical) }
 }
@@ -127,5 +129,6 @@ export async function inspectCanonicalAuthCatalog(execute: Execute): Promise<str
     }
   }
   violations.push(...caseAssigneePredicateViolations(await execute(CASE_ASSIGNEE_CATALOG_QUERY)))
+  violations.push(...conversationAssigneePredicateViolations(await execute(CONVERSATION_ASSIGNEE_CATALOG_QUERY)))
   return violations
 }
