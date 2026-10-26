@@ -6,7 +6,7 @@ Machine-readable copy: `docs/union-eyes/convergence/VS_CODE_EXECUTION_QUEUE.json
 
 Preserved commit: `960a88481aa1f5a9db2ddfaa6f3da510b743a1bc`. Pull request: #1014. Branch: `agents/ue-cursor-final-closure`. Base: `agents/ue-final-convergence`.
 
-Replace `PENDING_INTRODUCING_COMMIT` in the JSON with the output of each item's `sourceCommitCommand` after this tranche is committed. That command is the source commit. A skipped Vitest run is not evidence.
+Source commit for both items: `215b21e6cc37276ba08d9f37c26bb7d504eff452`. A skipped Vitest run is not evidence.
 
 ## auth-native-pg16
 
