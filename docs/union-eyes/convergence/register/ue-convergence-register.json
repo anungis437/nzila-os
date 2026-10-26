@@ -763,7 +763,7 @@
       "defect": "The WorkAid candidate (agents/workaid-prep-20261023 541effda5, four commits on 38a824918) is merged as docs and an isolated synthetic harness only: 111 paths under docs/union-eyes/workaid and tooling/workaid-prep, no application, migration, workspace or lockfile change, no database, network or Clio access, no counsel-side authority, and no status overclaim (the only 'delivered' hits are about reminder delivery). 259 of its 264 synthetic tests pass; its five branch-provenance checks (branch name, diff confined to its folders, sandboxed validator preflight) are skipped unless the checkout is on an agents/workaid-prep* branch because they cannot hold after integration. A passing synthetic test closes no runtime gate. NOT done: none of its proposed tables, routes or contracts are implemented on the kernel; its legal-matter domain and its information-sharing requirements still have to be expressed as kernel authority rules and checked against the counsel boundary contract, and its proposed tables depend on an unqualified migration journal.",
       "consumers": [],
       "securityImplications": "None while it remains docs and synthetic tooling; any implementation must go through the counsel boundary contract (separate capacity, conflict screen, consent-governed exchange).",
-      "requiredImplementation": "Express the WorkAid legal-matter and information-sharing requirements as kernel authority rules and implement them on kernel storage once it is qualified. CONTINUATION 7: Union-side WorkAid built on kernel storage (platform 0027, RLS 0026): versioned consent wording (none authored: capture refused until a legally approved text is recorded), member consent with closed scope categories and 365-day cap, referral by member or authorised representative, per-document authorisation, pseudonymous server-generated matter identity, revocation that ends disclosure and invalidates shares in one transaction, fail-closed counsel boundary. Counsel-side activation and key custody (G-003) remain separate EXTERNAL gates; no counsel HTTP route or UI exists.",
+      "requiredImplementation": "Express the WorkAid legal-matter and information-sharing requirements as kernel authority rules and implement them on kernel storage once it is qualified. CONTINUATION 7: Union-side WorkAid built on kernel storage (platform 0027, RLS 0026): versioned consent wording (none authored: capture refused until a legally approved text is recorded), member consent with closed scope categories and 365-day cap, referral by member or authorised representative, per-document authorisation, pseudonymous server-generated matter identity, revocation that ends disclosure and invalidates shares in one transaction, fail-closed counsel boundary. Counsel-side activation and key custody (G-003) remain separate EXTERNAL gates; no counsel HTTP route or counsel UI exists. Member and staff screens at dashboard/claims/workaid and dashboard/workbench/workaid call the union-side routes, show consent and document state, and refuse a referral the server denies. Consent capture stays disabled until recorded wording exists. A component test is not credentialed browser acceptance.",
       "evidence": [
         {
           "type": "path",
@@ -776,6 +776,10 @@
         {
           "type": "path",
           "ref": "apps/union-eyes/lib/authority/store/workaid-disclosure.ts"
+        },
+        {
+          "type": "test",
+          "ref": "apps/union-eyes/components/workaid/workaid-journey.test.tsx"
         }
       ],
       "status": "IN_PROGRESS",

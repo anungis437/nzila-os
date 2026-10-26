@@ -1030,7 +1030,7 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     ownedBy: [],
     evidence: [
       'Union-side referral, consent and disclosure records exist (see UE-WORKAID-UNION-SIDE-DISCLOSURE); no counsel-side connector, transmission, acknowledgement, WSIB/WSIAT filing or Clio code exists',
-      'No navigation entry, route or component presents WorkAid progress; the representative experience shows no specialist status feed',
+      'Member and staff screens show union-side consent, document release and referral status. They do not show counsel progress, acknowledgement or a specialist feed',
     ],
     targetWave: 3,
     readinessImpact: 'non_blocking',
@@ -1048,7 +1048,7 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     id: 'UE-WORKAID-UNION-SIDE-DISCLOSURE',
     title: 'WorkAid union-side consent, referral record, document authorisation and revocation',
     state: 'LIMITED',
-    ownedBy: ['lib/authority/store/workaid-disclosure.ts', 'app/api/workaid/consents/route.ts', 'app/api/workaid/referrals/route.ts'],
+    ownedBy: ['lib/authority/store/workaid-disclosure.ts', 'app/api/workaid/consents/route.ts', 'app/api/workaid/referrals/route.ts', 'components/workaid/workaid-journey.tsx'],
     evidence: [
       'db/__tests__/workaid-union-side.pglite.test.ts — consent scope, per-document authorisation, revocation, recusal and removed-representative denial, audit-fault rollback, cross-tenant isolation (PGlite on the real kernel storage; not a native or credentialed run)',
       'Counsel reads fail closed (COUNSEL_NOT_VERIFIABLE) because no CounselAssertionVerifier is configured',
@@ -1057,8 +1057,8 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     readinessImpact: 'non_blocking',
     disposition: 'OPTIONAL_NATIVE_CAPABILITY',
     notes:
-      'A union-side record only: a referral is not delivery to counsel, no counsel HTTP route or UI exists, and no consent text has been authored ' +
-      '(consent capture is refused until a legally approved wording version is recorded). Two external gates stay separate and closed: ' +
+      'A union-side record only: a referral is not delivery to counsel, and no counsel HTTP route or counsel UI exists. Member and staff screens call the union-side routes. ' +
+      'Consent capture stays refused until a legally approved wording version is recorded. Two external gates stay separate and closed: ' +
       'counsel-side activation (a counsel-side system and its issuer allow-list) and key custody (UE-CONV-G-003).',
   },
 ] as const;
