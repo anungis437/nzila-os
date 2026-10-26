@@ -94,27 +94,28 @@
       "risk": "P0",
       "dependsOn": ["auth-native-pg16"],
       "convergenceRegister": ["UE-CONV-I-002"],
-      "sourceCommit": "6ce6e945406b693a948601aecadf99e27b6b09dc",
+      "sourceCommit": "b4dde796fbee63291d4d96896692ad869071dc2c",
       "sourceCommitCommand": "git log -1 --format=%H -- apps/union-eyes/lib/messaging/thread-lifecycle.ts apps/union-eyes/db/__tests__/message-lifecycle.postgres.test.ts",
       "test": "apps/union-eyes/db/__tests__/message-lifecycle.postgres.test.ts",
       "command": "UE_AUTHORITY_COMBINED_URL=<admin-url-of-a-fresh-disposable-combined-database> pnpm exec vitest run apps/union-eyes/db/__tests__/message-lifecycle.postgres.test.ts",
       "workingDirectory": "repository root of agents/ue-cursor-final-closure at 6ce6e945406b693a948601aecadf99e27b6b09dc or later",
       "environment": {
-        "UE_AUTHORITY_COMBINED_URL": "admin connection to a fresh disposable database prepared the same way as thread-assignment.postgres.test.ts: Django migrate plus the approved Drizzle bootstrap, including platform 0013, 0014, 0025 and 0029, and RLS 0020, 0021 and 0024",
+        "UE_AUTHORITY_COMBINED_URL": "admin connection to a fresh disposable database prepared the same way as thread-assignment.postgres.test.ts: Django migrate plus the approved Drizzle bootstrap, including platform 0013, 0014, 0025, 0029 and 0030, and RLS 0020, 0021 and 0024",
         "docker": "not started by this file",
         "role": "the suite sets union_eyes_runtime and union_eyes_system under forced RLS; the hold-row insert that proves retention uses the admin connection and is not an authorization success"
       },
-      "fixtureSetup": "Same combined-schema preparation as apps/union-eyes/db/__tests__/thread-assignment.postgres.test.ts. Apply platform 0029 before the run so the recusal and non-delegable checks match this commit. Do not seed a governance_review mandate for this file: the administrator denial is the contract under test.",
+      "fixtureSetup": "Same combined-schema preparation as apps/union-eyes/db/__tests__/thread-assignment.postgres.test.ts. Apply platform 0029 and 0030 before the run so the recusal and non-delegable checks match this commit. Do not seed a governance_review mandate for this file: the administrator denial of a hold and of retention adoption is the contract under test.",
       "cleanup": "Drop the disposable database. The suite installs a fault trigger on the audit tables of that database and removes it in afterEach; if the process is killed during a fault test, drop that trigger before retrying.",
       "expect": {
         "success": [
           "An administrator, a steward and a foreign-organization actor receive kind forbidden or not_found from setLegalHold. No hold_place row is written by those calls.",
+          "An administrator receives kind forbidden from adoptRetentionPolicy for a valid period, and kind invalid for a period outside 1..36500. No retention row is written by those calls.",
           "A hold_place and hold_release inserted by the admin connection, with acted_via organization_administrator, make retention report legal_hold and then retention_elapsed. The member view does not reveal the hold. The administrator still cannot read the thread.",
           "Cursor ran the PGlite lifecycle file and the pure kernel tests. That run is not this proof."
         ],
         "denial": [
           "The file is skipped unless UE_AUTHORITY_COMBINED_URL is set. A skipped run is not evidence.",
-          "This file does not prove an allowed hold. It does not prove that a failed audit rolls back a successful hold write. Do not mock enforceAuthority to return allow and call that equivalent.",
+          "This file does not prove an allowed hold or an allowed retention adoption. It does not prove that a failed audit rolls back either successful write. Do not mock enforceAuthority to return allow and call that equivalent.",
           "Do not point the URL at a shared or production database."
         ]
       },
@@ -126,9 +127,9 @@
   "nextEngineeringAction": [
     "Do not edit commit 960a88481aa1f5a9db2ddfaa6f3da510b743a1bc or docs/union-eyes/convergence/UE-FINAL-CONVERGENCE-CHECKPOINT-8.md.",
     "Do not start Docker and do not set AUTH_NATIVE_PROOF or UE_AUTH_CONCURRENCY_PROOF in Cursor.",
-    "Legal hold on messages/threads/[threadId]/legal-hold is a kernel decision as of 6ce6e945406b693a948601aecadf99e27b6b09dc. The scanner still labels that route THREAD_POLICY because the route calls lib/messaging/thread-lifecycle. Do not edit the scanner. The decision denies an administrator title, a member, an assignee, a delegation, a recusal, a revoked mandate, and a mandate that names another conversation. place_legal_hold and release_legal_hold are on the inactive governance_review issuance template and are refused by ue_authority_deleg_nondelegable_chk after platform 0029. They confer nothing until a live rule naming them is adopted.",
-    "The combined-schema lifecycle file does not prove an allowed hold or audit-fault rollback of that write. Next Cursor work seeds a governance_review mandate through the issuance workflow inside a skip-gated native test, proves the allow, and proves that a failed audit rolls the hold back. Do not mock the kernel.",
-    "adoptRetentionPolicy and messages/retention-policy still use actor.role admin. Message read, reply, assign and close still use thread participation. staffActing still uses caseActionAllowed('note_add_internal'). external/grievances/[id]/documents/upload is EXTERNAL_AUTHORITY. Each still needs operative action-level authority, tenant binding, mandate limits, privacy classification, revocation, one transaction, durable audit and negative tests.",
+    "Legal hold is a kernel decision as of 6ce6e945406b693a948601aecadf99e27b6b09dc. Retention read and adoption are kernel decisions as of b4dde796fbee63291d4d96896692ad869071dc2c. The scanner still labels both routes THREAD_POLICY because they call lib/messaging/thread-lifecycle. Do not edit the scanner. An administrator title is denied. The powers sit on the inactive governance_review issuance template and confer nothing until a live rule naming them is adopted. Platform 0029 and 0030 refuse stored delegations and allow recusals. Both migrations are UNQUALIFIED.",
+    "The combined-schema lifecycle file does not prove an allowed hold, an allowed retention adoption, or audit-fault rollback of either successful write. Next Cursor work seeds a governance_review mandate through the issuance workflow inside a skip-gated native test and restores those proofs. Do not mock the kernel.",
+    "Message read, reply, assign and close still use thread participation. staffActing still uses caseActionAllowed('note_add_internal'). external/grievances/[id]/documents/upload is EXTERNAL_AUTHORITY. Each still needs operative action-level authority, tenant binding, mandate limits, privacy classification, revocation, one transaction, durable audit and negative tests.",
     "Schema census on this branch is 231 entries in docs/union-eyes/convergence/register/ue-canonical-schema-census.json. The mutation-scope baseline sums to 13. Checkpoint 5 recorded 351 and 276 before those shrinks. Continue only entries that lack a machine-verifiable engineering disposition. Do not regenerate either baseline to change the count.",
     "Finance stays fail-closed until a governed issuance and activation workflow exists. Do not invent mandate holders.",
     "CURSOR_IMPLEMENTATION_COMPLETE remains false."
