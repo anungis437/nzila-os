@@ -60,7 +60,7 @@ export function expandRange(prefix, from, to) {
   return out
 }
 
-function idsInQuote(quote) {
+export function idsInQuote(quote) {
   const ids = new Set()
   for (const match of quote.matchAll(/\b(FJ|F|R)(\d{2})\s*[–-]\s*(?:FJ|F|R)?(\d{2})\b/g)) for (const id of expandRange(match[1], match[2], match[3])) ids.add(id)
   for (const match of quote.matchAll(/\b(FJ\d{2}|F\d{2}|R\d{2})\b/g)) ids.add(match[1])

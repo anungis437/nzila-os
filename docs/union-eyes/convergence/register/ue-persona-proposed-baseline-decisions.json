@@ -1,0 +1,1150 @@
+{
+  "schemaVersion": 1,
+  "kind": "PROPOSED_PERSONA_BASELINE",
+  "persona": "decisions",
+  "title": "Persona baseline decision register",
+  "status": "PROPOSED_NOT_ADOPTED",
+  "adopted": false,
+  "frozen": false,
+  "originalRecovered": false,
+  "banner": [
+    "PROPOSED NEW BASELINE. NOT A RECOVERED ORIGINAL. NOT FROZEN. NOT ADOPTED.",
+    "The original canonical document for this persona was not recovered. This document is a new design prepared from recovered evidence, existing frozen persona contracts and the executable authority contracts, for product specification review.",
+    "It grants no authority. Every institutional authority decision it names is outstanding and the behaviour it describes stays inactive until a duly authorized body adopts the decision."
+  ],
+  "labels": {
+    "HISTORICALLY_EVIDENCED": "The identifier is individually evidenced by a recovered historical record. Only the identifier and the recorded title or status are historical; the specification is new.",
+    "PROPOSED_NEW_BASELINE": "The specification is a new design in this proposed baseline. Every contract carries this label.",
+    "IMPLEMENTED_SOURCE": "The cited source files show some implementation. A cited file is not verification, conformance was not checked, and no run exists.",
+    "REQUIRES_INSTITUTIONAL_ADOPTION": "The behaviour depends on an institutional authority decision that is outstanding. It stays inactive until a duly authorized body adopts it."
+  },
+  "recoveryBaseCommit": "f39828e97837afa73cf2a03f40c841b3b2699dad",
+  "sources": [
+    {
+      "id": "REP-DISPOSITION-V1",
+      "class": "FROZEN_DISPOSITION",
+      "commit": "571784d58f93ed6939438422534c63b83d77c7ed",
+      "path": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "blob": "6cd96c32171a504b1b233fd994539d9394aa13d7"
+    },
+    {
+      "id": "REP-DISPOSITION-V2",
+      "class": "FROZEN_DISPOSITION",
+      "commit": "a0e7753fdfc43f4fd3fcc7c39a69d6c68b845407",
+      "path": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "blob": "2d6a55bb316f1376e551c7af5b649da3a0853841"
+    },
+    {
+      "id": "FO-DISPOSITION-V1",
+      "class": "FROZEN_DISPOSITION",
+      "commit": "ee9ecbb5100497b2bbefa9e06b276d3c7d31ae80",
+      "path": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "blob": "515833351da9a0234bce0ef9ae4a81abfab40cc9"
+    },
+    {
+      "id": "FO-DISPOSITION-V2",
+      "class": "FROZEN_DISPOSITION",
+      "commit": "7ba993a318425c94820bc20ad07a6821302aca25",
+      "path": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "blob": "afda5af00f9820181b07697fca03b267c25bc9de"
+    },
+    {
+      "id": "SR-DISPOSITION",
+      "class": "FROZEN_DISPOSITION",
+      "commit": "f39828e97837afa73cf2a03f40c841b3b2699dad",
+      "path": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "blob": "41369d2887ba2acc600c69d6a2c236960dd90080"
+    },
+    {
+      "id": "EXEC-ROLES",
+      "class": "EXISTING_EXECUTABLE_CONTRACT",
+      "commit": "f39828e97837afa73cf2a03f40c841b3b2699dad",
+      "path": "apps/union-eyes/lib/auth/roles.ts",
+      "blob": "03267527de4fa99b5b435d45d5cc78e81adaf140"
+    },
+    {
+      "id": "EXEC-FINANCIAL-AUTHORITY",
+      "class": "EXISTING_EXECUTABLE_CONTRACT",
+      "commit": "f39828e97837afa73cf2a03f40c841b3b2699dad",
+      "path": "apps/union-eyes/lib/finance/financial-authority.ts",
+      "blob": "a055b751e1cf2d85911b5c86681fd6c9b6c298f3"
+    },
+    {
+      "id": "EXEC-FINANCIAL-LIFECYCLE",
+      "class": "EXISTING_EXECUTABLE_CONTRACT",
+      "commit": "f39828e97837afa73cf2a03f40c841b3b2699dad",
+      "path": "apps/union-eyes/lib/finance/financial-mandate-lifecycle.ts",
+      "blob": "5a04b5399f8ed528ec06bfc1868f2b4b478f990a"
+    },
+    {
+      "id": "EXEC-FINANCIAL-PRINCIPAL",
+      "class": "EXISTING_EXECUTABLE_CONTRACT",
+      "commit": "f39828e97837afa73cf2a03f40c841b3b2699dad",
+      "path": "apps/union-eyes/lib/finance/principal-financial-authority.ts",
+      "blob": "9e0a369342c11da2c01f8f7d03adcd07c14f0ea2"
+    }
+  ],
+  "authorizationBases": {
+    "CASE_OWNER_OR_ASSIGNEE": {
+      "domain": "case",
+      "kernelActions": [
+        "case:read",
+        "case:read_internal",
+        "case:comment",
+        "case:write_notes",
+        "case:draft_action",
+        "case:upload_evidence",
+        "case:modify_document",
+        "case:process_ocr",
+        "case:transition"
+      ],
+      "definition": "A live owner or assignee relationship to this one case, held by a principal whose live membership carries a representation capacity (steward, chief steward or officer). The relationship is a fact about the case; the capacity is eligibility only. Closing, disclosing to the member and exporting sealed evidence are additionally limited to the primary handler.",
+      "source": "apps/union-eyes/lib/authority/policies/case.ts",
+      "requiresInstitutionalInstrument": false
+    },
+    "CASE_PRIMARY_HANDLER_ONLY": {
+      "domain": "case",
+      "kernelActions": [
+        "case:close",
+        "case:disclose_to_member",
+        "case:export_sealed_evidence",
+        "case:read_third_party_restricted"
+      ],
+      "definition": "The owner or assignee relationship, limited to the primary handler. A collaborator grant can never carry these actions.",
+      "source": "apps/union-eyes/lib/authority/policies/case.ts",
+      "requiresInstitutionalInstrument": false
+    },
+    "CASE_COLLABORATOR_EXPLICIT": {
+      "domain": "case",
+      "kernelActions": [
+        "case:read",
+        "case:read_internal",
+        "case:comment",
+        "case:write_notes",
+        "case:draft_action",
+        "case:upload_evidence"
+      ],
+      "definition": "A live collaborator relationship that was granted explicitly by someone other than its holder, names each permission, carries an expiry, and never reaches privileged matters unless a separate independent privileged grant exists.",
+      "source": "apps/union-eyes/lib/authority/policies/case.ts",
+      "requiresInstitutionalInstrument": false
+    },
+    "CASE_MEMBER_OWN": {
+      "domain": "case",
+      "kernelActions": [
+        "case:read",
+        "case:comment",
+        "case:read_own_submission"
+      ],
+      "definition": "The represented member or creator of this case, as a live derived relationship. It reaches only the member-visible view of the case.",
+      "source": "apps/union-eyes/lib/authority/policies/case.ts",
+      "requiresInstitutionalInstrument": false
+    },
+    "CASE_SUPERVISORY_MANDATE": {
+      "domain": "case",
+      "kernelActions": [
+        "case:read",
+        "case:read_internal",
+        "case:assign",
+        "case:transition"
+      ],
+      "definition": "A live supervisory mandate whose unit, territory or resource scope covers this case and whose powers name the action. Seniority, role title and platform status are not inputs. Privileged matters are outside every mandate except assignment.",
+      "source": "apps/union-eyes/lib/authority/policies/case.ts",
+      "requiresInstitutionalInstrument": true
+    },
+    "CASE_TRIAGE_DESIGNATION": {
+      "domain": "case",
+      "kernelActions": [],
+      "definition": "A live, expiring, revocable triage designation for the cases scope, granted by an organization administrator to an eligible staff member for at most 90 days. It exposes the unassigned queue metadata only and grants no kernel action on any case.",
+      "source": "apps/union-eyes/lib/triage/designations.ts",
+      "requiresInstitutionalInstrument": true
+    },
+    "CASE_FILING_CAPACITY": {
+      "domain": "case",
+      "kernelActions": [],
+      "definition": "An active canonical membership whose capacity allows opening a matter in the stated mode (member, handler or bulk). Opening a matter grants no access to anyone else’s case.",
+      "source": "apps/union-eyes/lib/cases/case-authorization.ts",
+      "requiresInstitutionalInstrument": false
+    },
+    "CASE_EMERGENCY_GRANT": {
+      "domain": "case",
+      "kernelActions": [
+        "case:read",
+        "case:read_internal"
+      ],
+      "definition": "A live, justified, independently approved, time-boxed, read-only emergency grant that names this case. It never reaches privileged matters.",
+      "source": "apps/union-eyes/lib/authority/policies/case.ts",
+      "requiresInstitutionalInstrument": true
+    },
+    "THREAD_PARTICIPANT": {
+      "domain": "message",
+      "kernelActions": [
+        "message:read",
+        "message:reply",
+        "message:close",
+        "message:archive"
+      ],
+      "definition": "The member of the conversation, or its assignee when that membership carries an assignee capacity. Participation follows the conversation row; no mandate and no delegation confers it.",
+      "source": "apps/union-eyes/lib/authority/policies/message.ts",
+      "requiresInstitutionalInstrument": false
+    },
+    "THREAD_TRIAGE_DESIGNATION": {
+      "domain": "message",
+      "kernelActions": [],
+      "definition": "A live triage designation for the messages scope. It exposes the unassigned conversation queue only and is not a read of any conversation.",
+      "source": "apps/union-eyes/lib/triage/designations.ts",
+      "requiresInstitutionalInstrument": true
+    },
+    "GOVERNANCE_MANDATE_THREAD_HOLD": {
+      "domain": "message",
+      "kernelActions": [
+        "message:place_legal_hold",
+        "message:release_legal_hold",
+        "message:adopt_retention",
+        "message:read_retention_policy"
+      ],
+      "definition": "A live governance review mandate whose powers name the action and whose scope names the conversation or the organization retention record. It confers no read of the conversation and cannot be delegated.",
+      "source": "apps/union-eyes/lib/authority/policies/message.ts",
+      "requiresInstitutionalInstrument": true
+    },
+    "DOCUMENT_CASE_RELATIONSHIP_AND_CLASS": {
+      "domain": "document",
+      "kernelActions": [
+        "case:read",
+        "case:read_internal",
+        "case:upload_evidence",
+        "case:process_ocr",
+        "case:modify_document"
+      ],
+      "definition": "A kernel decision on the linked case together with the document classification. A privileged classification needs an explicit independent privileged-access grant; a role never reaches it.",
+      "source": "apps/union-eyes/lib/authority/document-class.ts",
+      "requiresInstitutionalInstrument": false
+    },
+    "DIRECTORY_SCOPE_BY_CASE_RELATIONSHIP": {
+      "domain": "member",
+      "kernelActions": [],
+      "definition": "The member directory policy: a steward sees self and the members of cases assigned to them; supervisory and officer scopes widen the directory without sensitive attributes only through the stated policy; only platform administrators cross organizations.",
+      "source": "apps/union-eyes/lib/members/directory-access.ts",
+      "requiresInstitutionalInstrument": false
+    },
+    "WORKAID_REFERRAL_WITH_CONSENT": {
+      "domain": "workaid",
+      "kernelActions": [
+        "workaid:refer",
+        "workaid:receive_disclosure"
+      ],
+      "definition": "The case relationship that permits a referral, plus a live member disclosure consent whose categories, purpose, recipient and expiry cover what moves. A union-authored record can never open counsel material. Consent wording is an institutional instrument that this baseline does not write.",
+      "source": "apps/union-eyes/lib/authority/workaid-disclosure.ts",
+      "requiresInstitutionalInstrument": true
+    },
+    "ORG_ADMIN_OPERATIONS": {
+      "domain": "administration",
+      "kernelActions": [],
+      "definition": "Administration of the tenant. The organization administrator title carries no case, money or governance capacity; it may grant a time-boxed triage designation and perform tenant operations only.",
+      "source": "apps/union-eyes/lib/authority/capacity.ts",
+      "requiresInstitutionalInstrument": true
+    },
+    "REPRESENTATION_PROTOCOL_APPROVAL": {
+      "domain": "administration",
+      "kernelActions": [],
+      "definition": "A representation protocol approved by an administrator who is not its author. An unapproved, missing or invalid protocol is not executable and fails closed.",
+      "source": "apps/union-eyes/lib/representation/protocol-types.ts",
+      "requiresInstitutionalInstrument": true
+    },
+    "SELF_SCOPED": {
+      "domain": "self",
+      "kernelActions": [],
+      "definition": "The signed-in principal’s own preferences and session. No other principal’s resource is touched.",
+      "source": "apps/union-eyes/lib/authority/ontology.ts",
+      "requiresInstitutionalInstrument": false
+    },
+    "ACTIVE_MEMBERSHIP_NAVIGATION": {
+      "domain": "navigation",
+      "kernelActions": [],
+      "definition": "A live membership in the active organization. A navigation entry is only an entry point: every resource behind it is decided individually, and an entry is not shown when its destination would resolve to an unavailable state.",
+      "source": "apps/union-eyes/lib/authority/ontology.ts",
+      "requiresInstitutionalInstrument": false
+    },
+    "FINANCIAL_MANDATE_VIEW": {
+      "domain": "finance",
+      "kernelActions": [
+        "finance:view"
+      ],
+      "definition": "A live financial mandate that names the account and the view duty, held by a principal with a financial capacity. A member may always view their own record. A role title, including the Secretary-Treasurer title, is not a mandate.",
+      "source": "apps/union-eyes/lib/authority/policies/finance.ts",
+      "requiresInstitutionalInstrument": true
+    },
+    "FINANCIAL_MANDATE_PREPARE": {
+      "domain": "finance",
+      "kernelActions": [
+        "finance:prepare"
+      ],
+      "definition": "A live financial mandate that names the account and the prepare duty. The preparer cannot approve the same transaction.",
+      "source": "apps/union-eyes/lib/authority/policies/finance.ts",
+      "requiresInstitutionalInstrument": true
+    },
+    "FINANCIAL_MANDATE_APPROVE": {
+      "domain": "finance",
+      "kernelActions": [
+        "finance:approve"
+      ],
+      "definition": "A live financial mandate that names the account and the approve duty, within its monetary limit and currency. The approver is not the preparer or the executor of the same transaction and is not a party to it.",
+      "source": "apps/union-eyes/lib/authority/policies/finance.ts",
+      "requiresInstitutionalInstrument": true
+    },
+    "FINANCIAL_MANDATE_EXECUTE": {
+      "domain": "finance",
+      "kernelActions": [
+        "finance:execute"
+      ],
+      "definition": "A live financial mandate that names the account and the execute duty. Execution is the money movement itself and happens only in the route that moves the money. The executor is neither the approver nor the later reconciler.",
+      "source": "apps/union-eyes/lib/authority/policies/finance.ts",
+      "requiresInstitutionalInstrument": true
+    },
+    "FINANCIAL_MANDATE_RECONCILE": {
+      "domain": "finance",
+      "kernelActions": [
+        "finance:reconcile"
+      ],
+      "definition": "A live financial mandate that names the account and the reconcile duty. The reconciler did not execute the transaction.",
+      "source": "apps/union-eyes/lib/authority/policies/finance.ts",
+      "requiresInstitutionalInstrument": true
+    },
+    "FINANCIAL_MANDATE_AUDIT": {
+      "domain": "finance",
+      "kernelActions": [
+        "finance:audit"
+      ],
+      "definition": "A live financial mandate that names the account and the audit duty. The auditor took no part in the transaction audited.",
+      "source": "apps/union-eyes/lib/authority/policies/finance.ts",
+      "requiresInstitutionalInstrument": true
+    },
+    "FINANCIAL_SUBJECT_OWN_RECORD": {
+      "domain": "finance",
+      "kernelActions": [
+        "finance:view"
+      ],
+      "definition": "The member viewing their own financial record, and nothing else’s.",
+      "source": "apps/union-eyes/lib/authority/policies/finance.ts",
+      "requiresInstitutionalInstrument": false
+    },
+    "FINANCIAL_MANDATE_ADMINISTRATION": {
+      "domain": "finance",
+      "kernelActions": [],
+      "definition": "Issuance, acceptance, suspension and revocation of a financial mandate under a live issuance rule. The issuer, the holder and the approver are three different people; the holder activates; an expired term is not activated. No mandate is issued from a request body or derived from a role title.",
+      "source": "apps/union-eyes/lib/finance/financial-mandate-lifecycle.ts",
+      "requiresInstitutionalInstrument": true
+    },
+    "TRUSTEE_APPOINTMENT_DUTY": {
+      "domain": "finance",
+      "kernelActions": [
+        "finance:view",
+        "finance:audit"
+      ],
+      "definition": "The trustee capacity, which is earned only by a recorded appointment and never by role, together with a live mandate naming the duty.",
+      "source": "apps/union-eyes/lib/authority/capacity.ts",
+      "requiresInstitutionalInstrument": true
+    },
+    "AUDITOR_APPOINTMENT_DUTY": {
+      "domain": "finance",
+      "kernelActions": [
+        "finance:view",
+        "finance:audit"
+      ],
+      "definition": "The auditor capacity, which is earned only by a recorded appointment and never by role, together with a live mandate naming the audit duty and the period.",
+      "source": "apps/union-eyes/lib/authority/capacity.ts",
+      "requiresInstitutionalInstrument": true
+    },
+    "UNDECIDED_INSTITUTIONAL_OFFICE": {
+      "domain": "administration",
+      "kernelActions": [],
+      "definition": "No source of authority is defined for this action. The institution must name the office, the mandate or the rule that holds it. Until then the action is not offered, and a role floor in the current source is not treated as that authority.",
+      "source": "apps/union-eyes/lib/authority/ontology.ts",
+      "requiresInstitutionalInstrument": true
+    },
+    "ROLE_ELIGIBILITY_ONLY": {
+      "domain": "role",
+      "kernelActions": [],
+      "definition": "A role, capacity, title or seniority makes a person eligible to hold an authority. It never is the authority. A denial contract names what a role never grants.",
+      "source": "apps/union-eyes/lib/authority/capacity.ts",
+      "requiresInstitutionalInstrument": false
+    },
+    "PLATFORM_BOUNDARY_NO_AUTHORITY": {
+      "domain": "finance",
+      "kernelActions": [],
+      "definition": "Nzila platform billing is not union finance. Platform staff status and SaaS entitlement confer no authority over union financial records.",
+      "source": "apps/union-eyes/lib/authority/capacity.ts",
+      "requiresInstitutionalInstrument": false
+    }
+  },
+  "designNote": "Product design decisions can be settled by the product specification review. Institutional authority decisions name who may issue, approve, decide or receive something. Nothing in this repository settles an institutional authority decision, so each stays outstanding and the behaviour it governs stays inactive.",
+  "decisions": [
+    {
+      "id": "DEC-PD-01",
+      "type": "PRODUCT_DESIGN",
+      "title": "Steward as a distinct persona",
+      "question": "Is Steward a distinct persona with its own action contract, or the front-line capacity inside Representative 2.2?",
+      "baselineProposal": "Steward is specified as its own persona. Every steward action names the Representative 2.2 action it narrows, so the two cannot drift.",
+      "options": [
+        "Distinct persona (proposed)",
+        "Front-line capacity inside Representative 2.2",
+        "Distinct persona only where an institution configures a steward-led protocol"
+      ],
+      "personas": [
+        "steward",
+        "representative"
+      ],
+      "decisionOwner": "PRODUCT_SPECIFICATION_REVIEW",
+      "status": "OUTSTANDING",
+      "activation": "PROPOSAL_ONLY_NOT_ADOPTED",
+      "inactiveBehaviorUntilAdopted": "The proposed behaviour is a design for review. Nothing is built from it before the review settles it."
+    },
+    {
+      "id": "DEC-PD-02",
+      "type": "PRODUCT_DESIGN",
+      "title": "Steward navigation",
+      "question": "Does the steward see the seven staff destinations, a subset, or a steward-specific set?",
+      "baselineProposal": "The seven Representative 2.2 destinations, each narrowed to the steward’s own relationships. Knowledge & Guidance is shown because the clause library is steward-gated in source.",
+      "options": [
+        "Seven narrowed destinations (proposed)",
+        "Five destinations without Communications and Knowledge"
+      ],
+      "personas": [
+        "steward"
+      ],
+      "decisionOwner": "PRODUCT_SPECIFICATION_REVIEW",
+      "status": "OUTSTANDING",
+      "activation": "PROPOSAL_ONLY_NOT_ADOPTED",
+      "inactiveBehaviorUntilAdopted": "The proposed behaviour is a design for review. Nothing is built from it before the review settles it."
+    },
+    {
+      "id": "DEC-PD-03",
+      "type": "PRODUCT_DESIGN",
+      "title": "Default visibility of working notes",
+      "question": "Is a representative working note staff-only unless the author chooses member visibility?",
+      "baselineProposal": "Staff-only by default. Member visibility is an explicit, affirmative choice. This matches the repaired source behaviour recorded as P0-F1.",
+      "options": [
+        "Staff-only default (proposed)",
+        "Member-visible default"
+      ],
+      "personas": [
+        "steward",
+        "representative"
+      ],
+      "decisionOwner": "PRODUCT_SPECIFICATION_REVIEW",
+      "status": "OUTSTANDING",
+      "activation": "PROPOSAL_ONLY_NOT_ADOPTED",
+      "inactiveBehaviorUntilAdopted": "The proposed behaviour is a design for review. Nothing is built from it before the review settles it."
+    },
+    {
+      "id": "DEC-PD-04",
+      "type": "PRODUCT_DESIGN",
+      "title": "Intake classification",
+      "question": "How are an inquiry, a request, an accepted case and a formal grievance distinguished, and when does an intake become a case?",
+      "baselineProposal": "Four named stages with a recorded transition between each. An unassigned intake is metadata until a person accepts or routes it.",
+      "options": [
+        "Four stages (proposed)",
+        "Two stages: intake and case"
+      ],
+      "personas": [
+        "steward",
+        "representative"
+      ],
+      "decisionOwner": "PRODUCT_SPECIFICATION_REVIEW",
+      "status": "OUTSTANDING",
+      "activation": "PROPOSAL_ONLY_NOT_ADOPTED",
+      "inactiveBehaviorUntilAdopted": "The proposed behaviour is a design for review. Nothing is built from it before the review settles it."
+    },
+    {
+      "id": "DEC-PD-05",
+      "type": "PRODUCT_DESIGN",
+      "title": "Assignment acknowledgement and handoff summary",
+      "question": "What does an assignee acknowledge on receipt, and what must an outgoing handler record at handoff?",
+      "baselineProposal": "The assignee acknowledges receipt; the outgoing handler records open deadlines, open communications, evidence state and the next step. Acknowledgement does not create authority.",
+      "options": [],
+      "personas": [
+        "steward",
+        "representative"
+      ],
+      "decisionOwner": "PRODUCT_SPECIFICATION_REVIEW",
+      "status": "OUTSTANDING",
+      "activation": "PROPOSAL_ONLY_NOT_ADOPTED",
+      "inactiveBehaviorUntilAdopted": "The proposed behaviour is a design for review. Nothing is built from it before the review settles it."
+    },
+    {
+      "id": "DEC-PD-06",
+      "type": "PRODUCT_DESIGN",
+      "title": "Representative R-domain meanings",
+      "question": "Confirm the proposed single meaning for each of R03–R08, R10–R12, R16, R17 and R19–R24.",
+      "baselineProposal": "Each grouped identifier receives its own meaning. Where the historical record gives an ordered list of labels, the pairing is a new design choice and is not historically evidenced.",
+      "options": [],
+      "personas": [
+        "representative"
+      ],
+      "decisionOwner": "PRODUCT_SPECIFICATION_REVIEW",
+      "status": "OUTSTANDING",
+      "activation": "PROPOSAL_ONLY_NOT_ADOPTED",
+      "inactiveBehaviorUntilAdopted": "The proposed behaviour is a design for review. Nothing is built from it before the review settles it."
+    },
+    {
+      "id": "DEC-PD-07",
+      "type": "PRODUCT_DESIGN",
+      "title": "R18 status vocabulary",
+      "question": "How is a historical disposition recorded beside the current implementation status?",
+      "baselineProposal": "Two separate fields. The historical dispositions (BLOCKED, then MISSING) are kept as dated observations. The current implementation status is recorded from source and is never written over a historical observation.",
+      "options": [],
+      "personas": [
+        "representative"
+      ],
+      "decisionOwner": "PRODUCT_SPECIFICATION_REVIEW",
+      "status": "OUTSTANDING",
+      "activation": "PROPOSAL_ONLY_NOT_ADOPTED",
+      "inactiveBehaviorUntilAdopted": "The proposed behaviour is a design for review. Nothing is built from it before the review settles it."
+    },
+    {
+      "id": "DEC-PD-08",
+      "type": "PRODUCT_DESIGN",
+      "title": "Journeys A–G acceptance form",
+      "question": "Are Journeys A–G accepted as the seven proposed workflows with the stated steps and assertions?",
+      "baselineProposal": "Seven proposed, testable workflows. They are specifications for later qualification and prove nothing now.",
+      "options": [],
+      "personas": [
+        "representative"
+      ],
+      "decisionOwner": "PRODUCT_SPECIFICATION_REVIEW",
+      "status": "OUTSTANDING",
+      "activation": "PROPOSAL_ONLY_NOT_ADOPTED",
+      "inactiveBehaviorUntilAdopted": "The proposed behaviour is a design for review. Nothing is built from it before the review settles it."
+    },
+    {
+      "id": "DEC-PD-09",
+      "type": "PRODUCT_DESIGN",
+      "title": "Financial Officer domain map",
+      "question": "Confirm the proposed meaning for each of F01–F28 that the historical record leaves unspecified.",
+      "baselineProposal": "A twenty-eight-domain map. Four identifiers have a recovered title. The others are new meanings and are marked so.",
+      "options": [],
+      "personas": [
+        "financial-officer"
+      ],
+      "decisionOwner": "PRODUCT_SPECIFICATION_REVIEW",
+      "status": "OUTSTANDING",
+      "activation": "PROPOSAL_ONLY_NOT_ADOPTED",
+      "inactiveBehaviorUntilAdopted": "The proposed behaviour is a design for review. Nothing is built from it before the review settles it."
+    },
+    {
+      "id": "DEC-PD-10",
+      "type": "PRODUCT_DESIGN",
+      "title": "Financial navigation names",
+      "question": "Confirm the three recovered navigation names and the four proposed names.",
+      "baselineProposal": "Accounts & Cash, Budgets & Spending and Funds & Programs are recovered names. Dues & Remittances, Approvals & Payments, Reports & Records and Mandates & Oversight are proposed. A destination whose engine is unavailable is not advertised.",
+      "options": [],
+      "personas": [
+        "financial-officer"
+      ],
+      "decisionOwner": "PRODUCT_SPECIFICATION_REVIEW",
+      "status": "OUTSTANDING",
+      "activation": "PROPOSAL_ONLY_NOT_ADOPTED",
+      "inactiveBehaviorUntilAdopted": "The proposed behaviour is a design for review. Nothing is built from it before the review settles it."
+    },
+    {
+      "id": "DEC-PD-11",
+      "type": "PRODUCT_DESIGN",
+      "title": "Financial journeys FJ01–FJ10",
+      "question": "Are FJ01–FJ10 accepted as the ten proposed workflows?",
+      "baselineProposal": "Ten proposed, testable workflows in which each step names one duty and each consecutive duty is held by a different person.",
+      "options": [],
+      "personas": [
+        "financial-officer"
+      ],
+      "decisionOwner": "PRODUCT_SPECIFICATION_REVIEW",
+      "status": "OUTSTANDING",
+      "activation": "PROPOSAL_ONLY_NOT_ADOPTED",
+      "inactiveBehaviorUntilAdopted": "The proposed behaviour is a design for review. Nothing is built from it before the review settles it."
+    },
+    {
+      "id": "DEC-PD-12",
+      "type": "PRODUCT_DESIGN",
+      "title": "Deadline extension workflow",
+      "question": "Is requesting an extension distinct from granting one?",
+      "baselineProposal": "Distinct. A steward requests an extension with a reason; granting is an institutional decision.",
+      "options": [],
+      "personas": [
+        "steward",
+        "representative"
+      ],
+      "decisionOwner": "PRODUCT_SPECIFICATION_REVIEW",
+      "status": "OUTSTANDING",
+      "activation": "PROPOSAL_ONLY_NOT_ADOPTED",
+      "inactiveBehaviorUntilAdopted": "The proposed behaviour is a design for review. Nothing is built from it before the review settles it."
+    },
+    {
+      "id": "DEC-PD-13",
+      "type": "PRODUCT_DESIGN",
+      "title": "Financial reporting scope",
+      "question": "Which reports and exports does the Financial Officer baseline cover?",
+      "baselineProposal": "Reports are read-only views over records the viewer holds a view duty on. An export is a separate duty-checked action and carries its own record.",
+      "options": [],
+      "personas": [
+        "financial-officer"
+      ],
+      "decisionOwner": "PRODUCT_SPECIFICATION_REVIEW",
+      "status": "OUTSTANDING",
+      "activation": "PROPOSAL_ONLY_NOT_ADOPTED",
+      "inactiveBehaviorUntilAdopted": "The proposed behaviour is a design for review. Nothing is built from it before the review settles it."
+    },
+    {
+      "id": "DEC-PD-14",
+      "type": "PRODUCT_DESIGN",
+      "title": "Organization scenario coverage",
+      "question": "Is the stated scenario set (CAPE, CUPE, LIUNA, small local) the right set to specify, and are the stated structures the right way to represent them?",
+      "baselineProposal": "Four scenarios that are not interchangeable. CAPE and CUPE are source-backed. LIUNA and the small local are hypotheses that need discovery with the institution.",
+      "options": [],
+      "personas": [
+        "representative",
+        "financial-officer"
+      ],
+      "decisionOwner": "PRODUCT_SPECIFICATION_REVIEW",
+      "status": "OUTSTANDING",
+      "activation": "PROPOSAL_ONLY_NOT_ADOPTED",
+      "inactiveBehaviorUntilAdopted": "The proposed behaviour is a design for review. Nothing is built from it before the review settles it."
+    },
+    {
+      "id": "DEC-IA-01",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Who holds a triage designation",
+      "question": "Which staff may hold a case-triage designation, for how long, and who grants it?",
+      "baselineProposal": null,
+      "options": [
+        "Organization administrator grants, at most 90 days (source today)",
+        "Governance body grants"
+      ],
+      "personas": [
+        "steward",
+        "representative"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "No designation is issued. The unassigned-case queue stays empty for every steward and nothing is inferred from role or seniority."
+    },
+    {
+      "id": "DEC-IA-02",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Self-assignment from triage",
+      "question": "May a triage designee take ownership of an unassigned case, and under what protocol per operating model?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "steward",
+        "representative"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "A designee can see queue metadata and nothing more. Taking ownership is not offered."
+    },
+    {
+      "id": "DEC-IA-03",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Who may assign or route cases",
+      "question": "Which offices may assign or route a case, over which unit or territory?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "steward",
+        "representative"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "Assignment is offered only to a holder of a live supervisory mandate that names the assign power. No steward holds it by role."
+    },
+    {
+      "id": "DEC-IA-04",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Who may close a case",
+      "question": "Who may close a case, and in which states?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "steward",
+        "representative"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "Closure is not offered to a steward. The source disagrees with itself: the role policy limits closing to level 2 and above in resolved or rejected states, while the kernel allows the primary handler."
+    },
+    {
+      "id": "DEC-IA-05",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Member-disclosable labels",
+      "question": "Which document and record labels may be disclosed to a member, and who defines a third party?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "steward",
+        "representative"
+      ],
+      "sources": [
+        "UE-CAP-F-003"
+      ],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "Nothing is disclosed to a member by a steward’s action alone. Disclosure stays a separate, primary-handler decision once an instrument exists."
+    },
+    {
+      "id": "DEC-IA-06",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Privileged-matter access grants",
+      "question": "Who may grant an independent privileged-access relationship, and on what record?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "steward",
+        "representative"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "No grant is made. Privileged matters stay unreachable by role, mandate, delegation or emergency grant."
+    },
+    {
+      "id": "DEC-IA-07",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Recusal lifting and conflict adjudication",
+      "question": "Who may lift a recusal, and who decides a contested conflict of interest?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "steward",
+        "representative"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "A declared recusal stays in force. No one lifts it through the application."
+    },
+    {
+      "id": "DEC-IA-08",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Temporary delegation, substitute coverage and succession",
+      "question": "Which offices may delegate which actions, for how long, and who succeeds an absent or departed handler?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "steward",
+        "representative"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "No delegation or substitute coverage is offered. An absent handler’s cases stay with the handler until a recorded reassignment."
+    },
+    {
+      "id": "DEC-IA-09",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Senior review and approval authority",
+      "question": "Who may review or approve an escalation, and is a decision distinct from a recommendation?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "steward",
+        "representative"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "A review request is recorded and routed. Nothing is approved and no decision record is created."
+    },
+    {
+      "id": "DEC-IA-10",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Territory and bargaining-unit mandates per operating model",
+      "question": "How are unit, territory and respondent scope assigned in each operating model?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "representative"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "No territory or unit scope is applied. Mandate-scoped reads and assignments are not offered."
+    },
+    {
+      "id": "DEC-IA-11",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Representation protocol approval",
+      "question": "Who approves a representation protocol, and what is the rule for an organization with one administrator?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "steward",
+        "representative"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "A protocol without independent approval is not executable and automatic assignment writes nothing."
+    },
+    {
+      "id": "DEC-IA-12",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "WorkAid referral authority and consent wording",
+      "question": "Who may authorize a referral, and what consent wording does the institution adopt?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "steward",
+        "representative"
+      ],
+      "sources": [
+        "UE-CAP-G-002",
+        "UE-CAP-G-003"
+      ],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "No referral is sent and no consent wording is shown. This baseline does not write consent text."
+    },
+    {
+      "id": "DEC-IA-13",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Deadline extension approval",
+      "question": "Who may grant an extension to a contractual or legal deadline?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "steward",
+        "representative"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "A request is recorded. No extension is granted."
+    },
+    {
+      "id": "DEC-IA-14",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Correspondence approval, signature and dispatch",
+      "question": "Who may approve, sign and dispatch correspondence on the union’s behalf?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "steward",
+        "representative"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "A steward may draft and submit. Approve, sign and dispatch are not offered to a steward."
+    },
+    {
+      "id": "DEC-IA-15",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Conversation legal hold and retention",
+      "question": "Who may place or release a legal hold, and who adopts the retention policy?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "steward",
+        "representative"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "No hold is placed and no retention policy is recorded by an assignee."
+    },
+    {
+      "id": "DEC-IA-16",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Financial mandate issuance rule",
+      "question": "Who may issue, approve and hold a financial mandate, and what is the rule where fewer than three eligible people exist?",
+      "baselineProposal": null,
+      "options": [
+        "Three distinct people required (source today)",
+        "Governed exception for small locals"
+      ],
+      "personas": [
+        "financial-officer"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "Every financial duty is refused with the explicit answer that no financial mandate has been issued."
+    },
+    {
+      "id": "DEC-IA-17",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Delegation of financial duties",
+      "question": "May any financial duty be delegated, and by whom?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "financial-officer"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "No financial duty is delegated. Source refuses a delegation on every finance action."
+    },
+    {
+      "id": "DEC-IA-18",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Monetary limits and required approvals",
+      "question": "What monetary limit applies to each duty and account, and how many independent approvals does each class of transaction need?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "financial-officer"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "No limit is set and no transaction is approved."
+    },
+    {
+      "id": "DEC-IA-19",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Expenditure approval policy",
+      "question": "What thresholds, categories and dual-approval rules govern an expense or disbursement?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "financial-officer"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "Expense and disbursement routes stay unavailable (HTTP 501)."
+    },
+    {
+      "id": "DEC-IA-20",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Payment execution and rails",
+      "question": "Who may execute a payment, and are scheduled or card payment rails authorized?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "financial-officer"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "No payment rail is activated. Scheduled dues processing and card payments stay off."
+    },
+    {
+      "id": "DEC-IA-21",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Reconciliation authority",
+      "question": "Who may reconcile, and what independence from execution does the institution require?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "financial-officer"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "No remittance or payment is reconciled by a person without a live reconcile mandate."
+    },
+    {
+      "id": "DEC-IA-22",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Trustee authority and administration",
+      "question": "What authority do trustees hold, and who administers the trustee register?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "financial-officer"
+      ],
+      "sources": [
+        "F19"
+      ],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "Trustee mutations stay unavailable (HTTP 501) for every role."
+    },
+    {
+      "id": "DEC-IA-23",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Auditor appointment and access scope",
+      "question": "Who appoints an auditor, and what accounts, periods and records may the auditor reach?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "financial-officer"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "No auditor capacity is granted and no audit access is offered."
+    },
+    {
+      "id": "DEC-IA-24",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Strike and restricted funds authority",
+      "question": "Who may establish, spend from and report on a strike or restricted fund, and who decides stipend eligibility?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "financial-officer"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "Strike and restricted fund routes stay unavailable (HTTP 501)."
+    },
+    {
+      "id": "DEC-IA-25",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Affiliate remittance and per-capita authority",
+      "question": "Who may prepare, approve and submit remittances to a central or affiliated body?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "financial-officer"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "Remittance submission and export stay unavailable (HTTP 501)."
+    },
+    {
+      "id": "DEC-IA-26",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Pension and benefit financial administration",
+      "question": "Who administers pension and benefit finance, and who approves contributions and benefit payments?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "financial-officer"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "Pension and benefit finance writes are not offered under the financial baseline."
+    },
+    {
+      "id": "DEC-IA-27",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Dues data access for presidents and administrators",
+      "question": "Do presidents and administrators receive any access to member dues data, through a mandate store or an interim allow-list?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "financial-officer"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "Only the existing explicit allow-list reads member financial data. A title is not a mandate."
+    },
+    {
+      "id": "DEC-IA-28",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Financial succession and revocation",
+      "question": "What happens to financial mandates when an office-holder leaves, is suspended or is replaced?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "financial-officer"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "A mandate that is not live is not honoured. Revocation is immediate once recorded; no automatic succession is applied."
+    },
+    {
+      "id": "DEC-IA-29",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "External accounting export and retention",
+      "question": "Who may export to an external accounting system, and what retention rule applies?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "financial-officer"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "No export to an external system is offered."
+    },
+    {
+      "id": "DEC-IA-30",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Tax slip issuance authority",
+      "question": "Who may issue tax slips and receipts, and under which registration?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "financial-officer"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "No tax slip is issued or filed by the application under this baseline."
+    },
+    {
+      "id": "DEC-IA-31",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Financial adoption by organization",
+      "question": "Which organizations adopt the financial baseline and when, given that institutions differ?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "financial-officer"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "The baseline is active for no organization."
+    },
+    {
+      "id": "DEC-IA-32",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "title": "Steward role scope per organization",
+      "question": "Which actions a steward holds in each organization, given the protocol each adopts?",
+      "baselineProposal": null,
+      "options": [],
+      "personas": [
+        "steward"
+      ],
+      "sources": [],
+      "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION",
+      "status": "OUTSTANDING",
+      "activation": "INACTIVE",
+      "inactiveBehaviorUntilAdopted": "A steward holds only what a live relationship to a case gives. Protocol-specific scope is not applied."
+    }
+  ]
+}
