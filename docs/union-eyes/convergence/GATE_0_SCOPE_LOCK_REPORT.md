@@ -1,151 +1,164 @@
-# Gate 0 scope lock
+# Gate 0 scope lock (adversarial rework)
 
-Mission: `UE-FINAL-CONVERGENCE-2026-10`. Verdict: `READY_FOR_ADVERSARIAL_REVIEW`.
+Mission: `UE-FINAL-CONVERGENCE-2026-10`. Verdict: `IN_PROGRESS`.
 
-This report locks the engineering inventory. It does not implement Gates 1–15, and it does not declare Union Eyes source-implementation complete. `CURSOR_IMPLEMENTATION_COMPLETE` stays false. Staging and production stay NO-GO.
+The earlier verdict, `READY_FOR_ADVERSARIAL_REVIEW`, is withdrawn. The adversarial review of `2247978bd642a89a7d4f8bd720b978f789cb4437` returned REWORK REQUIRED. This report states what Gate 0 can and cannot prove today. `matrix.gate0Verdict` is computed from the validator's blockers and the validator rejects any other value. `CURSOR_IMPLEMENTATION_COMPLETE` stays false. Staging and production stay NO-GO. This rework does not start Gate 1.
 
 ## Evaluated SHAs
 
 | Fact | SHA |
 | --- | --- |
-| Source inventories read at HEAD before these artifacts | `ce854162cae5595f2f00e65db14444229da0a6ab` |
-| Matrix and validator commit | `3f452bf7cbd9e92e4f8910e8b3f7c51521b35bf0` |
+| Reviewed HEAD (verdict REWORK REQUIRED) | `2247978bd642a89a7d4f8bd720b978f789cb4437` |
+| Evidence recorder | `e9b8cbe6a` |
+| First executed-evidence recording | `8c40e84d6` |
+| Validator, persona, ownership, lock, and test rework | `b3a7f4046` |
+| Regenerated matrix, route ownership, lock, and evidence | `489f16277` |
+| This report | the next commit; a file cannot contain its own SHA |
 
-The matrix field `evaluatedBaselineSha` is the inventory SHA. The matrix commit adds the matrix, the builder, and the checker. This report is a later commit and does not change that matrix. The branch tip after the report commit is the closure commit; a file cannot contain its own commit SHA.
+The capability lock is anchored to the reviewed HEAD. It reads that commit's matrix with `git show`, so editing the working-tree matrix cannot rewrite the anchor.
+
+## Why the old 102 of 102 headline was incomplete
+
+The earlier extractor counted only the tokens it could see. It matched 102 persona actions, 14 of them for the Financial Officer, and then reported that all 102 were mapped. That proved the extractor against itself. It did not prove coverage of the personas:
+
+- The Steward had no action list, and the report recorded that as out of scope.
+- The Representative disposition cites `UE-REPRESENTATIVE-CANONICAL-2.2`, which is not in the repository, and its action list was never extracted.
+- The Financial Officer disposition cites `F01–F28` and `FJ01–FJ10`. Range endpoints were counted as actions and the interior of each range was never expanded.
+- Routes were mapped by guard class, not by route and method.
+
+Coverage is now measured against each persona's declared universe. The validator refuses a `READY_FOR_ADVERSARIAL_REVIEW` verdict while any persona universe is unresolved.
 
 ## Register reconciliation
 
-The register at the inventory SHA has 41 entries. The counts match the expected census:
+The register has 41 entries: CLOSED 8, OPEN 12, IN_PROGRESS 17, EXTERNAL_GATE 4. `UE-CONV-H-007`, `UE-CONV-K-006`, `UE-CONV-K-009`, and `UE-CONV-G-002` stay IN_PROGRESS. The four EXTERNAL_GATE entries stay `operationallyActivated` false. `UE-CONV-H-007` stays one workstream with census 231; the census was not edited and the 231 rows are not copied into the matrix.
+
+## Persona-source coverage
+
+182 persona action identifiers are extracted and mapped to a capability. Individually defined means the source gives that identifier its own definition. Grouped only means the identifier appears only inside a range or a list that carries one shared title. Unspecified means the source cites the identifier as an endpoint or range member and gives it no content.
+
+| Persona | Source | Universe | Individually defined | Grouped only | Unspecified | Resolved |
+| --- | --- | --- | --- | --- | --- | --- |
+| Member | `UE_MEMBER_CANONICAL_2_1.md` | 10 | 10 | 0 | 0 | yes |
+| Steward | no canonical file in the repository | 0 | 0 | 0 | 0 | no |
+| Representative | `UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md` (canonical 2.2 file absent) | 56 | 32 | 14 | 10 | no |
+| Senior representative | `32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md` | 22 | 22 | 0 | 0 | yes |
+| Officer / executive | `apps/union-eyes/lib/executive/capability-matrix.ts` | 26 | 26 | 0 | 0 | yes |
+| Financial officer | `UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md` (canonical file absent) | 38 | 4 | 6 | 28 | no |
+| Governance officer | `UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md` | 30 | 30 | 0 | 0 | yes |
+
+Total: 182 identifiers, 124 individually defined.
+
+Unresolved detail:
+
+- Steward: no action universe exists. `UE-OMIT-STEWARD-CANONICAL-ABSENT` (gate 10, `SOURCE_UNSPECIFIED`) owns the gap. The earlier out-of-scope record for the Steward was removed, because absent specs are debt and not an exclusion.
+- Representative: individually defined `REP-NAV-1..7` and `REP-ACT-01..25`. Grouped only `R03 R04 R05 R06 R10 R16 R17 R18 R19 R20 R21 R22 R23 R24`. Unspecified `R01 R02 R07 R08 R09 R11 R12 R13 R14 R15`. Owner `UE-OMIT-REP-CANONICAL-ABSENT`. Two source findings are tracked separately: `UE-OMIT-REP-CORRESPONDENCE` (gate 11, `PARTIAL`) and `UE-OMIT-REP-TRANSITION-REASON-LEAK` (gate 10, `NOT_IMPLEMENTED`).
+- Financial officer: individually defined `F08 F09 F10 F19`. Grouped only `F11 F12 F13 F14 F17 F18`. Unspecified `F01–F07 F15 F16 F20–F28 FJ01–FJ10`. Owner `UE-OMIT-FINANCE-RANGE-UNSPECIFIED`. No title or action text was invented for any unspecified identifier.
+
+No canonical source was invented. The three unresolved personas make Gate 0 `IN_PROGRESS` until the repository contains those sources.
+
+## Route and method ownership
+
+The 993-route manifest is unchanged: 993 routes, 1644 route-method pairs. `ue-route-capability-ownership.json` owns every pair with a route, method, rule, capability, disposition, actor, control category, audit code, and privacy code (or a justified non-applicability). Rules carry evidence from the register, the frozen persona sources, or the capability registry. `matrix.routeOwnership.entriesHash` covers the entries, so deleting an entry fails validation even when the route hash is unchanged.
+
+| Disposition | Operations |
+| --- | --- |
+| `OWNED` | 355 |
+| `RETIRED_501` | 97 |
+| `STUB_501` | 31 |
+| `SYSTEM` | 9 |
+| `SCOPE_UNDECIDED` | 1152 |
+| Total | 1644 |
+
+The validator rejects an operation without an entry, an entry without a capability, an owner that is not a capability, an owner that differs from the rule-derived owner, two owners for one operation, an entry for a route that is not in the manifest, a route that matches no rule, and a route file on disk that is neither in the manifest nor recorded as uninventoried.
+
+Exceptions:
+
+- `SCOPE_UNDECIDED` is 1152 operations, owned by `UE-OMIT-ROUTE-DOMAIN-SCOPE` (gate 13, `SOURCE_UNSPECIFIED`). Their control owner stays the guard-class owner. No register entry, persona source, or registry record names a business owner for those domains, and none was guessed. This blocks Gate 0 until each domain is decided.
+- `reviews/route.ts` (GET, POST) exists on disk and is absent from the manifest. It is recorded as uninventoried and owned by `UE-CAP-REVIEW-INTAKE`. Regenerating the manifest belongs to `UE-CONV-K-008` and was not done here.
+- 42 operations are unauthenticated without a recorded justification. The matrix summary counts them. They are not accepted as justified.
+- 0 mutating operations have an absent audit code.
+
+## Capabilities
+
+56 capabilities: 52 preserved plus 4 new records, `UE-OMIT-STEWARD-CANONICAL-ABSENT`, `UE-OMIT-REP-CORRESPONDENCE`, `UE-OMIT-REP-TRANSITION-REASON-LEAK`, and `UE-OMIT-ROUTE-DOMAIN-SCOPE`.
 
 | Status | Count |
 | --- | --- |
-| CLOSED | 8 |
-| OPEN | 12 |
-| IN_PROGRESS | 17 |
-| EXTERNAL_GATE | 4 |
+| `NOT_IMPLEMENTED` | 12 |
+| `PARTIAL` | 27 |
+| `SOURCE_IMPLEMENTED` | 2 |
+| `SOURCE_VERIFIED` | 5 |
+| `NATIVE_PENDING` | 2 |
+| `EXTERNAL_GATE` | 4 |
+| `SOURCE_UNSPECIFIED` | 4 |
 
-No historical count was forced. The checker reads `docs/union-eyes/convergence/register/ue-convergence-register.json` and requires one owner capability `UE-CAP-<suffix>` for each `UE-CONV-<suffix>`. All 41 owners are present. `UE-CONV-H-007` remains one capability, `UE-CAP-H-007`, with `censusCount` 231, `individuallyReclassified` false, and primary gate `schema-census`. The 231 census rows were not copied into the matrix.
+By primary gate: 1:7, 2:1, 3:1, 4:2, 5:5, 6:4, 7:3, 8:3, 9:5, 10:8, 11:3, 12:2, 13:3, 14:3, 15:5, schema-census:1.
 
-## Capabilities and persona actions
+No capability has a native or browser qualification of `PASS`.
 
-52 distinct capabilities. 41 own a register entry. 11 are additional obligations: member review intake, plus the 10 omissions below.
+## Source-verification evidence
 
-102 mandatory persona actions were extracted from the frozen sources and mapped:
+`SOURCE_VERIFIED` now requires an executed record in `evidence/gate0-source-verification.json` with the command, the tested revision, the suite and assertion family, the executed result, the capability, the exclusions, the blob hashes of the cited test and source files, and a log hash. The validator rejects a record whose cited blobs changed, whose run failed, skipped tests, or ran no tests, whose tested revision is not a commit, or whose recorded output does not match its hash. A test file that exists but has no execution record no longer qualifies.
 
-| Persona | Source | Actions |
-| --- | --- | --- |
-| Governance officer | `docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md` | G01–G30 (30) |
-| Officer / executive | `apps/union-eyes/lib/executive/capability-matrix.ts` | O01–O26 (26) |
-| Senior representative | `docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md` section 4 | SR01–SR22 (22) |
-| Member | `docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md` | M01–M10 (10) |
-| Financial officer | `docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md` | 14 tokens that actually appear |
+Tested revision for every record: `8c40e84d6`.
 
-Each action maps to exactly one capability. Review intake (`UE-CAP-REVIEW-INTAKE`) is a separate obligation from `UE-CONV-I-001` and `UE-CONV-K-009`. It does not close either register entry.
+| Capability | Suite | Result | Status |
+| --- | --- | --- | --- |
+| `UE-CAP-F-001` | authority kernel resources and lifecycle PGlite | 69 passed | `SOURCE_VERIFIED` |
+| `UE-CAP-G-001` | counsel boundary, resources, counsel PGlite | exit 1, 53 passed, 13 skipped | `PARTIAL` (downgraded from `SOURCE_VERIFIED`) |
+| `UE-CAP-H-001` | anti-theatre scan | 33 passed | `SOURCE_VERIFIED` |
+| `UE-CAP-K-002` | anti-theatre scan | 33 passed | `SOURCE_VERIFIED` |
+| `UE-CAP-H-005` | admin seed route | 2 passed | `SOURCE_VERIFIED` |
+| `UE-CAP-K-001` | migration lineage certification | 9 passed | `SOURCE_VERIFIED` |
+| `UE-CAP-K-003` | convergence checker | 12 passed | `PARTIAL` (evidence recorded, status not raised) |
+| `UE-CAP-REVIEW-INTAKE` | review-intake PGlite, route, component | 12 passed | `PARTIAL` (evidence recorded, status not raised) |
+| `UE-OMIT-DELIVERY-EVIDENCE` | delivery reconciliation | 9 passed | `NATIVE_PENDING` |
 
-## Mapping by primary gate
+`UE-CAP-G-001` was `SOURCE_VERIFIED` on the strength of a referenced test file. Executing the counsel PGlite suite fails at setup with `REFERRAL_SCOPE_REQUIRED`, raised by a migration 0037 trigger, so 13 tests skip. The capability is downgraded to `PARTIAL` and the suite is tracked as a defect blocking Gate 7. No test or migration was changed.
 
-| Gate | Capabilities |
-| --- | --- |
-| 1 Identity, sessions and membership | 7 |
-| 2 Case ownership and representation | 1 |
-| 3 Bargaining units, territories and respondents | 1 |
-| 4 Claims/grievances convergence | 2 |
-| 5 Finance operating model | 5 |
-| 6 Documents, privacy and records | 4 |
-| 7 WorkAid union-side completion | 3 |
-| 8 Thirteen stubbed operations | 3 |
-| 9 Runtime and installation architecture | 5 |
-| 10 Frozen persona journeys | 6 |
-| 11 Member/staff messaging | 2 |
-| 12 Voting, elections and reviews | 2 |
-| 13 Generic CRUD and route authorization | 2 |
-| 14 Audit, mutation isolation and security | 3 |
-| 15 Machine-enforced completion and cleanroom readiness | 5 |
-| schema-census (`UE-CONV-H-007` only) | 1 |
+Recorded exclusions: PGlite results are not native PostgreSQL proof, anti-theatre scans do not prove runtime behaviour, and none of these runs is a credentialed browser run. Counsel execution stays `UE-CONV-G-003` (`EXTERNAL_GATE`) and has no HTTP route.
 
-Status counts inside the matrix: `NOT_IMPLEMENTED` 11, `PARTIAL` 25, `SOURCE_IMPLEMENTED` 2, `SOURCE_VERIFIED` 6, `NATIVE_PENDING` 2, `EXTERNAL_GATE` 4, `SOURCE_UNSPECIFIED` 2. `SOURCE_VERIFIED` means the cited source test or checker file exists. It is not a native PostgreSQL pass and not a credentialed browser pass. No capability has `nativeQualification` or `browserQualification` of `PASS`. No `EXTERNAL_GATE` is operationally activated.
+## Independent capability lock
 
-## Newly identified obligations
+`ue-gate0-capability-lock.json` is a second list of the mandatory capability IDs. It carries `anchorCommit` `2247978bd642a89a7d4f8bd720b978f789cb4437`, and the validator reads that commit's matrix with `git show`. Deleting a capability from both the matrix `capabilities` array and the matrix's own `lockedCapabilityIds` array still fails, because the anchored matrix and the lock file still name it. A capability leaves the lock only through a `retirements` entry with `schemaVersion` 2 or later, a reason of at least 20 characters, and an evidence file that exists. A capability in the matrix without a lock entry also fails. The lock holds 56 IDs.
 
-These were not separate rows in the 41-entry register. Each has source evidence in the matrix.
+## Ratchet defects
 
-| ID | Evidence | Status |
-| --- | --- | --- |
-| `UE-OMIT-M04-MEMBER-REQUESTS` | Member canonical M04: withdrawal, clarification, and acknowledgement are not implemented. Own-case read exists. | `PARTIAL` |
-| `UE-OMIT-M04-LEGAL-DEADLINE` | Member canonical M04: legal-deadline calculation is unavailable. | `NOT_IMPLEMENTED` |
-| `UE-OMIT-DEADLINE-OVERDUE` | Senior-representative SR10. Deadline-engine source exists; overdue processing is unproven. | `PARTIAL` |
-| `UE-OMIT-PRIVACY-RIGHTS` | Member M09 and capability-registry DSAR, incident, jurisdictional privacy, and breach-notification entries. | `PARTIAL` |
-| `UE-OMIT-MAIN-APP-CRONS` | Registry ids `UE-CRON-MONTHLY-DUES`, `UE-CRON-OVERDUE-NOTIFICATIONS`, `UE-CRON-PROCESS-MESSAGES`, `UE-CRON-PROCESS-NOTIFICATIONS`, `UE-CRON-SCHEDULED-REPORTS`. | `NOT_IMPLEMENTED` |
-| `UE-OMIT-A11Y-BILINGUAL` | G30, O26, M10, SR22. Locale catalogs exist. WCAG 2.2 AA journey evidence does not. | `PARTIAL` |
-| `UE-OMIT-FINANCE-UNAVAILABLE` | Financial disposition F10, F11–F14, F17, F18, and the matching registry entries. | `NOT_IMPLEMENTED` |
-| `UE-OMIT-FINANCE-RANGE-UNSPECIFIED` | The disposition cites F01–F28 and FJ01–FJ10. Titles exist only for the named codes above plus F08, F09, and F19. | `SOURCE_UNSPECIFIED` |
-| `UE-OMIT-REP-CANONICAL-ABSENT` | `UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md` cites `UE-REPRESENTATIVE-CANONICAL-2.2`. That canonical file is not in the repository. | `SOURCE_UNSPECIFIED` |
-| `UE-OMIT-DELIVERY-EVIDENCE` | `apps/union-eyes/lib/services/delivery-reconciliation.ts`. Native proof stays skipped unless `UE_DELIVERY_NATIVE_PROOF=1`. | `NATIVE_PENDING` |
+`node tooling/scripts/check-ue-convergence.mjs` exits 1 on two ratchets that fail on this branch. Neither implementation file and neither allowlist was changed. Each defect has one owning capability, and the validator fails when a live ratchet failure is untracked or when a tracked defect no longer reproduces and is not recorded as resolved.
 
-`UE-CAP-REVIEW-INTAKE` is a split of work already named by the updated `UE-CONV-I-001` text. It is not an undiscovered product. Source commit `08f20236c540b556e022d7b430ba0cbf3e8470e2`. PGlite tests are not native proof.
+| Defect | File | Owner | Blocks acceptance of |
+| --- | --- | --- | --- |
+| `MUTABLE-REP-IDENTIFIER` | `apps/union-eyes/lib/authority/store/case-ownership-backfill.ts` | `UE-CAP-B-001` | Gate 2 |
+| `DIRECT-MANDATORY-AUDIT-IMPORT` | `apps/union-eyes/lib/voting/election-succession.ts` | `UE-CAP-K-005` | Gates 14 and 12 |
+| `COUNSEL-PGLITE-SUITE-FAILS-AT-SETUP` | `apps/union-eyes/db/__tests__/authority-kernel-counsel.pglite.test.ts` | `UE-CAP-G-001` | Gate 7 |
+| `P0-F2-TRANSITION-REASON-LEAK` | `apps/union-eyes/app/api/cases/[caseId]/transition/route.ts` | `UE-OMIT-REP-TRANSITION-REASON-LEAK` | Gate 10 |
 
-## Outside committed scope
-
-| ID | Why it is not an implementation obligation |
-| --- | --- |
-| `UE-SCOPE-ORG-HIERARCHY-SEED` | `UE-CONV-H-005` treats a canonical seed as optional. The route stays HTTP 501. |
-| `UE-SCOPE-M07-UNADOPTED-SURFACES` | The member canonical tells My Union to show agreement, benefits, events, participation, and the digital card as not available. |
-| `UE-SCOPE-REPORTS-DASHBOARD-REMOVED` | The capability registry records `/dashboard/reports` as removed. |
-| `UE-SCOPE-WORKAID-SYNTHETIC-JOURNEYS` | `docs/union-eyes/workaid/14_PERSONA_JOURNEY_CONTRACTS.md` is an in-memory contract, not a Union Eyes route. |
-| `UE-SCOPE-COUNSEL-HTTP-ROUTE` | No counsel HTTP route is in scope. Counsel verification stays `UE-CONV-G-003`. |
-| `UE-SCOPE-STEWARD-NO-ACTION-MATRIX` | `UE-CONV-I-001` names the steward experience. No steward action-id matrix is in the repository, so none was invented. |
-
-## Ownership, routes, and persistence
-
-The checker found no duplicate `obligationKey` and no register entry with two owners.
-
-The route manifest remains the inventory: 993 routes, hash `702046516e2d8cc8f70e9f50df62364bfe481f3fdc9733a1136d1891a1a56ecd`. Coverage is by guard class plus that hash and the per-guard counts. A new route or a new guard fails the checker until the matrix records it. The 993 routes were not copied into a second inventory.
-
-Kernel actions: 41, hash `79252abd9e10b12af272c33ae7f3d9905865dd152682ce38f193710e81941954`, each assigned. Source: `apps/union-eyes/lib/authority/ontology.ts`.
-
-The thirteen stub routes are listed on `UE-CAP-H-002` and checked against `UE-ACTION-*` `ownedBy` paths, including paths that contain brackets. Each file exists. Their current response is HTTP 501. That is not implementation.
-
-Persistence still absent, as recorded on the owning capability and not created here: `unit_id`, `territory_id`, and `case_respondents` (`UE-CAP-B-002`); document grant, expiry, and revocation (`UE-CAP-F-002`); the thirteen stub operations; the five main-app crons.
-
-Additional cron routes exist beyond those five registry ids, including `app/api/cron/deadline-overdue/route.ts`, whose own header says partially implemented. They stay under the route-manifest guard count. Gate 0 does not reclassify each one.
-
-## External gates
-
-`UE-CAP-A-007`, `UE-CAP-F-003`, `UE-CAP-G-003`, and `UE-CAP-J-001` stay `EXTERNAL_GATE` with `operationallyActivated` false. Missing proofs are the owners and texts already on the register: webhook and Whop evidence, an institutional classification instrument, counsel verifier and key custody, and clone qualification of kernel migrations. Code cited for the classification workflow does not activate the gate.
+The checker's global failure is unresolved debt, not a pass. The stale allowlist note for `apps/union-eyes/app/api/grievances/[id]/convert/route.ts` is non-failing and was not edited.
 
 ## Tests
 
-Run from `/home/ubuntu/ue-cursor-final-closure` on Monday, October 26, 2026, about 3:47 PM America/Toronto, against the matrix commit's tree before this report.
+Run from `/home/ubuntu/ue-cursor-final-closure` on Monday, October 26, 2026, America/Toronto, against the tree at `489f16277`.
 
 | Command | Result |
 | --- | --- |
-| `node --test tooling/scripts/lib/ue-gate0-scope-lock.test.mjs` | 14 passed, 0 failed |
+| `node --test tooling/scripts/lib/ue-gate0-scope-lock.test.mjs` | 33 passed, 0 failed |
 | `node --test tooling/scripts/lib/ue-convergence-check.test.mjs` | 12 passed, 0 failed |
-| `node tooling/scripts/check-ue-convergence.mjs` | Register validation passed (41 entries, same counts). Migration lineage verified. Two pre-existing ratchet failures, below. |
+| `node tooling/scripts/check-ue-convergence.mjs` | exit 1. Register valid (41 entries). Migration lineage verified. Two ratchet failures, above. |
 
-The Gate 0 file includes negative cases for a missing register owner, a missing persona action, a duplicate obligation, an invalid gate, a missing source file, missing test evidence, native PASS without evidence, a skipped native suite cited as PASS, browser PASS without evidence, a new route, a new kernel action, an activated external gate, a disappeared required capability, and an individually reclassified census.
+The 33 Gate 0 tests are the 14 original tests plus 19 new tests. The new negative tests cover: a missing Steward, a missing Representative, a Financial Officer marked complete while specs are unresolved, an existing route with no capability owner, an unrelated or invalid owner, deleted ownership with an unchanged route hash, `SOURCE_VERIFIED` backed by a test file with no execution evidence, a capability removed from both the matrix and its in-matrix lock array, and global convergence failures omitted from tracked debt. Further cases cover orphan, conflicting, and unclassified entries, an uninventoried route, stale or tampered evidence, a lock retirement without a reason, a capability added without a lock entry, a single owner per ratchet defect, and a verdict that disagrees with the blockers.
 
-No Union Eyes typecheck was required. Gate 0 did not change TypeScript application code. Docker and native PostgreSQL were not run.
+The matrix validator returns 0 problems and 5 blocker groups. A problem is a rule violation. A blocker is unfinished Gate 0 scope.
 
-### Pre-existing ratchet failures
+## Remaining Gate 0 blockers
 
-`node tooling/scripts/check-ue-convergence.mjs` failed on two matches that already exist on this branch and that Gate 0 did not introduce or allowlist:
+1. Steward action universe is absent from the repository.
+2. Representative canonical 2.2 file is absent; 10 identifiers are unspecified and 14 are grouped only.
+3. Financial Officer canonical file is absent; 28 identifiers are unspecified and 6 are grouped only.
+4. 1152 route operations are `SCOPE_UNDECIDED`.
+5. `reviews/route.ts` is on disk and not in the route-coverage manifest.
 
-- `MUTABLE-REP-IDENTIFIER`: `apps/union-eyes/lib/authority/store/case-ownership-backfill.ts`
-- `DIRECT-MANDATORY-AUDIT-IMPORT`: `apps/union-eyes/lib/voting/election-succession.ts`
+Gate acceptance debt that is tracked and not a Gate 0 blocker: the four defects above.
 
-The checker also printed a stale allowlist note for `apps/union-eyes/app/api/grievances/[id]/convert/route.ts`. Stale notes do not fail the command. Gate 0 did not edit the ratchet file. Editing it to silence these matches would weaken the ratchet. Fixing the two files is implementation work for later gates, not a Gate 0 inventory change.
+## Not done
 
-## Inventory changes
-
-No change to the convergence register, the route-coverage manifest, the route-coverage baselines, the schema-mutation batches, the census, the authority kernel, migrations, or production configuration. New files are the matrix, its builder, the checker, this report, and a queue note that Gate 0 is not a native suite.
-
-## Next-gate order
-
-The next action is an independent adversarial review of these artifacts, then an explicit GO or REWORK. Gate 1 does not start from this report.
-
-If that review returns GO, the primary order is: Gate 1, then Gates 2 and 3, then Gate 4's entity choice before `UE-CAP-K-010` can finish, then Gates 5 and 6, Gate 7's remaining native qualification with counsel still external, Gate 8, Gate 9 including the five crons and external clone qualification, Gates 10–12, then Gates 13 and 14, then Gate 15. `UE-CAP-K-004` stays open until controls consume this matrix. `UE-CONV-H-007` stays a single later census workstream and is not one of the 15 gates.
-
-## Assumptions
-
-Guard-class route assignment plus the manifest hash is the mechanical lock for new routes. It is not a claim that every route of a class is implemented. Financial codes that appear only as range endpoints have no titles in this repository; those titles were not invented. The representative canonical file's absence is treated as an unspecified action list, not as permission to write one. Stale WorkAid sentences in the member and senior-representative documents are not current evidence that the union-side code is absent.
+No runtime migration, application source, security allowlist, or census change. No Docker, native PostgreSQL, or Next server run. Migrations 0031–0037 and cache 0028 are not applied. Gate 1 does not start. The next action is an independent adversarial review of these artifacts.
