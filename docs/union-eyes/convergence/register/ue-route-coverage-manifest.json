@@ -1,9 +1,9 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 989,
-  "mutating": 714,
-  "kernel": 57,
+  "routes": 990,
+  "mutating": 715,
+  "kernel": 58,
   "byGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 12,
@@ -17,7 +17,7 @@
    "ROLE_AUTH": 125,
    "SESSION_AUTH": 59,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 277,
+   "WITH_API": 278,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -33,11 +33,11 @@
    "ROLE_AUTH": 74,
    "SESSION_AUTH": 29,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 170
+   "WITH_API": 171
   },
   "mutatingByAudit": {
    "ATOMIC": 143,
-   "ATOMIC_SERVICE": 139,
+   "ATOMIC_SERVICE": 140,
    "COMPUTE_ONLY": 34,
    "CRUD_ATOMIC": 299,
    "EXEMPT_BALLOT_SECRECY": 2,
@@ -48,9 +48,9 @@
   "mutatingByData": {
    "AMBIENT_DB": 14,
    "CRUD_TENANT_TX": 299,
-   "NONE": 199,
-   "SYSTEM_CONTEXT": 57,
-   "TENANT_TX": 145
+   "NONE": 198,
+   "SYSTEM_CONTEXT": 58,
+   "TENANT_TX": 146
   }
  },
  "routes": [
@@ -5818,6 +5818,18 @@
    "audit": "ATOMIC"
   },
   {
+   "route": "elections/[id]/succession/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": true,
+   "subordinate": null,
+   "data": "SYSTEM_CONTEXT",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
    "route": "elections/[id]/vote/route.ts",
    "methods": [
     "POST"
@@ -7567,7 +7579,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -12218,7 +12230,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "EXEMPT_BALLOT_SECRECY"
   },
   {

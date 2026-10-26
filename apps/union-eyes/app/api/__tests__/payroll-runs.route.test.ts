@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   withRLSContext: vi.fn(),
   requireEntitlement: vi.fn(),
+  requireLiveFinancialMandate: vi.fn(),
   selectQueue: [] as unknown[][],
 }));
 
@@ -40,6 +41,9 @@ vi.mock('@/lib/api/framework', () => {
 });
 vi.mock('@/db', () => ({ db: mockDb }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
+vi.mock('@/lib/finance/require-live-financial-mandate', () => ({
+  requireLiveFinancialMandate: m.requireLiveFinancialMandate,
+}));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({
   PLATFORM_MODULES: { EMPLOYER_PAYROLL_OFFICIAL: 'EMPLOYER_PAYROLL_OFFICIAL' },
   requireEntitlement: m.requireEntitlement,
@@ -72,8 +76,9 @@ describe('employer-execution/payroll-runs route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.selectQueue = [];
-    m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.withRLSContext.mockImplementation(async (...args: unknown[]) => (args[args.length - 1] as (tx: unknown) => Promise<unknown>)(mockDb));
     m.requireEntitlement.mockResolvedValue(undefined);
+    m.requireLiveFinancialMandate.mockResolvedValue(undefined);
     m.withApi.mockImplementation(
       (_cfg: unknown, handler: (ctx: any) => Promise<unknown>) =>
         async (request: NextRequest, ctx: any = { organizationId: 'org_1', userId: 'u1', body: {} }) => {

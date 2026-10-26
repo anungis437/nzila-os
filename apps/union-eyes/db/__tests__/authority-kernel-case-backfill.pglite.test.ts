@@ -24,8 +24,18 @@ const effectiveAt = () => new Date(Date.now() - 60_000)
 const G = (id: string, rep: string | null) =>
   db.query(`INSERT INTO public.grievances (id, organization_id, created_by, union_rep_id) VALUES ($1,$2,$3,$4)`, [id, ORG, U.member, rep])
 const plan = () => k.as(U.president)((t) => planOwnershipBackfill(t, canonicalMembershipSource, ORG))
-const run = (issuer: string, hash: string, reference = 'EXEC-2026-10 minute 14') =>
-  k.as(issuer)((t) => executeOwnershipBackfill(t, k.deps, { organizationId: ORG, issuerUserId: issuer, approvedPlanHash: hash, decisionReference: reference, effectiveAt: effectiveAt() }))
+const run = (issuer: string, hash: string, reference = 'EXEC-2026-10 minute 14', sourceRevision?: string) =>
+  k.as(issuer)(async (t) => {
+    const approvedSourceRevision = sourceRevision ?? (await planOwnershipBackfill(t, canonicalMembershipSource, ORG)).sourceRevision
+    return executeOwnershipBackfill(t, k.deps, {
+      organizationId: ORG,
+      issuerUserId: issuer,
+      approvedPlanHash: hash,
+      approvedSourceRevision,
+      decisionReference: reference,
+      effectiveAt: effectiveAt(),
+    })
+  })
 const canRead = (who: string, id: string) =>
   k.as(who)((t) => enforceAuthority(t, k.deps, { principalUserId: who, organizationId: ORG, action: 'case:read_internal', resource: { type: 'case', id, organizationId: ORG } }, { authenticated: true })).then((d) => d.effect)
 const liveAssignments = () =>
@@ -55,6 +65,7 @@ describe('plan', () => {
     expect(p.deferred.map((f) => f.caseId)).toEqual([CASE_C])
     expect(p.truncated).toBe(false)
     expect(p.planHash).toBe(hashBackfillCandidates(ORG, p.candidates))
+    expect(p.sourceRevision).toHaveLength(64)
     expect(await liveAssignments()).toBe(before)
     expect(await canRead(REP_A, CASE_A)).toBe('deny')
   })
@@ -68,12 +79,24 @@ describe('plan', () => {
   })
 })
 
+let approved: { hash: string; source: string } | undefined
+
 describe('execution', () => {
   it('refuses a missing decision reference, a malformed hash and a stale approval, and writes nothing', async () => {
     const p = await plan()
     await expect(run(U.officer, p.planHash, '   ')).rejects.toThrow(/decision reference/)
     await expect(run(U.officer, 'abc')).rejects.toThrow(/plan hash/)
     await expect(run(U.officer, hashBackfillCandidates(ORG, []))).rejects.toThrow(/changed since it was approved/)
+    await expect(run(U.officer, p.planHash, 'EXEC-2026-10 minute 14', 'c'.repeat(64))).rejects.toThrow(/historical source changed/)
+    expect(await liveAssignments()).toBe(0)
+  })
+
+  it('refuses a deferred-only change and writes nothing', async () => {
+    const p = await plan()
+    const drifted = '99999999-9999-4999-8999-999999999999'
+    await k.asAdmin(() => db.query(`UPDATE public.grievances SET union_rep_id = $2 WHERE id = $1`, [CASE_C, drifted]))
+    await expect(run(U.officer, p.planHash, 'EXEC-2026-10 minute 14', p.sourceRevision)).rejects.toThrow(/historical source changed/)
+    await k.asAdmin(() => db.query(`UPDATE public.grievances SET union_rep_id = $2 WHERE id = $1`, [CASE_C, MEMBER_ONLY]))
     expect(await liveAssignments()).toBe(0)
   })
 
@@ -94,7 +117,9 @@ describe('execution', () => {
 
   it('assigns the approved candidates through governed assignment and records the decision in the audit', async () => {
     const p = await plan()
-    const r = await run(U.officer, p.planHash)
+    approved = { hash: p.planHash, source: p.sourceRevision }
+    const r = await run(U.officer, p.planHash, 'EXEC-2026-10 minute 14', p.sourceRevision)
+    expect(r.replayed).toBe(false)
     expect(r.assigned.map((a) => a.caseId).sort()).toEqual([CASE_A, CASE_B].sort())
     expect(await canRead(REP_A, CASE_A)).toBe('allow')
     expect(await canRead(REP_B, CASE_B)).toBe('allow')
@@ -109,6 +134,16 @@ describe('execution', () => {
     expect(p.candidates).toEqual([])
     const r = await run(U.officer, p.planHash)
     expect(r.assigned).toEqual([])
+    expect(r.replayed).toBe(false)
     expect(await liveAssignments()).toBe(2)
+  })
+
+  it('replays an already executed plan hash without a second assignment', async () => {
+    expect(approved).toBeDefined()
+    const before = await liveAssignments()
+    const r = await run(U.officer, approved!.hash, 'EXEC-2026-10 minute 14', approved!.source)
+    expect(r.replayed).toBe(true)
+    expect(r.assigned.map((a) => a.caseId).sort()).toEqual([CASE_A, CASE_B].sort())
+    expect(await liveAssignments()).toBe(before)
   })
 })

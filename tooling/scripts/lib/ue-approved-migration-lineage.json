@@ -314,6 +314,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Partial unique index on notification_delivery_log (external_event_id, event) and a locked owner check so one provider message belongs to one organization. Refuses existing duplicates. Does not delete a row, choose an owner, or change notification_queue. Has not been applied to a native or live database."
+      },
+      {
+        "tag": "0033_election_certificate_successions",
+        "sha256": "e7290edf6388862327de49b2fd89ad00f23f30a60e14963476f540c19ff5e8aa",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Successor relation for a certified council_elections row. Distinct issuer and reviewer, version, provenance hash, decision, dispute and recount references. Does not rewrite the certified row. Fails closed when council_elections is absent. Has not been applied to a native or live database."
       }
     ]
   }

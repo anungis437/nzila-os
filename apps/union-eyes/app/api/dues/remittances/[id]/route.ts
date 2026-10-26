@@ -6,7 +6,7 @@
  */
 import { withApi, ApiError, z } from '@/lib/api/framework';
 import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
-import { db } from '@/db';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { employerRemittances } from '@/db/schema/dues-finance-schema';
@@ -26,10 +26,13 @@ export const GET = withApi(
     if (!organizationId) throw ApiError.badRequest('Organization context required');
     const { id } = await params;
 
-    const [remittance] = await db
-      .select()
-      .from(employerRemittances)
-      .where(and(eq(employerRemittances.id, id), eq(employerRemittances.organizationId, organizationId)));
+    const [remittance] = await withRLSContext({ organizationId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, organizationId);
+      return tx
+        .select()
+        .from(employerRemittances)
+        .where(and(eq(employerRemittances.id, id), eq(employerRemittances.organizationId, organizationId)));
+    });
 
     if (!remittance) throw ApiError.notFound('Remittance not found');
 
@@ -58,14 +61,8 @@ export const PATCH = withApi(
 
     const body = patchSchema.parse(await request.json());
 
-    const [existing] = await db
-      .select()
-      .from(employerRemittances)
-      .where(and(eq(employerRemittances.id, id), eq(employerRemittances.organizationId, organizationId)));
-
-    if (!existing) throw ApiError.notFound('Remittance not found');
-
-    const updated = await withRLSContext(async (tx) => {
+    const updated = await withRLSContext({ organizationId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, organizationId);
       const [row] = await tx
         .update(employerRemittances)
         .set({ ...body, updatedAt: new Date(), lastModifiedBy: userId ?? undefined })

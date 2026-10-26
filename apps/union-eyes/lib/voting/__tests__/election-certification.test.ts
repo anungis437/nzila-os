@@ -24,7 +24,7 @@ describe('council election certification (UE-CONV-K-009)', () => {
     expect(checkElectionUpdate({ verifiedBy: 'Independent Auditor' }, { contestedResults: true, totalVotes: 1 })).toMatchObject({ ok: false })
   })
 
-  it('plans a successor from the stored certified row and writes nothing without the relation', () => {
+  it('plans a successor from the stored certified row and does not persist it', () => {
     const existing: CertifiedElection = {
       id: 'election-1',
       electionYear: 2026,
@@ -48,8 +48,8 @@ describe('council election certification (UE-CONV-K-009)', () => {
     expect(planCertifiedSupersession(existing, { ...grant, electionId: 'other' })).toMatchObject({ ok: false, code: 'CORRECTION_UNISSUED' })
     const planned = planCertifiedSupersession(existing, grant)
     expect(planned).toMatchObject({
-      ok: false,
-      code: 'SUCCESSOR_RELATION_ABSENT',
+      ok: true,
+      persisted: false,
       proposedSuccessor: {
         supersedesElectionId: 'election-1',
         winners: existing.winners,
@@ -67,5 +67,16 @@ describe('council election certification (UE-CONV-K-009)', () => {
     expect(source).toContain('checkElectionUpdate')
     expect(source).not.toContain('planCertifiedSupersession')
     expect(source).not.toContain('.insert(')
+  })
+
+  it('keeps the succession route from accepting a grant in the request, and the council vote route at 501', () => {
+    const succession = readFileSync(join(__dirname, '..', '..', '..', 'app', 'api', 'elections', '[id]', 'succession', 'route.ts'), 'utf8')
+    const vote = readFileSync(join(__dirname, '..', '..', '..', 'app', 'api', 'elections', '[id]', 'vote', 'route.ts'), 'utf8')
+    expect(succession).toContain('recordCertifiedSupersession')
+    expect(succession).toContain('null')
+    expect(succession).not.toContain('request.json')
+    expect(succession).not.toContain('issued: true')
+    expect(vote).toContain('notImplemented')
+    expect(vote).not.toContain('recordCertifiedSupersession')
   })
 })

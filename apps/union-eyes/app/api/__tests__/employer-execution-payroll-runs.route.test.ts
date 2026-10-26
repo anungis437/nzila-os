@@ -20,6 +20,7 @@ const m = vi.hoisted(() => {
     withRLSContext: vi.fn(),
     persistAtomicAudit: vi.fn(),
     requireEntitlement: vi.fn(),
+    requireLiveFinancialMandate: vi.fn(),
     resolvePayrollRules: vi.fn(),
     calculatePayroll: vi.fn(),
     sha256: vi.fn(),
@@ -33,6 +34,9 @@ const m = vi.hoisted(() => {
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError: m.ApiError, z: require('zod') }));
 vi.mock('@/db', () => ({ db: m.db }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
+vi.mock('@/lib/finance/require-live-financial-mandate', () => ({
+  requireLiveFinancialMandate: m.requireLiveFinancialMandate,
+}));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({
   requireEntitlement: m.requireEntitlement,
@@ -88,6 +92,9 @@ describe('employer-execution/payroll-runs route', () => {
 
     m.withRLSContext.mockImplementation((_ctx: unknown, fn: any) => {
       const tx = {
+        select: vi.fn(() => ({
+          from: vi.fn(() => makeQuery(m.selectResults.shift() ?? [])),
+        })),
         insert: vi.fn((table: unknown) => ({
           values: vi.fn((values: any) => {
             m.txInserts.push({ table, values });
@@ -102,6 +109,7 @@ describe('employer-execution/payroll-runs route', () => {
     });
 
     m.resolvePayrollRules.mockReturnValue({});
+    m.requireLiveFinancialMandate.mockResolvedValue(undefined);
     m.calculatePayroll.mockReturnValue({
       items: [
         {

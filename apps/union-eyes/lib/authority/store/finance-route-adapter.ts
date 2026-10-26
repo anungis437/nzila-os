@@ -32,7 +32,7 @@ import { logger } from '@/lib/logger'
 import type { Action, AuthorityRequest, Decision } from '../ontology'
 import { FINANCE_CAPACITIES } from '../policies/finance'
 import { enforceAuthority, type EnforcementDeps } from './enforce'
-import { AuthorityStoreError, type SqlExecutor } from './executor'
+import { AuthorityStoreError, isUuid, type SqlExecutor } from './executor'
 import { canonicalMembershipSource } from './identity'
 import { financeSourceReadiness, loadFinancialTransaction } from './resources'
 import { drizzleExecutor, kernelDeps } from './route-adapter'
@@ -155,6 +155,12 @@ async function liveFinancialMandateCount(exec: SqlExecutor, organizationId: stri
     )
   ).rows[0]
   return Number(row?.n ?? 0)
+}
+
+/** Refuses when this organization has no live financial mandate. Does not treat a role or an administrator title as one. */
+export async function assertLiveFinancialMandate(exec: SqlExecutor, organizationId: string): Promise<void> {
+  if (!isUuid(organizationId)) throw new FinancialDutyError('INVALID_REQUEST', 'organizationId must be a uuid')
+  if ((await liveFinancialMandateCount(exec, organizationId)) === 0) throw mandatesNotIssuedError()
 }
 
 async function holdsFinancialCapacity(exec: SqlExecutor, organizationId: string, userId: string): Promise<boolean> {

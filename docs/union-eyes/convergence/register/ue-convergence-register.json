@@ -331,7 +331,7 @@
         "apps/union-eyes/lib/deadline-engine/recipient-resolver.ts"
       ],
       "securityImplications": "Any route that updates a grievance can reassign ownership and silently change authority.",
-      "requiredImplementation": "Reconciliation and the governed backfill are built (lib/authority/store/case-ownership-backfill.ts: read-only plan, approval by plan hash against a recorded decision reference, execution through assignCase under the normal issuance governance, all-or-nothing, drift refused, idempotent; proven on PGlite). REMAINING: run it per organization against the qualified kernel storage, which exists only on disposable databases (platform 0013 and 0020 are unqualified and staging is NO-GO), then migrate the two consumers (case-access-service primary-owner check and deadline recipient-resolver) and about 28 other readers to the kernel, then retire the column as an authority source. Migrating readers before kernel storage is deployed would remove every owner in production, so reader migration is gated on that qualification and on an institutional decision that each recorded legacy owner is genuine. CONTINUATION 7: Reader inventory at this checkpoint: the remaining production readers are the legacy writers/mirrors (grievances assign/status/convert), a display line in the grievance console, the creator-retains-access rule (lib/cases/creator-access.ts, authority-bearing), the cognition steward lookup, and deadline-engine recipient routing (notification only). Migrating the deadline recipient resolver needs the system role to read kernel relationships (manifest grant) and a native proof; no ambiguous historical value has been converted into authority.",
+      "requiredImplementation": "Reconciliation and the governed backfill are built (lib/authority/store/case-ownership-backfill.ts: read-only plan, approval by plan hash against a recorded decision reference, execution through assignCase under the normal issuance governance, all-or-nothing, drift refused, idempotent; proven on PGlite). REMAINING: run it per organization against the qualified kernel storage, which exists only on disposable databases (platform 0013 and 0020 are unqualified and staging is NO-GO), then migrate the two consumers (case-access-service primary-owner check and deadline recipient-resolver) and about 28 other readers to the kernel, then retire the column as an authority source. Migrating readers before kernel storage is deployed would remove every owner in production, so reader migration is gated on that qualification and on an institutional decision that each recorded legacy owner is genuine. CONTINUATION 7: Reader inventory at this checkpoint: the remaining production readers are the legacy writers/mirrors (grievances assign/status/convert), a display line in the grievance console, the creator-retains-access rule (lib/cases/creator-access.ts, authority-bearing), the cognition steward lookup, and deadline-engine recipient routing (notification only). Migrating the deadline recipient resolver needs the system role to read kernel relationships (manifest grant) and a native proof; no ambiguous historical value has been converted into authority. CONTINUATION: execution also requires the approved source revision, takes pg_advisory_xact_lock for the organization, and re-reads each candidate's legacy owner and live assignee count before assignCase. A stale source, a conflicting assignee, or a changed legacy owner refuses the transaction. Idempotent replay returns the prior receipt. Native concurrent execution is apps/union-eyes/db/__tests__/authority-kernel-case-backfill.native.test.ts and stays READY_FOR_VS_EXECUTION. Cursor does not set UE_OWNERSHIP_NATIVE_PROOF. No historical assignment is manufactured.",
       "evidence": [
         {
           "type": "path",
@@ -340,6 +340,14 @@
         {
           "type": "test",
           "ref": "apps/union-eyes/db/__tests__/authority-kernel-case-sources.pglite.test.ts"
+        },
+        {
+          "type": "test",
+          "ref": "apps/union-eyes/db/__tests__/authority-kernel-case-backfill.pglite.test.ts"
+        },
+        {
+          "type": "test",
+          "ref": "apps/union-eyes/db/__tests__/authority-kernel-case-backfill.native.test.ts"
         }
       ],
       "status": "IN_PROGRESS",
@@ -505,7 +513,7 @@
         "apps/union-eyes/app/api/dues"
       ],
       "securityImplications": "Executives can read organization finance summaries by hierarchy level rather than by an issued financial mandate.",
-      "requiredImplementation": "Decide, with the institution, which offices hold which financial duties; express them as kernel financial mandates once the disbursement and approval sources exist (UE-CONV-D-001), then replace both gate families. CONTINUATION 7: Role-gate families still govern reads and the non-payment finance operations; the kernel slice above replaces them only where a financial resource exists. Institutional prerequisite to turn the slice on: which offices hold prepare/approve/execute/reconcile per account, monetary limits and approval counts (four different people, incompatible duties never co-held).",
+      "requiredImplementation": "Decide, with the institution, which offices hold which financial duties; express them as kernel financial mandates once the disbursement and approval sources exist (UE-CONV-D-001), then replace both gate families. CONTINUATION 7: Role-gate families still govern reads and the non-payment finance operations; the kernel slice above replaces them only where a financial resource exists. Institutional prerequisite to turn the slice on: which offices hold prepare/approve/execute/reconcile per account, monetary limits and approval counts (four different people, incompatible duties never co-held). CONTINUATION: employer remittance list, create, update and upload, and payroll-run list, refuse with FINANCIAL_MANDATES_NOT_ISSUED when the organization has no live financial mandate. Payroll list and detail no longer use a member role floor; they use FINANCIAL_MEMBER_DATA_ROLES. issueFinancialMandate, activateFinancialMandate and revokeFinancialMandate require segregation of duties and still do nothing until a live issuance rule exists. No financial officer was invented.",
       "evidence": [
         {
           "type": "test",
@@ -1486,10 +1494,10 @@
           "classification": "CANONICAL"
         }
       ],
-      "defect": "A steward could PATCH a voting session to any status (reopening a closed election), rewrite its title and dates after it opened, and DELETE it in any state, including after ballots were cast; the service updated and deleted by session id alone, and the evidence pack was best-effort. The council-election item route let a governance-role caller rewrite candidates, winners, totals and the verifying auditor of a certified result with no audit. Now: a status lifecycle (closed and cancelled are terminal), terms locked once a session opens, deletion only of an empty draft, organization predicates on the session writes, and update and audit committed in one tenant transaction; certified election results are locked except for recording a dispute, and creation and update are audited in the same system transaction. Option, eligibility and proxy writes load the owning organization's session and proceed only while it is a draft; a proxy must be a different eligible voter in that session. INSTITUTIONAL DECISIONS OPEN: no authority-kernel action issues voting:extend_session or election:supersede_certified_result, so an opened session's closing time stays locked and a certified row is not rewritten. planCertifiedSupersession copies the stored certified facts into a proposed successor and returns SUCCESSOR_RELATION_ABSENT because the qualified store has no successor relation; nothing is inserted. The session route does not read a grant from the request. The council vote route stays 501. Per-ballot audit stays withheld so a ballot stays secret. Session creation audit is already atomic.",
+      "defect": "A steward could PATCH a voting session to any status (reopening a closed election), rewrite its title and dates after it opened, and DELETE it in any state, including after ballots were cast; the service updated and deleted by session id alone, and the evidence pack was best-effort. The council-election item route let a governance-role caller rewrite candidates, winners, totals and the verifying auditor of a certified result with no audit. Now: a status lifecycle (closed and cancelled are terminal), terms locked once a session opens, deletion only of an empty draft, organization predicates on the session writes, and update and audit committed in one tenant transaction; certified election results are locked except for recording a dispute, and creation and update are audited in the same system transaction. Option, eligibility and proxy writes load the owning organization's session and proceed only while it is a draft; a proxy must be a different eligible voter in that session. Platform 0033 (UNQUALIFIED, unapplied) adds election_certificate_successions. recordCertifiedSupersession inserts an uncertified successor and a succession row only for a kernel-loaded grant whose provenance matches the locked certified row, with a distinct issuer and reviewer, and rolls back if the audit fails. The HTTP succession route passes no grant and writes nothing. The council vote route stays 501. Ballot choice stays unaudited. Acceptance, eligibility, proxy authorization and recount are process records that cannot name a person and a choice together. INSTITUTIONAL DECISIONS OPEN: no authority-kernel action issues voting:extend_session or election:supersede_certified_result.",
       "consumers": [],
       "securityImplications": "An election's lifecycle, terms, ballots or certified results could be changed or destroyed by a role floor.",
-      "requiredImplementation": "Options, eligibility and proxy writes are refused unless the session is a draft and the row belongs to the caller's organization; a proxy must be a different eligible voter of that session. Session creation is already audited atomically. Per-ballot audit stays withheld (secret ballot). Extension and certified-result supersession stay refused until an authority-kernel grant is loaded for that session or election; a request body is not a grant, and the certified row is not rewritten.",
+      "requiredImplementation": "Options, eligibility and proxy writes are refused unless the session is a draft and the row belongs to the caller's organization; a proxy must be a different eligible voter of that session. Session creation is already audited atomically. Secret-ballot process audit records eligibility, acceptance, proxy authorization and recount without a voter-choice link. Certified supersession persists only through recordCertifiedSupersession after platform 0033 is applied and an authority-kernel grant is loaded; the request route cannot supply that grant, and the certified row is not rewritten. Extension of an opened session stays refused until an authority-kernel grant is loaded. UE-CONV-K-009 stays IN_PROGRESS until native proof and an adopted issuance rule exist.",
       "evidence": [
         {
           "type": "test",
@@ -1506,6 +1514,14 @@
         {
           "type": "test",
           "ref": "apps/union-eyes/app/api/__tests__/elections-certification.route.test.ts"
+        },
+        {
+          "type": "test",
+          "ref": "apps/union-eyes/lib/voting/__tests__/ballot-process-audit.test.ts"
+        },
+        {
+          "type": "test",
+          "ref": "apps/union-eyes/db/__tests__/election-certificate-succession.pglite.test.ts"
         }
       ],
       "status": "IN_PROGRESS",

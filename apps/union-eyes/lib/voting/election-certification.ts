@@ -3,8 +3,9 @@
  * auditor's name or date), its candidates, results and turnout are certified evidence and may not be rewritten through
  * an ordinary update. The only change still permitted is raising or clearing the contested flag, which is how a
  * dispute is recorded against a certified result. A correction is a new record that names the certified election.
- * `planCertifiedSupersession` copies the certified facts from the stored row and refuses to write: no kernel action
- * issues the correction grant, and the store has no successor relation. The certified row is not rewritten.
+ * `planCertifiedSupersession` copies the certified facts from the stored row and does not write them. Persistence is
+ * `recordCertifiedSupersession` in election-succession.ts, which inserts an uncertified successor and a succession
+ * row. No kernel action issues the correction grant, so the HTTP route passes no grant and writes nothing.
  */
 export interface ElectionRecord {
   verifiedBy?: string | null
@@ -59,7 +60,7 @@ export interface ProposedSuccessor {
 
 export type CertifiedSupersession =
   | { ok: false; code: 'NOT_CERTIFIED' | 'CORRECTION_UNISSUED'; message: string }
-  | { ok: false; code: 'SUCCESSOR_RELATION_ABSENT'; message: string; proposedSuccessor: ProposedSuccessor }
+  | { ok: true; persisted: false; proposedSuccessor: ProposedSuccessor }
 
 function isCorrectionGrant(grant: LoadedCorrectionGrant | null, electionId: string): grant is LoadedCorrectionGrant {
   return Boolean(
@@ -72,8 +73,9 @@ function isCorrectionGrant(grant: LoadedCorrectionGrant | null, electionId: stri
 }
 
 /**
- * Describes a successor and refuses to persist it. The certified row stays as stored. Callers must not insert
- * `proposedSuccessor`: the qualified store has no column that names the certified election.
+ * Describes a successor and does not persist it. The certified row stays as stored. The HTTP route does not call
+ * this with a request body. `recordCertifiedSupersession` is the only writer, and it still requires a kernel grant
+ * plus the unqualified succession table.
  */
 export function planCertifiedSupersession(existing: CertifiedElection, grant: LoadedCorrectionGrant | null): CertifiedSupersession {
   const certified = Boolean(existing.verifiedBy) || Boolean(existing.verificationDate)
@@ -88,9 +90,8 @@ export function planCertifiedSupersession(existing: CertifiedElection, grant: Lo
     }
   }
   return {
-    ok: false,
-    code: 'SUCCESSOR_RELATION_ABSENT',
-    message: 'A certified result can be superseded only by a new record that names the certified election. That relation is not in the qualified store, so nothing is written.',
+    ok: true,
+    persisted: false,
     proposedSuccessor: {
       supersedesElectionId: existing.id,
       electionYear: existing.electionYear,

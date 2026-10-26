@@ -6,6 +6,8 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { votes, votingOptions, votingSessions } from '@/db/schema';
 import { and, eq, sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { recordRecount } from '@/lib/voting/ballot-process-audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,6 +47,7 @@ export const GET = withApi(
       .groupBy(votes.optionId);
 
     const totalVotes = tallies.reduce((sum, t) => sum + t.count, 0);
+    await withRLSContext({ organizationId }, (tx) => recordRecount(tx, { organizationId, sessionId: id, totalBallots: totalVotes }));
 
     return {
       session,

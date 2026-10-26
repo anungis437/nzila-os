@@ -79,9 +79,10 @@ function dataOf(source: string, guard: RouteGuard): RouteData {
 }
 
 /**
- * Ballot-casting routes carry no per-ballot audit row on purpose (G12): a row with the member and a timestamp would let a
- * reader of the audit log link a member to a ballot. The ballot row under the anonymous voter id is the participation
- * record, and the session lifecycle around it is audited. The manifest test pins this list and its justification.
+ * Ballot-casting routes carry no per-ballot choice audit on purpose (G12): a row with the member and a choice, or a
+ * member and a receipt that points at a choice, would let a reader link a voter to a selection. Acceptance, eligibility,
+ * proxy authorization and recount are audited by lib/voting/ballot-process-audit.ts without that pair. The manifest test
+ * pins this list: the route file itself must not call persistAtomicAudit.
  */
 export const BALLOT_SECRECY_EXEMPT_ROUTES = ['voting/sessions/[id]/vote/route.ts', 'governance/elections/sessions/[id]/vote/route.ts']
 

@@ -239,6 +239,13 @@
       "when": 1758890000000,
       "tag": "0032_notification_callback_identity",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1758900000000,
+      "tag": "0033_election_certificate_successions",
+      "breakpoints": true
     }
   ]
 }

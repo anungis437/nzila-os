@@ -15,7 +15,7 @@
  * `backfill_candidate` set, through assignCase, and only when the issuer, the approved plan hash and a decision
  * reference are all present. It does not invent a representative relationship.
  *
- *   ... --execute --issuer=<uuid> --approved-plan-hash=<64 hex> --decision-reference=<minute or resolution>
+ *   ... --execute --issuer=<uuid> --approved-plan-hash=<64 hex> --approved-source-revision=<64 hex> --decision-reference=<minute or resolution>
  *
  * Exit codes: 0 no drift (every legacy owner is aligned with a kernel assignee), 1 drift found, 2 the check could not run.
  * An executed backfill that assigns rows exits 0. A refused execute exits 2 and writes nothing.
@@ -35,6 +35,7 @@ export interface ReconcileArguments {
   execute: boolean
   issuerUserId?: string
   approvedPlanHash?: string
+  approvedSourceRevision?: string
   decisionReference?: string
 }
 
@@ -48,13 +49,15 @@ export function parseArguments(argv: readonly string[]): ReconcileArguments | { 
   const execute = argv.includes('--execute')
   const issuerUserId = value('issuer')
   const approvedPlanHash = value('approved-plan-hash')
+  const approvedSourceRevision = value('approved-source-revision')
   const decisionReference = value('decision-reference')
   if (execute) {
     if (!issuerUserId || !UUID.test(issuerUserId)) return { error: '--execute requires --issuer=<uuid>' }
     if (!approvedPlanHash || !PLAN_HASH.test(approvedPlanHash)) return { error: '--execute requires --approved-plan-hash=<64 hex characters>' }
+    if (!approvedSourceRevision || !PLAN_HASH.test(approvedSourceRevision)) return { error: '--execute requires --approved-source-revision=<64 hex characters>' }
     const reference = decisionReference?.trim() ?? ''
     if (reference.length === 0 || reference.length > 200) return { error: '--execute requires --decision-reference of 1 to 200 characters' }
-    return { organizationId, limit, json: argv.includes('--json'), execute: true, issuerUserId, approvedPlanHash, decisionReference: reference }
+    return { organizationId, limit, json: argv.includes('--json'), execute: true, issuerUserId, approvedPlanHash, approvedSourceRevision, decisionReference: reference }
   }
   return { organizationId, limit, json: argv.includes('--json'), execute: false }
 }
@@ -87,6 +90,7 @@ async function main(): Promise<number> {
           organizationId: args.organizationId,
           issuerUserId: args.issuerUserId!,
           approvedPlanHash: args.approvedPlanHash!,
+          approvedSourceRevision: args.approvedSourceRevision!,
           decisionReference: args.decisionReference!,
           effectiveAt: new Date(),
           limit: args.limit,
@@ -94,7 +98,13 @@ async function main(): Promise<number> {
         return { plan, result }
       })
       const quarantine = executed.plan.deferred
-      const payload = { assigned: executed.result.assigned, planHash: executed.result.planHash, quarantine }
+      const payload = {
+        assigned: executed.result.assigned,
+        planHash: executed.result.planHash,
+        sourceRevision: executed.result.sourceRevision,
+        replayed: executed.result.replayed,
+        quarantine,
+      }
       if (args.json) console.log(JSON.stringify(payload, null, 2))
       else {
         console.log(`assigned ${payload.assigned.length} case(s); plan ${payload.planHash}`)
@@ -111,11 +121,11 @@ async function main(): Promise<number> {
     })
     const quarantine = report.plan.deferred
     if (args.json) {
-      console.log(JSON.stringify({ ...report.reconciled, planHash: report.plan.planHash, candidates: report.plan.candidates, quarantine }, null, 2))
+      console.log(JSON.stringify({ ...report.reconciled, planHash: report.plan.planHash, sourceRevision: report.plan.sourceRevision, candidates: report.plan.candidates, quarantine }, null, 2))
     } else {
       const body = report.reconciled
       console.log(`organization ${body.organizationId}: ${body.casesExamined} case(s) examined${body.truncated ? ' (truncated; raise --limit)' : ''}`)
-      console.log(`plan ${report.plan.planHash}; ${report.plan.candidates.length} backfill candidate(s); quarantine ${quarantine.length} deferred finding(s)`)
+      console.log(`plan ${report.plan.planHash}; source ${report.plan.sourceRevision}; ${report.plan.candidates.length} backfill candidate(s); quarantine ${quarantine.length} deferred finding(s)`)
       for (const [kind, count] of Object.entries(body.counts)) console.log(`  ${kind}: ${count}`)
       for (const f of body.findings) console.log(`  ${f.kind} case ${f.caseId} legacy=${f.legacyOwner ?? '-'} kernel=[${f.kernelAssignees.join(',')}] ${f.detail}`)
       for (const f of quarantine) console.log(`  quarantine ${f.kind} case ${f.caseId}`)

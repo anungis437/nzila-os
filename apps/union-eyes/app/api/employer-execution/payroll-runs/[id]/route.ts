@@ -17,7 +17,7 @@ const transitionSchema = z.object({
 
 export const GET = withApi(
   {
-    auth: { minRole: "member" },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_payroll_preview",
     openapi: { tags: ["Employer Execution"], summary: "Get payroll run detail" },
   },
