@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { beforeEach, describe, it, expect, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => {
@@ -65,6 +67,14 @@ import {
 const tx = mocks.chain as never;
 
 describe('admin-actions', () => {
+  it('does not invent a storage measurement', () => {
+    const source = readFileSync(path.join(__dirname, '../admin-actions.ts'), 'utf8');
+    expect(source).not.toMatch(/totalStorage\s*=\s*0/);
+    expect(source).not.toMatch(/storageUsed\s*=\s*["']0["']/);
+    expect(source).not.toContain('totalStorage');
+    expect(source).not.toContain('storageUsed');
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.queue.length = 0;
@@ -79,7 +89,6 @@ describe('admin-actions', () => {
         totalMembers: 5,
         totalOrgs: 3,
         activeOrgs: 2,
-        totalStorage: 0,
         activeToday: 1,
       });
     });
@@ -91,7 +100,6 @@ describe('admin-actions', () => {
         totalMembers: 0,
         totalOrgs: 0,
         activeOrgs: 0,
-        totalStorage: 0,
         activeToday: 0,
       });
     });
@@ -159,7 +167,8 @@ describe('admin-actions', () => {
       ]);
       const orgs = await getAdminOrgs('search');
       expect(orgs).toHaveLength(1);
-      expect(orgs[0]).toMatchObject({ id: 'o1', totalUsers: 0, activeUsers: 0, storageUsed: '0' });
+      expect(orgs[0]).toMatchObject({ id: 'o1', totalUsers: 0, activeUsers: 0 });
+      expect(orgs[0]).not.toHaveProperty('storageUsed');
     });
 
     it('applies defaults for nullable org fields (no search)', async () => {

@@ -85,6 +85,26 @@ describe('schema and mutation batch program', () => {
     expect(retire?.execution).toBe('cursor-then-vs')
     expect(retire?.action).toContain('READY_FOR_VS_EXECUTION')
     expect(retire?.action).toContain('Do not DROP')
+    expect(retire?.action).not.toContain('totalStorage = 0')
+    const unreferenced = program.batches.find((batch) => batch.id === 'schema-live-unreferenced')
+    expect(unreferenced?.entryCount).toBe(5)
+    expect(unreferenced?.sourceRetired).toBe(true)
+    expect(unreferenced?.applyNow).toBe(false)
+    expect(unreferenced?.action).toContain('READY_FOR_VS_EXECUTION')
+    expect(unreferenced?.action).toContain('Do not DROP')
+    const removed = ['bank_accounts', 'bank_reconciliations', 'clc_remittance_mapping', 'erp_invoices', 'grievance_timeline']
+    const retained = ['budget_pool', 'dues_rates', 'gl_account_mappings', 'grievance_settlements', 'integration_webhooks', 'payment_cycles', 'payment_disputes', 'safety_training_records']
+    for (const table of removed) {
+      const row = program.schema.find((entry) => entry.table === table)
+      expect(row?.batchId).toBe('schema-live-unreferenced')
+      expect(row?.declarationRemoved).toBe(true)
+    }
+    for (const table of retained) {
+      const row = program.schema.find((entry) => entry.table === table)
+      expect(row?.batchId).toBe('schema-live-unreferenced-blocked')
+      expect(row?.declarationRemoved).toBeUndefined()
+      expect(row?.holdReason).toBeTruthy()
+    }
     expect(program.censusCount).toBe(231)
   })
 })

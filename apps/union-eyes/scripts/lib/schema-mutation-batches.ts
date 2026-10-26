@@ -54,6 +54,18 @@ export interface SchemaAssignment {
   reachable: boolean
   djangoDefined: boolean
   blockers: string[]
+  /** Set when the schema barrel no longer exports this census table. */
+  declarationRemoved?: boolean
+  /** Why a live-unreferenced declaration stays. */
+  holdReason?: string
+}
+
+/** Kept because another declaration or a raw SQL reader still names them. */
+const REQUIRED_DECLARATION: Record<string, string> = {
+  budget_pool: 'budgetReservations.poolId references budgetPool, and finance summary plus financial-insights read budget_pool. The declaration stays.',
+  dues_rates: 'memberDuesLedgerRelations names duesRates. The declaration stays.',
+  payment_cycles: 'payments.paymentCycleId and paymentsRelations.cycle reference paymentCycles. The declaration stays. Do not drop the physical foreign key.',
+  payment_disputes: 'paymentsRelations.disputes references paymentDisputes. The declaration stays.',
 }
 
 export interface MutationAssignment {
@@ -383,7 +395,8 @@ function schemaBatch(entry: CensusEntry, disposition: string, index: ReachIndex,
       if (entry.table === 'grievance_communications') return 'schema-django-defined'
       return refs.length === 0 ? 'schema-retire-declaration' : 'schema-retire-blocked'
     case 'LIVE_UNREFERENCED':
-      return refs.length === 0 ? 'schema-live-unreferenced' : 'schema-live-unreferenced-blocked'
+      if (REQUIRED_DECLARATION[entry.table] || refs.length > 0) return 'schema-live-unreferenced-blocked'
+      return 'schema-live-unreferenced'
     case 'VERIFY_UNREACHABLE_THEN_RETIRE':
       if (!reachable && !index.graphComplete) return 'schema-verify-unproven'
       if (!reachable) return 'schema-verify-dead-module'
@@ -432,7 +445,8 @@ export function buildSchemaMutationBatches(live: Record<string, number> = scanUn
     const record = disposition[entry.table]
     if (!record) throw new Error(`census table has no disposition: ${entry.table}`)
     const blockers = evolutionBlockers(entry.table, entry, declared, enums)
-    return {
+    const refs = productionReferences(index, entry.table)
+    const row: SchemaAssignment = {
       table: entry.table,
       batchId: schemaBatch(entry, record.disposition, index, blockers),
       disposition: record.disposition,
@@ -442,6 +456,13 @@ export function buildSchemaMutationBatches(live: Record<string, number> = scanUn
       djangoDefined: index.djangoTables.has(entry.table),
       blockers,
     }
+    if (!declared.has(entry.table)) row.declarationRemoved = true
+    const holdReason = REQUIRED_DECLARATION[entry.table]
+      ?? (record.disposition === 'LIVE_UNREFERENCED' && refs.length > 0
+        ? `A production file reads this relation: ${refs.join(', ')}`
+        : undefined)
+    if (holdReason) row.holdReason = holdReason
+    return row
   }).sort((a, b) => a.table.localeCompare(b.table))
 
   const baseline = JSON.parse(readFileSync(BASELINE, 'utf8')).entries as Record<string, number>
@@ -467,14 +488,15 @@ export function buildSchemaMutationBatches(live: Record<string, number> = scanUn
     const sourceEntries = sourceMutations.filter((entry) => entry.batchId === batch.id)
     const implemented = sourceEntries.length > 0 && sourceEntries.every((entry) => entry.liveCount === 0)
     const execution: Execution = implemented ? 'implemented' : batch.execution
-    const sourceRetired = batch.id === 'schema-retire-declaration'
+    const sourceRetired = (batch.id === 'schema-retire-declaration' || batch.id === 'schema-live-unreferenced')
       && schemaEntries.length > 0
       && schemaEntries.every((entry) => !declared.has(entry.table))
+    const retiredAction = batch.id === 'schema-live-unreferenced'
+      ? 'bank_accounts, bank_reconciliations, erp_invoices, clc_remittance_mapping, and grievance_timeline are no longer union-eyes Drizzle declarations. Django still defines those relations. packages/db exec-data.ts still declares erp_invoices for the console reader. No DROP was added. The census file still lists them. Census regeneration is READY_FOR_VS_EXECUTION. budget_pool, dues_rates, gl_account_mappings, grievance_settlements, integration_webhooks, payment_cycles, payment_disputes, and safety_training_records stay declared because a kept declaration or a production SQL reader names them. Do not hand-delete the census row. Do not DROP the relation.'
+      : 'org_usage, signature_templates, and signature_webhooks_log are no longer Drizzle declarations. signature_documents.template_id stays a column without a Drizzle foreign key. Django SignatureTemplates and SignatureWebhooksLog stay, and their view sets stay. The unwired admin-actions module no longer returns a storage figure. No DROP was added. The census file still lists the three tables. Census regeneration is READY_FOR_VS_EXECUTION. Do not hand-delete the census row. Do not DROP the relation.'
     const row: BatchSpec & { applyNow: boolean; entryCount: number; statementCount: number; liveStatementCount: number; sourceRetired?: boolean } = {
       ...batch,
-      action: sourceRetired
-        ? 'org_usage, signature_templates, and signature_webhooks_log are no longer Drizzle declarations. signature_documents.template_id stays a column without a Drizzle foreign key. Django SignatureTemplates and SignatureWebhooksLog stay, and their view sets stay. The unwired admin-actions reader no longer selects org_usage. No DROP was added. The census file still lists the three tables. Census regeneration is READY_FOR_VS_EXECUTION. Do not hand-delete the census row. Do not DROP the relation.'
-        : batch.action,
+      action: sourceRetired ? retiredAction : batch.action,
       execution,
       applyNow: implemented,
       entryCount: schemaEntries.length + sourceEntries.length,

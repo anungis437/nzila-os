@@ -292,36 +292,8 @@ export const settlements = pgTable("settlements", {
   index("idx_settlements_org").on(table.organizationId),
 ]);
 
-// Grievance Timeline/History
-export const grievanceTimeline = pgTable("grievance_timeline", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  grievanceId: uuid("grievance_id").references(() => grievances.id).notNull(),
-  
-  // Event details
-  eventType: varchar("event_type", { length: 100 }).notNull(),
-  eventDate: timestamp("event_date", { withTimezone: true }).notNull(),
-  actor: varchar("actor", { length: 255 }),
-  actorRole: varchar("actor_role", { length: 100 }),
-  
-  // Content
-  description: text("description").notNull(),
-  notes: text("notes"),
-  
-  // Attachments
-  attachments: jsonb("attachments").$type<Array<{
-    id: string;
-    name: string;
-    url: string;
-  }>>(),
-  
-  // Metadata
-  createdBy: text("created_by"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (table) => [
-  index("idx_grievance_timeline_grievance").on(table.grievanceId),
-  index("idx_grievance_timeline_date").on(table.eventDate),
-  index("idx_grievance_timeline_type").on(table.eventType),
-]);
+// grievance_timeline is not declared in this barrel. Django GrievanceTimeline and
+// its view set remain. Do not DROP the relation.
 
 // Grievance Deadlines
 export const grievanceDeadlines = pgTable("grievance_deadlines", {
@@ -384,5 +356,4 @@ export type Grievance = typeof grievances.$inferSelect;
 export type GrievanceInsert = typeof grievances.$inferInsert;
 export type Arbitration = typeof arbitrations.$inferSelect;
 export type Settlement = typeof settlements.$inferSelect;
-export type GrievanceTimeline = typeof grievanceTimeline.$inferSelect;
 export type GrievanceDeadline = typeof grievanceDeadlines.$inferSelect;

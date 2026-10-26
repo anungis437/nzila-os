@@ -82,7 +82,7 @@
       "ratchet": "census",
       "execution": "cursor-then-vs",
       "shrink": "census",
-      "action": "org_usage, signature_templates, and signature_webhooks_log are no longer Drizzle declarations. signature_documents.template_id stays a column without a Drizzle foreign key. Django SignatureTemplates and SignatureWebhooksLog stay, and their view sets stay. The unwired admin-actions reader no longer selects org_usage. No DROP was added. The census file still lists the three tables. Census regeneration is READY_FOR_VS_EXECUTION. Do not hand-delete the census row. Do not DROP the relation.",
+      "action": "org_usage, signature_templates, and signature_webhooks_log are no longer Drizzle declarations. signature_documents.template_id stays a column without a Drizzle foreign key. Django SignatureTemplates and SignatureWebhooksLog stay, and their view sets stay. The unwired admin-actions module no longer returns a storage figure. No DROP was added. The census file still lists the three tables. Census regeneration is READY_FOR_VS_EXECUTION. Do not hand-delete the census row. Do not DROP the relation.",
       "proof": "apps/union-eyes/db/__tests__/schema-retire-declaration.test.ts",
       "applyNow": false,
       "entryCount": 3,
@@ -96,12 +96,13 @@
       "ratchet": "census",
       "execution": "cursor-then-vs",
       "shrink": "census",
-      "action": "The registry class is live and the reference scan finds no production file. Retire the Drizzle declaration only. Do not DROP the live relation and do not hand-delete the census row.",
+      "action": "bank_accounts, bank_reconciliations, erp_invoices, clc_remittance_mapping, and grievance_timeline are no longer union-eyes Drizzle declarations. Django still defines those relations. packages/db exec-data.ts still declares erp_invoices for the console reader. No DROP was added. The census file still lists them. Census regeneration is READY_FOR_VS_EXECUTION. budget_pool, dues_rates, gl_account_mappings, grievance_settlements, integration_webhooks, payment_cycles, payment_disputes, and safety_training_records stay declared because a kept declaration or a production SQL reader names them. Do not hand-delete the census row. Do not DROP the relation.",
       "proof": "apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts",
       "applyNow": false,
-      "entryCount": 13,
+      "entryCount": 5,
       "statementCount": 0,
-      "liveStatementCount": 0
+      "liveStatementCount": 0,
+      "sourceRetired": true
     },
     {
       "id": "schema-live-unreferenced-blocked",
@@ -112,7 +113,7 @@
       "action": "A production file names this relation. Reclassify it before any retirement.",
       "proof": "apps/union-eyes/db/__tests__/schema-mutation-batches.test.ts",
       "applyNow": false,
-      "entryCount": 2,
+      "entryCount": 10,
       "statementCount": 0,
       "liveStatementCount": 0
     },
@@ -541,7 +542,10 @@
       ],
       "reachable": false,
       "djangoDefined": true,
-      "blockers": []
+      "blockers": [
+        "no-declaration"
+      ],
+      "declarationRemoved": true
     },
     {
       "table": "bank_of_canada_rates",
@@ -566,7 +570,8 @@
       ],
       "reachable": false,
       "djangoDefined": true,
-      "blockers": []
+      "blockers": [],
+      "holdReason": "A production file reads this relation: lib/services/audit-trail-service.ts"
     },
     {
       "table": "bank_reconciliations",
@@ -578,7 +583,10 @@
       ],
       "reachable": false,
       "djangoDefined": true,
-      "blockers": []
+      "blockers": [
+        "no-declaration"
+      ],
+      "declarationRemoved": true
     },
     {
       "table": "bargaining_team_members",
@@ -643,15 +651,16 @@
     },
     {
       "table": "budget_pool",
-      "batchId": "schema-live-unreferenced",
+      "batchId": "schema-live-unreferenced-blocked",
       "disposition": "LIVE_UNREFERENCED",
       "registryClass": "TENANT_RLS_REQUIRED",
       "defects": [
         "COLUMNS_MISSING"
       ],
-      "reachable": false,
+      "reachable": true,
       "djangoDefined": true,
-      "blockers": []
+      "blockers": [],
+      "holdReason": "budgetReservations.poolId references budgetPool, and finance summary plus financial-insights read budget_pool. The declaration stays."
     },
     {
       "table": "budget_reservations",
@@ -992,7 +1001,10 @@
       ],
       "reachable": false,
       "djangoDefined": true,
-      "blockers": []
+      "blockers": [
+        "no-declaration"
+      ],
+      "declarationRemoved": true
     },
     {
       "table": "clc_union_density",
@@ -1246,7 +1258,7 @@
       "defects": [
         "TABLE_ABSENT"
       ],
-      "reachable": false,
+      "reachable": true,
       "djangoDefined": false,
       "blockers": [
         "table-absent"
@@ -1260,7 +1272,7 @@
       "defects": [
         "TABLE_ABSENT"
       ],
-      "reachable": false,
+      "reachable": true,
       "djangoDefined": false,
       "blockers": [
         "table-absent"
@@ -1333,7 +1345,7 @@
     },
     {
       "table": "dues_rates",
-      "batchId": "schema-live-unreferenced",
+      "batchId": "schema-live-unreferenced-blocked",
       "disposition": "LIVE_UNREFERENCED",
       "registryClass": "TENANT_RLS_REQUIRED",
       "defects": [
@@ -1341,7 +1353,8 @@
       ],
       "reachable": false,
       "djangoDefined": true,
-      "blockers": []
+      "blockers": [],
+      "holdReason": "memberDuesLedgerRelations names duesRates. The declaration stays."
     },
     {
       "table": "dunning_cases",
@@ -1432,7 +1445,10 @@
       ],
       "reachable": false,
       "djangoDefined": true,
-      "blockers": []
+      "blockers": [
+        "no-declaration"
+      ],
+      "declarationRemoved": true
     },
     {
       "table": "event_attendees",
@@ -1666,15 +1682,16 @@
     },
     {
       "table": "gl_account_mappings",
-      "batchId": "schema-live-unreferenced",
+      "batchId": "schema-live-unreferenced-blocked",
       "disposition": "LIVE_UNREFERENCED",
       "registryClass": "TENANT_RLS_REQUIRED",
       "defects": [
         "COLUMNS_MISSING"
       ],
-      "reachable": false,
+      "reachable": true,
       "djangoDefined": true,
-      "blockers": []
+      "blockers": [],
+      "holdReason": "A production file reads this relation: services/platform-economics/finance-outputs.ts"
     },
     {
       "table": "governance_events",
@@ -1729,15 +1746,16 @@
     },
     {
       "table": "grievance_settlements",
-      "batchId": "schema-live-unreferenced",
+      "batchId": "schema-live-unreferenced-blocked",
       "disposition": "LIVE_UNREFERENCED",
       "registryClass": "TENANT_RLS_REQUIRED",
       "defects": [
         "COLUMNS_MISSING"
       ],
-      "reachable": false,
+      "reachable": true,
       "djangoDefined": true,
-      "blockers": []
+      "blockers": [],
+      "holdReason": "A production file reads this relation: app/api/finance/summary/route.ts"
     },
     {
       "table": "grievance_stages",
@@ -1762,7 +1780,10 @@
       ],
       "reachable": false,
       "djangoDefined": true,
-      "blockers": []
+      "blockers": [
+        "no-declaration"
+      ],
+      "declarationRemoved": true
     },
     {
       "table": "grievance_workflows",
@@ -1870,15 +1891,16 @@
     },
     {
       "table": "integration_webhooks",
-      "batchId": "schema-live-unreferenced",
+      "batchId": "schema-live-unreferenced-blocked",
       "disposition": "LIVE_UNREFERENCED",
       "registryClass": "TENANT_RLS_REQUIRED",
       "defects": [
         "COLUMNS_MISSING"
       ],
-      "reachable": false,
+      "reachable": true,
       "djangoDefined": true,
-      "blockers": []
+      "blockers": [],
+      "holdReason": "A production file reads this relation: app/[locale]/dashboard/integrations/page.tsx"
     },
     {
       "table": "international_addresses",
@@ -2156,7 +2178,8 @@
       "blockers": [
         "no-declaration",
         "table-absent"
-      ]
+      ],
+      "declarationRemoved": true
     },
     {
       "table": "organization_billing_config",
@@ -2222,7 +2245,7 @@
     },
     {
       "table": "payment_cycles",
-      "batchId": "schema-live-unreferenced",
+      "batchId": "schema-live-unreferenced-blocked",
       "disposition": "LIVE_UNREFERENCED",
       "registryClass": "TENANT_RLS_REQUIRED",
       "defects": [
@@ -2230,11 +2253,12 @@
       ],
       "reachable": false,
       "djangoDefined": true,
-      "blockers": []
+      "blockers": [],
+      "holdReason": "payments.paymentCycleId and paymentsRelations.cycle reference paymentCycles. The declaration stays. Do not drop the physical foreign key."
     },
     {
       "table": "payment_disputes",
-      "batchId": "schema-live-unreferenced",
+      "batchId": "schema-live-unreferenced-blocked",
       "disposition": "LIVE_UNREFERENCED",
       "registryClass": "TENANT_RLS_REQUIRED",
       "defects": [
@@ -2242,7 +2266,8 @@
       ],
       "reachable": false,
       "djangoDefined": true,
-      "blockers": []
+      "blockers": [],
+      "holdReason": "paymentsRelations.disputes references paymentDisputes. The declaration stays."
     },
     {
       "table": "payroll_deductions",
@@ -2577,15 +2602,16 @@
     },
     {
       "table": "safety_training_records",
-      "batchId": "schema-live-unreferenced",
+      "batchId": "schema-live-unreferenced-blocked",
       "disposition": "LIVE_UNREFERENCED",
       "registryClass": "TENANT_RLS_REQUIRED",
       "defects": [
         "COLUMNS_MISSING"
       ],
-      "reachable": false,
+      "reachable": true,
       "djangoDefined": true,
-      "blockers": []
+      "blockers": [],
+      "holdReason": "A production file reads this relation: app/api/health-safety/dashboard/route.ts, app/api/health-safety/stats/route.ts"
     },
     {
       "table": "security_events",
@@ -2600,7 +2626,8 @@
       "djangoDefined": true,
       "blockers": [
         "required-undeclared:event_id"
-      ]
+      ],
+      "holdReason": "A production file reads this relation: app/[locale]/dashboard/security/page.tsx, lib/api/crud-governance.ts"
     },
     {
       "table": "segment_executions",
@@ -2678,7 +2705,8 @@
       "djangoDefined": true,
       "blockers": [
         "no-declaration"
-      ]
+      ],
+      "declarationRemoved": true
     },
     {
       "table": "signature_verification",
@@ -2706,7 +2734,8 @@
       "djangoDefined": true,
       "blockers": [
         "no-declaration"
-      ]
+      ],
+      "declarationRemoved": true
     },
     {
       "table": "signature_workflows",
@@ -2832,7 +2861,7 @@
       "defects": [
         "COLUMNS_MISSING"
       ],
-      "reachable": false,
+      "reachable": true,
       "djangoDefined": true,
       "blockers": []
     },

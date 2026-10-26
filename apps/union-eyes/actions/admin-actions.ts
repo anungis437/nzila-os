@@ -58,9 +58,6 @@ export async function getSystemStats(tx: AdminTx): Promise<SystemStats> {
         ne(organizations.status, 'archived')
       ));
 
-    // org_usage is no longer declared. This unwired reader does not query it.
-    const totalStorage = 0;
-
     // Users active in last 24 hours
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const activeTodayResult = await tx
@@ -75,7 +72,6 @@ export async function getSystemStats(tx: AdminTx): Promise<SystemStats> {
       totalMembers: totalMembersResult[0]?.count || 0,
       totalOrgs: totalOrgsResult[0]?.count || 0,
       activeOrgs: activeOrgsResult[0]?.count || 0,
-      totalStorage: totalStorage,
       activeToday: activeTodayResult[0]?.count || 0,
     };
   } catch (error) {
@@ -191,9 +187,6 @@ export async function getAdminOrgs(searchQuery?: string): Promise<OrgWithStats[]
           .from(organizationUsers)
           .where(eq(organizationUsers.organizationId, org.orgId));
 
-        // org_usage is no longer declared. This unwired reader does not query it.
-        const storageUsed = "0";
-
         return {
           id: org.orgId,
           slug: org.orgSlug,
@@ -202,7 +195,6 @@ export async function getAdminOrgs(searchQuery?: string): Promise<OrgWithStats[]
           subscriptionTier: org.subscriptionTier ?? 'free',
           totalUsers: userCount?.total || 0,
           activeUsers: userCount?.active || 0,
-          storageUsed: storageUsed,
           createdAt: org.createdAt?.toISOString() || "",
           contactEmail: org.contactEmail,
           phone: org.phone,

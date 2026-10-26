@@ -166,42 +166,6 @@ export const clcWebhookLog = pgTable(
   })
 );
 
-/**
- * CLC Remittance Mapping - for tracking remittance data from CLC
- */
-export const clcRemittanceMapping = pgTable(
-  "clc_remittance_mapping",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    organizationId: uuid("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
-    
-    // Local and external reference
-    localRemittanceId: uuid("local_remittance_id"),
-    externalRemittanceId: varchar("external_remittance_id", { length: 100 }).notNull(),
-    
-    // Mapping details
-    localData: jsonb("local_data"),
-    externalData: jsonb("external_data"),
-    reconciliationStatus: varchar("reconciliation_status", { length: 50 }),
-    
-    // Verification
-    isVerified: boolean("is_verified").default(false),
-    verificationNotes: text("verification_notes"),
-    
-    // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-    verifiedAt: timestamp("verified_at"),
-    verifiedBy: varchar("verified_by", { length: 255 }),
-  },
-  (t) => ({
-    orgIdx: index("clc_remittance_mapping_org_idx").on(t.organizationId),
-    externalIdx: index("clc_remittance_mapping_external_idx").on(t.externalRemittanceId),
-  })
-);
-
 // ============================================================================
 // RELATIONS
 // ============================================================================
@@ -222,13 +186,6 @@ export const clcWebhookLogRelations = relations(clcWebhookLog, ({ one }) => ({
   syncLog: one(clcSyncLog, {
     fields: [clcWebhookLog.syncLogId],
     references: [clcSyncLog.id],
-  }),
-}));
-
-export const clcRemittanceMappingRelations = relations(clcRemittanceMapping, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [clcRemittanceMapping.organizationId],
-    references: [organizations.id],
   }),
 }));
 

@@ -171,6 +171,14 @@ export function buildReachIndex(tables: readonly string[]): ReachIndex {
     for (const match of text.matchAll(/['"`]([a-z][\w.]*)['"`]/g)) {
       if (wanted.has(match[1])) hit.add(match[1])
     }
+    const sqlNames = [...wanted].map((table) => table.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')
+    if (sqlNames) {
+      const sqlRef = new RegExp(`\\b(?:from|join|into|update)\\s+"?(${sqlNames})"?\\b`, 'gi')
+      for (const match of text.matchAll(sqlRef)) {
+        const name = match[1].toLowerCase()
+        if (wanted.has(name)) hit.add(name)
+      }
+    }
     if (/\.(?:ts|tsx)$/.test(file)) {
       const imported = importedSchemaNames(text)
       if (imported === 'namespace') {

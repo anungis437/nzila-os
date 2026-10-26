@@ -413,8 +413,8 @@ export const orgConfigurationsRelations = relations(orgConfigurations, ({ one })
 }));
 
 // org_usage is not declared here. The physical relation stays. Django does not
-// define it. The only TypeScript reader was the unwired actions/admin-actions.ts
-// module, which no longer selects it. Do not DROP the relation from this file.
+// define it. The unwired admin-actions module no longer returns a storage figure.
+// Do not DROP the relation from this file.
 
 // =====================================================
 // TYPE EXPORTS
