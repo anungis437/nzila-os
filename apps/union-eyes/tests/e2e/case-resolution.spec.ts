@@ -11,8 +11,15 @@ test.describe('UE E2E - case resolution', () => {
     await cleanupDatabaseConnections(request)
   })
 
-  test('authorized resolution is visible and invalid post-resolution mutation is blocked', async ({ request }) => {
+  test('the assigned steward resolves, an admin without a mandate cannot, and an invalid post-resolution mutation is blocked', async ({ request }) => {
+    // Case authority is a governed relationship, not a role: only the assigned handler may move the case.
     await loginAsTestUser(request, UE_E2E_USERS.admin)
+    const adminAttempt = await request.post('/api/workflow/transition', {
+      data: { claimNumber: 'UE-QA-0002', targetStatus: 'resolved', notes: 'Admin without a mandate' },
+    })
+    expect([403, 404]).toContain(adminAttempt.status())
+
+    await loginAsTestUser(request, UE_E2E_USERS.steward)
 
     const resolve = await request.post('/api/workflow/transition', {
       data: {

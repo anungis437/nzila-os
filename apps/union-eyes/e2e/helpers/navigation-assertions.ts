@@ -247,7 +247,7 @@ export async function assertSidebarActiveLabel(page: Page, label: string): Promi
  * Assert that the correct, authorised page has loaded.
  *
  * Proof requires ALL of:
- *   1. Settled URL is a /dashboard/ path (not auth or error redirect).
+ *   1. Settled URL is the dashboard or a /dashboard/ path (the member Home is /dashboard itself; not an auth or error redirect).
  *   2. At least one page-specific identity signal:
  *      (a) visible <h1> or labelled heading, OR
  *      (b) active sidebar nav link matching fallbackText and visible, OR
@@ -260,7 +260,7 @@ export async function assertHeadingOrFallback(page: Page, fallbackText: string):
   expect(
     settledUrl,
     `assertHeadingOrFallback: URL "${settledUrl}" is not a dashboard path.`,
-  ).toMatch(/\/dashboard\//);
+  ).toMatch(/\/dashboard(?:[/?#]|$)/);
 
   await expect
     .poll(

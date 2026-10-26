@@ -14,6 +14,7 @@ import { hashPassword } from '@nzila/platform-auth/password'
 import { UE_TEST_ORGS } from '@/tests/fixtures/test-orgs'
 import { UE_TEST_USERS, UE_TEST_USER_PASSWORD } from '@/tests/fixtures/test-users'
 import { UE_TEST_CASES } from '@/tests/fixtures/test-cases'
+import { seedQaCaseAssignments } from './seed-test-env-kernel'
 
 const NOW = new Date('2026-05-01T00:00:00.000Z')
 
@@ -442,6 +443,10 @@ async function seed(): Promise<void> {
       `[ue:seed:test-env] claim_updates insert skipped due schema drift: ${describePgError(error)}`,
     )
   }
+
+  // Case authority is relationship-based: give the QA steward the QA cases (synthetic fixture, audited by the store).
+  const assignments = await seedQaCaseAssignments(process.env.DATABASE_URL as string)
+  console.log(`[ue:seed:test-env] QA case assignments created: ${assignments}`)
 
   // Required containment artifacts for external UX tester access.
   console.log('[ue:seed:test-env] Seed complete')
