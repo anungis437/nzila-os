@@ -137,6 +137,7 @@ export const UNATTRIBUTABLE_WRITE_ROUTES: Record<string, { why: string; control:
   'pilot/events/route.ts': { why: 'Pilot usage telemetry stamped from the session; an audit row per usage event would flood the audit log.', control: /withRoleAuth|withApiAuth/ },
   'location/track/route.ts': { why: 'Per-ping location telemetry of a consenting member; consent, geofence and disable changes are audited.', control: /withApiAuth/ },
   'cron/external-data-sync/route.ts': { why: 'Platform-wide reference data refresh; no acting organization.', control: /cron:\s*true/ },
+  'cron/location-retention/route.ts': { why: 'Platform-wide 24-hour retention sweep over user-scoped location rows; no acting organization. Its evidence row (location_deletion_log) commits in the same system transaction, so a failed evidence write keeps the data for the next run.', control: /cron:\s*true/ },
   'whop/create-checkout/route.ts': { why: 'Creates a payment-provider checkout session for the signed-in user, who may hold no organization yet; nothing is stored here.', control: /requireUser/ },
   'organizations/switch/route.ts': { why: 'Session rotation is owned and audited by platform-auth; the legacy branch only validates membership and stores nothing.', control: /auth\(\)/ },
   'cron/sla-watchdog/route.ts': { why: 'Emits deadline events and metrics only; no acting organization.', control: /cron:\s*true|CRON_SECRET|verifyCronAuth|cronAuth/i },

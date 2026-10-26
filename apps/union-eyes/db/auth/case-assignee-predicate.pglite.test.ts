@@ -19,7 +19,7 @@ beforeAll(async () => {
     CREATE SCHEMA user_management;
     CREATE TABLE user_management.users(user_id text PRIMARY KEY,is_active boolean,lifecycle_state text);
     CREATE TABLE user_management.organization_users(user_id text,organization_id uuid,role text,is_active boolean);
-    CREATE TABLE user_management.user_sessions(user_id text,organization_id uuid,session_token_hash text,is_active boolean,expires_at timestamptz);
+    CREATE TABLE user_management.user_sessions(user_id text,organization_id uuid,session_token_hash text,is_active boolean,expires_at timestamptz,session_id uuid DEFAULT gen_random_uuid(),device_info jsonb DEFAULT '{}'::jsonb);
     ALTER TABLE user_management.users ENABLE ROW LEVEL SECURITY;
     ALTER TABLE user_management.users FORCE ROW LEVEL SECURITY;
     ALTER TABLE user_management.organization_users ENABLE ROW LEVEL SECURITY;

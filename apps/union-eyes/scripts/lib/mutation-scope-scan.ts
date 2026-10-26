@@ -62,7 +62,12 @@ export function scanUnscopedMutations(): Record<string, number> {
           else if (text[i] === ')') depth--
           i++
         }
-        scoped = /organizationId|organization_id|orgId|org_id|inOrganization|deadlineInOrganization|sourceOrganizationId/.test(text.slice(start, i - 1))
+        // Case-insensitive so a predicate such as `verifiedOrganizationId = previousOrganizationId` counts as organization-scoped.
+        // A user-owned relation is scoped by its owning user, which is the predicate its RLS policy enforces.
+        const scope = classes[table] === 'USER_RLS_REQUIRED'
+          ? /organization_?id|org_?id|inOrganization|user_?id|member_?id/i
+          : /organization_?id|org_?id|inOrganization/i
+        scoped = scope.test(text.slice(start, i - 1))
       }
       if (!scoped) {
         const key = `${rel}|${table}`

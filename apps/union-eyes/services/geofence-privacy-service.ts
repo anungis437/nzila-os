@@ -378,27 +378,28 @@ export class GeofencePrivacyService {
   }
 
   /**
-   * Delete expired location data (auto-cleanup job)
-   * Should run hourly via cron
+   * Delete expired location data (auto-cleanup job).
+   * Runs hourly from app/api/cron/location-retention under the system role: the 24-hour retention covers every
+   * member's rows, which an ordinary user-scoped session cannot see. Deletion and its evidence commit together.
    */
-  static async deleteExpiredLocationData() {
+  static async deleteExpiredLocationData(tx: RLSTx = db) {
     const now = new Date();
 
     // Delete expired location tracking records
-    const deletedTracking = await db
+    const deletedTracking = await tx
       .delete(locationTracking)
       .where(lte(locationTracking.expiresAt, now))
       .returning({ id: locationTracking.id });
 
     // Delete expired geofence events
-    const deletedEvents = await db
+    const deletedEvents = await tx
       .delete(geofenceEvents)
       .where(lte(geofenceEvents.expiresAt, now))
       .returning({ id: geofenceEvents.id });
 
     // Log deletion
     if (deletedTracking.length > 0 || deletedEvents.length > 0) {
-      await db.insert(locationDeletionLog).values({
+      await tx.insert(locationDeletionLog).values({
         deletionType: "auto_24hr",
         deletionReason: "24-hour retention policy (automatic cleanup)",
         recordCount: (deletedTracking.length + deletedEvents.length).toString(),

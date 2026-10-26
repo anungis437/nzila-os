@@ -296,7 +296,7 @@ describe('deployed v2 reader: real session predicates and the definer membership
       await db.exec(`
         DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'nzila_auth_org_authority_reader') THEN
           CREATE ROLE nzila_auth_org_authority_reader NOLOGIN NOINHERIT; END IF; END $$;
-        CREATE TABLE user_management.user_sessions (user_id text, organization_id uuid, session_token_hash text, is_active boolean, expires_at timestamptz);
+        CREATE TABLE user_management.user_sessions (user_id text, organization_id uuid, session_token_hash text, is_active boolean, expires_at timestamptz, session_id uuid DEFAULT gen_random_uuid(), device_info jsonb DEFAULT '{}'::jsonb);
         REVOKE ALL ON user_management.users, user_management.organization_users FROM union_eyes_runtime;
         ALTER TABLE user_management.users ENABLE ROW LEVEL SECURITY;
         ALTER TABLE user_management.users FORCE ROW LEVEL SECURITY;

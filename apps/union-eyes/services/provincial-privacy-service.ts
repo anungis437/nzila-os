@@ -399,44 +399,6 @@ export class ProvincialPrivacyService {
   }
 
   /**
-   * Update DSAR status
-   */
-  static async updateDSARStatus(
-    dsarId: string,
-    status: "in_progress" | "completed" | "denied",
-    assignedTo?: string
-  ) {
-    const updateData: {
-      status: "in_progress" | "completed" | "denied";
-      updatedAt: Date;
-      assignedTo?: string;
-      respondedAt?: Date;
-      deadlineMet?: boolean;
-    } = { status, updatedAt: new Date() };
-    if (assignedTo) updateData.assignedTo = assignedTo;
-
-    if (status === "completed") {
-      updateData.respondedAt = new Date();
-
-      // Check if deadline was met
-      const dsar = await db
-        .select()
-        .from(dataSubjectAccessRequests)
-        .where(eq(dataSubjectAccessRequests.id, dsarId))
-        .limit(1);
-
-      if (dsar[0]) {
-        updateData.deadlineMet = new Date() <= dsar[0].responseDeadline;
-      }
-    }
-
-    await db
-      .update(dataSubjectAccessRequests)
-      .set(updateData)
-      .where(eq(dataSubjectAccessRequests.id, dsarId));
-  }
-
-  /**
    * Get overdue DSARs (approaching 30-day deadline)
    */
   static async getOverdueDSARs() {

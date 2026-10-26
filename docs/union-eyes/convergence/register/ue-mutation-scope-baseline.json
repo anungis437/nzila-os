@@ -4,20 +4,15 @@
   "entries": {
     "app/api/payments/webhooks/stripe/route.ts|workbooks": 1,
     "app/api/workbook/[id]/claim/route.ts|workbooks": 1,
-    "lib/pilot/pilot-ownership.ts|pilot_applications": 2,
+    "lib/pilot/pilot-ownership.ts|pilot_applications": 1,
     "lib/services/external-data/clc-partnership-service.ts|clc_sync_log": 1,
     "lib/services/geofence-privacy-service.ts|location_tracking": 1,
-    "lib/services/geofence-privacy-service.ts|member_location_consent": 1,
-    "lib/services/location-tracking-service.ts|location_tracking": 2,
-    "lib/services/location-tracking-service.ts|member_location_consent": 2,
+    "lib/services/location-tracking-service.ts|location_tracking": 1,
     "services/financial-service/src/jobs/arrears-management-workflow.ts|dues_transactions": 1,
     "services/financial-service/src/jobs/payment-collection-workflow.ts|dues_transactions": 1,
     "services/financial-service/src/jobs/payment-collection-workflow.ts|payments": 3,
     "services/financial-service/src/services/notification-service.ts|notification_queue": 2,
-    "services/geofence-privacy-service.ts|geofence_events": 2,
-    "services/geofence-privacy-service.ts|location_tracking": 2,
-    "services/geofence-privacy-service.ts|member_location_consent": 2,
-    "services/provincial-privacy-service.ts|data_subject_access_requests": 1,
-    "services/provincial-privacy-service.ts|provincial_consent": 1
+    "services/geofence-privacy-service.ts|geofence_events": 1,
+    "services/geofence-privacy-service.ts|location_tracking": 1
   }
 }
