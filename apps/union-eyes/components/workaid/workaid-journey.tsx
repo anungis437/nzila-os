@@ -39,6 +39,7 @@ interface ConsentRow {
   referred: boolean
   referralWithdrawn: boolean
   counselAccepted: boolean
+  releasedCategories?: string[]
   documentAuthorisations: DocumentAuth[]
 }
 
@@ -47,6 +48,15 @@ interface Referable {
   categories: string[]
   purpose: string
   expiresAt: string
+}
+
+interface RecordedReferral {
+  matterId: string
+  purpose: string
+  referredCategories: string[]
+  releasedCategories: string[]
+  withdrawn: boolean
+  counselAccepted: boolean
 }
 
 interface WordingProposal {
@@ -73,6 +83,23 @@ function asReferable(value: unknown): Referable[] {
   return value as Referable[]
 }
 
+function asRecorded(value: unknown): RecordedReferral[] {
+  if (!Array.isArray(value)) return []
+  return value as RecordedReferral[]
+}
+
+function releasableCategories(row: RecordedReferral): string[] {
+  const released = new Set(row.releasedCategories)
+  return row.referredCategories.filter((category) => category !== 'documents' && !released.has(category))
+}
+
+function labelled(categories: readonly string[], translate: (key: `category.${(typeof WORKAID_UI_CATEGORIES)[number]}`) => string): string {
+  return categories.map((category) => {
+    const known = WORKAID_UI_CATEGORIES.find((item) => item === category)
+    return known ? translate(`category.${known}`) : category
+  }).join(', ')
+}
+
 export function WorkAidJourney({ audience }: { audience: Audience }) {
   const t = useTranslations('workAidPage')
   const [consents, setConsents] = useState<ConsentRow[]>([])
@@ -90,6 +117,9 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
   const [matterForDocument, setMatterForDocument] = useState('')
   const [staffCaseId, setStaffCaseId] = useState('')
   const [referable, setReferable] = useState<Referable[]>([])
+  const [recorded, setRecorded] = useState<RecordedReferral[]>([])
+  const [caseReviewed, setCaseReviewed] = useState(false)
+  const [scopeChoice, setScopeChoice] = useState<Record<string, string[]>>({})
   const [proposals, setProposals] = useState<WordingProposal[]>([])
   const [wordingVersion, setWordingVersion] = useState('')
   const [wordingBody, setWordingBody] = useState('')
@@ -203,10 +233,32 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
     const result = await readJson(await fetch(`/api/workaid/referrals?caseId=${encodeURIComponent(staffCaseId)}`))
     if (!result.ok) {
       setReferable([])
+      setRecorded([])
+      setCaseReviewed(false)
       setError(String(result.data.code ?? result.data.error ?? result.status))
       return
     }
-    setReferable(asReferable(result.data.referable))
+    const next = asReferable(result.data.referable)
+    setReferable(next)
+    setRecorded(asRecorded(result.data.recorded))
+    setScopeChoice((current) => {
+      const kept: Record<string, string[]> = {}
+      for (const row of next) kept[row.matterId] = current[row.matterId] ?? row.categories
+      return kept
+    })
+    setCaseReviewed(true)
+  }
+
+  function chosenCategories(row: Referable): string[] {
+    return scopeChoice[row.matterId] ?? row.categories
+  }
+
+  function toggleCategory(row: Referable, category: string, checked: boolean) {
+    setScopeChoice((current) => {
+      const existing = current[row.matterId] ?? row.categories
+      const next = checked ? [...existing, category] : existing.filter((item) => item !== category)
+      return { ...current, [row.matterId]: [...new Set(next)] }
+    })
   }
 
   async function referOwn(row: ConsentRow) {
@@ -269,10 +321,30 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
 
   async function refer(row: Referable) {
     setNotice(null)
+    const categories = chosenCategories(row)
+    if (categories.length === 0) return
     const result = await readJson(await fetch('/api/workaid/referrals', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ matterId: row.matterId, categories: row.categories }),
+      body: JSON.stringify({ matterId: row.matterId, categories }),
+    }))
+    if (!result.ok || result.data.delivered !== false || result.data.counselAcknowledged !== false) {
+      setError(String(result.data.code ?? result.data.error ?? result.status))
+      return
+    }
+    setNotice(t('recordedUnionSide'))
+    await loadReferable()
+  }
+
+  async function release(row: RecordedReferral) {
+    const categories = releasableCategories(row)
+    setNotice(null)
+    setError(null)
+    if (categories.length === 0) return
+    const result = await readJson(await fetch('/api/workaid/shares', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ matterId: row.matterId, categories }),
     }))
     if (!result.ok || result.data.delivered !== false || result.data.counselAcknowledged !== false) {
       setError(String(result.data.code ?? result.data.error ?? result.status))
@@ -331,6 +403,7 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
               <p className="text-sm">{t('status')}: {t(`state.${row.state}`)}</p>
               <p className="text-sm">{row.referred ? t('referred') : t('notReferred')}{row.referralWithdrawn ? ` · ${t('withdrawn')}` : ''}</p>
               <p className="text-sm">{row.counselAccepted ? t('counselAccepted') : t('counselNotAccepted')}</p>
+              <p className="text-sm">{(row.releasedCategories ?? []).length > 0 ? `${t('memberReleased')}: ${labelled(row.releasedCategories ?? [], t)}` : t('memberReleaseNone')}</p>
               <p className="text-sm">{t('requiredIntake')}</p>
               <ul className="flex flex-col gap-2">
                 {row.documentAuthorisations.length === 0 ? <li>{t('documentsEmpty')}</li> : row.documentAuthorisations.map((doc) => (
@@ -368,10 +441,42 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
           {referable.map((row) => (
             <article key={row.matterId} className="flex flex-col gap-2 rounded-md border p-3">
               <p className="text-sm">{row.purpose}</p>
-              <p className="text-sm">{row.categories.join(', ')}</p>
-              <Button type="button" className="w-full sm:w-auto" onClick={() => void refer(row)}>{t('refer')}</Button>
+              <fieldset className="flex flex-col gap-1 text-sm">
+                <legend>{t('referredScope')}</legend>
+                {row.categories.map((category) => (
+                  <label key={category} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={chosenCategories(row).includes(category)}
+                      onChange={(event) => toggleCategory(row, category, event.target.checked)}
+                    />
+                    {t(`category.${category}`)}
+                  </label>
+                ))}
+              </fieldset>
+              <Button type="button" className="w-full sm:w-auto" disabled={chosenCategories(row).length === 0} onClick={() => void refer(row)}>{t('refer')}</Button>
             </article>
           ))}
+          {caseReviewed ? (
+            <section className="flex flex-col gap-3" data-testid="recorded-referrals">
+              <h2 className="text-lg font-medium">{t('recordedTitle')}</h2>
+              {recorded.length === 0 ? <p>{t('recordedEmpty')}</p> : null}
+              {recorded.map((row) => (
+                <article key={row.matterId} className="flex flex-col gap-2 rounded-md border p-3" data-testid="recorded-referral">
+                  <p className="text-sm">{row.purpose}</p>
+                  <p className="text-sm">{t('referredScope')}: {labelled(row.referredCategories, t)}</p>
+                  <p className="text-sm">{row.withdrawn ? t('withdrawn') : t('referred')}</p>
+                  <p className="text-sm">{row.counselAccepted ? t('counselAccepted') : t('counselNotAccepted')}</p>
+                  <p className="text-sm">{row.releasedCategories.length > 0 ? `${t('releasedScope')}: ${labelled(row.releasedCategories, t)}` : t('releasedNone')}</p>
+                  <p className="text-sm">{t('notDelivered')}</p>
+                  {row.referredCategories.includes('documents') ? <p className="text-sm">{t('documentsStayWithMember')}</p> : null}
+                  {releasableCategories(row).length > 0 && !row.withdrawn ? (
+                    <Button type="button" className="w-full sm:w-auto" onClick={() => void release(row)}>{t('releaseScope')}</Button>
+                  ) : null}
+                </article>
+              ))}
+            </section>
+          ) : null}
           <section className="flex flex-col gap-3" data-testid="wording-adoption">
             <h2 className="text-lg font-medium">{t('wordingTitle')}</h2>
             <p className="text-sm text-muted-foreground">{t('wordingIntro')}</p>

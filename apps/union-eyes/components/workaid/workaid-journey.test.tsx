@@ -135,4 +135,68 @@ describe('WorkAidJourney', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Adopter ce texte' }))
     expect(await screen.findByRole('status')).toHaveTextContent('texte de consentement en vigueur')
   })
+
+  it('sends only the categories a representative leaves selected', async () => {
+    const bodies: unknown[] = []
+    vi.stubGlobal('fetch', vi.fn(async (_url: string, init?: RequestInit) => {
+      if ((init?.method ?? 'GET') === 'POST') {
+        bodies.push(JSON.parse(String(init?.body)))
+        return Response.json({ success: true, delivered: false, counselAcknowledged: false }, { status: 201 })
+      }
+      return Response.json({
+        success: true,
+        referable: [{ matterId: '22222222-2222-4222-8222-222222222222', categories: ['case_summary', 'case_timeline'], purpose: 'wage review', expiresAt: '2027-01-01T00:00:00.000Z' }],
+        recorded: [],
+      })
+    }))
+    renderJourney('staff')
+    fireEvent.change(screen.getByLabelText('Case to review'), { target: { value: '33333333-3333-4333-8333-333333333333' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Show matters you may refer' }))
+    fireEvent.click(await screen.findByRole('checkbox', { name: 'Case timeline' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Record referral' }))
+    await screen.findByRole('status')
+    expect(bodies[0]).toEqual({ matterId: '22222222-2222-4222-8222-222222222222', categories: ['case_summary'] })
+  })
+
+  it('releases a recorded non-document category and rejects a response that claims counsel delivery', async () => {
+    const calls: string[] = []
+    vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
+      calls.push(`${init?.method ?? 'GET'} ${url}`)
+      if (String(url).includes('/shares')) {
+        const sent = JSON.parse(String(init?.body))
+        expect(sent).toEqual({ matterId: '22222222-2222-4222-8222-222222222222', categories: ['case_summary'] })
+        return Response.json({ success: true, delivered: true, counselAcknowledged: false }, { status: 201 })
+      }
+      return Response.json({
+        success: true,
+        referable: [],
+        recorded: [{
+          matterId: '22222222-2222-4222-8222-222222222222',
+          purpose: 'wage review',
+          referredCategories: ['case_summary', 'documents'],
+          releasedCategories: [],
+          withdrawn: false,
+          counselAccepted: false,
+        }],
+      })
+    }))
+    renderJourney('staff', 'fr')
+    fireEvent.change(screen.getByLabelText('Dossier à examiner'), { target: { value: '33333333-3333-4333-8333-333333333333' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Afficher les affaires que vous pouvez signaler' }))
+    expect(await screen.findByText(/Les documents restent avec le membre/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Communiquer cette portée' }))
+    expect(await screen.findByRole('alert')).toBeInTheDocument()
+    expect(screen.queryByText('Enregistré du côté syndical seulement')).not.toBeInTheDocument()
+    expect(calls.some((call) => call.startsWith('POST') && call.includes('/api/workaid/shares'))).toBe(true)
+  })
+
+  it('shows a member when a category was released and when none was', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+      if (String(url).includes('consent-text')) return Response.json({ success: false, code: 'CONSENT_TEXT_UNAVAILABLE' }, { status: 409 })
+      return Response.json({ success: true, consents: [{ ...consent, referred: true, releasedCategories: ['case_summary'] }] })
+    }))
+    renderJourney('member')
+    expect(await screen.findByText(/Released on the union side: Case summary/)).toBeInTheDocument()
+    expect(screen.getByTestId('workaid-boundary')).toHaveTextContent('nothing here is transmitted')
+  })
 })

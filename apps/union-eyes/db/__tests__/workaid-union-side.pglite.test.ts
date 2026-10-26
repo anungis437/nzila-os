@@ -20,6 +20,7 @@ import {
   grantWorkAidConsent,
   listOpenConsentWordingProposals,
   proposeConsentWording,
+  listCaseWorkAidReferrals,
   listMemberWorkAidConsents,
   listReferableWorkAidConsents,
   loadCurrentConsentText,
@@ -269,6 +270,26 @@ describe('referral: consent first, then an authorised referrer', () => {
     expect(await audits('refer')).toBe(before + 1)
     await expect(refer(rep.user, matterId)).rejects.toThrow(/already been referred/)
     expect(consentId).toBeTruthy()
+  })
+
+  it('shows a recorded referral only to a principal the kernel still allows, without member or referrer identity', async () => {
+    const c = await newCase()
+    const rep = await newRep(c)
+    const { matterId } = await grant(c, { categories: ['case_summary', 'case_timeline'] })
+    await refer(rep.user, matterId, ['case_summary'])
+    const seen = await k.as(rep.user)((t) => listCaseWorkAidReferrals(t, k.deps, { organizationId: ORG, actorUserId: rep.user, caseId: c }))
+    expect(seen).toEqual([expect.objectContaining({ matterId, referredCategories: ['case_summary'], releasedCategories: [], withdrawn: false, counselAccepted: false })])
+    expect(JSON.stringify(seen)).not.toContain(U.member)
+    expect(JSON.stringify(seen)).not.toContain(rep.user)
+    expect(await k.as(U.steward2)((t) => listCaseWorkAidReferrals(t, k.deps, { organizationId: ORG, actorUserId: U.steward2, caseId: c }))).toEqual([])
+    expect(await k.as(U.steward, ORG_B)((t) => listCaseWorkAidReferrals(t, k.deps, { organizationId: ORG_B, actorUserId: U.steward, caseId: c }))).toEqual([])
+    await share(rep.user, matterId, { categories: ['case_summary'] })
+    const released = await k.as(rep.user)((t) => listCaseWorkAidReferrals(t, k.deps, { organizationId: ORG, actorUserId: rep.user, caseId: c }))
+    expect(released[0].releasedCategories).toEqual(['case_summary'])
+    const mine = await k.as(U.member)((t) => listMemberWorkAidConsents(t, k.deps, { organizationId: ORG, memberUserId: U.member }))
+    expect(mine.find((row) => row.matterId === matterId)?.releasedCategories).toEqual(['case_summary'])
+    await k.as(rep.user)((t) => declareOwnRecusal(t, { organizationId: ORG, principalUserId: rep.user, resourceType: 'case', resourceId: c, reason: 'conflict of interest' }))
+    expect(await k.as(rep.user)((t) => listCaseWorkAidReferrals(t, k.deps, { organizationId: ORG, actorUserId: rep.user, caseId: c }))).toEqual([])
   })
 
   it('the member refers their own matter (creator relationship); a different member cannot', async () => {

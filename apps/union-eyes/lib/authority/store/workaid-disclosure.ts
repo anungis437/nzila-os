@@ -23,6 +23,7 @@ import {
   MAX_PURPOSE_LENGTH,
   normaliseCategories,
   SHAREABLE_DOCUMENT_CLASSES,
+  WORKAID_CATEGORIES,
   type CounselManifest,
   type WorkAidCategory,
   type WorkAidRefusalCode,
@@ -494,6 +495,110 @@ export async function listReferableWorkAidConsents(
   return out
 }
 
+export interface CaseWorkAidReferralView {
+  matterId: string
+  purpose: string
+  referredCategories: WorkAidCategory[]
+  releasedCategories: WorkAidCategory[]
+  expiresAt: Date
+  referredAt: Date
+  withdrawn: boolean
+  counselAccepted: boolean
+}
+
+function knownCategories(value: unknown): WorkAidCategory[] {
+  let tokens: string[] = []
+  if (Array.isArray(value)) tokens = value.map(String)
+  else if (typeof value === 'string' && value.trim().startsWith('[')) {
+    try {
+      const parsed = JSON.parse(value) as unknown
+      if (Array.isArray(parsed)) tokens = parsed.map(String)
+    } catch {
+      tokens = []
+    }
+  } else if (typeof value === 'string') {
+    try {
+      tokens = parsePgTextArray(value)
+    } catch {
+      tokens = []
+    }
+  }
+  return WORKAID_CATEGORIES.filter((category) => tokens.includes(category))
+}
+
+async function referredCategories(exec: SqlExecutor, organizationId: string, matterId: string, fallback: WorkAidCategory[]): Promise<WorkAidCategory[]> {
+  const row = (
+    await exec.query<Row>(
+      `SELECT details -> 'categories' AS categories
+         FROM public.audit_logs
+        WHERE organization_id = $1 AND action = 'authority.workaid.refer' AND resource_id = $2
+        ORDER BY created_at DESC
+        LIMIT 1`,
+      [organizationId, matterId],
+    )
+  ).rows[0]
+  const recorded = row ? knownCategories(row.categories) : []
+  return recorded.length > 0 ? recorded : fallback
+}
+
+async function liveReleasedCategories(exec: SqlExecutor, organizationId: string, matterId: string): Promise<WorkAidCategory[]> {
+  const rows = (
+    await exec.query<Row>(
+      `SELECT categories FROM ue_authority_workaid_shares
+        WHERE organization_id = $1 AND matter_id = $2 AND invalidated_at IS NULL`,
+      [organizationId, matterId],
+    )
+  ).rows
+  const released = new Set<string>()
+  for (const row of rows) for (const category of knownCategories(row.categories)) released.add(category)
+  return WORKAID_CATEGORIES.filter((category) => released.has(category))
+}
+
+/**
+ * Recorded referrals on one case. The kernel must still allow `workaid:refer` for this principal and the recorded
+ * categories. A recused, removed, unrelated or cross-tenant caller receives an empty list, the same shape as a case
+ * with no referral. The payload names the matter, the referred scope and the categories released on the union side.
+ * It does not name the member or the referrer, and it does not contact counsel.
+ */
+export async function listCaseWorkAidReferrals(
+  exec: SqlExecutor,
+  deps: EnforcementDeps,
+  i: { organizationId: string; actorUserId: string; caseId: string },
+): Promise<CaseWorkAidReferralView[]> {
+  requireUuids(i.organizationId, i.caseId)
+  requirePrincipals(i.actorUserId)
+  await bindSessionActor(exec, i.actorUserId, 'representative')
+  const now = clock(deps)
+  const matters = (
+    await exec.query<Row>(
+      `SELECT id::text AS matter_id, referred_at, withdrawn_at, counsel_accepted_at
+         FROM ue_authority_workaid_matters
+        WHERE organization_id = $1 AND case_id = $2
+        ORDER BY referred_at DESC`,
+      [i.organizationId, i.caseId],
+    )
+  ).rows
+  const out: CaseWorkAidReferralView[] = []
+  for (const matter of matters) {
+    const grant = await loadGrantByMatter(exec, i.organizationId, String(matter.matter_id))
+    if (!grant || grant.caseId !== i.caseId) continue
+    const categories = await referredCategories(exec, i.organizationId, grant.matterId, grant.categories)
+    const decision = await referralDecision(exec, deps, { organizationId: i.organizationId, actorUserId: i.actorUserId, grant, categories, now })
+    if (decision.effect !== 'allow') continue
+    out.push({
+      matterId: grant.matterId,
+      purpose: grant.purpose,
+      referredCategories: categories,
+      releasedCategories: await liveReleasedCategories(exec, i.organizationId, grant.matterId),
+      expiresAt: grant.expiresAt,
+      referredAt: toDate(matter.referred_at),
+      withdrawn: Boolean(matter.withdrawn_at),
+      counselAccepted: Boolean(matter.counsel_accepted_at),
+    })
+  }
+  return out
+}
+
 /**
  * Records the referral of a consented matter. The member and the case come from the consent record, never from the
  * caller. The kernel decides: an active member who is EITHER a representative with a live owner/assignee relationship
@@ -759,6 +864,8 @@ export interface MemberWorkAidConsentView {
   referred: boolean
   referralWithdrawn: boolean
   counselAccepted: boolean
+  /** Categories with a live union-side share. Empty after revocation. This is not delivery to counsel. */
+  releasedCategories: WorkAidCategory[]
   documentAuthorisations: { id: string; documentId: string; classification: string; expiresAt: Date; revoked: boolean }[]
 }
 
@@ -790,6 +897,7 @@ export async function listMemberWorkAidConsents(exec: SqlExecutor, deps: Deps, i
       referred: !!m,
       referralWithdrawn: !!m?.withdrawn_at,
       counselAccepted: !!m?.counsel_accepted_at,
+      releasedCategories: await liveReleasedCategories(exec, i.organizationId, g.matterId),
       documentAuthorisations: docs.map((d) => ({ id: String(d.id), documentId: String(d.document_id), classification: String(d.classification), expiresAt: toDate(d.expires_at), revoked: !!d.revoked_at })),
     })
   }
