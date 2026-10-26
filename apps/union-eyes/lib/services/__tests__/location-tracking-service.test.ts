@@ -52,7 +52,7 @@ vi.mock('@/lib/logger', () => ({
 
 // ── Imports ──────────────────────────────────────────────────────────────────
 
-import { LocationTrackingService, scheduledLocationPurge } from '../location-tracking-service';
+import { LocationTrackingService } from '../location-tracking-service';
 
 // ── Tests ────────────────────────────────────────────────────────────────────
 
@@ -185,16 +185,6 @@ describe('LocationTrackingService', () => {
     });
   });
 
-  // ── purgeExpiredLocations ──────────────────────────────────────────────────
-  describe('purgeExpiredLocations', () => {
-    it('returns deleted count', async () => {
-      mocks.mockDelete.mockReturnValue(chain([{ id: 'loc-1' }, { id: 'loc-2' }]));
-      const result = await service.purgeExpiredLocations();
-      expect(result.deletedCount).toBe(2);
-      expect(result.message).toContain('Purged 2');
-    });
-  });
-
   // ── purgeLocationData ──────────────────────────────────────────────────────
   describe('purgeLocationData', () => {
     it('deletes all data for member', async () => {
@@ -264,19 +254,6 @@ describe('LocationTrackingService', () => {
   });
 });
 
-// ── scheduledLocationPurge ───────────────────────────────────────────────────
-describe('scheduledLocationPurge', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mocks.mockDelete.mockReturnValue(chain([]));
-  });
-
-  it('calls purge and logs result', async () => {
-    const result = await scheduledLocationPurge();
-    expect(result.deletedCount).toBe(0);
-  });
-});
-
 // ── Batch 37: uncovered branch & function coverage ─────────────────────────
 describe('Batch 37 branch coverage', () => {
   let service: LocationTrackingService;
@@ -319,12 +296,5 @@ describe('Batch 37 branch coverage', () => {
     }, 'strike_line_tracking');
     expect(result.success).toBe(true);
     expect(result.locationId).toBe('loc-3');
-  });
-
-  it('purgeExpiredLocations deletes expired records', async () => {
-    mocks.mockDelete.mockReturnValue(chain([{ id: 'loc-old-1' }, { id: 'loc-old-2' }]));
-    const result = await service.purgeExpiredLocations();
-    expect(result.deletedCount).toBe(2);
-    expect(result.message).toContain('Purged 2 expired');
   });
 });

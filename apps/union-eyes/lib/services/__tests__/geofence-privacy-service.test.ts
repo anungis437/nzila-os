@@ -40,7 +40,6 @@ vi.mock("drizzle-orm", () => ({
 import {
   requestLocationPermission,
   trackLocation,
-  purgeExpiredLocations,
   revokeLocationConsent,
   getLocationConsentStatus,
   verifyNoBackgroundTracking,
@@ -146,21 +145,6 @@ describe("geofence-privacy-service", () => {
       // .catch(() => null) ⇒ consent is null ⇒ returns consent error
       expect(result.success).toBe(false);
       expect(result.error).toContain("explicit opt-in consent");
-    });
-  });
-
-  // ── purgeExpiredLocations ────────────────────────────────────────────────
-  describe("purgeExpiredLocations", () => {
-    it("returns purge result", async () => {
-      const result = await purgeExpiredLocations();
-      expect(result.message).toContain("purged");
-      expect(mocks.mockDelete).toHaveBeenCalled();
-    });
-
-    it("handles error gracefully", async () => {
-      mocks.mockDeleteWhere.mockRejectedValueOnce(new Error("fail"));
-      const result = await purgeExpiredLocations();
-      expect(result.message).toContain("Error");
     });
   });
 

@@ -9,7 +9,7 @@
  */
 
 import { db } from '@/db';
-import { eq, lte } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { memberLocationConsent, locationTracking } from '@/db/schema/geofence-privacy-schema';
 
 export interface LocationConsentRequest {
@@ -116,31 +116,6 @@ export async function trackLocation(
     return {
       success: false,
       error: `Failed to track location: ${error}`
-    };
-  }
-}
-
-/**
- * Purge expired location data (run hourly)
- * Ensures data is not kept longer than 24 hours
- */
-export async function purgeExpiredLocations(): Promise<{
-  purgedCount: number;
-  message: string;
-}> {
-  try {
-    const _result = await db
-      .delete(locationTracking)
-      .where(lte(locationTracking.expiresAt, new Date()));
-
-    return {
-      purgedCount: 0, // Drizzle doesn&apos;t return count, but deletion happened
-      message: 'Expired location data purged (24-hour TTL enforced)'
-    };
-  } catch (error) {
-    return {
-      purgedCount: 0,
-      message: `Error purging locations: ${error}`
     };
   }
 }
