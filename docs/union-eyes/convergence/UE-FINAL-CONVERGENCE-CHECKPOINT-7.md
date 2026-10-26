@@ -56,6 +56,21 @@ Native runs prove real roles and grants (runtime role cannot delete, truncate or
 
 The vitest worker-start timeout (`documents-console.journey.test.tsx`) did not recur in the full suite at `a7c5d7532` or in the root run at `61812e606`; it remains a machine-load artefact, not a closed defect.
 
+## Remote CI findings (first PR #996 run, after the pushes above)
+
+The first remote run exposed defects that local runs on Windows could not. Each was reproduced locally and fixed at the cause; none was suppressed.
+
+| Finding | Cause | Fix |
+| --- | --- | --- |
+| **`apps/union-eyes/app/api/documents/repository/downloads/route.ts` was never committed** | `.gitignore` carried the Python-packaging pattern `downloads/`, which silently excluded the bulk-download route (Cursor finding B3: per-document authorization, partial-success reporting). The file existed only in the local working tree, so every local suite passed while the route was absent from every commit and from CI. `git log --all` shows no commit ever contained it. | `.gitignore` now exempts Next.js API route folders; the route is tracked (`82c2ac3ac`). A scan of ignored-but-present files under `apps`, `packages`, `tooling` and `docs/union-eyes` found no other file. |
+| E2E bootstrap failed (`platform 0014 fail-closed: public.message_threads does not exist`) | The synthetic CI database ran only the Drizzle bootstrap; platform SQL from 0013 onward extends Django-owned tables. | Django migrates first in the E2E workflow (as in production and in the native proofs). Verified locally on a fresh PostgreSQL 15 database (Django migrate, Drizzle bootstrap, `seed:test-env`); the CI run is the remaining proof. |
+| Agent-coordination contract failed in CI | It proves commit ancestry; the contract jobs used a shallow checkout. | Both contract jobs check out with `fetch-depth: 0`. |
+| Canonical-schema verify, script-alias guard, ops snapshot age, GA in-memory-Map gate, auth-authority README declaration, red-team org-scope heuristic | Stale manifest (`organization_id` on two clause-library tables that the runtime does not have), a thin wrapper alias, a 9-day-old evidence snapshot, three static or one-shot `Map` declarations, a superseded README sentence, five retired 501 routes the heuristic could not recognise. | Manifest republished from the runtime-schema oracle, alias inlined, snapshot regenerated, `ga-check:exempt` with reasons, validator updated to the Entra declaration, helper recognised (`0ab02de16`, `82c2ac3ac`). |
+
+Still failing remotely and **not** changed by this branch: `Dependency Audit`, `pnpm audit` and `Trivy` (unwaived advisories; `Dependency Audit` already failed on `main` at `0c994b968`), and `Security Design Review Required`, which needs a human `security-design-reviewed` label from @nzila/security.
+
+The document integration verdict stays `PASS` (engineering only), but its evidence was weaker than recorded until this fix: the bulk-download route and its tests had run only from an untracked working-tree file. They are now tracked and must be qualified at the committed SHA by the remote run.
+
 ## Readiness verdicts (independent)
 
 | Verdict | State |
