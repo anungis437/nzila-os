@@ -10,7 +10,7 @@
   "banner": [
     "PROPOSED NEW BASELINE. NOT A RECOVERED ORIGINAL. NOT FROZEN. NOT ADOPTED.",
     "The original canonical document for this persona was not recovered. This document is a new design prepared from recovered evidence, existing frozen persona contracts and the executable authority contracts, for product specification review.",
-    "It grants no authority. Every institutional authority decision it names is outstanding and the behaviour it describes stays inactive until a duly authorized body adopts the decision."
+    "It grants no authority. Every institutional authority decision it names is outstanding. Engineering implementation and synthetic authorized-path testing are permitted. Production or institutional activation of the authority a decision governs is prohibited until a duly authorized body adopts the decision."
   ],
   "labels": {
     "HISTORICALLY_EVIDENCED": "The identifier is individually evidenced by a recovered historical record. Only the identifier and the recorded title or status are historical; the specification is new.",
@@ -278,7 +278,7 @@
       "kernelActions": [
         "finance:prepare"
       ],
-      "definition": "A live financial mandate that names the account and the prepare duty. The preparer cannot approve the same transaction.",
+      "definition": "A live financial mandate that names the account and the prepare duty. The implemented software rule SEP-SW-01 stops a preparer approving the same transaction; whether an institution adopts that separation is outstanding.",
       "source": "apps/union-eyes/lib/authority/policies/finance.ts",
       "requiresInstitutionalInstrument": true
     },
@@ -287,7 +287,7 @@
       "kernelActions": [
         "finance:approve"
       ],
-      "definition": "A live financial mandate that names the account and the approve duty, within its monetary limit and currency. The approver is not the preparer or the executor of the same transaction and is not a party to it.",
+      "definition": "A live financial mandate that names the account and the approve duty, within its monetary limit and currency. The implemented software rules SEP-SW-01 and SEP-SW-02 refuse an approver who prepared the same transaction or who later executes it. An adverse party is refused. Institutional adoption of the separation is outstanding.",
       "source": "apps/union-eyes/lib/authority/policies/finance.ts",
       "requiresInstitutionalInstrument": true
     },
@@ -296,7 +296,7 @@
       "kernelActions": [
         "finance:execute"
       ],
-      "definition": "A live financial mandate that names the account and the execute duty. Execution is the money movement itself and happens only in the route that moves the money. The executor is neither the approver nor the later reconciler.",
+      "definition": "A live financial mandate that names the account and the execute duty. Execution is the money movement itself and happens only in the route that moves the money. The implemented software rules SEP-SW-02 and SEP-SW-03 refuse an executor who prepared or approved the same transaction, and a reconciler who took part in it. Institutional adoption is outstanding.",
       "source": "apps/union-eyes/lib/authority/policies/finance.ts",
       "requiresInstitutionalInstrument": true
     },
@@ -305,7 +305,7 @@
       "kernelActions": [
         "finance:reconcile"
       ],
-      "definition": "A live financial mandate that names the account and the reconcile duty. The reconciler did not execute the transaction.",
+      "definition": "A live financial mandate that names the account and the reconcile duty. The implemented software rule SEP-SW-03 refuses a reconciler who took part in the same transaction. Institutional adoption is outstanding.",
       "source": "apps/union-eyes/lib/authority/policies/finance.ts",
       "requiresInstitutionalInstrument": true
     },
@@ -314,7 +314,7 @@
       "kernelActions": [
         "finance:audit"
       ],
-      "definition": "A live financial mandate that names the account and the audit duty. The auditor took no part in the transaction audited.",
+      "definition": "A live financial mandate that names the account and the audit duty. The implemented software rule SEP-SW-04 refuses an auditor who took part in the same transaction. Institutional adoption is outstanding.",
       "source": "apps/union-eyes/lib/authority/policies/finance.ts",
       "requiresInstitutionalInstrument": true
     },
@@ -330,7 +330,7 @@
     "FINANCIAL_MANDATE_ADMINISTRATION": {
       "domain": "finance",
       "kernelActions": [],
-      "definition": "Issuance, acceptance, suspension and revocation of a financial mandate under a live issuance rule. The issuer, the holder and the approver are three different people; the holder activates; an expired term is not activated. No mandate is issued from a request body or derived from a role title.",
+      "definition": "Issuance, acceptance, suspension and revocation of a financial mandate under a live issuance rule. The implemented software rule SEP-SW-07 requires the issuer, the holder and the approver to be three different people, and SEP-SW-08 stops the issuer and approver activating the mandate; that is evidence of a software rule and not proof that an institution adopted it. The holder activates; an expired term is not activated. No mandate is issued from a request body or derived from a role title.",
       "source": "apps/union-eyes/lib/finance/financial-mandate-lifecycle.ts",
       "requiresInstitutionalInstrument": true
     },
@@ -376,6 +376,42 @@
       "requiresInstitutionalInstrument": false
     }
   },
+  "authorityStatesVocabulary": {
+    "rule": "An outstanding institutional authority decision does not stop engineering. It stops production or institutional activation of the authority the decision governs.",
+    "states": {
+      "ENGINEERING_IMPLEMENTATION": "PERMITTED. Drafts, queues, previews, read models, refusal paths and positive paths may be built.",
+      "SYNTHETIC_AUTHORIZED_PATH_TESTING": "PERMITTED. A positive path may be demonstrated with test-issued authority in a synthetic organization that is marked synthetic and holds no real member, money or privileged record.",
+      "PRODUCTION_INSTITUTIONAL_ACTIVATION": "PROHIBITED until a duly authorized body adopts the decision. No real organization receives the authority.",
+      "EXTERNAL_OR_INSTITUTIONAL_ADOPTION": "REQUIRED. The decision is settled outside this repository and is recorded here only as outstanding."
+    },
+    "syntheticAuthority": {
+      "scope": "SYNTHETIC_ORGANIZATIONS_ONLY",
+      "mayBeIssuedInRealOrganization": false,
+      "note": "Test-issued authority exists only inside a test fixture. It is never copied into, derived from or promoted to a real organization."
+    }
+  },
+  "prohibitedWithoutInstitutionalAdoption": [
+    {
+      "id": "REAL_FINANCIAL_MANDATES",
+      "prohibited": "Issuing a real financial mandate. FINANCIAL_MANDATES_NOT_ISSUED stays the answer."
+    },
+    {
+      "id": "INSTITUTIONAL_OFFICES",
+      "prohibited": "Establishing, naming or filling an institutional office, including a steward office."
+    },
+    {
+      "id": "REAL_PAYMENTS",
+      "prohibited": "Authorizing or executing a real payment, payment rail or export to an external accounting system."
+    },
+    {
+      "id": "PRIVILEGED_DISCLOSURE",
+      "prohibited": "Disclosing privileged, counsel-controlled or third-party restricted material to anyone."
+    },
+    {
+      "id": "COUNSEL_EXECUTION",
+      "prohibited": "Activating counsel execution or transmitting anything to counsel. UE-CONV-G-003 stays an external gate."
+    }
+  ],
   "evidenceUse": {
     "S1": "Names one combined steward and staff experience in the first Representative 2.2 record. Used to align steward navigation with the seven staff destinations.",
     "S2": "Places the steward at level 1 of the policy layer and lists no steward actions. Used to keep steward authority narrower than chief steward and above.",
@@ -404,7 +440,8 @@
       "resource": "The steward’s own queue entries across cases and conversations they hold.",
       "preconditions": [
         "The signed-in principal has a live membership in the active organization.",
-        "The destination resolves to a real page with a truthful state; an entry whose destination would be unavailable is not shown."
+        "The destination resolves to a real page with a truthful state; an entry whose destination would be unavailable is not shown.",
+        "At least one capability behind this destination is usable by the principal now. If none is, the entry is not shown and nothing is advertised."
       ],
       "permittedAction": "Enter Today and see only the facts the steward’s own relationships and designations allow.",
       "persistedResult": "None. Entering a destination persists nothing.",
@@ -422,7 +459,7 @@
         "classId": "PRIV_NONE",
         "note": "The entry itself exposes nothing. The destination applies the privacy class of each action it offers."
       },
-      "userVisibleOutcome": "Today opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other.",
+      "userVisibleOutcome": "Today opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable.",
       "denialAndRecovery": {
         "class": "FAIL_CLOSED_NO_WRITE",
         "behavior": "Without an active organization the steward is redirected and nothing is loaded. A failed read shows an error with retry."
@@ -462,6 +499,42 @@
         "openQuestionIds": [
           "DEC-PD-02"
         ]
+      },
+      "authorityDerivedFrom": [],
+      "navigationVisibility": {
+        "fixedPromise": false,
+        "shownOnlyWhenUsable": true,
+        "hiddenWhenNoUsableCapability": true,
+        "requiredCapabilityContractIds": [
+          "STW-ACT-01",
+          "STW-ACT-02",
+          "STW-ACT-03"
+        ],
+        "usableCapabilityMeans": "The capability is implemented or partially implemented, is not answering HTTP 501, and the principal holds the case relationship or issued authority it needs.",
+        "currentSourceState": {
+          "SOURCE_PRESENT": 1,
+          "PARTIAL_SOURCE": 2,
+          "NOT_IMPLEMENTED": 0,
+          "UNAVAILABLE_501": 0
+        }
+      },
+      "revision": {
+        "round": "GATE_0A_2R",
+        "reasons": [
+          "Navigation follows the capabilities a principal can use, not a fixed page count."
+        ],
+        "changedFields": [
+          "navigationVisibility",
+          "preconditions",
+          "userVisibleOutcome"
+        ]
+      },
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -481,7 +554,8 @@
       "resource": "Cases the steward owns or is assigned to, plus triage metadata only where a live triage designation exists.",
       "preconditions": [
         "The signed-in principal has a live membership in the active organization.",
-        "The destination resolves to a real page with a truthful state; an entry whose destination would be unavailable is not shown."
+        "The destination resolves to a real page with a truthful state; an entry whose destination would be unavailable is not shown.",
+        "At least one capability behind this destination is usable by the principal now. If none is, the entry is not shown and nothing is advertised."
       ],
       "permittedAction": "Enter Representation and see only the facts the steward’s own relationships and designations allow.",
       "persistedResult": "None. Entering a destination persists nothing.",
@@ -499,7 +573,7 @@
         "classId": "PRIV_NONE",
         "note": "The entry itself exposes nothing. The destination applies the privacy class of each action it offers."
       },
-      "userVisibleOutcome": "Representation opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other.",
+      "userVisibleOutcome": "Representation opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable.",
       "denialAndRecovery": {
         "class": "FAIL_CLOSED_NO_WRITE",
         "behavior": "Without an active organization the steward is redirected and nothing is loaded. A failed read shows an error with retry."
@@ -544,6 +618,45 @@
         "openQuestionIds": [
           "DEC-PD-02"
         ]
+      },
+      "authorityDerivedFrom": [],
+      "navigationVisibility": {
+        "fixedPromise": false,
+        "shownOnlyWhenUsable": true,
+        "hiddenWhenNoUsableCapability": true,
+        "requiredCapabilityContractIds": [
+          "STW-ACT-01",
+          "STW-ACT-06",
+          "STW-ACT-07",
+          "STW-ACT-08",
+          "STW-ACT-10",
+          "STW-ACT-12"
+        ],
+        "usableCapabilityMeans": "The capability is implemented or partially implemented, is not answering HTTP 501, and the principal holds the case relationship or issued authority it needs.",
+        "currentSourceState": {
+          "SOURCE_PRESENT": 3,
+          "PARTIAL_SOURCE": 3,
+          "NOT_IMPLEMENTED": 0,
+          "UNAVAILABLE_501": 0
+        }
+      },
+      "revision": {
+        "round": "GATE_0A_2R",
+        "reasons": [
+          "Navigation follows the capabilities a principal can use, not a fixed page count."
+        ],
+        "changedFields": [
+          "navigationVisibility",
+          "preconditions",
+          "userVisibleOutcome"
+        ]
+      },
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "PROHIBITED_UNTIL_ADOPTED",
+        "externalOrInstitutionalAdoptionRequired": true,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -562,7 +675,8 @@
       "resource": "The directory slice the directory policy gives a steward.",
       "preconditions": [
         "The signed-in principal has a live membership in the active organization.",
-        "The destination resolves to a real page with a truthful state; an entry whose destination would be unavailable is not shown."
+        "The destination resolves to a real page with a truthful state; an entry whose destination would be unavailable is not shown.",
+        "At least one capability behind this destination is usable by the principal now. If none is, the entry is not shown and nothing is advertised."
       ],
       "permittedAction": "Enter Members & Workplaces and see only the facts the steward’s own relationships and designations allow.",
       "persistedResult": "None. Entering a destination persists nothing.",
@@ -580,7 +694,7 @@
         "classId": "PRIV_NONE",
         "note": "The entry itself exposes nothing. The destination applies the privacy class of each action it offers."
       },
-      "userVisibleOutcome": "Members & Workplaces opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other.",
+      "userVisibleOutcome": "Members & Workplaces opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable.",
       "denialAndRecovery": {
         "class": "FAIL_CLOSED_NO_WRITE",
         "behavior": "Without an active organization the steward is redirected and nothing is loaded. A failed read shows an error with retry."
@@ -620,6 +734,41 @@
         "openQuestionIds": [
           "DEC-PD-02"
         ]
+      },
+      "authorityDerivedFrom": [],
+      "navigationVisibility": {
+        "fixedPromise": false,
+        "shownOnlyWhenUsable": true,
+        "hiddenWhenNoUsableCapability": true,
+        "requiredCapabilityContractIds": [
+          "STW-ACT-34",
+          "STW-ACT-35"
+        ],
+        "usableCapabilityMeans": "The capability is implemented or partially implemented, is not answering HTTP 501, and the principal holds the case relationship or issued authority it needs.",
+        "currentSourceState": {
+          "SOURCE_PRESENT": 0,
+          "PARTIAL_SOURCE": 2,
+          "NOT_IMPLEMENTED": 0,
+          "UNAVAILABLE_501": 0
+        }
+      },
+      "revision": {
+        "round": "GATE_0A_2R",
+        "reasons": [
+          "Navigation follows the capabilities a principal can use, not a fixed page count."
+        ],
+        "changedFields": [
+          "navigationVisibility",
+          "preconditions",
+          "userVisibleOutcome"
+        ]
+      },
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -639,7 +788,8 @@
       "resource": "Conversations the steward is assigned to and correspondence the steward drafted.",
       "preconditions": [
         "The signed-in principal has a live membership in the active organization.",
-        "The destination resolves to a real page with a truthful state; an entry whose destination would be unavailable is not shown."
+        "The destination resolves to a real page with a truthful state; an entry whose destination would be unavailable is not shown.",
+        "At least one capability behind this destination is usable by the principal now. If none is, the entry is not shown and nothing is advertised."
       ],
       "permittedAction": "Enter Communications and see only the facts the steward’s own relationships and designations allow.",
       "persistedResult": "None. Entering a destination persists nothing.",
@@ -657,7 +807,7 @@
         "classId": "PRIV_NONE",
         "note": "The entry itself exposes nothing. The destination applies the privacy class of each action it offers."
       },
-      "userVisibleOutcome": "Communications opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other.",
+      "userVisibleOutcome": "Communications opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable.",
       "denialAndRecovery": {
         "class": "FAIL_CLOSED_NO_WRITE",
         "behavior": "Without an active organization the steward is redirected and nothing is loaded. A failed read shows an error with retry."
@@ -699,6 +849,42 @@
         "openQuestionIds": [
           "DEC-PD-02"
         ]
+      },
+      "authorityDerivedFrom": [],
+      "navigationVisibility": {
+        "fixedPromise": false,
+        "shownOnlyWhenUsable": true,
+        "hiddenWhenNoUsableCapability": true,
+        "requiredCapabilityContractIds": [
+          "STW-ACT-25",
+          "STW-ACT-26",
+          "STW-ACT-27"
+        ],
+        "usableCapabilityMeans": "The capability is implemented or partially implemented, is not answering HTTP 501, and the principal holds the case relationship or issued authority it needs.",
+        "currentSourceState": {
+          "SOURCE_PRESENT": 0,
+          "PARTIAL_SOURCE": 3,
+          "NOT_IMPLEMENTED": 0,
+          "UNAVAILABLE_501": 0
+        }
+      },
+      "revision": {
+        "round": "GATE_0A_2R",
+        "reasons": [
+          "Navigation follows the capabilities a principal can use, not a fixed page count."
+        ],
+        "changedFields": [
+          "navigationVisibility",
+          "preconditions",
+          "userVisibleOutcome"
+        ]
+      },
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "PROHIBITED_UNTIL_ADOPTED",
+        "externalOrInstitutionalAdoptionRequired": true,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -718,7 +904,8 @@
       "resource": "Documents linked to cases the steward holds.",
       "preconditions": [
         "The signed-in principal has a live membership in the active organization.",
-        "The destination resolves to a real page with a truthful state; an entry whose destination would be unavailable is not shown."
+        "The destination resolves to a real page with a truthful state; an entry whose destination would be unavailable is not shown.",
+        "At least one capability behind this destination is usable by the principal now. If none is, the entry is not shown and nothing is advertised."
       ],
       "permittedAction": "Enter Documents & Evidence and see only the facts the steward’s own relationships and designations allow.",
       "persistedResult": "None. Entering a destination persists nothing.",
@@ -736,7 +923,7 @@
         "classId": "PRIV_NONE",
         "note": "The entry itself exposes nothing. The destination applies the privacy class of each action it offers."
       },
-      "userVisibleOutcome": "Documents & Evidence opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other.",
+      "userVisibleOutcome": "Documents & Evidence opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable.",
       "denialAndRecovery": {
         "class": "FAIL_CLOSED_NO_WRITE",
         "behavior": "Without an active organization the steward is redirected and nothing is loaded. A failed read shows an error with retry."
@@ -778,6 +965,44 @@
         "openQuestionIds": [
           "DEC-PD-02"
         ]
+      },
+      "authorityDerivedFrom": [],
+      "navigationVisibility": {
+        "fixedPromise": false,
+        "shownOnlyWhenUsable": true,
+        "hiddenWhenNoUsableCapability": true,
+        "requiredCapabilityContractIds": [
+          "STW-ACT-13",
+          "STW-ACT-14",
+          "STW-ACT-15",
+          "STW-ACT-16",
+          "STW-ACT-39"
+        ],
+        "usableCapabilityMeans": "The capability is implemented or partially implemented, is not answering HTTP 501, and the principal holds the case relationship or issued authority it needs.",
+        "currentSourceState": {
+          "SOURCE_PRESENT": 1,
+          "PARTIAL_SOURCE": 4,
+          "NOT_IMPLEMENTED": 0,
+          "UNAVAILABLE_501": 0
+        }
+      },
+      "revision": {
+        "round": "GATE_0A_2R",
+        "reasons": [
+          "Navigation follows the capabilities a principal can use, not a fixed page count."
+        ],
+        "changedFields": [
+          "navigationVisibility",
+          "preconditions",
+          "userVisibleOutcome"
+        ]
+      },
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "PROHIBITED_UNTIL_ADOPTED",
+        "externalOrInstitutionalAdoptionRequired": true,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -796,7 +1021,8 @@
       "resource": "Deadlines attached to cases the steward holds.",
       "preconditions": [
         "The signed-in principal has a live membership in the active organization.",
-        "The destination resolves to a real page with a truthful state; an entry whose destination would be unavailable is not shown."
+        "The destination resolves to a real page with a truthful state; an entry whose destination would be unavailable is not shown.",
+        "At least one capability behind this destination is usable by the principal now. If none is, the entry is not shown and nothing is advertised."
       ],
       "permittedAction": "Enter Tasks & Deadlines and see only the facts the steward’s own relationships and designations allow.",
       "persistedResult": "None. Entering a destination persists nothing.",
@@ -814,7 +1040,7 @@
         "classId": "PRIV_NONE",
         "note": "The entry itself exposes nothing. The destination applies the privacy class of each action it offers."
       },
-      "userVisibleOutcome": "Tasks & Deadlines opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other.",
+      "userVisibleOutcome": "Tasks & Deadlines opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable.",
       "denialAndRecovery": {
         "class": "FAIL_CLOSED_NO_WRITE",
         "behavior": "Without an active organization the steward is redirected and nothing is loaded. A failed read shows an error with retry."
@@ -854,6 +1080,43 @@
         "openQuestionIds": [
           "DEC-PD-02"
         ]
+      },
+      "authorityDerivedFrom": [],
+      "navigationVisibility": {
+        "fixedPromise": false,
+        "shownOnlyWhenUsable": true,
+        "hiddenWhenNoUsableCapability": true,
+        "requiredCapabilityContractIds": [
+          "STW-ACT-21",
+          "STW-ACT-22",
+          "STW-ACT-23",
+          "STW-ACT-24"
+        ],
+        "usableCapabilityMeans": "The capability is implemented or partially implemented, is not answering HTTP 501, and the principal holds the case relationship or issued authority it needs.",
+        "currentSourceState": {
+          "SOURCE_PRESENT": 0,
+          "PARTIAL_SOURCE": 2,
+          "NOT_IMPLEMENTED": 2,
+          "UNAVAILABLE_501": 0
+        }
+      },
+      "revision": {
+        "round": "GATE_0A_2R",
+        "reasons": [
+          "Navigation follows the capabilities a principal can use, not a fixed page count."
+        ],
+        "changedFields": [
+          "navigationVisibility",
+          "preconditions",
+          "userVisibleOutcome"
+        ]
+      },
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -872,7 +1135,8 @@
       "resource": "Clause library entries the organization has published to staff.",
       "preconditions": [
         "The signed-in principal has a live membership in the active organization.",
-        "The destination resolves to a real page with a truthful state; an entry whose destination would be unavailable is not shown."
+        "The destination resolves to a real page with a truthful state; an entry whose destination would be unavailable is not shown.",
+        "At least one capability behind this destination is usable by the principal now. If none is, the entry is not shown and nothing is advertised."
       ],
       "permittedAction": "Enter Knowledge & Guidance and see only the facts the steward’s own relationships and designations allow.",
       "persistedResult": "None. Entering a destination persists nothing.",
@@ -890,7 +1154,7 @@
         "classId": "PRIV_NONE",
         "note": "The entry itself exposes nothing. The destination applies the privacy class of each action it offers."
       },
-      "userVisibleOutcome": "Knowledge & Guidance opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other.",
+      "userVisibleOutcome": "Knowledge & Guidance opens with the steward’s own items. An empty list says it is empty, and a failed read says it failed; neither is shown as the other. The entry is absent whenever no capability behind it is usable.",
       "denialAndRecovery": {
         "class": "FAIL_CLOSED_NO_WRITE",
         "behavior": "Without an active organization the steward is redirected and nothing is loaded. A failed read shows an error with retry."
@@ -930,6 +1194,41 @@
         "openQuestionIds": [
           "DEC-PD-02"
         ]
+      },
+      "authorityDerivedFrom": [],
+      "navigationVisibility": {
+        "fixedPromise": false,
+        "shownOnlyWhenUsable": true,
+        "hiddenWhenNoUsableCapability": true,
+        "requiredCapabilityContractIds": [
+          "STW-ACT-36",
+          "STW-ACT-37"
+        ],
+        "usableCapabilityMeans": "The capability is implemented or partially implemented, is not answering HTTP 501, and the principal holds the case relationship or issued authority it needs.",
+        "currentSourceState": {
+          "SOURCE_PRESENT": 0,
+          "PARTIAL_SOURCE": 2,
+          "NOT_IMPLEMENTED": 0,
+          "UNAVAILABLE_501": 0
+        }
+      },
+      "revision": {
+        "round": "GATE_0A_2R",
+        "reasons": [
+          "Navigation follows the capabilities a principal can use, not a fixed page count."
+        ],
+        "changedFields": [
+          "navigationVisibility",
+          "preconditions",
+          "userVisibleOutcome"
+        ]
+      },
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -1014,6 +1313,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -1093,6 +1402,16 @@
         "openQuestionIds": [
           "DEC-PD-02"
         ]
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -1170,6 +1489,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -1240,6 +1569,16 @@
         "openQuestionIds": [
           "DEC-PD-05"
         ]
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -1311,6 +1650,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "PROHIBITED_UNTIL_ADOPTED",
+        "externalOrInstitutionalAdoptionRequired": true,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -1403,6 +1752,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -1484,6 +1843,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -1492,27 +1861,28 @@
       "title": "Add a working note",
       "labels": [
         "PROPOSED_NEW_BASELINE",
-        "IMPLEMENTED_SOURCE"
+        "IMPLEMENTED_SOURCE",
+        "REQUIRES_INSTITUTIONAL_ADOPTION"
       ],
       "historical": null,
       "meaningOrigin": "NEW_DESIGN",
-      "proposedMeaning": "The steward records a working note on a held case. The note is staff-only unless the steward affirmatively chooses member visibility.",
+      "proposedMeaning": "The steward records a working note on a held case. The note is staff-only. It cannot be made member-visible by editing the note or by a flag in the request: that needs a classification and a separate authorized disclosure decision taken on the server.",
       "actor": "Steward holding the case",
       "trigger": "The steward writes a note on the case.",
       "resource": "One case and its note history.",
       "preconditions": [
         "A live relationship to the case that carries note writing.",
         "Text is present and within the length limit.",
-        "Member visibility, if wanted, is stated explicitly."
+        "A request for member visibility is a request for a disclosure decision. It is not applied to the note."
       ],
-      "permittedAction": "Append one note with author, time and visibility.",
-      "persistedResult": "One claim update row, staff-only by default, member-visible only when chosen.",
+      "permittedAction": "Append one staff-only note with author and time. A request for member visibility is routed to the disclosure decision: STW-ACT-09 for a communication to the member, STW-ACT-17 for a staff-held record.",
+      "persistedResult": "One claim update row. It is staff-only whenever this action writes it.",
       "authorization": {
         "basisId": "CASE_OWNER_OR_ASSIGNEE",
         "kernelActions": [
           "case:write_notes"
         ],
-        "requirement": "A kernel decision for write_notes on this case. A member-visible note is an affirmative disclosure by the author.",
+        "requirement": "A kernel decision for write_notes on this case. This action never makes a note member-visible.",
         "recusal": "A live recusal or adverse-party status on this case denies the action before any source of authority is consulted. A person may declare their own recusal. Lifting a recusal is an institutional decision (DEC-IA-07) and is not offered."
       },
       "audit": {
@@ -1521,15 +1891,15 @@
       },
       "privacy": {
         "classId": "PRIV_STAFF_ONLY_INTERNAL",
-        "note": "Staff-only by default. A representative who states no visibility gets an internal note."
+        "note": "Staff-only. Member visibility needs a classification and an authorized server-side disclosure decision. A client-supplied visibility flag is ignored."
       },
-      "userVisibleOutcome": "The note appears on the timeline labelled staff-only or member-visible, as chosen.",
+      "userVisibleOutcome": "The note appears on the timeline labelled staff-only. An offer to share it with the member opens the disclosure decision.",
       "denialAndRecovery": {
         "class": "KERNEL_DENY_403",
         "behavior": "A refused note is not saved and the author sees why. A failed audit rolls the note back and the author is told it was not saved."
       },
       "implementation": {
-        "status": "SOURCE_PRESENT",
+        "status": "PARTIAL_SOURCE",
         "routes": [
           {
             "file": "apps/union-eyes/app/api/cases/[caseId]/notes/route.ts",
@@ -1548,7 +1918,7 @@
         ],
         "capabilityId": "UE-CAP-K-010",
         "conformanceChecked": false,
-        "note": "The route resolves the case through the kernel and defaults a representative note to internal."
+        "note": "The route resolves the case through the kernel and defaults a representative note to internal. The route lets the request body choose an internal or member-visible note, and decides a member-visible note with case:comment. No classification step or separate disclosure decision record exists."
       },
       "provenance": {
         "design": "New design for the proposed baseline.",
@@ -1561,14 +1931,65 @@
         ]
       },
       "institutionalAdoption": {
-        "required": false,
-        "decisionIds": []
+        "required": true,
+        "decisionIds": [
+          "DEC-IA-05"
+        ]
       },
       "liveAuthorityCreated": false,
-      "activation": "PROPOSAL_ONLY_NOT_ADOPTED",
+      "activation": "INACTIVE_UNTIL_ADOPTED",
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "revision": {
+        "round": "GATE_0A_2R",
+        "reasons": [
+          "A working note is staff-only. Member visibility is a separate classified and authorized disclosure decision.",
+          "Member visibility needs a classification and an authorized server-side disclosure decision."
+        ],
+        "changedFields": [
+          "proposedMeaning",
+          "preconditions",
+          "permittedAction",
+          "persistedResult",
+          "authorization.requirement",
+          "userVisibleOutcome",
+          "privacy.note",
+          "disclosure"
+        ]
+      },
+      "disclosure": {
+        "defaultVisibility": "STAFF_ONLY",
+        "pathId": "DISC-PATH-COMMUNICATION",
+        "classification": "MEMBER_COMMUNICATION",
+        "classificationRequired": true,
+        "decisionEvaluatedServerSide": true,
+        "clientVisibilityFlagSufficient": false,
+        "independentOfAuthoringAuthority": true,
+        "decisionAuthority": {
+          "basisId": "CASE_OWNER_OR_ASSIGNEE",
+          "kernelActions": [
+            "case:comment"
+          ]
+        },
+        "decisionRecord": "One disclosure record naming the classification, the discloser, the authority source, the record and the time.",
+        "neverDisclosable": [
+          "privileged",
+          "counsel-controlled",
+          "third-party restricted"
+        ],
+        "memberDisclosableLabelsDecision": "DEC-IA-05"
+      },
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "PROHIBITED_UNTIL_ADOPTED",
+        "externalOrInstitutionalAdoptionRequired": true,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -1577,26 +1998,28 @@
       "title": "Send a member-visible comment",
       "labels": [
         "PROPOSED_NEW_BASELINE",
-        "IMPLEMENTED_SOURCE"
+        "IMPLEMENTED_SOURCE",
+        "REQUIRES_INSTITUTIONAL_ADOPTION"
       ],
       "historical": null,
       "meaningOrigin": "NEW_DESIGN",
-      "proposedMeaning": "The steward sends the member a comment on their case that the member can read. It is separate from a working note and always member-visible.",
+      "proposedMeaning": "The steward sends the member a communication written for the member. It is a different act from a working note and is never produced by changing a note’s visibility. The server classifies it as a member communication and refuses restricted content before the member can see it.",
       "actor": "Steward holding the case",
       "trigger": "The steward chooses to reply to the member on the case.",
       "resource": "One case and its member-visible thread.",
       "preconditions": [
         "A live relationship that carries commenting.",
-        "The comment contains no internal assessment, reserve or privileged content."
+        "The server classifies the text as a member communication.",
+        "The comment contains no internal assessment, reserve, privileged, counsel-controlled or third-party restricted content."
       ],
-      "permittedAction": "Append a member-visible comment.",
+      "permittedAction": "Append a member-visible comment after the server-side disclosure decision allows it.",
       "persistedResult": "One member-visible claim update and a content-free in-app notice to the member.",
       "authorization": {
         "basisId": "CASE_OWNER_OR_ASSIGNEE",
         "kernelActions": [
           "case:comment"
         ],
-        "requirement": "A kernel decision for comment on this case.",
+        "requirement": "A kernel decision for comment on this case, taken on the server for each comment. A client flag cannot supply it.",
         "recusal": "A live recusal or adverse-party status on this case denies the action before any source of authority is consulted. A person may declare their own recusal. Lifting a recusal is an institutional decision (DEC-IA-07) and is not offered."
       },
       "audit": {
@@ -1627,7 +2050,7 @@
         "services": [],
         "capabilityId": "UE-CAP-K-010",
         "conformanceChecked": false,
-        "note": "Comments share the notes route with an explicit visibility choice. No separate comment route exists."
+        "note": "Comments share the notes route and no separate comment route exists. The route lets the request body choose an internal or member-visible note, and decides a member-visible note with case:comment. No classification step or separate disclosure decision record exists."
       },
       "provenance": {
         "design": "New design for the proposed baseline.",
@@ -1641,16 +2064,64 @@
         ]
       },
       "institutionalAdoption": {
-        "required": false,
-        "decisionIds": []
+        "required": true,
+        "decisionIds": [
+          "DEC-IA-05"
+        ]
       },
       "liveAuthorityCreated": false,
-      "activation": "PROPOSAL_ONLY_NOT_ADOPTED",
+      "activation": "INACTIVE_UNTIL_ADOPTED",
       "completeness": {
         "state": "PROPOSED_WITH_OPEN_QUESTIONS",
         "openQuestionIds": [
           "DEC-PD-03"
         ]
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "revision": {
+        "round": "GATE_0A_2R",
+        "reasons": [
+          "A member-visible communication is classified and authorized on the server for each communication.",
+          "Member visibility needs a classification and an authorized server-side disclosure decision."
+        ],
+        "changedFields": [
+          "proposedMeaning",
+          "preconditions",
+          "permittedAction",
+          "authorization.requirement",
+          "disclosure"
+        ]
+      },
+      "disclosure": {
+        "defaultVisibility": "STAFF_ONLY",
+        "pathId": "DISC-PATH-COMMUNICATION",
+        "classification": "MEMBER_COMMUNICATION",
+        "classificationRequired": true,
+        "decisionEvaluatedServerSide": true,
+        "clientVisibilityFlagSufficient": false,
+        "independentOfAuthoringAuthority": true,
+        "decisionAuthority": {
+          "basisId": "CASE_OWNER_OR_ASSIGNEE",
+          "kernelActions": [
+            "case:comment"
+          ]
+        },
+        "decisionRecord": "One disclosure record naming the classification, the discloser, the authority source, the record and the time.",
+        "neverDisclosable": [
+          "privileged",
+          "counsel-controlled",
+          "third-party restricted"
+        ],
+        "memberDisclosableLabelsDecision": "DEC-IA-05"
+      },
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "PROHIBITED_UNTIL_ADOPTED",
+        "externalOrInstitutionalAdoptionRequired": true,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -1688,7 +2159,7 @@
       },
       "privacy": {
         "classId": "PRIV_STAFF_ONLY_INTERNAL",
-        "note": "The reason is staff-only. The member-visible entry carries no free text from the steward."
+        "note": "The reason is staff-only. The member-visible entry is a structured entry holding only the from and to states. It carries no free text from the steward, and a client flag cannot widen it."
       },
       "userVisibleOutcome": "The new state is shown. The steward sees a refusal with the reason class when the state is not allowed.",
       "denialAndRecovery": {
@@ -1744,6 +2215,62 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "revision": {
+        "round": "GATE_0A_2R",
+        "reasons": [
+          "The member-visible entry is a structured entry. Its content is not chosen by the author.",
+          "The contract names the entity types it handles and assumes no prior entity or mandatory sequence.",
+          "Member visibility needs a classification and an authorized server-side disclosure decision."
+        ],
+        "changedFields": [
+          "privacy.note",
+          "lifecycle",
+          "disclosure"
+        ]
+      },
+      "lifecycle": {
+        "entityTypes": [
+          "CASE",
+          "GRIEVANCE"
+        ],
+        "assumesPriorEntity": false,
+        "mandatorySequence": false,
+        "transitionsConfigurable": true,
+        "canonicalClaimsVersusGrievancesSettled": false,
+        "canonicalDecisionGate": 4
+      },
+      "disclosure": {
+        "defaultVisibility": "STAFF_ONLY",
+        "pathId": "DISC-PATH-STRUCTURED-ENTRY",
+        "classification": "STRUCTURED_STATE_CHANGE_ENTRY",
+        "classificationRequired": true,
+        "decisionEvaluatedServerSide": true,
+        "clientVisibilityFlagSufficient": false,
+        "independentOfAuthoringAuthority": true,
+        "decisionAuthority": {
+          "basisId": "CASE_OWNER_OR_ASSIGNEE",
+          "kernelActions": [
+            "case:transition"
+          ]
+        },
+        "decisionRecord": "One disclosure record naming the classification, the discloser, the authority source, the record and the time.",
+        "neverDisclosable": [
+          "privileged",
+          "counsel-controlled",
+          "third-party restricted"
+        ],
+        "memberDisclosableLabelsDecision": "DEC-IA-05"
+      },
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -1814,6 +2341,35 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "lifecycle": {
+        "entityTypes": [
+          "CASE"
+        ],
+        "assumesPriorEntity": false,
+        "mandatorySequence": false,
+        "transitionsConfigurable": true,
+        "canonicalClaimsVersusGrievancesSettled": false,
+        "canonicalDecisionGate": 4
+      },
+      "revision": {
+        "round": "GATE_0A_2R",
+        "reasons": [
+          "The contract names the entity types it handles and assumes no prior entity or mandatory sequence."
+        ],
+        "changedFields": [
+          "lifecycle"
+        ]
+      },
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "PROHIBITED_UNTIL_ADOPTED",
+        "externalOrInstitutionalAdoptionRequired": true,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -1892,6 +2448,16 @@
         "openQuestionIds": [
           "DEC-PD-04"
         ]
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -1900,7 +2466,8 @@
       "title": "Upload evidence to a held case",
       "labels": [
         "PROPOSED_NEW_BASELINE",
-        "IMPLEMENTED_SOURCE"
+        "IMPLEMENTED_SOURCE",
+        "REQUIRES_INSTITUTIONAL_ADOPTION"
       ],
       "historical": null,
       "meaningOrigin": "NEW_DESIGN",
@@ -1929,7 +2496,7 @@
       },
       "privacy": {
         "classId": "PRIV_STAFF_ONLY_INTERNAL",
-        "note": "Evidence is staff-only until a member-visible disclosure is chosen."
+        "note": "Evidence is staff-only. It becomes member-visible only through the separate disclosure decision in STW-ACT-17."
       },
       "userVisibleOutcome": "The document appears in the case with its classification. A rejected file says why.",
       "denialAndRecovery": {
@@ -1971,14 +2538,59 @@
         ]
       },
       "institutionalAdoption": {
-        "required": false,
-        "decisionIds": []
+        "required": true,
+        "decisionIds": [
+          "DEC-IA-05"
+        ]
       },
       "liveAuthorityCreated": false,
-      "activation": "PROPOSAL_ONLY_NOT_ADOPTED",
+      "activation": "INACTIVE_UNTIL_ADOPTED",
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "revision": {
+        "round": "GATE_0A_2R",
+        "reasons": [
+          "Evidence is staff-only until the primary handler takes a disclosure decision.",
+          "Member visibility needs a classification and an authorized server-side disclosure decision."
+        ],
+        "changedFields": [
+          "privacy.note",
+          "disclosure"
+        ]
+      },
+      "disclosure": {
+        "defaultVisibility": "STAFF_ONLY",
+        "pathId": "DISC-PATH-RECORD",
+        "classification": "MEMBER_DISCLOSABLE_LABEL",
+        "classificationRequired": true,
+        "decisionEvaluatedServerSide": true,
+        "clientVisibilityFlagSufficient": false,
+        "independentOfAuthoringAuthority": true,
+        "decisionAuthority": {
+          "basisId": "CASE_PRIMARY_HANDLER_ONLY",
+          "kernelActions": [
+            "case:disclose_to_member"
+          ]
+        },
+        "decisionRecord": "One disclosure record naming the classification, the discloser, the authority source, the record and the time.",
+        "neverDisclosable": [
+          "privileged",
+          "counsel-controlled",
+          "third-party restricted"
+        ],
+        "memberDisclosableLabelsDecision": "DEC-IA-05"
+      },
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "PROHIBITED_UNTIL_ADOPTED",
+        "externalOrInstitutionalAdoptionRequired": true,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -2065,6 +2677,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -2141,6 +2763,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -2217,6 +2849,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -2236,10 +2878,11 @@
       "preconditions": [
         "The steward is the primary handler.",
         "The record’s label is one the institution has listed as member-disclosable.",
-        "The record is not privileged or counsel-controlled."
+        "The record is not privileged or counsel-controlled.",
+        "The record has been classified, and its classification is one the institution lists as member-disclosable (DEC-IA-05)."
       ],
-      "permittedAction": "Make one record visible to the member.",
-      "persistedResult": "One disclosure record naming the record, the member, the discloser and the time.",
+      "permittedAction": "Take a disclosure decision for one record and, if it allows, make that record visible to the member.",
+      "persistedResult": "One disclosure record naming the classification, the record, the member, the discloser, the authority source and the time.",
       "authorization": {
         "basisId": "CASE_PRIMARY_HANDLER_ONLY",
         "kernelActions": [
@@ -2288,6 +2931,51 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "revision": {
+        "round": "GATE_0A_2R",
+        "reasons": [
+          "Disclosure of a staff-held record needs a classification and a per-record decision.",
+          "Member visibility needs a classification and an authorized server-side disclosure decision."
+        ],
+        "changedFields": [
+          "preconditions",
+          "permittedAction",
+          "persistedResult",
+          "disclosure"
+        ]
+      },
+      "disclosure": {
+        "defaultVisibility": "STAFF_ONLY",
+        "pathId": "DISC-PATH-RECORD",
+        "classification": "MEMBER_DISCLOSABLE_LABEL",
+        "classificationRequired": true,
+        "decisionEvaluatedServerSide": true,
+        "clientVisibilityFlagSufficient": false,
+        "independentOfAuthoringAuthority": true,
+        "decisionAuthority": {
+          "basisId": "CASE_PRIMARY_HANDLER_ONLY",
+          "kernelActions": [
+            "case:disclose_to_member"
+          ]
+        },
+        "decisionRecord": "One disclosure record naming the classification, the discloser, the authority source, the record and the time.",
+        "neverDisclosable": [
+          "privileged",
+          "counsel-controlled",
+          "third-party restricted"
+        ],
+        "memberDisclosableLabelsDecision": "DEC-IA-05"
+      },
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "PROHIBITED_UNTIL_ADOPTED",
+        "externalOrInstitutionalAdoptionRequired": true,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -2301,7 +2989,7 @@
       ],
       "historical": null,
       "meaningOrigin": "NEW_DESIGN",
-      "proposedMeaning": "The steward converts a held case into a formal grievance with the facts and the clause or basis recorded.",
+      "proposedMeaning": "Where the organization protocol allows, the steward opens a formal grievance linked to a held case, with the facts and the clause or basis recorded. A grievance is a distinct entity. A case need not become one, and the case keeps its own state unless a configured transition says otherwise.",
       "actor": "Steward holding the case",
       "trigger": "The steward selects Escalate on the case.",
       "resource": "One case and the grievance created from it.",
@@ -2310,8 +2998,8 @@
         "Required grievance facts are present.",
         "The institution’s representation protocol permits a steward to escalate. An unapproved protocol blocks it."
       ],
-      "permittedAction": "Create the formal grievance linked to the case and move the case to the grievance stage.",
-      "persistedResult": "One grievance row, one link to the case, one state change.",
+      "permittedAction": "Create the formal grievance entity linked to the case. Any change to the case’s own state is a separate configured transition and is not implied.",
+      "persistedResult": "One grievance row and one link to the case. No case state change unless a configured transition applies.",
       "authorization": {
         "basisId": "CASE_OWNER_OR_ASSIGNEE",
         "kernelActions": [
@@ -2328,7 +3016,7 @@
         "classId": "PRIV_STAFF_ONLY_INTERNAL",
         "note": "Internal assessment is not copied to the member."
       },
-      "userVisibleOutcome": "The grievance opens and the case shows its new stage. If the protocol forbids escalation, the steward is told to request senior review.",
+      "userVisibleOutcome": "The grievance opens and the case shows the link. If the protocol forbids escalation, the steward is told to request senior review.",
       "denialAndRecovery": {
         "class": "KERNEL_DENY_403",
         "behavior": "A refused escalation writes nothing. A missing or unapproved protocol fails closed."
@@ -2347,7 +3035,7 @@
         "services": [],
         "capabilityId": "UE-CAP-K-010",
         "conformanceChecked": false,
-        "note": "The route resolves the case through the kernel and has a steward role floor. The disposition lists the action as not re-examined."
+        "note": "The route resolves the case through the kernel and has a steward role floor. The disposition lists the action as not re-examined. The route may change the case state on escalation. This contract does not rely on that behaviour."
       },
       "provenance": {
         "design": "New design for the proposed baseline.",
@@ -2370,6 +3058,42 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "revision": {
+        "round": "GATE_0A_2R",
+        "reasons": [
+          "A formal grievance is a distinct entity. A case does not have to become one, and a case state change is not implied.",
+          "The contract names the entity types it handles and assumes no prior entity or mandatory sequence."
+        ],
+        "changedFields": [
+          "proposedMeaning",
+          "permittedAction",
+          "persistedResult",
+          "userVisibleOutcome",
+          "implementation.note",
+          "lifecycle"
+        ]
+      },
+      "lifecycle": {
+        "entityTypes": [
+          "CASE",
+          "GRIEVANCE"
+        ],
+        "assumesPriorEntity": false,
+        "mandatorySequence": false,
+        "transitionsConfigurable": true,
+        "canonicalClaimsVersusGrievancesSettled": false,
+        "canonicalDecisionGate": 4
+      },
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "PROHIBITED_UNTIL_ADOPTED",
+        "externalOrInstitutionalAdoptionRequired": true,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -2442,6 +3166,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "PROHIBITED_UNTIL_ADOPTED",
+        "externalOrInstitutionalAdoptionRequired": true,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -2528,6 +3262,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -2613,6 +3357,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -2691,6 +3445,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -2712,7 +3476,7 @@
         "A reason is given."
       ],
       "permittedAction": "Record an extension request routed to whoever the institution designates.",
-      "persistedResult": "One extension-request record linked to the deadline.",
+      "persistedResult": "One extension-request record linked to the deadline. The request changes no deadline and does not alter any legal or contractual effect of the deadline.",
       "authorization": {
         "basisId": "CASE_OWNER_OR_ASSIGNEE",
         "kernelActions": [
@@ -2763,6 +3527,25 @@
         "openQuestionIds": [
           "DEC-PD-12"
         ]
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "revision": {
+        "round": "GATE_0A_2R",
+        "reasons": [
+          "Requesting an extension does not change the deadline or its legal or contractual effect."
+        ],
+        "changedFields": [
+          "persistedResult"
+        ]
+      },
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "PROHIBITED_UNTIL_ADOPTED",
+        "externalOrInstitutionalAdoptionRequired": true,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -2830,6 +3613,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -2913,6 +3706,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -2994,6 +3797,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -3073,6 +3886,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "PROHIBITED_UNTIL_ADOPTED",
+        "externalOrInstitutionalAdoptionRequired": true,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -3163,6 +3986,37 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "ISSUED_AUTHORITY"
+      ],
+      "lifecycle": {
+        "entityTypes": [
+          "INQUIRY",
+          "SERVICE_REQUEST",
+          "CASE"
+        ],
+        "assumesPriorEntity": false,
+        "mandatorySequence": false,
+        "transitionsConfigurable": true,
+        "canonicalClaimsVersusGrievancesSettled": false,
+        "canonicalDecisionGate": 4
+      },
+      "revision": {
+        "round": "GATE_0A_2R",
+        "reasons": [
+          "The contract names the entity types it handles and assumes no prior entity or mandatory sequence."
+        ],
+        "changedFields": [
+          "lifecycle"
+        ]
+      },
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "PROHIBITED_UNTIL_ADOPTED",
+        "externalOrInstitutionalAdoptionRequired": true,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -3247,6 +4101,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "ISSUED_AUTHORITY"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "PROHIBITED_UNTIL_ADOPTED",
+        "externalOrInstitutionalAdoptionRequired": true,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -3321,6 +4185,36 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "ISSUED_AUTHORITY"
+      ],
+      "lifecycle": {
+        "entityTypes": [
+          "SERVICE_REQUEST",
+          "CASE"
+        ],
+        "assumesPriorEntity": false,
+        "mandatorySequence": false,
+        "transitionsConfigurable": true,
+        "canonicalClaimsVersusGrievancesSettled": false,
+        "canonicalDecisionGate": 4
+      },
+      "revision": {
+        "round": "GATE_0A_2R",
+        "reasons": [
+          "The contract names the entity types it handles and assumes no prior entity or mandatory sequence."
+        ],
+        "changedFields": [
+          "lifecycle"
+        ]
+      },
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "PROHIBITED_UNTIL_ADOPTED",
+        "externalOrInstitutionalAdoptionRequired": true,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -3416,6 +4310,36 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "ISSUED_AUTHORITY"
+      ],
+      "lifecycle": {
+        "entityTypes": [
+          "SERVICE_REQUEST",
+          "CASE"
+        ],
+        "assumesPriorEntity": false,
+        "mandatorySequence": false,
+        "transitionsConfigurable": true,
+        "canonicalClaimsVersusGrievancesSettled": false,
+        "canonicalDecisionGate": 4
+      },
+      "revision": {
+        "round": "GATE_0A_2R",
+        "reasons": [
+          "The contract names the entity types it handles and assumes no prior entity or mandatory sequence."
+        ],
+        "changedFields": [
+          "lifecycle"
+        ]
+      },
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "PROHIBITED_UNTIL_ADOPTED",
+        "externalOrInstitutionalAdoptionRequired": true,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -3502,6 +4426,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "PROHIBITED_UNTIL_ADOPTED",
+        "externalOrInstitutionalAdoptionRequired": true,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -3571,6 +4505,16 @@
         "openQuestionIds": [
           "DEC-PD-05"
         ]
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -3651,6 +4595,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -3729,6 +4683,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -3806,6 +4770,14 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -3881,6 +4853,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -3964,6 +4946,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -4056,6 +5048,16 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [
+        "CASE_RELATIONSHIP"
+      ],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -4128,6 +5130,14 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -4203,6 +5213,14 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -4277,6 +5295,14 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -4350,6 +5376,14 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -4423,6 +5457,14 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -4494,6 +5536,14 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -4565,6 +5615,14 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -4636,6 +5694,14 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     },
     {
@@ -4707,7 +5773,417 @@
       "completeness": {
         "state": "PROPOSED_NO_OPEN_QUESTIONS",
         "openQuestionIds": []
+      },
+      "authorityDerivedFrom": [],
+      "authorityStates": {
+        "engineeringImplementationPermitted": true,
+        "syntheticAuthorizedPathTestingPermitted": true,
+        "productionInstitutionalActivation": "NOT_APPLICABLE",
+        "externalOrInstitutionalAdoptionRequired": false,
+        "syntheticAuthorityScope": "SYNTHETIC_ORGANIZATIONS_ONLY"
       }
     }
-  ]
+  ],
+  "identityModel": {
+    "rule": "A distinct Steward workspace is a presentation choice. Five facts are kept apart. Only a live case relationship and issued authority can carry authority, and each does so only for what it names.",
+    "distinctInstitutionalOfficeImplied": false,
+    "officeAndCapacityConfigurablePerOrganization": true,
+    "focusedWorkspaceGrants": {
+      "organizationWideVisibility": false,
+      "triage": false,
+      "reassignment": false,
+      "privilegedDisclosure": false
+    },
+    "dimensions": [
+      {
+        "id": "UI_PERSONA",
+        "name": "Interface persona",
+        "meaning": "The focused Steward workspace: its navigation, queue and layout.",
+        "definedBy": "Product design (DEC-PD-01)",
+        "grantsAuthorityByItself": false,
+        "impliesOrganizationWideVisibility": false,
+        "impliesTriage": false,
+        "impliesReassignment": false,
+        "impliesPrivilegedDisclosure": false
+      },
+      {
+        "id": "UNION_OFFICE",
+        "name": "Employment or union office",
+        "meaning": "Whatever office, election, appointment or employment status the institution gives a person. Whether a steward office exists, what it is called and what it does differ by institution. This baseline names no office.",
+        "definedBy": "The institution (DEC-IA-32)",
+        "grantsAuthorityByItself": false,
+        "impliesOrganizationWideVisibility": false,
+        "impliesTriage": false,
+        "impliesReassignment": false,
+        "impliesPrivilegedDisclosure": false
+      },
+      {
+        "id": "PLATFORM_ROLE",
+        "name": "Platform role",
+        "meaning": "The role value on a membership record. The code has a steward role (evidence S7). It is eligibility for a representation capacity and never authority.",
+        "definedBy": "The membership record",
+        "grantsAuthorityByItself": false,
+        "impliesOrganizationWideVisibility": false,
+        "impliesTriage": false,
+        "impliesReassignment": false,
+        "impliesPrivilegedDisclosure": false
+      },
+      {
+        "id": "CASE_RELATIONSHIP",
+        "name": "Case relationship",
+        "meaning": "A live owner, assignee or explicit collaborator relationship to one case. It reaches that case only, and only the actions the kernel decides.",
+        "definedBy": "Kernel assignment facts",
+        "grantsAuthorityByItself": true,
+        "authorityScope": "ONE_CASE_ONLY"
+      },
+      {
+        "id": "ISSUED_AUTHORITY",
+        "name": "Issued authority",
+        "meaning": "A triage designation, supervisory mandate, delegation, appointment or other instrument that an authorized body issued under an adopted rule. This baseline issues none.",
+        "definedBy": "The issuing body under an adopted rule",
+        "grantsAuthorityByItself": true,
+        "authorityScope": "AS_ISSUED",
+        "issuedByThisBaseline": false
+      }
+    ]
+  },
+  "navigationPolicy": {
+    "rule": "Navigation follows what a signed-in principal can use now. The seven destinations are candidates, not a promise. A destination appears only while at least one capability behind it is usable by that principal, and it is hidden otherwise.",
+    "fixedDestinationCount": false,
+    "candidateDestinations": 7,
+    "hiddenWhenNoUsableCapability": true,
+    "neverAdvertisesRouteThatResolvesTo404": true,
+    "usableCapabilityMeans": "The capability is implemented or partially implemented, is not answering HTTP 501, and the principal holds the case relationship or issued authority it needs."
+  },
+  "lifecycleModel": {
+    "rule": "Seven entity types are distinct. None is a stage of another. No sequence is mandatory, and the allowed links and transitions are configured per organization protocol.",
+    "mandatoryLinearSequence": false,
+    "canonicalEntityDecision": {
+      "capabilityId": "UE-CAP-C-001",
+      "gate": 4,
+      "status": "UNRESOLVED_UNDER_GATE_4",
+      "settledByThisBaseline": false,
+      "note": "Whether the product keeps claims and grievances as one canonical entity or two is decided under Gate 4. This model names CASE and GRIEVANCE as distinct concepts and does not choose a storage model."
+    },
+    "entityTypes": [
+      {
+        "id": "INQUIRY",
+        "name": "Inquiry",
+        "meaning": "A question or request for information. It may be answered and closed without opening a case.",
+        "requiresPriorEntity": false,
+        "mayStandAlone": true,
+        "evidence": {
+          "class": "PROPOSED_NEW_BASELINE",
+          "note": "No source stores an inquiry as its own entity."
+        }
+      },
+      {
+        "id": "SERVICE_REQUEST",
+        "name": "Service request",
+        "meaning": "A request that the union act or provide a service, such as representation. It may be accepted into a case, declined, referred or answered.",
+        "requiresPriorEntity": false,
+        "mayStandAlone": true,
+        "evidence": {
+          "class": "PROPOSED_NEW_BASELINE",
+          "note": "No source stores a service request as its own entity."
+        }
+      },
+      {
+        "id": "CASE",
+        "name": "Case",
+        "meaning": "A matter accepted for handling by a representative. In source it is the claims or cases model.",
+        "requiresPriorEntity": false,
+        "mayStandAlone": true,
+        "evidence": {
+          "class": "SOURCE_BACKED",
+          "file": "apps/union-eyes/app/api/cases/intake/route.ts",
+          "quote": "Server-side validated case creation",
+          "note": "The intake route creates a case directly. It does not create an inquiry or a request first."
+        }
+      },
+      {
+        "id": "GRIEVANCE",
+        "name": "Formal grievance",
+        "meaning": "A formal contractual grievance with its own clock and formal states. It may be opened from a case or, where the organization protocol allows, directly.",
+        "requiresPriorEntity": false,
+        "mayStandAlone": true,
+        "evidence": {
+          "class": "SOURCE_BACKED",
+          "file": "docs/union-eyes/convergence/UE-FINAL-CONVERGENCE-CHECKPOINT-6.md",
+          "quote": "grievance create and import use capacity",
+          "note": "The Checkpoint 6 record states that grievance create and import use capacity, not a prior case."
+        }
+      },
+      {
+        "id": "COMPLAINT",
+        "name": "Complaint",
+        "meaning": "A member complaint about union conduct or service. It is reviewed on its own and is not a grievance unless an organization protocol says it is treated as one.",
+        "requiresPriorEntity": false,
+        "mayStandAlone": true,
+        "evidence": {
+          "class": "SOURCE_BACKED",
+          "file": "apps/union-eyes/lib/authority/review-intake-types.ts",
+          "quote": "['complaint', 'appeal', 'reconsideration']",
+          "note": "Source opens a complaint as a review intake. UE-OMIT-M04-MEMBER-REQUESTS records review intake as a different obligation from a representation matter."
+        }
+      },
+      {
+        "id": "APPEAL",
+        "name": "Appeal",
+        "meaning": "A request that a body review a decision. It may follow a grievance outcome, a union decision about a member, or a complaint outcome. It is not necessarily a stage after a grievance is accepted.",
+        "requiresPriorEntity": false,
+        "mayStandAlone": true,
+        "evidence": {
+          "class": "SOURCE_BACKED",
+          "file": "apps/union-eyes/lib/authority/review-intake-types.ts",
+          "quote": "['complaint', 'appeal', 'reconsideration']",
+          "note": "Source opens an appeal as a review intake with no grievance reference."
+        }
+      },
+      {
+        "id": "RECONSIDERATION",
+        "name": "Reconsideration",
+        "meaning": "A request that the deciding body reconsider its own decision. It may follow any decision, including an appeal outcome.",
+        "requiresPriorEntity": false,
+        "mayStandAlone": true,
+        "evidence": {
+          "class": "SOURCE_BACKED",
+          "file": "apps/union-eyes/lib/authority/review-intake-types.ts",
+          "quote": "['complaint', 'appeal', 'reconsideration']",
+          "note": "Source opens a reconsideration as a review intake with no grievance reference."
+        }
+      }
+    ],
+    "allowedLinks": [
+      {
+        "from": "INQUIRY",
+        "to": "SERVICE_REQUEST",
+        "kind": "MAY_LINK",
+        "required": false,
+        "exclusive": false
+      },
+      {
+        "from": "INQUIRY",
+        "to": "CASE",
+        "kind": "MAY_LINK",
+        "required": false,
+        "exclusive": false
+      },
+      {
+        "from": "SERVICE_REQUEST",
+        "to": "CASE",
+        "kind": "MAY_LINK",
+        "required": false,
+        "exclusive": false
+      },
+      {
+        "from": "SERVICE_REQUEST",
+        "to": "GRIEVANCE",
+        "kind": "MAY_LINK",
+        "required": false,
+        "exclusive": false
+      },
+      {
+        "from": "CASE",
+        "to": "GRIEVANCE",
+        "kind": "MAY_LINK",
+        "required": false,
+        "exclusive": false
+      },
+      {
+        "from": "GRIEVANCE",
+        "to": "APPEAL",
+        "kind": "MAY_LINK",
+        "required": false,
+        "exclusive": false
+      },
+      {
+        "from": "CASE",
+        "to": "APPEAL",
+        "kind": "MAY_LINK",
+        "required": false,
+        "exclusive": false
+      },
+      {
+        "from": "COMPLAINT",
+        "to": "CASE",
+        "kind": "MAY_LINK",
+        "required": false,
+        "exclusive": false
+      },
+      {
+        "from": "COMPLAINT",
+        "to": "GRIEVANCE",
+        "kind": "MAY_LINK",
+        "required": false,
+        "exclusive": false
+      },
+      {
+        "from": "COMPLAINT",
+        "to": "APPEAL",
+        "kind": "MAY_LINK",
+        "required": false,
+        "exclusive": false
+      },
+      {
+        "from": "APPEAL",
+        "to": "RECONSIDERATION",
+        "kind": "MAY_LINK",
+        "required": false,
+        "exclusive": false
+      },
+      {
+        "from": "GRIEVANCE",
+        "to": "RECONSIDERATION",
+        "kind": "MAY_LINK",
+        "required": false,
+        "exclusive": false
+      },
+      {
+        "from": "COMPLAINT",
+        "to": "RECONSIDERATION",
+        "kind": "MAY_LINK",
+        "required": false,
+        "exclusive": false
+      }
+    ],
+    "transitions": {
+      "configurationScope": "PER_ORGANIZATION_PROTOCOL",
+      "everyTransitionConfigurable": true,
+      "defaultsAreProposalsOnly": true,
+      "note": "A transition between entity types or between states of one entity type is allowed only when the organization protocol allows it and the actor holds the authority the transition needs. A source finite-state machine for grievances is evidence of one configuration, not of a universal one.",
+      "proposedDefaults": [
+        {
+          "from": "INQUIRY",
+          "to": "SERVICE_REQUEST",
+          "configurable": true,
+          "decisionIds": [
+            "DEC-IA-03"
+          ]
+        },
+        {
+          "from": "SERVICE_REQUEST",
+          "to": "CASE",
+          "configurable": true,
+          "decisionIds": [
+            "DEC-IA-03",
+            "DEC-IA-11"
+          ]
+        },
+        {
+          "from": "CASE",
+          "to": "GRIEVANCE",
+          "configurable": true,
+          "decisionIds": [
+            "DEC-IA-09",
+            "DEC-IA-11"
+          ]
+        },
+        {
+          "from": "GRIEVANCE",
+          "to": "APPEAL",
+          "configurable": true,
+          "decisionIds": [
+            "DEC-IA-09",
+            "DEC-IA-11"
+          ]
+        },
+        {
+          "from": "COMPLAINT",
+          "to": "RECONSIDERATION",
+          "configurable": true,
+          "decisionIds": [
+            "DEC-IA-09"
+          ]
+        }
+      ]
+    },
+    "organizationVariations": [
+      {
+        "scenarioId": "REP-SCN-CAPE",
+        "variation": "An Officer holds every case. Intake by a steward is a recorded request and acceptance, escalation and grievance filing belong to the Officer under the protocol."
+      },
+      {
+        "scenarioId": "REP-SCN-CUPE",
+        "variation": "A National Representative may open a grievance on a case held with a local steward, or an appeal on a decision, under a mandate scoped to named matters."
+      },
+      {
+        "scenarioId": "REP-SCN-LIUNA",
+        "variation": "A hypothesis. A territory may open a grievance directly from a request without a separate case. This needs discovery with the institution."
+      },
+      {
+        "scenarioId": "REP-SCN-SMALL-LOCAL",
+        "variation": "A hypothesis. One person may hold intake and a case, and a complaint about that person needs a different reviewer. This needs discovery with the institution."
+      }
+    ]
+  },
+  "disclosureModel": {
+    "rule": "A staff note is staff-only. It becomes member-visible only after it is classified and an authorized disclosure decision is taken on the server. A visibility flag sent by a client is never sufficient.",
+    "defaultVisibility": "STAFF_ONLY",
+    "memberVisibleRequires": [
+      "CLASSIFICATION",
+      "AUTHORIZED_DISCLOSURE_DECISION"
+    ],
+    "clientVisibilityFlagSufficient": false,
+    "decisionEvaluatedServerSide": true,
+    "independentOfAuthoringAuthority": true,
+    "neverDisclosable": [
+      "privileged",
+      "counsel-controlled",
+      "third-party restricted"
+    ],
+    "paths": [
+      {
+        "id": "DISC-PATH-COMMUNICATION",
+        "title": "A communication written for the member",
+        "classification": "MEMBER_COMMUNICATION",
+        "decisionAction": "case:comment",
+        "basisId": "CASE_OWNER_OR_ASSIGNEE",
+        "note": "The text is authored as a member communication from the start. The server classifies it, checks the relationship permits commenting and refuses restricted content."
+      },
+      {
+        "id": "DISC-PATH-STRUCTURED-ENTRY",
+        "title": "A structured entry produced by a state change",
+        "classification": "STRUCTURED_STATE_CHANGE_ENTRY",
+        "decisionAction": "case:transition",
+        "basisId": "CASE_OWNER_OR_ASSIGNEE",
+        "note": "The member-visible entry holds only the from and to states. The author supplies no free text for it, and the reason stays a separate staff-only entry."
+      },
+      {
+        "id": "DISC-PATH-RECORD",
+        "title": "Disclosure of an existing staff-held note or record",
+        "classification": "A label the institution lists as member-disclosable (DEC-IA-05)",
+        "decisionAction": "case:disclose_to_member",
+        "basisId": "CASE_PRIMARY_HANDLER_ONLY",
+        "note": "A working note is never converted by editing a flag. The primary handler takes a separate disclosure decision for each record."
+      }
+    ],
+    "decisionRecord": "One disclosure record naming the classification, the discloser, the authority source, the record and the time.",
+    "sourceBehaviourToday": "The notes route lets the request body choose an internal or member-visible note and decides a member-visible note with case:comment. It records no classification and no separate disclosure decision. Source is partial against this model."
+  },
+  "revisionLog": {
+    "round": "GATE_0A_2R",
+    "purpose": "Adversarial product specification corrections. Identifiers, titles and historical records are unchanged.",
+    "revisedContractCount": 18,
+    "revisedContractIds": [
+      "STW-NAV-1",
+      "STW-NAV-2",
+      "STW-NAV-3",
+      "STW-NAV-4",
+      "STW-NAV-5",
+      "STW-NAV-6",
+      "STW-NAV-7",
+      "STW-ACT-08",
+      "STW-ACT-09",
+      "STW-ACT-10",
+      "STW-ACT-11",
+      "STW-ACT-13",
+      "STW-ACT-17",
+      "STW-ACT-18",
+      "STW-ACT-23",
+      "STW-ACT-28",
+      "STW-ACT-30",
+      "STW-ACT-31"
+    ]
+  }
 }

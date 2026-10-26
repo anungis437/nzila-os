@@ -15,11 +15,11 @@ import {
   FINANCIAL_DUTIES, HISTORICAL_KINDS, IMPLEMENTATION_STATUSES, LABELS, PRIVACY_CLASSES, ROUTE_SIGNALS, deriveFileFacts, loadOntologyActions,
 } from './ue-gate0a2-baseline-facts.mjs'
 import { gitBlobAt, gitShowAt, loadRecovery } from './ue-gate0a-persona-recovery.mjs'
+import { validateRevisions } from './ue-gate0a2r-validate.mjs'
 
 const norm = (text) => String(text ?? '').replace(/\s+/g, ' ').trim()
 const filled = (value) => (Array.isArray(value) ? value.length > 0 && value.every((item) => norm(item).length > 0) : norm(value).length > 0)
 const SEGREGATED_DUTIES = ['approve', 'execute', 'reconcile', 'audit']
-const SEGREGATED_BASES = ['FINANCIAL_MANDATE_PREPARE', 'FINANCIAL_MANDATE_APPROVE', 'FINANCIAL_MANDATE_EXECUTE', 'FINANCIAL_MANDATE_RECONCILE', 'AUDITOR_APPOINTMENT_DUTY']
 const MEANING_ORIGINS = ['NEW_DESIGN', 'HISTORICAL_TITLE_WITH_NEW_SPECIFICATION', 'NEW_DESIGN_UNDER_HISTORICAL_STATUS', 'NEW_DESIGN_UNDER_HISTORICAL_GROUP']
 
 /** The Phase 4 fields a proposed action contract must carry. Returns the names of the missing ones. */
@@ -246,8 +246,6 @@ export function validateBaselines(root, options = {}) {
       referencedDecisions.add(id)
       if (!decisionIds.has(id)) fail('DECISION-UNKNOWN', `${where} names ${id}`)
     }
-    const segregatedActors = (j.steps ?? []).filter((s) => SEGREGATED_BASES.includes(s.authorizationBasisId)).map((s) => s.actor)
-    if (new Set(segregatedActors).size !== segregatedActors.length) fail('JOURNEY-SEGREGATION', `${where} lets one actor hold two segregated duties`)
   }
 
   const checkScenarios = (key, scenarios) => {
@@ -421,7 +419,7 @@ export function validateBaselines(root, options = {}) {
       if (f && c.historical?.individuallyEvidenced && c.historical.kind === 'TITLE' && !f.historicalMeaningRecovered.includes(c.historical.quote)) fail('FO-HISTORY', `${c.id} recovered meaning disagrees with its historical quote`)
       const segregated = (c.authorization.kernelActions ?? []).filter((a) => SEGREGATED_DUTIES.includes(a.replace('finance:', '')))
       if (segregated.length > 1) fail('FO-SEGREGATION', `${c.id} joins segregated duties ${segregated.join(', ')} in one contract`)
-      if (!filled(f?.requiredSegregationOfDuties)) fail('FO-SEGREGATION', `${c.id} states no segregation rule`)
+      if (!filled(f?.requiredSegregationOfDuties?.summary)) fail('FO-SEGREGATION', `${c.id} states no separation rule summary`)
     }
     if (c.authorization?.basisId === 'ROLE_ELIGIBILITY_ONLY' && c.kind !== 'DENIAL') fail('FO-ROLE-TITLE', `${c.id} rests on role eligibility alone`)
     if (c.kind !== 'DENIAL' && c.kind !== 'NAVIGATION' && AUTHORIZATION_BASES[c.authorization?.basisId]?.domain === 'finance' && c.authorization.basisId !== 'PLATFORM_BOUNDARY_NO_AUTHORITY' && !/mandate|appointment|own record|own settings/i.test(c.authorization.requirement)) fail('FO-ROLE-TITLE', `${c.id} authorization does not name a mandate`)
@@ -452,12 +450,14 @@ export function validateBaselines(root, options = {}) {
   for (const j of finJourneys) {
     checkContract('financial-officer', j)
     checkJourney('financial-officer', j, finKnown)
-    if (!(j.segregatedPairs ?? []).length) fail('FO-JOURNEY-SEGREGATION', `${j.id} states no segregated duty pairs`)
   }
   checkScenarios('financial-officer', fin.scenarios)
   if (!(fin.contracts ?? []).some((c) => c.id === 'FO-BND-WORKAID')) fail('FO-BOUNDARY', 'the WorkAid boundary is absent')
   for (const id of ['FO-DENY-01', 'FO-DENY-02', 'FO-DENY-03', 'FO-DENY-04', 'FO-DENY-05']) if (!(fin.contracts ?? []).some((c) => c.id === id)) fail('FO-DENIALS', `${id} is absent`)
   measures('financial-officer', fin, finUniverse)
+
+  // ---------- Gate 0A.2R corrections ----------
+  validateRevisions({ root, data, matrix, fail, capabilityText })
 
   // ---------- Decisions referenced ----------
   for (const d of decisions.decisions ?? []) {

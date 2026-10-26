@@ -16,6 +16,7 @@ import { buildRepDomains } from './ue-gate0a2-content-rep-domains.mjs'
 import { buildFinancial } from './ue-gate0a2-content-financial.mjs'
 import { sha256File, validateBaselines } from './ue-gate0a2-validate-baselines.mjs'
 import { loadRecovery } from './ue-gate0a-persona-recovery.mjs'
+import { authorityHeader, finalizeBaseline, reviseFinancial, reviseRepresentative, reviseSteward } from './ue-gate0a2r-revise.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 
@@ -42,6 +43,7 @@ function header(persona, title, extra = {}) {
     recoveryBaseCommit: recovery?.baseCommit ?? null,
     sources: (recovery?.sources ?? []).map((s) => ({ id: s.id, class: s.class, commit: s.commit, path: s.path, blob: s.blob })),
     authorizationBases: Object.fromEntries(Object.entries(AUTHORIZATION_BASES).map(([id, b]) => [id, { domain: b.domain, kernelActions: b.kernelActions, definition: b.definition, source: b.source, requiresInstitutionalInstrument: Boolean(b.requiresInstitutionalInstrument) }])),
+    ...authorityHeader(),
     ...extra,
   }
 }
@@ -54,6 +56,8 @@ export function buildBaselines() {
     }),
     contracts: buildSteward(ROOT),
   }
+  reviseSteward(steward)
+  finalizeBaseline(steward)
 
   const repActions = buildRepActions(ROOT)
   const repDomains = buildRepDomains(ROOT)
@@ -66,6 +70,8 @@ export function buildBaselines() {
     journeys: repDomains.journeys,
     scenarios: repDomains.scenarios,
   }
+  reviseRepresentative(representative)
+  finalizeBaseline(representative)
 
   const fin = buildFinancial(ROOT)
   for (const c of fin.domains) c.financial.currentImplementationStatus = c.implementation.status
@@ -78,6 +84,8 @@ export function buildBaselines() {
     journeys: fin.journeys,
     scenarios: fin.scenarios,
   }
+  reviseFinancial(financialOfficer, ROOT)
+  finalizeBaseline(financialOfficer)
 
   const decisionData = {
     ...header('decisions', 'Persona baseline decision register', {
@@ -126,11 +134,31 @@ function renderContract(c) {
     row('Historical meaning recovered', esc(f.historicalMeaningRecovered))
     row('Operational capability', esc(f.operationalCapability))
     row('Required financial authority', `Duties: ${f.requiredFinancialAuthority.duties.join(', ') || 'none'}; basis \`${f.requiredFinancialAuthority.authorizationBasisId}\`; a mandate is required; derived from a role title: no.`)
-    row('Required segregation of duties', esc(f.requiredSegregationOfDuties))
+    const sod = f.requiredSegregationOfDuties
+    row('Separation of duties', `Not a universal different-person rule. Rules: ${(sod.ruleIds ?? []).map((id) => `\`${id}\``).join(', ') || 'none'}. ${esc(sod.summary)}`)
     row('Data and reporting scope', esc(f.dataAndReportingScope))
     row('Integration boundary', esc(f.integrationBoundary))
     row('Current implementation status', `\`${f.currentImplementationStatus}\``)
   }
+  if (c.authorityDerivedFrom) row('Authority derives from', c.authorityDerivedFrom.length ? c.authorityDerivedFrom.map((x) => `\`${x}\``).join(', ') : 'Nothing. This entry confers no authority.')
+  if (c.navigationVisibility) {
+    const v = c.navigationVisibility
+    row('Navigation visibility', `Shown only while a capability behind it is usable by the principal; hidden otherwise; no fixed promise. Capabilities: ${v.requiredCapabilityContractIds.join(', ')}. Current source state: ${Object.entries(v.currentSourceState).map(([k, n]) => `${k} ${n}`).join('; ')}.`)
+  }
+  if (c.capabilityState) {
+    const st = c.capabilityState
+    row('Capability state', `\`${st.advertisement}\` (${st.aggregate}). ${Object.entries(st.byCapability).map(([id, status]) => `${id} ${status}`).join('; ') || 'No capability named.'}. This destination does not imply an operational finance engine.`)
+  }
+  if (c.lifecycle) row('Lifecycle', `Entity types: ${c.lifecycle.entityTypes.map((e) => `\`${e}\``).join(', ')}. Assumes no prior entity, no mandatory sequence, transitions configurable per organization protocol. The claims versus grievances canonical entity stays unresolved under Gate ${c.lifecycle.canonicalDecisionGate}.`)
+  if (c.disclosure) {
+    const d = c.disclosure
+    row('Member disclosure', `Default \`${d.defaultVisibility}\`. Path \`${d.pathId}\`, classification \`${esc(d.classification)}\` (required). The disclosure decision is taken on the server by \`${d.decisionAuthority.basisId}\` (${d.decisionAuthority.kernelActions.map((a) => `\`${a}\``).join(', ')}) independently of the authoring authority. A client visibility flag is not sufficient. ${esc(d.decisionRecord)} Never disclosable: ${d.neverDisclosable.join(', ')}.`)
+  }
+  if (c.reporting) row('Reporting authorization', `${c.reporting.reportKind}. A view duty alone is not sufficient. Authorized separately on: ${c.reporting.authorizationDimensionIds.join(', ')}. Export needs its own authorization${c.reporting.exportAllowedByThisContract ? ' and is the subject of this contract' : ' and this contract does not allow one'}. Platform billing is excluded.`)
+  if (c.softwareRuleEvidence) row('Software rule evidence', `${c.softwareRuleEvidence.ruleIds.map((id) => `\`${id}\``).join(', ')}: implemented software rules. Institutionally adopted: no.`)
+  if (c.implementation?.platformBillingSurfaces?.length) row('Platform billing surfaces (not union finance)', c.implementation.platformBillingSurfaces.map((x) => `\`${x.file.replace('apps/union-eyes/', '')}\``).join('; '))
+  if (c.authorityStates) row('Authority states', `Engineering implementation: permitted. Synthetic authorized-path testing: permitted (${c.authorityStates.syntheticAuthorityScope}). Production or institutional activation: ${c.authorityStates.productionInstitutionalActivation}. Institutional adoption required: ${c.authorityStates.externalOrInstitutionalAdoptionRequired ? 'yes' : 'no'}.`)
+  if (c.revision) row('Revision (Gate 0A.2R)', `${esc(c.revision.reasons.join(' '))}${c.revision.changedFields.length ? ` Changed: ${c.revision.changedFields.map((x) => `\`${x}\``).join(', ')}.` : ''}`)
   if (c.navigationNameOrigin) row('Navigation name origin', `\`${c.navigationNameOrigin}\``)
   if (c.versionedStatus) {
     const v = c.versionedStatus
@@ -141,12 +169,13 @@ function renderContract(c) {
 }
 
 function renderJourney(j) {
-  const steps = j.steps.map((s) => `| ${s.n} | ${esc(s.actor)} | ${esc(s.action)} | ${s.contractIds.join(', ')} | \`${s.authorizationBasisId}\` | ${esc(s.assertion)} |`).join('\n')
-  return `### ${j.id} ${esc(j.title)}\n\nLabels: ${j.labels.map((l) => `\`${l}\``).join(' ')}. Meaning origin: \`${j.meaningOrigin}\`. Historical record: ${j.historical ? `${j.historical.kind} in \`${j.historical.sourceId}\` ("${esc(j.historical.quote)}"; the range is named and no journey is defined)` : 'none'}.\n\n${esc(j.proposedMeaning)}\n\n- Actors: ${esc(j.actor)}\n- Preconditions: ${bullets(j.preconditions)}\n- Expected persisted result: ${esc(j.expectedPersistedResult)}\n- Denial and recovery: ${esc(j.denialAndRecovery)}\n- Testable assertions: ${bullets(j.testableAssertions)}\n- Institutional adoption: ${j.institutionalAdoption.required ? `required (${j.institutionalAdoption.decisionIds.join(', ')}); activation \`${j.activation}\`` : 'not required'}\n- Implementation: ${esc(j.implementation.note)}\n${j.segregatedPairs ? `- Segregated duty pairs: ${j.segregatedPairs.map((p) => p.join(' / ')).join('; ')}\n` : ''}\n| Step | Actor | Action | Contracts | Authorization boundary | Assertion |\n| --- | --- | --- | --- | --- | --- |\n${steps}\n`
+  const steps = j.steps.map((s) => `| ${s.n} | ${esc(s.actor)}${s.actorSlot ? ` (slot ${esc(s.actorSlot)})` : ''} | ${esc(s.action)} | ${s.contractIds.join(', ')} | \`${s.authorizationBasisId}\` | ${esc(s.assertion)} |`).join('\n')
+  const checks = j.separationChecks ? `- Separation checks: ${j.separationChecks.map((c) => `\`${c.ruleId}\` over steps ${c.stepNumbers.join(', ')}`).join('; ') || 'none'}. Consecutive steps are not assumed to need different people. Whether one actor slot may hold two steps is decided by the rules listed here.\n` : ''
+  return `### ${j.id} ${esc(j.title)}\n\nLabels: ${j.labels.map((l) => `\`${l}\``).join(' ')}. Meaning origin: \`${j.meaningOrigin}\`. Historical record: ${j.historical ? `${j.historical.kind} in \`${j.historical.sourceId}\` ("${esc(j.historical.quote)}"; the range is named and no journey is defined)` : 'none'}.\n\n${esc(j.proposedMeaning)}\n\n- Actors: ${esc(j.actor)}\n- Preconditions: ${bullets(j.preconditions)}\n- Expected persisted result: ${esc(j.expectedPersistedResult)}\n- Denial and recovery: ${esc(j.denialAndRecovery)}\n- Testable assertions: ${bullets(j.testableAssertions)}\n- Institutional adoption: ${j.institutionalAdoption.required ? `required (${j.institutionalAdoption.decisionIds.join(', ')}); activation \`${j.activation}\`` : 'not required'}\n- Execution: \`${j.executionStatus}\`. A journey is a design and counts as passed only after it is executed.\n- Implementation: ${esc(j.implementation.note)}\n${checks}${j.lifecycle ? `- Lifecycle: entity types ${j.lifecycle.entityTypes.join(', ')}; no mandatory sequence.\n` : ''}${j.revision ? `- Revision (Gate 0A.2R): ${esc(j.revision.reasons.join(' '))}\n` : ''}\n| Step | Actor | Action | Contracts | Authorization boundary | Assertion |\n| --- | --- | --- | --- | --- | --- |\n${steps}\n`
 }
 
 function renderScenario(s) {
-  return `### ${s.id} ${esc(s.title)}\n\nLabels: ${s.labels.map((l) => `\`${l}\``).join(' ')}. Operating model: \`${s.operatingModel}\`. Source backing: \`${s.sourceBacking}\`. Historical record: ${s.historical ? `${s.historical.kind} in \`${s.historical.sourceId}\` ("${esc(s.historical.quote)}"; a name only)` : 'none'}.\n\n- Facts: ${s.facts.map((f) => `${esc(f.statement)}${f.file ? ` (\`${f.file.replace('apps/union-eyes/', '')}\`: "${esc(f.quote)}")` : ' (no source; hypothesis)'}`).join('<br>')}\n- Authority structure: ${esc(s.authorityStructure)}\n- Behaviour: ${esc(s.behavior)}\n- Denials: ${bullets(s.denials)}\n- Applies to: ${s.appliesToContractIds.join(', ')}\n- Not interchangeable because: ${esc(s.notInterchangeableBecause)}\n- Implementation: ${esc(s.implementation.note)}\n- Institutional adoption: ${s.institutionalAdoption.required ? `required (${s.institutionalAdoption.decisionIds.join(', ')}); activation \`${s.activation}\`` : 'not required'}\n`
+  return `### ${s.id} ${esc(s.title)}\n\nLabels: ${s.labels.map((l) => `\`${l}\``).join(' ')}. Operating model: \`${s.operatingModel}\`. Source backing: \`${s.sourceBacking}\`. Historical record: ${s.historical ? `${s.historical.kind} in \`${s.historical.sourceId}\` ("${esc(s.historical.quote)}"; a name only)` : 'none'}.\n\n- Facts: ${s.facts.map((f) => `${esc(f.statement)}${f.file ? ` (\`${f.file.replace('apps/union-eyes/', '')}\`: "${esc(f.quote)}")` : ' (no source; hypothesis)'}`).join('<br>')}\n- Authority structure: ${esc(s.authorityStructure)}\n- Behaviour: ${esc(s.behavior)}\n- Denials: ${bullets(s.denials)}\n- Applies to: ${s.appliesToContractIds.join(', ')}\n- Not interchangeable because: ${esc(s.notInterchangeableBecause)}\n- Implementation: ${esc(s.implementation.note)}\n- Configuration: \`${s.configuration.configurationKey}\`, independently configurable; shares configuration with nothing; validation \`${s.configuration.validation.status}\`.\n- Institutional adoption: ${s.institutionalAdoption.required ? `required (${s.institutionalAdoption.decisionIds.join(', ')}); activation \`${s.activation}\`` : 'not required'}\n`
 }
 
 function identifierTable(contracts) {
@@ -171,13 +200,56 @@ function basesSection(usedIds) {
   return `## Authorization bases used\n\n${[...usedIds].sort().map((id) => `- \`${id}\` (${AUTHORIZATION_BASES[id].domain}): ${AUTHORIZATION_BASES[id].definition}${AUTHORIZATION_BASES[id].requiresInstitutionalInstrument ? ' It needs an institutional instrument that is outstanding.' : ''}`).join('\n')}\n`
 }
 
+
+function authoritySection(data) {
+  const v = data.authorityStatesVocabulary
+  return `## Authority states\n\n${v.rule}\n\n${Object.entries(v.states).map(([k, t]) => `- \`${k}\`: ${t}`).join('\n')}\n\nSynthetic authority: ${v.syntheticAuthority.note}\n\nProhibited without institutional adoption:\n\n${data.prohibitedWithoutInstitutionalAdoption.map((p) => `- \`${p.id}\`: ${p.prohibited}`).join('\n')}\n\nProduct acceptance of this baseline activates none of these.\n`
+}
+
+function identitySection(m, policy) {
+  return `## Steward identity and navigation\n\n${m.rule}\n\nA distinct institutional office is not implied (\`distinctInstitutionalOfficeImplied: false\`). Office and capacity are configurable per organization. The focused workspace grants no organization-wide visibility, no triage, no reassignment and no privileged disclosure.\n\n| Dimension | Meaning | Defined by | Grants authority by itself |\n| --- | --- | --- | --- |\n${m.dimensions.map((d) => `| \`${d.id}\` ${esc(d.name)} | ${esc(d.meaning)} | ${esc(d.definedBy)} | ${d.grantsAuthorityByItself ? `Yes, ${d.authorityScope === 'ONE_CASE_ONLY' ? 'for one case only' : 'only as issued'}` : 'No'} |`).join('\n')}\n\n### Navigation policy\n\n${policy.rule} ${policy.usableCapabilityMeans}\n`
+}
+
+function lifecycleSection(m) {
+  return `## Entity types and lifecycle\n\n${m.rule}\n\n| Entity | Meaning | Prior entity required | Evidence |\n| --- | --- | --- | --- |\n${m.entityTypes.map((e) => `| \`${e.id}\` ${esc(e.name)} | ${esc(e.meaning)} | No | ${e.evidence.class}: ${esc(e.evidence.note)}${e.evidence.file ? ` (\`${e.evidence.file.replace('apps/union-eyes/', '')}\`: "${esc(e.evidence.quote)}")` : ''} |`).join('\n')}\n\nOptional links (none required, none exclusive): ${m.allowedLinks.map((l) => `${l.from} to ${l.to}`).join('; ')}.\n\nTransitions: ${m.transitions.note} Proposed defaults are configurable: ${m.transitions.proposedDefaults.map((d) => `${d.from} to ${d.to} (${d.decisionIds.join(', ')})`).join('; ')}.\n\nCanonical entity decision: \`${m.canonicalEntityDecision.capabilityId}\` is \`${m.canonicalEntityDecision.status}\` at Gate ${m.canonicalEntityDecision.gate}. ${m.canonicalEntityDecision.note}\n\nOrganization variations: ${m.organizationVariations.map((v) => `${v.scenarioId}: ${esc(v.variation)}`).join('<br>')}\n`
+}
+
+function disclosureSection(m) {
+  return `## Staff notes and member disclosure\n\n${m.rule}\n\n${m.paths.map((p) => `- \`${p.id}\` ${esc(p.title)}: classification \`${esc(p.classification)}\`, decided by \`${p.decisionAction}\` on \`${p.basisId}\`. ${esc(p.note)}`).join('\n')}\n\nDecision record: ${m.decisionRecord} Never disclosable: ${m.neverDisclosable.join(', ')}.\n\nSource today: ${m.sourceBehaviourToday}\n`
+}
+
+function scopeSection(m) {
+  return `## Scope and conflict boundaries\n\n${m.rule}\n\nScope dimensions: ${m.scopeDimensions.map((d) => `\`${d}\``).join(', ')}. Recusal lifting and conflict adjudication: ${m.recusalLiftingAndConflictAdjudicationDecision}. Territory and unit scope stay inactive until ${m.territoryAndUnitScopeInactiveUntil.join(', ')}.\n`
+}
+
+function financeSections(data) {
+  const m = data.segregationModel
+  const rules = (kind) => m.separationRules.filter((r) => r.kind === kind)
+  const ruleRow = (r) => `| \`${r.id}\` | ${esc(r.title)} | ${esc(r.meaning)} | ${esc(r.scope)} | ${Array.isArray(r.prohibitedCombinations) ? r.prohibitedCombinations.map((x) => x.join('/')).join(', ') : 'n/a'} | ${r.adoptionDecisionIds.join(', ')}${r.source ? ` | \`${r.source.file.replace('apps/union-eyes/', '')}\`: "${esc(r.source.quote)}"` : ' | proposal, no source'} |`
+  const head = '| Rule | Title | Meaning | Scope | Prohibited pairs | Adoption | Evidence |\n| --- | --- | --- | --- | --- | --- | --- |'
+  const r = data.reportingModel
+  const b = data.platformBillingBoundary
+  return [
+    `## Separation of duties\n\n${m.rule}\n\nStance: \`${m.stance}\`. Separation is evaluated against: ${m.evaluatedAgainst.join(', ')}. ${m.threePersonIssuance}\n\n### Mandatory technical protections\n\nThese hold in source for every organization. They are not institutional requirements.\n\n| Id | Protection | Meaning | Evidence |\n| --- | --- | --- | --- |\n${m.technicalProtections.map((p) => `| \`${p.id}\` | ${esc(p.title)} | ${esc(p.meaning)} | \`${p.source.file.replace('apps/union-eyes/', '')}\`: "${esc(p.source.quote)}" |`).join('\n')}\n\n### Implemented software rules\n\nSource enforces these today. None is configurable in source, none is universal, and no institution has adopted any of them.\n\n${head}\n${rules('IMPLEMENTED_SOFTWARE_RULE').map(ruleRow).join('\n')}\n\n### Proposed institutional separation\n\nProposals for an institution to adopt, adapt or decline. Each is configurable. None is in force.\n\n${head}\n${rules('PROPOSED_INSTITUTIONAL_SEPARATION').map(ruleRow).join('\n')}\n`,
+    `## Reports and exports\n\n${r.rule}\n\n${r.authorizationDimensions.map((d) => `- \`${d.id}\`: ${d.requires}`).join('\n')}\n\nNo union finance report engine exists in source. Related decisions: ${r.institutionalDecisionIds.join(', ')}.\n`,
+    `## Platform billing boundary\n\n${b.rule}\n\nEvidence that these surfaces belong to platform billing: ${b.evidence.map((e) => `\`${e.file.replace('apps/union-eyes/', '')}\` ("${esc(e.quote)}")`).join('; ')}.\n`,
+    `## Navigation advertisement\n\nA destination takes the state its capabilities support. The financial taxonomy is a proposal and is not evidence that any financial functionality exists.\n\n${Object.entries(data.navigationAdvertisement).map(([k, t]) => `- \`${k}\`: ${t}`).join('\n')}\n`,
+  ].join('\n')
+}
+
 function renderPersona(key, data, summary, dataHash) {
   const used = new Set()
   for (const c of [...(data.contracts ?? [])]) used.add(c.authorization.basisId)
   for (const j of data.journeys ?? []) for (const s of j.steps) used.add(s.authorizationBasisId)
-  const parts = [`# ${data.title}\n\n${banner(dataHash)}\n`, `## Design note\n\n${data.designNote}\n`, labelsSection(), `## Measures\n\n${summaryTable(summary.personas[key], summary.historicalVersusProposed[key])}`]
+  const parts = [`# ${data.title}\n\n${banner(dataHash)}\n`, `## Design note\n\n${data.designNote}\n`, authoritySection(data), labelsSection(), `## Measures\n\n${summaryTable(summary.personas[key], summary.historicalVersusProposed[key])}`]
   if (key === 'steward') parts.push(`## Recovered evidence used\n\n${Object.entries(data.evidenceUse).map(([id, text]) => `- ${id}: ${text}`).join('\n')}\n\nThe evidence supports some contracts and defines none.\n`)
   if (data.r18VersionedRecord) parts.push(`## R18 versioned record\n\n${data.r18VersionedRecord.rule}\n\n${data.r18VersionedRecord.historicalDispositions.map((d) => `- \`${d.sourceId}\` (${d.commit}): ${d.observation}. "${esc(d.quote)}". ${d.meaning}`).join('\n')}\n\nHistorical conflict: ${data.r18VersionedRecord.historicalConflict}. Current implementation status: ${data.r18VersionedRecord.currentImplementationStatus}. ${data.r18VersionedRecord.currentImplementationBasis}\n`)
+  if (key === 'steward') parts.push(identitySection(data.identityModel, data.navigationPolicy))
+  if (data.lifecycleModel) parts.push(lifecycleSection(data.lifecycleModel))
+  if (data.disclosureModel) parts.push(disclosureSection(data.disclosureModel))
+  if (data.scopeAndConflictBoundaries) parts.push(scopeSection(data.scopeAndConflictBoundaries))
+  if (key === 'financial-officer') parts.push(financeSections(data))
+  parts.push(`## Revision log (Gate 0A.2R)\n\n${data.revisionLog.purpose} ${data.revisionLog.revisedContractCount} entries carry a revision record: ${data.revisionLog.revisedContractIds.join(', ')}.\n`)
   parts.push(`## Identifier accounting\n\n${identifierTable(data.contracts)}`)
   parts.push(basesSection(used))
   const byKind = (kind) => data.contracts.filter((c) => c.kind === kind)
@@ -192,10 +264,12 @@ function renderPersona(key, data, summary, dataHash) {
 }
 
 function renderDecisions(data, dataHash) {
-  const render = (d) => `### ${d.id} ${esc(d.title)}\n\n- Type: \`${d.type}\`. Status: \`${d.status}\`. Activation: \`${d.activation}\`. Decision owner: \`${d.decisionOwner}\`.\n- Personas: ${d.personas.join(', ')}\n- Question: ${esc(d.question)}\n${d.baselineProposal ? `- Baseline proposal (for review, not adopted): ${esc(d.baselineProposal)}\n` : '- Baseline proposal: none. This baseline does not propose an answer to an institutional authority decision.\n'}${d.options?.length ? `- Options: ${bullets(d.options)}\n` : ''}${d.sources?.length ? `- Related capability or identifier: ${d.sources.join(', ')}\n` : ''}- Behaviour that stays inactive until adopted: ${esc(d.inactiveBehaviorUntilAdopted)}\n`
+  const states = (d) => (d.authorityStates ? `- Authority states: engineering implementation \`${d.authorityStates.engineeringImplementation}\`; synthetic authorized-path testing \`${d.authorityStates.syntheticAuthorizedPathTesting}\` (${d.authorityStates.syntheticAuthorityScope}); production or institutional activation \`${d.authorityStates.productionInstitutionalActivation}\`; institutional adoption \`${d.authorityStates.externalOrInstitutionalAdoption}\`.\n- Engineering may build: ${esc(d.engineeringMayBuild)}\n- A synthetic test may: ${esc(d.syntheticTestMay)}\n` : '')
+  const recommendation = (d) => (d.reviewerRecommendation ? `- Reviewer recommendation (a recommendation only, never an adoption): \`${d.reviewerRecommendation.disposition}\`${d.reviewerRecommendation.revisionRequired ? ', baseline revised in Gate 0A.2R' : ''}. ${esc(d.reviewerRecommendation.qualification)}\n` : '')
+  const render = (d) => `### ${d.id} ${esc(d.title)}\n\n- Type: \`${d.type}\`. Status: \`${d.status}\`. Activation: \`${d.activation}\`. Decision owner: \`${d.decisionOwner}\`.\n- Personas: ${d.personas.join(', ')}\n- Question: ${esc(d.question)}\n${d.baselineProposal ? `- Baseline proposal (for review, not adopted): ${esc(d.baselineProposal)}\n` : '- Baseline proposal: none. This baseline does not propose an answer to an institutional authority decision.\n'}${recommendation(d)}${d.options?.length ? `- Options: ${bullets(d.options)}\n` : ''}${d.sources?.length ? `- Related capability or identifier: ${d.sources.join(', ')}\n` : ''}${states(d)}- Production behaviour that stays inactive until adopted: ${esc(d.inactiveBehaviorUntilAdopted)}\n`
   const pd = data.decisions.filter((d) => d.type === 'PRODUCT_DESIGN')
   const ia = data.decisions.filter((d) => d.type === 'INSTITUTIONAL_AUTHORITY')
-  return `# ${data.title}\n\n${banner(dataHash)}\n\n## Design note\n\n${data.designNote}\n\n## Product design decisions (${pd.length})\n\nThe product specification review can settle these. A settled product decision changes the proposed baseline and still grants no authority.\n\n${pd.map(render).join('\n')}\n## Institutional authority decisions (${ia.length})\n\nThese name who may issue, approve, decide or receive something. They are outstanding. The behaviour each governs is inactive. No reviewer of this repository can settle them.\n\n${ia.map(render).join('\n')}`
+  return `# ${data.title}\n\n${banner(dataHash)}\n\n## Design note\n\n${data.designNote}\n\n${authoritySection(data)}\n## Product design decisions (${pd.length})\n\nThe product specification review can settle these. A settled product decision changes the proposed baseline and still grants no authority. Each carries a reviewer recommendation from the adversarial review. A recommendation is not an adoption, and every decision here is still outstanding.\n\n${pd.map(render).join('\n')}\n## Institutional authority decisions (${ia.length})\n\nThese name who may issue, approve, decide or receive something. They are outstanding. An outstanding decision does not stop engineering: engineering may build the drafts, queues, previews, refusal paths and positive paths it lists, and a synthetic organization may exercise them with test-issued authority. Production or institutional activation of the authority each decision governs is prohibited until a duly authorized body adopts it. No reviewer of this repository can settle them.\n\n${ia.map(render).join('\n')}`
 }
 
 export function writeBaselines(root = ROOT) {

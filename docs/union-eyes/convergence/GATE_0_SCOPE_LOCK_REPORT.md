@@ -143,9 +143,9 @@ The validator reports identifier coverage, behavioral specification completeness
 
 | Persona | Identifier coverage | Contracts with every required field | Implementation the cited source supports |
 | --- | --- | --- | --- |
-| Steward | no historical identifiers; 40 actions, 7 navigation destinations, 8 denial contracts | 55 of 55 | 26 source present, 20 partial, 9 not implemented |
-| Representative | 56 of 56 (`REP-NAV-1..7`, `REP-ACT-01..25`, `R01`–`R24`), plus Journeys A–G and 4 institutional scenarios | 63 of 63 | 16 source present, 36 partial, 4 not implemented |
-| Financial Officer | 38 of 38 (`F01`–`F28`, `FJ01`–`FJ10`), plus 7 navigation destinations, 5 denial contracts, 4 scenarios | 51 of 51 | 8 source present, 13 partial, 11 not implemented, 9 unavailable (501) |
+| Steward | no historical identifiers; 40 actions, 7 navigation destinations, 8 denial contracts | 55 of 55 | 25 source present, 21 partial, 9 not implemented |
+| Representative | 56 of 56 (`REP-NAV-1..7`, `REP-ACT-01..25`, `R01`–`R24`), plus Journeys A–G and 4 institutional scenarios | 63 of 63 | 15 source present, 37 partial, 4 not implemented |
+| Financial Officer | 38 of 38 (`F01`–`F28`, `FJ01`–`FJ10`), plus 7 navigation destinations, 5 denial contracts, 4 scenarios | 51 of 51 | 8 source present, 11 partial, 13 not implemented, 9 unavailable (501) |
 
 A cited file is not verification. Conformance was not checked and no run exists. "Source present" requires a cited file that carries an authority-kernel signal in the route itself. A route that only applies a role floor is recorded as partial. The validator raised the first draft's overclaims (six contracts) and they were downgraded.
 
@@ -155,8 +155,8 @@ A cited file is not verification. Conformance was not checked and no run exists.
 
 | Persona | Contracts | Historically evidenced (identifier and title) | Historical group or status only | New design only | Requires institutional adoption |
 | --- | --- | --- | --- | --- | --- |
-| Steward | 55 | 0 | 0 | 55 | 15 |
-| Representative | 67 | 39 | 28 | 0 | 38 |
+| Steward | 55 | 0 | 0 | 55 | 18 |
+| Representative | 67 | 39 | 28 | 0 | 39 |
 | Financial Officer | 55 | 7 | 39 | 9 | 49 |
 
 `R18` carries both versioned dispositions (BLOCKED in the first version, MISSING in the current one) and a separate current implementation status. The four institutional scenarios (CAPE, CUPE, LIUNA, small local) each state why they are not interchangeable. Financial Officer navigation distinguishes three recovered names from four proposed new names. The six financial powers (view, prepare, approve, execute, reconcile, audit) are specified apart, and no mandate is derived from a role title.
@@ -171,6 +171,26 @@ The decision register holds 46 decisions, all `OUTSTANDING`: 14 product design (
 - It implements no application functionality. It does not start Gate 1.
 - It creates no live institutional authority. Every contract has `liveAuthorityCreated: false` and is inactive until adopted.
 - It does not close Gate 0. The five Gate 0 blockers remain.
+
+## Gate 0A.2R: adversarial product specification corrections
+
+An adversarial review of the three proposed baselines returned conditional acceptance with revisions. Gate 0A.2R corrects the product specification only. It adds no application code, does not classify routes, edits no migration, and leaves the route ownership register, the 1,152 unresolved operations, the schema census (231) and the security allowlists untouched. The only matrix change is the four baseline data hashes. The baselines remain proposed, not adopted, not frozen, and not recovered originals. Gate 0 stays `IN_PROGRESS`.
+
+The corrections are layered on top of the Gate 0A.2 content by `ue-gate0a2r-revise.mjs`. Every revised contract carries a `revision` block (round, reasons, changed fields), and `ue-gate0a2r-validate.mjs` compares each identifier, historical record, meaning origin, title and decision against the Gate 0A.2 anchor commit `9836ecd7a` read from git, so a silent change to provenance fails.
+
+| Area | Correction |
+| --- | --- |
+| Steward identity | Interface persona, union office, platform role, case relationship and issued authority are five separate facts. Only a live case relationship (one case) and issued authority carry authority. A distinct institutional office is not implied, and office and capacity are configurable per organization. The focused workspace grants no organization-wide visibility, triage, reassignment or privileged disclosure. |
+| Steward navigation | The seven destinations are candidates. A destination is shown only while a capability behind it is usable by the principal and is hidden otherwise. No page count is promised. |
+| Lifecycle | Inquiry, service request, case, formal grievance, complaint, appeal and reconsideration are seven distinct entity types. None requires a prior entity, links are optional, and transitions are configured per organization protocol. Whether claims and grievances are one canonical entity stays unresolved under Gate 4 (`UE-CAP-C-001`). |
+| Staff notes | A note is staff-only. Member visibility needs a classification and an authorized server-side disclosure decision, taken independently of the authoring authority. A client flag is never sufficient. Source is recorded as partial: the notes route lets the request body choose visibility and records no classification or disclosure decision. |
+| Financial separation | Viewing, preparing, approving, executing, reconciling and auditing stay separate powers. Whether one principal may hold two is decided by a separation rule evaluated against the transaction, account, amount, mandate, approval and principal. The model separates 6 mandatory technical protections, 8 implemented software rules (source today, none universal, none adopted), and 10 proposed institutional rules. The three-person issuance design is evidence of an implemented software rule and not proof of institutional adoption. Journeys carry actor slots and per-rule separation checks and assume nothing about consecutive steps. |
+| Financial navigation | Every destination carries a capability state derived from the contracts behind it. A destination whose capabilities are all unavailable is not advertised, and the taxonomy is not evidence of functionality. Platform economics surfaces were removed from union finance evidence, which downgraded F07 and F28 to not implemented. |
+| Reports and exports | A view duty does not authorize a report, an aggregate, member-level rows or an export. Disclosed fields, aggregation, scope, sensitivity, export and inference risk are authorized separately. No union finance report engine exists. |
+| Institutional decisions | All 32 stay `OUTSTANDING` and `INACTIVE`. Each now states what engineering may build, what a synthetic test may do, that production or institutional activation is prohibited until adoption, and that adoption is required. No real mandate, office, payment, privileged disclosure or counsel activation is permitted. |
+| Product decisions | Each of the 14 carries the reviewer disposition as a recommendation only (never an adoption). PD-02, PD-04, PD-10 and PD-11 are revised. |
+
+Preserved: all 182 persona identifiers (the matrix universes are compared with the anchor), the 46 decisions and their titles, every historical record, the R18 versioned discrepancy, and the Gate 0 verdict.
 
 ## Route and method ownership
 
@@ -260,11 +280,14 @@ Run from `/home/ubuntu/ue-cursor-final-closure` on Monday, October 26, 2026, Ame
 | `node --test tooling/scripts/lib/ue-gate0-scope-lock.test.mjs` | 33 passed, 0 failed |
 | `node --test tooling/scripts/lib/ue-gate0a-persona-recovery.test.mjs` | 10 passed, 0 failed |
 | `node --test tooling/scripts/lib/ue-convergence-check.test.mjs` | 12 passed, 0 failed |
+| `node --test tooling/scripts/lib/ue-gate0a2-baselines.test.mjs` | 45 passed, 0 failed (21 Gate 0A.2 tests and 24 Gate 0A.2R tests) |
 | `node tooling/scripts/check-ue-convergence.mjs` | exit 1. Register valid (41 entries). Migration lineage verified. Two ratchet failures, above. |
 
 The 33 Gate 0 tests are the 14 original tests plus 19 new tests. The new negative tests cover: a missing Steward, a missing Representative, a Financial Officer marked complete while specs are unresolved, an existing route with no capability owner, an unrelated or invalid owner, deleted ownership with an unchanged route hash, `SOURCE_VERIFIED` backed by a test file with no execution evidence, a capability removed from both the matrix and its in-matrix lock array, and global convergence failures omitted from tracked debt. Further cases cover orphan, conflicting, and unclassified entries, an uninventoried route, stale or tampered evidence, a lock retirement without a reason, a capability added without a lock entry, a single owner per ratchet defect, and a verdict that disagrees with the blockers.
 
 The 10 Gate 0A tests cover: exact recovered counts and provenance; a missing persona specification marked resolved, and loss of the recovery file; a grouped-only identifier promoted without a solitary quote; an executable-only, inferred, or steward-evidence item presented as a requirement; the Financial Officer range completed by endpoint counting, by an invented identifier, or by an unsupported quote; a hidden or settled source conflict; an identifier removed from the previously recorded universe in the matrix and in the source; a tampered quote, blob, short commit, or kind; a dropped reference with no identifier; and a canonical claimed without a canonical-class source. The Gate 0A suite does not run any application test.
+
+The 24 Gate 0A.2R tests are negative tests. They prove that a Steward interface persona, union office or platform role does not grant authority; that a linear intake-to-grievance sequence is not mandatory and the claims versus grievances decision stays at Gate 4; that member disclosure needs an independently authorized server-side classification and decision and a client flag is refused; that no universal different-person rule is invented, that an actor slot cannot hold duties a listed rule separates, and that technical protections, software rules and proposed rules stay distinct; that platform billing is not union finance; that reports and exports are authorized apart from a view duty; that product acceptance activates no institutional mandate and all 32 institutional decisions stay outstanding and inactive; and that historical provenance, the 182 identifiers, the 46 decisions and the R18 record are unchanged from the anchor commit.
 
 The matrix validator returns 0 problems and 5 blocker groups. A problem is a rule violation. A blocker is unfinished Gate 0 scope.
 

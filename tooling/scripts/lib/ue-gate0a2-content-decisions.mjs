@@ -6,32 +6,46 @@
  * outstanding, and the behaviour they govern stays inactive.
  */
 
+import { IA_ENGINEERING, PD_PROPOSALS, PD_QUALIFICATIONS, PD_RECOMMENDATIONS, REVISION_ROUND } from './ue-gate0a2r-models.mjs'
+
 const pd = (id, title, question, proposal, personas, options = []) => ({
-  id, type: 'PRODUCT_DESIGN', title, question, baselineProposal: proposal, options, personas,
+  id, type: 'PRODUCT_DESIGN', title, question, baselineProposal: `${proposal}${PD_QUALIFICATIONS[id] ?? ''}`, options, personas,
   decisionOwner: 'PRODUCT_SPECIFICATION_REVIEW', status: 'OUTSTANDING', activation: 'PROPOSAL_ONLY_NOT_ADOPTED',
+  reviewerRecommendation: { ...PD_RECOMMENDATIONS[id], recommendationOnly: true, adoptedByInstitution: false, revisedInRound: PD_RECOMMENDATIONS[id].revisionRequired ? REVISION_ROUND : null },
   inactiveBehaviorUntilAdopted: 'The proposed behaviour is a design for review. Nothing is built from it before the review settles it.',
 })
+
+const pdFrom = (id, title, question, personas) => pd(id, title, PD_PROPOSALS[id].question ?? question, PD_PROPOSALS[id].proposal, personas, PD_PROPOSALS[id].options)
 
 const ia = (id, title, question, personas, inactive, options = [], sources = []) => ({
   id, type: 'INSTITUTIONAL_AUTHORITY', title, question, baselineProposal: null, options, personas, sources,
   decisionOwner: 'TO_BE_NAMED_BY_INSTITUTION', status: 'OUTSTANDING', activation: 'INACTIVE',
+  authorityStates: {
+    engineeringImplementation: 'PERMITTED',
+    syntheticAuthorizedPathTesting: 'PERMITTED',
+    productionInstitutionalActivation: 'PROHIBITED_UNTIL_ADOPTED',
+    externalOrInstitutionalAdoption: 'REQUIRED',
+    syntheticAuthorityScope: 'SYNTHETIC_ORGANIZATIONS_ONLY',
+  },
+  engineeringMayBuild: IA_ENGINEERING[id][0],
+  syntheticTestMay: IA_ENGINEERING[id][1],
   inactiveBehaviorUntilAdopted: inactive,
 })
 
 export const decisions = [
-  pd('DEC-PD-01', 'Steward as a distinct persona', 'Is Steward a distinct persona with its own action contract, or the front-line capacity inside Representative 2.2?', 'Steward is specified as its own persona. Every steward action names the Representative 2.2 action it narrows, so the two cannot drift.', ['steward', 'representative'], ['Distinct persona (proposed)', 'Front-line capacity inside Representative 2.2', 'Distinct persona only where an institution configures a steward-led protocol']),
-  pd('DEC-PD-02', 'Steward navigation', 'Does the steward see the seven staff destinations, a subset, or a steward-specific set?', 'The seven Representative 2.2 destinations, each narrowed to the steward\u2019s own relationships. Knowledge & Guidance is shown because the clause library is steward-gated in source.', ['steward'], ['Seven narrowed destinations (proposed)', 'Five destinations without Communications and Knowledge']),
-  pd('DEC-PD-03', 'Default visibility of working notes', 'Is a representative working note staff-only unless the author chooses member visibility?', 'Staff-only by default. Member visibility is an explicit, affirmative choice. This matches the repaired source behaviour recorded as P0-F1.', ['steward', 'representative'], ['Staff-only default (proposed)', 'Member-visible default']),
-  pd('DEC-PD-04', 'Intake classification', 'How are an inquiry, a request, an accepted case and a formal grievance distinguished, and when does an intake become a case?', 'Four named stages with a recorded transition between each. An unassigned intake is metadata until a person accepts or routes it.', ['steward', 'representative'], ['Four stages (proposed)', 'Two stages: intake and case']),
+  pdFrom('DEC-PD-01', 'Steward as a distinct persona', 'Is Steward a distinct persona with its own action contract, or the front-line capacity inside Representative 2.2?', ['steward', 'representative']),
+  pdFrom('DEC-PD-02', 'Steward navigation', 'Does the steward see the seven staff destinations, a subset, or a steward-specific set?', ['steward']),
+  pdFrom('DEC-PD-03', 'Default visibility of working notes', 'Is a representative working note staff-only unless the author chooses member visibility?', ['steward', 'representative']),
+  pdFrom('DEC-PD-04', 'Intake classification', 'How are an inquiry, a request, an accepted case and a formal grievance distinguished, and when does an intake become a case?', ['steward', 'representative']),
   pd('DEC-PD-05', 'Assignment acknowledgement and handoff summary', 'What does an assignee acknowledge on receipt, and what must an outgoing handler record at handoff?', 'The assignee acknowledges receipt; the outgoing handler records open deadlines, open communications, evidence state and the next step. Acknowledgement does not create authority.', ['steward', 'representative'], []),
   pd('DEC-PD-06', 'Representative R-domain meanings', 'Confirm the proposed single meaning for each of R03\u2013R08, R10\u2013R12, R16, R17 and R19\u2013R24.', 'Each grouped identifier receives its own meaning. Where the historical record gives an ordered list of labels, the pairing is a new design choice and is not historically evidenced.', ['representative'], []),
   pd('DEC-PD-07', 'R18 status vocabulary', 'How is a historical disposition recorded beside the current implementation status?', 'Two separate fields. The historical dispositions (BLOCKED, then MISSING) are kept as dated observations. The current implementation status is recorded from source and is never written over a historical observation.', ['representative'], []),
   pd('DEC-PD-08', 'Journeys A\u2013G acceptance form', 'Are Journeys A\u2013G accepted as the seven proposed workflows with the stated steps and assertions?', 'Seven proposed, testable workflows. They are specifications for later qualification and prove nothing now.', ['representative'], []),
   pd('DEC-PD-09', 'Financial Officer domain map', 'Confirm the proposed meaning for each of F01\u2013F28 that the historical record leaves unspecified.', 'A twenty-eight-domain map. Four identifiers have a recovered title. The others are new meanings and are marked so.', ['financial-officer'], []),
-  pd('DEC-PD-10', 'Financial navigation names', 'Confirm the three recovered navigation names and the four proposed names.', 'Accounts & Cash, Budgets & Spending and Funds & Programs are recovered names. Dues & Remittances, Approvals & Payments, Reports & Records and Mandates & Oversight are proposed. A destination whose engine is unavailable is not advertised.', ['financial-officer'], []),
-  pd('DEC-PD-11', 'Financial journeys FJ01\u2013FJ10', 'Are FJ01\u2013FJ10 accepted as the ten proposed workflows?', 'Ten proposed, testable workflows in which each step names one duty and each consecutive duty is held by a different person.', ['financial-officer'], []),
+  pdFrom('DEC-PD-10', 'Financial navigation names', 'Confirm the three recovered navigation names and the four proposed names.', ['financial-officer']),
+  pdFrom('DEC-PD-11', 'Financial journeys FJ01\u2013FJ10', 'Are FJ01\u2013FJ10 accepted as the ten proposed workflows?', ['financial-officer']),
   pd('DEC-PD-12', 'Deadline extension workflow', 'Is requesting an extension distinct from granting one?', 'Distinct. A steward requests an extension with a reason; granting is an institutional decision.', ['steward', 'representative'], []),
-  pd('DEC-PD-13', 'Financial reporting scope', 'Which reports and exports does the Financial Officer baseline cover?', 'Reports are read-only views over records the viewer holds a view duty on. An export is a separate duty-checked action and carries its own record.', ['financial-officer'], []),
+  pdFrom('DEC-PD-13', 'Financial reporting scope', 'Which reports and exports does the Financial Officer baseline cover?', ['financial-officer']),
   pd('DEC-PD-14', 'Organization scenario coverage', 'Is the stated scenario set (CAPE, CUPE, LIUNA, small local) the right set to specify, and are the stated structures the right way to represent them?', 'Four scenarios that are not interchangeable. CAPE and CUPE are source-backed. LIUNA and the small local are hypotheses that need discovery with the institution.', ['representative', 'financial-officer'], []),
 
   ia('DEC-IA-01', 'Who holds a triage designation', 'Which staff may hold a case-triage designation, for how long, and who grants it?', ['steward', 'representative'], 'No designation is issued. The unassigned-case queue stays empty for every steward and nothing is inferred from role or seniority.', ['Organization administrator grants, at most 90 days (source today)', 'Governance body grants']),

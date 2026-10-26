@@ -444,72 +444,77 @@ const domains = [
   }),
 ]
 
-const stepFo = (actor, action, ids, basis, assert) => ({ actor, action, ids, basis, assert })
+/**
+ * A step carries an actor slot. Two steps may share a slot (one principal) unless a listed separation rule prohibits that
+ * pair of duties on the transaction, account or record the journey touches. No rule is assumed beyond those listed.
+ */
+const stepFo = (slot, role, action, ids, basis, assert) => ({ slot, actor: role, action, ids, basis, assert })
 
-const SEG = 'Each consecutive segregated duty is held by a different person.'
-const jr = (n, title, desc, steps, seg, assertions, adopt, rel, recovery = 'A refusal writes nothing and says which rule applied. Where no mandate exists the answer is that no financial mandate has been issued.') => buildJourney({
+const STANCE = 'Separation is decided by the rules listed in the journey\u2019s separation checks, evaluated against the transaction, account, amount, mandate, approval and principal. A pair of steps that no listed rule prohibits may be held by one principal. Position in a workflow creates no separation requirement of its own.'
+const jr = (n, title, desc, steps, checks, assertions, adopt, rel, recovery = 'A refusal writes nothing and says which rule applied. Where no mandate exists the answer is that no financial mandate has been issued.') => buildJourney({
   id: `FJ${String(n).padStart(2, '0')}`, title: `FJ${String(n).padStart(2, '0')}: ${title}`,
   hist: { src: FO2, q: 'Journeys FJ01\u2013FJ10', kind: 'NAME', note: 'The range is named. No journey is defined.' },
   desc, actor: 'Financial mandate holders named per step',
-  pre: ['Live mandates exist for each step, held by different people where the steps are segregated.', 'The institution has adopted the rules the steps depend on.'],
+  pre: ['Live mandates exist for each step.', 'Principals are assigned to steps so that every separation rule in force for the journey is satisfied. A rule the institution has not adopted is not in force, and only the implemented software rules refuse today.', 'The institution has adopted the rules the steps depend on.'],
   steps, result: steps.map((s) => s.assert).slice(-1)[0],
-  recovery, assertions: [...assertions, SEG], adopt, rel, open: ['DEC-PD-11'],
+  recovery, assertions: [...assertions, STANCE], adopt, rel, open: ['DEC-PD-11'],
   design: 'A proposed testable workflow.',
-  extra: { segregatedPairs: seg },
+  extra: { separationStance: 'RULE_DRIVEN_NOT_UNIVERSAL', consecutiveStepsRequireDifferentPerson: false, separationChecks: checks, executionStatus: 'NOT_EXECUTED', countsAsPassed: false },
 })
+const chk = (ruleId, stepNumbers) => ({ ruleId, stepNumbers })
 
 const journeys = [
   jr(1, 'Issue and activate a financial mandate', 'An issuer proposes a mandate, an approver approves it, and the holder activates it. Until then no duty exists.', [
-    stepFo('Issuer A', 'Issue the mandate.', ['F01'], 'FINANCIAL_MANDATE_ADMINISTRATION', 'A pending mandate exists with three named parties.'),
-    stepFo('Approver B', 'Approve the issue.', ['F01'], 'FINANCIAL_MANDATE_ADMINISTRATION', 'The approver is neither issuer nor holder.'),
-    stepFo('Holder C', 'Activate the mandate.', ['F01'], 'FINANCIAL_MANDATE_ADMINISTRATION', 'The mandate is live and the holder can take only the named duties.'),
-  ], [['issue', 'approve'], ['approve', 'activate'], ['issue', 'activate']], ['An expired term is not activated.', 'No mandate exists before a successful issue.'], ['DEC-IA-16', 'DEC-IA-17'], ['F01']),
+    stepFo('S1', 'Issuer', 'Issue the mandate.', ['F01'], 'FINANCIAL_MANDATE_ADMINISTRATION', 'A pending mandate exists with three named parties.'),
+    stepFo('S2', 'Approver', 'Approve the issue.', ['F01'], 'FINANCIAL_MANDATE_ADMINISTRATION', 'The implemented rule SEP-SW-07 is evaluated for issuer, approver and holder; where the institution has adopted it, an approver who is also the issuer or holder is refused.'),
+    stepFo('S3', 'Holder', 'Activate the mandate.', ['F01'], 'FINANCIAL_MANDATE_ADMINISTRATION', 'The mandate is live and the holder can take only the named duties. SEP-SW-08 refuses activation by the issuer or approver.'),
+  ], [chk('SEP-SW-07', [1, 2, 3]), chk('SEP-SW-08', [1, 2, 3])], ['An expired term is not activated.', 'No mandate exists before a successful issue.', 'The three-person issuance rule is an implemented software rule. Its adoption by an institution is outstanding (DEC-IA-16).'], ['DEC-IA-16', 'DEC-IA-17'], ['F01']),
   jr(2, 'Run a dues billing cycle', 'A preparer prepares the cycle for a period, an approver approves it, and the charges become visible to members.', [
-    stepFo('Preparer A', 'Prepare the cycle.', ['F04'], 'FINANCIAL_MANDATE_PREPARE', 'A prepared cycle exists with counts.'),
-    stepFo('Approver B', 'Approve the cycle.', ['F04'], 'FINANCIAL_MANDATE_APPROVE', 'The approver differs from the preparer.'),
-    stepFo('Member', 'See their charge.', ['F08'], 'FINANCIAL_SUBJECT_OWN_RECORD', 'The member sees only their own record.'),
-  ], [['prepare', 'approve']], ['The preparer cannot approve the cycle.', 'A member sees no other member\u2019s record.'], ['DEC-IA-18'], ['F04', 'F08']),
-  jr(3, 'Receive and reconcile an employer remittance', 'A preparer uploads a remittance file, the file is preserved unparsed, and a different person reconciles it.', [
-    stepFo('Preparer A', 'Upload and preserve the file.', ['F09'], 'FINANCIAL_MANDATE_PREPARE', 'The file is stored with its hash and recorded unparsed.'),
-    stepFo('Reconciler B', 'Match the remittance.', ['F20'], 'FINANCIAL_MANDATE_RECONCILE', 'The reconciler did not upload the file.'),
-    stepFo('Auditor C', 'Review the period.', ['F21'], 'AUDITOR_APPOINTMENT_DUTY', 'The auditor took no part in the remittance.'),
-  ], [['prepare', 'reconcile'], ['reconcile', 'audit']], ['A duplicate hash is refused.', 'The uploader cannot reconcile.'], ['DEC-IA-21', 'DEC-IA-23'], ['F09', 'F20']),
-  jr(4, 'Follow up a member in arrears', 'A viewer finds the arrears, a preparer prepares a plan, and an approver approves it.', [
-    stepFo('Viewer A', 'View the arrears record.', ['F08'], 'FINANCIAL_MANDATE_VIEW', 'The viewer sees only named accounts.'),
-    stepFo('Preparer B', 'Prepare a payment plan.', ['F06'], 'FINANCIAL_MANDATE_PREPARE', 'A prepared plan exists.'),
-    stepFo('Approver C', 'Approve the plan.', ['F06'], 'FINANCIAL_MANDATE_APPROVE', 'The approver differs from the preparer.'),
-  ], [['prepare', 'approve']], ['A president or administrator without a mandate sees no arrears.'], ['DEC-IA-27', 'DEC-IA-18'], ['F05', 'F06', 'F08']),
-  jr(5, 'Pay an expense', 'An expense is prepared, approved, paid and reconciled by four different people.', [
-    stepFo('Preparer A', 'Register and prepare the expense payment.', ['F12', 'F15'], 'FINANCIAL_MANDATE_PREPARE', 'A registered payment exists.'),
-    stepFo('Approver B', 'Approve the payment.', ['F15'], 'FINANCIAL_MANDATE_APPROVE', 'The approver is not the preparer.'),
-    stepFo('Executor C', 'Execute the payment.', ['F16'], 'FINANCIAL_MANDATE_EXECUTE', 'The executor is neither preparer nor approver.'),
-    stepFo('Reconciler D', 'Reconcile the payment.', ['F20'], 'FINANCIAL_MANDATE_RECONCILE', 'The reconciler did not execute it.'),
-  ], [['prepare', 'approve'], ['approve', 'execute'], ['execute', 'reconcile']], ['No one can mark a payment executed without posting it.', 'Four duties need four people.'], ['DEC-IA-19', 'DEC-IA-18', 'DEC-IA-20'], ['F12', 'F15', 'F16', 'F20']),
+    stepFo('S1', 'Preparer', 'Prepare the cycle.', ['F04'], 'FINANCIAL_MANDATE_PREPARE', 'A prepared cycle exists with counts.'),
+    stepFo('S2', 'Approver', 'Approve the cycle.', ['F04'], 'FINANCIAL_MANDATE_APPROVE', 'Where the institution adopts maker-checker approval for this record (SEP-PI-07), the preparer is refused as approver.'),
+    stepFo('M', 'Member', 'See their charge.', ['F08'], 'FINANCIAL_SUBJECT_OWN_RECORD', 'The member sees only their own record.'),
+  ], [chk('SEP-PI-07', [1, 2])], ['Where SEP-PI-07 is adopted, the preparer cannot approve the cycle.', 'A member sees no other member\u2019s record.'], ['DEC-IA-18'], ['F04', 'F08']),
+  jr(3, 'Receive and reconcile an employer remittance', 'A preparer uploads a remittance file, the file is preserved unparsed, and a reconciler matches it.', [
+    stepFo('S1', 'Preparer', 'Upload and preserve the file.', ['F09'], 'FINANCIAL_MANDATE_PREPARE', 'The file is stored with its hash and recorded unparsed.'),
+    stepFo('S2', 'Reconciler', 'Match the remittance.', ['F20'], 'FINANCIAL_MANDATE_RECONCILE', 'Where the institution adopts SEP-PI-09, the uploader is refused as reconciler of the same remittance.'),
+    stepFo('S3', 'Auditor', 'Review the period.', ['F21'], 'AUDITOR_APPOINTMENT_DUTY', 'Where SEP-PI-10 is adopted, an auditor who took part in the remittance is refused.'),
+  ], [chk('SEP-PI-09', [1, 2]), chk('SEP-PI-10', [1, 2, 3])], ['A duplicate hash is refused.', 'Where SEP-PI-09 is adopted, the uploader cannot reconcile.'], ['DEC-IA-21', 'DEC-IA-23'], ['F09', 'F20']),
+  jr(4, 'Follow up a member in arrears', 'A viewer finds the arrears, prepares a plan, and an approver approves it. Viewing and preparing may be held by one principal because no rule prohibits that pair.', [
+    stepFo('S1', 'Viewer', 'View the arrears record.', ['F08'], 'FINANCIAL_MANDATE_VIEW', 'The viewer sees only named accounts.'),
+    stepFo('S1', 'Preparer', 'Prepare a payment plan.', ['F06'], 'FINANCIAL_MANDATE_PREPARE', 'A prepared plan exists. The same principal that viewed the record may prepare it because a view duty does not segregate.'),
+    stepFo('S2', 'Approver', 'Approve the plan.', ['F06'], 'FINANCIAL_MANDATE_APPROVE', 'Where SEP-PI-07 is adopted, the preparer is refused as approver.'),
+  ], [chk('SEP-PI-07', [2, 3])], ['A president or administrator without a mandate sees no arrears.'], ['DEC-IA-27', 'DEC-IA-18'], ['F05', 'F06', 'F08']),
+  jr(5, 'Pay an expense', 'An expense is prepared, approved, paid and reconciled. The implemented software rules decide which of these duties one principal may not combine on this transaction.', [
+    stepFo('S1', 'Preparer', 'Register and prepare the expense payment.', ['F12', 'F15'], 'FINANCIAL_MANDATE_PREPARE', 'A registered payment exists.'),
+    stepFo('S2', 'Approver', 'Approve the payment.', ['F15'], 'FINANCIAL_MANDATE_APPROVE', 'SEP-SW-01 refuses an approver who prepared this transaction.'),
+    stepFo('S3', 'Executor', 'Execute the payment.', ['F16'], 'FINANCIAL_MANDATE_EXECUTE', 'SEP-SW-02 refuses an executor who prepared or approved this transaction.'),
+    stepFo('S4', 'Reconciler', 'Reconcile the payment.', ['F20'], 'FINANCIAL_MANDATE_RECONCILE', 'SEP-SW-03 refuses a reconciler who took part in this transaction.'),
+  ], [chk('SEP-SW-01', [1, 2]), chk('SEP-SW-02', [1, 2, 3]), chk('SEP-SW-03', [1, 2, 3, 4])], ['No one can mark a payment executed without posting it.', 'Under the implemented rules the four duties on one transaction need four principals. That is a consequence of those rules and not a universal requirement. An institution may adopt a different rule set (DEC-IA-18).'], ['DEC-IA-19', 'DEC-IA-18', 'DEC-IA-20'], ['F12', 'F15', 'F16', 'F20']),
   jr(6, 'Pay a vendor', 'A vendor is verified, an invoice is matched, and the payment passes through approval and execution.', [
-    stepFo('Preparer A', 'Prepare the vendor and payable.', ['F13', 'F14'], 'FINANCIAL_MANDATE_PREPARE', 'The payable matches an approved line.'),
-    stepFo('Approver B', 'Approve the vendor change and the payable.', ['F13', 'F15'], 'FINANCIAL_MANDATE_APPROVE', 'The approver is not the preparer.'),
-    stepFo('Executor C', 'Execute the payment.', ['F16'], 'FINANCIAL_MANDATE_EXECUTE', 'The executor is neither preparer nor approver.'),
-  ], [['prepare', 'approve'], ['approve', 'execute']], ['A duplicate invoice is refused.', 'A changed bank reference is approved by someone else.'], ['DEC-IA-19'], ['F13', 'F14']),
+    stepFo('S1', 'Preparer', 'Prepare the vendor and payable.', ['F13', 'F14'], 'FINANCIAL_MANDATE_PREPARE', 'The payable matches an approved line.'),
+    stepFo('S2', 'Approver', 'Approve the vendor change and the payable.', ['F13', 'F15'], 'FINANCIAL_MANDATE_APPROVE', 'SEP-SW-01 refuses an approver who prepared the payment. Where SEP-PI-03 is adopted, the person who changed the vendor bank reference does not approve that change.'),
+    stepFo('S3', 'Executor', 'Execute the payment.', ['F16'], 'FINANCIAL_MANDATE_EXECUTE', 'SEP-SW-02 refuses an executor who prepared or approved the payment.'),
+  ], [chk('SEP-SW-01', [1, 2]), chk('SEP-SW-02', [1, 2, 3]), chk('SEP-PI-03', [1, 2])], ['A duplicate invoice is refused.', 'Where SEP-PI-03 is adopted, a changed bank reference is not approved by the person who changed it.'], ['DEC-IA-19'], ['F13', 'F14']),
   jr(7, 'Disburse from a strike or restricted fund', 'A disbursement is prepared against a restriction, approved, and executed.', [
-    stepFo('Preparer A', 'Prepare the disbursement.', ['F17', 'F18'], 'FINANCIAL_MANDATE_PREPARE', 'The disbursement names its restriction.'),
-    stepFo('Approver B', 'Approve it.', ['F17', 'F18'], 'FINANCIAL_MANDATE_APPROVE', 'The approver is not a recipient.'),
-    stepFo('Executor C', 'Execute the payment.', ['F16'], 'FINANCIAL_MANDATE_EXECUTE', 'The executor is a third person.'),
-  ], [['prepare', 'approve'], ['approve', 'execute']], ['A person cannot approve their own stipend.'], ['DEC-IA-24'], ['F17', 'F18']),
-  jr(8, 'Remit to an affiliate', 'An affiliate remittance is prepared, approved and submitted by different people.', [
-    stepFo('Preparer A', 'Prepare the remittance.', ['F10'], 'FINANCIAL_MANDATE_PREPARE', 'A prepared remittance exists.'),
-    stepFo('Approver B', 'Approve it.', ['F10'], 'FINANCIAL_MANDATE_APPROVE', 'The approver is not the preparer.'),
-    stepFo('Executor C', 'Submit it.', ['F10', 'F16'], 'FINANCIAL_MANDATE_EXECUTE', 'Submission is a separate duty.'),
-  ], [['prepare', 'approve'], ['approve', 'execute']], ['Submission and export answer HTTP 501 until adopted.'], ['DEC-IA-25'], ['F10']),
-  jr(9, 'Close a period with independent review', 'A reconciler closes the period and an appointed auditor reviews it.', [
-    stepFo('Reconciler A', 'Reconcile the period.', ['F20'], 'FINANCIAL_MANDATE_RECONCILE', 'All items are matched or accepted.'),
-    stepFo('Auditor B', 'Review the period and record findings.', ['F21', 'F27'], 'AUDITOR_APPOINTMENT_DUTY', 'The auditor took no part in the period\u2019s transactions.'),
-    stepFo('Viewer C', 'Read the statements.', ['F22'], 'FINANCIAL_MANDATE_VIEW', 'The statements state their scope.'),
-  ], [['reconcile', 'audit']], ['The auditor holds no other duty in the period.'], ['DEC-IA-21', 'DEC-IA-23'], ['F20', 'F21', 'F22']),
+    stepFo('S1', 'Preparer', 'Prepare the disbursement.', ['F17', 'F18'], 'FINANCIAL_MANDATE_PREPARE', 'The disbursement names its restriction.'),
+    stepFo('S2', 'Approver', 'Approve it.', ['F17', 'F18'], 'FINANCIAL_MANDATE_APPROVE', 'SEP-SW-01 refuses an approver who prepared it. Where SEP-PI-02 is adopted, a recipient is refused as approver.'),
+    stepFo('S3', 'Executor', 'Execute the payment.', ['F16'], 'FINANCIAL_MANDATE_EXECUTE', 'SEP-SW-02 refuses an executor who prepared or approved it.'),
+  ], [chk('SEP-SW-01', [1, 2]), chk('SEP-SW-02', [1, 2, 3]), chk('SEP-PI-02', [2])], ['Where SEP-PI-02 is adopted, a person cannot approve their own stipend.'], ['DEC-IA-24'], ['F17', 'F18']),
+  jr(8, 'Remit to an affiliate', 'An affiliate remittance is prepared, approved and submitted.', [
+    stepFo('S1', 'Preparer', 'Prepare the remittance.', ['F10'], 'FINANCIAL_MANDATE_PREPARE', 'A prepared remittance exists.'),
+    stepFo('S2', 'Approver', 'Approve it.', ['F10'], 'FINANCIAL_MANDATE_APPROVE', 'Where SEP-PI-07 is adopted, the preparer is refused as approver.'),
+    stepFo('S3', 'Executor', 'Submit it.', ['F10', 'F16'], 'FINANCIAL_MANDATE_EXECUTE', 'Submission is a separate duty. SEP-SW-02 applies where the submission is a payment transaction.'),
+  ], [chk('SEP-PI-07', [1, 2]), chk('SEP-SW-02', [1, 2, 3])], ['Submission and export answer HTTP 501 until adopted.'], ['DEC-IA-25'], ['F10']),
+  jr(9, 'Close a period with independent review', 'A reconciler closes the period and an appointed auditor reviews it. The reconciler may later read the statements because a view duty does not segregate.', [
+    stepFo('S1', 'Reconciler', 'Reconcile the period.', ['F20'], 'FINANCIAL_MANDATE_RECONCILE', 'All items are matched or accepted.'),
+    stepFo('S2', 'Auditor', 'Review the period and record findings.', ['F21', 'F27'], 'AUDITOR_APPOINTMENT_DUTY', 'Where SEP-PI-10 is adopted, an auditor who took part in the period\u2019s records is refused.'),
+    stepFo('S1', 'Viewer', 'Read the statements.', ['F22'], 'FINANCIAL_MANDATE_VIEW', 'The statements state their scope. Reading is authorized separately from reconciling and from any export (F25).'),
+  ], [chk('SEP-PI-10', [1, 2])], ['Where SEP-PI-10 is adopted, the auditor holds no other duty on the audited records.'], ['DEC-IA-21', 'DEC-IA-23'], ['F20', 'F21', 'F22']),
   jr(10, 'Revoke financial authority on departure', 'When an office-holder leaves, their mandates are revoked and replacements are issued by the register.', [
-    stepFo('Issuer A', 'Revoke the departing person\u2019s mandates.', ['F26', 'F01'], 'FINANCIAL_MANDATE_ADMINISTRATION', 'Revocation takes effect when recorded.'),
-    stepFo('Approver B', 'Approve the replacement issue.', ['F01'], 'FINANCIAL_MANDATE_ADMINISTRATION', 'The replacement has three different parties.'),
-    stepFo('Holder C', 'Activate the replacement.', ['F01'], 'FINANCIAL_MANDATE_ADMINISTRATION', 'The new holder takes only the named duties.'),
-  ], [['revoke', 'approve'], ['approve', 'activate']], ['The departed person\u2019s duty is refused immediately after revocation.'], ['DEC-IA-28', 'DEC-IA-16'], ['F26', 'F01']),
+    stepFo('S1', 'Issuer', 'Revoke the departing person\u2019s mandates.', ['F26', 'F01'], 'FINANCIAL_MANDATE_ADMINISTRATION', 'Revocation takes effect when recorded. The departing person takes no part in it (SEP-PI-08).'),
+    stepFo('S2', 'Approver', 'Approve the replacement issue.', ['F01'], 'FINANCIAL_MANDATE_ADMINISTRATION', 'SEP-SW-07 is evaluated for the replacement\u2019s issuer, approver and holder.'),
+    stepFo('S3', 'Holder', 'Activate the replacement.', ['F01'], 'FINANCIAL_MANDATE_ADMINISTRATION', 'The new holder takes only the named duties. SEP-SW-08 refuses activation by the issuer or approver.'),
+  ], [chk('SEP-PI-08', [1]), chk('SEP-SW-07', [1, 2, 3]), chk('SEP-SW-08', [1, 2, 3])], ['The departed person\u2019s duty is refused immediately after revocation.'], ['DEC-IA-28', 'DEC-IA-16'], ['F26', 'F01']),
 ]
 
 const denial = (n, title, desc, attempt, basis, rel) => ({
@@ -530,7 +535,7 @@ const denial = (n, title, desc, attempt, basis, rel) => ({
 const denials = [
   denial(1, 'No financial authority from a role title', 'The Secretary-Treasurer, President, administrator and every other title carry no financial duty. A duty comes only from a live mandate.', 'taking any financial duty on the strength of a title', 'ROLE_ELIGIBILITY_ONLY', ['F01', 'F08']),
   denial(2, 'No union financial authority from platform billing or entitlement', 'Nzila platform billing and a SaaS entitlement are not union finance and confer no authority over union records.', 'reading or changing union financial records through platform billing or entitlement', 'PLATFORM_BOUNDARY_NO_AUTHORITY', ['F22']),
-  denial(3, 'No second segregated duty on a transaction', 'A person who prepared, approved, executed or reconciled a transaction, or who is a party to it, cannot take another segregated duty on it.', 'taking a second segregated duty on one transaction', 'ROLE_ELIGIBILITY_ONLY', ['F15', 'F16', 'F20']),
+  denial(3, 'No bypass of a separation rule in force', 'A title, seniority or consecutive position in a workflow never creates or removes a separation requirement. Where an implemented software rule or an institutionally adopted rule prohibits a duty combination on this transaction, account or record, the combination is refused. No rule is assumed beyond those listed in the separation model.', 'taking a duty that a separation rule in force prohibits on the same transaction, account or record', 'ROLE_ELIGIBILITY_ONLY', ['F15', 'F16', 'F20']),
   denial(4, 'No delegation of a financial duty', 'A financial duty is not delegable. The source refuses a delegation on every finance action.', 'delegating a financial duty', 'ROLE_ELIGIBILITY_ONLY', ['F01']),
   denial(5, 'No success where the capability is unavailable', 'A financial capability that is unavailable answers HTTP 501. It never returns a success it did not perform.', 'receiving a success answer from an unavailable financial route', 'ROLE_ELIGIBILITY_ONLY', ['F10', 'F11', 'F17']),
 ]
@@ -553,7 +558,7 @@ const scenarios = [
   SCN('FO-SCN-SMALL-LOCAL', 'Small local: too few people to separate duties', { src: FO2, q: 'organization scenarios', kind: 'NAME' }, 'SMALL_LOCAL_THREE_PERSON_RULE', 'HYPOTHESIS_ONLY',
     [{ t: 'The source requires three different people to issue a mandate. A small local may not have three.' , file: A('lib/finance/financial-mandate-lifecycle.ts'), q: 'The issuer, the holder and the approver of a financial mandate are three different people.' }],
     'One or two officers hold every financial office.', 'Where the three-person rule cannot be met, no mandate is issued unless a governed exception exists.',
-    ['One person never holds two segregated duties on one transaction.'], ['F01', 'F15', 'F16'], 'The binding constraint is the count of independent people.', ['DEC-IA-16', 'DEC-IA-31']),
+    ['A governed exception, where the institution adopts one, names the rule it relaxes, the compensating control and the independent reviewer. Without one, the implemented software rules still refuse.'], ['F01', 'F15', 'F16'], 'The binding constraint is the count of independent people.', ['DEC-IA-16', 'DEC-IA-31']),
 ].map((s) => ({ ...s }))
 
 const boundary = {

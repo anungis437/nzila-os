@@ -4758,19 +4758,19 @@
     "data": {
       "steward": {
         "file": "docs/union-eyes/convergence/register/ue-persona-proposed-baseline-steward.json",
-        "sha256": "57dec7445ceb137023a7ff108d188266f86ade1881090bee74b423f8a7b46018"
+        "sha256": "9b7eae86da9598160abb6aae144e8cbcfef1fe12cc465a4fcaab1a084a03d207"
       },
       "representative": {
         "file": "docs/union-eyes/convergence/register/ue-persona-proposed-baseline-representative.json",
-        "sha256": "0893536b7c8a4274ed44c9ab1e69e547287c0097f6f554f74a13c7011287656b"
+        "sha256": "34f3d145e945a11bf8cba049d16bd66998fe5ee2b2f6a3e817bdebfdf6b891d0"
       },
       "financial-officer": {
         "file": "docs/union-eyes/convergence/register/ue-persona-proposed-baseline-financial-officer.json",
-        "sha256": "30ed8f42eb25096ca9e77b87736adcbeb881d5528930533165456ed9a2d969b9"
+        "sha256": "01e11c12ce91b8ec96ff9d0af68595296effbc36e6f05def07ea0a02f677c216"
       },
       "decisions": {
         "file": "docs/union-eyes/convergence/register/ue-persona-proposed-baseline-decisions.json",
-        "sha256": "7db3fb2d8d9d965598bce63865fca61062a66646e5cb534c4f16bf593e3187b0"
+        "sha256": "6761145be559a484a65845ddd39b42e012d03e4ce9a5297365c0db2d10f18580"
       }
     },
     "documents": {
