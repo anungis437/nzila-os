@@ -68,6 +68,26 @@ const REQUIRED_DECLARATION: Record<string, string> = {
   payment_disputes: 'paymentsRelations.disputes references paymentDisputes. The declaration stays.',
 }
 
+/** Dead-module declarations a kept relation, public export, or shadow schema still names. */
+const REQUIRED_DEAD_MODULE: Record<string, string> = {
+  clc_webhook_log: 'clc_sync_log relations name clcWebhookLog. The declaration stays.',
+  committee_memberships: 'committees relations name committeeMemberships. The declaration stays.',
+  event_reminders: 'calendar_events relations name eventReminders. The declaration stays.',
+  grievance_approvals: 'grievance_communications relations name grievanceApprovals. The declaration stays.',
+  grievance_assignments: 'grievance_transitions relations name grievanceAssignments. The declaration stays.',
+  grievance_stages: 'grievance_transitions references grievanceStages. The declaration stays. Do not drop the physical foreign key.',
+  grievance_workflows: 'grievance_stages.workflowId references grievanceWorkflows. The declaration stays. Do not drop the physical foreign key.',
+  member_documents: 'Member profile relations name memberDocuments, and the financial-service shadow schema still declares member_documents. The union-eyes declaration stays.',
+  notification_log: 'clc_sync_log relations name notificationLog. The declaration stays.',
+  organization_contacts: 'clc_sync_log relations name organizationContacts. The declaration stays.',
+  organization_sharing_settings: 'cross_org_access_log relations name organizationSharingSettings. The declaration stays.',
+  role_tenure_history: 'steward_assignments relations name roleTenureHistory. The declaration stays.',
+  room_bookings: 'calendar_events relations name roomBookings. The financial-service shadow schema also declares room_bookings. The union-eyes declaration stays.',
+  segment_executions: 'member_segments relations name segmentExecutions. The declaration stays.',
+  segment_exports: 'member_segments relations name segmentExports. The declaration stays.',
+  user_sessions: 'domains/member/user-management.ts re-exports userSessions, and organizationUsers relations name it. The public declaration stays.',
+}
+
 export interface MutationAssignment {
   key: string
   file: string
@@ -188,8 +208,17 @@ const BATCHES: BatchSpec[] = [
     ratchet: 'census',
     execution: 'cursor-then-vs',
     shrink: 'census',
-    action: 'No production entry reaches a file that names this relation, and the import graph resolved every relative and @/ import. Retire the app Drizzle declaration together with dead importers and their tests. Do not delete a shadow pgTable file and do not DROP the relation. grievance_communications is not in this batch.',
+    action: 'No production entry reaches a file that names this relation, and no kept declaration names it. Retire the app Drizzle declaration together with dead importers and their tests. Do not delete a shadow pgTable file and do not DROP the relation. grievance_communications is not in this batch.',
     proof: 'apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts',
+  },
+  {
+    id: 'schema-verify-dead-required',
+    order: 10.5,
+    ratchet: 'census',
+    execution: 'hold',
+    shrink: 'none',
+    action: 'A kept Drizzle relation, a public schema export, or a shadow schema still names this declaration. Do not retire it to shrink the census. Do not DROP the relation.',
+    proof: 'apps/union-eyes/db/__tests__/schema-mutation-batches.test.ts',
   },
   {
     id: 'schema-verify-unproven',
@@ -215,7 +244,7 @@ const BATCHES: BatchSpec[] = [
     ratchet: 'census',
     execution: 'prepared-evolve',
     shrink: 'census',
-    action: 'A production entry reaches the relation and the stub-evolution rules accept it: additive nullable columns, declared defaults, and Django id/created_at/updated_at defaults only. No keys and no RLS from that generator. Generate SQL only for this list, review it, and commit it as the next platform migration. Do not apply it here. VS Code proves the shrink on a disposable database.',
+    action: 'Platform migration 0031_reachable_stub_shape evolves data_anonymization_log, employment_history, job_classifications, and member_leaves. Additive columns and defaults only. NOT NULL only when the relation is empty. No keys, no RLS, no DROP. It is registered UNQUALIFIED. Do not apply it here. Census regeneration after apply is READY_FOR_VS_EXECUTION.',
     proof: 'apps/union-eyes/scripts/generate-stub-evolution.ts and apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts',
   },
   {
@@ -399,7 +428,7 @@ function schemaBatch(entry: CensusEntry, disposition: string, index: ReachIndex,
       return 'schema-live-unreferenced'
     case 'VERIFY_UNREACHABLE_THEN_RETIRE':
       if (!reachable && !index.graphComplete) return 'schema-verify-unproven'
-      if (!reachable) return 'schema-verify-dead-module'
+      if (!reachable) return REQUIRED_DEAD_MODULE[entry.table] ? 'schema-verify-dead-required' : 'schema-verify-dead-module'
       if (blockers.length > 0) return 'schema-verify-reachable-blocked'
       return 'schema-evolve-reachable'
     default:
@@ -458,6 +487,7 @@ export function buildSchemaMutationBatches(live: Record<string, number> = scanUn
     }
     if (!declared.has(entry.table)) row.declarationRemoved = true
     const holdReason = REQUIRED_DECLARATION[entry.table]
+      ?? REQUIRED_DEAD_MODULE[entry.table]
       ?? (record.disposition === 'LIVE_UNREFERENCED' && refs.length > 0
         ? `A production file reads this relation: ${refs.join(', ')}`
         : undefined)

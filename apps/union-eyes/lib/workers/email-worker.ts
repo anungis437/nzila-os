@@ -25,7 +25,7 @@ if (typeof window === 'undefined' && !process.env.__NEXT_BUILDING) {
 import { sendEmail } from '../email-service';
 import { render } from '@react-email/render';
 import { db } from '../../db/db';
-import { notificationHistory, userNotificationPreferences, inAppNotifications } from '../../db/schema';
+import { userNotificationPreferences, inAppNotifications } from '../../db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
@@ -94,33 +94,6 @@ async function checkUserPreferences(email: string): Promise<boolean> {
 }
 
 /**
- * Log notification to history
- */
-async function logNotification(
-  userId: string | null,
-  email: string,
-  subject: string,
-  template: string,
-  status: 'sent' | 'failed',
-  error?: string
-) {
-  try {
-    await db.insert(notificationHistory).values({
-      userId,
-      channel: 'email',
-      recipient: email,
-      subject,
-      template,
-      status,
-      error,
-      sentAt: new Date(),
-    });
-  } catch (err) {
-    logger.error('Error logging notification', err instanceof Error ? err : new Error(String(err)));
-  }
-}
-
-/**
  * Process email job
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -144,7 +117,6 @@ async function processEmailJob(job: any) {
       if (!wantsEmail && priority !== 1) {
         // Skip non-critical emails if user disabled
         logger.info('Skipping email (disabled by user)', { email });
-        await logNotification(null, email, subject, template, 'sent', 'Skipped by user preference');
         return { email, skipped: true };
       }
 
@@ -198,20 +170,10 @@ async function processEmailJob(job: any) {
           attachments,
         });
 
-        await logNotification(data.userId || null, email, subject, template, 'sent');
-
         logger.info('Email sent successfully', { email });
         return { email, sent: true };
       } catch (error) {
         logger.error('Error sending email', error instanceof Error ? error : new Error(String(error)), { email });
-        await logNotification(
-          data.userId || null,
-          email,
-          subject,
-          template,
-          'failed',
-          error instanceof Error ? error.message : 'Unknown error'
-        );
         throw error;
       }
     })
@@ -300,8 +262,6 @@ async function processDigestJob(job: any) {
         subject: `Your ${frequency === 'daily' ? 'Daily' : 'Weekly'} Union Claims Digest`,
         html,
       });
-
-      await logNotification(user.userId!, user.email, 'Digest', 'digest', 'sent');
 
       sent++;
     } catch (error) {

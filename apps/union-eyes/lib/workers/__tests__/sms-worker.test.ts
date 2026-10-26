@@ -142,12 +142,12 @@ describe('sms-worker', () => {
       expect(h.messagesCreate).toHaveBeenCalledWith(expect.objectContaining({ to: '+447911123456' }));
     });
 
-    it('logs and rethrows when Twilio send fails', async () => {
+    it('rethrows when Twilio send fails and does not write SMS history', async () => {
       await loadFresh(FULL_TWILIO);
       h.messagesCreate.mockRejectedValueOnce(new Error('twilio down'));
       await expect(h.workers[0].processor(job({ to: '5551234567', message: 'hi', priority: 1 })))
         .rejects.toThrow('twilio down');
-      expect(h.insertValues).toHaveBeenCalled();
+      expect(h.insertValues).not.toHaveBeenCalled();
     });
 
     it('handles a non-Error throw from Twilio', async () => {
@@ -171,11 +171,11 @@ describe('sms-worker', () => {
       expect(r.skipped).toBe(true);
     });
 
-    it('swallows errors when writing to the SMS history log', async () => {
+    it('sends without writing SMS history', async () => {
       await loadFresh(FULL_TWILIO);
-      h.insertValues.mockRejectedValue(new Error('insert failed'));
       const r = await h.workers[0].processor(job({ to: '5551234567', message: 'hi', priority: 1 })) as { success: boolean };
       expect(r.success).toBe(true);
+      expect(h.insertValues).not.toHaveBeenCalled();
     });
   });
 

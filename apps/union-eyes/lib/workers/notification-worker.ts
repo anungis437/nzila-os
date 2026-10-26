@@ -25,7 +25,7 @@ if (typeof window === 'undefined' && !process.env.__NEXT_BUILDING) {
 import { addEmailJob } from '../job-queue';
 import { addSmsJob } from '../job-queue';
 import { db } from '@/db/db';
-import { notificationHistory, userNotificationPreferences, inAppNotifications, pushDevices } from '@/db/schema';
+import { userNotificationPreferences, inAppNotifications, pushDevices } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { FCMService } from '@/services/fcm-service';
@@ -314,25 +314,6 @@ async function processNotification(job: any) {
       channel: enabledChannels[i],
       error: (r as PromiseRejectedResult).reason,
     }));
-
-  await db.insert(notificationHistory).values({
-    userId,
-    channel: 'multi',
-    recipient: userId,
-    subject: title,
-    template: 'notification',
-    status: failedChannels.length === 0 ? 'sent' : 'partial',
-    error: failedChannels.length > 0 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ? `Failed channels: ${failedChannels.map((f: any) => f.channel).join(', ')}`
-      : undefined,
-    sentAt: new Date(),
-    metadata: {
-      channels: successfulChannels,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      failedChannels: failedChannels.map((f: any) => f.channel),
-    },
-  });
 
   await job.updateProgress(100);
 

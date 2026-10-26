@@ -23,7 +23,6 @@ if (typeof window === 'undefined' && !process.env.__NEXT_BUILDING) {
 
 import { db } from '../../db/db';
 import { auditLogs } from '../../db/schema/audit-security-schema';
-import { notificationHistory } from '../../db/schema/notifications-schema';
 import { lt } from 'drizzle-orm';
 import fs from 'fs/promises';
 import path from 'path';
@@ -53,18 +52,6 @@ const result = await db
     })
     .where(lt(auditLogs.createdAt, cutoffDate));
 return { archived: result.rowCount || 0 };
-}
-
-/**
- * Clean up old notification history
- */
-async function _cleanupNotificationHistory(olderThanDays: number) {
-  const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
-const result = await db
-    .delete(notificationHistory)
-    .where(lt(notificationHistory.sentAt, cutoffDate));
-return { deleted: result.length };
 }
 
 /**

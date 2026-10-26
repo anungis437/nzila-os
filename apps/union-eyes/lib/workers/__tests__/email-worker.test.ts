@@ -182,19 +182,19 @@ describe('email-worker', () => {
       .rejects.toThrow(/Failed to send 1\/1/);
   });
 
-  it('throws when sending fails and logs a failed notification', async () => {
+  it('throws when sending fails and does not write notification history', async () => {
     await loadFresh();
     h.sendEmail.mockRejectedValueOnce(new Error('smtp down'));
     await expect(h.workers[0].processor(job({ to: 'a@x.com', subject: 'Hi', template: 'welcome', data: {}, priority: 2 })))
       .rejects.toThrow(/Failed to send/);
-    expect(h.insertValues).toHaveBeenCalled();
+    expect(h.insertValues).not.toHaveBeenCalled();
   });
 
-  it('swallows errors while logging a notification', async () => {
+  it('sends without writing notification history', async () => {
     await loadFresh();
-    h.insertValues.mockRejectedValue(new Error('log fail'));
     const r = await h.workers[0].processor(job({ to: 'a@x.com', subject: 'Hi', template: 'welcome', data: {}, priority: 2 })) as { success: boolean };
     expect(r.success).toBe(true);
+    expect(h.insertValues).not.toHaveBeenCalled();
   });
 
   it('renders raw-html with text and processes attachments', async () => {

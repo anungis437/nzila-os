@@ -225,6 +225,13 @@
       "when": 1758870000000,
       "tag": "0030_message_retention_authority_scope",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1758880000000,
+      "tag": "0031_reachable_stub_shape",
+      "breakpoints": true
     }
   ]
 }

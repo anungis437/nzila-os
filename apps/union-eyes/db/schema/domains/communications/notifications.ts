@@ -180,38 +180,8 @@ export const inAppNotifications = pgTable('in_app_notifications', {
   expiresAt: timestamp('expires_at'), // Optional expiration
 });
 
-// ============================================
-// Notification History (Audit Log)
-// ============================================
-
-export const notificationHistory = pgTable('notification_history', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  
-  // Recipient info
-  userId: text('user_id'), // Nullable for system-wide notifications
-  organizationId: uuid('organization_id').references(() => organizations.id, {
-    onDelete: 'cascade',
-  }),
-  recipient: text('recipient').notNull(), // Email, phone, or user ID
-  
-  // Notification details
-  channel: notificationChannelEnum('channel').notNull(),
-  subject: text('subject'),
-  template: text('template'),
-  
-  // Status
-  status: notificationStatusEnum('status').notNull(),
-  error: text('error'), // Error message if failed
-  
-  // Delivery tracking
-  sentAt: timestamp('sent_at').notNull(),
-  deliveredAt: timestamp('delivered_at'),
-  openedAt: timestamp('opened_at'),
-  clickedAt: timestamp('clicked_at'),
-  
-  // External IDs for tracking
-  metadata: jsonb('metadata'), // e.g., { twilioSid, sendgridId, channels: [] }
-});
+// notification_history is not declared in this barrel. The physical relation stays.
+// services/financial-service still declares its own notification_history. Do not DROP it.
 
 export type NotificationTracking = typeof notificationTracking.$inferSelect;
 export type NewNotificationTracking = typeof notificationTracking.$inferInsert;
@@ -265,9 +235,6 @@ export type NewUserNotificationPreferences = typeof userNotificationPreferences.
 
 export type InAppNotification = typeof inAppNotifications.$inferSelect;
 export type NewInAppNotification = typeof inAppNotifications.$inferInsert;
-
-export type NotificationHistory = typeof notificationHistory.$inferSelect;
-export type NewNotificationHistory = typeof notificationHistory.$inferInsert;
 
 // ============================================
 // Notification Templates

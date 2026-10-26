@@ -106,5 +106,20 @@ describe('schema and mutation batch program', () => {
       expect(row?.holdReason).toBeTruthy()
     }
     expect(program.censusCount).toBe(231)
+    const evolve = program.batches.find((batch) => batch.id === 'schema-evolve-reachable')
+    expect(evolve?.entryCount).toBe(4)
+    expect(evolve?.applyNow).toBe(false)
+    expect(evolve?.action).toContain('0031_reachable_stub_shape')
+    expect(evolve?.action).toContain('READY_FOR_VS_EXECUTION')
+    expect(evolve?.action).toContain('no DROP')
+    const history = program.schema.find((entry) => entry.table === 'notification_history')
+    expect(history?.declarationRemoved).toBe(true)
+    expect(history?.batchId).toBe('schema-verify-dead-module')
+    for (const table of ['user_sessions', 'member_documents', 'grievance_stages', 'grievance_workflows']) {
+      const row = program.schema.find((entry) => entry.table === table)
+      expect(row?.batchId).toBe('schema-verify-dead-required')
+      expect(row?.declarationRemoved).toBeUndefined()
+      expect(row?.holdReason).toBeTruthy()
+    }
   })
 })
