@@ -228,7 +228,7 @@
     "next-themes": "^0.3.0",
     "node-cron": "^4.2.1",
     "node-geocoder": "^4.4.1",
-    "papaparse": "^5.5.3",
+    "papaparse": "^5.7.0",
     "pdf-parse": "^2.4.5",
     "pdfjs-dist": "^6.4.299",
     "pdfkit": "^0.15.0",
