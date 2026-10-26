@@ -12,6 +12,8 @@ import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { loadRecovery } from './ue-gate0a-persona-recovery.mjs'
+import { BASELINE_DATA } from './ue-gate0a2-baseline-facts.mjs'
+import { sha256File, validateBaselines } from './ue-gate0a2-validate-baselines.mjs'
 import { PERSONAS, computePersonaSpecs, personaActionsFromSpecs, validatePersonaCompleteness } from './ue-gate0-persona-spec.mjs'
 import { UNDECIDED_OWNER, ownershipHash, validateRouteOwnership } from './ue-gate0-route-ownership.mjs'
 import { evaluateRule } from './ue-convergence-check.mjs'
@@ -238,6 +240,32 @@ export function loadContext(root = ROOT) {
   }
 }
 
+function proposedBaselineProblems(matrix, root, ctx) {
+  if ('baselineProblems' in ctx) return ctx.baselineProblems
+  const out = []
+  const record = matrix?.proposedPersonaBaselines
+  if (!record) return ['PROPOSED-BASELINES-ABSENT: the matrix records no proposedPersonaBaselines block']
+  if (record.status !== 'READY_FOR_PRODUCT_SPECIFICATION_REVIEW') out.push(`PROPOSED-BASELINES-STATUS: status is ${JSON.stringify(record.status)}`)
+  if (record.adopted !== false || record.frozen !== false || record.originalRecovered !== false) out.push('PROPOSED-BASELINES-ADOPTED: a proposed baseline is recorded as adopted, frozen, or recovered')
+  for (const [key, file] of Object.entries(BASELINE_DATA)) {
+    const entry = record.data?.[key]
+    if (!entry || entry.file !== file) {
+      out.push(`PROPOSED-BASELINES-FILE: ${key} is not recorded at ${file}`)
+      continue
+    }
+    try {
+      if (sha256File(root, file) !== entry.sha256) out.push(`PROPOSED-BASELINES-HASH: ${file} no longer matches the hash recorded in the matrix`)
+    } catch {
+      out.push(`PROPOSED-BASELINES-FILE: ${file} is unreadable`)
+    }
+  }
+  for (const persona of matrix?.personaCompleteness ?? []) {
+    if (['steward', 'representative', 'financial-officer'].includes(persona.persona) && persona.resolved === true) out.push(`PROPOSED-BASELINES-RESOLVED: ${persona.persona} is marked resolved by a proposed baseline`)
+  }
+  out.push(...validateBaselines(root, { matrix }).problems)
+  return out
+}
+
 export function validateGate0(matrix, ctx = {}) {
   const problems = []
   const base = ctx.base ?? loadContext(ctx.root ?? ROOT)
@@ -372,6 +400,7 @@ export function validateGate0(matrix, ctx = {}) {
   if (!personaFloor) problems.push('the persona universe floor cannot be read from its anchor commit')
   const personaCheck = validatePersonaCompleteness(matrix, personaSpecs, byId, personaFloor)
   problems.push(...personaCheck.problems)
+  problems.push(...proposedBaselineProblems(matrix, base.root, ctx))
 
   const liveHash = routeBaselineHash(routes)
   const liveGuards = guardCounts(routes)

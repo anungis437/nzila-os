@@ -157,7 +157,7 @@ function trackedFiles(root) {
 export function computePersonaSpecs(root, options = {}) {
   const read = options.read ?? ((file) => readFileSync(join(root, file), 'utf8'))
   const files = options.trackedFiles ?? trackedFiles(root)
-  const dispositionOrCanonical = (pattern) => files.filter((file) => pattern.test(file) && !/disposition|checkpoint|report|queue|register/i.test(file))
+  const dispositionOrCanonical = (pattern) => files.filter((file) => pattern.test(file) && !/disposition|checkpoint|report|queue|register|proposed|baseline/i.test(file))
   const canonicalProbes = {
     steward: dispositionOrCanonical(/steward[^/]*canonical|canonical[^/]*steward/i),
     representative: dispositionOrCanonical(/representative[^/]*canonical|canonical[^/]*representative/i),

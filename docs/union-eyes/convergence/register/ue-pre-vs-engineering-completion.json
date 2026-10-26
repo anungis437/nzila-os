@@ -4749,6 +4749,37 @@
     "file": "docs/union-eyes/convergence/register/ue-gate0a-persona-source-recovery.json",
     "kind": "EVIDENCE_CONSOLIDATION"
   },
+  "proposedPersonaBaselines": {
+    "status": "READY_FOR_PRODUCT_SPECIFICATION_REVIEW",
+    "adopted": false,
+    "frozen": false,
+    "originalRecovered": false,
+    "note": "Three proposed new baselines are available for review. They are new designs, not recovered originals. They do not resolve a persona, add a capability, or create institutional authority.",
+    "data": {
+      "steward": {
+        "file": "docs/union-eyes/convergence/register/ue-persona-proposed-baseline-steward.json",
+        "sha256": "57dec7445ceb137023a7ff108d188266f86ade1881090bee74b423f8a7b46018"
+      },
+      "representative": {
+        "file": "docs/union-eyes/convergence/register/ue-persona-proposed-baseline-representative.json",
+        "sha256": "0893536b7c8a4274ed44c9ab1e69e547287c0097f6f554f74a13c7011287656b"
+      },
+      "financial-officer": {
+        "file": "docs/union-eyes/convergence/register/ue-persona-proposed-baseline-financial-officer.json",
+        "sha256": "30ed8f42eb25096ca9e77b87736adcbeb881d5528930533165456ed9a2d969b9"
+      },
+      "decisions": {
+        "file": "docs/union-eyes/convergence/register/ue-persona-proposed-baseline-decisions.json",
+        "sha256": "7db3fb2d8d9d965598bce63865fca61062a66646e5cb534c4f16bf593e3187b0"
+      }
+    },
+    "documents": {
+      "steward": "docs/union-eyes/persona-baselines/UE-STEWARD-PROPOSED-PERSONA-BASELINE.md",
+      "representative": "docs/union-eyes/persona-baselines/UE-REPRESENTATIVE-2.2-PROPOSED-PERSONA-BASELINE.md",
+      "financial-officer": "docs/union-eyes/persona-baselines/UE-FINANCIAL-OFFICER-2.1-PROPOSED-PERSONA-BASELINE.md",
+      "decisions": "docs/union-eyes/persona-baselines/UE-PERSONA-BASELINE-DECISION-REGISTER.md"
+    }
+  },
   "routeOwnership": {
     "file": "docs/union-eyes/convergence/register/ue-route-capability-ownership.json",
     "entriesHash": "1c26296d4f178a02d7d5493c5cee987611d89ff85412da99562b83a895c5d7e9",

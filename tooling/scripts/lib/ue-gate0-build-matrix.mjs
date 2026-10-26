@@ -18,6 +18,8 @@ import { PERSONAS, SOURCE_FILES, UNRESOLVED_OWNER, personaActionsFromSpecs } fro
 import { loadRecovery, RECOVERY_FILE } from './ue-gate0a-persona-recovery.mjs'
 import { ownershipHash } from './ue-gate0-route-ownership.mjs'
 import { buildOwnership, ownershipJson } from './ue-gate0-build-ownership.mjs'
+import { BASELINE_DATA, BASELINE_DOCS } from './ue-gate0a2-baseline-facts.mjs'
+import { sha256File } from './ue-gate0a2-validate-baselines.mjs'
 
 const ctx = loadContext(ROOT)
 const personaSpecs = ctx.personaSpecs
@@ -677,6 +679,15 @@ const matrix = {
   personaActions,
   personaCompleteness,
   personaRecovery: { file: RECOVERY_FILE, kind: 'EVIDENCE_CONSOLIDATION' },
+  proposedPersonaBaselines: {
+    status: 'READY_FOR_PRODUCT_SPECIFICATION_REVIEW',
+    adopted: false,
+    frozen: false,
+    originalRecovered: false,
+    note: 'Three proposed new baselines are available for review. They are new designs, not recovered originals. They do not resolve a persona, add a capability, or create institutional authority.',
+    data: Object.fromEntries(Object.entries(BASELINE_DATA).map(([key, file]) => [key, { file, sha256: sha256File(ROOT, file) }])),
+    documents: BASELINE_DOCS,
+  },
   routeOwnership: { file: FILES.ownership, entriesHash, operations: ownership.entries.length },
   outOfScope: [
     {
