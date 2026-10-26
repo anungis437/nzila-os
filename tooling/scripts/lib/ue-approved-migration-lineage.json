@@ -279,6 +279,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-final-convergence",
         "note": "Union-side WorkAid consent wording, consent grants, document authorisations, shares and counsel-access records. Not yet applied to any clone or live database."
+      },
+      {
+        "tag": "0028_location_deletion_log_shape",
+        "sha256": "93a97dc69752c89cb2368922e73dfb6e73c2a293431866124d410fb5d4f0c7a2",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-final-convergence",
+        "note": "Additive evolution of the Django-created location_deletion_log stub: the evidence columns the application writes plus defaults on id, created_at and updated_at. Proven on native PostgreSQL 15 and 16; not applied to any live database."
       }
     ]
   }
