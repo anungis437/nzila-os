@@ -87,12 +87,48 @@
       "evidenceOutput": "docs/union-eyes/convergence/evidence/auth-invite-concurrency.json",
       "failureInterpretation": "Lock timeout not observed on the redemption-first test means redemption never held auth-inviter:<user> through the user insert, or the gate trigger did not run. A redemption that succeeds after the offboarding commit means the re-read or the same-statement revoke did not happen. A sibling that stays unrevoked after the later suspend means the trigger did not update pending invites. A 500ms lock-wait failure means the second offboarding did not block.",
       "recovery": "Drop the disposable database and retry. Do not weaken a timeout into a mock. Do not grant the system role a general invites UPDATE to make a failure pass."
+    },
+    {
+      "id": "message-lifecycle-combined",
+      "status": "READY_FOR_VS_EXECUTION",
+      "risk": "P0",
+      "dependsOn": ["auth-native-pg16"],
+      "convergenceRegister": ["UE-CONV-I-002"],
+      "sourceCommit": "6ce6e945406b693a948601aecadf99e27b6b09dc",
+      "sourceCommitCommand": "git log -1 --format=%H -- apps/union-eyes/lib/messaging/thread-lifecycle.ts apps/union-eyes/db/__tests__/message-lifecycle.postgres.test.ts",
+      "test": "apps/union-eyes/db/__tests__/message-lifecycle.postgres.test.ts",
+      "command": "UE_AUTHORITY_COMBINED_URL=<admin-url-of-a-fresh-disposable-combined-database> pnpm exec vitest run apps/union-eyes/db/__tests__/message-lifecycle.postgres.test.ts",
+      "workingDirectory": "repository root of agents/ue-cursor-final-closure at 6ce6e945406b693a948601aecadf99e27b6b09dc or later",
+      "environment": {
+        "UE_AUTHORITY_COMBINED_URL": "admin connection to a fresh disposable database prepared the same way as thread-assignment.postgres.test.ts: Django migrate plus the approved Drizzle bootstrap, including platform 0013, 0014, 0025 and 0029, and RLS 0020, 0021 and 0024",
+        "docker": "not started by this file",
+        "role": "the suite sets union_eyes_runtime and union_eyes_system under forced RLS; the hold-row insert that proves retention uses the admin connection and is not an authorization success"
+      },
+      "fixtureSetup": "Same combined-schema preparation as apps/union-eyes/db/__tests__/thread-assignment.postgres.test.ts. Apply platform 0029 before the run so the recusal and non-delegable checks match this commit. Do not seed a governance_review mandate for this file: the administrator denial is the contract under test.",
+      "cleanup": "Drop the disposable database. The suite installs a fault trigger on the audit tables of that database and removes it in afterEach; if the process is killed during a fault test, drop that trigger before retrying.",
+      "expect": {
+        "success": [
+          "An administrator, a steward and a foreign-organization actor receive kind forbidden or not_found from setLegalHold. No hold_place row is written by those calls.",
+          "A hold_place and hold_release inserted by the admin connection, with acted_via organization_administrator, make retention report legal_hold and then retention_elapsed. The member view does not reveal the hold. The administrator still cannot read the thread.",
+          "Cursor ran the PGlite lifecycle file and the pure kernel tests. That run is not this proof."
+        ],
+        "denial": [
+          "The file is skipped unless UE_AUTHORITY_COMBINED_URL is set. A skipped run is not evidence.",
+          "This file does not prove an allowed hold. It does not prove that a failed audit rolls back a successful hold write. Do not mock enforceAuthority to return allow and call that equivalent.",
+          "Do not point the URL at a shared or production database."
+        ]
+      },
+      "evidenceOutput": "docs/union-eyes/convergence/evidence/message-lifecycle-combined.json",
+      "failureInterpretation": "A forbidden result that throws instead of returning means the authority load aborted the transaction. Platform 0013 must already be installed, and app.current_user_id must be set before the decision. An administrator place that returns ok means the administrator role is still treated as authority. A member who can see the hold reference, or an administrator who can read the thread after the recorded hold, means the privacy boundary failed.",
+      "recovery": "Drop the disposable database. Apply 0029 only through the platform journal executor. Do not edit 0013. Do not grant a hold by inserting a mandate outside the issuance workflow."
     }
   ],
   "nextEngineeringAction": [
     "Do not edit commit 960a88481aa1f5a9db2ddfaa6f3da510b743a1bc or docs/union-eyes/convergence/UE-FINAL-CONVERGENCE-CHECKPOINT-8.md.",
     "Do not start Docker and do not set AUTH_NATIVE_PROOF or UE_AUTH_CONCURRENCY_PROOF in Cursor.",
-    "The route-coverage baseline on this branch records auditGap [] and kernelPending []. Checkpoint 5 recorded 313 mutating routes without route-level atomic-audit evidence and 42 case, claim, document and message mutations not kernel-decided. The scanner now excludes a route from kernelPending when subordinate is set. Eight live domain mutations are outside the kernel flag: messages/retention-policy, messages/threads, messages/threads/[threadId]/messages, assignment, legal-hold, lifecycle, read (THREAD_POLICY) and external/grievances/[id]/documents/upload (EXTERNAL_AUTHORITY). Next implementation reads those eight and any kernel-flagged domain route whose decision is only an import, and gives each operative action-level authority, resource relationship, tenant binding, mandate and delegation limits, privacy classification, triage where it applies, revocation, one database transaction, durable audit and negative tests. Do not clear them by editing the scanner.",
+    "Legal hold on messages/threads/[threadId]/legal-hold is a kernel decision as of 6ce6e945406b693a948601aecadf99e27b6b09dc. The scanner still labels that route THREAD_POLICY because the route calls lib/messaging/thread-lifecycle. Do not edit the scanner. The decision denies an administrator title, a member, an assignee, a delegation, a recusal, a revoked mandate, and a mandate that names another conversation. place_legal_hold and release_legal_hold are on the inactive governance_review issuance template and are refused by ue_authority_deleg_nondelegable_chk after platform 0029. They confer nothing until a live rule naming them is adopted.",
+    "The combined-schema lifecycle file does not prove an allowed hold or audit-fault rollback of that write. Next Cursor work seeds a governance_review mandate through the issuance workflow inside a skip-gated native test, proves the allow, and proves that a failed audit rolls the hold back. Do not mock the kernel.",
+    "adoptRetentionPolicy and messages/retention-policy still use actor.role admin. Message read, reply, assign and close still use thread participation. staffActing still uses caseActionAllowed('note_add_internal'). external/grievances/[id]/documents/upload is EXTERNAL_AUTHORITY. Each still needs operative action-level authority, tenant binding, mandate limits, privacy classification, revocation, one transaction, durable audit and negative tests.",
     "Schema census on this branch is 231 entries in docs/union-eyes/convergence/register/ue-canonical-schema-census.json. The mutation-scope baseline sums to 13. Checkpoint 5 recorded 351 and 276 before those shrinks. Continue only entries that lack a machine-verifiable engineering disposition. Do not regenerate either baseline to change the count.",
     "Finance stays fail-closed until a governed issuance and activation workflow exists. Do not invent mandate holders.",
     "CURSOR_IMPLEMENTATION_COMPLETE remains false."

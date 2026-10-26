@@ -6,7 +6,7 @@ Machine-readable copy: `docs/union-eyes/convergence/VS_CODE_EXECUTION_QUEUE.json
 
 Preserved commit: `960a88481aa1f5a9db2ddfaa6f3da510b743a1bc`. Pull request: #1014. Branch: `agents/ue-cursor-final-closure`. Base: `agents/ue-final-convergence`.
 
-Source commit for both items: `215b21e6cc37276ba08d9f37c26bb7d504eff452`. A skipped Vitest run is not evidence.
+Invitation items are source commit `215b21e6cc37276ba08d9f37c26bb7d504eff452`. The conversation-lifecycle item is source commit `6ce6e945406b693a948601aecadf99e27b6b09dc`. A skipped Vitest run is not evidence.
 
 ## auth-native-pg16
 
@@ -44,9 +44,32 @@ Source commit for both items: `215b21e6cc37276ba08d9f37c26bb7d504eff452`. A skip
 | Failure | The lock, the revoke trigger, or the redemption re-read did not serialize. |
 | Recovery | Drop the disposable database. Do not grant `nzila_auth_system_mutation` a general `invites` update. |
 
+## message-lifecycle-combined
+
+| Field | Value |
+| --- | --- |
+| Status | `READY_FOR_VS_EXECUTION` |
+| Risk | P0. Depends on `auth-native-pg16` only for environment order. The suite itself is independent. |
+| Register | `UE-CONV-I-002` |
+| Source | `6ce6e945406b693a948601aecadf99e27b6b09dc` |
+| Test | `apps/union-eyes/db/__tests__/message-lifecycle.postgres.test.ts` |
+| Command | `UE_AUTHORITY_COMBINED_URL=<admin-url-of-a-fresh-disposable-combined-database> pnpm exec vitest run apps/union-eyes/db/__tests__/message-lifecycle.postgres.test.ts` |
+| Environment | Fresh disposable combined schema: Django migrate, approved Drizzle bootstrap, platform `0013`, `0014`, `0025` and `0029`, RLS `0020`, `0021` and `0024`. This file does not start Docker. |
+| Fixture | Same preparation as `thread-assignment.postgres.test.ts`. Do not seed a governance mandate. The administrator denial is the contract. |
+| Cleanup | Drop the database. If a fault test is killed, drop the audit fault trigger it installed. |
+| Success | Administrator, steward and foreign actors do not write a hold. An admin-connection `hold_place` makes retention `legal_hold` without letting the member see the hold or letting the administrator read the thread. |
+| Denial | Skipped unless `UE_AUTHORITY_COMBINED_URL` is set. This file does not prove an allowed hold or audit-fault rollback of an allowed write. |
+| Evidence | `docs/union-eyes/convergence/evidence/message-lifecycle-combined.json` |
+| Failure | A throw instead of `forbidden` means the authority load aborted the transaction. An administrator `ok` means the role is still authority. |
+| Recovery | Drop the database. Apply `0029` through the platform journal. Do not edit `0013` and do not insert a mandate outside issuance. |
+
 ## Next engineering action
 
-The route-coverage baseline on this branch has an empty `auditGap` and an empty `kernelPending`. Checkpoint 5 recorded 313 mutating routes without route-level atomic-audit evidence and 42 case, claim, document and message mutations that were not kernel-decided. Eight live domain mutations are outside the kernel flag because the scanner sets `subordinate`: the seven `messages/` thread routes (`THREAD_POLICY`) and `external/grievances/[id]/documents/upload` (`EXTERNAL_AUTHORITY`). The next implementation reads those routes, and any kernel-flagged domain route whose decision is only an import, and supplies operative action-level authority. The scanner is not edited to shrink the count.
+Legal hold is a kernel decision as of `6ce6e945406b693a948601aecadf99e27b6b09dc`. The scanner still labels that route `THREAD_POLICY` because the route calls `lib/messaging/thread-lifecycle`. Do not edit the scanner. The decision denies an administrator title, a member, an assignee, a delegation, a recusal, a revoked mandate, and a mandate that names another conversation. The two hold powers sit on the inactive governance-review issuance template and stay unconferred until a live rule naming them is adopted.
+
+The combined-schema lifecycle file does not prove an allowed hold or audit-fault rollback of that write. The next Cursor slice seeds a governance-review mandate through issuance inside a skip-gated native test, proves the allow, and proves that a failed audit rolls the hold back. Do not mock the kernel.
+
+`adoptRetentionPolicy` and `messages/retention-policy` still use the administrator role. Message read, reply, assign and close still use thread participation. `staffActing` still uses `caseActionAllowed('note_add_internal')`. `external/grievances/[id]/documents/upload` remains `EXTERNAL_AUTHORITY`. Each still needs operative action-level authority. The route-coverage baseline's empty `kernelPending` does not change that.
 
 Schema census on this branch is 231 entries. The mutation-scope baseline sums to 13. Checkpoint 5 recorded 351 and 276 before those later shrinks. Continue entries that still lack a machine-verifiable disposition. Do not regenerate either baseline to change the count.
 
