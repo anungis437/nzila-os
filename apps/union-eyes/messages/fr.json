@@ -5327,6 +5327,7 @@
     "retry": "Réessayer",
     "noDataAvailable": "Aucune donnée disponible",
     "exports": "Exportations",
+    "unionRemittances": "Remises syndicales",
     "refresh": "Actualiser",
     "billingStatusLabel": "Statut de facturation",
     "notConfigured": "Non configuré",
@@ -11904,5 +11905,20 @@
     "revoked": "Le retrait a été enregistré.",
     "refusal": "Refusé",
     "openJourney": "Consentement et signalement WorkAid"
+  },
+  "financialAuthorityPage": {
+    "title": "Remises syndicales",
+    "intro": "Ce sont les remises d'employeur que votre propre mandat financier vous permet de voir. La facturation de l'abonnement est une autre page.",
+    "loading": "Chargement des remises",
+    "empty": "Aucune remise n'est visible sous votre mandat.",
+    "denied": "Cette action ne vous est pas autorisée.",
+    "unissued": "Aucun mandat financier n'a été émis dans cette organisation.",
+    "duty": "Vous ne détenez pas cette fonction financière.",
+    "segregation": "Vous avez déjà pris part à cette action financière.",
+    "missing": "Cette remise n'est pas disponible.",
+    "retry": "Réessayer",
+    "employer": "Employeur",
+    "amount": "Montant",
+    "status": "Statut"
   }
 }

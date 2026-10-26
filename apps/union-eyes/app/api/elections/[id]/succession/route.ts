@@ -1,21 +1,18 @@
 /**
  * POST /api/elections/[id]/succession
  *
- * A certified council election is superseded only by an authority-kernel grant.
- * This route does not read a grant, a mandate id, or a successor body from the
- * request. It asks the succession service with no grant, which writes nothing.
- * The council vote route stays 501 until a qualified electorate exists.
+ * A certified council election is superseded only when the authority kernel loads a
+ * grant for the authenticated principal. The request body is not read. The election
+ * is visible only when this organization owns it. The council vote route stays 501.
  */
-import { withApi, ApiError, ErrorCode } from '@/lib/api/framework';
-import { GOVERNANCE_SYSTEM_ROLES } from '@/lib/api-auth-guard';
-import { db } from '@/db';
-import { councilElections } from '@/db/schema/governance-schema';
-import { eq } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
-import { drizzleExecutor } from '@/lib/authority/store/route-adapter';
-import { recordCertifiedSupersession } from '@/lib/voting/election-succession';
+import { withApi, ApiError, ErrorCode } from '@/lib/api/framework'
+import { GOVERNANCE_SYSTEM_ROLES } from '@/lib/api-auth-guard'
+import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context'
+import { drizzleExecutor } from '@/lib/authority/store/route-adapter'
+import { loadCertifiedSupersessionGrant } from '@/lib/voting/election-succession-grant'
+import { recordCertifiedSupersession } from '@/lib/voting/election-succession'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export const POST = withApi(
   {
@@ -23,17 +20,23 @@ export const POST = withApi(
     openapi: {
       tags: ['Governance'],
       summary: 'Supersede a certified council election',
-      description: 'Fails closed. A request body is not an authority-kernel grant, so no successor is written.',
+      description: 'Loads an authority-kernel grant for the authenticated principal. A request body is not a grant.',
     },
   },
-  async ({ params, organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
-    const [existing] = await db.select({ id: councilElections.id }).from(councilElections).where(eq(councilElections.id, params.id)).limit(1);
-    if (!existing) throw ApiError.notFound('Election not found');
+  async ({ params, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required')
 
-    const result = await withSystemContext(async (tx) => recordCertifiedSupersession(drizzleExecutor(tx), params.id, null, organizationId));
-    if (!result.ok && result.code === 'STORE_UNAPPLIED') throw new ApiError(ErrorCode.NOT_IMPLEMENTED, result.message);
-    if (!result.ok) throw ApiError.conflict(result.message);
-    throw ApiError.conflict('A certified successor was not written. The route has no authority-kernel grant.');
+    const loaded = await withRLSContext({ organizationId, userId }, (tx) =>
+      loadCertifiedSupersessionGrant(drizzleExecutor(tx), { electionId: params.id, organizationId, userId }),
+    )
+    if (!loaded.ok && loaded.code === 'STORE_UNAPPLIED') throw new ApiError(ErrorCode.NOT_IMPLEMENTED, loaded.message)
+    if (!loaded.ok && loaded.code === 'NOT_FOUND') throw new ApiError(ErrorCode.NOT_FOUND, 'Election not found')
+    if (!loaded.ok) throw ApiError.conflict(loaded.message)
+
+    const result = await withSystemContext((tx) => recordCertifiedSupersession(drizzleExecutor(tx), params.id, loaded.grant, organizationId))
+    if (!result.ok && result.code === 'STORE_UNAPPLIED') throw new ApiError(ErrorCode.NOT_IMPLEMENTED, result.message)
+    if (!result.ok && result.code === 'NOT_FOUND') throw new ApiError(ErrorCode.NOT_FOUND, 'Election not found')
+    if (!result.ok) throw ApiError.conflict(result.message)
+    return { data: result }
   },
-);
+)

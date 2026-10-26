@@ -68,6 +68,7 @@ export type ResourceType =
   | 'workaid_matter'
   | 'message_thread'
   | 'message_retention'
+  | 'council_election'
 
 export interface ResourceRef {
   type: ResourceType
@@ -315,6 +316,16 @@ export interface MessageRetentionFacts {
   organizationId: Uuid
 }
 
+/** A council election owned by one organization. Certified facts are immutable; supersession is a new row. */
+export interface CouncilElectionFacts {
+  kind: 'council_election'
+  id: Uuid
+  organizationId: Uuid
+  certified: boolean
+  /** User ids named on the certified candidates or winners. They cannot issue or review the supersession. */
+  namedUserIds: readonly Uuid[]
+}
+
 export type ResourceFacts =
   | CaseFacts
   | FinancialTransactionFacts
@@ -324,6 +335,7 @@ export type ResourceFacts =
   | WorkAidMatterFacts
   | MessageThreadFacts
   | MessageRetentionFacts
+  | CouncilElectionFacts
 
 // ── Actions ────────────────────────────────────────────────────────────────
 
@@ -353,6 +365,7 @@ export const ACTIONS = [
   'finance:reconcile',
   'finance:audit',
   'governance:approve',
+  'governance:supersede_certified_result',
   'review:monitor',
   'review:access_evidence',
   'review:issue_finding',

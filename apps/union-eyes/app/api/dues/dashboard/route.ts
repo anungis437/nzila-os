@@ -11,6 +11,8 @@
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db';
 import { memberArrears, employerRemittances, remittanceLineItems } from '@/db/schema/dues-finance-schema';
 import { eq, and, sql, ne } from 'drizzle-orm';
@@ -23,8 +25,11 @@ export const GET = withApi(
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Dues'], summary: 'Dues dashboard aggregate stats' },
   },
-  async ({ organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+  async ({ organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    await withRLSContext({ organizationId, userId }, (tx) =>
+      requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view', requiresLedger: true }),
+    );
 
     const [arrearsRow] = await db
       .select({

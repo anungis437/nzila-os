@@ -246,6 +246,20 @@
       "when": 1758900000000,
       "tag": "0033_election_certificate_successions",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1758910000000,
+      "tag": "0034_election_organization_ownership",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1758920000000,
+      "tag": "0035_election_supersession_authority_scope",
+      "breakpoints": true
     }
   ]
 }

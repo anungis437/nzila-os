@@ -7,10 +7,11 @@
 import { withApi, ApiError, z } from '@/lib/api/framework';
 import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
+import { rowsVisibleToGrant } from '@/lib/finance/principal-financial-authority';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { employerRemittances } from '@/db/schema/dues-finance-schema';
-import { eq, desc } from 'drizzle-orm';
+import { desc } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 
@@ -22,15 +23,15 @@ export const GET = withApi(
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Dues'], summary: 'List employer remittances' },
   },
-  async ({ organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+  async ({ organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
-    const rows = await withRLSContext({ organizationId }, async (tx) => {
-      await requireLiveFinancialMandate(tx, organizationId);
+    const rows = await withRLSContext({ organizationId, userId }, async (tx) => {
+      const grant = await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view' });
       return tx
         .select()
         .from(employerRemittances)
-        .where(eq(employerRemittances.organizationId, organizationId))
+        .where(rowsVisibleToGrant(grant, organizationId, employerRemittances.organizationId, employerRemittances.id))
         .orderBy(desc(employerRemittances.createdAt));
     });
 
@@ -62,8 +63,8 @@ export const POST = withApi(
 
     const body = createSchema.parse(await request.json());
 
-    const remittance = await withRLSContext({ organizationId }, async (tx) => {
-      await requireLiveFinancialMandate(tx, organizationId);
+    const remittance = await withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:prepare', employerId: body.employerId });
       const [row] = await tx
         .insert(employerRemittances)
         .values({

@@ -6,6 +6,8 @@
  */
 
 import { withApi, ApiError } from '@/lib/api/framework';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { listExceptions } from '@/services/platform-economics';
 
 export const dynamic = 'force-dynamic';
@@ -19,8 +21,11 @@ export const GET = withApi(
       summary: 'List reconciliation exceptions for the organization',
     },
   },
-  async ({ request, organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+  async ({ request, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    await withRLSContext({ organizationId, userId }, (tx) =>
+      requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view', requiresLedger: true }),
+    );
     const url = new URL(request.url);
     const status = url.searchParams.get('status');
     const statusFilter = status

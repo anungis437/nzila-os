@@ -48,9 +48,9 @@
   "mutatingByData": {
    "AMBIENT_DB": 14,
    "CRUD_TENANT_TX": 299,
-   "NONE": 198,
+   "NONE": 195,
    "SYSTEM_CONTEXT": 58,
-   "TENANT_TX": 146
+   "TENANT_TX": 149
   }
  },
  "routes": [
@@ -5424,7 +5424,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -5484,7 +5484,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -5545,7 +5545,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -5581,7 +5581,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -11097,7 +11097,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -11110,7 +11110,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -11122,7 +11122,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -11134,7 +11134,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {

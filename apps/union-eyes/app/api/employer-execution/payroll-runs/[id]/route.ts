@@ -21,13 +21,13 @@ export const GET = withApi(
     entitlement: "employer_payroll_preview",
     openapi: { tags: ["Employer Execution"], summary: "Get payroll run detail" },
   },
-  async ({ organizationId, params }) => {
-    if (!organizationId) throw ApiError.badRequest("Organization context required");
+  async ({ organizationId, userId, params }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest("Organization context required");
     const id = params?.id;
     if (typeof id !== "string") throw ApiError.badRequest("Payroll run id is required");
 
-    const loaded = await withRLSContext({ organizationId }, async (tx) => {
-      await requireLiveFinancialMandate(tx, organizationId);
+    const loaded = await withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:view", resourceId: id });
       const [run] = await tx
         .select()
         .from(employerPayrollRuns)
@@ -96,8 +96,13 @@ export const PATCH = withApi(
 
     // The run is read under a row lock so two concurrent transitions are serialised; the status predicate on each
     // UPDATE below is the second line of defence. The change, its evidence and its audit record commit together.
-    return withRLSContext({ organizationId }, async (tx) => {
-      await requireLiveFinancialMandate(tx, organizationId);
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, {
+        organizationId,
+        userId,
+        action: body.action === "approve" ? "finance:approve" : "finance:execute",
+        resourceId: id,
+      });
       const [run] = await tx
         .select()
         .from(employerPayrollRuns)

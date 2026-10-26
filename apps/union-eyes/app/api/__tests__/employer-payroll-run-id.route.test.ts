@@ -131,7 +131,7 @@ describe('employer-execution/payroll-runs/[id] route', () => {
     vi.clearAllMocks();
     m.resetQueues();
     m.requireEntitlement.mockResolvedValue(undefined);
-    m.requireLiveFinancialMandate.mockResolvedValue(undefined);
+    m.requireLiveFinancialMandate.mockResolvedValue({ mandateId: 'synthetic', ledgerWide: true, resourceIds: [], accountIds: [] });
     m.persistAtomicAudit.mockResolvedValue(undefined);
     m.verifyEvidenceChainFromLinks.mockReturnValue({ valid: true });
     m.enforcePayrollLifecycleTransition.mockImplementation(() => undefined);
@@ -192,7 +192,7 @@ describe('employer-execution/payroll-runs/[id] route', () => {
       }],
     );
 
-    const result = await GET({ organizationId: 'org_1', params: { id: 'run_1' } } as any);
+    const result = await GET({ organizationId: 'org_1', userId: 'reader_1', params: { id: 'run_1' } } as any);
 
     expect(result.data.run.id).toBe('run_1');
     expect(result.data.items.length).toBe(1);
@@ -205,7 +205,7 @@ describe('employer-execution/payroll-runs/[id] route', () => {
     const denied = Object.assign(new Error('financial mandate'), { status: 403 });
     m.requireLiveFinancialMandate.mockRejectedValue(denied);
     m.queueSelect([[{ id: 'run_1', runType: 'official' }]]);
-    await expect(GET({ organizationId: 'org_1', params: { id: 'run_1' } } as any)).rejects.toMatchObject({ status: 403 });
+    await expect(GET({ organizationId: 'org_1', userId: 'reader_1', params: { id: 'run_1' } } as any)).rejects.toMatchObject({ status: 403 });
     await expect(PATCH(patch('approver_1', 'run_1', 'approve'))).rejects.toMatchObject({ status: 403 });
     expect(m.state.selectQueue).toHaveLength(1);
   });
@@ -229,7 +229,7 @@ describe('employer-execution/payroll-runs/[id] route', () => {
     m.queueSelect([{ ...baseRun, id: 'run_3', runType: 'preview' }]);
 
     await expect(PATCH(patch('approver_1', 'run_3', 'approve'))).rejects.toMatchObject({ status: 400 });
-    expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org_1' }, expect.any(Function));
+    expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org_1', userId: 'approver_1' }, expect.any(Function));
     expect(m.state.locks).toEqual(['update']);
   });
 

@@ -321,6 +321,20 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Successor relation for a certified council_elections row. Distinct issuer and reviewer, version, provenance hash, decision, dispute and recount references. Does not rewrite the certified row. Fails closed when council_elections is absent. Has not been applied to a native or live database."
+      },
+      {
+        "tag": "0034_election_organization_ownership",
+        "sha256": "069aeb4f54a65543a5267e520c70bc13ea0ea7861310256201bab43bfa21f38c",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Binds one council election to one organization. Lookups join this relation and filter organization_id. Does not rewrite a certified column and does not issue a grant. Has not been applied to a native or live database."
+      },
+      {
+        "tag": "0035_election_supersession_authority_scope",
+        "sha256": "e16d811997ee4f571ef1fd25ab499d696c131e77469831fa69eefb29100c47b7",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Lets a recusal name a council election and refuses a stored delegation of governance:supersede_certified_result. Does not issue that power. Has not been applied to a native or live database."
       }
     ]
   }

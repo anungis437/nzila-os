@@ -69,10 +69,12 @@ native('election certificate succession on disposable PostgreSQL', () => {
         previous_hash text
       );
     `)
-    const sql = readFileSync(path.join(__dirname, '../migrations-platform/0033_election_certificate_successions.sql'), 'utf8')
-    for (const statement of sql.split('--> statement-breakpoint')) {
-      const body = statement.replace(/--[^\n]*/g, '').trim()
-      if (body) await pool.query(body)
+    for (const file of ['0033_election_certificate_successions.sql', '0034_election_organization_ownership.sql']) {
+      const sql = readFileSync(path.join(__dirname, '../migrations-platform', file), 'utf8')
+      for (const statement of sql.split('--> statement-breakpoint')) {
+        const body = statement.replace(/--[^\n]*/g, '').trim()
+        if (body) await pool.query(body)
+      }
     }
   }, 120_000)
 
@@ -89,6 +91,10 @@ native('election certificate succession on disposable PostgreSQL', () => {
        RETURNING id::text AS id`,
     )
     const row = inserted.rows[0]
+    await pool.query(
+      `INSERT INTO public.election_organization_ownership (election_id, organization_id) VALUES ($1::uuid, $2::uuid)`,
+      [row.id, '11111111-1111-4111-8111-111111111111'],
+    )
     const provenanceHash = certificateProvenance({
       id: row.id,
       electionYear: 2026,

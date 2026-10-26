@@ -68,6 +68,7 @@ export const NON_DELEGABLE_ACTIONS: readonly string[] = [
   'message:release_legal_hold',
   'message:adopt_retention',
   'message:read_retention_policy',
+  'governance:supersede_certified_result',
 ]
 
 export interface IssuanceRule {

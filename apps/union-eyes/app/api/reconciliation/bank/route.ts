@@ -3,6 +3,8 @@
  */
 
 import { withApi, ApiError } from '@/lib/api/framework';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db';
 import { reconciliationRuns } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
@@ -18,8 +20,11 @@ export const GET = withApi(
       summary: 'List reconciliation runs for the organization',
     },
   },
-  async ({ organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+  async ({ organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    await withRLSContext({ organizationId, userId }, (tx) =>
+      requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view', requiresLedger: true }),
+    );
     const runs = await db
       .select()
       .from(reconciliationRuns)

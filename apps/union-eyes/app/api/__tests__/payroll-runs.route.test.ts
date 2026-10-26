@@ -78,7 +78,7 @@ describe('employer-execution/payroll-runs route', () => {
     m.selectQueue = [];
     m.withRLSContext.mockImplementation(async (...args: unknown[]) => (args[args.length - 1] as (tx: unknown) => Promise<unknown>)(mockDb));
     m.requireEntitlement.mockResolvedValue(undefined);
-    m.requireLiveFinancialMandate.mockResolvedValue(undefined);
+    m.requireLiveFinancialMandate.mockResolvedValue({ mandateId: 'synthetic', ledgerWide: true, resourceIds: [], accountIds: [] });
     m.withApi.mockImplementation(
       (_cfg: unknown, handler: (ctx: any) => Promise<unknown>) =>
         async (request: NextRequest, ctx: any = { organizationId: 'org_1', userId: 'u1', body: {} }) => {
@@ -104,7 +104,7 @@ describe('employer-execution/payroll-runs route', () => {
     const { GET } = await loadRoute();
     m.selectQueue.push([{ id: 'pr1' }]);
 
-    const response = await GET(new NextRequest('http://localhost/api/employer-execution/payroll-runs'), { organizationId: 'org_1' });
+    const response = await GET(new NextRequest('http://localhost/api/employer-execution/payroll-runs'), { organizationId: 'org_1', userId: 'u1' });
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.data).toHaveLength(1);

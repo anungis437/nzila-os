@@ -10,6 +10,7 @@ import type { SqlExecutor } from '../../lib/authority/store/executor'
 import { certificateProvenance, recordCertifiedSupersession, type SuccessionGrant } from '../../lib/voting/election-succession'
 
 const SQL = readFileSync(resolve(__dirname, '../migrations-platform/0033_election_certificate_successions.sql'), 'utf8')
+const OWNERSHIP = readFileSync(resolve(__dirname, '../migrations-platform/0034_election_organization_ownership.sql'), 'utf8')
 const ORG = '11111111-1111-4111-8111-111111111111'
 const ISSUER = 'issuer-officer'
 const REVIEWER = 'reviewer-officer'
@@ -67,6 +68,14 @@ async function withElections(db: PGlite): Promise<void> {
 
 function executor(db: PGlite): SqlExecutor {
   return { query: (text, params) => db.query(text, params) }
+}
+
+async function apply(db: PGlite, sql: string): Promise<void> {
+  for (const statement of statements(sql)) await db.exec(statement)
+}
+
+async function own(db: PGlite, electionId: string, organizationId = ORG): Promise<void> {
+  await db.query(`INSERT INTO public.election_organization_ownership (election_id, organization_id) VALUES ($1::uuid, $2::uuid)`, [electionId, organizationId])
 }
 
 async function seedCertified(db: PGlite, votes = 10): Promise<string> {
@@ -127,11 +136,18 @@ describe('election certificate succession', () => {
     await expect(db.exec(statements(SQL)[0])).rejects.toThrow(/council_elections does not exist/)
   })
 
+  it('refuses to apply 0034 when council_elections is absent', async () => {
+    const db = await emptyDb()
+    await expect(db.exec(statements(OWNERSHIP)[0])).rejects.toThrow(/council_elections does not exist/)
+  })
+
   it('writes an uncertified successor, leaves the certified row unchanged, and replays the same decision', async () => {
     const db = await emptyDb()
     await withElections(db)
-    for (const statement of statements(SQL)) await db.exec(statement)
+    await apply(db, SQL)
+    await apply(db, OWNERSHIP)
     const id = await seedCertified(db)
+    await own(db, id)
     const provenanceHash = certificateProvenance(await locked(db, id))
     const exec = executor(db)
 
@@ -167,11 +183,35 @@ describe('election certificate succession', () => {
     expect(elections.rows[0].n).toBe(2)
   })
 
+  it('does not read council_elections when the election is foreign or missing', async () => {
+    const db = await emptyDb()
+    await withElections(db)
+    await apply(db, SQL)
+    await apply(db, OWNERSHIP)
+    const id = await seedCertified(db)
+    await own(db, id)
+    const provenanceHash = certificateProvenance(await locked(db, id))
+    const seen: string[] = []
+    const exec: SqlExecutor = {
+      query: (text, params) => {
+        seen.push(text)
+        return db.query(text, params)
+      },
+    }
+    const other = '22222222-2222-4222-8222-222222222222'
+    const missing = '33333333-3333-4333-8333-333333333333'
+    expect(await recordCertifiedSupersession(exec, id, grant(id, provenanceHash, { organizationId: other }), other)).toMatchObject({ ok: false, code: 'NOT_FOUND' })
+    expect(await recordCertifiedSupersession(exec, missing, grant(missing, provenanceHash, { electionId: missing }), ORG)).toMatchObject({ ok: false, code: 'NOT_FOUND' })
+    expect(seen.join('\n')).not.toContain('council_elections')
+  })
+
   it('rolls the successor back when the audit write fails', async () => {
     const db = await emptyDb()
     await withElections(db)
-    for (const statement of statements(SQL)) await db.exec(statement)
+    await apply(db, SQL)
+    await apply(db, OWNERSHIP)
     const id = await seedCertified(db)
+    await own(db, id)
     const provenanceHash = certificateProvenance(await locked(db, id))
     await expect(
       db.transaction(async (tx) => {
@@ -188,6 +228,8 @@ describe('election certificate succession', () => {
     expect(elections.rows[0].n).toBe(1)
     const links = await db.query<{ n: number }>(`SELECT count(*)::int AS n FROM public.election_certificate_successions`)
     expect(links.rows[0].n).toBe(0)
+    const owners = await db.query<{ n: number }>(`SELECT count(*)::int AS n FROM public.election_organization_ownership`)
+    expect(owners.rows[0].n).toBe(1)
   })
 
   it('writes nothing when the succession relation is not installed', async () => {

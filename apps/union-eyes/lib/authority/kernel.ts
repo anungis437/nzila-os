@@ -17,6 +17,7 @@ import type {
 } from './ontology'
 import { decideCase } from './policies/case'
 import { decideFinancialTransaction, decideMemberFinancialRecord } from './policies/finance'
+import { decideCertifiedSupersession } from './policies/election'
 import { decideApproval, decideReview } from './policies/governance'
 import { decideWorkAid } from './policies/workaid'
 import { decideMessageRetention, decideMessageThread } from './policies/message'
@@ -24,7 +25,7 @@ import { decideMessageRetention, decideMessageThread } from './policies/message'
 const ACTION_RESOURCE: Record<string, readonly ResourceType[]> = {
   case: ['case'],
   finance: ['financial_transaction', 'member_financial_record'],
-  governance: ['approval_request'],
+  governance: ['approval_request', 'council_election'],
   review: ['governance_review'],
   workaid: ['workaid_matter'],
   message: ['message_thread', 'message_retention'],
@@ -120,5 +121,7 @@ function evaluate(
       return decideMessageThread(req, facts, resource, now)
     case 'message_retention':
       return decideMessageRetention(req, facts, resource, now)
+    case 'council_election':
+      return decideCertifiedSupersession(req, facts, resource, now)
   }
 }

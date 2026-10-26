@@ -72,10 +72,12 @@ describe('council election certification (UE-CONV-K-009)', () => {
   it('keeps the succession route from accepting a grant in the request, and the council vote route at 501', () => {
     const succession = readFileSync(join(__dirname, '..', '..', '..', 'app', 'api', 'elections', '[id]', 'succession', 'route.ts'), 'utf8')
     const vote = readFileSync(join(__dirname, '..', '..', '..', 'app', 'api', 'elections', '[id]', 'vote', 'route.ts'), 'utf8')
+    expect(succession).toContain('loadCertifiedSupersessionGrant')
     expect(succession).toContain('recordCertifiedSupersession')
-    expect(succession).toContain('null')
     expect(succession).not.toContain('request.json')
     expect(succession).not.toContain('issued: true')
+    expect(succession).not.toContain('councilElections')
+    expect(succession).not.toContain('db.select')
     expect(vote).toContain('notImplemented')
     expect(vote).not.toContain('recordCertifiedSupersession')
   })

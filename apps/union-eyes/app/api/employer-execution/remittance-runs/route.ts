@@ -1,8 +1,9 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
-import { db } from "@/db";
 import { withRLSContext } from "@/lib/db/with-rls-context";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { FINANCIAL_MEMBER_DATA_ROLES } from "@/lib/finance/financial-authority";
+import { requireLiveFinancialMandate } from "@/lib/finance/require-live-financial-mandate";
+import { rowsVisibleToGrant } from "@/lib/finance/principal-financial-authority";
 import { participantsFromRun, recordedRunAmounts } from "@/lib/employer-execution/run-duties";
 import {
   employerPayrollRuns,
@@ -53,17 +54,20 @@ const createSchema = z.object({
 
 export const GET = withApi(
   {
-    auth: { minRole: "member" },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_remittance_generation",
     openapi: { tags: ["Employer Execution"], summary: "List remittance runs" },
   },
-  async ({ organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest("Organization context required");
-    const rows = await db
-      .select()
-      .from(employerRemittanceRuns)
-      .where(eq(employerRemittanceRuns.organizationId, organizationId))
-      .orderBy(desc(employerRemittanceRuns.createdAt));
+  async ({ organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest("Organization context required");
+    const rows = await withRLSContext({ organizationId, userId }, async (tx) => {
+      const grant = await requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:view" });
+      return tx
+        .select()
+        .from(employerRemittanceRuns)
+        .where(rowsVisibleToGrant(grant, organizationId, employerRemittanceRuns.organizationId, employerRemittanceRuns.id))
+        .orderBy(desc(employerRemittanceRuns.createdAt));
+    });
     return { data: rows };
   },
 );
@@ -83,7 +87,8 @@ export const POST = withApi(
 
     // The payroll run is locked for the whole generation, so two concurrent requests cannot both produce a
     // remittance for it. Generation, its artifacts, its evidence link and the audit record commit together.
-    return withRLSContext({ organizationId }, async (tx) => {
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:execute", resourceId: body.payrollRunId });
       const [payrollRun] = await tx
         .select()
         .from(employerPayrollRuns)

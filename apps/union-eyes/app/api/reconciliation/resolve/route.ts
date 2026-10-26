@@ -3,6 +3,8 @@
  */
 
 import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { resolveException } from '@/services/platform-economics';
 
 export const dynamic = 'force-dynamic';
@@ -25,10 +27,13 @@ export const POST = withApi(
     },
   },
   async ({ body, organizationId, userId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    await withRLSContext({ organizationId, userId }, (tx) =>
+      requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:reconcile', resourceId: body.exceptionId }),
+    );
     const result = await resolveException(body.exceptionId, organizationId, {
       status: body.resolution,
-      resolvedBy: userId ?? 'system',
+      resolvedBy: userId,
       notes: body.notes,
     });
     return result;

@@ -109,7 +109,7 @@ describe('employer-execution/payroll-runs route', () => {
     });
 
     m.resolvePayrollRules.mockReturnValue({});
-    m.requireLiveFinancialMandate.mockResolvedValue(undefined);
+    m.requireLiveFinancialMandate.mockResolvedValue({ mandateId: 'synthetic', ledgerWide: true, resourceIds: [], accountIds: [] });
     m.calculatePayroll.mockReturnValue({
       items: [
         {
@@ -151,7 +151,7 @@ describe('employer-execution/payroll-runs route', () => {
   it('GET returns payroll runs for organization', async () => {
     const { GET } = await loadRoute();
     m.selectResults = [[{ id: 'run_1', organizationId: 'org_1' }]];
-    const result = await GET({ organizationId: 'org_1' });
+    const result = await GET({ organizationId: 'org_1', userId: 'u1' });
     expect(result.data).toEqual([{ id: 'run_1', organizationId: 'org_1' }]);
   });
 

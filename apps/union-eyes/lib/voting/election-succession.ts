@@ -5,6 +5,8 @@
  * `election_certificate_successions` row that names the predecessor, the version, the provenance hash, the distinct
  * issuer and reviewer, and the decision. Platform migration 0033 creates that relation and is UNQUALIFIED. Until it
  * is applied, or until the authority kernel loads a grant, this function writes nothing.
+ * The election is read only after `election_organization_ownership` names this organization. A foreign
+ * election and a missing election are both absent, and neither lookup reads `council_elections`.
  *
  * A request body is not a grant. The council vote route stays 501: this relation does not create an electorate.
  * Institutional notice is recorded as required and unsent. This module does not send a voter or officer notification,
@@ -133,6 +135,10 @@ function jsonValue(value: unknown): unknown {
   }
 }
 
+export function certificateProvenanceFromRow(row: Record<string, unknown>): string {
+  return certificateProvenance(lockedFrom(row))
+}
+
 function lockedFrom(row: Record<string, unknown>): LockedElection {
   return {
     id: String(row.id),
@@ -172,6 +178,20 @@ export async function recordCertifiedSupersession(
   if (grant.issuerUserId === grant.reviewerUserId || recused.has(grant.issuerUserId) || recused.has(grant.reviewerUserId)) {
     return fail('RECUSAL_REQUIRED', 'The issuer and the reviewer must be different people, and neither may be recused.')
   }
+
+  const ownership = (await exec.query<{ rel: string | null }>(`SELECT to_regclass('public.election_organization_ownership')::text AS rel`)).rows[0]?.rel
+  if (!ownership) {
+    return fail('STORE_UNAPPLIED', 'The election ownership relation is not in this database. Nothing was written.')
+  }
+  const owned = (
+    await exec.query<{ election_id: string }>(
+      `SELECT election_id::text AS election_id
+         FROM public.election_organization_ownership
+        WHERE election_id = $1::uuid AND organization_id = $2::uuid`,
+      [electionId, organizationId],
+    )
+  ).rows[0]
+  if (!owned) return fail('NOT_FOUND', 'Election not found.')
 
   const stored = (
     await exec.query<Record<string, unknown>>(
@@ -249,6 +269,12 @@ export async function recordCertifiedSupersession(
     )
   ).rows[0]
   if (!successor) throw new Error('the successor election was not stored')
+  await exec.query(
+    `INSERT INTO public.election_organization_ownership (election_id, organization_id)
+     VALUES ($1::uuid, $2::uuid)
+     ON CONFLICT (election_id) DO NOTHING`,
+    [successor.id, organizationId],
+  )
   const notice = grant.institutionalNoticeRequired ? 'required_not_sent' : null
   const succession = (
     await exec.query<{ id: string }>(

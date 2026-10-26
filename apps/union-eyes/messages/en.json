@@ -5390,6 +5390,7 @@
     "retry": "Retry",
     "noDataAvailable": "No data available",
     "exports": "Exports",
+    "unionRemittances": "Union remittances",
     "refresh": "Refresh",
     "billingStatusLabel": "Billing Status",
     "notConfigured": "Not configured",
@@ -11912,5 +11913,20 @@
     "revoked": "The withdrawal was recorded.",
     "refusal": "Refused",
     "openJourney": "WorkAid consent and referral"
+  },
+  "financialAuthorityPage": {
+    "title": "Union remittances",
+    "intro": "These are employer remittances your own financial mandate lets you see. Platform subscription billing is a different page.",
+    "loading": "Loading remittances",
+    "empty": "No remittance is visible under your mandate.",
+    "denied": "This action is not authorized for you.",
+    "unissued": "No financial mandate has been issued in this organization.",
+    "duty": "You do not hold this financial duty.",
+    "segregation": "You already took part in this financial action.",
+    "missing": "That remittance is not available.",
+    "retry": "Try again",
+    "employer": "Employer",
+    "amount": "Amount",
+    "status": "Status"
   }
 }

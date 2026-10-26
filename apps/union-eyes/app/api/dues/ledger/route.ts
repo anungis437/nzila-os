@@ -4,6 +4,8 @@
 
 import { withApi, ApiError } from '@/lib/api/framework';
 import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { getLedgerEntries } from '@/services/platform-economics';
 
 export const dynamic = 'force-dynamic';
@@ -17,8 +19,11 @@ export const GET = withApi(
       summary: 'List dues ledger entries for the organization',
     },
   },
-  async ({ request, organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+  async ({ request, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    await withRLSContext({ organizationId, userId }, (tx) =>
+      requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view', requiresLedger: true }),
+    );
     const url = new URL(request.url);
     const billingPeriodId = url.searchParams.get('billingPeriodId') ?? undefined;
     const costType = (url.searchParams.get('costType') as Parameters<typeof getLedgerEntries>[0]['costType']) ?? undefined;

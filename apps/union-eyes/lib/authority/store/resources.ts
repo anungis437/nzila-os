@@ -23,6 +23,7 @@ import type {
   AuthorityRequest,
   CaseFacts,
   FinancialTransactionFacts,
+  CouncilElectionFacts,
   GovernanceReviewFacts,
   MessageRetentionFacts,
   MessageThreadFacts,
@@ -361,6 +362,53 @@ export async function loadMessageThread(exec: SqlExecutor, req: AuthorityRequest
   return { resource: facts }
 }
 
+function namedElectionUserIds(value: unknown): string[] {
+  if (!value || typeof value !== 'object') return []
+  if (Array.isArray(value)) return value.flatMap(namedElectionUserIds)
+  const record = value as Record<string, unknown>
+  const ids = typeof record.userId === 'string' ? [record.userId] : []
+  return [...ids, ...Object.values(record).flatMap(namedElectionUserIds)]
+}
+
+function jsonElectionValue(value: unknown): unknown {
+  if (typeof value !== 'string') return value
+  try {
+    return JSON.parse(value)
+  } catch {
+    return value
+  }
+}
+
+/**
+ * A council election is visible only through its ownership row for this organization.
+ * The ownership relation is unqualified. When it is absent this returns null and does not
+ * query `council_elections`, so a missing relation is not an existence oracle.
+ */
+export async function loadCouncilElection(exec: SqlExecutor, req: AuthorityRequest): Promise<LoadedResource | null> {
+  const org = req.resource.organizationId
+  if (!isUuid(org) || !isUuid(req.resource.id)) return null
+  const relation = (await exec.query<{ rel: string | null }>(`SELECT to_regclass('public.election_organization_ownership')::text AS rel`)).rows[0]?.rel
+  if (!relation) return null
+  const r = (
+    await exec.query<Row>(
+      `SELECT e.id::text AS id, o.organization_id::text AS organization_id, e.verified_by, e.verification_date, e.candidates, e.winners
+         FROM public.council_elections e
+         INNER JOIN public.election_organization_ownership o ON o.election_id = e.id
+        WHERE e.id = $1::uuid AND o.organization_id = $2::uuid`,
+      [req.resource.id, org],
+    )
+  ).rows[0]
+  if (!r) return null
+  const facts: CouncilElectionFacts = {
+    kind: 'council_election',
+    id: String(r.id),
+    organizationId: String(r.organization_id),
+    certified: r.verified_by != null || r.verification_date != null,
+    namedUserIds: [...new Set([...namedElectionUserIds(jsonElectionValue(r.candidates)), ...namedElectionUserIds(jsonElectionValue(r.winners))])],
+  }
+  return { resource: facts }
+}
+
 /** The organization's retention duty. There is no row to load: the duty is the organization itself. */
 export async function loadMessageRetention(_exec: SqlExecutor, req: AuthorityRequest): Promise<LoadedResource | null> {
   const org = req.resource.organizationId
@@ -384,6 +432,8 @@ export const createCanonicalResourceLoader = (policy: DocumentClassPolicy = DEFA
       return loadMessageThread(exec, req)
     case 'message_retention':
       return loadMessageRetention(exec, req)
+    case 'council_election':
+      return loadCouncilElection(exec, req)
     default:
       // member_financial_record has no authoritative principal-keyed source; approval_request is loaded by the store.
       return null

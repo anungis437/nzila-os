@@ -4,6 +4,8 @@
  */
 
 import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { runReconciliation, getReconciliationRun } from '@/services/platform-economics';
 
 export const dynamic = 'force-dynamic';
@@ -26,7 +28,10 @@ export const POST = withApi(
     },
   },
   async ({ body, organizationId, userId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    await withRLSContext({ organizationId, userId }, (tx) =>
+      requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:reconcile', requiresLedger: true }),
+    );
     const result = await runReconciliation({
       organizationId,
       periodStart: body.periodStart,
@@ -47,8 +52,11 @@ export const GET = withApi(
       summary: 'Get reconciliation run details',
     },
   },
-  async ({ request, organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+  async ({ request, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    await withRLSContext({ organizationId, userId }, (tx) =>
+      requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view', requiresLedger: true }),
+    );
     const url = new URL(request.url);
     const runId = url.searchParams.get('runId');
     if (!runId) throw ApiError.badRequest('runId query parameter is required');

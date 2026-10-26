@@ -85,7 +85,9 @@ export const POST = withApi(
     if (file.size === 0) throw ApiError.badRequest('Remittance file is empty');
     if (file.size > MAX_REMITTANCE_FILE_BYTES) throw ApiError.badRequest('Remittance file exceeds the 10 MB limit');
 
-    await withRLSContext({ organizationId }, (tx) => requireLiveFinancialMandate(tx, organizationId));
+    await withRLSContext({ organizationId, userId }, (tx) =>
+      requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:prepare', employerId: meta.employerId }),
+    );
 
     const bytes = Buffer.from(await file.arrayBuffer());
     const fileHash = createHash('sha256').update(bytes).digest('hex');
@@ -117,8 +119,8 @@ export const POST = withApi(
     let remittance;
     try {
       // The record and its audit commit together; if either fails the preserved blob is removed again.
-      remittance = await withRLSContext({ organizationId }, async (tx) => {
-        await requireLiveFinancialMandate(tx, organizationId);
+      remittance = await withRLSContext({ organizationId, userId }, async (tx) => {
+        await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:prepare', employerId: meta.employerId });
         const [row] = await tx
           .insert(employerRemittances)
           .values({
