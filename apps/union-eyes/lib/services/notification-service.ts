@@ -20,6 +20,11 @@ import {
 } from "@/db/schema/domains/communications";
 import { organizationMembers } from "@/db/schema";
 import { eq, and, or, lt, isNull } from "drizzle-orm";
+import {
+  decideDeliveryRetry,
+  isDeliveryClaimConflict,
+  loadDeliveryFacts,
+} from "./delivery-reconciliation";
 
 let firebaseAdmin: typeof import('firebase-admin') | null = null;
 let firebaseApp: import('firebase-admin').app.App | null = null;
@@ -63,7 +68,7 @@ async function getFirebaseMessaging() {
 // ============================================================================
 
 export type NotificationType = "email" | "sms" | "push" | "in_app";
-export type NotificationStatus = "pending" | "sent" | "failed" | "delivered" | "bounced";
+export type NotificationStatus = "pending" | "sent" | "failed" | "delivered" | "bounced" | "uncertain";
 export type NotificationPriority = "low" | "normal" | "high" | "urgent";
 
 export interface NotificationPayload {
@@ -88,6 +93,8 @@ export interface NotificationPayload {
   
   metadata?: Record<string, unknown>;
   userId?: string; // User who triggered notification
+  /** Stable across retries. A second send with the same key must not call the provider again after acceptance or an uncertain attempt. */
+  idempotencyKey?: string;
 }
 
 export interface NotificationResponse {
@@ -96,6 +103,8 @@ export interface NotificationResponse {
   sentAt?: Date;
   deliveredAt?: Date;
   failureReason?: string;
+  /** Provider receipt. Present when the provider accepted the submission, including when that acceptance was not recorded. */
+  providerMessageId?: string;
 }
 
 export interface NotificationProvider {
@@ -112,7 +121,8 @@ type DeliveryLedgerEvent =
   | "retried"
   | "delivered"
   | "suppressed"
-  | "bounced";
+  | "bounced"
+  | "uncertain";
 
 /** Provider status `sent` is submission acceptance. Confirmed delivery stays `delivered`. */
 function providerSubmissionEvent(status: NotificationStatus): DeliveryLedgerEvent {
@@ -607,15 +617,85 @@ export class NotificationService {
    */
   async send(payload: NotificationPayload): Promise<NotificationResponse> {
     try {
+      const idempotencyKey = payload.idempotencyKey;
+      let retryingConfirmedFailure = false;
+      if (idempotencyKey) {
+        const prior = await loadDeliveryFacts(payload.organizationId, idempotencyKey);
+        const decision = decideDeliveryRetry(prior);
+        if (decision.action === "skip") {
+          return {
+            id: idempotencyKey,
+            status: decision.status,
+            failureReason: decision.reason,
+            providerMessageId: decision.providerMessageId,
+          };
+        }
+        retryingConfirmedFailure = decision.retry;
+        if (prior.length === 0) {
+          try {
+            await db.insert(notificationQueue).values({
+              id: idempotencyKey,
+              organizationId: payload.organizationId,
+              status: "processing",
+              priority: payload.priority || "normal",
+              payload,
+              attemptCount: "0",
+              maxAttempts: "3",
+              nextRetryAt: new Date(),
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            });
+          } catch (error) {
+            if (!isDeliveryClaimConflict(error)) throw error;
+            const claimed = await db
+              .update(notificationQueue)
+              .set({ status: "processing", updatedAt: new Date() })
+              .where(and(
+                eq(notificationQueue.id, idempotencyKey),
+                eq(notificationQueue.organizationId, payload.organizationId),
+                or(
+                  eq(notificationQueue.status, "pending"),
+                  eq(notificationQueue.status, "failed"),
+                  eq(notificationQueue.status, "retrying"),
+                ),
+              ))
+              .returning({ id: notificationQueue.id });
+            if (Array.isArray(claimed) && claimed.length === 0) {
+              return {
+                id: idempotencyKey,
+                status: "uncertain",
+                failureReason: "another worker claimed this delivery",
+              };
+            }
+          }
+        } else {
+          const claimed = await db
+            .update(notificationQueue)
+            .set({ status: "processing", updatedAt: new Date() })
+            .where(and(
+              eq(notificationQueue.id, idempotencyKey),
+              eq(notificationQueue.organizationId, payload.organizationId),
+            ))
+            .returning({ id: notificationQueue.id });
+          if (Array.isArray(claimed) && claimed.length === 0) {
+            return {
+              id: idempotencyKey,
+              status: "uncertain",
+              failureReason: "another worker is retrying this delivery",
+            };
+          }
+        }
+      }
+
       const recipientActive = await isNotificationRecipientActive(payload);
       if (!recipientActive) {
-        const id = uuid();
+        const id = idempotencyKey ?? uuid();
         await recordDeliveryEvent({
           organizationId: payload.organizationId,
           notificationId: id,
           event: "suppressed",
           errorMessage: "Recipient is not active in organization",
-          details: { type: payload.type, channel: payload.type },
+          details: { type: payload.type, channel: payload.type, idempotencyKey: id },
         });
         return {
           id,
@@ -626,13 +706,13 @@ export class NotificationService {
 
       const suppression = await channelSuppression(payload);
       if (suppression) {
-        const id = uuid();
+        const id = idempotencyKey ?? uuid();
         await recordDeliveryEvent({
           organizationId: payload.organizationId,
           notificationId: id,
           event: "suppressed",
           errorMessage: suppression,
-          details: { type: payload.type, channel: payload.type },
+          details: { type: payload.type, channel: payload.type, idempotencyKey: id },
         });
         return {
           id,
@@ -647,54 +727,100 @@ export class NotificationService {
         throw new Error(`No provider configured for notification type: ${payload.type}`);
       }
 
-      const attemptId = uuid();
+      const attemptId = idempotencyKey ?? uuid();
+      if (retryingConfirmedFailure) {
+        await recordDeliveryEvent({
+          organizationId: payload.organizationId,
+          notificationId: attemptId,
+          event: "retried",
+          providerId: provider.name,
+          details: { type: payload.type, channel: payload.type, idempotencyKey: attemptId },
+        });
+      }
       await recordDeliveryEvent({
         organizationId: payload.organizationId,
         notificationId: attemptId,
         event: "attempted",
         providerId: provider.name,
-        details: { type: payload.type, channel: payload.type },
+        details: { type: payload.type, channel: payload.type, idempotencyKey: attemptId },
       });
 
       const response = await provider.send(payload);
       const ledgerEvent = providerSubmissionEvent(response.status);
-      await recordDeliveryEvent({
-        organizationId: payload.organizationId,
-        notificationId: response.id,
-        event: ledgerEvent,
-        providerId: provider.name,
-        externalEventId: response.id,
-        statusCode: ledgerEvent === "failed" || ledgerEvent === "bounced" ? "500" : "202",
-        errorMessage: response.failureReason,
-        details: {
-          type: payload.type,
-          channel: payload.type,
-          providerStatus: response.status,
-        },
-      });
-
+      const providerAccepted = response.status === "sent" || response.status === "delivered";
       try {
-        await db.insert(notificationQueue).values({
-          id: response.id,
+        await recordDeliveryEvent({
           organizationId: payload.organizationId,
-          status: ledgerEvent === "failed" || ledgerEvent === "bounced" ? "failed" : "completed",
-          priority: payload.priority || "normal",
-          payload: {
-            ...payload,
-          },
-          attemptCount: "1",
-          maxAttempts: "1",
-          processedAt: new Date(),
-          completedAt: response.sentAt,
-          resultNotificationId: response.id,
+          notificationId: attemptId,
+          event: ledgerEvent,
+          providerId: provider.name,
+          externalEventId: response.id,
+          statusCode: providerAccepted ? "202" : "500",
           errorMessage: response.failureReason,
+          details: {
+            type: payload.type,
+            channel: payload.type,
+            providerStatus: response.status,
+            idempotencyKey: attemptId,
+            providerMessageId: response.id,
+          },
         });
-      } catch (dbError) {
-        logger.warn("Queue mirror failed after the delivery ledger was written", { dbError, responseId: response.id });
+      } catch (error) {
+        if (!providerAccepted) throw error;
+        try {
+          await recordDeliveryEvent({
+            organizationId: payload.organizationId,
+            notificationId: attemptId,
+            event: "uncertain",
+            providerId: provider.name,
+            externalEventId: response.id,
+            errorMessage: "provider accepted the message but the acceptance was not recorded",
+            details: {
+              type: payload.type,
+              channel: payload.type,
+              idempotencyKey: attemptId,
+              providerMessageId: response.id,
+            },
+          });
+        } catch (uncertainError) {
+          logger.error("Provider accepted a message and neither acceptance nor the uncertain marker was recorded", {
+            uncertainError,
+            idempotencyKey: attemptId,
+            providerMessageId: response.id,
+          });
+        }
+        return {
+          id: attemptId,
+          status: "uncertain",
+          providerMessageId: response.id,
+          failureReason: "provider accepted the message but the acceptance was not recorded",
+        };
+      }
+
+      if (!idempotencyKey) {
+        try {
+          await db.insert(notificationQueue).values({
+            id: response.id,
+            organizationId: payload.organizationId,
+            status: ledgerEvent === "failed" || ledgerEvent === "bounced" ? "failed" : "completed",
+            priority: payload.priority || "normal",
+            payload: {
+              ...payload,
+            },
+            attemptCount: "1",
+            maxAttempts: "1",
+            processedAt: new Date(),
+            completedAt: response.sentAt,
+            resultNotificationId: response.id,
+            errorMessage: response.failureReason,
+          });
+        } catch (dbError) {
+          logger.warn("Queue mirror failed after the delivery ledger was written", { dbError, responseId: response.id });
+        }
       }
 
       // Create audit log
-      if (payload.userId) {
+      if (payload.userId && (response.status === "sent" || response.status === "delivered")) {
         await createAuditLog({
           organizationId: payload.organizationId,
           userId: payload.userId,
@@ -711,7 +837,10 @@ export class NotificationService {
         }));
       }
 
-      return response;
+      return {
+        ...response,
+        providerMessageId: response.id,
+      };
     } catch (error) {
       logger.error("Failed to send notification", { error, payload });
       throw error;
@@ -939,14 +1068,21 @@ export class NotificationService {
           if (!payload) continue;
 
           const currentAttempt = parseInt(queuedItem.attemptCount?.toString() || '0', 10);
-          await recordDeliveryEvent({
-            organizationId: payload.organizationId,
-            notificationId: queuedItem.id,
-            event: 'retried',
-            details: { type: payload.type, channel: payload.type, attempt: currentAttempt + 1 },
+          const response = await this.send({
+            ...payload,
+            idempotencyKey: payload.idempotencyKey ?? queuedItem.id,
           });
 
-          const response = await this.send(payload);
+          if (response.status === 'uncertain' || response.status === 'bounced') {
+            await db.update(notificationQueue).set({
+              status: 'failed',
+              errorMessage: response.failureReason ?? response.status,
+              nextRetryAt: null,
+            }).where(and(eq(notificationQueue.id, queuedItem.id), eq(notificationQueue.organizationId, queuedItem.organizationId ?? payload.organizationId)));
+            failedCount++;
+            retried++;
+            continue;
+          }
           
           // Update queue entry with new status
           if (response.status === 'sent' || response.status === 'delivered') {
@@ -1167,7 +1303,10 @@ export async function processPendingNotifications(batchSize: number = 50): Promi
         const payload = queuedItem.payload as NotificationPayload;
         if (!payload) continue;
 
-        const response = await notificationService.send(payload);
+        const response = await notificationService.send({
+          ...payload,
+          idempotencyKey: payload.idempotencyKey ?? queuedItem.id,
+        });
         
         if (response.status === 'sent' || response.status === 'delivered') {
           succeeded++;

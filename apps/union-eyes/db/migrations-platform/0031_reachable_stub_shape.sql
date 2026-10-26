@@ -11,7 +11,8 @@
 -- in schema public. An existing column of a different type, length, or numeric precision fails the
 -- transaction. A populated table keeps new columns nullable; consumers must accept that null until a
 -- later qualified backfill. Constraint counts and row security are recorded before the alters and
--- must be unchanged after them. The platform runner commits the file as one transaction and rolls
+-- must be unchanged after them. The guard stores constraint, index, policy, and grant
+-- definitions, not only their counts. The platform runner commits the file as one transaction and rolls
 -- it back when any statement fails. Idempotent when the shape already matches.
 -- Revised in place before any apply. The previous unqualified hash is superseded. Still registered
 -- UNQUALIFIED. Do not apply it on this lane. Native role, grant, and RLS proof is
@@ -63,14 +64,38 @@ DECLARE
 BEGIN
   CREATE TEMP TABLE IF NOT EXISTS reachable_stub_shape_guard (
     relation_name text PRIMARY KEY,
-    constraint_count integer NOT NULL,
-    row_security boolean NOT NULL
+    row_security boolean NOT NULL,
+    constraint_defs text NOT NULL,
+    index_defs text NOT NULL,
+    policy_defs text NOT NULL,
+    grant_defs text NOT NULL
   ) ON COMMIT DROP;
   DELETE FROM reachable_stub_shape_guard;
-  INSERT INTO reachable_stub_shape_guard (relation_name, constraint_count, row_security)
+  INSERT INTO reachable_stub_shape_guard (relation_name, row_security, constraint_defs, index_defs, policy_defs, grant_defs)
   SELECT c.relname,
-         (SELECT count(*) FROM pg_constraint k WHERE k.conrelid = c.oid),
-         c.relrowsecurity
+         c.relrowsecurity,
+         coalesce((
+           SELECT string_agg(k.conname || ':' || pg_get_constraintdef(k.oid), '|' ORDER BY k.conname)
+           FROM pg_constraint k WHERE k.conrelid = c.oid
+         ), ''),
+         coalesce((
+           SELECT string_agg(i.relname || ':' || pg_get_indexdef(ix.indexrelid), '|' ORDER BY i.relname)
+           FROM pg_index ix
+           JOIN pg_class i ON i.oid = ix.indexrelid
+           WHERE ix.indrelid = c.oid
+         ), ''),
+         coalesce((
+           SELECT string_agg(
+             p.polname || ':' || p.polcmd::text || ':' || coalesce(pg_get_expr(p.polqual, p.polrelid), ''),
+             '|' ORDER BY p.polname
+           )
+           FROM pg_policy p WHERE p.polrelid = c.oid
+         ), ''),
+         coalesce((
+           SELECT string_agg(g.grantee || ':' || g.privilege_type || ':' || g.is_grantable, '|' ORDER BY g.grantee, g.privilege_type)
+           FROM information_schema.role_table_grants g
+           WHERE g.table_schema = 'public' AND g.table_name = c.relname
+         ), '')
   FROM pg_class c
   JOIN pg_namespace n ON n.oid = c.relnamespace
   WHERE n.nspname = 'public'
@@ -248,18 +273,54 @@ END $$;
 DO $postflight$
 DECLARE
   prior record;
-  current_count integer;
   current_rls boolean;
+  current_constraints text;
+  current_indexes text;
+  current_policies text;
+  current_grants text;
 BEGIN
-  FOR prior IN SELECT relation_name, constraint_count, row_security FROM reachable_stub_shape_guard LOOP
-    SELECT (SELECT count(*) FROM pg_constraint k WHERE k.conrelid = c.oid), c.relrowsecurity
-      INTO current_count, current_rls
+  FOR prior IN
+    SELECT relation_name, row_security, constraint_defs, index_defs, policy_defs, grant_defs
+    FROM reachable_stub_shape_guard
+  LOOP
+    SELECT c.relrowsecurity,
+           coalesce((
+             SELECT string_agg(k.conname || ':' || pg_get_constraintdef(k.oid), '|' ORDER BY k.conname)
+             FROM pg_constraint k WHERE k.conrelid = c.oid
+           ), ''),
+           coalesce((
+             SELECT string_agg(i.relname || ':' || pg_get_indexdef(ix.indexrelid), '|' ORDER BY i.relname)
+             FROM pg_index ix
+             JOIN pg_class i ON i.oid = ix.indexrelid
+             WHERE ix.indrelid = c.oid
+           ), ''),
+           coalesce((
+             SELECT string_agg(
+               p.polname || ':' || p.polcmd::text || ':' || coalesce(pg_get_expr(p.polqual, p.polrelid), ''),
+               '|' ORDER BY p.polname
+             )
+             FROM pg_policy p WHERE p.polrelid = c.oid
+           ), ''),
+           coalesce((
+             SELECT string_agg(g.grantee || ':' || g.privilege_type || ':' || g.is_grantable, '|' ORDER BY g.grantee, g.privilege_type)
+             FROM information_schema.role_table_grants g
+             WHERE g.table_schema = 'public' AND g.table_name = c.relname
+           ), '')
+      INTO current_rls, current_constraints, current_indexes, current_policies, current_grants
       FROM pg_class c
       JOIN pg_namespace n ON n.oid = c.relnamespace
      WHERE n.nspname = 'public' AND c.relname = prior.relation_name;
-    IF current_count IS DISTINCT FROM prior.constraint_count THEN
-      RAISE EXCEPTION 'platform stub evolution fail-closed: public.% constraint count changed from % to %.',
-        prior.relation_name, prior.constraint_count, current_count;
+    IF current_constraints IS DISTINCT FROM prior.constraint_defs THEN
+      RAISE EXCEPTION 'platform stub evolution fail-closed: public.% constraint definitions changed.', prior.relation_name;
+    END IF;
+    IF current_indexes IS DISTINCT FROM prior.index_defs THEN
+      RAISE EXCEPTION 'platform stub evolution fail-closed: public.% index definitions changed.', prior.relation_name;
+    END IF;
+    IF current_policies IS DISTINCT FROM prior.policy_defs THEN
+      RAISE EXCEPTION 'platform stub evolution fail-closed: public.% policy definitions changed.', prior.relation_name;
+    END IF;
+    IF current_grants IS DISTINCT FROM prior.grant_defs THEN
+      RAISE EXCEPTION 'platform stub evolution fail-closed: public.% grant definitions changed.', prior.relation_name;
     END IF;
     IF current_rls IS DISTINCT FROM prior.row_security THEN
       RAISE EXCEPTION 'platform stub evolution fail-closed: public.% row security changed.', prior.relation_name;

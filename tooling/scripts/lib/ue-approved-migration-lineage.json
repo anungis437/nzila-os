@@ -303,10 +303,10 @@
       },
       {
         "tag": "0031_reachable_stub_shape",
-        "sha256": "3c32cf6e846ea2d8593dbdbdad801d3b6155a781964c90597e645c9c9285e56f",
+        "sha256": "614d675d3b6e99cba138661dff7f32b77564df7ed9dc77d907540086b832f97e",
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
-        "note": "Revised in place before any apply. Previous unqualified content was never executed. Additive columns and defaults for data_anonymization_log, employment_history, job_classifications, and member_leaves, with a column-type preflight and a constraint and row-security guard. NOT NULL only when the relation is empty. No keys, no RLS change, no destructive statement. Has not been applied to a native or live database."
+        "note": "Revised in place before any apply. Previous unqualified bytes were never executed. Type preflight plus constraint, index, policy, and grant definition fingerprints for data_anonymization_log, employment_history, job_classifications, and member_leaves. NOT NULL only when the relation is empty. No keys, no RLS change, no destructive statement. Has not been applied to a native or live database."
       }
     ]
   }

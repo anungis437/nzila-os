@@ -844,6 +844,111 @@ describe('NotificationService', () => {
       expect(send).toHaveBeenCalledOnce();
     });
 
+    function historySelect() {
+      mocks.mockWhere.mockReturnValue({ limit: mocks.mockLimit });
+      mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });
+      mocks.mockSelect.mockReturnValue({ from: mocks.mockFrom });
+    }
+
+    it('does not call the provider again when the prior attempt has no outcome', async () => {
+      const send = vi.fn();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+      mocks.mockLimit.mockResolvedValue([
+        { event: 'attempted', organizationId: 'org-1', notificationId: '11111111-1111-4111-8111-111111111111', externalEventId: null },
+      ]);
+      historySelect();
+
+      const result = await service.send({
+        ...emailPayload,
+        idempotencyKey: '11111111-1111-4111-8111-111111111111',
+      });
+
+      expect(result.status).toBe('uncertain');
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    it('returns uncertain and does not resend when the provider accepted but the ledger write failed', async () => {
+      const send = vi.fn().mockResolvedValue({ id: 'provider-msg-1', status: 'sent', sentAt: new Date() });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+      const key = '22222222-2222-4222-8222-222222222222';
+      let inserts = 0;
+      mocks.mockInsert.mockImplementation(() => ({
+        values: () => {
+          inserts += 1;
+          if (inserts >= 3) return Promise.reject(new Error('acceptance lost'));
+          return Promise.resolve();
+        },
+      }));
+      mocks.mockLimit
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([
+          { event: 'attempted', organizationId: 'org-1', notificationId: key, externalEventId: 'provider-msg-1' },
+        ]);
+      historySelect();
+
+      const first = await service.send({ ...emailPayload, idempotencyKey: key });
+      const second = await service.send({ ...emailPayload, idempotencyKey: key });
+
+      expect(first.status).toBe('uncertain');
+      expect(first.providerMessageId).toBe('provider-msg-1');
+      expect(first.status).not.toBe('delivered');
+      expect(second.status).toBe('uncertain');
+      expect(send).toHaveBeenCalledOnce();
+    });
+
+    it('does not call the provider when another worker already claimed the delivery', async () => {
+      const send = vi.fn();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+      mocks.mockLimit.mockResolvedValue([]);
+      historySelect();
+      mocks.mockInsert.mockReturnValue({
+        values: () => Promise.reject(Object.assign(new Error('duplicate key value violates unique constraint'), { code: '23505' })),
+      });
+      const returning = vi.fn().mockResolvedValue([]);
+      mocks.mockSet.mockReturnValue({ where: vi.fn().mockReturnValue({ returning }) });
+      mocks.mockUpdate.mockReturnValue({ set: mocks.mockSet });
+
+      const result = await service.send({
+        ...emailPayload,
+        idempotencyKey: '33333333-3333-4333-8333-333333333333',
+      });
+
+      expect(result.status).toBe('uncertain');
+      expect(result.failureReason).toContain('claimed');
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    it('sends a queued notice when its queue row already exists and no outcome is recorded', async () => {
+      const send = vi.fn().mockResolvedValue({ id: 'provider-msg', status: 'sent', sentAt: new Date() });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+      const key = '44444444-4444-4444-8444-444444444444';
+      let inserts = 0;
+      mocks.mockInsert.mockImplementation(() => ({
+        values: () => {
+          inserts += 1;
+          if (inserts === 1) {
+            return Promise.reject(Object.assign(new Error('duplicate key value violates unique constraint'), { code: '23505' }));
+          }
+          return Promise.resolve();
+        },
+      }));
+      mocks.mockLimit.mockResolvedValue([]);
+      historySelect();
+      const returning = vi.fn().mockResolvedValue([{ id: key }]);
+      mocks.mockSet.mockReturnValue({ where: vi.fn().mockReturnValue({ returning }) });
+      mocks.mockUpdate.mockReturnValue({ set: mocks.mockSet });
+
+      const result = await service.send({ ...emailPayload, idempotencyKey: key });
+
+      expect(result.status).toBe('sent');
+      expect(result.status).not.toBe('delivered');
+      expect(send).toHaveBeenCalledOnce();
+    });
+
     it('does not record a preference suppression as a successful send', async () => {
       const send = vi.fn().mockResolvedValue({ id: 'msg-pref', status: 'sent', sentAt: new Date() });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1480,6 +1585,7 @@ describe('processPendingNotifications', () => {
           },
         },
       ])
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
     mocks.mockWhere.mockReturnValue({ limit: mocks.mockLimit });
     mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });

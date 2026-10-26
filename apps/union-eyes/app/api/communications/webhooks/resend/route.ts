@@ -7,6 +7,7 @@ import { campaigns, communicationPreferences, messageLog } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
+import { recordProviderCallback, type DeliveryLedgerEvent } from '@/lib/services/delivery-reconciliation';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,6 +45,24 @@ function getEventTimestamp(event: WebhookEventPayload): Date {
   const raw = event.created_at;
   const parsed = raw ? new Date(raw) : new Date();
   return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+}
+
+function callbackLedgerEvent(eventType: WebhookEventPayload['type']): Extract<DeliveryLedgerEvent, 'accepted' | 'delivered' | 'failed' | 'bounced' | 'suppressed'> | null {
+  switch (eventType) {
+    case 'email.sent':
+      return 'accepted';
+    case 'email.delivered':
+      return 'delivered';
+    case 'email.bounced':
+      return 'bounced';
+    case 'email.failed':
+      return 'failed';
+    case 'email.suppressed':
+    case 'email.complained':
+      return 'suppressed';
+    default:
+      return null;
+  }
 }
 
 function mapEventToStatus(eventType: WebhookEventPayload['type']): {
@@ -302,6 +321,16 @@ export async function POST(request: NextRequest) {
       }
     }
   });
+
+  const ledgerEvent = callbackLedgerEvent(event.type);
+  if (ledgerEvent) {
+    await recordProviderCallback({
+      providerMessageId,
+      event: ledgerEvent,
+      providerId: 'resend',
+      webhookId: svixId,
+    });
+  }
 
   return NextResponse.json({ received: true, eventType: event.type });
 }
