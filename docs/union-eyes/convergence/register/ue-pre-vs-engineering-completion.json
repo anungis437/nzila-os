@@ -4782,8 +4782,26 @@
   },
   "routeOwnership": {
     "file": "docs/union-eyes/convergence/register/ue-route-capability-ownership.json",
-    "entriesHash": "1c26296d4f178a02d7d5493c5cee987611d89ff85412da99562b83a895c5d7e9",
+    "entriesHash": "54e294916e548426371e118f5bcf1ff161ca01660867ca21dfd4c1f3b84c19a5",
     "operations": 1644
+  },
+  "routeClassification": {
+    "tranche": "GATE-0B.1",
+    "note": "Hash pins for the frozen tranche manifest, the source-evidenced classification register, and the cumulative classification ledger.",
+    "files": {
+      "manifest": {
+        "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b1-manifest.json",
+        "sha256": "23bd9ca6a393ad6a8f09d511b7595f6c41dee2b39273442be5ff74f630cc6235"
+      },
+      "classification": {
+        "file": "docs/union-eyes/convergence/register/ue-route-classification-0b1.json",
+        "sha256": "2dcbd16329eb4ebe0302dfd5da914676fdeff6a8245e2a784a270ccc21acc327"
+      },
+      "ledger": {
+        "file": "docs/union-eyes/convergence/register/ue-route-classification-ledger.json",
+        "sha256": "f85eb96af706e2776b20853c932a5ac8d15099036cf438cc54de422a0650cd42"
+      }
+    }
   },
   "outOfScope": [
     {

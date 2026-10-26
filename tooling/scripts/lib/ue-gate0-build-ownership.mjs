@@ -5,6 +5,7 @@
  * SCOPE_UNDECIDED. Ownership is never guessed from a route name.
  */
 import { deriveEntry, selectRule, UNDECIDED_OWNER } from './ue-gate0-route-ownership.mjs'
+import { ownershipRulesForTranche } from './ue-gate0b1-groups.mjs'
 
 const REP = 'docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md'
 const MEMBER = 'docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md'
@@ -26,6 +27,7 @@ export function buildOwnershipRules(routes, registryActions) {
   const cronRoutes = registryActions.filter((record) => record.id.startsWith('UE-CRON-')).flatMap((record) => record.routes).map((route) => route.replace(/^app\/api\//, ''))
 
   const rules = [
+    ...ownershipRulesForTranche(),
     {
       id: 'RULE-STUB-H002',
       precedence: 30,

@@ -17,6 +17,8 @@ import { sha256File, validateBaselines } from './ue-gate0a2-validate-baselines.m
 import { PERSONAS, computePersonaSpecs, personaActionsFromSpecs, validatePersonaCompleteness } from './ue-gate0-persona-spec.mjs'
 import { UNDECIDED_OWNER, ownershipHash, validateRouteOwnership } from './ue-gate0-route-ownership.mjs'
 import { evaluateRule } from './ue-convergence-check.mjs'
+import { FILES_0B1, validateClassification } from './ue-gate0b1-classification.mjs'
+import { ANCHOR_COMMIT } from './ue-gate0b1-groups.mjs'
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 
@@ -182,6 +184,33 @@ function anchoredPersonaFloor(root, recovery) {
   }
 }
 
+function anchoredOwnershipEntries(root) {
+  try {
+    return JSON.parse(git(root, ['show', `${ANCHOR_COMMIT}:${FILES.ownership}`])).entries
+  } catch {
+    return null
+  }
+}
+
+function classificationPinProblems(matrix, root) {
+  const record = matrix?.routeClassification
+  if (!record) return ['CLASSIFICATION-PIN-ABSENT: the matrix records no routeClassification block']
+  const out = []
+  for (const [key, file] of Object.entries(FILES_0B1)) {
+    const entry = record.files?.[key]
+    if (!entry || entry.file !== file) {
+      out.push(`CLASSIFICATION-PIN-FILE: ${key} is not recorded at ${file}`)
+      continue
+    }
+    try {
+      if (sha256File(root, file) !== entry.sha256) out.push(`CLASSIFICATION-PIN-HASH: ${file} no longer matches the hash recorded in the matrix`)
+    } catch {
+      out.push(`CLASSIFICATION-PIN-FILE: ${file} is unreadable`)
+    }
+  }
+  return out
+}
+
 function currentRatchetFailures(root) {
   const ratchets = JSON.parse(readFileSync(join(root, 'docs/union-eyes/convergence/register/ue-convergence-ratchets.json'), 'utf8'))
   const failures = []
@@ -233,6 +262,10 @@ export function loadContext(root = ROOT) {
     censusCount: batches.censusCount,
     registryActions: extractRegistryIds(registry),
     ownership: readJsonIfPresent(root, FILES.ownership),
+    tranche0b1: readJsonIfPresent(root, FILES_0B1.manifest),
+    classification0b1: readJsonIfPresent(root, FILES_0B1.classification),
+    ledger0b1: readJsonIfPresent(root, FILES_0B1.ledger),
+    anchoredOwnershipEntries: anchoredOwnershipEntries(root),
     lock,
     anchorCapabilityIds: anchoredCapabilityIds(root, lock),
     evidence: readJsonIfPresent(root, FILES.evidence),
@@ -480,7 +513,23 @@ export function validateGate0(matrix, ctx = {}) {
   problems.push(...independentLockProblems(byId, lock, anchorIds, { exists, commitExists }))
 
   const ownership = 'ownership' in ctx ? ctx.ownership : base.ownership
+  const classificationCheck = ownership
+    ? validateClassification({
+        classification: 'classification0b1' in ctx ? ctx.classification0b1 : base.classification0b1,
+        manifest: 'tranche0b1' in ctx ? ctx.tranche0b1 : base.tranche0b1,
+        ledger: 'ledger0b1' in ctx ? ctx.ledger0b1 : base.ledger0b1,
+        entries: ownership.entries ?? [],
+        capabilityById: byId,
+        universe: new Set(routes.flatMap((route) => [].concat(route.methods).map((method) => `${route.route}|${method}`))),
+        exists,
+        readText,
+        anchoredEntries: 'anchoredOwnershipEntries' in ctx ? ctx.anchoredOwnershipEntries : base.anchoredOwnershipEntries,
+      })
+    : { problems: ['route classification cannot be validated without the ownership register'], justifiedUnauthenticated: new Set(), blockers: [], summary: null }
+  problems.push(...classificationCheck.problems)
+  problems.push(...('classificationPinProblems' in ctx ? ctx.classificationPinProblems : classificationPinProblems(matrix, base.root)))
   const routeCheck = validateRouteOwnership({
+    justifiedUnauthenticated: classificationCheck.justifiedUnauthenticated,
     ownership,
     capabilityById: byId,
     routes,
@@ -501,7 +550,7 @@ export function validateGate0(matrix, ctx = {}) {
   const debt = defectProblems(capabilities, ratchetFailures, evidence, { exists, readText })
   problems.push(...debt.problems)
 
-  const blockers = [...personaCheck.blockers, ...routeCheck.blockers]
+  const blockers = [...personaCheck.blockers, ...routeCheck.blockers, ...classificationCheck.blockers]
   const gateAcceptanceBlockers = debt.open
   const verdict = blockers.length > 0 ? 'IN_PROGRESS' : 'READY_FOR_ADVERSARIAL_REVIEW'
   if (matrix?.gate0Verdict !== verdict) {
@@ -511,6 +560,7 @@ export function validateGate0(matrix, ctx = {}) {
   const summary = summarize(matrix, registerEntries, personaActions, problems)
   summary.verdict = verdict
   summary.route = routeCheck.summary
+  summary.classification0b1 = classificationCheck.summary
   summary.persona = Object.fromEntries(PERSONAS.map((persona) => {
     const spec = personaSpecs[persona]
     return [persona, { identifiers: spec.universe.length, individuallyDefined: spec.individuallyDefined.length, groupedOnly: spec.groupedOnly.length, unspecified: spec.unspecified.length, canonicalFileFound: spec.canonicalFileFound, resolved: spec.resolved }]

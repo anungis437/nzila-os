@@ -125,7 +125,7 @@ function ruleStructureProblems(ownership, capabilityById, scopeIds, registerIds,
   return problems
 }
 
-export function validateRouteOwnership({ ownership, capabilityById, routes, diskRouteKeys, scopeIds, registerIds, registryIds, exists, readText }) {
+export function validateRouteOwnership({ ownership, capabilityById, routes, diskRouteKeys, scopeIds, registerIds, registryIds, exists, readText, justifiedUnauthenticated = new Set() }) {
   const problems = []
   const exceptions = { scopeUndecided: [], unauthenticated: [], auditAbsent: [], uninventoried: [] }
   const blockers = []
@@ -187,7 +187,7 @@ export function validateRouteOwnership({ ownership, capabilityById, routes, disk
       capabilityCounts[expected[3]] = (capabilityCounts[expected[3]] ?? 0) + 1
       ruleCounts[selected.rule.id] = (ruleCounts[selected.rule.id] ?? 0) + 1
       if (expected[4] === 'SCOPE_UNDECIDED') exceptions.scopeUndecided.push(key)
-      if (expected[5] === 'NO_AUTHENTICATION_DECLARED' && expected[4] !== 'SYSTEM' && !ENDPOINT_501.includes(expected[4])) exceptions.unauthenticated.push(key)
+      if (expected[5] === 'NO_AUTHENTICATION_DECLARED' && expected[4] !== 'SYSTEM' && !ENDPOINT_501.includes(expected[4]) && !justifiedUnauthenticated.has(key)) exceptions.unauthenticated.push(key)
       if (expected[6].startsWith('AUDIT_ABSENT')) exceptions.auditAbsent.push(key)
     }
   }

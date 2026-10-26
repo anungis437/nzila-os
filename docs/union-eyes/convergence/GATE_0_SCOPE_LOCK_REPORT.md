@@ -1,4 +1,4 @@
-# Gate 0 scope lock (adversarial rework, Gate 0A, and Gate 0A.2)
+# Gate 0 scope lock (adversarial rework, Gate 0A, Gate 0A.2, and Gate 0B.1)
 
 Mission: `UE-FINAL-CONVERGENCE-2026-10`. Verdict: `IN_PROGRESS`.
 
@@ -198,21 +198,65 @@ The 993-route manifest is unchanged: 993 routes, 1644 route-method pairs. `ue-ro
 
 | Disposition | Operations |
 | --- | --- |
-| `OWNED` | 355 |
+| `OWNED` | 436 |
 | `RETIRED_501` | 97 |
 | `STUB_501` | 31 |
 | `SYSTEM` | 9 |
-| `SCOPE_UNDECIDED` | 1152 |
+| `SCOPE_UNDECIDED` | 1071 |
 | Total | 1644 |
 
 The validator rejects an operation without an entry, an entry without a capability, an owner that is not a capability, an owner that differs from the rule-derived owner, two owners for one operation, an entry for a route that is not in the manifest, a route that matches no rule, and a route file on disk that is neither in the manifest nor recorded as uninventoried.
 
 Exceptions:
 
-- `SCOPE_UNDECIDED` is 1152 operations, owned by `UE-OMIT-ROUTE-DOMAIN-SCOPE` (gate 13, `SOURCE_UNSPECIFIED`). Their control owner stays the guard-class owner. No register entry, persona source, or registry record names a business owner for those domains, and none was guessed. This blocks Gate 0 until each domain is decided.
+- `SCOPE_UNDECIDED` is 1071 operations, owned by `UE-OMIT-ROUTE-DOMAIN-SCOPE` (gate 13, `SOURCE_UNSPECIFIED`). Their control owner stays the guard-class owner. No register entry, persona source, or registry record names a business owner for those domains, and none was guessed. This blocks Gate 0 until each domain is decided.
 - `reviews/route.ts` (GET, POST) exists on disk and is absent from the manifest. It is recorded as uninventoried and owned by `UE-CAP-REVIEW-INTAKE`. Regenerating the manifest belongs to `UE-CONV-K-008` and was not done here.
-- 42 operations are unauthenticated without a recorded justification. The matrix summary counts them. They are not accepted as justified.
+- 0 operations are unauthenticated without a recorded justification. The 42 operations previously counted were each inspected in Gate 0B.1 and carry a disposition. Three supplementary system probes are recorded as unjustified exposure and block Gate 0 (see Gate 0B.1).
 - 0 mutating operations have an absent audit code.
+
+## Gate 0B.1: first route-classification tranche
+
+Scope: the Gate 0 route inventory only. No application route, service, schema, migration, security allowlist, census item or persona baseline changed. No regression was investigated and `pnpm test:fast` was not run.
+
+Tranche: `GATE-0B.1`, version 1. The first 100 `SCOPE_UNDECIDED` route-method operations in ascending code-unit order of `<route>|<METHOD>` at anchor commit `ed2cf69d83f366ca431817c21113d7b6dd15fb28`. `ue-route-tranche-0b1-manifest.json` freezes them with an operations hash and a `versionLog`. The validator recomputes the selection from the anchored ownership register, so a changed order or membership fails unless a new version carries a reason of at least 20 characters and the new hash.
+
+Result: 100 examined, 81 classified with source evidence, 19 left `SCOPE_UNDECIDED`. The register now holds 436 `OWNED` and 1071 `SCOPE_UNDECIDED`. All 1644 operations are preserved and no previously classified operation reverted. No capability was created.
+
+| Group | Operations | Capability |
+| --- | --- | --- |
+| Generic CRUD facade over `organization_members` (READ_ONLY, every write refused with 403) | 64 | `UE-CAP-K-007` |
+| Generic CRUD over `analytics_metrics` (OPERATIONAL, atomically audited) | 2 | `UE-CAP-K-007` |
+| Billing cycles | 4 | `UE-CAP-D-003` |
+| CLC remittance analytics reads | 4 | `UE-OMIT-FINANCE-UNAVAILABLE` |
+| Case ingestion and duplicates | 6 | `UE-CAP-K-010` |
+| Legacy document backfill | 1 | `UE-CAP-F-002` |
+
+Each record in `ue-route-classification-0b1.json` holds route, method, business domain, capability, actor, service owner, authorization category, tenant scope, data sensitivity, mutation and audit obligation, implementation status, source references (each quote is verified in the file), and unresolved defects. A role floor is recorded as a role floor, never as a kernel decision. An audit is recorded as `ATOMIC` only when `persistAtomicAudit` appears in source. `performAuditedOperation` is recorded as `INTENT_OUTCOME`, because it writes intent and outcome in separate transactions. The route manifest's own audit and control labels were corrected where the source disagrees (the detector marks CRUD reads as mutating, overstates `performAuditedOperation`, and misses `cognitionRoute` and `authenticateUser`).
+
+The 19 unresolved operations are `activities`, `ai-usage`, `database/health`, `database/optimize`, `feature-flags` (GET, PATCH), `jobs/[action]`, `jobs/retry`, `members/stats`, `organizations` (GET), `pilot-status`, `pki/sign`, `pki/verify`, `pki/workflows` (GET, PUT, DELETE) and `representation-protocol` (GET, POST, PUT). No existing capability genuinely covers them. Each carries a `proposedCapability` candidate for Gate 0B.2 and none was invented as an owner.
+
+### Unauthenticated operations
+
+All 42 operations flagged unauthenticated were inspected against source. Eight further `SYSTEM` probes were inspected and recorded, giving 50 records.
+
+| Disposition | Operations |
+| --- | --- |
+| `AUTHENTICATED_BY_UNDETECTED_GUARD` (a sixth category: `cognitionRoute` or equivalent guard the manifest detector misses) | 27 |
+| `INTENTIONALLY_PUBLIC` | 12 |
+| `HEALTH_OR_OPERATIONAL` | 4 |
+| `EXTERNAL_TRUST_MECHANISM` (HMAC tracking tokens) | 3 |
+| `INTERNAL_MACHINE_TO_MACHINE` (staging-proof, HMAC, nonce, environment gates) | 1 |
+| `UNJUSTIFIED_EXPOSURE` (`docs`, `docs/openapi`, `version`) | 3 |
+
+Of the 42, 27 are guarded by an undetected guard, 11 are intentionally public, 3 use an external trust mechanism and 1 is machine-to-machine. None of the 42 is unjustified exposure. The three unjustified operations are among the supplementary probes and raise the blocker `ROUTE_UNJUSTIFIED_EXPOSURE`. A public disposition needs a recorded exposure contract, and the validator rejects one without it.
+
+### Defects recorded (21, none fixed)
+
+Gate 13: CRUD facade over `organization_members`, inert super-admin write fix, writable CLC analytics, platform role title as authority. Gate 14: non-atomic intent and outcome audit, CLC cross-tenant read, CLC public cache control, audit read at member floor, legacy cross-tenant AI usage, organizations cross-org contacts, unauthenticated docs surface, unauthenticated version topology, process-local ICRA telemetry limit. Gate 5: billing history returns a false empty result, billing target org unbound, billing scheduler latent. Gate 6: PKI workflows held in memory. Gate 2: representation protocol absent from the capability model. Gate 11: communications tracking GET mutates. Gate 15: manifest detector errors, public-route allowlist drift.
+
+### New validator checks
+
+`validateClassification` is part of `validateGate0`. It rejects an operation without source evidence, a role floor labelled kernel authorization, a public endpoint without an exposure contract, a mutating operation labelled atomically audited without `persistAtomicAudit`, a route assigned to a capability outside its business domain, a previously classified operation reverted to undecided (against the ledger and against the anchored register), a tranche operation that disappears, and a tranche order or membership change without a versioned reason. The matrix pins the sha256 of the three 0B.1 files.
 
 ## Capabilities
 
@@ -289,15 +333,18 @@ The 10 Gate 0A tests cover: exact recovered counts and provenance; a missing per
 
 The 24 Gate 0A.2R tests are negative tests. They prove that a Steward interface persona, union office or platform role does not grant authority; that a linear intake-to-grievance sequence is not mandatory and the claims versus grievances decision stays at Gate 4; that member disclosure needs an independently authorized server-side classification and decision and a client flag is refused; that no universal different-person rule is invented, that an actor slot cannot hold duties a listed rule separates, and that technical protections, software rules and proposed rules stay distinct; that platform billing is not union finance; that reports and exports are authorized apart from a view duty; that product acceptance activates no institutional mandate and all 32 institutional decisions stay outstanding and inactive; and that historical provenance, the 182 identifiers, the 46 decisions and the R18 record are unchanged from the anchor commit.
 
-The matrix validator returns 0 problems and 5 blocker groups. A problem is a rule violation. A blocker is unfinished Gate 0 scope.
+The 13 Gate 0B.1 tests in `ue-gate0b1-classification.test.mjs` cover the eight required negative cases, the positive tranche selection, the 42 dispositions, the open exposure blocker, and an end-to-end tamper rejection. All `ue-*.test.mjs` suites under `tooling/scripts/lib` ran 182 tests: 176 passed, 0 failed, 6 skipped (pre-existing). `pnpm test:fast` was not run, by instruction.
+
+The matrix validator returns 0 problems and 6 blockers (3 persona, route scope undecided, uninventoried route, unjustified exposure). A problem is a rule violation. A blocker is unfinished Gate 0 scope.
 
 ## Remaining Gate 0 blockers
 
 1. Steward: no canonical and no action universe. Open decision: distinct persona or the level-1 role in Representative 2.2.
 2. Representative: canonical 2.2 file absent. 17 identifiers grouped only, `R18` in source conflict, 2 references with no identifier.
 3. Financial Officer: canonical file absent. 28 identifiers unspecified, 6 grouped only, 3 references with no identifier.
-4. 1152 route operations are `SCOPE_UNDECIDED`.
+4. 1071 route operations are `SCOPE_UNDECIDED`.
 5. `reviews/route.ts` is on disk and not in the route-coverage manifest.
+6. Three unauthenticated system operations (`docs`, `docs/openapi`, `version`) are unjustified exposure (`ROUTE_UNJUSTIFIED_EXPOSURE`). The repair is owned by Gate 14 and was not made here.
 
 Gate acceptance debt that is tracked and not a Gate 0 blocker: the four defects above.
 

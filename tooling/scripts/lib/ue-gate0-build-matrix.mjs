@@ -20,6 +20,7 @@ import { ownershipHash } from './ue-gate0-route-ownership.mjs'
 import { buildOwnership, ownershipJson } from './ue-gate0-build-ownership.mjs'
 import { BASELINE_DATA, BASELINE_DOCS } from './ue-gate0a2-baseline-facts.mjs'
 import { sha256File } from './ue-gate0a2-validate-baselines.mjs'
+import { FILES_0B1 } from './ue-gate0b1-classification.mjs'
 
 const ctx = loadContext(ROOT)
 const personaSpecs = ctx.personaSpecs
@@ -689,6 +690,11 @@ const matrix = {
     documents: BASELINE_DOCS,
   },
   routeOwnership: { file: FILES.ownership, entriesHash, operations: ownership.entries.length },
+  routeClassification: {
+    tranche: 'GATE-0B.1',
+    note: 'Hash pins for the frozen tranche manifest, the source-evidenced classification register, and the cumulative classification ledger.',
+    files: Object.fromEntries(Object.entries(FILES_0B1).map(([key, file]) => [key, { file, sha256: existsSync(join(ROOT, file)) ? sha256File(ROOT, file) : null }])),
+  },
   outOfScope: [
     {
       id: 'UE-SCOPE-ORG-HIERARCHY-SEED',
