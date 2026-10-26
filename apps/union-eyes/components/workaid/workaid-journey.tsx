@@ -40,6 +40,8 @@ interface ConsentRow {
   referralWithdrawn: boolean
   counselAccepted: boolean
   releasedCategories?: string[]
+  disclosureHistory?: DisclosureEvent[]
+  notificationDelivered?: boolean
   documentAuthorisations: DocumentAuth[]
 }
 
@@ -50,9 +52,22 @@ interface Referable {
   expiresAt: string
 }
 
+interface DisclosureEvent {
+  shareId: string
+  categories: string[]
+  categoriesUnavailable?: boolean
+  releasedAt: string
+  withdrawnAt: string | null
+  withdrawalReason: string | null
+  effective: boolean
+  deliveredToCounsel: boolean
+  counselAcknowledged: boolean
+}
+
 interface RecordedReferral {
   matterId: string
   purpose: string
+  scopeStatus?: 'recorded' | 'unavailable' | 'conflict'
   referredCategories: string[]
   releasedCategories: string[]
   withdrawn: boolean
@@ -120,6 +135,8 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
   const [recorded, setRecorded] = useState<RecordedReferral[]>([])
   const [caseReviewed, setCaseReviewed] = useState(false)
   const [scopeChoice, setScopeChoice] = useState<Record<string, string[]>>({})
+  const [releaseChoice, setReleaseChoice] = useState<Record<string, string[]>>({})
+  const [releaseConfirmed, setReleaseConfirmed] = useState<Record<string, boolean>>({})
   const [proposals, setProposals] = useState<WordingProposal[]>([])
   const [wordingVersion, setWordingVersion] = useState('')
   const [wordingBody, setWordingBody] = useState('')
@@ -246,7 +263,22 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
       for (const row of next) kept[row.matterId] = current[row.matterId] ?? row.categories
       return kept
     })
+    setReleaseChoice({})
+    setReleaseConfirmed({})
     setCaseReviewed(true)
+  }
+
+  function chosenRelease(row: RecordedReferral): string[] {
+    return releaseChoice[row.matterId] ?? []
+  }
+
+  function toggleRelease(row: RecordedReferral, category: string, checked: boolean) {
+    setReleaseChoice((current) => {
+      const existing = current[row.matterId] ?? []
+      const next = checked ? [...existing, category] : existing.filter((item) => item !== category)
+      return { ...current, [row.matterId]: next.filter((item) => releasableCategories(row).includes(item)) }
+    })
+    setReleaseConfirmed((current) => ({ ...current, [row.matterId]: false }))
   }
 
   function chosenCategories(row: Referable): string[] {
@@ -337,14 +369,14 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
   }
 
   async function release(row: RecordedReferral) {
-    const categories = releasableCategories(row)
+    const categories = chosenRelease(row).filter((category) => releasableCategories(row).includes(category))
     setNotice(null)
     setError(null)
-    if (categories.length === 0) return
+    if (categories.length === 0 || !releaseConfirmed[row.matterId]) return
     const result = await readJson(await fetch('/api/workaid/shares', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ matterId: row.matterId, categories }),
+      body: JSON.stringify({ matterId: row.matterId, categories, confirm: true }),
     }))
     if (!result.ok || result.data.delivered !== false || result.data.counselAcknowledged !== false) {
       setError(String(result.data.code ?? result.data.error ?? result.status))
@@ -404,6 +436,20 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
               <p className="text-sm">{row.referred ? t('referred') : t('notReferred')}{row.referralWithdrawn ? ` · ${t('withdrawn')}` : ''}</p>
               <p className="text-sm">{row.counselAccepted ? t('counselAccepted') : t('counselNotAccepted')}</p>
               <p className="text-sm">{(row.releasedCategories ?? []).length > 0 ? `${t('memberReleased')}: ${labelled(row.releasedCategories ?? [], t)}` : t('memberReleaseNone')}</p>
+              <p className="text-sm">{row.notificationDelivered ? t('notificationSent') : t('notificationNotSent')}</p>
+              <section className="flex flex-col gap-2" data-testid="disclosure-history">
+                <h2 className="text-base font-medium">{t('historyTitle')}</h2>
+                {(row.disclosureHistory ?? []).length === 0 ? <p className="text-sm">{t('historyEmpty')}</p> : null}
+                {(row.disclosureHistory ?? []).map((event) => (
+                  <article key={event.shareId} className="flex flex-col gap-1 rounded border p-2 text-sm">
+                    <p>{event.categoriesUnavailable ? t('historyCategoriesUnavailable') : `${t('historyReleased')}: ${labelled(event.categories, t)}`}</p>
+                    <p>{event.releasedAt}</p>
+                    <p>{event.effective ? t('historyEffective') : t('historyWithdrawnState')}{event.withdrawalReason ? ` · ${event.withdrawalReason}` : ''}</p>
+                    <p>{event.deliveredToCounsel ? t('deliveredToCounsel') : t('notDeliveredEvent')}</p>
+                    <p>{event.counselAcknowledged ? t('acknowledgedByCounsel') : t('notAcknowledgedEvent')}</p>
+                  </article>
+                ))}
+              </section>
               <p className="text-sm">{t('requiredIntake')}</p>
               <ul className="flex flex-col gap-2">
                 {row.documentAuthorisations.length === 0 ? <li>{t('documentsEmpty')}</li> : row.documentAuthorisations.map((doc) => (
@@ -464,14 +510,38 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
               {recorded.map((row) => (
                 <article key={row.matterId} className="flex flex-col gap-2 rounded-md border p-3" data-testid="recorded-referral">
                   <p className="text-sm">{row.purpose}</p>
-                  <p className="text-sm">{t('referredScope')}: {labelled(row.referredCategories, t)}</p>
+                  {row.scopeStatus === 'unavailable' ? <p className="text-sm">{t('scopeUnavailable')}</p> : null}
+                  {row.scopeStatus === 'conflict' ? <p className="text-sm">{t('scopeConflict')}</p> : null}
+                  {row.scopeStatus !== 'unavailable' && row.scopeStatus !== 'conflict' ? <p className="text-sm">{t('referredScope')}: {labelled(row.referredCategories, t)}</p> : null}
                   <p className="text-sm">{row.withdrawn ? t('withdrawn') : t('referred')}</p>
                   <p className="text-sm">{row.counselAccepted ? t('counselAccepted') : t('counselNotAccepted')}</p>
                   <p className="text-sm">{row.releasedCategories.length > 0 ? `${t('releasedScope')}: ${labelled(row.releasedCategories, t)}` : t('releasedNone')}</p>
                   <p className="text-sm">{t('notDelivered')}</p>
                   {row.referredCategories.includes('documents') ? <p className="text-sm">{t('documentsStayWithMember')}</p> : null}
-                  {releasableCategories(row).length > 0 && !row.withdrawn ? (
-                    <Button type="button" className="w-full sm:w-auto" onClick={() => void release(row)}>{t('releaseScope')}</Button>
+                  {row.scopeStatus !== 'unavailable' && row.scopeStatus !== 'conflict' && releasableCategories(row).length > 0 && !row.withdrawn ? (
+                    <fieldset className="flex flex-col gap-2 text-sm">
+                      <legend>{t('releaseChoose')}</legend>
+                      {releasableCategories(row).map((category) => (
+                        <label key={category} className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={chosenRelease(row).includes(category)}
+                            onChange={(event) => toggleRelease(row, category, event.target.checked)}
+                          />
+                          {t(`category.${category}`)}
+                        </label>
+                      ))}
+                      <p>{t('releasePreview')}: {labelled(chosenRelease(row), t)}</p>
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(releaseConfirmed[row.matterId])}
+                          onChange={(event) => setReleaseConfirmed((current) => ({ ...current, [row.matterId]: event.target.checked }))}
+                        />
+                        {t('releaseConfirm')}
+                      </label>
+                      <Button type="button" className="w-full sm:w-auto" disabled={chosenRelease(row).length === 0 || !releaseConfirmed[row.matterId]} onClick={() => void release(row)}>{t('releaseScope')}</Button>
+                    </fieldset>
                   ) : null}
                 </article>
               ))}

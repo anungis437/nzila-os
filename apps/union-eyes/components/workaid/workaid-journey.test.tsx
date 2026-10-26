@@ -164,7 +164,7 @@ describe('WorkAidJourney', () => {
       calls.push(`${init?.method ?? 'GET'} ${url}`)
       if (String(url).includes('/shares')) {
         const sent = JSON.parse(String(init?.body))
-        expect(sent).toEqual({ matterId: '22222222-2222-4222-8222-222222222222', categories: ['case_summary'] })
+        expect(sent).toEqual({ matterId: '22222222-2222-4222-8222-222222222222', categories: ['case_summary'], confirm: true })
         return Response.json({ success: true, delivered: true, counselAcknowledged: false }, { status: 201 })
       }
       return Response.json({
@@ -184,6 +184,10 @@ describe('WorkAidJourney', () => {
     fireEvent.change(screen.getByLabelText('Dossier à examiner'), { target: { value: '33333333-3333-4333-8333-333333333333' } })
     fireEvent.click(screen.getByRole('button', { name: 'Afficher les affaires que vous pouvez signaler' }))
     expect(await screen.findByText(/Les documents restent avec le membre/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Résumé du dossier' }))
+    expect(screen.getByText(/Cette communication contiendra: Résumé du dossier/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Communiquer cette portée' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('checkbox', { name: "Je confirme la communication d'exactement ces catégories." }))
     fireEvent.click(screen.getByRole('button', { name: 'Communiquer cette portée' }))
     expect(await screen.findByRole('alert')).toBeInTheDocument()
     expect(screen.queryByText('Enregistré du côté syndical seulement')).not.toBeInTheDocument()
@@ -198,5 +202,36 @@ describe('WorkAidJourney', () => {
     renderJourney('member')
     expect(await screen.findByText(/Released on the union side: Case summary/)).toBeInTheDocument()
     expect(screen.getByTestId('workaid-boundary')).toHaveTextContent('nothing here is transmitted')
+  })
+
+  it('shows disclosure history and does not call a release a notification', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+      if (String(url).includes('consent-text')) return Response.json({ success: false, code: 'CONSENT_TEXT_UNAVAILABLE' }, { status: 409 })
+      return Response.json({
+        success: true,
+        consents: [{
+          ...consent,
+          referred: true,
+          releasedCategories: [],
+          notificationDelivered: false,
+          disclosureHistory: [{
+            shareId: '77777777-7777-4777-8777-777777777777',
+            categories: ['case_summary'],
+            releasedAt: '2026-10-26T18:00:00.000Z',
+            withdrawnAt: '2026-10-26T19:00:00.000Z',
+            withdrawalReason: 'consent_revoked',
+            effective: false,
+            deliveredToCounsel: false,
+            counselAcknowledged: false,
+          }],
+        }],
+      })
+    }))
+    renderJourney('member', 'fr')
+    expect(await screen.findByTestId('disclosure-history')).toHaveTextContent('Historique des communications')
+    expect(screen.getByText(/Non transmis au conseil/)).toBeInTheDocument()
+    expect(screen.getByText(/Non accusé par le conseil/)).toBeInTheDocument()
+    expect(screen.getByText(/Aucun avis n'a été envoyé/)).toBeInTheDocument()
+    expect(screen.getByText(/Retiré dans le système syndical/)).toBeInTheDocument()
   })
 })

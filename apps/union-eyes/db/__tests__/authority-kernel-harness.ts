@@ -33,6 +33,7 @@ export const WORKAID_PLATFORM_SQL = read('db/migrations-platform/0027_workaid_un
 export const WORKAID_RLS_SQL = read('db/migrations-cache/0026_workaid_union_side_rls_closure.sql')
 export const WORKAID_WORDING_SQL = read('db/migrations-platform/0036_workaid_consent_wording_proposals.sql')
 export const WORKAID_WORDING_RLS_SQL = read('db/migrations-cache/0028_workaid_consent_wording_proposal_rls.sql')
+export const WORKAID_REFERRAL_SCOPE_SQL = read('db/migrations-platform/0037_workaid_referral_scope.sql')
 export const HELPER = read('db/migrations-cache/0010_tenant_isolation_rls_foundation.sql')
   .match(/CREATE OR REPLACE FUNCTION ue_create_direct_org_rls_policy\([\s\S]*?\$\$ LANGUAGE plpgsql;/)?.[0] as string
 if (!HELPER) throw new Error('ue_create_direct_org_rls_policy not found')
@@ -130,6 +131,7 @@ export async function installAuthoritySchema(db: Db, options: { realAuditLogs?: 
   await db.exec(WORKAID_RLS_SQL)
   await db.exec(WORKAID_WORDING_SQL)
   await db.exec(WORKAID_WORDING_RLS_SQL)
+  await db.exec(WORKAID_REFERRAL_SCOPE_SQL)
   for (const t of ['audit_logs', 'grievances', 'claims', 'grievance_case_access_assignments', 'documents', 'payments']) {
     await db.exec(`SELECT ue_create_direct_org_rls_policy('${t}')`)
   }

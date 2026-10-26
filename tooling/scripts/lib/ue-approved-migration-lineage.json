@@ -349,6 +349,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Stores a proposed consent text until a different executive adopts it. Does not insert approved wording. Has not been applied to a native or live database."
+      },
+      {
+        "tag": "0037_workaid_referral_scope",
+        "sha256": "521c8f96d3bbe8872ef1a639ab2d4e4de3a2d407a611c1b0bdadec03ed45b603",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Adds immutable referred_categories on ue_authority_workaid_matters. New referrals must record the categories actually referred. Does not copy a broader consent. Has not been applied to a native or live database."
       }
     ]
   }

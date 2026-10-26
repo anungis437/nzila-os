@@ -267,6 +267,13 @@
       "when": 1758930000000,
       "tag": "0036_workaid_consent_wording_proposals",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1758940000000,
+      "tag": "0037_workaid_referral_scope",
+      "breakpoints": true
     }
   ]
 }

@@ -159,8 +159,8 @@ describe.skipIf(!URL)('union-side WorkAid disclosure on the combined deployed sc
     const unionFile = await addDoc(c, U.steward)
     await expect(k.as(U.member)((t) => authoriseWorkAidDocument(t, k.deps, { organizationId: ORG, memberUserId: U.member, matterId, documentId: unionFile }))).rejects.toThrow(/DOCUMENT_NOT_SHAREABLE/)
 
-    await expect(k.as(rep)((t) => createWorkAidShare(t, k.deps, { organizationId: ORG, actorUserId: rep, matterId, categories: ['case_timeline'] }))).rejects.toThrow(/CONSENT_SCOPE_EXCEEDED/)
-    const ids = await k.as(rep)((t) => createWorkAidShare(t, k.deps, { organizationId: ORG, actorUserId: rep, matterId, categories: ['case_summary'], documentAuthorisationIds: [authId] }))
+    await expect(k.as(rep)((t) => createWorkAidShare(t, k.deps, { organizationId: ORG, actorUserId: rep, matterId, categories: ['case_timeline'], confirm: true }))).rejects.toThrow(/CONSENT_SCOPE_EXCEEDED/)
+    const ids = await k.as(rep)((t) => createWorkAidShare(t, k.deps, { organizationId: ORG, actorUserId: rep, matterId, categories: ['case_summary'], documentAuthorisationIds: [authId], confirm: true }))
     expect(ids).toHaveLength(2)
 
     // Revocation by the member cascades atomically; nobody else may revoke.
@@ -200,10 +200,10 @@ describe.skipIf(!URL)('union-side WorkAid disclosure on the combined deployed sc
 
     s = await snapshot()
     await failAudit('share_create')
-    await expect(k.as(rep)((t) => createWorkAidShare(t, k.deps, { organizationId: ORG, actorUserId: rep, matterId, categories: ['case_summary'], documentAuthorisationIds: [authId] }))).rejects.toThrow(/injected audit fault/)
+    await expect(k.as(rep)((t) => createWorkAidShare(t, k.deps, { organizationId: ORG, actorUserId: rep, matterId, categories: ['case_summary'], documentAuthorisationIds: [authId], confirm: true }))).rejects.toThrow(/injected audit fault/)
     await clearFaults()
     expect(await snapshot()).toEqual(s)
-    await k.as(rep)((t) => createWorkAidShare(t, k.deps, { organizationId: ORG, actorUserId: rep, matterId, categories: ['case_summary'], documentAuthorisationIds: [authId] }))
+    await k.as(rep)((t) => createWorkAidShare(t, k.deps, { organizationId: ORG, actorUserId: rep, matterId, categories: ['case_summary'], documentAuthorisationIds: [authId], confirm: true }))
 
     // A half-applied revocation must not cut anything: the consent, authorisations and shares all stay live.
     s = await snapshot()
