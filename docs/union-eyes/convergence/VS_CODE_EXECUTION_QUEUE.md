@@ -143,4 +143,6 @@ Member review intake is source commit `08f20236c540b556e022d7b430ba0cbf3e8470e2`
 
 When referral provenance is unavailable, the recorded-referral listing may still use consent categories for the visibility decision and returns no inferred categories. Confirm that a malformed record does not reveal the referral to a principal who would not be allowed to see the recorded scope. Native release against withdrawal, recusal, mandate revocation and tenant crossover stays `READY_FOR_VS_EXECUTION`.
 
+Gate 0 is the completion matrix `docs/union-eyes/convergence/register/ue-pre-vs-engineering-completion.json` and the checker `tooling/scripts/lib/ue-gate0-scope-lock.mjs` at `3f452bf7cbd9e92e4f8910e8b3f7c51521b35bf0`. It is not a native suite. Do not start Docker for it. Do not mark any native or browser qualification PASS from this inventory. `UE-CONV-H-007` stays one census workstream of 231.
+
 `CURSOR_IMPLEMENTATION_COMPLETE` is false. `VS_NATIVE_VALIDATION_COMPLETE`, `CREDENTIALED_PERSONA_ACCEPTANCE_COMPLETE`, `INSTITUTIONAL_POLICY_ADOPTED`, `STAGING_RELEASE_AUTHORIZED` and `PRODUCTION_RELEASE_AUTHORIZED` are false.
