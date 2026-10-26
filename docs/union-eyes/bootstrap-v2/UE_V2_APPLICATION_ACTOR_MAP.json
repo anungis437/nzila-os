@@ -1638,7 +1638,7 @@
     "apps/union-eyes/app/api/governance/elections/sessions/[id]/route.ts": "b8e4e488dab4a4237a6cc938946fc5864b5339e4eb8cab86150d8c6d25b90bb3",
     "apps/union-eyes/app/api/governance/elections/sessions/[id]/results/route.ts": "82cc437236a339cd24b7c43c6ad46a94a22150aa3f5c123e17108da3d2ed2b56",
     "apps/union-eyes/lib/services/voting-crypto-service.ts": "3b99fdd43a7c2d94c83eca0fa75e26b8985c93feac1e91a134eb1f6d169a5b7f",
-    "apps/union-eyes/lib/services/voting-service.ts": "83d0130cf4ac873ac240985bb23a2fe49ff20dfa8b23bb6201932dfccb06d210",
+    "apps/union-eyes/lib/services/voting-service.ts": "052dac5b8e63c4a183af647121caaab1fe50209464c8753de63c2424193c5ced",
     "apps/union-eyes/app/api/governance/elections/sessions/[id]/vote/route.ts": "5309afcb246718b58f662dcbb739bc4e6fd6e4ad2c184fcc4d076edc7fea8007",
     "apps/union-eyes/app/api/governance/events/route.ts": "e0a8e3d3440f76fa27b251b2b926a03d73f5b1d6540303377e6ff4c7c93a1503",
     "apps/union-eyes/app/api/governance/golden-share/route.ts": "3fb8d2f42961b841fc58d014aa844e1999834f92e52b3ebfa5dc0fb54644847f",

@@ -173,6 +173,11 @@ describe('VotingService', () => {
     mocks.mockSelect.mockReturnValue(chain([]));
   });
 
+  const draftSession = [{ ...baseSession, status: 'draft' }];
+  function queueSelects(...rows: unknown[][]) {
+    for (const row of rows) mocks.mockSelect.mockReturnValueOnce(chain(row));
+  }
+
   // ── getVotingSessionById ──────────────────────────────────────────
   describe('getVotingSessionById', () => {
     it('returns null when not found', async () => {
@@ -295,20 +300,29 @@ describe('VotingService', () => {
   // ── addVotingOption ───────────────────────────────────────────────
   describe('addVotingOption', () => {
     it('inserts and returns option', async () => {
+      queueSelects(draftSession);
       mocks.mockInsertReturning.mockResolvedValue([baseOption]);
-      const r = await addVotingOption(baseOption as never);
+      const r = await addVotingOption(baseOption as never, 'org-1');
       expect(r.id).toBe('opt-1');
     });
 
     it('throws on error', async () => {
+      queueSelects(draftSession);
       mocks.mockInsertReturning.mockRejectedValue(new Error('DB'));
-      await expect(addVotingOption({} as never)).rejects.toThrow('Failed to add voting option');
+      await expect(addVotingOption(baseOption as never, 'org-1')).rejects.toThrow('Failed to add voting option');
+    });
+
+    it('refuses an opened session and does not insert', async () => {
+      queueSelects([baseSession]);
+      await expect(addVotingOption(baseOption as never, 'org-1')).rejects.toThrow('cannot change once the session has opened');
+      expect(mocks.mockInsertReturning).not.toHaveBeenCalled();
     });
   });
 
   // ── updateVotingOption ────────────────────────────────────────────
   describe('updateVotingOption', () => {
     it('updates and returns option', async () => {
+      queueSelects([{ id: 'opt-1', sessionId: 'session-1' }], [], draftSession);
       mocks.mockUpdateReturning.mockResolvedValue([{ ...baseOption, text: 'No' }]);
       const r = await updateVotingOption('opt-1', 'org-1', { text: 'No' } as never);
       expect(r?.text).toBe('No');
@@ -320,48 +334,79 @@ describe('VotingService', () => {
     });
 
     it('throws on error', async () => {
+      queueSelects([{ id: 'opt-1', sessionId: 'session-1' }], [], draftSession);
       mocks.mockUpdateReturning.mockRejectedValue(new Error('DB'));
       await expect(updateVotingOption('x', 'org-1', {} as never)).rejects.toThrow('Failed to update voting option');
+    });
+
+    it('refuses an opened session and does not write', async () => {
+      queueSelects([{ id: 'opt-1', sessionId: 'session-1' }], [], [baseSession]);
+      await expect(updateVotingOption('opt-1', 'org-1', { text: 'No' } as never)).rejects.toThrow('cannot change once the session has opened');
+      expect(mocks.mockUpdateReturning).not.toHaveBeenCalled();
     });
   });
 
   // ── deleteVotingOption ────────────────────────────────────────────
   describe('deleteVotingOption', () => {
     it('deletes and returns true', async () => {
+      queueSelects([{ id: 'opt-1', sessionId: 'session-1' }], [], draftSession);
       expect(await deleteVotingOption('opt-1', 'org-1')).toBe(true);
     });
 
     it('throws on error', async () => {
+      queueSelects([{ id: 'opt-1', sessionId: 'session-1' }], [], draftSession);
       mocks.mockDeleteWhere.mockRejectedValue(new Error('DB'));
       await expect(deleteVotingOption('opt-1', 'org-1')).rejects.toThrow('Failed to delete voting option');
+    });
+
+    it('refuses an opened session and does not delete', async () => {
+      queueSelects([{ id: 'opt-1', sessionId: 'session-1' }], [], [baseSession]);
+      await expect(deleteVotingOption('opt-1', 'org-1')).rejects.toThrow('cannot change once the session has opened');
+      expect(mocks.mockDeleteWhere).not.toHaveBeenCalled();
     });
   });
 
   // ── addVoterEligibility ───────────────────────────────────────────
   describe('addVoterEligibility', () => {
     it('inserts and returns eligibility', async () => {
+      queueSelects(draftSession);
       mocks.mockInsertReturning.mockResolvedValue([baseEligibility]);
-      const r = await addVoterEligibility(baseEligibility as never);
+      const r = await addVoterEligibility(baseEligibility as never, 'org-1');
       expect(r.memberId).toBe('member-1');
     });
 
     it('throws on error', async () => {
+      queueSelects(draftSession);
       mocks.mockInsertReturning.mockRejectedValue(new Error('DB'));
-      await expect(addVoterEligibility(baseEligibility as never)).rejects.toThrow('Failed to add voter eligibility');
+      await expect(addVoterEligibility(baseEligibility as never, 'org-1')).rejects.toThrow('Failed to add voter eligibility');
+    });
+
+    it('refuses an opened session and does not insert', async () => {
+      queueSelects([baseSession]);
+      await expect(addVoterEligibility(baseEligibility as never, 'org-1')).rejects.toThrow('cannot change once the session has opened');
+      expect(mocks.mockInsertReturning).not.toHaveBeenCalled();
     });
   });
 
   // ── bulkAddVoterEligibility ───────────────────────────────────────
   describe('bulkAddVoterEligibility', () => {
     it('inserts multiple and returns count', async () => {
+      queueSelects(draftSession);
       mocks.mockInsertReturning.mockResolvedValue([{ id: '1' }, { id: '2' }, { id: '3' }]);
-      const count = await bulkAddVoterEligibility('session-1', ['m1', 'm2', 'm3']);
+      const count = await bulkAddVoterEligibility('session-1', ['m1', 'm2', 'm3'], 'org-1');
       expect(count).toBe(3);
     });
 
     it('throws on error', async () => {
+      queueSelects(draftSession);
       mocks.mockInsertReturning.mockRejectedValue(new Error('DB'));
-      await expect(bulkAddVoterEligibility('s', ['m'])).rejects.toThrow('Failed to bulk add');
+      await expect(bulkAddVoterEligibility('session-1', ['m'], 'org-1')).rejects.toThrow('Failed to bulk add');
+    });
+
+    it('refuses an opened session and does not insert', async () => {
+      queueSelects([baseSession]);
+      await expect(bulkAddVoterEligibility('session-1', ['m'], 'org-1')).rejects.toThrow('cannot change once the session has opened');
+      expect(mocks.mockInsertReturning).not.toHaveBeenCalled();
     });
   });
 
@@ -386,6 +431,7 @@ describe('VotingService', () => {
   // ── updateVoterEligibility ────────────────────────────────────────
   describe('updateVoterEligibility', () => {
     it('updates and returns record', async () => {
+      queueSelects([baseEligibility], [], draftSession);
       mocks.mockUpdateReturning.mockResolvedValue([{ ...baseEligibility, isEligible: false }]);
       const r = await updateVoterEligibility('elig-1', 'org-1', { isEligible: false } as never);
       expect(r?.isEligible).toBe(false);
@@ -397,8 +443,15 @@ describe('VotingService', () => {
     });
 
     it('throws on error', async () => {
+      queueSelects([baseEligibility], [], draftSession);
       mocks.mockUpdateReturning.mockRejectedValue(new Error('DB'));
       await expect(updateVoterEligibility('x', 'org-1', {} as never)).rejects.toThrow('Failed to update voter eligibility');
+    });
+
+    it('refuses an opened session and does not write', async () => {
+      queueSelects([baseEligibility], [], [baseSession]);
+      await expect(updateVoterEligibility('elig-1', 'org-1', { isEligible: false } as never)).rejects.toThrow('cannot change once the session has opened');
+      expect(mocks.mockUpdateReturning).not.toHaveBeenCalled();
     });
   });
 
@@ -783,33 +836,70 @@ describe('VotingService', () => {
   // ── setProxyVoter ─────────────────────────────────────────────────
   describe('setProxyVoter', () => {
     it('sets proxy', async () => {
+      queueSelects(
+        [baseEligibility],
+        [],
+        draftSession,
+        [{ ...baseEligibility, memberId: 'member-2', isEligible: true }],
+        [],
+        [baseEligibility],
+        [],
+        draftSession,
+      );
       mocks.mockUpdateReturning.mockResolvedValue([{ ...baseEligibility, delegatedTo: 'member-2' }]);
       const r = await setProxyVoter('session-1', 'member-1', 'member-2', 'org-1');
       expect(r?.delegatedTo).toBe('member-2');
     });
 
-    it('throws when not eligible', async () => {
-      mocks.mockEligibilityFindFirst.mockResolvedValue(null);
-      await expect(setProxyVoter('s', 'm', 'p', 'org-1')).rejects.toThrow('Failed to set proxy voter');
+    it('returns null when the voter is not in the organization', async () => {
+      queueSelects([]);
+      expect(await setProxyVoter('s', 'm', 'p', 'org-1')).toBeNull();
+      expect(mocks.mockUpdateReturning).not.toHaveBeenCalled();
     });
 
     it('throws when cannot delegate', async () => {
-      mocks.mockEligibilityFindFirst.mockResolvedValue({ ...baseEligibility, canDelegate: false });
-      await expect(setProxyVoter('s', 'm', 'p', 'org-1')).rejects.toThrow('Failed to set proxy voter');
+      queueSelects([{ ...baseEligibility, canDelegate: false }], [], draftSession);
+      await expect(setProxyVoter('s', 'm', 'p', 'org-1')).rejects.toThrow('Voter cannot delegate');
+      expect(mocks.mockUpdateReturning).not.toHaveBeenCalled();
+    });
+
+    it('refuses a voter holding their own proxy', async () => {
+      queueSelects([baseEligibility], [], draftSession);
+      await expect(setProxyVoter('session-1', 'member-1', 'member-1', 'org-1')).rejects.toThrow('own proxy');
+      expect(mocks.mockUpdateReturning).not.toHaveBeenCalled();
+    });
+
+    it('refuses a proxy who is not eligible in the session', async () => {
+      queueSelects([baseEligibility], [], draftSession, [{ ...baseEligibility, memberId: 'member-2', isEligible: false }], []);
+      await expect(setProxyVoter('session-1', 'member-1', 'member-2', 'org-1')).rejects.toThrow('not an eligible voter');
+      expect(mocks.mockUpdateReturning).not.toHaveBeenCalled();
+    });
+
+    it('refuses an opened session and does not write', async () => {
+      queueSelects([baseEligibility], [], [baseSession]);
+      await expect(setProxyVoter('session-1', 'member-1', 'member-2', 'org-1')).rejects.toThrow('cannot change once the session has opened');
+      expect(mocks.mockUpdateReturning).not.toHaveBeenCalled();
     });
   });
 
   // ── removeProxyVoter ──────────────────────────────────────────────
   describe('removeProxyVoter', () => {
     it('removes proxy', async () => {
+      queueSelects([baseEligibility], [], draftSession, [baseEligibility], [], draftSession);
       mocks.mockUpdateReturning.mockResolvedValue([{ ...baseEligibility, delegatedTo: null }]);
       const r = await removeProxyVoter('session-1', 'member-1', 'org-1');
       expect(r?.delegatedTo).toBeNull();
     });
 
-    it('throws when not found', async () => {
-      mocks.mockEligibilityFindFirst.mockResolvedValue(null);
-      await expect(removeProxyVoter('s', 'm', 'org-1')).rejects.toThrow('Failed to remove proxy voter');
+    it('returns null when the voter is not in the organization', async () => {
+      queueSelects([]);
+      expect(await removeProxyVoter('s', 'm', 'org-1')).toBeNull();
+    });
+
+    it('refuses an opened session and does not write', async () => {
+      queueSelects([baseEligibility], [], [baseSession]);
+      await expect(removeProxyVoter('session-1', 'member-1', 'org-1')).rejects.toThrow('cannot change once the session has opened');
+      expect(mocks.mockUpdateReturning).not.toHaveBeenCalled();
     });
   });
 

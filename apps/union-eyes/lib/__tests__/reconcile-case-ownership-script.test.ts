@@ -17,8 +17,22 @@ describe('reconcile-case-ownership script', () => {
     expect(parseArguments(['--organization=not-a-uuid'])).toEqual({ error: expect.stringContaining('--organization') })
     expect(parseArguments([`--organization=${ORG}`, '--limit=0'])).toEqual({ error: expect.stringContaining('--limit') })
     expect(parseArguments([`--organization=${ORG}`, '--limit=5001'])).toEqual({ error: expect.stringContaining('--limit') })
-    expect(parseArguments([`--organization=${ORG}`, '--limit=25', '--json'])).toEqual({ organizationId: ORG, limit: 25, json: true })
-    expect(parseArguments([`--organization=${ORG}`])).toEqual({ organizationId: ORG, limit: undefined, json: false })
+    expect(parseArguments([`--organization=${ORG}`, '--limit=25', '--json'])).toEqual({ organizationId: ORG, limit: 25, json: true, execute: false })
+    expect(parseArguments([`--organization=${ORG}`])).toEqual({ organizationId: ORG, limit: undefined, json: false, execute: false })
+  })
+
+  it('refuses to execute without an issuer, an approved plan hash and a decision reference', () => {
+    const hash = 'a'.repeat(64)
+    expect(parseArguments([`--organization=${ORG}`, '--execute'])).toEqual({ error: expect.stringContaining('--issuer') })
+    expect(parseArguments([`--organization=${ORG}`, '--execute', `--issuer=${ORG}`, `--approved-plan-hash=${hash}`])).toEqual({ error: expect.stringContaining('--decision-reference') })
+    expect(parseArguments([`--organization=${ORG}`, '--execute', `--issuer=${ORG}`, '--approved-plan-hash=short', '--decision-reference=minute 12'])).toEqual({ error: expect.stringContaining('--approved-plan-hash') })
+    expect(parseArguments([
+      `--organization=${ORG}`,
+      '--execute',
+      `--issuer=${ORG}`,
+      `--approved-plan-hash=${hash}`,
+      '--decision-reference=executive minute 12',
+    ])).toMatchObject({ execute: true, issuerUserId: ORG, approvedPlanHash: hash, decisionReference: 'executive minute 12' })
   })
 
   it('exits 1 on any drift, including an eligible backfill candidate, because a legacy owner is not authority', () => {
