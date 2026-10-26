@@ -51,23 +51,23 @@ Invitation items are source commit `215b21e6cc37276ba08d9f37c26bb7d504eff452`. T
 | Status | `READY_FOR_VS_EXECUTION` |
 | Risk | P0. Depends on `auth-native-pg16` only for environment order. The suite itself is independent. |
 | Register | `UE-CONV-I-002` |
-| Source | `b4dde796fbee63291d4d96896692ad869071dc2c` |
+| Source | `b5caa1a1abea738cc7589e6010e99c70bef2324b` |
 | Test | `apps/union-eyes/db/__tests__/message-lifecycle.postgres.test.ts` |
 | Command | `UE_AUTHORITY_COMBINED_URL=<admin-url-of-a-fresh-disposable-combined-database> pnpm exec vitest run apps/union-eyes/db/__tests__/message-lifecycle.postgres.test.ts` |
 | Environment | Fresh disposable combined schema: Django migrate, approved Drizzle bootstrap, platform `0013`, `0014`, `0025`, `0029` and `0030`, RLS `0020`, `0021` and `0024`. This file does not start Docker. |
-| Fixture | Same preparation as `thread-assignment.postgres.test.ts`. Do not seed a governance mandate. The administrator denial of a hold and of retention adoption is the contract. |
+| Fixture | Same preparation as `thread-assignment.postgres.test.ts`. Do not insert a governance mandate by SQL. The ceremony describe adopts the rules and issues two mandates through the store. Earlier tests still expect an administrator denial. |
 | Cleanup | Drop the database. If a fault test is killed, drop the audit fault trigger it installed. |
-| Success | Administrator, steward and foreign actors do not write a hold. An administrator receives `forbidden` from `adoptRetentionPolicy` for a valid period and `invalid` outside 1..36500, and those calls write no retention row. An admin-connection `hold_place` makes retention `legal_hold` without letting the member see the hold or letting the administrator read the thread. |
-| Denial | Skipped unless `UE_AUTHORITY_COMBINED_URL` is set. This file does not prove an allowed hold, an allowed retention adoption, or audit-fault rollback of either write. |
+| Success | Administrator, steward and foreign actors do not write a hold. An administrator receives `forbidden` from `adoptRetentionPolicy` for a valid period and `invalid` outside 1..36500. The ceremony describe then lets the issued mandate holder place and release a hold and adopt a 30-day policy. Revocation ends each power. An audit fault rolls the release and the second adoption back. |
+| Denial | Skipped unless `UE_AUTHORITY_COMBINED_URL` is set. Cursor ran `message-authority-issuance.pglite.test.ts` in process (4 passed). That run is not this proof. |
 | Evidence | `docs/union-eyes/convergence/evidence/message-lifecycle-combined.json` |
-| Failure | A throw instead of `forbidden` means the authority load aborted the transaction. An administrator `ok` means the role is still authority. |
-| Recovery | Drop the database. Apply `0029` through the platform journal. Do not edit `0013` and do not insert a mandate outside issuance. |
+| Failure | A throw instead of `forbidden` means the authority load aborted the transaction. An administrator `ok` means the role is still authority. A ceremony failure before any hold means issuance or platform `0029` and `0030` did not load. An audit fault that leaves `hold_release` or a second live policy means the write committed without its audit. |
+| Recovery | Drop the database. Apply `0029` and `0030` through the platform journal. Do not edit `0013` and do not insert a mandate outside issuance. |
 
 ## Next engineering action
 
 Legal hold is a kernel decision as of `6ce6e945406b693a948601aecadf99e27b6b09dc`. Retention read and adoption are kernel decisions as of `b4dde796fbee63291d4d96896692ad869071dc2c`. The scanner still labels both routes `THREAD_POLICY`. Do not edit the scanner. An administrator title is denied. The powers stay unconferred until a live governance-review rule names them. Platform `0029` and `0030` are UNQUALIFIED.
 
-The combined-schema lifecycle file does not prove an allowed hold, an allowed retention adoption, or audit-fault rollback of either successful write. The next Cursor slice seeds a governance-review mandate through issuance inside a skip-gated native test and restores those proofs. Do not mock the kernel.
+The in-process issuance proof is `apps/union-eyes/db/__tests__/message-authority-issuance.pglite.test.ts` at `b5caa1a1abea738cc7589e6010e99c70bef2324b`. Cursor ran it: 4 passed. The same ceremony is in `message-lifecycle.postgres.test.ts` and stays `READY_FOR_VS_EXECUTION`. Do not mock the kernel. Do not mark the combined file PASS from the in-process run.
 
 Message read, reply, assign and close still use thread participation. `staffActing` still uses `caseActionAllowed('note_add_internal')`. `external/grievances/[id]/documents/upload` remains `EXTERNAL_AUTHORITY`. Each still needs operative action-level authority. The route-coverage baseline's empty `kernelPending` does not change that.
 
