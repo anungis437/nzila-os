@@ -11,6 +11,7 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { loadRecovery } from './ue-gate0a-persona-recovery.mjs'
 import { PERSONAS, computePersonaSpecs, personaActionsFromSpecs, validatePersonaCompleteness } from './ue-gate0-persona-spec.mjs'
 import { UNDECIDED_OWNER, ownershipHash, validateRouteOwnership } from './ue-gate0-route-ownership.mjs'
 import { evaluateRule } from './ue-convergence-check.mjs'
@@ -168,6 +169,17 @@ function anchoredCapabilityIds(root, lock) {
   }
 }
 
+function anchoredPersonaFloor(root, recovery) {
+  const anchor = recovery?.universeFloorAnchor
+  if (!anchor?.commit) return null
+  try {
+    const matrix = JSON.parse(git(root, ['show', `${anchor.commit}:${anchor.path ?? FILES.matrix}`]))
+    return Object.fromEntries(matrix.personaCompleteness.map((entry) => [entry.persona, entry.universe]))
+  } catch {
+    return null
+  }
+}
+
 function currentRatchetFailures(root) {
   const ratchets = JSON.parse(readFileSync(join(root, 'docs/union-eyes/convergence/register/ue-convergence-ratchets.json'), 'utf8'))
   const failures = []
@@ -210,6 +222,7 @@ export function loadContext(root = ROOT) {
       externalGate: entry.externalGate ?? null,
     })),
     personaSpecs,
+    personaFloor: anchoredPersonaFloor(root, loadRecovery(root)),
     personaActions: personaActionsFromSpecs(personaSpecs),
     routes: manifest.routes,
     routeSummaryCount: manifest.summary.routes,
@@ -355,7 +368,9 @@ export function validateGate0(matrix, ctx = {}) {
       problems.push(`persona action ${action.actionId} is recorded as ${mapping.definition} but its source defines it as ${action.definition}`)
     }
   }
-  const personaCheck = validatePersonaCompleteness(matrix, personaSpecs, byId)
+  const personaFloor = ctx.personaFloor === undefined ? base.personaFloor : ctx.personaFloor
+  if (!personaFloor) problems.push('the persona universe floor cannot be read from its anchor commit')
+  const personaCheck = validatePersonaCompleteness(matrix, personaSpecs, byId, personaFloor)
   problems.push(...personaCheck.problems)
 
   const liveHash = routeBaselineHash(routes)

@@ -175,7 +175,7 @@ test('unresolved Financial Officer specifications cannot be marked complete', ()
   const mapped = clone()
   mapped.personaActions.find((item) => item.actionId === 'F01').capabilityId = 'UE-CAP-D-003'
   mapped.capabilities.find((item) => item.id === 'UE-CAP-D-003').sourceStatus = 'SOURCE_IMPLEMENTED'
-  assert.ok(run(mapped).problems.some((problem) => /unspecified financial-officer action F01 maps to UE-CAP-D-003, which claims implementation/.test(problem)))
+  assert.ok(run(mapped).problems.some((problem) => /financial-officer action F01 has no individual definition and maps to UE-CAP-D-003, which claims implementation/.test(problem)))
 })
 
 test('an existing route with no capability owner fails', () => {

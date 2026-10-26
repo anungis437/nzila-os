@@ -15,6 +15,7 @@ import {
   routeBaselineHash,
 } from './ue-gate0-scope-lock.mjs'
 import { PERSONAS, SOURCE_FILES, UNRESOLVED_OWNER, personaActionsFromSpecs } from './ue-gate0-persona-spec.mjs'
+import { loadRecovery, RECOVERY_FILE } from './ue-gate0a-persona-recovery.mjs'
 import { ownershipHash } from './ue-gate0-route-ownership.mjs'
 import { buildOwnership, ownershipJson } from './ue-gate0-build-ownership.mjs'
 
@@ -300,7 +301,7 @@ const distinct = [
     nativeQualification: 'NOT_REQUIRED',
     browserQualification: 'NOT_REQUIRED',
     proof: [{ type: 'path', ref: 'docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md' }],
-    gap: 'F01–F28 and FJ01–FJ10 are cited. Individual outcomes are stated for F08, F09, F10, F11–F14, F17, F18, and F19 only. F01, F28, FJ01, and FJ10 appear as range endpoints. The other unnamed codes are not given titles in this repository.',
+    gap: 'F01–F28 and FJ01–FJ10 are cited. Individual statements exist for F08, F09, F10, and F19 only. F11–F14 and F17–F18 carry shared labels. The other unnamed codes are not given titles in this repository.',
   }),
   cap({
     id: 'UE-OMIT-REP-CANONICAL-ABSENT',
@@ -337,10 +338,10 @@ const distinct = [
 
 const byDistinct = (id) => distinct.find((item) => item.id === id)
 
-byDistinct('UE-OMIT-FINANCE-RANGE-UNSPECIFIED').gap = 'F01–F28 and FJ01–FJ10 form a 38-identifier universe in the financial-officer disposition. F08, F09, F10 and F19 each carry their own statement. F11–F14 and F17–F18 carry shared group labels only. The remaining 28 identifiers (F01–F07, F15, F16, F20–F28, FJ01–FJ10) are cited only as range members and have no title or outcome. No financial-officer canonical file exists in the repository. Gate 0 gives none of them a title.'
+byDistinct('UE-OMIT-FINANCE-RANGE-UNSPECIFIED').gap = 'F01–F28 and FJ01–FJ10 form a 38-identifier universe in the financial-officer disposition. Gate 0A searched all 526 refs and the repository history and recovered no Financial Officer canonical. Four identifiers (F08, F09, F10, F19) carry their own statement; F08 and F09 give a status statement and no domain title. Six (F11–F14, F17, F18) carry shared labels: four identifiers share three labels (budgets, expenses, vendors), so no pairing was made. Twenty-eight (F01–F07, F15, F16, F20–F28, FJ01–FJ10) are cited only as range members and the disposition says only that all other domains are NOT_PROVEN. Three further references have no identifier (seven navigation destinations of which three are named, organization scenarios and related acceptance topics). The separation of viewing, preparation, approval, payment execution, reconciliation, mandate administration, and audit is recorded as evidence in ue-gate0a-persona-source-recovery.json with no institutional requirement attached. Gate 0 gives none of the unspecified identifiers a title.'
 byDistinct('UE-OMIT-REP-CANONICAL-ABSENT').actor = 'Representative'
 byDistinct('UE-OMIT-REP-CANONICAL-ABSENT').businessOutcome = 'Lock the representative R01–R24 identifiers once the frozen UE-REPRESENTATIVE-CANONICAL-2.2 is in the repository.'
-byDistinct('UE-OMIT-REP-CANONICAL-ABSENT').gap = 'The Representative 2.2 disposition cites UE-REPRESENTATIVE-CANONICAL-2.2 (FROZEN), and that canonical file is not in the repository. The disposition gives 7 navigation destinations and a 25-row action proof matrix, and those 32 rows are mapped by source locator. Of R01–R24, 14 identifiers appear only as a status mention or range member without a title (R03–R06, R10, R16–R24), and 10 are not mentioned at all (R01, R02, R07–R09, R11–R15). Gate 0 gives none of the 24 a title.'
+byDistinct('UE-OMIT-REP-CANONICAL-ABSENT').gap = 'The Representative 2.2 disposition cites UE-REPRESENTATIVE-CANONICAL-2.2 (FROZEN). Gate 0A searched all 526 refs and the repository history and recovered no canonical. The disposition gives 7 navigation destinations and a 25-row action proof matrix, mapped by source locator (32 individually defined). The first version of that disposition (571784d58, replaced at a0e7753fd) carries titles for R01 identity/mandates, R02 daily workload, R09 member relationships, R13 evidence/records, R14 tasks/deadlines, R15 agreements and R18 WorkAid/specialists, so those 7 are individually defined (title only; no required behavior). R03–R08, R10–R12, R16, R17 and R19–R24 (17 identifiers) stay grouped only: R03–R06 share one parenthetical, R07/R08 share one label cell, R11/R12 share one label, and the rest carry a status and no label. R18 has conflicting statuses (BLOCKED in the first version, MISSING in the current one) and stays an unresolved conflict. Journeys A–G and the institutional scenarios have no identifier.'
 
 distinct.push(
   cap({
@@ -354,7 +355,7 @@ distinct.push(
     nativeQualification: 'NOT_REQUIRED',
     browserQualification: 'NOT_REQUIRED',
     proof: [{ type: 'path', ref: 'apps/union-eyes/lib/dashboard/role-experience.ts' }],
-    gap: 'No steward canonical, steward action-identifier matrix, or steward disposition exists in the repository. The only steward statements are the staff navigation floor in role-experience.ts (Knowledge & Guidance is hidden below steward) and the Representative 2.2 policy-level note that a steward is level 1. Gate 0 invents no steward action. The Steward persona cannot be accepted at Gate 10 until the frozen canonical is supplied.',
+    gap: 'No steward canonical, steward action-identifier matrix, or steward disposition exists in the repository or its history (Gate 0A searched 526 refs). Eight evidence items are recorded and none defines an action: the Representative 2.2 disposition describes one combined steward and staff experience and puts the steward at level 1, the repairs list what a steward must not hold or see, and the role exists in code. The reading that the Steward is the level-1 role inside Representative 2.2 is an unverified inference and needs an institutional decision. Gate 0 invents no steward action. The Steward persona cannot be accepted at Gate 10 until the frozen canonical is supplied or that decision is recorded.',
   }),
   cap({
     id: 'UE-OMIT-REP-CORRESPONDENCE',
@@ -526,8 +527,9 @@ const personaMap = {
   },
 }
 
+const recoveredCapability = Object.fromEntries((loadRecovery(ROOT)?.identifiers ?? []).filter((item) => item.capabilityId && item.persona === 'representative').map((item) => [item.id, item.capabilityId]))
 const personaActions = personaActionsFromSpecs(personaSpecs).map((action) => {
-  const explicit = personaMap[action.source]?.[action.actionId]
+  const explicit = personaMap[action.source]?.[action.actionId] ?? (action.definition === 'INDIVIDUAL' ? recoveredCapability[action.actionId] : undefined)
   const fallback = action.persona === 'financial-officer' ? UNRESOLVED_OWNER['financial-officer'] : action.persona === 'representative' && /^R\d{2}$/.test(action.actionId) ? UNRESOLVED_OWNER.representative : undefined
   const capabilityId = explicit ?? fallback
   if (!capabilityId) throw new Error(`no mapping for ${action.persona} ${action.actionId}`)
@@ -546,6 +548,9 @@ const personaCompleteness = PERSONAS.map((persona) => {
     groupedOnly: spec.groupedOnly,
     unspecified: spec.unspecified,
     resolved: spec.resolved,
+    definitionSources: spec.definitionSources,
+    conflicts: spec.conflicts,
+    unidentifiedReferences: spec.unidentifiedReferences,
     trackingCapability: UNRESOLVED_OWNER[persona] ?? null,
   }
 })
@@ -671,6 +676,7 @@ const matrix = {
   capabilities: all,
   personaActions,
   personaCompleteness,
+  personaRecovery: { file: RECOVERY_FILE, kind: 'EVIDENCE_CONSOLIDATION' },
   routeOwnership: { file: FILES.ownership, entriesHash, operations: ownership.entries.length },
   outOfScope: [
     {

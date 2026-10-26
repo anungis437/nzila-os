@@ -8,6 +8,7 @@
 import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { applyRecovery, loadRecovery, verifyRecovery } from './ue-gate0a-persona-recovery.mjs'
 
 export const PERSONAS = [
   'member',
@@ -162,15 +163,25 @@ export function computePersonaSpecs(root, options = {}) {
     representative: dispositionOrCanonical(/representative[^/]*canonical|canonical[^/]*representative/i),
     'financial-officer': dispositionOrCanonical(/financial[^/]*canonical|canonical[^/]*financial/i),
   }
+  const extractedByPersona = {}
+  for (const persona of PERSONAS) {
+    const file = SOURCE_FILES[persona] ?? null
+    extractedByPersona[persona] = { universe: [], individuallyDefined: [], groupedOnly: [], unspecified: [] }
+    if (file && EXTRACTORS[persona]) extractedByPersona[persona] = EXTRACTORS[persona](read(file))
+  }
+  const recovery = options.recovery === undefined ? loadRecovery(root) : options.recovery
+  const verification = verifyRecovery(recovery, extractedByPersona, { root, show: options.recoveryShow, blobOf: options.recoveryBlobOf })
   const specs = {}
   for (const persona of PERSONAS) {
     const file = SOURCE_FILES[persona] ?? null
-    let extracted = { universe: [], individuallyDefined: [], groupedOnly: [], unspecified: [] }
-    if (file && EXTRACTORS[persona]) extracted = EXTRACTORS[persona](read(file))
+    const applied = applyRecovery(persona, extractedByPersona[persona], verification)
+    const extracted = { universe: extractedByPersona[persona].universe, individuallyDefined: applied.individuallyDefined, groupedOnly: applied.groupedOnly, unspecified: applied.unspecified }
     const canonicalFiles = canonicalProbes[persona] ?? null
     const canonicalFileFound = canonicalFiles ? canonicalFiles.length > 0 : true
     const requiresCanonical = persona in UNRESOLVED_OWNER
-    const complete = extracted.universe.length > 0 && extracted.groupedOnly.length === 0 && extracted.unspecified.length === 0
+    const conflicts = verification.conflicts.filter((item) => item.persona === persona).map((item) => item.id)
+    const unidentifiedReferences = verification.unidentified.filter((item) => item.persona === persona).map((item) => item.label)
+    const complete = extracted.universe.length > 0 && extracted.groupedOnly.length === 0 && extracted.unspecified.length === 0 && conflicts.length === 0 && unidentifiedReferences.length === 0
     const resolved = requiresCanonical ? complete && canonicalFileFound : complete
     specs[persona] = {
       persona,
@@ -179,9 +190,15 @@ export function computePersonaSpecs(root, options = {}) {
       canonicalFileFound,
       canonicalFiles: canonicalFiles ?? [],
       ...extracted,
+      definitionSources: applied.definitionSources,
+      conflicts,
+      unidentifiedReferences,
+      groupLabels: verification.groupLabels.filter((item) => item.persona === persona),
+      stewardEvidenceCount: persona === 'steward' ? verification.steward.evidenceCount : 0,
       resolved,
     }
   }
+  Object.defineProperty(specs, 'recovery', { value: { problems: verification.problems, sources: verification.sources, steward: verification.steward }, enumerable: false })
   return specs
 }
 
@@ -203,8 +220,8 @@ const sameSet = (left, right) => {
   return a.length === b.length && a.every((item, index) => item === b[index])
 }
 
-export function validatePersonaCompleteness(matrix, specs, capabilityById) {
-  const problems = []
+export function validatePersonaCompleteness(matrix, specs, capabilityById, floor = null) {
+  const problems = [...(specs.recovery?.problems ?? [])]
   const entries = Array.isArray(matrix?.personaCompleteness) ? matrix.personaCompleteness : []
   const byPersona = new Map()
   for (const entry of entries) {
@@ -222,6 +239,17 @@ export function validatePersonaCompleteness(matrix, specs, capabilityById) {
     for (const field of ['universe', 'individuallyDefined', 'groupedOnly', 'unspecified']) {
       if (!sameSet(entry[field], spec[field])) problems.push(`personaCompleteness for ${persona} does not match its source (${field})`)
     }
+    if (!sameSet(entry.conflicts, spec.conflicts)) problems.push(`personaCompleteness for ${persona} does not record the source conflicts (${(spec.conflicts ?? []).join(', ') || 'none'})`)
+    if (!sameSet(entry.unidentifiedReferences, spec.unidentifiedReferences)) problems.push(`personaCompleteness for ${persona} does not record the references that have no identifier`)
+    if (!sameSet(Object.keys(entry.definitionSources ?? {}), Object.keys(spec.definitionSources ?? {}))) problems.push(`personaCompleteness for ${persona} does not match the recovered definition sources`)
+    for (const [id, source] of Object.entries(spec.definitionSources ?? {})) {
+      const recorded = entry.definitionSources?.[id]
+      if (recorded && (recorded.commit !== source.commit || recorded.class !== source.class || recorded.title !== source.title)) problems.push(`personaCompleteness for ${persona} misreports the recovered source of ${id}`)
+    }
+    for (const id of floor?.[persona] ?? []) {
+      if (!spec.universe.includes(id)) problems.push(`${persona} action ${id} disappeared from the previously recorded universe`)
+      if (!(entry.universe ?? []).includes(id)) problems.push(`${persona} action ${id} is missing from the matrix universe but was previously recorded`)
+    }
     if (entry.canonicalFileFound !== spec.canonicalFileFound) problems.push(`personaCompleteness for ${persona} misreports whether a canonical file exists`)
     if (entry.resolved === true && !spec.resolved) {
       problems.push(`${persona} is marked resolved while its source specifications are unresolved`)
@@ -233,12 +261,12 @@ export function validatePersonaCompleteness(matrix, specs, capabilityById) {
       if (!capability) problems.push(`unresolved persona ${persona} has no tracking capability ${owner}`)
       else if (capability.sourceStatus !== 'SOURCE_UNSPECIFIED') problems.push(`${owner} must stay SOURCE_UNSPECIFIED while ${persona} specifications are unresolved`)
     }
-    for (const actionId of spec.unspecified) {
+    for (const actionId of [...spec.unspecified, ...spec.groupedOnly]) {
       const mapping = mappings.get(`${spec.sourceFile}|${actionId}`)
       const capability = mapping ? capabilityById.get(mapping.capabilityId) : null
       if (!capability) continue
       if (['SOURCE_IMPLEMENTED', 'SOURCE_VERIFIED', 'NATIVE_PENDING'].includes(capability.sourceStatus)) {
-        problems.push(`unspecified ${persona} action ${actionId} maps to ${capability.id}, which claims implementation`)
+        problems.push(`${persona} action ${actionId} has no individual definition and maps to ${capability.id}, which claims implementation`)
       }
     }
   }
@@ -254,6 +282,8 @@ export function validatePersonaCompleteness(matrix, specs, capabilityById) {
       individuallyDefined: spec.individuallyDefined.length,
       groupedOnly: spec.groupedOnly.length,
       unspecified: spec.unspecified.length,
+      sourceConflicts: spec.conflicts.length,
+      unidentifiedReferences: spec.unidentifiedReferences.length,
     })
   }
   return { problems, blockers }
