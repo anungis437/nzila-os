@@ -6,7 +6,7 @@ Machine-readable copy: `docs/union-eyes/convergence/VS_CODE_EXECUTION_QUEUE.json
 
 Preserved commit: `960a88481aa1f5a9db2ddfaa6f3da510b743a1bc`. Pull request: #1014. Branch: `agents/ue-cursor-final-closure`. Base: `agents/ue-final-convergence`.
 
-Invitation items are source commit `215b21e6cc37276ba08d9f37c26bb7d504eff452`. Retention adoption is `b4dde796fbee63291d4d96896692ad869071dc2c`. The conversation-lifecycle suite file is source commit `c72d863d817facf62f672c688a99688eb6fb5b1a`. A skipped Vitest run is not evidence.
+Invitation items are source commit `215b21e6cc37276ba08d9f37c26bb7d504eff452`. Retention adoption is `b4dde796fbee63291d4d96896692ad869071dc2c`. The conversation-lifecycle suite file is source commit `c72d863d817facf62f672c688a99688eb6fb5b1a`. External grievance upload derivation is `31fc3e339750466b4661182f14476750db9dae68`. A skipped Vitest run is not evidence.
 
 ## auth-native-pg16
 
@@ -69,7 +69,11 @@ Legal hold is a kernel decision as of `6ce6e945406b693a948601aecadf99e27b6b09dc`
 
 The in-process issuance proof is `apps/union-eyes/db/__tests__/message-authority-issuance.pglite.test.ts` at `b5caa1a1abea738cc7589e6010e99c70bef2324b`. Cursor ran it: 4 passed. The same ceremony is in `message-lifecycle.postgres.test.ts` and stays `READY_FOR_VS_EXECUTION`. Do not mock the kernel. Do not mark the combined file PASS from the in-process run.
 
-Message read, reply, close, and archive are kernel decisions as of `c72d863d8`. `staffActing` reads the stored role through a conversation-assignee capacity and ignores the actor role label. An administrator title is denied. A legal-hold mandate does not confer a read. Canonical V2 calls `public.ue_conversation_assignee_authorized` and denies assignees when that function is absent. The scanner still labels the routes `THREAD_POLICY`. Do not edit the scanner. `external/grievances/[id]/documents/upload` remains `EXTERNAL_AUTHORITY`. The route-coverage baseline's empty `kernelPending` does not change that.
+Message read, reply, close, and archive are kernel decisions as of `c72d863d8`. `staffActing` reads the stored role through a conversation-assignee capacity and ignores the actor role label. An administrator title is denied. A legal-hold mandate does not confer a read. Canonical V2 calls `public.ue_conversation_assignee_authorized` and denies assignees when that function is absent. The scanner still labels the routes `THREAD_POLICY`. Do not edit the scanner.
+
+External grievance document upload copies the live matter grant as of `31fc3e339750466b4661182f14476750db9dae68`. The write re-reads that grant inside the transaction. `canView` and `canDownload` come from `canViewDocuments` and `canDownloadDocuments`. `canShare` stays false. `grantedBy` stays the issuer on the matter grant. A missing, inactive, expired, or self-issued grant returns 403 before any insert. Labels `privileged` and `highly_sensitive` are an invalid payload. The scanner still labels the route `EXTERNAL_AUTHORITY`. Do not edit the scanner. Do not send the upload through `case:upload_evidence`. An institution that stored the representative as `grantedBy` cannot upload until a different issuer is recorded.
+
+Next engineering work traces `CRUD_ATOMIC` and `ATOMIC_SERVICE` credits through the transaction that writes, without editing the scanner. Schema census stays 231 entries. The mutation-scope baseline stays 13. Finance issuance stays fail-closed. WorkAid, voting, `union_rep_id` reconciliation, and persona journeys remain open. The route-coverage baseline's empty `kernelPending` does not close those.
 
 Schema census on this branch is 231 entries. The mutation-scope baseline sums to 13. Checkpoint 5 recorded 351 and 276 before those later shrinks. Continue entries that still lack a machine-verifiable disposition. Do not regenerate either baseline to change the count.
 
