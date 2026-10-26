@@ -2,18 +2,24 @@
  * Writes the Gate 0 completion matrix from the inventories already in the repo.
  * The JSON file is the canonical artifact. This script does not change those inventories.
  */
-import { readFileSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import {
+  FILES,
   ROOT,
-  extractRegistryIds,
+  evidenceDeps,
+  executionEvidenceProblems,
   guardCounts,
   kernelBaselineHash,
   loadContext,
   routeBaselineHash,
 } from './ue-gate0-scope-lock.mjs'
+import { PERSONAS, SOURCE_FILES, UNRESOLVED_OWNER, personaActionsFromSpecs } from './ue-gate0-persona-spec.mjs'
+import { ownershipHash } from './ue-gate0-route-ownership.mjs'
+import { buildOwnership, ownershipJson } from './ue-gate0-build-ownership.mjs'
 
 const ctx = loadContext(ROOT)
+const personaSpecs = ctx.personaSpecs
 
 function cap(partial) {
   return {
@@ -329,10 +335,119 @@ const distinct = [
   }),
 ]
 
+const byDistinct = (id) => distinct.find((item) => item.id === id)
+
+byDistinct('UE-OMIT-FINANCE-RANGE-UNSPECIFIED').gap = 'F01–F28 and FJ01–FJ10 form a 38-identifier universe in the financial-officer disposition. F08, F09, F10 and F19 each carry their own statement. F11–F14 and F17–F18 carry shared group labels only. The remaining 28 identifiers (F01–F07, F15, F16, F20–F28, FJ01–FJ10) are cited only as range members and have no title or outcome. No financial-officer canonical file exists in the repository. Gate 0 gives none of them a title.'
+byDistinct('UE-OMIT-REP-CANONICAL-ABSENT').actor = 'Representative'
+byDistinct('UE-OMIT-REP-CANONICAL-ABSENT').businessOutcome = 'Lock the representative R01–R24 identifiers once the frozen UE-REPRESENTATIVE-CANONICAL-2.2 is in the repository.'
+byDistinct('UE-OMIT-REP-CANONICAL-ABSENT').gap = 'The Representative 2.2 disposition cites UE-REPRESENTATIVE-CANONICAL-2.2 (FROZEN), and that canonical file is not in the repository. The disposition gives 7 navigation destinations and a 25-row action proof matrix, and those 32 rows are mapped by source locator. Of R01–R24, 14 identifiers appear only as a status mention or range member without a title (R03–R06, R10, R16–R24), and 10 are not mentioned at all (R01, R02, R07–R09, R11–R15). Gate 0 gives none of the 24 a title.'
+
+distinct.push(
+  cap({
+    id: 'UE-OMIT-STEWARD-CANONICAL-ABSENT',
+    parentRegisterId: 'UE-CONV-I-001',
+    obligationKey: 'steward-canonical-action-ids',
+    primaryGate: 10,
+    actor: 'Steward',
+    businessOutcome: 'Lock steward action identifiers once a frozen steward canonical exists in the repository.',
+    sourceStatus: 'SOURCE_UNSPECIFIED',
+    nativeQualification: 'NOT_REQUIRED',
+    browserQualification: 'NOT_REQUIRED',
+    proof: [{ type: 'path', ref: 'apps/union-eyes/lib/dashboard/role-experience.ts' }],
+    gap: 'No steward canonical, steward action-identifier matrix, or steward disposition exists in the repository. The only steward statements are the staff navigation floor in role-experience.ts (Knowledge & Guidance is hidden below steward) and the Representative 2.2 policy-level note that a steward is level 1. Gate 0 invents no steward action. The Steward persona cannot be accepted at Gate 10 until the frozen canonical is supplied.',
+  }),
+  cap({
+    id: 'UE-OMIT-REP-CORRESPONDENCE',
+    parentRegisterId: 'UE-CONV-I-001',
+    obligationKey: 'representative-correspondence-lifecycle',
+    primaryGate: 11,
+    actor: 'Representative',
+    businessOutcome: 'Draft, approve, dispatch, and track correspondence as distinct governed states, with thread participants and matter grants.',
+    sourceStatus: 'PARTIAL',
+    navigationEntrypoint: '/dashboard/correspondence',
+    apiRoute: 'app/api/correspondence/route.ts',
+    sourceFiles: ['apps/union-eyes/app/api/correspondence/route.ts'],
+    proof: [{ type: 'path', ref: 'docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md' }],
+    gap: 'The Representative 2.2 disposition records list and draft as IMPLEMENTED-UNVERIFIED (organization required, fails closed), approve, dispatch, delivery, and receipt as not examined, and thread participants and matter grants as MISSING (no model). The correspondence routes are owned here and no approval or delivery state is claimed.',
+  }),
+  cap({
+    id: 'UE-OMIT-REP-TRANSITION-REASON-LEAK',
+    parentRegisterId: 'UE-CONV-I-001',
+    relatedRegisterIds: ['UE-CONV-K-010'],
+    obligationKey: 'representative-transition-reason-visibility',
+    primaryGate: 10,
+    dependencyGates: [4],
+    actor: 'Representative and the member on their own case',
+    businessOutcome: 'A member-visible status change records only the from and to status. The representative free-text reason is held in a staff-only record and absent from member-visible metadata.',
+    sourceStatus: 'NOT_IMPLEMENTED',
+    apiRoute: 'app/api/cases/[caseId]/transition/route.ts',
+    httpAction: 'PATCH',
+    kernelAction: 'case:transition',
+    proof: [{ type: 'path', ref: 'apps/union-eyes/app/api/cases/[caseId]/transition/route.ts' }],
+    negativeAndRecovery: 'The repair needs a test asserting that the member case-history projection excludes the reason.',
+    gap: 'Representative 2.2 finding P0-F2 is declared OPEN in that disposition. Gate 0 re-read the route at this revision: the member-visible status_change row (isInternal false, visibilityScope member) embeds the representative reason in its message and in its metadata. No second staff-only row is written. Gate 0 did not change the route.',
+    trackedDefects: [
+      {
+        id: 'P0-F2-TRANSITION-REASON-LEAK',
+        kind: 'SOURCE_DEFECT',
+        file: 'apps/union-eyes/app/api/cases/[caseId]/transition/route.ts',
+        sourceQuote: 'Status changed: ${fromStatus} → ${toDbStatus}. Reason: ${reason}',
+        description: 'The member-visible case-history row embeds the representative free-text reason in message and metadata (Representative 2.2 finding P0-F2).',
+        blocksGates: [10],
+      },
+    ],
+  }),
+  cap({
+    id: 'UE-OMIT-ROUTE-DOMAIN-SCOPE',
+    parentRegisterId: 'UE-CONV-K-007',
+    relatedRegisterIds: ['UE-CONV-K-008'],
+    obligationKey: 'route-domain-scope-decision',
+    primaryGate: 13,
+    actor: 'Programme owner (scope decision)',
+    businessOutcome: 'Give each route domain that no register entry, persona source, or capability-registry record names an explicit decision: adopt it under a named capability, retire it to HTTP 501, or record it as out of scope with evidence.',
+    sourceStatus: 'SOURCE_UNSPECIFIED',
+    nativeQualification: 'NOT_REQUIRED',
+    browserQualification: 'NOT_REQUIRED',
+    proof: [{ type: 'path', ref: 'docs/union-eyes/convergence/register/ue-route-coverage-manifest.json' }],
+    gap: 'The route-coverage manifest lists operations in domains that no register entry, frozen persona source, or capability-registry record names. Their operations carry disposition SCOPE_UNDECIDED in ue-route-capability-ownership.json, and their control owner stays the guard-class owner. Gate 0 does not guess a business owner from a route name.',
+  }),
+)
+
 // NOT_IMPLEMENTED finance domains cite a service in the narrative. The validator
 // rejects source files on NOT_IMPLEMENTED, so the retired route stays in the gap text only.
 const financeUnavailable = distinct.find((item) => item.id === 'UE-OMIT-FINANCE-UNAVAILABLE')
 financeUnavailable.service = null
+
+capabilities.find((item) => item.id === 'UE-CAP-B-001').trackedDefects = [
+  {
+    id: 'MUTABLE-REP-IDENTIFIER@case-ownership-backfill',
+    kind: 'RATCHET',
+    ratchetId: 'MUTABLE-REP-IDENTIFIER',
+    file: 'apps/union-eyes/lib/authority/store/case-ownership-backfill.ts',
+    description: 'The ownership backfill reads grievances.union_rep_id, a mutable identifier with no foreign key that is not an authority source. The global convergence checker reports an unexpected occurrence. The implementation and the allowlist are unchanged.',
+    blocksGates: [2],
+  },
+]
+capabilities.find((item) => item.id === 'UE-CAP-K-005').trackedDefects = [
+  {
+    id: 'DIRECT-MANDATORY-AUDIT-IMPORT@election-succession',
+    kind: 'RATCHET',
+    ratchetId: 'DIRECT-MANDATORY-AUDIT-IMPORT',
+    file: 'apps/union-eyes/lib/voting/election-succession.ts',
+    description: 'appendMandatoryAudit returns false outside Canonical V2 and leaves the caller unaudited. The global convergence checker reports an unexpected occurrence. The implementation and the allowlist are unchanged.',
+    blocksGates: [14, 12],
+  },
+]
+capabilities.find((item) => item.id === 'UE-CAP-G-001').trackedDefects = [
+  {
+    id: 'COUNSEL-PGLITE-SUITE-FAILS-AT-SETUP',
+    kind: 'TEST_SUITE',
+    suite: 'apps/union-eyes/db/__tests__/authority-kernel-counsel.pglite.test.ts',
+    file: 'apps/union-eyes/db/__tests__/authority-kernel-counsel.pglite.test.ts',
+    description: 'The suite fails in beforeAll with REFERRAL_SCOPE_REQUIRED, raised by the referral-scope trigger of platform migration 0037, so none of its 13 assertions run.',
+    blocksGates: [7],
+  },
+]
 
 const f003 = capabilities.find((item) => item.id === 'UE-CAP-F-003')
 f003.sourceFiles = []
@@ -357,59 +472,83 @@ try {
 }
 
 const all = [...capabilities, ...distinct]
-const personaSources = {
-  governance: 'docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md',
-  officer: 'apps/union-eyes/lib/executive/capability-matrix.ts',
-  senior: 'docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md',
-  member: 'docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md',
-  finance: 'docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md',
+
+const evidenceFile = JSON.parse(readFileSync(join(ROOT, FILES.evidence), 'utf8'))
+const deps = evidenceDeps(ROOT)
+for (const item of all) {
+  if (item.sourceStatus !== 'SOURCE_VERIFIED') continue
+  const problems = executionEvidenceProblems(item, evidenceFile, deps)
+  if (problems.length === 0) continue
+  const executed = evidenceFile.records.find((record) => record.capabilityId === item.id)
+  const failedSuite = executed?.files?.some((file) => file.suiteStatus !== 'passed' || file.failed > 0 || file.skipped > 0)
+  item.sourceStatus = failedSuite ? 'PARTIAL' : 'SOURCE_IMPLEMENTED'
+  item.lifecycleState = item.sourceStatus
+  item.gap = `${item.gap} Downgraded from SOURCE_VERIFIED: ${problems[0].replace(`${item.id} is SOURCE_VERIFIED without execution evidence: `, '')}.`
+}
+const personaMap = {
+  [SOURCE_FILES['governance-officer']]: {
+    G01: 'UE-CAP-I-001', G02: 'UE-CAP-I-001', G03: 'UE-CAP-I-001', G04: 'UE-CAP-I-001', G05: 'UE-CAP-I-001', G06: 'UE-CAP-I-001',
+    G07: 'UE-CAP-REVIEW-INTAKE', G08: 'UE-CAP-REVIEW-INTAKE', G09: 'UE-CAP-I-001', G10: 'UE-CAP-B-001', G11: 'UE-CAP-K-009', G12: 'UE-CAP-K-009',
+    G13: 'UE-CAP-I-001', G14: 'UE-OMIT-PRIVACY-RIGHTS', G15: 'UE-OMIT-PRIVACY-RIGHTS', G16: 'UE-OMIT-PRIVACY-RIGHTS', G17: 'UE-CAP-F-003',
+    G18: 'UE-CAP-F-002', G19: 'UE-CAP-G-002', G20: 'UE-CAP-I-001', G21: 'UE-CAP-D-003', G22: 'UE-CAP-K-003', G23: 'UE-CAP-K-005', G24: 'UE-CAP-I-001',
+    G25: 'UE-CAP-I-001', G26: 'UE-CAP-I-001', G27: 'UE-CAP-G-002', G28: 'UE-CAP-I-001', G29: 'UE-CAP-I-001', G30: 'UE-OMIT-A11Y-BILINGUAL',
+  },
+  [SOURCE_FILES['officer-executive']]: {
+    O01: 'UE-CAP-I-001', O02: 'UE-CAP-I-001', O03: 'UE-CAP-I-001', O04: 'UE-CAP-B-001', O05: 'UE-CAP-I-001', O06: 'UE-CAP-I-001', O07: 'UE-CAP-I-001',
+    O08: 'UE-CAP-I-001', O09: 'UE-CAP-K-009', O10: 'UE-CAP-I-001', O11: 'UE-CAP-I-001', O12: 'UE-CAP-I-001', O13: 'UE-OMIT-FINANCE-UNAVAILABLE',
+    O14: 'UE-CAP-D-002', O15: 'UE-CAP-D-001', O16: 'UE-CAP-I-001', O17: 'UE-CAP-I-001', O18: 'UE-CAP-I-001', O19: 'UE-CAP-G-002', O20: 'UE-CAP-I-001',
+    O21: 'UE-OMIT-PRIVACY-RIGHTS', O22: 'UE-CAP-I-001', O23: 'UE-CAP-I-001', O24: 'UE-CAP-I-001', O25: 'UE-CAP-I-001', O26: 'UE-OMIT-A11Y-BILINGUAL',
+  },
+  [SOURCE_FILES['senior-representative']]: {
+    SR01: 'UE-CAP-I-001', SR02: 'UE-CAP-I-001', SR03: 'UE-CAP-I-001', SR04: 'UE-CAP-B-001', SR05: 'UE-CAP-I-001', SR06: 'UE-CAP-I-001', SR07: 'UE-CAP-I-001',
+    SR08: 'UE-CAP-I-001', SR09: 'UE-CAP-I-001', SR10: 'UE-OMIT-DEADLINE-OVERDUE', SR11: 'UE-CAP-B-001', SR12: 'UE-CAP-F-002', SR13: 'UE-CAP-I-001',
+    SR14: 'UE-CAP-G-002', SR15: 'UE-CAP-I-001', SR16: 'UE-CAP-I-001', SR17: 'UE-CAP-I-001', SR18: 'UE-CAP-I-001', SR19: 'UE-CAP-I-001', SR20: 'UE-CAP-I-001',
+    SR21: 'UE-CAP-I-001', SR22: 'UE-OMIT-A11Y-BILINGUAL',
+  },
+  [SOURCE_FILES.member]: {
+    M01: 'UE-CAP-A-004', M02: 'UE-CAP-I-001', M03: 'UE-CAP-K-010', M04: 'UE-OMIT-M04-MEMBER-REQUESTS', M05: 'UE-CAP-I-002', M06: 'UE-CAP-F-002',
+    M07: 'UE-CAP-I-001', M08: 'UE-CAP-G-002', M09: 'UE-OMIT-PRIVACY-RIGHTS', M10: 'UE-OMIT-A11Y-BILINGUAL',
+  },
+  [SOURCE_FILES.representative]: {
+    'REP-NAV-1': 'UE-CAP-I-001', 'REP-NAV-2': 'UE-CAP-I-001', 'REP-NAV-3': 'UE-CAP-I-001', 'REP-NAV-4': 'UE-OMIT-REP-CORRESPONDENCE',
+    'REP-NAV-5': 'UE-CAP-F-002', 'REP-NAV-6': 'UE-OMIT-DEADLINE-OVERDUE', 'REP-NAV-7': 'UE-CAP-I-001',
+    'REP-ACT-01': 'UE-CAP-I-001', 'REP-ACT-02': 'UE-CAP-K-010', 'REP-ACT-03': 'UE-CAP-K-010', 'REP-ACT-04': 'UE-CAP-B-001', 'REP-ACT-05': 'UE-CAP-B-001',
+    'REP-ACT-06': 'UE-CAP-K-010', 'REP-ACT-07': 'UE-CAP-K-010', 'REP-ACT-08': 'UE-CAP-K-010', 'REP-ACT-09': 'UE-CAP-B-001', 'REP-ACT-10': 'UE-CAP-I-001',
+    'REP-ACT-11': 'UE-CAP-I-001', 'REP-ACT-12': 'UE-OMIT-REP-CORRESPONDENCE', 'REP-ACT-13': 'UE-OMIT-REP-CORRESPONDENCE', 'REP-ACT-14': 'UE-OMIT-REP-CORRESPONDENCE',
+    'REP-ACT-15': 'UE-CAP-F-002', 'REP-ACT-16': 'UE-CAP-F-001', 'REP-ACT-17': 'UE-CAP-F-002', 'REP-ACT-18': 'UE-OMIT-DEADLINE-OVERDUE', 'REP-ACT-19': 'UE-CAP-K-010',
+    'REP-ACT-20': 'UE-CAP-I-001', 'REP-ACT-21': 'UE-CAP-B-001', 'REP-ACT-22': 'UE-CAP-I-001', 'REP-ACT-23': 'UE-OMIT-REP-TRANSITION-REASON-LEAK',
+    'REP-ACT-24': 'UE-CAP-G-002', 'REP-ACT-25': 'UE-OMIT-A11Y-BILINGUAL',
+  },
+  [SOURCE_FILES['financial-officer']]: {
+    F08: 'UE-CAP-D-003', F09: 'UE-CAP-D-001', F10: 'UE-OMIT-FINANCE-UNAVAILABLE', F19: 'UE-CAP-D-003',
+    F11: 'UE-OMIT-FINANCE-UNAVAILABLE', F12: 'UE-OMIT-FINANCE-UNAVAILABLE', F13: 'UE-OMIT-FINANCE-UNAVAILABLE', F14: 'UE-OMIT-FINANCE-UNAVAILABLE',
+    F17: 'UE-OMIT-FINANCE-UNAVAILABLE', F18: 'UE-OMIT-FINANCE-UNAVAILABLE',
+  },
 }
 
-function bind(source, pairs) {
-  return pairs.map(([actionId, capabilityId]) => ({ source, actionId, capabilityId, mandatory: true }))
-}
+const personaActions = personaActionsFromSpecs(personaSpecs).map((action) => {
+  const explicit = personaMap[action.source]?.[action.actionId]
+  const fallback = action.persona === 'financial-officer' ? UNRESOLVED_OWNER['financial-officer'] : action.persona === 'representative' && /^R\d{2}$/.test(action.actionId) ? UNRESOLVED_OWNER.representative : undefined
+  const capabilityId = explicit ?? fallback
+  if (!capabilityId) throw new Error(`no mapping for ${action.persona} ${action.actionId}`)
+  return { persona: action.persona, source: action.source, actionId: action.actionId, definition: action.definition, capabilityId, mandatory: true }
+})
 
-const personaActions = [
-  ...bind(personaSources.governance, [
-    ['G01', 'UE-CAP-I-001'], ['G02', 'UE-CAP-I-001'], ['G03', 'UE-CAP-I-001'], ['G04', 'UE-CAP-I-001'],
-    ['G05', 'UE-CAP-I-001'], ['G06', 'UE-CAP-I-001'], ['G07', 'UE-CAP-REVIEW-INTAKE'], ['G08', 'UE-CAP-REVIEW-INTAKE'],
-    ['G09', 'UE-CAP-I-001'], ['G10', 'UE-CAP-B-001'], ['G11', 'UE-CAP-K-009'], ['G12', 'UE-CAP-K-009'],
-    ['G13', 'UE-CAP-I-001'], ['G14', 'UE-OMIT-PRIVACY-RIGHTS'], ['G15', 'UE-OMIT-PRIVACY-RIGHTS'], ['G16', 'UE-OMIT-PRIVACY-RIGHTS'],
-    ['G17', 'UE-CAP-F-003'], ['G18', 'UE-CAP-F-002'], ['G19', 'UE-CAP-G-002'], ['G20', 'UE-CAP-I-001'],
-    ['G21', 'UE-CAP-D-003'], ['G22', 'UE-CAP-K-003'], ['G23', 'UE-CAP-K-005'], ['G24', 'UE-CAP-I-001'],
-    ['G25', 'UE-CAP-I-001'], ['G26', 'UE-CAP-I-001'], ['G27', 'UE-CAP-G-002'], ['G28', 'UE-CAP-I-001'],
-    ['G29', 'UE-CAP-I-001'], ['G30', 'UE-OMIT-A11Y-BILINGUAL'],
-  ]),
-  ...bind(personaSources.officer, [
-    ['O01', 'UE-CAP-I-001'], ['O02', 'UE-CAP-I-001'], ['O03', 'UE-CAP-I-001'], ['O04', 'UE-CAP-B-001'],
-    ['O05', 'UE-CAP-I-001'], ['O06', 'UE-CAP-I-001'], ['O07', 'UE-CAP-I-001'], ['O08', 'UE-CAP-I-001'],
-    ['O09', 'UE-CAP-K-009'], ['O10', 'UE-CAP-I-001'], ['O11', 'UE-CAP-I-001'], ['O12', 'UE-CAP-I-001'],
-    ['O13', 'UE-OMIT-FINANCE-UNAVAILABLE'], ['O14', 'UE-CAP-D-002'], ['O15', 'UE-CAP-D-001'], ['O16', 'UE-CAP-I-001'],
-    ['O17', 'UE-CAP-I-001'], ['O18', 'UE-CAP-I-001'], ['O19', 'UE-CAP-G-002'], ['O20', 'UE-CAP-I-001'],
-    ['O21', 'UE-OMIT-PRIVACY-RIGHTS'], ['O22', 'UE-CAP-I-001'], ['O23', 'UE-CAP-I-001'], ['O24', 'UE-CAP-I-001'],
-    ['O25', 'UE-CAP-I-001'], ['O26', 'UE-OMIT-A11Y-BILINGUAL'],
-  ]),
-  ...bind(personaSources.senior, [
-    ['SR01', 'UE-CAP-I-001'], ['SR02', 'UE-CAP-I-001'], ['SR03', 'UE-CAP-I-001'], ['SR04', 'UE-CAP-B-001'],
-    ['SR05', 'UE-CAP-I-001'], ['SR06', 'UE-CAP-I-001'], ['SR07', 'UE-CAP-I-001'], ['SR08', 'UE-CAP-I-001'],
-    ['SR09', 'UE-CAP-I-001'], ['SR10', 'UE-OMIT-DEADLINE-OVERDUE'], ['SR11', 'UE-CAP-B-001'], ['SR12', 'UE-CAP-F-002'],
-    ['SR13', 'UE-CAP-I-001'], ['SR14', 'UE-CAP-G-002'], ['SR15', 'UE-CAP-I-001'], ['SR16', 'UE-CAP-I-001'],
-    ['SR17', 'UE-CAP-I-001'], ['SR18', 'UE-CAP-I-001'], ['SR19', 'UE-CAP-I-001'], ['SR20', 'UE-CAP-I-001'],
-    ['SR21', 'UE-CAP-I-001'], ['SR22', 'UE-OMIT-A11Y-BILINGUAL'],
-  ]),
-  ...bind(personaSources.member, [
-    ['M01', 'UE-CAP-A-004'], ['M02', 'UE-CAP-I-001'], ['M03', 'UE-CAP-K-010'], ['M04', 'UE-OMIT-M04-MEMBER-REQUESTS'],
-    ['M05', 'UE-CAP-I-002'], ['M06', 'UE-CAP-F-002'], ['M07', 'UE-CAP-I-001'], ['M08', 'UE-CAP-G-002'],
-    ['M09', 'UE-OMIT-PRIVACY-RIGHTS'], ['M10', 'UE-OMIT-A11Y-BILINGUAL'],
-  ]),
-  ...bind(personaSources.finance, [
-    ['F01', 'UE-OMIT-FINANCE-RANGE-UNSPECIFIED'], ['F08', 'UE-CAP-D-003'], ['F09', 'UE-CAP-D-001'],
-    ['F10', 'UE-OMIT-FINANCE-UNAVAILABLE'], ['F11', 'UE-OMIT-FINANCE-UNAVAILABLE'], ['F12', 'UE-OMIT-FINANCE-UNAVAILABLE'],
-    ['F13', 'UE-OMIT-FINANCE-UNAVAILABLE'], ['F14', 'UE-OMIT-FINANCE-UNAVAILABLE'], ['F17', 'UE-OMIT-FINANCE-UNAVAILABLE'],
-    ['F18', 'UE-OMIT-FINANCE-UNAVAILABLE'], ['F19', 'UE-CAP-D-003'], ['F28', 'UE-OMIT-FINANCE-RANGE-UNSPECIFIED'],
-    ['FJ01', 'UE-OMIT-FINANCE-RANGE-UNSPECIFIED'], ['FJ10', 'UE-OMIT-FINANCE-RANGE-UNSPECIFIED'],
-  ]),
-]
+const personaCompleteness = PERSONAS.map((persona) => {
+  const spec = personaSpecs[persona]
+  return {
+    persona,
+    label: spec.label,
+    sourceFile: spec.sourceFile,
+    canonicalFileFound: spec.canonicalFileFound,
+    universe: spec.universe,
+    individuallyDefined: spec.individuallyDefined,
+    groupedOnly: spec.groupedOnly,
+    unspecified: spec.unspecified,
+    resolved: spec.resolved,
+    trackingCapability: UNRESOLVED_OWNER[persona] ?? null,
+  }
+})
 
 const kernelActionAssignments = {
   'case:read': 'UE-CAP-K-010',
@@ -479,15 +618,34 @@ for (const record of ctx.registryActions) {
   else stubActionAssignments[record.id] = 'UE-OMIT-MAIN-APP-CRONS'
 }
 
+const manifestKeys = new Set(ctx.routes.map((route) => route.route))
+const uninventoried = ctx.diskRouteKeys
+  .filter((key) => !manifestKeys.has(key))
+  .map((key) => {
+    const text = readFileSync(join(ROOT, 'apps/union-eyes/app/api', key), 'utf8')
+    const methods = [...new Set([...text.matchAll(/export\s+(?:async\s+function|const)\s+(GET|POST|PUT|PATCH|DELETE)\b/g)].map((match) => match[1]))].sort()
+    if (key !== 'reviews/route.ts') throw new Error(`unexpected uninventoried route ${key}`)
+    return {
+      route: key,
+      methods,
+      capabilityId: 'UE-CAP-REVIEW-INTAKE',
+      reason: 'The member review-intake route was added after the route-coverage manifest was last regenerated. The manifest still lists 993 routes and the route-coverage test expects every route file. Regenerating the manifest belongs to UE-CONV-K-008 and is not done in Gate 0.',
+    }
+  })
+
+const ownership = buildOwnership({ routes: ctx.routes, registryActions: ctx.registryActions, uninventoried })
+const entriesHash = ownershipHash(ownership.entries)
+
 const matrix = {
   schemaVersion: 1,
   mission: 'UE-FINAL-CONVERGENCE-2026-10',
+  gate0Verdict: 'IN_PROGRESS',
   evaluatedBaselineSha: 'ce854162cae5595f2f00e65db14444229da0a6ab',
   statusVocabulary: {
     NOT_IMPLEMENTED: 'The required outcome has no implementation in the cited source.',
     PARTIAL: 'Some of the required outcome exists in source. The recorded gap remains. A cited file is not verification.',
     SOURCE_IMPLEMENTED: 'The recorded source outcome is present in the cited files. Native and browser qualification are separate.',
-    SOURCE_VERIFIED: 'The cited source tests or checker evidence exist. This is not a native PostgreSQL pass and not operational acceptance.',
+    SOURCE_VERIFIED: 'The cited suites were executed and every test file passed in full with no skip, against the recorded revision and file hashes (gate0-source-verification.json). A test file that exists is not verification. This is not a native PostgreSQL pass and not operational acceptance.',
     NATIVE_PENDING: 'The recorded source outcome is present and the blocking remainder is an unrecorded native or credentialed runtime proof.',
     EXTERNAL_GATE: 'A named external owner holds the missing proof. operationallyActivated is false.',
     SOURCE_UNSPECIFIED: 'The frozen source cites the identifier without a distinct in-repository outcome. This is not an implementation claim.',
@@ -512,6 +670,8 @@ const matrix = {
   },
   capabilities: all,
   personaActions,
+  personaCompleteness,
+  routeOwnership: { file: FILES.ownership, entriesHash, operations: ownership.entries.length },
   outOfScope: [
     {
       id: 'UE-SCOPE-ORG-HIERARCHY-SEED',
@@ -543,12 +703,6 @@ const matrix = {
       reason: 'No counsel HTTP route is in the committed engineering scope. Counsel-side verification remains the external gate UE-CONV-G-003.',
       evidence: 'docs/union-eyes/convergence/UE-WORKAID-COUNSEL-BOUNDARY-CONTRACT.md',
     },
-    {
-      id: 'UE-SCOPE-STEWARD-NO-ACTION-MATRIX',
-      topic: 'Steward action identifiers',
-      reason: 'UE-CONV-I-001 names the Steward experience. The repository has no separate steward action-id matrix, so Gate 0 does not invent steward action ids.',
-      evidence: 'docs/union-eyes/convergence/register/ue-convergence-register.json UE-CONV-I-001',
-    },
   ],
   dispositions: [],
   lockedCapabilityIds: all.map((item) => item.id).sort(),
@@ -571,6 +725,20 @@ const matrix = {
   stubActionAssignments,
 }
 
-const out = join(ROOT, 'docs/union-eyes/convergence/register/ue-pre-vs-engineering-completion.json')
-writeFileSync(out, `${JSON.stringify(matrix, null, 2)}\n`)
-console.log(`wrote ${all.length} capabilities, ${personaActions.length} persona mappings, ${h002.scopedRoutes.length} stub routes, census ${ctx.censusCount}`)
+writeFileSync(join(ROOT, FILES.matrix), `${JSON.stringify(matrix, null, 2)}\n`)
+writeFileSync(join(ROOT, FILES.ownership), ownershipJson(ownership))
+
+const lockPath = join(ROOT, FILES.lock)
+if (!existsSync(lockPath)) {
+  mkdirSync(dirname(lockPath), { recursive: true })
+  writeFileSync(lockPath, `${JSON.stringify({
+    schemaVersion: 1,
+    lockVersion: 1,
+    note: 'Independent capability lock. The anchored capability set is read from git history at anchorCommit, which an edit to the working tree cannot change. A capability may leave the matrix only through a retirement record here with schemaVersion 2 or later, a reason, and an existing evidence file.',
+    anchorCommit: '2247978bd642a89a7d4f8bd720b978f789cb4437',
+    anchorMatrixPath: FILES.matrix,
+    capabilityIds: all.map((item) => item.id).sort(),
+    retirements: [],
+  }, null, 2)}\n`)
+}
+console.log(`wrote ${all.length} capabilities, ${personaActions.length} persona mappings, ${ownership.entries.length} route operations, ${h002.scopedRoutes.length} stub routes, census ${ctx.censusCount}`)

@@ -12,9 +12,9 @@ import { createHash } from 'node:crypto'
 import { execFileSync, spawnSync } from 'node:child_process'
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { ROOT } from './ue-gate0-scope-lock.mjs'
+import { FILES, ROOT } from './ue-gate0-scope-lock.mjs'
 
-export const EVIDENCE_FILE = 'docs/union-eyes/convergence/evidence/gate0-source-verification.json'
+export const EVIDENCE_FILE = FILES.evidence
 export const EVIDENCE_LOG_DIR = 'docs/union-eyes/convergence/evidence/gate0-source-verification'
 
 const UE = 'apps/union-eyes'
@@ -22,6 +22,7 @@ const UE = 'apps/union-eyes'
 export const EVIDENCE_JOBS = [
   {
     capabilityId: 'UE-CAP-F-001',
+    sourceFiles: ['apps/union-eyes/lib/authority/ontology.ts'],
     suiteFamily: 'authority-kernel PGlite (resources, lifecycle)',
     assertionFamily: 'internal-file read, edit, and disclosure grants stay separate kernel actions',
     cwd: UE,
@@ -31,6 +32,7 @@ export const EVIDENCE_JOBS = [
   },
   {
     capabilityId: 'UE-CAP-G-001',
+    sourceFiles: ['apps/union-eyes/lib/authority/store/counsel.ts'],
     suiteFamily: 'counsel boundary (unit, PGlite resources, PGlite counsel engagement register)',
     assertionFamily: 'counsel engagement stays on the kernel boundary',
     cwd: UE,
@@ -44,6 +46,7 @@ export const EVIDENCE_JOBS = [
   },
   {
     capabilityId: 'UE-CAP-H-001',
+    sourceFiles: ['tooling/reality/anti-theatre-scan.ts'],
     suiteFamily: 'anti-theatre scanner',
     assertionFamily: 'retired scaffold detection (rule R-9) against a synthetic tree',
     cwd: 'tooling/reality',
@@ -54,6 +57,7 @@ export const EVIDENCE_JOBS = [
   },
   {
     capabilityId: 'UE-CAP-K-002',
+    sourceFiles: ['tooling/reality/anti-theatre-scan.ts'],
     suiteFamily: 'anti-theatre scanner',
     assertionFamily: 'stub and fake-success detection against a synthetic tree',
     cwd: 'tooling/reality',
@@ -64,6 +68,7 @@ export const EVIDENCE_JOBS = [
   },
   {
     capabilityId: 'UE-CAP-H-005',
+    sourceFiles: ['apps/union-eyes/app/api/admin/seed-test-data/route.ts'],
     suiteFamily: 'admin seed route',
     assertionFamily: 'retired seed route answers HTTP 501',
     cwd: UE,
@@ -73,6 +78,7 @@ export const EVIDENCE_JOBS = [
   },
   {
     capabilityId: 'UE-CAP-K-001',
+    sourceFiles: ['tooling/scripts/lib/ue-approved-migration-lineage.json'],
     suiteFamily: 'migration lineage certification',
     assertionFamily: 'approved migration lineage verification',
     cwd: '.',
@@ -82,6 +88,7 @@ export const EVIDENCE_JOBS = [
   },
   {
     capabilityId: 'UE-CAP-K-003',
+    sourceFiles: ['tooling/scripts/lib/ue-convergence-check.mjs'],
     suiteFamily: 'convergence register checker',
     assertionFamily: 'register integrity and allowlist ratchet evaluation',
     cwd: '.',
@@ -91,6 +98,7 @@ export const EVIDENCE_JOBS = [
   },
   {
     capabilityId: 'UE-CAP-REVIEW-INTAKE',
+    sourceFiles: ['apps/union-eyes/lib/authority/store/review-intake.ts', 'apps/union-eyes/app/api/reviews/route.ts', 'apps/union-eyes/components/reviews/review-intake.tsx'],
     suiteFamily: 'review intake (PGlite, route, component)',
     assertionFamily: 'member review intake and oversight listing',
     cwd: UE,
@@ -104,6 +112,7 @@ export const EVIDENCE_JOBS = [
   },
   {
     capabilityId: 'UE-OMIT-DELIVERY-EVIDENCE',
+    sourceFiles: ['apps/union-eyes/lib/services/delivery-reconciliation.ts'],
     suiteFamily: 'delivery reconciliation (unit)',
     assertionFamily: 'notification delivery ledger arithmetic',
     cwd: UE,
@@ -198,6 +207,8 @@ export function recordAll() {
     writeFileSync(join(ROOT, logPath), result.log)
     const blobs = {}
     for (const path of capabilityFiles) blobs[path] = blobFor(path)
+    const sourceBlobs = {}
+    for (const path of job.sourceFiles) sourceBlobs[path] = blobFor(path)
     records.push({
       capabilityId: job.capabilityId,
       suiteFamily: job.suiteFamily,
@@ -207,6 +218,7 @@ export function recordAll() {
       testedRevision: revision,
       testFiles: capabilityFiles,
       testFileBlobs: blobs,
+      sourceFileBlobs: sourceBlobs,
       executedAt: new Date().toISOString(),
       exitCode: result.exitCode,
       durationMs: result.durationMs,
@@ -225,9 +237,13 @@ export function recordAll() {
 }
 
 if (process.argv[1] && process.argv[1].endsWith('ue-gate0-record-evidence.mjs')) {
-  const status = git(['status', '--porcelain', '--', 'apps/union-eyes', 'tooling'])
+  const cited = EVIDENCE_JOBS.flatMap((job) => [
+    ...job.sourceFiles,
+    ...job.tests.map((test) => `${job.runner === 'vitest-root' ? job.testPathPrefix : job.cwd === '.' ? '' : `${job.cwd}/`}${test}`),
+  ])
+  const status = git(['status', '--porcelain', '--', ...new Set(cited)])
   if (status) {
-    console.error('The working tree has uncommitted changes under apps/union-eyes or tooling. Commit them before recording evidence so the tested revision is exact.')
+    console.error('A cited source or test file has uncommitted changes. Commit them before recording evidence so the tested revision is exact.')
     console.error(status)
     process.exit(2)
   }

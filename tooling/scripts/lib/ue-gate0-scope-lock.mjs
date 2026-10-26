@@ -11,6 +11,9 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { PERSONAS, computePersonaSpecs, personaActionsFromSpecs, validatePersonaCompleteness } from './ue-gate0-persona-spec.mjs'
+import { UNDECIDED_OWNER, ownershipHash, validateRouteOwnership } from './ue-gate0-route-ownership.mjs'
+import { evaluateRule } from './ue-convergence-check.mjs'
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 
@@ -38,37 +41,6 @@ export const REQUIRED_DISTINCT_IDS = [
   'UE-OMIT-FINANCE-RANGE-UNSPECIFIED',
   'UE-OMIT-REP-CANONICAL-ABSENT',
   'UE-OMIT-DELIVERY-EVIDENCE',
-]
-
-export const PERSONA_SOURCES = [
-  {
-    persona: 'governance-officer',
-    file: 'docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md',
-    extract: (text) => [...text.matchAll(/^\| (G\d{2}) \|/gm)].map((m) => m[1]),
-  },
-  {
-    persona: 'officer-executive',
-    file: 'apps/union-eyes/lib/executive/capability-matrix.ts',
-    extract: (text) => [...text.matchAll(/id: '(O\d{2})'/g)].map((m) => m[1]),
-  },
-  {
-    persona: 'senior-representative',
-    file: 'docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md',
-    extract: (text) => {
-      const section = text.split('## 4.')[1]?.split('## 5.')[0] ?? ''
-      return [...new Set([...section.matchAll(/\bSR\d{2}\b/g)].map((m) => m[0]))]
-    },
-  },
-  {
-    persona: 'member',
-    file: 'docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md',
-    extract: (text) => [...new Set([...text.matchAll(/\bM\d{2}\b/g)].map((m) => m[0]))],
-  },
-  {
-    persona: 'financial-officer',
-    file: 'docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md',
-    extract: (text) => [...new Set([...text.matchAll(/\bFJ\d{2}\b|\bF\d{2}\b/g)].map((m) => m[0]))],
-  },
 ]
 
 const REQUIRED_FIELDS = [
@@ -136,13 +108,8 @@ export function extractRegistryIds(registryText) {
   return records
 }
 
-export function extractPersonaActions(root, read = (file) => readFileSync(join(root, file), 'utf8')) {
-  const actions = []
-  for (const source of PERSONA_SOURCES) {
-    const ids = source.extract(read(source.file))
-    for (const actionId of ids) actions.push({ persona: source.persona, source: source.file, actionId })
-  }
-  return actions
+export function extractPersonaActions(root, options = {}) {
+  return personaActionsFromSpecs(computePersonaSpecs(root, options))
 }
 
 function ownerIdFor(registerId) {
@@ -167,12 +134,74 @@ function qualificationEvidenceOk(items, exists, readText) {
   })
 }
 
+export const FILES = {
+  matrix: 'docs/union-eyes/convergence/register/ue-pre-vs-engineering-completion.json',
+  ownership: 'docs/union-eyes/convergence/register/ue-route-capability-ownership.json',
+  lock: 'docs/union-eyes/convergence/register/ue-gate0-capability-lock.json',
+  evidence: 'docs/union-eyes/convergence/evidence/gate0-source-verification.json',
+}
+
+function readJsonIfPresent(root, file) {
+  const path = join(root, file)
+  return existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : null
+}
+
+function git(root, args) {
+  return execFileSync('git', args, { cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
+}
+
+function gitBlob(root, path) {
+  try {
+    return git(root, ['rev-parse', `HEAD:${path}`]).trim()
+  } catch {
+    return null
+  }
+}
+
+function anchoredCapabilityIds(root, lock) {
+  if (!lock?.anchorCommit) return null
+  try {
+    const text = git(root, ['show', `${lock.anchorCommit}:${lock.anchorMatrixPath ?? FILES.matrix}`])
+    return JSON.parse(text).capabilities.map((capability) => capability.id)
+  } catch {
+    return null
+  }
+}
+
+function currentRatchetFailures(root) {
+  const ratchets = JSON.parse(readFileSync(join(root, 'docs/union-eyes/convergence/register/ue-convergence-ratchets.json'), 'utf8'))
+  const failures = []
+  for (const rule of ratchets.rules) {
+    const args = ['grep', '-l', '-I', '-E']
+    if (rule.ignoreCase) args.push('-i')
+    args.push(rule.pattern, '--', ...rule.paths, ...(rule.exclude ?? []).map((glob) => `:(exclude,glob)${glob}`))
+    let files = []
+    try {
+      files = git(root, args).split('\n').map((item) => item.trim()).filter(Boolean)
+    } catch (error) {
+      if (error.status !== 1) throw error
+    }
+    for (const problem of evaluateRule(rule, files).problems) {
+      const match = problem.match(/^([A-Z0-9-]+): unexpected occurrence in (\S+)/)
+      if (match) failures.push({ ruleId: match[1], file: match[2], message: problem })
+    }
+  }
+  return failures
+}
+
+function diskRouteKeys(root) {
+  const files = git(root, ['ls-files', 'apps/union-eyes/app/api']).split('\n').filter((file) => file.endsWith('/route.ts'))
+  return files.map((file) => file.replace('apps/union-eyes/app/api/', ''))
+}
+
 export function loadContext(root = ROOT) {
   const register = JSON.parse(readFileSync(join(root, 'docs/union-eyes/convergence/register/ue-convergence-register.json'), 'utf8'))
   const manifest = JSON.parse(readFileSync(join(root, 'docs/union-eyes/convergence/register/ue-route-coverage-manifest.json'), 'utf8'))
   const batches = JSON.parse(readFileSync(join(root, 'docs/union-eyes/convergence/register/ue-schema-mutation-batches.json'), 'utf8'))
   const ontology = readFileSync(join(root, 'apps/union-eyes/lib/authority/ontology.ts'), 'utf8')
   const registry = readFileSync(join(root, 'apps/union-eyes/lib/reality/capability-registry.ts'), 'utf8')
+  const lock = readJsonIfPresent(root, FILES.lock)
+  const personaSpecs = computePersonaSpecs(root)
   return {
     root,
     registerEntries: register.entries.map((entry) => ({
@@ -180,12 +209,19 @@ export function loadContext(root = ROOT) {
       status: entry.status,
       externalGate: entry.externalGate ?? null,
     })),
-    personaActions: extractPersonaActions(root),
+    personaSpecs,
+    personaActions: personaActionsFromSpecs(personaSpecs),
     routes: manifest.routes,
     routeSummaryCount: manifest.summary.routes,
+    diskRouteKeys: diskRouteKeys(root),
     kernelActions: extractKernelActions(ontology),
     censusCount: batches.censusCount,
     registryActions: extractRegistryIds(registry),
+    ownership: readJsonIfPresent(root, FILES.ownership),
+    lock,
+    anchorCapabilityIds: anchoredCapabilityIds(root, lock),
+    evidence: readJsonIfPresent(root, FILES.evidence),
+    ratchetFailures: currentRatchetFailures(root),
   }
 }
 
@@ -197,6 +233,9 @@ export function validateGate0(matrix, ctx = {}) {
   const commitExists = ctx.commitExists ?? gitCommitExists
   const registerEntries = ctx.registerEntries ?? base.registerEntries
   const personaActions = ctx.personaActions ?? base.personaActions
+  const personaSpecs = ctx.personaSpecs ?? base.personaSpecs
+  const evidence = 'evidence' in ctx ? ctx.evidence : base.evidence
+  const blobFor = ctx.blobFor ?? ((path) => gitBlob(base.root, path))
   const routes = ctx.routes ?? base.routes
   const kernelActions = ctx.kernelActions ?? base.kernelActions
   const registryActions = ctx.registryActions ?? base.registryActions
@@ -247,7 +286,9 @@ export function validateGate0(matrix, ctx = {}) {
     if (capability.sourceStatus === 'SOURCE_VERIFIED') {
       if (tests.length === 0) problems.push(`${capability.id} is SOURCE_VERIFIED without test evidence`)
       for (const file of tests) if (!exists(file)) problems.push(`${capability.id} test evidence does not exist: ${file}`)
+      problems.push(...executionEvidenceProblems(capability, evidence, { exists, readText, commitExists, blobFor }))
     }
+    if (!Array.isArray(capability.trackedDefects ?? [])) problems.push(`${capability.id} trackedDefects must be an array`)
     for (const file of capability.sourceStatus === 'PARTIAL' ? files : []) {
       if (!exists(file)) problems.push(`${capability.id} cited source file does not exist: ${file}`)
     }
@@ -309,7 +350,13 @@ export function validateGate0(matrix, ctx = {}) {
   for (const action of personaActions) {
     const key = `${action.source}|${action.actionId}`
     if (!mapped.has(key)) problems.push(`mandatory persona action ${action.actionId} in ${action.source} has no mapped capability`)
+    const mapping = mappings.find((item) => item.source === action.source && item.actionId === action.actionId)
+    if (mapping && action.definition && mapping.definition !== action.definition) {
+      problems.push(`persona action ${action.actionId} is recorded as ${mapping.definition} but its source defines it as ${action.definition}`)
+    }
   }
+  const personaCheck = validatePersonaCompleteness(matrix, personaSpecs, byId)
+  problems.push(...personaCheck.problems)
 
   const liveHash = routeBaselineHash(routes)
   const liveGuards = guardCounts(routes)
@@ -384,8 +431,149 @@ export function validateGate0(matrix, ctx = {}) {
     if (!disposition || disposition.schemaVersion < 2) problems.push(`required capability ${id} disappeared without a versioned disposition`)
   }
 
+  const lock = 'lock' in ctx ? ctx.lock : base.lock
+  const anchorIds = 'anchorCapabilityIds' in ctx ? ctx.anchorCapabilityIds : base.anchorCapabilityIds
+  problems.push(...independentLockProblems(byId, lock, anchorIds, { exists, commitExists }))
+
+  const ownership = 'ownership' in ctx ? ctx.ownership : base.ownership
+  const routeCheck = validateRouteOwnership({
+    ownership,
+    capabilityById: byId,
+    routes,
+    diskRouteKeys: ctx.diskRouteKeys ?? base.diskRouteKeys,
+    scopeIds,
+    registerIds: new Set(registerEntries.map((entry) => entry.id)),
+    registryIds: new Set(registryActions.map((record) => record.id)),
+    exists,
+    readText,
+  })
+  problems.push(...routeCheck.problems)
+  if (ownership && matrix?.routeOwnership?.entriesHash !== ownershipHash(ownership.entries ?? [])) {
+    problems.push('route ownership entries do not match the hash recorded in the matrix')
+  }
+  if (!byId.has(UNDECIDED_OWNER)) problems.push(`route ownership requires the capability ${UNDECIDED_OWNER}`)
+
+  const ratchetFailures = ctx.ratchetFailures ?? base.ratchetFailures
+  const debt = defectProblems(capabilities, ratchetFailures, evidence, { exists, readText })
+  problems.push(...debt.problems)
+
+  const blockers = [...personaCheck.blockers, ...routeCheck.blockers]
+  const gateAcceptanceBlockers = debt.open
+  const verdict = blockers.length > 0 ? 'IN_PROGRESS' : 'READY_FOR_ADVERSARIAL_REVIEW'
+  if (matrix?.gate0Verdict !== verdict) {
+    problems.push(`gate0Verdict is ${JSON.stringify(matrix?.gate0Verdict)} but ${blockers.length} Gate 0 blocker(s) ${blockers.length > 0 ? 'remain, so it must be IN_PROGRESS' : 'are absent, so it must be READY_FOR_ADVERSARIAL_REVIEW'}`)
+  }
+
   const summary = summarize(matrix, registerEntries, personaActions, problems)
-  return { problems, summary }
+  summary.verdict = verdict
+  summary.route = routeCheck.summary
+  summary.persona = Object.fromEntries(PERSONAS.map((persona) => {
+    const spec = personaSpecs[persona]
+    return [persona, { identifiers: spec.universe.length, individuallyDefined: spec.individuallyDefined.length, groupedOnly: spec.groupedOnly.length, unspecified: spec.unspecified.length, canonicalFileFound: spec.canonicalFileFound, resolved: spec.resolved }]
+  }))
+  return { problems, blockers, gateAcceptanceBlockers, summary, routeExceptions: routeCheck.exceptions }
+}
+
+export function evidenceDeps(root = ROOT) {
+  return {
+    exists: (file) => existsSync(join(root, file)),
+    readText: (file) => readFileSync(join(root, file), 'utf8'),
+    commitExists: gitCommitExists,
+    blobFor: (path) => gitBlob(root, path),
+  }
+}
+
+export function executionEvidenceProblems(capability, evidence, deps) {
+  const label = `${capability.id} is SOURCE_VERIFIED without execution evidence`
+  const records = (evidence?.records ?? []).filter((record) => record.capabilityId === capability.id)
+  if (records.length === 0) return [label]
+  const failures = []
+  for (const record of records) {
+    const why = []
+    if (typeof record.command !== 'string' || record.command.trim() === '') why.push('no command')
+    if (!/^[0-9a-f]{40}$/.test(record.testedRevision ?? '') || !deps.commitExists(record.testedRevision)) why.push('tested revision is not a commit')
+    if (typeof record.suiteFamily !== 'string' || typeof record.assertionFamily !== 'string' || !Array.isArray(record.exclusions)) why.push('suite family, assertion family, or exclusions missing')
+    if (Number.isNaN(Date.parse(record.executedAt))) why.push('no execution time')
+    if (record.exitCode !== 0) why.push(`exit code ${record.exitCode}`)
+    const totals = record.totals ?? {}
+    if (!(totals.passed > 0) || totals.failed !== 0 || totals.skipped !== 0) why.push(`totals passed ${totals.passed} failed ${totals.failed} skipped ${totals.skipped}`)
+    for (const test of capability.sourceTests ?? []) {
+      const file = (record.files ?? []).find((item) => item.path === test)
+      if (!file) why.push(`${test} was not executed`)
+      else if (file.suiteStatus !== 'passed' || !(file.passed > 0) || file.failed !== 0 || file.skipped !== 0) why.push(`${test} did not pass in full`)
+      if (record.testFileBlobs?.[test] !== deps.blobFor(test)) why.push(`${test} changed after the recorded run`)
+    }
+    for (const source of capability.sourceFiles ?? []) {
+      if (record.sourceFileBlobs?.[source] !== deps.blobFor(source)) why.push(`${source} changed after the recorded run or was not recorded`)
+    }
+    if (!record.logFile || !deps.exists(record.logFile)) why.push('no recorded output')
+    else if (createHash('sha256').update(deps.readText(record.logFile)).digest('hex') !== record.logSha256) why.push('recorded output does not match its hash')
+    if (why.length === 0) return []
+    failures.push(why.join('; '))
+  }
+  return [`${label}: ${failures.join(' | ')}`]
+}
+
+function independentLockProblems(byId, lock, anchorIds, deps) {
+  const problems = []
+  if (!lock || lock.schemaVersion !== 1) return ['independent capability lock is missing or has the wrong schemaVersion']
+  if (!Number.isInteger(lock.lockVersion) || lock.lockVersion < 1) problems.push('independent capability lock needs a lockVersion')
+  if (!/^[0-9a-f]{40}$/.test(lock.anchorCommit ?? '') || !deps.commitExists(lock.anchorCommit)) problems.push('independent capability lock anchor commit does not exist')
+  if (!Array.isArray(anchorIds)) problems.push('independent capability lock anchor matrix cannot be read from git history')
+  const lockIds = new Set(lock.capabilityIds ?? [])
+  const retirements = new Map((lock.retirements ?? []).map((item) => [item.capabilityId, item]))
+  for (const id of anchorIds ?? []) {
+    if (!lockIds.has(id)) problems.push(`independent lock dropped anchored capability ${id}`)
+  }
+  for (const id of new Set([...(anchorIds ?? []), ...lockIds])) {
+    if (byId.has(id)) continue
+    const retirement = retirements.get(id)
+    const valid = retirement && Number.isInteger(retirement.schemaVersion) && retirement.schemaVersion >= 2 &&
+      typeof retirement.reason === 'string' && retirement.reason.trim().length >= 20 && typeof retirement.evidence === 'string' && deps.exists(retirement.evidence)
+    if (!valid) problems.push(`mandatory capability ${id} disappeared without a versioned disposition in the independent lock`)
+  }
+  for (const id of byId.keys()) {
+    if (!lockIds.has(id)) problems.push(`${id} is not in the independent capability lock`)
+  }
+  return problems
+}
+
+function defectProblems(capabilities, ratchetFailures, evidence, deps) {
+  const problems = []
+  const open = []
+  const claimed = new Map()
+  for (const capability of capabilities) {
+    for (const defect of capability.trackedDefects ?? []) {
+      const label = `${capability.id} tracked defect ${defect.id ?? '(missing id)'}`
+      if (!defect.id || !['RATCHET', 'TEST_SUITE', 'SOURCE_DEFECT'].includes(defect.kind) || !defect.file || typeof defect.description !== 'string' || defect.description.trim().length < 20) {
+        problems.push(`${label} is malformed`)
+        continue
+      }
+      if (!Array.isArray(defect.blocksGates) || defect.blocksGates.length === 0 || defect.blocksGates.some((gate) => !Number.isInteger(gate) || gate < 1 || gate > 15)) {
+        problems.push(`${label} must name the gates whose acceptance it blocks`)
+      }
+      if (!deps.exists(defect.file)) problems.push(`${label} cites a missing file ${defect.file}`)
+      const key = `${defect.kind}|${defect.ratchetId ?? defect.suite ?? defect.id}|${defect.file}`
+      if (claimed.has(key)) problems.push(`defect ${key} is owned by both ${claimed.get(key)} and ${capability.id}`)
+      claimed.set(key, capability.id)
+      let live = false
+      if (defect.kind === 'RATCHET') live = ratchetFailures.some((failure) => failure.ruleId === defect.ratchetId && failure.file === defect.file)
+      else if (defect.kind === 'TEST_SUITE') {
+        const record = (evidence?.records ?? []).find((item) => item.capabilityId === capability.id)
+        const file = record?.files?.find((item) => item.path === defect.suite)
+        live = Boolean(file) && (file.suiteStatus !== 'passed' || file.failed > 0 || file.skipped > 0)
+      } else if (defect.kind === 'SOURCE_DEFECT') {
+        live = deps.exists(defect.file) && deps.readText(defect.file).includes(defect.sourceQuote ?? '\u0000')
+      }
+      if (!live) problems.push(`${label} no longer reproduces; record it as resolved with new evidence before removing it`)
+      else open.push({ capabilityId: capability.id, id: defect.id, kind: defect.kind, file: defect.file, blocksGates: defect.blocksGates })
+    }
+  }
+  for (const failure of ratchetFailures) {
+    const tracked = capabilities.some((capability) => (capability.trackedDefects ?? []).some((defect) => defect.kind === 'RATCHET' && defect.ratchetId === failure.ruleId && defect.file === failure.file))
+    if (!tracked) problems.push(`global convergence failure ${failure.ruleId} in ${failure.file} is not tracked as engineering debt`)
+  }
+  return { problems, open }
 }
 
 function summarize(matrix, registerEntries, personaActions, problems) {
