@@ -54,6 +54,24 @@ export interface KernelCaseRequest {
 }
 
 /** A full kernel decision for a legal hold on one conversation, for the authenticated principal of `tx`. */
+export function decideMessageRetention(
+  tx: RLSTx,
+  input: { userId: string; organizationId: string; action: 'message:adopt_retention' | 'message:read_retention_policy' },
+  deps: EnforcementDeps = kernelDeps,
+): Promise<Decision> {
+  return enforceAuthority(
+    drizzleExecutor(tx),
+    deps,
+    {
+      principalUserId: input.userId,
+      organizationId: input.organizationId,
+      action: input.action,
+      resource: { type: 'message_retention', id: input.organizationId, organizationId: input.organizationId },
+    },
+    { authenticated: true },
+  )
+}
+
 export function decideMessageHold(
   tx: RLSTx,
   input: { userId: string; organizationId: string; threadId: string; action: 'message:place_legal_hold' | 'message:release_legal_hold' },

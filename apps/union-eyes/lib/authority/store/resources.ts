@@ -24,6 +24,7 @@ import type {
   CaseFacts,
   FinancialTransactionFacts,
   GovernanceReviewFacts,
+  MessageRetentionFacts,
   MessageThreadFacts,
   ResourceFacts,
   ResourceRelationship,
@@ -360,6 +361,14 @@ export async function loadMessageThread(exec: SqlExecutor, req: AuthorityRequest
   return { resource: facts }
 }
 
+/** The organization's retention duty. There is no row to load: the duty is the organization itself. */
+export async function loadMessageRetention(_exec: SqlExecutor, req: AuthorityRequest): Promise<LoadedResource | null> {
+  const org = req.resource.organizationId
+  if (!isUuid(org) || req.resource.id !== org) return null
+  const facts: MessageRetentionFacts = { kind: 'message_retention', id: org, organizationId: org }
+  return { resource: facts }
+}
+
 /** The canonical loaders under the document classification policy in force (provisional default unless an institution supplies one). */
 export const createCanonicalResourceLoader = (policy: DocumentClassPolicy = DEFAULT_DOCUMENT_CLASS_POLICY): ResourceLoader => async (exec, req, now) => {
   switch (req.resource.type) {
@@ -373,6 +382,8 @@ export const createCanonicalResourceLoader = (policy: DocumentClassPolicy = DEFA
       return loadWorkAidMatter(exec, req)
     case 'message_thread':
       return loadMessageThread(exec, req)
+    case 'message_retention':
+      return loadMessageRetention(exec, req)
     default:
       // member_financial_record has no authoritative principal-keyed source; approval_request is loaded by the store.
       return null

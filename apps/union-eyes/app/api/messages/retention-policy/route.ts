@@ -1,10 +1,10 @@
 /**
- * The organization's adopted retention policy for closed conversations. Organization administrators only.
+ * The organization's adopted retention policy for closed conversations.
  *
  * There is no default period: until one is recorded here, every conversation reports `policy_not_adopted` and nothing
- * is eligible for disposition. Recording a policy changes no conversation and deletes nothing; the application has no
- * deletion of conversation content. The record names the authority that adopted the period; the system stores the
- * reference and who recorded it but cannot verify the institutional decision itself.
+ * is eligible for disposition. Recording a policy changes no conversation and deletes nothing. Reading or recording
+ * the record requires a live governance mandate naming this organization and the action. An administrator title is
+ * not that mandate.
  */
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -12,7 +12,7 @@ import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { getCaseActor } from '@/lib/cases/case-authorization';
-import { adoptRetentionPolicy, liveRetentionPolicy, MAX_POLICY_REFERENCE, MAX_RETENTION_DAYS } from '@/lib/messaging/thread-lifecycle';
+import { adoptRetentionPolicy, MAX_POLICY_REFERENCE, MAX_RETENTION_DAYS, readRetentionPolicy } from '@/lib/messaging/thread-lifecycle';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,21 +23,21 @@ const bodySchema = z.object({
 });
 
 export const GET = withApi(
-  { auth: { required: true, minRole: 'admin' }, openapi: { tags: ['Messages'], summary: 'Adopted message retention policy' } },
+  { auth: { required: true }, openapi: { tags: ['Messages'], summary: 'Adopted message retention policy' } },
   async () => {
     const actor = await getCaseActor();
-    if (actor.role !== 'admin') throw ApiError.forbidden();
-    const policy = await withRLSContext(async (tx) => liveRetentionPolicy(tx, actor.organizationId));
-    return { adopted: policy !== null, policy };
+    const result = await withRLSContext(async (tx) => readRetentionPolicy(tx, actor));
+    if (result.kind === 'forbidden') throw ApiError.forbidden('A live governance mandate naming this organization is required.');
+    return { adopted: result.policy !== null, policy: result.policy };
   },
 );
 
 export const POST = withApi(
-  { auth: { required: true, minRole: 'admin' }, body: bodySchema, openapi: { tags: ['Messages'], summary: 'Record the adopted message retention policy' } },
+  { auth: { required: true }, body: bodySchema, openapi: { tags: ['Messages'], summary: 'Record the adopted message retention policy' } },
   async ({ body }) => {
     const actor = await getCaseActor();
     const result = await withRLSContext(async (tx) => adoptRetentionPolicy(tx, actor, body));
-    if (result.kind === 'forbidden') throw ApiError.forbidden('Only an organization administrator can record a retention policy.');
+    if (result.kind === 'forbidden') throw ApiError.forbidden('A live governance mandate naming this organization is required.');
     if (result.kind === 'invalid') throw ApiError.badRequest('The retention policy is not valid.');
     return NextResponse.json({ data: { policy: result.policy } }, { status: 201 });
   },

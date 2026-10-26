@@ -66,6 +66,8 @@ export const NON_DELEGABLE_ACTIONS: readonly string[] = [
   'workaid:read_counsel_material',
   'message:place_legal_hold',
   'message:release_legal_hold',
+  'message:adopt_retention',
+  'message:read_retention_policy',
 ]
 
 export interface IssuanceRule {
@@ -387,7 +389,7 @@ export const DEFAULT_ISSUANCE_TEMPLATES: readonly IssuanceRuleTemplate[] = [
   { domain: 'executive_office', operation: 'issue', issuerCapacities: ['executive'], allowedPowers: ['approve'], maxTermDays: 1095, requiresAcceptance: true, requiredIndependentApprovals: 1, rationale: 'Authorized executive body; office terms are bounded.' },
   { domain: 'delegation', operation: 'issue', issuerCapacities: ['executive'], issuerMandateKind: 'executive_office', issuerMandatePower: 'approve', allowedPowers: ['case:read', 'case:comment', 'governance:approve'], maxTermDays: 90, requiresAcceptance: true, requiredIndependentApprovals: 0, rationale: 'Office holder; limited, expiring, action-specific.' },
   { domain: 'financial', operation: 'issue', issuerCapacities: ['executive'], allowedPowers: ['view', 'prepare', 'approve', 'execute', 'reconcile', 'audit'], maxTermDays: 365, requiresAcceptance: true, requiredIndependentApprovals: 1, rationale: 'Authorized financial governing body; segregation of duties is enforced at grant time.' },
-  { domain: 'governance_review', operation: 'issue', issuerCapacities: ['executive'], allowedPowers: ['monitor', 'access_evidence', 'issue_finding', 'request_corrective_action', 'place_legal_hold', 'release_legal_hold'], maxTermDays: 365, requiresAcceptance: true, requiredIndependentApprovals: 1, rationale: 'Governed approval body; independent approvers and recusal. place_legal_hold and release_legal_hold name one conversation and disclose none of its content. Neither is conferred until a live rule that lists it is adopted.' },
+  { domain: 'governance_review', operation: 'issue', issuerCapacities: ['executive'], allowedPowers: ['monitor', 'access_evidence', 'issue_finding', 'request_corrective_action', 'place_legal_hold', 'release_legal_hold', 'adopt_retention', 'read_retention_policy'], maxTermDays: 365, requiresAcceptance: true, requiredIndependentApprovals: 1, rationale: 'Governed approval body; independent approvers and recusal. place_legal_hold and release_legal_hold name one conversation and disclose none of its content. adopt_retention and read_retention_policy name the organization and disclose no conversation. None of these powers is conferred until a live rule that lists it is adopted.' },
   { domain: 'emergency_access', operation: 'issue', issuerCapacities: ['executive'], allowedPowers: ['read'], maxTermDays: 1, requiresAcceptance: false, requiredIndependentApprovals: 1, rationale: 'Pre-authorized emergency process; time-limited, justified, independently approved.' },
   { domain: 'case_assignment', operation: 'revoke', issuerCapacities: ['steward', 'chief_steward', 'officer'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Ends a case assignment at once; the kernel additionally requires case:assign on the case.' },
   { domain: 'supervisory', operation: 'revoke', issuerCapacities: ['officer', 'executive'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Revocation is immediate and does not need approval.' },

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { decide } from '../kernel'
-import type { MessageThreadFacts } from '../ontology'
+import type { MessageRetentionFacts, MessageThreadFacts } from '../ontology'
 import { NOW, ORG, U, facts, mandate, recusal, ref, request } from './fixtures'
 
 const THREAD = '00000000-0000-4000-8000-000000000258'
@@ -67,5 +67,22 @@ describe('conversation legal hold', () => {
     const holder = governed(U.reviewer)
     holder.recusals = [recusal({ principalUserId: U.reviewer, resource })]
     expect(decide(request(U.reviewer, 'message:place_legal_hold', resource), holder, thread(), NOW).reasons.map((reason) => reason.code)).toContain('RECUSED')
+  })
+})
+
+const retention = (): MessageRetentionFacts => ({ kind: 'message_retention', id: ORG, organizationId: ORG })
+const retentionResource = ref('message_retention', ORG)
+
+describe('conversation retention record', () => {
+  it('denies an administrator title and allows only a mandate that names this organization and the action', () => {
+    const admin = facts(U.admin, ['member'])
+    expect(decide(request(U.admin, 'message:adopt_retention', retentionResource), admin, retention(), NOW).reasons.map((r) => r.code)).toContain('CAPACITY_NOT_ELIGIBLE')
+    const holder = governed(U.reviewer, ['adopt_retention', 'read_retention_policy'], [ORG])
+    expect(decide(request(U.reviewer, 'message:adopt_retention', retentionResource), holder, retention(), NOW).effect).toBe('allow')
+    expect(decide(request(U.reviewer, 'message:read_retention_policy', retentionResource), holder, retention(), NOW).effect).toBe('allow')
+    const readOnly = governed(U.reviewer, ['read_retention_policy'], [ORG])
+    expect(decide(request(U.reviewer, 'message:adopt_retention', retentionResource), readOnly, retention(), NOW).effect).toBe('deny')
+    const otherOrg = governed(U.reviewer, ['adopt_retention'], ['00000000-0000-4000-8000-000000000259'])
+    expect(decide(request(U.reviewer, 'message:adopt_retention', retentionResource), otherOrg, retention(), NOW).reasons.map((r) => r.code)).toContain('OUT_OF_SCOPE')
   })
 })

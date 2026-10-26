@@ -395,12 +395,12 @@ describe.skipIf(!URL)('conversation lifecycle, retention and read markers on the
       const id = await mkThread(U.member, { staffId: U.steward })
       await as(steward, (tx) => access!.postThreadMessage(tx, steward, id, { body: BODY }))
       await as(member, (tx) => readState!.markThreadRead(tx, member, id))
-      await as(adminActor, (tx) => lifecycle!.setLegalHold(tx, adminActor, id, 'place', 'HOLD-REF-9921'))
+      expect(await as(adminActor, (tx) => lifecycle!.setLegalHold(tx, adminActor, id, 'place', 'HOLD-REF-9921'))).toEqual({ kind: 'forbidden' })
       await as(member, (tx) => lifecycle!.changeThreadLifecycle(tx, member, id, 'close'))
       await as(member, (tx) => lifecycle!.changeThreadLifecycle(tx, member, id, 'archive'))
       const audit = JSON.stringify((await admin.query(`SELECT row_to_json(a) AS r FROM audit_security.audit_logs a WHERE organization_id = $1`, [ORG_A])).rows)
       expect(audit).not.toMatch(/PRIVATE-BODY-TEXT|PRIVATE-SUBJECT|HOLD-REF-9921|POLICY-REF-1|AUTH-REF-1|dues file/)
-      for (const action of ['messages.message.create', 'messages.thread.read', 'messages.thread.hold_place', 'messages.thread.close', 'messages.thread.archive']) {
+      for (const action of ['messages.message.create', 'messages.thread.read', 'messages.thread.close', 'messages.thread.archive']) {
         expect(await audits(action), action).toBeGreaterThan(0)
       }
     })
@@ -418,7 +418,7 @@ describe.skipIf(!URL)('conversation lifecycle, retention and read markers on the
     }
     const liveCount = () => count(`SELECT count(*) AS n FROM message_retention_policies WHERE organization_id = $1 AND superseded_at IS NULL`, [ORG_A])
 
-    it('says "policy not adopted" until an organization records one; the period then comes only from an adopted record, by an administrator, and nothing is deleted', async () => {
+    it('says "policy not adopted" until a policy row exists; an administrator title cannot record one, and nothing is deleted', async () => {
       const id = await closedThread()
       const open = await mkThread(U.member2)
       expect(await retentionOf(open)).toEqual({ state: 'not_closed' })
@@ -433,18 +433,24 @@ describe.skipIf(!URL)('conversation lifecycle, retention and read markers on the
       expect(await as(adminActor, (tx) => lifecycle!.adoptRetentionPolicy(tx, adminActor, { retentionDays: 30, policyReference: ' ', authorityReference: 'a' }))).toEqual({ kind: 'invalid' })
       expect(await liveCount()).toBe(0)
 
-      const adopted = await as(adminActor, (tx) => lifecycle!.adoptRetentionPolicy(tx, adminActor, { retentionDays: 30, policyReference: 'Policy 1', authorityReference: 'Resolution 9' }))
-      expect(adopted).toMatchObject({ kind: 'ok', policy: { retentionDays: 30, adoptedBy: U.admin } })
-      expect(await audits('messages.retention.adopt')).toBeGreaterThan(0)
-      expect(JSON.stringify((await admin.query(`SELECT row_to_json(a) AS r FROM audit_security.audit_logs a WHERE organization_id = $1 AND action = 'messages.retention.adopt'`, [ORG_A])).rows)).not.toMatch(/Policy 1|Resolution 9/)
+      expect(await as(adminActor, (tx) => lifecycle!.adoptRetentionPolicy(tx, adminActor, { retentionDays: 30, policyReference: 'Policy 1', authorityReference: 'Resolution 9' }))).toEqual({ kind: 'forbidden' })
+      await admin.query(
+        `INSERT INTO message_retention_policies (organization_id, policy_reference, authority_reference, retention_days, adopted_by) VALUES ($1,'Policy 1','Resolution 9',30,$2)`,
+        [ORG_A, U.admin],
+      )
+      expect(await audits('messages.retention.adopt')).toBe(0)
       expect(await retentionOf(id, new Date(Date.now() + 10 * DAY))).toMatchObject({ state: 'retained' })
       expect(await retentionOf(id, new Date(Date.now() + 31 * DAY))).toMatchObject({ state: 'retention_elapsed' })
       // Reporting that a period has elapsed deletes nothing; the runtime role could not delete in any case.
       expect(await count(`SELECT count(*) AS n FROM messages WHERE thread_id = $1`, [id])).toBe(1)
       expect(await as(member, (tx) => readState!.getThreadDetail(tx, member, id, new Date(Date.now() + 90 * DAY)))).toMatchObject({ retention: { audience: 'member', state: 'retained' } })
 
-      // A second adoption supersedes the first: exactly one policy is live, and history is kept.
-      await as(adminActor, (tx) => lifecycle!.adoptRetentionPolicy(tx, adminActor, { retentionDays: 365, policyReference: 'Policy 2', authorityReference: 'Resolution 12' }))
+      // A later recorded policy supersedes the first. The application write stays mandate-gated and is not reached here.
+      await admin.query(`UPDATE message_retention_policies SET superseded_at = now(), superseded_by = $2 WHERE organization_id = $1 AND superseded_at IS NULL`, [ORG_A, U.admin])
+      await admin.query(
+        `INSERT INTO message_retention_policies (organization_id, policy_reference, authority_reference, retention_days, adopted_by) VALUES ($1,'Policy 2','Resolution 12',365,$2)`,
+        [ORG_A, U.admin],
+      )
       expect(await liveCount()).toBe(1)
       expect(await count(`SELECT count(*) AS n FROM message_retention_policies WHERE organization_id = $1`, [ORG_A])).toBe(2)
       expect(await retentionOf(id, new Date(Date.now() + 31 * DAY))).toMatchObject({ state: 'retained' })
@@ -458,13 +464,12 @@ describe.skipIf(!URL)('conversation lifecycle, retention and read markers on the
       await rejectsWith(raw(foreignAdmin, sql`INSERT INTO message_retention_policies (organization_id, policy_reference, authority_reference, retention_days, adopted_by) VALUES (${ORG_A}, 'p', 'a', 5, ${U.foreign})`), /row-level security/)
     })
 
-    it('rolls an adoption back when its audit record cannot be written', async () => {
+    it('an unauthorized adoption writes nothing even when an audit fault is armed', async () => {
       const before = await count(`SELECT count(*) AS n FROM message_retention_policies WHERE organization_id = $1`, [ORG_A])
       const liveBefore = await liveCount()
       await failAudit('messages.retention.adopt')
-      await rejectsWith(as(adminActor, (tx) => lifecycle!.adoptRetentionPolicy(tx, adminActor, { retentionDays: 90, policyReference: 'p', authorityReference: 'a' })), /injected audit fault/)
+      expect(await as(adminActor, (tx) => lifecycle!.adoptRetentionPolicy(tx, adminActor, { retentionDays: 90, policyReference: 'p', authorityReference: 'a' }))).toEqual({ kind: 'forbidden' })
       expect(await count(`SELECT count(*) AS n FROM message_retention_policies WHERE organization_id = $1`, [ORG_A])).toBe(before)
-      // The supersession of the live policy rolled back with it: the previous policy is still the live one.
       expect(await liveCount()).toBe(liveBefore)
     })
 

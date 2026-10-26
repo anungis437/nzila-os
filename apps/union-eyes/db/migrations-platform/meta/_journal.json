@@ -218,6 +218,13 @@
       "when": 1758860000000,
       "tag": "0029_message_thread_authority_scope",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1758870000000,
+      "tag": "0030_message_retention_authority_scope",
+      "breakpoints": true
     }
   ]
 }

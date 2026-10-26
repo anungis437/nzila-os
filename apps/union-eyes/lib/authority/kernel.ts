@@ -19,7 +19,7 @@ import { decideCase } from './policies/case'
 import { decideFinancialTransaction, decideMemberFinancialRecord } from './policies/finance'
 import { decideApproval, decideReview } from './policies/governance'
 import { decideWorkAid } from './policies/workaid'
-import { decideMessageThread } from './policies/message'
+import { decideMessageRetention, decideMessageThread } from './policies/message'
 
 const ACTION_RESOURCE: Record<string, readonly ResourceType[]> = {
   case: ['case'],
@@ -27,7 +27,7 @@ const ACTION_RESOURCE: Record<string, readonly ResourceType[]> = {
   governance: ['approval_request'],
   review: ['governance_review'],
   workaid: ['workaid_matter'],
-  message: ['message_thread'],
+  message: ['message_thread', 'message_retention'],
 }
 
 function distinct(ids: readonly string[]): boolean {
@@ -118,5 +118,7 @@ function evaluate(
       return decideWorkAid(req, facts, resource, now)
     case 'message_thread':
       return decideMessageThread(req, facts, resource, now)
+    case 'message_retention':
+      return decideMessageRetention(req, facts, resource, now)
   }
 }

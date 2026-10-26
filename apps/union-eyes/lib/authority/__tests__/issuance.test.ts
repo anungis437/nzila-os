@@ -159,7 +159,7 @@ describe('issuance policy: conflicts and domain protections', () => {
 
   it('a conversation legal hold is issuable only as a named governance power, with independent approval, and is not delegable', () => {
     const template = DEFAULT_ISSUANCE_TEMPLATES.find((entry) => entry.domain === 'governance_review' && entry.operation === 'issue')!
-    expect(template.allowedPowers).toEqual(['monitor', 'access_evidence', 'issue_finding', 'request_corrective_action', 'place_legal_hold', 'release_legal_hold'])
+    expect(template.allowedPowers).toEqual(['monitor', 'access_evidence', 'issue_finding', 'request_corrective_action', 'place_legal_hold', 'release_legal_hold', 'adopt_retention', 'read_retention_policy'])
     expect(template.requiredIndependentApprovals).toBeGreaterThanOrEqual(1)
     const gr = rule({
       domain: 'governance_review',
@@ -180,7 +180,7 @@ describe('issuance policy: conflicts and domain protections', () => {
     expect(run(hold, issuerFacts(), holder(['member'], U.reviewer), gr).effect).toBe('allow')
     expect(codes(run({ ...hold, approval: undefined }, issuerFacts(), holder(['member'], U.reviewer), gr))).toContain('APPROVAL_NOT_SATISFIED')
     expect(codes(run({ ...hold, powers: ['message:write'] }, issuerFacts(), holder(['member'], U.reviewer), gr))).toContain('EXCEEDS_RULE_CEILING')
-    expect(NON_DELEGABLE_ACTIONS).toEqual(expect.arrayContaining(['message:place_legal_hold', 'message:release_legal_hold']))
+    expect(NON_DELEGABLE_ACTIONS).toEqual(expect.arrayContaining(['message:place_legal_hold', 'message:release_legal_hold', 'message:adopt_retention', 'message:read_retention_policy']))
   })
 
   it('a governance reviewer cannot hold executive or financial authority', () => {

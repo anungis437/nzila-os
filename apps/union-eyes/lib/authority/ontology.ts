@@ -67,6 +67,7 @@ export type ResourceType =
   | 'governance_review'
   | 'workaid_matter'
   | 'message_thread'
+  | 'message_retention'
 
 export interface ResourceRef {
   type: ResourceType
@@ -306,6 +307,14 @@ export interface MessageThreadFacts {
   status: 'open' | 'closed'
 }
 
+/** The organization's conversation-retention duty. It is not a conversation and holds no message text. */
+export interface MessageRetentionFacts {
+  kind: 'message_retention'
+  /** The organization whose retention record is being read or recorded. */
+  id: Uuid
+  organizationId: Uuid
+}
+
 export type ResourceFacts =
   | CaseFacts
   | FinancialTransactionFacts
@@ -314,6 +323,7 @@ export type ResourceFacts =
   | GovernanceReviewFacts
   | WorkAidMatterFacts
   | MessageThreadFacts
+  | MessageRetentionFacts
 
 // ── Actions ────────────────────────────────────────────────────────────────
 
@@ -355,6 +365,9 @@ export const ACTIONS = [
   // Distinct from reading or replying. Neither action discloses message content.
   'message:place_legal_hold',
   'message:release_legal_hold',
+  // Recording or reading the organization's retention record. Neither action reads a conversation.
+  'message:adopt_retention',
+  'message:read_retention_policy',
 ] as const
 
 export type Action = (typeof ACTIONS)[number]

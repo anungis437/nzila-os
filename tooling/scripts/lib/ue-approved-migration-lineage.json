@@ -293,6 +293,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Extends the recusal resource check to message_thread and the non-delegable action check to message:place_legal_hold and message:release_legal_hold. Does not issue either power and has not been applied to a native or live database."
+      },
+      {
+        "tag": "0030_message_retention_authority_scope",
+        "sha256": "b88ac020e35afeed4222ce9e1eecc2fcb910beff812a7c6125ea247545979b6a",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Extends the recusal resource check to message_retention and the non-delegable action check to message:adopt_retention and message:read_retention_policy. Does not issue either power and has not been applied to a native or live database."
       }
     ]
   }

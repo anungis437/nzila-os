@@ -4,7 +4,7 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import type { CaseActor } from '@/lib/cases/case-authorization'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import { findReadableThread } from '@/lib/messaging/thread-access'
-import { decideMessageHold } from '@/lib/authority/store/route-adapter'
+import { decideMessageHold, decideMessageRetention } from '@/lib/authority/store/route-adapter'
 
 /**
  * Conversation lifecycle, legal hold and retention.
@@ -162,6 +162,19 @@ export interface RetentionPolicy {
   adoptedAt: string
 }
 
+export type RetentionRead = { kind: 'ok'; policy: RetentionPolicy | null } | { kind: 'forbidden' }
+
+/** The retention record, for a mandate that names this organization and `read_retention_policy`. */
+export async function readRetentionPolicy(tx: RLSTx, actor: CaseActor): Promise<RetentionRead> {
+  const decision = await decideMessageRetention(tx, {
+    userId: actor.userId,
+    organizationId: actor.organizationId,
+    action: 'message:read_retention_policy',
+  })
+  if (decision.effect !== 'allow') return { kind: 'forbidden' }
+  return { kind: 'ok', policy: await liveRetentionPolicy(tx, actor.organizationId) }
+}
+
 export async function liveRetentionPolicy(tx: RLSTx, organizationId: string): Promise<RetentionPolicy | null> {
   const [row] = await tx
     .select()
@@ -228,16 +241,17 @@ export function memberRetentionView(state: RetentionState): MemberRetention {
 export type AdoptResult = { kind: 'ok'; policy: RetentionPolicy } | { kind: 'forbidden' } | { kind: 'invalid' }
 
 /**
- * Records an organization's adopted retention period. The caller is an organization administrator, and the record names the
- * authority that adopted it; the system cannot verify that authority, so it stores the reference and who recorded it.
- * Adopting again supersedes the live policy. Nothing here changes any conversation.
+ * Records an organization's adopted retention period. A live governance mandate
+ * naming this organization and `adopt_retention` is the authority. The record
+ * stores the institutional reference the caller supplies; the mandate is what
+ * the kernel verified. Adopting again supersedes the live policy. Nothing here
+ * changes any conversation.
  */
 export async function adoptRetentionPolicy(
   tx: RLSTx,
   actor: CaseActor,
   input: { retentionDays: number; policyReference: string; authorityReference: string },
 ): Promise<AdoptResult> {
-  if (actor.role !== 'admin') return { kind: 'forbidden' }
   const policyReference = input.policyReference.trim()
   const authorityReference = input.authorityReference.trim()
   if (
@@ -251,6 +265,12 @@ export async function adoptRetentionPolicy(
   ) {
     return { kind: 'invalid' }
   }
+  const decision = await decideMessageRetention(tx, {
+    userId: actor.userId,
+    organizationId: actor.organizationId,
+    action: 'message:adopt_retention',
+  })
+  if (decision.effect !== 'allow') return { kind: 'forbidden' }
   const [superseded] = await tx
     .update(messageRetentionPolicies)
     .set({ supersededAt: new Date(), supersededBy: actor.userId })
