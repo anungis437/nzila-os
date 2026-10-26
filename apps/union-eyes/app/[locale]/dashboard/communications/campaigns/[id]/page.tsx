@@ -110,7 +110,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/messages/threads/${params.id}`);
+      const response = await fetch(`/api/communications/campaigns/${params.id}`);
       
       if (!response.ok) {
         if (response.status === 404) {
@@ -128,35 +128,11 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
     }
   };
 
-  const handleSendCampaign = async (dryRun: boolean = false) => {
-    try {
-      setActionLoading(true);
-      setError(null);
-
-      const response = await fetch(`/api/messages/threads/${params.id}/send`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dryRun }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || t('errors.sendFailed'));
-      }
-
-      const result = await response.json();
-      
-      if (dryRun) {
-        setDryRunResult(result);
-      } else {
-        setShowSendDialog(false);
-        await fetchCampaign(); // Refresh campaign data
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.sendFailed'));
-    } finally {
-      setActionLoading(false);
-    }
+  // No campaign delivery capability exists: the route this used to call (a message-thread path) never existed, so a
+  // "send" could only fail or be mistaken for a delivery. Say so and send nothing.
+  const handleSendCampaign = async (_dryRun: boolean = false) => {
+    setShowSendDialog(false);
+    setError(t('errors.sendUnavailable'));
   };
 
   const handleDeleteCampaign = async () => {
@@ -164,7 +140,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
       setActionLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/messages/threads/${params.id}`, {
+      const response = await fetch(`/api/communications/campaigns/${params.id}`, {
         method: 'DELETE',
       });
 

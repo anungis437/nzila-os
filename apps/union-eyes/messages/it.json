@@ -1913,6 +1913,7 @@
       "notFound": "Campagna non trovata",
       "fetchFailed": "Impossibile recuperare la campagna",
       "sendFailed": "Invio della campagna fallito",
+      "sendUnavailable": "L'invio delle campagne non è ancora disponibile. Nessun messaggio è stato inviato.",
       "deleteFailed": "Eliminazione della campagna fallita"
     },
     "backButton": "Torna alle Campagne",

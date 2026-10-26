@@ -1913,6 +1913,7 @@
       "notFound": "Campaign not found",
       "fetchFailed": "Failed to fetch campaign",
       "sendFailed": "Failed to send campaign",
+      "sendUnavailable": "Sending campaigns is not available yet. No message was sent.",
       "deleteFailed": "Failed to delete campaign"
     },
     "backButton": "Back to Campaigns",
