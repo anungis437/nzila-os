@@ -115,6 +115,22 @@
         {
           "type": "test",
           "ref": "apps/union-eyes/lib/auth/__tests__/session-membership-revocation.pglite.test.ts"
+        },
+        {
+          "type": "test",
+          "ref": "packages/db/src/auth-invite-revocation.test.ts"
+        },
+        {
+          "type": "test",
+          "ref": "packages/db/src/auth-inviter-lock.test.ts"
+        },
+        {
+          "type": "test",
+          "ref": "packages/platform-auth/src/invites/accept-invite-serialization.test.ts"
+        },
+        {
+          "type": "test",
+          "ref": "apps/union-eyes/scripts/bootstrap-v2/auth-invite-concurrency.native.test.ts"
         }
       ],
       "status": "OPEN",
@@ -159,6 +175,10 @@
         {
           "type": "test",
           "ref": "apps/union-eyes/lib/auth/__tests__/session-bearer-exposure.test.ts"
+        },
+        {
+          "type": "test",
+          "ref": "packages/db/src/auth-invite-revocation.test.ts"
         }
       ],
       "status": "IN_PROGRESS",

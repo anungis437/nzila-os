@@ -181,7 +181,7 @@ export const SUBORDINATE_AUTHORITY_REGISTER: readonly SubordinateAuthorityRecord
     status: 'ENFORCED',
     proof: BINDING_PROOF,
     residual:
-      'A bridge that records parentSessionId is denied on the same statement its parent is revoked, expired, or no longer that user. A bridge with no parentSessionId has no parent to revoke and stays bounded by its own expiry plus the live user and membership checks. Suspension does not revoke sessions; the binder refuses them regardless.',
+      'A bridge that records parentSessionId is denied on the same statement its parent is revoked, expired, or no longer that user. A bridge with no parent is denied unless device_info.bridgeClass is provider-no-parent, which is only the provider sign-in path and stays bounded by the bridge row expiry plus the live user and membership checks. Suspension does not revoke sessions; the binder refuses them regardless.',
   },
   {
     id: 'invite-tokens',
@@ -192,14 +192,17 @@ export const SUBORDINATE_AUTHORITY_REGISTER: readonly SubordinateAuthorityRecord
       'packages/db/src/auth-client.ts',
       'packages/db/src/auth-inviter-lock.ts',
     ],
-    gate: 'Single use, 7 days, hashed, role fixed by the row. Every redemption statement requires auth_invite_inviter_live(). The redemption transaction locks the inviter and re-reads that predicate before any membership or session write. The conferred role is a tenant role, never a kernel authority.',
-    status: 'OPEN',
+    gate: 'Single use, 7 days, hashed, role fixed by the row. Every redemption statement requires auth_invite_inviter_live(). The redemption transaction locks the inviter and re-reads that predicate before any membership or session write. Losing admin authority revokes that inviter’s still-pending invitations in the same statement. The conferred role is a tenant role, never a kernel authority.',
+    status: 'FIXED',
     proof: [
+      'packages/db/src/auth-invite-revocation.test.ts',
       'packages/db/src/auth-inviter-lock.test.ts',
       'packages/platform-auth/src/invites/accept-invite-serialization.test.ts',
+      'apps/union-eyes/scripts/bootstrap-v2/auth-native.test.ts',
+      'apps/union-eyes/scripts/bootstrap-v2/auth-invite-concurrency.native.test.ts',
     ],
     residual:
-      'Redemption and the lifecycle or membership writes that end inviter authority take one transaction advisory lock, then redemption re-reads the invite, so an offboarding that commits first cannot leave a membership or session. An inviter who is later reactivated still revives that inviter’s unexpired pending invitations: the system role has no invites UPDATE grant, and adding one changes the hash-locked auth manifest. A superuser role change that bypasses those writers is still denied by the next statement’s inviter predicate, and it does not take this lock.',
+      'Native concurrency, rollback, and reactivation proof is READY_FOR_VS_EXECUTION. The auth manifest grant is UPDATE(revoked_at) for the invite reader only, exercised by the revoke function. Reactivation does not clear revoked_at. A new invitation is required after authority returns.',
   },
   {
     id: 'mfa-challenges',

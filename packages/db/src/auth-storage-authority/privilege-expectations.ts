@@ -13,7 +13,10 @@ export const AUTH_PRIVILEGE_EXPECTATIONS: Record<string, Record<string, Record<s
   nzila_auth_org_authority_reader: {
     users: { SELECT: ['user_id', 'is_active', 'lifecycle_state'] },
     organization_users: { SELECT: ['user_id', 'organization_id', 'role', 'is_active'] },
-    invites: { SELECT: ['token_hash', 'organization_id', 'invited_by'] },
+    invites: {
+      SELECT: ['token_hash', 'organization_id', 'invited_by', 'accepted_at', 'revoked_at'],
+      UPDATE: ['revoked_at'],
+    },
     user_sessions: { SELECT: ['session_id', 'user_id', 'organization_id', 'session_token_hash', 'is_active', 'expires_at', 'device_info'] },
   },
   nzila_auth_lookup: {
@@ -82,6 +85,9 @@ export const AUTH_FUNCTION_EXPECTATIONS = [
   { name: 'auth_business_user_parent_authorized', owner: 'nzila_auth_org_authority_reader', callers: ['union_eyes_runtime'] },
   { name: 'auth_business_member_parent_authorized', owner: 'nzila_auth_org_authority_reader', callers: ['union_eyes_runtime'] },
   { name: 'auth_invite_inviter_live', owner: 'nzila_auth_org_authority_reader', callers: ['nzila_auth_redemption'] },
+  { name: 'auth_revoke_pending_invites', owner: 'nzila_auth_org_authority_reader', callers: [] },
+  { name: 'auth_revoke_invites_on_user_change', owner: 'nzila_auth_org_authority_reader', callers: ['nzila_auth_lifecycle'] },
+  { name: 'auth_revoke_invites_on_membership_change', owner: 'nzila_auth_org_authority_reader', callers: ['nzila_auth_system_mutation', 'nzila_auth_redemption'] },
   { name: 'auth_failed_login_count', owner: 'nzila_auth_risk_aggregate', callers: ['nzila_auth_identity'] },
   { name: 'auth_request_count', owner: 'nzila_auth_risk_aggregate', callers: ['nzila_auth_issuance'] },
   { name: 'auth_lifecycle_actor', owner: 'nzila_auth_provider_reader', callers: ['nzila_auth_lifecycle', 'nzila_auth_mfa_admin'] },

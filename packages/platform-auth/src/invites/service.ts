@@ -194,7 +194,6 @@ async function acceptInviteWithContext(input: AcceptInviteInput, tokenHash: stri
       ),
     )
     .limit(1)
-    .for('update')
 
   if (!invite) {
     await logEvent('invite_accept_failed', {

@@ -203,6 +203,9 @@ native('local native PostgreSQL auth execution boundary', () => {
       await owner.query(`UPDATE user_management.organization_users SET role='member' WHERE user_id='auth-proof-a'`)
       expect((await acceptInvite({ token: demoted })).success).toBe(false)
       expect(await outcome('invite-demoted@example.invalid')).toBe(0)
+      await owner.query(`UPDATE user_management.organization_users SET role='admin', is_active=true WHERE user_id='auth-proof-a'`)
+      expect((await acceptInvite({ token: demoted })).success).toBe(false)
+      expect((await owner.query(`SELECT revoked_at IS NOT NULL AS revoked FROM user_management.invites WHERE email='invite-demoted@example.invalid'`)).rows[0].revoked).toBe(true)
 
       await owner.query(`UPDATE user_management.organization_users SET role='admin', is_active=false WHERE user_id='auth-proof-a'`)
       await expect(createInvite({ email: 'invite-offboarded@example.invalid', invitedBy: cookies.actor, organizationId, role: 'member' })).rejects.toThrow()
@@ -212,6 +215,7 @@ native('local native PostgreSQL auth execution boundary', () => {
       expect((await acceptInvite({ token: removed })).success).toBe(false)
       expect(await outcome('invite-removed@example.invalid')).toBe(0)
       await owner.query(`UPDATE user_management.organization_users SET is_active=true WHERE user_id='auth-proof-a'`)
+      expect((await acceptInvite({ token: removed })).success).toBe(false)
 
       const suspended = await issue('invite-suspended@example.invalid')
       await owner.query(`UPDATE user_management.users SET lifecycle_state='suspended' WHERE user_id='auth-proof-a'`)
@@ -219,6 +223,7 @@ native('local native PostgreSQL auth execution boundary', () => {
         expect((await acceptInvite({ token: suspended })).success).toBe(false)
         expect(await outcome('invite-suspended@example.invalid')).toBe(0)
       } finally { await owner.query(`UPDATE user_management.users SET lifecycle_state='active' WHERE user_id='auth-proof-a'`) }
+      expect((await acceptInvite({ token: suspended })).success).toBe(false)
 
       // A forged row whose inviter never administered the organization cannot be redeemed.
       const forgedToken = 'forged-invite-token-without-admin-inviter'
@@ -272,6 +277,19 @@ native('local native PostgreSQL auth execution boundary', () => {
         expect(await allowed()).toBe(false)
         await setParent(created.session.sessionId)
         expect(await allowed()).toBe(true)
+        await setParent(null)
+        expect(await allowed()).toBe(false)
+        await clients.owner.query(
+          `UPDATE user_management.user_sessions SET device_info=jsonb_set(device_info-'parentSessionId','{bridgeClass}',to_jsonb('provider-no-parent'::text)) WHERE session_token_hash=$1`,
+          [hash],
+        )
+        expect(await allowed()).toBe(true)
+        await clients.owner.query(
+          `UPDATE user_management.user_sessions SET device_info=device_info-'bridgeClass' WHERE session_token_hash=$1`,
+          [hash],
+        )
+        expect(await allowed()).toBe(false)
+        await setParent(created.session.sessionId)
         // Revoking only the parent, while the bridge row itself is still live and unexpired, ends authority at once.
         await clients.owner.query('UPDATE user_management.user_sessions SET is_active=false WHERE session_id=$1', [created.session.sessionId])
         expect((await clients.owner.query('SELECT is_active FROM user_management.user_sessions WHERE session_token_hash=$1', [hash])).rows[0].is_active).toBe(true)

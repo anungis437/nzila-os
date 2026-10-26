@@ -1,0 +1,100 @@
+{
+  "record": "VS_CODE_EXECUTION_QUEUE",
+  "owner": "VS Code executes. Cursor prepares and does not mark these PASS.",
+  "integrationBranch": "agents/ue-final-convergence",
+  "implementationBranch": "agents/ue-cursor-final-closure",
+  "pullRequest": 1014,
+  "preservedCommit": "960a88481aa1f5a9db2ddfaa6f3da510b743a1bc",
+  "verdicts": {
+    "CURSOR_IMPLEMENTATION_COMPLETE": false,
+    "VS_NATIVE_VALIDATION_COMPLETE": false,
+    "CREDENTIALED_PERSONA_ACCEPTANCE_COMPLETE": false,
+    "INSTITUTIONAL_POLICY_ADOPTED": false,
+    "STAGING_RELEASE_AUTHORIZED": false,
+    "PRODUCTION_RELEASE_AUTHORIZED": false
+  },
+  "items": [
+    {
+      "id": "auth-native-pg16",
+      "status": "READY_FOR_VS_EXECUTION",
+      "risk": "P0",
+      "dependsOn": [],
+      "convergenceRegister": ["UE-CONV-A-003", "UE-CONV-A-004"],
+      "sourceCommit": "PENDING_INTRODUCING_COMMIT",
+      "sourceCommitCommand": "git log -1 --format=%H -- apps/union-eyes/scripts/bootstrap-v2/auth-native.test.ts packages/db/src/auth-storage-authority/bootstrap-sql.ts",
+      "test": "apps/union-eyes/scripts/bootstrap-v2/auth-native.test.ts",
+      "command": "AUTH_NATIVE_PROOF=1 pnpm exec vitest run apps/union-eyes/scripts/bootstrap-v2/auth-native.test.ts",
+      "workingDirectory": "repository root of agents/ue-cursor-final-closure",
+      "environment": {
+        "AUTH_NATIVE_PROOF": "1",
+        "docker": "required; the suite starts and removes its own container",
+        "image": "pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337",
+        "role": "suite creates auth_proof_login and auth_proof_system_login and the bootstrap roles; Cursor does not run this"
+      },
+      "fixtureSetup": "beforeAll runs the pinned image, waits until PostgreSQL accepts connections, applies compileSyntheticAuthFixtureSql and compileAuthBootstrapSql, and points AUTH_DATABASE_URL and AUTH_SYSTEM_DATABASE_URL at the container.",
+      "cleanup": "afterAll closes clients and runs docker rm --force on the container it created. If the process is killed first, remove any container named ue-auth-v2-*.",
+      "expect": {
+        "success": [
+          "Privilege inspection failures and gaps are empty, including EXECUTE only for the owner or the listed callers of auth_revoke_pending_invites, auth_revoke_invites_on_user_change and auth_revoke_invites_on_membership_change.",
+          "Demotion, membership removal and suspension make the pending token fail, and restoring admin, is_active or lifecycle_state does not clear revoked_at or let that token succeed.",
+          "A bridge with parentSessionId is allowed only while that parent session is active, unexpired and the same user.",
+          "A bridge with neither a live parent nor device_info.bridgeClass provider-no-parent is denied.",
+          "A bridge with parentSessionId null and bridgeClass provider-no-parent is allowed only while that bridge row is itself live."
+        ],
+        "denial": [
+          "Forged inviter, foreign organization, revoked parent, expired parent and a parentless bridge without the provider class confer nothing.",
+          "Do not record PASS from the compiler-only describe. That describe runs when AUTH_NATIVE_PROOF is unset and does not exercise PostgreSQL."
+        ]
+      },
+      "evidenceOutput": "docs/union-eyes/convergence/evidence/auth-native-pg16.json",
+      "failureInterpretation": "A privilege failure means the new revoke grants or function owner, SECURITY DEFINER, search_path or EXECUTE list do not match AUTH_FUNCTION_EXPECTATIONS. A redemption success after reactivation means revoked_at was cleared or the live-inviter predicate ignored it. A parentless bridge that is allowed without bridgeClass means the old IS NULL parent clause is still installed.",
+      "recovery": "docker rm --force the suite container. Do not point the suite at a shared database. Re-run only after the implementation commit that introduced the assertion is the one under test."
+    },
+    {
+      "id": "auth-invite-concurrency",
+      "status": "READY_FOR_VS_EXECUTION",
+      "risk": "P0",
+      "dependsOn": ["auth-native-pg16"],
+      "convergenceRegister": ["UE-CONV-A-003"],
+      "sourceCommit": "PENDING_INTRODUCING_COMMIT",
+      "sourceCommitCommand": "git log -1 --format=%H -- apps/union-eyes/scripts/bootstrap-v2/auth-invite-concurrency.native.test.ts",
+      "test": "apps/union-eyes/scripts/bootstrap-v2/auth-invite-concurrency.native.test.ts",
+      "command": "UE_AUTH_CONCURRENCY_PROOF=1 UE_AUTH_OWNER_URL=<empty-localhost-superuser-url> pnpm exec vitest run apps/union-eyes/scripts/bootstrap-v2/auth-invite-concurrency.native.test.ts",
+      "workingDirectory": "repository root of agents/ue-cursor-final-closure",
+      "environment": {
+        "UE_AUTH_CONCURRENCY_PROOF": "1",
+        "UE_AUTH_OWNER_URL": "superuser URL of an empty disposable database; the local URL shape is the comment at the top of the test file",
+        "docker": "not started by this file; provide PostgreSQL 16 yourself",
+        "role": "the suite creates auth_concurrency_login and auth_concurrency_system_login and grants the gateway roles"
+      },
+      "fixtureSetup": "Applies compileSyntheticAuthFixtureSql and compileAuthBootstrapSql on UE_AUTH_OWNER_URL, creates the two login roles, and seeds concurrency-inviter as an active admin of organization 11111111-1111-4111-8111-111111111111 only.",
+      "cleanup": "Drop the disposable database. The suite closes its clients and does not drop the database. The redemption-first test adds and then drops trigger concurrency_wait; if the test is killed during the wait, set user_management.concurrency_gate.open to true and drop the trigger before retrying.",
+      "expect": {
+        "success": [
+          "Offboarding that commits while redemption waits returns success false and Invalid or expired invite, sets revoked_at, and inserts no user.",
+          "Membership removal that commits while redemption waits does the same.",
+          "Rollback of a suspend releases the inviter lock, leaves revoked_at null, lets one redemption succeed, and makes the replay fail.",
+          "An offboarding UPDATE waits while another session holds pg_advisory_xact_lock on auth-inviter:concurrency-inviter, then commits after ROLLBACK.",
+          "Reactivation does not clear revoked_at and the suspended token still fails.",
+          "An invitation for organization 22222222-2222-4222-8222-222222222222 fails. The organization A redemption creates a membership only in organization A.",
+          "Redemption that holds the lock first succeeds. The waiting suspend then revokes the still-pending sibling and does not revoke the accepted invitation."
+        ],
+        "denial": [
+          "Five tests stay skipped unless UE_AUTH_CONCURRENCY_PROOF=1. A skipped run is not evidence.",
+          "Do not point UE_AUTH_OWNER_URL at a shared or production database. Bootstrap raises if auth policies already exist."
+        ]
+      },
+      "evidenceOutput": "docs/union-eyes/convergence/evidence/auth-invite-concurrency.json",
+      "failureInterpretation": "Lock timeout not observed on the redemption-first test means redemption never held auth-inviter:<user> through the user insert, or the gate trigger did not run. A redemption that succeeds after the offboarding commit means the re-read or the same-statement revoke did not happen. A sibling that stays unrevoked after the later suspend means the trigger did not update pending invites. A 500ms lock-wait failure means the second offboarding did not block.",
+      "recovery": "Drop the disposable database and retry. Do not weaken a timeout into a mock. Do not grant the system role a general invites UPDATE to make a failure pass."
+    }
+  ],
+  "nextEngineeringAction": [
+    "Do not edit commit 960a88481aa1f5a9db2ddfaa6f3da510b743a1bc or docs/union-eyes/convergence/UE-FINAL-CONVERGENCE-CHECKPOINT-8.md.",
+    "Do not start Docker and do not set AUTH_NATIVE_PROOF or UE_AUTH_CONCURRENCY_PROOF in Cursor.",
+    "The route-coverage baseline on this branch records auditGap [] and kernelPending []. Checkpoint 5 recorded 313 mutating routes without route-level atomic-audit evidence and 42 case, claim, document and message mutations not kernel-decided. The scanner now excludes a route from kernelPending when subordinate is set. Eight live domain mutations are outside the kernel flag: messages/retention-policy, messages/threads, messages/threads/[threadId]/messages, assignment, legal-hold, lifecycle, read (THREAD_POLICY) and external/grievances/[id]/documents/upload (EXTERNAL_AUTHORITY). Next implementation reads those eight and any kernel-flagged domain route whose decision is only an import, and gives each operative action-level authority, resource relationship, tenant binding, mandate and delegation limits, privacy classification, triage where it applies, revocation, one database transaction, durable audit and negative tests. Do not clear them by editing the scanner.",
+    "Schema census on this branch is 231 entries in docs/union-eyes/convergence/register/ue-canonical-schema-census.json. The mutation-scope baseline sums to 13. Checkpoint 5 recorded 351 and 276 before those shrinks. Continue only entries that lack a machine-verifiable engineering disposition. Do not regenerate either baseline to change the count.",
+    "Finance stays fail-closed until a governed issuance and activation workflow exists. Do not invent mandate holders.",
+    "CURSOR_IMPLEMENTATION_COMPLETE remains false."
+  ]
+}

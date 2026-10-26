@@ -6,6 +6,11 @@ export const AUTH_BUSINESS_MEMBER_PARENT_PREDICATE = 'user_management.auth_busin
 export const AUTH_BUSINESS_CONTEXT_KEYS = ['app.current_user_id', 'app.current_org_id', 'app.current_session_token'] as const
 /** Marks the 30-second request-scoped bridge row minted by `withResolvedOrgBinding`. */
 export const AUTH_BRIDGE_PURPOSE = 'business-org-binding'
+/**
+ * A provider sign-in has no parent session cookie. The bridge must say so.
+ * A business-org bridge that omits both this class and a parent id confers nothing.
+ */
+export const AUTH_BRIDGE_PROVIDER_NO_PARENT = 'provider-no-parent'
 
 export function authBusinessContextSettings(binding: {
   userId: string; organizationId: string; sessionToken: string
@@ -63,10 +68,16 @@ export function compileAuthOrgBindingSql(options: { ordinaryRole?: string } = {}
             AND s.is_active AND s.expires_at>statement_timestamp()
             AND (s.organization_id IS NULL OR s.organization_id=row_org)
             AND (s.device_info->>'purpose' IS DISTINCT FROM '${AUTH_BRIDGE_PURPOSE}'
-              OR s.device_info->>'parentSessionId' IS NULL
-              OR EXISTS (SELECT FROM user_management.user_sessions p
-                WHERE p.session_id::text=s.device_info->>'parentSessionId' AND p.user_id=s.user_id
-                  AND p.is_active AND p.expires_at>statement_timestamp()))
+              OR (
+                NULLIF(s.device_info->>'parentSessionId','') IS NOT NULL
+                AND EXISTS (SELECT FROM user_management.user_sessions p
+                  WHERE p.session_id::text=s.device_info->>'parentSessionId' AND p.user_id=s.user_id
+                    AND p.is_active AND p.expires_at>statement_timestamp())
+              )
+              OR (
+                NULLIF(s.device_info->>'parentSessionId','') IS NULL
+                AND s.device_info->>'bridgeClass'='${AUTH_BRIDGE_PROVIDER_NO_PARENT}'
+              ))
             AND u.is_active AND u.lifecycle_state='active' AND m.is_active
             AND (required_roles IS NULL OR m.role=ANY(required_roles))
         ) $auth$;
