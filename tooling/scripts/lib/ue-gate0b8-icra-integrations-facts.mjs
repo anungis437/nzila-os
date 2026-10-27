@@ -24,6 +24,7 @@ const CRUD_GOVERNANCE_FILE = `${APP}lib/api/crud-governance.ts`
 const CONTROL_PLANE = `${APP}lib/integrations/control-plane.ts`
 const SYNC_ENGINE = `${APP}lib/integrations/sync-engine.ts`
 const FACTORY = `${APP}lib/integrations/factory.ts`
+const OPERATION_AUDIT = `${APP}lib/audit/operation-audit.ts`
 const WEBHOOK_SERVICE = `${APP}lib/services/rewards/webhook-service.ts`
 const REDEMPTION_SERVICE = `${APP}lib/services/rewards/redemption-service.ts`
 const REWARDS_SCHEMA = `${APP}db/schema/domains/infrastructure/rewards.ts`
@@ -183,6 +184,7 @@ const DEF_CHECKOUT_CONFIG = 'DEF-0B8-ICRA-CHECKOUT-REDIRECT-DEFAULTS-TO-LOCALHOS
 const DEF_CREDENTIALS = 'DEF-0B8-ICRA-INTEGRATION-CREDENTIALS-NEVER-STORED-OR-RESOLVED-YET-REPORTED-STORED'
 const DEF_DRY_RUN = 'DEF-0B8-ICRA-SYNC-DRY-RUN-IS-ACCEPTED-AND-AUDITED-BUT-NEVER-READ'
 const DEF_SYNC_LOCAL = 'DEF-0B8-ICRA-SYNC-CONCURRENCY-GUARD-AND-INSTANCE-CACHE-ARE-PROCESS-LOCAL'
+const DEF_SYNC_AUDIT = 'DEF-0B8-ICRA-SYNC-OUTCOME-AUDIT-IS-WRITTEN-AFTER-THE-EFFECT-AND-ITS-FAILURE-IS-SWALLOWED'
 const DEF_CONFIG_RESET = 'DEF-0B8-ICRA-CONFIGURE-UPDATE-RESETS-OMITTED-ENABLED-SETTINGS-AND-WEBHOOK-URL'
 const DEF_API_KEYS = 'DEF-0B8-ICRA-API-KEYS-ROUTES-REFUSE-EVERY-REQUEST-WHILE-THE-AUTHORITY-REGISTER-CALLS-THEM-LIVE'
 const DEF_SHOPIFY_CODE = 'DEF-0B8-ICRA-SHOPIFY-DISCOUNT-CODE-NEVER-MATCHES-THE-WEBHOOK-EXTRACTOR'
@@ -250,6 +252,8 @@ export const DEFECTS = [
     'The integration sync route accepts dryRun in the body, passes it into SyncOptions and records dryRun in the audited details, but neither the sync engine nor any adapter reads it, so a steward who sets dryRun true expecting a rehearsal is recorded in the audit trail as having requested a dry run for an operation that is executed as a normal synchronization.'),
   D(DEF_SYNC_LOCAL, PROVIDER_CAP, GATE, 'LOW',
     'The sync engine prevents concurrent runs with a process-local Set keyed organization, provider and type, and the integration factory caches adapter instances in a process-local Map keyed organization and provider that the sync route never evicts, so two instances can run the same synchronization at once and a reconfigured integration can keep serving the adapter built from the earlier configuration until the process restarts.'),
+  D(DEF_SYNC_AUDIT, PROVIDER_CAP, GATE, 'LOW',
+    'The integration sync route records its outcome audit row (completed or failed) in a separate transaction after the sync engine has already written provider data, and recordOutcome catches any failure of that write and only logs platform_operation_outcome_not_recorded, so a synchronization that changed organization data can leave the audit trail holding only the requested intent row with no outcome, and the response to the steward does not say the outcome was not recorded.'),
   D(DEF_CONFIG_RESET, PROVIDER_CAP, GATE, 'LOW',
     'The integration configure route on an existing provider row writes enabled input.enabled ?? false, settings input.settings ?? {} and webhookUrl input.webhookUrl ?? null into the update, so a steward who changes only the credential reference silently disables the integration and clears its settings and webhook URL, and a configure call with enabled true switches the integration on without the concurrency predicate that the activate route applies.'),
   D(DEF_API_KEYS, PROVIDER_CAP, GATE, 'MEDIUM',
@@ -1123,12 +1127,13 @@ const syncPost = (a) => mk({
     a.svc('defect', SYNC_ENGINE, 'private runningJobs: Set<string> = new Set();'),
     a.svc('defect', FACTORY, 'private instances: Map<string, IIntegration> = new Map();'),
     a.svc('defect', CONTROL_PLANE, 'credentialsStored: true,', 'toPublicConfig'),
+    a.svc('defect', OPERATION_AUDIT, "logger.error('platform_operation_outcome_not_recorded', { action: record.action, outcome, error })", 'recordOutcome'),
   ],
   inf: [
     { claim: 'defect', statement: 'A repository search finds dryRun only in lib/integrations/types.ts and control-plane.ts: it is placed in SyncOptions and in the audit details and is never read by the sync engine or by an adapter.' },
     { claim: 'defect', statement: 'The factory builds the adapter from integration_configs.credentials, which the control plane writes only as {credentialRef}, and the adapter initialize calls validateConfig, which requires apiKey (or clientId and clientSecret), so each sync that reaches the adapter fails at initialization.' },
   ],
-  def: [DEF_CREDENTIALS, DEF_DRY_RUN, DEF_SYNC_LOCAL],
+  def: [DEF_CREDENTIALS, DEF_DRY_RUN, DEF_SYNC_LOCAL, DEF_SYNC_AUDIT],
   corr: [NOT_ATOMIC],
 })
 

@@ -507,7 +507,7 @@ test('the matrix pins the Gate 0B.4 files and a changed file fails the pin', () 
   delete absent.routeClassification0b4
   assert.ok(validateGate0(absent).problems.some((problem) => /CLASSIFICATION-PIN-ABSENT/.test(problem)))
   const drift = clone(matrix)
-  drift.routeDefects[drift.routeDefects.length - 1].ownerCapabilityId = IDS.CALENDAR
+  drift.routeDefects[drift.routeDefects.length - 1].ownerCapabilityId = 'UE-OMIT-DRIFTED-OWNER'
   assert.ok(validateGate0(drift).problems.some((problem) => /ROUTE-DEFECT-DRIFT/.test(problem)))
   assert.equal(FILES_0B4.classification, 'docs/union-eyes/convergence/register/ue-route-classification-0b4.json')
 })

@@ -164,6 +164,7 @@ export const GROUPS = {
     domain: 'MEETING_ROOM_BOOKINGS_PATH_OVER_MEETING_ROOM_ITEM',
     actor: 'Member reading, and administrator removing, a meeting room under a path named for the bookings of the room',
     routes: ['meeting-rooms/[id]/bookings/route.ts'],
+    methods: ['DELETE', 'GET'],
     evidence: [
       ev(`${APP}db/schema/calendar-schema.ts`, "export const meetingRooms = pgTable('meeting_rooms', {"),
       ev(`${APP}db/schema/calendar-schema.ts`, "export const roomBookings = pgTable('room_bookings', {"),

@@ -20,6 +20,7 @@ import { FILE_REVIEW_QUEUE } from './ue-gate0b7-release-dispositions.mjs'
 import { FILES_0B8, validateClassification8 } from './ue-gate0b8-classification.mjs'
 import { ANCHOR_COMMIT, DECISION_BOUND_OPERATIONS, PRIOR_TRANCHES, TRANCHE_ID, TRANCHE_SIZE } from './ue-gate0b8-ids.mjs'
 import { groupOfRoute } from './ue-gate0b8-groups.mjs'
+import { DEFECT_RISK_CATEGORIES, RISK_SCREENS } from './ue-gate0b8-risk-screen.mjs'
 import { DECISIONS_0B8, DEFECTS_0B8, UNRESOLVED_0B8, factsFor } from './ue-gate0b8-modules.mjs'
 import { FILE_EXCEPTIONS, validateDecisionBoundExceptions } from './ue-gate0b6-exceptions.mjs'
 import { callerFindingOf, callersOf, loadApiReferences } from './ue-gate0b3-callers.mjs'
@@ -95,15 +96,22 @@ export function buildClassification8() {
     record.callers = callersOf(route, references)
     record.callerFinding = callerFindingOf(record.callers)
     record.institutionalDecisions = record.institutionalDecisions ?? []
+    record.riskScreen = RISK_SCREENS[id] ?? {}
     for (const key of Object.keys(record)) if (record[key] === undefined) delete record[key]
     for (const field of ['defects', 'manifestCorrections']) record[field] = record[field] ?? []
     records.push(record)
   }
 
+  for (const id of Object.keys(DEFECT_RISK_CATEGORIES)) if (!DEFECTS_0B8.some((defect) => defect.id === id)) throw new Error(`risk category map names unknown defect ${id}`)
   const exposures = classification0b1.unauthenticated.filter((record) => record.disposition === 'UNJUSTIFIED_EXPOSURE')
   const defectRegister = [
     ...classification0b7.defectRegister,
-    ...DEFECTS_0B8.map((defect) => ({ ...defect, tranche: '0B.8', releaseBlocking: defect.releaseDisposition?.disposition === 'RELEASE_BLOCKING' })),
+    ...DEFECTS_0B8.map((defect) => ({
+      ...defect,
+      ...(DEFECT_RISK_CATEGORIES[defect.id] ? { riskCategories: DEFECT_RISK_CATEGORIES[defect.id] } : {}),
+      tranche: '0B.8',
+      releaseBlocking: defect.releaseDisposition?.disposition === 'RELEASE_BLOCKING',
+    })),
   ]
   const hash = trancheHash(manifest.operations)
   const classification = {

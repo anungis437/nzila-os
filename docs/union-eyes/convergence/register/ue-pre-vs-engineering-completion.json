@@ -6828,7 +6828,7 @@
   },
   "routeOwnership": {
     "file": "docs/union-eyes/convergence/register/ue-route-capability-ownership.json",
-    "entriesHash": "a93b8191848a455f8996e7e6c3a65d30cbaf7a129522fa151221f2254a1f9a8f",
+    "entriesHash": "e6ac896e870f479d368ab05b41a163f700f710d85c886892b8fe325f14d81d50",
     "operations": 1644
   },
   "routeClassification": {
@@ -6947,7 +6947,7 @@
       },
       "classification": {
         "file": "docs/union-eyes/convergence/register/ue-route-classification-0b8.json",
-        "sha256": "26104b32d8a172e67ab3c15f29d7628054b9f515f9a88213c5a3da6700f06af7"
+        "sha256": "f1ab2813bd16f6fb07c4a5b87c39a5bd3a32ad409ba68dbe4f183c943f33cf9a"
       }
     }
   },
@@ -6963,8 +6963,8 @@
     ]
   },
   "routeInventoryTotals": {
-    "OWNED": 1127,
-    "SCOPE_UNDECIDED_AWAITING_CLASSIFICATION": 376,
+    "OWNED": 1126,
+    "SCOPE_UNDECIDED_AWAITING_CLASSIFICATION": 377,
     "DECISION_BOUND_SCOPE_EXCEPTION": 4,
     "RETIRED_501": 97,
     "STUB_501": 31,
@@ -10222,6 +10222,14 @@
     },
     {
       "id": "DEF-0B8-ICRA-SYNC-CONCURRENCY-GUARD-AND-INSTANCE-CACHE-ARE-PROCESS-LOCAL",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-SYNC-OUTCOME-AUDIT-IS-WRITTEN-AFTER-THE-EFFECT-AND-ITS-FAILURE-IS-SWALLOWED",
       "gate": 14,
       "severity": "LOW",
       "ownerCapabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",

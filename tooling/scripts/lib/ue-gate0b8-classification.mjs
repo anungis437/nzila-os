@@ -15,13 +15,14 @@ import { releaseDispositionProblems, validateReviewQueue } from './ue-gate0b7-re
 import { ANCHOR_COMMIT, DECISION_BOUND_OPERATIONS, PRIOR_TRANCHES, TRANCHE_ID, TRANCHE_SIZE } from './ue-gate0b8-ids.mjs'
 import { CAPABILITY_DOMAINS, OWNERSHIP_GROUPS } from './ue-gate0b8-groups.mjs'
 import { CAPABILITY_RECORDS, UNRESOLVED_0B8 } from './ue-gate0b8-modules.mjs'
+import { riskCategoryProblems, riskCoverage, riskDefectProblems } from './ue-gate0b8-risk-screen.mjs'
 
 export const FILES_0B8 = {
   manifest: 'docs/union-eyes/convergence/register/ue-route-tranche-0b8-manifest.json',
   classification: 'docs/union-eyes/convergence/register/ue-route-classification-0b8.json',
 }
 
-export const RECORD_FIELDS_0B8 = [...new Set([...RECORD_FIELDS_0B2, ...RECORD_FIELDS_0B6])]
+export const RECORD_FIELDS_0B8 = [...new Set([...RECORD_FIELDS_0B2, ...RECORD_FIELDS_0B6, 'riskScreen'])]
 export const NEW_CAPABILITY_IDS = CAPABILITY_RECORDS.map((record) => record.id)
 const TRANCHE_DEFECT = '0B.8'
 const PRIOR_DISPOSITION_TRANCHE = '0B.7'
@@ -189,14 +190,25 @@ export function validateClassification8({
   const frozenSet = new Set(frozen)
   const seen = new Set()
   const cited = new Set()
+  const newRegisterDefects = register.filter((defect) => defect.tranche === TRANCHE_DEFECT)
+  const newDefectById = new Map(newRegisterDefects.map((defect) => [defect.id, defect]))
   for (const record of records) {
     if (seen.has(record.id)) problems.push(`classification ${record.id} is recorded twice`)
     seen.add(record.id)
     if (!frozenSet.has(record.id)) problems.push(`classification ${record.id} is not in the frozen tranche`)
     problems.push(...validateRecord8(record, ctx))
+    problems.push(...riskCategoryProblems(record, newDefectById, { exists, readText }))
     for (const id of record.defects ?? []) cited.add(id)
   }
+  for (const defect of newRegisterDefects) problems.push(...riskDefectProblems(defect))
+  for (const defect of register.filter((item) => item.tranche !== TRANCHE_DEFECT)) {
+    if ('riskCategories' in defect) problems.push(`defect ${defect.id} of an earlier tranche gained riskCategories; the frozen records are preserved`)
+  }
   for (const id of frozen) if (!seen.has(id)) problems.push(`tranche operation ${id} has no classification record`)
+  for (const entry of entries ?? []) {
+    const id = `${entry[0]}|${entry[1]}`
+    if (typeof entry[2] === 'string' && entry[2].startsWith(OPTIONS_0B8.rulePrefix) && !frozenSet.has(id)) problems.push(`ownership rule ${entry[2]} owns ${id}, which is outside the frozen tranche; a rule may own only the 100 selected operations`)
+  }
   for (const defect of register) {
     if (defect.tranche === '0B.8' && !cited.has(defect.id)) problems.push(`defect ${defect.id} is recorded but no classification cites it`)
   }
@@ -309,6 +321,8 @@ export function validateClassification8({
     newHighDefects: newDefects.filter((defect) => defect.severity === 'HIGH').length,
     releaseDispositions: Object.fromEntries(['RELEASE_BLOCKING', 'CONDITIONALLY_BLOCKING', 'NON_BLOCKING_WITH_JUSTIFICATION'].map((name) => [name, newDefects.filter((defect) => defect.releaseDisposition?.disposition === name).length])),
     reviewQueue: (reviewQueue?.entries ?? []).length,
+    riskCategoryDefects: riskCoverage(newDefects),
+    riskScreens: records.reduce((total, record) => total + Object.keys(record.riskScreen ?? {}).length, 0),
     preservedReleaseBlockingDispositions: preserved.filter((defect) => defect.releaseDisposition?.disposition === 'RELEASE_BLOCKING').length,
   }
   if (classification.summary && JSON.stringify(classification.summary) !== JSON.stringify(summary)) problems.push('classification summary does not match its records')

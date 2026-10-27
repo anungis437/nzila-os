@@ -4127,6 +4127,9 @@
         "existingContainment": "NONE",
         "justification": "The anonymous option is offered in the live report forms and the identity of the reporter is written and returned by routes whose readers include the lowest organization role on the item reads; no code path withholds createdBy, so the promise made to the reporter is not kept and the release is blocked until the reporter identity is not stored with, or not returned for, an anonymous report."
       },
+      "riskCategories": [
+        "SENSITIVE_SOURCE_IN_DERIVED_OUTPUT"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": true
     },
@@ -4173,6 +4176,9 @@
         "blockingCondition": "Any client other than the three-value incident form (an integration, a bulk import, a mobile client or a form revision that offers near_miss, moderate, serious or fatal) is allowed to post incidents, or the organization depends on the stored severity for reportability or critical alerts.",
         "justification": "The substitution is silent and answers success, but it is reached only by callers that send values outside the form scale and only by representatives and above, so it does not block the form as shipped; it blocks as soon as another client or a richer form sends the severities the schema defines, which is why the release depends on that condition."
       },
+      "riskCategories": [
+        "FABRICATED_INSTITUTIONAL_FINDING"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4182,6 +4188,9 @@
       "gate": 6,
       "severity": "MEDIUM",
       "title": "The incident create hook never writes the structured injury, witness and reporter columns (injuredPersonName, bodyPartAffected, injuryNature, treatmentProvided, witnessNames, witnessStatements, reportedByName, isAnonymous): it copies injuryDetails, witnessNames, witnessContacts, reporter name and reporter contact, and the anonymous flag, into the free-form metadata JSON, which every incident read returns whole, so injury, witness and contact data cannot be classified, redacted or reported per field and the columns the schema defines for them stay empty for rows created through the API.",
+      "riskCategories": [
+        "SENSITIVE_SOURCE_IN_DERIVED_OUTPUT"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4270,6 +4279,9 @@
         "blockingCondition": "Any query of the dashboard can fail in a deployed environment (a database or row-level-security fault, an unapplied migration or a column that the deployed schema lacks) while members or representatives use the dashboard card as the status of workplace safety.",
         "justification": "The fabricated clean result is produced only when a query throws, so it is conditional on a fault, but the route has no containment: it logs and answers success to the lowest organization role, so the release is blocked wherever a fault is possible and the dashboard is used as the safety status."
       },
+      "riskCategories": [
+        "FABRICATED_INSTITUTIONAL_FINDING"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4302,6 +4314,9 @@
         "existingContainment": "NONE",
         "justification": "The figure is a literal selected by whether any row exists, it is returned to the lowest organization role and rendered as a compliance percentage with a pass threshold, and nothing in the route, the component or the table measures training currency, so the release is blocked until the figure is computed from training records or removed."
       },
+      "riskCategories": [
+        "FABRICATED_INSTITUTIONAL_FINDING"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": true
     },
@@ -4311,6 +4326,9 @@
       "gate": 6,
       "severity": "MEDIUM",
       "title": "The dashboard metrics are labelled as workplace measures but computed from record creation and defaults: inspectionsDue is the count of inspections created in the window (not inspections that are due), inspectionComplianceRate is completed over created, daysWithoutIncident is measured from the latest created_at of any incident row (including archived rows and not the incident date) and is 90 when the organization has no incident row, hazardTrend is up when more than three hazards are open and down only at zero, and incidentChange is 0 when the previous window has no incidents.",
+      "riskCategories": [
+        "FABRICATED_INSTITUTIONAL_FINDING"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4320,6 +4338,9 @@
       "gate": 6,
       "severity": "MEDIUM",
       "title": "health-safety/stats and the dashboard read safety_training_records, and no route, service or job of the application inserts or updates that table (the runtime role is granted SELECT only on it and the only code that names it is these two routes), so trainingDue and the training compliance figure are computed over a table that application code cannot populate and read as 0 and 100 for every organization.",
+      "riskCategories": [
+        "FABRICATED_INSTITUTIONAL_FINDING"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4329,6 +4350,9 @@
       "gate": 6,
       "severity": "MEDIUM",
       "title": "The statistics and findings routes turn missing measurements into zero: avgResolutionTime is 0 when no incident or hazard has a closing date, complianceRate and avgScore are 0 when no inspection has item counts or a score, and each inspection finding with no score_percentage returns complianceRate 0, so an unmeasured inspection is shown as 0 percent compliant and a not-yet-resolved set as a zero-day resolution time.",
+      "riskCategories": [
+        "FABRICATED_INSTITUTIONAL_FINDING"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4338,6 +4362,9 @@
       "gate": 6,
       "severity": "MEDIUM",
       "title": "avgResolutionTime of the incident and hazard statistics is computed from closed_date and resolution_date, which no route sets when a status changes (create stores neither, and update stores only what the body states), and the incident statistics count a status of resolved although the schema defines only reported, investigating and closed for incidents, so an incident or hazard closed by a status update has no resolution time and the figures omit it.",
+      "riskCategories": [
+        "FABRICATED_INSTITUTIONAL_FINDING"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4347,6 +4374,9 @@
       "gate": 6,
       "severity": "LOW",
       "title": "Each aggregate route builds its organization filter as organizationId ? organization_id = id : 1=1: the filter falls back to an always-true predicate, so the organization boundary of the aggregates depends on withApi having refused a request with no organization (requireOrg defaults to true) and on row-level security, and not on the route itself.",
+      "riskCategories": [
+        "ANALYTICS_CROSSES_BOUNDARY"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4392,6 +4422,9 @@
         "blockingCondition": "The workplace_incidents row-level-security policy is not applied to, or is bypassed by, the connection role that serves the route (migration not applied, table owner or bypass role, or app.current_org_id not set to the session organization), which no source here proves either way.",
         "justification": "The route itself carries no organization control and trusts the query string, so the only barrier is the database policy that the source defines but whose application to the live runtime connection is not shown here; the harm is cross-organization disclosure of aggregate incident data, so the release blocks wherever that policy cannot be shown to apply."
       },
+      "riskCategories": [
+        "ANALYTICS_CROSSES_BOUNDARY"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4493,6 +4526,9 @@
       "gate": 14,
       "severity": "MEDIUM",
       "title": "The stepwise ICRA submit route refuses only when no answer row exists (answerRows.length === 0) and otherwise computes and stores a maturity band, composite and continuity profile from however few answers were recorded and sets status submitted, where the one-shot route rejects any answer set that does not cover every routed question, so a profile built from one answer is stored and returned as the organization continuity profile and can be bought and reported on.",
+      "riskCategories": [
+        "FABRICATED_INSTITUTIONAL_FINDING"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4502,6 +4538,9 @@
       "gate": 14,
       "severity": "MEDIUM",
       "title": "The ICRA e-mail results route accepts any syntactically valid address in the body, with no proof the sender controls it, and sends a branded message from the platform that embeds the caller 30-day bearer capability in the link fragment; any capability holder (and a capability is issued free by the start route) can therefore make the platform send mail to arbitrary third parties, limited only by the per-process in-memory allowance of 5 per hour keyed on a forwarded header, and the event handed to the sink carries an unsalted SHA-256 prefix of the typed address.",
+      "riskCategories": [
+        "EXTERNAL_DISCLOSURE_WITHOUT_DECISION"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4547,6 +4586,9 @@
       "gate": 14,
       "severity": "MEDIUM",
       "title": "The ICRA report review route writes its audit record only when the assessment has a claimedOrgId, a column set only by the claim route whose claim token no code issues, so in practice every review decision is committed with no audit record, the decision (reviewer role, status, summary and time) living only inside the assessment organizationContext JSON that the same route rewrites.",
+      "riskCategories": [
+        "AUDIT_OUTSIDE_DATA_TRANSACTION"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4592,6 +4634,18 @@
       "gate": 14,
       "severity": "LOW",
       "title": "The sync engine prevents concurrent runs with a process-local Set keyed organization, provider and type, and the integration factory caches adapter instances in a process-local Map keyed organization and provider that the sync route never evicts, so two instances can run the same synchronization at once and a reconfigured integration can keep serving the adapter built from the earlier configuration until the process restarts.",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-SYNC-OUTCOME-AUDIT-IS-WRITTEN-AFTER-THE-EFFECT-AND-ITS-FAILURE-IS-SWALLOWED",
+      "ownerCapabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "gate": 14,
+      "severity": "LOW",
+      "title": "The integration sync route records its outcome audit row (completed or failed) in a separate transaction after the sync engine has already written provider data, and recordOutcome catches any failure of that write and only logs platform_operation_outcome_not_recorded, so a synchronization that changed organization data can leave the audit trail holding only the requested intent row with no outcome, and the response to the steward does not say the outcome was not recorded.",
+      "riskCategories": [
+        "AUDIT_OUTSIDE_DATA_TRANSACTION"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4665,6 +4719,9 @@
       "gate": 14,
       "severity": "MEDIUM",
       "title": "The Shopify webhook receiver answers 200 with received true and error Internal processing error for every thrown failure (so Shopify, which retries only on non-2xx, never redelivers a paid, fulfilled or refund event that failed), and processWebhookIdempotent records the receipt after the handler for ignored results too, so an event ignored because the redemption was not yet found (an orders/fulfilled that arrives before orders/paid is processed) is stored as processed and a redelivery of the same webhook id is skipped as already_processed; the receipt check, the handler and the receipt insert run in separate transactions.",
+      "riskCategories": [
+        "AUDIT_OUTSIDE_DATA_TRANSACTION"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4683,6 +4740,9 @@
       "gate": 14,
       "severity": "MEDIUM",
       "title": "The Shopify webhook receiver stores the full request payload in webhook_receipts.payload_json, a table with no organization column that records every event of every organization, and the orders/paid handler writes the Shopify customer id, e-mail address, first and last name and the line items into reward_redemptions.provider_payload_json and logs the discount codes, so personal data of the purchaser is retained in global and per-redemption JSON with no retention rule or field minimization.",
+      "riskCategories": [
+        "SENSITIVE_SOURCE_IN_DERIVED_OUTPUT"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4692,6 +4752,9 @@
       "gate": 14,
       "severity": "MEDIUM",
       "title": "The Shopify webhook handlers read and update reward_redemptions and the credit ledger through the plain db import with no withRLSContext or withSystemContext around the handler (the system context in webhook-service covers only the receipt check and insert), while reward_redemptions carries a fail-closed organization policy for the union_eyes_runtime role and the union_eyes_system privileges on it are revoked, so with no app.current_org_id set the lookups can match no row and every transition throws or is ignored as redemption_not_found even if the discount code format matched.",
+      "riskCategories": [
+        "RLS_ASSUMED_FROM_DB_CLIENT"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4710,6 +4773,10 @@
       "gate": 14,
       "severity": "MEDIUM",
       "title": "The /api/federations/[id]/affiliates, /dashboard, /meetings and /remittances routes are four copies of the federation item route (crudRoutes over the federations table, read at member floor and written at steward floor): each one resolves the path id as the id of a federations row of the session organization and returns that same row under all four names, so no affiliate list, dashboard aggregate, meeting record or remittance is read, no child or parent organization is derived or checked, and the federation_remittances table that holds the remittances is not touched by any of them; a federation officer calling the remittances or dashboard path receives the federation profile row (contact fields, per-capita rate, settings, bylaws links) with status 200 and no figure the path name promises.",
+      "riskCategories": [
+        "FABRICATED_INSTITUTIONAL_FINDING",
+        "ANALYTICS_CROSSES_BOUNDARY"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4728,6 +4795,10 @@
       "gate": 14,
       "severity": "MEDIUM",
       "title": "The /api/federations/benchmark/grievances route is the generic crudRoutes collection over the grievances table with orgScoped true, not a benchmark: it computes no count, rate or aggregate, derives no federation or affiliate scope and applies no minimum group size, and the only thing that stops it returning identifiable grievance rows (grievant name and email, title, description) is the OWN_ROWS_READ entry for grievances in the governance table, which today refuses every caller with 403 because the grievances table has no userId or memberId owner column and its POST is refused by the same table; the route answers no benchmark to any caller and carries no protection of its own against listing grievance rows if that table entry changes.",
+      "riskCategories": [
+        "FABRICATED_INSTITUTIONAL_FINDING",
+        "ANALYTICS_CROSSES_BOUNDARY"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4836,6 +4907,10 @@
       "gate": 6,
       "severity": "MEDIUM",
       "title": "Each external route records the access decision (external_authorization.allowed or denied) through auditLog, a call separate from the read or write that follows, and the read itself (the grievance projection, the document list or the document metadata) is not recorded; outside canonical V2 auditLog catches a failed database insert, logs it and returns, so the grievance data is still released to the outside party when the audit row could not be written, and the document metadata route writes two decision rows for one request.",
+      "riskCategories": [
+        "AUDIT_OUTSIDE_DATA_TRANSACTION",
+        "GET_WITH_SIDE_EFFECTS"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4913,6 +4988,9 @@
         "blockingCondition": "A page, client or integration mounts ComplianceChecker or otherwise uses the arbitration_deadline rule of /api/jurisdiction-rules to decide or display whether an arbitration or grievance step is within time.",
         "justification": "The route answers with authority-looking data whose meaning and unit do not match its label, and a verdict component is wired to it; no page uses that component today, so the harm needs a screen or client to rely on it, and the release is blocked from the moment one does."
       },
+      "riskCategories": [
+        "FABRICATED_INSTITUTIONAL_FINDING"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4954,6 +5032,9 @@
         "blockingCondition": "A steward, a screen or an integration relies on the compliance check or the published schedule to decide whether the notice given to a British Columbia employee with 8 or more years of service meets the statutory minimum.",
         "justification": "The defect is a data-shape fault that silently turns a violation into no finding for a defined tenure band; the route is live for stewards but no caller in the repository relies on it, so the release is blocked when any representative or screen treats its termination verdict as a determination."
       },
+      "riskCategories": [
+        "FABRICATED_INSTITUTIONAL_FINDING"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4963,6 +5044,9 @@
       "gate": 14,
       "severity": "MEDIUM",
       "title": "The labour standards compliance check declares every body field optional and each rule block runs only when its own fields are present, so an empty body, a body missing the tenure or notice pair, or a daily-hours figure below the meal-break trigger returns a 200 summary with totalFindings, violations and warnings of 0 and an empty findings list; the response does not list which checks were evaluated, accepts negative and absurd hour counts, and gives no sign that nothing was checked, so a request that tested nothing reads as a clean result.",
+      "riskCategories": [
+        "FABRICATED_INSTITUTIONAL_FINDING"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4972,6 +5056,9 @@
       "gate": 14,
       "severity": "MEDIUM",
       "title": "The break, overtime, termination notice, statutory holiday and workers compensation tables behind the jurisdiction rules, labour standards list, profile and compliance check are literals compiled into the application: apart from the anti-scab entries they carry no effective date, version, source document or verifier, no office is named as having determined them, and the routes return them with statute and article citations and violation severities as if they were governed law, so a stale or wrong constant is served as authority until the code is edited.",
+      "riskCategories": [
+        "FABRICATED_INSTITUTIONAL_FINDING"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4981,6 +5068,9 @@
       "gate": 14,
       "severity": "MEDIUM",
       "title": "The labour standards profile returns minimumWage as { hourly: 0, effectiveDate: 'varies' } with a comment that it is populated by live data, but the handler reads no live source, so every jurisdiction profile publishes a zero hourly minimum wage to unauthenticated callers as a real field of the profile.",
+      "riskCategories": [
+        "FABRICATED_INSTITUTIONAL_FINDING"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4990,6 +5080,9 @@
       "gate": 14,
       "severity": "MEDIUM",
       "title": "The jurisdiction rules route maps a known CA-XX code and otherwise casts the raw query string to a jurisdiction, never validates it against the known set, and indexes plain-object tables with it, so an unknown code answers success true with an empty rule list (no error), an inherited property name such as constructor selects a function from the tables and raises a TypeError that the handler reports only as a generic 500, and a category that matches no rule also answers success with an empty list.",
+      "riskCategories": [
+        "FABRICATED_INSTITUTIONAL_FINDING"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -4999,6 +5092,9 @@
       "gate": 14,
       "severity": "MEDIUM",
       "title": "The /api/jurisdiction/clc-compliance and /api/jurisdiction/validate-deadline routes are the same generic crudRoutes configuration over bargaining_units: neither path checks a CLC rule or validates or calculates a deadline, a GET lists the bargaining unit rows of the organization (certification numbers and dates, contract expiry, next bargaining date, chief steward and chair user ids) at the member floor, and a POST inserts a bargaining unit from the request body and answers success, so a client that posts to validate-deadline expecting a validation gets a stored unit and no verdict.",
+      "riskCategories": [
+        "FABRICATED_INSTITUTIONAL_FINDING"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -5035,6 +5131,9 @@
       "gate": 14,
       "severity": "MEDIUM",
       "title": "The knowledge-base list and item routes filter only by the organization and its parent and by is_active: they never read is_public or allowed_organizations, so the access-control columns of the table do not limit a read (the publish route stores exit-interview copies with is_public false and they are still returned), they apply no union_knowledge_suite entitlement although publication requires it, the list q parameter matches the full content of rows whose content it does not return (a search oracle over exit-interview text), and neither read writes an audit record of who opened which document.",
+      "riskCategories": [
+        "PUBLICATION_BYPASSES_CLASSIFICATION_OR_CONSENT"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -5044,6 +5143,9 @@
       "gate": 14,
       "severity": "LOW",
       "title": "The knowledge-base item GET writes: after the read it runs UPDATE knowledge_base SET view_count = view_count + 1 WHERE id under withSystemContext, which bypasses row-level security, with no organization predicate, not awaited and with no audit record; the id was matched under an organization predicate by the select just before, but the write itself is an unscoped system-context statement that a read-only route should not hold.",
+      "riskCategories": [
+        "GET_WITH_SIDE_EFFECTS"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -5089,6 +5191,10 @@
         "blockingCondition": "A web or mobile client calls the geofence entry check for a member who has no active location consent, or the location retention handler remains unscheduled while any client submits positions.",
         "justification": "The route stores a precise position on a GET with no consent condition, which contradicts the opt-in rule stated by the service; the data is the caller own and no client in the repository calls the route, so the release is blocked when a client submits positions for members without consent or without the retention job running."
       },
+      "riskCategories": [
+        "GET_WITH_SIDE_EFFECTS",
+        "RLS_ASSUMED_FROM_DB_CLIENT"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -5107,6 +5213,9 @@
       "gate": 6,
       "severity": "MEDIUM",
       "title": "The location track POST inserts the precise position through the shared db handle with no transaction, no persistAtomicAudit, no location_tracking_audit row and no log of the write, although consent grant and revocation are audited, so no record shows when positions were collected for a member; getConfig creates a default configuration row with tracking enabled on first use as a side effect of this write path; and a missing consent, a disabled configuration and any database failure are all answered 500 with the raw error message.",
+      "riskCategories": [
+        "RLS_ASSUMED_FROM_DB_CLIENT"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -5134,6 +5243,10 @@
       "gate": 6,
       "severity": "LOW",
       "title": "The consent status GET calls hasValidConsent, which updates the consent row to expired through the shared db handle, with no transaction and no audit record, when the stored expiry has passed, and reflects the unvalidated context query parameter without checking that it is strike or event, so a read changes the consent state and leaves no trace.",
+      "riskCategories": [
+        "GET_WITH_SIDE_EFFECTS",
+        "RLS_ASSUMED_FROM_DB_CLIENT"
+      ],
       "tranche": "0B.8",
       "releaseBlocking": false
     },
@@ -5393,7 +5506,8 @@
       ],
       "domain": "EXTERNAL_REPRESENTATIVE_DOCUMENT_METADATA",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "external/grievances/[id]/documents/route.ts|GET",
@@ -5581,7 +5695,8 @@
       ],
       "domain": "EXTERNAL_REPRESENTATIVE_DOCUMENT_METADATA",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "external/grievances/[id]/documents/upload/route.ts|POST",
@@ -5902,7 +6017,8 @@
       "manifestCorrections": [],
       "domain": "EXTERNAL_REPRESENTATIVE_DOCUMENT_DEPOSIT",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "external/grievances/[id]/route.ts|GET",
@@ -6127,7 +6243,8 @@
       ],
       "domain": "EXTERNAL_REPRESENTATIVE_GRIEVANCE_VIEW",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "feature-flags/route.ts|GET",
@@ -6267,7 +6384,8 @@
           "quote": "const response = await fetch('/api/feature-flags');"
         }
       ],
-      "callerFinding": "2 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "2 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "federations/[id]/affiliates/route.ts|DELETE",
@@ -6406,7 +6524,8 @@
       "crudGovernanceClass": "READ_ONLY",
       "domain": "FEDERATION_AFFILIATE_DASHBOARD_MEETING_REMITTANCE_PATHS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "federations/[id]/affiliates/route.ts|GET",
@@ -6552,7 +6671,8 @@
       "crudGovernanceClass": "READ_ONLY",
       "domain": "FEDERATION_AFFILIATE_DASHBOARD_MEETING_REMITTANCE_PATHS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "federations/[id]/affiliates/route.ts|PATCH",
@@ -6698,7 +6818,8 @@
       "crudGovernanceClass": "READ_ONLY",
       "domain": "FEDERATION_AFFILIATE_DASHBOARD_MEETING_REMITTANCE_PATHS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "federations/[id]/dashboard/route.ts|DELETE",
@@ -6837,7 +6958,8 @@
       "crudGovernanceClass": "READ_ONLY",
       "domain": "FEDERATION_AFFILIATE_DASHBOARD_MEETING_REMITTANCE_PATHS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "federations/[id]/dashboard/route.ts|GET",
@@ -6983,7 +7105,8 @@
       "crudGovernanceClass": "READ_ONLY",
       "domain": "FEDERATION_AFFILIATE_DASHBOARD_MEETING_REMITTANCE_PATHS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "federations/[id]/dashboard/route.ts|PATCH",
@@ -7129,7 +7252,8 @@
       "crudGovernanceClass": "READ_ONLY",
       "domain": "FEDERATION_AFFILIATE_DASHBOARD_MEETING_REMITTANCE_PATHS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "federations/[id]/meetings/route.ts|DELETE",
@@ -7268,7 +7392,8 @@
       "crudGovernanceClass": "READ_ONLY",
       "domain": "FEDERATION_AFFILIATE_DASHBOARD_MEETING_REMITTANCE_PATHS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "federations/[id]/meetings/route.ts|GET",
@@ -7414,7 +7539,8 @@
       "crudGovernanceClass": "READ_ONLY",
       "domain": "FEDERATION_AFFILIATE_DASHBOARD_MEETING_REMITTANCE_PATHS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "federations/[id]/meetings/route.ts|PATCH",
@@ -7560,7 +7686,8 @@
       "crudGovernanceClass": "READ_ONLY",
       "domain": "FEDERATION_AFFILIATE_DASHBOARD_MEETING_REMITTANCE_PATHS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "federations/[id]/remittances/route.ts|DELETE",
@@ -7699,7 +7826,8 @@
       "crudGovernanceClass": "READ_ONLY",
       "domain": "FEDERATION_AFFILIATE_DASHBOARD_MEETING_REMITTANCE_PATHS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "federations/[id]/remittances/route.ts|GET",
@@ -7845,7 +7973,8 @@
       "crudGovernanceClass": "READ_ONLY",
       "domain": "FEDERATION_AFFILIATE_DASHBOARD_MEETING_REMITTANCE_PATHS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "federations/[id]/remittances/route.ts|PATCH",
@@ -7991,7 +8120,8 @@
       "crudGovernanceClass": "READ_ONLY",
       "domain": "FEDERATION_AFFILIATE_DASHBOARD_MEETING_REMITTANCE_PATHS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "federations/[id]/route.ts|DELETE",
@@ -8118,7 +8248,8 @@
       "crudGovernanceClass": "READ_ONLY",
       "domain": "FEDERATION_ORGANIZATION_REGISTER",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "federations/[id]/route.ts|GET",
@@ -8251,7 +8382,8 @@
       "crudGovernanceClass": "READ_ONLY",
       "domain": "FEDERATION_ORGANIZATION_REGISTER",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "federations/[id]/route.ts|PATCH",
@@ -8385,7 +8517,8 @@
       "crudGovernanceClass": "READ_ONLY",
       "domain": "FEDERATION_ORGANIZATION_REGISTER",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "federations/benchmark/grievances/route.ts|GET",
@@ -8539,7 +8672,8 @@
       "crudGovernanceClass": "OWN_ROWS_READ",
       "domain": "FEDERATION_GRIEVANCE_BENCHMARK",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "federations/benchmark/grievances/route.ts|POST",
@@ -8691,7 +8825,8 @@
       "crudGovernanceClass": "OWN_ROWS_READ",
       "domain": "FEDERATION_GRIEVANCE_BENCHMARK",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "federations/route.ts|GET",
@@ -8824,7 +8959,8 @@
       "crudGovernanceClass": "READ_ONLY",
       "domain": "FEDERATION_ORGANIZATION_REGISTER",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "federations/route.ts|POST",
@@ -8958,7 +9094,8 @@
       "crudGovernanceClass": "READ_ONLY",
       "domain": "FEDERATION_ORGANIZATION_REGISTER",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/dashboard/route.ts|GET",
@@ -9182,7 +9319,8 @@
           "quote": "`/api/health-safety/dashboard?organizationId=${organizationId}&period=${selectedPeriod}`"
         }
       ],
-      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/hazards/[id]/route.ts|DELETE",
@@ -9316,7 +9454,8 @@
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "WORKPLACE_HAZARD_REPORTS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/hazards/[id]/route.ts|GET",
@@ -9482,7 +9621,8 @@
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "WORKPLACE_HAZARD_REPORTS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/hazards/[id]/route.ts|PATCH",
@@ -9646,7 +9786,8 @@
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "WORKPLACE_HAZARD_REPORTS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/hazards/route.ts|GET",
@@ -9833,7 +9974,8 @@
           "quote": "const response = await fetch(`/api/health-safety/hazards?${params}`);"
         }
       ],
-      "callerFinding": "3 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "3 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/hazards/route.ts|POST",
@@ -10056,7 +10198,8 @@
           "quote": "const response = await fetch(`/api/health-safety/hazards?${params}`);"
         }
       ],
-      "callerFinding": "3 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "3 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/hazards/stats/route.ts|GET",
@@ -10191,7 +10334,8 @@
           "quote": "const res = await fetch(`/api/health-safety/hazards/stats?organizationId=${organizationId}`);"
         }
       ],
-      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/incidents/[id]/route.ts|DELETE",
@@ -10348,7 +10492,8 @@
           "quote": "? `/api/health-safety/incidents/${incidentId}`"
         }
       ],
-      "callerFinding": "2 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "2 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/incidents/[id]/route.ts|GET",
@@ -10545,7 +10690,8 @@
           "quote": "? `/api/health-safety/incidents/${incidentId}`"
         }
       ],
-      "callerFinding": "2 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "2 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/incidents/[id]/route.ts|PATCH",
@@ -10732,7 +10878,8 @@
           "quote": "? `/api/health-safety/incidents/${incidentId}`"
         }
       ],
-      "callerFinding": "2 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "2 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/incidents/route.ts|GET",
@@ -10934,7 +11081,8 @@
           "quote": ": `/api/health-safety/incidents`;"
         }
       ],
-      "callerFinding": "3 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "3 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/incidents/route.ts|POST",
@@ -11229,7 +11377,8 @@
           "quote": ": `/api/health-safety/incidents`;"
         }
       ],
-      "callerFinding": "3 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "3 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/incidents/stats/route.ts|GET",
@@ -11378,7 +11527,8 @@
           "quote": "const res = await fetch(`/api/health-safety/incidents/stats?organizationId=${organizationId}&period=${dateRange}`);"
         }
       ],
-      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/incidents/trends/route.ts|GET",
@@ -11535,7 +11685,8 @@
           "quote": "`/api/health-safety/incidents/trends?organizationId=${organizationId}&period=${period}`"
         }
       ],
-      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/inspections/[id]/route.ts|DELETE",
@@ -11661,7 +11812,8 @@
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "WORKPLACE_SAFETY_INSPECTIONS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/inspections/[id]/route.ts|GET",
@@ -11797,7 +11949,8 @@
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "WORKPLACE_SAFETY_INSPECTIONS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/inspections/[id]/route.ts|PATCH",
@@ -11946,7 +12099,8 @@
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "WORKPLACE_SAFETY_INSPECTIONS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/inspections/findings/route.ts|GET",
@@ -12086,7 +12240,8 @@
           "quote": "const res = await fetch(`/api/health-safety/inspections/findings?organizationId=${organizationId}`);"
         }
       ],
-      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/inspections/route.ts|GET",
@@ -12227,7 +12382,8 @@
           "quote": "`/api/health-safety/inspections?organizationId=${organizationId}&startDate=${start}&endDate=${end}`"
         }
       ],
-      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/inspections/route.ts|POST",
@@ -12389,7 +12545,8 @@
           "quote": "`/api/health-safety/inspections?organizationId=${organizationId}&startDate=${start}&endDate=${end}`"
         }
       ],
-      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/inspections/stats/route.ts|GET",
@@ -12530,7 +12687,8 @@
           "quote": "const res = await fetch(`/api/health-safety/inspections/stats?organizationId=${organizationId}`);"
         }
       ],
-      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/ppe/route.ts|GET",
@@ -12667,7 +12825,8 @@
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "WORKPLACE_PPE_EQUIPMENT",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/ppe/route.ts|POST",
@@ -12808,7 +12967,8 @@
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "WORKPLACE_PPE_EQUIPMENT",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "health-safety/stats/route.ts|GET",
@@ -12940,7 +13100,8 @@
           "quote": "const res = await fetch(`/api/health-safety/stats?organizationId=${organizationId}&period=30d`);"
         }
       ],
-      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "healthwelfare/plans/route.ts|GET",
@@ -13068,7 +13229,8 @@
       "crudGovernanceClass": "READ_ONLY",
       "domain": "HEALTH_AND_WELFARE_PATH_OVER_PER_CAPITA_REMITTANCES",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "healthwelfare/plans/route.ts|POST",
@@ -13208,7 +13370,8 @@
       "crudGovernanceClass": "READ_ONLY",
       "domain": "HEALTH_AND_WELFARE_PATH_OVER_PER_CAPITA_REMITTANCES",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "icra/[assessmentId]/answer/route.ts|POST",
@@ -13390,7 +13553,8 @@
       "manifestCorrections": [],
       "domain": "ICRA_PSEUDONYMOUS_ASSESSMENT_INTAKE",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "icra/[assessmentId]/capability/exchange/route.ts|POST",
@@ -13549,7 +13713,8 @@
           "quote": "const res = await fetch(`/api/icra/${assessmentId}/capability/exchange`, {"
         }
       ],
-      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "icra/[assessmentId]/claim/route.ts|POST",
@@ -13702,7 +13867,8 @@
       "manifestCorrections": [],
       "domain": "ICRA_PAID_ASSESSMENT_CLAIM_INTO_ORGANIZATION",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "icra/[assessmentId]/profile/route.ts|GET",
@@ -13834,7 +14000,8 @@
       "manifestCorrections": [],
       "domain": "ICRA_PSEUDONYMOUS_RESULT_ACCESS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "icra/[assessmentId]/submit/route.ts|POST",
@@ -13995,7 +14162,8 @@
       "manifestCorrections": [],
       "domain": "ICRA_PSEUDONYMOUS_ASSESSMENT_INTAKE",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "icra/checkout/route.ts|POST",
@@ -14175,7 +14343,18 @@
           "quote": "const res = await fetch('/api/icra/checkout', {"
         }
       ],
-      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {
+        "EXTERNAL_DISCLOSURE_WITHOUT_DECISION": {
+          "reason": "The only values sent to the external payment service are the assessment id, the tier id and a product label as session metadata plus the price lines; no answer, organization context or respondent field is sent, so no protected assessment content is disclosed.",
+          "evidence": [
+            {
+              "ref": "apps/union-eyes/app/api/icra/checkout/route.ts",
+              "quote": "icra_assessment_id: assessmentId,"
+            }
+          ]
+        }
+      }
     },
     {
       "id": "icra/email-results/route.ts|POST",
@@ -14356,7 +14535,8 @@
           "quote": "const res = await fetch('/api/icra/email-results', {"
         }
       ],
-      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "icra/report/[assessmentId]/review/route.ts|POST",
@@ -14507,7 +14687,18 @@
       ],
       "domain": "ICRA_REPORT_NARRATIVE_REVIEW_DECISION",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {
+        "SENSITIVE_SOURCE_IN_DERIVED_OUTPUT": {
+          "reason": "The review summary is stored back into the assessment record and the response returns only the action and the review status, so no assessment content is copied into a response or a new record.",
+          "evidence": [
+            {
+              "ref": "apps/union-eyes/app/api/icra/report/[assessmentId]/review/route.ts",
+              "quote": "reviewStatus: updated.reviewWorkflow.status,"
+            }
+          ]
+        }
+      }
     },
     {
       "id": "icra/report/[assessmentId]/route.ts|GET",
@@ -14673,7 +14864,18 @@
       "manifestCorrections": [],
       "domain": "ICRA_PAID_REPORT_TIER_AND_PDF",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {
+        "SENSITIVE_SOURCE_IN_DERIVED_OUTPUT": {
+          "reason": "The PDF is rendered only for a caller who presents the assessment bearer capability, and the response is private and not cached, so the derived report reaches the holder of the source assessment and not another party.",
+          "evidence": [
+            {
+              "ref": "apps/union-eyes/app/api/icra/report/[assessmentId]/route.ts",
+              "quote": "'Cache-Control': 'private, no-store',"
+            }
+          ]
+        }
+      }
     },
     {
       "id": "icra/results/[id]/route.ts|GET",
@@ -14826,7 +15028,8 @@
       "manifestCorrections": [],
       "domain": "ICRA_PSEUDONYMOUS_RESULT_ACCESS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "icra/start/route.ts|GET",
@@ -14960,7 +15163,8 @@
       "manifestCorrections": [],
       "domain": "ICRA_PSEUDONYMOUS_ASSESSMENT_INTAKE",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "icra/start/route.ts|POST",
@@ -15115,7 +15319,8 @@
       "manifestCorrections": [],
       "domain": "ICRA_PSEUDONYMOUS_ASSESSMENT_INTAKE",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "icra/submit/route.ts|POST",
@@ -15300,7 +15505,8 @@
           "quote": "const res = await fetch('/api/icra/submit', {"
         }
       ],
-      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "icra/telemetry/route.ts|POST",
@@ -15446,7 +15652,8 @@
           "quote": "void fetch('/api/icra/telemetry', {"
         }
       ],
-      "callerFinding": "2 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "2 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "integrations/api-keys/route.ts|GET",
@@ -15580,7 +15787,8 @@
       "crudGovernanceClass": "DENIED",
       "domain": "INTEGRATION_API_KEY_RECORDS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "integrations/api-keys/route.ts|POST",
@@ -15720,7 +15928,8 @@
       "crudGovernanceClass": "DENIED",
       "domain": "INTEGRATION_API_KEY_RECORDS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "integrations/framework/[id]/activate/route.ts|POST",
@@ -15888,7 +16097,8 @@
       "manifestCorrections": [],
       "domain": "TENANT_INTEGRATION_CONTROL_PLANE",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "integrations/framework/[id]/sync/route.ts|POST",
@@ -16053,6 +16263,13 @@
           "ref": "apps/union-eyes/lib/integrations/control-plane.ts",
           "symbol": "toPublicConfig",
           "quote": "credentialsStored: true,"
+        },
+        {
+          "provenance": "SERVICE_IMPLEMENTATION",
+          "claim": "defect",
+          "ref": "apps/union-eyes/lib/audit/operation-audit.ts",
+          "symbol": "recordOutcome",
+          "quote": "logger.error('platform_operation_outcome_not_recorded', { action: record.action, outcome, error })"
         }
       ],
       "inferences": [
@@ -16068,7 +16285,8 @@
       "defects": [
         "DEF-0B8-ICRA-INTEGRATION-CREDENTIALS-NEVER-STORED-OR-RESOLVED-YET-REPORTED-STORED",
         "DEF-0B8-ICRA-SYNC-DRY-RUN-IS-ACCEPTED-AND-AUDITED-BUT-NEVER-READ",
-        "DEF-0B8-ICRA-SYNC-CONCURRENCY-GUARD-AND-INSTANCE-CACHE-ARE-PROCESS-LOCAL"
+        "DEF-0B8-ICRA-SYNC-CONCURRENCY-GUARD-AND-INSTANCE-CACHE-ARE-PROCESS-LOCAL",
+        "DEF-0B8-ICRA-SYNC-OUTCOME-AUDIT-IS-WRITTEN-AFTER-THE-EFFECT-AND-ITS-FAILURE-IS-SWALLOWED"
       ],
       "manifestCorrections": [
         {
@@ -16079,7 +16297,8 @@
       ],
       "domain": "TENANT_INTEGRATION_CONTROL_PLANE",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "integrations/framework/route.ts|GET",
@@ -16201,7 +16420,8 @@
       "manifestCorrections": [],
       "domain": "TENANT_INTEGRATION_CONTROL_PLANE",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "integrations/framework/route.ts|POST",
@@ -16400,7 +16620,8 @@
       "manifestCorrections": [],
       "domain": "TENANT_INTEGRATION_CONTROL_PLANE",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "integrations/shopify/webhooks/route.ts|GET",
@@ -16493,7 +16714,8 @@
           "quote": "'/api/integrations/shopify/webhooks', // Shopify order events (verified via HMAC)"
         }
       ],
-      "callerFinding": "3 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "3 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "integrations/shopify/webhooks/route.ts|POST",
@@ -16783,7 +17005,8 @@
           "quote": "'/api/integrations/shopify/webhooks', // Shopify order events (verified via HMAC)"
         }
       ],
-      "callerFinding": "3 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "3 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "intelligence/route.ts|GET",
@@ -16888,7 +17111,8 @@
       "manifestCorrections": [],
       "domain": "INTELLIGENCE_PATH_OVER_INSIGHT_RECOMMENDATION_ROWS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "intelligence/route.ts|POST",
@@ -17010,7 +17234,8 @@
       "manifestCorrections": [],
       "domain": "INTELLIGENCE_PATH_OVER_INSIGHT_RECOMMENDATION_ROWS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "investigations/audit/route.ts|GET",
@@ -17138,7 +17363,8 @@
       "manifestCorrections": [],
       "domain": "INVESTIGATIONS_AUDIT_PATH_OVER_ORGANIZATION_AUDIT_LOG",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "investigations/route.ts|GET",
@@ -17247,7 +17473,8 @@
       "manifestCorrections": [],
       "domain": "INVESTIGATIONS_PATH_OVER_CASE_COLLECTION",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "investigations/route.ts|POST",
@@ -17364,7 +17591,8 @@
       "manifestCorrections": [],
       "domain": "INVESTIGATIONS_PATH_OVER_CASE_COLLECTION",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "jurisdiction-rules/route.ts|GET",
@@ -17521,7 +17749,8 @@
           "quote": "`/api/jurisdiction-rules?jurisdiction=${jurisdiction}&category=arbitration_deadline`"
         }
       ],
-      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "jurisdiction/clc-compliance/route.ts|GET",
@@ -17650,7 +17879,8 @@
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "JURISDICTION_PATH_NAMES_OVER_BARGAINING_UNIT_ROWS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "jurisdiction/clc-compliance/route.ts|POST",
@@ -17796,7 +18026,8 @@
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "JURISDICTION_PATH_NAMES_OVER_BARGAINING_UNIT_ROWS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "jurisdiction/validate-deadline/route.ts|GET",
@@ -17925,7 +18156,8 @@
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "JURISDICTION_PATH_NAMES_OVER_BARGAINING_UNIT_ROWS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "jurisdiction/validate-deadline/route.ts|POST",
@@ -18071,7 +18303,8 @@
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "JURISDICTION_PATH_NAMES_OVER_BARGAINING_UNIT_ROWS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "knowledge-base/[id]/route.ts|GET",
@@ -18258,7 +18491,8 @@
           "quote": "const res = await fetch(`/api/knowledge-base/${docId}`);"
         }
       ],
-      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "knowledge-base/route.ts|GET",
@@ -18414,7 +18648,8 @@
           "quote": "fetch(\"/api/knowledge-base\")"
         }
       ],
-      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses."
+      "callerFinding": "1 call site(s) in product source name this route path; the search is route-level and does not determine the HTTP method each site uses.",
+      "riskScreen": {}
     },
     {
       "id": "labour-standards/[jurisdiction]/compliance-check/route.ts|POST",
@@ -18555,7 +18790,8 @@
       "nonMutationReason": "A POST that only computes findings from the request body and constants; it inserts, updates and deletes nothing.",
       "domain": "STATUTORY_PARAMETER_RULES_AND_COMPLIANCE_CHECK",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "labour-standards/[jurisdiction]/route.ts|GET",
@@ -18667,7 +18903,8 @@
       "manifestCorrections": [],
       "domain": "STATUTORY_PARAMETER_RULES_AND_COMPLIANCE_CHECK",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "labour-standards/route.ts|GET",
@@ -18766,7 +19003,8 @@
       "manifestCorrections": [],
       "domain": "STATUTORY_PARAMETER_RULES_AND_COMPLIANCE_CHECK",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "locals/[id]/route.ts|DELETE",
@@ -18917,7 +19155,8 @@
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "LOCAL_PATH_BARGAINING_UNIT_RECORDS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "locals/[id]/route.ts|GET",
@@ -19080,7 +19319,8 @@
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "LOCAL_PATH_BARGAINING_UNIT_RECORDS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "locals/[id]/route.ts|PATCH",
@@ -19254,7 +19494,8 @@
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "LOCAL_PATH_BARGAINING_UNIT_RECORDS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "locals/route.ts|GET",
@@ -19417,7 +19658,8 @@
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "LOCAL_PATH_BARGAINING_UNIT_RECORDS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "locals/route.ts|POST",
@@ -19591,7 +19833,8 @@
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "LOCAL_PATH_BARGAINING_UNIT_RECORDS",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "location/consent/route.ts|DELETE",
@@ -19749,7 +19992,18 @@
       "manifestCorrections": [],
       "domain": "MEMBER_LOCATION_CONSENT_GEOFENCE_AND_TRACKING",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {
+        "RLS_ASSUMED_FROM_DB_CLIENT": {
+          "reason": "The handler runs the service call inside withRLSContext and passes the transaction handle in, so the service default of the shared db handle is not the one used for this write; the organization context is set for the statement.",
+          "evidence": [
+            {
+              "ref": "apps/union-eyes/app/api/location/consent/route.ts",
+              "quote": "await withRLSContext({ organizationId }, async (tx) => {"
+            }
+          ]
+        }
+      }
     },
     {
       "id": "location/consent/route.ts|GET",
@@ -19877,7 +20131,8 @@
       ],
       "domain": "MEMBER_LOCATION_CONSENT_GEOFENCE_AND_TRACKING",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "location/consent/route.ts|POST",
@@ -20055,7 +20310,18 @@
       "manifestCorrections": [],
       "domain": "MEMBER_LOCATION_CONSENT_GEOFENCE_AND_TRACKING",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {
+        "RLS_ASSUMED_FROM_DB_CLIENT": {
+          "reason": "The handler runs the service call inside withRLSContext and passes the transaction handle in, so the service default of the shared db handle is not the one used for this write; the organization context is set for the statement.",
+          "evidence": [
+            {
+              "ref": "apps/union-eyes/app/api/location/consent/route.ts",
+              "quote": "const consent = await withRLSContext({ organizationId }, async (tx) => {"
+            }
+          ]
+        }
+      }
     },
     {
       "id": "location/geofence/route.ts|GET",
@@ -20203,7 +20469,8 @@
       ],
       "domain": "MEMBER_LOCATION_CONSENT_GEOFENCE_AND_TRACKING",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "location/geofence/route.ts|POST",
@@ -20355,7 +20622,18 @@
       "manifestCorrections": [],
       "domain": "MEMBER_LOCATION_CONSENT_GEOFENCE_AND_TRACKING",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {
+        "RLS_ASSUMED_FROM_DB_CLIENT": {
+          "reason": "The handler runs the service call inside withRLSContext and passes the transaction handle in, so the service default of the shared db handle is not the one used for this write; the organization context is set for the statement.",
+          "evidence": [
+            {
+              "ref": "apps/union-eyes/app/api/location/geofence/route.ts",
+              "quote": "const geofence = await withRLSContext({ organizationId: trustedUnionLocalId }, async (tx) => {"
+            }
+          ]
+        }
+      }
     },
     {
       "id": "location/track/route.ts|POST",
@@ -20508,7 +20786,8 @@
       "manifestCorrections": [],
       "domain": "MEMBER_LOCATION_CONSENT_GEOFENCE_AND_TRACKING",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "meeting-rooms/[id]/bookings/route.ts|DELETE",
@@ -20637,7 +20916,8 @@
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "MEETING_ROOM_BOOKINGS_PATH_OVER_MEETING_ROOM_ITEM",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     },
     {
       "id": "meeting-rooms/[id]/bookings/route.ts|GET",
@@ -20757,7 +21037,8 @@
       "crudGovernanceClass": "OPERATIONAL",
       "domain": "MEETING_ROOM_BOOKINGS_PATH_OVER_MEETING_ROOM_ITEM",
       "callers": [],
-      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source."
+      "callerFinding": "No caller outside the API tree, tests, documentation and capability registries names this route path in tracked product source.",
+      "riskScreen": {}
     }
   ],
   "summary": {
@@ -20768,8 +21049,8 @@
     "newlyExamined": 100,
     "classified": 100,
     "unresolved": 0,
-    "newDefects": 81,
-    "defectsTotal": 450,
+    "newDefects": 82,
+    "defectsTotal": 451,
     "institutionalDecisions": 30,
     "crossTenantExposures": 2,
     "newCapabilities": 3,
@@ -20780,6 +21061,17 @@
       "NON_BLOCKING_WITH_JUSTIFICATION": 0
     },
     "reviewQueue": 71,
+    "riskCategoryDefects": {
+      "SENSITIVE_SOURCE_IN_DERIVED_OUTPUT": 3,
+      "PUBLICATION_BYPASSES_CLASSIFICATION_OR_CONSENT": 1,
+      "ANALYTICS_CROSSES_BOUNDARY": 4,
+      "RLS_ASSUMED_FROM_DB_CLIENT": 4,
+      "AUDIT_OUTSIDE_DATA_TRANSACTION": 4,
+      "GET_WITH_SIDE_EFFECTS": 4,
+      "FABRICATED_INSTITUTIONAL_FINDING": 17,
+      "EXTERNAL_DISCLOSURE_WITHOUT_DECISION": 1
+    },
+    "riskScreens": 6,
     "preservedReleaseBlockingDispositions": 4
   }
 }
