@@ -8142,6 +8142,52 @@
       }
     }
   },
+  "releaseDebt0c3": {
+    "gate": "GATE-0C.3",
+    "note": "Hash pins for the Gate 0C.3 reconciliation artifacts: the release assessment of the 71 earlier HIGH defects, the release-debt index, the OPL challenge treatment, the carbon scope decision record, the decision index, the defect relationship map, the two-level closure model and the three review documents. Every assessment is PROPOSED_NOT_ACCEPTED, no decision is adopted, no carbon option is selected and the Gate 0 verdict is unchanged.",
+    "files": {
+      "assessment": {
+        "file": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+        "sha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8"
+      },
+      "debt": {
+        "file": "docs/union-eyes/convergence/register/ue-release-debt-index-0c3.json",
+        "sha256": "457ecd54a080199bd1ebfa276c0eaa170a9a0fe1021b2e49c682e70fe7f5d4d8"
+      },
+      "challenges": {
+        "file": "docs/union-eyes/convergence/register/ue-opl-challenge-treatment-0c3.json",
+        "sha256": "46871016035772ae87b29b8ef4607b2c65db3ffc400d0aea7b2f1761c5654bf5"
+      },
+      "carbon": {
+        "file": "docs/union-eyes/convergence/register/ue-carbon-scope-decision-0c3.json",
+        "sha256": "65a78d5766d9f25cfd775bfc2f5e8439acfaa0b7d823517659cc65f72b130106"
+      },
+      "decisions": {
+        "file": "docs/union-eyes/convergence/register/ue-decision-index-0c3.json",
+        "sha256": "b94d5433e7151b097b25d0ba62855b1f3716fd63c2384bc4a20547bc21678db0"
+      },
+      "relationships": {
+        "file": "docs/union-eyes/convergence/register/ue-defect-relationship-map-0c3.json",
+        "sha256": "3c166aa58e8606217fd6ff9f828af19da9b03af47f13c7065fe30bad69b10dbf"
+      },
+      "closure": {
+        "file": "docs/union-eyes/convergence/register/ue-closure-model-0c3.json",
+        "sha256": "36b6423a34fe97e30ad09bdc7c98664875e79f74ca1e81d4bf105d984d47a635"
+      },
+      "doc-index": {
+        "file": "docs/union-eyes/convergence/gate-0c3/UE-GATE-0C3-RECONCILIATION.md",
+        "sha256": "fa98e018574f59db945551ff565c3a81870a82acb5a024d6ad8fee82e3a5a8be"
+      },
+      "doc-assessment": {
+        "file": "docs/union-eyes/convergence/gate-0c3/UE-HIGH-DEFECT-RELEASE-ASSESSMENT-0C3.md",
+        "sha256": "8015d5c09ed9e67be4a90f79856948c2fc658754ac95e183267343db177f249e"
+      },
+      "doc-carbon": {
+        "file": "docs/union-eyes/convergence/gate-0c3/UE-CARBON-SCOPE-DECISION-RECORD-0C3.md",
+        "sha256": "3fcaec0a866a0d8b364754bce91fb06fe95f470bae87db20acead1ee0f689e1c"
+      }
+    }
+  },
   "releaseDispositionChallenges": {
     "note": "Independent reviewer challenge of the frozen Gate 0B.10 dispositions of DEF-0B10-OPL-01 and DEF-0B10-OPL-07. It is additional review evidence pinned here; it changes no frozen defect or disposition and claims no remediation.",
     "file": "docs/union-eyes/convergence/register/ue-release-disposition-challenges.json",
