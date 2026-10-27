@@ -122,7 +122,7 @@ test('NEGATIVE: a checkpoint that is not an existing commit or cannot be read fr
 test('NEGATIVE: a lockVersion that does not follow from the checkpoints and additions is refused', () => {
   const lock = clone(base.lock)
   lock.lockVersion = 9
-  assert.ok(has(problems({ lock }), /lockVersion is 9 but its checkpoints and additions require 4/))
+  assert.ok(has(problems({ lock }), /lockVersion is 9 but its checkpoints and additions require 5/))
 })
 
 test('NEGATIVE: the updater refuses a capability that no frozen tranche classified an operation to', () => {
