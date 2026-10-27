@@ -94,7 +94,7 @@ const GROUPS = {
     capabilityId: REUSED.OPERATOR,
     domain: 'COGNITION_HEALTH',
     actor: 'Officer reading the posture of the organizational cognition subsystem',
-    evidence: [api('cognition/health/route.ts', "import { withApi } from '@/lib/api/with-api';")],
+    evidence: [api('cognition/health/route.ts', "import { withApi } from '@/lib/api/framework';")],
   },
   COMMITTEE_RECORDS: {
     capabilityId: NEW.COMMITTEES,

@@ -3704,6 +3704,340 @@
       "businessOutcome": "A health and safety filing is readable and changeable only by the representative who holds the member case, a regulatory record is retained and not hard-deleted, committee rosters are readable only by the readers the institution names, and every change commits with its audit record.",
       "sourceStatus": "PARTIAL",
       "gap": "No capability named health and safety regulatory records before Gate 0B.4. The routes are the generic CRUD factory: a steward of the organization reads and changes any filing without holding the member case, the collection and item routes disagree about which filings a steward sees, the anti-scab record has no author column, and the anti-scab and committee records are hard-deleted. This record closes none of them and names no retention rule, which is an institutional decision no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-E-001"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        2,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/cnesst/pay-equity",
+      "httpAction": null,
+      "service": "apps/union-eyes/db/schema/domains/health-safety/cnesst-schema.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "Every write is the generic CRUD factory, which commits persistAtomicAudit with the row. Reads are not audited.",
+      "privacyClassification": "Pay equity exercise status, deadlines and outcomes for an organization; the table holds no member identifier.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/cnesst/pay-equity/route.ts",
+        "apps/union-eyes/app/api/cnesst/pay-equity/[id]/route.ts",
+        "apps/union-eyes/db/schema/domains/health-safety/cnesst-schema.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/cnesst/pay-equity/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-PAY-EQUITY-EXERCISES",
+      "parentRegisterId": "UE-CONV-F-003",
+      "obligationKey": "pay-equity-exercises",
+      "primaryGate": 6,
+      "actor": "Officer or steward recording, and member reading, the pay equity exercises of an organization",
+      "businessOutcome": "A pay equity exercise names the employer or bargaining unit it concerns, moves through a recorded sequence of states with the statutory dates it must meet, is changeable only by the offices the institution names, is retained and not hard-deleted, and every change commits with its audit record.",
+      "sourceStatus": "PARTIAL",
+      "gap": "Gate 0B.5 found the pay equity exercise routes under the cnesst path but owned by no health and safety obligation: the table is a pay equity record, not a workplace injury record. The routes are the generic CRUD factory, the table has no author column and no link to the employer or bargaining unit the exercise concerns, no source computes or enforces a state sequence or a statutory deadline, and any body field, including status and adjustment amounts, is stored as the body gives it. This record closes none of them. The statute that sets the deadlines and the office that may close an exercise are institutional matters no source states, and this record invents neither."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        1,
+        6
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/committees",
+      "httpAction": null,
+      "service": "apps/union-eyes/lib/services/committee-workspace-service.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "Every workspace write runs in withRLSContext with persistAtomicAudit in the same transaction, and the scope check requireCommitteeScope runs first. The committee record routes are the generic CRUD factory, which commits persistAtomicAudit with the row. Reads are not audited.",
+      "privacyClassification": "Committee membership, meeting minutes, attendance, action items, internal notes and committee documents, which may describe grievance strategy and individual members.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/committees/route.ts",
+        "apps/union-eyes/app/api/committees/[id]/meetings/route.ts",
+        "apps/union-eyes/lib/services/committee-workspace-service.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/lib/services/committee-workspace-service.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-COMMITTEE-WORKSPACE",
+      "parentRegisterId": "UE-CONV-K-006",
+      "obligationKey": "committee-workspace",
+      "primaryGate": 14,
+      "actor": "Committee chair, secretary and member working with committee meetings, minutes, attendance, action items and documents",
+      "businessOutcome": "A committee record, its meetings, minutes, attendance, action items and documents are readable and changeable only by the people the committee names, every record referenced by an id is verified to belong to the same committee and organization, an approved decision cannot be edited in place, the preparer and the approver of minutes are different people, and every change commits with its audit record.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No capability named the committee workspace before Gate 0B.5. The service writes are already scoped and atomic; the gaps are on the reads and on what the writes accept. Reads are open to any member of the organization, not only committee members; ids referenced by a meeting, minute or action item are not verified to belong to the committee; an approved decision can be edited in place; the person who prepares minutes may approve them; the intelligence route gathers every committee of the organization and returns a placeholder as a result; list pagination is unbounded; and internal notes are returned to any reader of the item. This record closes none of them and names no committee confidentiality rule, which no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-006",
+        "UE-CONV-K-007"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        9,
+        14
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/communications/campaigns, app/api/communications/templates, app/api/communications/distribution-lists",
+      "httpAction": null,
+      "service": "apps/union-eyes/db/schema/domains/communications/campaigns.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "Campaign, template and list writes through the generic CRUD factory commit persistAtomicAudit with the row. The subscriber removal commits persistAtomicAudit with the delete. Reads are not audited, including reads of subscriber e-mail addresses.",
+      "privacyClassification": "Campaign content, template content, distribution lists and the e-mail addresses of their subscribers.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/communications/campaigns/route.ts",
+        "apps/union-eyes/app/api/communications/templates/route.ts",
+        "apps/union-eyes/app/api/communications/distribution-lists/route.ts",
+        "apps/union-eyes/db/schema/domains/communications/campaigns.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/communications/campaigns/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING",
+      "parentRegisterId": "UE-CONV-I-002",
+      "obligationKey": "communications-campaign-authoring",
+      "primaryGate": 11,
+      "actor": "Steward or officer authoring campaigns, templates and distribution lists, and managing list subscribers",
+      "businessOutcome": "A campaign, a template and a distribution list belong to one organization and are changed only by the offices the institution names; campaign status and delivery statistics are written only by the delivery process and never by a caller; a campaign is tied to the consent and the delivery path that sends it; a template is retained and not hard-deleted; removing a list does not erase the consent trail of its subscribers; subscriber e-mail addresses are readable only by the offices that manage the list; and every change commits with its audit record.",
+      "sourceStatus": "PARTIAL",
+      "gap": "Gate 0B.4 recorded the delivery of a campaign under UE-OMIT-COMMUNICATIONS-CAMPAIGN-DELIVERY and left the owner of campaign delivery as the outstanding decision UE-INST-COMMUNICATIONS-CAMPAIGN-OWNER; this record covers authoring only and does not decide that owner. The campaign routes are the generic CRUD factory, so a caller writes campaign status and delivery statistics directly; the schedule, send-test and analytics routes are the generic campaign item route under another name and send nothing, validate no schedule and return no analytics; the campaign rows are detached from the consent and the delivery path; the template route hard-deletes; deleting a list erases the consent trail of its subscribers; and any member reads the subscriber e-mail addresses of a list."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-006",
+        "UE-CONV-K-007"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        9,
+        14
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/communications/sms",
+      "httpAction": null,
+      "service": "apps/union-eyes/db/schema/domains/communications/sms.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "SMS message, campaign and conversation writes through the generic CRUD factory commit persistAtomicAudit with the row. Reads are not audited.",
+      "privacyClassification": "SMS message bodies, member phone numbers and the conversations of members with the union.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/communications/sms/route.ts",
+        "apps/union-eyes/app/api/communications/sms/campaigns/route.ts",
+        "apps/union-eyes/app/api/communications/sms/conversations/route.ts",
+        "apps/union-eyes/db/schema/domains/communications/sms.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/communications/sms/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-COMMUNICATIONS-SMS",
+      "parentRegisterId": "UE-CONV-I-002",
+      "obligationKey": "communications-sms",
+      "primaryGate": 11,
+      "actor": "Steward sending SMS messages and campaigns to members, and member receiving them",
+      "businessOutcome": "An SMS row exists only for a message that was handed to a delivery provider, a steward reads the conversation of a member only for a case or an office the institution names, an SMS campaign is readable only by the offices that run it, a member sees only their own messages, and every change commits with its audit record.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No capability named SMS before Gate 0B.5. The message create route writes a row and calls no delivery provider, so a stored message can read as sent; a steward reads every member message of the organization without a case or office; the campaign list is readable by any member; and the conversation read route is the generic message collection route under another name, ignores the conversation id and marks nothing read. This record closes none of them. Which offices may read member SMS conversations is an institutional matter no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-006",
+        "UE-CONV-A-004"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        9,
+        14
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/communications/track, app/api/communications/unsubscribe",
+      "httpAction": "GET",
+      "service": "apps/union-eyes/app/api/communications/unsubscribe/[recipientId]/route.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "The click and open routes update campaign statistics with a read, modify and write and record no audit. The unsubscribe route updates the message log, the campaign statistics, the communication preference and the consent record as separate statements with no transaction and no atomic audit record.",
+      "privacyClassification": "Recipient identifiers carried in an unauthenticated link, e-mail consent state and campaign engagement counters.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/communications/track/click/route.ts",
+        "apps/union-eyes/app/api/communications/track/open/[campaignId]/[recipientId]/route.ts",
+        "apps/union-eyes/app/api/communications/unsubscribe/[recipientId]/route.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/communications/unsubscribe/[recipientId]/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-COMMUNICATIONS-TRACKING-AND-UNSUBSCRIBE",
+      "parentRegisterId": "UE-CONV-I-002",
+      "obligationKey": "communications-tracking-and-unsubscribe",
+      "primaryGate": 11,
+      "actor": "Recipient of a union communication clicking, opening or unsubscribing through an unauthenticated link",
+      "businessOutcome": "An unsubscribe link changes the consent of exactly the recipient it was issued to, through a token the recipient cannot guess, in one transaction with its audit record; it records consent whether or not a campaign is attached; it ends the recipient list subscriptions as well as the campaign preference; and a click or an open never changes state through a GET.",
+      "sourceStatus": "PARTIAL",
+      "gap": "Gate 0B.1 recorded that the tracking routes mutate on GET (DEF-0B1-COMMS-TRACKING-GET-MUTATES) under a generic communications owner; Gate 0B.5 classifies the three operations under this obligation and does not repair that defect. The statistics are a read, modify and write that loses concurrent updates; the unsubscribe writes are not one transaction; no consent record is written when the link carries no campaign; and the recipient list subscriptions stay active after an unsubscribe."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-F-003"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        6,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/communications/polls, app/api/communications/surveys",
+      "httpAction": null,
+      "service": "apps/union-eyes/db/schema/domains/communications/surveys.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "Survey and response writes through the generic CRUD factory commit persistAtomicAudit with the row. The poll routes refuse every write through the governance table. Reads are not audited.",
+      "privacyClassification": "Member survey answers, respondent identifiers, poll votes and survey results that may reveal how an identifiable member answered.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/communications/surveys/route.ts",
+        "apps/union-eyes/app/api/communications/surveys/[surveyId]/results/route.ts",
+        "apps/union-eyes/app/api/communications/polls/route.ts",
+        "apps/union-eyes/db/schema/domains/communications/surveys.ts",
+        "apps/union-eyes/db/schema/survey-polling-schema.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/communications/surveys/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+      "parentRegisterId": "UE-CONV-K-006",
+      "obligationKey": "member-polls-and-surveys",
+      "primaryGate": 14,
+      "actor": "Steward publishing, and member answering, organization polls and surveys; steward reading survey results",
+      "businessOutcome": "A poll is created and voted through a defined path that records one vote per member; a survey moves through draft, open and closed only by the owner of the survey; a member reads only open surveys; an anonymous response is never attributable to its member by a steward; responses are read by survey and organization; and every change commits with its audit record.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No capability named polls or surveys before Gate 0B.5. Polls are read-only in the governance table and poll votes are denied, so no route can create a poll or cast a vote; the poll item route returns the collection; survey status is writable directly; draft surveys are readable by members; the responses list identifies each respondent to a steward; the responses route ignores the survey id in its path; no route writes survey answers; and the results route reads every answer without an organization predicate. This record closes none of them. Whether a survey answer may ever be attributed to a member is an institutional matter no source states."
     }
   ],
   "personaActions": [
@@ -5746,7 +6080,7 @@
   },
   "routeOwnership": {
     "file": "docs/union-eyes/convergence/register/ue-route-capability-ownership.json",
-    "entriesHash": "35e82400b3a93f4c0cf2154e5932645107dcdf7126a638c7d32ab7b543fdd0bf",
+    "entriesHash": "eeca960f3eca9e6262756cf656b37cd22f0693a968c62bedf66bf459adef3399",
     "operations": 1644
   },
   "routeClassification": {
@@ -5763,7 +6097,7 @@
       },
       "ledger": {
         "file": "docs/union-eyes/convergence/register/ue-route-classification-ledger.json",
-        "sha256": "be35f3e61364ed8f22269c0a122b80eb8cd2352cd0aa0e682fde7b04ccf0fa15"
+        "sha256": "5cb37a3a4cb2c505a0989dae5923a57e1802f523d4aaaee36bba3195646c2f90"
       }
     }
   },
@@ -5806,6 +6140,20 @@
       "classification": {
         "file": "docs/union-eyes/convergence/register/ue-route-classification-0b4.json",
         "sha256": "56cb5eb99631b7dfbeccae774cafe1055e94f53fe7670ff06e4d86fecaad1685"
+      }
+    }
+  },
+  "routeClassification0b5": {
+    "tranche": "GATE-0B.5",
+    "note": "Hash pins for the frozen Gate 0B.5 tranche manifest and its source-evidenced classification register. The cumulative ledger is pinned above.",
+    "files": {
+      "manifest": {
+        "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b5-manifest.json",
+        "sha256": "0b72b37b65cb8ebb88bb68b1f2af11f312ef44180d70ac2850cbc8fd41e7a9b8"
+      },
+      "classification": {
+        "file": "docs/union-eyes/convergence/register/ue-route-classification-0b5.json",
+        "sha256": "43341255456f946f2de5a55e6dbbf5b84b7c43f865cc0fa6b62ae0e9434cb426"
       }
     }
   },
@@ -6897,6 +7245,342 @@
       "ownerCapabilityId": "UE-CAP-H-001",
       "tranche": "0B.4",
       "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-OHS-OWNER-COLUMN-WORKERID-ABSENT",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-OHS-WITHDRAWAL-REFUSAL-NO-CASE-AUTHORITY",
+      "gate": 6,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-OHS-REFUSAL-EVENT-HARD-DELETE",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-PAY-EQUITY-NO-STATE-MACHINE-OR-DEADLINES",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PAY-EQUITY-EXERCISES",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COGNITION-SNAPSHOTS-IN-LOCAL-FILES",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COGNITION-READ-ROUTES-WRITE-FILES-AUDIT-NOT-ATOMIC",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COGNITION-ANY-STEWARD-SCORES-ANY-CASE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COGNITION-ENGAGEMENT-NEVER-COMPUTED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COGNITION-WORKLOAD-BURNOUT-VISIBLE-TO-PEERS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COGNITION-KPI-ROI-FROM-ASSUMED-HOURS",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COGNITION-HEALTH-PLATFORM-POSTURE-TO-ORG-OFFICER",
+      "gate": 9,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COMMITTEE-READ-IGNORES-MEMBERSHIP",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMMITTEE-WORKSPACE",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COMMITTEE-REFERENCED-IDS-NOT-VERIFIED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMMITTEE-WORKSPACE",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COMMITTEE-DECISIONS-EDITABLE-AFTER-APPROVAL",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMMITTEE-WORKSPACE",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COMMITTEE-MINUTES-NO-SEPARATION-OF-DUTIES",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-COMMITTEE-WORKSPACE",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COMMITTEE-INTELLIGENCE-GATHERS-ALL-COMMITTEES",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMMITTEE-WORKSPACE",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COMMITTEE-LIST-PAGINATION-UNBOUNDED",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-COMMITTEE-WORKSPACE",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COMMITTEE-INTERNAL-NOTES-READ-BY-ANY-MEMBER",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-COMMITTEE-WORKSPACE",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COMMITTEE-INTELLIGENCE-PLACEHOLDER-RETURNED-AS-RESULT",
+      "gate": 8,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-H-001",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COMMS-CAMPAIGN-STATUS-AND-STATS-WRITABLE",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COMMS-CAMPAIGN-DETACHED-FROM-CONSENT-AND-DELIVERY",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COMMS-ACTION-ROUTE-IS-GENERIC-CAMPAIGN-CRUD",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COMMS-TEMPLATE-HARD-DELETE",
+      "gate": 11,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COMMS-TEMPLATE-DUPLICATE-IS-GENERIC-CRUD",
+      "gate": 11,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COMMS-LIST-DELETE-ERASES-SUBSCRIBER-CONSENT-TRAIL",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-COMMS-SUBSCRIBER-EMAILS-READ-BY-ANY-MEMBER",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-SMS-ROWS-WRITTEN-WITHOUT-SENDING",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMMUNICATIONS-SMS",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-SMS-STEWARD-READS-ALL-MEMBER-MESSAGES",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMMUNICATIONS-SMS",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-SMS-CAMPAIGN-READ-BY-ANY-MEMBER",
+      "gate": 11,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-COMMUNICATIONS-SMS",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-SMS-READ-ROUTE-IS-GENERIC-MESSAGE-CRUD",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMMUNICATIONS-SMS",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-TRACKING-STATS-READ-MODIFY-WRITE-UNAUDITED",
+      "gate": 11,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-COMMUNICATIONS-TRACKING-AND-UNSUBSCRIBE",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-UNSUBSCRIBE-WRITES-NOT-ATOMIC",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMMUNICATIONS-TRACKING-AND-UNSUBSCRIBE",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-UNSUBSCRIBE-NO-CONSENT-RECORD-WITHOUT-CAMPAIGN",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMMUNICATIONS-TRACKING-AND-UNSUBSCRIBE",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-UNSUBSCRIBE-LEAVES-LIST-SUBSCRIPTIONS-ACTIVE",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMMUNICATIONS-TRACKING-AND-UNSUBSCRIBE",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-POLLS-NO-CREATE-OR-VOTE-PATH",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-POLLS-ITEM-ROUTE-IS-COLLECTION",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-SURVEY-LIFECYCLE-WRITABLE-DIRECTLY",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-SURVEY-DRAFTS-READABLE-BY-MEMBERS",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-SURVEY-RESPONSES-IDENTIFY-RESPONDENTS-TO-STEWARDS",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-SURVEY-RESPONSES-ROUTE-IGNORES-SURVEY-ID",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-SURVEY-ANSWERS-HAVE-NO-ROUTE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+      "tranche": "0B.5",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B5-SURVEY-RESULTS-NO-ORG-PREDICATE-LOADS-ALL-ANSWERS",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+      "tranche": "0B.5",
+      "releaseBlocking": false
     }
   ],
   "outOfScope": [
@@ -6985,7 +7669,11 @@
     "UE-OMIT-CBA-INTELLIGENCE-DATASET",
     "UE-OMIT-CLAUSE-LIBRARY-SHARING",
     "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+    "UE-OMIT-COMMITTEE-WORKSPACE",
+    "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING",
     "UE-OMIT-COMMUNICATIONS-CAMPAIGN-DELIVERY",
+    "UE-OMIT-COMMUNICATIONS-SMS",
+    "UE-OMIT-COMMUNICATIONS-TRACKING-AND-UNSUBSCRIBE",
     "UE-OMIT-DEADLINE-OVERDUE",
     "UE-OMIT-DELIVERY-EVIDENCE",
     "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
@@ -6993,8 +7681,10 @@
     "UE-OMIT-M04-LEGAL-DEADLINE",
     "UE-OMIT-M04-MEMBER-REQUESTS",
     "UE-OMIT-MAIN-APP-CRONS",
+    "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
     "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
     "UE-OMIT-OHS-REGULATORY-RECORDS",
+    "UE-OMIT-PAY-EQUITY-EXERCISES",
     "UE-OMIT-PKI-SIGNING-WORKFLOW",
     "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
     "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",

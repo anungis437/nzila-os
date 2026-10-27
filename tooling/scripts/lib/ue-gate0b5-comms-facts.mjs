@@ -402,7 +402,7 @@ const TRACKING = {
     future: 'Record engagement as events in one transaction and keep counters derived; do not change state on a GET that a link scanner can trigger.',
     ev: [
       ...authEv(a),
-      a.h('mutation', '.set(updatePayload)'),
+      a.h('mutation', '.update(messageLog)'),
       a.h('audit', 'status: \'clicked\','),
       a.h('defect', 'stats: nextStats,'),
     ],
@@ -421,7 +421,7 @@ const TRACKING = {
     future: 'Record opens as events in one transaction and keep counters derived; treat a mail-client prefetch as a non-event.',
     ev: [
       ...authEv(a),
-      a.h('mutation', 'status: nextStatus,'),
+      a.h('mutation', '.update(messageLog)'),
       a.h('audit', 'openedAt: new Date(),'),
       a.h('defect', 'stats: incrementStat(campaign.stats, \'opened\'),'),
     ],
@@ -440,7 +440,7 @@ const TRACKING = {
     future: 'Accept the unsubscribe through a POST that a scanner cannot trigger, apply it in one transaction to the preference, consent and list subscriptions of each affected organization, and record it for every organization.',
     ev: [
       ...authEv(a),
-      a.h('mutation', '.set({'),
+      a.h('mutation', '.update(communicationPreferences)'),
       a.h('audit', "status: 'revoked',"),
       a.h('defect', 'const ownPreferences = await db'),
     ],

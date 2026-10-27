@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "lockVersion": 3,
+  "lockVersion": 4,
   "note": "Independent capability lock. The anchored capability set is read from git history at anchorCommit, which an edit to the working tree cannot change. A capability may leave the matrix only through a retirement record here with schemaVersion 2 or later, a reason, and an existing evidence file.",
   "anchorCommit": "2247978bd642a89a7d4f8bd720b978f789cb4437",
   "anchorMatrixPath": "docs/union-eyes/convergence/register/ue-pre-vs-engineering-completion.json",
@@ -57,7 +57,11 @@
     "UE-OMIT-CBA-INTELLIGENCE-DATASET",
     "UE-OMIT-CLAUSE-LIBRARY-SHARING",
     "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+    "UE-OMIT-COMMITTEE-WORKSPACE",
+    "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING",
     "UE-OMIT-COMMUNICATIONS-CAMPAIGN-DELIVERY",
+    "UE-OMIT-COMMUNICATIONS-SMS",
+    "UE-OMIT-COMMUNICATIONS-TRACKING-AND-UNSUBSCRIBE",
     "UE-OMIT-DEADLINE-OVERDUE",
     "UE-OMIT-DELIVERY-EVIDENCE",
     "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
@@ -65,8 +69,10 @@
     "UE-OMIT-M04-LEGAL-DEADLINE",
     "UE-OMIT-M04-MEMBER-REQUESTS",
     "UE-OMIT-MAIN-APP-CRONS",
+    "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
     "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
     "UE-OMIT-OHS-REGULATORY-RECORDS",
+    "UE-OMIT-PAY-EQUITY-EXERCISES",
     "UE-OMIT-PKI-SIGNING-WORKFLOW",
     "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
     "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
@@ -129,6 +135,48 @@
       "operationsHash": "041e12b14c22e6e40e825b15d7f72cbe85aeceb03b210bd157a791896aa19d35",
       "classifiedOperations": 15,
       "reason": "Created by GATE-0B.4 as the engineering capability whose obligation covers operations that tranche classified from source evidence: ohs-regulatory-records."
+    },
+    {
+      "capabilityId": "UE-OMIT-COMMITTEE-WORKSPACE",
+      "tranche": "GATE-0B.5",
+      "operationsHash": "5143d4bbb4de1f5b46e9b620d587398f0a5f63e3a97008b1eb7af9f7cbe4230e",
+      "classifiedOperations": 20,
+      "reason": "Created by GATE-0B.5 as the engineering capability whose obligation covers operations that tranche classified from source evidence: committee-workspace."
+    },
+    {
+      "capabilityId": "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING",
+      "tranche": "GATE-0B.5",
+      "operationsHash": "5143d4bbb4de1f5b46e9b620d587398f0a5f63e3a97008b1eb7af9f7cbe4230e",
+      "classifiedOperations": 29,
+      "reason": "Created by GATE-0B.5 as the engineering capability whose obligation covers operations that tranche classified from source evidence: communications-campaign-authoring."
+    },
+    {
+      "capabilityId": "UE-OMIT-COMMUNICATIONS-SMS",
+      "tranche": "GATE-0B.5",
+      "operationsHash": "5143d4bbb4de1f5b46e9b620d587398f0a5f63e3a97008b1eb7af9f7cbe4230e",
+      "classifiedOperations": 8,
+      "reason": "Created by GATE-0B.5 as the engineering capability whose obligation covers operations that tranche classified from source evidence: communications-sms."
+    },
+    {
+      "capabilityId": "UE-OMIT-COMMUNICATIONS-TRACKING-AND-UNSUBSCRIBE",
+      "tranche": "GATE-0B.5",
+      "operationsHash": "5143d4bbb4de1f5b46e9b620d587398f0a5f63e3a97008b1eb7af9f7cbe4230e",
+      "classifiedOperations": 3,
+      "reason": "Created by GATE-0B.5 as the engineering capability whose obligation covers operations that tranche classified from source evidence: communications-tracking-and-unsubscribe."
+    },
+    {
+      "capabilityId": "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+      "tranche": "GATE-0B.5",
+      "operationsHash": "5143d4bbb4de1f5b46e9b620d587398f0a5f63e3a97008b1eb7af9f7cbe4230e",
+      "classifiedOperations": 14,
+      "reason": "Created by GATE-0B.5 as the engineering capability whose obligation covers operations that tranche classified from source evidence: member-polls-and-surveys."
+    },
+    {
+      "capabilityId": "UE-OMIT-PAY-EQUITY-EXERCISES",
+      "tranche": "GATE-0B.5",
+      "operationsHash": "5143d4bbb4de1f5b46e9b620d587398f0a5f63e3a97008b1eb7af9f7cbe4230e",
+      "classifiedOperations": 5,
+      "reason": "Created by GATE-0B.5 as the engineering capability whose obligation covers operations that tranche classified from source evidence: pay-equity-exercises."
     }
   ]
 }
