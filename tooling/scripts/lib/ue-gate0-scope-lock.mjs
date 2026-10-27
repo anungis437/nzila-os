@@ -27,6 +27,9 @@ import { FILES_0B4, validateClassification4 } from './ue-gate0b4-classification.
 import { ANCHOR_COMMIT as ANCHOR_COMMIT_0B4 } from './ue-gate0b4-groups.mjs'
 import { FILES_0B5, validateClassification5 } from './ue-gate0b5-classification.mjs'
 import { ANCHOR_COMMIT as ANCHOR_COMMIT_0B5 } from './ue-gate0b5-groups.mjs'
+import { FILES_0B6, validateClassification6 } from './ue-gate0b6-classification.mjs'
+import { ANCHOR_COMMIT as ANCHOR_COMMIT_0B6 } from './ue-gate0b6-ids.mjs'
+import { FILE_EXCEPTIONS, inventoryTotals, inventoryTotalsProblems, validateDecisionBoundExceptions } from './ue-gate0b6-exceptions.mjs'
 import { lockProvenanceProblems } from './ue-gate0-lock-provenance.mjs'
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
@@ -238,14 +241,16 @@ function classificationPinProblems(matrix, root) {
     ...pinProblems(matrix?.routeClassification0b3, 'routeClassification0b3', FILES_0B3, root),
     ...pinProblems(matrix?.routeClassification0b4, 'routeClassification0b4', FILES_0B4, root),
     ...pinProblems(matrix?.routeClassification0b5, 'routeClassification0b5', FILES_0B5, root),
+    ...pinProblems(matrix?.routeClassification0b6, 'routeClassification0b6', FILES_0B6, root),
+    ...pinProblems(matrix?.decisionBoundExceptions, 'decisionBoundExceptions', { register: FILE_EXCEPTIONS }, root, true),
   ]
 }
 
-function pinProblems(record, name, files, root) {
+function pinProblems(record, name, files, root, flat = false) {
   if (!record) return [`CLASSIFICATION-PIN-ABSENT: the matrix records no ${name} block`]
   const out = []
   for (const [key, file] of Object.entries(files)) {
-    const entry = record.files?.[key]
+    const entry = flat ? record : record.files?.[key]
     if (!entry || entry.file !== file) {
       out.push(`CLASSIFICATION-PIN-FILE: ${key} is not recorded at ${file}`)
       continue
@@ -321,11 +326,15 @@ export function loadContext(root = ROOT) {
     classification0b4: readJsonIfPresent(root, FILES_0B4.classification),
     tranche0b5: readJsonIfPresent(root, FILES_0B5.manifest),
     classification0b5: readJsonIfPresent(root, FILES_0B5.classification),
+    tranche0b6: readJsonIfPresent(root, FILES_0B6.manifest),
+    classification0b6: readJsonIfPresent(root, FILES_0B6.classification),
+    exceptionRegister: readJsonIfPresent(root, FILE_EXCEPTIONS),
     anchoredOwnershipEntries: anchoredOwnershipEntries(root),
     anchoredOwnershipEntries0b2: anchoredOwnershipEntries(root, ANCHOR_COMMIT_0B2),
     anchoredOwnershipEntries0b3: anchoredOwnershipEntries(root, ANCHOR_COMMIT_0B3),
     anchoredOwnershipEntries0b4: anchoredOwnershipEntries(root, ANCHOR_COMMIT_0B4),
     anchoredOwnershipEntries0b5: anchoredOwnershipEntries(root, ANCHOR_COMMIT_0B5),
+    anchoredOwnershipEntries0b6: anchoredOwnershipEntries(root, ANCHOR_COMMIT_0B6),
     lock,
     anchorCapabilityIds: anchoredCapabilityIds(root, lock),
     checkpointCapabilityIds: checkpointCapabilityIds(root, lock),
@@ -676,8 +685,53 @@ export function validateGate0(matrix, ctx = {}) {
       })
     : { problems: ['Gate 0B.5 route classification cannot be validated without the ownership register'], registeredReleaseBlocking: new Set(), releaseBlockingDefects: [], summary: null }
   problems.push(...check0b5.problems)
+  const classification0b6 = 'classification0b6' in ctx ? ctx.classification0b6 : base.classification0b6
+  const exceptionRegister = 'exceptionRegister' in ctx ? ctx.exceptionRegister : base.exceptionRegister
+  const universe = new Set(routes.flatMap((route) => [].concat(route.methods).map((method) => `${route.route}|${method}`)))
+  const exceptionCheck = ownership
+    ? validateDecisionBoundExceptions({
+        register: exceptionRegister,
+        classification0b4,
+        classification0b5,
+        latestDecisions: classification0b6?.institutionalDecisions ?? [],
+        defectRegister: classification0b6?.defectRegister ?? [],
+        ledger: 'ledger0b1' in ctx ? ctx.ledger0b1 : base.ledger0b1,
+        entries: ownership.entries ?? [],
+        capabilityById: byId,
+        universe,
+        laterOperations: new Set(('tranche0b6' in ctx ? ctx.tranche0b6 : base.tranche0b6)?.operations ?? []),
+      })
+    : { problems: ['the decision-bound scope exception register cannot be validated without the ownership register'], operations: new Set(), summary: null }
+  problems.push(...exceptionCheck.problems)
+  const check0b6 = ownership
+    ? validateClassification6({
+        classification: classification0b6,
+        manifest: 'tranche0b6' in ctx ? ctx.tranche0b6 : base.tranche0b6,
+        ledger: 'ledger0b1' in ctx ? ctx.ledger0b1 : base.ledger0b1,
+        classification0b1: 'classification0b1' in ctx ? ctx.classification0b1 : base.classification0b1,
+        classification0b2,
+        classification0b3,
+        classification0b4,
+        classification0b5,
+        manifest0b1: 'tranche0b1' in ctx ? ctx.tranche0b1 : base.tranche0b1,
+        manifest0b2: 'tranche0b2' in ctx ? ctx.tranche0b2 : base.tranche0b2,
+        manifest0b3: 'tranche0b3' in ctx ? ctx.tranche0b3 : base.tranche0b3,
+        manifest0b4: 'tranche0b4' in ctx ? ctx.tranche0b4 : base.tranche0b4,
+        manifest0b5: 'tranche0b5' in ctx ? ctx.tranche0b5 : base.tranche0b5,
+        entries: ownership.entries ?? [],
+        capabilityById: byId,
+        universe,
+        exists,
+        readText,
+        anchoredEntries: 'anchoredOwnershipEntries0b6' in ctx ? ctx.anchoredOwnershipEntries0b6 : base.anchoredOwnershipEntries0b6,
+        exceptionIds: exceptionCheck.operations,
+      })
+    : { problems: ['Gate 0B.6 route classification cannot be validated without the ownership register'], registeredReleaseBlocking: new Set(), releaseBlockingDefects: [], summary: null }
+  problems.push(...check0b6.problems)
+  const inventory = ownership ? inventoryTotals(ownership.entries ?? [], exceptionCheck.operations) : null
+  if (inventory) problems.push(...inventoryTotalsProblems(matrix?.routeInventoryTotals, inventory))
   const trancheEvidence = 'trancheEvidence' in ctx ? ctx.trancheEvidence : [
-    ['tranche0b1', 'classification0b1'], ['tranche0b2', 'classification0b2'], ['tranche0b3', 'classification0b3'], ['tranche0b4', 'classification0b4'], ['tranche0b5', 'classification0b5'],
+    ['tranche0b1', 'classification0b1'], ['tranche0b2', 'classification0b2'], ['tranche0b3', 'classification0b3'], ['tranche0b4', 'classification0b4'], ['tranche0b5', 'classification0b5'], ['tranche0b6', 'classification0b6'],
   ].map(([manifestKey, classificationKey]) => ({
     manifest: manifestKey in ctx ? ctx[manifestKey] : base[manifestKey],
     classification: classificationKey in ctx ? ctx[classificationKey] : base[classificationKey],
@@ -690,10 +744,11 @@ export function validateGate0(matrix, ctx = {}) {
     tranches: trancheEvidence,
     deps: { exists, commitExists },
   }))
-  problems.push(...routeDefectProblems(matrix, classification0b5))
+  problems.push(...routeDefectProblems(matrix, classification0b6))
   problems.push(...('classificationPinProblems' in ctx ? ctx.classificationPinProblems : classificationPinProblems(matrix, base.root)))
   const routeCheck = validateRouteOwnership({
     justifiedUnauthenticated: classificationCheck.justifiedUnauthenticated,
+    decisionBoundExceptions: exceptionCheck.operations,
     ownership,
     capabilityById: byId,
     routes,
@@ -714,8 +769,8 @@ export function validateGate0(matrix, ctx = {}) {
   const debt = defectProblems(capabilities, ratchetFailures, evidence, { exists, readText })
   problems.push(...debt.problems)
 
-  const exposureBlocked = (blocker) => blocker.code === 'ROUTE_UNJUSTIFIED_EXPOSURE' && blocker.operations.every((operation) => check0b5.registeredReleaseBlocking.has(operation))
-  const releaseBlocking = check0b5.releaseBlockingDefects.map((item) => ({
+  const exposureBlocked = (blocker) => blocker.code === 'ROUTE_UNJUSTIFIED_EXPOSURE' && blocker.operations.every((operation) => check0b6.registeredReleaseBlocking.has(operation))
+  const releaseBlocking = check0b6.releaseBlockingDefects.map((item) => ({
     capabilityId: item.ownerCapabilityId,
     id: item.defectId,
     kind: 'RELEASE_BLOCKING_ROUTE_EXPOSURE',
@@ -738,6 +793,9 @@ export function validateGate0(matrix, ctx = {}) {
   summary.classification0b3 = check0b3.summary
   summary.classification0b4 = check0b4.summary
   summary.classification0b5 = check0b5.summary
+  summary.classification0b6 = check0b6.summary
+  summary.decisionBoundExceptions = exceptionCheck.summary
+  summary.inventory = inventory
   summary.persona = Object.fromEntries(PERSONAS.map((persona) => {
     const spec = personaSpecs[persona]
     return [persona, { identifiers: spec.universe.length, individuallyDefined: spec.individuallyDefined.length, groupedOnly: spec.groupedOnly.length, unspecified: spec.unspecified.length, canonicalFileFound: spec.canonicalFileFound, resolved: spec.resolved }]

@@ -4038,6 +4038,348 @@
       "businessOutcome": "A poll is created and voted through a defined path that records one vote per member; a survey moves through draft, open and closed only by the owner of the survey; a member reads only open surveys; an anonymous response is never attributable to its member by a steward; responses are read by survey and organization; and every change commits with its audit record.",
       "sourceStatus": "PARTIAL",
       "gap": "No capability named polls or surveys before Gate 0B.5. Polls are read-only in the governance table and poll votes are denied, so no route can create a poll or cast a vote; the poll item route returns the collection; survey status is writable directly; draft surveys are readable by members; the responses list identifies each respondent to a steward; the responses route ignores the survey id in its path; no route writes survey answers; and the results route reads every answer without an organization predicate. This record closes none of them. Whether a survey answer may ever be attributed to a member is an institutional matter no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-006",
+        "UE-CONV-K-011"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        6,
+        9,
+        11,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/education, app/api/content/training, app/api/cron/education-reminders",
+      "httpAction": null,
+      "service": "apps/union-eyes/db/schema/domains/scheduling/training.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "Every write is the generic CRUD factory, which commits persistAtomicAudit with the row. Reads are not audited, including reads of registrations and certifications. The reminder job writes no row and no audit record.",
+      "privacyClassification": "Member course registrations, attendance, grades, certificate numbers, certifications and their expiry dates, session meeting access codes, session costs and member e-mail addresses used by the reminder job.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/education/registrations/route.ts",
+        "apps/union-eyes/app/api/education/completions/route.ts",
+        "apps/union-eyes/app/api/education/certifications/route.ts",
+        "apps/union-eyes/app/api/cron/education-reminders/route.ts",
+        "apps/union-eyes/db/schema/domains/scheduling/training.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/education/registrations/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "parentRegisterId": "UE-CONV-K-007",
+      "obligationKey": "education-and-training-records",
+      "primaryGate": 14,
+      "actor": "Member registering for courses and holding certifications; steward or officer maintaining the course catalog, sessions, programs and training records; scheduled job sending session and certification reminders",
+      "businessOutcome": "A course, a session and a program belong to one organization and are changed only by the offices the institution names; a registration names a member, a session of the course and an open seat, and a member cannot write their own completion, grade, certificate or fee fields; a certification exists only for a completed course and is verified by a named office; the offices that may read the training record of another member are named; session access codes and costs are not shown to members who are not registered; reminders go only to members who have not opted out, once, and a run reports the sends that failed; and every change commits with its audit record.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No capability named education or training before Gate 0B.6, and the education routes were owned by the route-domain catch-all. The twelve education files are the generic CRUD factory; six of them (certification generation, renewal reminders, completion certificates, notification preferences, program enrollments and session attendance) are the training_courses table under another name and do none of what the path says. Registrations, completions and certifications are read at the caller member id only, so no office reads another member record, while sessions are read in full by any member; a member registering can write completion, grade, certificate and fee fields; the completions route skips the organization checks of the registrations route; a certification is a free-form verified-by-default insert; and the reminder cron references columns the schema does not define, ignores opt-out and sent state, and reports success after failed sends. This record closes none of them. Which offices may read, complete, certify and revoke training records is an institutional matter no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-006",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        6,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/content/templates, app/api/content/stats",
+      "httpAction": null,
+      "service": "apps/union-eyes/db/schema/domains/infrastructure/cms.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "The status transition locks the row and commits persistAtomicAudit with the update in one tenant transaction. The list and statistics reads are not audited.",
+      "privacyClassification": "Content titles, slugs, file URLs, author user ids, view and download counters and, in the statistics, training course and completion counts.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/content/templates/route.ts",
+        "apps/union-eyes/app/api/content/templates/[id]/status/route.ts",
+        "apps/union-eyes/app/api/content/stats/route.ts",
+        "apps/union-eyes/db/schema/domains/infrastructure/cms.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/content/templates/[id]/status/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-CONTENT-LIBRARY-EDITORIAL",
+      "parentRegisterId": "UE-CONV-K-007",
+      "obligationKey": "content-library-editorial",
+      "primaryGate": 14,
+      "actor": "Content manager drafting and administrator publishing the organization templates and resources; member reading published content and content statistics",
+      "businessOutcome": "A template or resource belongs to one organization, moves through draft, review, published and archived only through the status route by the role each step names, is readable by members only once published, a different person approves than prepared it, and every change commits with its audit record.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No capability named the content library before Gate 0B.6; cms_pages had no owner and the content routes were owned by the route-domain catch-all. The status route holds the best-formed write of the domain (row lock, transition table, role check per step, optimistic conflict check, atomic audit). The gaps are on the read: any member lists drafts, items in review and archived items with their author user id, the limit is caller-chosen and unbounded, and the transition checks no separation between preparer and approver. This record closes none of them."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-I-002"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        6,
+        11,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/employers, app/api/employers/communications",
+      "httpAction": null,
+      "service": "apps/union-eyes/db/schema/domains/communications/employer-communications.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "The employer rows are the generic CRUD factory, which commits persistAtomicAudit with the row. The contact and communication creates commit persistAtomicAudit with the row and then emit a second audit event after the commit. Reads are not audited.",
+      "privacyClassification": "Employer identifiers, names, e-mail addresses and telephone numbers of employer representatives, and the subject and body of correspondence that may describe a grievance and a member.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/employers/route.ts",
+        "apps/union-eyes/app/api/employers/communications/route.ts",
+        "apps/union-eyes/db/schema/domains/communications/employer-communications.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/db/schema/domains/communications/employer-communications.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
+      "parentRegisterId": "UE-CONV-K-006",
+      "obligationKey": "employer-registry-and-communications",
+      "primaryGate": 14,
+      "actor": "Steward and officer maintaining the register of employers, the employer contact directory and the log of communications with the employer",
+      "businessOutcome": "An employer, its representatives and the communications with it belong to one organization, are changed only by the offices the institution names, every id a record references is verified to belong to the same organization, contact details of employer representatives are readable only by the offices that need them with an audit record, grievance correspondence is readable only by those who hold the grievance, a communication reads as sent only when a delivery path sent it, and every change commits with its audit record.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No capability named the employer registry or employer communications before Gate 0B.6; the nearest, UE-OMIT-COMMUNICATIONS-*, owns union to member campaign, SMS and tracking delivery, and the finance capabilities own payroll runs, not the employer record. The employer routes are the generic CRUD factory over employers, whose parentCompanyId is an unscoped foreign key and whose archive leaves archivedAt empty; any steward reads employer representative contact details; the communications POST route stores a row, takes the status from the caller and calls no delivery provider, so a record of status sent is not a delivered message, and it verifies none of the ids it stores, so a communication can be attached to another organization grievance or contact; any steward lists every communication with its grievance link; and a second audit event is written after the commit and can report failure for a committed row. This record closes none of them and names no office that holds employer correspondence authority, which no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-005",
+        "UE-CONV-F-003"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        6,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/compliance",
+      "httpAction": null,
+      "service": "apps/union-eyes/app/api/compliance/validate/route.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "The alert, report, validate and firewall policy reads write no audit record. The firewall policy writes are refused by the CRUD governance table. The validate route persists nothing.",
+      "privacyClassification": "Employer compliance alert text, compliance report documents held as free JSON, the organization compliance verdicts computed from caller-supplied numbers, and the employer data firewall policy.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/compliance/alerts/route.ts",
+        "apps/union-eyes/app/api/compliance/reports/route.ts",
+        "apps/union-eyes/app/api/compliance/validate/route.ts",
+        "apps/union-eyes/app/api/compliance/data-classification-policy/route.ts",
+        "apps/union-eyes/db/schema/domains/compliance/employer-compliance.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/compliance/validate/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-COMPLIANCE-ASSURANCE",
+      "parentRegisterId": "UE-CONV-K-007",
+      "obligationKey": "employer-compliance-assurance",
+      "primaryGate": 14,
+      "actor": "Steward or officer reading employer compliance alerts and reports, checking statutory thresholds, and member reading the employer data firewall policy",
+      "businessOutcome": "A compliance alert or report exists only because a governed process raised it, a compliance verdict is computed from records of the organization against statutory parameters held in a governed source and names the office that determined it, a failed read is reported as a failure and not as an empty list, and the data firewall policy has a governed writer and is read by the code that withholds union data from employers.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No capability named employer compliance before Gate 0B.6. The alert and report tables are read by two routes and by the leadership dashboard and no source inserts into either, so the lists are empty and the leadership compliance metrics read 100 percent; both list routes answer success with an empty list when the query fails; the validate route returns compliant and violation verdicts, with severity and a recommendation, from numbers the caller types in, against thresholds written as literals, and swallows the failure of its own rules lookup; and the firewall policy table has no writer and no code reads its block flags. This record closes none of them. Which office may declare a compliance verdict and where the statutory parameters live are institutional matters no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-005",
+        "UE-CONV-F-003"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        6,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/cope",
+      "httpAction": null,
+      "service": "apps/union-eyes/app/api/cope/campaigns/route.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "Writes through the generic CRUD factory over donation_campaigns commit persistAtomicAudit with the row. Reads are not audited.",
+      "privacyClassification": "Political campaign goals, electoral districts, endorsed candidates, canvassing voter support levels and notes, and elected-official contact records.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/cope/campaigns/route.ts",
+        "apps/union-eyes/app/api/cope/canvassing/route.ts",
+        "apps/union-eyes/app/api/cope/officials/route.ts",
+        "apps/union-eyes/components/cope/PoliticalCampaignDashboard.tsx",
+        "apps/union-eyes/services/financial-service/src/db/schema.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/cope/campaigns/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-COPE-POLITICAL-ACTION",
+      "parentRegisterId": "UE-CONV-K-007",
+      "obligationKey": "cope-political-action",
+      "primaryGate": 14,
+      "actor": "Steward running political action campaigns, canvassing and elected-official contacts, and member reading the campaigns",
+      "businessOutcome": "A political campaign, a canvassing activity and an elected-official contact are held in tables built for them, voter support levels and canvassing notes are readable only by the offices the union names, funds raised come from recorded contributions and not from a caller, and every change commits with its audit record.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No capability named political action before Gate 0B.6. The campaign, canvassing and officials routes are the same generic CRUD factory over donation_campaigns, a public donation campaign table; the political campaign, elected official and member political participation tables exist only in the financial-service schema, which the application schema does not export, and the two interfaces expect fields (electoral district, voter response, support level) that donation_campaigns does not have. A steward can set funds raised and payment product identifiers through the body. This record closes none of them and names no holder or reader of political data, which no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-005",
+        "UE-CONV-K-007"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        2,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/dispatch",
+      "httpAction": null,
+      "service": "apps/union-eyes/lib/services/dispatch-engine.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "The request create and the assignment run in withRLSContext and commit persistAtomicAudit with the rows. The queue read is not audited.",
+      "privacyClassification": "Member identifiers offered work, the employer and job title of each request, and assignment status.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/dispatch/requests/route.ts",
+        "apps/union-eyes/app/api/dispatch/assign/route.ts",
+        "apps/union-eyes/app/api/dispatch/queue/route.ts",
+        "apps/union-eyes/lib/services/dispatch-engine.ts",
+        "apps/union-eyes/db/schema/domains/dispatch/dispatch.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/lib/services/dispatch-engine.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-DISPATCH-HALL",
+      "parentRegisterId": "UE-CONV-K-006",
+      "obligationKey": "hiring-hall-dispatch",
+      "primaryGate": 14,
+      "actor": "Steward opening an employer request for workers, officer assigning members to it, and member offered the work",
+      "businessOutcome": "A dispatch request names an employer of the organization, a member is assigned only when the member belongs to the organization and the organization rules (seniority, rotation, availability, skills) rank the member for the request, a closed or filled request accepts no further assignment, the fill count comes from all assignments and not from one call, and every change commits with its audit record.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No capability named dispatch before Gate 0B.6. The request create, the queue and the assignment are implemented and audited atomically with an organization predicate on the request. The assignment inserts whatever member identifiers the officer posts without checking that they belong to the organization, ignores the status of the request and the assignments it already has, derives filled from the one call, and never applies the dispatch rules: the ranking function is called by no route and no route writes the rules table. The employer identifier of a request is not verified. This record closes none of them and names no dispatch office, which no source states."
     }
   ],
   "personaActions": [
@@ -6080,7 +6422,7 @@
   },
   "routeOwnership": {
     "file": "docs/union-eyes/convergence/register/ue-route-capability-ownership.json",
-    "entriesHash": "eeca960f3eca9e6262756cf656b37cd22f0693a968c62bedf66bf459adef3399",
+    "entriesHash": "c9fd515cecf9311f20eda1b0889c82b0e87892ab1a9d8f710af91c823c455573",
     "operations": 1644
   },
   "routeClassification": {
@@ -6097,7 +6439,7 @@
       },
       "ledger": {
         "file": "docs/union-eyes/convergence/register/ue-route-classification-ledger.json",
-        "sha256": "5cb37a3a4cb2c505a0989dae5923a57e1802f523d4aaaee36bba3195646c2f90"
+        "sha256": "a65a29aa6978bf1ea0e555ba6c339740846e3dfbf96c307b190dde3aea498c50"
       }
     }
   },
@@ -6156,6 +6498,40 @@
         "sha256": "43341255456f946f2de5a55e6dbbf5b84b7c43f865cc0fa6b62ae0e9434cb426"
       }
     }
+  },
+  "routeClassification0b6": {
+    "tranche": "GATE-0B.6",
+    "note": "Hash pins for the frozen Gate 0B.6 tranche manifest and its source-evidenced classification register. The cumulative ledger is pinned above.",
+    "files": {
+      "manifest": {
+        "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b6-manifest.json",
+        "sha256": "3adcb9a4379ae5b2567ad51af97d98337a3f649cb30b3e50895d2390e2f42ab6"
+      },
+      "classification": {
+        "file": "docs/union-eyes/convergence/register/ue-route-classification-0b6.json",
+        "sha256": "52b464423ae2da0d272191678a9957e95614fc6b851e9d5df8ae9070b46954d4"
+      }
+    }
+  },
+  "decisionBoundExceptions": {
+    "note": "Operations Gate 0B.4 and Gate 0B.5 examined, whose evidence is exhausted and whose scope waits on an outstanding institutional decision. They are reported apart from operations awaiting source classification and are never counted as OWNED. The register is pinned here; an exception is not an approval.",
+    "file": "docs/union-eyes/convergence/register/ue-route-decision-bound-exceptions.json",
+    "sha256": "e412bec8870a37d3b3ac7354763b7b79c8f8e891a08e62e5ec28ca45d75e63c4",
+    "operations": [
+      "carbon/dashboard/route.ts|GET",
+      "carbon/infrastructure/route.ts|GET",
+      "carbon/validate/route.ts|GET",
+      "carbon/validate/route.ts|POST"
+    ]
+  },
+  "routeInventoryTotals": {
+    "OWNED": 926,
+    "SCOPE_UNDECIDED_AWAITING_CLASSIFICATION": 577,
+    "DECISION_BOUND_SCOPE_EXCEPTION": 4,
+    "RETIRED_501": 97,
+    "STUB_501": 31,
+    "SYSTEM": 9,
+    "operations": 1644
   },
   "routeDefects": [
     {
@@ -7581,6 +7957,790 @@
       "ownerCapabilityId": "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
       "tranche": "0B.5",
       "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-FACADE-PATHS-ARE-COURSE-CATALOG-CRUD",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-ITEM-FACADES-REWRITE-OR-DELETE-COURSE-BY-PATH-ID",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-COMPLETIONS-ROUTE-NOT-FILTERED-TO-COMPLETED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-COMPLETIONS-POST-SKIPS-REGISTRATION-CHECKS",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-OWNER-SCOPED-READS-HIDE-MEMBER-RECORDS-FROM-STAFF",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-REGISTRATION-MEMBER-SETS-COMPLETION-FEE-AND-APPROVAL-FIELDS",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-REGISTRATION-NO-CAPACITY-DUPLICATE-OR-SESSION-COURSE-CHECK",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-SESSION-READ-EXPOSES-ACCESS-CODE-AND-COSTS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-SESSION-COURSE-ID-NOT-VERIFIED-TO-ORGANIZATION",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-CERTIFICATION-ISSUED-WITHOUT-COMPLETION-OR-VERIFICATION",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-GLOBAL-UNIQUE-CODES-ACROSS-ORGANIZATIONS",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-UI-CALLS-OPERATIONS-THE-ROUTES-DO-NOT-EXPORT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-CRON-QUERIES-REFERENCE-COLUMNS-ABSENT-FROM-SCHEMA",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-CRON-REMINDERS-IGNORE-OPT-OUT-AND-HAVE-NO-SENT-MARKER",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-CRON-REPORTS-SUCCESS-AFTER-FAILED-SENDS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-CRON-UNBOUNDED-SEQUENTIAL-SENDS",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-CONTENT-COMPLETIONS-COUNT-ATTENDED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-CONTENT-LISTS-UNBOUNDED-OR-UNVALIDATED",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-CONTENT-DRAFTS-AND-ARCHIVED-READABLE-BY-MEMBER",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CONTENT-LIBRARY-EDITORIAL",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EDU-CONTENT-PUBLISH-NO-SEPARATION-OF-DUTIES",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-CONTENT-LIBRARY-EDITORIAL",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-REMITTANCE-DETAIL-MEMBER-READ",
+      "gate": 5,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-CAP-D-002",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-REPLAY-NO-FINANCIAL-MANDATE",
+      "gate": 5,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-CAP-D-002",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-REPLAY-NOT-IDEMPOTENT-GATES-APPROVAL",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-D-002",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-REPLAY-MODE-MISRECORDED",
+      "gate": 5,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-CAP-D-002",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-PAYROLL-POSTED-IS-STATUS-ONLY",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-D-002",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-OFFICIAL-APPROVAL-UNREACHABLE",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-D-002",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-EVIDENCE-SEAL-UNKEYED-HASH",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-D-002",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-PAYROLL-PREPARE-NOT-BOUND-AND-RACY",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-D-002",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-REMITTANCE-PACKAGE-SHAPE",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-D-002",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-TIMESHEET-INGEST-STEWARD-FLOOR-UNBOUNDED",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-D-003",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-COMPLIANCE-EVENT-FORGEABLE-BY-STEWARD",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-D-003",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-EXECUTION-READS-AT-MEMBER-FLOOR",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-D-003",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-CONTACT-PII-READ-AT-STEWARD-UNAUDITED",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-REGISTRY-PARENT-COMPANY-CROSS-ORG-LINK",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-REGISTRY-ARCHIVE-IGNORES-DEPENDENTS",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-COMMUNICATION-NOT-DELIVERED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-COMMUNICATION-REFERENCES-UNVERIFIED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-COMMUNICATION-GRIEVANCE-CORRESPONDENCE-STEWARD-READ",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-CAPE-AUDIT-EVENT-AFTER-COMMIT",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-EMP-CONTACT-PRIMARY-NOT-EXCLUSIVE",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-AUDIT-LOG-FULL-ROW-READ-BY-OFFICER",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AUDIT-LOG-VISIBILITY",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-AUDIT-MANUAL-ENTRY-FREE-REFERENCE",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-AUDIT-LOG-VISIBILITY",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-CONTRACT-READ-AT-MEMBER-FLOOR",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-CONTRACT-CREATE-REFERENCES-UNVERIFIED",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-CONTRACT-AUDIT-NOT-ATOMIC",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-READ-FAILURE-RETURNS-EMPTY-SUCCESS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMPLIANCE-ASSURANCE",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-ALERT-AND-REPORT-TABLES-HAVE-NO-WRITER",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMPLIANCE-ASSURANCE",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-COMPLIANCE-LISTS-UNBOUNDED",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-COMPLIANCE-ASSURANCE",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-VALIDATE-ATTESTS-FROM-CALLER-DATA",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-COMPLIANCE-ASSURANCE",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-VALIDATE-LITERAL-THRESHOLDS-AND-SWALLOWED-LOOKUP",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMPLIANCE-ASSURANCE",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-VALIDATE-INPUT-NOT-VALIDATED",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-COMPLIANCE-ASSURANCE",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-FIREWALL-POLICY-NO-WRITER-OR-ENFORCER",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMPLIANCE-ASSURANCE",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-COPE-ROUTES-ARE-DONATION-CAMPAIGN-FACADE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COPE-POLITICAL-ACTION",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-COPE-FUNDRAISING-TOTALS-WRITABLE-BY-STEWARD",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COPE-POLITICAL-ACTION",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-DISPATCH-REFERENCED-IDS-NOT-VERIFIED",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-DISPATCH-HALL",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-DISPATCH-ASSIGN-NO-STATE-OR-FILL-CHECK",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-DISPATCH-HALL",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-DISPATCH-RULES-ENGINE-NEVER-APPLIED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-DISPATCH-HALL",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-DASHBOARD-STATS-FAILURE-RETURNS-ZEROS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-LEADERSHIP-COMPLIANCE-DEFAULTS-TO-100-AND-TRUNCATES",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-EXPORT-CSV-AUTHENTICATION-ONLY-AND-EMPTY-200-OUTSIDE-PRODUCTION",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-DSR-GENERIC-ROUTE-REFUSES-WITH-MISLEADING-403",
+      "gate": 6,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-PRIVACY-RIGHTS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-INTEGRATIONS-ROUTE-OVER-USER-TOKEN-TABLE",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-CRUD-ORG-SCOPE-NO-OP-ON-TABLE-WITHOUT-ORG-COLUMN",
+      "gate": 13,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-K-007",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-CMP-DEBUG-ROUTE-REACHABLE-IN-PRODUCTION",
+      "gate": 1,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-A-005",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-RESEND-UNMATCHED-EVENTS-ACKNOWLEDGED-AND-DROPPED",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-DELIVERY-EVIDENCE",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-RESEND-STATUS-OVERWRITTEN-BY-OUT-OF-ORDER-EVENTS",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-DELIVERY-EVIDENCE",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-RESEND-REDELIVERY-DOUBLE-COUNTS-STATS",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-DELIVERY-EVIDENCE",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-RESEND-SUPPRESSION-UPDATES-ONLY-ONE-PREFERENCE-ROW",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-DELIVERY-EVIDENCE",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-RESEND-LEDGER-CALLBACK-OUTSIDE-TRANSACTION",
+      "gate": 11,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-DELIVERY-EVIDENCE",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-RESEND-MESSAGE-ID-LOOKUP-UNINDEXED-AND-NOT-UNIQUE",
+      "gate": 11,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-DELIVERY-EVIDENCE",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-CONTACT-ACKNOWLEDGES-SUBMISSION-WITH-NOTHING-STORED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ROUTE-EXPOSURE-HARDENING",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-CONTACT-RATE-LIMIT-KEYED-ON-FORGEABLE-ADDRESS-NO-BOT-CHALLENGE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ROUTE-EXPOSURE-HARDENING",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-CONTACT-UNBOUNDED-FIELDS-AND-EMAIL-LOGGED",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ROUTE-EXPOSURE-HARDENING",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-CONTINUITY-ALIASES-ARE-THE-DOCUMENT-REPOSITORY-WITH-PLACEHOLDER-GUARD",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-F-002",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-CONTINUITY-LIST-UNBOUNDED-AND-FILTERED-AFTER-FETCH",
+      "gate": 6,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-CAP-F-002",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-INHERITANCE-IS-PENDING-PROFILES-REFUSED-BY-GOVERNANCE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-INHERITANCE-ORG-SCOPE-NO-OP-ON-PENDING-PROFILES",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-DEPRECATION-REGISTRY-NAMES-MISSING-REPLACEMENTS-AND-STALE-SUNSET",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ROUTE-EXPOSURE-HARDENING",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-CRON-GET-ALIASES-RUN-STATE-CHANGES",
+      "gate": 9,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MAIN-APP-CRONS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-CRON-ROUTES-HAVE-NO-SCHEDULER-IN-REPOSITORY",
+      "gate": 9,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MAIN-APP-CRONS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-CRON-EDGE-SECRET-CHECK-DIFFERS-FROM-ROUTE-CHECK",
+      "gate": 9,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MAIN-APP-CRONS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-CALENDAR-SYNC-SCHEDULE-ENTRY-DOES-NOT-MATCH-ROUTE-CONTRACT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-CALENDAR-SYNC-SWALLOWED-EVENT-ERRORS-COUNTED-AS-IMPORTED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-CALENDAR-SYNC-FIRST-PAGE-ONLY-AND-NO-CLAIM-OF-DUE-CONNECTIONS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-REAPER-OBJECTS-PAST-RETRY-LIMIT-ARE-ABANDONED-UNREPORTED",
+      "gate": 6,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-CAP-F-002",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-EXTERNAL-DATA-SYNC-FAILURES-ANSWER-HTTP-200-AND-LOG-COMPLETED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CBA-INTELLIGENCE-DATASET",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-EXTERNAL-DATA-SYNC-CONTRIBUTIONS-WRITE-OUTSIDE-SYSTEM-CONTEXT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CBA-INTELLIGENCE-DATASET",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-LOCATION-RETENTION-HAS-NO-SCHEDULER-IN-REPOSITORY",
+      "gate": 6,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-PRIVACY-RIGHTS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-LOCATION-DELETION-LOG-FABRICATES-DATES-AND-HAS-NO-ORGANIZATION",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PRIVACY-RIGHTS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-LOCATION-RETENTION-BATCH-UNBOUNDED-IN-ONE-TRANSACTION",
+      "gate": 6,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-PRIVACY-RIGHTS",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-PER-CAPITA-CRON-WRITES-A-DOMAIN-DECLARED-NOT-IMPLEMENTED",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-PER-CAPITA-CRON-REPORTS-SUCCESS-AND-SWALLOWS-ORG-FAILURES",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-OBSERVABILITY-SWEEP-RECORDS-EMAIL-SUCCESS-WITHOUT-SENDING",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-OBSERVABILITY-SWEEP-ALERT-HAS-NO-HUMAN-RECIPIENT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-OBSERVABILITY-SWEEP-NO-DEDUPE-REPEATS-EVERY-RUN",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-SLA-WATCHDOG-EVENTS-HAVE-NO-SUBSCRIBER",
+      "gate": 10,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-DEADLINE-OVERDUE",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-SLA-CLOCK-RESTARTS-ON-ANY-CLAIM-UPDATE",
+      "gate": 10,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-DEADLINE-OVERDUE",
+      "tranche": "0B.6",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B6-SYS-SLA-WATCHDOG-UNBOUNDED-SCAN-AND-UNAWAITED-DUPLICATE-METRICS",
+      "gate": 10,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-DEADLINE-OVERDUE",
+      "tranche": "0B.6",
+      "releaseBlocking": false
     }
   ],
   "outOfScope": [
@@ -7674,8 +8834,14 @@
     "UE-OMIT-COMMUNICATIONS-CAMPAIGN-DELIVERY",
     "UE-OMIT-COMMUNICATIONS-SMS",
     "UE-OMIT-COMMUNICATIONS-TRACKING-AND-UNSUBSCRIBE",
+    "UE-OMIT-COMPLIANCE-ASSURANCE",
+    "UE-OMIT-CONTENT-LIBRARY-EDITORIAL",
+    "UE-OMIT-COPE-POLITICAL-ACTION",
     "UE-OMIT-DEADLINE-OVERDUE",
     "UE-OMIT-DELIVERY-EVIDENCE",
+    "UE-OMIT-DISPATCH-HALL",
+    "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
+    "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
     "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
     "UE-OMIT-FINANCE-UNAVAILABLE",
     "UE-OMIT-M04-LEGAL-DEADLINE",

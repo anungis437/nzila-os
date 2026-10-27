@@ -129,7 +129,7 @@ function ruleStructureProblems(ownership, capabilityById, scopeIds, registerIds,
   return problems
 }
 
-export function validateRouteOwnership({ ownership, capabilityById, routes, diskRouteKeys, scopeIds, registerIds, registryIds, exists, readText, justifiedUnauthenticated = new Set() }) {
+export function validateRouteOwnership({ ownership, capabilityById, routes, diskRouteKeys, scopeIds, registerIds, registryIds, exists, readText, justifiedUnauthenticated = new Set(), decisionBoundExceptions = new Set() }) {
   const problems = []
   const exceptions = { scopeUndecided: [], unauthenticated: [], auditAbsent: [], uninventoried: [] }
   const blockers = []
@@ -217,8 +217,13 @@ export function validateRouteOwnership({ ownership, capabilityById, routes, disk
     if (routes.some((route) => route.route === key)) problems.push(`uninventoried route record ${key} is already in the manifest and must be removed`)
   }
 
-  if (exceptions.scopeUndecided.length > 0) {
-    blockers.push({ code: 'ROUTE_SCOPE_UNDECIDED', operations: exceptions.scopeUndecided.length, owner: UNDECIDED_OWNER })
+  const bound = exceptions.scopeUndecided.filter((key) => decisionBoundExceptions.has(key))
+  const awaiting = exceptions.scopeUndecided.filter((key) => !decisionBoundExceptions.has(key))
+  if (awaiting.length > 0) {
+    blockers.push({ code: 'ROUTE_SCOPE_UNDECIDED', operations: awaiting.length, owner: UNDECIDED_OWNER })
+  }
+  if (bound.length > 0) {
+    blockers.push({ code: 'ROUTE_DECISION_BOUND_SCOPE_EXCEPTION', operations: bound.length, owner: UNDECIDED_OWNER })
   }
   if (exceptions.uninventoried.length > 0) {
     blockers.push({ code: 'ROUTE_UNINVENTORIED', routes: exceptions.uninventoried.slice().sort() })
@@ -233,6 +238,8 @@ export function validateRouteOwnership({ ownership, capabilityById, routes, disk
     capabilityCounts,
     ruleCounts,
     scopeUndecided: exceptions.scopeUndecided.length,
+    scopeUndecidedAwaitingClassification: awaiting.length,
+    decisionBoundScopeExceptions: bound.length,
     unauthenticatedWithoutRecordedJustification: exceptions.unauthenticated.length,
     mutatingWithoutDeclaredAudit: exceptions.auditAbsent.length,
     uninventoriedRoutes: exceptions.uninventoried.length,
