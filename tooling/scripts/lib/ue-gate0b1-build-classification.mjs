@@ -12,6 +12,7 @@ import { ANCHOR_COMMIT, TRANCHE_ID, TRANCHE_SIZE, CAPABILITY_DOMAINS } from './u
 import { GROUP_OF, DEFECTS, UNRESOLVED_FACTS, backfillFacts, billingFacts, clcReportFacts, crudFacts, ingestionFacts } from './ue-gate0b1-facts.mjs'
 import { unauthenticatedFacts } from './ue-gate0b1-unauth-facts.mjs'
 import { FILES } from './ue-gate0-scope-lock.mjs'
+import { UNDECIDED_OWNER } from './ue-gate0-route-ownership.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const APP = 'apps/union-eyes/app/api/'
@@ -82,7 +83,7 @@ export function buildClassification() {
       route,
       method,
       status: classified ? 'CLASSIFIED' : 'UNRESOLVED',
-      capabilityId: entry[3],
+      capabilityId: classified ? entry[3] : UNDECIDED_OWNER,
       control: entry[5],
       manifestAudit: entry[6],
       ...facts,
@@ -117,12 +118,14 @@ export function buildClassification() {
     operations,
     unauthenticated,
   }
+  const priorLedger = exists(FILES_0B1.ledger) ? readJson(FILES_0B1.ledger) : {}
   const ledger = {
     schemaVersion: 1,
     note: 'Cumulative record of operations classified in Gate 0 tranches and of each tranche version and hash. An operation listed here must never return to SCOPE_UNDECIDED.',
     anchorCommit: ANCHOR_COMMIT,
-    tranches: { [TRANCHE_ID]: { version: manifest.version, operationsHash: hash } },
-    classified: Object.fromEntries(operations.filter((record) => record.status === 'CLASSIFIED').map((record) => [record.id, record.capabilityId])),
+    ...priorLedger,
+    tranches: { ...(priorLedger.tranches ?? {}), [TRANCHE_ID]: { version: manifest.version, operationsHash: hash } },
+    classified: { ...(priorLedger.classified ?? {}), ...Object.fromEntries(operations.filter((record) => record.status === 'CLASSIFIED').map((record) => [record.id, record.capabilityId])) },
   }
   classification.summary = validateClassification({
     classification: { ...classification, summary: undefined },

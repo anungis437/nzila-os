@@ -19,6 +19,8 @@ import { UNDECIDED_OWNER, ownershipHash, validateRouteOwnership } from './ue-gat
 import { evaluateRule } from './ue-convergence-check.mjs'
 import { FILES_0B1, validateClassification } from './ue-gate0b1-classification.mjs'
 import { ANCHOR_COMMIT } from './ue-gate0b1-groups.mjs'
+import { FILES_0B2, validateClassification2 } from './ue-gate0b2-classification.mjs'
+import { ANCHOR_COMMIT as ANCHOR_COMMIT_0B2 } from './ue-gate0b2-groups.mjs'
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 
@@ -184,19 +186,43 @@ function anchoredPersonaFloor(root, recovery) {
   }
 }
 
-function anchoredOwnershipEntries(root) {
+function anchoredOwnershipEntries(root, commit = ANCHOR_COMMIT) {
   try {
-    return JSON.parse(git(root, ['show', `${ANCHOR_COMMIT}:${FILES.ownership}`])).entries
+    return JSON.parse(git(root, ['show', `${commit}:${FILES.ownership}`])).entries
   } catch {
     return null
   }
 }
 
-function classificationPinProblems(matrix, root) {
-  const record = matrix?.routeClassification
-  if (!record) return ['CLASSIFICATION-PIN-ABSENT: the matrix records no routeClassification block']
+function routeDefectProblems(matrix, classification0b2) {
+  const register = classification0b2?.defectRegister
+  if (!Array.isArray(register)) return []
+  const recorded = matrix?.routeDefects
+  if (!Array.isArray(recorded)) return ['ROUTE-DEFECTS-ABSENT: the matrix records no routeDefects block']
   const out = []
-  for (const [key, file] of Object.entries(FILES_0B1)) {
+  const byId = new Map(recorded.map((item) => [item.id, item]))
+  for (const defect of register) {
+    const item = byId.get(defect.id)
+    if (!item) out.push(`ROUTE-DEFECT-MISSING: ${defect.id} is not in the engineering completion matrix`)
+    else if (item.ownerCapabilityId !== defect.ownerCapabilityId || item.gate !== defect.gate || item.releaseBlocking !== defect.releaseBlocking) {
+      out.push(`ROUTE-DEFECT-DRIFT: ${defect.id} does not match its owner, gate or release-blocking mark in the classification`)
+    }
+  }
+  for (const item of recorded) if (!register.some((defect) => defect.id === item.id)) out.push(`ROUTE-DEFECT-UNKNOWN: ${item.id} is not in the classification defect register`)
+  return out
+}
+
+function classificationPinProblems(matrix, root) {
+  return [
+    ...pinProblems(matrix?.routeClassification, 'routeClassification', FILES_0B1, root),
+    ...pinProblems(matrix?.routeClassification0b2, 'routeClassification0b2', FILES_0B2, root),
+  ]
+}
+
+function pinProblems(record, name, files, root) {
+  if (!record) return [`CLASSIFICATION-PIN-ABSENT: the matrix records no ${name} block`]
+  const out = []
+  for (const [key, file] of Object.entries(files)) {
     const entry = record.files?.[key]
     if (!entry || entry.file !== file) {
       out.push(`CLASSIFICATION-PIN-FILE: ${key} is not recorded at ${file}`)
@@ -265,7 +291,10 @@ export function loadContext(root = ROOT) {
     tranche0b1: readJsonIfPresent(root, FILES_0B1.manifest),
     classification0b1: readJsonIfPresent(root, FILES_0B1.classification),
     ledger0b1: readJsonIfPresent(root, FILES_0B1.ledger),
+    tranche0b2: readJsonIfPresent(root, FILES_0B2.manifest),
+    classification0b2: readJsonIfPresent(root, FILES_0B2.classification),
     anchoredOwnershipEntries: anchoredOwnershipEntries(root),
+    anchoredOwnershipEntries0b2: anchoredOwnershipEntries(root, ANCHOR_COMMIT_0B2),
     lock,
     anchorCapabilityIds: anchoredCapabilityIds(root, lock),
     evidence: readJsonIfPresent(root, FILES.evidence),
@@ -527,6 +556,24 @@ export function validateGate0(matrix, ctx = {}) {
       })
     : { problems: ['route classification cannot be validated without the ownership register'], justifiedUnauthenticated: new Set(), blockers: [], summary: null }
   problems.push(...classificationCheck.problems)
+  const classification0b2 = 'classification0b2' in ctx ? ctx.classification0b2 : base.classification0b2
+  const check0b2 = ownership
+    ? validateClassification2({
+        classification: classification0b2,
+        manifest: 'tranche0b2' in ctx ? ctx.tranche0b2 : base.tranche0b2,
+        ledger: 'ledger0b1' in ctx ? ctx.ledger0b1 : base.ledger0b1,
+        classification0b1: 'classification0b1' in ctx ? ctx.classification0b1 : base.classification0b1,
+        manifest0b1: 'tranche0b1' in ctx ? ctx.tranche0b1 : base.tranche0b1,
+        entries: ownership.entries ?? [],
+        capabilityById: byId,
+        universe: new Set(routes.flatMap((route) => [].concat(route.methods).map((method) => `${route.route}|${method}`))),
+        exists,
+        readText,
+        anchoredEntries: 'anchoredOwnershipEntries0b2' in ctx ? ctx.anchoredOwnershipEntries0b2 : base.anchoredOwnershipEntries0b2,
+      })
+    : { problems: ['Gate 0B.2 route classification cannot be validated without the ownership register'], registeredReleaseBlocking: new Set(), releaseBlockingDefects: [], summary: null }
+  problems.push(...check0b2.problems)
+  problems.push(...routeDefectProblems(matrix, classification0b2))
   problems.push(...('classificationPinProblems' in ctx ? ctx.classificationPinProblems : classificationPinProblems(matrix, base.root)))
   const routeCheck = validateRouteOwnership({
     justifiedUnauthenticated: classificationCheck.justifiedUnauthenticated,
@@ -550,8 +597,17 @@ export function validateGate0(matrix, ctx = {}) {
   const debt = defectProblems(capabilities, ratchetFailures, evidence, { exists, readText })
   problems.push(...debt.problems)
 
-  const blockers = [...personaCheck.blockers, ...routeCheck.blockers, ...classificationCheck.blockers]
-  const gateAcceptanceBlockers = debt.open
+  const exposureBlocked = (blocker) => blocker.code === 'ROUTE_UNJUSTIFIED_EXPOSURE' && blocker.operations.every((operation) => check0b2.registeredReleaseBlocking.has(operation))
+  const releaseBlocking = check0b2.releaseBlockingDefects.map((item) => ({
+    capabilityId: item.ownerCapabilityId,
+    id: item.defectId,
+    kind: 'RELEASE_BLOCKING_ROUTE_EXPOSURE',
+    file: item.operation,
+    blocksGates: [item.gate],
+    releaseBlocking: true,
+  }))
+  const blockers = [...personaCheck.blockers, ...routeCheck.blockers, ...classificationCheck.blockers.filter((blocker) => !exposureBlocked(blocker))]
+  const gateAcceptanceBlockers = [...debt.open, ...(classificationCheck.blockers.some(exposureBlocked) ? releaseBlocking : [])]
   const verdict = blockers.length > 0 ? 'IN_PROGRESS' : 'READY_FOR_ADVERSARIAL_REVIEW'
   if (matrix?.gate0Verdict !== verdict) {
     problems.push(`gate0Verdict is ${JSON.stringify(matrix?.gate0Verdict)} but ${blockers.length} Gate 0 blocker(s) ${blockers.length > 0 ? 'remain, so it must be IN_PROGRESS' : 'are absent, so it must be READY_FOR_ADVERSARIAL_REVIEW'}`)
@@ -561,6 +617,7 @@ export function validateGate0(matrix, ctx = {}) {
   summary.verdict = verdict
   summary.route = routeCheck.summary
   summary.classification0b1 = classificationCheck.summary
+  summary.classification0b2 = check0b2.summary
   summary.persona = Object.fromEntries(PERSONAS.map((persona) => {
     const spec = personaSpecs[persona]
     return [persona, { identifiers: spec.universe.length, individuallyDefined: spec.individuallyDefined.length, groupedOnly: spec.groupedOnly.length, unspecified: spec.unspecified.length, canonicalFileFound: spec.canonicalFileFound, resolved: spec.resolved }]

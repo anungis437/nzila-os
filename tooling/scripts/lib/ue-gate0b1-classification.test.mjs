@@ -190,13 +190,22 @@ test('8. a change to tranche order or membership without a versioned reason fail
   assert.ok(hasProblem(run(reasonless), /no versioned reason/))
 })
 
-test('Gate 0 stays IN_PROGRESS and counts the unjustified exposures as a blocker', () => {
+test('Gate 0 stays IN_PROGRESS and carries the unjustified exposures as Gate 14 release-blocking defects', () => {
   const result = validateGate0(matrix)
   assert.deepEqual(result.problems, [])
-  assert.ok(result.blockers.some((item) => item.code === 'ROUTE_UNJUSTIFIED_EXPOSURE' && item.operations.length === 3))
+  assert.ok(!result.blockers.some((item) => item.code === 'ROUTE_UNJUSTIFIED_EXPOSURE'))
+  const releaseBlocking = result.gateAcceptanceBlockers.filter((item) => item.kind === 'RELEASE_BLOCKING_ROUTE_EXPOSURE')
+  assert.deepEqual(releaseBlocking.map((item) => item.file).sort(), ['docs/openapi/route.ts|GET', 'docs/route.ts|GET', 'version/route.ts|GET'])
+  assert.ok(releaseBlocking.every((item) => item.blocksGates.includes(14) && item.releaseBlocking === true))
   assert.equal(result.summary.route.unauthenticatedWithoutRecordedJustification, 0)
-  assert.equal(result.summary.route.scopeUndecided, 1071)
+  assert.equal(result.summary.route.scopeUndecided, 972)
   assert.equal(matrix.gate0Verdict, 'IN_PROGRESS')
+})
+
+test('the Gate 0B.1 validator still reports the three unjustified exposures as a blocker when no later tranche registers them', () => {
+  const result = run(fixture())
+  assert.deepEqual(result.problems, [])
+  assert.ok(result.blockers.some((item) => item.code === 'ROUTE_UNJUSTIFIED_EXPOSURE' && item.operations.length === 3))
 })
 
 test('Gate 0 rejects a tampered classification register end to end', () => {

@@ -63,9 +63,9 @@ export const RECORD_FIELDS = [
   'kernelAuthorization', 'authorizationDetail', 'tenantScope', 'dataSensitivity', 'mutationAudit', 'auditDetail',
   'implementationStatus', 'evidence', 'defects', 'manifestCorrections', 'control', 'manifestAudit',
 ]
-const MUTATING_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE']
-const CRUD_GOVERNANCE_FILE = 'apps/union-eyes/lib/api/crud-governance.ts'
-const KERNEL_EVIDENCE = /authorizeAction|authorize\(|kernelDecision|decideAction|authority kernel/
+export const MUTATING_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE']
+export const CRUD_GOVERNANCE_FILE = 'apps/union-eyes/lib/api/crud-governance.ts'
+export const KERNEL_EVIDENCE = /authorizeAction|authorize\(|kernelDecision|decideAction|authority kernel/
 
 export function governanceClassOf(text, table) {
   for (const name of ['DENIED', 'SUBJECT_OWNED', 'OWN_ROWS_READ', 'READ_ONLY', 'OPERATIONAL']) {
@@ -87,9 +87,9 @@ export function selectTranche(undecidedIds, size = TRANCHE_SIZE) {
   return [...undecidedIds].sort(compareCodeUnit).slice(0, size)
 }
 
-const nonEmpty = (value, min = 1) => typeof value === 'string' && value.trim().length >= min
+export const nonEmpty = (value, min = 1) => typeof value === 'string' && value.trim().length >= min
 
-function evidenceProblems(label, evidence, exists, readText, { requireFile } = {}) {
+export function evidenceProblems(label, evidence, exists, readText, { requireFile } = {}) {
   const out = []
   if (!Array.isArray(evidence) || evidence.length === 0) return [`${label} has no source evidence`]
   let sawRequired = !requireFile
@@ -155,7 +155,7 @@ export function validateTranche({ manifest, ledger, universe, entryByKey, anchor
 }
 
 function validateRecord(record, ctx) {
-  const { entryByKey, capabilityById, exists, readText, defectIds } = ctx
+  const { entryByKey, capabilityById, exists, readText, defectIds, resolvedLater } = ctx
   const label = `classification ${record?.id ?? '(missing id)'}`
   const out = []
   for (const field of RECORD_FIELDS) {
@@ -189,7 +189,8 @@ function validateRecord(record, ctx) {
       out.push(`${label} is assigned to ${record.capabilityId} (${record.domain}) but the route belongs to ${group.capabilityId} (${group.domain})`)
     }
   } else if (record.status === 'UNRESOLVED') {
-    if (entry[4] !== 'SCOPE_UNDECIDED' || entry[3] !== UNDECIDED_OWNER) out.push(`${label} is unresolved but the ownership register assigns it`)
+    if (!resolvedLater?.has(record.id) && (entry[4] !== 'SCOPE_UNDECIDED' || entry[3] !== UNDECIDED_OWNER)) out.push(`${label} is unresolved but the ownership register assigns it`)
+    if (resolvedLater?.has(record.id) && (entry[4] === 'SCOPE_UNDECIDED' || entry[3] === UNDECIDED_OWNER)) out.push(`${label} is recorded as resolved in a later tranche but the ownership register still holds it undecided`)
     if (record.capabilityId !== UNDECIDED_OWNER) out.push(`${label} is unresolved and must name ${UNDECIDED_OWNER}`)
     if (record.domain !== 'UNRESOLVED') out.push(`${label} is unresolved and must use the domain UNRESOLVED`)
     if (!nonEmpty(record.proposedCapability, 20)) out.push(`${label} is unresolved without a proposed capability candidate`)
@@ -305,7 +306,8 @@ export function validateClassification({ classification, manifest, ledger, entri
     if (!nonEmpty(defect.title, 20) || !nonEmpty(defect.severity)) problems.push(`defect ${defect.id} is incomplete`)
   }
 
-  const ctx = { entryByKey, capabilityById, exists, readText, defectIds }
+  const resolvedLater = new Set(Object.keys(ledger?.classifiedIn ?? {}))
+  const ctx = { entryByKey, capabilityById, exists, readText, defectIds, resolvedLater }
   const records = Array.isArray(classification.operations) ? classification.operations : []
   const frozen = manifest?.operations ?? []
   const frozenSet = new Set(frozen)

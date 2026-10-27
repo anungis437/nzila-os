@@ -6,6 +6,7 @@
  */
 import { deriveEntry, selectRule, UNDECIDED_OWNER } from './ue-gate0-route-ownership.mjs'
 import { ownershipRulesForTranche } from './ue-gate0b1-groups.mjs'
+import { ownershipRulesForTranche2 } from './ue-gate0b2-groups.mjs'
 
 const REP = 'docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md'
 const MEMBER = 'docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md'
@@ -28,6 +29,7 @@ export function buildOwnershipRules(routes, registryActions) {
 
   const rules = [
     ...ownershipRulesForTranche(),
+    ...ownershipRulesForTranche2(),
     {
       id: 'RULE-STUB-H002',
       precedence: 30,
@@ -367,9 +369,11 @@ export function buildOwnership({ routes, registryActions, uninventoried }) {
   const rules = buildOwnershipRules(routes, registryActions)
   const entries = []
   for (const route of routes) {
-    const { rule } = selectRule(rules, route)
-    if (!rule) throw new Error(`no rule for ${route.route}`)
-    for (const method of [].concat(route.methods)) entries.push(deriveEntry(route, method, rule))
+    for (const method of [].concat(route.methods)) {
+      const { rule } = selectRule(rules, route, method)
+      if (!rule) throw new Error(`no rule for ${route.route}|${method}`)
+      entries.push(deriveEntry(route, method, rule))
+    }
   }
   entries.sort((a, b) => (a[0] + a[1] < b[0] + b[1] ? -1 : 1))
   return {

@@ -166,6 +166,632 @@
       ]
     },
     {
+      "id": "RULE-0B2-GENERIC-CRUD-MEMBERS",
+      "precedence": 40,
+      "prefixes": [
+        "admin/segments/[id]/execute/route.ts",
+        "admin/segments/[id]/route.ts",
+        "admin/segments/route.ts",
+        "admin/system/settings/route.ts",
+        "admin/update-role/route.ts"
+      ],
+      "capabilityId": "UE-CAP-K-007",
+      "disposition": "OWNED",
+      "actor": "Staff at the role floor through the generic CRUD factory over organization_members",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-factory.ts",
+          "quote": "export function crudRoutes"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-governance.ts",
+          "quote": "Generic CRUD routes authorise by organization and role floor only"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-governance.ts",
+          "quote": "'organization_members', 'organizations', 'profiles'"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-GENERIC-CRUD-INSIGHTS-GET",
+      "precedence": 40,
+      "prefixes": [
+        "analytics/insights/route.ts"
+      ],
+      "capabilityId": "UE-CAP-K-007",
+      "disposition": "OWNED",
+      "actor": "Staff at the role floor through the generic CRUD factory over insight_recommendations",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-factory.ts",
+          "quote": "export function crudRoutes"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-governance.ts",
+          "quote": "Generic CRUD routes authorise by organization and role floor only"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-governance.ts",
+          "quote": "'insight_recommendations'"
+        }
+      ],
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "id": "RULE-0B2-GENERIC-CRUD-ANALYTICS",
+      "precedence": 40,
+      "prefixes": [
+        "analytics/claims/categories/route.ts",
+        "analytics/claims/route.ts",
+        "analytics/claims/stewards/route.ts",
+        "analytics/clause-stats/route.ts",
+        "analytics/comparative/route.ts",
+        "analytics/dashboard/route.ts",
+        "analytics/deadlines-metrics/route.ts",
+        "analytics/executive/route.ts",
+        "analytics/financial/categories/route.ts",
+        "analytics/financial/costs/route.ts",
+        "analytics/financial/outcomes/route.ts",
+        "analytics/financial/route.ts",
+        "analytics/financial/trends/route.ts",
+        "analytics/heatmap/route.ts",
+        "analytics/claims/trends/route.ts"
+      ],
+      "capabilityId": "UE-CAP-K-007",
+      "disposition": "OWNED",
+      "actor": "Staff at the role floor through the generic CRUD factory over analytics tables",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-factory.ts",
+          "quote": "export function crudRoutes"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-governance.ts",
+          "quote": "Generic CRUD routes authorise by organization and role floor only"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-governance.ts",
+          "quote": "'analytics_metrics'"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-AGREEMENTS",
+      "precedence": 40,
+      "prefixes": [
+        "agreements/route.ts"
+      ],
+      "capabilityId": "UE-CAP-I-001",
+      "disposition": "OWNED",
+      "actor": "Representative reading and registering collective agreements for the organization (persona action R15)",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "docs/union-eyes/convergence/register/ue-gate0a-persona-source-recovery.json",
+          "quote": "| R15 agreements | LIMITED |"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/agreements/route.ts",
+          "quote": "CRUD for collective bargaining agreements (org-scoped)"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-MEMBER-ACCESS-REVOCATION",
+      "precedence": 40,
+      "prefixes": [
+        "admin/users/[userId]/route.ts"
+      ],
+      "capabilityId": "UE-CAP-A-003",
+      "disposition": "OWNED",
+      "actor": "Platform administrator deactivating, reactivating or removing a member membership",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/admin/users/[userId]/route.ts",
+          "quote": "revokeMemberAccess"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/services/member-access-revocation-service.ts",
+          "quote": "await withMemberAuthMutation(input, 'revoke-sessions'"
+        },
+        {
+          "kind": "file",
+          "ref": "docs/union-eyes/convergence/register/ue-convergence-register.json",
+          "quote": "every kernel record type (mandates, delegations, assignments, relationships, grants, WorkAid referral) proven to deny after session revocation, membership deactivation and user suspension"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-AUDIT-FEED",
+      "precedence": 40,
+      "prefixes": [
+        "activities/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AUDIT-LOG-VISIBILITY",
+      "disposition": "OWNED",
+      "actor": "Organization member reading the organization activity feed derived from the audit log",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/activities/route.ts",
+          "quote": "FROM public.audit_logs"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-PROTOCOL",
+      "precedence": 40,
+      "prefixes": [
+        "admin/representation-protocol/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+      "disposition": "OWNED",
+      "actor": "Organization administrators drafting and independently approving the representation protocol",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/representation/protocol-service.ts",
+          "quote": "Fails closed when the protocol is missing, malformed, unapproved or self-approved."
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/case-assignment-engine.ts",
+          "quote": "Assignment requires a configured, independently approved protocol."
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-PKI-SIGNING",
+      "precedence": 40,
+      "prefixes": [
+        "admin/pki/signatures/[id]/sign/route.ts",
+        "admin/pki/signatures/[id]/verify/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-PKI-SIGNING-WORKFLOW",
+      "disposition": "OWNED",
+      "actor": "Organization administrator signing or verifying a document signature as themselves",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/services/pki/signature-service.ts",
+          "quote": "signatureValue: 'ATTESTATION'"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/services/pki/workflow-engine.ts",
+          "quote": "return new Map<string, WorkflowDefinition>()"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-PKI-WORKFLOW",
+      "precedence": 40,
+      "prefixes": [
+        "admin/pki/workflows/[id]/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-PKI-SIGNING-WORKFLOW",
+      "disposition": "OWNED",
+      "actor": "Organization administrator reading or cancelling a signing workflow",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/services/pki/signature-service.ts",
+          "quote": "signatureValue: 'ATTESTATION'"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/services/pki/workflow-engine.ts",
+          "quote": "return new Map<string, WorkflowDefinition>()"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-PLATFORM-DATABASE-OPERATIONS",
+      "precedence": 40,
+      "prefixes": [
+        "admin/database/health/route.ts",
+        "admin/database/optimize/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
+      "disposition": "OWNED",
+      "actor": "Platform operator inspecting or maintaining the shared database",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/admin/database/health/route.ts",
+          "quote": "minRole: 'platform_lead'"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/admin/database/optimize/route.ts",
+          "quote": "isPlatformAdminUser(userId)"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-PLATFORM-JOB-QUEUE",
+      "precedence": 40,
+      "prefixes": [
+        "admin/jobs/[action]/route.ts",
+        "admin/jobs/retry/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
+      "disposition": "OWNED",
+      "actor": "Platform operator controlling the shared background job queues",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/admin/jobs/[action]/route.ts",
+          "quote": "withSystemAdminAuth"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/admin/jobs/retry/route.ts",
+          "quote": "action: 'platform.job.retry',"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-PLATFORM-FEATURE-FLAGS",
+      "precedence": 40,
+      "prefixes": [
+        "admin/feature-flags/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
+      "disposition": "OWNED",
+      "actor": "Platform operator reading and toggling platform feature flags",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/admin/feature-flags/route.ts",
+          "quote": "export const PATCH = withSystemAdminAuth("
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-PILOT-OPERATIONS",
+      "precedence": 40,
+      "prefixes": [
+        "admin/pilot-status/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
+      "disposition": "OWNED",
+      "actor": "Platform operator reading pilot status for an organization",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/admin/pilot-status/route.ts",
+          "quote": "hasMinRole('platform_lead')"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-PLATFORM-AI-CACHE",
+      "precedence": 40,
+      "prefixes": [
+        "ai/cache-stats/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
+      "disposition": "OWNED",
+      "actor": "Platform operator inspecting and clearing the shared embedding cache",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ai/cache-stats/route.ts",
+          "quote": "export const POST = withSystemAdminAuth("
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-PLATFORM-DIRECTORY",
+      "precedence": 40,
+      "prefixes": [
+        "admin/users/route.ts",
+        "admin/organizations/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
+      "disposition": "OWNED",
+      "actor": "Platform operator enumerating users and organizations across organizations",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/admin/users/route.ts",
+          "quote": "minRole: 'platform_lead'"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/admin/organizations/route.ts",
+          "quote": "minRole: 'platform_lead'"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-PLATFORM-STATISTICS",
+      "precedence": 40,
+      "prefixes": [
+        "admin/stats/activity/route.ts",
+        "admin/stats/overview/route.ts",
+        "admin/members/stats/route.ts",
+        "analytics/cross-org/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
+      "disposition": "OWNED",
+      "actor": "Platform operator reading statistics and aggregates across organizations",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/admin/stats/overview/route.ts",
+          "quote": "minRole: 'platform_lead'"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/admin/members/stats/route.ts",
+          "quote": "hasMinRole('platform_lead')"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/analytics/cross-org/route.ts",
+          "quote": "dataClass: 'aggregate_only',"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-AI-GRIEVANCE-ADVISORY",
+      "precedence": 40,
+      "prefixes": [
+        "ai/grievances/[id]/clause-reasoning/route.ts",
+        "ai/grievances/[id]/triage/route.ts",
+        "ai/grievances/triage/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "disposition": "OWNED",
+      "actor": "Steward requesting advisory AI analysis of a grievance",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/ai/ai-feature-guard.ts",
+          "quote": "export async function auditAiInteraction"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ai/grievances/triage/route.ts",
+          "quote": "analyzeGrievance({"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-AI-CLAUSE-PRECEDENT",
+      "precedence": 40,
+      "prefixes": [
+        "ai/classify/route.ts",
+        "ai/extract-clauses/route.ts",
+        "ai/match-precedents/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "disposition": "OWNED",
+      "actor": "Staff requesting advisory AI classification, extraction or precedent matching",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/ai/ai-feature-guard.ts",
+          "quote": "export async function auditAiInteraction"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ai/classify/route.ts",
+          "quote": "classifyClause"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-AI-COPILOT",
+      "precedence": 40,
+      "prefixes": [
+        "ai/copilot/query/route.ts",
+        "ai/copilot/sessions/[id]/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "disposition": "OWNED",
+      "actor": "Steward using the advisory AI copilot and recording the outcome",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/ai/ai-feature-guard.ts",
+          "quote": "export async function auditAiInteraction"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ai/copilot/query/route.ts",
+          "quote": "AI_FEATURES.STEWARD_COPILOT"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-AI-FINANCE-PENSION",
+      "precedence": 40,
+      "prefixes": [
+        "ai/finance/analysis/route.ts",
+        "ai/pension/members/[id]/projection/route.ts",
+        "ai/pension/plans/[id]/funding/route.ts",
+        "ai/pension/plans/[id]/trustee-summary/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "disposition": "OWNED",
+      "actor": "Officer requesting advisory AI analysis of finance or pension data",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/ai/ai-feature-guard.ts",
+          "quote": "export async function auditAiInteraction"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ai/finance/analysis/route.ts",
+          "quote": "generateFinancialInsight({"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-AI-INSIGHTS",
+      "precedence": 40,
+      "prefixes": [
+        "ai/employers/[id]/risk/route.ts",
+        "ai/insights/[reportType]/route.ts",
+        "ai/insights/summary/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "disposition": "OWNED",
+      "actor": "Officer requesting advisory AI insight reports and employer risk scores",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/ai/ai-feature-guard.ts",
+          "quote": "export async function auditAiInteraction"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ai/insights/summary/route.ts",
+          "quote": "AI_FEATURES.EXECUTIVE_INSIGHTS"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-AI-KNOWLEDGE-SEARCH",
+      "precedence": 40,
+      "prefixes": [
+        "ai/search/route.ts",
+        "ai/semantic-search/route.ts",
+        "ai/summarize/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "disposition": "OWNED",
+      "actor": "Member requesting AI search, semantic search or summarization of the knowledge base",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/ai/ai-feature-guard.ts",
+          "quote": "export async function auditAiInteraction"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ai/search/route.ts",
+          "quote": "AI_FEATURES.AI_SEARCH"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-AI-KNOWLEDGE-INGESTION",
+      "precedence": 40,
+      "prefixes": [
+        "ai/ingest/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "disposition": "OWNED",
+      "actor": "Officer ingesting documents into the AI knowledge pipeline",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/ai/ai-feature-guard.ts",
+          "quote": "export async function auditAiInteraction"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ai/ingest/route.ts",
+          "quote": "ragPipeline.addDocuments"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-AI-FEEDBACK-AND-USAGE",
+      "precedence": 40,
+      "prefixes": [
+        "ai/feedback/route.ts",
+        "admin/ai-usage/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "disposition": "OWNED",
+      "actor": "Organization member giving AI feedback and administrator reading AI usage",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/ai/ai-feature-guard.ts",
+          "quote": "export async function auditAiInteraction"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ai/feedback/route.ts",
+          "quote": "AI_FEATURES.AI_FEEDBACK"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/admin/ai-usage/route.ts",
+          "quote": "minRole: 'admin'"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B2-AI-MODEL-UTILITY",
+      "precedence": 40,
+      "prefixes": [
+        "ai/mamba/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "disposition": "OWNED",
+      "actor": "Officer running the local sequence model utility",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/ai/ai-feature-guard.ts",
+          "quote": "export async function auditAiInteraction"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ai/mamba/route.ts",
+          "quote": "AI_FEATURES.AI_MAMBA"
+        }
+      ]
+    },
+    {
       "id": "RULE-STUB-H002",
       "precedence": 30,
       "prefixes": [
@@ -1111,8 +1737,8 @@
     }
   ],
   "entries": [
-    ["activities/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/ai-usage/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["activities/route.ts","GET","RULE-0B2-AUDIT-FEED","UE-OMIT-AUDIT-LOG-VISIBILITY","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Organization member reading the organization activity feed derived from the audit log"],
+    ["admin/ai-usage/route.ts","GET","RULE-0B2-AI-FEEDBACK-AND-USAGE","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Organization member giving AI feedback and administrator reading AI usage"],
     ["admin/alerts/escalations/[id]/route.ts","DELETE","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/alerts/escalations/[id]/route.ts","GET","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/alerts/escalations/[id]/route.ts","PATCH","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
@@ -1157,8 +1783,8 @@
     ["admin/clc/remittances/export/route.ts","POST","RULE-STUB-H002","UE-CAP-H-002","STUB_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Administrative operator"],
     ["admin/clc/remittances/route.ts","GET","RULE-AFFILIATE-REMITTANCES","UE-OMIT-FINANCE-UNAVAILABLE","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Financial officer"],
     ["admin/clc/remittances/route.ts","POST","RULE-AFFILIATE-REMITTANCES","UE-OMIT-FINANCE-UNAVAILABLE","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Financial officer"],
-    ["admin/database/health/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/database/optimize/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["admin/database/health/route.ts","GET","RULE-0B2-PLATFORM-DATABASE-OPERATIONS","UE-OMIT-PLATFORM-OPERATOR-CONTROLS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Platform operator inspecting or maintaining the shared database"],
+    ["admin/database/optimize/route.ts","POST","RULE-0B2-PLATFORM-DATABASE-OPERATIONS","UE-OMIT-PLATFORM-OPERATOR-CONTROLS","OWNED","SESSION_ONLY","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Platform operator inspecting or maintaining the shared database"],
     ["admin/documents/legacy-backfill/route.ts","POST","RULE-0B1-DOCUMENT-LEGACY-BACKFILL","UE-CAP-F-002","OWNED","ADMIN_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Platform administrator backfilling legacy document versions"],
     ["admin/dues/overview/route.ts","GET","RULE-ADMIN-DUES","UE-CAP-D-003","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Financial officer"],
     ["admin/dues/payments/[id]/route.ts","DELETE","RULE-ADMIN-DUES","UE-CAP-D-003","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Financial officer"],
@@ -1178,8 +1804,8 @@
     ["admin/employment/member/[memberId]/route.ts","POST","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/employment/route.ts","GET","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/employment/route.ts","POST","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
-    ["admin/feature-flags/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ADMIN_ROLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/feature-flags/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ADMIN_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["admin/feature-flags/route.ts","GET","RULE-0B2-PLATFORM-FEATURE-FLAGS","UE-OMIT-PLATFORM-OPERATOR-CONTROLS","OWNED","ADMIN_ROLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Platform operator reading and toggling platform feature flags"],
+    ["admin/feature-flags/route.ts","PATCH","RULE-0B2-PLATFORM-FEATURE-FLAGS","UE-OMIT-PLATFORM-OPERATOR-CONTROLS","OWNED","ADMIN_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Platform operator reading and toggling platform feature flags"],
     ["admin/fix-super-admin-roles/route.ts","GET","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/fix-super-admin-roles/route.ts","POST","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/ingest/batches/[id]/route.ts","GET","RULE-0B1-CASE-INGESTION","UE-CAP-K-010","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Organization administrator importing and reviewing legacy case data"],
@@ -1191,8 +1817,8 @@
     ["admin/job-classifications/[id]/route.ts","PATCH","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/job-classifications/route.ts","GET","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/job-classifications/route.ts","POST","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
-    ["admin/jobs/[action]/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ADMIN_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/jobs/retry/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ADMIN_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["admin/jobs/[action]/route.ts","POST","RULE-0B2-PLATFORM-JOB-QUEUE","UE-OMIT-PLATFORM-OPERATOR-CONTROLS","OWNED","ADMIN_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Platform operator controlling the shared background job queues"],
+    ["admin/jobs/retry/route.ts","POST","RULE-0B2-PLATFORM-JOB-QUEUE","UE-OMIT-PLATFORM-OPERATOR-CONTROLS","OWNED","ADMIN_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Platform operator controlling the shared background job queues"],
     ["admin/jobs/route.ts","GET","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/jobs/route.ts","POST","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/leaves/[id]/route.ts","DELETE","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
@@ -1206,119 +1832,119 @@
     ["admin/members/bulk-import/route.ts","POST","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/members/export/route.ts","GET","RULE-STUB-H002","UE-CAP-H-002","STUB_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Administrative operator"],
     ["admin/members/export/route.ts","POST","RULE-STUB-H002","UE-CAP-H-002","STUB_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Administrative operator"],
-    ["admin/members/stats/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["admin/members/stats/route.ts","GET","RULE-0B2-PLATFORM-STATISTICS","UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION","OWNED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Platform operator reading statistics and aggregates across organizations"],
     ["admin/organizations/[id]/route.ts","DELETE","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/organizations/[id]/route.ts","GET","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/organizations/[id]/route.ts","PATCH","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/organizations/bulk-import/route.ts","GET","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/organizations/bulk-import/route.ts","POST","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
-    ["admin/organizations/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["admin/organizations/route.ts","GET","RULE-0B2-PLATFORM-DIRECTORY","UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Platform operator enumerating users and organizations across organizations"],
     ["admin/payments/retry-failed/route.ts","POST","RULE-ADMIN-PAYMENTS","UE-CAP-D-001","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Financial officer"],
-    ["admin/pilot-status/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["admin/pilot-status/route.ts","GET","RULE-0B2-PILOT-OPERATIONS","UE-OMIT-PLATFORM-OPERATOR-CONTROLS","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Platform operator reading pilot status for an organization"],
     ["admin/pki/certificates/[id]/route.ts","DELETE","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/pki/certificates/[id]/route.ts","GET","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/pki/certificates/[id]/route.ts","PATCH","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/pki/certificates/route.ts","GET","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/pki/certificates/route.ts","POST","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
-    ["admin/pki/signatures/[id]/sign/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/pki/signatures/[id]/verify/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["admin/pki/signatures/[id]/sign/route.ts","POST","RULE-0B2-PKI-SIGNING","UE-OMIT-PKI-SIGNING-WORKFLOW","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Organization administrator signing or verifying a document signature as themselves"],
+    ["admin/pki/signatures/[id]/verify/route.ts","POST","RULE-0B2-PKI-SIGNING","UE-OMIT-PKI-SIGNING-WORKFLOW","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Organization administrator signing or verifying a document signature as themselves"],
     ["admin/pki/signatures/route.ts","GET","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/pki/signatures/route.ts","POST","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
-    ["admin/pki/workflows/[id]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ADMIN_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/pki/workflows/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ADMIN_ROLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/pki/workflows/[id]/route.ts","PUT","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ADMIN_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["admin/pki/workflows/[id]/route.ts","DELETE","RULE-0B2-PKI-WORKFLOW","UE-OMIT-PKI-SIGNING-WORKFLOW","OWNED","ADMIN_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Organization administrator reading or cancelling a signing workflow"],
+    ["admin/pki/workflows/[id]/route.ts","GET","RULE-0B2-PKI-WORKFLOW","UE-OMIT-PKI-SIGNING-WORKFLOW","OWNED","ADMIN_ROLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Organization administrator reading or cancelling a signing workflow"],
+    ["admin/pki/workflows/[id]/route.ts","PUT","RULE-0B2-PKI-WORKFLOW","UE-OMIT-PKI-SIGNING-WORKFLOW","OWNED","ADMIN_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Organization administrator reading or cancelling a signing workflow"],
     ["admin/pki/workflows/route.ts","GET","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/pki/workflows/route.ts","POST","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
-    ["admin/representation-protocol/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ADMIN_ROLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/representation-protocol/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ADMIN_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/representation-protocol/route.ts","PUT","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ADMIN_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["admin/representation-protocol/route.ts","GET","RULE-0B2-PROTOCOL","UE-OMIT-REPRESENTATION-PROTOCOL-POLICY","OWNED","ADMIN_ROLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Organization administrators drafting and independently approving the representation protocol"],
+    ["admin/representation-protocol/route.ts","POST","RULE-0B2-PROTOCOL","UE-OMIT-REPRESENTATION-PROTOCOL-POLICY","OWNED","ADMIN_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Organization administrators drafting and independently approving the representation protocol"],
+    ["admin/representation-protocol/route.ts","PUT","RULE-0B2-PROTOCOL","UE-OMIT-REPRESENTATION-PROTOCOL-POLICY","OWNED","ADMIN_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Organization administrators drafting and independently approving the representation protocol"],
     ["admin/roles/batch/route.ts","GET","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/roles/batch/route.ts","POST","RULE-0B1-GENERIC-CRUD","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory"],
     ["admin/seed-cupe-pilot/route.ts","POST","RULE-SEED-RETIRED","UE-CAP-H-005","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Development seed control"],
     ["admin/seed-test-data/route.ts","GET","RULE-SEED-RETIRED","UE-CAP-H-005","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Development seed control"],
     ["admin/seed-test-data/route.ts","POST","RULE-SEED-RETIRED","UE-CAP-H-005","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Development seed control"],
-    ["admin/segments/[id]/execute/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/segments/[id]/execute/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/segments/[id]/execute/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/segments/[id]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/segments/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/segments/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/segments/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/segments/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/stats/activity/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/stats/overview/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["admin/segments/[id]/execute/route.ts","DELETE","RULE-0B2-GENERIC-CRUD-MEMBERS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over organization_members"],
+    ["admin/segments/[id]/execute/route.ts","GET","RULE-0B2-GENERIC-CRUD-MEMBERS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over organization_members"],
+    ["admin/segments/[id]/execute/route.ts","PATCH","RULE-0B2-GENERIC-CRUD-MEMBERS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over organization_members"],
+    ["admin/segments/[id]/route.ts","DELETE","RULE-0B2-GENERIC-CRUD-MEMBERS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over organization_members"],
+    ["admin/segments/[id]/route.ts","GET","RULE-0B2-GENERIC-CRUD-MEMBERS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over organization_members"],
+    ["admin/segments/[id]/route.ts","PATCH","RULE-0B2-GENERIC-CRUD-MEMBERS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over organization_members"],
+    ["admin/segments/route.ts","GET","RULE-0B2-GENERIC-CRUD-MEMBERS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over organization_members"],
+    ["admin/segments/route.ts","POST","RULE-0B2-GENERIC-CRUD-MEMBERS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over organization_members"],
+    ["admin/stats/activity/route.ts","GET","RULE-0B2-PLATFORM-STATISTICS","UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Platform operator reading statistics and aggregates across organizations"],
+    ["admin/stats/overview/route.ts","GET","RULE-0B2-PLATFORM-STATISTICS","UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Platform operator reading statistics and aggregates across organizations"],
     ["admin/system/cache/route.ts","POST","RULE-RETIRED-ANY","UE-CAP-H-001","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Any caller of a retired scaffold route"],
-    ["admin/system/settings/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/system/settings/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/update-role/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/update-role/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/users/[userId]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/users/[userId]/route.ts","PUT","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["admin/users/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["agreements/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["agreements/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/cache-stats/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ADMIN_ROLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/cache-stats/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ADMIN_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/classify/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/copilot/query/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/copilot/query/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/copilot/sessions/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/employers/[id]/risk/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/extract-clauses/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/feedback/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/feedback/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/finance/analysis/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/grievances/[id]/clause-reasoning/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/grievances/[id]/triage/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/grievances/triage/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/ingest/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/ingest/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/insights/[reportType]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/insights/summary/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/mamba/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/mamba/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/match-precedents/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/pension/members/[id]/projection/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/pension/plans/[id]/funding/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/pension/plans/[id]/trustee-summary/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/search/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/search/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/semantic-search/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/semantic-search/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ai/summarize/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["admin/system/settings/route.ts","GET","RULE-0B2-GENERIC-CRUD-MEMBERS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over organization_members"],
+    ["admin/system/settings/route.ts","POST","RULE-0B2-GENERIC-CRUD-MEMBERS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over organization_members"],
+    ["admin/update-role/route.ts","GET","RULE-0B2-GENERIC-CRUD-MEMBERS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over organization_members"],
+    ["admin/update-role/route.ts","POST","RULE-0B2-GENERIC-CRUD-MEMBERS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over organization_members"],
+    ["admin/users/[userId]/route.ts","DELETE","RULE-0B2-MEMBER-ACCESS-REVOCATION","UE-CAP-A-003","OWNED","SESSION_ONLY","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Platform administrator deactivating, reactivating or removing a member membership"],
+    ["admin/users/[userId]/route.ts","PUT","RULE-0B2-MEMBER-ACCESS-REVOCATION","UE-CAP-A-003","OWNED","SESSION_ONLY","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Platform administrator deactivating, reactivating or removing a member membership"],
+    ["admin/users/route.ts","GET","RULE-0B2-PLATFORM-DIRECTORY","UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Platform operator enumerating users and organizations across organizations"],
+    ["agreements/route.ts","GET","RULE-0B2-AGREEMENTS","UE-CAP-I-001","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Representative reading and registering collective agreements for the organization (persona action R15)"],
+    ["agreements/route.ts","POST","RULE-0B2-AGREEMENTS","UE-CAP-I-001","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Representative reading and registering collective agreements for the organization (persona action R15)"],
+    ["ai/cache-stats/route.ts","GET","RULE-0B2-PLATFORM-AI-CACHE","UE-OMIT-PLATFORM-OPERATOR-CONTROLS","OWNED","ADMIN_ROLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Platform operator inspecting and clearing the shared embedding cache"],
+    ["ai/cache-stats/route.ts","POST","RULE-0B2-PLATFORM-AI-CACHE","UE-OMIT-PLATFORM-OPERATOR-CONTROLS","OWNED","ADMIN_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Platform operator inspecting and clearing the shared embedding cache"],
+    ["ai/classify/route.ts","POST","RULE-0B2-AI-CLAUSE-PRECEDENT","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Staff requesting advisory AI classification, extraction or precedent matching"],
+    ["ai/copilot/query/route.ts","GET","RULE-0B2-AI-COPILOT","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Steward using the advisory AI copilot and recording the outcome"],
+    ["ai/copilot/query/route.ts","POST","RULE-0B2-AI-COPILOT","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Steward using the advisory AI copilot and recording the outcome"],
+    ["ai/copilot/sessions/[id]/route.ts","PATCH","RULE-0B2-AI-COPILOT","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Steward using the advisory AI copilot and recording the outcome"],
+    ["ai/employers/[id]/risk/route.ts","GET","RULE-0B2-AI-INSIGHTS","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Officer requesting advisory AI insight reports and employer risk scores"],
+    ["ai/extract-clauses/route.ts","POST","RULE-0B2-AI-CLAUSE-PRECEDENT","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Staff requesting advisory AI classification, extraction or precedent matching"],
+    ["ai/feedback/route.ts","GET","RULE-0B2-AI-FEEDBACK-AND-USAGE","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Organization member giving AI feedback and administrator reading AI usage"],
+    ["ai/feedback/route.ts","POST","RULE-0B2-AI-FEEDBACK-AND-USAGE","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Organization member giving AI feedback and administrator reading AI usage"],
+    ["ai/finance/analysis/route.ts","GET","RULE-0B2-AI-FINANCE-PENSION","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Officer requesting advisory AI analysis of finance or pension data"],
+    ["ai/grievances/[id]/clause-reasoning/route.ts","POST","RULE-0B2-AI-GRIEVANCE-ADVISORY","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Steward requesting advisory AI analysis of a grievance"],
+    ["ai/grievances/[id]/triage/route.ts","POST","RULE-0B2-AI-GRIEVANCE-ADVISORY","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Steward requesting advisory AI analysis of a grievance"],
+    ["ai/grievances/triage/route.ts","POST","RULE-0B2-AI-GRIEVANCE-ADVISORY","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Steward requesting advisory AI analysis of a grievance"],
+    ["ai/ingest/route.ts","GET","RULE-0B2-AI-KNOWLEDGE-INGESTION","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Officer ingesting documents into the AI knowledge pipeline"],
+    ["ai/ingest/route.ts","POST","RULE-0B2-AI-KNOWLEDGE-INGESTION","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Officer ingesting documents into the AI knowledge pipeline"],
+    ["ai/insights/[reportType]/route.ts","GET","RULE-0B2-AI-INSIGHTS","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Officer requesting advisory AI insight reports and employer risk scores"],
+    ["ai/insights/summary/route.ts","GET","RULE-0B2-AI-INSIGHTS","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Officer requesting advisory AI insight reports and employer risk scores"],
+    ["ai/mamba/route.ts","GET","RULE-0B2-AI-MODEL-UTILITY","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Officer running the local sequence model utility"],
+    ["ai/mamba/route.ts","POST","RULE-0B2-AI-MODEL-UTILITY","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Officer running the local sequence model utility"],
+    ["ai/match-precedents/route.ts","POST","RULE-0B2-AI-CLAUSE-PRECEDENT","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Staff requesting advisory AI classification, extraction or precedent matching"],
+    ["ai/pension/members/[id]/projection/route.ts","GET","RULE-0B2-AI-FINANCE-PENSION","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Officer requesting advisory AI analysis of finance or pension data"],
+    ["ai/pension/plans/[id]/funding/route.ts","GET","RULE-0B2-AI-FINANCE-PENSION","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Officer requesting advisory AI analysis of finance or pension data"],
+    ["ai/pension/plans/[id]/trustee-summary/route.ts","POST","RULE-0B2-AI-FINANCE-PENSION","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Officer requesting advisory AI analysis of finance or pension data"],
+    ["ai/search/route.ts","GET","RULE-0B2-AI-KNOWLEDGE-SEARCH","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Member requesting AI search, semantic search or summarization of the knowledge base"],
+    ["ai/search/route.ts","POST","RULE-0B2-AI-KNOWLEDGE-SEARCH","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Member requesting AI search, semantic search or summarization of the knowledge base"],
+    ["ai/semantic-search/route.ts","GET","RULE-0B2-AI-KNOWLEDGE-SEARCH","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Member requesting AI search, semantic search or summarization of the knowledge base"],
+    ["ai/semantic-search/route.ts","POST","RULE-0B2-AI-KNOWLEDGE-SEARCH","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Member requesting AI search, semantic search or summarization of the knowledge base"],
+    ["ai/summarize/route.ts","POST","RULE-0B2-AI-KNOWLEDGE-SEARCH","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Member requesting AI search, semantic search or summarization of the knowledge base"],
     ["alerts/realtime/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/claims/categories/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/claims/categories/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/claims/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/claims/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/claims/stewards/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/claims/stewards/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/claims/trends/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/claims/trends/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/clause-stats/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/clause-stats/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/comparative/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/comparative/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/cross-org/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/dashboard/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/dashboard/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/deadlines-metrics/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/deadlines-metrics/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/executive/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/executive/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/financial/categories/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/financial/categories/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/financial/costs/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/financial/costs/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/financial/outcomes/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/financial/outcomes/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/financial/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/financial/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/financial/trends/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/financial/trends/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/heatmap/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/heatmap/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/insights/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["analytics/claims/categories/route.ts","GET","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/claims/categories/route.ts","POST","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/claims/route.ts","GET","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/claims/route.ts","POST","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/claims/stewards/route.ts","GET","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/claims/stewards/route.ts","POST","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/claims/trends/route.ts","GET","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/claims/trends/route.ts","POST","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/clause-stats/route.ts","GET","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/clause-stats/route.ts","POST","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/comparative/route.ts","GET","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/comparative/route.ts","POST","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/cross-org/route.ts","GET","RULE-0B2-PLATFORM-STATISTICS","UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Platform operator reading statistics and aggregates across organizations"],
+    ["analytics/dashboard/route.ts","GET","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/dashboard/route.ts","POST","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/deadlines-metrics/route.ts","GET","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/deadlines-metrics/route.ts","POST","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/executive/route.ts","GET","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/executive/route.ts","POST","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/financial/categories/route.ts","GET","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/financial/categories/route.ts","POST","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/financial/costs/route.ts","GET","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/financial/costs/route.ts","POST","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/financial/outcomes/route.ts","GET","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/financial/outcomes/route.ts","POST","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/financial/route.ts","GET","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/financial/route.ts","POST","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/financial/trends/route.ts","GET","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/financial/trends/route.ts","POST","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/heatmap/route.ts","GET","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/heatmap/route.ts","POST","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
+    ["analytics/insights/route.ts","GET","RULE-0B2-GENERIC-CRUD-INSIGHTS-GET","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over insight_recommendations"],
     ["analytics/insights/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
     ["analytics/insights/weekly-summary/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
     ["analytics/kpis/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],

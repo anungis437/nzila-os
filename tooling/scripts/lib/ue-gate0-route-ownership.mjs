@@ -41,10 +41,11 @@ export function routeKeys(routes) {
   return routes.flatMap((route) => [].concat(route.methods).map((method) => `${route.route}|${method}`))
 }
 
-export function selectRule(rules, route) {
+export function selectRule(rules, route, method) {
   const applicable = []
   for (const rule of rules) {
     if (Array.isArray(rule.guards) && !rule.guards.includes(route.guard)) continue
+    if (method && Array.isArray(rule.methods) && !rule.methods.includes(method)) continue
     let best = -1
     for (const prefix of rule.prefixes ?? []) if (route.route.startsWith(prefix) && prefix.length > best) best = prefix.length
     if (best >= 0) applicable.push({ rule, precedence: rule.precedence ?? 10, length: best })
@@ -99,6 +100,9 @@ function ruleStructureProblems(ownership, capabilityById, scopeIds, registerIds,
     seen.add(rule.id)
     if (!DISPOSITIONS.includes(rule.disposition)) problems.push(`${label} has an invalid disposition`)
     if (!Array.isArray(rule.prefixes) || rule.prefixes.length === 0) problems.push(`${label} has no route prefix`)
+    if (rule.methods !== undefined && (!Array.isArray(rule.methods) || rule.methods.length === 0 || !rule.methods.every((item) => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].includes(item)))) {
+      problems.push(`${label} has an invalid method filter`)
+    }
     if (!capabilityById.has(rule.capabilityId)) problems.push(`${label} names an invalid owner ${rule.capabilityId}`)
     if (typeof rule.actor !== 'string' || rule.actor.trim() === '') problems.push(`${label} has no persona or system actor`)
     if (!['CAPABILITY', 'NOT_APPLICABLE'].includes(rule.privacy)) problems.push(`${label} has an invalid privacy obligation`)
@@ -151,8 +155,8 @@ export function validateRouteOwnership({ ownership, capabilityById, routes, disk
   const capabilityCounts = {}
   const ruleCounts = {}
   for (const route of routes) {
-    const selected = selectRule(rules, route)
     for (const method of [].concat(route.methods)) {
+      const selected = selectRule(rules, route, method)
       const key = `${route.route}|${method}`
       liveKeys.add(key)
       if (!selected.rule) {
