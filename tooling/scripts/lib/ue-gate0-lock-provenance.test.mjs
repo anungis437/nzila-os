@@ -81,8 +81,8 @@ test('NEGATIVE: an addition with the wrong operations hash, the wrong count or a
   addition(count).classifiedOperations += 1
   assert.ok(has(problems({ lock: count }), /records \d+ classified operation\(s\) but GATE-0B.4 classified \d+/))
   const unknown = clone(base.lock)
-  addition(unknown).tranche = 'GATE-0B.9'
-  assert.ok(has(problems({ lock: unknown }), /names tranche GATE-0B.9, which has no frozen classification/))
+  addition(unknown).tranche = 'GATE-0B.10'
+  assert.ok(has(problems({ lock: unknown }), /names tranche GATE-0B.10, which has no frozen classification/))
 })
 
 test('NEGATIVE: an addition without a reason, or without an implementation source file, is refused', () => {
