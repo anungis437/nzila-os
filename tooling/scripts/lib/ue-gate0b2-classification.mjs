@@ -198,7 +198,13 @@ export function validateRecordGeneric(record, ctx, opts) {
   }
   if (record.mutationAudit === 'NOT_MUTATING' && mutating && !nonEmpty(record.nonMutationReason, 15)) out.push(`${label} is ${record.method} but is marked not mutating without a reason`)
   if (record.mutationAudit === 'NOT_MUTATING' && !mutating && quotes.some((quote) => READ_WRITE_QUOTES.test(quote))) out.push(`${label} is a read method recorded as not mutating but cites a write; a GET that writes is not read-only`)
-  if (!mutating && !['NOT_MUTATING', 'SEPARATE_AUDIT_EVENT_NOT_ATOMIC'].includes(record.mutationAudit)) out.push(`${label} is a read method but records a mutation obligation`)
+  const readAudits = ['NOT_MUTATING', 'SEPARATE_AUDIT_EVENT_NOT_ATOMIC', ...(opts.readWriteAudits ?? [])]
+  if (!mutating && !readAudits.includes(record.mutationAudit)) out.push(`${label} is a read method but records a mutation obligation`)
+  if (!mutating && record.mutationAudit === 'NONE') {
+    if (!quotes.some((quote) => READ_WRITE_QUOTES.test(quote))) out.push(`${label} is a read that writes with no audit record but cites no write`)
+    if (!(record.manifestCorrections ?? []).some((item) => item.field === 'mutating')) out.push(`${label} is a GET that writes a row and must correct the manifest read-only classification`)
+    if (!Array.isArray(record.defects) || record.defects.length === 0) out.push(`${label} is a GET that writes with no audit record and must record a defect`)
+  }
   if (record.mutationAudit === 'ATOMIC_AUDIT_IN_TRANSACTION') {
     if (!quoted('persistAtomicAudit')) out.push(`${label} is marked atomically audited without citing an in-transaction audit write`)
   }
