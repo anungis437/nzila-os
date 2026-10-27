@@ -55,11 +55,17 @@ export function definitionRegion(text, symbol) {
 }
 
 /** The region of one class method or object method named `name`, found by indentation, or null. */
+/** A top-level definition, or `Owner.member` for a method of a class or an object defined at top level. */
+export function symbolRegion(text, symbol) {
+  const dot = symbol.indexOf('.')
+  return dot < 0 ? definitionRegion(text, symbol) : memberRegion(text, symbol.slice(0, dot), symbol.slice(dot + 1))
+}
+
 export function memberRegion(text, owner, name) {
   const ownerRegion = definitionRegion(text, owner)
   if (!ownerRegion) return null
   const lines = ownerRegion.split('\n')
-  const re = new RegExp(`^(\\s+)(?:async\\s+)?(?:static\\s+)?${escapeRe(name)}\\s*[(<]`)
+  const re = new RegExp(`^(\\s+)(?:(?:private|public|protected)\\s+)?(?:static\\s+)?(?:async\\s+)?${escapeRe(name)}\\s*[(<]`)
   for (let i = 0; i < lines.length; i += 1) {
     const match = re.exec(lines[i])
     if (!match) continue
@@ -68,8 +74,12 @@ export function memberRegion(text, owner, name) {
     for (let j = i + 1; j < lines.length; j += 1) {
       if (lines[j].trim() === '') continue
       const lead = lines[j].match(/^(\s*)/)[1].length
-      if (lead <= indent && /^\s*\S/.test(lines[j])) {
+      if (lead < indent && /^\s*\S/.test(lines[j])) {
         end = j
+        break
+      }
+      if (lead === indent && /^\s*\}[,;]?\s*$/.test(lines[j])) {
+        end = j + 1
         break
       }
     }
@@ -231,7 +241,14 @@ export function evidenceItemProblems(item, ctx, label) {
     else if (item.ref === routeFile) {
       const region = handlerRegion(text, method)
       if (region === null) out.push(`${where}: the route file exports no ${method} handler`)
-      else if (!region.includes(item.quote)) out.push(`${where}: the quote is not inside the ${method} handler of the route; it may belong to another method or to module scope`)
+      else if (item.symbol === undefined) {
+        if (!region.includes(item.quote)) out.push(`${where}: the quote is not inside the ${method} handler of the route; it may belong to another method or to module scope`)
+      } else {
+        const local = definitionRegion(text, item.symbol)
+        if (local === null) out.push(`${where}: the route file has no module-scope declaration of ${item.symbol}`)
+        else if (!local.includes(item.quote)) out.push(`${where}: the quote is not inside the declaration of ${item.symbol}`)
+        if (!wordIn(region, item.symbol)) out.push(`${where}: the ${method} handler does not call ${item.symbol}; a helper another method calls proves nothing about this method`)
+      }
     }
     return out
   }
@@ -261,7 +278,7 @@ export function evidenceItemProblems(item, ctx, label) {
     const reach = reachableFiles(routeFile, readText, exists, 4)
     if (!reach.has(item.ref) || item.ref === routeFile) out.push(`${where}: the file is not reachable from the route through imports; code the route does not run supports nothing about it`)
     if (item.symbol) {
-      const definition = definitionRegion(text, item.symbol)
+      const definition = symbolRegion(text, item.symbol)
       if (definition === null) out.push(`${where}: ${item.ref} has no top-level definition of ${item.symbol}`)
       else if (!definition.includes(item.quote)) out.push(`${where}: the quote is not inside the definition of ${item.symbol}`)
     }

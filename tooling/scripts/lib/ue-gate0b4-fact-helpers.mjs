@@ -5,7 +5,7 @@
  * not reach. The validator re-proves each item independently from the written register.
  */
 import {
-  definitionRegion, handlerRegion, importsOf, resolveExportDefinitions, resolveSpec,
+  definitionRegion, handlerRegion, importsOf, resolveExportDefinitions, resolveSpec, symbolRegion,
 } from './ue-gate0b4-provenance.mjs'
 
 export const APP = 'apps/union-eyes/'
@@ -34,6 +34,14 @@ export function opAuthoring(id, readText, exists) {
 
   const h = (claim, pattern) => ({ provenance: 'ROUTE_HANDLER_DIRECT', claim, method, ref: routeFile, quote: pickLine(region, pattern, `${id} handler`) })
 
+  /** A statement from a module-scope function of the route file that the exact method handler calls. */
+  const local = (claim, symbol, pattern) => {
+    const definition = definitionRegion(routeText, symbol)
+    if (definition === null) throw new Error(`${id}: ${routeFile} declares no ${symbol}`)
+    if (!new RegExp(`(?<![\\w$])${symbol}(?![\\w$])`).test(region)) throw new Error(`${id}: the ${method} handler does not call ${symbol}`)
+    return { provenance: 'ROUTE_HANDLER_DIRECT', claim, method, ref: routeFile, symbol, quote: pickLine(definition, pattern, `${id} ${symbol}`) }
+  }
+
   const imp = (claim, symbol, pattern) => {
     const importers = importsOf(routeText).filter((item) => item.names.some((name) => name.local === symbol || name.imported === symbol))
     if (importers.length === 0) throw new Error(`${id}: the route does not import ${symbol}`)
@@ -49,7 +57,7 @@ export function opAuthoring(id, readText, exists) {
 
   const svc = (claim, file, pattern, symbol) => {
     const text = readText(file)
-    const scope = symbol ? definitionRegion(text, symbol) : text
+    const scope = symbol ? symbolRegion(text, symbol) : text
     if (scope === null) throw new Error(`${file} has no definition of ${symbol}`)
     return { provenance: 'SERVICE_IMPLEMENTATION', claim, ref: file, ...(symbol ? { symbol } : {}), quote: pickLine(scope, pattern, symbol ? `${file} ${symbol}` : file) }
   }
@@ -83,7 +91,7 @@ export function opAuthoring(id, readText, exists) {
   const tbl = (claim, name, pattern, options = {}) => sch(claim, definedIn(name), pattern, { ...options, resolvesExport: name })
   const tableText = (name) => definitionRegion(readText(definedIn(name)), name)
 
-  return { route, method, routeFile, region, h, imp, svc, sch, tbl, tableText, grab, definedIn }
+  return { route, method, routeFile, region, h, local, imp, svc, sch, tbl, tableText, grab, definedIn }
 }
 
 export const NOT_ATOMIC = { field: 'audit', manifest: 'audit ATOMIC_SERVICE', actual: 'performAuditedOperation records intent and outcome around the effect; it is not committed with it.' }
