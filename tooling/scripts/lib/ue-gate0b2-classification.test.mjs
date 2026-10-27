@@ -126,14 +126,15 @@ test('only one operation stays undecided and it names its exact evidence gap and
   assert.equal(unresolved[0].capabilityId, UNDECIDED_OWNER)
   assert.ok(unresolved[0].evidenceGap.length > 60)
   assert.deepEqual(unresolved[0].institutionalDecisions, ['UE-INST-OBSERVABILITY-ALERT-OWNER'])
-  assert.equal(entryOf(args, ALERTS)[4], 'SCOPE_UNDECIDED')
+  assert.equal(args.ledger.classifiedIn[ALERTS], 'GATE-0B.3', 'Gate 0B.3 resolved the carry-forward operation and the ledger records it')
+  assert.equal(entryOf(args, ALERTS)[4], 'OWNED')
 })
 
 test('cumulative counts, the 1,644 operations, the schema census and the persona material are preserved', () => {
   const args = fixture()
   assert.equal(args.entries.length, 1644)
-  assert.equal(args.entries.filter((entry) => entry[4] === 'OWNED').length, 535)
-  assert.equal(args.entries.filter((entry) => entry[4] === 'SCOPE_UNDECIDED').length, 972)
+  assert.equal(args.entries.filter((entry) => entry[4] === 'OWNED').length, 634)
+  assert.equal(args.entries.filter((entry) => entry[4] === 'SCOPE_UNDECIDED').length, 873)
   assert.equal(matrix.routeOwnership.operations, 1644)
   assert.equal(matrix.capabilities.find((item) => item.schemaCensus === true).censusCount, 231)
   assert.equal(matrix.capabilities.find((item) => item.schemaCensus === true).individuallyReclassified, false)
@@ -156,7 +157,7 @@ test('every previously classified operation keeps its owner and the ledger only 
   const anchored = JSON.parse(atAnchor(FILES_0B1.ledger))
   for (const [id, owner] of Object.entries(anchored.classified)) assert.equal(args.ledger.classified[id], owner, id)
   assert.equal(args.ledger.tranches['GATE-0B.1'].operationsHash, anchored.tranches['GATE-0B.1'].operationsHash)
-  assert.equal(Object.keys(args.ledger.classified).length, 81 + 99)
+  assert.equal(Object.keys(args.ledger.classified).length, 81 + 99 + 99)
   for (const old of base.anchoredOwnershipEntries0b2.filter((entry) => entry[4] !== 'SCOPE_UNDECIDED')) {
     assert.notEqual(entryOf(args, `${old[0]}|${old[1]}`)[4], 'SCOPE_UNDECIDED')
   }
@@ -188,7 +189,7 @@ test('every new defect has exactly one responsible engineering capability that o
 })
 
 test('the 21 Gate 0B.1 defects and the 19 new defects are in the engineering completion matrix with owners and gates', () => {
-  assert.equal(matrix.routeDefects.length, 40)
+  assert.equal(matrix.routeDefects.length, 76)
   for (const defect of matrix.routeDefects) {
     const owner = matrix.capabilities.find((item) => item.id === defect.ownerCapabilityId)
     assert.ok(owner, defect.id)
@@ -376,6 +377,7 @@ test('an unresolved operation must name its exact evidence gap and the decision 
   record(gap, ALERTS).evidenceGap = ''
   assert.ok(hasProblem(run(gap), /unresolved without evidenceGap/))
   const assigned = fixture()
+  delete assigned.ledger.classifiedIn[ALERTS]
   const entry = entryOf(assigned, ALERTS)
   entry[3] = IDS.AI
   entry[4] = 'OWNED'
@@ -402,9 +404,9 @@ test('end to end: a tampered Gate 0B.2 register fails the Gate 0 validator and a
   classification.operations.find((item) => item.id === FINANCE_GET).evidence = []
   const tampered = validateGate0(matrix, { classification0b2: classification })
   assert.ok(tampered.problems.some((problem) => /has no source evidence/.test(problem)))
-  const unregistered = clone(base.classification0b2)
+  const unregistered = clone(base.classification0b3)
   unregistered.releaseBlockingExposures = []
-  const result = validateGate0(matrix, { classification0b2: unregistered })
+  const result = validateGate0(matrix, { classification0b3: unregistered })
   assert.ok(result.blockers.some((item) => item.code === 'ROUTE_UNJUSTIFIED_EXPOSURE'))
 })
 

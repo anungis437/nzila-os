@@ -23,6 +23,8 @@ import { sha256File } from './ue-gate0a2-validate-baselines.mjs'
 import { FILES_0B1 } from './ue-gate0b1-classification.mjs'
 import { FILES_0B2 } from './ue-gate0b2-classification.mjs'
 import { capabilitiesForTranche2 } from './ue-gate0b2-capabilities.mjs'
+import { FILES_0B3 } from './ue-gate0b3-classification.mjs'
+import { capabilitiesForTranche3 } from './ue-gate0b3-capabilities.mjs'
 
 const ctx = loadContext(ROOT)
 const personaSpecs = ctx.personaSpecs
@@ -418,6 +420,7 @@ distinct.push(
     gap: 'The route-coverage manifest lists operations in domains that no register entry, frozen persona source, or capability-registry record names. Their operations carry disposition SCOPE_UNDECIDED in ue-route-capability-ownership.json, and their control owner stays the guard-class owner. Gate 0 does not guess a business owner from a route name.',
   }),
   ...capabilitiesForTranche2(cap),
+  ...capabilitiesForTranche3(cap),
 )
 
 // NOT_IMPLEMENTED finance domains cite a service in the narrative. The validator
@@ -703,8 +706,13 @@ const matrix = {
     note: 'Hash pins for the frozen Gate 0B.2 tranche manifest and its source-evidenced classification register. The cumulative ledger is pinned above.',
     files: Object.fromEntries(Object.entries(FILES_0B2).map(([key, file]) => [key, { file, sha256: existsSync(join(ROOT, file)) ? sha256File(ROOT, file) : null }])),
   },
-  routeDefects: existsSync(join(ROOT, FILES_0B2.classification))
-    ? JSON.parse(readFileSync(join(ROOT, FILES_0B2.classification), 'utf8')).defectRegister.map(({ id, gate, severity, ownerCapabilityId, tranche, releaseBlocking }) => ({ id, gate, severity, ownerCapabilityId, tranche, releaseBlocking }))
+  routeClassification0b3: {
+    tranche: 'GATE-0B.3',
+    note: 'Hash pins for the frozen Gate 0B.3 tranche manifest and its source-evidenced classification register. The cumulative ledger is pinned above.',
+    files: Object.fromEntries(Object.entries(FILES_0B3).map(([key, file]) => [key, { file, sha256: existsSync(join(ROOT, file)) ? sha256File(ROOT, file) : null }])),
+  },
+  routeDefects: existsSync(join(ROOT, FILES_0B3.classification))
+    ? JSON.parse(readFileSync(join(ROOT, FILES_0B3.classification), 'utf8')).defectRegister.map(({ id, gate, severity, ownerCapabilityId, tranche, releaseBlocking }) => ({ id, gate, severity, ownerCapabilityId, tranche, releaseBlocking }))
     : [],
   outOfScope: [
     {

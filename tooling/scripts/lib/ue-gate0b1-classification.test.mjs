@@ -198,7 +198,7 @@ test('Gate 0 stays IN_PROGRESS and carries the unjustified exposures as Gate 14 
   assert.deepEqual(releaseBlocking.map((item) => item.file).sort(), ['docs/openapi/route.ts|GET', 'docs/route.ts|GET', 'version/route.ts|GET'])
   assert.ok(releaseBlocking.every((item) => item.blocksGates.includes(14) && item.releaseBlocking === true))
   assert.equal(result.summary.route.unauthenticatedWithoutRecordedJustification, 0)
-  assert.equal(result.summary.route.scopeUndecided, 972)
+  assert.equal(result.summary.route.scopeUndecided, 873)
   assert.equal(matrix.gate0Verdict, 'IN_PROGRESS')
 })
 

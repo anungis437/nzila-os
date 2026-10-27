@@ -96,15 +96,31 @@ export function validateTranche2({ manifest, ledger, universe, anchoredEntries, 
   return problems
 }
 
-function groupFor(record) {
-  return OWNERSHIP_GROUPS.find((group) => group.routes.includes(record.route) && (!group.methods || group.methods.includes(record.method)))
+export const READ_WRITE_QUOTES = /\.insert\(|\.update\(|\.delete\(/
+
+export const OPTIONS_0B2 = {
+  gate: '0B.2',
+  rulePrefix: 'RULE-0B2-',
+  carryFrom: CARRY_FORWARD_FROM,
+  domains: CAPABILITY_DOMAINS,
+  groups: OWNERSHIP_GROUPS,
+  fields: RECORD_FIELDS_0B2,
 }
 
 function validateRecord2(record, ctx) {
-  const { entryByKey, capabilityById, exists, readText, defectIds, decisionIds, carry } = ctx
+  return validateRecordGeneric(record, ctx, OPTIONS_0B2)
+}
+
+/**
+ * The record rules shared by every route-classification tranche. A tranche supplies the ownership groups, the rule
+ * prefix its groups use, the domains each capability covers and the tranche it carries unresolved operations from.
+ */
+export function validateRecordGeneric(record, ctx, opts) {
+  const { entryByKey, capabilityById, exists, readText, defectIds, decisionIds, carry, resolvedLater } = ctx
+  const groupFor = (item) => opts.groups.find((group) => group.routes.includes(item.route) && (!group.methods || group.methods.includes(item.method)))
   const label = `classification ${record?.id ?? '(missing id)'}`
   const out = []
-  for (const field of RECORD_FIELDS_0B2) {
+  for (const field of opts.fields) {
     if (record.status === 'UNRESOLVED' && ['proposedCapability', 'unresolvedReason'].includes(field)) continue
     if (!(field in record)) out.push(`${label} is missing ${field}`)
   }
@@ -132,7 +148,7 @@ function validateRecord2(record, ctx) {
   }
 
   if (carry.has(record.id)) {
-    if (record.carriedForwardFrom !== CARRY_FORWARD_FROM) out.push(`${label} is carried forward but does not record ${CARRY_FORWARD_FROM}`)
+    if (record.carriedForwardFrom !== opts.carryFrom) out.push(`${label} is carried forward but does not record ${opts.carryFrom}`)
   } else if (record.carriedForwardFrom !== undefined) out.push(`${label} claims to be carried forward but is a new operation`)
 
   const group = groupFor(record)
@@ -140,17 +156,19 @@ function validateRecord2(record, ctx) {
     if (!capabilityById.has(record.capabilityId) || CATCH_ALL_CAPABILITIES.includes(record.capabilityId)) out.push(`${label} names an invalid capability ${record.capabilityId}`)
     if (entry[3] !== record.capabilityId) out.push(`${label} is owned by ${record.capabilityId} but the ownership register names ${entry[3]}`)
     if (entry[4] === 'SCOPE_UNDECIDED') out.push(`${label} is classified but the ownership register still records SCOPE_UNDECIDED`)
-    if (!String(entry[2]).startsWith('RULE-0B2-')) out.push(`${label} is owned through ${entry[2]}, not a Gate 0B.2 business-evidence rule; a generic or earlier rule is not business evidence`)
-    const domains = CAPABILITY_DOMAINS[record.capabilityId]
+    if (!String(entry[2]).startsWith(opts.rulePrefix)) out.push(`${label} is owned through ${entry[2]}, not a Gate ${opts.gate} business-evidence rule; a generic or earlier rule is not business evidence`)
+    const domains = opts.domains[record.capabilityId]
     if (!domains || !domains.includes(record.domain)) out.push(`${label} is in the domain ${record.domain}, which ${record.capabilityId} does not cover`)
-    if (!group) out.push(`${label} is classified but no Gate 0B.2 ownership group names its route and method`)
+    if (!group) out.push(`${label} is classified but no Gate ${opts.gate} ownership group names its route and method`)
     else {
       if (group.capabilityId !== record.capabilityId || group.domain !== record.domain) out.push(`${label} is assigned to ${record.capabilityId} (${record.domain}) but the route belongs to ${group.capabilityId} (${group.domain})`)
       if (entry[2] !== group.id) out.push(`${label} is owned through ${entry[2]} but its group is ${group.id}`)
       if (!Array.isArray(group.evidence) || group.evidence.length === 0) out.push(`${label} belongs to ${group.id}, which has no business evidence`)
     }
   } else if (record.status === 'UNRESOLVED') {
-    if (entry[4] !== 'SCOPE_UNDECIDED' || entry[3] !== UNDECIDED_OWNER) out.push(`${label} is unresolved but the ownership register assigns it`)
+    if (resolvedLater?.has(record.id)) {
+      if (entry[4] === 'SCOPE_UNDECIDED' || entry[3] === UNDECIDED_OWNER) out.push(`${label} is recorded as resolved in a later tranche but the ownership register still holds it undecided`)
+    } else if (entry[4] !== 'SCOPE_UNDECIDED' || entry[3] !== UNDECIDED_OWNER) out.push(`${label} is unresolved but the ownership register assigns it`)
     if (record.capabilityId !== UNDECIDED_OWNER) out.push(`${label} is unresolved and must name ${UNDECIDED_OWNER}`)
     if (record.domain !== 'UNRESOLVED') out.push(`${label} is unresolved and must use the domain UNRESOLVED`)
     for (const field of UNRESOLVED_FIELDS_0B2) if (!nonEmpty(record[field], 30)) out.push(`${label} is unresolved without ${field}`)
@@ -179,6 +197,7 @@ function validateRecord2(record, ctx) {
     if (mutating && governed === 'OPERATIONAL' && record.mutationAudit !== 'ATOMIC_AUDIT_IN_TRANSACTION') out.push(`${label} writes an OPERATIONAL table through the factory, which audits atomically`)
   }
   if (record.mutationAudit === 'NOT_MUTATING' && mutating && !nonEmpty(record.nonMutationReason, 15)) out.push(`${label} is ${record.method} but is marked not mutating without a reason`)
+  if (record.mutationAudit === 'NOT_MUTATING' && !mutating && quotes.some((quote) => READ_WRITE_QUOTES.test(quote))) out.push(`${label} is a read method recorded as not mutating but cites a write; a GET that writes is not read-only`)
   if (!mutating && !['NOT_MUTATING', 'SEPARATE_AUDIT_EVENT_NOT_ATOMIC'].includes(record.mutationAudit)) out.push(`${label} is a read method but records a mutation obligation`)
   if (record.mutationAudit === 'ATOMIC_AUDIT_IN_TRANSACTION') {
     if (!quoted('persistAtomicAudit')) out.push(`${label} is marked atomically audited without citing an in-transaction audit write`)
@@ -260,7 +279,8 @@ export function validateClassification2({
   if (register.filter((defect) => defect.tranche === '0B.1').length !== defects0b1.length) problems.push('defect register holds a Gate 0B.1 defect that Gate 0B.1 did not record')
 
   const carry = new Set(manifest?.carryForward ?? [])
-  const ctx = { entryByKey, capabilityById, exists, readText, defectIds, decisionIds, carry }
+  const resolvedLater = new Set(Object.entries(ledger?.classifiedIn ?? {}).filter(([, tranche]) => tranche !== TRANCHE_ID).map(([id]) => id))
+  const ctx = { entryByKey, capabilityById, exists, readText, defectIds, decisionIds, carry, resolvedLater }
   const records = Array.isArray(classification.operations) ? classification.operations : []
   const frozen = manifest?.operations ?? []
   const frozenSet = new Set(frozen)

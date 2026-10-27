@@ -792,6 +792,538 @@
       ]
     },
     {
+      "id": "RULE-0B3-GENERIC-CRUD-ANALYTICS",
+      "precedence": 40,
+      "prefixes": [
+        "analytics/kpis/route.ts",
+        "analytics/members/churn-risk/route.ts",
+        "analytics/members/cohorts/route.ts",
+        "analytics/members/route.ts",
+        "analytics/members/trends/route.ts",
+        "analytics/operational/bottlenecks/route.ts",
+        "analytics/operational/queues/route.ts",
+        "analytics/operational/route.ts",
+        "analytics/operational/sla/route.ts",
+        "analytics/operational/workload/route.ts",
+        "analytics/org-activity/route.ts",
+        "analytics/precedent-stats/route.ts",
+        "analytics/predictions/route.ts",
+        "analytics/refresh/route.ts",
+        "analytics/trends/route.ts"
+      ],
+      "capabilityId": "UE-CAP-K-007",
+      "disposition": "OWNED",
+      "actor": "Staff at the role floor through the generic CRUD factory over analytics and KPI tables",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-factory.ts",
+          "quote": "export function crudRoutes"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-governance.ts",
+          "quote": "Generic CRUD routes authorise by organization and role floor only"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-governance.ts",
+          "quote": "'analytics_metrics'"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-governance.ts",
+          "quote": "'kpi_configurations'"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B3-GENERIC-CRUD-INSIGHTS-POST",
+      "precedence": 40,
+      "prefixes": [
+        "analytics/insights/route.ts"
+      ],
+      "capabilityId": "UE-CAP-K-007",
+      "disposition": "OWNED",
+      "actor": "Steward through the generic CRUD factory over insight_recommendations",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-factory.ts",
+          "quote": "export function crudRoutes"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-governance.ts",
+          "quote": "Generic CRUD routes authorise by organization and role floor only"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-governance.ts",
+          "quote": "'insight_recommendations'"
+        }
+      ],
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "id": "RULE-0B3-GENERIC-CRUD-BREAKS",
+      "precedence": 40,
+      "prefixes": [
+        "breaks/route.ts",
+        "breaks/[id]/route.ts",
+        "breaks/policies/route.ts",
+        "breaks/policies/[id]/route.ts"
+      ],
+      "capabilityId": "UE-CAP-K-007",
+      "disposition": "OWNED",
+      "actor": "Member and staff through the generic CRUD factory over break policy and member break tables",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-factory.ts",
+          "quote": "export function crudRoutes"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-governance.ts",
+          "quote": "Generic CRUD routes authorise by organization and role floor only"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-governance.ts",
+          "quote": "'member_breaks'"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-governance.ts",
+          "quote": "'break_policies'"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B3-GENERIC-CRUD-BULK-IMPORT",
+      "precedence": 40,
+      "prefixes": [
+        "bulk-import/route.ts"
+      ],
+      "capabilityId": "UE-CAP-K-007",
+      "disposition": "OWNED",
+      "actor": "Staff at the role floor through the generic CRUD factory over organization_members",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-factory.ts",
+          "quote": "export function crudRoutes"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-governance.ts",
+          "quote": "Generic CRUD routes authorise by organization and role floor only"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-governance.ts",
+          "quote": "'organization_members', 'organizations', 'profiles'"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B3-GENERIC-CRUD-CALENDAR-DISCONNECT",
+      "precedence": 40,
+      "prefixes": [
+        "calendar-sync/connections/[id]/route.ts"
+      ],
+      "capabilityId": "UE-CAP-K-007",
+      "disposition": "OWNED",
+      "actor": "Organization administrator through the generic CRUD factory over external calendar connections",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-factory.ts",
+          "quote": "export function crudRoutes"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-governance.ts",
+          "quote": "Generic CRUD routes authorise by organization and role floor only"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-governance.ts",
+          "quote": "'external_calendar_connections'"
+        }
+      ],
+      "methods": [
+        "DELETE"
+      ]
+    },
+    {
+      "id": "RULE-0B3-ARBITRATION-CASE-RECORDS",
+      "precedence": 40,
+      "prefixes": [
+        "arbitrations/route.ts",
+        "arbitrations/[id]/route.ts"
+      ],
+      "capabilityId": "UE-CAP-K-010",
+      "disposition": "OWNED",
+      "actor": "Steward and above reading and writing the arbitration stage of a grievance",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/grievance-schema.ts",
+          "quote": "grievanceId: uuid(\"grievance_id\").references(() => grievances.id).notNull(),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/crud-governance.ts",
+          "quote": "'arbitrations'"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/arbitrations/route.ts",
+          "quote": "table: arbitrations,"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B3-FINANCE-EXTERNAL-INVOICES",
+      "precedence": 40,
+      "prefixes": [
+        "billing/invoices/route.ts"
+      ],
+      "capabilityId": "UE-CAP-D-003",
+      "disposition": "OWNED",
+      "actor": "Organization member reading union accounting-system invoices synchronized from an external ledger",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/data/accounting.ts",
+          "quote": "external_invoices: Invoices from external accounting systems"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/integrations/adapters/accounting/sync-utils.ts",
+          "quote": "externalInvoices"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B3-AUDIT-LOG-ENGAGEMENTS",
+      "precedence": 40,
+      "prefixes": [
+        "audits/route.ts",
+        "audits/[id]/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AUDIT-LOG-VISIBILITY",
+      "disposition": "OWNED",
+      "actor": "Officer reading organization audit-log rows presented as audit engagements",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/audits/route.ts",
+          "quote": "Organization audit logs from PostgreSQL."
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/[locale]/dashboard/audits/page.tsx",
+          "quote": "/api/audits"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B3-BARGAINING-NEGOTIATIONS",
+      "precedence": 40,
+      "prefixes": [
+        "bargaining/negotiations/route.ts",
+        "bargaining/negotiations/[id]/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-BARGAINING-RECORDS",
+      "disposition": "OWNED",
+      "actor": "Member and steward reading and maintaining collective-bargaining negotiation records",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/bargaining-negotiations-schema.ts",
+          "quote": "export const negotiationStatusEnum = pgEnum(\"negotiation_status\", ["
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/executive/capability-matrix.ts",
+          "quote": "sources: ['/dashboard/bargaining', 'app/api/bargaining/negotiations', 'app/api/bargaining/proposals']"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B3-BARGAINING-PROPOSALS",
+      "precedence": 40,
+      "prefixes": [
+        "bargaining/proposals/route.ts",
+        "bargaining/proposals/[id]/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-BARGAINING-RECORDS",
+      "disposition": "OWNED",
+      "actor": "Member and steward reading and maintaining bargaining proposals within a negotiation",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/bargaining-negotiations-schema.ts",
+          "quote": "export const bargainingProposals = pgTable(\"bargaining_proposals\", {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/executive/capability-matrix.ts",
+          "quote": "sources: ['/dashboard/bargaining', 'app/api/bargaining/negotiations', 'app/api/bargaining/proposals']"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B3-BARGAINING-NOTES",
+      "precedence": 40,
+      "prefixes": [
+        "bargaining-notes/route.ts",
+        "bargaining-notes/[id]/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-BARGAINING-RECORDS",
+      "disposition": "OWNED",
+      "actor": "Member and steward reading and recording bargaining session notes under a confidentiality level",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/cba-intelligence-schema.ts",
+          "quote": "// Bargaining notes (corporate knowledge preservation)"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/services/bargaining-notes-service.ts",
+          "quote": "visibleToUserId"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B3-BARGAINING-TENTATIVE-AGREEMENTS",
+      "precedence": 40,
+      "prefixes": [
+        "bargaining/tentative-agreements/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-BARGAINING-RECORDS",
+      "disposition": "OWNED",
+      "actor": "Member and steward reading and recording tentative agreements reached in a negotiation",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/bargaining/tentative-agreements/route.ts",
+          "quote": "is derived entirely through negotiation_id -> negotiations.organization_id"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/bargaining-negotiations-schema.ts",
+          "quote": "negotiationStatusEnum"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B3-ARBITRATION-DECISION-LIBRARY",
+      "precedence": 40,
+      "prefixes": [
+        "arbitration/precedents/route.ts",
+        "arbitration/precedents/[id]/route.ts",
+        "arbitration/precedents/[id]/citations/route.ts",
+        "arbitration/precedents/[id]/documents/route.ts",
+        "arbitration/precedents/search/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
+      "disposition": "OWNED",
+      "actor": "Member reading and content manager maintaining the shared arbitration decision library",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/cba-intelligence-schema.ts",
+          "quote": "export const arbitrationDecisions = pgTable(\"arbitration_decisions\", {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/components/precedents/precedents-console.tsx",
+          "quote": "/api/arbitration/precedents"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B3-PLATFORM-SUBSCRIPTIONS",
+      "precedence": 40,
+      "prefixes": [
+        "billing/subscriptions/route.ts",
+        "billing/subscriptions/[id]/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "disposition": "OWNED",
+      "actor": "Organization representative viewing, pausing, resuming and cancelling the organization subscription to the platform",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+          "quote": "`services/platform-economics` (Nzila SaaS billing) | Nzila platform billing | Labelled; not union finance"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/billing/subscriptions/route.ts",
+          "quote": "import { pauseSubscription, resumeSubscription } from '@/services/platform-economics';"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B3-PLATFORM-INVOICING",
+      "precedence": 40,
+      "prefixes": [
+        "billing/send-invoice/route.ts",
+        "billing/send-batch/route.ts",
+        "billing/replay-invoice/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "disposition": "OWNED",
+      "actor": "Platform billing: generating and replaying platform invoices for subscribed organizations",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+          "quote": "`services/platform-economics` (Nzila SaaS billing) | Nzila platform billing | Labelled; not union finance"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/billing/send-invoice/route.ts",
+          "quote": "import { generateInvoice } from '@/services/platform-economics';"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B3-PLATFORM-TRIAL-EXPIRY",
+      "precedence": 40,
+      "prefixes": [
+        "billing/credits/check-expired/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "disposition": "OWNED",
+      "actor": "Organization representative expiring the organization platform trial",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+          "quote": "`services/platform-economics` (Nzila SaaS billing) | Nzila platform billing | Labelled; not union finance"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/billing/credits/check-expired/route.ts",
+          "quote": "import { expireTrials } from '@/services/platform-economics/subscription-lifecycle-service';"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B3-BILLING-VALIDATION",
+      "precedence": 40,
+      "prefixes": [
+        "billing/validate/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "disposition": "OWNED",
+      "actor": "Organization representative validating a platform billing amount against the CAD-only rule",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+          "quote": "`services/platform-economics` (Nzila SaaS billing) | Nzila platform billing | Labelled; not union finance"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/billing/validate/route.ts",
+          "quote": "import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B3-ANALYTICS-COMPUTED-REPORTS",
+      "precedence": 40,
+      "prefixes": [
+        "analytics/metrics/route.ts",
+        "analytics/insights/weekly-summary/route.ts",
+        "analytics/operational/derived-case-metrics/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "disposition": "OWNED",
+      "actor": "Steward computing and member reading organization analytics, engagement summaries and case metrics",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/components/analytics/analytics-dashboard.tsx",
+          "quote": "fetch('/api/analytics/metrics?limit=10')"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/analytics/metrics/route.ts",
+          "quote": "Endpoint for calculating and retrieving analytics metrics"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B3-BREAK-COMPLIANCE-REPORT",
+      "precedence": 40,
+      "prefixes": [
+        "breaks/compliance/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "disposition": "OWNED",
+      "actor": "Steward and officer reviewing per-member break compliance for the organization",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/breaks/compliance/route.ts",
+          "quote": "useful for stewards and officers reviewing employer compliance"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B3-OBSERVABILITY-ALERT-INBOX",
+      "precedence": 40,
+      "prefixes": [
+        "alerts/realtime/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
+      "disposition": "OWNED",
+      "actor": "Organization member reading the realtime alerts the observability sweep records for the organization",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/services/observability/realtime-alerting-service.ts",
+          "quote": "category: 'realtime-observability',"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/services/observability/realtime-alerting-service.ts",
+          "quote": "export async function runRealtimeObservabilitySweep"
+        }
+      ]
+    },
+    {
       "id": "RULE-STUB-H002",
       "precedence": 30,
       "prefixes": [
@@ -1912,7 +2444,7 @@
     ["ai/semantic-search/route.ts","GET","RULE-0B2-AI-KNOWLEDGE-SEARCH","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Member requesting AI search, semantic search or summarization of the knowledge base"],
     ["ai/semantic-search/route.ts","POST","RULE-0B2-AI-KNOWLEDGE-SEARCH","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Member requesting AI search, semantic search or summarization of the knowledge base"],
     ["ai/summarize/route.ts","POST","RULE-0B2-AI-KNOWLEDGE-SEARCH","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Member requesting AI search, semantic search or summarization of the knowledge base"],
-    ["alerts/realtime/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["alerts/realtime/route.ts","GET","RULE-0B3-OBSERVABILITY-ALERT-INBOX","UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Organization member reading the realtime alerts the observability sweep records for the organization"],
     ["analytics/claims/categories/route.ts","GET","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
     ["analytics/claims/categories/route.ts","POST","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
     ["analytics/claims/route.ts","GET","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
@@ -1945,59 +2477,59 @@
     ["analytics/heatmap/route.ts","GET","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
     ["analytics/heatmap/route.ts","POST","RULE-0B2-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics tables"],
     ["analytics/insights/route.ts","GET","RULE-0B2-GENERIC-CRUD-INSIGHTS-GET","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over insight_recommendations"],
-    ["analytics/insights/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/insights/weekly-summary/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/kpis/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/kpis/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/members/churn-risk/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/members/churn-risk/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/members/cohorts/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/members/cohorts/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/members/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/members/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/members/trends/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/members/trends/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/metrics/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/metrics/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/operational/bottlenecks/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/operational/bottlenecks/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/operational/derived-case-metrics/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ORGANIZATION_ROLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/operational/queues/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/operational/queues/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/operational/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/operational/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/operational/sla/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/operational/sla/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/operational/workload/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/operational/workload/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/org-activity/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/org-activity/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/precedent-stats/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/precedent-stats/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/predictions/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/predictions/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/refresh/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/refresh/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/trends/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["analytics/trends/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["arbitration/precedents/[id]/citations/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["arbitration/precedents/[id]/citations/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["arbitration/precedents/[id]/citations/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["arbitration/precedents/[id]/documents/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["arbitration/precedents/[id]/documents/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["arbitration/precedents/[id]/documents/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["arbitration/precedents/[id]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["arbitration/precedents/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["arbitration/precedents/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["arbitration/precedents/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["arbitration/precedents/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["arbitration/precedents/search/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["arbitration/precedents/search/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["arbitrations/[id]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["arbitrations/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["arbitrations/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["arbitrations/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["arbitrations/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["analytics/insights/route.ts","POST","RULE-0B3-GENERIC-CRUD-INSIGHTS-POST","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward through the generic CRUD factory over insight_recommendations"],
+    ["analytics/insights/weekly-summary/route.ts","POST","RULE-0B3-ANALYTICS-COMPUTED-REPORTS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Steward computing and member reading organization analytics, engagement summaries and case metrics"],
+    ["analytics/kpis/route.ts","GET","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/kpis/route.ts","POST","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/members/churn-risk/route.ts","GET","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/members/churn-risk/route.ts","POST","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/members/cohorts/route.ts","GET","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/members/cohorts/route.ts","POST","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/members/route.ts","GET","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/members/route.ts","POST","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/members/trends/route.ts","GET","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/members/trends/route.ts","POST","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/metrics/route.ts","GET","RULE-0B3-ANALYTICS-COMPUTED-REPORTS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Steward computing and member reading organization analytics, engagement summaries and case metrics"],
+    ["analytics/metrics/route.ts","POST","RULE-0B3-ANALYTICS-COMPUTED-REPORTS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Steward computing and member reading organization analytics, engagement summaries and case metrics"],
+    ["analytics/operational/bottlenecks/route.ts","GET","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/operational/bottlenecks/route.ts","POST","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/operational/derived-case-metrics/route.ts","GET","RULE-0B3-ANALYTICS-COMPUTED-REPORTS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","ORGANIZATION_ROLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Steward computing and member reading organization analytics, engagement summaries and case metrics"],
+    ["analytics/operational/queues/route.ts","GET","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/operational/queues/route.ts","POST","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/operational/route.ts","GET","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/operational/route.ts","POST","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/operational/sla/route.ts","GET","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/operational/sla/route.ts","POST","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/operational/workload/route.ts","GET","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/operational/workload/route.ts","POST","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/org-activity/route.ts","GET","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/org-activity/route.ts","POST","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/precedent-stats/route.ts","GET","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/precedent-stats/route.ts","POST","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/predictions/route.ts","GET","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/predictions/route.ts","POST","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/refresh/route.ts","GET","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/refresh/route.ts","POST","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/trends/route.ts","GET","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["analytics/trends/route.ts","POST","RULE-0B3-GENERIC-CRUD-ANALYTICS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over analytics and KPI tables"],
+    ["arbitration/precedents/[id]/citations/route.ts","DELETE","RULE-0B3-ARBITRATION-DECISION-LIBRARY","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member reading and content manager maintaining the shared arbitration decision library"],
+    ["arbitration/precedents/[id]/citations/route.ts","GET","RULE-0B3-ARBITRATION-DECISION-LIBRARY","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member reading and content manager maintaining the shared arbitration decision library"],
+    ["arbitration/precedents/[id]/citations/route.ts","PATCH","RULE-0B3-ARBITRATION-DECISION-LIBRARY","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member reading and content manager maintaining the shared arbitration decision library"],
+    ["arbitration/precedents/[id]/documents/route.ts","DELETE","RULE-0B3-ARBITRATION-DECISION-LIBRARY","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member reading and content manager maintaining the shared arbitration decision library"],
+    ["arbitration/precedents/[id]/documents/route.ts","GET","RULE-0B3-ARBITRATION-DECISION-LIBRARY","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member reading and content manager maintaining the shared arbitration decision library"],
+    ["arbitration/precedents/[id]/documents/route.ts","PATCH","RULE-0B3-ARBITRATION-DECISION-LIBRARY","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member reading and content manager maintaining the shared arbitration decision library"],
+    ["arbitration/precedents/[id]/route.ts","DELETE","RULE-0B3-ARBITRATION-DECISION-LIBRARY","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member reading and content manager maintaining the shared arbitration decision library"],
+    ["arbitration/precedents/[id]/route.ts","GET","RULE-0B3-ARBITRATION-DECISION-LIBRARY","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member reading and content manager maintaining the shared arbitration decision library"],
+    ["arbitration/precedents/[id]/route.ts","PATCH","RULE-0B3-ARBITRATION-DECISION-LIBRARY","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member reading and content manager maintaining the shared arbitration decision library"],
+    ["arbitration/precedents/route.ts","GET","RULE-0B3-ARBITRATION-DECISION-LIBRARY","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member reading and content manager maintaining the shared arbitration decision library"],
+    ["arbitration/precedents/route.ts","POST","RULE-0B3-ARBITRATION-DECISION-LIBRARY","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member reading and content manager maintaining the shared arbitration decision library"],
+    ["arbitration/precedents/search/route.ts","GET","RULE-0B3-ARBITRATION-DECISION-LIBRARY","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member reading and content manager maintaining the shared arbitration decision library"],
+    ["arbitration/precedents/search/route.ts","POST","RULE-0B3-ARBITRATION-DECISION-LIBRARY","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member reading and content manager maintaining the shared arbitration decision library"],
+    ["arbitrations/[id]/route.ts","DELETE","RULE-0B3-ARBITRATION-CASE-RECORDS","UE-CAP-K-010","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward and above reading and writing the arbitration stage of a grievance"],
+    ["arbitrations/[id]/route.ts","GET","RULE-0B3-ARBITRATION-CASE-RECORDS","UE-CAP-K-010","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward and above reading and writing the arbitration stage of a grievance"],
+    ["arbitrations/[id]/route.ts","PATCH","RULE-0B3-ARBITRATION-CASE-RECORDS","UE-CAP-K-010","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward and above reading and writing the arbitration stage of a grievance"],
+    ["arbitrations/route.ts","GET","RULE-0B3-ARBITRATION-CASE-RECORDS","UE-CAP-K-010","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward and above reading and writing the arbitration stage of a grievance"],
+    ["arbitrations/route.ts","POST","RULE-0B3-ARBITRATION-CASE-RECORDS","UE-CAP-K-010","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward and above reading and writing the arbitration stage of a grievance"],
     ["arrears/case/[memberId]/route.ts","GET","RULE-FINANCE-TRANSACTIONS","UE-CAP-D-001","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Financial officer"],
     ["arrears/case/[memberId]/route.ts","POST","RULE-FINANCE-TRANSACTIONS","UE-CAP-D-001","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Financial officer"],
     ["arrears/cases/route.ts","GET","RULE-FINANCE-TRANSACTIONS","UE-CAP-D-001","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Financial officer"],
@@ -2010,8 +2542,8 @@
     ["arrears/log-contact/route.ts","POST","RULE-FINANCE-TRANSACTIONS","UE-CAP-D-001","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Financial officer"],
     ["arrears/resolve/[caseId]/route.ts","GET","RULE-FINANCE-TRANSACTIONS","UE-CAP-D-001","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Financial officer"],
     ["arrears/resolve/[caseId]/route.ts","POST","RULE-FINANCE-TRANSACTIONS","UE-CAP-D-001","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Financial officer"],
-    ["audits/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["audits/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["audits/[id]/route.ts","GET","RULE-0B3-AUDIT-LOG-ENGAGEMENTS","UE-OMIT-AUDIT-LOG-VISIBILITY","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Officer reading organization audit-log rows presented as audit engagements"],
+    ["audits/route.ts","GET","RULE-0B3-AUDIT-LOG-ENGAGEMENTS","UE-OMIT-AUDIT-LOG-VISIBILITY","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Officer reading organization audit-log rows presented as audit engagements"],
     ["auth/forgot-password/route.ts","POST","RULE-IDENTITY-SESSION","UE-CAP-A-004","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:NO_WRITES_FOUND","CAPABILITY","Authenticated member and staff session"],
     ["auth/invite/accept/route.ts","POST","RULE-IDENTITY-SESSION","UE-CAP-A-004","OWNED","IDENTITY_PROVIDER_HANDLER","NOT_APPLICABLE:NO_WRITES_FOUND","CAPABILITY","Authenticated member and staff session"],
     ["auth/invite/create/route.ts","POST","RULE-IDENTITY-SESSION","UE-CAP-A-004","OWNED","ORGANIZATION_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Authenticated member and staff session"],
@@ -2035,50 +2567,50 @@
     ["auth/signup/route.ts","POST","RULE-IDENTITY-SESSION","UE-CAP-A-004","OWNED","IDENTITY_PROVIDER_HANDLER","NOT_APPLICABLE:NO_WRITES_FOUND","CAPABILITY","Authenticated member and staff session"],
     ["auth/user-role/route.ts","GET","RULE-IDENTITY-SESSION","UE-CAP-A-004","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Authenticated member and staff session"],
     ["auth_core/health/route.ts","GET","RULE-SYSTEM-PROBE","UE-CAP-K-008","SYSTEM","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","NOT_APPLICABLE:RULE","Platform operations and API consumers"],
-    ["bargaining-notes/[id]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["bargaining-notes/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["bargaining-notes/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["bargaining-notes/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["bargaining-notes/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["bargaining/negotiations/[id]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["bargaining/negotiations/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["bargaining/negotiations/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["bargaining/negotiations/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["bargaining/negotiations/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["bargaining/proposals/[id]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["bargaining/proposals/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["bargaining/proposals/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["bargaining/proposals/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["bargaining/proposals/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["bargaining/tentative-agreements/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["bargaining/tentative-agreements/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["bargaining-notes/[id]/route.ts","DELETE","RULE-0B3-BARGAINING-NOTES","UE-OMIT-BARGAINING-RECORDS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member and steward reading and recording bargaining session notes under a confidentiality level"],
+    ["bargaining-notes/[id]/route.ts","GET","RULE-0B3-BARGAINING-NOTES","UE-OMIT-BARGAINING-RECORDS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member and steward reading and recording bargaining session notes under a confidentiality level"],
+    ["bargaining-notes/[id]/route.ts","PATCH","RULE-0B3-BARGAINING-NOTES","UE-OMIT-BARGAINING-RECORDS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member and steward reading and recording bargaining session notes under a confidentiality level"],
+    ["bargaining-notes/route.ts","GET","RULE-0B3-BARGAINING-NOTES","UE-OMIT-BARGAINING-RECORDS","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Member and steward reading and recording bargaining session notes under a confidentiality level"],
+    ["bargaining-notes/route.ts","POST","RULE-0B3-BARGAINING-NOTES","UE-OMIT-BARGAINING-RECORDS","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Member and steward reading and recording bargaining session notes under a confidentiality level"],
+    ["bargaining/negotiations/[id]/route.ts","DELETE","RULE-0B3-BARGAINING-NEGOTIATIONS","UE-OMIT-BARGAINING-RECORDS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member and steward reading and maintaining collective-bargaining negotiation records"],
+    ["bargaining/negotiations/[id]/route.ts","GET","RULE-0B3-BARGAINING-NEGOTIATIONS","UE-OMIT-BARGAINING-RECORDS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member and steward reading and maintaining collective-bargaining negotiation records"],
+    ["bargaining/negotiations/[id]/route.ts","PATCH","RULE-0B3-BARGAINING-NEGOTIATIONS","UE-OMIT-BARGAINING-RECORDS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member and steward reading and maintaining collective-bargaining negotiation records"],
+    ["bargaining/negotiations/route.ts","GET","RULE-0B3-BARGAINING-NEGOTIATIONS","UE-OMIT-BARGAINING-RECORDS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member and steward reading and maintaining collective-bargaining negotiation records"],
+    ["bargaining/negotiations/route.ts","POST","RULE-0B3-BARGAINING-NEGOTIATIONS","UE-OMIT-BARGAINING-RECORDS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member and steward reading and maintaining collective-bargaining negotiation records"],
+    ["bargaining/proposals/[id]/route.ts","DELETE","RULE-0B3-BARGAINING-PROPOSALS","UE-OMIT-BARGAINING-RECORDS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member and steward reading and maintaining bargaining proposals within a negotiation"],
+    ["bargaining/proposals/[id]/route.ts","GET","RULE-0B3-BARGAINING-PROPOSALS","UE-OMIT-BARGAINING-RECORDS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member and steward reading and maintaining bargaining proposals within a negotiation"],
+    ["bargaining/proposals/[id]/route.ts","PATCH","RULE-0B3-BARGAINING-PROPOSALS","UE-OMIT-BARGAINING-RECORDS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member and steward reading and maintaining bargaining proposals within a negotiation"],
+    ["bargaining/proposals/route.ts","GET","RULE-0B3-BARGAINING-PROPOSALS","UE-OMIT-BARGAINING-RECORDS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member and steward reading and maintaining bargaining proposals within a negotiation"],
+    ["bargaining/proposals/route.ts","POST","RULE-0B3-BARGAINING-PROPOSALS","UE-OMIT-BARGAINING-RECORDS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member and steward reading and maintaining bargaining proposals within a negotiation"],
+    ["bargaining/tentative-agreements/route.ts","GET","RULE-0B3-BARGAINING-TENTATIVE-AGREEMENTS","UE-OMIT-BARGAINING-RECORDS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Member and steward reading and recording tentative agreements reached in a negotiation"],
+    ["bargaining/tentative-agreements/route.ts","POST","RULE-0B3-BARGAINING-TENTATIVE-AGREEMENTS","UE-OMIT-BARGAINING-RECORDS","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Member and steward reading and recording tentative agreements reached in a negotiation"],
     ["billing/batch-status/[jobId]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["billing/credits/check-expired/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["billing/invoices/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["billing/invoices/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["billing/replay-invoice/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["billing/send-batch/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["billing/send-invoice/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["billing/subscriptions/[id]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["billing/subscriptions/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["billing/subscriptions/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["billing/subscriptions/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["billing/subscriptions/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["billing/validate/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["breaks/[id]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["breaks/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["breaks/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["breaks/compliance/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["breaks/policies/[id]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["breaks/policies/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["breaks/policies/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["breaks/policies/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["breaks/policies/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["breaks/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["breaks/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["bulk-import/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["bulk-import/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["calendar-sync/connections/[id]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["billing/credits/check-expired/route.ts","POST","RULE-0B3-PLATFORM-TRIAL-EXPIRY","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Organization representative expiring the organization platform trial"],
+    ["billing/invoices/route.ts","GET","RULE-0B3-FINANCE-EXTERNAL-INVOICES","UE-CAP-D-003","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Organization member reading union accounting-system invoices synchronized from an external ledger"],
+    ["billing/invoices/route.ts","POST","RULE-0B3-FINANCE-EXTERNAL-INVOICES","UE-CAP-D-003","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Organization member reading union accounting-system invoices synchronized from an external ledger"],
+    ["billing/replay-invoice/route.ts","POST","RULE-0B3-PLATFORM-INVOICING","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Platform billing: generating and replaying platform invoices for subscribed organizations"],
+    ["billing/send-batch/route.ts","POST","RULE-0B3-PLATFORM-INVOICING","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Platform billing: generating and replaying platform invoices for subscribed organizations"],
+    ["billing/send-invoice/route.ts","POST","RULE-0B3-PLATFORM-INVOICING","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Platform billing: generating and replaying platform invoices for subscribed organizations"],
+    ["billing/subscriptions/[id]/route.ts","DELETE","RULE-0B3-PLATFORM-SUBSCRIPTIONS","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Organization representative viewing, pausing, resuming and cancelling the organization subscription to the platform"],
+    ["billing/subscriptions/[id]/route.ts","GET","RULE-0B3-PLATFORM-SUBSCRIPTIONS","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Organization representative viewing, pausing, resuming and cancelling the organization subscription to the platform"],
+    ["billing/subscriptions/[id]/route.ts","PATCH","RULE-0B3-PLATFORM-SUBSCRIPTIONS","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Organization representative viewing, pausing, resuming and cancelling the organization subscription to the platform"],
+    ["billing/subscriptions/route.ts","GET","RULE-0B3-PLATFORM-SUBSCRIPTIONS","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Organization representative viewing, pausing, resuming and cancelling the organization subscription to the platform"],
+    ["billing/subscriptions/route.ts","POST","RULE-0B3-PLATFORM-SUBSCRIPTIONS","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Organization representative viewing, pausing, resuming and cancelling the organization subscription to the platform"],
+    ["billing/validate/route.ts","POST","RULE-0B3-BILLING-VALIDATION","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Organization representative validating a platform billing amount against the CAD-only rule"],
+    ["breaks/[id]/route.ts","DELETE","RULE-0B3-GENERIC-CRUD-BREAKS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member and staff through the generic CRUD factory over break policy and member break tables"],
+    ["breaks/[id]/route.ts","GET","RULE-0B3-GENERIC-CRUD-BREAKS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member and staff through the generic CRUD factory over break policy and member break tables"],
+    ["breaks/[id]/route.ts","PATCH","RULE-0B3-GENERIC-CRUD-BREAKS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member and staff through the generic CRUD factory over break policy and member break tables"],
+    ["breaks/compliance/route.ts","GET","RULE-0B3-BREAK-COMPLIANCE-REPORT","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Steward and officer reviewing per-member break compliance for the organization"],
+    ["breaks/policies/[id]/route.ts","DELETE","RULE-0B3-GENERIC-CRUD-BREAKS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member and staff through the generic CRUD factory over break policy and member break tables"],
+    ["breaks/policies/[id]/route.ts","GET","RULE-0B3-GENERIC-CRUD-BREAKS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member and staff through the generic CRUD factory over break policy and member break tables"],
+    ["breaks/policies/[id]/route.ts","PATCH","RULE-0B3-GENERIC-CRUD-BREAKS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member and staff through the generic CRUD factory over break policy and member break tables"],
+    ["breaks/policies/route.ts","GET","RULE-0B3-GENERIC-CRUD-BREAKS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member and staff through the generic CRUD factory over break policy and member break tables"],
+    ["breaks/policies/route.ts","POST","RULE-0B3-GENERIC-CRUD-BREAKS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member and staff through the generic CRUD factory over break policy and member break tables"],
+    ["breaks/route.ts","GET","RULE-0B3-GENERIC-CRUD-BREAKS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member and staff through the generic CRUD factory over break policy and member break tables"],
+    ["breaks/route.ts","POST","RULE-0B3-GENERIC-CRUD-BREAKS","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member and staff through the generic CRUD factory over break policy and member break tables"],
+    ["bulk-import/route.ts","GET","RULE-0B3-GENERIC-CRUD-BULK-IMPORT","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Staff at the role floor through the generic CRUD factory over organization_members"],
+    ["bulk-import/route.ts","POST","RULE-0B3-GENERIC-CRUD-BULK-IMPORT","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Staff at the role floor through the generic CRUD factory over organization_members"],
+    ["calendar-sync/connections/[id]/route.ts","DELETE","RULE-0B3-GENERIC-CRUD-CALENDAR-DISCONNECT","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Organization administrator through the generic CRUD factory over external calendar connections"],
     ["calendar-sync/connections/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
     ["calendar-sync/connections/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
     ["calendar-sync/connections/[id]/sync/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ORGANIZATION_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
