@@ -769,7 +769,7 @@ export function validateGate0(matrix, ctx = {}) {
   const debt = defectProblems(capabilities, ratchetFailures, evidence, { exists, readText })
   problems.push(...debt.problems)
 
-  const exposureBlocked = (blocker) => blocker.code === 'ROUTE_UNJUSTIFIED_EXPOSURE' && blocker.operations.every((operation) => check0b6.registeredReleaseBlocking.has(operation))
+  const exposureBlocked = (blocker) => blocker.code === 'ROUTE_UNJUSTIFIED_EXPOSURE' && blocker.operations.every((operation) => check0b5.registeredReleaseBlocking.has(operation) && check0b6.registeredReleaseBlocking.has(operation))
   const releaseBlocking = check0b6.releaseBlockingDefects.map((item) => ({
     capabilityId: item.ownerCapabilityId,
     id: item.defectId,

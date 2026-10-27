@@ -13,7 +13,7 @@ import { FILES_0B5, NEW_CAPABILITY_IDS, UNRESOLVED_OPERATIONS, validateClassific
 import { ANCHOR_COMMIT, CAPABILITY_IDS_0B5 as IDS } from './ue-gate0b5-groups.mjs'
 import { REUSED_CAPABILITY_IDS_0B5 as REUSED } from './ue-gate0b5-ids.mjs'
 import { anchoredEntries } from './ue-gate0b5-build-classification.mjs'
-import { ACCEPTED, countsAt, fileAt } from './ue-gate0-history.mjs'
+import { ACCEPTED, countsAt, fileAt, ledgerAt, matrixAt, ownershipEntriesAt } from './ue-gate0-history.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const base = loadContext(ROOT)
@@ -35,7 +35,7 @@ function fixture() {
   return {
     classification: clone(base.classification0b5),
     manifest: clone(base.tranche0b5),
-    ledger: clone(base.ledger0b1),
+    ledger: ledgerAt(ACCEPTED['0B.5']),
     classification0b1: clone(base.classification0b1),
     classification0b2: clone(base.classification0b2),
     classification0b3: clone(base.classification0b3),
@@ -44,7 +44,7 @@ function fixture() {
     manifest0b2: clone(base.tranche0b2),
     manifest0b3: clone(base.tranche0b3),
     manifest0b4: clone(base.tranche0b4),
-    entries: clone(base.ownership.entries),
+    entries: ownershipEntriesAt(ACCEPTED['0B.5']),
     capabilityById: new Map(matrix.capabilities.map((capability) => [capability.id, capability])),
     universe: new Set(routeKeys(base.routes)),
     exists,
@@ -183,8 +183,8 @@ test('the six new capabilities are justified: each owns classified operations, s
   assert.deepEqual(Object.fromEntries(NEW_CAPABILITY_IDS.map((id) => [id, matrix.capabilities.find((item) => item.id === id).primaryGate])), {
     [IDS.PAY_EQUITY]: 6, [IDS.COMMITTEES]: 14, [IDS.CAMPAIGN_AUTHORING]: 11, [IDS.SMS]: 11, [IDS.CONSENT]: 11, [IDS.POLLS_SURVEYS]: 14,
   })
-  assert.equal(matrix.capabilities.length, 80)
-  assert.equal(lock.capabilityIds.length, 80)
+  assert.equal(matrixAt(ACCEPTED['0B.5']).capabilities.length, 80)
+  assert.equal(JSON.parse(fileAt(ACCEPTED['0B.5'], FILES.lock)).capabilityIds.length, 80)
   const owned = base.classification0b5.operations.filter((item) => item.status === 'CLASSIFIED').reduce((counts, item) => ({ ...counts, [item.capabilityId]: (counts[item.capabilityId] ?? 0) + 1 }), {})
   assert.deepEqual(owned, {
     [REUSED.OHS]: 10, [IDS.PAY_EQUITY]: 5, [REUSED.ANALYTICS]: 6, [REUSED.OPERATOR]: 1, [IDS.COMMITTEES]: 20, [IDS.CAMPAIGN_AUTHORING]: 29, [IDS.SMS]: 8, [IDS.CONSENT]: 3, [IDS.POLLS_SURVEYS]: 14,
@@ -221,7 +221,7 @@ test('the 42 new defects each have one responsible capability that owns the repa
   }
   assert.equal(args.classification.defectRegister.length, 178)
   assert.deepEqual(args.classification.defectRegister.slice(0, 136), base.classification0b4.defectRegister)
-  assert.equal(matrix.routeDefects.length, 178)
+  assert.equal(matrixAt(ACCEPTED['0B.5']).routeDefects.length, 178)
   const accepted = JSON.parse(fileAt(ACCEPTED['0B.4'], 'docs/union-eyes/convergence/register/ue-pre-vs-engineering-completion.json')).routeDefects
   assert.equal(accepted.length, 136)
   const current = new Map(matrix.routeDefects.map((defect) => [defect.id, defect]))
