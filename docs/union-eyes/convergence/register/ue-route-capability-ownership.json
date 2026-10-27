@@ -6684,6 +6684,779 @@
       ]
     },
     {
+      "id": "RULE-0B11-PRP-MEMBER-DUES-SELF-SERVICE",
+      "precedence": 40,
+      "prefixes": [
+        "portal/dues/balance/route.ts",
+        "portal/dues/pay/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-MEMBER-DUES-SELF-SERVICE",
+      "disposition": "OWNED",
+      "actor": "Member of the organization reading their own dues balance and payment history and paying outstanding dues by card; treasurer who expects the ledger to be credited only by a verified payment",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/portal/dues/pay/route.ts",
+          "quote": " * The member cannot assert payment. This endpoint only creates a server-owned pending dues"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/dues/member-dues-flag.ts",
+          "quote": " * Member dues collection is NOT part of the initial Union Eyes launch. The dues initiation and"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/dues-finance-schema.ts",
+          "quote": "export const memberDuesLedger = pgTable('member_dues_ledger', {"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-PRP-PRECEDENT-LIBRARY",
+      "precedence": 40,
+      "prefixes": [
+        "precedents/route.ts",
+        "precedents/search/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
+      "disposition": "OWNED",
+      "actor": "Member or steward researching arbitration decisions of the shared precedent library, and the platform content role adding a decision to it",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/precedents/route.ts",
+          "quote": "// The precedent library is shared across tenants, so only a platform-elevated role may add to it."
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/cba-intelligence-schema.ts",
+          "quote": "export const arbitrationDecisions = pgTable(\"arbitration_decisions\", {"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-PRP-PRECEDENT-ITEMS",
+      "precedence": 40,
+      "prefixes": [
+        "precedents/[id]/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
+      "disposition": "OWNED",
+      "actor": "Steward or administrator of an organization reading, amending and removing the arbitration precedent rows its own organization contributed to the federation",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/arbitration-precedents-schema.ts",
+          "quote": "export const arbitrationPrecedents = pgTable(\"arbitration_precedents\", {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/arbitration-precedents-schema.ts",
+          "quote": "  sourceOrganizationId: uuid(\"source_organization_id\")"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/arbitration-precedents-schema.ts",
+          "quote": "  sharingLevel: varchar(\"sharing_level\", { length: 50 }).notNull().default(\"federation\"),"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-PRP-PRECEDENT-PREFERENCES",
+      "precedence": 40,
+      "prefixes": [
+        "precedents/jurisdiction-preferences/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
+      "disposition": "OWNED",
+      "actor": "Member choosing the jurisdictions and levels the precedent console filters to",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/precedents/jurisdiction-preferences/route.ts",
+          "quote": " * User-level jurisdiction preferences for precedent filtering."
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/member/jurisdiction-preferences.ts",
+          "quote": "export const memberJurisdictionPreferences = pgTable('member_jurisdiction_preferences', {"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-PRP-PROFILE-ROUTES",
+      "precedence": 40,
+      "prefixes": [
+        "profile/me/route.ts",
+        "profile/roles/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "disposition": "OWNED",
+      "actor": "Signed-in user reading their own subscription and billing profile; steward expecting a role list from a route named roles",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/profiles-schema.ts",
+          "quote": "export const profilesTable = pgTable(\"profiles\", {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/profiles-schema.ts",
+          "quote": "  stripeCustomerId: text(\"stripe_customer_id\"),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/profiles-schema.ts",
+          "quote": "  membership: membershipEnum(\"membership\").notNull().default(\"free\"),"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-PRP-RECONCILIATION",
+      "precedence": 40,
+      "prefixes": [
+        "reconciliation/bank/route.ts",
+        "reconciliation/process/route.ts",
+        "reconciliation/resolve/route.ts",
+        "reconciliation/upload/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "disposition": "OWNED",
+      "actor": "Administrator running a reconciliation of the organization platform invoices, payments and fee events for a period, and officer reading the runs and exceptions",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/reconciliation/upload/route.ts",
+          "quote": " * Upload endpoint reserved for future bank-statement file intake."
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/services/platform-economics/reconciliation-service.ts",
+          "quote": " * Guard: require a completed reconciliation run before period closure."
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/finance/reconciliation.ts",
+          "quote": "export const reconciliationExceptions = pgTable('reconciliation_exceptions', {"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-PRP-REWARDS-MEMBER-AND-EXPORT",
+      "precedence": 40,
+      "prefixes": [
+        "rewards/export/route.ts",
+        "rewards/redemptions/route.ts",
+        "rewards/wallet/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "disposition": "OWNED",
+      "actor": "Member reading their own rewards balance, ledger and redemptions and cancelling an unfulfilled redemption; program administrator expecting to export awards, ledger and budgets",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/rewards/export/route.ts",
+          "quote": "      const rows = await tx.execute(sql`"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/infrastructure/rewards.ts",
+          "quote": " * Append-only credit ledger. Prospective entity fields are owned by"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/services/rewards/redemption-service.ts",
+          "quote": " * Returns credits to user wallet"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-PRP-REWARDS-CRON",
+      "precedence": 40,
+      "prefixes": [
+        "rewards/cron/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "disposition": "OWNED",
+      "actor": "Scheduler holding the cron secret that triggers anniversary awards, credit expiration warnings and scheduled awards for every active organization",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/rewards/cron/route.ts",
+          "quote": " * Security: Requires CRON_SECRET environment variable"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/services/rewards/automation-service.ts",
+          "quote": "        // This is a placeholder for cron-based scheduling"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-RPT-REPORT-DEFINITIONS",
+      "precedence": 40,
+      "prefixes": [
+        "reports/route.ts",
+        "reports/[id]/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "disposition": "OWNED",
+      "actor": "Steward keeping, and member reading, the saved report definitions of the organization (name, category, configuration JSON, public and template flags)",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/analytics/reports.ts",
+          "quote": "export const reports = pgTable('reports', {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/analytics/reports.ts",
+          "quote": "config: jsonb('config').notNull(), // Report configuration (data sources, fields, filters, etc.)"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/reports/route.ts",
+          "quote": " * CRUD collection route for reports"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-RPT-REPORT-LABELLED-PATH-COPIES",
+      "precedence": 40,
+      "prefixes": [
+        "reports/[id]/execute/route.ts",
+        "reports/[id]/run/route.ts",
+        "reports/[id]/share/route.ts",
+        "reports/builder/route.ts",
+        "reports/templates/route.ts",
+        "reports/datasources/sample/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "disposition": "OWNED",
+      "actor": "Steward or officer using a report page that expects a run, a share, the builder, the template list or a data source sample, and any caller of those path names",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/analytics/reports.ts",
+          "quote": "export const reports = pgTable('reports', {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/analytics/reports.ts",
+          "quote": "isPublic: boolean('is_public').notNull().default(false),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/analytics/reports.ts",
+          "quote": "isTemplate: boolean('is_template').notNull().default(false),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/reports/[id]/share/route.ts",
+          "quote": " * CRUD item route for reports"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-RPT-SCHEDULED-REPORTS",
+      "precedence": 40,
+      "prefixes": [
+        "reports/scheduled/route.ts",
+        "reports/scheduled/[id]/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "disposition": "OWNED",
+      "actor": "Administrator or steward scheduling a report for recurring delivery to named recipients, and the member reading the schedule list",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/components/admin/ScheduledReportForm.tsx",
+          "quote": "deliveryMethod: formData.deliveryMethod,"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/components/admin/ScheduledReportForm.tsx",
+          "quote": "recipients,"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/reality/capability-registry.ts",
+          "quote": "id: 'UE-CRON-SCHEDULED-REPORTS',"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-RPT-ADHOC-EXECUTION",
+      "precedence": 40,
+      "prefixes": [
+        "reports/execute/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "disposition": "OWNED",
+      "actor": "Officer building and running an ad-hoc report over claims or members whose rows are returned as the report result",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/reports/execute/route.ts",
+          "quote": " * Dynamically builds and executes SQL queries based on report config"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/report-executor.ts",
+          "quote": " * Executes report configurations by generating and running SQL queries dynamically."
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-RPT-DATA-SOURCE-REGISTRY",
+      "precedence": 40,
+      "prefixes": [
+        "reports/datasources/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "disposition": "OWNED",
+      "actor": "Signed-in user opening the report builder to see which data sources and fields a report can be built from",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/reports/datasources/route.ts",
+          "quote": " * Returns metadata for building reports dynamically"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/report-executor.ts",
+          "quote": " * Registry of available data sources with metadata"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-SOC-ESIGNATURE-REQUESTS",
+      "precedence": 40,
+      "prefixes": [
+        "signatures/audit/[documentId]/route.ts",
+        "signatures/documents/[id]/route.ts",
+        "signatures/documents/route.ts",
+        "signatures/sign/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+      "disposition": "OWNED",
+      "actor": "Member or steward sending a document for signature to named signers (platform users or external e-mail addresses), a signer recording a signature, the sender voiding a request, and the sender or a signer reading the status and audit trail of a signature document",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/documents/signatures.ts",
+          "quote": "fileHash: text(\"file_hash\").notNull(), // SHA-256 for integrity"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/documents/signatures.ts",
+          "quote": "hashChain: text(\"hash_chain\"), // Link to previous event"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/signature/signature-service.ts",
+          "quote": "* Generate audit report for legal compliance"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/signature/providers.ts",
+          "quote": " * Simple signature system without external provider"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-SOC-SOCIAL-ACCOUNT-CONNECTIONS",
+      "precedence": 40,
+      "prefixes": [
+        "social-media/accounts/route.ts",
+        "social-media/accounts/callback/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "disposition": "OWNED",
+      "actor": "Steward connecting, refreshing and disconnecting the organization Facebook, Instagram, X and LinkedIn pages through an OAuth flow, and any member listing the connected accounts",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/social-media-schema.ts",
+          "quote": "accessToken: text('access_token').notNull(),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/social-media-schema.ts",
+          "quote": "refreshToken: text('refresh_token'),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/social-media/accounts/route.ts",
+          "quote": " * Endpoints for managing social media account connections."
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-SOC-SOCIAL-POSTS-AND-CAMPAIGNS",
+      "precedence": 40,
+      "prefixes": [
+        "social-media/posts/route.ts",
+        "social-media/campaigns/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "disposition": "OWNED",
+      "actor": "Steward publishing a post to the connected platform accounts of the organization, removing a published post, and keeping social media campaigns; any member listing the posts and campaigns",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/social-media-schema.ts",
+          "quote": "platformPostId: text('platform_post_id'),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/social-media-schema.ts",
+          "quote": "goalImpressions: integer('goal_impressions'),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/social-media/posts/route.ts",
+          "quote": " * Supports create, read, update, delete, and publish operations."
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-SOC-SOCIAL-ANALYTICS",
+      "precedence": 40,
+      "prefixes": [
+        "social-media/analytics/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "disposition": "OWNED",
+      "actor": "Member or steward reading account analytics, post performance and campaign metrics, and exporting them as CSV or JSON",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/social-media-schema.ts",
+          "quote": "totalImpressions: integer('total_impressions').default(0),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/social-media/analytics/route.ts",
+          "quote": " * Supports account analytics, post performance, campaign metrics, and exports."
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-SOC-SOCIAL-FEED-CAMPAIGN-FACADE",
+      "precedence": 40,
+      "prefixes": [
+        "social-media/feed/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING",
+      "disposition": "OWNED",
+      "actor": "Member reading, and steward creating, mass communication campaign rows through a route and a widget that are named for a social media feed",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/social-media/feed/route.ts",
+          "quote": " * CRUD collection route for campaigns"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/communications/campaigns.ts",
+          "quote": " * Mass communication campaigns across channels"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/components/social-media/social-feed-widget.tsx",
+          "quote": "const res = await fetch('/api/v2/social-media/feed');"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-IDS-SATISFACTION-SURVEY-LIFECYCLE",
+      "precedence": 40,
+      "prefixes": [
+        "satisfaction/route.ts",
+        "satisfaction/[id]/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+      "disposition": "OWNED",
+      "actor": "Steward creating a satisfaction survey for a claim, and the member who was represented listing, reading, submitting or declining the survey about their representative",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/claims/satisfaction.ts",
+          "quote": "lroId: varchar('lro_id', { length: 255 }).notNull(), // LRO being rated (assignedTo)"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/claims/satisfaction.ts",
+          "quote": "isAnonymous: boolean('is_anonymous').notNull().default(false),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/components/satisfaction/satisfaction-survey.tsx",
+          "quote": "Your name will not be visible to your representative"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/workflow-engine.ts",
+          "quote": "// When a claim is resolved or closed with an assigned LRO, send"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-IDS-SATISFACTION-LRO-PERFORMANCE",
+      "precedence": 40,
+      "prefixes": [
+        "satisfaction/lro/[lroId]/route.ts",
+        "satisfaction/rankings/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+      "disposition": "OWNED",
+      "actor": "Steward reading the aggregated satisfaction ratings of one representative or the ranking of every representative of the organization",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/services/satisfaction-service.ts",
+          "quote": "// Sort by overall average descending"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/claims/satisfaction.ts",
+          "quote": "overallScore: decimal('overall_score', { precision: 3, scale: 2 }),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/[locale]/dashboard/stewards/ratings/page.tsx",
+          "quote": " * Steward-facing dashboard for viewing LRO performance metrics"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-IDS-SCIM-USER-PROVISIONING",
+      "precedence": 40,
+      "prefixes": [
+        "scim/v2/[organizationId]/Users/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS",
+      "disposition": "OWNED",
+      "actor": "Organization administrator, or the identity provider of the organization, listing the members of the organization in SCIM form and provisioning a new member",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/sso-scim-schema.ts",
+          "quote": "bearerToken: text(\"bearer_token\").notNull(), // Long-lived token for IdP"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/sso-scim-schema.ts",
+          "quote": "deprovisionAction: varchar(\"deprovision_action\", { length: 50 }).default('suspend'), "
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts",
+          "quote": " * SCIM 2.0 Users endpoint"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-IDS-SECURITY-EVENTS",
+      "precedence": 40,
+      "prefixes": [
+        "security/events/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AUDIT-LOG-VISIBILITY",
+      "disposition": "OWNED",
+      "actor": "Security manager reading the security events of the organization, and the process or person recording a security event",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/audit-security-schema.ts",
+          "quote": "severity: varchar(\"severity\", { length: 20 }).notNull(),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/audit-security-schema.ts",
+          "quote": "additionalData: jsonb(\"additional_data\").default(sql`'{}'::jsonb`),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/[locale]/dashboard/security/page.tsx",
+          "quote": "  const hasAccess = await hasMinRole('security_manager');"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-IDS-ORGANIZATION-SETTINGS",
+      "precedence": 40,
+      "prefixes": [
+        "settings/organization/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "disposition": "OWNED",
+      "actor": "Organization administrator loading and saving the organization profile (name, short name, region) and the settings JSON on the organization settings and platform settings pages",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/services/clc/per-capita-calculator.ts",
+          "quote": "const perCapitaRate = parseFloat(String(orgSettings.perCapitaRate ?? '1.0'));"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/services/entitlements.ts",
+          "quote": "const credits = (settings.credits as number) ?? TIER_CREDITS[tier];"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/[locale]/dashboard/settings/_components/platform-settings-content.tsx",
+          "quote": "// Platform settings are env/config-driven — this persists the"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-IDS-STEWARD-ASSIGNMENTS",
+      "precedence": 40,
+      "prefixes": [
+        "stewards/route.ts",
+        "stewards/[id]/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY",
+      "disposition": "OWNED",
+      "actor": "Member looking for a steward, steward or officer reading the stewards of a unit or worksite, and the office that appoints a steward",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/union-structure-schema.ts",
+          "quote": "stewardType: stewardTypeEnum('steward_type').notNull(),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/union-structure-schema.ts",
+          "quote": "personalPhone: varchar('personal_phone', { length: 50 }),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/union-structure-schema.ts",
+          "quote": "availabilityNotes: text('availability_notes'),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/services/steward-assignment.ts",
+          "quote": " * Assign a steward to a grievance — inserts assignment row"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-IDS-STORAGE-MEDIA-LIBRARY",
+      "precedence": 40,
+      "prefixes": [
+        "storage/cleanup/route.ts",
+        "storage/usage/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-CONTENT-LIBRARY-EDITORIAL",
+      "disposition": "OWNED",
+      "actor": "Member or steward expecting storage usage figures and a storage cleanup, served the organization media library rows",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/cms-website-schema.ts",
+          "quote": "fileUrl: text('file_url').notNull(),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/cms-website-schema.ts",
+          "quote": "fileSize: integer('file_size').notNull(),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/cms-website-schema.ts",
+          "quote": "uploadedBy: text('uploaded_by').references(() => profiles.userId),"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-IDS-SUPPORT-NOTIFICATION-ROWS",
+      "precedence": 40,
+      "prefixes": [
+        "support/metrics/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "disposition": "OWNED",
+      "actor": "Support or union staff expecting support metrics and service-level figures, served the in-app notification rows of the organization",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/notifications-schema.ts",
+          "quote": "actionUrl: text('action_url'),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/notifications-schema.ts",
+          "quote": "message: text('message').notNull(),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/notifications-schema.ts",
+          "quote": "type: text('type').notNull().default('info'), // info, success, warning, error"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B11-IDS-SUPPORT-SLA-NOTIFICATION-ROWS",
+      "precedence": 40,
+      "prefixes": [
+        "support/sla/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "disposition": "OWNED",
+      "actor": "Support or union staff expecting support metrics and service-level figures, served the in-app notification rows of the organization",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/notifications-schema.ts",
+          "quote": "actionUrl: text('action_url'),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/notifications-schema.ts",
+          "quote": "message: text('message').notNull(),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/notifications-schema.ts",
+          "quote": "type: text('type').notNull().default('info'), // info, success, warning, error"
+        }
+      ],
+      "methods": [
+        "GET"
+      ]
+    },
+    {
       "id": "RULE-STUB-H002",
       "precedence": 30,
       "prefixes": [
@@ -9037,17 +9810,17 @@
     ["portal/documents/route.ts","POST","RULE-0B10-PEN-PORTAL-DOCUMENTS","UE-OMIT-CONTENT-LIBRARY-EDITORIAL","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member of the organization expecting to list the documents the union publishes to them, and steward expecting to deposit a document for members"],
     ["portal/documents/upload/route.ts","GET","RULE-0B10-PEN-PORTAL-DOCUMENTS","UE-OMIT-CONTENT-LIBRARY-EDITORIAL","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member of the organization expecting to list the documents the union publishes to them, and steward expecting to deposit a document for members"],
     ["portal/documents/upload/route.ts","POST","RULE-0B10-PEN-PORTAL-DOCUMENTS","UE-OMIT-CONTENT-LIBRARY-EDITORIAL","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member of the organization expecting to list the documents the union publishes to them, and steward expecting to deposit a document for members"],
-    ["portal/dues/balance/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["portal/dues/pay/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["portal/dues/pay/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["precedents/[id]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["precedents/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["precedents/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["precedents/jurisdiction-preferences/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["precedents/jurisdiction-preferences/route.ts","PUT","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["precedents/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["precedents/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["precedents/search/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["portal/dues/balance/route.ts","GET","RULE-0B11-PRP-MEMBER-DUES-SELF-SERVICE","UE-OMIT-MEMBER-DUES-SELF-SERVICE","OWNED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Member of the organization reading their own dues balance and payment history and paying outstanding dues by card; treasurer who expects the ledger to be credited only by a verified payment"],
+    ["portal/dues/pay/route.ts","GET","RULE-0B11-PRP-MEMBER-DUES-SELF-SERVICE","UE-OMIT-MEMBER-DUES-SELF-SERVICE","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Member of the organization reading their own dues balance and payment history and paying outstanding dues by card; treasurer who expects the ledger to be credited only by a verified payment"],
+    ["portal/dues/pay/route.ts","POST","RULE-0B11-PRP-MEMBER-DUES-SELF-SERVICE","UE-OMIT-MEMBER-DUES-SELF-SERVICE","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Member of the organization reading their own dues balance and payment history and paying outstanding dues by card; treasurer who expects the ledger to be credited only by a verified payment"],
+    ["precedents/[id]/route.ts","DELETE","RULE-0B11-PRP-PRECEDENT-ITEMS","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward or administrator of an organization reading, amending and removing the arbitration precedent rows its own organization contributed to the federation"],
+    ["precedents/[id]/route.ts","GET","RULE-0B11-PRP-PRECEDENT-ITEMS","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward or administrator of an organization reading, amending and removing the arbitration precedent rows its own organization contributed to the federation"],
+    ["precedents/[id]/route.ts","PATCH","RULE-0B11-PRP-PRECEDENT-ITEMS","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward or administrator of an organization reading, amending and removing the arbitration precedent rows its own organization contributed to the federation"],
+    ["precedents/jurisdiction-preferences/route.ts","GET","RULE-0B11-PRP-PRECEDENT-PREFERENCES","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Member choosing the jurisdictions and levels the precedent console filters to"],
+    ["precedents/jurisdiction-preferences/route.ts","PUT","RULE-0B11-PRP-PRECEDENT-PREFERENCES","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Member choosing the jurisdictions and levels the precedent console filters to"],
+    ["precedents/route.ts","GET","RULE-0B11-PRP-PRECEDENT-LIBRARY","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Member or steward researching arbitration decisions of the shared precedent library, and the platform content role adding a decision to it"],
+    ["precedents/route.ts","POST","RULE-0B11-PRP-PRECEDENT-LIBRARY","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Member or steward researching arbitration decisions of the shared precedent library, and the platform content role adding a decision to it"],
+    ["precedents/search/route.ts","POST","RULE-0B11-PRP-PRECEDENT-LIBRARY","UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Member or steward researching arbitration decisions of the shared precedent library, and the platform content role adding a decision to it"],
     ["privacy/breach/route.ts","GET","RULE-PRIVACY-RIGHTS","UE-OMIT-PRIVACY-RIGHTS","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Member and governance officer"],
     ["privacy/breach/route.ts","POST","RULE-PRIVACY-RIGHTS","UE-OMIT-PRIVACY-RIGHTS","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Member and governance officer"],
     ["privacy/consent/route.ts","DELETE","RULE-PRIVACY-RIGHTS","UE-OMIT-PRIVACY-RIGHTS","OWNED","SESSION_ONLY","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Member and governance officer"],
@@ -9057,96 +9830,96 @@
     ["privacy/dsar/route.ts","POST","RULE-PRIVACY-RIGHTS","UE-OMIT-PRIVACY-RIGHTS","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Member and governance officer"],
     ["privacy/provincial/route.ts","GET","RULE-PRIVACY-RIGHTS","UE-OMIT-PRIVACY-RIGHTS","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Member and governance officer"],
     ["privacy/provincial/route.ts","POST","RULE-PRIVACY-RIGHTS","UE-OMIT-PRIVACY-RIGHTS","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Member and governance officer"],
-    ["profile/me/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["profile/roles/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["profile/roles/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["profile/me/route.ts","GET","RULE-0B11-PRP-PROFILE-ROUTES","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Signed-in user reading their own subscription and billing profile; steward expecting a role list from a route named roles"],
+    ["profile/roles/route.ts","GET","RULE-0B11-PRP-PROFILE-ROUTES","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Signed-in user reading their own subscription and billing profile; steward expecting a role list from a route named roles"],
+    ["profile/roles/route.ts","POST","RULE-0B11-PRP-PROFILE-ROUTES","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Signed-in user reading their own subscription and billing profile; steward expecting a role list from a route named roles"],
     ["ready/route.ts","GET","RULE-SYSTEM-PROBE","UE-CAP-K-008","SYSTEM","SHARED_SECRET","NOT_APPLICABLE:READ","NOT_APPLICABLE:RULE","Platform operations and API consumers"],
-    ["reconciliation/bank/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reconciliation/process/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reconciliation/process/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reconciliation/resolve/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reconciliation/upload/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/[id]/execute/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/[id]/execute/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/[id]/execute/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/[id]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/[id]/run/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/[id]/run/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/[id]/run/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/[id]/share/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/[id]/share/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/[id]/share/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/builder/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/builder/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/datasources/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/datasources/sample/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/datasources/sample/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/execute/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/scheduled/[id]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/scheduled/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/scheduled/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/scheduled/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/scheduled/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/templates/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["reports/templates/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["rewards/cron/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SHARED_SECRET","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["rewards/cron/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SHARED_SECRET","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["rewards/export/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["rewards/redemptions/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["rewards/redemptions/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["rewards/wallet/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["satisfaction/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["satisfaction/[id]/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["satisfaction/lro/[lroId]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["satisfaction/rankings/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["satisfaction/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["satisfaction/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["scim/v2/[organizationId]/Users/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["scim/v2/[organizationId]/Users/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["reconciliation/bank/route.ts","GET","RULE-0B11-PRP-RECONCILIATION","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Administrator running a reconciliation of the organization platform invoices, payments and fee events for a period, and officer reading the runs and exceptions"],
+    ["reconciliation/process/route.ts","GET","RULE-0B11-PRP-RECONCILIATION","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Administrator running a reconciliation of the organization platform invoices, payments and fee events for a period, and officer reading the runs and exceptions"],
+    ["reconciliation/process/route.ts","POST","RULE-0B11-PRP-RECONCILIATION","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Administrator running a reconciliation of the organization platform invoices, payments and fee events for a period, and officer reading the runs and exceptions"],
+    ["reconciliation/resolve/route.ts","POST","RULE-0B11-PRP-RECONCILIATION","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Administrator running a reconciliation of the organization platform invoices, payments and fee events for a period, and officer reading the runs and exceptions"],
+    ["reconciliation/upload/route.ts","GET","RULE-0B11-PRP-RECONCILIATION","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Administrator running a reconciliation of the organization platform invoices, payments and fee events for a period, and officer reading the runs and exceptions"],
+    ["reports/[id]/execute/route.ts","DELETE","RULE-0B11-RPT-REPORT-LABELLED-PATH-COPIES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward or officer using a report page that expects a run, a share, the builder, the template list or a data source sample, and any caller of those path names"],
+    ["reports/[id]/execute/route.ts","GET","RULE-0B11-RPT-REPORT-LABELLED-PATH-COPIES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward or officer using a report page that expects a run, a share, the builder, the template list or a data source sample, and any caller of those path names"],
+    ["reports/[id]/execute/route.ts","PATCH","RULE-0B11-RPT-REPORT-LABELLED-PATH-COPIES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward or officer using a report page that expects a run, a share, the builder, the template list or a data source sample, and any caller of those path names"],
+    ["reports/[id]/route.ts","DELETE","RULE-0B11-RPT-REPORT-DEFINITIONS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward keeping, and member reading, the saved report definitions of the organization (name, category, configuration JSON, public and template flags)"],
+    ["reports/[id]/route.ts","GET","RULE-0B11-RPT-REPORT-DEFINITIONS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward keeping, and member reading, the saved report definitions of the organization (name, category, configuration JSON, public and template flags)"],
+    ["reports/[id]/route.ts","PATCH","RULE-0B11-RPT-REPORT-DEFINITIONS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward keeping, and member reading, the saved report definitions of the organization (name, category, configuration JSON, public and template flags)"],
+    ["reports/[id]/run/route.ts","DELETE","RULE-0B11-RPT-REPORT-LABELLED-PATH-COPIES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward or officer using a report page that expects a run, a share, the builder, the template list or a data source sample, and any caller of those path names"],
+    ["reports/[id]/run/route.ts","GET","RULE-0B11-RPT-REPORT-LABELLED-PATH-COPIES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward or officer using a report page that expects a run, a share, the builder, the template list or a data source sample, and any caller of those path names"],
+    ["reports/[id]/run/route.ts","PATCH","RULE-0B11-RPT-REPORT-LABELLED-PATH-COPIES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward or officer using a report page that expects a run, a share, the builder, the template list or a data source sample, and any caller of those path names"],
+    ["reports/[id]/share/route.ts","DELETE","RULE-0B11-RPT-REPORT-LABELLED-PATH-COPIES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward or officer using a report page that expects a run, a share, the builder, the template list or a data source sample, and any caller of those path names"],
+    ["reports/[id]/share/route.ts","GET","RULE-0B11-RPT-REPORT-LABELLED-PATH-COPIES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward or officer using a report page that expects a run, a share, the builder, the template list or a data source sample, and any caller of those path names"],
+    ["reports/[id]/share/route.ts","PATCH","RULE-0B11-RPT-REPORT-LABELLED-PATH-COPIES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward or officer using a report page that expects a run, a share, the builder, the template list or a data source sample, and any caller of those path names"],
+    ["reports/builder/route.ts","GET","RULE-0B11-RPT-REPORT-LABELLED-PATH-COPIES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward or officer using a report page that expects a run, a share, the builder, the template list or a data source sample, and any caller of those path names"],
+    ["reports/builder/route.ts","POST","RULE-0B11-RPT-REPORT-LABELLED-PATH-COPIES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward or officer using a report page that expects a run, a share, the builder, the template list or a data source sample, and any caller of those path names"],
+    ["reports/datasources/route.ts","GET","RULE-0B11-RPT-DATA-SOURCE-REGISTRY","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Signed-in user opening the report builder to see which data sources and fields a report can be built from"],
+    ["reports/datasources/sample/route.ts","GET","RULE-0B11-RPT-REPORT-LABELLED-PATH-COPIES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward or officer using a report page that expects a run, a share, the builder, the template list or a data source sample, and any caller of those path names"],
+    ["reports/datasources/sample/route.ts","POST","RULE-0B11-RPT-REPORT-LABELLED-PATH-COPIES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward or officer using a report page that expects a run, a share, the builder, the template list or a data source sample, and any caller of those path names"],
+    ["reports/execute/route.ts","POST","RULE-0B11-RPT-ADHOC-EXECUTION","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Officer building and running an ad-hoc report over claims or members whose rows are returned as the report result"],
+    ["reports/route.ts","GET","RULE-0B11-RPT-REPORT-DEFINITIONS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward keeping, and member reading, the saved report definitions of the organization (name, category, configuration JSON, public and template flags)"],
+    ["reports/route.ts","POST","RULE-0B11-RPT-REPORT-DEFINITIONS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward keeping, and member reading, the saved report definitions of the organization (name, category, configuration JSON, public and template flags)"],
+    ["reports/scheduled/[id]/route.ts","DELETE","RULE-0B11-RPT-SCHEDULED-REPORTS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Administrator or steward scheduling a report for recurring delivery to named recipients, and the member reading the schedule list"],
+    ["reports/scheduled/[id]/route.ts","GET","RULE-0B11-RPT-SCHEDULED-REPORTS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Administrator or steward scheduling a report for recurring delivery to named recipients, and the member reading the schedule list"],
+    ["reports/scheduled/[id]/route.ts","PATCH","RULE-0B11-RPT-SCHEDULED-REPORTS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Administrator or steward scheduling a report for recurring delivery to named recipients, and the member reading the schedule list"],
+    ["reports/scheduled/route.ts","GET","RULE-0B11-RPT-SCHEDULED-REPORTS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Administrator or steward scheduling a report for recurring delivery to named recipients, and the member reading the schedule list"],
+    ["reports/scheduled/route.ts","POST","RULE-0B11-RPT-SCHEDULED-REPORTS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Administrator or steward scheduling a report for recurring delivery to named recipients, and the member reading the schedule list"],
+    ["reports/templates/route.ts","GET","RULE-0B11-RPT-REPORT-LABELLED-PATH-COPIES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward or officer using a report page that expects a run, a share, the builder, the template list or a data source sample, and any caller of those path names"],
+    ["reports/templates/route.ts","POST","RULE-0B11-RPT-REPORT-LABELLED-PATH-COPIES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward or officer using a report page that expects a run, a share, the builder, the template list or a data source sample, and any caller of those path names"],
+    ["rewards/cron/route.ts","GET","RULE-0B11-PRP-REWARDS-CRON","UE-OMIT-REWARDS-REDEMPTION-FULFILMENT","OWNED","SHARED_SECRET","NOT_APPLICABLE:READ","CAPABILITY","Scheduler holding the cron secret that triggers anniversary awards, credit expiration warnings and scheduled awards for every active organization"],
+    ["rewards/cron/route.ts","POST","RULE-0B11-PRP-REWARDS-CRON","UE-OMIT-REWARDS-REDEMPTION-FULFILMENT","OWNED","SHARED_SECRET","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Scheduler holding the cron secret that triggers anniversary awards, credit expiration warnings and scheduled awards for every active organization"],
+    ["rewards/export/route.ts","GET","RULE-0B11-PRP-REWARDS-MEMBER-AND-EXPORT","UE-OMIT-REWARDS-REDEMPTION-FULFILMENT","OWNED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Member reading their own rewards balance, ledger and redemptions and cancelling an unfulfilled redemption; program administrator expecting to export awards, ledger and budgets"],
+    ["rewards/redemptions/route.ts","GET","RULE-0B11-PRP-REWARDS-MEMBER-AND-EXPORT","UE-OMIT-REWARDS-REDEMPTION-FULFILMENT","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Member reading their own rewards balance, ledger and redemptions and cancelling an unfulfilled redemption; program administrator expecting to export awards, ledger and budgets"],
+    ["rewards/redemptions/route.ts","POST","RULE-0B11-PRP-REWARDS-MEMBER-AND-EXPORT","UE-OMIT-REWARDS-REDEMPTION-FULFILMENT","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Member reading their own rewards balance, ledger and redemptions and cancelling an unfulfilled redemption; program administrator expecting to export awards, ledger and budgets"],
+    ["rewards/wallet/route.ts","GET","RULE-0B11-PRP-REWARDS-MEMBER-AND-EXPORT","UE-OMIT-REWARDS-REDEMPTION-FULFILMENT","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Member reading their own rewards balance, ledger and redemptions and cancelling an unfulfilled redemption; program administrator expecting to export awards, ledger and budgets"],
+    ["satisfaction/[id]/route.ts","GET","RULE-0B11-IDS-SATISFACTION-SURVEY-LIFECYCLE","UE-OMIT-MEMBER-POLLS-AND-SURVEYS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Steward creating a satisfaction survey for a claim, and the member who was represented listing, reading, submitting or declining the survey about their representative"],
+    ["satisfaction/[id]/route.ts","POST","RULE-0B11-IDS-SATISFACTION-SURVEY-LIFECYCLE","UE-OMIT-MEMBER-POLLS-AND-SURVEYS","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Steward creating a satisfaction survey for a claim, and the member who was represented listing, reading, submitting or declining the survey about their representative"],
+    ["satisfaction/lro/[lroId]/route.ts","GET","RULE-0B11-IDS-SATISFACTION-LRO-PERFORMANCE","UE-OMIT-MEMBER-POLLS-AND-SURVEYS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Steward reading the aggregated satisfaction ratings of one representative or the ranking of every representative of the organization"],
+    ["satisfaction/rankings/route.ts","GET","RULE-0B11-IDS-SATISFACTION-LRO-PERFORMANCE","UE-OMIT-MEMBER-POLLS-AND-SURVEYS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Steward reading the aggregated satisfaction ratings of one representative or the ranking of every representative of the organization"],
+    ["satisfaction/route.ts","GET","RULE-0B11-IDS-SATISFACTION-SURVEY-LIFECYCLE","UE-OMIT-MEMBER-POLLS-AND-SURVEYS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Steward creating a satisfaction survey for a claim, and the member who was represented listing, reading, submitting or declining the survey about their representative"],
+    ["satisfaction/route.ts","POST","RULE-0B11-IDS-SATISFACTION-SURVEY-LIFECYCLE","UE-OMIT-MEMBER-POLLS-AND-SURVEYS","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Steward creating a satisfaction survey for a claim, and the member who was represented listing, reading, submitting or declining the survey about their representative"],
+    ["scim/v2/[organizationId]/Users/route.ts","GET","RULE-0B11-IDS-SCIM-USER-PROVISIONING","UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Organization administrator, or the identity provider of the organization, listing the members of the organization in SCIM form and provisioning a new member"],
+    ["scim/v2/[organizationId]/Users/route.ts","POST","RULE-0B11-IDS-SCIM-USER-PROVISIONING","UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Organization administrator, or the identity provider of the organization, listing the members of the organization in SCIM form and provisioning a new member"],
     ["search/universal/route.ts","GET","RULE-DOCUMENTS","UE-CAP-F-002","OWNED","ORGANIZATION_ROLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Member and representative document custodian"],
-    ["security/events/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["security/events/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["settings/organization/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["settings/organization/route.ts","PUT","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["signatures/audit/[documentId]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["signatures/documents/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["signatures/documents/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["signatures/documents/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["signatures/documents/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["signatures/sign/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["social-media/accounts/callback/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["social-media/accounts/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["social-media/accounts/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["social-media/accounts/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["social-media/accounts/route.ts","PUT","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["social-media/analytics/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["social-media/analytics/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["social-media/analytics/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["social-media/analytics/route.ts","PUT","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["social-media/campaigns/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["social-media/campaigns/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["social-media/campaigns/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["social-media/campaigns/route.ts","PUT","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["social-media/feed/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["social-media/feed/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["social-media/posts/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["social-media/posts/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["social-media/posts/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["security/events/route.ts","GET","RULE-0B11-IDS-SECURITY-EVENTS","UE-OMIT-AUDIT-LOG-VISIBILITY","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Security manager reading the security events of the organization, and the process or person recording a security event"],
+    ["security/events/route.ts","POST","RULE-0B11-IDS-SECURITY-EVENTS","UE-OMIT-AUDIT-LOG-VISIBILITY","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Security manager reading the security events of the organization, and the process or person recording a security event"],
+    ["settings/organization/route.ts","GET","RULE-0B11-IDS-ORGANIZATION-SETTINGS","UE-OMIT-ORGANIZATION-ADMINISTRATION","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Organization administrator loading and saving the organization profile (name, short name, region) and the settings JSON on the organization settings and platform settings pages"],
+    ["settings/organization/route.ts","PUT","RULE-0B11-IDS-ORGANIZATION-SETTINGS","UE-OMIT-ORGANIZATION-ADMINISTRATION","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Organization administrator loading and saving the organization profile (name, short name, region) and the settings JSON on the organization settings and platform settings pages"],
+    ["signatures/audit/[documentId]/route.ts","GET","RULE-0B11-SOC-ESIGNATURE-REQUESTS","UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Member or steward sending a document for signature to named signers (platform users or external e-mail addresses), a signer recording a signature, the sender voiding a request, and the sender or a signer reading the status and audit trail of a signature document"],
+    ["signatures/documents/[id]/route.ts","GET","RULE-0B11-SOC-ESIGNATURE-REQUESTS","UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Member or steward sending a document for signature to named signers (platform users or external e-mail addresses), a signer recording a signature, the sender voiding a request, and the sender or a signer reading the status and audit trail of a signature document"],
+    ["signatures/documents/[id]/route.ts","PATCH","RULE-0B11-SOC-ESIGNATURE-REQUESTS","UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Member or steward sending a document for signature to named signers (platform users or external e-mail addresses), a signer recording a signature, the sender voiding a request, and the sender or a signer reading the status and audit trail of a signature document"],
+    ["signatures/documents/route.ts","GET","RULE-0B11-SOC-ESIGNATURE-REQUESTS","UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Member or steward sending a document for signature to named signers (platform users or external e-mail addresses), a signer recording a signature, the sender voiding a request, and the sender or a signer reading the status and audit trail of a signature document"],
+    ["signatures/documents/route.ts","POST","RULE-0B11-SOC-ESIGNATURE-REQUESTS","UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Member or steward sending a document for signature to named signers (platform users or external e-mail addresses), a signer recording a signature, the sender voiding a request, and the sender or a signer reading the status and audit trail of a signature document"],
+    ["signatures/sign/route.ts","POST","RULE-0B11-SOC-ESIGNATURE-REQUESTS","UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS","OWNED","SESSION_ONLY","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Member or steward sending a document for signature to named signers (platform users or external e-mail addresses), a signer recording a signature, the sender voiding a request, and the sender or a signer reading the status and audit trail of a signature document"],
+    ["social-media/accounts/callback/route.ts","GET","RULE-0B11-SOC-SOCIAL-ACCOUNT-CONNECTIONS","UE-OMIT-SOCIAL-MEDIA-PUBLISHING","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Steward connecting, refreshing and disconnecting the organization Facebook, Instagram, X and LinkedIn pages through an OAuth flow, and any member listing the connected accounts"],
+    ["social-media/accounts/route.ts","DELETE","RULE-0B11-SOC-SOCIAL-ACCOUNT-CONNECTIONS","UE-OMIT-SOCIAL-MEDIA-PUBLISHING","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Steward connecting, refreshing and disconnecting the organization Facebook, Instagram, X and LinkedIn pages through an OAuth flow, and any member listing the connected accounts"],
+    ["social-media/accounts/route.ts","GET","RULE-0B11-SOC-SOCIAL-ACCOUNT-CONNECTIONS","UE-OMIT-SOCIAL-MEDIA-PUBLISHING","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Steward connecting, refreshing and disconnecting the organization Facebook, Instagram, X and LinkedIn pages through an OAuth flow, and any member listing the connected accounts"],
+    ["social-media/accounts/route.ts","POST","RULE-0B11-SOC-SOCIAL-ACCOUNT-CONNECTIONS","UE-OMIT-SOCIAL-MEDIA-PUBLISHING","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Steward connecting, refreshing and disconnecting the organization Facebook, Instagram, X and LinkedIn pages through an OAuth flow, and any member listing the connected accounts"],
+    ["social-media/accounts/route.ts","PUT","RULE-0B11-SOC-SOCIAL-ACCOUNT-CONNECTIONS","UE-OMIT-SOCIAL-MEDIA-PUBLISHING","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Steward connecting, refreshing and disconnecting the organization Facebook, Instagram, X and LinkedIn pages through an OAuth flow, and any member listing the connected accounts"],
+    ["social-media/analytics/route.ts","DELETE","RULE-0B11-SOC-SOCIAL-ANALYTICS","UE-OMIT-SOCIAL-MEDIA-PUBLISHING","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Member or steward reading account analytics, post performance and campaign metrics, and exporting them as CSV or JSON"],
+    ["social-media/analytics/route.ts","GET","RULE-0B11-SOC-SOCIAL-ANALYTICS","UE-OMIT-SOCIAL-MEDIA-PUBLISHING","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Member or steward reading account analytics, post performance and campaign metrics, and exporting them as CSV or JSON"],
+    ["social-media/analytics/route.ts","POST","RULE-0B11-SOC-SOCIAL-ANALYTICS","UE-OMIT-SOCIAL-MEDIA-PUBLISHING","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Member or steward reading account analytics, post performance and campaign metrics, and exporting them as CSV or JSON"],
+    ["social-media/analytics/route.ts","PUT","RULE-0B11-SOC-SOCIAL-ANALYTICS","UE-OMIT-SOCIAL-MEDIA-PUBLISHING","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Member or steward reading account analytics, post performance and campaign metrics, and exporting them as CSV or JSON"],
+    ["social-media/campaigns/route.ts","DELETE","RULE-0B11-SOC-SOCIAL-POSTS-AND-CAMPAIGNS","UE-OMIT-SOCIAL-MEDIA-PUBLISHING","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Steward publishing a post to the connected platform accounts of the organization, removing a published post, and keeping social media campaigns; any member listing the posts and campaigns"],
+    ["social-media/campaigns/route.ts","GET","RULE-0B11-SOC-SOCIAL-POSTS-AND-CAMPAIGNS","UE-OMIT-SOCIAL-MEDIA-PUBLISHING","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Steward publishing a post to the connected platform accounts of the organization, removing a published post, and keeping social media campaigns; any member listing the posts and campaigns"],
+    ["social-media/campaigns/route.ts","POST","RULE-0B11-SOC-SOCIAL-POSTS-AND-CAMPAIGNS","UE-OMIT-SOCIAL-MEDIA-PUBLISHING","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Steward publishing a post to the connected platform accounts of the organization, removing a published post, and keeping social media campaigns; any member listing the posts and campaigns"],
+    ["social-media/campaigns/route.ts","PUT","RULE-0B11-SOC-SOCIAL-POSTS-AND-CAMPAIGNS","UE-OMIT-SOCIAL-MEDIA-PUBLISHING","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Steward publishing a post to the connected platform accounts of the organization, removing a published post, and keeping social media campaigns; any member listing the posts and campaigns"],
+    ["social-media/feed/route.ts","GET","RULE-0B11-SOC-SOCIAL-FEED-CAMPAIGN-FACADE","UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member reading, and steward creating, mass communication campaign rows through a route and a widget that are named for a social media feed"],
+    ["social-media/feed/route.ts","POST","RULE-0B11-SOC-SOCIAL-FEED-CAMPAIGN-FACADE","UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member reading, and steward creating, mass communication campaign rows through a route and a widget that are named for a social media feed"],
+    ["social-media/posts/route.ts","DELETE","RULE-0B11-SOC-SOCIAL-POSTS-AND-CAMPAIGNS","UE-OMIT-SOCIAL-MEDIA-PUBLISHING","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Steward publishing a post to the connected platform accounts of the organization, removing a published post, and keeping social media campaigns; any member listing the posts and campaigns"],
+    ["social-media/posts/route.ts","GET","RULE-0B11-SOC-SOCIAL-POSTS-AND-CAMPAIGNS","UE-OMIT-SOCIAL-MEDIA-PUBLISHING","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Steward publishing a post to the connected platform accounts of the organization, removing a published post, and keeping social media campaigns; any member listing the posts and campaigns"],
+    ["social-media/posts/route.ts","POST","RULE-0B11-SOC-SOCIAL-POSTS-AND-CAMPAIGNS","UE-OMIT-SOCIAL-MEDIA-PUBLISHING","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Steward publishing a post to the connected platform accounts of the organization, removing a published post, and keeping social media campaigns; any member listing the posts and campaigns"],
     ["staging-proof/deadline-engine/scenario/route.ts","POST","RULE-DEADLINE-JOBS","UE-OMIT-DEADLINE-OVERDUE","OWNED","NO_AUTHENTICATION_DECLARED","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Responsible representative"],
     ["status/route.ts","GET","RULE-SYSTEM-PROBE","UE-CAP-K-008","SYSTEM","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","NOT_APPLICABLE:RULE","Platform operations and API consumers"],
-    ["stewards/[id]/route.ts","DELETE","RULE-STEWARD-ABSENT","UE-OMIT-STEWARD-CANONICAL-ABSENT","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward (no frozen canonical in the repository)"],
-    ["stewards/[id]/route.ts","GET","RULE-STEWARD-ABSENT","UE-OMIT-STEWARD-CANONICAL-ABSENT","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward (no frozen canonical in the repository)"],
-    ["stewards/[id]/route.ts","PATCH","RULE-STEWARD-ABSENT","UE-OMIT-STEWARD-CANONICAL-ABSENT","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward (no frozen canonical in the repository)"],
-    ["stewards/route.ts","GET","RULE-STEWARD-ABSENT","UE-OMIT-STEWARD-CANONICAL-ABSENT","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward (no frozen canonical in the repository)"],
-    ["stewards/route.ts","POST","RULE-STEWARD-ABSENT","UE-OMIT-STEWARD-CANONICAL-ABSENT","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward (no frozen canonical in the repository)"],
-    ["storage/cleanup/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["storage/cleanup/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["storage/usage/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["storage/usage/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["stewards/[id]/route.ts","DELETE","RULE-0B11-IDS-STEWARD-ASSIGNMENTS","UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member looking for a steward, steward or officer reading the stewards of a unit or worksite, and the office that appoints a steward"],
+    ["stewards/[id]/route.ts","GET","RULE-0B11-IDS-STEWARD-ASSIGNMENTS","UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member looking for a steward, steward or officer reading the stewards of a unit or worksite, and the office that appoints a steward"],
+    ["stewards/[id]/route.ts","PATCH","RULE-0B11-IDS-STEWARD-ASSIGNMENTS","UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member looking for a steward, steward or officer reading the stewards of a unit or worksite, and the office that appoints a steward"],
+    ["stewards/route.ts","GET","RULE-0B11-IDS-STEWARD-ASSIGNMENTS","UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member looking for a steward, steward or officer reading the stewards of a unit or worksite, and the office that appoints a steward"],
+    ["stewards/route.ts","POST","RULE-0B11-IDS-STEWARD-ASSIGNMENTS","UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member looking for a steward, steward or officer reading the stewards of a unit or worksite, and the office that appoints a steward"],
+    ["storage/cleanup/route.ts","GET","RULE-0B11-IDS-STORAGE-MEDIA-LIBRARY","UE-OMIT-CONTENT-LIBRARY-EDITORIAL","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member or steward expecting storage usage figures and a storage cleanup, served the organization media library rows"],
+    ["storage/cleanup/route.ts","POST","RULE-0B11-IDS-STORAGE-MEDIA-LIBRARY","UE-OMIT-CONTENT-LIBRARY-EDITORIAL","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member or steward expecting storage usage figures and a storage cleanup, served the organization media library rows"],
+    ["storage/usage/route.ts","GET","RULE-0B11-IDS-STORAGE-MEDIA-LIBRARY","UE-OMIT-CONTENT-LIBRARY-EDITORIAL","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member or steward expecting storage usage figures and a storage cleanup, served the organization media library rows"],
+    ["storage/usage/route.ts","POST","RULE-0B11-IDS-STORAGE-MEDIA-LIBRARY","UE-OMIT-CONTENT-LIBRARY-EDITORIAL","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member or steward expecting storage usage figures and a storage cleanup, served the organization media library rows"],
     ["strike-fund/dashboard/route.ts","GET","RULE-FINANCE-UNAVAILABLE","UE-OMIT-FINANCE-UNAVAILABLE","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Financial officer"],
     ["strike/disbursements/route.ts","GET","RULE-FINANCE-UNAVAILABLE","UE-OMIT-FINANCE-UNAVAILABLE","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Financial officer"],
     ["strike/disbursements/route.ts","POST","RULE-FINANCE-UNAVAILABLE","UE-OMIT-FINANCE-UNAVAILABLE","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Financial officer"],
@@ -9158,9 +9931,9 @@
     ["strike/picket-lines/route.ts","POST","RULE-FINANCE-UNAVAILABLE","UE-OMIT-FINANCE-UNAVAILABLE","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Financial officer"],
     ["strike/stipends/route.ts","GET","RULE-FINANCE-UNAVAILABLE","UE-OMIT-FINANCE-UNAVAILABLE","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Financial officer"],
     ["strike/stipends/route.ts","POST","RULE-FINANCE-UNAVAILABLE","UE-OMIT-FINANCE-UNAVAILABLE","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Financial officer"],
-    ["support/metrics/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["support/metrics/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["support/sla/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["support/metrics/route.ts","GET","RULE-0B11-IDS-SUPPORT-NOTIFICATION-ROWS","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Support or union staff expecting support metrics and service-level figures, served the in-app notification rows of the organization"],
+    ["support/metrics/route.ts","POST","RULE-0B11-IDS-SUPPORT-NOTIFICATION-ROWS","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Support or union staff expecting support metrics and service-level figures, served the in-app notification rows of the organization"],
+    ["support/sla/route.ts","GET","RULE-0B11-IDS-SUPPORT-SLA-NOTIFICATION-ROWS","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Support or union staff expecting support metrics and service-level figures, served the in-app notification rows of the organization"],
     ["support/sla/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
     ["support/tickets/[id]/assign/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
     ["support/tickets/[id]/assign/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],

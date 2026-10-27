@@ -38,6 +38,9 @@ import { FILES_0B9 } from './ue-gate0b9-classification.mjs'
 import { capabilitiesForTranche9 } from './ue-gate0b9-capabilities.mjs'
 import { FILES_0B10 } from './ue-gate0b10-classification.mjs'
 import { capabilitiesForTranche10 } from './ue-gate0b10-capabilities.mjs'
+import { FILES_0B11 } from './ue-gate0b11-classification.mjs'
+import { capabilitiesForTranche11 } from './ue-gate0b11-capabilities.mjs'
+import { FILE_CHALLENGES } from './ue-gate0b11-challenge.mjs'
 import { capabilitiesForTranche6 } from './ue-gate0b6-capabilities.mjs'
 import { DECISION_BOUND_OPERATIONS } from './ue-gate0b6-ids.mjs'
 import { FILE_EXCEPTIONS, inventoryTotals } from './ue-gate0b6-exceptions.mjs'
@@ -444,6 +447,7 @@ distinct.push(
   ...capabilitiesForTranche8(cap),
   ...capabilitiesForTranche9(cap),
   ...capabilitiesForTranche10(cap),
+  ...capabilitiesForTranche11(cap),
 )
 
 // NOT_IMPLEMENTED finance domains cite a service in the narrative. The validator
@@ -769,6 +773,16 @@ const matrix = {
     note: 'Hash pins for the frozen Gate 0B.10 tranche manifest and its source-evidenced classification register. The cumulative ledger and the release disposition review queue are pinned above.',
     files: Object.fromEntries(Object.entries(FILES_0B10).map(([key, file]) => [key, { file, sha256: existsSync(join(ROOT, file)) ? sha256File(ROOT, file) : null }])),
   },
+  routeClassification0b11: {
+    tranche: 'GATE-0B.11',
+    note: 'Hash pins for the frozen Gate 0B.11 tranche manifest and its source-evidenced classification register. The cumulative ledger and the release disposition review queue are pinned above.',
+    files: Object.fromEntries(Object.entries(FILES_0B11).map(([key, file]) => [key, { file, sha256: existsSync(join(ROOT, file)) ? sha256File(ROOT, file) : null }])),
+  },
+  releaseDispositionChallenges: {
+    note: 'Independent reviewer challenge of the frozen Gate 0B.10 dispositions of DEF-0B10-OPL-01 and DEF-0B10-OPL-07. It is additional review evidence pinned here; it changes no frozen defect or disposition and claims no remediation.',
+    file: FILE_CHALLENGES,
+    sha256: existsSync(join(ROOT, FILE_CHALLENGES)) ? sha256File(ROOT, FILE_CHALLENGES) : null,
+  },
   decisionBoundExceptions: {
     note: 'Operations Gate 0B.4 and Gate 0B.5 examined, whose evidence is exhausted and whose scope waits on an outstanding institutional decision. They are reported apart from operations awaiting source classification and are never counted as OWNED. The register is pinned here; an exception is not an approval.',
     file: FILE_EXCEPTIONS,
@@ -776,7 +790,7 @@ const matrix = {
     operations: [...DECISION_BOUND_OPERATIONS],
   },
   routeInventoryTotals: inventoryTotals(ownership.entries, new Set(DECISION_BOUND_OPERATIONS)),
-  routeDefects: JSON.parse(readFileSync(join(ROOT, [FILES_0B10, FILES_0B9, FILES_0B8, FILES_0B7, FILES_0B6, FILES_0B5, FILES_0B4, FILES_0B3].map((files) => files.classification).find((file) => existsSync(join(ROOT, file)))), 'utf8'))
+  routeDefects: JSON.parse(readFileSync(join(ROOT, [FILES_0B11, FILES_0B10, FILES_0B9, FILES_0B8, FILES_0B7, FILES_0B6, FILES_0B5, FILES_0B4, FILES_0B3].map((files) => files.classification).find((file) => existsSync(join(ROOT, file)))), 'utf8'))
     .defectRegister.map(({ id, gate, severity, ownerCapabilityId, tranche, releaseBlocking }) => ({ id, gate, severity, ownerCapabilityId, tranche, releaseBlocking })),
   outOfScope: [
     {

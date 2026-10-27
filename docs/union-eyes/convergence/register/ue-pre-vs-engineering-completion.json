@@ -5146,6 +5146,243 @@
       "businessOutcome": "Usage telemetry, feedback and the signals derived from them are recorded only for what happened, are readable only for the reader own organization, and state their basis; the onboarding checklist and the figures shown to an enrolled organization correspond to work that was done and to live records; and demo data and bootstrap resets can never alter or remove a real record.",
       "sourceStatus": "PARTIAL",
       "gap": "No existing capability names the pilot program. UE-OMIT-ORGANIZATION-ONBOARDING owns the onboarding assistance lookups and the onboarding event recorder under the onboarding path, not the pilot usage telemetry, feedback, conversion signals, enrollment metrics, onboarding checklist or the demo and bootstrap seeding of an organization; UE-OMIT-PLATFORM-OPERATOR-CONTROLS owns the platform pilot status switch under the admin path; UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION owns analytics reports over operational tables, not event-derived pilot signals; and UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION owns only the platform-wide overview read."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        5,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/portal/dues (balance, pay)",
+      "httpAction": null,
+      "service": "apps/union-eyes/lib/dues/dues-payment-service.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "The payment initiation commits a dues.payment_initiated audit row in the same tenant transaction as the pending dues_transactions row (persistAtomicAudit); the later processor_payment_id update and the cancellation after a failed processor call write no audit row, the balance and history reads are not audited, and the settlement path is outside these routes.",
+      "privacyClassification": "Member dues ledger entries (charges, payments, credits, adjustments, write-offs, payment method, processor payment reference, receipt number) and the processor metadata (organization id, member user id) of a card payment; financial personal data of the member.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/portal/dues/balance/route.ts",
+        "apps/union-eyes/app/api/portal/dues/pay/route.ts",
+        "apps/union-eyes/lib/dues/dues-payment-service.ts",
+        "apps/union-eyes/lib/dues/dues-settlement.ts",
+        "apps/union-eyes/lib/dues/member-dues-flag.ts",
+        "apps/union-eyes/db/schema/dues-finance-schema.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/portal/dues/pay/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-MEMBER-DUES-SELF-SERVICE",
+      "parentRegisterId": "UE-CONV-K-006",
+      "obligationKey": "member-dues-self-service-balance-and-payment",
+      "primaryGate": 14,
+      "actor": "Member of the organization reading their own dues balance and ledger history and paying outstanding dues; treasurer who relies on the dues ledger being credited only by a verified payment",
+      "businessOutcome": "A member sees their own dues balance and payment history from a ledger that the union keeps, pays outstanding dues once through a processor account the union has decided to use, the ledger is credited exactly once for each verified payment and never past the balance owed, every initiation and settlement commits with its audit record, and member data sent to the processor is limited to what the union has decided.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No existing capability owns member dues self-service. UE-CAP-D-001 and UE-CAP-D-003 own the organization-side finance and pension records read by officers and administrators, not a member paying their own dues; UE-OMIT-FINANCE-UNAVAILABLE is the honest-501 owner of finance surfaces that are not built, while these routes read a real ledger and create a real processor payment when enabled; UE-OMIT-MAIN-APP-CRONS owns five named scheduled routes; UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING owns the billing of Union Eyes subscriptions by the platform operator and its records are not union financial records, whereas these routes handle union dues owed by members to their union."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        6,
+        11,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/signatures (documents, documents/[id], sign, audit/[documentId])",
+      "httpAction": null,
+      "service": "apps/union-eyes/lib/signature/signature-service.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "Creating a request, recording a signature, completing a document, voiding and each provider status synchronization commit a persistAtomicAudit row and signature_audit_trail rows in the same tenant transaction; the provider envelope, the stored file and the provider void call are outside that transaction, and the audit trail has an unused hash chain column and is not sealed.",
+      "privacyClassification": "Signed and to-be-signed documents (arbitrary uploaded files), signer names, e-mail addresses and user ids, signature images, IP addresses, user agents and geolocation of signers, provider envelope identifiers, and the audit trail and report of each document.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/lib/signature/signature-service.ts",
+        "apps/union-eyes/lib/signature/providers.ts",
+        "apps/union-eyes/lib/signature/provider-sync.ts",
+        "apps/union-eyes/lib/documents/signature-projection.ts",
+        "apps/union-eyes/db/schema/domains/documents/signatures.ts",
+        "apps/union-eyes/app/api/signatures/documents/route.ts",
+        "apps/union-eyes/app/api/signatures/sign/route.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/lib/signature/signature-service.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+      "parentRegisterId": "UE-CONV-K-006",
+      "obligationKey": "esignature-document-requests-signing-and-audit-trail",
+      "primaryGate": 14,
+      "actor": "Sender sending a document for signature to named platform and external signers, signer recording a signature, sender voiding a request, and the sender or a signer reading the status and the audit trail",
+      "businessOutcome": "A document is sent for signature only by the offices the institution names and only to recipients with a recorded basis for contact, a signer is a verified identity bound to the person who signs, a signature, a completion and a void state what happened at the signing provider, the audit trail is sealed and verifiable before it is called evidence, the institution states what legal validity a signature carries, and every state change commits with its audit record.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No existing capability owns the e-signature request workflow. UE-OMIT-PKI-SIGNING-WORKFLOW is bound to app/api/admin/pki and the services/pki files: its record states that its signature value is a literal attestation over a document-reference hash, that its workflow is a process-local map and that its table does not exist, none of which describes these routes, which create provider envelopes, store signature_documents, document_signers and signature_audit_trail rows and are the live signature subsystem the storage authority register names; UE-OMIT-AUDIT-LOG-VISIBILITY owns platform audit log reads, not the per-document signature audit trail; UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS owns calendar provider OAuth connections and its token crypto, not a document signing provider; UE-OMIT-COMMUNICATIONS-* capabilities own mass message campaigns, not a signing request to named signers; and UE-OMIT-ROUTE-DOMAIN-SCOPE is the undecided catch-all. This record closes none of the gaps, names no signing office and states no legal validity, which no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        6,
+        11,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/social-media (accounts, accounts/callback, posts, campaigns, analytics)",
+      "httpAction": null,
+      "service": "apps/union-eyes/lib/social-media/social-media-service.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "Account disconnect and token refresh, campaign create, update and delete commit persistAtomicAudit with the row. Publishing and deleting a post record intent and outcome through performAuditedOperation around the external platform call, which is not atomic. Initiating and completing a connection and listing accounts call logApiAuditEvent, which writes a log line and no audit row. The post and analytics reads are not audited.",
+      "privacyClassification": "OAuth access and refresh tokens of the organization Facebook, Instagram, X and LinkedIn accounts, platform account identifiers, post text, media URLs, links, hashtags and mentions (which may name members), campaign targeting text, and engagement and follower figures.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/lib/social-media/social-media-service.ts",
+        "apps/union-eyes/lib/social-media/meta-api-client.ts",
+        "apps/union-eyes/lib/social-media/twitter-api-client.ts",
+        "apps/union-eyes/lib/social-media/linkedin-api-client.ts",
+        "apps/union-eyes/db/schema/social-media-schema.ts",
+        "apps/union-eyes/app/api/social-media/accounts/route.ts",
+        "apps/union-eyes/app/api/social-media/accounts/callback/route.ts",
+        "apps/union-eyes/app/api/social-media/posts/route.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/lib/social-media/social-media-service.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "parentRegisterId": "UE-CONV-K-006",
+      "obligationKey": "social-media-publishing-accounts-posts-campaigns-and-analytics",
+      "primaryGate": 14,
+      "actor": "Steward connecting the organization social media accounts and publishing, scheduling and removing posts under the union name; member reading the accounts, posts, campaigns and analytics",
+      "businessOutcome": "The union public accounts are connected and disconnected by the offices the institution names, their credentials are held encrypted and revoked on disconnect, a post is published only after the approval the institution requires and only to the accounts it names, a scheduled post is published at its time, a published and a deleted post match the platform, analytics are measured from the platform and not defaulted, and every change commits with its audit record.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No existing capability owns social media publishing. UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING and UE-OMIT-COMMUNICATIONS-CAMPAIGN-DELIVERY own e-mail, SMS and push campaigns to members through the communications campaigns table, and the social routes read and write the separate social_accounts, social_posts, social_campaigns and social_analytics tables and call public platform APIs; UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS owns the personal calendar provider connections and its token-crypto module, not an organization public identity; UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION owns analytics reports over operational tables, not platform engagement figures; UE-OMIT-REWARDS-REDEMPTION-FULFILMENT and UE-OMIT-FEDERATION-LOCAL-HIERARCHY concern other domains; and UE-OMIT-ROUTE-DOMAIN-SCOPE is the undecided catch-all. This record closes none of the gaps and names no office that may speak for the union publicly or hold its platform credentials, which no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        6,
+        10,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/stewards",
+      "httpAction": null,
+      "service": "apps/union-eyes/lib/services/steward-assignment.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "The steward routes write nothing: the CRUD governance list refuses every write to steward_assignments before a row or an audit record exists. The steward assignment service inserts an assignment row and updates a caseload counter with the shared database handle and writes no audit record; no route calls it. Reads are not audited.",
+      "privacyClassification": "Steward id, steward type, coverage unit, worksite, department, shift, floor and area, tenure and election dates, appointer, training and certification dates, work phone, personal phone, preferred contact method, availability notes, free-text notes and the id of the grievance a case-based assignment points at. A personal telephone number and availability notes of a union representative, and a grievance link on a row a member can list.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/stewards/route.ts",
+        "apps/union-eyes/app/api/stewards/[id]/route.ts",
+        "apps/union-eyes/db/schema/union-structure-schema.ts",
+        "apps/union-eyes/lib/services/steward-assignment.ts",
+        "apps/union-eyes/lib/api/crud-governance.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/stewards/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY",
+      "parentRegisterId": "UE-CONV-K-006",
+      "obligationKey": "steward-assignment-directory-and-appointment",
+      "primaryGate": 14,
+      "actor": "Member looking for a steward, steward or officer reading the stewards of a unit or worksite, and the office that appoints, confirms and ends a steward",
+      "businessOutcome": "A steward assignment names who is the steward for a unit or worksite and for how long, the appointing office is recorded, a member reads only the contact fields the institution allows a member to read, a steward assignment is created, changed and ended only by the office the institution names and every change commits with its audit record.",
+      "sourceStatus": "PARTIAL",
+      "gap": "UE-OMIT-STEWARD-CANONICAL-ABSENT (gate 10) records that no steward canonical or steward action-identifier matrix exists; it has no source files and owns no route, so it cannot own the steward routes. UE-OMIT-REPRESENTATION-PROTOCOL-POLICY owns the draft-and-approve representation protocol and the case assignment engine, not the steward directory rows; UE-OMIT-COMMITTEE-WORKSPACE owns committee meetings, minutes and action items; UE-OMIT-ORGANIZATION-ADMINISTRATION owns the organization record and the roster of organization_members (the table that holds the role title steward), and the steward_assignments table is a separate table that no roster route reads; UE-CAP-K-007 owns the generic CRUD factory as a mechanism, not the domain meaning of a table it is configured over; and UE-OMIT-ROUTE-DOMAIN-SCOPE is the undecided catch-all. Two route files, stewards and stewards/[id], read the steward_assignments table at the member floor and are configured at the steward write floor, and no existing capability names the steward assignment rows. This record closes none of the gaps and names no appointing office, which no source states."
     }
   ],
   "personaActions": [
@@ -7188,7 +7425,7 @@
   },
   "routeOwnership": {
     "file": "docs/union-eyes/convergence/register/ue-route-capability-ownership.json",
-    "entriesHash": "11e3e1dfdc01da03ad3b77eacd0318423634268b9b64f78e141593675b62a59d",
+    "entriesHash": "d797d94a4ef7d44750b7063a5597c52bc69e85ff50e5ab8f57f3cd3d39b34344",
     "operations": 1644
   },
   "routeClassification": {
@@ -7205,7 +7442,7 @@
       },
       "ledger": {
         "file": "docs/union-eyes/convergence/register/ue-route-classification-ledger.json",
-        "sha256": "7ad23a968f98488614975c5c3718d84df9d34db7f7252d259f3e935f9071d7d0"
+        "sha256": "009fedc3ebc7a73a9f92d3a17aeea3908eecf582bd4408fcb5e03cc99fb16302"
       }
     }
   },
@@ -7339,6 +7576,25 @@
       }
     }
   },
+  "routeClassification0b11": {
+    "tranche": "GATE-0B.11",
+    "note": "Hash pins for the frozen Gate 0B.11 tranche manifest and its source-evidenced classification register. The cumulative ledger and the release disposition review queue are pinned above.",
+    "files": {
+      "manifest": {
+        "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b11-manifest.json",
+        "sha256": "7327e1324d2f4402794a599a56811ff944c46a7bb188370d9884e4c93493a142"
+      },
+      "classification": {
+        "file": "docs/union-eyes/convergence/register/ue-route-classification-0b11.json",
+        "sha256": "f063c1dcbaa95ec77c1bebf9371b04f5c7699e619e0145d477cfecc341406f77"
+      }
+    }
+  },
+  "releaseDispositionChallenges": {
+    "note": "Independent reviewer challenge of the frozen Gate 0B.10 dispositions of DEF-0B10-OPL-01 and DEF-0B10-OPL-07. It is additional review evidence pinned here; it changes no frozen defect or disposition and claims no remediation.",
+    "file": "docs/union-eyes/convergence/register/ue-release-disposition-challenges.json",
+    "sha256": "ea818d2a17a8c201ba110d8c80bb2652a5bcd9ac28909118fa03b3b8ae42acae"
+  },
   "decisionBoundExceptions": {
     "note": "Operations Gate 0B.4 and Gate 0B.5 examined, whose evidence is exhausted and whose scope waits on an outstanding institutional decision. They are reported apart from operations awaiting source classification and are never counted as OWNED. The register is pinned here; an exception is not an approval.",
     "file": "docs/union-eyes/convergence/register/ue-route-decision-bound-exceptions.json",
@@ -7351,8 +7607,8 @@
     ]
   },
   "routeInventoryTotals": {
-    "OWNED": 1326,
-    "SCOPE_UNDECIDED_AWAITING_CLASSIFICATION": 177,
+    "OWNED": 1426,
+    "SCOPE_UNDECIDED_AWAITING_CLASSIFICATION": 77,
     "DECISION_BOUND_SCOPE_EXCEPTION": 4,
     "RETIRED_501": 97,
     "STUB_501": 31,
@@ -12231,6 +12487,870 @@
       "ownerCapabilityId": "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
       "tranche": "0B.10",
       "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-DUES-BALANCE-TAKES-THE-ORGANIZATION-FROM-THE-CLIENT-WITH-NO-MEMBERSHIP-CHECK-AND-NO-TENANT-CONTEXT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MEMBER-DUES-SELF-SERVICE",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-DUES-BALANCE-CREDIT-STATUS-IS-UNREACHABLE",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-MEMBER-DUES-SELF-SERVICE",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-DUES-PAY-GET-RETURNS-EVERY-LEDGER-ENTRY-TYPE-AS-PAYMENTS-AND-OMITS-PENDING-ATTEMPTS",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-MEMBER-DUES-SELF-SERVICE",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-DUES-PAY-POST-CREATES-A-NEW-FULL-BALANCE-PAYMENT-AND-INTENT-ON-EVERY-CALL-AND-SETTLEMENT-DOES-NOT-RECHECK-THE-BALANCE",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-MEMBER-DUES-SELF-SERVICE",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-DUES-PAY-POST-INITIATION-AUDIT-COMMITS-BEFORE-THE-PROCESSOR-CALL-AND-THE-LATER-STATE-CHANGES-ARE-UNAUDITED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MEMBER-DUES-SELF-SERVICE",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-DUES-PAY-POST-SENDS-THE-ORGANIZATION-AND-MEMBER-USER-ID-TO-THE-PROCESSOR-FOR-A-MERCHANT-ACCOUNT-NO-SOURCE-NAMES",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MEMBER-DUES-SELF-SERVICE",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-PRECEDENT-ITEM-ROUTE-ORGANIZATION-SCOPE-IS-A-NO-OP-ON-A-TABLE-KEYED-BY-SOURCE-ORGANIZATION",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
+      "tranche": "0B.11",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B11-PRP-PRECEDENT-ITEM-PATCH-WRITES-SHARING-LEVEL-SHARED-WITH-LIST-AND-SOURCE-ORGANIZATION-FROM-THE-BODY",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-PRECEDENT-ITEM-DELETE-HARD-DELETES-THE-PRECEDENT-AND-CASCADES-TO-ITS-TAGS-AND-CITATIONS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-PRECEDENT-LIBRARY-READS-RETURN-EVERY-COLUMN-AND-IGNORE-IS-PUBLIC-AND-ACCESS-RESTRICTIONS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-PRECEDENT-COLLECTION-GET-TAKES-UNBOUNDED-LIMIT-AND-PAGE-FROM-THE-QUERY-STRING",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-PRECEDENT-SEARCH-USES-UNESCAPED-WILDCARD-LIKE-OVER-THE-FULL-TEXT-AND-CASTS-UNVALIDATED-FILTERS",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-PRECEDENT-POST-PUBLISHES-INTO-THE-SHARED-LIBRARY-WITH-NO-REVIEW-PROVENANCE-OR-OWNING-ORGANIZATION",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-JURISDICTION-PREFERENCES-HAVE-NO-UNIQUE-ROW-UNVALIDATED-FLAGS-AND-NO-SERVER-CONSUMER",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-PROFILE-ROLES-GET-LISTS-EVERY-USER-BILLING-PROFILE-TO-STEWARD-AND-ABOVE-OF-ANY-ORGANIZATION",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.11",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B11-PRP-PROFILE-ROLES-PATH-IS-A-BILLING-PROFILE-LIST-AND-ITS-POST-IS-REFUSED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-PROFILE-ME-GET-SWALLOWS-DATABASE-ERRORS-INTO-A-SUCCESS-WITH-NULL-DATA",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-RECONCILIATION-PROCESS-GET-RETURNS-ANY-ORGANIZATION-RUN-BY-ID",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.11",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B11-PRP-RECONCILIATION-SERVICE-QUERIES-THROUGH-THE-SHARED-DB-HANDLE-WITH-EXPLICIT-PREDICATES-ONLY",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-RECONCILIATION-AUDIT-IS-A-SEPARATE-EVENT-NOT-COMMITTED-WITH-THE-RECONCILIATION-WRITES",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-RECONCILIATION-RUNS-ARE-NOT-REPEATABLE-AND-THE-BILLING-PERIOD-IS-NOT-BOUND-TO-THE-ORGANIZATION",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-RECONCILIATION-ENGINE-FABRICATES-FEE-SETTLEMENT-MATCHES-AND-SUMS-REFUNDED-PAYMENTS-AS-RECEIVED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-RECONCILIATION-RESOLVE-IS-A-STATUS-AND-NOTE-ONLY-WITH-NO-SECOND-APPROVER-OR-LEDGER-EFFECT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-RECONCILIATION-BANK-AND-UPLOAD-PATHS-ARE-NAMED-FOR-BANK-FEEDS-BUT-LIST-RUNS-AND-EXCEPTIONS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-RECONCILIATION-LISTS-ARE-UNBOUNDED-AND-THE-EXCEPTION-STATUS-FILTER-IS-AN-UNVALIDATED-CAST",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-REWARDS-EXPORT-RETURNS-EVERY-MEMBER-LEDGER-AWARD-AND-BUDGET-ROW-TO-ANY-MEMBER",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.11",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B11-PRP-REWARDS-EXPORT-CSV-DOES-NOT-NEUTRALISE-SPREADSHEET-FORMULAS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-REWARDS-EXPORT-IS-UNBOUNDED-AND-WRITES-NO-AUDIT-RECORD",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-REWARDS-CRON-ANNIVERSARY-AWARDS-REPEAT-ON-EVERY-CALL-ON-AN-ANNIVERSARY-DAY",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-REWARDS-CRON-SCHEDULED-TASK-IS-A-PLACEHOLDER-THAT-COUNTS-RULES-AS-PROCESSED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-REWARDS-CRON-EXPIRATION-TASK-READS-AN-EXPIRY-NO-WRITER-SETS-AND-WOULD-REPEAT-ACROSS-THE-7-14-AND-30-DAY-WINDOWS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-REWARDS-CRON-REPORTS-SUCCESS-FOR-UNKNOWN-TASKS-AND-FAILED-ORGANIZATIONS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-REWARDS-CRON-ACCEPTS-THE-SECRET-IN-TWO-HEADERS-AND-THE-PROXY-COMPARES-IT-WITHOUT-A-CONSTANT-TIME-COMPARISON",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-REWARDS-CRON-ANNIVERSARY-CREDIT-SCALE-IS-COMPUTED-AND-DISCARDED-AND-THE-AWARD-REASON-NAMES-THE-ORGANIZATION-UUID",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-REWARDS-CRON-AND-WALLET-AND-REDEMPTION-QUERIES-USE-THE-SHARED-DB-HANDLE-WITH-EXPLICIT-PREDICATES-ONLY",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-REWARDS-CRON-RUNS-ARE-AUDITED-PER-AWARD-ONLY-AND-THE-EXPIRATION-E-MAILS-ARE-NOT-AUDITED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-REDEMPTIONS-GET-IGNORES-THE-STATUS-FILTER-AND-VALIDATES-AGAINST-AN-INCOMPLETE-LIST",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-REDEMPTIONS-GET-RETURNS-WHOLE-ROWS-INCLUDING-THE-PROVIDER-PAYLOAD",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-REDEMPTIONS-POST-IS-NAMED-FOR-INITIATION-BUT-CANCELS-AND-DISCARDS-THE-VALIDATED-BODY",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-PRP-WALLET-GET-READS-BALANCE-AND-LEDGER-SEPARATELY-WITH-UNVALIDATED-PAGING",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-RPT-DEFINITION-READS-RETURN-EVERY-REPORT-OF-THE-ORGANIZATION-TO-ANY-MEMBER-AND-NO-ROUTE-READS-IS-PUBLIC",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-RPT-STORED-CONFIG-IS-UNVALIDATED-UNBOUNDED-JSON-THAT-NO-SAVE-APPLIES-THE-EXECUTOR-CONTRACT-TO",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-RPT-RUN-AND-EXECUTE-ITEM-PATHS-ARE-REPORT-DEFINITION-CRUD-AND-THEIR-DELETE-REMOVES-THE-REPORT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-RPT-SHARE-ITEM-PATH-SHARES-NOTHING-AND-ITS-DELETE-REMOVES-THE-REPORT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-RPT-TEMPLATES-ROUTE-LISTS-EVERY-REPORT-DEFINITION-AND-STORES-A-NON-TEMPLATE-BY-DEFAULT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-RPT-BUILDER-AND-DATA-SOURCE-SAMPLE-PATHS-ARE-REPORT-DEFINITION-CRUD-AND-SAMPLE-NO-SOURCE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-RPT-SCHEDULED-PATHS-ARE-REPORT-DEFINITION-CRUD-NO-SCHEDULE-RECIPIENT-OR-DELIVERY-EXISTS-AND-PAUSE-RESUME-REPORT-SUCCESS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-RPT-EXECUTE-JOINED-TABLES-CARRY-NO-ORGANIZATION-PREDICATE-SO-A-CALLER-CONFIGURED-JOIN-SELECTS-ROWS-OF-OTHER-ORGANIZATIONS",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.11",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B11-RPT-EXECUTE-ROUTE-ALLOWLIST-CHECKS-FILTER-FIELD-ID-BUT-THE-EXECUTOR-EVALUATES-FIELD-NAME-AND-JOINS-HAVING-LIMIT-AND-TABLE-QUALIFIER-ARE-NOT-CHECKED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-RPT-EXECUTE-OPERATORS-THE-ROUTE-ACCEPTS-ARE-SKIPPED-BY-THE-EXECUTOR-SO-THE-FILTER-IS-DROPPED-AND-ALL-ROWS-RETURN",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-RPT-EXECUTE-FAILURE-IS-ANSWERED-200-WITH-NO-MESSAGE-AND-AUDITED-AS-SUCCESS-OR-AUTH-FAILED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-RPT-EXECUTE-RETURNS-MEMBER-EMAIL-AND-CLAIM-ROWS-AT-AN-OFFICER-ROLE-TITLE-WITH-NO-FIELD-AUTHORITY-AND-NO-DURABLE-RECORD-OF-WHAT-WAS-RETURNED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-RPT-DATA-SOURCE-REGISTRY-ADVERTISES-SOURCES-AND-COLUMNS-THE-EXECUTE-ROUTE-REFUSES-OR-THE-TABLES-DO-NOT-HAVE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-RPT-DATA-SOURCE-REGISTRY-IS-SERVED-TO-ANY-SIGNED-IN-USER-WHILE-EXECUTION-NEEDS-AN-OFFICER",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-SIGNER-IDENTITY-IS-SENDER-TYPED-TEXT-AND-A-SENDER-CAN-SIGN-AS-A-NAMED-PERSON-AND-COMPLETE-THE-DOCUMENT",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+      "tranche": "0B.11",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B11-SOC-SIGNATURE-AUDIT-TRAIL-HAS-NO-HASH-CHAIN-OR-VERIFICATION-AND-IS-SERVED-AS-A-LEGAL-COMPLIANCE-REPORT-OF-SELF-ASSERTED-EVIDENCE",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-VOID-SWALLOWS-THE-PROVIDER-FAILURE-AND-RECORDS-VOIDED-WHILE-THE-ENVELOPE-CAN-STILL-BE-SIGNED",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-ANY-AUTHENTICATED-USER-SENDS-AN-UPLOADED-FILE-TO-TYPED-ADDRESSES-THROUGH-THE-ORGANIZATION-SIGNATURE-PROVIDER-ACCOUNT",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-INTERNAL-SIGNATURE-PROVIDER-IS-A-STUB-THAT-SENDS-NOTHING-AND-THE-REQUEST-IS-RECORDED-AS-SENT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-SIGNING-IGNORES-THE-STORED-EXPIRY-SIGNING-ORDER-AND-AUTHENTICATION-REQUIREMENT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-SIGNATURE-DOCUMENT-GET-CALLS-THE-PROVIDER-AND-WRITES-STATUS-SIGNER-AND-AUDIT-ROWS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-SIGNATURE-READS-AND-ACCESS-CHECK-USE-THE-BARE-DB-HANDLE-WITH-NO-ORGANIZATION-PREDICATE-AND-ACCEPT-ANY-USER-ID-A-SENDER-TYPED-AS-SIGNER",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-SIGNATURE-STATUS-AND-AUDIT-DISCLOSE-EVERY-SIGNER-ADDRESS-IP-USER-AGENT-AND-LOCATION-TO-EVERY-OTHER-SIGNER",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-SIGNATURE-ENVELOPE-AND-STORED-FILE-ARE-CREATED-BEFORE-AND-OUTSIDE-THE-TRANSACTION-THAT-RECORDS-THEM",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-SIGNATURE-PATCH-DECLARES-A-SCHEMA-IT-NEVER-APPLIES-AND-STORES-UNBOUNDED-REASON-TEXT",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-SIGNATURE-LIST-IS-UNPAGINATED-AND-RETURNS-WHOLE-SIGNER-ROWS",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-OAUTH-ACCESS-AND-REFRESH-TOKENS-ARE-STORED-AS-PLAINTEXT-TEXT-COLUMNS-WITH-PAGE-AND-ORGANIZATION-ADMIN-SCOPES",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-POST-PUBLISHES-AT-ONCE-TO-EVERY-ACTIVE-ACCOUNT-OF-THE-SELECTED-PLATFORMS-AT-STEWARD-FLOOR-WITH-NO-APPROVAL-OR-CLASSIFICATION-CHECK",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-X-MEDIA-URL-IS-FETCHED-BY-THE-SERVER-WITH-ONLY-A-SCHEME-CHECK-AND-THE-BODY-IS-UPLOADED-TO-THE-PLATFORM",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-OAUTH-CALLBACK-IS-A-GET-THAT-INSERTS-THE-CREDENTIAL-CLEARS-ITS-COOKIES-BEFORE-VALIDATION-AND-AUDITS-AFTER-COMMIT-TO-A-LOG-LINE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-CONNECT-AUDIT-IS-A-LOG-LINE-THAT-DROPS-THE-ACTION-ORGANIZATION-AND-PLATFORM-THE-CALLER-PASSES",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-STEWARD-CONNECTS-THE-ORGANIZATION-PUBLISHING-IDENTITY-WITH-ADMIN-LEVEL-SCOPES-AND-PICKS-THE-FIRST-PAGE-AUTOMATICALLY",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-DISCONNECT-DELETES-THE-CREDENTIAL-EVEN-WHEN-REVOCATION-FAILS-AND-NEVER-REVOKES-META-OR-LINKEDIN-TOKENS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-ANY-REFRESH-FAILURE-MARKS-THE-ACCOUNT-EXPIRED-AND-A-SUCCESS-FORCES-IT-ACTIVE",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-PUBLISH-RECORDS-THE-ROW-AFTER-THE-EXTERNAL-POST-AUDITS-COMPLETED-WHEN-EVERY-PLATFORM-FAILED-AND-RETURNS-PLATFORM-ERROR-TEXT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-SCHEDULED-POST-IS-PUBLISHED-AT-ONCE-ON-INSTAGRAM-X-AND-LINKEDIN-WHILE-THE-ROW-SAYS-SCHEDULED-AND-HASHTAGS-AND-MENTIONS-ARE-NOT-SENT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-POSTS-ARE-NEVER-LINKED-TO-A-CAMPAIGN-SO-CAMPAIGN-METRICS-AND-THE-DELETE-GUARD-NEVER-SEE-A-POST",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-ANALYTICS-AND-ENGAGEMENT-FIGURES-HAVE-NO-WRITER-SO-EVERY-METRIC-IS-ZERO-OR-EMPTY",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-CAMPAIGN-ANALYTICS-PLATFORM-AND-GOAL-FIGURES-READ-FIELDS-THE-QUERY-DOES-NOT-SELECT-AND-A-HARD-CODED-UNDEFINED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-CAMPAIGN-CREATE-VALIDATES-GOALS-AND-STATUS-THEN-DISCARDS-THEM-AND-REPORTS-SUCCESS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-CAMPAIGN-UPDATE-APPLIES-UNVALIDATED-BODY-FIELDS-INCLUDING-STATUS-AND-PLATFORMS",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-ANALYTICS-EXPORT-IS-A-DELETE-VERB-READ-AT-MEMBER-FLOOR-WITH-UNBOUNDED-ROWS-UNNEUTRALISED-CSV-AND-MISMATCHED-COLUMNS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-RECORD-IS-LOADED-BY-ID-ALONE-ON-THE-BARE-DB-HANDLE-AND-THE-ORGANIZATION-IS-COMPARED-AFTERWARDS",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-LIMIT-AND-OFFSET-ARE-PARSED-FROM-THE-QUERY-WITH-NO-NUMBER-CHECK-OR-UPPER-BOUND",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-POST-DELETE-REMOVES-THE-PLATFORM-POST-BEFORE-THE-LOCAL-ROW-AND-AUDITS-INTENT-AND-OUTCOME-ONLY",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-SOC-FEED-ROUTE-SERVES-THE-COMMUNICATIONS-CAMPAIGNS-TABLE-TO-ANY-MEMBER-AS-A-SOCIAL-FEED",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-STEWARD-ASSIGNMENT-ROWS-READABLE-BY-ANY-MEMBER-WITH-PERSONAL-PHONE-NOTES-AND-GRIEVANCE-LINK",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY",
+      "tranche": "0B.11",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B11-IDS-STEWARD-ROUTES-SERVE-ASSIGNMENT-ROWS-AND-NO-ROUTE-APPOINTS-OR-ENDS-A-STEWARD",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-STEWARD-ROUTES-ARE-CONFIGURED-AT-THE-STEWARD-WRITE-FLOOR-AND-REFUSED-ONLY-BY-THE-GOVERNANCE-LIST",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-SATISFACTION-ANONYMITY-FLAG-IS-STORED-AND-NEVER-READ-WHILE-THE-FORM-PROMISES-THE-NAME-IS-HIDDEN",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-SATISFACTION-REPRESENTATIVE-FIGURES-HAVE-NO-MINIMUM-RESPONSES-AND-ARE-READ-BY-EVERY-STEWARD-FOR-ANY-REPRESENTATIVE-ID",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-SATISFACTION-REPRESENTATIVE-FIGURES-FOR-AN-UNKNOWN-OR-UNRATED-ID-ARE-200-WITH-ZERO-AVERAGES",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-SATISFACTION-CREATE-DOES-NOT-CHECK-CLAIM-STATE-AND-ACCEPTS-ANY-REPRESENTATIVE-ID-ON-AN-UNASSIGNED-CLAIM",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-SATISFACTION-PENDING-LIST-HAS-NO-ORGANIZATION-PREDICATE",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-SCIM-ROUTE-HAS-NO-BEARER-AUTHENTICATION-AND-READS-NO-SCIM-CONFIGURATION",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-SCIM-LIST-INCLUDES-REMOVED-MEMBERS-AS-ACTIVE-AND-READS-THE-WHOLE-ROSTER-BEFORE-PAGING",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-SCIM-PROVISION-STORES-THE-USERNAME-STRING-AS-THE-USER-ID-AND-ACTIVATES-WITHOUT-ACCEPTANCE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-SCIM-PROVISION-BODY-IS-UNVALIDATED-AND-MALFORMED-INPUT-IS-A-500",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-SETTINGS-PUT-MERGES-ANY-KEY-INTO-THE-JSON-THAT-HOLDS-THE-CREDIT-LEDGER-AND-THE-PER-CAPITA-RATE",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.11",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B11-IDS-SETTINGS-SECURITY-POLICY-VALUES-ARE-SAVED-AS-UPDATED-TRUE-AND-ENFORCED-BY-NO-CODE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-SETTINGS-PUT-IS-UNVALIDATED-AND-MERGES-OUTSIDE-THE-TRANSACTION",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-SETTINGS-TWILIO-NUMBER-KEY-ATTRIBUTES-INBOUND-SMS-WITH-NO-UNIQUENESS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-SECURITY-EVENTS-ROUTE-IS-CONFIGURED-FOR-SECURITY-MANAGER-AND-DENIED-FOR-EVERY-CALLER",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-AUDIT-LOG-VISIBILITY",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-STORAGE-USAGE-AND-CLEANUP-ROUTES-SERVE-MEDIA-LIBRARY-ROWS-AND-COMPUTE-OR-DELETE-NOTHING",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CONTENT-LIBRARY-EDITORIAL",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-STORAGE-POST-INSERTS-A-CALLER-WRITTEN-MEDIA-ROW-WITH-ANY-FILE-URL-SIZE-AND-UPLOADER",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CONTENT-LIBRARY-EDITORIAL",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-SUPPORT-METRICS-AND-SLA-ROUTES-SERVE-NOTIFICATION-ROWS-NOT-SUPPORT-FIGURES",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-SUPPORT-READ-GIVES-EVERY-STEWARD-THE-NOTIFICATIONS-OF-EVERY-MEMBER",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B11-IDS-SUPPORT-METRICS-POST-LETS-A-STEWARD-STORE-A-NOTIFICATION-FOR-ANY-USER-ID-WITH-A-LINK-AND-NO-SENDER",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "0B.11",
+      "releaseBlocking": false
     }
   ],
   "outOfScope": [
@@ -12334,6 +13454,7 @@
     "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
     "UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS",
     "UE-OMIT-EQUITY-SELF-IDENTIFICATION",
+    "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
     "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
     "UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER",
     "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
@@ -12343,6 +13464,7 @@
     "UE-OMIT-M04-LEGAL-DEADLINE",
     "UE-OMIT-M04-MEMBER-REQUESTS",
     "UE-OMIT-MAIN-APP-CRONS",
+    "UE-OMIT-MEMBER-DUES-SELF-SERVICE",
     "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
     "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
     "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
@@ -12365,6 +13487,8 @@
     "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
     "UE-OMIT-ROUTE-DOMAIN-SCOPE",
     "UE-OMIT-ROUTE-EXPOSURE-HARDENING",
+    "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+    "UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY",
     "UE-OMIT-STEWARD-CANONICAL-ABSENT"
   ],
   "routeBaseline": {

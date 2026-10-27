@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "lockVersion": 9,
+  "lockVersion": 10,
   "note": "Independent capability lock. The anchored capability set is read from git history at anchorCommit, which an edit to the working tree cannot change. A capability may leave the matrix only through a retirement record here with schemaVersion 2 or later, a reason, and an existing evidence file.",
   "anchorCommit": "2247978bd642a89a7d4f8bd720b978f789cb4437",
   "anchorMatrixPath": "docs/union-eyes/convergence/register/ue-pre-vs-engineering-completion.json",
@@ -72,6 +72,7 @@
     "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
     "UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS",
     "UE-OMIT-EQUITY-SELF-IDENTIFICATION",
+    "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
     "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
     "UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER",
     "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
@@ -81,6 +82,7 @@
     "UE-OMIT-M04-LEGAL-DEADLINE",
     "UE-OMIT-M04-MEMBER-REQUESTS",
     "UE-OMIT-MAIN-APP-CRONS",
+    "UE-OMIT-MEMBER-DUES-SELF-SERVICE",
     "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
     "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
     "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
@@ -103,6 +105,8 @@
     "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
     "UE-OMIT-ROUTE-DOMAIN-SCOPE",
     "UE-OMIT-ROUTE-EXPOSURE-HARDENING",
+    "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+    "UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY",
     "UE-OMIT-STEWARD-CANONICAL-ABSENT"
   ],
   "retirements": [],
@@ -329,6 +333,34 @@
       "operationsHash": "8e0b6ef1b382c817264503a249c4a41dfe7e68a2392697e285a6336781ce4387",
       "classifiedOperations": 13,
       "reason": "Created by GATE-0B.10 as the engineering capability whose obligation covers operations that tranche classified from source evidence: pilot-program-operations."
+    },
+    {
+      "capabilityId": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+      "tranche": "GATE-0B.11",
+      "operationsHash": "3c84f3b2b70a4fb9da9bdba327e59bebd490ce60bc90b55570b57c778552f327",
+      "classifiedOperations": 6,
+      "reason": "Created by GATE-0B.11 as the engineering capability whose obligation covers operations that tranche classified from source evidence: esignature-document-requests-signing-and-audit-trail."
+    },
+    {
+      "capabilityId": "UE-OMIT-MEMBER-DUES-SELF-SERVICE",
+      "tranche": "GATE-0B.11",
+      "operationsHash": "3c84f3b2b70a4fb9da9bdba327e59bebd490ce60bc90b55570b57c778552f327",
+      "classifiedOperations": 3,
+      "reason": "Created by GATE-0B.11 as the engineering capability whose obligation covers operations that tranche classified from source evidence: member-dues-self-service-balance-and-payment."
+    },
+    {
+      "capabilityId": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
+      "tranche": "GATE-0B.11",
+      "operationsHash": "3c84f3b2b70a4fb9da9bdba327e59bebd490ce60bc90b55570b57c778552f327",
+      "classifiedOperations": 16,
+      "reason": "Created by GATE-0B.11 as the engineering capability whose obligation covers operations that tranche classified from source evidence: social-media-publishing-accounts-posts-campaigns-and-analytics."
+    },
+    {
+      "capabilityId": "UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY",
+      "tranche": "GATE-0B.11",
+      "operationsHash": "3c84f3b2b70a4fb9da9bdba327e59bebd490ce60bc90b55570b57c778552f327",
+      "classifiedOperations": 5,
+      "reason": "Created by GATE-0B.11 as the engineering capability whose obligation covers operations that tranche classified from source evidence: steward-assignment-directory-and-appointment."
     }
   ]
 }

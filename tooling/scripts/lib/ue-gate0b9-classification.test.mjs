@@ -378,9 +378,9 @@ test('Gate 0 stays IN_PROGRESS, validates the ninth tranche and keeps the three 
   assert.equal(result.summary.classification0b9.classified, 100)
   assert.equal(result.summary.decisionBoundExceptions.exceptions, 4)
   assert.ok(!result.blockers.some((item) => item.code === 'ROUTE_UNJUSTIFIED_EXPOSURE'))
-  assert.equal(result.summary.route.scopeUndecidedAwaitingClassification, 177, 'the live total after Gate 0B.10; the 277 at acceptance is asserted from the anchored register above')
+  assert.equal(result.summary.route.scopeUndecidedAwaitingClassification, 77, 'the live total after Gate 0B.11; the 277 at acceptance is asserted from the anchored register above')
   assert.equal(result.summary.route.decisionBoundScopeExceptions, 4)
-  assert.equal(result.summary.capabilityCount, 99, 'the live count after Gate 0B.10; 96 at acceptance')
+  assert.equal(result.summary.capabilityCount, 103, 'the live count after Gate 0B.11; 96 at acceptance')
 })
 
 test('adversarial findings are recorded as defects with a later gate and the source facts they rest on', () => {
@@ -936,8 +936,8 @@ test('NEGATIVE 13: the Gate 0B.7 and Gate 0B.8 release dispositions are preserve
   assert.equal(entryOf(fixture(), outsiderId)[4], 'SCOPE_UNDECIDED')
 
   const gate = validateGate0(matrix, { base })
-  const dispositions = gate.gateAcceptanceBlockers.filter((item) => item.kind === 'RELEASE_BLOCKING_DEFECT_DISPOSITION')
-  assert.equal(dispositions.length, 20, 'the live gate holds the 0B.7, 0B.8, 0B.9 and 0B.10 dispositions')
+  const dispositions = gate.gateAcceptanceBlockers.filter((item) => item.kind === 'RELEASE_BLOCKING_DEFECT_DISPOSITION' && !/DEF-0B11-/.test(JSON.stringify(item)))
+  assert.equal(dispositions.length, 20, 'the live gate holds the 0B.7, 0B.8, 0B.9 and 0B.10 dispositions plus those of Gate 0B.11, excluded here')
   const text = (item) => item.id ?? item.defectId ?? item.detail ?? JSON.stringify(item)
   assert.equal(dispositions.filter((item) => /^DEF-0B7-/.test(text(item))).length, 4)
   assert.equal(dispositions.filter((item) => /^DEF-0B8-/.test(text(item))).length, 4)
