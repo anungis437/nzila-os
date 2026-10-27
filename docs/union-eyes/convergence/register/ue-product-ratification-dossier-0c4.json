@@ -1,0 +1,853 @@
+{
+  "schemaVersion": 1,
+  "register": "UE-PRODUCT-RATIFICATION-DOSSIER",
+  "gate": "GATE-0C.4",
+  "version": 1,
+  "anchorCommit": "ab9c184263020a95b91066014395f16dc3ec78e8",
+  "preparedOn": "2026-10-27",
+  "status": "PREPARED_FOR_DECISION_NOT_DECIDED",
+  "note": "A dossier for the authorized product owner. It states what each decision would do and what it depends on. It decides nothing, ratifies nothing and carries no approval.",
+  "separation": "A product ratification fixes a product-specification baseline only. It cannot issue an institutional permission, mandate, office, delegation or authority decision, and it changes no implementation, security, release or runtime status.",
+  "personas": [
+    {
+      "persona": "steward",
+      "recordId": "PDR-0C2-STEWARD-V1",
+      "proposedCanonical": {
+        "packageId": "UE-STEWARD-PROPOSED-CANONICAL-R1",
+        "version": "1.0-R1",
+        "file": "docs/union-eyes/convergence/register/ue-persona-decision-package-steward-0c2.json",
+        "sha256": "a01076343d199a98554756e577edabb8150fec6353baddab749d6efe00fa9cea"
+      },
+      "currentState": "PROPOSED_FOR_RATIFICATION",
+      "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+      "selfRatification": false,
+      "approvalEvidenceOnFile": null,
+      "decisionsAvailable": [
+        {
+          "option": "APPROVE",
+          "resultingState": "ACCEPTED_BY_AUTHORIZED_PRODUCT_OWNER",
+          "effect": "Establishes the named artifact version as the engineering canonical for this persona. Settles or explicitly defers each listed product decision. Issues no institutional authority and activates nothing."
+        },
+        {
+          "option": "REJECT",
+          "resultingState": "REJECTED_BY_AUTHORIZED_PRODUCT_OWNER",
+          "effect": "The artifact version is not the engineering canonical. The persona stays unresolved and its Gate 0 blocker stays."
+        },
+        {
+          "option": "RETURN_FOR_REWORK",
+          "resultingState": "RETURNED_FOR_REWORK",
+          "effect": "The named reasons are recorded and a new artifact version is prepared. The returned version stays preserved."
+        }
+      ],
+      "requiredApprovalEvidence": [
+        "decisionMaker.name",
+        "decisionMaker.role",
+        "decidedOn",
+        "artifactVersion",
+        "artifactSha256",
+        "scope",
+        "evidenceDocument.reference",
+        "evidenceDocument.sha256",
+        "independentOfPreparer"
+      ],
+      "productDecisionsToSettle": [
+        "DEC-PD-01",
+        "DEC-PD-02",
+        "DEC-PD-03",
+        "DEC-PD-04",
+        "DEC-PD-05",
+        "DEC-PD-12",
+        "DEC-PD-0C2-01",
+        "DEC-PD-0C2-02",
+        "DEC-PD-0C2-03",
+        "DEC-PD-0C2-10"
+      ],
+      "listedInstitutionalAuthorityDecisions": [],
+      "institutionalBoundary": "The decision identifiers beginning DEC-IA are institutional authority decisions. Approving the package cannot settle, adopt or issue them; they stay outstanding.",
+      "decisionsSharedWithOtherPersonaRecords": [
+        {
+          "decisionId": "DEC-PD-01",
+          "listedBy": [
+            "PDR-0C2-REPRESENTATIVE-V1",
+            "PDR-0C2-STEWARD-V1"
+          ]
+        },
+        {
+          "decisionId": "DEC-PD-03",
+          "listedBy": [
+            "PDR-0C2-REPRESENTATIVE-V1",
+            "PDR-0C2-STEWARD-V1"
+          ]
+        },
+        {
+          "decisionId": "DEC-PD-04",
+          "listedBy": [
+            "PDR-0C2-REPRESENTATIVE-V1",
+            "PDR-0C2-STEWARD-V1"
+          ]
+        },
+        {
+          "decisionId": "DEC-PD-05",
+          "listedBy": [
+            "PDR-0C2-REPRESENTATIVE-V1",
+            "PDR-0C2-STEWARD-V1"
+          ]
+        },
+        {
+          "decisionId": "DEC-PD-12",
+          "listedBy": [
+            "PDR-0C2-REPRESENTATIVE-V1",
+            "PDR-0C2-STEWARD-V1"
+          ]
+        },
+        {
+          "decisionId": "DEC-PD-0C2-10",
+          "listedBy": [
+            "PDR-0C2-FINANCIAL-OFFICER-V1",
+            "PDR-0C2-REPRESENTATIVE-V1",
+            "PDR-0C2-STEWARD-V1"
+          ]
+        }
+      ],
+      "dependsOnPersonas": [
+        "financial-officer via SHARED_OBLIGATION",
+        "representative via RELATED_REQUIREMENT",
+        "representative via SHARED_OBLIGATION"
+      ],
+      "evidenceStillUnavailable": [
+        {
+          "gapId": "GAP-STW-NO-CANONICAL",
+          "kind": "IRREDUCIBLE_HISTORICAL",
+          "statement": "No Steward canonical exists in any of the 526 refs scanned. The eight recovered evidence items S1 to S8 define no action. Every one of the Steward contracts is a new design, and no historical Steward action list can be recovered."
+        },
+        {
+          "gapId": "GAP-STW-STRUCTURE",
+          "kind": "PRODUCT_DECISION",
+          "statement": "Whether Steward is a distinct persona or a scoped profile of Representative 2.2 is undecided (DEC-PD-01)."
+        },
+        {
+          "gapId": "GAP-STW-OFFICE",
+          "kind": "INSTITUTIONAL",
+          "statement": "No source names a steward office, and none may be created here (DEC-IA-32)."
+        }
+      ],
+      "productApprovalDoesNot": [
+        "Issue, approve or activate any of the 79 outstanding institutional decisions or the 32 baseline institutional authority decisions.",
+        "Issue a financial mandate, a triage designation, a supervisory mandate, a delegation, an appointment or any other instrument.",
+        "Create, name or fill an institutional office, including a steward office.",
+        "Change an implementation status, a security status, a release disposition or a runtime qualification status.",
+        "Resolve any ratchet, test or route defect."
+      ],
+      "claims": {
+        "implementationComplete": false,
+        "runtimeQualification": "NOT_QUALIFIED",
+        "securityStatusChanged": false,
+        "institutionalAuthorityGranted": false,
+        "productSpecificationRatified": false
+      }
+    },
+    {
+      "persona": "representative",
+      "recordId": "PDR-0C2-REPRESENTATIVE-V1",
+      "proposedCanonical": {
+        "packageId": "UE-REPRESENTATIVE-PROPOSED-CANONICAL-2.2-R1",
+        "version": "2.2-R1",
+        "file": "docs/union-eyes/convergence/register/ue-persona-decision-package-representative-0c2.json",
+        "sha256": "e4dcbf3635b8807c9e923f2f12b5a1dc9b53196fadf864664393ff19f3af6861"
+      },
+      "currentState": "PROPOSED_FOR_RATIFICATION",
+      "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+      "selfRatification": false,
+      "approvalEvidenceOnFile": null,
+      "decisionsAvailable": [
+        {
+          "option": "APPROVE",
+          "resultingState": "ACCEPTED_BY_AUTHORIZED_PRODUCT_OWNER",
+          "effect": "Establishes the named artifact version as the engineering canonical for this persona. Settles or explicitly defers each listed product decision. Issues no institutional authority and activates nothing."
+        },
+        {
+          "option": "REJECT",
+          "resultingState": "REJECTED_BY_AUTHORIZED_PRODUCT_OWNER",
+          "effect": "The artifact version is not the engineering canonical. The persona stays unresolved and its Gate 0 blocker stays."
+        },
+        {
+          "option": "RETURN_FOR_REWORK",
+          "resultingState": "RETURNED_FOR_REWORK",
+          "effect": "The named reasons are recorded and a new artifact version is prepared. The returned version stays preserved."
+        }
+      ],
+      "requiredApprovalEvidence": [
+        "decisionMaker.name",
+        "decisionMaker.role",
+        "decidedOn",
+        "artifactVersion",
+        "artifactSha256",
+        "scope",
+        "evidenceDocument.reference",
+        "evidenceDocument.sha256",
+        "independentOfPreparer"
+      ],
+      "productDecisionsToSettle": [
+        "DEC-PD-01",
+        "DEC-PD-03",
+        "DEC-PD-04",
+        "DEC-PD-05",
+        "DEC-PD-06",
+        "DEC-PD-07",
+        "DEC-PD-08",
+        "DEC-PD-12",
+        "DEC-PD-14",
+        "DEC-PD-0C2-04",
+        "DEC-PD-0C2-05",
+        "DEC-PD-0C2-06",
+        "DEC-PD-0C2-10"
+      ],
+      "listedInstitutionalAuthorityDecisions": [
+        "DEC-IA-03",
+        "DEC-IA-07",
+        "DEC-IA-08",
+        "DEC-IA-09",
+        "DEC-IA-10",
+        "DEC-IA-11"
+      ],
+      "institutionalBoundary": "The decision identifiers beginning DEC-IA are institutional authority decisions. Approving the package cannot settle, adopt or issue them; they stay outstanding.",
+      "decisionsSharedWithOtherPersonaRecords": [
+        {
+          "decisionId": "DEC-PD-01",
+          "listedBy": [
+            "PDR-0C2-REPRESENTATIVE-V1",
+            "PDR-0C2-STEWARD-V1"
+          ]
+        },
+        {
+          "decisionId": "DEC-PD-03",
+          "listedBy": [
+            "PDR-0C2-REPRESENTATIVE-V1",
+            "PDR-0C2-STEWARD-V1"
+          ]
+        },
+        {
+          "decisionId": "DEC-PD-04",
+          "listedBy": [
+            "PDR-0C2-REPRESENTATIVE-V1",
+            "PDR-0C2-STEWARD-V1"
+          ]
+        },
+        {
+          "decisionId": "DEC-PD-05",
+          "listedBy": [
+            "PDR-0C2-REPRESENTATIVE-V1",
+            "PDR-0C2-STEWARD-V1"
+          ]
+        },
+        {
+          "decisionId": "DEC-PD-12",
+          "listedBy": [
+            "PDR-0C2-REPRESENTATIVE-V1",
+            "PDR-0C2-STEWARD-V1"
+          ]
+        },
+        {
+          "decisionId": "DEC-PD-14",
+          "listedBy": [
+            "PDR-0C2-FINANCIAL-OFFICER-V1",
+            "PDR-0C2-REPRESENTATIVE-V1"
+          ]
+        },
+        {
+          "decisionId": "DEC-PD-0C2-10",
+          "listedBy": [
+            "PDR-0C2-FINANCIAL-OFFICER-V1",
+            "PDR-0C2-REPRESENTATIVE-V1",
+            "PDR-0C2-STEWARD-V1"
+          ]
+        }
+      ],
+      "dependsOnPersonas": [
+        "financial-officer via SHARED_OBLIGATION",
+        "steward via RELATED_REQUIREMENT",
+        "steward via SHARED_OBLIGATION"
+      ],
+      "evidenceStillUnavailable": [
+        {
+          "gapId": "GAP-REP-CANONICAL-CITED-NOT-RECOVERED",
+          "kind": "IRREDUCIBLE_HISTORICAL",
+          "statement": "UE-REPRESENTATIVE-CANONICAL-2.2 is cited as FROZEN by a disposition and exists in no ref. The package is a reconstruction candidate and is not that document."
+        },
+        {
+          "gapId": "GAP-REP-R-RANGE",
+          "kind": "IRREDUCIBLE_HISTORICAL",
+          "statement": "The first disposition carried the R01 to R24 matrix and was rewritten. Only R01, R02, R09, R13, R14, R15 and R18 carry their own titles. The other seventeen share group labels, and pairing a label to an identifier is an inference."
+        },
+        {
+          "gapId": "GAP-REP-R18-CONFLICT",
+          "kind": "IRREDUCIBLE_HISTORICAL",
+          "statement": "R18 is recorded BLOCKED in the first disposition and MISSING in the second. The conflict is preserved, not resolved. Both agree nothing is operational."
+        },
+        {
+          "gapId": "GAP-REP-JOURNEYS-UNDEFINED",
+          "kind": "IRREDUCIBLE_HISTORICAL",
+          "statement": "Journeys A to G and the institutional scenario proofs are named by range only. No journey or scenario is defined in any source."
+        }
+      ],
+      "productApprovalDoesNot": [
+        "Issue, approve or activate any of the 79 outstanding institutional decisions or the 32 baseline institutional authority decisions.",
+        "Issue a financial mandate, a triage designation, a supervisory mandate, a delegation, an appointment or any other instrument.",
+        "Create, name or fill an institutional office, including a steward office.",
+        "Change an implementation status, a security status, a release disposition or a runtime qualification status.",
+        "Resolve any ratchet, test or route defect."
+      ],
+      "claims": {
+        "implementationComplete": false,
+        "runtimeQualification": "NOT_QUALIFIED",
+        "securityStatusChanged": false,
+        "institutionalAuthorityGranted": false,
+        "productSpecificationRatified": false
+      }
+    },
+    {
+      "persona": "financial-officer",
+      "recordId": "PDR-0C2-FINANCIAL-OFFICER-V1",
+      "proposedCanonical": {
+        "packageId": "UE-FINANCIAL-OFFICER-PROPOSED-CANONICAL-2.1-R1",
+        "version": "2.1-R1",
+        "file": "docs/union-eyes/convergence/register/ue-persona-decision-package-financial-officer-0c2.json",
+        "sha256": "5ec3e9a10eb6c4458f467f5b8e659d746f6631924664d9f7ca062c6e435c3889"
+      },
+      "currentState": "PROPOSED_FOR_RATIFICATION",
+      "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+      "selfRatification": false,
+      "approvalEvidenceOnFile": null,
+      "decisionsAvailable": [
+        {
+          "option": "APPROVE",
+          "resultingState": "ACCEPTED_BY_AUTHORIZED_PRODUCT_OWNER",
+          "effect": "Establishes the named artifact version as the engineering canonical for this persona. Settles or explicitly defers each listed product decision. Issues no institutional authority and activates nothing."
+        },
+        {
+          "option": "REJECT",
+          "resultingState": "REJECTED_BY_AUTHORIZED_PRODUCT_OWNER",
+          "effect": "The artifact version is not the engineering canonical. The persona stays unresolved and its Gate 0 blocker stays."
+        },
+        {
+          "option": "RETURN_FOR_REWORK",
+          "resultingState": "RETURNED_FOR_REWORK",
+          "effect": "The named reasons are recorded and a new artifact version is prepared. The returned version stays preserved."
+        }
+      ],
+      "requiredApprovalEvidence": [
+        "decisionMaker.name",
+        "decisionMaker.role",
+        "decidedOn",
+        "artifactVersion",
+        "artifactSha256",
+        "scope",
+        "evidenceDocument.reference",
+        "evidenceDocument.sha256",
+        "independentOfPreparer"
+      ],
+      "productDecisionsToSettle": [
+        "DEC-PD-09",
+        "DEC-PD-10",
+        "DEC-PD-11",
+        "DEC-PD-13",
+        "DEC-PD-14",
+        "DEC-PD-0C2-07",
+        "DEC-PD-0C2-08",
+        "DEC-PD-0C2-09",
+        "DEC-PD-0C2-10"
+      ],
+      "listedInstitutionalAuthorityDecisions": [
+        "DEC-IA-16",
+        "DEC-IA-24",
+        "DEC-IA-25",
+        "DEC-IA-26",
+        "DEC-IA-31"
+      ],
+      "institutionalBoundary": "The decision identifiers beginning DEC-IA are institutional authority decisions. Approving the package cannot settle, adopt or issue them; they stay outstanding.",
+      "decisionsSharedWithOtherPersonaRecords": [
+        {
+          "decisionId": "DEC-PD-14",
+          "listedBy": [
+            "PDR-0C2-FINANCIAL-OFFICER-V1",
+            "PDR-0C2-REPRESENTATIVE-V1"
+          ]
+        },
+        {
+          "decisionId": "DEC-PD-0C2-10",
+          "listedBy": [
+            "PDR-0C2-FINANCIAL-OFFICER-V1",
+            "PDR-0C2-REPRESENTATIVE-V1",
+            "PDR-0C2-STEWARD-V1"
+          ]
+        }
+      ],
+      "dependsOnPersonas": [
+        "representative via RELATED_REQUIREMENT",
+        "representative via SHARED_OBLIGATION",
+        "steward via SHARED_OBLIGATION"
+      ],
+      "evidenceStillUnavailable": [
+        {
+          "gapId": "GAP-FO-CANONICAL-CITED-NOT-RECOVERED",
+          "kind": "IRREDUCIBLE_HISTORICAL",
+          "statement": "UE-FINANCIAL-OFFICER-CANONICAL-2.1 is cited as FROZEN (design only) and exists in no ref. The package is a reconstruction candidate and is not that document."
+        },
+        {
+          "gapId": "GAP-FO-IDENTIFIERS-UNSPECIFIED",
+          "kind": "IRREDUCIBLE_HISTORICAL",
+          "statement": "Of the 38 historical identifiers, four carry their own title or status, six carry only group labels and twenty-eight have no individual meaning in any source. F01 to F28 meanings are new design under a historical status or group."
+        },
+        {
+          "gapId": "GAP-FO-NO-FINANCE-SOURCE",
+          "kind": "SOURCE",
+          "statement": "No source describes any organization’s finance structure. The four organization scenarios are hypotheses. The existing finance page is Nzila platform billing and is not union finance."
+        },
+        {
+          "gapId": "GAP-FO-NO-CAPABILITY-OWNER",
+          "kind": "ENGINEERING_OWNERSHIP",
+          "statement": "The navigation and several domain contracts have no implementation capability. Their completion owner is the Financial Officer tracking capability UE-OMIT-FINANCE-RANGE-UNSPECIFIED until a finance capability exists."
+        }
+      ],
+      "productApprovalDoesNot": [
+        "Issue, approve or activate any of the 79 outstanding institutional decisions or the 32 baseline institutional authority decisions.",
+        "Issue a financial mandate, a triage designation, a supervisory mandate, a delegation, an appointment or any other instrument.",
+        "Create, name or fill an institutional office, including a steward office.",
+        "Change an implementation status, a security status, a release disposition or a runtime qualification status.",
+        "Resolve any ratchet, test or route defect."
+      ],
+      "claims": {
+        "implementationComplete": false,
+        "runtimeQualification": "NOT_QUALIFIED",
+        "securityStatusChanged": false,
+        "institutionalAuthorityGranted": false,
+        "productSpecificationRatified": false
+      }
+    }
+  ],
+  "stewardStructure": {
+    "decisionId": "DEC-PD-01",
+    "options": [
+      {
+        "optionId": "OPT-A-DISTINCT-PERSONA",
+        "title": "Distinct persona with an independent action universe"
+      },
+      {
+        "optionId": "OPT-B-LEVEL-WITHIN-REPRESENTATIVE",
+        "title": "Scoped level within Representative 2.2 only"
+      },
+      {
+        "optionId": "OPT-C-SCOPED-PROFILE",
+        "title": "Scoped profile of Representative 2.2 with its own presentation profile and acceptance profile"
+      }
+    ],
+    "preparerRecommendation": "OPT-C-SCOPED-PROFILE",
+    "recommendationOnly": true,
+    "selected": null,
+    "ratified": false,
+    "effectOfRecommendation": "The recommendation is not a selection. If the product owner selects another option, the Steward package is returned or rejected rather than approved as written.",
+    "changesBaselineProposal": "The proposed Steward baseline (DEC-PD-01 option 1) treats Steward as its own persona. Option C keeps the Steward contracts and the Steward package as a reviewable unit, and changes how the package is ratified and owned: the Representative 2.2 package is the authority universe and the Steward package is a profile of it."
+  },
+  "ratificationOrder": {
+    "dependency": "The Steward structure decision and DEC-PD-01 are listed by more than one persona record, and DEC-PD-0C2-10 asks for the order of product acceptance.",
+    "sharedDecisions": [
+      "DEC-PD-01",
+      "DEC-PD-03",
+      "DEC-PD-04",
+      "DEC-PD-05",
+      "DEC-PD-0C2-10",
+      "DEC-PD-12",
+      "DEC-PD-14"
+    ],
+    "preparerSequencingOpinion": null
+  },
+  "outstandingProductDecisions": {
+    "count": 24,
+    "byFamily": {
+      "BASELINE_PRODUCT": 14,
+      "GATE_0C2_PRODUCT": 10
+    },
+    "items": [
+      {
+        "decisionId": "DEC-PD-01",
+        "family": "BASELINE_PRODUCT",
+        "title": "Steward as a distinct persona",
+        "question": "Is Steward a distinct persona with its own action contract, or the front-line capacity inside Representative 2.2?",
+        "personas": [
+          "representative",
+          "steward"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-REPRESENTATIVE-V1",
+          "PDR-0C2-STEWARD-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-02",
+        "family": "BASELINE_PRODUCT",
+        "title": "Steward navigation",
+        "question": "Which destinations does the steward see, and what decides whether one appears?",
+        "personas": [
+          "steward"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-STEWARD-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-03",
+        "family": "BASELINE_PRODUCT",
+        "title": "Default visibility of working notes",
+        "question": "Is a representative working note staff-only unless the author chooses member visibility?",
+        "personas": [
+          "representative",
+          "steward"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-REPRESENTATIVE-V1",
+          "PDR-0C2-STEWARD-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-04",
+        "family": "BASELINE_PRODUCT",
+        "title": "Intake classification",
+        "question": "How are an inquiry, a service request, a case, a formal grievance, a complaint, an appeal and a reconsideration distinguished, and how may they relate?",
+        "personas": [
+          "representative",
+          "steward"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-REPRESENTATIVE-V1",
+          "PDR-0C2-STEWARD-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-05",
+        "family": "BASELINE_PRODUCT",
+        "title": "Assignment acknowledgement and handoff summary",
+        "question": "What does an assignee acknowledge on receipt, and what must an outgoing handler record at handoff?",
+        "personas": [
+          "representative",
+          "steward"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-REPRESENTATIVE-V1",
+          "PDR-0C2-STEWARD-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-06",
+        "family": "BASELINE_PRODUCT",
+        "title": "Representative R-domain meanings",
+        "question": "Confirm the proposed single meaning for each of R03–R08, R10–R12, R16, R17 and R19–R24.",
+        "personas": [
+          "representative"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-REPRESENTATIVE-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-07",
+        "family": "BASELINE_PRODUCT",
+        "title": "R18 status vocabulary",
+        "question": "How is a historical disposition recorded beside the current implementation status?",
+        "personas": [
+          "representative"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-REPRESENTATIVE-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-08",
+        "family": "BASELINE_PRODUCT",
+        "title": "Journeys A–G acceptance form",
+        "question": "Are Journeys A–G accepted as the seven proposed workflows with the stated steps and assertions?",
+        "personas": [
+          "representative"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-REPRESENTATIVE-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-09",
+        "family": "BASELINE_PRODUCT",
+        "title": "Financial Officer domain map",
+        "question": "Confirm the proposed meaning for each of F01–F28 that the historical record leaves unspecified.",
+        "personas": [
+          "financial-officer"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-FINANCIAL-OFFICER-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-10",
+        "family": "BASELINE_PRODUCT",
+        "title": "Financial navigation names",
+        "question": "Confirm the three recovered navigation names and the four proposed names.",
+        "personas": [
+          "financial-officer"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-FINANCIAL-OFFICER-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-11",
+        "family": "BASELINE_PRODUCT",
+        "title": "Financial journeys FJ01–FJ10",
+        "question": "Are FJ01–FJ10 accepted as the ten proposed workflows, and how is separation of duties modelled?",
+        "personas": [
+          "financial-officer"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-FINANCIAL-OFFICER-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-12",
+        "family": "BASELINE_PRODUCT",
+        "title": "Deadline extension workflow",
+        "question": "Is requesting an extension distinct from granting one?",
+        "personas": [
+          "representative",
+          "steward"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-REPRESENTATIVE-V1",
+          "PDR-0C2-STEWARD-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-13",
+        "family": "BASELINE_PRODUCT",
+        "title": "Financial reporting scope",
+        "question": "Which reports and exports does the Financial Officer baseline cover, and what authorizes them?",
+        "personas": [
+          "financial-officer"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-FINANCIAL-OFFICER-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-14",
+        "family": "BASELINE_PRODUCT",
+        "title": "Organization scenario coverage",
+        "question": "Is the stated scenario set (CAPE, CUPE, LIUNA, small local) the right set to specify, and are the stated structures the right way to represent them?",
+        "personas": [
+          "financial-officer",
+          "representative"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-FINANCIAL-OFFICER-V1",
+          "PDR-0C2-REPRESENTATIVE-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-0C2-01",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Steward access when a relationship or the platform role ends",
+        "question": "What happens to a steward’s read access and in-flight work when an assignment ends, a collaborator grant is revoked, the steward role is removed or the person leaves the organization?",
+        "personas": [
+          "steward"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-STEWARD-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-0C2-02",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Steward scope across federations, locals and territories",
+        "question": "Does a steward act only inside one organization, or may an institution scope a steward to a workplace, a local or a territory?",
+        "personas": [
+          "steward"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-STEWARD-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-0C2-03",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Steward absence cover and substitution",
+        "question": "When a steward is absent, who acts, and by what explicit instrument?",
+        "personas": [
+          "steward"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-STEWARD-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-0C2-04",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Representative scope across federations and affiliated organizations",
+        "question": "How do representative actions work when assistance crosses organizations (national office assistance, regional support, territory denial)?",
+        "personas": [
+          "representative"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-REPRESENTATIVE-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-0C2-05",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Explicit denial of financial authority for the representative",
+        "question": "Should the Representative canonical carry an explicit denial contract that states a representative role holds no financial authority?",
+        "personas": [
+          "representative"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-REPRESENTATIVE-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-0C2-06",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Former representative access and mandate termination",
+        "question": "What happens to a representative’s access, mandates and open work when a mandate expires, is revoked or the person leaves?",
+        "personas": [
+          "representative"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-REPRESENTATIVE-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-0C2-07",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Finance scope across affiliates and multiple organizations",
+        "question": "Is finance scoped to one organization, or may a central finance office hold duties over several organizations or affiliates?",
+        "personas": [
+          "financial-officer"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-FINANCIAL-OFFICER-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-0C2-08",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Absent mandate holder without delegation",
+        "question": "FO-DENY-04 forbids delegating a financial duty. How is a duty carried on when its holder is absent?",
+        "personas": [
+          "financial-officer"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-FINANCIAL-OFFICER-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-0C2-09",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Financial notifications and workflow transitions",
+        "question": "Which financial events notify whom (approval pending, payment failure, reconciliation exception, mandate expiry)?",
+        "personas": [
+          "financial-officer"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-FINANCIAL-OFFICER-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      },
+      {
+        "decisionId": "DEC-PD-0C2-10",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Order of product acceptance and the Steward structure",
+        "question": "In what order are the three packages decided, and must the Steward structural decision (DEC-PD-01) be settled before the Steward and Representative packages are accepted?",
+        "personas": [
+          "all"
+        ],
+        "settledByRecords": [
+          "PDR-0C2-FINANCIAL-OFFICER-V1",
+          "PDR-0C2-REPRESENTATIVE-V1",
+          "PDR-0C2-STEWARD-V1"
+        ],
+        "currentState": "OUTSTANDING",
+        "adopted": false,
+        "decisionRequested": "Settle or explicitly defer this decision through approval, rejection or return of each persona record that lists it."
+      }
+    ]
+  },
+  "institutionalBoundary": {
+    "outstandingInstitutionalDecisions": 111,
+    "statement": "None of the institutional decisions is settled by a product ratification. They are carried in the institutional decision dossier.",
+    "productRatificationIssuesInstitutionalPermissions": false
+  },
+  "approvalFieldsFilled": 0
+}

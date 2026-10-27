@@ -1,0 +1,2103 @@
+{
+  "schemaVersion": 1,
+  "register": "UE-EVIDENCE-QUALIFICATION",
+  "gate": "GATE-0C.4",
+  "version": 1,
+  "anchorCommit": "ab9c184263020a95b91066014395f16dc3ec78e8",
+  "preparedOn": "2026-10-27",
+  "status": "QUALIFICATION_NOT_ACCEPTANCE",
+  "note": "Independent-in-method qualification of the Gate 0C.3 evidence other than the 71 per-defect records: the 150-item index, the two OPL challenges, the three public exposures, the per-capita relationship, the carbon evidence and the retention scheduler search. Statuses use SOURCE_VERIFIED, PARTIALLY_VERIFIED, INFERENCE_ONLY and REQUIRES_RUNTIME_PROOF only.",
+  "statusVocabulary": [
+    "SOURCE_VERIFIED",
+    "PARTIALLY_VERIFIED",
+    "INFERENCE_ONLY",
+    "REQUIRES_RUNTIME_PROOF"
+  ],
+  "review": {
+    "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+    "independence": "METHOD_INDEPENDENT_ONLY",
+    "authorityIndependent": false,
+    "limitation": "The reviewer belongs to the same engineering-agent family that prepared the Gate 0C.3 registers. The review re-reads the source with a separate extractor and shares no code with the Gate 0C.3 builder, so it is independent in method. It is not an authority-independent approval and it accepts, ratifies and authorizes nothing.",
+    "method": [
+      "Route wrappers and role floors are re-extracted from each route file by a separate extractor that does not read any Gate 0C.3 register.",
+      "Each cited quotation is searched in its cited file.",
+      "Each affected operation is looked up in the classified inventory and in its route file.",
+      "Each proposed disposition is tested against the rubric precondition the Gate 0C.3 register itself states.",
+      "Each absence claim is searched for a contradicting token in the cited source.",
+      "The 150-item index is rebuilt from the frozen registers and compared."
+    ],
+    "notDone": [
+      "No test, database, browser, deployment or role-title check was run.",
+      "No disposition, severity, owner or decision was changed.",
+      "No authority-independent reviewer has accepted any record."
+    ]
+  },
+  "deduplication": {
+    "method": "The sets are rebuilt from the frozen defect register (release dispositions and the release-blocking flag), the review queue and the handoff register. The Gate 0C.3 debt index is read only to compare.",
+    "groups": {
+      "releaseBlocking": 32,
+      "conditional": 41,
+      "awaiting": 71,
+      "exposureDefects": 2,
+      "tracked": 4
+    },
+    "sumOfGroups": 150,
+    "uniqueRecomputed": 150,
+    "overlapsBetweenGroups": [],
+    "indexedItems": 150,
+    "indexedItemsDuplicated": 0,
+    "missingFromIndex": [],
+    "notInRecomputedSets": [],
+    "listedInstances": 153,
+    "duplicateInflationAvoided": 3,
+    "matches": true,
+    "status": "SOURCE_VERIFIED",
+    "limitation": "This verifies that the index counts each frozen record once. It does not verify that the frozen records are complete: a defect never recorded in the register cannot appear in either count."
+  },
+  "releaseBlockingProposals": {
+    "count": 43,
+    "byRubric": {
+      "RB_ANYMUT": 7,
+      "RB_CRED": 4,
+      "RB_FALSE": 8,
+      "RB_MF": 9,
+      "RB_SHARED": 4,
+      "RB_XT": 11
+    },
+    "byRubricResult": {
+      "PRECONDITION_MET": 42,
+      "PRECONDITION_NOT_MET": 1
+    },
+    "byReviewStatus": {
+      "PARTIALLY_VERIFIED": 7,
+      "REQUIRES_RUNTIME_PROOF": 19,
+      "SOURCE_VERIFIED": 17
+    },
+    "note": "These remain proposals. Each stays PROPOSED_NOT_ACCEPTED."
+  },
+  "conditionalProposals": {
+    "count": 25,
+    "items": [
+      {
+        "defectId": "DEF-0B1-BILLING-TARGET-ORG-UNBOUND",
+        "rubricKey": "CB_PLAT",
+        "condition": "The platform role title can be held by, or granted to, a user who is not platform staff under an adopted mandate, or the route is reachable by a caller who is not bound to the target organization.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CUSTOM_CHECK_UNPROVEN"
+        },
+        "dependsOn": "Who holds the platform role title and under which adopted mandate.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [
+          "UE-INST-PLATFORM-STAFF-MANDATE"
+        ],
+        "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+        "sensitivity": [
+          "RUBRIC_APPLICATION_UNCLEAR"
+        ]
+      },
+      {
+        "defectId": "DEF-0B1-CRUD-FACADE-ORG-MEMBERS",
+        "rubricKey": "CB_INERT",
+        "condition": "Any listed operation is reachable, or advertised in navigation or documentation, as a working capability, or answers 200 where the capability is not implemented, or is reachable below the roster-reader audience. The two operations outside admin/ (debug/user-role and member/ai-feedback) must be confirmed separately.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "MIXED"
+        },
+        "dependsOn": "Whether the route is reachable or advertised as a working capability.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [
+          "UE-INST-ORGANIZATION-ROSTER-AND-ROLE-GRANT-AUTHORITY"
+        ],
+        "reviewStatus": "PARTIALLY_VERIFIED",
+        "sensitivity": [
+          "POSSIBLY_TOO_LENIENT"
+        ]
+      },
+      {
+        "defectId": "DEF-0B1-FIX-SUPER-ADMIN-INERT",
+        "rubricKey": "CB_INERT",
+        "condition": "The route is reachable or documented as a working repair, so an operator can believe a repair ran that did not.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "Whether the route is reachable or advertised as a working capability.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [
+          "UE-INST-ORGANIZATION-ROSTER-AND-ROLE-GRANT-AUTHORITY"
+        ],
+        "reviewStatus": "SOURCE_VERIFIED",
+        "sensitivity": []
+      },
+      {
+        "defectId": "DEF-0B1-ORGANIZATIONS-CROSS-ORG-CONTACTS",
+        "rubricKey": "CB_PLAT",
+        "condition": "The platform role title is held or grantable outside platform staff, or no platform-staff mandate is adopted and enforced for the directory.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "Who holds the platform role title and under which adopted mandate.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [
+          "UE-INST-PLATFORM-STAFF-MANDATE"
+        ],
+        "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+        "sensitivity": [
+          "RUBRIC_APPLICATION_UNCLEAR"
+        ]
+      },
+      {
+        "defectId": "DEF-0B1-PKI-WORKFLOW-IN-MEMORY",
+        "rubricKey": "CB_INT",
+        "condition": "The PKI signing workflow is offered in the released scope or the deployment runs more than one instance.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "The population of role-restricted callers who can reach the route.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [],
+        "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+        "sensitivity": []
+      },
+      {
+        "defectId": "DEF-0B2-AI-DATA-CLASS-DOWNGRADE",
+        "rubricKey": "CB_DEP",
+        "condition": "A model provider is enabled in the released configuration and its data-handling terms depend on the data class the service layer sends.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "A deployment or scheduler fact the repository cannot establish.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [],
+        "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+        "sensitivity": []
+      },
+      {
+        "defectId": "DEF-0B2-AI-FINANCE-ROLE-TITLE-GATE",
+        "rubricKey": "CB_AUD",
+        "condition": "The financial mandate decision is not adopted and the routes remain reachable by a role title that is not a mandate.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "An institutional decision on the audience that may read the records.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [
+          "DEC-IA-16",
+          "DEC-IA-26"
+        ],
+        "reviewStatus": "PARTIALLY_VERIFIED",
+        "sensitivity": []
+      },
+      {
+        "defectId": "DEF-0B2-AI-GRIEVANCE-NO-CASE-AUTHORITY",
+        "rubricKey": "CB_AUD",
+        "condition": "Representation authority is not adopted or not enforced for these routes and a model provider is enabled.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "An institutional decision on the audience that may read the records.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [
+          "UE-INST-REPRESENTATION-AUTHORITY-SOURCE"
+        ],
+        "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+        "sensitivity": []
+      },
+      {
+        "defectId": "DEF-0B2-ANALYTICS-CRUD-FACADE",
+        "rubricKey": "CB_INT",
+        "condition": "Analytics served by these routes is presented to officers as computed from case data.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "MIXED"
+        },
+        "dependsOn": "The population of role-restricted callers who can reach the route.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [],
+        "reviewStatus": "PARTIALLY_VERIFIED",
+        "sensitivity": [
+          "POSSIBLY_TOO_LENIENT"
+        ]
+      },
+      {
+        "defectId": "DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ",
+        "rubricKey": "CB_PLAT",
+        "condition": "The platform role title is held or grantable outside platform staff, or the reads are not audited under an adopted platform-staff mandate.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "Who holds the platform role title and under which adopted mandate.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [
+          "UE-INST-PLATFORM-STAFF-MANDATE"
+        ],
+        "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+        "sensitivity": [
+          "RUBRIC_APPLICATION_UNCLEAR"
+        ]
+      },
+      {
+        "defectId": "DEF-0B2-UPDATE-ROLE-INERT",
+        "rubricKey": "CB_INERT",
+        "condition": "The route is reachable or documented as the role-change path.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "Whether the route is reachable or advertised as a working capability.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [
+          "UE-INST-ORGANIZATION-ROSTER-AND-ROLE-GRANT-AUTHORITY"
+        ],
+        "reviewStatus": "PARTIALLY_VERIFIED",
+        "sensitivity": []
+      },
+      {
+        "defectId": "DEF-0B3-ARBITRATION-RECORD-NO-CASE-AUTHORITY",
+        "rubricKey": "CB_AUD",
+        "condition": "Representation authority is not adopted or not enforced for arbitration records.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "An institutional decision on the audience that may read the records.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [
+          "UE-INST-REPRESENTATION-AUTHORITY-SOURCE"
+        ],
+        "reviewStatus": "SOURCE_VERIFIED",
+        "sensitivity": []
+      },
+      {
+        "defectId": "DEF-0B3-AUDIT-ROW-FULL-DISCLOSURE",
+        "rubricKey": "CB_AUD",
+        "condition": "The audit-history reader audience is not adopted, so the officer floor is not a decided audience.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "An institutional decision on the audience that may read the records.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [
+          "UE-INST-AUDIT-HISTORY-READERS"
+        ],
+        "reviewStatus": "SOURCE_VERIFIED",
+        "sensitivity": []
+      },
+      {
+        "defectId": "DEF-0B3-BULK-IMPORT-INERT",
+        "rubricKey": "CB_INERT",
+        "condition": "The route is reachable or documented as a working import.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "Whether the route is reachable or advertised as a working capability.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [
+          "UE-INST-ORGANIZATION-ROSTER-AND-ROLE-GRANT-AUTHORITY"
+        ],
+        "reviewStatus": "PARTIALLY_VERIFIED",
+        "sensitivity": []
+      },
+      {
+        "defectId": "DEF-0B3-METRICS-CLAIM-IDS-IN-MEMBER-READ",
+        "rubricKey": "CB_AUD",
+        "condition": "A claim identifier is not otherwise visible to the reading member under the adopted case-visibility rules.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "An institutional decision on the audience that may read the records.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [
+          "UE-INST-REPRESENTATION-AUTHORITY-SOURCE"
+        ],
+        "reviewStatus": "SOURCE_VERIFIED",
+        "sensitivity": []
+      },
+      {
+        "defectId": "DEF-0B4-CHATBOT-SAFETY-SKIPPED-OR-FAILS-OPEN",
+        "rubricKey": "CB_DEP",
+        "condition": "The released configuration has no moderation key, or the moderation provider can be unavailable, while the chatbot is enabled for members.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "A deployment or scheduler fact the repository cannot establish.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [],
+        "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+        "sensitivity": []
+      },
+      {
+        "defectId": "DEF-0B4-OHS-FILINGS-NO-CASE-AUTHORITY",
+        "rubricKey": "CB_AUD",
+        "condition": "Representation authority or the incident-reader audience is not adopted or not enforced for filings.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "An institutional decision on the audience that may read the records.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [
+          "UE-INST-OHS-INCIDENT-RECORD-READERS",
+          "UE-INST-REPRESENTATION-AUTHORITY-SOURCE"
+        ],
+        "reviewStatus": "SOURCE_VERIFIED",
+        "sensitivity": []
+      },
+      {
+        "defectId": "DEF-0B5-COGNITION-SNAPSHOTS-IN-LOCAL-FILES",
+        "rubricKey": "CB_DEP",
+        "condition": "The released runtime writes these files on a filesystem that is shared across organizations, shared across instances or discarded on restart.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "UNDERSTATED"
+        },
+        "dependsOn": "A deployment or scheduler fact the repository cannot establish.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [],
+        "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+        "sensitivity": [
+          "POSSIBLY_TOO_LENIENT",
+          "RUBRIC_APPLICATION_UNCLEAR"
+        ]
+      },
+      {
+        "defectId": "DEF-0B5-OHS-WITHDRAWAL-REFUSAL-NO-CASE-AUTHORITY",
+        "rubricKey": "CB_AUD",
+        "condition": "Representation authority or the incident-reader audience is not adopted or not enforced for these records.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "An institutional decision on the audience that may read the records.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [
+          "UE-INST-OHS-INCIDENT-RECORD-READERS",
+          "UE-INST-REPRESENTATION-AUTHORITY-SOURCE"
+        ],
+        "reviewStatus": "SOURCE_VERIFIED",
+        "sensitivity": []
+      },
+      {
+        "defectId": "DEF-0B6-CMP-DISPATCH-REFERENCED-IDS-NOT-VERIFIED",
+        "rubricKey": "CB_INT",
+        "condition": "The dispatch authority is not adopted, or the assignment table can be read or joined across organizations.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CUSTOM_CHECK_UNPROVEN"
+        },
+        "dependsOn": "The population of role-restricted callers who can reach the route.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [
+          "UE-INST-DISPATCH-AUTHORITY"
+        ],
+        "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+        "sensitivity": []
+      },
+      {
+        "defectId": "DEF-0B6-EDU-CRON-QUERIES-REFERENCE-COLUMNS-ABSENT-FROM-SCHEMA",
+        "rubricKey": "CB_DEP",
+        "condition": "Education reminders are part of the released scope, or the scheduler invokes the job and records its failure as success.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "A deployment or scheduler fact the repository cannot establish.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [],
+        "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+        "sensitivity": []
+      },
+      {
+        "defectId": "DEF-0B6-EMP-REPLAY-NO-FINANCIAL-MANDATE",
+        "rubricKey": "CB_AUD",
+        "condition": "The financial mandate decision is not adopted and the replay remains reachable by a role title that is not a mandate.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "An institutional decision on the audience that may read the records.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [
+          "DEC-IA-16",
+          "DEC-IA-18"
+        ],
+        "reviewStatus": "PARTIALLY_VERIFIED",
+        "sensitivity": []
+      },
+      {
+        "defectId": "DEF-0B6-SYS-INHERITANCE-ORG-SCOPE-NO-OP-ON-PENDING-PROFILES",
+        "rubricKey": "CB_INERT",
+        "condition": "The governance DENIED entry is removed or bypassed, or the route is reachable by a role that is not support staff.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "Whether the route is reachable or advertised as a working capability.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [
+          "UE-INST-BUSINESS-CONTINUITY-RECORDS-OWNER",
+          "UE-INST-PLATFORM-CONTRACT-AUTHORITY"
+        ],
+        "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+        "sensitivity": [
+          "RUBRIC_APPLICATION_UNCLEAR"
+        ]
+      },
+      {
+        "defectId": "DEF-0B6-SYS-OBSERVABILITY-SWEEP-RECORDS-EMAIL-SUCCESS-WITHOUT-SENDING",
+        "rubricKey": "CB_INT",
+        "condition": "Operations rely on the sweep e-mail leg to learn of an alert in the released configuration.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "The population of role-restricted callers who can reach the route.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [
+          "UE-INST-OBSERVABILITY-ALERT-OWNER"
+        ],
+        "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+        "sensitivity": []
+      },
+      {
+        "defectId": "DEF-0B6-SYS-SLA-WATCHDOG-EVENTS-HAVE-NO-SUBSCRIBER",
+        "rubricKey": "CB_INT",
+        "condition": "Deadline-breach notification is part of the released scope.",
+        "activationAssumption": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "sourceVerdict": "CONSISTENT"
+        },
+        "dependsOn": "The population of role-restricted callers who can reach the route.",
+        "resolvableFromRepository": false,
+        "institutionalDecisionIds": [],
+        "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+        "sensitivity": []
+      }
+    ]
+  },
+  "reviewRequiredProposals": [
+    {
+      "defectId": "DEF-0B2-CRUD-FACADE-SEGMENTS-SETTINGS",
+      "namedMissingEvidence": "The frozen record does not state which organization_members columns the member-floor read returns, so the over-disclosure cannot be graded; roster visibility among members is an outstanding institutional decision.",
+      "reviewStatus": "SOURCE_VERIFIED",
+      "decidedHere": false,
+      "retentionSchedulerFinding": null
+    },
+    {
+      "defectId": "DEF-0B4-CASE-STUDIES-READ-IGNORES-PUBLICATION-STATE",
+      "namedMissingEvidence": "The frozen record does not establish whether the list query fails on the absent status column or returns rows, so what an unauthenticated caller receives is unknown; it also does not state whether any stored row is unpublished.",
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "decidedHere": false,
+      "retentionSchedulerFinding": null
+    },
+    {
+      "defectId": "DEF-0B6-SYS-LOCATION-RETENTION-HAS-NO-SCHEDULER-IN-REPOSITORY",
+      "namedMissingEvidence": "A scheduler may exist outside the repository; the frozen record cannot establish whether any invocation runs in the released configuration, so the retention breach cannot be graded.",
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "decidedHere": false,
+      "retentionSchedulerFinding": {
+        "defectId": "DEF-0B6-SYS-LOCATION-RETENTION-HAS-NO-SCHEDULER-IN-REPOSITORY",
+        "route": "apps/union-eyes/app/api/cron/location-retention/route.ts",
+        "routeDeclaresCronAuth": true,
+        "referencesToTheRouteOutsideItsOwnFile": [
+          "apps/union-eyes/db/migrations-platform/0028_location_deletion_log_shape.sql",
+          "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+          "apps/union-eyes/lib/services/location-tracking-service.ts",
+          "apps/union-eyes/scripts/lib/route-coverage-scan.ts",
+          "apps/union-eyes/scripts/lib/schema-mutation-batches.ts",
+          "apps/union-eyes/services/geofence-privacy-service.ts"
+        ],
+        "repositorySearchFinding": "Files outside the route name it; each needs reading to decide whether it schedules the route.",
+        "establishes": "What the searched repository paths contain.",
+        "doesNotEstablish": [
+          "That no retention mechanism exists. A scheduler can be configured in a deployment, a platform console or another repository, none of which is searched.",
+          "That location data is or is not deleted in any deployment."
+        ],
+        "dispositionTreatment": "REVIEW_REQUIRED stays undecided; the search result is evidence of repository content only.",
+        "status": "REQUIRES_RUNTIME_PROOF"
+      }
+    }
+  ],
+  "challenges": {
+    "method": "The files the two challenges cite are compared by blob between the challenge commit and the working tree, and every file that names the flag is compared by name.",
+    "anchorCommit": "b091158a8df04eb82c837ab0b53b115e1be70e90",
+    "citedFiles": 9,
+    "citedFilesChanged": [],
+    "flagFilesAtAnchor": 40,
+    "flagFilesNow": 40,
+    "flagFilesAdded": [],
+    "flagFilesRemoved": [],
+    "challenges": [
+      {
+        "challengeId": "CHALLENGE-0B10-OPL-01",
+        "challengedDefectId": "DEF-0B10-OPL-01",
+        "frozenDisposition": "CONDITIONALLY_BLOCKING",
+        "challengePosition": "RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF",
+        "relationToDisposition": "CHALLENGE_OF_FROZEN_DISPOSITION",
+        "isAdditionalDefect": false,
+        "supersedesFrozenDisposition": false,
+        "statuses": {
+          "sourceCitedByChallenge": "SOURCE_VERIFIED",
+          "flagNotEnforcedInEveryReleasePath": "PARTIALLY_VERIFIED",
+          "containment": "REQUIRES_RUNTIME_PROOF"
+        },
+        "requiredProof": [
+          "An executed proof, on a database that carries migration 0108, that the role the released DATABASE_URL connects as is subject to the organizations row-level-security policy (the policy is bypassed by a superuser, a table owner and any role with BYPASSRLS, and a policy that is not enabled and forced for the connecting role confines nothing).",
+          "An executed proof that a caller of one organization receives no row of another organization from the route in the intended release configuration, including the case of the flag unset and the flag at 0.",
+          "Either a code or deployment guard that makes the released runtime refuse to start with the flag unset or 0, or removal of the legacy branch; the deployment template alone is not a guard.",
+          "An institutional decision naming which organization fields a signed-in user of another organization may read and the audience that holds that permission, followed by a field projection that returns only those fields."
+        ],
+        "executedProofOnFile": 0
+      },
+      {
+        "challengeId": "CHALLENGE-0B10-OPL-07",
+        "challengedDefectId": "DEF-0B10-OPL-07",
+        "frozenDisposition": "CONDITIONALLY_BLOCKING",
+        "challengePosition": "RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF",
+        "relationToDisposition": "CHALLENGE_OF_FROZEN_DISPOSITION",
+        "isAdditionalDefect": false,
+        "supersedesFrozenDisposition": false,
+        "statuses": {
+          "sourceCitedByChallenge": "SOURCE_VERIFIED",
+          "flagNotEnforcedInEveryReleasePath": "PARTIALLY_VERIFIED",
+          "containment": "REQUIRES_RUNTIME_PROOF"
+        },
+        "requiredProof": [
+          "An executed proof, on a database that carries migration 0108, that the role the released DATABASE_URL connects as is subject to the organizations row-level-security policy (the policy is bypassed by a superuser, a table owner and any role with BYPASSRLS, and a policy that is not enabled and forced for the connecting role confines nothing).",
+          "An executed proof that a caller of one organization receives no row of another organization from the route in the intended release configuration, including the case of the flag unset and the flag at 0.",
+          "Either a code or deployment guard that makes the released runtime refuse to start with the flag unset or 0, or removal of the legacy branch; the deployment template alone is not a guard.",
+          "An institutional decision naming which organization fields a signed-in user of another organization may read and the audience that holds that permission, followed by a field projection that returns only those fields."
+        ],
+        "executedProofOnFile": 0
+      }
+    ],
+    "limitation": "Row-level-security enforcement for the connecting database role and the deployed flag value cannot be read from the repository."
+  },
+  "exposures": {
+    "allowlistFile": "apps/union-eyes/lib/public-routes.ts",
+    "allowlistEntries": 36,
+    "proxyConsultsAllowlist": true,
+    "operations": [
+      {
+        "operation": "docs/openapi/route.ts|GET",
+        "path": "/api/docs/openapi",
+        "handlerFloor": "UNDETERMINED",
+        "handlerWrapper": "FUNCTION_DECLARATION",
+        "inProxyAllowlist": false,
+        "allowlistJustification": "NONE_RECORDED",
+        "handlerDeclaresNoAuth": true,
+        "statuses": {
+          "handlerDeclaration": "SOURCE_VERIFIED",
+          "publicReachability": "REQUIRES_RUNTIME_PROOF",
+          "justification": "SOURCE_VERIFIED"
+        }
+      },
+      {
+        "operation": "docs/route.ts|GET",
+        "path": "/api/docs",
+        "handlerFloor": "UNDETERMINED",
+        "handlerWrapper": "FUNCTION_DECLARATION",
+        "inProxyAllowlist": false,
+        "allowlistJustification": "NONE_RECORDED",
+        "handlerDeclaresNoAuth": true,
+        "statuses": {
+          "handlerDeclaration": "SOURCE_VERIFIED",
+          "publicReachability": "REQUIRES_RUNTIME_PROOF",
+          "justification": "SOURCE_VERIFIED"
+        }
+      },
+      {
+        "operation": "version/route.ts|GET",
+        "path": "/api/version",
+        "handlerFloor": "UNDETERMINED",
+        "handlerWrapper": "FUNCTION_DECLARATION",
+        "inProxyAllowlist": false,
+        "allowlistJustification": "NONE_RECORDED",
+        "handlerDeclaresNoAuth": true,
+        "statuses": {
+          "handlerDeclaration": "SOURCE_VERIFIED",
+          "publicReachability": "REQUIRES_RUNTIME_PROOF",
+          "justification": "SOURCE_VERIFIED"
+        }
+      }
+    ],
+    "finding": "Each of the three handlers is a plain exported function with no authentication wrapper, so the handler itself does not restrict the caller. None of the three paths is in the proxy allowlist the proxy consults (only /api/docs/openapi.json is), so whether an unauthenticated caller reaches them is decided by the proxy and the deployment, which the repository cannot show. The record keeps the exposure contract as release blocking and does not rely on either reading.",
+    "limitation": "The proxy matcher and the deployment edge are not executed here."
+  },
+  "perCapita": {
+    "sharedTable": "perCapitaRemittances",
+    "routes": [
+      {
+        "route": "healthwelfare/plans/route.ts",
+        "wrapper": "crudRoutes",
+        "table": "perCapitaRemittances",
+        "orgScoped": true,
+        "ownerColumn": null,
+        "readFloor": "ANY_AUTHENTICATED",
+        "readRole": "member"
+      },
+      {
+        "route": "tax/slips/route.ts",
+        "wrapper": "crudRoutes",
+        "table": "perCapitaRemittances",
+        "orgScoped": true,
+        "ownerColumn": null,
+        "readFloor": "ANY_AUTHENTICATED",
+        "readRole": "member"
+      },
+      {
+        "route": "tax/t106/route.ts",
+        "wrapper": "crudRoutes",
+        "table": "perCapitaRemittances",
+        "orgScoped": true,
+        "ownerColumn": null,
+        "readFloor": "ANY_AUTHENTICATED",
+        "readRole": "member"
+      },
+      {
+        "route": "tax/rl-1/generate/route.ts",
+        "wrapper": "crudRoutes",
+        "table": "perCapitaRemittances",
+        "orgScoped": true,
+        "ownerColumn": null,
+        "readFloor": "ANY_AUTHENTICATED",
+        "readRole": "member"
+      },
+      {
+        "route": "tax/cope/receipts/route.ts",
+        "wrapper": "crudRoutes",
+        "table": "perCapitaRemittances",
+        "orgScoped": true,
+        "ownerColumn": null,
+        "readFloor": "ANY_AUTHENTICATED",
+        "readRole": "member"
+      }
+    ],
+    "allRoutesBindSharedTable": true,
+    "allRoutesShareReadFloor": true,
+    "records": [
+      {
+        "defectId": "DEF-0B8-JUR-HEALTH-WELFARE-PLANS-PATH-IS-THE-PER-CAPITA-REMITTANCE-LEDGER-AT-MEMBER-FLOOR",
+        "severity": "MEDIUM",
+        "releaseBlocking": false,
+        "path": "healthwelfare/plans",
+        "inReleaseDebtIndex": false
+      },
+      {
+        "defectId": "DEF-0B12-CRUD-TAX-PATHS-SERVE-THE-PER-CAPITA-REMITTANCE-LEDGER-TO-ANY-MEMBER",
+        "severity": "HIGH",
+        "releaseBlocking": true,
+        "paths": [
+          "tax/slips",
+          "tax/t106",
+          "tax/rl-1/generate",
+          "tax/cope/receipts"
+        ],
+        "inReleaseDebtIndex": true
+      }
+    ],
+    "finding": "The health-and-welfare path and the four tax paths are separate advertised paths over the same table at the same member read floor. The source shows the same exposure on both. The difference between the MEDIUM and the HIGH rating is therefore not explained by the route source.",
+    "severityChanged": false,
+    "reratedHere": false,
+    "carriedGap": "The MEDIUM record is not an item of the 150-item index although the route it describes exposes the same ledger at the same floor as the indexed HIGH record. It is cross-referenced here and remains an obligation of its engineering owner; it is not added to the index by this gate.",
+    "status": "SOURCE_VERIFIED",
+    "runtimeStatus": "REQUIRES_RUNTIME_PROOF"
+  },
+  "carbon": {
+    "method": "The files that name carbon accounting are listed from the repository, each is read for an estimate or measurement statement, and the four route files are read for an import of any carbon component.",
+    "filesNamingCarbonAccounting": [
+      "apps/union-eyes/app/api/carbon/dashboard/route.ts",
+      "apps/union-eyes/app/api/carbon/validate/route.ts",
+      "apps/union-eyes/backend/services/api/carbon_accounting_integration_views.py",
+      "apps/union-eyes/backend/services/api/carbon_accounting_service_views.py",
+      "apps/union-eyes/backend/services/api/urls.py",
+      "apps/union-eyes/db/migrations/0004_phase2_complete.sql",
+      "apps/union-eyes/modules.d.ts",
+      "apps/union-eyes/scripts/bootstrap-v2/framework_application.py",
+      "apps/union-eyes/services/__tests__/carbon-accounting-integration.test.ts",
+      "apps/union-eyes/services/__tests__/carbon-accounting-service.test.ts",
+      "apps/union-eyes/services/carbon-accounting-integration.ts",
+      "apps/union-eyes/services/carbon-accounting-service.ts"
+    ],
+    "components": [
+      {
+        "file": "apps/union-eyes/services/carbon-accounting-service.ts",
+        "exists": true,
+        "recordsEstimateOrCallerEnteredFigures": true,
+        "statesMeasured": false
+      },
+      {
+        "file": "apps/union-eyes/services/carbon-accounting-integration.ts",
+        "exists": true,
+        "recordsEstimateOrCallerEnteredFigures": true,
+        "statesMeasured": false
+      },
+      {
+        "file": "apps/union-eyes/backend/services/api/carbon_accounting_service_views.py",
+        "exists": true,
+        "recordsEstimateOrCallerEnteredFigures": true,
+        "statesMeasured": false
+      },
+      {
+        "file": "apps/union-eyes/db/migrations/0004_phase2_complete.sql",
+        "exists": true,
+        "recordsEstimateOrCallerEnteredFigures": true,
+        "statesMeasured": false
+      }
+    ],
+    "routeFiles": [
+      {
+        "file": "apps/union-eyes/app/api/carbon/dashboard/route.ts",
+        "importsCarbonService": false,
+        "importsAnyServiceOrDatabase": false
+      },
+      {
+        "file": "apps/union-eyes/app/api/carbon/infrastructure/route.ts",
+        "importsCarbonService": false,
+        "importsAnyServiceOrDatabase": false
+      },
+      {
+        "file": "apps/union-eyes/app/api/carbon/validate/route.ts",
+        "importsCarbonService": false,
+        "importsAnyServiceOrDatabase": false
+      }
+    ],
+    "filesImportingACarbonService": [
+      "apps/union-eyes/backend/services/api/carbon_accounting_integration_views.py",
+      "apps/union-eyes/backend/services/api/urls.py",
+      "apps/union-eyes/modules.d.ts",
+      "apps/union-eyes/scripts/bootstrap-v2/framework_application.py",
+      "apps/union-eyes/services/__tests__/carbon-accounting-integration.test.ts",
+      "apps/union-eyes/services/__tests__/carbon-accounting-service.test.ts"
+    ],
+    "reachableFromTheFourRoutes": [],
+    "supersededStatement": "No table, service, persona source, register entry or product caller names carbon accounting or Azure emissions monitoring.",
+    "narrowerSupportedFinding": "Sources outside the four route files do name carbon accounting. None of them has been demonstrated to supply measured evidence to the four classified routes: no route file imports a carbon component, and the components record their figures as estimates or caller-entered amounts.",
+    "narrowerFindingHolds": true,
+    "notEstablished": [
+      "That no measured carbon data source exists anywhere in the platform.",
+      "That the backend recording path is outside the released scope.",
+      "That a source citation is absent from every register for the four operations."
+    ],
+    "status": "PARTIALLY_VERIFIED",
+    "limitation": "Absence of an import in the four files shows no source-level link. It does not show that the components are unused at runtime or that no measured feed exists in a deployment."
+  },
+  "sourceBlobs": [
+    {
+      "sha256": "e157da59b6b89c68c59ab4d42a9a9d8fe192a0cad3bd383233a4109c1f18bf38",
+      "file": "apps/union-eyes/actions/analytics-actions.ts"
+    },
+    {
+      "sha256": "1ead0c5b4d5469b012a318ca93656a518d375fc6822454a26945e42c4aa767eb",
+      "file": "apps/union-eyes/app/api/activities/route.ts"
+    },
+    {
+      "sha256": "abaf86dc2aa832e240db5f87e976a5a9f192ab9608fcfe51f7b1dc281f6e9955",
+      "file": "apps/union-eyes/app/api/admin/alerts/escalations/[id]/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/admin/alerts/escalations/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/admin/alerts/executions/route.ts"
+    },
+    {
+      "sha256": "abaf86dc2aa832e240db5f87e976a5a9f192ab9608fcfe51f7b1dc281f6e9955",
+      "file": "apps/union-eyes/app/api/admin/alerts/recipients/[id]/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/admin/alerts/recipients/route.ts"
+    },
+    {
+      "sha256": "abaf86dc2aa832e240db5f87e976a5a9f192ab9608fcfe51f7b1dc281f6e9955",
+      "file": "apps/union-eyes/app/api/admin/alerts/rules/[id]/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/admin/alerts/rules/route.ts"
+    },
+    {
+      "sha256": "080561ce91aca61051f1c47f45e993ec7808dbe03cd00d7e4fac1e64b1a13f6a",
+      "file": "apps/union-eyes/app/api/admin/billing-cycles/preview/route.ts"
+    },
+    {
+      "sha256": "eaad0e8419fbeba1e04c31843aac687f4f1f001a81c33a9aab4d3c5a6087f417",
+      "file": "apps/union-eyes/app/api/admin/billing-cycles/route.ts"
+    },
+    {
+      "sha256": "8f2b140cfb791c6787602b0632c0d683859a9238822fa33bbb766c79b3017232",
+      "file": "apps/union-eyes/app/api/admin/clc/analytics/annual-report/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/admin/clc/analytics/anomalies/route.ts"
+    },
+    {
+      "sha256": "1d5dcbb5f436166c35567cc0173aef19db017cac0c3bcf42d3fd8cd765cdb4a2",
+      "file": "apps/union-eyes/app/api/admin/clc/analytics/forecast/route.ts"
+    },
+    {
+      "sha256": "bcd8cdeef753dfd0f6af23f4462b3583bd5febbcd0e3f978b9c41f06469139fe",
+      "file": "apps/union-eyes/app/api/admin/clc/analytics/multi-year-trends/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/admin/clc/analytics/patterns/route.ts"
+    },
+    {
+      "sha256": "d2263b3da06ac7032933da785127b0e85006846e26ebca2d31519ed5d89859c9",
+      "file": "apps/union-eyes/app/api/admin/clc/analytics/trends/route.ts"
+    },
+    {
+      "sha256": "abaf86dc2aa832e240db5f87e976a5a9f192ab9608fcfe51f7b1dc281f6e9955",
+      "file": "apps/union-eyes/app/api/admin/employment/[id]/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/admin/employment/member/[memberId]/history/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/admin/employment/member/[memberId]/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/admin/employment/route.ts"
+    },
+    {
+      "sha256": "20c90dffa806a57539b18892bded3c3d1ac0c395d3d833d7523970731a5352a0",
+      "file": "apps/union-eyes/app/api/admin/fix-super-admin-roles/route.ts"
+    },
+    {
+      "sha256": "abaf86dc2aa832e240db5f87e976a5a9f192ab9608fcfe51f7b1dc281f6e9955",
+      "file": "apps/union-eyes/app/api/admin/job-classifications/[id]/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/admin/job-classifications/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/admin/jobs/route.ts"
+    },
+    {
+      "sha256": "abaf86dc2aa832e240db5f87e976a5a9f192ab9608fcfe51f7b1dc281f6e9955",
+      "file": "apps/union-eyes/app/api/admin/leaves/[id]/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/admin/leaves/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/admin/lro/metrics/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/admin/members/bulk-import/route.ts"
+    },
+    {
+      "sha256": "abaf86dc2aa832e240db5f87e976a5a9f192ab9608fcfe51f7b1dc281f6e9955",
+      "file": "apps/union-eyes/app/api/admin/organizations/[id]/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/admin/organizations/bulk-import/route.ts"
+    },
+    {
+      "sha256": "274067133b7f4d28e567eea567ddcab6684350e154b17e15d42142f9e63c72a9",
+      "file": "apps/union-eyes/app/api/admin/organizations/route.ts"
+    },
+    {
+      "sha256": "aee183ba93b91f5cad96243fe1cd5af5764547be8cde71345d2f9aeb8cf6f5c9",
+      "file": "apps/union-eyes/app/api/admin/pki/certificates/[id]/route.ts"
+    },
+    {
+      "sha256": "6e80bc74023d6358b874d4a7d770e8cc583ace10a4faee4cd018923fc34c1e9b",
+      "file": "apps/union-eyes/app/api/admin/pki/certificates/route.ts"
+    },
+    {
+      "sha256": "9c31df3f9e00bf97ec7424cae00b8fb4a102cb749767ecf760b9f972fe02da58",
+      "file": "apps/union-eyes/app/api/admin/pki/signatures/[id]/sign/route.ts"
+    },
+    {
+      "sha256": "2fd5bf181a0549c112c6c1909f880ba465d4ff72fe0bf5143ac6b8711079f2f2",
+      "file": "apps/union-eyes/app/api/admin/pki/signatures/[id]/verify/route.ts"
+    },
+    {
+      "sha256": "6e80bc74023d6358b874d4a7d770e8cc583ace10a4faee4cd018923fc34c1e9b",
+      "file": "apps/union-eyes/app/api/admin/pki/signatures/route.ts"
+    },
+    {
+      "sha256": "51a05037e0dbbf11d847bfeee52e42cc821e1f73df1a6c933f45ac9e9bcb2530",
+      "file": "apps/union-eyes/app/api/admin/pki/workflows/[id]/route.ts"
+    },
+    {
+      "sha256": "6e80bc74023d6358b874d4a7d770e8cc583ace10a4faee4cd018923fc34c1e9b",
+      "file": "apps/union-eyes/app/api/admin/pki/workflows/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/admin/roles/batch/route.ts"
+    },
+    {
+      "sha256": "abaf86dc2aa832e240db5f87e976a5a9f192ab9608fcfe51f7b1dc281f6e9955",
+      "file": "apps/union-eyes/app/api/admin/segments/[id]/execute/route.ts"
+    },
+    {
+      "sha256": "abaf86dc2aa832e240db5f87e976a5a9f192ab9608fcfe51f7b1dc281f6e9955",
+      "file": "apps/union-eyes/app/api/admin/segments/[id]/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/admin/segments/route.ts"
+    },
+    {
+      "sha256": "6660c0545d5c008aae274586325b72ccc53ac9c03e11ff74027ec0fc2f874187",
+      "file": "apps/union-eyes/app/api/admin/stats/activity/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/admin/system/settings/route.ts"
+    },
+    {
+      "sha256": "aff4a029625af142baf2db3c527829c78e3e1b819dcb724ca9b82b561284e550",
+      "file": "apps/union-eyes/app/api/admin/update-role/route.ts"
+    },
+    {
+      "sha256": "9c8b1c5d7aa88972d44614f4f73b30bc0df1d162d8882d90e0639ecc4631328f",
+      "file": "apps/union-eyes/app/api/admin/users/route.ts"
+    },
+    {
+      "sha256": "60dd64f327fbd3732e570db09f1d0d595cd33d47b2344d086e0a2e1802e76aad",
+      "file": "apps/union-eyes/app/api/ai/copilot/query/route.ts"
+    },
+    {
+      "sha256": "410fe8ab3448ed32911c6c088ae7940217a6b40e8b8ac8c1166f1a0d745cbd29",
+      "file": "apps/union-eyes/app/api/ai/employers/[id]/risk/route.ts"
+    },
+    {
+      "sha256": "275b8db12343d5a582394ff1c6bd4d8fa35cef9d7b5b6ae2cd9ecf6168a1450c",
+      "file": "apps/union-eyes/app/api/ai/finance/analysis/route.ts"
+    },
+    {
+      "sha256": "dd0f621bac362649b0fad74c6a6183a58e980698f5185c95ba886f1f66a87397",
+      "file": "apps/union-eyes/app/api/ai/grievances/[id]/clause-reasoning/route.ts"
+    },
+    {
+      "sha256": "38d96ce9182c3064b62e19175b54ce2fefe55f8932a00041d076d650429f1eb7",
+      "file": "apps/union-eyes/app/api/ai/grievances/[id]/triage/route.ts"
+    },
+    {
+      "sha256": "ade4c9f609f858389e6f064e8c9975880a21f853e4a221c12ec88b318773bd09",
+      "file": "apps/union-eyes/app/api/ai/grievances/triage/route.ts"
+    },
+    {
+      "sha256": "0d67fa1364dee30462881f310d5bd8afa653d89a070e686f6f138435a53add69",
+      "file": "apps/union-eyes/app/api/ai/insights/[reportType]/route.ts"
+    },
+    {
+      "sha256": "521182863f0002629ebd790c1bf588b2e2d227e323823dde8385ca01e56a9b81",
+      "file": "apps/union-eyes/app/api/ai/pension/members/[id]/projection/route.ts"
+    },
+    {
+      "sha256": "28c9956171c2f81327678585d5c41444434e26702115abb86578f9daa14818f3",
+      "file": "apps/union-eyes/app/api/ai/pension/plans/[id]/funding/route.ts"
+    },
+    {
+      "sha256": "dec6bd29fa36342d74ccc876d2da0d6b91456318081749392b3bf8b6fc802d79",
+      "file": "apps/union-eyes/app/api/ai/pension/plans/[id]/trustee-summary/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/claims/categories/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/claims/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/claims/stewards/route.ts"
+    },
+    {
+      "sha256": "60732690c062dd63346b62c8664679b5dbd12b318df8bf632779862e1fb8e782",
+      "file": "apps/union-eyes/app/api/analytics/claims/trends/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/clause-stats/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/comparative/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/dashboard/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/deadlines-metrics/route.ts"
+    },
+    {
+      "sha256": "1dc6d123697537e540d936ae38fd6d132b8053291492df79fd832493f8b12994",
+      "file": "apps/union-eyes/app/api/analytics/executive/route.ts"
+    },
+    {
+      "sha256": "1dc6d123697537e540d936ae38fd6d132b8053291492df79fd832493f8b12994",
+      "file": "apps/union-eyes/app/api/analytics/financial/categories/route.ts"
+    },
+    {
+      "sha256": "1dc6d123697537e540d936ae38fd6d132b8053291492df79fd832493f8b12994",
+      "file": "apps/union-eyes/app/api/analytics/financial/costs/route.ts"
+    },
+    {
+      "sha256": "1dc6d123697537e540d936ae38fd6d132b8053291492df79fd832493f8b12994",
+      "file": "apps/union-eyes/app/api/analytics/financial/outcomes/route.ts"
+    },
+    {
+      "sha256": "1dc6d123697537e540d936ae38fd6d132b8053291492df79fd832493f8b12994",
+      "file": "apps/union-eyes/app/api/analytics/financial/route.ts"
+    },
+    {
+      "sha256": "1dc6d123697537e540d936ae38fd6d132b8053291492df79fd832493f8b12994",
+      "file": "apps/union-eyes/app/api/analytics/financial/trends/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/heatmap/route.ts"
+    },
+    {
+      "sha256": "6cf9ff842e2c32d251322c2e0ab56ff824ff106ce2a9a56e2b9b0504d3bf5e3e",
+      "file": "apps/union-eyes/app/api/analytics/insights/route.ts"
+    },
+    {
+      "sha256": "6d623a0d3e3711bd4e5319b4b9a99a666d18f14c50dac62f18291bbf1c5cb5ce",
+      "file": "apps/union-eyes/app/api/analytics/insights/weekly-summary/route.ts"
+    },
+    {
+      "sha256": "9b757366f9c8dfd417f1920d957de198ffa81f28e14ed274b808c10d99531bc5",
+      "file": "apps/union-eyes/app/api/analytics/kpis/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/members/churn-risk/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/members/cohorts/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/members/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/members/trends/route.ts"
+    },
+    {
+      "sha256": "233f5b5ccb1c22d744b98c3a8c94871fb179851e5a9b46dc126491ac829a52c0",
+      "file": "apps/union-eyes/app/api/analytics/metrics/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/operational/bottlenecks/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/operational/queues/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/operational/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/operational/sla/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/operational/workload/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/org-activity/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/precedent-stats/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/predictions/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/refresh/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/analytics/trends/route.ts"
+    },
+    {
+      "sha256": "ba18494083222964ce524642418d882a6ae2c69286fc963074f40fe068b3f3ff",
+      "file": "apps/union-eyes/app/api/arbitration/precedents/[id]/citations/route.ts"
+    },
+    {
+      "sha256": "ba18494083222964ce524642418d882a6ae2c69286fc963074f40fe068b3f3ff",
+      "file": "apps/union-eyes/app/api/arbitration/precedents/[id]/documents/route.ts"
+    },
+    {
+      "sha256": "ba18494083222964ce524642418d882a6ae2c69286fc963074f40fe068b3f3ff",
+      "file": "apps/union-eyes/app/api/arbitration/precedents/[id]/route.ts"
+    },
+    {
+      "sha256": "185a0a2cc447ad35783df6983469467983b809adf8a192c545e362bcc18d33b6",
+      "file": "apps/union-eyes/app/api/arbitration/precedents/route.ts"
+    },
+    {
+      "sha256": "185a0a2cc447ad35783df6983469467983b809adf8a192c545e362bcc18d33b6",
+      "file": "apps/union-eyes/app/api/arbitration/precedents/search/route.ts"
+    },
+    {
+      "sha256": "f0b201ae553af611e3fd3c73d770e0cbdb9b1ad81268324bf0b960818e37de9a",
+      "file": "apps/union-eyes/app/api/arbitrations/[id]/route.ts"
+    },
+    {
+      "sha256": "d85ab20299c9a8e82cb11bee3d29aadf4ab3f71e64fb261bcf8f0f08bb91db30",
+      "file": "apps/union-eyes/app/api/arbitrations/route.ts"
+    },
+    {
+      "sha256": "bc7c9ffa09f549dca8f96110302130f4b2ddd78bab432afd1b9e5a17444f9236",
+      "file": "apps/union-eyes/app/api/audits/[id]/route.ts"
+    },
+    {
+      "sha256": "901d3257bb30902d7bb668ae3c0334dceda0f9f5121a24a37f2513b8350c9c83",
+      "file": "apps/union-eyes/app/api/bargaining-notes/[id]/route.ts"
+    },
+    {
+      "sha256": "8ebbff92a8a00954b063789015f21f9d727738a3a67bc01c406e3810dc8740c4",
+      "file": "apps/union-eyes/app/api/bargaining-notes/route.ts"
+    },
+    {
+      "sha256": "21d9e9dd9b2eee39ab59d2e311609391e89461fdc328a0b36363f19e2e18e448",
+      "file": "apps/union-eyes/app/api/bargaining/negotiations/[id]/route.ts"
+    },
+    {
+      "sha256": "ed403dbb240461447c7e8196a59000976cac4bc541be967647974091efa0d7db",
+      "file": "apps/union-eyes/app/api/bargaining/negotiations/route.ts"
+    },
+    {
+      "sha256": "635be8a95ee2e49c3f28dc678385e7479c09b59c75b661f9e587c4599658e037",
+      "file": "apps/union-eyes/app/api/bargaining/proposals/[id]/route.ts"
+    },
+    {
+      "sha256": "fedb74fbe15615f5679ddde3c4be6526253a8459d2489a19329ee03164e2be15",
+      "file": "apps/union-eyes/app/api/bargaining/proposals/route.ts"
+    },
+    {
+      "sha256": "a8778ad9649204caf1707863d803170b5873b888171e7f92dc597fe411f08492",
+      "file": "apps/union-eyes/app/api/bargaining/tentative-agreements/route.ts"
+    },
+    {
+      "sha256": "9f9109bf7974039ce062f1b4bf12799e7d64452d36b5e289017da7e671237fa2",
+      "file": "apps/union-eyes/app/api/billing/credits/check-expired/route.ts"
+    },
+    {
+      "sha256": "fc00798762ec3152a10ae5fdfe1bf9b6949fc1e378164844b4c48edcec410985",
+      "file": "apps/union-eyes/app/api/billing/invoices/route.ts"
+    },
+    {
+      "sha256": "3c93b8cf4e0b75acb7710549a85204dbed634ebad8c91dd6aef4a2b68880ead9",
+      "file": "apps/union-eyes/app/api/billing/replay-invoice/route.ts"
+    },
+    {
+      "sha256": "27eacc37ce6e3c8b7267957450685398b0282b75572f55a71c6523c612512fc0",
+      "file": "apps/union-eyes/app/api/billing/send-batch/route.ts"
+    },
+    {
+      "sha256": "43303d60615579d89921bbf8334582c7e0816793a3172a20861aadc41b9a33f8",
+      "file": "apps/union-eyes/app/api/billing/send-invoice/route.ts"
+    },
+    {
+      "sha256": "be49f69d8a5a0e71ad2201b5281b3678c76c360f92f6d873c6bce3ccf3514c1d",
+      "file": "apps/union-eyes/app/api/billing/subscriptions/[id]/route.ts"
+    },
+    {
+      "sha256": "20f64e553babd60c719a19ad6b3db213c81c10f47fe6ab129d9ccd72c075a54b",
+      "file": "apps/union-eyes/app/api/billing/subscriptions/route.ts"
+    },
+    {
+      "sha256": "f94eecd46dd4c926dcc29fad4fb3d4417052ae9381713fb0fd7913cff9afe3c6",
+      "file": "apps/union-eyes/app/api/breaks/[id]/route.ts"
+    },
+    {
+      "sha256": "bb94e1850d51fba1a3e4ffa3232da8a1286e6af83ea2ac4811f43f6962753113",
+      "file": "apps/union-eyes/app/api/breaks/policies/[id]/route.ts"
+    },
+    {
+      "sha256": "865cd200253de3b2a1ced72a5d7bc6c9fd856da18b63e79f6b62d4dccc30797a",
+      "file": "apps/union-eyes/app/api/breaks/policies/route.ts"
+    },
+    {
+      "sha256": "bec4513427c887c2e78c94f9ddb2b3c5d9ca6ea80bbb813e4641abe6786c58fb",
+      "file": "apps/union-eyes/app/api/breaks/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/bulk-import/route.ts"
+    },
+    {
+      "sha256": "85dad9ee585ef796d3720c629dc623acc05120aaf7ec8999842f80d0cf5f7c03",
+      "file": "apps/union-eyes/app/api/calendar-sync/connections/[id]/route.ts"
+    },
+    {
+      "sha256": "6a8498612a6c457cff1cd937ed50c61257bfe2af76d462f6556f2d602ea1f7b2",
+      "file": "apps/union-eyes/app/api/calendar-sync/connections/[id]/sync/route.ts"
+    },
+    {
+      "sha256": "e6d23976c4f7ea794ce5a50c3e1f96340c01867f5c8cc2b5ab4a9ef8f9a95ab9",
+      "file": "apps/union-eyes/app/api/calendar-sync/connections/route.ts"
+    },
+    {
+      "sha256": "3c7f258b45b0919ed5bed6594f9ed5333d3ca055f7ea9e5187e421a5173b2fdd",
+      "file": "apps/union-eyes/app/api/calendar-sync/google/auth/route.ts"
+    },
+    {
+      "sha256": "8466f25dc9f7f73219603e6fc9b2546d45667f0349e868c5f4cbe448d36041a7",
+      "file": "apps/union-eyes/app/api/calendar-sync/google/callback/route.ts"
+    },
+    {
+      "sha256": "7ee0a333d0d3b6e278d54461e1e26811d67a788f37a1d059a9a2232085d4b6b5",
+      "file": "apps/union-eyes/app/api/calendar-sync/microsoft/auth/route.ts"
+    },
+    {
+      "sha256": "54c7aaf0536493d1e0bce55a824fab454953c08a0f60351a5c669a2e7ba642ea",
+      "file": "apps/union-eyes/app/api/calendar-sync/microsoft/callback/route.ts"
+    },
+    {
+      "sha256": "21159cb12dcde34632796647ddf0d369f8ca69dfb782169594a001c01243f410",
+      "file": "apps/union-eyes/app/api/calendar/events/[id]/route.ts"
+    },
+    {
+      "sha256": "33fd81d1e97fd6044e66ddfd10b411d33858e7606b03cb3df1ab87803c0712c2",
+      "file": "apps/union-eyes/app/api/calendar/events/route.ts"
+    },
+    {
+      "sha256": "75b1641dbf0a02964c5085eeb6576a6d9a4006cd225d71f16702d1440e6441df",
+      "file": "apps/union-eyes/app/api/calendars/[id]/events/route.ts"
+    },
+    {
+      "sha256": "52bd3c81ddcee15ca1af3fb9b2bb9f13a74191d072897690090d7b8d69a1ceb4",
+      "file": "apps/union-eyes/app/api/calendars/[id]/route.ts"
+    },
+    {
+      "sha256": "868360e5121f5d5c6f4c2b94171046efed76d77d288420b4b8ee2607873541fc",
+      "file": "apps/union-eyes/app/api/calendars/route.ts"
+    },
+    {
+      "sha256": "78aed7124a870edbc56ddf0dbf1243818ea85d945af78b9dd14bd4e39acdcf0b",
+      "file": "apps/union-eyes/app/api/carbon/dashboard/route.ts"
+    },
+    {
+      "sha256": "f3f79516ef85ce3eadcd99dd3a6811d3b9ab50088af0449890d501a52cbe7ffe",
+      "file": "apps/union-eyes/app/api/carbon/infrastructure/route.ts"
+    },
+    {
+      "sha256": "c809031b177d7fa860843c0a005fb7aca38befcdc323ddce53a89b11c405da73",
+      "file": "apps/union-eyes/app/api/carbon/validate/route.ts"
+    },
+    {
+      "sha256": "c53372f46bf7df0ae9000d9fdc787e9dfc8c9dcd366ce7fe2548b5e93d01e289",
+      "file": "apps/union-eyes/app/api/case-studies/[slug]/route.ts"
+    },
+    {
+      "sha256": "84188561375efb5bfaf6599facde589084dc9cd99e8c756a562d005f4a548e77",
+      "file": "apps/union-eyes/app/api/case-studies/route.ts"
+    },
+    {
+      "sha256": "29ee691775f39631ac78e177b2009aa1f9113472ca85eab9f57532b7eab83e31",
+      "file": "apps/union-eyes/app/api/cba-intelligence/extraction/route.ts"
+    },
+    {
+      "sha256": "d52e482ea9703a951d66c25170256ddd06ad331cbf1531b4d623f4660c4fd0cc",
+      "file": "apps/union-eyes/app/api/cba-intelligence/ingestion/route.ts"
+    },
+    {
+      "sha256": "c6bd73a8c722846d66f415c24531dc5a35ffc4a4cf3596837cdd9213c759d547",
+      "file": "apps/union-eyes/app/api/cba-intelligence/ingestion/run/route.ts"
+    },
+    {
+      "sha256": "768b1cd58160e0d024a9961fade892f455f99770210c2b9adf9543fb3f5d3c9b",
+      "file": "apps/union-eyes/app/api/cba-intelligence/ingestion/seed/route.ts"
+    },
+    {
+      "sha256": "19b7546fa7ec62791fa303c27cb60e89420d7fbe0c03c5413bcd283d11514891",
+      "file": "apps/union-eyes/app/api/cba-intelligence/review/route.ts"
+    },
+    {
+      "sha256": "b120d260534638bb941099668fa8c77e6285c9f10244fbd5a2ef6010d73011d4",
+      "file": "apps/union-eyes/app/api/cba-intelligence/sources/[id]/route.ts"
+    },
+    {
+      "sha256": "21addb463b50a10575b24b5e8edb6aae539db56d6751aefbdd8671af3131f6ae",
+      "file": "apps/union-eyes/app/api/cba-intelligence/sources/route.ts"
+    },
+    {
+      "sha256": "ac9c6ea52024dd753800c08b3f2bed0d19f35340ef4ce629a96f5befc3336d33",
+      "file": "apps/union-eyes/app/api/cbas/[id]/route.ts"
+    },
+    {
+      "sha256": "cafd4e87a1f0dc5ba84de150536c80e18cf4d1a5cd40e7746a9968a56df94bba",
+      "file": "apps/union-eyes/app/api/chatbot/messages/route.ts"
+    },
+    {
+      "sha256": "1e8b498420f722f9dd59c4839fc0301ba60eabfc1885b28f0756f496e4ab9173",
+      "file": "apps/union-eyes/app/api/clause-library/[id]/route.ts"
+    },
+    {
+      "sha256": "ec8cb7fa337fcb114351a6ba964a764d47855030a0a764bc5eefc0fdd6b5a1c6",
+      "file": "apps/union-eyes/app/api/clauses/route.ts"
+    },
+    {
+      "sha256": "ec8cb7fa337fcb114351a6ba964a764d47855030a0a764bc5eefc0fdd6b5a1c6",
+      "file": "apps/union-eyes/app/api/clauses/search/route.ts"
+    },
+    {
+      "sha256": "c81ee915b130804870f844de6a2bfcb03b631557457bae5a941535f9549cb841",
+      "file": "apps/union-eyes/app/api/clc/dashboard/route.ts"
+    },
+    {
+      "sha256": "c81ee915b130804870f844de6a2bfcb03b631557457bae5a941535f9549cb841",
+      "file": "apps/union-eyes/app/api/clc/remittances/route.ts"
+    },
+    {
+      "sha256": "c81ee915b130804870f844de6a2bfcb03b631557457bae5a941535f9549cb841",
+      "file": "apps/union-eyes/app/api/clc/sync/route.ts"
+    },
+    {
+      "sha256": "06c7ae4a30af191b0e42ccbb8d4edcd7fe71e0f458cf179d67cbdb059972dee4",
+      "file": "apps/union-eyes/app/api/cnesst/anti-scab/[id]/route.ts"
+    },
+    {
+      "sha256": "9708e2ddabab5fe868a112966c2187bf6d5dca8a06e08ba681770ff31f7287ac",
+      "file": "apps/union-eyes/app/api/cnesst/anti-scab/route.ts"
+    },
+    {
+      "sha256": "9fea5881fe4f515167e257e0a5ef1e25c41e32da0813f73e4c64cd4e0a00635f",
+      "file": "apps/union-eyes/app/api/cnesst/filings/[id]/route.ts"
+    },
+    {
+      "sha256": "d9215b719822349e15f10baa7134d2a71e9b331381f2065b0cd2e1a61c7e2dc9",
+      "file": "apps/union-eyes/app/api/cnesst/filings/route.ts"
+    },
+    {
+      "sha256": "042bb29c301200d47cd6bd0e07b584a020b53cf8422ba0e9929ac8dc5ac95ab7",
+      "file": "apps/union-eyes/app/api/cnesst/hs-committees/[id]/route.ts"
+    },
+    {
+      "sha256": "8e8497bd522d43076a358ed1fc1340165e252917486b0b71724d062ebb26b9c0",
+      "file": "apps/union-eyes/app/api/cnesst/hs-committees/route.ts"
+    },
+    {
+      "sha256": "36e6fcc22c6d5012767ff1b79617c951af729c03d69c5952e563ee1b26be5ecf",
+      "file": "apps/union-eyes/app/api/cnesst/pay-equity/[id]/route.ts"
+    },
+    {
+      "sha256": "6d9f1e8396e1628a42aed83f105211ab626337b2d562f6bfd701e61d7dc6ed38",
+      "file": "apps/union-eyes/app/api/cnesst/pay-equity/route.ts"
+    },
+    {
+      "sha256": "bb13f2b358a2b1df5e228d60b24e4521802f3c7b668da90aa3bd94c2be3b273a",
+      "file": "apps/union-eyes/app/api/cnesst/preventive-withdrawals/[id]/route.ts"
+    },
+    {
+      "sha256": "777387ce80daa6d5a1ef1fcbb828056ff485245986b2be9bca160d9ba1aac00a",
+      "file": "apps/union-eyes/app/api/cnesst/preventive-withdrawals/route.ts"
+    },
+    {
+      "sha256": "155c69d6562d8406764b9a08572ab3582cc2931eeee463726d327cfe45c123de",
+      "file": "apps/union-eyes/app/api/cnesst/right-of-refusal/[id]/route.ts"
+    },
+    {
+      "sha256": "1f726e0f438bd9e902ac666b3e512bf6aa82664dc4d4255c634d3de6f6098416",
+      "file": "apps/union-eyes/app/api/cnesst/right-of-refusal/route.ts"
+    },
+    {
+      "sha256": "94e0cad3639766d3f07907e7ab8be70ff687081f24dffe26529f739876c0bbd3",
+      "file": "apps/union-eyes/app/api/cognition/cases/[id]/risk/route.ts"
+    },
+    {
+      "sha256": "6034b17fa9fb525c1cd2af71d87ebfdd123c67f80860008b73a2416263dc8599",
+      "file": "apps/union-eyes/app/api/cognition/engagement/route.ts"
+    },
+    {
+      "sha256": "ce58168045f5d86df348ea2575ce2b2c253b986c6eaffa8046c6693aac6f4e31",
+      "file": "apps/union-eyes/app/api/cognition/executive-summary/route.ts"
+    },
+    {
+      "sha256": "f3aeec25a80d76910335aee2b2ae9a22a5a2feb341d8cfb6458de8fbc992aea0",
+      "file": "apps/union-eyes/app/api/cognition/kpis/route.ts"
+    },
+    {
+      "sha256": "81574fe4b3e12c892b5dc850b5a7108d8fb888a738ba984d3efa79e83d42d06e",
+      "file": "apps/union-eyes/app/api/cognition/precedents/route.ts"
+    },
+    {
+      "sha256": "e053b57f92c10bee83e0bb0c7de53254c252fe8c4cc1ef275ff2ba8968ff59dd",
+      "file": "apps/union-eyes/app/api/cognition/workload/route.ts"
+    },
+    {
+      "sha256": "f4de27ff1d90c7d54e0b5dce422e428dd8ef7ec4465bed5e362d38ddf5841377",
+      "file": "apps/union-eyes/app/api/committees/[id]/route.ts"
+    },
+    {
+      "sha256": "c17355a321bc9b36fada7e3eac8a76a777f0d9f0e3169159faca0f2de870b52f",
+      "file": "apps/union-eyes/app/api/committees/route.ts"
+    },
+    {
+      "sha256": "c570ee434bb47f534e4e81e38d674c593364e00aa8405e92ee81c0c06889f427",
+      "file": "apps/union-eyes/app/api/communications/campaigns/[id]/analytics/route.ts"
+    },
+    {
+      "sha256": "c570ee434bb47f534e4e81e38d674c593364e00aa8405e92ee81c0c06889f427",
+      "file": "apps/union-eyes/app/api/communications/campaigns/[id]/route.ts"
+    },
+    {
+      "sha256": "c570ee434bb47f534e4e81e38d674c593364e00aa8405e92ee81c0c06889f427",
+      "file": "apps/union-eyes/app/api/communications/campaigns/[id]/schedule/route.ts"
+    },
+    {
+      "sha256": "c570ee434bb47f534e4e81e38d674c593364e00aa8405e92ee81c0c06889f427",
+      "file": "apps/union-eyes/app/api/communications/campaigns/[id]/send-test/route.ts"
+    },
+    {
+      "sha256": "f79a3933f7a0bee9f3fe4646cae34b11f5903fedfa699aedd7635e833aab73c1",
+      "file": "apps/union-eyes/app/api/communications/campaigns/route.ts"
+    },
+    {
+      "sha256": "a06dcb97fd38fced7ff90f2cfb832e09b0cd72e5fee8d087edd1dc727159fa57",
+      "file": "apps/union-eyes/app/api/communications/distribution-lists/[id]/route.ts"
+    },
+    {
+      "sha256": "793ac048739baaf8c78c2d7925720718979135175486276d0571892931af0502",
+      "file": "apps/union-eyes/app/api/communications/distribution-lists/route.ts"
+    },
+    {
+      "sha256": "5ba7320bf6b6c8d2fb9a781aaac1d8ed3edc60b5202ae43b6a7b5f47694ca2c0",
+      "file": "apps/union-eyes/app/api/communications/sms/campaigns/route.ts"
+    },
+    {
+      "sha256": "0cc8b0b9960584c8139577c9b919ab476a8793364d3498d4e5b131363b959c5a",
+      "file": "apps/union-eyes/app/api/communications/sms/conversations/[conversationId]/read/route.ts"
+    },
+    {
+      "sha256": "a43819cccc74e905e1c61b4e96ab88d3dd683eacca46794ee6aceda53890d06f",
+      "file": "apps/union-eyes/app/api/communications/sms/conversations/route.ts"
+    },
+    {
+      "sha256": "2e1a5f0f2688977b51c30a35fe926a7725053331cbe6fe0b9ca579aa69ca0a8c",
+      "file": "apps/union-eyes/app/api/communications/sms/route.ts"
+    },
+    {
+      "sha256": "f63a6a2db8fad84c0f655ea2d70fe70c560689b7d7293f98e49a31230027257d",
+      "file": "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/route.ts"
+    },
+    {
+      "sha256": "4d118874a17f47d18b7f390d6adcff81e86896eadd56cb2db513fbccc19badad",
+      "file": "apps/union-eyes/app/api/communications/surveys/[surveyId]/results/route.ts"
+    },
+    {
+      "sha256": "21efd1b612fb919882fbe5296b2c14ac97b6a7fd82343ab4c815b1a9399f53dd",
+      "file": "apps/union-eyes/app/api/communications/surveys/[surveyId]/route.ts"
+    },
+    {
+      "sha256": "12c0de5b3a1339a3520bb854a724c792db170c35a7e6f3b1e15e657da1d74eb9",
+      "file": "apps/union-eyes/app/api/communications/surveys/route.ts"
+    },
+    {
+      "sha256": "d01be020e77472ab7d845f33d9aba72170acdf69645438e2079f1487f7db854e",
+      "file": "apps/union-eyes/app/api/communications/templates/[id]/duplicate/route.ts"
+    },
+    {
+      "sha256": "070e12af48731952c46e2edca44f8bb1e29c6feaef32d7e7a3f7b9b1b36edcec",
+      "file": "apps/union-eyes/app/api/communications/templates/[id]/route.ts"
+    },
+    {
+      "sha256": "7cd5722fe0138d56211eb7ba45019567454492edc900a1db723fd696e1ee9ccf",
+      "file": "apps/union-eyes/app/api/communications/templates/route.ts"
+    },
+    {
+      "sha256": "50f4139e9e1f1b95ff1edc9fd5f83551689a6c551f11a831e6b644b0dbb3176b",
+      "file": "apps/union-eyes/app/api/compliance/validate/route.ts"
+    },
+    {
+      "sha256": "fa6eaea2e027ee4a15bda7dc26a4a5e85d74c7b0299a2a24e220dd82c4b7a098",
+      "file": "apps/union-eyes/app/api/continuity/inheritance/route.ts"
+    },
+    {
+      "sha256": "562d32812c76d284d0b1ffe75cc5fa8e8811306da48f60368ada49819f7f6652",
+      "file": "apps/union-eyes/app/api/contracts/route.ts"
+    },
+    {
+      "sha256": "b5877b2faaebd14a4049dcc37bf73069c651988dc6a975135b4a42a78c269c35",
+      "file": "apps/union-eyes/app/api/cope/campaigns/route.ts"
+    },
+    {
+      "sha256": "b5877b2faaebd14a4049dcc37bf73069c651988dc6a975135b4a42a78c269c35",
+      "file": "apps/union-eyes/app/api/cope/canvassing/route.ts"
+    },
+    {
+      "sha256": "b5877b2faaebd14a4049dcc37bf73069c651988dc6a975135b4a42a78c269c35",
+      "file": "apps/union-eyes/app/api/cope/officials/route.ts"
+    },
+    {
+      "sha256": "22292cd85de2a76f5e8c8cd71ff237aca19455474021ca1bbbef69ac115de18e",
+      "file": "apps/union-eyes/app/api/cron/education-reminders/route.ts"
+    },
+    {
+      "sha256": "66fd52d79629a2bd055151603c44e9331fa71382f90203d7d93a192b3a180602",
+      "file": "apps/union-eyes/app/api/cron/location-retention/route.ts"
+    },
+    {
+      "sha256": "c849ebf00a03b5b676228ed89f4334a215bd346dc561bd204ac4d808ca243d5c",
+      "file": "apps/union-eyes/app/api/cron/observability-alerts/route.ts"
+    },
+    {
+      "sha256": "1b2a31a913015ffe0eb2678af88ed3b40ff3982d806b867b7108716d43eef7fb",
+      "file": "apps/union-eyes/app/api/cron/sla-watchdog/route.ts"
+    },
+    {
+      "sha256": "d5f5724fb5f9d09b2f7e96e932620b7c6bfbf5fcd8855e858efdb702b97a407e",
+      "file": "apps/union-eyes/app/api/debug/user-role/route.ts"
+    },
+    {
+      "sha256": "fa8898cf30572592650deda86fefbbd9cda18025ded9bfc7576b349ab67c7caf",
+      "file": "apps/union-eyes/app/api/dispatch/assign/route.ts"
+    },
+    {
+      "sha256": "092af09b3bcdbbb62368753346f49358e87a40d1e9135dce9db5654ebe43f657",
+      "file": "apps/union-eyes/app/api/dispatch/requests/route.ts"
+    },
+    {
+      "sha256": "3e21c5dc0f6fd96c7789061e5d96de746374b90875230e9e7183626e2bf711bd",
+      "file": "apps/union-eyes/app/api/docs/openapi/route.ts"
+    },
+    {
+      "sha256": "e2d5d53f06c69e3f08d69af021d7232bbc85882d96ddba749b19e20dfa04ca49",
+      "file": "apps/union-eyes/app/api/docs/route.ts"
+    },
+    {
+      "sha256": "3e312f1395664c01c163331eda51324baf57a436b82a8c1f0d431b81b1c353db",
+      "file": "apps/union-eyes/app/api/education/certifications/generate/route.ts"
+    },
+    {
+      "sha256": "3e312f1395664c01c163331eda51324baf57a436b82a8c1f0d431b81b1c353db",
+      "file": "apps/union-eyes/app/api/education/certifications/renewal-reminders/route.ts"
+    },
+    {
+      "sha256": "a71aa2fde3b8519de2a4d0df289ac21884007a012738807938b3685fc5b189d7",
+      "file": "apps/union-eyes/app/api/education/certifications/route.ts"
+    },
+    {
+      "sha256": "3e312f1395664c01c163331eda51324baf57a436b82a8c1f0d431b81b1c353db",
+      "file": "apps/union-eyes/app/api/education/completions/certificates/route.ts"
+    },
+    {
+      "sha256": "4a4a6851a496200e52b6ea99402c9f25ad26ce4257f444c4f0a0ce850d663939",
+      "file": "apps/union-eyes/app/api/education/completions/route.ts"
+    },
+    {
+      "sha256": "3e312f1395664c01c163331eda51324baf57a436b82a8c1f0d431b81b1c353db",
+      "file": "apps/union-eyes/app/api/education/courses/route.ts"
+    },
+    {
+      "sha256": "3e312f1395664c01c163331eda51324baf57a436b82a8c1f0d431b81b1c353db",
+      "file": "apps/union-eyes/app/api/education/notification-preferences/route.ts"
+    },
+    {
+      "sha256": "2354a0207418405844227bcee0484842e611d564c6ffb35439584302667f24ba",
+      "file": "apps/union-eyes/app/api/education/programs/[id]/enrollments/route.ts"
+    },
+    {
+      "sha256": "2c86b97d0282e192d01eac637142de9660e794abd986ad6cf370e2bc62b8b8be",
+      "file": "apps/union-eyes/app/api/education/programs/route.ts"
+    },
+    {
+      "sha256": "a10af8ea74fe3b8edf47b3c01951f1465532513e3b2aead8ead4521724bc39a2",
+      "file": "apps/union-eyes/app/api/education/registrations/route.ts"
+    },
+    {
+      "sha256": "2354a0207418405844227bcee0484842e611d564c6ffb35439584302667f24ba",
+      "file": "apps/union-eyes/app/api/education/sessions/[id]/attendance/route.ts"
+    },
+    {
+      "sha256": "c4ee647128b97c946a81c22d7c427d0fb78d33e6c33367f6698fa3803ffa694a",
+      "file": "apps/union-eyes/app/api/education/sessions/route.ts"
+    },
+    {
+      "sha256": "75909782492b9771753dec8d30bd775a9ba6408a38bda93463318ec8423d3c5c",
+      "file": "apps/union-eyes/app/api/employer-execution/remittance-runs/[id]/route.ts"
+    },
+    {
+      "sha256": "7909cddfd8b1e5765f221e59db45eab8eda321f967927dc713d8d6e6f4d7caec",
+      "file": "apps/union-eyes/app/api/employer-execution/replay/[runId]/route.ts"
+    },
+    {
+      "sha256": "6d51df9dd0d7101fb86dc3bcfc9a4065436a0bbf1ce8445e45b16c2f10da3a11",
+      "file": "apps/union-eyes/app/api/employers/[id]/route.ts"
+    },
+    {
+      "sha256": "f3ecfa6e15e35eaf11988cb3220260257b3333213ac5a162f0ef93f72b779c15",
+      "file": "apps/union-eyes/app/api/employers/route.ts"
+    },
+    {
+      "sha256": "5774648b9d51a9920dd0c79f3e118dc1b942bcfaeb4456527082b805219ddb03",
+      "file": "apps/union-eyes/app/api/equity/monitoring/route.ts"
+    },
+    {
+      "sha256": "5774648b9d51a9920dd0c79f3e118dc1b942bcfaeb4456527082b805219ddb03",
+      "file": "apps/union-eyes/app/api/equity/self-identify/route.ts"
+    },
+    {
+      "sha256": "5774648b9d51a9920dd0c79f3e118dc1b942bcfaeb4456527082b805219ddb03",
+      "file": "apps/union-eyes/app/api/equity/snapshots/route.ts"
+    },
+    {
+      "sha256": "21159cb12dcde34632796647ddf0d369f8ca69dfb782169594a001c01243f410",
+      "file": "apps/union-eyes/app/api/events/[id]/occurrences/route.ts"
+    },
+    {
+      "sha256": "21159cb12dcde34632796647ddf0d369f8ca69dfb782169594a001c01243f410",
+      "file": "apps/union-eyes/app/api/events/[id]/route.ts"
+    },
+    {
+      "sha256": "5e9d780e5d397ce43a1628854633d53d2723d7b9b5670cbb44a4c63cdc9cb951",
+      "file": "apps/union-eyes/app/api/exports/[id]/route.ts"
+    },
+    {
+      "sha256": "77182827346a05c98842a3dab5a61ebd807987fe5132f16881a52ad417467730",
+      "file": "apps/union-eyes/app/api/exports/csv/route.ts"
+    },
+    {
+      "sha256": "77182827346a05c98842a3dab5a61ebd807987fe5132f16881a52ad417467730",
+      "file": "apps/union-eyes/app/api/exports/excel/route.ts"
+    },
+    {
+      "sha256": "77182827346a05c98842a3dab5a61ebd807987fe5132f16881a52ad417467730",
+      "file": "apps/union-eyes/app/api/exports/pdf/route.ts"
+    },
+    {
+      "sha256": "77182827346a05c98842a3dab5a61ebd807987fe5132f16881a52ad417467730",
+      "file": "apps/union-eyes/app/api/exports/route.ts"
+    },
+    {
+      "sha256": "77f64fed25601dad911d2a45401c30e137858beeb00e14e260614bd2b3ef02c0",
+      "file": "apps/union-eyes/app/api/health-safety/hazards/[id]/route.ts"
+    },
+    {
+      "sha256": "17395cfb8652baf1ee858579980de184e8aed176b7e465f241267beb901d5bc4",
+      "file": "apps/union-eyes/app/api/health-safety/incidents/[id]/route.ts"
+    },
+    {
+      "sha256": "b102a99473c1502cffedf16ee53a6bd784cff105d17e8ac93c49f71d7c0dc876",
+      "file": "apps/union-eyes/app/api/health-safety/inspections/[id]/route.ts"
+    },
+    {
+      "sha256": "8d7597d835149b248fdc09d71f1a962949a43bca9123121513601fd6271ce749",
+      "file": "apps/union-eyes/app/api/health-safety/inspections/route.ts"
+    },
+    {
+      "sha256": "2933a22452daeebd4aac8d64dee27d58e94a9b914ebaeece6f7f5e58107014a0",
+      "file": "apps/union-eyes/app/api/health-safety/ppe/route.ts"
+    },
+    {
+      "sha256": "74db2e9f1285f64b23599c7f7c360607598fa6cc55ac0ebbedbca510be9cf5b8",
+      "file": "apps/union-eyes/app/api/healthwelfare/plans/route.ts"
+    },
+    {
+      "sha256": "5ad81b4ba1daf748103236606f9be26f1fb884e73a8b04b49fc4e9c756bf92c9",
+      "file": "apps/union-eyes/app/api/intelligence/route.ts"
+    },
+    {
+      "sha256": "463ae301b7ddf74fe632ef6c35779393542273351a21153b2403d0f0ebaab9ef",
+      "file": "apps/union-eyes/app/api/jurisdiction/clc-compliance/route.ts"
+    },
+    {
+      "sha256": "463ae301b7ddf74fe632ef6c35779393542273351a21153b2403d0f0ebaab9ef",
+      "file": "apps/union-eyes/app/api/jurisdiction/validate-deadline/route.ts"
+    },
+    {
+      "sha256": "f82c8ffa44b5326dd5107e574e8bd8e63b73e32ede13637b4b853cad1dc4e1fd",
+      "file": "apps/union-eyes/app/api/locals/[id]/route.ts"
+    },
+    {
+      "sha256": "463ae301b7ddf74fe632ef6c35779393542273351a21153b2403d0f0ebaab9ef",
+      "file": "apps/union-eyes/app/api/locals/route.ts"
+    },
+    {
+      "sha256": "29b4b04810a9d9806dedd0418d663c3e0fcbe675349149c5f826b841dc3b53bd",
+      "file": "apps/union-eyes/app/api/location/consent/route.ts"
+    },
+    {
+      "sha256": "a5744d09ae40848683efe79b219c00b3cb0a7a54401807cbb376f16904187948",
+      "file": "apps/union-eyes/app/api/location/geofence/route.ts"
+    },
+    {
+      "sha256": "9b3e04020701dea416f2eb26343616fffd898ce96e00930983f3591e5c698a4c",
+      "file": "apps/union-eyes/app/api/location/track/route.ts"
+    },
+    {
+      "sha256": "a0d76ad4048f6c27f6180390d1e7d192ddf05767f55d80ce04f11bb01ba09d6c",
+      "file": "apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts"
+    },
+    {
+      "sha256": "7af01d0364b71407d9e353f921cbc5706dd7e10d4e700608b2fc09149249bb9e",
+      "file": "apps/union-eyes/app/api/meeting-rooms/route.ts"
+    },
+    {
+      "sha256": "0c267a30f7c4a1b2705d79971762622501e97c51400476d0ee7c2a2f1b9efbad",
+      "file": "apps/union-eyes/app/api/member/ai-feedback/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/metrics/route.ts"
+    },
+    {
+      "sha256": "1ce992bf0f6548a5eeb91fa3dc14ca510f3cbcaf1158e958da3a4c6d81c199e6",
+      "file": "apps/union-eyes/app/api/ml/monitoring/drift/route.ts"
+    },
+    {
+      "sha256": "1ce992bf0f6548a5eeb91fa3dc14ca510f3cbcaf1158e958da3a4c6d81c199e6",
+      "file": "apps/union-eyes/app/api/ml/monitoring/usage/route.ts"
+    },
+    {
+      "sha256": "1ce992bf0f6548a5eeb91fa3dc14ca510f3cbcaf1158e958da3a4c6d81c199e6",
+      "file": "apps/union-eyes/app/api/ml/predictions/claim-outcome/route.ts"
+    },
+    {
+      "sha256": "1ce992bf0f6548a5eeb91fa3dc14ca510f3cbcaf1158e958da3a4c6d81c199e6",
+      "file": "apps/union-eyes/app/api/ml/predictions/timeline/route.ts"
+    },
+    {
+      "sha256": "1ce992bf0f6548a5eeb91fa3dc14ca510f3cbcaf1158e958da3a4c6d81c199e6",
+      "file": "apps/union-eyes/app/api/ml/predictions/workload-forecast/route.ts"
+    },
+    {
+      "sha256": "1ce992bf0f6548a5eeb91fa3dc14ca510f3cbcaf1158e958da3a4c6d81c199e6",
+      "file": "apps/union-eyes/app/api/ml/recommendations/route.ts"
+    },
+    {
+      "sha256": "ce5d77ce099a8cb1c00b43354cc090436eebdaf293b03274cf8b292288ee2c93",
+      "file": "apps/union-eyes/app/api/mobile/devices/route.ts"
+    },
+    {
+      "sha256": "2ef82738bc267a5e38b88fa8d121d272ff0fe4d8ddcc27d43d58e525465b73d2",
+      "file": "apps/union-eyes/app/api/mobile/notifications/route.ts"
+    },
+    {
+      "sha256": "5b7fec8ebd5d76de127023565769af4ddba722632d9aed832d15f6779eeead17",
+      "file": "apps/union-eyes/app/api/mobile/push/subscribe/route.ts"
+    },
+    {
+      "sha256": "5b7fec8ebd5d76de127023565769af4ddba722632d9aed832d15f6779eeead17",
+      "file": "apps/union-eyes/app/api/mobile/push/unsubscribe/route.ts"
+    },
+    {
+      "sha256": "d1129b014d6afaae5122b8fb99d64c8958e206382bf1e7d944f5252cc34b1964",
+      "file": "apps/union-eyes/app/api/movement-insights/trends/route.ts"
+    },
+    {
+      "sha256": "ed403dbb240461447c7e8196a59000976cac4bc541be967647974091efa0d7db",
+      "file": "apps/union-eyes/app/api/negotiations/route.ts"
+    },
+    {
+      "sha256": "6352633bbf5991aa5578a526626f2875c781f9ba42463e9bcfeb810f7e675a69",
+      "file": "apps/union-eyes/app/api/organizer/impact/route.ts"
+    },
+    {
+      "sha256": "d446515bec720660562a323c9467966505c4f72066470f1d95558121a11ca4d7",
+      "file": "apps/union-eyes/app/api/organizing/assignments/[id]/route.ts"
+    },
+    {
+      "sha256": "953eebe03c272841e63a22cb54d14428a526e5521d5bd590aa4e43c9e8fcd5d7",
+      "file": "apps/union-eyes/app/api/organizing/assignments/route.ts"
+    },
+    {
+      "sha256": "953eebe03c272841e63a22cb54d14428a526e5521d5bd590aa4e43c9e8fcd5d7",
+      "file": "apps/union-eyes/app/api/organizing/campaigns/route.ts"
+    },
+    {
+      "sha256": "953eebe03c272841e63a22cb54d14428a526e5521d5bd590aa4e43c9e8fcd5d7",
+      "file": "apps/union-eyes/app/api/organizing/card-check/route.ts"
+    },
+    {
+      "sha256": "953eebe03c272841e63a22cb54d14428a526e5521d5bd590aa4e43c9e8fcd5d7",
+      "file": "apps/union-eyes/app/api/organizing/committee/route.ts"
+    },
+    {
+      "sha256": "953eebe03c272841e63a22cb54d14428a526e5521d5bd590aa4e43c9e8fcd5d7",
+      "file": "apps/union-eyes/app/api/organizing/forms/generate/route.ts"
+    },
+    {
+      "sha256": "953eebe03c272841e63a22cb54d14428a526e5521d5bd590aa4e43c9e8fcd5d7",
+      "file": "apps/union-eyes/app/api/organizing/labour-board/route.ts"
+    },
+    {
+      "sha256": "953eebe03c272841e63a22cb54d14428a526e5521d5bd590aa4e43c9e8fcd5d7",
+      "file": "apps/union-eyes/app/api/organizing/nlrb-filings/route.ts"
+    },
+    {
+      "sha256": "d446515bec720660562a323c9467966505c4f72066470f1d95558121a11ca4d7",
+      "file": "apps/union-eyes/app/api/organizing/notes/[id]/route.ts"
+    },
+    {
+      "sha256": "953eebe03c272841e63a22cb54d14428a526e5521d5bd590aa4e43c9e8fcd5d7",
+      "file": "apps/union-eyes/app/api/organizing/notes/route.ts"
+    },
+    {
+      "sha256": "d446515bec720660562a323c9467966505c4f72066470f1d95558121a11ca4d7",
+      "file": "apps/union-eyes/app/api/organizing/sequences/[id]/enroll/route.ts"
+    },
+    {
+      "sha256": "d446515bec720660562a323c9467966505c4f72066470f1d95558121a11ca4d7",
+      "file": "apps/union-eyes/app/api/organizing/sequences/[id]/route.ts"
+    },
+    {
+      "sha256": "953eebe03c272841e63a22cb54d14428a526e5521d5bd590aa4e43c9e8fcd5d7",
+      "file": "apps/union-eyes/app/api/organizing/sequences/route.ts"
+    },
+    {
+      "sha256": "953eebe03c272841e63a22cb54d14428a526e5521d5bd590aa4e43c9e8fcd5d7",
+      "file": "apps/union-eyes/app/api/organizing/support-percentage/route.ts"
+    },
+    {
+      "sha256": "953eebe03c272841e63a22cb54d14428a526e5521d5bd590aa4e43c9e8fcd5d7",
+      "file": "apps/union-eyes/app/api/organizing/workplace-mapping/route.ts"
+    },
+    {
+      "sha256": "88a5b9c8b7ec5271118ab7a100d609babe69be08877406e0475f901eed60f56f",
+      "file": "apps/union-eyes/app/api/portal/documents/route.ts"
+    },
+    {
+      "sha256": "88a5b9c8b7ec5271118ab7a100d609babe69be08877406e0475f901eed60f56f",
+      "file": "apps/union-eyes/app/api/portal/documents/upload/route.ts"
+    },
+    {
+      "sha256": "f237f5a3a7e61fb6e0f48559ac12376281788d41f8d9a6045727e63963780940",
+      "file": "apps/union-eyes/app/api/precedents/[id]/route.ts"
+    },
+    {
+      "sha256": "6f4b13efc59ffccdc7845d93c27a4ab5d0cb61992142b831c8d4b60909104f12",
+      "file": "apps/union-eyes/app/api/reports/[id]/execute/route.ts"
+    },
+    {
+      "sha256": "6f4b13efc59ffccdc7845d93c27a4ab5d0cb61992142b831c8d4b60909104f12",
+      "file": "apps/union-eyes/app/api/reports/[id]/route.ts"
+    },
+    {
+      "sha256": "6f4b13efc59ffccdc7845d93c27a4ab5d0cb61992142b831c8d4b60909104f12",
+      "file": "apps/union-eyes/app/api/reports/[id]/run/route.ts"
+    },
+    {
+      "sha256": "6f4b13efc59ffccdc7845d93c27a4ab5d0cb61992142b831c8d4b60909104f12",
+      "file": "apps/union-eyes/app/api/reports/[id]/share/route.ts"
+    },
+    {
+      "sha256": "3d657bf5152f984c90b13138076fd2791b7b73718fbe59982e2fe466d3d9e2f5",
+      "file": "apps/union-eyes/app/api/reports/builder/route.ts"
+    },
+    {
+      "sha256": "3d657bf5152f984c90b13138076fd2791b7b73718fbe59982e2fe466d3d9e2f5",
+      "file": "apps/union-eyes/app/api/reports/datasources/sample/route.ts"
+    },
+    {
+      "sha256": "3d657bf5152f984c90b13138076fd2791b7b73718fbe59982e2fe466d3d9e2f5",
+      "file": "apps/union-eyes/app/api/reports/route.ts"
+    },
+    {
+      "sha256": "6f4b13efc59ffccdc7845d93c27a4ab5d0cb61992142b831c8d4b60909104f12",
+      "file": "apps/union-eyes/app/api/reports/scheduled/[id]/route.ts"
+    },
+    {
+      "sha256": "3d657bf5152f984c90b13138076fd2791b7b73718fbe59982e2fe466d3d9e2f5",
+      "file": "apps/union-eyes/app/api/reports/scheduled/route.ts"
+    },
+    {
+      "sha256": "3d657bf5152f984c90b13138076fd2791b7b73718fbe59982e2fe466d3d9e2f5",
+      "file": "apps/union-eyes/app/api/reports/templates/route.ts"
+    },
+    {
+      "sha256": "f79a3933f7a0bee9f3fe4646cae34b11f5903fedfa699aedd7635e833aab73c1",
+      "file": "apps/union-eyes/app/api/social-media/feed/route.ts"
+    },
+    {
+      "sha256": "d8cd45094684ea0e0b9ba05ebff5086d03ddd34c0f6abcf01b83f1535d34c352",
+      "file": "apps/union-eyes/app/api/storage/cleanup/route.ts"
+    },
+    {
+      "sha256": "d8cd45094684ea0e0b9ba05ebff5086d03ddd34c0f6abcf01b83f1535d34c352",
+      "file": "apps/union-eyes/app/api/storage/usage/route.ts"
+    },
+    {
+      "sha256": "b3653cca3e6f27f0849f0a7090a36307ac71108cea1cc7341138ff23c46aa930",
+      "file": "apps/union-eyes/app/api/support/metrics/route.ts"
+    },
+    {
+      "sha256": "b3653cca3e6f27f0849f0a7090a36307ac71108cea1cc7341138ff23c46aa930",
+      "file": "apps/union-eyes/app/api/support/sla/route.ts"
+    },
+    {
+      "sha256": "6e8d5a336d32564edebcbb395d1c1bf40f562eeed4ba035d9c53149c8ad949ad",
+      "file": "apps/union-eyes/app/api/support/tickets/[id]/assign/route.ts"
+    },
+    {
+      "sha256": "6e8d5a336d32564edebcbb395d1c1bf40f562eeed4ba035d9c53149c8ad949ad",
+      "file": "apps/union-eyes/app/api/support/tickets/[id]/comments/route.ts"
+    },
+    {
+      "sha256": "6e8d5a336d32564edebcbb395d1c1bf40f562eeed4ba035d9c53149c8ad949ad",
+      "file": "apps/union-eyes/app/api/support/tickets/[id]/route.ts"
+    },
+    {
+      "sha256": "b3653cca3e6f27f0849f0a7090a36307ac71108cea1cc7341138ff23c46aa930",
+      "file": "apps/union-eyes/app/api/support/tickets/route.ts"
+    },
+    {
+      "sha256": "74db2e9f1285f64b23599c7f7c360607598fa6cc55ac0ebbedbca510be9cf5b8",
+      "file": "apps/union-eyes/app/api/tax/cope/receipts/route.ts"
+    },
+    {
+      "sha256": "74db2e9f1285f64b23599c7f7c360607598fa6cc55ac0ebbedbca510be9cf5b8",
+      "file": "apps/union-eyes/app/api/tax/rl-1/generate/route.ts"
+    },
+    {
+      "sha256": "74db2e9f1285f64b23599c7f7c360607598fa6cc55ac0ebbedbca510be9cf5b8",
+      "file": "apps/union-eyes/app/api/tax/slips/route.ts"
+    },
+    {
+      "sha256": "74db2e9f1285f64b23599c7f7c360607598fa6cc55ac0ebbedbca510be9cf5b8",
+      "file": "apps/union-eyes/app/api/tax/t106/route.ts"
+    },
+    {
+      "sha256": "f5f61965dcfbcb568ee8806e9a82f987b4be3eb0d9a76111efd5f2dc9b442e84",
+      "file": "apps/union-eyes/app/api/testimonials/[id]/route.ts"
+    },
+    {
+      "sha256": "f82c8ffa44b5326dd5107e574e8bd8e63b73e32ede13637b4b853cad1dc4e1fd",
+      "file": "apps/union-eyes/app/api/units/[id]/route.ts"
+    },
+    {
+      "sha256": "463ae301b7ddf74fe632ef6c35779393542273351a21153b2403d0f0ebaab9ef",
+      "file": "apps/union-eyes/app/api/units/route.ts"
+    },
+    {
+      "sha256": "d8cd45094684ea0e0b9ba05ebff5086d03ddd34c0f6abcf01b83f1535d34c352",
+      "file": "apps/union-eyes/app/api/upload/route.ts"
+    },
+    {
+      "sha256": "9963b56ef641cbdae412630b823e5eb9bd7ede0302856b00acdd319230179c9f",
+      "file": "apps/union-eyes/app/api/version/route.ts"
+    },
+    {
+      "sha256": "aa881fbc124c79c5ebda87bfdecd143d08638531e8751bdc9ac94fa0a29cbd39",
+      "file": "apps/union-eyes/app/api/wcb/assessments/[id]/route.ts"
+    },
+    {
+      "sha256": "51c915798110fa9f80be0ac6d9bf0187647b9b3e74c7c006090fe8e09d863d04",
+      "file": "apps/union-eyes/app/api/wcb/assessments/route.ts"
+    },
+    {
+      "sha256": "b59451fcb9dd32ff19b079745b11ff9460fcfa41602db163922e811a3fcfbae7",
+      "file": "apps/union-eyes/app/api/worksites/[id]/route.ts"
+    },
+    {
+      "sha256": "074880c4f9bfed469b2c594a17f1546f79fb0cf4d390ccfc632d54bc7298619d",
+      "file": "apps/union-eyes/app/api/worksites/route.ts"
+    },
+    {
+      "sha256": "264fd15332645ed4e3836e1ee39d01460c895ec072b49a1c593ce2a5d4d8bd87",
+      "file": "apps/union-eyes/backend/services/api/carbon_accounting_service_views.py"
+    },
+    {
+      "sha256": "5cf59c18962223a428789c39c0b05830071504fc13d540eb0975f5f458b82c63",
+      "file": "apps/union-eyes/db/migrations/0004_phase2_complete.sql"
+    },
+    {
+      "sha256": "4c612ef3b2b75ec5ac648d9d517addde9cb31e9a6bcd50697862ec5fb1c2740b",
+      "file": "apps/union-eyes/lib/ai/employer-risk.ts"
+    },
+    {
+      "sha256": "a741219035b5181c11c76964e13d9d7c65688f38db1285daf81f33c33ef5ebf5",
+      "file": "apps/union-eyes/lib/ai/financial-insights.ts"
+    },
+    {
+      "sha256": "1e811ced4a4b076b66cfb398fa9e7bf598a1f2be3ef2dd1050e7639524718055",
+      "file": "apps/union-eyes/lib/ai/steward-copilot.ts"
+    },
+    {
+      "sha256": "ddda114ac7159bffa4d3536051473e528a74cb02352b71749f5f27a345e67beb",
+      "file": "apps/union-eyes/lib/api-auth-guard.ts"
+    },
+    {
+      "sha256": "4a56510a0da1ff978bc5022098a569d747ebac25fd5eaa312501e1f3e6d4057e",
+      "file": "apps/union-eyes/lib/api/crud-factory.ts"
+    },
+    {
+      "sha256": "adba26b646c3ee008e36c2e6e3feed8283ae2b4d9f742a13beca83c9988c6d13",
+      "file": "apps/union-eyes/lib/api/crud-governance.ts"
+    },
+    {
+      "sha256": "fb8e51994c639321e07cf21a0c7fbf137c4ca9121817e9afffda77e4283e17e1",
+      "file": "apps/union-eyes/lib/api/with-api.ts"
+    },
+    {
+      "sha256": "55d0a8efaf34e5835f8b2a4ae3b72c70ca75ec53c3682a02e314d601f6356cc7",
+      "file": "apps/union-eyes/lib/organization-middleware.ts"
+    },
+    {
+      "sha256": "2a438cfbb6270326956134475d567f93286a64bdfeedcf7aea77f669d9370137",
+      "file": "apps/union-eyes/lib/public-routes.ts"
+    },
+    {
+      "sha256": "0cfa07861742e4645c5de7c505586853069b099d8d5b93446ad49434bd23222e",
+      "file": "apps/union-eyes/proxy.ts"
+    },
+    {
+      "sha256": "a259612069861df184ac0ab3076d171f461c2f2b06dc6ca097cf9abc9c2d5027",
+      "file": "apps/union-eyes/services/carbon-accounting-integration.ts"
+    },
+    {
+      "sha256": "bf665d7236181e7e8f3af976dfe72f3e28f70e572058ad6c9bd563321af7ac5e",
+      "file": "apps/union-eyes/services/carbon-accounting-service.ts"
+    },
+    {
+      "sha256": "972c7de76ced8d85f1a29a224c3ffca6411e06976fbe10e7b7a6d870b00e41e6",
+      "file": "apps/union-eyes/services/clc/compliance-reports.ts"
+    },
+    {
+      "sha256": "567e4613f525537a4f2c3a43fe396907ca8ea790c23f5304b77f52e658aafb24",
+      "file": "apps/union-eyes/services/pki/workflow-engine.ts"
+    }
+  ],
+  "limitations": [
+    "No test, database, browser, deployment, role-title or scheduler check was run.",
+    "A source reading shows what the repository declares. It does not show what a deployment enforces.",
+    "The reviewer is method-independent only and is not an authority-independent approver."
+  ]
+}

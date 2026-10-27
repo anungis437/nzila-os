@@ -52,6 +52,9 @@ import { readinessSummary, validatePersonaReadiness } from './ue-gate0c2-readine
 import { DOCS_0C3, FILES_0C3 } from './ue-gate0c3-ids.mjs'
 import { loadDocs as loadDocs0c3, loadFrozen as loadFrozen0c3, loadRegisters as loadRegisters0c3, loadSources as loadSources0c3 } from './ue-gate0c3-load.mjs'
 import { releaseDebtSummary, validateReleaseDebt } from './ue-gate0c3-validate.mjs'
+import { DOCS_0C4, FILES_0C4 } from './ue-gate0c4-ids.mjs'
+import { loadDocs as loadDocs0c4, loadRegisters as loadRegisters0c4, loadSources as loadSources0c4 } from './ue-gate0c4-load.mjs'
+import { qualificationSummary, validateQualification0c4 } from './ue-gate0c4-validate.mjs'
 import { FILE_EXCEPTIONS, inventoryTotals, inventoryTotalsProblems, validateDecisionBoundExceptions } from './ue-gate0b6-exceptions.mjs'
 import { lockProvenanceProblems } from './ue-gate0-lock-provenance.mjs'
 
@@ -276,6 +279,7 @@ function classificationPinProblems(matrix, root) {
     ...pinProblems(matrix?.gate0cHandoff, 'gate0cHandoff', { register: FILE_HANDOFF }, root, true),
     ...pinProblems(matrix?.personaReadiness0c2, 'personaReadiness0c2', { ...FILES_0C2, ...Object.fromEntries(Object.entries(DOCS_0C2).map(([key, file]) => [`doc-${key}`, file])) }, root),
     ...pinProblems(matrix?.releaseDebt0c3, 'releaseDebt0c3', { ...FILES_0C3, ...Object.fromEntries(Object.entries(DOCS_0C3).map(([key, file]) => [`doc-${key}`, file])) }, root),
+    ...pinProblems(matrix?.qualification0c4, 'qualification0c4', { ...FILES_0C4, ...Object.fromEntries(Object.entries(DOCS_0C4).map(([key, file]) => [`doc-${key}`, file])) }, root),
     ...pinProblems(matrix?.releaseDispositionChallenges, 'releaseDispositionChallenges', { register: FILE_CHALLENGES }, root, true),
     ...pinProblems(matrix?.decisionBoundExceptions, 'decisionBoundExceptions', { register: FILE_EXCEPTIONS }, root, true),
   ]
@@ -383,6 +387,7 @@ export function loadContext(root = ROOT) {
     handoffRegister: readJsonIfPresent(root, FILE_HANDOFF),
     readiness0c2: { registers: loadRegisters0c2(root), docs: loadDocs0c2(root), src: loadSources0c2(root), frozen: loadFrozen0c2(root) },
     reconcile0c3: { registers: loadRegisters0c3(root), docs: loadDocs0c3(root), src: loadSources0c3(root), frozen: loadFrozen0c3(root) },
+    qualification0c4: { registers: loadRegisters0c4(root), docs: loadDocs0c4(root), src: loadSources0c4(root) },
     reviewQueue0c: readJsonIfPresent(root, FILES_0B7.reviewQueue),
     universeHistory: loadUniverseHistory(root),
     manifestSha256: sha256File(root, 'docs/union-eyes/convergence/register/ue-route-coverage-manifest.json'),
@@ -1092,6 +1097,15 @@ export function validateGate0(matrix, ctx = {}) {
     readText,
   })
   problems.push(...reconcileProblems.map((problem) => `RELEASE-DEBT-0C3: ${problem}`))
+  const qualification0c4 = 'qualification0c4' in ctx ? ctx.qualification0c4 : base.qualification0c4
+  const qualificationProblems = validateQualification0c4({
+    registers: qualification0c4.registers,
+    src: { ...qualification0c4.src, base: { ...qualification0c4.src.base, matrix } },
+    docs: qualification0c4.docs,
+    liveFileSha: ctx.liveFileSha ?? ((file) => fileSha256(base.root, file)),
+    readText,
+  })
+  problems.push(...qualificationProblems.map((problem) => `QUALIFICATION-0C4: ${problem}`))
   const challenges0b11 = 'challenges0b11' in ctx ? ctx.challenges0b11 : base.challenges0b11
   problems.push(...validateChallengeRegister({
     register: challenges0b11,
@@ -1183,6 +1197,7 @@ export function validateGate0(matrix, ctx = {}) {
   summary.classification0c1 = check0c1.summary
   summary.personaReadiness0c2 = readiness0c2.registers.decisions ? readinessSummary({ registers: readiness0c2.registers }) : null
   summary.releaseDebt0c3 = reconcile0c3.registers.debt ? releaseDebtSummary({ registers: reconcile0c3.registers }) : null
+  summary.qualification0c4 = qualification0c4.registers.qualification ? qualificationSummary({ registers: qualification0c4.registers }) : null
   summary.universe = universeSummary({ record: universeTransition, routes, entries: ownership?.entries ?? [] })
   summary.decisionBoundExceptions = exceptionCheck.summary
   summary.inventory = inventory

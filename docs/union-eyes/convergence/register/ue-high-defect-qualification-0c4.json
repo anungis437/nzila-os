@@ -1,0 +1,5255 @@
+{
+  "schemaVersion": 1,
+  "register": "UE-HIGH-DEFECT-QUALIFICATION",
+  "gate": "GATE-0C.4",
+  "version": 1,
+  "anchorCommit": "ab9c184263020a95b91066014395f16dc3ec78e8",
+  "preparedOn": "2026-10-27",
+  "status": "QUALIFICATION_NOT_ACCEPTANCE",
+  "note": "An independent-in-method source qualification of the 71 proposed Gate 0C.3 dispositions. It records what the route source supports, contests or cannot show. It accepts no disposition, changes no severity and fills no approval field.",
+  "review": {
+    "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+    "independence": "METHOD_INDEPENDENT_ONLY",
+    "authorityIndependent": false,
+    "limitation": "The reviewer belongs to the same engineering-agent family that prepared the Gate 0C.3 registers. The review re-reads the source with a separate extractor and shares no code with the Gate 0C.3 builder, so it is independent in method. It is not an authority-independent approval and it accepts, ratifies and authorizes nothing.",
+    "method": [
+      "Route wrappers and role floors are re-extracted from each route file by a separate extractor that does not read any Gate 0C.3 register.",
+      "Each cited quotation is searched in its cited file.",
+      "Each affected operation is looked up in the classified inventory and in its route file.",
+      "Each proposed disposition is tested against the rubric precondition the Gate 0C.3 register itself states.",
+      "Each absence claim is searched for a contradicting token in the cited source.",
+      "The 150-item index is rebuilt from the frozen registers and compared."
+    ],
+    "notDone": [
+      "No test, database, browser, deployment or role-title check was run.",
+      "No disposition, severity, owner or decision was changed.",
+      "No authority-independent reviewer has accepted any record."
+    ]
+  },
+  "lineage": {
+    "assessmentFile": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+    "assessmentSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+    "queueDefects": 71
+  },
+  "statusDefinitions": {
+    "SOURCE_VERIFIED": "Every check the route source can settle agrees with the assessment and no absence claim is made that source cannot prove.",
+    "PARTIALLY_VERIFIED": "The route source supports part of the assessment and contests, narrows or cannot prove another part. The named findings say which.",
+    "INFERENCE_ONLY": "The route source recomputes nothing the assessment states.",
+    "REQUIRES_RUNTIME_PROOF": "The disposition rests on a fact (row-level security, a database, a deployment value or a browser) that no reading of the repository can supply. This status takes precedence over the source-verification status of the same record; the source status is carried separately."
+  },
+  "separation": "A qualification record is not an acceptance. The proposed disposition keeps state PROPOSED_NOT_ACCEPTED and every approval field stays empty.",
+  "totals": {
+    "assessed": 71,
+    "byReviewStatus": {
+      "PARTIALLY_VERIFIED": 13,
+      "REQUIRES_RUNTIME_PROOF": 34,
+      "SOURCE_VERIFIED": 24
+    },
+    "bySourceVerification": {
+      "PARTIALLY_VERIFIED": 31,
+      "SOURCE_VERIFIED": 40
+    },
+    "byActivationVerdict": {
+      "CONSISTENT": 59,
+      "CUSTOM_CHECK_UNPROVEN": 3,
+      "MIXED": 4,
+      "OVERSTATED": 2,
+      "UNDERSTATED": 3
+    },
+    "byProposedDisposition": {
+      "CONDITIONALLY_BLOCKING": 25,
+      "RELEASE_BLOCKING": 43,
+      "REVIEW_REQUIRED": 3
+    },
+    "findingCodes": {
+      "ABSENCE_CLAIM_CONTESTED": 7,
+      "FLOOR_OVERSTATED": 2,
+      "FLOOR_RESTS_ON_HANDLER_BODY": 3,
+      "FLOOR_UNDERSTATED": 7,
+      "LOCAL_GUARD_RETURNS_TRUE": 2,
+      "RUBRIC_PRECEDENCE_AMBIGUOUS": 5,
+      "RUBRIC_PRECONDITION_NOT_MET": 1,
+      "STATED_FLOOR_ROLE_NOT_DECLARED": 6
+    },
+    "byDispositionSensitivity": {
+      "POSSIBLY_TOO_LENIENT": 4,
+      "POSSIBLY_TOO_STRICT": 2,
+      "RUBRIC_APPLICATION_UNCLEAR": 6
+    },
+    "withQualifyingOrChallengeFinding": 22,
+    "accepted": 0,
+    "executedProofs": 0
+  },
+  "qualifications": [
+    {
+      "defectId": "DEF-0B1-AUDIT-READ-MEMBER-FLOOR",
+      "tranche": "0B.1",
+      "assessmentRecordSha256": "5fe2f82dd8237264ac57983a87ad817757741b9da1f885bdfb38822a83d2f5df",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_MF",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 2,
+          "present": 2,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "declaredRoles": [
+            "member"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_MF",
+          "result": "PRECONDITION_MET",
+          "needs": "A member-floor operation and an over-disclosure or privacy impact."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B1-BILLING-HISTORY-FAKE-EMPTY",
+      "tranche": "0B.1",
+      "assessmentRecordSha256": "1913acc18c248c736e944e53b97698e4a86e6623ce4d05866f73f5f1a1dfa0f3",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_FALSE",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 2,
+          "present": 2,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "CUSTOM_CHECK": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "CUSTOM_CHECK": 1
+          },
+          "declaredRoles": [],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "platform role title",
+          "verdict": "CUSTOM_CHECK_UNPROVEN"
+        },
+        "rubric": {
+          "key": "RB_FALSE",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include FALSE_ATTESTATION_OR_OUTCOME."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [
+        {
+          "code": "FLOOR_RESTS_ON_HANDLER_BODY",
+          "severity": "INFO",
+          "statement": "The wrapper authenticates the caller and the handler body names its own role or credential check, so the wrapper alone does not establish the floor."
+        }
+      ],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B1-BILLING-TARGET-ORG-UNBOUND",
+      "tranche": "0B.1",
+      "assessmentRecordSha256": "def7e37cdb0dc4a7e5a5437c13c7e886f567229349d10264619d4d90752d3e56",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_PLAT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 3,
+          "recomputed": 3,
+          "missing": [],
+          "floorsByClass": {
+            "CUSTOM_CHECK": 3
+          },
+          "relevant": 3,
+          "relevantFloorsByClass": {
+            "CUSTOM_CHECK": 3
+          },
+          "declaredRoles": [],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "platform role title",
+          "verdict": "CUSTOM_CHECK_UNPROVEN"
+        },
+        "rubric": {
+          "key": "CB_PLAT",
+          "result": "PRECONDITION_MET",
+          "needs": "A platform role title floor and cross-organization impact."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [
+        {
+          "code": "FLOOR_RESTS_ON_HANDLER_BODY",
+          "severity": "INFO",
+          "statement": "The wrapper authenticates the caller and the handler body names its own role or credential check, so the wrapper alone does not establish the floor."
+        },
+        {
+          "code": "RUBRIC_PRECEDENCE_AMBIGUOUS",
+          "severity": "CHALLENGE",
+          "statement": "The impact includes cross-organization disclosure and no executed containment proof is on file, which is the rubric RB_XT test, yet the proposal applies CB_PLAT. The proposal stays as proposed; the precedence between the two rubric keys needs an authorized reviewer."
+        }
+      ],
+      "dispositionSensitivity": [
+        "RUBRIC_APPLICATION_UNCLEAR"
+      ],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "RLS_TENANT_ISOLATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B1-CLC-CROSS-TENANT-READ",
+      "tranche": "0B.1",
+      "assessmentRecordSha256": "c9a223de2c7f7703f00e8f5aa9555d38010b6adc5fa2d271522bf6da0b830eca",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_XT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 4,
+          "recomputed": 4,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 4
+          },
+          "relevant": 4,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 4
+          },
+          "declaredRoles": [
+            "administrator"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "organization administrator",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_XT",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include CROSS_TENANT_DISCLOSURE."
+        },
+        "absenceClaims": [
+          {
+            "subject": "predicate",
+            "phrase": "no caller-organization predicate",
+            "status": "NOT_CONTRADICTED_BY_CITED_SOURCE",
+            "contestedBy": []
+          }
+        ]
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "RLS_TENANT_ISOLATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B1-CRUD-FACADE-ORG-MEMBERS",
+      "tranche": "0B.1",
+      "assessmentRecordSha256": "22d2d6dc86e353f826f81c6af64a2dd4515b428050ed9317486f8c0e298d10a2",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_INERT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 67,
+          "recomputed": 67,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 29,
+            "ROLE_RESTRICTED": 38
+          },
+          "relevant": 67,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 29,
+            "ROLE_RESTRICTED": 38
+          },
+          "declaredRoles": [
+            "administrator",
+            "member",
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward to administrator (role floor per route)",
+          "verdict": "MIXED"
+        },
+        "rubric": {
+          "key": "CB_INERT",
+          "result": "NOT_MACHINE_CHECKABLE",
+          "needs": null
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [
+        {
+          "code": "FLOOR_UNDERSTATED",
+          "severity": "QUALIFYING",
+          "statement": "The stated state REACHABLE_ROLE_RESTRICTED understates reachability: some relevant operation is declared at a lower floor."
+        }
+      ],
+      "dispositionSensitivity": [
+        "POSSIBLY_TOO_LENIENT"
+      ],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "PARTIALLY_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B1-FIX-SUPER-ADMIN-INERT",
+      "tranche": "0B.1",
+      "assessmentRecordSha256": "6d16f53c588f9282f0a11ee9626d892e6262c195dd960bba9f4a463f5939f448",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_INERT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 2,
+          "recomputed": 2,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 2
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "administrator"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward to administrator",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_INERT",
+          "result": "NOT_MACHINE_CHECKABLE",
+          "needs": null
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B1-ORGANIZATIONS-CROSS-ORG-CONTACTS",
+      "tranche": "0B.1",
+      "assessmentRecordSha256": "bddcbeaf5d7d5bc2c2d895f243269016b63f90d598e647493bf7a108f31ec7b0",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_PLAT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 2,
+          "present": 2,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "platform_lead"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "platform role title",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_PLAT",
+          "result": "PRECONDITION_MET",
+          "needs": "A platform role title floor and cross-organization impact."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [
+        {
+          "code": "RUBRIC_PRECEDENCE_AMBIGUOUS",
+          "severity": "CHALLENGE",
+          "statement": "The impact includes cross-organization disclosure and no executed containment proof is on file, which is the rubric RB_XT test, yet the proposal applies CB_PLAT. The proposal stays as proposed; the precedence between the two rubric keys needs an authorized reviewer."
+        }
+      ],
+      "dispositionSensitivity": [
+        "RUBRIC_APPLICATION_UNCLEAR"
+      ],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "RLS_TENANT_ISOLATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B1-PKI-WORKFLOW-IN-MEMORY",
+      "tranche": "0B.1",
+      "assessmentRecordSha256": "ddbaf799f0246d18093771d1ba27440ca31ae93a8ff79b824179e11b48a8e175",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_INT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 3,
+          "recomputed": 3,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 3
+          },
+          "relevant": 3,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 3
+          },
+          "declaredRoles": [
+            "administrator"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "administrator",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_INT",
+          "result": "PRECONDITION_MET",
+          "needs": "A role-restricted floor."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "DEPLOYMENT_CONFIGURATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B2-AI-DATA-CLASS-DOWNGRADE",
+      "tranche": "0B.2",
+      "assessmentRecordSha256": "9576b347ae8f18b16d17db4523cd2834ebcd66bea3d0f3fc413a234b9a214943",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_DEP",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 9,
+          "recomputed": 9,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 9
+          },
+          "relevant": 5,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 5
+          },
+          "declaredRoles": [
+            "officer",
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward and above (role floor per route)",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_DEP",
+          "result": "PRECONDITION_MET",
+          "needs": "A deployment-configuration proof among the proofs the disposition depends on."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "DEPLOYMENT_CONFIGURATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B2-AI-FINANCE-ROLE-TITLE-GATE",
+      "tranche": "0B.2",
+      "assessmentRecordSha256": "c14f6b31433cff3161f5a47db815fe26b7a2f99a3592df787be7c9355888a3a0",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_AUD",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 4,
+          "recomputed": 4,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 4
+          },
+          "relevant": 3,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 3
+          },
+          "declaredRoles": [
+            "officer"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "officer role title",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_AUD",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include SAME_TENANT_OVER_DISCLOSURE."
+        },
+        "absenceClaims": [
+          {
+            "subject": "mandate",
+            "phrase": "no financial mandate",
+            "status": "NOT_MACHINE_CHECKABLE",
+            "contestedBy": []
+          }
+        ]
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "PARTIALLY_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B2-AI-GRIEVANCE-NO-CASE-AUTHORITY",
+      "tranche": "0B.2",
+      "assessmentRecordSha256": "ee9a1f9c0897a88a456ed8843307a2aba095c20d68066080d66b8bb6b7ad0235",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_AUD",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 4,
+          "recomputed": 4,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 4
+          },
+          "relevant": 4,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 4
+          },
+          "declaredRoles": [
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_AUD",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include SAME_TENANT_OVER_DISCLOSURE."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "DEPLOYMENT_CONFIGURATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B2-ANALYTICS-CRUD-FACADE",
+      "tranche": "0B.2",
+      "assessmentRecordSha256": "b25a9963a7d5cd9570b905f5b47c54264b3172f5d63a8f8efea9fd1a81104236",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_INT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 66,
+          "recomputed": 66,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 33,
+            "ROLE_RESTRICTED": 33
+          },
+          "relevant": 66,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 33,
+            "ROLE_RESTRICTED": 33
+          },
+          "declaredRoles": [
+            "member",
+            "steward"
+          ],
+          "delegated": [
+            {
+              "operation": "intelligence/route.ts|GET",
+              "to": "apps/union-eyes/app/api/analytics/insights/route.ts"
+            },
+            {
+              "operation": "intelligence/route.ts|POST",
+              "to": "apps/union-eyes/app/api/analytics/insights/route.ts"
+            }
+          ]
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward",
+          "verdict": "MIXED"
+        },
+        "rubric": {
+          "key": "CB_INT",
+          "result": "PRECONDITION_MET",
+          "needs": "A role-restricted floor."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [
+        {
+          "code": "FLOOR_UNDERSTATED",
+          "severity": "QUALIFYING",
+          "statement": "The stated state REACHABLE_ROLE_RESTRICTED understates reachability: some relevant operation is declared at a lower floor."
+        },
+        {
+          "code": "LOCAL_GUARD_RETURNS_TRUE",
+          "severity": "QUALIFYING",
+          "statement": "apps/union-eyes/app/api/intelligence/route.ts defines requireOrgAccess, which returns true unconditionally."
+        }
+      ],
+      "dispositionSensitivity": [
+        "POSSIBLY_TOO_LENIENT"
+      ],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "PARTIALLY_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B2-CRUD-FACADE-SEGMENTS-SETTINGS",
+      "tranche": "0B.2",
+      "assessmentRecordSha256": "125c5428789b2b580dfc6600bad87fd0be05b1723cf792ff9c1b2e790fc86158",
+      "proposedDisposition": {
+        "value": "REVIEW_REQUIRED",
+        "rubricKey": "RR",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 10,
+          "recomputed": 10,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 4,
+            "ROLE_RESTRICTED": 6
+          },
+          "relevant": 10,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 4,
+            "ROLE_RESTRICTED": 6
+          },
+          "declaredRoles": [
+            "member",
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RR",
+          "result": "NOT_MACHINE_CHECKABLE",
+          "needs": null
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B2-PKI-ATTESTATION-NOT-CRYPTOGRAPHIC",
+      "tranche": "0B.2",
+      "assessmentRecordSha256": "6b7de750c29b0491a9a78b6821f496edb48846590473d8bce314be3a83962c65",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_FALSE",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 2,
+          "recomputed": 2,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 2
+          },
+          "relevant": 2,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 2
+          },
+          "declaredRoles": [
+            "administrator"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "administrator",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_FALSE",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include FALSE_ATTESTATION_OR_OUTCOME."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ",
+      "tranche": "0B.2",
+      "assessmentRecordSha256": "6f2ef400f964568b82defb1a13cc1ecf523d5daf801f740bc20bcaaf42b0d26c",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_PLAT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 2,
+          "recomputed": 2,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 2
+          },
+          "relevant": 2,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 2
+          },
+          "declaredRoles": [
+            "platform_lead"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "platform role title",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_PLAT",
+          "result": "PRECONDITION_MET",
+          "needs": "A platform role title floor and cross-organization impact."
+        },
+        "absenceClaims": [
+          {
+            "subject": "predicate",
+            "phrase": "no organization predicate",
+            "status": "CONTESTED_BY_CITED_SOURCE",
+            "contestedBy": [
+              {
+                "ref": "apps/union-eyes/app/api/admin/stats/activity/route.ts",
+                "token": "organizationId"
+              }
+            ]
+          }
+        ]
+      },
+      "independentFindings": [
+        {
+          "code": "RUBRIC_PRECEDENCE_AMBIGUOUS",
+          "severity": "CHALLENGE",
+          "statement": "The impact includes cross-organization disclosure and no executed containment proof is on file, which is the rubric RB_XT test, yet the proposal applies CB_PLAT. The proposal stays as proposed; the precedence between the two rubric keys needs an authorized reviewer."
+        },
+        {
+          "code": "ABSENCE_CLAIM_CONTESTED",
+          "severity": "QUALIFYING",
+          "statement": "The claim \"no organization predicate\" is contested: cited source names organizationId."
+        }
+      ],
+      "dispositionSensitivity": [
+        "RUBRIC_APPLICATION_UNCLEAR"
+      ],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "RLS_TENANT_ISOLATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B2-UPDATE-ROLE-INERT",
+      "tranche": "0B.2",
+      "assessmentRecordSha256": "21232ed3e3240b25b22fcf6b17a2ab5792017fcc28d2761e67a7afb7487567b4",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_INERT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 2,
+          "recomputed": 2,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 2
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "administrator"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_INERT",
+          "result": "NOT_MACHINE_CHECKABLE",
+          "needs": null
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [
+        {
+          "code": "STATED_FLOOR_ROLE_NOT_DECLARED",
+          "severity": "QUALIFYING",
+          "statement": "The stated floor names steward; the relevant operations declare administrator."
+        }
+      ],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "PARTIALLY_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B3-ARBITRATION-DECISIONS-NON-PUBLIC-READABLE-CROSS-TENANT",
+      "tranche": "0B.3",
+      "assessmentRecordSha256": "299bcbbb3a86e126a10f4edd8e0b2d50f2f28a06d6f2b758f390f69efde108b5",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_XT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 13,
+          "recomputed": 13,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 5,
+            "ROLE_RESTRICTED": 8
+          },
+          "relevant": 5,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 5
+          },
+          "declaredRoles": [
+            "member"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward and above (role floor per route)",
+          "verdict": "UNDERSTATED"
+        },
+        "rubric": {
+          "key": "RB_XT",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include CROSS_TENANT_DISCLOSURE."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [
+        {
+          "code": "FLOOR_UNDERSTATED",
+          "severity": "QUALIFYING",
+          "statement": "The stated state REACHABLE_ROLE_RESTRICTED understates reachability: every relevant operation is declared at a lower floor."
+        }
+      ],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "NATIVE_POSTGRES",
+          "RLS_TENANT_ISOLATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B3-ARBITRATION-DECISIONS-ORG-ADMIN-DELETES-SHARED-ROW",
+      "tranche": "0B.3",
+      "assessmentRecordSha256": "37ce4cc83b8c8edd3e2350665085e3e5cb276012542ab2ad54e74a2bbd4e93af",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_SHARED",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 3,
+          "recomputed": 3,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 3
+          },
+          "relevant": 3,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 3
+          },
+          "declaredRoles": [
+            "content_manager"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "organization administrator",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_SHARED",
+          "result": "PRECONDITION_MET",
+          "needs": "Cross-organization impact and a write operation."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [
+        {
+          "code": "STATED_FLOOR_ROLE_NOT_DECLARED",
+          "severity": "QUALIFYING",
+          "statement": "The stated floor names administrator; the relevant operations declare content_manager."
+        }
+      ],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "RLS_TENANT_ISOLATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B3-ARBITRATION-RECORD-NO-CASE-AUTHORITY",
+      "tranche": "0B.3",
+      "assessmentRecordSha256": "95b3ba72869a0e12e25f64862f34d9b0fee1b10f1195b4d76e02fb9c62e0bbd8",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_AUD",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 5,
+          "recomputed": 5,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 5
+          },
+          "relevant": 5,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 5
+          },
+          "declaredRoles": [
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_AUD",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include SAME_TENANT_OVER_DISCLOSURE."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B3-AUDIT-ROW-FULL-DISCLOSURE",
+      "tranche": "0B.3",
+      "assessmentRecordSha256": "443e404a77924020699d5b4f060818750a0ce02b2282e9a5476a38bc686b6c60",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_AUD",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "officer"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "officer role floor",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_AUD",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include SAME_TENANT_OVER_DISCLOSURE."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B3-BARGAINING-NEGOTIATION-RECORDS-MEMBER-READ",
+      "tranche": "0B.3",
+      "assessmentRecordSha256": "09d020599afe52f803f90af5973b273827e8aec22d4d6b403d0a08cd13be437a",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_MF",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 4,
+          "recomputed": 4,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 4
+          },
+          "relevant": 4,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 4
+          },
+          "declaredRoles": [
+            "member"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_MF",
+          "result": "PRECONDITION_MET",
+          "needs": "A member-floor operation and an over-disclosure or privacy impact."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B3-BARGAINING-NOTE-ITEM-ROUTE-BYPASSES-CONFIDENTIALITY",
+      "tranche": "0B.3",
+      "assessmentRecordSha256": "65468d88cbb0d23dec7deba7b83af9ec0b45ccba4326748f6f7437ed3b10b751",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_MF",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 2,
+          "recomputed": 2,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 1,
+            "ROLE_RESTRICTED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "declaredRoles": [
+            "member"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_MF",
+          "result": "PRECONDITION_MET",
+          "needs": "A member-floor operation and an over-disclosure or privacy impact."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B3-BARGAINING-NOTES-SUMMARY-MODES-IGNORE-CONFIDENTIALITY",
+      "tranche": "0B.3",
+      "assessmentRecordSha256": "bbea91e2dd229f27bd97719d97f1ca190079d70605ac98db9ddbe4c4179d73bb",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_MF",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "declaredRoles": [
+            "member"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_MF",
+          "result": "PRECONDITION_MET",
+          "needs": "A member-floor operation and an over-disclosure or privacy impact."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B3-BARGAINING-PROPOSALS-NO-TENANT-PREDICATE",
+      "tranche": "0B.3",
+      "assessmentRecordSha256": "236fa9ab66a244173bc0059814c08d2f6bb24ab82247ae506470b2b34acbc1ac",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_XT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 5,
+          "recomputed": 5,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 2,
+            "ROLE_RESTRICTED": 3
+          },
+          "relevant": 5,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 2,
+            "ROLE_RESTRICTED": 3
+          },
+          "declaredRoles": [
+            "member",
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward and above (role floor per route)",
+          "verdict": "MIXED"
+        },
+        "rubric": {
+          "key": "RB_XT",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include CROSS_TENANT_DISCLOSURE."
+        },
+        "absenceClaims": [
+          {
+            "subject": "predicate",
+            "phrase": "no organization column, so the generic factory adds no tenant predicate",
+            "status": "CONTESTED_BY_CITED_SOURCE",
+            "contestedBy": [
+              {
+                "ref": "apps/union-eyes/lib/api/crud-factory.ts",
+                "token": "organizationId"
+              }
+            ]
+          }
+        ]
+      },
+      "independentFindings": [
+        {
+          "code": "FLOOR_UNDERSTATED",
+          "severity": "QUALIFYING",
+          "statement": "The stated state REACHABLE_ROLE_RESTRICTED understates reachability: some relevant operation is declared at a lower floor."
+        },
+        {
+          "code": "ABSENCE_CLAIM_CONTESTED",
+          "severity": "QUALIFYING",
+          "statement": "The claim \"no organization column, so the generic factory adds no tenant predicate\" is contested: cited source names organizationId."
+        }
+      ],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "NATIVE_POSTGRES",
+          "RLS_TENANT_ISOLATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B3-BILLING-REPLAY-INVOICE-CROSS-TENANT-READ",
+      "tranche": "0B.3",
+      "assessmentRecordSha256": "c850170ca4f5d5291d3aa8095026ed7ef66a15c2b3f2473e08a45cc425b96813",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_XT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_XT",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include CROSS_TENANT_DISCLOSURE."
+        },
+        "absenceClaims": [
+          {
+            "subject": "predicate",
+            "phrase": "no organization predicate",
+            "status": "CONTESTED_BY_CITED_SOURCE",
+            "contestedBy": [
+              {
+                "ref": "apps/union-eyes/app/api/billing/replay-invoice/route.ts",
+                "token": "organizationId"
+              }
+            ]
+          }
+        ]
+      },
+      "independentFindings": [
+        {
+          "code": "ABSENCE_CLAIM_CONTESTED",
+          "severity": "QUALIFYING",
+          "statement": "The claim \"no organization predicate\" is contested: cited source names organizationId."
+        }
+      ],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "RLS_TENANT_ISOLATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B3-BILLING-SEND-BATCH-CROSS-TENANT-MUTATION",
+      "tranche": "0B.3",
+      "assessmentRecordSha256": "505384ed52eef4ead427aa8f2f611602b6e376eed88de0497d76ce44444ed02f",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_XT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "administrator"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "organization administrator",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_XT",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include CROSS_TENANT_DISCLOSURE."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "RLS_TENANT_ISOLATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B3-BREAKS-CREATE-FOR-OTHER-MEMBER",
+      "tranche": "0B.3",
+      "assessmentRecordSha256": "44ec8bad755bbab0aa3497a613fe3099731d6f23268a6536d822e81312445b81",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_ANYMUT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "declaredRoles": [
+            "member"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_ANYMUT",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include UNAUTHORIZED_MUTATION and a write operation."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B3-BULK-IMPORT-INERT",
+      "tranche": "0B.3",
+      "assessmentRecordSha256": "9c8777079ec0e255867dd6303e3114f9586658b0e085e564bf504ff391c0b5af",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_INERT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 2,
+          "recomputed": 2,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 1,
+            "ROLE_RESTRICTED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "staff",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_INERT",
+          "result": "NOT_MACHINE_CHECKABLE",
+          "needs": null
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [
+        {
+          "code": "STATED_FLOOR_ROLE_NOT_DECLARED",
+          "severity": "QUALIFYING",
+          "statement": "The stated floor names staff; the relevant operations declare steward."
+        }
+      ],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "PARTIALLY_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT",
+      "tranche": "0B.3",
+      "assessmentRecordSha256": "c236fbd56fbba189a4abfd9692f4c7ef8f78c9827603383496fc60e97be85fbc",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_ANYMUT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 174,
+          "recomputed": 174,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 4,
+            "ROLE_RESTRICTED": 170
+          },
+          "relevant": 174,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 4,
+            "ROLE_RESTRICTED": 170
+          },
+          "declaredRoles": [
+            "administrator",
+            "content_manager",
+            "member",
+            "officer",
+            "steward"
+          ],
+          "delegated": [
+            {
+              "operation": "intelligence/route.ts|POST",
+              "to": "apps/union-eyes/app/api/analytics/insights/route.ts"
+            }
+          ]
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member to steward (per route)",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_ANYMUT",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include UNAUTHORIZED_MUTATION and a write operation."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [
+        {
+          "code": "LOCAL_GUARD_RETURNS_TRUE",
+          "severity": "QUALIFYING",
+          "statement": "apps/union-eyes/app/api/intelligence/route.ts defines requireOrgAccess, which returns true unconditionally."
+        }
+      ],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "NATIVE_POSTGRES"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B3-EXTERNAL-INVOICES-MEMBER-FLOOR",
+      "tranche": "0B.3",
+      "assessmentRecordSha256": "317eb222651debf51c90202b136a5ef7b708c6bc382bec6d297866d6802df02d",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_MF",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "declaredRoles": [
+            "member"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_MF",
+          "result": "PRECONDITION_MET",
+          "needs": "A member-floor operation and an over-disclosure or privacy impact."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B3-METRICS-CLAIM-IDS-IN-MEMBER-READ",
+      "tranche": "0B.3",
+      "assessmentRecordSha256": "48578f8ec049dfe0ada5185f8dd78e79cf006a9206e69b7a645012f187c3d37b",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_AUD",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 4,
+          "recomputed": 4,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 3,
+            "ROLE_RESTRICTED": 1
+          },
+          "relevant": 3,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 3
+          },
+          "declaredRoles": [
+            "member"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_AUD",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include SAME_TENANT_OVER_DISCLOSURE."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B3-SUBSCRIPTION-ROLE-TITLE-AND-MEMBER-READ",
+      "tranche": "0B.3",
+      "assessmentRecordSha256": "ab494ef53c2452aa02732c48436aa2ae463c1dc53656730a162bca223aed0d81",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_MF",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 9,
+          "recomputed": 9,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 2,
+            "ROLE_RESTRICTED": 7
+          },
+          "relevant": 9,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 2,
+            "ROLE_RESTRICTED": 7
+          },
+          "declaredRoles": [
+            "administrator",
+            "member",
+            "role-list",
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member read; steward and treasurer-title mutation",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_MF",
+          "result": "PRECONDITION_MET",
+          "needs": "A member-floor operation and an over-disclosure or privacy impact."
+        },
+        "absenceClaims": [
+          {
+            "subject": "authority",
+            "phrase": "no source names the office with contract authority",
+            "status": "NOT_MACHINE_CHECKABLE",
+            "contestedBy": []
+          }
+        ]
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "PARTIALLY_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B3-TRIAL-EXPIRY-PLACEHOLDER-PAYMENT-CHECK",
+      "tranche": "0B.3",
+      "assessmentRecordSha256": "0fad5b8bee1a6bff9d3c755af592f0295362cfc08cc80e4aec82660ce8a2b94e",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_FALSE",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_FALSE",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include FALSE_ATTESTATION_OR_OUTCOME."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "NATIVE_POSTGRES"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B3-WEEKLY-SUMMARY-FABRICATED-MODEL-CLAIM",
+      "tranche": "0B.3",
+      "assessmentRecordSha256": "5951a8324e14cee2456af286f1e6f0501ba5aaeacbdd1a63503acd4c534a14ec",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_FALSE",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "officer role floor",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_FALSE",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include FALSE_ATTESTATION_OR_OUTCOME."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [
+        {
+          "code": "STATED_FLOOR_ROLE_NOT_DECLARED",
+          "severity": "QUALIFYING",
+          "statement": "The stated floor names officer; the relevant operations declare steward."
+        }
+      ],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "PARTIALLY_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B4-CALENDAR-CALLBACK-GET-WRITES-TOKENS-NO-AUDIT",
+      "tranche": "0B.4",
+      "assessmentRecordSha256": "83f68d39f0b19388e5c73c42196a26874efb51e2d6283aed8112c711a20a8525",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_CRED",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 2,
+          "recomputed": 2,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 2
+          },
+          "relevant": 2,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 2
+          },
+          "declaredRoles": [
+            "member"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_CRED",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include PRIVACY_OR_CONSENT."
+        },
+        "absenceClaims": [
+          {
+            "subject": "audit",
+            "phrase": "no audit",
+            "status": "NOT_MACHINE_CHECKABLE",
+            "contestedBy": []
+          }
+        ]
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "NATIVE_POSTGRES"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B4-CALENDAR-CONNECTION-CRUD-WRITES-AROUND-OAUTH",
+      "tranche": "0B.4",
+      "assessmentRecordSha256": "754449f4457368450a0f70ed8e4c531bd30090ecdade43c4cb9d5404af5bdcf8",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_CRED",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 2,
+          "recomputed": 2,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 2
+          },
+          "relevant": 2,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 2
+          },
+          "declaredRoles": [
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_CRED",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include PRIVACY_OR_CONSENT."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "NATIVE_POSTGRES"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B4-CALENDAR-CONNECTION-ROW-RETURNS-TOKENS",
+      "tranche": "0B.4",
+      "assessmentRecordSha256": "0dbcb80a4dc5515f2cbfe620bf6bc5859427b4b3800bf03bff4f28cb255c960d",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_CRED",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 2,
+          "recomputed": 2,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 2
+          },
+          "relevant": 2,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 2
+          },
+          "declaredRoles": [
+            "member"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member (connection owner)",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_CRED",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include PRIVACY_OR_CONSENT."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "BROWSER"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B4-CALENDAR-EVENTS-PERSONAL-CALENDAR-LEAK",
+      "tranche": "0B.4",
+      "assessmentRecordSha256": "4b67957286d154e43a8282ef62fd810f2c1cbaaf8619104123ad2f8f8cb1fe74",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_MF",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 8,
+          "recomputed": 8,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 5,
+            "ROLE_RESTRICTED": 3
+          },
+          "relevant": 5,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 5
+          },
+          "declaredRoles": [
+            "member"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_MF",
+          "result": "PRECONDITION_MET",
+          "needs": "A member-floor operation and an over-disclosure or privacy impact."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B4-CALENDAR-ITEM-LOCKED-CHECK-INERT",
+      "tranche": "0B.4",
+      "assessmentRecordSha256": "75ca2f0ce63c919509fb5a09997ee96faac76e5d8bc6c795a803ed8e89b7c9ce",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_ANYMUT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 2,
+          "recomputed": 2,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 2
+          },
+          "relevant": 2,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 2
+          },
+          "declaredRoles": [
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member",
+          "verdict": "OVERSTATED"
+        },
+        "rubric": {
+          "key": "RB_ANYMUT",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include UNAUTHORIZED_MUTATION and a write operation."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [
+        {
+          "code": "FLOOR_OVERSTATED",
+          "severity": "QUALIFYING",
+          "statement": "The stated state REACHABLE_ANY_AUTHENTICATED overstates reachability: every relevant operation is declared at a higher floor."
+        },
+        {
+          "code": "STATED_FLOOR_ROLE_NOT_DECLARED",
+          "severity": "QUALIFYING",
+          "statement": "The stated floor names member; the relevant operations declare steward."
+        }
+      ],
+      "dispositionSensitivity": [
+        "POSSIBLY_TOO_STRICT"
+      ],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "PARTIALLY_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B4-CALENDAR-OAUTH-STATE-IS-USER-ID",
+      "tranche": "0B.4",
+      "assessmentRecordSha256": "bb6bfab4d24225718f3bd43aa1e32b943ed3eed1a79bb0d14c5faaf0dc98d6ba",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_CRED",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 4,
+          "recomputed": 4,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 4
+          },
+          "relevant": 4,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 4
+          },
+          "declaredRoles": [
+            "member"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_CRED",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include PRIVACY_OR_CONSENT."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B4-CALENDAR-SYNC-ANY-MEMBER-CONNECTION",
+      "tranche": "0B.4",
+      "assessmentRecordSha256": "b258fbbf22d4d76ba9a1ada73bffbe993fe4a6646d260c42620d42d18c9ed8e0",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_ANYMUT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "declaredRoles": [],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_ANYMUT",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include UNAUTHORIZED_MUTATION and a write operation."
+        },
+        "absenceClaims": [
+          {
+            "subject": "predicate",
+            "phrase": "no userId predicate",
+            "status": "CONTESTED_BY_CITED_SOURCE",
+            "contestedBy": [
+              {
+                "ref": "apps/union-eyes/lib/organization-middleware.ts",
+                "token": "organizationId"
+              }
+            ]
+          }
+        ]
+      },
+      "independentFindings": [
+        {
+          "code": "ABSENCE_CLAIM_CONTESTED",
+          "severity": "QUALIFYING",
+          "statement": "The claim \"no userId predicate\" is contested: cited source names organizationId."
+        }
+      ],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "PARTIALLY_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B4-CALENDAR-SYNC-NO-PERSONAL-CALENDAR-CHECK",
+      "tranche": "0B.4",
+      "assessmentRecordSha256": "fc184f42fd88d9a14db10a14c557bec864afcaf424081f6aad2cb38b22637c29",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_ANYMUT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "declaredRoles": [],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_ANYMUT",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include UNAUTHORIZED_MUTATION and a write operation."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B4-CARBON-FABRICATED-MEASUREMENTS-RETURNED-200",
+      "tranche": "0B.4",
+      "assessmentRecordSha256": "9cd5aaae97b296ef12868408de97b3bf759b55ab14d209dd4b0d5d25b294b4ae",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_FALSE",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 2,
+          "recomputed": 2,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 2
+          },
+          "relevant": 2,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 2
+          },
+          "declaredRoles": [],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "any authenticated caller",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_FALSE",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include FALSE_ATTESTATION_OR_OUTCOME."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B4-CASE-STUDIES-ORG-ADMIN-WRITES-GLOBAL-CONTENT",
+      "tranche": "0B.4",
+      "assessmentRecordSha256": "657d5a7a2afa06fe36258db43cea21a16f0c192457840eacd30f6fe391b53559",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_SHARED",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 3,
+          "recomputed": 3,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 3
+          },
+          "relevant": 3,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 3
+          },
+          "declaredRoles": [
+            "administrator"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "organization administrator",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_SHARED",
+          "result": "PRECONDITION_MET",
+          "needs": "Cross-organization impact and a write operation."
+        },
+        "absenceClaims": [
+          {
+            "subject": "mandate",
+            "phrase": "no source names the platform staff mandate",
+            "status": "NOT_MACHINE_CHECKABLE",
+            "contestedBy": []
+          }
+        ]
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "PARTIALLY_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B4-CASE-STUDIES-READ-IGNORES-PUBLICATION-STATE",
+      "tranche": "0B.4",
+      "assessmentRecordSha256": "446e3d7ff168a01cb8970d8b37e4b65cf2c386f8f5bfcec2f8b3028b3c3be043",
+      "proposedDisposition": {
+        "value": "REVIEW_REQUIRED",
+        "rubricKey": "RR",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 2,
+          "recomputed": 2,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 1,
+            "UNAUTHENTICATED": 1
+          },
+          "relevant": 2,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 1,
+            "UNAUTHENTICATED": 1
+          },
+          "declaredRoles": [
+            "member"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_UNAUTHENTICATED",
+          "statedFloor": "public list; member item read",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RR",
+          "result": "NOT_MACHINE_CHECKABLE",
+          "needs": null
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "NATIVE_POSTGRES"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B4-CBA-CHILD-RECORDS-READ-BY-AGREEMENT-ID-ONLY",
+      "tranche": "0B.4",
+      "assessmentRecordSha256": "dea75c7813a802edb0a5cbe43c9f32d3b666577fc3be979bb1c76e5ded8f3899",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_XT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "declaredRoles": [
+            "member"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward and above (role floor per route)",
+          "verdict": "UNDERSTATED"
+        },
+        "rubric": {
+          "key": "RB_XT",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include CROSS_TENANT_DISCLOSURE."
+        },
+        "absenceClaims": [
+          {
+            "subject": "predicate",
+            "phrase": "no organization predicate",
+            "status": "CONTESTED_BY_CITED_SOURCE",
+            "contestedBy": [
+              {
+                "ref": "apps/union-eyes/lib/api-auth-guard.ts",
+                "token": "organizationId"
+              }
+            ]
+          }
+        ]
+      },
+      "independentFindings": [
+        {
+          "code": "FLOOR_UNDERSTATED",
+          "severity": "QUALIFYING",
+          "statement": "The stated state REACHABLE_ROLE_RESTRICTED understates reachability: every relevant operation is declared at a lower floor."
+        },
+        {
+          "code": "ABSENCE_CLAIM_CONTESTED",
+          "severity": "QUALIFYING",
+          "statement": "The claim \"no organization predicate\" is contested: cited source names organizationId."
+        }
+      ],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "NATIVE_POSTGRES",
+          "RLS_TENANT_ISOLATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B4-CBA-INTEL-TENANT-ADMIN-WRITES-SHARED-DATASET",
+      "tranche": "0B.4",
+      "assessmentRecordSha256": "91221eb09ff44bacc7c08a07eeb7c3f853ba74c3b1337c00b3a9bb2b542c25e9",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_SHARED",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 6,
+          "recomputed": 6,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 6
+          },
+          "relevant": 6,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 6
+          },
+          "declaredRoles": [
+            "administrator"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "organization administrator",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_SHARED",
+          "result": "PRECONDITION_MET",
+          "needs": "Cross-organization impact and a write operation."
+        },
+        "absenceClaims": [
+          {
+            "subject": "mandate",
+            "phrase": "no source names the platform staff mandate",
+            "status": "NOT_MACHINE_CHECKABLE",
+            "contestedBy": []
+          }
+        ]
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "PARTIALLY_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B4-CBA-INTEL-TENANT-STEWARD-REVIEWS-SHARED-DATASET",
+      "tranche": "0B.4",
+      "assessmentRecordSha256": "8d05e15b9a6e1570369e32062743bc433240b7d51ba7401d2a47a76e18a2574b",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_SHARED",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 2,
+          "recomputed": 2,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 2
+          },
+          "relevant": 2,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 2
+          },
+          "declaredRoles": [
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_SHARED",
+          "result": "PRECONDITION_MET",
+          "needs": "Cross-organization impact and a write operation."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B4-CHATBOT-SAFETY-SKIPPED-OR-FAILS-OPEN",
+      "tranche": "0B.4",
+      "assessmentRecordSha256": "728de89164eb03121b4017bec82dd4ef11fb4008770042a84d65bc0331ffd48d",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_DEP",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "declaredRoles": [
+            "member"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_DEP",
+          "result": "PRECONDITION_MET",
+          "needs": "A deployment-configuration proof among the proofs the disposition depends on."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "DEPLOYMENT_CONFIGURATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B4-CLAUSE-LIBRARY-ANONYMIZATION-NOT-ENFORCED-ON-READ",
+      "tranche": "0B.4",
+      "assessmentRecordSha256": "dfdfbbeddaa264a1e6600cfe5224d2fcef448070ffb64f4719eaf82d8ba3de2c",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_XT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member",
+          "verdict": "OVERSTATED"
+        },
+        "rubric": {
+          "key": "RB_XT",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include CROSS_TENANT_DISCLOSURE."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [
+        {
+          "code": "FLOOR_OVERSTATED",
+          "severity": "QUALIFYING",
+          "statement": "The stated state REACHABLE_ANY_AUTHENTICATED overstates reachability: every relevant operation is declared at a higher floor."
+        },
+        {
+          "code": "STATED_FLOOR_ROLE_NOT_DECLARED",
+          "severity": "QUALIFYING",
+          "statement": "The stated floor names member; the relevant operations declare steward."
+        }
+      ],
+      "dispositionSensitivity": [
+        "POSSIBLY_TOO_STRICT"
+      ],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "RLS_TENANT_ISOLATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B4-CLAUSES-CREATE-ACCEPTS-ANY-CBA-ID",
+      "tranche": "0B.4",
+      "assessmentRecordSha256": "26d40b30468c7ce5b5afc27239186c2c6e19727ab1a55652658b2915b4a8f1e5",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_XT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 2,
+          "recomputed": 2,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 2
+          },
+          "relevant": 2,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 2
+          },
+          "declaredRoles": [
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_XT",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include CROSS_TENANT_DISCLOSURE."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "NATIVE_POSTGRES",
+          "RLS_TENANT_ISOLATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B4-CLC-SYNC-LOG-MEMBER-READ-AND-FORGEABLE-VERIFICATION",
+      "tranche": "0B.4",
+      "assessmentRecordSha256": "d81e48cfeec7b5437cde5717b02d9b888cf916a5ce1eb77eed103debfff31604",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_MF",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 6,
+          "recomputed": 6,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 3,
+            "ROLE_RESTRICTED": 3
+          },
+          "relevant": 6,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 3,
+            "ROLE_RESTRICTED": 3
+          },
+          "declaredRoles": [
+            "member",
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member read; steward create",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_MF",
+          "result": "PRECONDITION_MET",
+          "needs": "A member-floor operation and an over-disclosure or privacy impact."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B4-OHS-FILINGS-NO-CASE-AUTHORITY",
+      "tranche": "0B.4",
+      "assessmentRecordSha256": "78b1fe20d596c1bbe9e83e0a12efae38dc356872499fbef89cb0b32cdd071892",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_AUD",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 5,
+          "recomputed": 5,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 5
+          },
+          "relevant": 5,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 5
+          },
+          "declaredRoles": [
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_AUD",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include SAME_TENANT_OVER_DISCLOSURE."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B5-COGNITION-SNAPSHOTS-IN-LOCAL-FILES",
+      "tranche": "0B.5",
+      "assessmentRecordSha256": "f7d5652dabb5c3ff762077f2a012fc0ff11f575c4605a26a97b51a38c7251e0e",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_DEP",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 6,
+          "recomputed": 6,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 6
+          },
+          "relevant": 6,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 6
+          },
+          "declaredRoles": [],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward and above (role floor per route)",
+          "verdict": "UNDERSTATED"
+        },
+        "rubric": {
+          "key": "CB_DEP",
+          "result": "PRECONDITION_MET",
+          "needs": "A deployment-configuration proof among the proofs the disposition depends on."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [
+        {
+          "code": "FLOOR_UNDERSTATED",
+          "severity": "QUALIFYING",
+          "statement": "The stated state REACHABLE_ROLE_RESTRICTED understates reachability: every relevant operation is declared at a lower floor."
+        },
+        {
+          "code": "RUBRIC_PRECEDENCE_AMBIGUOUS",
+          "severity": "CHALLENGE",
+          "statement": "The impact includes cross-organization disclosure and no executed containment proof is on file, which is the rubric RB_XT test, yet the proposal applies CB_DEP. The proposal stays as proposed; the precedence between the two rubric keys needs an authorized reviewer."
+        }
+      ],
+      "dispositionSensitivity": [
+        "POSSIBLY_TOO_LENIENT",
+        "RUBRIC_APPLICATION_UNCLEAR"
+      ],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "DEPLOYMENT_CONFIGURATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B5-OHS-WITHDRAWAL-REFUSAL-NO-CASE-AUTHORITY",
+      "tranche": "0B.5",
+      "assessmentRecordSha256": "faeb579a997f54eeacc909ebe61e768f8ca0da4e7c6e89da25b4bdfe32ade226",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_AUD",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 10,
+          "recomputed": 10,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 10
+          },
+          "relevant": 10,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 10
+          },
+          "declaredRoles": [
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_AUD",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include SAME_TENANT_OVER_DISCLOSURE."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B5-SURVEY-RESPONSES-IDENTIFY-RESPONDENTS-TO-STEWARDS",
+      "tranche": "0B.5",
+      "assessmentRecordSha256": "2d91601277f4548682c229d45916c47b57c169799692fcb4bf8b4cac3824f6dc",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_FALSE",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_FALSE",
+          "result": "PRECONDITION_NOT_MET",
+          "needs": "The impact classes include FALSE_ATTESTATION_OR_OUTCOME."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [
+        {
+          "code": "RUBRIC_PRECONDITION_NOT_MET",
+          "severity": "CHALLENGE",
+          "statement": "The rubric RB_FALSE requires: The impact classes include FALSE_ATTESTATION_OR_OUTCOME. The record does not show it."
+        }
+      ],
+      "dispositionSensitivity": [
+        "RUBRIC_APPLICATION_UNCLEAR"
+      ],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "PARTIALLY_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B5-SURVEY-RESULTS-NO-ORG-PREDICATE-LOADS-ALL-ANSWERS",
+      "tranche": "0B.5",
+      "assessmentRecordSha256": "9b58c609dd0907201cdcb0ea3b301ccb01fbf4d0b0c6821b5fc313965a7ff7e1",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_XT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_XT",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include CROSS_TENANT_DISCLOSURE."
+        },
+        "absenceClaims": [
+          {
+            "subject": "predicate",
+            "phrase": "no organization predicate",
+            "status": "CONTESTED_BY_CITED_SOURCE",
+            "contestedBy": [
+              {
+                "ref": "apps/union-eyes/lib/api/with-api.ts",
+                "token": "organizationId"
+              }
+            ]
+          }
+        ]
+      },
+      "independentFindings": [
+        {
+          "code": "ABSENCE_CLAIM_CONTESTED",
+          "severity": "QUALIFYING",
+          "statement": "The claim \"no organization predicate\" is contested: cited source names organizationId."
+        }
+      ],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "NATIVE_POSTGRES",
+          "RLS_TENANT_ISOLATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B6-CMP-CONTRACT-CREATE-REFERENCES-UNVERIFIED",
+      "tranche": "0B.6",
+      "assessmentRecordSha256": "4956028f8fc215159b1214d2cbea8250365b04298ac4affdbd88b54773de737a",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_XT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "administrator"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward and above (role floor)",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_XT",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include CROSS_TENANT_DISCLOSURE."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "NATIVE_POSTGRES",
+          "RLS_TENANT_ISOLATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B6-CMP-DISPATCH-REFERENCED-IDS-NOT-VERIFIED",
+      "tranche": "0B.6",
+      "assessmentRecordSha256": "1ff7749e5bda3c3d87df9c495ad22ec01e90c0c26a8ca1fbc76de521411716b1",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_INT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 2,
+          "recomputed": 2,
+          "missing": [],
+          "floorsByClass": {
+            "CUSTOM_CHECK": 2
+          },
+          "relevant": 2,
+          "relevantFloorsByClass": {
+            "CUSTOM_CHECK": 2
+          },
+          "declaredRoles": [],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward and above (role floor)",
+          "verdict": "CUSTOM_CHECK_UNPROVEN"
+        },
+        "rubric": {
+          "key": "CB_INT",
+          "result": "PRECONDITION_MET",
+          "needs": "A role-restricted floor."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [
+        {
+          "code": "FLOOR_RESTS_ON_HANDLER_BODY",
+          "severity": "INFO",
+          "statement": "The wrapper authenticates the caller and the handler body names its own role or credential check, so the wrapper alone does not establish the floor."
+        }
+      ],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "RLS_TENANT_ISOLATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B6-CMP-VALIDATE-ATTESTS-FROM-CALLER-DATA",
+      "tranche": "0B.6",
+      "assessmentRecordSha256": "7f1021b73d3eb7ed3d7a18292f2168d73014cc855fb81b7491146e3916e878c2",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_FALSE",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "declaredRoles": [],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "any authenticated caller",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_FALSE",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include FALSE_ATTESTATION_OR_OUTCOME."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B6-EDU-CERTIFICATION-ISSUED-WITHOUT-COMPLETION-OR-VERIFICATION",
+      "tranche": "0B.6",
+      "assessmentRecordSha256": "f2e74d810921b4a45b382fdc4848b5a7357896e3b9ad21d2f70dd7b9be82e2a2",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_FALSE",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_FALSE",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include FALSE_ATTESTATION_OR_OUTCOME."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B6-EDU-COMPLETIONS-POST-SKIPS-REGISTRATION-CHECKS",
+      "tranche": "0B.6",
+      "assessmentRecordSha256": "f3daa802db61398b4eede645824afd157b824c6e61ae28e86bd4ba06f00f59bf",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_XT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_XT",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include CROSS_TENANT_DISCLOSURE."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "NATIVE_POSTGRES",
+          "RLS_TENANT_ISOLATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B6-EDU-CRON-QUERIES-REFERENCE-COLUMNS-ABSENT-FROM-SCHEMA",
+      "tranche": "0B.6",
+      "assessmentRecordSha256": "210fe46d543b791d97730218168325f864f66894a621475f582e24e2bd0f8c5c",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_DEP",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "cron"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "external trust",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_DEP",
+          "result": "PRECONDITION_MET",
+          "needs": "A deployment-configuration proof among the proofs the disposition depends on."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "DEPLOYMENT_CONFIGURATION",
+          "NATIVE_POSTGRES"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B6-EDU-ITEM-FACADES-REWRITE-OR-DELETE-COURSE-BY-PATH-ID",
+      "tranche": "0B.6",
+      "assessmentRecordSha256": "656bed4fb224c3672b5ffb9b55f84c9efd003cadad1d56d1bf93240a7d09185b",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_ANYMUT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 6,
+          "recomputed": 6,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 2,
+            "ROLE_RESTRICTED": 4
+          },
+          "relevant": 4,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 4
+          },
+          "declaredRoles": [
+            "steward"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "steward to administrator",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_ANYMUT",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include UNAUTHORIZED_MUTATION and a write operation."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "NATIVE_POSTGRES"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B6-EDU-REGISTRATION-MEMBER-SETS-COMPLETION-FEE-AND-APPROVAL-FIELDS",
+      "tranche": "0B.6",
+      "assessmentRecordSha256": "53c43990b799f3a078fabc6da9cc84e678c6662c0a0976dec54b1e0aa7275163",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_ANYMUT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "declaredRoles": [
+            "member"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_ANYMUT",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include UNAUTHORIZED_MUTATION and a write operation."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "SOURCE_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B6-EMP-REMITTANCE-DETAIL-MEMBER-READ",
+      "tranche": "0B.6",
+      "assessmentRecordSha256": "e1e3bcb773b241c3ea5b66521e7ddd8fa444bb0c022040a940bc855899bbd1cb",
+      "proposedDisposition": {
+        "value": "RELEASE_BLOCKING",
+        "rubricKey": "RB_MF",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 1
+          },
+          "declaredRoles": [
+            "member"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ANY_AUTHENTICATED",
+          "statedFloor": "member",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "RB_MF",
+          "result": "PRECONDITION_MET",
+          "needs": "A member-floor operation and an over-disclosure or privacy impact."
+        },
+        "absenceClaims": [
+          {
+            "subject": "mandate",
+            "phrase": "no financial mandate",
+            "status": "NOT_MACHINE_CHECKABLE",
+            "contestedBy": []
+          }
+        ]
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "RLS_TENANT_ISOLATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B6-EMP-REPLAY-NO-FINANCIAL-MANDATE",
+      "tranche": "0B.6",
+      "assessmentRecordSha256": "6ca50377d426d9436588159b0f21ba79bf2941829d4d698dd79d85c1e16d4ce1",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_AUD",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "role-list"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "secretary_treasurer role title",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_AUD",
+          "result": "PRECONDITION_MET",
+          "needs": "The impact classes include SAME_TENANT_OVER_DISCLOSURE."
+        },
+        "absenceClaims": [
+          {
+            "subject": "mandate",
+            "phrase": "never calls requireLiveFinancialMandate, so it neither requires a live financial mandate",
+            "status": "NOT_MACHINE_CHECKABLE",
+            "contestedBy": []
+          },
+          {
+            "subject": "mandate",
+            "phrase": "never requires a live financial mandate",
+            "status": "NOT_MACHINE_CHECKABLE",
+            "contestedBy": []
+          }
+        ]
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": false,
+        "proofs": []
+      },
+      "reviewStatus": "PARTIALLY_VERIFIED",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B6-SYS-INHERITANCE-ORG-SCOPE-NO-OP-ON-PENDING-PROFILES",
+      "tranche": "0B.6",
+      "assessmentRecordSha256": "38589e81d2fd5bc54932930d615805ec48580d08f155e5d132dbee33f16524a3",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_INERT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 2,
+          "recomputed": 2,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 2
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "support_agent"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "support_agent role floor",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_INERT",
+          "result": "NOT_MACHINE_CHECKABLE",
+          "needs": null
+        },
+        "absenceClaims": [
+          {
+            "subject": "predicate",
+            "phrase": "no organization column, so the factory adds no tenant predicate",
+            "status": "CONTESTED_BY_CITED_SOURCE",
+            "contestedBy": [
+              {
+                "ref": "apps/union-eyes/lib/api/crud-factory.ts",
+                "token": "organizationId"
+              }
+            ]
+          }
+        ]
+      },
+      "independentFindings": [
+        {
+          "code": "RUBRIC_PRECEDENCE_AMBIGUOUS",
+          "severity": "CHALLENGE",
+          "statement": "The impact includes cross-organization disclosure and no executed containment proof is on file, which is the rubric RB_XT test, yet the proposal applies CB_INERT. The proposal stays as proposed; the precedence between the two rubric keys needs an authorized reviewer."
+        },
+        {
+          "code": "ABSENCE_CLAIM_CONTESTED",
+          "severity": "QUALIFYING",
+          "statement": "The claim \"no organization column, so the factory adds no tenant predicate\" is contested: cited source names organizationId."
+        }
+      ],
+      "dispositionSensitivity": [
+        "RUBRIC_APPLICATION_UNCLEAR"
+      ],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "RLS_TENANT_ISOLATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B6-SYS-LOCATION-RETENTION-HAS-NO-SCHEDULER-IN-REPOSITORY",
+      "tranche": "0B.6",
+      "assessmentRecordSha256": "9bcace1b6153f5ac6d7d121852b558666fba8b59622ffe4bc5f618f250ee5cb6",
+      "proposedDisposition": {
+        "value": "REVIEW_REQUIRED",
+        "rubricKey": "RR",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 5,
+          "recomputed": 5,
+          "missing": [],
+          "floorsByClass": {
+            "ANY_AUTHENTICATED": 3,
+            "ROLE_RESTRICTED": 2
+          },
+          "relevant": 5,
+          "relevantFloorsByClass": {
+            "ANY_AUTHENTICATED": 3,
+            "ROLE_RESTRICTED": 2
+          },
+          "declaredRoles": [
+            "cron"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "external trust and session (per route)",
+          "verdict": "MIXED"
+        },
+        "rubric": {
+          "key": "RR",
+          "result": "NOT_MACHINE_CHECKABLE",
+          "needs": null
+        },
+        "absenceClaims": [
+          {
+            "subject": "scheduler",
+            "phrase": "no scheduler",
+            "status": "NOT_MACHINE_CHECKABLE",
+            "contestedBy": []
+          }
+        ]
+      },
+      "independentFindings": [
+        {
+          "code": "FLOOR_UNDERSTATED",
+          "severity": "QUALIFYING",
+          "statement": "The stated state REACHABLE_ROLE_RESTRICTED understates reachability: some relevant operation is declared at a lower floor."
+        }
+      ],
+      "dispositionSensitivity": [
+        "POSSIBLY_TOO_LENIENT"
+      ],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "DEPLOYMENT_CONFIGURATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B6-SYS-OBSERVABILITY-SWEEP-RECORDS-EMAIL-SUCCESS-WITHOUT-SENDING",
+      "tranche": "0B.6",
+      "assessmentRecordSha256": "9a690c9d4c52caf3ca3f91394ed177138359f42a0c916755a5df42a3a749b7fa",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_INT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "cron"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "external trust",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_INT",
+          "result": "PRECONDITION_MET",
+          "needs": "A role-restricted floor."
+        },
+        "absenceClaims": []
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "SOURCE_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "DEPLOYMENT_CONFIGURATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    },
+    {
+      "defectId": "DEF-0B6-SYS-SLA-WATCHDOG-EVENTS-HAVE-NO-SUBSCRIBER",
+      "tranche": "0B.6",
+      "assessmentRecordSha256": "cf2c8874e93acf20903f7fc01ac46a0791314d1641c02133a3e3f4e658d28cbc",
+      "proposedDisposition": {
+        "value": "CONDITIONALLY_BLOCKING",
+        "rubricKey": "CB_INT",
+        "state": "PROPOSED_NOT_ACCEPTED",
+        "acceptedBy": null,
+        "acceptedOn": null,
+        "severityChanged": false
+      },
+      "sourceChecks": {
+        "frozenRecordMatches": true,
+        "quotes": {
+          "total": 3,
+          "present": 3,
+          "missing": []
+        },
+        "operations": {
+          "declared": 1,
+          "recomputed": 1,
+          "missing": [],
+          "floorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "relevant": 1,
+          "relevantFloorsByClass": {
+            "ROLE_RESTRICTED": 1
+          },
+          "declaredRoles": [
+            "cron"
+          ],
+          "delegated": []
+        },
+        "activation": {
+          "stated": "REACHABLE_ROLE_RESTRICTED",
+          "statedFloor": "external trust",
+          "verdict": "CONSISTENT"
+        },
+        "rubric": {
+          "key": "CB_INT",
+          "result": "PRECONDITION_MET",
+          "needs": "A role-restricted floor."
+        },
+        "absenceClaims": [
+          {
+            "subject": "subscriber",
+            "phrase": "no subscriber",
+            "status": "NOT_MACHINE_CHECKABLE",
+            "contestedBy": []
+          }
+        ]
+      },
+      "independentFindings": [],
+      "dispositionSensitivity": [],
+      "sourceVerification": "PARTIALLY_VERIFIED",
+      "runtimeDependency": {
+        "required": true,
+        "proofs": [
+          "DEPLOYMENT_CONFIGURATION"
+        ]
+      },
+      "reviewStatus": "REQUIRES_RUNTIME_PROOF",
+      "executedProof": [],
+      "runtimeEvidence": null,
+      "review": {
+        "reviewerRole": "ENGINEERING_AGENT_METHOD_REVIEW",
+        "independence": "METHOD_INDEPENDENT_ONLY",
+        "authorityIndependent": false,
+        "approval": null,
+        "acceptedBy": null,
+        "acceptedOn": null
+      }
+    }
+  ]
+}

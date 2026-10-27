@@ -48,6 +48,7 @@ import { FILE_TRANSITION } from './ue-gate0c1-universe.mjs'
 import { FILE_HANDOFF } from './ue-gate0c1-handoff.mjs'
 import { DOCS_0C2, FILES_0C2 } from './ue-gate0c2-ids.mjs'
 import { DOCS_0C3, FILES_0C3 } from './ue-gate0c3-ids.mjs'
+import { DOCS_0C4, FILES_0C4 } from './ue-gate0c4-ids.mjs'
 import { capabilitiesForTranche6 } from './ue-gate0b6-capabilities.mjs'
 import { DECISION_BOUND_OPERATIONS } from './ue-gate0b6-ids.mjs'
 import { FILE_EXCEPTIONS, inventoryTotals } from './ue-gate0b6-exceptions.mjs'
@@ -805,6 +806,11 @@ const matrix = {
     gate: 'GATE-0C.3',
     note: 'Hash pins for the Gate 0C.3 reconciliation artifacts: the release assessment of the 71 earlier HIGH defects, the release-debt index, the OPL challenge treatment, the carbon scope decision record, the decision index, the defect relationship map, the two-level closure model and the three review documents. Every assessment is PROPOSED_NOT_ACCEPTED, no decision is adopted, no carbon option is selected and the Gate 0 verdict is unchanged.',
     files: Object.fromEntries(Object.entries({ ...FILES_0C3, ...Object.fromEntries(Object.entries(DOCS_0C3).map(([key, file]) => [`doc-${key}`, file])) }).map(([key, file]) => [key, { file, sha256: existsSync(join(ROOT, file)) ? sha256File(ROOT, file) : null }])),
+  },
+  qualification0c4: {
+    gate: 'GATE-0C.4',
+    note: 'Hash pins for the Gate 0C.4 independent scope-lock qualification: the qualification of the 71 proposed dispositions, the evidence qualification, the supersession and clarification records, the certification model, the product-owner dossier, the institutional decision dossier and the four review documents. The review is independent in method only. No disposition is accepted, no persona is ratified, no institutional decision is adopted, Gate 0 certification is NOT_GRANTED and the Gate 0 verdict is unchanged.',
+    files: Object.fromEntries(Object.entries({ ...FILES_0C4, ...Object.fromEntries(Object.entries(DOCS_0C4).map(([key, file]) => [`doc-${key}`, file])) }).map(([key, file]) => [key, { file, sha256: existsSync(join(ROOT, file)) ? sha256File(ROOT, file) : null }])),
   },
   releaseDispositionChallenges: {
     note: 'Independent reviewer challenge of the frozen Gate 0B.10 dispositions of DEF-0B10-OPL-01 and DEF-0B10-OPL-07. It is additional review evidence pinned here; it changes no frozen defect or disposition and claims no remediation.',

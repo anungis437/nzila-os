@@ -8188,6 +8188,52 @@
       }
     }
   },
+  "qualification0c4": {
+    "gate": "GATE-0C.4",
+    "note": "Hash pins for the Gate 0C.4 independent scope-lock qualification: the qualification of the 71 proposed dispositions, the evidence qualification, the supersession and clarification records, the certification model, the product-owner dossier, the institutional decision dossier and the four review documents. The review is independent in method only. No disposition is accepted, no persona is ratified, no institutional decision is adopted, Gate 0 certification is NOT_GRANTED and the Gate 0 verdict is unchanged.",
+    "files": {
+      "qualification": {
+        "file": "docs/union-eyes/convergence/register/ue-high-defect-qualification-0c4.json",
+        "sha256": "9b924f1ecc99790e92e85279048502f7ea6902e9ee5a99ac96ba0692159e1e83"
+      },
+      "evidence": {
+        "file": "docs/union-eyes/convergence/register/ue-evidence-qualification-0c4.json",
+        "sha256": "8185f1ce82d487ce1f4d040000922f2fb1f2249dcd59336fa20c3b25b0a45bf7"
+      },
+      "supersessions": {
+        "file": "docs/union-eyes/convergence/register/ue-supersession-clarification-0c4.json",
+        "sha256": "dfd5d5bfe781392ced7613a89237ea6912e32615ccb3430a0310fb36c81f5930"
+      },
+      "certification": {
+        "file": "docs/union-eyes/convergence/register/ue-gate0-certification-model-0c4.json",
+        "sha256": "51a4f0e84a694afccaefb1aec3f957917b5a11d19d7c9c62ae063c049471baa3"
+      },
+      "product": {
+        "file": "docs/union-eyes/convergence/register/ue-product-ratification-dossier-0c4.json",
+        "sha256": "00f39e355722557800713c51367a61d81b68b275102602a02d7e3667e7f637da"
+      },
+      "institutional": {
+        "file": "docs/union-eyes/convergence/register/ue-institutional-decision-dossier-0c4.json",
+        "sha256": "fddc314609ff653aed3d9f46f2e5affe64e191e5cb0aae07fce2ac73bdf7ed93"
+      },
+      "doc-index": {
+        "file": "docs/union-eyes/convergence/gate-0c4/UE-GATE-0C4-QUALIFICATION.md",
+        "sha256": "5f378e1754fb93b9e9b523577f1fbfcc06c7e8c91a462c2a6fb937196fdfb7de"
+      },
+      "doc-product": {
+        "file": "docs/union-eyes/convergence/gate-0c4/UE-PRODUCT-RATIFICATION-DOSSIER-0C4.md",
+        "sha256": "361f94f2d3d7baf575e413d05732bab9f4a0c32ca74ae5ed1776c50604bbcd57"
+      },
+      "doc-institutional": {
+        "file": "docs/union-eyes/convergence/gate-0c4/UE-INSTITUTIONAL-DECISION-DOSSIER-0C4.md",
+        "sha256": "4b8af5bd7b3ac14f39727100817d1c637180795b63728c4e2ef1f2ea806e2cf4"
+      },
+      "doc-checklist": {
+        "file": "docs/union-eyes/convergence/gate-0c4/UE-GATE0-CERTIFICATION-CHECKLIST-0C4.md",
+        "sha256": "53f667906b0d9af64b8e2832f99da0658e9c9608d75f0710c33d7d26c6375104"
+      }
+    }
+  },
   "releaseDispositionChallenges": {
     "note": "Independent reviewer challenge of the frozen Gate 0B.10 dispositions of DEF-0B10-OPL-01 and DEF-0B10-OPL-07. It is additional review evidence pinned here; it changes no frozen defect or disposition and claims no remediation.",
     "file": "docs/union-eyes/convergence/register/ue-release-disposition-challenges.json",
