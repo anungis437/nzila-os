@@ -8092,6 +8092,56 @@
     "file": "docs/union-eyes/convergence/register/ue-gate0c-handoff-register.json",
     "sha256": "641eb2242302076f9e6a3f19e2b17c82ed23391df3cf2df9348329d09cb4a322"
   },
+  "personaReadiness0c2": {
+    "gate": "GATE-0C.2",
+    "note": "Hash pins for the Gate 0C.2 persona ratification-readiness artifacts: the identifier preservation register, the Steward structure recommendation, the three decision packages, the requirement reconciliation, the product decision register and the four review documents. The three proposed baselines pinned above are unchanged. Every package is PROPOSED_FOR_RATIFICATION; none is ratified and no institutional authority is granted.",
+    "files": {
+      "preservation": {
+        "file": "docs/union-eyes/convergence/register/ue-persona-identifier-preservation-0c2.json",
+        "sha256": "4ae4cf1852154c23185ad76d0d46da453e9d04b614db3de1a2818219e6f31501"
+      },
+      "structure": {
+        "file": "docs/union-eyes/convergence/register/ue-persona-steward-structure-0c2.json",
+        "sha256": "2f43abcd9d79ee79b69c59e638deac8f21b94a3f7d2d9d5687f67c2d1980c715"
+      },
+      "steward": {
+        "file": "docs/union-eyes/convergence/register/ue-persona-decision-package-steward-0c2.json",
+        "sha256": "a01076343d199a98554756e577edabb8150fec6353baddab749d6efe00fa9cea"
+      },
+      "representative": {
+        "file": "docs/union-eyes/convergence/register/ue-persona-decision-package-representative-0c2.json",
+        "sha256": "e4dcbf3635b8807c9e923f2f12b5a1dc9b53196fadf864664393ff19f3af6861"
+      },
+      "financial-officer": {
+        "file": "docs/union-eyes/convergence/register/ue-persona-decision-package-financial-officer-0c2.json",
+        "sha256": "5ec3e9a10eb6c4458f467f5b8e659d746f6631924664d9f7ca062c6e435c3889"
+      },
+      "reconciliation": {
+        "file": "docs/union-eyes/convergence/register/ue-persona-requirement-reconciliation-0c2.json",
+        "sha256": "1195f5f987fce1a5399bf6ac8cde26accc57bd03ee7bc11d733c5fa331751fa0"
+      },
+      "decisions": {
+        "file": "docs/union-eyes/convergence/register/ue-persona-product-decision-register-0c2.json",
+        "sha256": "f65b621c10d58c4346848f020914b68ed7a8d1f1084576c53e9ccff9b224ed68"
+      },
+      "doc-index": {
+        "file": "docs/union-eyes/persona-baselines/decision-packages/UE-PERSONA-RATIFICATION-READINESS-0C2.md",
+        "sha256": "43c8dce64cf00385f27f83c999628a3878dd471a048f9bac29d009bc0dda4e32"
+      },
+      "doc-steward": {
+        "file": "docs/union-eyes/persona-baselines/decision-packages/UE-STEWARD-DECISION-PACKAGE-0C2.md",
+        "sha256": "03a691878e24f1cd628e43623f7afff4bcbb7008b3c0fb5b6e601e837f0e1a30"
+      },
+      "doc-representative": {
+        "file": "docs/union-eyes/persona-baselines/decision-packages/UE-REPRESENTATIVE-2.2-DECISION-PACKAGE-0C2.md",
+        "sha256": "3541ff06f6607b3e932fd92d69ea3fabbe7a72e405da982ad50952687f0581be"
+      },
+      "doc-financial-officer": {
+        "file": "docs/union-eyes/persona-baselines/decision-packages/UE-FINANCIAL-OFFICER-2.1-DECISION-PACKAGE-0C2.md",
+        "sha256": "e7cd383d0612b1d66a9ad43616244c89ca295589f28b682a3afa5b735a5b888f"
+      }
+    }
+  },
   "releaseDispositionChallenges": {
     "note": "Independent reviewer challenge of the frozen Gate 0B.10 dispositions of DEF-0B10-OPL-01 and DEF-0B10-OPL-07. It is additional review evidence pinned here; it changes no frozen defect or disposition and claims no remediation.",
     "file": "docs/union-eyes/convergence/register/ue-release-disposition-challenges.json",

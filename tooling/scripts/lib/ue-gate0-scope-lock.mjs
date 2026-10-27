@@ -46,6 +46,9 @@ import { FILES_0C1, validateClassification0c1 } from './ue-gate0c1-classificatio
 import { FILE_TRANSITION, fileSha256, historicalView, loadUniverseHistory, universeSummary, validateUniverseTransition } from './ue-gate0c1-universe.mjs'
 import { FILE_HANDOFF, handoffFacts, validateHandoffRegister } from './ue-gate0c1-handoff.mjs'
 import { DEFECTS as DEFECTS_0C1 } from './ue-gate0c1-facts.mjs'
+import { DOCS_0C2, FILES_0C2 } from './ue-gate0c2-ids.mjs'
+import { loadDocs as loadDocs0c2, loadFrozen as loadFrozen0c2, loadRegisters as loadRegisters0c2, loadSources as loadSources0c2 } from './ue-gate0c2-load.mjs'
+import { readinessSummary, validatePersonaReadiness } from './ue-gate0c2-readiness.mjs'
 import { FILE_EXCEPTIONS, inventoryTotals, inventoryTotalsProblems, validateDecisionBoundExceptions } from './ue-gate0b6-exceptions.mjs'
 import { lockProvenanceProblems } from './ue-gate0-lock-provenance.mjs'
 
@@ -268,6 +271,7 @@ function classificationPinProblems(matrix, root) {
     ...pinProblems(matrix?.routeClassification0c1, 'routeClassification0c1', FILES_0C1, root),
     ...pinProblems(matrix?.routeUniverseTransition, 'routeUniverseTransition', { register: FILE_TRANSITION }, root, true),
     ...pinProblems(matrix?.gate0cHandoff, 'gate0cHandoff', { register: FILE_HANDOFF }, root, true),
+    ...pinProblems(matrix?.personaReadiness0c2, 'personaReadiness0c2', { ...FILES_0C2, ...Object.fromEntries(Object.entries(DOCS_0C2).map(([key, file]) => [`doc-${key}`, file])) }, root),
     ...pinProblems(matrix?.releaseDispositionChallenges, 'releaseDispositionChallenges', { register: FILE_CHALLENGES }, root, true),
     ...pinProblems(matrix?.decisionBoundExceptions, 'decisionBoundExceptions', { register: FILE_EXCEPTIONS }, root, true),
   ]
@@ -373,6 +377,7 @@ export function loadContext(root = ROOT) {
     ledger0c: readJsonIfPresent(root, FILES_0C1.ledger),
     universeTransition: readJsonIfPresent(root, FILE_TRANSITION),
     handoffRegister: readJsonIfPresent(root, FILE_HANDOFF),
+    readiness0c2: { registers: loadRegisters0c2(root), docs: loadDocs0c2(root), src: loadSources0c2(root), frozen: loadFrozen0c2(root) },
     reviewQueue0c: readJsonIfPresent(root, FILES_0B7.reviewQueue),
     universeHistory: loadUniverseHistory(root),
     manifestSha256: sha256File(root, 'docs/union-eyes/convergence/register/ue-route-coverage-manifest.json'),
@@ -1063,6 +1068,15 @@ export function validateGate0(matrix, ctx = {}) {
     newDefectIds: DEFECTS_0C1.map((defect) => defect.id),
   })
   problems.push(...handoffProblems)
+  const readiness0c2 = 'readiness0c2' in ctx ? ctx.readiness0c2 : base.readiness0c2
+  const readinessProblems = validatePersonaReadiness({
+    registers: readiness0c2.registers,
+    src: { ...readiness0c2.src, matrix },
+    frozen: readiness0c2.frozen,
+    docs: readiness0c2.docs,
+    liveFileSha: ctx.liveFileSha ?? ((file) => fileSha256(base.root, file)),
+  })
+  problems.push(...readinessProblems.map((problem) => `PERSONA-READINESS-0C2: ${problem}`))
   const challenges0b11 = 'challenges0b11' in ctx ? ctx.challenges0b11 : base.challenges0b11
   problems.push(...validateChallengeRegister({
     register: challenges0b11,
@@ -1152,6 +1166,7 @@ export function validateGate0(matrix, ctx = {}) {
   summary.classification0b11 = check0b11.summary
   summary.classification0b12 = check0b12.summary
   summary.classification0c1 = check0c1.summary
+  summary.personaReadiness0c2 = readiness0c2.registers.decisions ? readinessSummary({ registers: readiness0c2.registers }) : null
   summary.universe = universeSummary({ record: universeTransition, routes, entries: ownership?.entries ?? [] })
   summary.decisionBoundExceptions = exceptionCheck.summary
   summary.inventory = inventory
