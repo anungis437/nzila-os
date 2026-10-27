@@ -160,7 +160,7 @@ export function validateClassification3({
   for (const id of NEW_CAPABILITY_IDS) if (!capabilityById.has(id)) problems.push(`Gate 0B.3 capability ${id} is not in the engineering completion matrix`)
 
   const carry = new Set(manifest?.carryForward ?? [])
-  const resolvedLater = new Set()
+  const resolvedLater = new Set(Object.entries(ledger?.classifiedIn ?? {}).filter(([, tranche]) => tranche !== TRANCHE_ID).map(([id]) => id))
   const ctx = { entryByKey, capabilityById, exists, readText, defectIds, decisionIds, carry, resolvedLater }
   const records = Array.isArray(classification.operations) ? classification.operations : []
   const frozen = manifest?.operations ?? []

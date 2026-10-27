@@ -25,6 +25,8 @@ import { FILES_0B2 } from './ue-gate0b2-classification.mjs'
 import { capabilitiesForTranche2 } from './ue-gate0b2-capabilities.mjs'
 import { FILES_0B3 } from './ue-gate0b3-classification.mjs'
 import { capabilitiesForTranche3 } from './ue-gate0b3-capabilities.mjs'
+import { FILES_0B4 } from './ue-gate0b4-classification.mjs'
+import { capabilitiesForTranche4 } from './ue-gate0b4-capabilities.mjs'
 
 const ctx = loadContext(ROOT)
 const personaSpecs = ctx.personaSpecs
@@ -421,6 +423,7 @@ distinct.push(
   }),
   ...capabilitiesForTranche2(cap),
   ...capabilitiesForTranche3(cap),
+  ...capabilitiesForTranche4(cap),
 )
 
 // NOT_IMPLEMENTED finance domains cite a service in the narrative. The validator
@@ -711,9 +714,13 @@ const matrix = {
     note: 'Hash pins for the frozen Gate 0B.3 tranche manifest and its source-evidenced classification register. The cumulative ledger is pinned above.',
     files: Object.fromEntries(Object.entries(FILES_0B3).map(([key, file]) => [key, { file, sha256: existsSync(join(ROOT, file)) ? sha256File(ROOT, file) : null }])),
   },
-  routeDefects: existsSync(join(ROOT, FILES_0B3.classification))
-    ? JSON.parse(readFileSync(join(ROOT, FILES_0B3.classification), 'utf8')).defectRegister.map(({ id, gate, severity, ownerCapabilityId, tranche, releaseBlocking }) => ({ id, gate, severity, ownerCapabilityId, tranche, releaseBlocking }))
-    : [],
+  routeClassification0b4: {
+    tranche: 'GATE-0B.4',
+    note: 'Hash pins for the frozen Gate 0B.4 tranche manifest and its source-evidenced classification register. The cumulative ledger is pinned above.',
+    files: Object.fromEntries(Object.entries(FILES_0B4).map(([key, file]) => [key, { file, sha256: existsSync(join(ROOT, file)) ? sha256File(ROOT, file) : null }])),
+  },
+  routeDefects: JSON.parse(readFileSync(join(ROOT, existsSync(join(ROOT, FILES_0B4.classification)) ? FILES_0B4.classification : FILES_0B3.classification), 'utf8'))
+    .defectRegister.map(({ id, gate, severity, ownerCapabilityId, tranche, releaseBlocking }) => ({ id, gate, severity, ownerCapabilityId, tranche, releaseBlocking })),
   outOfScope: [
     {
       id: 'UE-SCOPE-ORG-HIERARCHY-SEED',
