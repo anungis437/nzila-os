@@ -121,7 +121,14 @@ function exportedLater(text, method) {
 }
 
 /** Parses static, re-export and dynamic import specifiers, with the names each one brings in. */
+const importCache = new Map()
+
 export function importsOf(text) {
+  if (!importCache.has(text)) importCache.set(text, parseImports(text))
+  return importCache.get(text)
+}
+
+function parseImports(text) {
   const out = []
   const staticRe = /import\s+(type\s+)?([\s\S]*?)\s+from\s+['"]([^'"]+)['"]/g
   for (const match of text.matchAll(staticRe)) {

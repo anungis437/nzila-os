@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url'
 import { loadContext, validateGate0 } from './ue-gate0-scope-lock.mjs'
 import { routeKeys } from './ue-gate0-route-ownership.mjs'
 import { trancheHash, validateClassification } from './ue-gate0b1-classification.mjs'
+import { ACCEPTED, countsAt, ledgerAt, ownershipEntriesAt } from './ue-gate0-history.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const base = loadContext(ROOT)
@@ -18,8 +19,8 @@ function fixture() {
   return {
     classification: clone(base.classification0b1),
     manifest: clone(base.tranche0b1),
-    ledger: clone(base.ledger0b1),
-    entries: clone(base.ownership.entries),
+    ledger: ledgerAt(ACCEPTED['0B.1']),
+    entries: ownershipEntriesAt(ACCEPTED['0B.1']),
     capabilityById: new Map(matrix.capabilities.map((capability) => [capability.id, capability])),
     universe: new Set(routeKeys(base.routes)),
     exists,
@@ -198,7 +199,8 @@ test('Gate 0 stays IN_PROGRESS and carries the unjustified exposures as Gate 14 
   assert.deepEqual(releaseBlocking.map((item) => item.file).sort(), ['docs/openapi/route.ts|GET', 'docs/route.ts|GET', 'version/route.ts|GET'])
   assert.ok(releaseBlocking.every((item) => item.blocksGates.includes(14) && item.releaseBlocking === true))
   assert.equal(result.summary.route.unauthenticatedWithoutRecordedJustification, 0)
-  assert.equal(result.summary.route.scopeUndecided, 873)
+  assert.equal(result.summary.route.scopeUndecided, base.ownership.entries.filter((entry) => entry[4] === 'SCOPE_UNDECIDED').length)
+  assert.deepEqual(countsAt(ACCEPTED['0B.1']), { operations: 1644, owned: 436, undecided: 1071, classified: 81 }, 'the registers Gate 0B.1 was accepted with')
   assert.equal(matrix.gate0Verdict, 'IN_PROGRESS')
 })
 

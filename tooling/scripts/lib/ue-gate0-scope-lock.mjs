@@ -357,8 +357,16 @@ function proposedBaselineProblems(matrix, root, ctx) {
 export function validateGate0(matrix, ctx = {}) {
   const problems = []
   const base = ctx.base ?? loadContext(ctx.root ?? ROOT)
-  const exists = ctx.exists ?? ((file) => existsSync(join(base.root, file)))
-  const readText = ctx.readText ?? ((file) => readFileSync(join(base.root, file), 'utf8'))
+  const existsCache = new Map()
+  const textCache = new Map()
+  const exists = ctx.exists ?? ((file) => {
+    if (!existsCache.has(file)) existsCache.set(file, existsSync(join(base.root, file)))
+    return existsCache.get(file)
+  })
+  const readText = ctx.readText ?? ((file) => {
+    if (!textCache.has(file)) textCache.set(file, readFileSync(join(base.root, file), 'utf8'))
+    return textCache.get(file)
+  })
   const commitExists = ctx.commitExists ?? gitCommitExists
   const registerEntries = ctx.registerEntries ?? base.registerEntries
   const personaActions = ctx.personaActions ?? base.personaActions

@@ -11,6 +11,7 @@ import { FILES_0B2 } from './ue-gate0b2-classification.mjs'
 import { FILES_0B3, NEW_CAPABILITY_IDS, validateClassification3 } from './ue-gate0b3-classification.mjs'
 import { ANCHOR_COMMIT, CAPABILITY_IDS_0B3 as IDS } from './ue-gate0b3-groups.mjs'
 import { anchoredEntries } from './ue-gate0b3-build-classification.mjs'
+import { ACCEPTED, countsAt, ledgerAt, matrixAt, ownershipEntriesAt } from './ue-gate0-history.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const base = loadContext(ROOT)
@@ -25,12 +26,12 @@ function fixture() {
   return {
     classification: clone(base.classification0b3),
     manifest: clone(base.tranche0b3),
-    ledger: clone(base.ledger0b1),
+    ledger: ledgerAt(ACCEPTED['0B.3']),
     classification0b1: clone(base.classification0b1),
     classification0b2: clone(base.classification0b2),
     manifest0b1: clone(base.tranche0b1),
     manifest0b2: clone(base.tranche0b2),
-    entries: clone(base.ownership.entries),
+    entries: ownershipEntriesAt(ACCEPTED['0B.3']),
     capabilityById: new Map(matrix.capabilities.map((capability) => [capability.id, capability])),
     universe: new Set(routeKeys(base.routes)),
     exists,
@@ -141,7 +142,10 @@ test('the 36 new defects each have one responsible capability that owns the repa
   }
   assert.equal(args.classification.defectRegister.length, 76)
   assert.deepEqual(args.classification.defectRegister.slice(0, 40), base.classification0b2.defectRegister)
-  assert.equal(matrix.routeDefects.length, 76)
+  const accepted = matrixAt(ACCEPTED['0B.3']).routeDefects
+  assert.equal(accepted.length, 76, 'defects when Gate 0B.3 was accepted')
+  const current = new Map(matrix.routeDefects.map((defect) => [defect.id, defect]))
+  for (const defect of accepted) assert.deepEqual(current.get(defect.id), defect, `${defect.id} is unchanged in the current matrix`)
 })
 
 test('the Gate 0B.1 and Gate 0B.2 manifests and classifications are byte-identical to the accepted commit and the ledger only grows', () => {
@@ -150,6 +154,10 @@ test('the Gate 0B.1 and Gate 0B.2 manifests and classifications are byte-identic
   const anchored = JSON.parse(atAnchor(FILES_0B1.ledger))
   for (const [id, owner] of Object.entries(anchored.classified)) assert.equal(args.ledger.classified[id], owner, id)
   for (const [id, tranche] of Object.entries(anchored.classifiedIn)) assert.equal(args.ledger.classifiedIn[id], tranche, id)
+  for (const [id, owner] of Object.entries(args.ledger.classified)) {
+    assert.equal(base.ledger0b1.classified[id], owner, `${id} keeps its owner in the current ledger`)
+    assert.notEqual(base.ownership.entries.find((entry) => `${entry[0]}|${entry[1]}` === id)[4], 'SCOPE_UNDECIDED', `${id} is never reverted`)
+  }
   assert.equal(Object.keys(args.ledger.classified).length, 81 + 99 + 99)
   assert.equal(args.ledger.tranches['GATE-0B.2'].operationsHash, anchored.tranches['GATE-0B.2'].operationsHash)
   for (const old of base.anchoredOwnershipEntries0b3.filter((entry) => entry[4] !== 'SCOPE_UNDECIDED')) {
@@ -160,8 +168,10 @@ test('the Gate 0B.1 and Gate 0B.2 manifests and classifications are byte-identic
 test('cumulative counts and the 1,644 operations are preserved', () => {
   const args = fixture()
   assert.equal(args.entries.length, 1644)
-  assert.equal(args.entries.filter((entry) => entry[4] === 'OWNED').length, 634)
-  assert.equal(args.entries.filter((entry) => entry[4] === 'SCOPE_UNDECIDED').length, 873)
+  assert.equal(args.entries.filter((entry) => entry[4] === 'OWNED').length, 634, 'owned operations when Gate 0B.3 was accepted')
+  assert.equal(args.entries.filter((entry) => entry[4] === 'SCOPE_UNDECIDED').length, 873, 'undecided operations when Gate 0B.3 was accepted')
+  assert.equal(countsAt(ACCEPTED['0B.3']).classified, 279)
+  assert.equal(base.ownership.entries.length, 1644)
   assert.equal(matrix.routeOwnership.operations, 1644)
   assert.equal(matrix.capabilities.find((item) => item.schemaCensus === true).censusCount, 231)
 })
