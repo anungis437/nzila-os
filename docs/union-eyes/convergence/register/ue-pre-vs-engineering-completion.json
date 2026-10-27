@@ -4962,6 +4962,190 @@
       "businessOutcome": "The organization record, its roster and its member directory are read and changed only by the offices the institution names, a read of another organization is authorized by a mandate and limited to what the reader needs, a membership grant names the person who accepted it and is limited to roles the granting office may confer, parent affiliation and lifecycle status change only through one verified path, and every change commits with its audit record.",
       "sourceStatus": "PARTIAL",
       "gap": "No existing capability owns the organization record or the roster. UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION concerns platform operators reading organizations, users and statistics through the admin routes under a platform role; UE-CAP-A-003 and UE-CAP-A-005 concern the authentication-side membership projection and its readers, not the organization profile, the member roster insert or the member directory; UE-OMIT-FEDERATION-LOCAL-HIERARCHY owns the parent and child link, which this record references but does not own; and UE-OMIT-AUDIT-LOG-VISIBILITY, UE-OMIT-ROUTE-EXPOSURE-HARDENING and UE-CAP-K-007 do not name the organization profile, the roster grant or the member directory. The source has an organization item route that mixes a tenant-scoped update with a system-context cross-organization read, a roster route that grants roles to any user id, and a directory policy that only two of the routes use."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        6,
+        11,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/organizing, app/api/organizer/impact",
+      "httpAction": null,
+      "service": "apps/union-eyes/app/api/organizing/campaigns/route.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "Every write through these routes commits the generic factory audit record (crud.organizing_campaigns.create, update or delete, or crud.organizer_tasks.create) in the same tenant transaction; the record lists the names of the fields written and none of their values. Reads are not audited.",
+      "privacyClassification": "Organizing campaign strategy, target employer and workplace, employer vulnerabilities, lead organizer and organizing team identifiers, card signing and contact counts, filing and election figures; organizer tasks that carry member, case and grievance references and completion notes. Among the most sensitive union data: disclosure to an employer exposes workers and organizers to retaliation.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/organizing/campaigns/route.ts",
+        "apps/union-eyes/app/api/organizing/card-check/route.ts",
+        "apps/union-eyes/app/api/organizing/nlrb-filings/route.ts",
+        "apps/union-eyes/app/api/organizing/labour-board/route.ts",
+        "apps/union-eyes/app/api/organizing/forms/generate/route.ts",
+        "apps/union-eyes/app/api/organizer/impact/route.ts",
+        "apps/union-eyes/db/schema/domains/infrastructure/organizing.ts",
+        "apps/union-eyes/components/organizing/nlrb-filing-wizard.tsx"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/organizing/campaigns/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-ORGANIZING-CAMPAIGNS",
+      "parentRegisterId": "UE-CONV-K-006",
+      "obligationKey": "organizing-campaign-records-card-check-and-filings",
+      "primaryGate": 14,
+      "actor": "Steward or organizer keeping organizing campaigns (target employer, workplace, strategy, card signing progress, filings and election outcome), organizer tasks and the campaign assignments; officer reading them",
+      "businessOutcome": "An organizing campaign, its card and support figures, its committee, its filings and its outreach are read only by the offices the institution names, a card count and a support percentage are derived from recorded cards and not typed in, a filing with a labour board is prepared, approved and transmitted by the office the institution names and the transmission is recorded, an outreach message is sent only with consent, and every change commits with its audit record.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No existing capability owns organizing campaigns. UE-OMIT-COMMITTEE-WORKSPACE concerns standing committees with meetings, minutes and action items, not a campaign committee; UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING and UE-OMIT-COMMUNICATIONS-CAMPAIGN-DELIVERY own bulk message campaigns, and no organizing route sends a message; UE-OMIT-COPE-POLITICAL-ACTION owns political donation campaigns; UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION and UE-OMIT-COMPLIANCE-ASSURANCE own metrics and statutory findings that no organizing route computes; UE-CAP-K-007 owns the generic CRUD factory as a mechanism, not the domain meaning of a table it is configured over; and UE-OMIT-ROUTE-DOMAIN-SCOPE is the undecided catch-all. The source has fifteen route files named for card check, support percentage, workplace mapping, committee, labour board and NLRB filings, form generation, notes, sequences, enrolment and assignments that all read and write the one organizing_campaigns table, plus an organizer impact route over organizer_tasks that serves the same steward and organizer persona and the same campaign workflow; no card, signer, committee member, note, sequence or filing table is read or written by any of them. This record closes none of the gaps and names no reader, filer or holder of cards, which no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        9,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/pilot/apply (intake, [id], verify-organization, rebind-organization, approve-commercial-terms, commercial-transition, proposal, package-export, artifacts, intelligence, commercialization-timeline, reference-profile)",
+      "httpAction": null,
+      "service": "apps/union-eyes/lib/pilot/pilot-ownership.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "Organization binding, rebinding, commercial terms approval and the commercial transition each commit persistAtomicAudit with their write in one transaction, and the generic application PATCH is audited by the CRUD factory in the same tenant transaction. The public application insert, and the artifact, intelligence and reference-profile writes, write no audit row.",
+      "privacyClassification": "Applicant contact name, e-mail address and phone number, organization name, member count, jurisdictions, challenges and goals typed by an anonymous submitter, the organization bound to the application, commercial terms and the contract, invoice and subscription identifiers they produce, and generated scores, proposals and reference material.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/lib/pilot/pilot-ownership.ts",
+        "apps/union-eyes/lib/pilot/commercial-terms-authority.ts",
+        "apps/union-eyes/lib/pilot/commercialization-wave1.ts",
+        "apps/union-eyes/lib/pilot/pilot-mutation.ts",
+        "apps/union-eyes/lib/pilot/responses-authority.ts",
+        "apps/union-eyes/app/api/pilot/apply/route.ts",
+        "apps/union-eyes/app/api/pilot/apply/[id]/route.ts",
+        "apps/union-eyes/app/api/pilot/apply/[id]/commercial-transition/route.ts",
+        "apps/union-eyes/app/api/pilot/apply/[id]/reference-profile/route.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/lib/pilot/pilot-ownership.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+      "parentRegisterId": "UE-CONV-K-006",
+      "obligationKey": "pilot-application-intake-and-commercialization",
+      "primaryGate": 14,
+      "actor": "Prospective union applying for a pilot, and the platform-tier administrator who binds the application to an organization, approves commercial terms and moves the application through the commercial states",
+      "businessOutcome": "A pilot application is created only with proof that the submitter controls the contact it names, its owner is an organization verified against that proof by an office with a stated mandate, the commercial terms are accepted by the applicant organization before any contract, invoice or subscription is created, every state it records corresponds to a row that was written, and generated proposals, packages and reference material state what was measured and attested.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No existing capability owns the pre-account sales pipeline. UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING owns the platform subscription and invoicing of one organization that already holds a billing account, not the public intake of a prospective union, the claim and verification of its organization, the commercial state sequence that precedes the account, or the proposal and reference material generated for it; UE-OMIT-ORGANIZATION-ONBOARDING owns the assistance an organization receives once it exists; UE-OMIT-PLATFORM-OPERATOR-CONTROLS owns platform operations such as the pilot status switch, not application review; and UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION owns reports over operational tables, not generated sales artifacts."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        9,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/pilot (events, feedback, champions, friction, metrics, readiness, current, onboarding, demo-data, bootstrap/cupe)",
+      "httpAction": null,
+      "service": "apps/union-eyes/lib/services/pilot-signals.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "Feedback, the onboarding checklist, demo data seeding and purge, and the CUPE bootstrap each commit persistAtomicAudit with their write in one transaction. The usage event insert writes no audit row, and the telemetry reads write none.",
+      "privacyClassification": "Per-user pilot usage events (user id, session id, event type and free metadata), per-user champion and friction lists, member ease-of-use feedback with free text and user id, organization member counts and role-based activity, onboarding checklist state, and fixture member names, e-mail addresses and roles.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/lib/services/pilot-signals.ts",
+        "apps/union-eyes/lib/services/pilot-friction.ts",
+        "apps/union-eyes/lib/services/pilot-metrics.ts",
+        "apps/union-eyes/lib/services/pilot-tracking.ts",
+        "apps/union-eyes/lib/pilot/cape-demo-data.ts",
+        "apps/union-eyes/lib/config/pilot-demo-runtime.ts",
+        "apps/union-eyes/app/api/pilot/events/route.ts",
+        "apps/union-eyes/app/api/pilot/current/route.ts",
+        "apps/union-eyes/app/api/pilot/onboarding/route.ts",
+        "apps/union-eyes/app/api/pilot/bootstrap/cupe/route.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/lib/services/pilot-signals.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
+      "parentRegisterId": "UE-CONV-K-006",
+      "obligationKey": "pilot-program-operations",
+      "primaryGate": 14,
+      "actor": "Member, officer or administrator of an organization enrolled in the pilot, and the platform-tier administrator who bootstraps the CUPE pilot organization",
+      "businessOutcome": "Usage telemetry, feedback and the signals derived from them are recorded only for what happened, are readable only for the reader own organization, and state their basis; the onboarding checklist and the figures shown to an enrolled organization correspond to work that was done and to live records; and demo data and bootstrap resets can never alter or remove a real record.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No existing capability names the pilot program. UE-OMIT-ORGANIZATION-ONBOARDING owns the onboarding assistance lookups and the onboarding event recorder under the onboarding path, not the pilot usage telemetry, feedback, conversion signals, enrollment metrics, onboarding checklist or the demo and bootstrap seeding of an organization; UE-OMIT-PLATFORM-OPERATOR-CONTROLS owns the platform pilot status switch under the admin path; UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION owns analytics reports over operational tables, not event-derived pilot signals; and UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION owns only the platform-wide overview read."
     }
   ],
   "personaActions": [
@@ -7004,7 +7188,7 @@
   },
   "routeOwnership": {
     "file": "docs/union-eyes/convergence/register/ue-route-capability-ownership.json",
-    "entriesHash": "0ff0dc7faa7bba62a011a28914ce0449012378425f135e4d43691b467f8280ea",
+    "entriesHash": "11e3e1dfdc01da03ad3b77eacd0318423634268b9b64f78e141593675b62a59d",
     "operations": 1644
   },
   "routeClassification": {
@@ -7021,7 +7205,7 @@
       },
       "ledger": {
         "file": "docs/union-eyes/convergence/register/ue-route-classification-ledger.json",
-        "sha256": "509481ebef0113295937e96b3537c99289fea115ecfa2432776c1f93d951e184"
+        "sha256": "7ad23a968f98488614975c5c3718d84df9d34db7f7252d259f3e935f9071d7d0"
       }
     }
   },
@@ -7141,6 +7325,20 @@
       }
     }
   },
+  "routeClassification0b10": {
+    "tranche": "GATE-0B.10",
+    "note": "Hash pins for the frozen Gate 0B.10 tranche manifest and its source-evidenced classification register. The cumulative ledger and the release disposition review queue are pinned above.",
+    "files": {
+      "manifest": {
+        "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b10-manifest.json",
+        "sha256": "c414b84946e9c57181148e8e3ad3d344d50a88c7f442565e2c8e434b749d6a7f"
+      },
+      "classification": {
+        "file": "docs/union-eyes/convergence/register/ue-route-classification-0b10.json",
+        "sha256": "22ced13f3c7a7e2ceb959f590d10b307785b394de20c874f95e72e639efed9b9"
+      }
+    }
+  },
   "decisionBoundExceptions": {
     "note": "Operations Gate 0B.4 and Gate 0B.5 examined, whose evidence is exhausted and whose scope waits on an outstanding institutional decision. They are reported apart from operations awaiting source classification and are never counted as OWNED. The register is pinned here; an exception is not an approval.",
     "file": "docs/union-eyes/convergence/register/ue-route-decision-bound-exceptions.json",
@@ -7153,8 +7351,8 @@
     ]
   },
   "routeInventoryTotals": {
-    "OWNED": 1226,
-    "SCOPE_UNDECIDED_AWAITING_CLASSIFICATION": 277,
+    "OWNED": 1326,
+    "SCOPE_UNDECIDED_AWAITING_CLASSIFICATION": 177,
     "DECISION_BOUND_SCOPE_EXCEPTION": 4,
     "RETIRED_501": 97,
     "STUB_501": 31,
@@ -11497,6 +11695,542 @@
       "ownerCapabilityId": "UE-OMIT-CLAUSE-LIBRARY-SHARING",
       "tranche": "0B.9",
       "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-ORG-CAMPAIGN-ROWS-READABLE-BY-ANY-MEMBER-WITH-STRATEGY-EMPLOYER-VULNERABILITIES-TEAM-AND-SUPPORT-COUNTS",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZING-CAMPAIGNS",
+      "tranche": "0B.10",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B10-ORG-ROUTES-NAMED-FOR-CARD-CHECK-SUPPORT-NOTES-SEQUENCES-FILINGS-AND-FORMS-ARE-CAMPAIGN-ROW-CRUD",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZING-CAMPAIGNS",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-ORG-CARD-COUNTS-ELECTION-RESULT-AND-CAMPAIGN-STATUS-ARE-CALLER-ASSERTED-WITH-NO-CARD-RECORDS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZING-CAMPAIGNS",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-ORG-NLRB-AND-LABOUR-BOARD-FILING-ROUTES-RECORD-NO-FILING-AND-TRANSMIT-NOTHING",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZING-CAMPAIGNS",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-ORG-FORM-GENERATION-ROUTE-RETURNS-JSON-AND-THE-CLIENT-SAVES-IT-AS-THE-PDF",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZING-CAMPAIGNS",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-ORG-ITEM-ROUTES-NAMED-FOR-NOTE-ENROLMENT-SEQUENCE-AND-ASSIGNMENT-REWRITE-OR-ARCHIVE-WHOLE-CAMPAIGN",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZING-CAMPAIGNS",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-ORG-CAMPAIGN-CODE-UNIQUE-ACROSS-ALL-ORGANIZATIONS-AND-REQUIRED-COLUMNS-FAIL-AS-500",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZING-CAMPAIGNS",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-ORG-ASSIGNMENT-IS-LEAD-ORGANIZER-AND-TEAM-COLUMNS-WRITABLE-WITH-UNVERIFIED-USER-IDS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZING-CAMPAIGNS",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-ORG-CLIENTS-CALL-CAMPAIGN-ITEM-AND-V2-ROUTES-THAT-ANSWER-NO-CAMPAIGN-DATA",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZING-CAMPAIGNS",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-ORG-ORGANIZER-IMPACT-ROUTE-IS-ORGANIZER-TASK-CRUD-NOT-IMPACT-METRICS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZING-CAMPAIGNS",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-ORG-ORGANIZER-TASKS-READABLE-BY-EVERY-STEWARD-WITH-MEMBER-CASE-AND-GRIEVANCE-REFERENCES",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZING-CAMPAIGNS",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-ORG-ORGANIZER-TASK-CREATE-STORES-UNVERIFIED-ASSIGNEE-MEMBER-CASE-AND-GRIEVANCE-REFERENCES",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZING-CAMPAIGNS",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PEN-RETIREMENT-ELIGIBILITY-LISTS-EVERY-PENSION-ENROLMENT-OF-THE-ORGANIZATION-TO-ANY-MEMBER",
+      "gate": 5,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-CAP-D-003",
+      "tranche": "0B.10",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B10-PEN-RETIREMENT-ELIGIBILITY-IS-A-YEARS-OF-SERVICE-COMPARISON-WITH-A-FIXED-DEFAULT-OF-25",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-D-003",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PEN-T4A-POST-STORES-AN-ADMINISTRATOR-TYPED-INCOME-AS-A-GENERATED-TAX-RECORD",
+      "gate": 5,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-CAP-D-003",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PEN-TRUSTEE-MEETING-READS-RETURN-AGENDA-MINUTES-AND-ATTENDEES-TO-ANY-MEMBER",
+      "gate": 5,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-CAP-D-003",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PEN-TRUSTEE-MEETING-MINUTES-CAN-BE-REWRITTEN-OR-DELETED-WITHOUT-HISTORY",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-D-003",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PEN-PLAN-FIGURES-ARE-ADMINISTRATOR-TYPED-AND-READABLE-BY-ANY-MEMBER",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-D-003",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PEN-PLAN-DELETE-REMOVES-THE-PLAN-ROW-WITH-NO-DEPENDENT-CHECK-OR-SNAPSHOT",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-D-003",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PEN-PENSION-ADMINISTRATION-WRITES-REST-ON-ONE-ROLE-TITLE-WITH-NO-MANDATE-OR-TRUSTEE-DECISION",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-D-003",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PEN-PENSION-WRITES-STORE-TYPED-MEMBER-REFERENCES-NAMES-AND-AMOUNTS-UNVERIFIED",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-D-003",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PEN-BENEFIT-CLAIMS-CAN-BE-FILED-BUT-NO-ROUTE-CAN-DECIDE-OR-PAY-THEM",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-D-003",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PEN-PENSION-ROUTES-APPLY-NO-RATE-LIMIT",
+      "gate": 5,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-CAP-D-003",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PEN-PENSION-LIST-READS-HAVE-NO-LIMIT-OR-PAGINATION",
+      "gate": 5,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-CAP-D-003",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PEN-MEMBERS-GET-IS-HELD-TO-THE-CALLER-OWN-ENROLMENT-AT-EVERY-ROLE",
+      "gate": 5,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-CAP-D-003",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PEN-PENSION-READS-USE-THE-SHARED-DB-HANDLE-WITHOUT-AN-EXPLICIT-TENANT-CONTEXT",
+      "gate": 5,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-CAP-D-003",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PEN-PORTAL-DOCUMENT-PATHS-ARE-CMS-PAGE-CRUD-WITH-NO-PORTAL-PRINCIPAL",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CONTENT-LIBRARY-EDITORIAL",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PEN-PORTAL-DOCUMENT-LIST-RETURNS-EVERY-PAGE-ROW-AND-IGNORES-ROLE-AND-AUTH-COLUMNS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CONTENT-LIBRARY-EDITORIAL",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PEN-PORTAL-UPLOAD-ROUTE-RECEIVES-NO-FILE-AND-STORES-A-CALLER-WRITTEN-FILE-URL",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-CONTENT-LIBRARY-EDITORIAL",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PEN-PORTAL-POST-LETS-A-STEWARD-SET-STATUS-PUBLISHED-AND-ACCESS-COLUMNS-AROUND-THE-EDITORIAL-WORKFLOW",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CONTENT-LIBRARY-EDITORIAL",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-COMMERCIAL-TRANSITION-RECORDS-SIGNED-ACTIVE-CONTRACTS-AND-ISSUED-INVOICES-WITH-NO-COUNTERPART-ACCEPTANCE-AND-ADVANCES-STATE-WHEN-EFFECTS-ARE-ONLY-STAGED",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-PLATFORM-TIER-OF-THE-PILOT-ROUTES-IS-ANY-ROLE-TITLE-AT-OR-ABOVE-SYSTEM-ADMIN-LEVEL-AND-NOT-A-PLATFORM-MANDATE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-APPLICATION-OWNERSHIP-BEFORE-VERIFICATION-RESTS-ON-THE-ORGANIZATION-ID-THE-ANONYMOUS-APPLICANT-TYPED-INTO-THE-FORM",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-PUBLIC-APPLICATION-RATE-LIMIT-IS-KEYED-ON-THE-FIRST-FORWARDED-FOR-VALUE-THE-CLIENT-CAN-SUPPLY",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-PUBLIC-APPLICATION-SENDS-THE-TYPED-CONTACT-TO-HUBSPOT-WITH-NO-PROOF-OF-THE-ADDRESS-AND-NO-CONSENT-DECISION",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-PUBLIC-APPLICATION-RESPONSES-OBJECT-AND-ASSESSMENT-PASSTHROUGH-HAVE-NO-SIZE-OR-DEPTH-BOUND",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-PROPOSAL-SCORES-AND-CUSTOMER-SUCCESS-SIGNALS-ARE-COMPUTED-FROM-THE-APPLICANT-SELF-ASSESSED-READINESS-SCORE-AND-THE-STAGE-REACHED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-ORGANIZATION-VERIFICATION-CHECKS-ONLY-THAT-THE-TARGET-ORGANIZATION-ROW-EXISTS-AND-RECORDS-NO-PROOF-OR-REASON",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-COMMERCIAL-TERMS-ARE-SET-BY-ONE-ADMINISTRATOR-FROM-A-TYPED-MEMBER-COUNT-AND-AMOUNT-WITH-NO-APPLICANT-ACCEPTANCE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-PILOT-WRITE-ROUTES-CAST-THE-JSON-BODY-WITHOUT-A-SCHEMA-AND-STORE-CALLER-TEXT-IN-AN-UNBOUNDED-JSONB-COLUMN",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-ARTIFACT-INTELLIGENCE-AND-REFERENCE-WRITES-COMMIT-NO-AUDIT-ROW-THOUGH-THE-MANIFEST-DECLARES-ATOMIC-AUDIT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-REFERENCE-PROFILE-PRESENTS-A-DEFAULT-TESTIMONIAL-A-SIX-HOUR-FLOOR-AND-SCORE-DERIVED-FIGURES-AS-PILOT-OUTCOMES-AND-STORES-THEM-AS-A-VERSIONED-CASE-STUDY",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-USAGE-TELEMETRY-ROUTES-READ-ANY-ORGANIZATION-NAMED-IN-THE-QUERY-AT-AN-ADMIN-FLOOR-AND-RETURN-PER-USER-IDS-THROUGH-THE-BARE-DB-IMPORT",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
+      "tranche": "0B.10",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B10-PIL-USAGE-EVENTS-ARE-CALLER-ASSERTED-AND-DRIVE-THE-CHAMPION-AND-CONVERSION-SIGNALS-WITHOUT-ANY-CHECK-THAT-THE-ACTION-HAPPENED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-CUPE-BOOTSTRAP-RESET-DELETES-ALL-GRIEVANCES-MEMBERS-AND-CHECKLIST-ROWS-OF-THE-ORGANIZATION-AT-THE-FIXTURE-SLUG-WITH-NO-DEMO-MARKER",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-CUPE-BOOTSTRAP-REPORTS-WORKSITES-IT-NEVER-WRITES-AND-LITERAL-ONBOARDING-COUNTS-FOR-CHECKLIST-IDS-THE-ONBOARDING-ROUTE-DOES-NOT-READ",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-DEMO-DATA-INSERTS-FICTIONAL-GRIEVANCES-AND-NAMED-FEDERAL-EMPLOYERS-INTO-THE-LIVE-TABLES-WITH-NO-ROW-MARKER-AND-DELETES-BY-NUMBER-AND-EMAIL-PATTERN",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-PILOT-ADOPTION-ENGAGEMENT-AND-RESOLUTION-FIGURES-ARE-ROW-UPDATE-PROXIES-AND-OPEN-CASE-AGE-WITH-STORED-FIGURES-AS-FALLBACK",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-ONBOARDING-CHECKLIST-ITEMS-ARE-TOGGLED-BY-THE-CALLER-WITH-NO-CHECK-THAT-THE-STEP-HAPPENED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-PILOT-OVERVIEW-LISTS-EVERY-ENROLLED-ORGANIZATION-WITH-ITS-FIGURES-TO-ANY-OFFICER-OF-THE-PLATFORM-ORGANIZATION",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-PILOT-CURRENT-READS-THE-SESSION-ORGANIZATION-UNDER-THE-SYSTEM-CONTEXT-SO-THE-EXPLICIT-PREDICATE-IS-THE-ONLY-SCOPE",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-PIL-PILOT-FEEDBACK-COMMENT-IS-UNVALIDATED-AND-UNBOUNDED-AND-IS-RETURNED-RAW-WITH-THE-USER-ID",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-OPL-01",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-OPL-02",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-OPL-03",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-OPL-04",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-OPL-05",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.10",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B10-OPL-06",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-OPL-07",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-OPL-08",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-OPL-09",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-OPL-10",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-OPL-11",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-OPL-12",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-OPL-13",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-OPL-14",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B10-OPL-15",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
+      "tranche": "0B.10",
+      "releaseBlocking": false
     }
   ],
   "outOfScope": [
@@ -11615,7 +12349,10 @@
     "UE-OMIT-OHS-REGULATORY-RECORDS",
     "UE-OMIT-ORGANIZATION-ADMINISTRATION",
     "UE-OMIT-ORGANIZATION-ONBOARDING",
+    "UE-OMIT-ORGANIZING-CAMPAIGNS",
     "UE-OMIT-PAY-EQUITY-EXERCISES",
+    "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+    "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
     "UE-OMIT-PKI-SIGNING-WORKFLOW",
     "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
     "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",

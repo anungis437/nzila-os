@@ -371,9 +371,9 @@ test('Gate 0 stays IN_PROGRESS, validates the eighth tranche and keeps the three
   assert.equal(result.summary.classification0b8.classified, 100)
   assert.equal(result.summary.decisionBoundExceptions.exceptions, 4)
   assert.ok(!result.blockers.some((item) => item.code === 'ROUTE_UNJUSTIFIED_EXPOSURE'))
-  assert.equal(result.summary.route.scopeUndecidedAwaitingClassification, 277)
+  assert.equal(result.summary.route.scopeUndecidedAwaitingClassification, 177)
   assert.equal(result.summary.route.decisionBoundScopeExceptions, 4)
-  assert.equal(result.summary.capabilityCount, 96)
+  assert.equal(result.summary.capabilityCount, 99)
 })
 
 test('adversarial findings are recorded as defects with a later gate and the source facts they rest on', () => {
@@ -926,7 +926,7 @@ test('NEGATIVE 13: the Gate 0B.7 release dispositions are preserved, a rule cann
 
   const gate = validateGate0(matrix, { base })
   const dispositions = gate.gateAcceptanceBlockers.filter((item) => item.kind === 'RELEASE_BLOCKING_DEFECT_DISPOSITION')
-  assert.equal(dispositions.length, 16, 'the live gate holds the 0B.7, 0B.8 and 0B.9 dispositions')
+  assert.equal(dispositions.length, 20, 'the live gate holds the 0B.7, 0B.8, 0B.9 and 0B.10 dispositions')
   assert.equal(dispositions.filter((item) => /^DEF-0B7-/.test(item.id ?? item.defectId ?? item.detail ?? JSON.stringify(item))).length, 4)
   const tampered = clone(base.classification0b8)
   const target = tampered.defectRegister.find((defect) => defect.id === PRIOR_DISPOSITIONED)

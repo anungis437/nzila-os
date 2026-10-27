@@ -12,7 +12,7 @@ const matrix = JSON.parse(readFileSync(join(ROOT, FILES.matrix), 'utf8'))
 const clone = (value) => JSON.parse(JSON.stringify(value))
 const byId = new Map(matrix.capabilities.map((capability) => [capability.id, capability]))
 const tranches = () => [
-  ['tranche0b1', 'classification0b1'], ['tranche0b2', 'classification0b2'], ['tranche0b3', 'classification0b3'], ['tranche0b4', 'classification0b4'], ['tranche0b5', 'classification0b5'], ['tranche0b6', 'classification0b6'], ['tranche0b7', 'classification0b7'], ['tranche0b8', 'classification0b8'], ['tranche0b9', 'classification0b9'],
+  ['tranche0b1', 'classification0b1'], ['tranche0b2', 'classification0b2'], ['tranche0b3', 'classification0b3'], ['tranche0b4', 'classification0b4'], ['tranche0b5', 'classification0b5'], ['tranche0b6', 'classification0b6'], ['tranche0b7', 'classification0b7'], ['tranche0b8', 'classification0b8'], ['tranche0b9', 'classification0b9'], ['tranche0b10', 'classification0b10'],
 ].map(([manifestKey, classificationKey]) => ({ manifest: clone(base[manifestKey]), classification: clone(base[classificationKey]), tranche: base[manifestKey].tranche }))
 const deps = { exists: (file) => existsSync(join(ROOT, file)), commitExists: () => true }
 
@@ -36,8 +36,8 @@ test('the committed lock has an anchor, checkpoint or addition record for every 
   assert.deepEqual(problems(), [])
   assert.equal(base.lock.lockVersion, lockVersionFor(base.lock))
   assert.equal(base.lock.checkpoints.length, 1)
-  assert.equal(base.lock.additions.length, 28)
-  assert.equal(base.lock.capabilityIds.length, 96)
+  assert.equal(base.lock.additions.length, 31)
+  assert.equal(base.lock.capabilityIds.length, 99)
 })
 
 test('the lock updater is deterministic and idempotent on the committed lock', () => {
@@ -81,8 +81,8 @@ test('NEGATIVE: an addition with the wrong operations hash, the wrong count or a
   addition(count).classifiedOperations += 1
   assert.ok(has(problems({ lock: count }), /records \d+ classified operation\(s\) but GATE-0B.4 classified \d+/))
   const unknown = clone(base.lock)
-  addition(unknown).tranche = 'GATE-0B.10'
-  assert.ok(has(problems({ lock: unknown }), /names tranche GATE-0B.10, which has no frozen classification/))
+  addition(unknown).tranche = 'GATE-0B.11'
+  assert.ok(has(problems({ lock: unknown }), /names tranche GATE-0B.11, which has no frozen classification/))
 })
 
 test('NEGATIVE: an addition without a reason, or without an implementation source file, is refused', () => {
@@ -121,8 +121,8 @@ test('NEGATIVE: a checkpoint that is not an existing commit or cannot be read fr
 
 test('NEGATIVE: a lockVersion that does not follow from the checkpoints and additions is refused', () => {
   const lock = clone(base.lock)
-  lock.lockVersion = 9
-  assert.ok(has(problems({ lock }), /lockVersion is 9 but its checkpoints and additions require 8/))
+  lock.lockVersion = 10
+  assert.ok(has(problems({ lock }), /lockVersion is 10 but its checkpoints and additions require 9/))
 })
 
 test('NEGATIVE: the updater refuses a capability that no frozen tranche classified an operation to', () => {
