@@ -416,9 +416,9 @@ test('end to end: a tampered Gate 0B.2 register fails the Gate 0 validator and a
   classification.operations.find((item) => item.id === FINANCE_GET).evidence = []
   const tampered = validateGate0(matrix, { classification0b2: classification })
   assert.ok(tampered.problems.some((problem) => /has no source evidence/.test(problem)))
-  const unregistered = clone(base.classification0b4)
+  const unregistered = clone(base.classification0b5)
   unregistered.releaseBlockingExposures = []
-  const result = validateGate0(matrix, { classification0b4: unregistered })
+  const result = validateGate0(matrix, { classification0b5: unregistered })
   assert.ok(result.blockers.some((item) => item.code === 'ROUTE_UNJUSTIFIED_EXPOSURE'))
 })
 

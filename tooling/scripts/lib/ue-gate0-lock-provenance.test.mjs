@@ -12,7 +12,7 @@ const matrix = JSON.parse(readFileSync(join(ROOT, FILES.matrix), 'utf8'))
 const clone = (value) => JSON.parse(JSON.stringify(value))
 const byId = new Map(matrix.capabilities.map((capability) => [capability.id, capability]))
 const tranches = () => [
-  ['tranche0b1', 'classification0b1'], ['tranche0b2', 'classification0b2'], ['tranche0b3', 'classification0b3'], ['tranche0b4', 'classification0b4'],
+  ['tranche0b1', 'classification0b1'], ['tranche0b2', 'classification0b2'], ['tranche0b3', 'classification0b3'], ['tranche0b4', 'classification0b4'], ['tranche0b5', 'classification0b5'],
 ].map(([manifestKey, classificationKey]) => ({ manifest: clone(base[manifestKey]), classification: clone(base[classificationKey]), tranche: base[manifestKey].tranche }))
 const deps = { exists: (file) => existsSync(join(ROOT, file)), commitExists: () => true }
 
@@ -36,8 +36,8 @@ test('the committed lock has an anchor, checkpoint or addition record for every 
   assert.deepEqual(problems(), [])
   assert.equal(base.lock.lockVersion, lockVersionFor(base.lock))
   assert.equal(base.lock.checkpoints.length, 1)
-  assert.equal(base.lock.additions.length, 6)
-  assert.equal(base.lock.capabilityIds.length, 74)
+  assert.equal(base.lock.additions.length, 12)
+  assert.equal(base.lock.capabilityIds.length, 80)
 })
 
 test('the lock updater is deterministic and idempotent on the committed lock', () => {
@@ -122,7 +122,7 @@ test('NEGATIVE: a checkpoint that is not an existing commit or cannot be read fr
 test('NEGATIVE: a lockVersion that does not follow from the checkpoints and additions is refused', () => {
   const lock = clone(base.lock)
   lock.lockVersion = 9
-  assert.ok(has(problems({ lock }), /lockVersion is 9 but its checkpoints and additions require 3/))
+  assert.ok(has(problems({ lock }), /lockVersion is 9 but its checkpoints and additions require 4/))
 })
 
 test('NEGATIVE: the updater refuses a capability that no frozen tranche classified an operation to', () => {

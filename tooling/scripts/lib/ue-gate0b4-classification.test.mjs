@@ -12,7 +12,7 @@ import { FILES_0B3 } from './ue-gate0b3-classification.mjs'
 import { FILES_0B4, NEW_CAPABILITY_IDS, UNRESOLVED_OPERATIONS, validateClassification4 } from './ue-gate0b4-classification.mjs'
 import { ANCHOR_COMMIT, CAPABILITY_IDS_0B4 as IDS } from './ue-gate0b4-groups.mjs'
 import { anchoredEntries } from './ue-gate0b4-build-classification.mjs'
-import { ACCEPTED, countsAt, matrixAt, ownershipEntriesAt } from './ue-gate0-history.mjs'
+import { ACCEPTED, countsAt, fileAt, ledgerAt, matrixAt, ownershipEntriesAt } from './ue-gate0-history.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const base = loadContext(ROOT)
@@ -35,14 +35,14 @@ function fixture() {
   return {
     classification: clone(base.classification0b4),
     manifest: clone(base.tranche0b4),
-    ledger: clone(base.ledger0b1),
+    ledger: ledgerAt(ACCEPTED['0B.4']),
     classification0b1: clone(base.classification0b1),
     classification0b2: clone(base.classification0b2),
     classification0b3: clone(base.classification0b3),
     manifest0b1: clone(base.tranche0b1),
     manifest0b2: clone(base.tranche0b2),
     manifest0b3: clone(base.tranche0b3),
-    entries: clone(base.ownership.entries),
+    entries: ownershipEntriesAt(ACCEPTED['0B.4']),
     capabilityById: new Map(matrix.capabilities.map((capability) => [capability.id, capability])),
     universe: new Set(routeKeys(base.routes)),
     exists,
@@ -162,8 +162,8 @@ test('the six new capabilities are justified: each owns classified operations, s
   assert.deepEqual(Object.fromEntries(NEW_CAPABILITY_IDS.map((id) => [id, matrix.capabilities.find((item) => item.id === id).primaryGate])), {
     [IDS.COMMS_DELIVERY]: 11, [IDS.CALENDAR]: 14, [IDS.CBA_DATASET]: 14, [IDS.CBA_REGISTER]: 14, [IDS.CLAUSE_LIBRARY]: 14, [IDS.OHS]: 6,
   })
-  assert.equal(matrix.capabilities.length, 74)
-  assert.equal(lock.capabilityIds.length, 74)
+  assert.equal(matrixAt(ACCEPTED['0B.4']).capabilities.length, 74)
+  assert.equal(JSON.parse(fileAt(ACCEPTED['0B.4'], FILES.lock)).capabilityIds.length, 74)
   assert.ok(!matrix.capabilities.some((item) => /carbon/i.test(item.id)), 'no capability was created for the carbon routes')
 })
 
@@ -196,7 +196,7 @@ test('the 60 new defects each have one responsible capability that owns the repa
   }
   assert.equal(args.classification.defectRegister.length, 136)
   assert.deepEqual(args.classification.defectRegister.slice(0, 76), base.classification0b3.defectRegister)
-  assert.equal(matrix.routeDefects.length, 136)
+  assert.equal(matrixAt(ACCEPTED['0B.4']).routeDefects.length, 136)
   const acceptedDefects = matrixAt(ACCEPTED['0B.3']).routeDefects
   const current = new Map(matrix.routeDefects.map((defect) => [defect.id, defect]))
   for (const defect of acceptedDefects) assert.deepEqual(current.get(defect.id), defect, defect.id)
