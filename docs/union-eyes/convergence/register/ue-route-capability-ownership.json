@@ -8028,6 +8028,38 @@
       ]
     },
     {
+      "id": "RULE-0C1-MEMBER-REVIEW-INTAKE",
+      "precedence": 40,
+      "prefixes": [
+        "reviews/route.ts"
+      ],
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "capabilityId": "UE-CAP-REVIEW-INTAKE",
+      "disposition": "OWNED",
+      "actor": "Active member opening a complaint, appeal or reconsideration and reading the reviews they opened or filed, and a governance officer holding a live review:monitor mandate reading the reviews that mandate names",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/reviews/route.ts",
+          "quote": " *   POST — the same member opens a complaint, appeal or reconsideration."
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/authority/store/review-intake.ts",
+          "quote": " * Any active member may open a complaint, appeal or reconsideration. The opener"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/authority/review-intake-types.ts",
+          "quote": "export const REVIEW_INTAKE_TYPES = ['complaint', 'appeal', 'reconsideration'] as const"
+        }
+      ]
+    },
+    {
       "id": "RULE-STUB-H002",
       "precedence": 30,
       "prefixes": [
@@ -8910,6 +8942,7 @@
         "ready/",
         "reconciliation/",
         "reports/",
+        "reviews/",
         "rewards/",
         "satisfaction/",
         "scim/",
@@ -8961,17 +8994,7 @@
       ]
     }
   ],
-  "uninventoriedRoutes": [
-    {
-      "route": "reviews/route.ts",
-      "methods": [
-        "GET",
-        "POST"
-      ],
-      "capabilityId": "UE-CAP-REVIEW-INTAKE",
-      "reason": "The member review-intake route was added after the route-coverage manifest was last regenerated. The manifest still lists 993 routes and the route-coverage test expects every route file. Regenerating the manifest belongs to UE-CONV-K-008 and is not done in Gate 0."
-    }
-  ],
+  "uninventoriedRoutes": [],
   "entries": [
     ["activities/route.ts","GET","RULE-0B2-AUDIT-FEED","UE-OMIT-AUDIT-LOG-VISIBILITY","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Organization member reading the organization activity feed derived from the audit log"],
     ["admin/ai-usage/route.ts","GET","RULE-0B2-AI-FEEDBACK-AND-USAGE","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Organization member giving AI feedback and administrator reading AI usage"],
@@ -10437,6 +10460,8 @@
     ["reports/scheduled/route.ts","POST","RULE-0B11-RPT-SCHEDULED-REPORTS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Administrator or steward scheduling a report for recurring delivery to named recipients, and the member reading the schedule list"],
     ["reports/templates/route.ts","GET","RULE-0B11-RPT-REPORT-LABELLED-PATH-COPIES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward or officer using a report page that expects a run, a share, the builder, the template list or a data source sample, and any caller of those path names"],
     ["reports/templates/route.ts","POST","RULE-0B11-RPT-REPORT-LABELLED-PATH-COPIES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward or officer using a report page that expects a run, a share, the builder, the template list or a data source sample, and any caller of those path names"],
+    ["reviews/route.ts","GET","RULE-0C1-MEMBER-REVIEW-INTAKE","UE-CAP-REVIEW-INTAKE","OWNED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Active member opening a complaint, appeal or reconsideration and reading the reviews they opened or filed, and a governance officer holding a live review:monitor mandate reading the reviews that mandate names"],
+    ["reviews/route.ts","POST","RULE-0C1-MEMBER-REVIEW-INTAKE","UE-CAP-REVIEW-INTAKE","OWNED","SESSION_ONLY","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Active member opening a complaint, appeal or reconsideration and reading the reviews they opened or filed, and a governance officer holding a live review:monitor mandate reading the reviews that mandate names"],
     ["rewards/cron/route.ts","GET","RULE-0B11-PRP-REWARDS-CRON","UE-OMIT-REWARDS-REDEMPTION-FULFILMENT","OWNED","SHARED_SECRET","NOT_APPLICABLE:READ","CAPABILITY","Scheduler holding the cron secret that triggers anniversary awards, credit expiration warnings and scheduled awards for every active organization"],
     ["rewards/cron/route.ts","POST","RULE-0B11-PRP-REWARDS-CRON","UE-OMIT-REWARDS-REDEMPTION-FULFILMENT","OWNED","SHARED_SECRET","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Scheduler holding the cron secret that triggers anniversary awards, credit expiration warnings and scheduled awards for every active organization"],
     ["rewards/export/route.ts","GET","RULE-0B11-PRP-REWARDS-MEMBER-AND-EXPORT","UE-OMIT-REWARDS-REDEMPTION-FULFILMENT","OWNED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Member reading their own rewards balance, ledger and redemptions and cancelling an unfulfilled redemption; program administrator expecting to export awards, ledger and budgets"],

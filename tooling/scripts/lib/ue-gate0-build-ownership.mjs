@@ -17,6 +17,7 @@ import { ownershipRulesForTranche9 } from './ue-gate0b9-groups.mjs'
 import { ownershipRulesForTranche10 } from './ue-gate0b10-groups.mjs'
 import { ownershipRulesForTranche11 } from './ue-gate0b11-groups.mjs'
 import { ownershipRulesForTranche12 } from './ue-gate0b12-groups.mjs'
+import { ownershipRulesForTranche0c1 } from './ue-gate0c1-groups.mjs'
 
 const REP = 'docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md'
 const MEMBER = 'docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md'
@@ -50,6 +51,7 @@ export function buildOwnershipRules(routes, registryActions) {
     ...ownershipRulesForTranche10(),
     ...ownershipRulesForTranche11(),
     ...ownershipRulesForTranche12(),
+    ...ownershipRulesForTranche0c1(),
     {
       id: 'RULE-STUB-H002',
       precedence: 30,

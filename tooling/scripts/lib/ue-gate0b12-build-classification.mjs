@@ -29,6 +29,7 @@ import { DECISIONS_0B12, DEFECTS_0B12, UNRESOLVED_0B12, factsFor } from './ue-ga
 import { FILE_EXCEPTIONS, validateDecisionBoundExceptions } from './ue-gate0b6-exceptions.mjs'
 import { callerFindingOf, callersOf, loadApiReferences } from './ue-gate0b3-callers.mjs'
 import { FILES } from './ue-gate0-scope-lock.mjs'
+import { ADDED_OPERATIONS as ADDED_0C1 } from './ue-gate0c1-ids.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const readJson = (file) => JSON.parse(readFileSync(join(ROOT, file), 'utf8'))
@@ -87,7 +88,9 @@ export function buildClassification12() {
     }
   }
 
-  const ownership = readJson(FILES.ownership)
+  const ownershipFull = readJson(FILES.ownership)
+  const addedLater = new Set(ADDED_0C1)
+  const ownership = { ...ownershipFull, entries: ownershipFull.entries.filter((entry) => !addedLater.has(`${entry[0]}|${entry[1]}`)) }
   const entryByKey = new Map(ownership.entries.map((entry) => [`${entry[0]}|${entry[1]}`, entry]))
   const references = loadApiReferences(ROOT)
   const records = []

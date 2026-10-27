@@ -25,11 +25,15 @@ import { ANCHOR_COMMIT, DECISION_BOUND_OPERATIONS, TRANCHE_SIZE } from './ue-gat
 import { FILE_EXCEPTIONS, inventoryTotals, inventoryTotalsProblems, validateDecisionBoundExceptions } from './ue-gate0b6-exceptions.mjs'
 import { anchoredEntries, buildClassification12 } from './ue-gate0b12-build-classification.mjs'
 import { buildReviewQueue, defectHash, releaseDispositionProblems } from './ue-gate0b7-release-dispositions.mjs'
+import { ADDED_OPERATIONS } from './ue-gate0c1-ids.mjs'
+import { historicalView } from './ue-gate0c1-universe.mjs'
 import { ACCEPTED, countsAt, fileAt, ledgerAt, matrixAt } from './ue-gate0-history.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const base = loadContext(ROOT)
 const matrix = JSON.parse(readFileSync(join(ROOT, FILES.matrix), 'utf8'))
+const historical = historicalView({ routes: base.routes, entries: base.ownership.entries, addedOperations: ADDED_OPERATIONS })
+const historicalDefects = matrix.routeDefects.filter((defect) => !defect.id.startsWith('DEF-0C1-'))
 const clone = (value) => JSON.parse(JSON.stringify(value))
 const sha = (value) => createHash('sha256').update(value).digest('hex')
 const existsCache = new Map()
@@ -73,9 +77,9 @@ function fixture() {
     manifest0b10: clone(base.tranche0b10),
     manifest0b11: clone(base.tranche0b11),
     reviewQueue: clone(base.reviewQueue0b7),
-    entries: clone(base.ownership.entries),
+    entries: clone(historical.entries),
     capabilityById: new Map(matrix.capabilities.map((capability) => [capability.id, capability])),
-    universe: new Set(routeKeys(base.routes)),
+    universe: new Set(routeKeys(historical.routes)),
     exists,
     readText,
     anchoredEntries: clone(base.anchoredOwnershipEntries0b12),
@@ -248,7 +252,7 @@ test('the four carbon operations stay decision-bound exceptions: not selected, n
     assert.equal(item.countedAsOwned, false, item.id)
     assert.equal(item.productionReady, false, item.id)
   }
-  assert.equal(base.ownership.entries.filter((entry) => entry[4] === 'SCOPE_UNDECIDED').length, 4, 'only the four exceptions remain undecided')
+  assert.equal(historical.entries.filter((entry) => entry[4] === 'SCOPE_UNDECIDED').length, 4, 'only the four exceptions remain undecided')
   assert.equal(readText(FILE_EXCEPTIONS), fileAt(ACCEPTED['0B.11'], FILE_EXCEPTIONS), 'the exception register is byte-identical to the accepted commit')
 })
 
@@ -333,11 +337,11 @@ test('the 53 new defects each have one responsible capability that owns the repa
   assert.deepEqual(args.classification.defectRegister.slice(0, 717), base.classification0b11.defectRegister)
   const accepted = matrixAt(ACCEPTED['0B.11']).routeDefects
   assert.equal(accepted.length, 717)
-  assert.equal(matrix.routeDefects.length, 770)
-  const current = new Map(matrix.routeDefects.map((defect) => [defect.id, defect]))
+  assert.equal(historicalDefects.length, 770)
+  const current = new Map(historicalDefects.map((defect) => [defect.id, defect]))
   for (const defect of accepted) assert.deepEqual(current.get(defect.id), defect, defect.id)
   assert.equal(accepted.filter((defect) => defect.severity === 'HIGH').length, 140)
-  assert.equal(matrix.routeDefects.filter((defect) => defect.severity === 'HIGH').length, 144)
+  assert.equal(historicalDefects.filter((defect) => defect.severity === 'HIGH').length, 144)
 })
 
 test('every new HIGH defect records a release disposition proved against the source, and none is downgraded for being found in an inventory phase', () => {
@@ -395,7 +399,7 @@ test('earlier tranche files are byte-identical to the accepted commits and the l
 })
 
 test('the six inventory classes add up to 1644 with exactly one disposition per operation, and the matrix pins the twelfth tranche', () => {
-  const totals = inventoryTotals(base.ownership.entries, exceptionOperations())
+  const totals = inventoryTotals(historical.entries, exceptionOperations())
   assert.deepEqual(totals, {
     OWNED: 1503,
     SCOPE_UNDECIDED_AWAITING_CLASSIFICATION: 0,
@@ -407,14 +411,14 @@ test('the six inventory classes add up to 1644 with exactly one disposition per 
   })
   assert.equal(Object.keys(totals).length, 7, 'no inventory class was added')
   assert.equal(1503 + 0 + 4 + 97 + 31 + 9, 1644)
-  assert.deepEqual(matrix.routeInventoryTotals, totals)
+  assert.deepEqual(matrix.routeInventoryTotals, inventoryTotals(base.ownership.entries, exceptionOperations()), 'the committed totals describe the canonical universe')
   const before = countsAt(ACCEPTED['0B.11'])
   assert.deepEqual([before.owned, before.undecided, before.classified], [1426, 81, 1071])
   assert.equal(before.owned + 77, totals.OWNED)
   assert.equal(before.undecided - 77, totals.SCOPE_UNDECIDED_AWAITING_CLASSIFICATION + totals.DECISION_BOUND_SCOPE_EXCEPTION)
-  const ids = base.ownership.entries.map((entry) => `${entry[0]}|${entry[1]}`)
+  const ids = historical.entries.map((entry) => `${entry[0]}|${entry[1]}`)
   assert.equal(new Set(ids).size, 1644, 'one disposition per route-method operation')
-  assert.deepEqual(new Set(ids), new Set(routeKeys(base.routes)))
+  assert.deepEqual(new Set(ids), new Set(routeKeys(historical.routes)))
   assert.equal(matrix.routeClassification0b12.files.manifest.sha256, sha(readText(FILES_0B12.manifest)))
   assert.equal(matrix.routeClassification0b12.files.classification.sha256, sha(readText(FILES_0B12.classification)))
   assert.equal(matrix.routeClassification0b11.files.classification.sha256, sha(readText(FILES_0B11.classification)))
@@ -455,7 +459,7 @@ test('Gate 0 stays IN_PROGRESS, validates the twelfth tranche and keeps the expo
   const codes = result.blockers.map((item) => item.code)
   assert.ok(codes.includes('ROUTE_DECISION_BOUND_SCOPE_EXCEPTION'))
   assert.ok(codes.includes('PERSONA_SPEC_UNRESOLVED'))
-  assert.ok(codes.includes('ROUTE_UNINVENTORIED'), 'reviews/route.ts is still outside the coverage manifest, so the inventory is not claimed complete')
+  assert.ok(!codes.includes('ROUTE_UNINVENTORIED'), 'Gate 0C.1 brought reviews/route.ts into the canonical universe')
   assert.ok(!codes.includes('ROUTE_SCOPE_UNDECIDED'), 'no never-examined operation stays undecided')
 })
 

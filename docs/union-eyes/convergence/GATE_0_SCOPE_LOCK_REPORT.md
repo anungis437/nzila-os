@@ -1249,6 +1249,81 @@ The lock holds 111 ids and 43 addition records. `lockVersion` is derived (now 11
 
 The Gate 0B.6 to 0B.11 suites are anchored to their acceptance commits for every moving total. `ue-gate0-cumulative.test.mjs`, `ue-gate0-lock-provenance.test.mjs` and `ue-gate0-scope-lock.test.mjs` assert the live moving totals.
 
+## Gate 0C.1: canonical route-universe reconciliation
+
+Inventory, manifest, governance registers and focused validators only. No application source, migration, allowlist, schema declaration or persona-specification change. Gate 0 overall stays `IN_PROGRESS`. Anchor commit `447c98c44b04fdca23d9b959bddfa62ccec351b2` (the accepted Gate 0B.12 state).
+
+### Finding
+
+`apps/union-eyes/app/api/reviews/route.ts` is on disk and exports two real handlers, `GET` and `POST`. The route-coverage manifest that Gate 0B froze did not contain it. The manifest was regenerated from the route files with `generate-route-manifest.ts`. That file is the only difference: one route and two operations were added, nothing was removed, no existing route or method changed and no route-method pair is duplicated. The count is 1,646, not a forced total: 1,644 plus the two handlers the source actually exports.
+
+| | Historical universe (version 1) | Canonical universe (version 2) |
+| --- | --- | --- |
+| Route-method operations | 1,644 | 1,646 |
+| Route files | 993 | 994 |
+| Operations hash | `f713a384064844beeac1d354a6a3afecca658fc083a8d0047a27cb11d055a608` | `fafb9d7d3ff33550ed58833177730a005364d79f63a473bb9fb2db07f5d68a71` |
+| Route baseline hash | `702046516e2d8cc8f70e9f50df62364bfe481f3fdc9733a1136d1891a1a56ecd` | `25b162f999775c073dab9281da62b9e1cd51b79a0c4d7d4cd76c920b17c52c1b` |
+
+The two manifest hashes are different and the transition record states `manifestHashesIdentical: false`. The validator refuses any record that claims otherwise.
+
+### Additions and removals
+
+- Added: `reviews/route.ts|GET` and `reviews/route.ts|POST`.
+- Removed: none.
+
+### Ownership and capability
+
+`UE-CAP-REVIEW-INTAKE` already owns the member review intake surface and no ownership rule covered `reviews/route.ts` (the older `uninventoriedRoutes` record named it). Both handlers use `getCurrentUser` and the organization database context, a session-only authorization with no kernel decision: `GET` is read-only (and lists oversight reviews for a live monitor mandate), `POST` writes the review and its audit row in one transaction. Ownership was not assumed from the file name. It was taken from the handler imports and the authority store they call. No capability was added: the capability lock still holds 111 identifiers.
+
+### Six-class totals
+
+| Class | Operations |
+| --- | --- |
+| `OWNED` | 1505 |
+| `SCOPE_UNDECIDED`, awaiting source classification | 0 |
+| `DECISION_BOUND_SCOPE_EXCEPTION` | 4 |
+| `RETIRED_501` | 97 |
+| `STUB_501` | 31 |
+| `SYSTEM` | 9 |
+
+The classes sum to 1,646. Only `OWNED` changed (1503 to 1505). The four carbon operations stay `SCOPE_UNDECIDED`, decision-bound, non-authorizing and outstanding on `UE-INST-CARBON-ACCOUNTING-SCOPE`. Every one of the 1,644 earlier operations keeps its accepted classification. `uninventoriedRoutes` is now empty and the `ROUTE_UNINVENTORIED` blocker is gone.
+
+### Classification of the two new operations
+
+Both are recorded in the new `ue-route-classification-0c1.json` under the Gate 0B contract (handler and method, capability, authentication and authorization, resource and case authority, tenant and data boundary, mutation and audit behavior, implementation status, handler-specific source evidence, defects, downstream gates). Both are `PARTIAL`. They sit in a separate ledger, `ue-route-classification-ledger-0c.json`. The Gate 0B ledger is byte-identical and an operation is in exactly one ledger.
+
+### New defects (7, none HIGH, none repaired here)
+
+All are owned by `UE-CAP-REVIEW-INTAKE`, repair gate 12.
+
+- MEDIUM: review rows are protected by an organization-only row-level-security policy, so adverse-party, complainant and privileged-classification confidentiality is application code only.
+- MEDIUM: adverse-party identifiers are checked for shape only and never against organization membership.
+- MEDIUM: `POST` has no rate limit or idempotency and every call writes a permanent append-only review and audit row.
+- LOW: the request body is read uncapped before the schema bounds apply.
+- LOW: the organization is resolved by the route and again by the database context with no comparison.
+- LOW: failures outside the store and case-authorization errors are rethrown unlogged.
+- LOW: the oversight list returns complainant identity and privileged classification with no access record.
+
+The defect total is 777 (770 accepted by Gate 0B.12 plus 7). No new HIGH defect, so no release disposition is required. The 144 HIGH defects of Gate 0B.12 are unchanged.
+
+### Preservation of the twelve Gate 0B tranches
+
+The twelve tranche manifests, the twelve classifications, the Gate 0B ledger, the review queue, the independent challenge register and the decision-bound exception register were not edited. They are byte-identical to the commits that accepted them. The validator reads each file from git at its acceptance commit (the `0B.12` entry was added to `ue-gate0-history.mjs`) and refuses any difference. The historical 0B validators run on a view of the canonical universe restricted to the 1,644 historical operations, so frozen hashes are never regenerated. The new `ue-route-universe-transition.json` carries the versioned transition: old and new size and hash, added and removed operations, source evidence, reason, ownership counts before and after, and backward compatibility.
+
+### Coverage validator
+
+`validateGate0` now distinguishes the historical 1,644 universe, the canonical universe, the versioned additions, the decision-bound exceptions and the Gate 0C classified operations. It refuses: a missing actual route, a manifest entry with no real handler, an inventoried operation with no ownership or classification, a duplicate or changed route-method identity or dynamic parameter, a silent change to a frozen 0B tranche or the 0B ledger, a carbon exception reclassified as owned, an unexplained count change, a false claim that the historical and current manifest hashes are identical, a capability added to the lock and a dropped anchored identifier.
+
+### Gate 0C handoff register
+
+`ue-gate0c-handoff-register.json` records nine obligations and resolves none (`RECORDED_NOT_RESOLVED`): the Steward, Representative and Financial Officer proposed baselines (not ratified, kept apart from any institutional grant of authority); the 79 outstanding institutional decisions; the 4 carbon exceptions; the 71 earlier HIGH defects awaiting release-disposition review; the 32 `RELEASE_BLOCKING` and 41 `CONDITIONALLY_BLOCKING` dispositions; the 2 independent challenges (`CHALLENGE-0B10-OPL-01`, `CHALLENGE-0B10-OPL-07`) and the 3 unjustified public exposures; the tracked ratchet and test defects; and the pending native PostgreSQL row-level-security and browser qualification. No persona specification is ratified.
+
+### Tests
+
+The 24 Gate 0C.1 tests in `ue-gate0c1-classification.test.mjs` rebuild the canonical universe from the route files on disk and check that the two `reviews/route.ts` handlers are genuine, that all 1,644 earlier entries keep their classification, the six-class totals, the classification and its seven defects, byte-identity of the twelve 0B tranches, the 0B ledger and the lock, the transition record, the historical view, the `IN_PROGRESS` verdict, the handoff register and a deterministic rebuild. Negative cases refuse: a route file missing from the universe; a manifest entry with no real handler, a stale route and an unlisted handler; a new operation with no ownership or classification; a duplicate or changed route-method identity and a changed dynamic parameter; a silent edit of a frozen 0B tranche or the 0B ledger; a carbon exception reclassified as owned; an unexplained count change; a false claim that the historical and current manifest hashes are identical; an added capability, a dropped anchored identifier and a hidden ledger overlap; an unsupported, kernel-claiming, generically owned or widened record; a ratified persona, a drifted count, a resolved obligation and a collapsed separation in the handoff register; and a changed pinned file.
+
+Gate 0C.1 run, focused suites only, each file run on its own: the 19 `ue-gate0*.test.mjs` suites ran 490 tests with 0 failures, and `ue-convergence-check`, `ue-migration-lineage-certification`, `ue-staging-0017-ownership`, `ue-staging-clone-qualification` and `ue-staging-historical-lineage` ran 75 passed and 6 skipped as before. `route-coverage-manifest.test.ts` (vitest) passes 17 of 17. The Gate 0 validator returns 0 problems and the verdict stays `IN_PROGRESS`. The pipeline (ownership, matrix, Gate 0C.1 builder, matrix, lock updater) rebuilt twice leaves every register byte-identical. The Gate 0B.2 to 0B.6 and 0B.12 suites and the cumulative and scope-lock suites were updated to the canonical totals (1,646 operations, 1,505 owned, 777 defects); the Gate 0B.12 suite and builder read the historical 1,644-operation view. The broad application regression, native PostgreSQL, Docker and browser qualification were not run, by instruction. `node tooling/scripts/check-ue-convergence.mjs` is unchanged (see below).
+
 ## Gate 0B completion statement (read-only)
 
 This is a statement of the source inventory, not an acceptance. Gate 0 stays `IN_PROGRESS`.
@@ -1259,7 +1334,7 @@ This is a statement of the source inventory, not an acceptance. Gate 0 stays `IN
 - Defects: 770 (144 high, 481 medium, 145 low). 73 dispositioned HIGH defects: 32 `RELEASE_BLOCKING` (4, 4, 8, 4, 8 and 4 from Gates 0B.7 to 0B.12) and 41 `CONDITIONALLY_BLOCKING`, none non-blocking. 71 older HIGH defects wait in the review queue with no disposition.
 - Institutional decisions: 79, all outstanding.
 - Carbon exceptions: 4, decision-bound, non-authorizing, outstanding on `UE-INST-CARBON-ACCOUNTING-SCOPE`.
-- Missing route: `apps/union-eyes/app/api/reviews/route.ts` (owner `UE-CAP-REVIEW-INTAKE`) is on disk and outside the coverage manifest. The route inventory is not claimed complete.
+- Missing route: `apps/union-eyes/app/api/reviews/route.ts` (owner `UE-CAP-REVIEW-INTAKE`) was on disk and outside the coverage manifest at the Gate 0B.12 acceptance. Gate 0C.1 reconciled it (see the Gate 0C.1 section); the 1,644 count above is the historical universe.
 - Persona blockers: steward (no canonical, no action universe), representative (canonical 2.2 absent) and financial officer (canonical file absent). The three proposed baselines are not accepted.
 - Unauthenticated system exposures: 3 (`docs`, `docs/openapi`, `version`), release-blocking.
 - Ratchet failures: 2 (`MUTABLE-REP-IDENTIFIER`, `DIRECT-MANDATORY-AUDIT-IMPORT`), plus the tracked counsel suite and transition reason leak defects.
@@ -1364,7 +1439,7 @@ Gate 0B.12 run: every `ue-*.test.mjs` suite was executed separately and ran with
 
 Gate 0B.11 run: every `ue-*.test.mjs` suite was executed separately and ran with 0 failures (512 passed, 6 skipped as before), the Gate 0 scope-lock validator returns 0 problems, `pnpm validate:docs` passes, and regenerating every register with the pipeline reproduces byte-identical files. `node tooling/scripts/check-ue-convergence.mjs` still reports the two pre-existing ratchet failures (`MUTABLE-REP-IDENTIFIER` in `case-ownership-backfill.ts` and `DIRECT-MANDATORY-AUDIT-IMPORT` in `election-succession.ts`), which Gate 0B.11 did not touch.
 
-The matrix validator returns 0 problems and 5 blockers (3 persona, decision-bound exceptions, uninventoried route); route scope undecided is no longer a blocker. The three unjustified exposures are Gate 14 release-blocking defects, carried in the defect register and counted in gate-acceptance debt. A problem is a rule violation. A blocker is unfinished Gate 0 scope.
+The matrix validator returns 0 problems and 4 blockers (3 persona, decision-bound exceptions; the uninventoried-route blocker was resolved by Gate 0C.1); route scope undecided is no longer a blocker. The three unjustified exposures are Gate 14 release-blocking defects, carried in the defect register and counted in gate-acceptance debt. A problem is a rule violation. A blocker is unfinished Gate 0 scope.
 
 ## Remaining Gate 0 blockers
 
@@ -1372,11 +1447,11 @@ The matrix validator returns 0 problems and 5 blockers (3 persona, decision-boun
 2. Representative: canonical 2.2 file absent. 17 identifiers grouped only, `R18` in source conflict, 2 references with no identifier.
 3. Financial Officer: canonical file absent. 28 identifiers unspecified, 6 grouped only, 3 references with no identifier.
 4. No route operation awaits source classification. 4 are `DECISION_BOUND_SCOPE_EXCEPTION` (carbon) that wait on `UE-INST-CARBON-ACCOUNTING-SCOPE`. 79 institutional decisions are outstanding.
-5. `reviews/route.ts` is on disk and not in the route-coverage manifest.
+5. Resolved by Gate 0C.1: `reviews/route.ts` is now in the canonical universe (1,646 operations).
 6. Not a Gate 0 blocker: three unauthenticated system operations (`docs`, `docs/openapi`, `version`) are unjustified exposure and Gate 14 release-blocking implementation defects (`DEF-0B1-DOCS-UNAUTH-API-SURFACE`, `DEF-0B1-VERSION-UNAUTH-TOPOLOGY`). Their exposure contracts and remediation obligations are preserved. The repair is owned by Gate 14 and was not made here.
 
 Gate acceptance debt that is tracked and not a Gate 0 blocker: the four ratchet defects above, the three release-blocking exposures and the thirty-two `RELEASE_BLOCKING` defect dispositions of Gate 0B.7 to Gate 0B.12 (four, four, eight, four, eight and four), and the two independent review challenges of `DEF-0B10-OPL-01` and `DEF-0B10-OPL-07` (provisional position `RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF`, containment not verified). The release dispositions of the 71 earlier HIGH defects are queued for independent qualification and are separate from both.
 
 ## Not done
 
-No runtime migration, application source, security allowlist, or census change. No Docker, native PostgreSQL, or Next server run. Migrations 0031–0037 and cache 0028 are not applied. Gate 1 does not start. The next action is an independent adversarial review of the Gate 0B.12 artifacts. Gate 0B.12 is the final route-classification tranche. No Gate 0C work, no Gate 1 work and no Phase 3B work was started.
+No runtime migration, application source, security allowlist, or census change. No Docker, native PostgreSQL, or Next server run. Migrations 0031–0037 and cache 0028 are not applied. Gate 1 does not start. The next action is an independent adversarial review of the Gate 0B.12 artifacts. Gate 0B.12 is the final route-classification tranche. Gate 0C.1 then reconciled the canonical route universe. No Gate 0C.2 work, no Gate 0C.3 work, no Gate 1 work and no Phase 3B work was started.

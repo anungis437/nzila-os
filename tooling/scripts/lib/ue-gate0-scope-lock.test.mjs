@@ -137,7 +137,7 @@ test('all seven personas are accounted for and the unresolved ones stop Gate 0',
   assert.ok(result.blockers.some((item) => item.persona === 'steward'))
   assert.ok(!result.blockers.some((item) => item.code === 'ROUTE_SCOPE_UNDECIDED'), 'no never-examined operation remains undecided after Gate 0B.12')
   assert.ok(result.blockers.some((item) => item.code === 'ROUTE_DECISION_BOUND_SCOPE_EXCEPTION'))
-  assert.ok(result.blockers.some((item) => item.code === 'ROUTE_UNINVENTORIED'))
+  assert.ok(!result.blockers.some((item) => item.code === 'ROUTE_UNINVENTORIED'), 'reviews/route.ts is inside the canonical universe since Gate 0C.1')
   assert.ok(!(clone().outOfScope ?? []).some((item) => /STEWARD/.test(item.id)), 'the steward gap is a capability, not an out-of-scope record')
 })
 
@@ -232,12 +232,13 @@ test('an orphan entry, a conflicting owner, and a new unclassified domain all fa
   assert.ok(problems.some((problem) => /route brand-new-domain\/route\.ts\|POST matches no ownership rule/.test(problem)))
 })
 
-test('a route file that is in neither the manifest nor the uninventoried record fails', () => {
-  const ownership = cloneJson(base.ownership)
-  ownership.uninventoriedRoutes = []
+test('a route file that exists on disk but is absent from the manifest fails, and the canonical universe holds the reviews handlers', () => {
   const matrix = clone()
-  assert.ok(run(matrix, { ownership }).problems.some((problem) => /route file reviews\/route\.ts exists but is neither in the route-coverage manifest nor recorded as uninventoried/.test(problem)))
-  assert.deepEqual(routeKeys(base.routes).length, 1644)
+  const routes = base.routes.filter((route) => route.route !== 'reviews/route.ts')
+  const problems = run(matrix, { routes }).problems
+  assert.ok(problems.some((problem) => /reviews\/route\.ts/.test(problem)), 'a manifest that omits an existing route file is refused')
+  assert.deepEqual(base.ownership.uninventoriedRoutes, [], 'nothing is recorded as uninventoried any more')
+  assert.equal(routeKeys(base.routes).length, 1646)
 })
 
 test('SOURCE_VERIFIED backed only by a test file and no execution evidence fails', () => {

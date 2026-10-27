@@ -142,6 +142,7 @@ export function validateRecordGeneric(record, ctx, opts) {
 
   const quotes = (record.evidence ?? []).map((item) => String(item.quote ?? ''))
   const quoted = (text) => quotes.some((quote) => quote.includes(text))
+  const quotedAtomic = () => (opts.atomicAuditTokens ?? ['persistAtomicAudit']).some(quoted)
 
   if (record.accessJustifiedBy !== undefined) {
     out.push(`${label} justifies access by ${JSON.stringify(record.accessJustifiedBy)}, but no institutional authority decision is adopted; ownership is not authorization`)
@@ -207,10 +208,10 @@ export function validateRecordGeneric(record, ctx, opts) {
     if (!Array.isArray(record.defects) || record.defects.length === 0) out.push(`${label} is a GET that writes with no audit record and must record a defect`)
   }
   if (record.mutationAudit === 'ATOMIC_AUDIT_IN_TRANSACTION') {
-    if (!quoted('persistAtomicAudit')) out.push(`${label} is marked atomically audited without citing an in-transaction audit write`)
+    if (!quotedAtomic()) out.push(`${label} is marked atomically audited without citing an in-transaction audit write`)
   }
   if (record.mutationAudit === 'ATOMIC_AUDIT_LOCAL_PART_ONLY') {
-    if (!quoted('persistAtomicAudit')) out.push(`${label} is marked atomic for its local part without citing an in-transaction audit write`)
+    if (!quotedAtomic()) out.push(`${label} is marked atomic for its local part without citing an in-transaction audit write`)
     if (!(record.manifestCorrections ?? []).some((item) => item.field === 'audit')) out.push(`${label} is audited atomically for its local part only and must correct the manifest audit declaration`)
   }
   if (record.mutationAudit === 'SEPARATE_AUDIT_EVENT_NOT_ATOMIC') {

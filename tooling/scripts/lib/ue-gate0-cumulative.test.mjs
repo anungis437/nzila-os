@@ -31,15 +31,15 @@ const sha = (value) => createHash('sha256').update(value).digest('hex')
  * The only test that reads the cumulative registers. Each historical tranche test is anchored to the commit that
  * accepted the tranche; the numbers that move from tranche to tranche live here and nowhere else.
  */
-test('cumulative route-ownership counts after the twelfth tranche', () => {
+test('cumulative route-ownership counts after the twelfth tranche and the Gate 0C.1 canonical-universe reconciliation', () => {
   const entries = base.ownership.entries
-  assert.equal(entries.length, 1644)
-  assert.equal(entries.filter((entry) => entry[4] === 'OWNED').length, 1503)
+  assert.equal(entries.length, 1646, 'canonical universe: the 1,644 historical operations plus the two reviews/route.ts handlers')
+  assert.equal(entries.filter((entry) => entry[4] === 'OWNED').length, 1505)
   assert.equal(entries.filter((entry) => entry[4] === 'SCOPE_UNDECIDED').length, 4, 'only the four decision-bound carbon exceptions remain')
-  assert.equal(entries.filter((entry) => !['OWNED', 'SCOPE_UNDECIDED'].includes(entry[4])).length, 1644 - 1503 - 4)
+  assert.equal(entries.filter((entry) => !['OWNED', 'SCOPE_UNDECIDED'].includes(entry[4])).length, 1646 - 1505 - 4)
   assert.equal(Object.keys(base.ledger0b1.classified).length, 1148)
-  assert.equal(matrix.routeOwnership.operations, 1644)
-  assert.equal(matrix.routeDefects.length, 770)
+  assert.equal(matrix.routeOwnership.operations, 1646)
+  assert.equal(matrix.routeDefects.length, 777, '770 accepted by Gate 0B.12 plus 7 recorded by Gate 0C.1')
   assert.equal(matrix.capabilities.length, 111)
   assert.equal(base.lock.capabilityIds.length, 111)
   assert.deepEqual(Object.keys(base.ledger0b1.tranches), ['GATE-0B.1', 'GATE-0B.2', 'GATE-0B.3', 'GATE-0B.4', 'GATE-0B.5', 'GATE-0B.6', 'GATE-0B.7', 'GATE-0B.8', 'GATE-0B.9', 'GATE-0B.10', 'GATE-0B.11', 'GATE-0B.12'])
@@ -48,15 +48,15 @@ test('cumulative route-ownership counts after the twelfth tranche', () => {
 test('the six inventory categories add up to the whole universe and the four carbon operations are counted once, apart from the unexamined operations', () => {
   const totals = inventoryTotals(base.ownership.entries, new Set(DECISION_BOUND_OPERATIONS))
   assert.deepEqual(totals, {
-    OWNED: 1503,
+    OWNED: 1505,
     SCOPE_UNDECIDED_AWAITING_CLASSIFICATION: 0,
     DECISION_BOUND_SCOPE_EXCEPTION: 4,
     RETIRED_501: 97,
     STUB_501: 31,
     SYSTEM: 9,
-    operations: 1644,
+    operations: 1646,
   })
-  assert.equal(1503 + 0 + 4 + 97 + 31 + 9, 1644)
+  assert.equal(1505 + 0 + 4 + 97 + 31 + 9, 1646)
   assert.deepEqual(matrix.routeInventoryTotals, totals)
   assert.equal(totals.SCOPE_UNDECIDED_AWAITING_CLASSIFICATION + totals.DECISION_BOUND_SCOPE_EXCEPTION, base.ownership.entries.filter((entry) => entry[4] === 'SCOPE_UNDECIDED').length)
 })
@@ -113,6 +113,7 @@ test('every accepted tranche manifest and classification is byte-identical to th
     ['0B.9', [FILES_0B9.manifest, FILES_0B9.classification]],
     ['0B.10', [FILES_0B10.manifest, FILES_0B10.classification]],
     ['0B.11', [FILES_0B11.manifest, FILES_0B11.classification]],
+    ['0B.12', [FILES_0B12.manifest, FILES_0B12.classification]],
   ]
   for (const [key, files] of frozen) for (const file of files) assert.equal(text(file), fileAt(ACCEPTED[key], file), `${key} ${file}`)
 })
@@ -149,7 +150,7 @@ test('Gate 0 validates the cumulative registers and stays IN_PROGRESS with the c
   assert.equal(result.summary.verdict, 'IN_PROGRESS')
   assert.equal(result.summary.capabilityCount, 111)
   assert.ok(!result.blockers.some((item) => item.code === 'ROUTE_SCOPE_UNDECIDED'), 'no never-examined operation remains undecided')
-  assert.ok(result.blockers.some((item) => item.code === 'ROUTE_UNINVENTORIED'), 'reviews/route.ts is still outside the coverage manifest')
+  assert.ok(!result.blockers.some((item) => item.code === 'ROUTE_UNINVENTORIED'), 'reviews/route.ts is inside the canonical universe since Gate 0C.1')
   assert.ok(result.blockers.some((item) => item.code === 'ROUTE_DECISION_BOUND_SCOPE_EXCEPTION' && item.operations === 4))
   assert.ok(base.classification0b12.institutionalDecisions.some((decision) => decision.id === 'UE-INST-CARBON-ACCOUNTING-SCOPE' && decision.status === 'OUTSTANDING'))
   assert.ok(base.classification0b5.institutionalDecisions.some((decision) => decision.id === 'UE-INST-CARBON-ACCOUNTING-SCOPE' && decision.status === 'OUTSTANDING'))

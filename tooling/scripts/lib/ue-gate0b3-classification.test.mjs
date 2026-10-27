@@ -171,8 +171,8 @@ test('cumulative counts and the 1,644 operations are preserved', () => {
   assert.equal(args.entries.filter((entry) => entry[4] === 'OWNED').length, 634, 'owned operations when Gate 0B.3 was accepted')
   assert.equal(args.entries.filter((entry) => entry[4] === 'SCOPE_UNDECIDED').length, 873, 'undecided operations when Gate 0B.3 was accepted')
   assert.equal(countsAt(ACCEPTED['0B.3']).classified, 279)
-  assert.equal(base.ownership.entries.length, 1644)
-  assert.equal(matrix.routeOwnership.operations, 1644)
+  assert.equal(base.ownership.entries.length, 1646, "canonical universe after Gate 0C.1")
+  assert.equal(matrix.routeOwnership.operations, 1646)
   assert.equal(matrix.capabilities.find((item) => item.schemaCensus === true).censusCount, 231)
 })
 

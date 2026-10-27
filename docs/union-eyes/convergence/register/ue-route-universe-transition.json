@@ -1,0 +1,315 @@
+{
+  "schemaVersion": 1,
+  "register": "UE-GATE0C1-CANONICAL-UNIVERSE-TRANSITION",
+  "note": "Versioned transition of the canonical route-method universe. Gate 0B froze a 1,644-operation inventory from a route-coverage manifest that omitted app/api/reviews/route.ts. Gate 0C.1 regenerated the manifest from the route files, found that file to be the only difference and added exactly its two exported handlers. The historical universe is kept as a first-class record and the twelve Gate 0B tranches are not rewritten: their manifests, classifications and ledger are proved byte-identical to their accepted commits. Ownership is accountability, not authorization.",
+  "anchorCommit": "447c98c44b04fdca23d9b959bddfa62ccec351b2",
+  "historicalUniverse": {
+    "version": 1,
+    "operations": 1644,
+    "routes": 993,
+    "operationsHash": "f713a384064844beeac1d354a6a3afecca658fc083a8d0047a27cb11d055a608",
+    "routeBaselineHash": "702046516e2d8cc8f70e9f50df62364bfe481f3fdc9733a1136d1891a1a56ecd",
+    "manifestSha256": "41471349719ef21e8267d556793070c912612bbc863a41abfc83d6d846d4c495",
+    "ownershipEntriesHash": "4f87c29ffb545086e411121c0ffbf6bcc12beb4ea38a02a313fc82691026dd99",
+    "inventoryTotals": {
+      "OWNED": 1503,
+      "SCOPE_UNDECIDED_AWAITING_CLASSIFICATION": 0,
+      "DECISION_BOUND_SCOPE_EXCEPTION": 4,
+      "RETIRED_501": 97,
+      "STUB_501": 31,
+      "SYSTEM": 9,
+      "operations": 1644
+    },
+    "dynamicParameterOperations": 587
+  },
+  "canonicalUniverse": {
+    "version": 2,
+    "operations": 1646,
+    "routes": 994,
+    "operationsHash": "fafb9d7d3ff33550ed58833177730a005364d79f63a473bb9fb2db07f5d68a71",
+    "routeBaselineHash": "25b162f999775c073dab9281da62b9e1cd51b79a0c4d7d4cd76c920b17c52c1b",
+    "manifestSha256": "04ab1451f4adeef5c3f35a4c0221e01ceda00ba3eafc2342829368a3665e390d",
+    "ownershipEntriesHash": "fe2709c185ab3a94ca75edcd75b54a98dac831f9405a51907090049db08c9c1e",
+    "inventoryTotals": {
+      "OWNED": 1505,
+      "SCOPE_UNDECIDED_AWAITING_CLASSIFICATION": 0,
+      "DECISION_BOUND_SCOPE_EXCEPTION": 4,
+      "RETIRED_501": 97,
+      "STUB_501": 31,
+      "SYSTEM": 9,
+      "operations": 1646
+    },
+    "dynamicParameterOperations": 587
+  },
+  "manifestHashesIdentical": false,
+  "transitions": [
+    {
+      "version": 2,
+      "from": 1,
+      "to": 2,
+      "date": "2026-10-27",
+      "tranche": "GATE-0C.1",
+      "added": [
+        "reviews/route.ts|GET",
+        "reviews/route.ts|POST"
+      ],
+      "removed": [],
+      "addedRouteFiles": [
+        "reviews/route.ts"
+      ],
+      "size": {
+        "before": 1644,
+        "after": 1646,
+        "routesBefore": 993,
+        "routesAfter": 994
+      },
+      "hash": {
+        "before": "f713a384064844beeac1d354a6a3afecca658fc083a8d0047a27cb11d055a608",
+        "after": "fafb9d7d3ff33550ed58833177730a005364d79f63a473bb9fb2db07f5d68a71"
+      },
+      "reason": "The route-coverage manifest was generated before app/api/reviews/route.ts existed and was never regenerated, so the Gate 0B inventory could not contain its GET and POST handlers although both are exported, reachable and owned by the member review-intake capability. The previous ownership register recorded the file as an uninventoried route. Gate 0C.1 regenerates the manifest from the route files and adds exactly the two operations the regeneration produced; it removes none.",
+      "sourceEvidence": [
+        {
+          "ref": "apps/union-eyes/app/api/reviews/route.ts",
+          "quote": "export async function GET() {"
+        },
+        {
+          "ref": "apps/union-eyes/app/api/reviews/route.ts",
+          "quote": "export async function POST(request: Request) {"
+        },
+        {
+          "ref": "apps/union-eyes/scripts/lib/route-coverage-scan.ts",
+          "quote": "export function scanRoutes(root: string): RouteEntry[] {"
+        },
+        {
+          "ref": "docs/union-eyes/convergence/register/ue-route-coverage-manifest.json",
+          "quote": "\"route\": \"reviews/route.ts\","
+        }
+      ],
+      "ownershipCountsBefore": {
+        "OWNED": 1503,
+        "SCOPE_UNDECIDED_AWAITING_CLASSIFICATION": 0,
+        "DECISION_BOUND_SCOPE_EXCEPTION": 4,
+        "RETIRED_501": 97,
+        "STUB_501": 31,
+        "SYSTEM": 9,
+        "operations": 1644
+      },
+      "ownershipCountsAfter": {
+        "OWNED": 1505,
+        "SCOPE_UNDECIDED_AWAITING_CLASSIFICATION": 0,
+        "DECISION_BOUND_SCOPE_EXCEPTION": 4,
+        "RETIRED_501": 97,
+        "STUB_501": 31,
+        "SYSTEM": 9,
+        "operations": 1646
+      },
+      "capabilityOperationCountsBefore": {
+        "UE-CAP-REVIEW-INTAKE": 0
+      },
+      "capabilityOperationCountsAfter": {
+        "UE-CAP-REVIEW-INTAKE": 2
+      },
+      "backwardCompatibility": {
+        "historicalTranchesFrozen": true,
+        "historicalOperationsKeepEntries": true,
+        "gate0BLedgerUnchanged": true,
+        "capabilityLockUnchanged": true,
+        "newCapabilities": [],
+        "explanation": "Every one of the 1,644 historical operations keeps its exact ownership entry. The twelve Gate 0B manifests and classifications and the Gate 0B ledger are not regenerated; the two new operations are classified in a separate Gate 0C ledger. No capability is added."
+      }
+    }
+  ],
+  "frozenTranches": [
+    {
+      "tranche": "0B.1",
+      "acceptedCommit": "8480b8899c49d313e8f1254637255674a1c1e4be",
+      "files": {
+        "manifest": {
+          "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b1-manifest.json",
+          "sha256": "23bd9ca6a393ad6a8f09d511b7595f6c41dee2b39273442be5ff74f630cc6235"
+        },
+        "classification": {
+          "file": "docs/union-eyes/convergence/register/ue-route-classification-0b1.json",
+          "sha256": "2dcbd16329eb4ebe0302dfd5da914676fdeff6a8245e2a784a270ccc21acc327"
+        }
+      }
+    },
+    {
+      "tranche": "0B.2",
+      "acceptedCommit": "e38eee48d8dbc7b4dddddeb4974ca4067213117a",
+      "files": {
+        "manifest": {
+          "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b2-manifest.json",
+          "sha256": "45a50cd11da4b8655077f9d50050479ea4ec5ea42fb77a7c7a69366ff0794fd9"
+        },
+        "classification": {
+          "file": "docs/union-eyes/convergence/register/ue-route-classification-0b2.json",
+          "sha256": "e42a20c5eab7cf22d65177e85e7cec929ea8341fa4e87f05a0a3abffaa6225d0"
+        }
+      }
+    },
+    {
+      "tranche": "0B.3",
+      "acceptedCommit": "6dcc66d292d9a10f3713691a93009e7dc82bd610",
+      "files": {
+        "manifest": {
+          "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b3-manifest.json",
+          "sha256": "714624aed5727b2d54982ba6389ae8b4bd9b5dfdb5deec6b6215fe130be981d3"
+        },
+        "classification": {
+          "file": "docs/union-eyes/convergence/register/ue-route-classification-0b3.json",
+          "sha256": "94a39f6edd974ad4cc0190a9eb24fe6ae34bfa8ec038fa7d6e48a7742484e55f"
+        }
+      }
+    },
+    {
+      "tranche": "0B.4",
+      "acceptedCommit": "64d45940c34890eef41cc86c017d99b484dbf71c",
+      "files": {
+        "manifest": {
+          "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b4-manifest.json",
+          "sha256": "f767e0616c9dbcec4c34bd6a4454ce37a36a4b963c268e85dcfe05fceb11b8d2"
+        },
+        "classification": {
+          "file": "docs/union-eyes/convergence/register/ue-route-classification-0b4.json",
+          "sha256": "56cb5eb99631b7dfbeccae774cafe1055e94f53fe7670ff06e4d86fecaad1685"
+        }
+      }
+    },
+    {
+      "tranche": "0B.5",
+      "acceptedCommit": "00de050b86e1014854e38fc34f51b4c7c85ed747",
+      "files": {
+        "manifest": {
+          "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b5-manifest.json",
+          "sha256": "0b72b37b65cb8ebb88bb68b1f2af11f312ef44180d70ac2850cbc8fd41e7a9b8"
+        },
+        "classification": {
+          "file": "docs/union-eyes/convergence/register/ue-route-classification-0b5.json",
+          "sha256": "43341255456f946f2de5a55e6dbbf5b84b7c43f865cc0fa6b62ae0e9434cb426"
+        }
+      }
+    },
+    {
+      "tranche": "0B.6",
+      "acceptedCommit": "cab380c61301152b604f4161d00d14ce81584045",
+      "files": {
+        "manifest": {
+          "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b6-manifest.json",
+          "sha256": "3adcb9a4379ae5b2567ad51af97d98337a3f649cb30b3e50895d2390e2f42ab6"
+        },
+        "classification": {
+          "file": "docs/union-eyes/convergence/register/ue-route-classification-0b6.json",
+          "sha256": "52b464423ae2da0d272191678a9957e95614fc6b851e9d5df8ae9070b46954d4"
+        }
+      }
+    },
+    {
+      "tranche": "0B.7",
+      "acceptedCommit": "32ae5951ef08eefecae73c0e08c88a70f184026d",
+      "files": {
+        "manifest": {
+          "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b7-manifest.json",
+          "sha256": "91fd47a9340c934ac45c9f09c49d38aee2f2e0bc332c14af476c279624af0160"
+        },
+        "classification": {
+          "file": "docs/union-eyes/convergence/register/ue-route-classification-0b7.json",
+          "sha256": "decea6f87fe92e1a1185d02624d37b73995e72e60b038af35b466280f0e41406"
+        }
+      }
+    },
+    {
+      "tranche": "0B.8",
+      "acceptedCommit": "f3d6262b6cbda002b08b06201e6da68e52c9bf21",
+      "files": {
+        "manifest": {
+          "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b8-manifest.json",
+          "sha256": "4979e1d88051f69914f5e7d73355c42c9a693746e04258f50f72c6aa7594bc4e"
+        },
+        "classification": {
+          "file": "docs/union-eyes/convergence/register/ue-route-classification-0b8.json",
+          "sha256": "f1ab2813bd16f6fb07c4a5b87c39a5bd3a32ad409ba68dbe4f183c943f33cf9a"
+        }
+      }
+    },
+    {
+      "tranche": "0B.9",
+      "acceptedCommit": "938c4521d0971bedcc75010f7ca27f2ff9388200",
+      "files": {
+        "manifest": {
+          "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b9-manifest.json",
+          "sha256": "09eb9ac7d53b7f7fe758fce1988ab30d3c9e2b2e21aa42bb4b588a1a27c71d95"
+        },
+        "classification": {
+          "file": "docs/union-eyes/convergence/register/ue-route-classification-0b9.json",
+          "sha256": "69586dc37cde47adaa618f3d1bfb4bf2383ac09217e29df8dbc034152c6b1fdb"
+        }
+      }
+    },
+    {
+      "tranche": "0B.10",
+      "acceptedCommit": "b091158a8df04eb82c837ab0b53b115e1be70e90",
+      "files": {
+        "manifest": {
+          "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b10-manifest.json",
+          "sha256": "c414b84946e9c57181148e8e3ad3d344d50a88c7f442565e2c8e434b749d6a7f"
+        },
+        "classification": {
+          "file": "docs/union-eyes/convergence/register/ue-route-classification-0b10.json",
+          "sha256": "22ced13f3c7a7e2ceb959f590d10b307785b394de20c874f95e72e639efed9b9"
+        }
+      }
+    },
+    {
+      "tranche": "0B.11",
+      "acceptedCommit": "6db896d31e7cb846cabe9763bd32e5406918832c",
+      "files": {
+        "manifest": {
+          "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b11-manifest.json",
+          "sha256": "7327e1324d2f4402794a599a56811ff944c46a7bb188370d9884e4c93493a142"
+        },
+        "classification": {
+          "file": "docs/union-eyes/convergence/register/ue-route-classification-0b11.json",
+          "sha256": "f063c1dcbaa95ec77c1bebf9371b04f5c7699e619e0145d477cfecc341406f77"
+        }
+      }
+    },
+    {
+      "tranche": "0B.12",
+      "acceptedCommit": "447c98c44b04fdca23d9b959bddfa62ccec351b2",
+      "files": {
+        "manifest": {
+          "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b12-manifest.json",
+          "sha256": "d8fa6bc8e3606d64f33e53e64097e13855c6cb834fb147d227de3a24c24539df"
+        },
+        "classification": {
+          "file": "docs/union-eyes/convergence/register/ue-route-classification-0b12.json",
+          "sha256": "8ef8f6c67613b03e425e25126016e43f01d43d5fc5f9f91950ec41cb92891dd3"
+        }
+      }
+    }
+  ],
+  "frozenLedger": {
+    "file": "docs/union-eyes/convergence/register/ue-route-classification-ledger.json",
+    "acceptedCommit": "447c98c44b04fdca23d9b959bddfa62ccec351b2",
+    "sha256": "258e04efd2a8f6b96111e2a90c0e8815fcc6666d616a338a0637a860b4f3e97f"
+  },
+  "carbonExceptions": {
+    "operations": [
+      "carbon/dashboard/route.ts|GET",
+      "carbon/infrastructure/route.ts|GET",
+      "carbon/validate/route.ts|GET",
+      "carbon/validate/route.ts|POST"
+    ],
+    "disposition": "SCOPE_UNDECIDED",
+    "nonAuthorizing": true,
+    "note": "The four carbon operations stay decision-bound scope exceptions. They are not owned, not classified and not authorized by this transition."
+  },
+  "capabilityLock": {
+    "capabilityCount": 111,
+    "matrixCapabilityCount": 111,
+    "added": [],
+    "note": "The independent capability lock keeps every anchored identifier. Gate 0C.1 adds no capability: UE-CAP-REVIEW-INTAKE already owns the two operations."
+  }
+}

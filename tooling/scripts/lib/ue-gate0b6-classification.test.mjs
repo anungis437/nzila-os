@@ -627,7 +627,7 @@ test('NEGATIVE 12: the cumulative counts cannot double count the exceptions or o
   const double = { ...totals, DECISION_BOUND_SCOPE_EXCEPTION: 4, SCOPE_UNDECIDED_AWAITING_CLASSIFICATION: totals.SCOPE_UNDECIDED_AWAITING_CLASSIFICATION + 4 }
   const doubleResult = inventoryTotalsProblems(double, totals)
   assert.ok(doubleResult.some((problem) => /INVENTORY-TOTALS-DRIFT: SCOPE_UNDECIDED_AWAITING_CLASSIFICATION/.test(problem)))
-  assert.ok(doubleResult.some((problem) => /INVENTORY-TOTALS-SUM: the categories add to 1648, not the 1644/.test(problem)))
+  assert.ok(doubleResult.some((problem) => /INVENTORY-TOTALS-SUM: the categories add to 1650, not the 1646/.test(problem)))
   const omitted = { ...totals, OWNED: totals.OWNED - 1 }
   assert.ok(inventoryTotalsProblems(omitted, totals).some((problem) => /INVENTORY-TOTALS-SUM/.test(problem)))
   assert.ok(inventoryTotalsProblems(undefined, totals).some((problem) => /INVENTORY-TOTALS-ABSENT/.test(problem)))
@@ -640,7 +640,7 @@ test('NEGATIVE 12: the cumulative counts cannot double count the exceptions or o
   const absent = clone(matrix)
   delete absent.routeInventoryTotals
   assert.ok(validateGate0(absent).problems.some((problem) => /INVENTORY-TOTALS-ABSENT/.test(problem)))
-  assert.equal(totals.OWNED + totals.SCOPE_UNDECIDED_AWAITING_CLASSIFICATION + totals.DECISION_BOUND_SCOPE_EXCEPTION + totals.RETIRED_501 + totals.STUB_501 + totals.SYSTEM, 1644)
+  assert.equal(totals.OWNED + totals.SCOPE_UNDECIDED_AWAITING_CLASSIFICATION + totals.DECISION_BOUND_SCOPE_EXCEPTION + totals.RETIRED_501 + totals.STUB_501 + totals.SYSTEM, 1646)
   assert.deepEqual(matrix.routeInventoryTotals, totals)
 })
 

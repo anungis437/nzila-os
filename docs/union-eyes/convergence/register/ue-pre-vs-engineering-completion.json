@@ -7885,8 +7885,8 @@
   },
   "routeOwnership": {
     "file": "docs/union-eyes/convergence/register/ue-route-capability-ownership.json",
-    "entriesHash": "4f87c29ffb545086e411121c0ffbf6bcc12beb4ea38a02a313fc82691026dd99",
-    "operations": 1644
+    "entriesHash": "fe2709c185ab3a94ca75edcd75b54a98dac831f9405a51907090049db08c9c1e",
+    "operations": 1646
   },
   "routeClassification": {
     "tranche": "GATE-0B.1",
@@ -8064,6 +8064,34 @@
       }
     }
   },
+  "routeClassification0c1": {
+    "tranche": "GATE-0C.1",
+    "note": "Hash pins for the Gate 0C.1 tranche manifest (the two operations the canonical route universe gained), its source-evidenced classification register and the separate Gate 0C ledger. The Gate 0B files and the Gate 0B ledger are pinned above and are not rewritten.",
+    "files": {
+      "manifest": {
+        "file": "docs/union-eyes/convergence/register/ue-route-tranche-0c1-manifest.json",
+        "sha256": "bc6d80be8f98d63ac555e7d762db0d970e6c7f3943a88eec66d2baaed276901c"
+      },
+      "classification": {
+        "file": "docs/union-eyes/convergence/register/ue-route-classification-0c1.json",
+        "sha256": "ebfaae1603b351e127fcb4f0cc006afa927f32937c4d45071cf3847fa28da1b3"
+      },
+      "ledger": {
+        "file": "docs/union-eyes/convergence/register/ue-route-classification-ledger-0c.json",
+        "sha256": "c7151dd047db58422fd23cf3720dbbb0867836bf2d28956b61abc638ac98f560"
+      }
+    }
+  },
+  "routeUniverseTransition": {
+    "note": "Versioned canonical route-universe transition record: the historical 1,644-operation universe, the canonical universe, the versioned additions and the proof that the twelve Gate 0B tranches are unchanged.",
+    "file": "docs/union-eyes/convergence/register/ue-route-universe-transition.json",
+    "sha256": "7cf08caa0e9e21fb571d3f8589f0744511a09754309edddbe864529987a5848f"
+  },
+  "gate0cHandoff": {
+    "note": "Gate 0C handoff register. It records the obligations that remain after Gate 0C.1 and resolves none.",
+    "file": "docs/union-eyes/convergence/register/ue-gate0c-handoff-register.json",
+    "sha256": "641eb2242302076f9e6a3f19e2b17c82ed23391df3cf2df9348329d09cb4a322"
+  },
   "releaseDispositionChallenges": {
     "note": "Independent reviewer challenge of the frozen Gate 0B.10 dispositions of DEF-0B10-OPL-01 and DEF-0B10-OPL-07. It is additional review evidence pinned here; it changes no frozen defect or disposition and claims no remediation.",
     "file": "docs/union-eyes/convergence/register/ue-release-disposition-challenges.json",
@@ -8081,13 +8109,13 @@
     ]
   },
   "routeInventoryTotals": {
-    "OWNED": 1503,
+    "OWNED": 1505,
     "SCOPE_UNDECIDED_AWAITING_CLASSIFICATION": 0,
     "DECISION_BOUND_SCOPE_EXCEPTION": 4,
     "RETIRED_501": 97,
     "STUB_501": 31,
     "SYSTEM": 9,
-    "operations": 1644
+    "operations": 1646
   },
   "routeDefects": [
     {
@@ -14249,6 +14277,62 @@
       "ownerCapabilityId": "UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT",
       "tranche": "0B.12",
       "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0C1-REV-REVIEW-ROWS-ARE-PROTECTED-BY-AN-ORGANIZATION-ONLY-RLS-POLICY-SO-ADVERSE-PARTY-COMPLAINANT-AND-PRIVILEGE-CONFIDENTIALITY-IS-APPLICATION-CODE-ONLY",
+      "gate": 12,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-REVIEW-INTAKE",
+      "tranche": "0C.1",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0C1-REV-ADVERSE-PARTY-IDS-ARE-CHECKED-FOR-SHAPE-ONLY-AND-NEVER-AGAINST-ORGANIZATION-MEMBERSHIP",
+      "gate": 12,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-REVIEW-INTAKE",
+      "tranche": "0C.1",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0C1-REV-POST-HAS-NO-RATE-LIMIT-OR-IDEMPOTENCY-AND-EVERY-CALL-WRITES-A-PERMANENT-APPEND-ONLY-REVIEW-AND-AUDIT-ROW",
+      "gate": 12,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-REVIEW-INTAKE",
+      "tranche": "0C.1",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0C1-REV-POST-READS-AN-UNCAPPED-REQUEST-BODY-BEFORE-ITS-SCHEMA-BOUNDS-APPLY",
+      "gate": 12,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-CAP-REVIEW-INTAKE",
+      "tranche": "0C.1",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0C1-REV-THE-ROUTE-RESOLVES-ITS-ORGANIZATION-ONCE-AND-THE-DATABASE-CONTEXT-RESOLVES-IT-AGAIN-WITH-NO-COMPARISON",
+      "gate": 12,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-CAP-REVIEW-INTAKE",
+      "tranche": "0C.1",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0C1-REV-FAILURES-OUTSIDE-THE-STORE-AND-CASE-AUTHORIZATION-ERRORS-ARE-RETHROWN-UNLOGGED-AS-AN-UNSTRUCTURED-SERVER-ERROR",
+      "gate": 12,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-CAP-REVIEW-INTAKE",
+      "tranche": "0C.1",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0C1-REV-THE-OVERSIGHT-LIST-RETURNS-COMPLAINANT-IDENTITY-AND-PRIVILEGED-CLASSIFICATION-WITH-NO-ACCESS-RECORD",
+      "gate": 12,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-CAP-REVIEW-INTAKE",
+      "tranche": "0C.1",
+      "releaseBlocking": false
     }
   ],
   "outOfScope": [
@@ -14400,14 +14484,14 @@
   "routeBaseline": {
     "manifest": "docs/union-eyes/convergence/register/ue-route-coverage-manifest.json",
     "algorithm": "sha256 of sorted route|methods|guard lines",
-    "hash": "702046516e2d8cc8f70e9f50df62364bfe481f3fdc9733a1136d1891a1a56ecd",
-    "routeCount": 993,
+    "hash": "25b162f999775c073dab9281da62b9e1cd51b79a0c4d7d4cd76c920b17c52c1b",
+    "routeCount": 994,
     "guardCounts": {
       "WITH_API": 278,
       "CRUD_FACTORY": 297,
       "RETIRED": 67,
       "ROLE_AUTH": 125,
-      "SESSION_AUTH": 62,
+      "SESSION_AUTH": 63,
       "ADMIN_AUTH": 7,
       "ORG_AUTH": 53,
       "NONE": 51,
@@ -14434,7 +14518,7 @@
       "WITH_API": "UE-CAP-K-008",
       "WITH_API_PUBLIC": "UE-CAP-K-008"
     },
-    "note": "Guard-class assignment locks a new guard or a changed guard count. It does not copy the 993-route manifest into a second inventory."
+    "note": "Guard-class assignment locks a new guard or a changed guard count. It does not copy the 994-route manifest into a second inventory."
   },
   "kernelBaseline": {
     "source": "apps/union-eyes/lib/authority/ontology.ts",

@@ -43,6 +43,9 @@ import { capabilitiesForTranche11 } from './ue-gate0b11-capabilities.mjs'
 import { FILES_0B12 } from './ue-gate0b12-classification.mjs'
 import { capabilitiesForTranche12 } from './ue-gate0b12-capabilities.mjs'
 import { FILE_CHALLENGES } from './ue-gate0b11-challenge.mjs'
+import { FILES_0C1 } from './ue-gate0c1-classification.mjs'
+import { FILE_TRANSITION } from './ue-gate0c1-universe.mjs'
+import { FILE_HANDOFF } from './ue-gate0c1-handoff.mjs'
 import { capabilitiesForTranche6 } from './ue-gate0b6-capabilities.mjs'
 import { DECISION_BOUND_OPERATIONS } from './ue-gate0b6-ids.mjs'
 import { FILE_EXCEPTIONS, inventoryTotals } from './ue-gate0b6-exceptions.mjs'
@@ -663,19 +666,9 @@ for (const record of ctx.registryActions) {
 }
 
 const manifestKeys = new Set(ctx.routes.map((route) => route.route))
-const uninventoried = ctx.diskRouteKeys
-  .filter((key) => !manifestKeys.has(key))
-  .map((key) => {
-    const text = readFileSync(join(ROOT, 'apps/union-eyes/app/api', key), 'utf8')
-    const methods = [...new Set([...text.matchAll(/export\s+(?:async\s+function|const)\s+(GET|POST|PUT|PATCH|DELETE)\b/g)].map((match) => match[1]))].sort()
-    if (key !== 'reviews/route.ts') throw new Error(`unexpected uninventoried route ${key}`)
-    return {
-      route: key,
-      methods,
-      capabilityId: 'UE-CAP-REVIEW-INTAKE',
-      reason: 'The member review-intake route was added after the route-coverage manifest was last regenerated. The manifest still lists 993 routes and the route-coverage test expects every route file. Regenerating the manifest belongs to UE-CONV-K-008 and is not done in Gate 0.',
-    }
-  })
+const missingFromManifest = ctx.diskRouteKeys.filter((key) => !manifestKeys.has(key))
+if (missingFromManifest.length > 0) throw new Error(`route file(s) missing from the canonical route universe; regenerate the manifest: ${missingFromManifest.join(', ')}`)
+const uninventoried = []
 
 const ownership = buildOwnership({ routes: ctx.routes, registryActions: ctx.registryActions, uninventoried })
 const entriesHash = ownershipHash(ownership.entries)
@@ -786,6 +779,21 @@ const matrix = {
     note: 'Hash pins for the frozen Gate 0B.12 tranche manifest and its source-evidenced classification register. The cumulative ledger and the release disposition review queue are pinned above.',
     files: Object.fromEntries(Object.entries(FILES_0B12).map(([key, file]) => [key, { file, sha256: existsSync(join(ROOT, file)) ? sha256File(ROOT, file) : null }])),
   },
+  routeClassification0c1: {
+    tranche: 'GATE-0C.1',
+    note: 'Hash pins for the Gate 0C.1 tranche manifest (the two operations the canonical route universe gained), its source-evidenced classification register and the separate Gate 0C ledger. The Gate 0B files and the Gate 0B ledger are pinned above and are not rewritten.',
+    files: Object.fromEntries(Object.entries(FILES_0C1).map(([key, file]) => [key, { file, sha256: existsSync(join(ROOT, file)) ? sha256File(ROOT, file) : null }])),
+  },
+  routeUniverseTransition: {
+    note: 'Versioned canonical route-universe transition record: the historical 1,644-operation universe, the canonical universe, the versioned additions and the proof that the twelve Gate 0B tranches are unchanged.',
+    file: FILE_TRANSITION,
+    sha256: existsSync(join(ROOT, FILE_TRANSITION)) ? sha256File(ROOT, FILE_TRANSITION) : null,
+  },
+  gate0cHandoff: {
+    note: 'Gate 0C handoff register. It records the obligations that remain after Gate 0C.1 and resolves none.',
+    file: FILE_HANDOFF,
+    sha256: existsSync(join(ROOT, FILE_HANDOFF)) ? sha256File(ROOT, FILE_HANDOFF) : null,
+  },
   releaseDispositionChallenges: {
     note: 'Independent reviewer challenge of the frozen Gate 0B.10 dispositions of DEF-0B10-OPL-01 and DEF-0B10-OPL-07. It is additional review evidence pinned here; it changes no frozen defect or disposition and claims no remediation.',
     file: FILE_CHALLENGES,
@@ -798,7 +806,7 @@ const matrix = {
     operations: [...DECISION_BOUND_OPERATIONS],
   },
   routeInventoryTotals: inventoryTotals(ownership.entries, new Set(DECISION_BOUND_OPERATIONS)),
-  routeDefects: JSON.parse(readFileSync(join(ROOT, [FILES_0B12, FILES_0B11, FILES_0B10, FILES_0B9, FILES_0B8, FILES_0B7, FILES_0B6, FILES_0B5, FILES_0B4, FILES_0B3].map((files) => files.classification).find((file) => existsSync(join(ROOT, file)))), 'utf8'))
+  routeDefects: JSON.parse(readFileSync(join(ROOT, [FILES_0C1, FILES_0B12, FILES_0B11, FILES_0B10, FILES_0B9, FILES_0B8, FILES_0B7, FILES_0B6, FILES_0B5, FILES_0B4, FILES_0B3].map((files) => files.classification).find((file) => existsSync(join(ROOT, file)))), 'utf8'))
     .defectRegister.map(({ id, gate, severity, ownerCapabilityId, tranche, releaseBlocking }) => ({ id, gate, severity, ownerCapabilityId, tranche, releaseBlocking })),
   outOfScope: [
     {
@@ -841,7 +849,7 @@ const matrix = {
     routeCount: ctx.routes.length,
     guardCounts: guardCounts(ctx.routes),
     guardAssignments,
-    note: 'Guard-class assignment locks a new guard or a changed guard count. It does not copy the 993-route manifest into a second inventory.',
+    note: 'Guard-class assignment locks a new guard or a changed guard count. It does not copy the 994-route manifest into a second inventory.',
   },
   kernelBaseline: {
     source: 'apps/union-eyes/lib/authority/ontology.ts',

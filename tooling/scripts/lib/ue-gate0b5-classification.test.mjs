@@ -251,7 +251,7 @@ test('cumulative counts advance by exactly the operations this tranche classifie
   assert.equal(owned, 730 + 96)
   assert.equal(undecided, 777 - 96)
   assert.equal(Object.keys(args.ledger.classified).length, before.classified + 96)
-  assert.equal(matrix.routeOwnership.operations, 1644)
+  assert.equal(matrix.routeOwnership.operations, 1646)
 })
 
 test('Gate 0 stays IN_PROGRESS, validates the fifth tranche and keeps the three unjustified exposures release blocking', () => {
