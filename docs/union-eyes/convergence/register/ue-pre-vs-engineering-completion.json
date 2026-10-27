@@ -4612,6 +4612,180 @@
       "businessOutcome": "A member answers voluntarily after a recorded consent that can be withdrawn, each answer is held in a table built for it, linked to the member only where the union has decided it must be and readable by no one but the office the union names, published counts are aggregates that suppress groups below a decided minimum size, a snapshot is computed from consented answers and retained for the decided period, and every change commits with its audit record.",
       "sourceStatus": "PARTIAL",
       "gap": "No capability named equity before Gate 0B.7, and UE-OMIT-PRIVACY-RIGHTS (receiving and fulfilling access, correction and portability requests) does not own a collection and monitoring programme. The three equity routes are the generic CRUD factory over member_segments, the saved member-search table: no self-identification, consent, monitoring or snapshot table exists in the application schema, equity_snapshots is declared only in the financial-service schema and revoked from the application roles, and the form and dashboard components that call the routes are mounted by no page. The form shows a consent text promising encryption, aggregate-only reporting with a ten-member minimum, deletion at any time and seven-year retention, none of which any source implements; the consent flag is a literal in the client body; the write floor is steward, so the member the form is for receives 403; the insert needs a name and filters the form never sends; and the reads return every saved segment, private ones included, to any member. This record closes none of them and names no data steward, reader, minimum group size or retention rule, which no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-006",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        6,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/icra (start, answer, submit, results, profile, report, report review, checkout, claim, email-results, telemetry, capability exchange)",
+      "httpAction": null,
+      "service": "apps/union-eyes/lib/icra/assessment-capability.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "The assessment routes write no audit record: start, answer and submit log with logger only. The claim route writes an atomic audit row with the organization of the signed-in user, and the review route writes one only for an assessment that has a claimed organization.",
+      "privacyClassification": "Pseudonymous organization context (display name, sector, jurisdiction, workforce band, governance model, federation affiliation), answers with optional free-text notes, a stored continuity profile, a consent record, a hashed bearer capability, and for a paid assessment a Stripe purchase and an optional claim binding to a tenant organization.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/lib/icra/assessment-capability.ts",
+        "apps/union-eyes/lib/icra/claim-tokens.ts",
+        "apps/union-eyes/lib/icra/observability.ts",
+        "apps/union-eyes/lib/public-intake/guard.ts",
+        "apps/union-eyes/db/schema/icra-schema.ts",
+        "apps/union-eyes/app/api/icra/start/route.ts",
+        "apps/union-eyes/app/api/icra/report/[assessmentId]/route.ts",
+        "apps/union-eyes/app/api/icra/checkout/route.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/lib/icra/assessment-capability.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "parentRegisterId": "UE-CONV-K-007",
+      "obligationKey": "icra-pseudonymous-assessment-product",
+      "primaryGate": 14,
+      "actor": "Anonymous respondent holding an assessment capability, a signed-in user holding a claim token, and the operator who records a narrative review decision, for the institutional continuity risk assessment product",
+      "businessOutcome": "A respondent can complete, resume and read an institutional continuity assessment without an account, only the holder of the assessment capability can read or change it, consent is recorded by the server before data is collected, a purchased report tier delivers what its copy promises, an organization that buys an assessment can bind it to its own tenant under a named office, and every public write is bounded by controls that do not depend on a forged header.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No existing capability names the pseudonymous ICRA product. UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING owns tenant subscription billing for signed-in organizations, UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION owns analytics reports read through a tenant session, UE-OMIT-AI-ADVISORY-GOVERNANCE owns routes whose purpose is a model call, and UE-OMIT-ROUTE-EXPOSURE-HARDENING owns the exposure of routes, not a product. These routes are not tenant routes: icra_assessments has no Union Eyes organization column, is classified SYSTEM_ONLY, is read and written through withSystemContext, and is authorized by a bearer capability, a Stripe purchase and a claim token, which none of those capabilities governs."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        6,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/integrations/shopify/webhooks",
+      "httpAction": null,
+      "service": "apps/union-eyes/lib/services/rewards/redemption-service.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "The redemption transitions (ordered, fulfilled, refund) commit an audit row in the same transaction through auditRewards; the webhook receipt is a separate write and the receipt insert is not part of that transaction.",
+      "privacyClassification": "Shopify order identifiers, purchaser customer id, e-mail address and names, line items, tracking details and refund amounts, retained in the webhook receipt payload and the redemption provider payload, alongside the member credit balance movements.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/integrations/shopify/webhooks/route.ts",
+        "apps/union-eyes/lib/services/rewards/webhook-service.ts",
+        "apps/union-eyes/lib/services/rewards/redemption-service.ts",
+        "apps/union-eyes/lib/services/rewards/shopify-service.ts",
+        "apps/union-eyes/db/schema/domains/infrastructure/rewards.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/lib/services/rewards/redemption-service.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "parentRegisterId": "UE-CONV-K-006",
+      "obligationKey": "rewards-redemption-provider-fulfilment",
+      "primaryGate": 14,
+      "actor": "Member redeeming recognition credits for a provider reward, the organization that holds the credit ledger, and the external shop that reports order, fulfilment and refund events",
+      "businessOutcome": "A redemption moves from initiated to ordered, fulfilled or refunded only on a verified event from the shop the organization chose, credits are deducted and returned exactly once and in the amount the shop refunded, failures are retried rather than acknowledged, and the purchaser data the shop sends is limited to what the organization needs.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No existing capability names reward redemptions or the Shopify provider. UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS owns the tenant integration control plane (provider configuration, activation and synchronization of approved adapters), and the Shopify webhook is not part of it: the route is a public provider webhook authenticated by a global signature secret, it writes the rewards credit ledger and webhook_receipts rather than integration_configs, and it is driven by the rewards actions, not by an integration configured through the framework routes."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        1,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/federations",
+      "httpAction": null,
+      "service": "apps/union-eyes/app/api/federations/route.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "The federation and benchmark routes refuse every write before any row or audit record exists. The locals routes write bargaining_units through the generic factory, which commits persistAtomicAudit with the row and lists the field names written. Reads are not audited.",
+      "privacyClassification": "Organization contact details, per-capita rate and aggregate counters of a federation, and bargaining unit certification, steward and bargaining chair references with free-text notes; the benchmark path would address grievance rows that carry grievant names and emails.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/federations/route.ts",
+        "apps/union-eyes/app/api/federations/[id]/route.ts",
+        "apps/union-eyes/app/api/federations/benchmark/grievances/route.ts",
+        "apps/union-eyes/app/api/locals/route.ts",
+        "apps/union-eyes/db/schema/domains/federation/federation-schema.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/federations/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+      "parentRegisterId": "UE-CONV-K-006",
+      "obligationKey": "federation-and-local-hierarchy",
+      "primaryGate": 14,
+      "actor": "Officer of a federation reading the federation record, its affiliates, remittances and meetings and a grievance benchmark; steward and member reading the bargaining unit records served under the locals paths",
+      "businessOutcome": "A federation sees of an affiliate only what the institution has decided an affiliate discloses, through a parent and child link that is established, verified and revoked by a named office; affiliate lists, dashboards, remittances and grievance benchmarks are computed from the affiliates and never from the caller organization alone, with small groups suppressed; the federation and local registers are maintained through audited routes that name the office permitted to change them; a local union is a record of its own, distinct from a bargaining unit.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No existing capability owns federation or local structure. UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION concerns platform enumeration of tenants, UE-OMIT-ROUTE-EXPOSURE-HARDENING concerns route exposure in general, UE-OMIT-EMPLOYER-RELATIONS-RECORDS concerns employer records and UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER concerns agreements, and none owns the parent and child relationship between a federation, its affiliates and their locals, or what flows up it. The source has a federations table and a federation_remittances table, but the affiliates, dashboard, meetings and remittances paths are copies of the federation item route that return the one federation row of the session organization, the grievance benchmark path is a copy of the grievance collection route that the governance table refuses, and the locals paths serve bargaining_units rather than local unions."
     }
   ],
   "personaActions": [
@@ -6654,7 +6828,7 @@
   },
   "routeOwnership": {
     "file": "docs/union-eyes/convergence/register/ue-route-capability-ownership.json",
-    "entriesHash": "70008c9194bca79544e7d1fb21531f5072e1b103cf0cd5c1276ab09d7a613f97",
+    "entriesHash": "a93b8191848a455f8996e7e6c3a65d30cbaf7a129522fa151221f2254a1f9a8f",
     "operations": 1644
   },
   "routeClassification": {
@@ -6671,7 +6845,7 @@
       },
       "ledger": {
         "file": "docs/union-eyes/convergence/register/ue-route-classification-ledger.json",
-        "sha256": "7f9df2df0fd6ccd1465a6567ff573c133112efe9a518e1c5ef52c53968091e36"
+        "sha256": "c0585847e2320e6837f867f4c6b8279cf8b132b4538ca337eba2d3dfcbe7e848"
       }
     }
   },
@@ -6763,6 +6937,20 @@
       }
     }
   },
+  "routeClassification0b8": {
+    "tranche": "GATE-0B.8",
+    "note": "Hash pins for the frozen Gate 0B.8 tranche manifest and its source-evidenced classification register. The cumulative ledger and the release disposition review queue are pinned above.",
+    "files": {
+      "manifest": {
+        "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b8-manifest.json",
+        "sha256": "4979e1d88051f69914f5e7d73355c42c9a693746e04258f50f72c6aa7594bc4e"
+      },
+      "classification": {
+        "file": "docs/union-eyes/convergence/register/ue-route-classification-0b8.json",
+        "sha256": "26104b32d8a172e67ab3c15f29d7628054b9f515f9a88213c5a3da6700f06af7"
+      }
+    }
+  },
   "decisionBoundExceptions": {
     "note": "Operations Gate 0B.4 and Gate 0B.5 examined, whose evidence is exhausted and whose scope waits on an outstanding institutional decision. They are reported apart from operations awaiting source classification and are never counted as OWNED. The register is pinned here; an exception is not an approval.",
     "file": "docs/union-eyes/convergence/register/ue-route-decision-bound-exceptions.json",
@@ -6775,8 +6963,8 @@
     ]
   },
   "routeInventoryTotals": {
-    "OWNED": 1026,
-    "SCOPE_UNDECIDED_AWAITING_CLASSIFICATION": 477,
+    "OWNED": 1127,
+    "SCOPE_UNDECIDED_AWAITING_CLASSIFICATION": 376,
     "DECISION_BOUND_SCOPE_EXCEPTION": 4,
     "RETIRED_501": 97,
     "STUB_501": 31,
@@ -9735,6 +9923,654 @@
       "ownerCapabilityId": "UE-OMIT-EQUITY-SELF-IDENTIFICATION",
       "tranche": "0B.7",
       "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-HS-INCIDENT-ITEM-READ-MEMBER-FLOOR-WHOLE-ROW",
+      "gate": 6,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.8",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B8-HS-HAZARD-ITEM-READ-MEMBER-FLOOR-WHOLE-ROW",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-HS-ANONYMOUS-REPORTER-STAMPED-IN-CREATED-BY",
+      "gate": 6,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.8",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B8-HS-INCIDENT-CREATE-SILENTLY-NORMALISES-SEVERITY-TYPE-AND-DATE",
+      "gate": 6,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-HS-INCIDENT-INJURY-WITNESS-AND-REPORTER-DATA-IN-UNTYPED-METADATA",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-HS-HAZARD-CREATE-DEFAULTS-LEVEL-AND-CATEGORY-SILENTLY",
+      "gate": 6,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-HS-RECORD-NUMBERS-CALLER-SUPPLIED-AND-UNIQUE-ACROSS-ORGANIZATIONS",
+      "gate": 6,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-HS-STATUS-AND-OUTCOME-FIELDS-WRITABLE-WITHOUT-WORKFLOW",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-HS-ARCHIVED-ROWS-STILL-READABLE-AND-COUNTED",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-HS-LIST-ROUTES-IGNORE-FILTERS-THE-FORMS-SEND",
+      "gate": 6,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-HS-PPE-ISSUEE-NAMES-READABLE-AT-MEMBER-FLOOR",
+      "gate": 6,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-HS-DASHBOARD-ERROR-RETURNS-SUCCESS-WITH-CLEAN-METRICS",
+      "gate": 6,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-HS-DASHBOARD-TRAINING-COMPLIANCE-IS-A-CONSTANT",
+      "gate": 6,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.8",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B8-HS-DASHBOARD-METRICS-DERIVED-FROM-RECORD-CREATION-AND-DEFAULTS",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-HS-TRAINING-FIGURES-READ-A-TABLE-NO-ROUTE-WRITES",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-HS-UNMEASURED-VALUES-COERCED-TO-ZERO",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-HS-RESOLUTION-TIME-NEEDS-DATES-NO-ROUTE-SETS",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-HS-STATS-ORGANIZATION-FILTER-FALLS-BACK-TO-ALWAYS-TRUE",
+      "gate": 6,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-HS-TRENDS-ORGANIZATION-FROM-QUERY-AND-NO-PREDICATE-WHEN-ABSENT",
+      "gate": 6,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-OHS-REGULATORY-RECORDS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-PAID-PDF-REPORT-GATE-REQUIRES-STATUS-COMPLETED-NO-WRITER",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B8-ICRA-CHECKOUT-SELLS-A-TIER-WITHOUT-REQUIRING-A-SUBMITTED-ASSESSMENT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-RATE-LIMITS-PER-PROCESS-AND-KEYED-ON-REQUEST-HEADER-ADDRESS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-PUBLIC-WRITES-HAVE-NO-BOT-CHALLENGE-AND-TURNSTILE-IS-OPTIONAL",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-READ-ROUTES-HAVE-NO-LIMITER",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-ONE-SHOT-SUBMIT-STORES-CLIENT-SUPPLIED-CONSENT-AND-UNBOUNDED-BODY",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-STEPWISE-FLOW-NEVER-REQUIRES-CONSENT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-STEPWISE-SUBMIT-SCORES-ANY-NON-EMPTY-ANSWER-SET",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-EMAIL-RESULTS-SENDS-THE-BEARER-CAPABILITY-TO-ANY-TYPED-ADDRESS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-EVENT-SINK-WRITES-A-TABLE-NO-SCHEMA-DEFINES-AND-SWALLOWS-FAILURE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-CLAIM-TOKEN-HAS-NO-ICRA-ISSUER-SO-CLAIM-CANNOT-SUCCEED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-CLAIM-BINDS-TO-ANY-SIGNED-IN-USER-ORGANIZATION-AND-KEEPS-CAPABILITY",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-REVIEW-DECISION-BY-SHARED-CRON-SECRET-WITH-BODY-CLAIMED-REVIEWER-ROLE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-REVIEW-AUDIT-ONLY-WHEN-A-CLAIMED-ORGANIZATION-EXISTS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-MALFORMED-IDS-AND-ANSWER-VALUES-SURFACE-AS-SERVER-ERRORS",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-CHECKOUT-REDIRECT-DEFAULTS-TO-LOCALHOST-AND-PRICE-MAY-DIFFER-FROM-DISPLAYED",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-INTEGRATION-CREDENTIALS-NEVER-STORED-OR-RESOLVED-YET-REPORTED-STORED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-SYNC-DRY-RUN-IS-ACCEPTED-AND-AUDITED-BUT-NEVER-READ",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-SYNC-CONCURRENCY-GUARD-AND-INSTANCE-CACHE-ARE-PROCESS-LOCAL",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-CONFIGURE-UPDATE-RESETS-OMITTED-ENABLED-SETTINGS-AND-WEBHOOK-URL",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-API-KEYS-ROUTES-REFUSE-EVERY-REQUEST-WHILE-THE-AUTHORITY-REGISTER-CALLS-THEM-LIVE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-SHOPIFY-DISCOUNT-CODE-NEVER-MATCHES-THE-WEBHOOK-EXTRACTOR",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-SHOPIFY-WEBHOOK-ACKNOWLEDGES-FAILURES-WITH-200-AND-RECORDS-IGNORED-AS-PROCESSED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-SHOPIFY-ANY-REFUND-EVENT-RETURNS-ALL-CREDITS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-SHOPIFY-WEBHOOK-STORES-FULL-PAYLOAD-AND-CUSTOMER-DATA-IN-A-GLOBAL-TABLE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-SHOPIFY-WEBHOOK-QUERIES-TENANT-RLS-TABLES-WITH-NO-ORGANIZATION-CONTEXT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-ICRA-SHOPIFY-SHOP-DOMAIN-NEVER-CHECKED-ONE-GLOBAL-SECRET-AND-HEADER-KEYED-LIMIT",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-FED-FEDERATION-SUBRESOURCE-PATHS-ARE-FEDERATION-ITEM-COPIES",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-FED-FEDERATION-WRITES-REFUSED-NO-ROUTE-MAINTAINS-THE-REGISTER",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-FED-BENCHMARK-ROUTE-IS-GENERIC-GRIEVANCE-CRUD-NOT-A-BENCHMARK",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-FED-LOCALS-PATHS-SERVE-BARGAINING-UNITS-NOT-LOCAL-UNIONS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-FED-LOCALS-READABLE-AT-MEMBER-FLOOR-WITH-NOTES-AND-OFFICER-IDS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-FED-LOCALS-WRITES-ANY-STEWARD-ANY-FIELD-REFERENCES-NOT-ORG-CHECKED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-FED-LOCALS-DELETE-ARCHIVES-STATUS-WITHOUT-ARCHIVED-AT",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-FED-EXTERNAL-UPLOAD-ATTACHES-ANY-ORGANIZATION-BLOB-TO-GRIEVANCE",
+      "gate": 6,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-CAP-F-002",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-FED-EXTERNAL-UPLOAD-CLIENT-CLAIMED-TYPE-SIZE-NO-SCAN-WHOLE-BLOB-READ",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-F-002",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-FED-EXTERNAL-DECISION-AUDIT-SEPARATE-AND-BEST-EFFORT-IN-LEGACY-MODE",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-F-002",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-AND-AUDIT-BEFORE-GRANT",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-F-002",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-FED-EXTERNAL-GRIEVANCE-PROJECTION-READS-COLUMNS-THE-TABLE-LACKS",
+      "gate": 6,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-CAP-F-002",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-FED-FLAGS-ANY-SIGNED-IN-USER-CAN-PROBE-ANY-FLAG-NAME",
+      "gate": 9,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-FED-FLAGS-TYPE-VOCABULARY-ORGANIZATION-NOT-EVALUATED",
+      "gate": 9,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-WCB-REPORTING-DEADLINE-SERVED-AS-ARBITRATION-DEADLINE",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-COMPLIANCE-ASSURANCE",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-BC-TERMINATION-SCHEDULE-HAS-NO-TIER-ABOVE-EIGHT-YEARS",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-COMPLIANCE-ASSURANCE",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-COMPLIANCE-CHECK-REPORTS-ZERO-FINDINGS-WHEN-NO-CHECK-APPLIES",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMPLIANCE-ASSURANCE",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-STATUTORY-RULE-TABLES-ARE-UNVERSIONED-LITERALS-SERVED-WITH-STATUTE-CITATIONS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMPLIANCE-ASSURANCE",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-PROFILE-MINIMUM-WAGE-IS-A-PLACEHOLDER-ZERO",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMPLIANCE-ASSURANCE",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-RULES-ROUTE-ACCEPTS-ANY-CODE-AND-ANSWERS-SUCCESS-WITH-NO-OR-WRONG-RULES",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMPLIANCE-ASSURANCE",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-CLC-AND-DEADLINE-PATHS-ARE-BARGAINING-UNIT-CRUD-NO-VALIDATION",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-COMPLIANCE-ASSURANCE",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-ALIAS-WRAPPERS-CARRY-AN-ALWAYS-TRUE-ORG-GUARD",
+      "gate": 13,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-CAP-K-007",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-INVESTIGATIONS-PATH-IS-THE-CASE-COLLECTION-NO-INVESTIGATION-RECORD",
+      "gate": 4,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-K-010",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-INVESTIGATIONS-AUDIT-PATH-RETURNS-THE-WHOLE-ORGANIZATION-AUDIT-LOG",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AUDIT-LOG-VISIBILITY",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-KNOWLEDGE-BASE-READS-IGNORE-ACCESS-COLUMNS-ENTITLEMENT-AND-LEAVE-NO-READ-TRACE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-KNOWLEDGE-BASE-ITEM-GET-INCREMENTS-VIEW-COUNT-IN-SYSTEM-CONTEXT-WITHOUT-ORG-PREDICATE",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-CAP-K-006",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-GEOFENCE-GET-STORES-MEMBER-COORDINATES-WITHOUT-A-CONSENT-CHECK",
+      "gate": 6,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-PRIVACY-RIGHTS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-LOCATION-ERASURE-IS-REACHABLE-ONLY-THROUGH-AN-ACTIVE-CONSENT",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PRIVACY-RIGHTS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-LOCATION-TRACK-WRITES-ARE-UNAUDITED-AND-REFUSALS-ANSWER-500",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PRIVACY-RIGHTS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-LOCATION-CONSENT-IS-NOT-BOUND-TO-PURPOSE-ORGANIZATION-OR-STRIKE",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PRIVACY-RIGHTS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-LOCATION-CONSENT-TEXT-AND-PURPOSE-ARE-CLIENT-SUPPLIED-AND-UNVALIDATED",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PRIVACY-RIGHTS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-LOCATION-CONSENT-GET-EXPIRES-THE-CONSENT-AS-A-SIDE-EFFECT",
+      "gate": 6,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-PRIVACY-RIGHTS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-GEOFENCE-CREATE-BODY-IS-UNVALIDATED-AND-STRIKE-ID-UNVERIFIED",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PRIVACY-RIGHTS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-HEALTH-WELFARE-PLANS-PATH-IS-THE-PER-CAPITA-REMITTANCE-LEDGER-AT-MEMBER-FLOOR",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "tranche": "0B.8",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B8-JUR-MEETING-ROOM-BOOKINGS-PATH-IS-THE-ROOM-ITEM-DELETE-ARCHIVES-THE-ROOM",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "tranche": "0B.8",
+      "releaseBlocking": false
     }
   ],
   "outOfScope": [
@@ -9840,8 +10676,10 @@
     "UE-OMIT-EQUITY-SELF-IDENTIFICATION",
     "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
     "UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER",
+    "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
     "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
     "UE-OMIT-FINANCE-UNAVAILABLE",
+    "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
     "UE-OMIT-M04-LEGAL-DEADLINE",
     "UE-OMIT-M04-MEMBER-REQUESTS",
     "UE-OMIT-MAIN-APP-CRONS",
@@ -9858,6 +10696,7 @@
     "UE-OMIT-REP-CORRESPONDENCE",
     "UE-OMIT-REP-TRANSITION-REASON-LEAK",
     "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+    "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
     "UE-OMIT-ROUTE-DOMAIN-SCOPE",
     "UE-OMIT-ROUTE-EXPOSURE-HARDENING",
     "UE-OMIT-STEWARD-CANONICAL-ABSENT"

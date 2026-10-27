@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "lockVersion": 6,
+  "lockVersion": 7,
   "note": "Independent capability lock. The anchored capability set is read from git history at anchorCommit, which an edit to the working tree cannot change. A capability may leave the matrix only through a retirement record here with schemaVersion 2 or later, a reason, and an existing evidence file.",
   "anchorCommit": "2247978bd642a89a7d4f8bd720b978f789cb4437",
   "anchorMatrixPath": "docs/union-eyes/convergence/register/ue-pre-vs-engineering-completion.json",
@@ -74,8 +74,10 @@
     "UE-OMIT-EQUITY-SELF-IDENTIFICATION",
     "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
     "UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER",
+    "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
     "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
     "UE-OMIT-FINANCE-UNAVAILABLE",
+    "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
     "UE-OMIT-M04-LEGAL-DEADLINE",
     "UE-OMIT-M04-MEMBER-REQUESTS",
     "UE-OMIT-MAIN-APP-CRONS",
@@ -92,6 +94,7 @@
     "UE-OMIT-REP-CORRESPONDENCE",
     "UE-OMIT-REP-TRANSITION-REASON-LEAK",
     "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+    "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
     "UE-OMIT-ROUTE-DOMAIN-SCOPE",
     "UE-OMIT-ROUTE-EXPOSURE-HARDENING",
     "UE-OMIT-STEWARD-CANONICAL-ABSENT"
@@ -257,6 +260,27 @@
       "operationsHash": "537d1362228dfe64c29e96f531652f2de7a4c8c19a8d10be632d96a633c52f03",
       "classifiedOperations": 13,
       "reason": "Created by GATE-0B.7 as the engineering capability whose obligation covers operations that tranche classified from source evidence: exit-interview-knowledge-transfer."
+    },
+    {
+      "capabilityId": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+      "tranche": "GATE-0B.8",
+      "operationsHash": "6b878d9c7abb599f60eae09713099d0e8f6b52aaaae6bdd3c0b1a6c3bcb136af",
+      "classifiedOperations": 24,
+      "reason": "Created by GATE-0B.8 as the engineering capability whose obligation covers operations that tranche classified from source evidence: federation-and-local-hierarchy."
+    },
+    {
+      "capabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "GATE-0B.8",
+      "operationsHash": "6b878d9c7abb599f60eae09713099d0e8f6b52aaaae6bdd3c0b1a6c3bcb136af",
+      "classifiedOperations": 14,
+      "reason": "Created by GATE-0B.8 as the engineering capability whose obligation covers operations that tranche classified from source evidence: icra-pseudonymous-assessment-product."
+    },
+    {
+      "capabilityId": "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT",
+      "tranche": "GATE-0B.8",
+      "operationsHash": "6b878d9c7abb599f60eae09713099d0e8f6b52aaaae6bdd3c0b1a6c3bcb136af",
+      "classifiedOperations": 2,
+      "reason": "Created by GATE-0B.8 as the engineering capability whose obligation covers operations that tranche classified from source evidence: rewards-redemption-provider-fulfilment."
     }
   ]
 }
