@@ -5122,6 +5122,880 @@
       ]
     },
     {
+      "id": "RULE-0B9-ML-MEMBER-AI-FEEDBACK-FACADE",
+      "precedence": 40,
+      "prefixes": [
+        "member/ai-feedback/route.ts"
+      ],
+      "capabilityId": "UE-CAP-K-007",
+      "disposition": "OWNED",
+      "actor": "Member reading their own membership row, and steward or above reading the organization member roster, through a route whose name advertises member feedback on AI output",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/member/ai-feedback/route.ts",
+          "quote": " * CRUD collection route for organizationMembers"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema-organizations.ts",
+          "quote": "email: text('email').notNull(),"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ML-ANALYTICS-METRICS-FACADES",
+      "precedence": 40,
+      "prefixes": [
+        "metrics/route.ts",
+        "movement-insights/trends/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "disposition": "OWNED",
+      "actor": "Organization member reading stored analytics metric rows, and steward or above inserting a metric row, through the routes named metrics and movement-insights trends",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/metrics/route.ts",
+          "quote": " * CRUD collection route for analyticsMetrics"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/movement-insights/trends/route.ts",
+          "quote": " * CRUD collection route for analyticsMetrics"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/analytics.ts",
+          "quote": "export const analyticsMetrics = pgTable('analytics_metrics', {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/observability/metrics.ts",
+          "quote": " * Access metrics at: GET /api/metrics"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/[locale]/dashboard/movement-insights/page.tsx",
+          "quote": " * - Minimum 5 organizations per trend"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ML-OPERATIONAL-METRICS",
+      "precedence": 40,
+      "prefixes": [
+        "metrics/operational/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
+      "disposition": "OWNED",
+      "actor": "Any signed-in user, or the internal AI service presenting the shared service key, reading platform-wide claim, workflow, queue and SLA counts for observability dashboards",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/metrics/operational/route.ts",
+          "quote": " * GET /api/metrics/operational"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/metrics/operational/route.ts",
+          "quote": " * - request_count (proxy — relies on external APM; returns placeholder)"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/scripts/perf-baseline.ts",
+          "quote": "{ name: 'metrics-operational', method: 'GET', path: '/api/metrics/operational', threshold_p95_ms: 1000 },"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ML-PREDICTION-ROW-FACADES",
+      "precedence": 40,
+      "prefixes": [
+        "ml/monitoring/drift/route.ts",
+        "ml/monitoring/usage/route.ts",
+        "ml/predictions/claim-outcome/route.ts",
+        "ml/predictions/timeline/route.ts",
+        "ml/predictions/workload-forecast/route.ts",
+        "ml/recommendations/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "disposition": "OWNED",
+      "actor": "Organization member reading stored ml_predictions rows, and steward or above inserting a prediction row, through routes named drift, usage, claim outcome, timeline, workload forecast and recommendations",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ml/monitoring/drift/route.ts",
+          "quote": " * CRUD collection route for mlPredictions"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ml/recommendations/route.ts",
+          "quote": " * CRUD collection route for mlPredictions"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/ml/predictions.ts",
+          "quote": "export const mlPredictions = pgTable(\"ml_predictions\", {"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ML-MONITORING-ALERTS",
+      "precedence": 40,
+      "prefixes": [
+        "ml/monitoring/alerts/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
+      "disposition": "OWNED",
+      "actor": "Organization member listing model monitoring alerts, and steward acknowledging an alert, for the AI models the organization runs",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ml/monitoring/alerts/route.ts",
+          "quote": " * Returns active ML monitoring alerts with severity levels"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ml/monitoring/alerts/route.ts",
+          "quote": " * - P1: Critical - Immediate action required (accuracy < 75%, PSI > 0.30)"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ML-MONITORING-METRICS",
+      "precedence": 40,
+      "prefixes": [
+        "ml/monitoring/metrics/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "disposition": "OWNED",
+      "actor": "Organization member reading accuracy, precision, recall, confidence and status figures for the organization AI models",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ml/monitoring/metrics/route.ts",
+          "quote": " * Returns real-time model performance metrics across all AI models:"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/ml/predictions.ts",
+          "quote": "export const modelMetadata = pgTable(\"model_metadata\", {"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ML-CHURN-RISK",
+      "precedence": 40,
+      "prefixes": [
+        "ml/predictions/churn-risk/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "disposition": "OWNED",
+      "actor": "Officer listing stored churn-risk predictions for the members of the organization, and generating a prediction for one named member",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ml/predictions/churn-risk/route.ts",
+          "quote": " * UC-07: Churn Risk Prediction API"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/ml/models/churn-prediction-model.ts",
+          "quote": "const MODEL_VERSION = 'v1.0.0';"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ML-SLA-BREACH-RISK",
+      "precedence": 40,
+      "prefixes": [
+        "ml/predictions/sla-breach-risk/route.ts",
+        "ml/predictions/sla-breach-risk/feedback/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "disposition": "OWNED",
+      "actor": "Steward submitting case features for an SLA breach risk score and recording the observed outcome, and member listing the stored scores and the feedback summary",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/route.ts",
+          "quote": "summary: 'Predict SLA breach risk with model/version and feature references',"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/feedback/route.ts",
+          "quote": "summary: 'Submit SLA prediction outcome feedback and update retrain signal',"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/ml/predictions.ts",
+          "quote": "export const modelMetadata = pgTable(\"model_metadata\", {"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ML-NATURAL-LANGUAGE-QUERY",
+      "precedence": 40,
+      "prefixes": [
+        "ml/query/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "disposition": "OWNED",
+      "actor": "Steward asking a natural-language question that the platform forwards to an external AI service and answers with the service result",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ml/query/route.ts",
+          "quote": " * Natural language query interface"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ml/query/route.ts",
+          "quote": "// Natural-language questions are answered over the organization's claims, steward workload and settlement data, which a"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-MOB-NOTIFICATION-INBOX",
+      "precedence": 40,
+      "prefixes": [
+        "notifications/route.ts",
+        "notifications/[id]/route.ts",
+        "notifications/count/route.ts",
+        "notifications/mark-all-read/route.ts",
+        "notifications/test/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "disposition": "OWNED",
+      "actor": "Member reading, marking read and deleting their own in-app notifications, and steward addressing a notification to a member of the organization or sending themself a test notification",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/notifications-schema.ts",
+          "quote": "export const inAppNotifications = pgTable('in_app_notifications', {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/notifications/route.ts",
+          "quote": " * In-app notifications — list and create."
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/notifications/test/route.ts",
+          "quote": " * Creates a test notification for the authenticated user. Steward-only."
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/components/notifications/notifications-console.tsx",
+          "quote": "await fetch('/api/notifications/mark-all-read', { method: 'POST' });"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-MOB-DEVICE-REGISTRATION",
+      "precedence": 40,
+      "prefixes": [
+        "mobile/devices/route.ts",
+        "mobile/sync/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "disposition": "OWNED",
+      "actor": "Member registering and listing the mobile devices of their own account for push delivery and sync, and steward registering a push device through the generic device collection",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/push-notifications.ts",
+          "quote": "'push_devices',"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/mobile-devices-schema.ts",
+          "quote": "export const mobileDevices = pgTable('mobile_devices', {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/mobile/sync/route.ts",
+          "quote": " * POST /api/mobile/sync — register a new mobile device"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/components/mobile/SyncStatus.tsx",
+          "quote": "const response = await fetch('/api/mobile/sync', {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/notifications/device/route.ts",
+          "quote": "Devices are registered through /api/mobile/devices, which stores the token under"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-MOB-PUSH-CAMPAIGN-FACADES",
+      "precedence": 40,
+      "prefixes": [
+        "mobile/push/subscribe/route.ts",
+        "mobile/push/unsubscribe/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "disposition": "OWNED",
+      "actor": "Member whose browser subscribes to or unsubscribes from push delivery through paths named subscribe and unsubscribe, and steward whose request stores a push campaign row",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/push-notifications.ts",
+          "quote": " * Push notification campaigns"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/mobile/push/subscribe/route.ts",
+          "quote": " * CRUD collection route for pushNotifications"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/mobile/push/unsubscribe/route.ts",
+          "quote": " * CRUD collection route for pushNotifications"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/mobile/push-notifications.ts",
+          "quote": "await fetch('/api/mobile/push/subscribe', {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/mobile/push-notifications.ts",
+          "quote": "await fetch('/api/mobile/push/unsubscribe', {"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-MOB-SCHEDULED-NOTIFICATION-QUEUE-FACADE",
+      "precedence": 40,
+      "prefixes": [
+        "mobile/notifications/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "disposition": "OWNED",
+      "actor": "Member reading their own, and steward reading and writing the organization, scheduled notification rows through a path named mobile notifications",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/notifications-schema.ts",
+          "quote": "export const notifications = pgTable('notifications', {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/notifications-schema.ts",
+          "quote": "type: text('type').notNull(), // deadline_reminder, deadline_missed, etc."
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/mobile/notifications/route.ts",
+          "quote": " * CRUD collection route for notifications"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-MOB-BARGAINING-NEGOTIATIONS-ALIAS",
+      "precedence": 40,
+      "prefixes": [
+        "negotiations/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-BARGAINING-RECORDS",
+      "disposition": "OWNED",
+      "actor": "Member reading, and steward creating, collective-bargaining negotiation records through a top-level negotiations path that repeats the bargaining negotiations collection",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/bargaining-negotiations-schema.ts",
+          "quote": "export const negotiations = pgTable(\"negotiations\", {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/negotiations/route.ts",
+          "quote": " * CRUD collection route for negotiations"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/bargaining/negotiations/route.ts",
+          "quote": " * CRUD collection route for negotiations"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-MOB-CALENDAR-MEETING-ROOMS",
+      "precedence": 40,
+      "prefixes": [
+        "meeting-rooms/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "disposition": "OWNED",
+      "actor": "Member reading, and steward creating, the meeting rooms of the organization together with their booking rules",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/calendar-schema.ts",
+          "quote": "export const meetingRooms = pgTable('meeting_rooms', {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/meeting-rooms/route.ts",
+          "quote": " * CRUD collection route for meetingRooms"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-MOB-CALENDAR-MEETING-ROOM-BOOKINGS-PATCH",
+      "precedence": 40,
+      "prefixes": [
+        "meeting-rooms/[id]/bookings/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "disposition": "OWNED",
+      "actor": "Steward updating a meeting room row through a path named for the bookings of the room",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/calendar-schema.ts",
+          "quote": "export const roomBookings = pgTable('room_bookings', {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts",
+          "quote": " * CRUD item route for meetingRooms"
+        }
+      ],
+      "methods": [
+        "PATCH"
+      ]
+    },
+    {
+      "id": "RULE-0B9-ASM-OCRA-ICRA-ALIASES",
+      "precedence": 40,
+      "prefixes": [
+        "ocra/start/route.ts",
+        "ocra/submit/route.ts",
+        "ocra/telemetry/route.ts",
+        "ocra/checkout/route.ts",
+        "ocra/email-results/route.ts",
+        "ocra/results/[id]/route.ts",
+        "ocra/report/[assessmentId]/route.ts",
+        "ocra/[assessmentId]/answer/route.ts",
+        "ocra/[assessmentId]/claim/route.ts",
+        "ocra/[assessmentId]/profile/route.ts",
+        "ocra/[assessmentId]/submit/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "disposition": "OWNED",
+      "actor": "Anonymous respondent, or signed-in user holding a claim token, reaching the pseudonymous continuity assessment through the canonical OCRA path names that re-export the ICRA handlers",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ocra/start/route.ts",
+          "quote": " * Canonical `/api/ocra/start` route. Re-exports the legacy"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ocra/start/route.ts",
+          "quote": " * `/api/icra/start` handlers verbatim so both surfaces serve identical"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/ocra/report/[assessmentId]/route.ts",
+          "quote": " * route file (not re-exported). The handler itself is reused from the ICRA"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ASM-OCI-ASSESSMENT-WRAPPERS",
+      "precedence": 40,
+      "prefixes": [
+        "oci/intake/route.ts",
+        "oci/assessment/route.ts",
+        "oci/results/[id]/route.ts",
+        "oci/report/[assessmentId]/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "disposition": "OWNED",
+      "actor": "Anonymous respondent reaching the pseudonymous continuity assessment through the OCI path names, which wrap the OCRA alias handlers behind a placeholder organization-access function",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/oci/intake/route.ts",
+          "quote": "import { GET as DelegateGET, POST as DelegatePOST } from '../../ocra/start/route';"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/oci/intake/route.ts",
+          "quote": "function requireOrgAccess(_request: Request): boolean {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/oci/assessment/route.ts",
+          "quote": "import { POST as DelegatePOST } from '../../ocra/submit/route';"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ASM-ONBOARDING-PENDING-PROFILES",
+      "precedence": 40,
+      "prefixes": [
+        "onboarding/route.ts",
+        "onboarding/readiness/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "disposition": "OWNED",
+      "actor": "Platform operator holding pre-signup membership profiles (Whop membership and usage credits) reached through the onboarding root path and its readiness alias, and the onboarding form that posts to the root path",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/member/pending-profiles.ts",
+          "quote": "export const pendingProfilesTable = pgTable(\"pending_profiles\", {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/member/pending-profiles.ts",
+          "quote": "  whopMembershipId: text(\"whop_membership_id\"),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/onboarding/route.ts",
+          "quote": " * CRUD collection route for pendingProfilesTable"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/onboarding/readiness/route.ts",
+          "quote": "import { GET as DelegateGET, POST as DelegatePOST } from '../route';"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ASM-ONBOARDING-EVENTS",
+      "precedence": 40,
+      "prefixes": [
+        "onboarding/events/route.ts",
+        "onboarding/transfers/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ORGANIZATION-ONBOARDING",
+      "disposition": "OWNED",
+      "actor": "Steward or higher of an organization recording an organization-created, user-invited or role-assigned onboarding milestone as a pilot event with an audit row, directly or through the transfers path",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/onboarding/events/route.ts",
+          "quote": "eventType: z.enum(['org_created', 'user_invited', 'role_assigned']),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/pilot/pilot-events.ts",
+          "quote": "export const pilotEvents = pgTable("
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/onboarding/transfers/route.ts",
+          "quote": "import { POST as DelegatePOST } from '../events/route';"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ASM-ONBOARDING-PEER-DISCOVERY",
+      "precedence": 40,
+      "prefixes": [
+        "onboarding/discover-federation/route.ts",
+        "onboarding/peer-benchmarks/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ORGANIZATION-ONBOARDING",
+      "disposition": "OWNED",
+      "actor": "Officer discovering candidate parent federations, and member reading peer benchmarks for an organization named in the request, during organization onboarding",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/utils/smart-onboarding.ts",
+          "quote": " * Auto-detect potential parent federation based on province, sector, and size"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/utils/smart-onboarding.ts",
+          "quote": " * Get benchmarks comparing organization to peers and national averages"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/onboarding/peer-benchmarks/route.ts",
+          "quote": " * GET /api/onboarding/peer-benchmarks?organizationId=xxx"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ASM-ONBOARDING-RECOMMENDATIONS",
+      "precedence": 40,
+      "prefixes": [
+        "onboarding/smart-defaults/route.ts",
+        "onboarding/suggest-clauses/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ORGANIZATION-ONBOARDING",
+      "disposition": "OWNED",
+      "actor": "Member reading suggested size-based defaults, and officer reading suggested shared clauses for an organization named in the request, during organization onboarding",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/utils/smart-onboarding.ts",
+          "quote": " * Generate smart defaults for rate limits and features based on org size/type"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/utils/smart-onboarding.ts",
+          "quote": " * Suggest relevant clauses from parent federation and peer organizations"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/onboarding/smart-defaults/route.ts",
+          "quote": " * - Suggested integrations"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ORG-CURRENT-CONTEXT",
+      "precedence": 40,
+      "prefixes": [
+        "org/current/route.ts",
+        "organizations/current/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "disposition": "OWNED",
+      "actor": "Signed-in member or officer whose client asks which organization the session is working in and for the record of that organization",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema-organizations.ts",
+          "quote": "billingContactId: uuid('billing_contact_id'),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema-organizations.ts",
+          "quote": "organizationType: organizationTypeEnum('organization_type').notNull(),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/org/current/route.ts",
+          "quote": " * Canonical org endpoint — all new code should hit this route."
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ORG-RECORD-ADMINISTRATION",
+      "precedence": 40,
+      "prefixes": [
+        "organizations/[id]/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "disposition": "OWNED",
+      "actor": "Organization administrator keeping the profile of the organization, and any signed-in user reading an organization record by its id; a platform administrator changing parent affiliation and lifecycle status",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema-organizations.ts",
+          "quote": "parentId: uuid('parent_id').references((): AnyPgColumn => organizations.id, { onDelete: 'restrict' }),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema-organizations.ts",
+          "quote": "settings: jsonb('settings').$type<Record<string, unknown>>().default({}),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/migrations/0108_rls_tenant_isolation_foundation.sql",
+          "quote": "SELECT ue_create_direct_org_rls_policy('organizations', 'id', FALSE); -- a tenant sees only its own org row"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ORG-MEMBERSHIP-ROSTER",
+      "precedence": 40,
+      "prefixes": [
+        "organizations/[id]/members/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "disposition": "OWNED",
+      "actor": "Member of an organization reading its roster, and steward adding a person to the roster of the organization with an organization role",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema-organizations.ts",
+          "quote": "role: text('role').notNull(),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema-organizations.ts",
+          "quote": "uniqueMembership: uniqueIndex('unique_org_membership').on("
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema-organizations.ts",
+          "quote": "deletedAt: timestamp('deleted_at', { withTimezone: true }),"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ORG-MEMBER-DIRECTORY",
+      "precedence": 40,
+      "prefixes": [
+        "organization/members/route.ts",
+        "organization/members/search/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "disposition": "OWNED",
+      "actor": "Steward reading the members of the cases assigned to them, and officer reading the member directory of the organization, through the member-directory policy",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/members/directory-access.ts",
+          "quote": " * Directory authority is derived from the case policy, not from a union-wide role name:"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema-organizations.ts",
+          "quote": "membershipNumber: text('membership_number'),"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ORG-HIERARCHY-READS",
+      "precedence": 40,
+      "prefixes": [
+        "organizations/[id]/ancestors/route.ts",
+        "organizations/[id]/children/route.ts",
+        "organizations/[id]/descendants/route.ts",
+        "organizations/[id]/path/route.ts",
+        "organizations/hierarchy/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+      "disposition": "OWNED",
+      "actor": "Administrator or officer who expects to see the ancestors, children, descendants, path and tree of an organization of the union hierarchy",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema-organizations.ts",
+          "quote": "hierarchyPath: text('hierarchy_path').array().notNull(),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema-organizations.ts",
+          "quote": "hierarchyLevel: integer('hierarchy_level').notNull().default(0),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/organizations/[id]/descendants/route.ts",
+          "quote": "/** GET /api/organizations/:id/descendants — orgs whose hierarchy_path contains this id */"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ORG-ANALYTICS",
+      "precedence": 40,
+      "prefixes": [
+        "organizations/[id]/analytics/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "disposition": "OWNED",
+      "actor": "Administrator or officer reading member and grievance counts, resolution time and growth of an organization",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema-organizations.ts",
+          "quote": "activeMemberCount: integer('active_member_count').default(0),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/organizations/[id]/analytics/route.ts",
+          "quote": "    // Average resolution days (for resolved grievances)"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ORG-SHARING-SETTINGS",
+      "precedence": 40,
+      "prefixes": [
+        "organizations/[id]/sharing-settings/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-CLAUSE-LIBRARY-SHARING",
+      "disposition": "OWNED",
+      "actor": "Organization administrator deciding what the organization shares with its federation, sector, province and the congress",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/sharing-permissions-schema.ts",
+          "quote": "allowFederationSharing: boolean(\"allow_federation_sharing\").default(false),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/sharing-permissions-schema.ts",
+          "quote": "sharingApprovalRequired: boolean(\"sharing_approval_required\").default(true),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/components/sharing/SharingSettingsForm.tsx",
+          "quote": "method: \"PUT\","
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B9-ORG-ACCESS-LOGS",
+      "precedence": 40,
+      "prefixes": [
+        "organizations/[id]/access-logs/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-CLAUSE-LIBRARY-SHARING",
+      "disposition": "OWNED",
+      "actor": "Organization administrator reviewing which other organizations viewed, downloaded, compared or cited the resources of the organization",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/sharing-permissions-schema.ts",
+          "quote": "export const crossOrgAccessLog = pgTable(\"cross_org_access_log\", {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/sharing-permissions-schema.ts",
+          "quote": "resourceOrganizationId: uuid(\"resource_organization_id\").notNull(),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/components/sharing/AccessLogViewer.tsx",
+          "quote": "setLogs(data.logs);"
+        }
+      ]
+    },
+    {
       "id": "RULE-STUB-H002",
       "precedence": 30,
       "prefixes": [
@@ -7196,11 +8070,11 @@
     ["location/track/route.ts","POST","RULE-0B8-JUR-LOCATION-CONSENT-AND-TRACKING","UE-OMIT-PRIVACY-RIGHTS","OWNED","ROLE_TITLE_CHECK","AUDIT_EXEMPT_DECLARED:EXEMPT_UNATTRIBUTABLE","CAPABILITY","Member granting, checking and revoking location consent, recording a position and checking a geofence, and a steward defining geofences for a strike or event"],
     ["meeting-rooms/[id]/bookings/route.ts","DELETE","RULE-0B8-JUR-CALENDAR-MEETING-ROOM-FACADE","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member reading, and administrator removing, a meeting room under a path named for the bookings of the room"],
     ["meeting-rooms/[id]/bookings/route.ts","GET","RULE-0B8-JUR-CALENDAR-MEETING-ROOM-FACADE","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member reading, and administrator removing, a meeting room under a path named for the bookings of the room"],
-    ["meeting-rooms/[id]/bookings/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["meeting-rooms/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["meeting-rooms/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["member/ai-feedback/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["member/ai-feedback/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["meeting-rooms/[id]/bookings/route.ts","PATCH","RULE-0B9-MOB-CALENDAR-MEETING-ROOM-BOOKINGS-PATCH","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward updating a meeting room row through a path named for the bookings of the room"],
+    ["meeting-rooms/route.ts","GET","RULE-0B9-MOB-CALENDAR-MEETING-ROOMS","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member reading, and steward creating, the meeting rooms of the organization together with their booking rules"],
+    ["meeting-rooms/route.ts","POST","RULE-0B9-MOB-CALENDAR-MEETING-ROOMS","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member reading, and steward creating, the meeting rooms of the organization together with their booking rules"],
+    ["member/ai-feedback/route.ts","GET","RULE-0B9-ML-MEMBER-AI-FEEDBACK-FACADE","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member reading their own membership row, and steward or above reading the organization member roster, through a route whose name advertises member feedback on AI output"],
+    ["member/ai-feedback/route.ts","POST","RULE-0B9-ML-MEMBER-AI-FEEDBACK-FACADE","UE-CAP-K-007","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member reading their own membership row, and steward or above reading the organization member roster, through a route whose name advertises member feedback on AI output"],
     ["members/[id]/claims/route.ts","GET","RULE-PERSONA-JOURNEYS","UE-CAP-I-001","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Frozen persona journeys"],
     ["members/[id]/consents/route.ts","GET","RULE-PERSONA-JOURNEYS","UE-CAP-I-001","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Frozen persona journeys"],
     ["members/[id]/consents/route.ts","PATCH","RULE-PERSONA-JOURNEYS","UE-CAP-I-001","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Frozen persona journeys"],
@@ -7264,106 +8138,106 @@
     ["messaging/templates/[id]/route.ts","PATCH","RULE-MESSAGING","UE-CAP-I-002","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member and assigned staff"],
     ["messaging/templates/route.ts","GET","RULE-MESSAGING","UE-CAP-I-002","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member and assigned staff"],
     ["messaging/templates/route.ts","POST","RULE-MESSAGING","UE-CAP-I-002","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member and assigned staff"],
-    ["metrics/operational/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["metrics/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["metrics/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/monitoring/alerts/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/monitoring/alerts/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/monitoring/drift/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/monitoring/drift/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/monitoring/metrics/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/monitoring/usage/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/monitoring/usage/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/predictions/churn-risk/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/predictions/churn-risk/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/predictions/claim-outcome/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/predictions/claim-outcome/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/predictions/sla-breach-risk/feedback/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/predictions/sla-breach-risk/feedback/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/predictions/sla-breach-risk/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/predictions/sla-breach-risk/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/predictions/timeline/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/predictions/timeline/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/predictions/workload-forecast/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/predictions/workload-forecast/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/query/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/recommendations/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ml/recommendations/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["mobile/devices/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["mobile/devices/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["mobile/notifications/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["mobile/notifications/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["mobile/push/subscribe/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["mobile/push/subscribe/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["mobile/push/unsubscribe/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["mobile/push/unsubscribe/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["mobile/sync/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["mobile/sync/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["movement-insights/trends/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["movement-insights/trends/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["negotiations/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["negotiations/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["notifications/[id]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["notifications/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["notifications/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["notifications/count/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["metrics/operational/route.ts","GET","RULE-0B9-ML-OPERATIONAL-METRICS","UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION","OWNED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Any signed-in user, or the internal AI service presenting the shared service key, reading platform-wide claim, workflow, queue and SLA counts for observability dashboards"],
+    ["metrics/route.ts","GET","RULE-0B9-ML-ANALYTICS-METRICS-FACADES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Organization member reading stored analytics metric rows, and steward or above inserting a metric row, through the routes named metrics and movement-insights trends"],
+    ["metrics/route.ts","POST","RULE-0B9-ML-ANALYTICS-METRICS-FACADES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Organization member reading stored analytics metric rows, and steward or above inserting a metric row, through the routes named metrics and movement-insights trends"],
+    ["ml/monitoring/alerts/route.ts","GET","RULE-0B9-ML-MONITORING-ALERTS","UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Organization member listing model monitoring alerts, and steward acknowledging an alert, for the AI models the organization runs"],
+    ["ml/monitoring/alerts/route.ts","POST","RULE-0B9-ML-MONITORING-ALERTS","UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Organization member listing model monitoring alerts, and steward acknowledging an alert, for the AI models the organization runs"],
+    ["ml/monitoring/drift/route.ts","GET","RULE-0B9-ML-PREDICTION-ROW-FACADES","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Organization member reading stored ml_predictions rows, and steward or above inserting a prediction row, through routes named drift, usage, claim outcome, timeline, workload forecast and recommendations"],
+    ["ml/monitoring/drift/route.ts","POST","RULE-0B9-ML-PREDICTION-ROW-FACADES","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Organization member reading stored ml_predictions rows, and steward or above inserting a prediction row, through routes named drift, usage, claim outcome, timeline, workload forecast and recommendations"],
+    ["ml/monitoring/metrics/route.ts","GET","RULE-0B9-ML-MONITORING-METRICS","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Organization member reading accuracy, precision, recall, confidence and status figures for the organization AI models"],
+    ["ml/monitoring/usage/route.ts","GET","RULE-0B9-ML-PREDICTION-ROW-FACADES","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Organization member reading stored ml_predictions rows, and steward or above inserting a prediction row, through routes named drift, usage, claim outcome, timeline, workload forecast and recommendations"],
+    ["ml/monitoring/usage/route.ts","POST","RULE-0B9-ML-PREDICTION-ROW-FACADES","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Organization member reading stored ml_predictions rows, and steward or above inserting a prediction row, through routes named drift, usage, claim outcome, timeline, workload forecast and recommendations"],
+    ["ml/predictions/churn-risk/route.ts","GET","RULE-0B9-ML-CHURN-RISK","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Officer listing stored churn-risk predictions for the members of the organization, and generating a prediction for one named member"],
+    ["ml/predictions/churn-risk/route.ts","POST","RULE-0B9-ML-CHURN-RISK","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Officer listing stored churn-risk predictions for the members of the organization, and generating a prediction for one named member"],
+    ["ml/predictions/claim-outcome/route.ts","GET","RULE-0B9-ML-PREDICTION-ROW-FACADES","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Organization member reading stored ml_predictions rows, and steward or above inserting a prediction row, through routes named drift, usage, claim outcome, timeline, workload forecast and recommendations"],
+    ["ml/predictions/claim-outcome/route.ts","POST","RULE-0B9-ML-PREDICTION-ROW-FACADES","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Organization member reading stored ml_predictions rows, and steward or above inserting a prediction row, through routes named drift, usage, claim outcome, timeline, workload forecast and recommendations"],
+    ["ml/predictions/sla-breach-risk/feedback/route.ts","GET","RULE-0B9-ML-SLA-BREACH-RISK","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Steward submitting case features for an SLA breach risk score and recording the observed outcome, and member listing the stored scores and the feedback summary"],
+    ["ml/predictions/sla-breach-risk/feedback/route.ts","POST","RULE-0B9-ML-SLA-BREACH-RISK","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Steward submitting case features for an SLA breach risk score and recording the observed outcome, and member listing the stored scores and the feedback summary"],
+    ["ml/predictions/sla-breach-risk/route.ts","GET","RULE-0B9-ML-SLA-BREACH-RISK","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Steward submitting case features for an SLA breach risk score and recording the observed outcome, and member listing the stored scores and the feedback summary"],
+    ["ml/predictions/sla-breach-risk/route.ts","POST","RULE-0B9-ML-SLA-BREACH-RISK","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Steward submitting case features for an SLA breach risk score and recording the observed outcome, and member listing the stored scores and the feedback summary"],
+    ["ml/predictions/timeline/route.ts","GET","RULE-0B9-ML-PREDICTION-ROW-FACADES","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Organization member reading stored ml_predictions rows, and steward or above inserting a prediction row, through routes named drift, usage, claim outcome, timeline, workload forecast and recommendations"],
+    ["ml/predictions/timeline/route.ts","POST","RULE-0B9-ML-PREDICTION-ROW-FACADES","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Organization member reading stored ml_predictions rows, and steward or above inserting a prediction row, through routes named drift, usage, claim outcome, timeline, workload forecast and recommendations"],
+    ["ml/predictions/workload-forecast/route.ts","GET","RULE-0B9-ML-PREDICTION-ROW-FACADES","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Organization member reading stored ml_predictions rows, and steward or above inserting a prediction row, through routes named drift, usage, claim outcome, timeline, workload forecast and recommendations"],
+    ["ml/predictions/workload-forecast/route.ts","POST","RULE-0B9-ML-PREDICTION-ROW-FACADES","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Organization member reading stored ml_predictions rows, and steward or above inserting a prediction row, through routes named drift, usage, claim outcome, timeline, workload forecast and recommendations"],
+    ["ml/query/route.ts","POST","RULE-0B9-ML-NATURAL-LANGUAGE-QUERY","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Steward asking a natural-language question that the platform forwards to an external AI service and answers with the service result"],
+    ["ml/recommendations/route.ts","GET","RULE-0B9-ML-PREDICTION-ROW-FACADES","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Organization member reading stored ml_predictions rows, and steward or above inserting a prediction row, through routes named drift, usage, claim outcome, timeline, workload forecast and recommendations"],
+    ["ml/recommendations/route.ts","POST","RULE-0B9-ML-PREDICTION-ROW-FACADES","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Organization member reading stored ml_predictions rows, and steward or above inserting a prediction row, through routes named drift, usage, claim outcome, timeline, workload forecast and recommendations"],
+    ["mobile/devices/route.ts","GET","RULE-0B9-MOB-DEVICE-REGISTRATION","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member registering and listing the mobile devices of their own account for push delivery and sync, and steward registering a push device through the generic device collection"],
+    ["mobile/devices/route.ts","POST","RULE-0B9-MOB-DEVICE-REGISTRATION","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member registering and listing the mobile devices of their own account for push delivery and sync, and steward registering a push device through the generic device collection"],
+    ["mobile/notifications/route.ts","GET","RULE-0B9-MOB-SCHEDULED-NOTIFICATION-QUEUE-FACADE","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member reading their own, and steward reading and writing the organization, scheduled notification rows through a path named mobile notifications"],
+    ["mobile/notifications/route.ts","POST","RULE-0B9-MOB-SCHEDULED-NOTIFICATION-QUEUE-FACADE","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member reading their own, and steward reading and writing the organization, scheduled notification rows through a path named mobile notifications"],
+    ["mobile/push/subscribe/route.ts","GET","RULE-0B9-MOB-PUSH-CAMPAIGN-FACADES","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member whose browser subscribes to or unsubscribes from push delivery through paths named subscribe and unsubscribe, and steward whose request stores a push campaign row"],
+    ["mobile/push/subscribe/route.ts","POST","RULE-0B9-MOB-PUSH-CAMPAIGN-FACADES","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member whose browser subscribes to or unsubscribes from push delivery through paths named subscribe and unsubscribe, and steward whose request stores a push campaign row"],
+    ["mobile/push/unsubscribe/route.ts","GET","RULE-0B9-MOB-PUSH-CAMPAIGN-FACADES","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member whose browser subscribes to or unsubscribes from push delivery through paths named subscribe and unsubscribe, and steward whose request stores a push campaign row"],
+    ["mobile/push/unsubscribe/route.ts","POST","RULE-0B9-MOB-PUSH-CAMPAIGN-FACADES","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member whose browser subscribes to or unsubscribes from push delivery through paths named subscribe and unsubscribe, and steward whose request stores a push campaign row"],
+    ["mobile/sync/route.ts","GET","RULE-0B9-MOB-DEVICE-REGISTRATION","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Member registering and listing the mobile devices of their own account for push delivery and sync, and steward registering a push device through the generic device collection"],
+    ["mobile/sync/route.ts","POST","RULE-0B9-MOB-DEVICE-REGISTRATION","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Member registering and listing the mobile devices of their own account for push delivery and sync, and steward registering a push device through the generic device collection"],
+    ["movement-insights/trends/route.ts","GET","RULE-0B9-ML-ANALYTICS-METRICS-FACADES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Organization member reading stored analytics metric rows, and steward or above inserting a metric row, through the routes named metrics and movement-insights trends"],
+    ["movement-insights/trends/route.ts","POST","RULE-0B9-ML-ANALYTICS-METRICS-FACADES","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Organization member reading stored analytics metric rows, and steward or above inserting a metric row, through the routes named metrics and movement-insights trends"],
+    ["negotiations/route.ts","GET","RULE-0B9-MOB-BARGAINING-NEGOTIATIONS-ALIAS","UE-OMIT-BARGAINING-RECORDS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member reading, and steward creating, collective-bargaining negotiation records through a top-level negotiations path that repeats the bargaining negotiations collection"],
+    ["negotiations/route.ts","POST","RULE-0B9-MOB-BARGAINING-NEGOTIATIONS-ALIAS","UE-OMIT-BARGAINING-RECORDS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member reading, and steward creating, collective-bargaining negotiation records through a top-level negotiations path that repeats the bargaining negotiations collection"],
+    ["notifications/[id]/route.ts","DELETE","RULE-0B9-MOB-NOTIFICATION-INBOX","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Member reading, marking read and deleting their own in-app notifications, and steward addressing a notification to a member of the organization or sending themself a test notification"],
+    ["notifications/[id]/route.ts","GET","RULE-0B9-MOB-NOTIFICATION-INBOX","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Member reading, marking read and deleting their own in-app notifications, and steward addressing a notification to a member of the organization or sending themself a test notification"],
+    ["notifications/[id]/route.ts","PATCH","RULE-0B9-MOB-NOTIFICATION-INBOX","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Member reading, marking read and deleting their own in-app notifications, and steward addressing a notification to a member of the organization or sending themself a test notification"],
+    ["notifications/count/route.ts","GET","RULE-0B9-MOB-NOTIFICATION-INBOX","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Member reading, marking read and deleting their own in-app notifications, and steward addressing a notification to a member of the organization or sending themself a test notification"],
     ["notifications/device/route.ts","DELETE","RULE-RETIRED-ANY","UE-CAP-H-001","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Any caller of a retired scaffold route"],
     ["notifications/device/route.ts","POST","RULE-RETIRED-ANY","UE-CAP-H-001","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Any caller of a retired scaffold route"],
-    ["notifications/mark-all-read/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["notifications/mark-all-read/route.ts","POST","RULE-0B9-MOB-NOTIFICATION-INBOX","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Member reading, marking read and deleting their own in-app notifications, and steward addressing a notification to a member of the organization or sending themself a test notification"],
     ["notifications/preferences/route.ts","GET","RULE-NOTIFICATION-PREFERENCES","UE-CAP-I-001","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Member"],
     ["notifications/preferences/route.ts","PUT","RULE-NOTIFICATION-PREFERENCES","UE-CAP-I-001","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Member"],
-    ["notifications/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["notifications/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["notifications/test/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["oci/assessment/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:NO_WRITES_FOUND","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["oci/intake/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["oci/intake/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:NO_WRITES_FOUND","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["oci/report/[assessmentId]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["oci/results/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ocra/[assessmentId]/answer/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","AUDIT_EXEMPT_DECLARED:EXEMPT_UNATTRIBUTABLE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ocra/[assessmentId]/claim/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ocra/[assessmentId]/profile/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ocra/[assessmentId]/submit/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","AUDIT_EXEMPT_DECLARED:EXEMPT_UNATTRIBUTABLE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ocra/checkout/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","AUDIT_EXEMPT_DECLARED:EXEMPT_UNATTRIBUTABLE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ocra/email-results/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","AUDIT_EXEMPT_DECLARED:EXEMPT_UNATTRIBUTABLE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ocra/report/[assessmentId]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ocra/results/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ocra/start/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ocra/start/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","AUDIT_EXEMPT_DECLARED:EXEMPT_UNATTRIBUTABLE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ocra/submit/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","AUDIT_EXEMPT_DECLARED:EXEMPT_UNATTRIBUTABLE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["ocra/telemetry/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","AUDIT_EXEMPT_DECLARED:EXEMPT_UNATTRIBUTABLE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["onboarding/discover-federation/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["onboarding/events/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ORGANIZATION_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["onboarding/peer-benchmarks/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["onboarding/readiness/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["onboarding/readiness/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["onboarding/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["onboarding/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["onboarding/smart-defaults/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["onboarding/suggest-clauses/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["onboarding/transfers/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","DELEGATED_TO_HANDLER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["org/current/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["notifications/route.ts","GET","RULE-0B9-MOB-NOTIFICATION-INBOX","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Member reading, marking read and deleting their own in-app notifications, and steward addressing a notification to a member of the organization or sending themself a test notification"],
+    ["notifications/route.ts","POST","RULE-0B9-MOB-NOTIFICATION-INBOX","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Member reading, marking read and deleting their own in-app notifications, and steward addressing a notification to a member of the organization or sending themself a test notification"],
+    ["notifications/test/route.ts","POST","RULE-0B9-MOB-NOTIFICATION-INBOX","UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Member reading, marking read and deleting their own in-app notifications, and steward addressing a notification to a member of the organization or sending themself a test notification"],
+    ["oci/assessment/route.ts","POST","RULE-0B9-ASM-OCI-ASSESSMENT-WRAPPERS","UE-OMIT-ICRA-PUBLIC-ASSESSMENT","OWNED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:NO_WRITES_FOUND","CAPABILITY","Anonymous respondent reaching the pseudonymous continuity assessment through the OCI path names, which wrap the OCRA alias handlers behind a placeholder organization-access function"],
+    ["oci/intake/route.ts","GET","RULE-0B9-ASM-OCI-ASSESSMENT-WRAPPERS","UE-OMIT-ICRA-PUBLIC-ASSESSMENT","OWNED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:READ","CAPABILITY","Anonymous respondent reaching the pseudonymous continuity assessment through the OCI path names, which wrap the OCRA alias handlers behind a placeholder organization-access function"],
+    ["oci/intake/route.ts","POST","RULE-0B9-ASM-OCI-ASSESSMENT-WRAPPERS","UE-OMIT-ICRA-PUBLIC-ASSESSMENT","OWNED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:NO_WRITES_FOUND","CAPABILITY","Anonymous respondent reaching the pseudonymous continuity assessment through the OCI path names, which wrap the OCRA alias handlers behind a placeholder organization-access function"],
+    ["oci/report/[assessmentId]/route.ts","GET","RULE-0B9-ASM-OCI-ASSESSMENT-WRAPPERS","UE-OMIT-ICRA-PUBLIC-ASSESSMENT","OWNED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:READ","CAPABILITY","Anonymous respondent reaching the pseudonymous continuity assessment through the OCI path names, which wrap the OCRA alias handlers behind a placeholder organization-access function"],
+    ["oci/results/[id]/route.ts","GET","RULE-0B9-ASM-OCI-ASSESSMENT-WRAPPERS","UE-OMIT-ICRA-PUBLIC-ASSESSMENT","OWNED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:READ","CAPABILITY","Anonymous respondent reaching the pseudonymous continuity assessment through the OCI path names, which wrap the OCRA alias handlers behind a placeholder organization-access function"],
+    ["ocra/[assessmentId]/answer/route.ts","POST","RULE-0B9-ASM-OCRA-ICRA-ALIASES","UE-OMIT-ICRA-PUBLIC-ASSESSMENT","OWNED","DELEGATED_TO_HANDLER","AUDIT_EXEMPT_DECLARED:EXEMPT_UNATTRIBUTABLE","CAPABILITY","Anonymous respondent, or signed-in user holding a claim token, reaching the pseudonymous continuity assessment through the canonical OCRA path names that re-export the ICRA handlers"],
+    ["ocra/[assessmentId]/claim/route.ts","POST","RULE-0B9-ASM-OCRA-ICRA-ALIASES","UE-OMIT-ICRA-PUBLIC-ASSESSMENT","OWNED","DELEGATED_TO_HANDLER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Anonymous respondent, or signed-in user holding a claim token, reaching the pseudonymous continuity assessment through the canonical OCRA path names that re-export the ICRA handlers"],
+    ["ocra/[assessmentId]/profile/route.ts","GET","RULE-0B9-ASM-OCRA-ICRA-ALIASES","UE-OMIT-ICRA-PUBLIC-ASSESSMENT","OWNED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:READ","CAPABILITY","Anonymous respondent, or signed-in user holding a claim token, reaching the pseudonymous continuity assessment through the canonical OCRA path names that re-export the ICRA handlers"],
+    ["ocra/[assessmentId]/submit/route.ts","POST","RULE-0B9-ASM-OCRA-ICRA-ALIASES","UE-OMIT-ICRA-PUBLIC-ASSESSMENT","OWNED","DELEGATED_TO_HANDLER","AUDIT_EXEMPT_DECLARED:EXEMPT_UNATTRIBUTABLE","CAPABILITY","Anonymous respondent, or signed-in user holding a claim token, reaching the pseudonymous continuity assessment through the canonical OCRA path names that re-export the ICRA handlers"],
+    ["ocra/checkout/route.ts","POST","RULE-0B9-ASM-OCRA-ICRA-ALIASES","UE-OMIT-ICRA-PUBLIC-ASSESSMENT","OWNED","DELEGATED_TO_HANDLER","AUDIT_EXEMPT_DECLARED:EXEMPT_UNATTRIBUTABLE","CAPABILITY","Anonymous respondent, or signed-in user holding a claim token, reaching the pseudonymous continuity assessment through the canonical OCRA path names that re-export the ICRA handlers"],
+    ["ocra/email-results/route.ts","POST","RULE-0B9-ASM-OCRA-ICRA-ALIASES","UE-OMIT-ICRA-PUBLIC-ASSESSMENT","OWNED","DELEGATED_TO_HANDLER","AUDIT_EXEMPT_DECLARED:EXEMPT_UNATTRIBUTABLE","CAPABILITY","Anonymous respondent, or signed-in user holding a claim token, reaching the pseudonymous continuity assessment through the canonical OCRA path names that re-export the ICRA handlers"],
+    ["ocra/report/[assessmentId]/route.ts","GET","RULE-0B9-ASM-OCRA-ICRA-ALIASES","UE-OMIT-ICRA-PUBLIC-ASSESSMENT","OWNED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:READ","CAPABILITY","Anonymous respondent, or signed-in user holding a claim token, reaching the pseudonymous continuity assessment through the canonical OCRA path names that re-export the ICRA handlers"],
+    ["ocra/results/[id]/route.ts","GET","RULE-0B9-ASM-OCRA-ICRA-ALIASES","UE-OMIT-ICRA-PUBLIC-ASSESSMENT","OWNED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:READ","CAPABILITY","Anonymous respondent, or signed-in user holding a claim token, reaching the pseudonymous continuity assessment through the canonical OCRA path names that re-export the ICRA handlers"],
+    ["ocra/start/route.ts","GET","RULE-0B9-ASM-OCRA-ICRA-ALIASES","UE-OMIT-ICRA-PUBLIC-ASSESSMENT","OWNED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:READ","CAPABILITY","Anonymous respondent, or signed-in user holding a claim token, reaching the pseudonymous continuity assessment through the canonical OCRA path names that re-export the ICRA handlers"],
+    ["ocra/start/route.ts","POST","RULE-0B9-ASM-OCRA-ICRA-ALIASES","UE-OMIT-ICRA-PUBLIC-ASSESSMENT","OWNED","DELEGATED_TO_HANDLER","AUDIT_EXEMPT_DECLARED:EXEMPT_UNATTRIBUTABLE","CAPABILITY","Anonymous respondent, or signed-in user holding a claim token, reaching the pseudonymous continuity assessment through the canonical OCRA path names that re-export the ICRA handlers"],
+    ["ocra/submit/route.ts","POST","RULE-0B9-ASM-OCRA-ICRA-ALIASES","UE-OMIT-ICRA-PUBLIC-ASSESSMENT","OWNED","DELEGATED_TO_HANDLER","AUDIT_EXEMPT_DECLARED:EXEMPT_UNATTRIBUTABLE","CAPABILITY","Anonymous respondent, or signed-in user holding a claim token, reaching the pseudonymous continuity assessment through the canonical OCRA path names that re-export the ICRA handlers"],
+    ["ocra/telemetry/route.ts","POST","RULE-0B9-ASM-OCRA-ICRA-ALIASES","UE-OMIT-ICRA-PUBLIC-ASSESSMENT","OWNED","DELEGATED_TO_HANDLER","AUDIT_EXEMPT_DECLARED:EXEMPT_UNATTRIBUTABLE","CAPABILITY","Anonymous respondent, or signed-in user holding a claim token, reaching the pseudonymous continuity assessment through the canonical OCRA path names that re-export the ICRA handlers"],
+    ["onboarding/discover-federation/route.ts","POST","RULE-0B9-ASM-ONBOARDING-PEER-DISCOVERY","UE-OMIT-ORGANIZATION-ONBOARDING","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Officer discovering candidate parent federations, and member reading peer benchmarks for an organization named in the request, during organization onboarding"],
+    ["onboarding/events/route.ts","POST","RULE-0B9-ASM-ONBOARDING-EVENTS","UE-OMIT-ORGANIZATION-ONBOARDING","OWNED","ORGANIZATION_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Steward or higher of an organization recording an organization-created, user-invited or role-assigned onboarding milestone as a pilot event with an audit row, directly or through the transfers path"],
+    ["onboarding/peer-benchmarks/route.ts","GET","RULE-0B9-ASM-ONBOARDING-PEER-DISCOVERY","UE-OMIT-ORGANIZATION-ONBOARDING","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Officer discovering candidate parent federations, and member reading peer benchmarks for an organization named in the request, during organization onboarding"],
+    ["onboarding/readiness/route.ts","GET","RULE-0B9-ASM-ONBOARDING-PENDING-PROFILES","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","DELEGATED_TO_HANDLER","NOT_APPLICABLE:READ","CAPABILITY","Platform operator holding pre-signup membership profiles (Whop membership and usage credits) reached through the onboarding root path and its readiness alias, and the onboarding form that posts to the root path"],
+    ["onboarding/readiness/route.ts","POST","RULE-0B9-ASM-ONBOARDING-PENDING-PROFILES","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","DELEGATED_TO_HANDLER","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Platform operator holding pre-signup membership profiles (Whop membership and usage credits) reached through the onboarding root path and its readiness alias, and the onboarding form that posts to the root path"],
+    ["onboarding/route.ts","GET","RULE-0B9-ASM-ONBOARDING-PENDING-PROFILES","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Platform operator holding pre-signup membership profiles (Whop membership and usage credits) reached through the onboarding root path and its readiness alias, and the onboarding form that posts to the root path"],
+    ["onboarding/route.ts","POST","RULE-0B9-ASM-ONBOARDING-PENDING-PROFILES","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Platform operator holding pre-signup membership profiles (Whop membership and usage credits) reached through the onboarding root path and its readiness alias, and the onboarding form that posts to the root path"],
+    ["onboarding/smart-defaults/route.ts","GET","RULE-0B9-ASM-ONBOARDING-RECOMMENDATIONS","UE-OMIT-ORGANIZATION-ONBOARDING","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Member reading suggested size-based defaults, and officer reading suggested shared clauses for an organization named in the request, during organization onboarding"],
+    ["onboarding/suggest-clauses/route.ts","POST","RULE-0B9-ASM-ONBOARDING-RECOMMENDATIONS","UE-OMIT-ORGANIZATION-ONBOARDING","OWNED","ROLE_TITLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Member reading suggested size-based defaults, and officer reading suggested shared clauses for an organization named in the request, during organization onboarding"],
+    ["onboarding/transfers/route.ts","POST","RULE-0B9-ASM-ONBOARDING-EVENTS","UE-OMIT-ORGANIZATION-ONBOARDING","OWNED","DELEGATED_TO_HANDLER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Steward or higher of an organization recording an organization-created, user-invited or role-assigned onboarding milestone as a pilot event with an audit row, directly or through the transfers path"],
+    ["org/current/route.ts","GET","RULE-0B9-ORG-CURRENT-CONTEXT","UE-OMIT-ORGANIZATION-ADMINISTRATION","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Signed-in member or officer whose client asks which organization the session is working in and for the record of that organization"],
     ["org/switch/route.ts","POST","RULE-RETIRED-ANY","UE-CAP-H-001","RETIRED_501","NONE_RETIRED_501","NOT_APPLICABLE:501","NOT_APPLICABLE:501","Any caller of a retired scaffold route"],
-    ["organization/members/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["organization/members/search/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["organizations/[id]/access-logs/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["organizations/[id]/access-logs/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["organizations/[id]/access-logs/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["organizations/[id]/analytics/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["organizations/[id]/ancestors/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["organizations/[id]/children/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["organizations/[id]/descendants/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["organizations/[id]/members/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["organizations/[id]/members/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["organizations/[id]/path/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["organizations/[id]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["organizations/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["organizations/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["organizations/[id]/sharing-settings/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["organizations/[id]/sharing-settings/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["organizations/[id]/sharing-settings/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["organizations/current/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["organizations/hierarchy/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["organization/members/route.ts","GET","RULE-0B9-ORG-MEMBER-DIRECTORY","UE-OMIT-ORGANIZATION-ADMINISTRATION","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Steward reading the members of the cases assigned to them, and officer reading the member directory of the organization, through the member-directory policy"],
+    ["organization/members/search/route.ts","GET","RULE-0B9-ORG-MEMBER-DIRECTORY","UE-OMIT-ORGANIZATION-ADMINISTRATION","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Steward reading the members of the cases assigned to them, and officer reading the member directory of the organization, through the member-directory policy"],
+    ["organizations/[id]/access-logs/route.ts","DELETE","RULE-0B9-ORG-ACCESS-LOGS","UE-OMIT-CLAUSE-LIBRARY-SHARING","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Organization administrator reviewing which other organizations viewed, downloaded, compared or cited the resources of the organization"],
+    ["organizations/[id]/access-logs/route.ts","GET","RULE-0B9-ORG-ACCESS-LOGS","UE-OMIT-CLAUSE-LIBRARY-SHARING","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Organization administrator reviewing which other organizations viewed, downloaded, compared or cited the resources of the organization"],
+    ["organizations/[id]/access-logs/route.ts","PATCH","RULE-0B9-ORG-ACCESS-LOGS","UE-OMIT-CLAUSE-LIBRARY-SHARING","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Organization administrator reviewing which other organizations viewed, downloaded, compared or cited the resources of the organization"],
+    ["organizations/[id]/analytics/route.ts","GET","RULE-0B9-ORG-ANALYTICS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Administrator or officer reading member and grievance counts, resolution time and growth of an organization"],
+    ["organizations/[id]/ancestors/route.ts","GET","RULE-0B9-ORG-HIERARCHY-READS","UE-OMIT-FEDERATION-LOCAL-HIERARCHY","OWNED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Administrator or officer who expects to see the ancestors, children, descendants, path and tree of an organization of the union hierarchy"],
+    ["organizations/[id]/children/route.ts","GET","RULE-0B9-ORG-HIERARCHY-READS","UE-OMIT-FEDERATION-LOCAL-HIERARCHY","OWNED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Administrator or officer who expects to see the ancestors, children, descendants, path and tree of an organization of the union hierarchy"],
+    ["organizations/[id]/descendants/route.ts","GET","RULE-0B9-ORG-HIERARCHY-READS","UE-OMIT-FEDERATION-LOCAL-HIERARCHY","OWNED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Administrator or officer who expects to see the ancestors, children, descendants, path and tree of an organization of the union hierarchy"],
+    ["organizations/[id]/members/route.ts","GET","RULE-0B9-ORG-MEMBERSHIP-ROSTER","UE-OMIT-ORGANIZATION-ADMINISTRATION","OWNED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Member of an organization reading its roster, and steward adding a person to the roster of the organization with an organization role"],
+    ["organizations/[id]/members/route.ts","POST","RULE-0B9-ORG-MEMBERSHIP-ROSTER","UE-OMIT-ORGANIZATION-ADMINISTRATION","OWNED","SESSION_ONLY","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Member of an organization reading its roster, and steward adding a person to the roster of the organization with an organization role"],
+    ["organizations/[id]/path/route.ts","GET","RULE-0B9-ORG-HIERARCHY-READS","UE-OMIT-FEDERATION-LOCAL-HIERARCHY","OWNED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Administrator or officer who expects to see the ancestors, children, descendants, path and tree of an organization of the union hierarchy"],
+    ["organizations/[id]/route.ts","DELETE","RULE-0B9-ORG-RECORD-ADMINISTRATION","UE-OMIT-ORGANIZATION-ADMINISTRATION","OWNED","SESSION_ONLY","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Organization administrator keeping the profile of the organization, and any signed-in user reading an organization record by its id; a platform administrator changing parent affiliation and lifecycle status"],
+    ["organizations/[id]/route.ts","GET","RULE-0B9-ORG-RECORD-ADMINISTRATION","UE-OMIT-ORGANIZATION-ADMINISTRATION","OWNED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Organization administrator keeping the profile of the organization, and any signed-in user reading an organization record by its id; a platform administrator changing parent affiliation and lifecycle status"],
+    ["organizations/[id]/route.ts","PATCH","RULE-0B9-ORG-RECORD-ADMINISTRATION","UE-OMIT-ORGANIZATION-ADMINISTRATION","OWNED","SESSION_ONLY","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Organization administrator keeping the profile of the organization, and any signed-in user reading an organization record by its id; a platform administrator changing parent affiliation and lifecycle status"],
+    ["organizations/[id]/sharing-settings/route.ts","DELETE","RULE-0B9-ORG-SHARING-SETTINGS","UE-OMIT-CLAUSE-LIBRARY-SHARING","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Organization administrator deciding what the organization shares with its federation, sector, province and the congress"],
+    ["organizations/[id]/sharing-settings/route.ts","GET","RULE-0B9-ORG-SHARING-SETTINGS","UE-OMIT-CLAUSE-LIBRARY-SHARING","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Organization administrator deciding what the organization shares with its federation, sector, province and the congress"],
+    ["organizations/[id]/sharing-settings/route.ts","PATCH","RULE-0B9-ORG-SHARING-SETTINGS","UE-OMIT-CLAUSE-LIBRARY-SHARING","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Organization administrator deciding what the organization shares with its federation, sector, province and the congress"],
+    ["organizations/current/route.ts","GET","RULE-0B9-ORG-CURRENT-CONTEXT","UE-OMIT-ORGANIZATION-ADMINISTRATION","OWNED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Signed-in member or officer whose client asks which organization the session is working in and for the record of that organization"],
+    ["organizations/hierarchy/route.ts","GET","RULE-0B9-ORG-HIERARCHY-READS","UE-OMIT-FEDERATION-LOCAL-HIERARCHY","OWNED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Administrator or officer who expects to see the ancestors, children, descendants, path and tree of an organization of the union hierarchy"],
     ["organizations/platform-id/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
     ["organizations/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
     ["organizations/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],

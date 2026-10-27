@@ -15,7 +15,7 @@ test('the committed matrix matches the live inventories', () => {
   assert.deepEqual(result.problems, [])
   assert.equal(result.summary.registerCount, 41)
   assert.deepEqual(result.summary.registerCounts, { OPEN: 12, CLOSED: 8, IN_PROGRESS: 17, EXTERNAL_GATE: 4 })
-  assert.equal(result.summary.capabilityCount, 93)
+  assert.equal(result.summary.capabilityCount, 96)
   assert.equal(result.summary.personaActionsExtracted, 182)
   assert.equal(result.summary.personaActionsMapped, 182)
   const stubs = loadMatrix().capabilities.find((item) => item.id === 'UE-CAP-H-002').scopedRoutes

@@ -92,7 +92,8 @@ export function memberRegion(text, owner, name) {
  * The text a route file dedicates to one HTTP method. A handler declared as `export const GET = ...` or
  * `export async function GET` is its own region. A method that the file takes from `crudRoutes(...)` (destructured or
  * assigned from a handlers object) is the crudRoutes configuration call, because the factory builds every method from
- * that configuration. A method the file does not export has no region.
+ * that configuration. A method the file only re-exports from another route (`export { GET } from '...'`) has the re-export
+ * statement as its region; the handler it names is reached as an import. A method the file does not export has no region.
  */
 export function handlerRegion(text, method) {
   const direct = new RegExp(`^export\\s+(?:(?:async\\s+)?function\\s+${method}\\b|const\\s+${method}\\b)`, 'm').exec(text)
@@ -108,6 +109,8 @@ export function handlerRegion(text, method) {
     if (!exportedLater(text, method)) return null
     return regionFrom(text, match.index)
   }
+  const reexport = new RegExp(`^export\\s*\\{[^}]*\\b${method}\\b[^}]*\\}\\s*from\\s*['"][^'"]+['"];?`, 'm').exec(text)
+  if (reexport) return reexport[0]
   return null
 }
 

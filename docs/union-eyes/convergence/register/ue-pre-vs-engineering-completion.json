@@ -4786,6 +4786,182 @@
       "businessOutcome": "A federation sees of an affiliate only what the institution has decided an affiliate discloses, through a parent and child link that is established, verified and revoked by a named office; affiliate lists, dashboards, remittances and grievance benchmarks are computed from the affiliates and never from the caller organization alone, with small groups suppressed; the federation and local registers are maintained through audited routes that name the office permitted to change them; a local union is a record of its own, distinct from a bargaining unit.",
       "sourceStatus": "PARTIAL",
       "gap": "No existing capability owns federation or local structure. UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION concerns platform enumeration of tenants, UE-OMIT-ROUTE-EXPOSURE-HARDENING concerns route exposure in general, UE-OMIT-EMPLOYER-RELATIONS-RECORDS concerns employer records and UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER concerns agreements, and none owns the parent and child relationship between a federation, its affiliates and their locals, or what flows up it. The source has a federations table and a federation_remittances table, but the affiliates, dashboard, meetings and remittances paths are copies of the federation item route that return the one federation row of the session organization, the grievance benchmark path is a copy of the grievance collection route that the governance table refuses, and the locals paths serve bargaining_units rather than local unions."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-006",
+        "UE-CONV-K-007"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        9,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/notifications, app/api/mobile/devices, app/api/mobile/sync, app/api/mobile/push, app/api/mobile/notifications",
+      "httpAction": null,
+      "service": "apps/union-eyes/app/api/notifications/route.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "The in-app notification writes and the device registration commit persistAtomicAudit in the same tenant transaction as the row; the generic device, push campaign and scheduled notification writes commit the factory audit record with the row; the audit names the fields or the recipient and type, never the notification text; reads are not audited.",
+      "privacyClassification": "In-app notification titles, messages, links and payloads addressed to a member, push device tokens and device security flags, and scheduled notification rows that name a related grievance, claim or deadline.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/notifications/route.ts",
+        "apps/union-eyes/app/api/notifications/[id]/route.ts",
+        "apps/union-eyes/app/api/mobile/sync/route.ts",
+        "apps/union-eyes/app/api/mobile/devices/route.ts",
+        "apps/union-eyes/db/schema/notifications-schema.ts",
+        "apps/union-eyes/db/schema/push-notifications.ts",
+        "apps/union-eyes/db/schema/mobile-devices-schema.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/notifications/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "parentRegisterId": "UE-CONV-I-002",
+      "obligationKey": "mobile-devices-and-in-app-notifications",
+      "primaryGate": 11,
+      "actor": "Member keeping the inbox of in-app notifications and the devices registered for push and sync under their own account, and steward addressing a notification to a member",
+      "businessOutcome": "A member reads, marks and deletes only their own notifications, a notification shows who sent it and is addressed only by an office the institution names, a member can register and remove their own device and opt out of push, a push or sync path stores what its name says, and every state change commits with its audit record.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No existing capability names the member notification inbox or the device registry. UE-OMIT-COMMUNICATIONS-CAMPAIGN-DELIVERY owns the delivery status of newsletter campaigns read from newsletter tables, UE-OMIT-COMMUNICATIONS-SMS owns SMS message, campaign and conversation tables, UE-CAP-I-002 owns member conversations on the kernel message contract, UE-CAP-I-001 is the frozen persona-journey programme, and UE-OMIT-DELIVERY-EVIDENCE owns proof of delivery, none of which read or write in_app_notifications, notifications, push_devices, push_notifications or mobile_devices. The gate follows its communications siblings (11) because the dispatcher is registered as a communications-truth dependency; which office owns member notification senders and the device registry stays the outstanding decision UE-INST-MEMBER-NOTIFICATION-SENDERS-AND-DEVICES."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        6,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/onboarding (discover-federation, events, transfers, peer-benchmarks, smart-defaults, suggest-clauses)",
+      "httpAction": null,
+      "service": "apps/union-eyes/lib/utils/smart-onboarding.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "The events route commits persistAtomicAudit with the pilot event in one tenant transaction. Federation discovery, peer benchmarks and clause suggestions emit an event on an in-process bus that nothing subscribes to, so they leave no audit row, and smart defaults writes nothing.",
+      "privacyClassification": "Organization names, types, provinces and member counts of other organizations, peer averages and percentiles, shared clause titles and types with source organization names, and free-text onboarding event metadata naming a target user and role.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/lib/utils/smart-onboarding.ts",
+        "apps/union-eyes/app/api/onboarding/events/route.ts",
+        "apps/union-eyes/app/api/onboarding/discover-federation/route.ts",
+        "apps/union-eyes/app/api/onboarding/peer-benchmarks/route.ts",
+        "apps/union-eyes/app/api/onboarding/suggest-clauses/route.ts",
+        "apps/union-eyes/app/api/onboarding/smart-defaults/route.ts",
+        "apps/union-eyes/db/schema/domains/pilot/pilot-events.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/lib/utils/smart-onboarding.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-ORGANIZATION-ONBOARDING",
+      "parentRegisterId": "UE-CONV-K-006",
+      "obligationKey": "organization-onboarding-assistance",
+      "primaryGate": 14,
+      "actor": "Steward or officer of an organization being onboarded, reading discovery, benchmark, default and clause suggestions and recording onboarding milestones",
+      "businessOutcome": "An organization being onboarded sees only what the institution has decided a new organization may see of federations, peers and shared clauses, every lookup is bounded to the caller own organization or to a declared public directory, a suggestion states the data and the basis it rests on, a failed lookup is reported as a failure, and an onboarding milestone is recorded only for something that happened and is audited with the change.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No existing capability names the onboarding assistance routes. UE-OMIT-FEDERATION-LOCAL-HIERARCHY owns the federation record, affiliates, remittances and the grievance benchmark served under the federations and locals paths for a federation officer, not the lookups a prospective affiliate runs before any affiliation exists; UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION concerns platform operators reading across organizations; UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION owns analytics reports over operational tables; and UE-OMIT-AI-ADVISORY-GOVERNANCE owns routes whose purpose is a model call, which these deterministic literal-table suggestions are not. The onboarding event recorder writes the pilot event table, which no existing capability names."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        1,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/organizations, app/api/organization/members, app/api/org/current",
+      "httpAction": null,
+      "service": "apps/union-eyes/app/api/organizations/[id]/route.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "The organization update and archive and the roster insert commit persistAtomicAudit with the row through the transaction handle; the audit records list the changed field names or the member user id and role. Reads of the organization record, the roster and the member directory are not audited.",
+      "privacyClassification": "Organization contact details, billing contact reference, settings and member counts; member names, emails, phones, membership numbers, departments, roles and (for officers) employment dates, seniority and profile metadata.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/organizations/[id]/route.ts",
+        "apps/union-eyes/app/api/organizations/[id]/members/route.ts",
+        "apps/union-eyes/app/api/organizations/current/route.ts",
+        "apps/union-eyes/app/api/organization/members/route.ts",
+        "apps/union-eyes/app/api/org/current/route.ts",
+        "apps/union-eyes/lib/members/directory-access.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/organizations/[id]/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "parentRegisterId": "UE-CONV-K-006",
+      "obligationKey": "organization-record-roster-and-directory",
+      "primaryGate": 14,
+      "actor": "Organization administrator keeping the organization record and the membership roster; steward adding a member; member and officer reading the roster and the member directory; any signed-in user asking for the current organization",
+      "businessOutcome": "The organization record, its roster and its member directory are read and changed only by the offices the institution names, a read of another organization is authorized by a mandate and limited to what the reader needs, a membership grant names the person who accepted it and is limited to roles the granting office may confer, parent affiliation and lifecycle status change only through one verified path, and every change commits with its audit record.",
+      "sourceStatus": "PARTIAL",
+      "gap": "No existing capability owns the organization record or the roster. UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION concerns platform operators reading organizations, users and statistics through the admin routes under a platform role; UE-CAP-A-003 and UE-CAP-A-005 concern the authentication-side membership projection and its readers, not the organization profile, the member roster insert or the member directory; UE-OMIT-FEDERATION-LOCAL-HIERARCHY owns the parent and child link, which this record references but does not own; and UE-OMIT-AUDIT-LOG-VISIBILITY, UE-OMIT-ROUTE-EXPOSURE-HARDENING and UE-CAP-K-007 do not name the organization profile, the roster grant or the member directory. The source has an organization item route that mixes a tenant-scoped update with a system-context cross-organization read, a roster route that grants roles to any user id, and a directory policy that only two of the routes use."
     }
   ],
   "personaActions": [
@@ -6828,7 +7004,7 @@
   },
   "routeOwnership": {
     "file": "docs/union-eyes/convergence/register/ue-route-capability-ownership.json",
-    "entriesHash": "e6ac896e870f479d368ab05b41a163f700f710d85c886892b8fe325f14d81d50",
+    "entriesHash": "0ff0dc7faa7bba62a011a28914ce0449012378425f135e4d43691b467f8280ea",
     "operations": 1644
   },
   "routeClassification": {
@@ -6845,7 +7021,7 @@
       },
       "ledger": {
         "file": "docs/union-eyes/convergence/register/ue-route-classification-ledger.json",
-        "sha256": "c0585847e2320e6837f867f4c6b8279cf8b132b4538ca337eba2d3dfcbe7e848"
+        "sha256": "509481ebef0113295937e96b3537c99289fea115ecfa2432776c1f93d951e184"
       }
     }
   },
@@ -6951,6 +7127,20 @@
       }
     }
   },
+  "routeClassification0b9": {
+    "tranche": "GATE-0B.9",
+    "note": "Hash pins for the frozen Gate 0B.9 tranche manifest and its source-evidenced classification register. The cumulative ledger and the release disposition review queue are pinned above.",
+    "files": {
+      "manifest": {
+        "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b9-manifest.json",
+        "sha256": "09eb9ac7d53b7f7fe758fce1988ab30d3c9e2b2e21aa42bb4b588a1a27c71d95"
+      },
+      "classification": {
+        "file": "docs/union-eyes/convergence/register/ue-route-classification-0b9.json",
+        "sha256": "69586dc37cde47adaa618f3d1bfb4bf2383ac09217e29df8dbc034152c6b1fdb"
+      }
+    }
+  },
   "decisionBoundExceptions": {
     "note": "Operations Gate 0B.4 and Gate 0B.5 examined, whose evidence is exhausted and whose scope waits on an outstanding institutional decision. They are reported apart from operations awaiting source classification and are never counted as OWNED. The register is pinned here; an exception is not an approval.",
     "file": "docs/union-eyes/convergence/register/ue-route-decision-bound-exceptions.json",
@@ -6963,8 +7153,8 @@
     ]
   },
   "routeInventoryTotals": {
-    "OWNED": 1126,
-    "SCOPE_UNDECIDED_AWAITING_CLASSIFICATION": 377,
+    "OWNED": 1226,
+    "SCOPE_UNDECIDED_AWAITING_CLASSIFICATION": 277,
     "DECISION_BOUND_SCOPE_EXCEPTION": 4,
     "RETIRED_501": 97,
     "STUB_501": 31,
@@ -10579,6 +10769,734 @@
       "ownerCapabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
       "tranche": "0B.8",
       "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-OPERATIONAL-METRICS-COUNT-EVERY-ORGANIZATIONS-CLAIMS-FOR-ANY-SIGNED-IN-CALLER-OR-THE-SERVICE-KEY",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
+      "tranche": "0B.9",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B9-ML-OPERATIONAL-METRICS-ARE-PROXIES-NAMED-AS-REQUEST-AND-ERROR-RATES-AND-FAILED-READS-BECOME-ZERO",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-OPERATIONAL-METRICS-SERVICE-KEY-COMPARED-WITH-EQUALITY-AND-ERROR-TEXT-RETURNED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-CHURN-SCORES-COME-FROM-A-RANDOMLY-INITIALISED-NETWORK-FITTED-ON-GENERATED-EXAMPLES-PRESENTED-AS-ML",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-CHURN-SQL-NAMES-COLUMNS-AND-STATUS-VALUES-THE-REPOSITORY-DOES-NOT-DEFINE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-CHURN-PROFILES-NAMED-MEMBERS-FROM-THEIR-CASE-HISTORY-WITH-NO-CONSENT-OR-PURPOSE-DECISION",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-CHURN-INVOCATION-AUDIT-IS-A-SEPARATE-WRITE-BEFORE-VALIDATION-AND-ON-GET",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-CHURN-RESOLVES-A-SECOND-IDENTITY-READS-CLAIMS-WITHOUT-AN-ORGANIZATION-PREDICATE-AND-HAS-NO-FEATURE-GATE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-SLA-SCORE-IS-LITERAL-WEIGHTS-OVER-CALLER-VALUES-PRESENTED-AS-A-MODEL-WITH-CONSTANT-CONFIDENCE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-SLA-CASE-ID-IS-NEVER-VERIFIED-AND-NOT-STORED-WITH-THE-PREDICTION",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-SLA-MODEL-VERSION-IS-CALLER-NAMED-AND-CREATES-UNBOUNDED-MODEL-ROWS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-SLA-FEEDBACK-IS-REPEATABLE-CALLER-STATED-VERSION-UNBOUND-AND-A-LOST-UPDATE-READ-MODIFY-WRITE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-SLA-RETRAIN-SIGNAL-AND-TRAINING-QUEUE-DESCRIBE-A-FORMULA-THAT-NEVER-READS-THEM",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-SLA-FEEDBACK-UPDATES-MODEL-METADATA-WHICH-THE-RUNTIME-ROLE-MAY-ONLY-SELECT-AND-INSERT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-SLA-FEEDBACK-PILOT-EVENT-IS-AN-AWAITED-POST-COMMIT-WRITE-THROUGH-THE-BARE-DB",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-SLA-LIST-GET-SKIPS-THE-FEATURE-GATE-AND-SAFETY-CHECK-THE-POST-APPLIES",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-QUERY-SENDS-FREE-TEXT-AND-ARBITRARY-CONTEXT-TO-AN-EXTERNAL-SERVICE-WITH-NO-DISCLOSURE-DECISION",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-QUERY-AUDIT-IS-A-LOG-LINE-AND-THE-SAFETY-CHECK-DECLARES-A-LOWER-ROLE-AND-DATA-CLASS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-MONITORING-METRICS-QUERY-ABSENT-COLUMNS-AND-JOIN-MODEL-METADATA-WITHOUT-AN-ORGANIZATION-PREDICATE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-MONITORING-METRICS-SUBSTITUTE-LITERAL-FIGURES-AND-REPORT-HEALTHY-WHEN-NOTHING-IS-MEASURED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-PREDICTION-ROUTES-ARE-ONE-GENERIC-ROW-LIST-UNDER-SIX-MODEL-NAMES",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-STEWARD-CAN-STORE-ANY-PREDICTION-ROW-THAT-THE-SLA-LIST-ALERT-SWEEP-AND-INSIGHTS-READ",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-DECLARED-PREDICTION-SHAPE-CONFLICTS-WITH-THE-SQL-THAT-CREATES-THE-TABLE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-ALERTS-SQL-NAMES-ABSENT-COLUMNS-AND-AN-ABSENT-TABLE-AND-IS-NOT-VALID-SQL",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-ALERTS-DRIFT-FINDING-IS-A-LITERAL-PSI-AND-ALERT-IDS-CHANGE-EVERY-SECOND",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-ALERT-ACKNOWLEDGE-GUID-NEVER-MATCHES-A-GENERATED-ID-AND-THE-ACKNOWLEDGEMENT-IS-KEYED-ON-THE-ID-ALONE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-ALERTS-ACKNOWLEDGEMENT-JOIN-HAS-NO-ORGANIZATION-PREDICATE-AND-READS-THROUGH-THE-BARE-DB",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-METRICS-ROUTE-SERVES-STORED-ANALYTICS-ROWS-WHERE-THE-PROMETHEUS-ENDPOINT-IS-DOCUMENTED",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ML-MOVEMENT-TRENDS-ROUTE-IS-NOT-THE-CONSENT-GATED-AGGREGATE-THE-DASHBOARD-SERVES",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-MOB-NOTIFICATION-READS-ANSWER-200-WITH-NO-NOTIFICATIONS-WHEN-THE-QUERY-FAILS",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-MOB-STEWARD-NOTIFICATION-IS-STORED-WITHOUT-A-SENDER-AND-WITH-UNBOUNDED-UNVALIDATED-CONTENT",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-MOB-NOTIFICATION-PATCH-READ-FLAG-IS-UNVALIDATED-AND-READ-AT-IS-NOT-CLEARED",
+      "gate": 11,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-MOB-NOTIFICATION-TEST-ROUTE-EXERCISES-NO-DELIVERY-CHANNEL-AND-LEAVES-A-PERMANENT-ROW",
+      "gate": 11,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-MOB-PUSH-DEVICE-REGISTRATION-REQUIRES-A-STEWARD-SO-A-MEMBER-DEVICE-IS-REFUSED",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-MOB-TWO-DEVICE-TABLES-NO-ROUTE-REMOVES-A-DEVICE-AND-NO-SENDER-READS-EITHER",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-MOB-DEVICE-ROWS-ARE-RETURNED-WHOLE-WITH-THE-PUSH-TOKEN-AND-SECURITY-FLAGS",
+      "gate": 11,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-MOB-SYNC-PATH-REGISTERS-A-DEVICE-AND-SYNCS-NOTHING-AND-ITS-ONLY-CALLER-ALWAYS-FAILS",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-MOB-DEVICE-REREGISTRATION-KEEPS-THE-OLD-ORGANIZATION-AND-CONSTRAINT-CLASHES-ANSWER-500",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-MOB-PUSH-SUBSCRIBE-AND-UNSUBSCRIBE-ARE-PUSH-CAMPAIGN-CRUD-AND-STORE-NO-SUBSCRIPTION",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-MOB-PUSH-CAMPAIGN-ROWS-ARE-READABLE-BY-EVERY-MEMBER-WITH-TARGETING-AND-DEVICE-IDS",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-MOB-PUSH-CAMPAIGN-CREATE-ACCEPTS-SENT-STATUS-AND-DELIVERY-COUNTERS-AND-NOTHING-SENDS",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-MOB-MOBILE-NOTIFICATIONS-PATH-SERVES-THE-SCHEDULED-QUEUE-TABLE-NOT-THE-INBOX",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-MOB-MOBILE-NOTIFICATIONS-CREATE-ADDRESSES-ANY-USER-ID-AND-STORES-A-CALLER-CHOSEN-SENT-STATE",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-MOB-NEGOTIATIONS-PATH-REPEATS-THE-BARGAINING-NEGOTIATIONS-COLLECTION",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-BARGAINING-RECORDS",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-MOB-NEGOTIATION-CREATE-LETS-A-STEWARD-RECORD-STRIKE-VOTE-MANDATE-AND-COST-CEILING-WITH-NO-SOURCE-RECORD",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-BARGAINING-RECORDS",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-MOB-MEETING-ROOM-BOOKING-RULES-ARE-STORED-BUT-NO-ROUTE-OR-SERVICE-ENFORCES-A-BOOKING",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-MOB-MEETING-ROOM-BOOKINGS-PATH-PATCH-EDITS-THE-ROOM-ROW-NOT-A-BOOKING",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ASM-OCI-PATHS-WRAP-THE-OCRA-HANDLERS-BEHIND-AN-ORG-ACCESS-FUNCTION-THAT-RETURNS-TRUE-FOR-EVERY-REQUEST",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ASM-OCRA-EMAIL-RESULTS-PATH-MAILS-THE-BEARER-CAPABILITY-TO-ANY-TYPED-ADDRESS-WITH-NO-DISCLOSURE-DECISION",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ASM-PEER-BENCHMARKS-AND-CLAUSE-SUGGESTIONS-TAKE-THE-TARGET-ORGANIZATION-FROM-THE-REQUEST-AND-NEVER-COMPARE-IT-TO-THE-SESSION",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ONBOARDING",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ASM-FEDERATION-DISCOVERY-LISTS-FEDERATIONS-AND-CONGRESSES-BY-NAME-AND-MEMBER-COUNT-WITH-NO-ORGANIZATION-PREDICATE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ONBOARDING",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ASM-ONBOARDING-LOOKUP-LIBRARY-SWALLOWS-EVERY-FAILURE-INTO-AN-EMPTY-SUCCESS-RESPONSE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ONBOARDING",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ASM-FEDERATION-MATCH-IGNORES-THE-SECTOR-AND-REPORTS-SIMILAR-SIZE-FOR-ANY-RATIO",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ONBOARDING",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ASM-CLAUSE-RELEVANCE-SCORES-SHARING-LEVELS-AND-SOURCE-NAMES-THAT-THE-ROW-LEVEL-POLICIES-WITHHOLD",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ONBOARDING",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ASM-NATIONAL-AVERAGE-BENCHMARK-FALLS-BACK-TO-HARD-CODED-LITERALS-WITH-NO-INDICATION",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ONBOARDING",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ASM-SMART-DEFAULTS-ARE-A-LITERAL-TABLE-OF-FEATURES-AND-INTEGRATIONS-NO-OTHER-CODE-DEFINES-OR-READS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ONBOARDING",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ASM-ONBOARDING-AUDIT-EVENTS-ARE-EMITTED-ON-AN-IN-PROCESS-BUS-WITH-NO-SUBSCRIBER",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ONBOARDING",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ASM-ONBOARDING-EVENTS-RECORD-CALLER-ASSERTED-MILESTONES-AS-EVENT-AND-AUDIT-ROWS-WITHOUT-PERFORMING-OR-VERIFYING-THEM",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ONBOARDING",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ASM-ONBOARDING-EVENT-METADATA-IS-UNBOUNDED-AND-OVERWRITES-THE-STORED-TARGET-AND-ROLE",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ONBOARDING",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ASM-ONBOARDING-TRANSFERS-PATH-IS-THE-EVENT-RECORDER-BEHIND-A-PLACEHOLDER-ORG-ACCESS-FUNCTION",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ONBOARDING",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ASM-ONBOARDING-ROOT-IS-PENDING-PROFILES-REFUSED-BY-GOVERNANCE-WHILE-THE-ONBOARDING-FORM-POSTS-TO-IT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ASM-ONBOARDING-ROOT-ORG-SCOPE-NO-OP-ON-PENDING-PROFILES",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ASM-ONBOARDING-READINESS-IS-THE-PENDING-PROFILES-ROUTE-BEHIND-A-PLACEHOLDER-ORG-ACCESS-FUNCTION",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-ITEM-GET-ANY-SIGNED-IN-USER-READS-ANY-ORGANIZATION-RECORD-AS-SYSTEM",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.9",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B9-ORG-ITEM-GET-STATISTICS-RUN-ON-BARE-DB-AFTER-SYSTEM-READ-WITHOUT-ORGANIZATION-CONTEXT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-ITEM-PATCH-BODY-UNVALIDATED-SETTINGS-AND-SLUG-REPLACED-WHOLESALE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-ITEM-PATCH-PARENT-CHANGE-DOES-NOT-REPOINT-HIERARCHY-PATH-OR-CHECK-CYCLE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-ITEM-DELETE-ORGANIZATION-ADMIN-ARCHIVES-OWN-ORGANIZATION-BYPASSING-STATUS-GOVERNANCE",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-MEMBERSHIP-GUARD-IGNORES-MEMBER-STATUS-AND-REMOVAL-FLAG",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-ROSTER-GET-ANY-ORGANIZATION-MEMBER-READS-FULL-ROSTER-WITH-CONTACT-DETAILS",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.9",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B9-ORG-ROSTER-GET-INCLUDES-REMOVED-MEMBERS-AND-IS-UNBOUNDED",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-ROSTER-POST-STEWARD-GRANTS-ANY-ORGANIZATION-ROLE-TO-ANY-USER-ID-WITHOUT-ACCEPTANCE",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.9",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B9-ORG-ROSTER-POST-DUPLICATE-USER-ID-AND-INVALID-JSON-HANDLING-LEAVES-UNHANDLED-ERRORS",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-DIRECTORY-PROJECTION-FILLS-MISSING-FIELDS-WITH-CANNED-DEPARTMENT-POSITION-AND-ZERO-SENIORITY",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-DIRECTORY-SEARCH-UNESCAPED-WILDCARDS-FIXED-FIFTY-NO-ORDER-OR-PAGE",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-CURRENT-CONTEXT-ROUTE-RETURNS-PLACEHOLDER-ORGANIZATION-WITH-NULL-NAME-AND-NO-FEATURES",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-CURRENT-ROW-READ-AT-ANY-MEMBER-FLOOR-RETURNS-SETTINGS-AND-BILLING-CONTACT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-HIERARCHY-LIST-ANY-SIGNED-IN-USER-ENUMERATES-EVERY-ORGANIZATION-AS-SYSTEM",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+      "tranche": "0B.9",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B9-ORG-HIERARCHY-LIST-HARD-CODED-RLS-FLAG-AND-SILENT-FIVE-HUNDRED-ROW-CAP",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-CHILDREN-ANY-SIGNED-IN-USER-LISTS-CHILDREN-OF-ANY-ORGANIZATION-AS-SYSTEM",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+      "tranche": "0B.9",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B9-ORG-DESCENDANTS-ANY-SIGNED-IN-USER-LISTS-WHOLE-SUBTREE-OF-ANY-ORGANIZATION-UNBOUNDED-AS-SYSTEM",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+      "tranche": "0B.9",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B9-ORG-ANCESTORS-ANY-SIGNED-IN-USER-READS-ANCESTRY-OF-ANY-ORGANIZATION-AS-SYSTEM",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-HIERARCHY-ROUTES-PASS-UNVALIDATED-PATH-ID-TO-UUID-COLUMN-AND-ANSWER-EMPTY-200-FOR-UNKNOWN-ORGANIZATION",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-PATH-LEGACY-BRANCH-READS-ORGANIZATIONS-ON-BARE-DB-WITHOUT-CONTEXT-OR-MEMBERSHIP-CHECK",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-ANALYTICS-ANY-SIGNED-IN-USER-READS-ANY-ORGANIZATION-NAME-TYPE-CHILD-COUNT-AND-AGGREGATES-BY-PATH-ID",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.9",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B9-ORG-ANALYTICS-METRIC-QUERIES-RUN-IN-SESSION-ORGANIZATION-CONTEXT-FILTERED-BY-PATH-ID-RETURNING-ZEROS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-ANALYTICS-ZERO-AND-HUNDRED-PERCENT-DEFAULTS-MEMBER-FLOOR-AND-NO-GROUP-SIZE-SUPPRESSION",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-ACCESS-LOGS-ROUTE-IS-ORGANIZATIONS-ROW-CRUD-NOT-A-CROSS-ORGANIZATION-ACCESS-LOG",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CLAUSE-LIBRARY-SHARING",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-SHARING-SETTINGS-ROUTE-IS-ORGANIZATIONS-ROW-CRUD-NOT-SHARING-SETTINGS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CLAUSE-LIBRARY-SHARING",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-ORGANIZATION-ROW-FACADES-RETURN-WHOLE-ORGANIZATION-ROW-AT-STEWARD-OR-ADMIN-FLOOR",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CLAUSE-LIBRARY-SHARING",
+      "tranche": "0B.9",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B9-ORG-ORGANIZATION-ROW-FACADES-CONFIGURE-STEWARD-WRITES-OVER-ORGANIZATIONS-REFUSED-ONLY-BY-GOVERNANCE-LIST",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CLAUSE-LIBRARY-SHARING",
+      "tranche": "0B.9",
+      "releaseBlocking": false
     }
   ],
   "outOfScope": [
@@ -10692,8 +11610,11 @@
     "UE-OMIT-M04-MEMBER-REQUESTS",
     "UE-OMIT-MAIN-APP-CRONS",
     "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+    "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
     "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
     "UE-OMIT-OHS-REGULATORY-RECORDS",
+    "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+    "UE-OMIT-ORGANIZATION-ONBOARDING",
     "UE-OMIT-PAY-EQUITY-EXERCISES",
     "UE-OMIT-PKI-SIGNING-WORKFLOW",
     "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",

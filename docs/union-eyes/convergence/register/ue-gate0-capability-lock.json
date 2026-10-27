@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "lockVersion": 7,
+  "lockVersion": 8,
   "note": "Independent capability lock. The anchored capability set is read from git history at anchorCommit, which an edit to the working tree cannot change. A capability may leave the matrix only through a retirement record here with schemaVersion 2 or later, a reason, and an existing evidence file.",
   "anchorCommit": "2247978bd642a89a7d4f8bd720b978f789cb4437",
   "anchorMatrixPath": "docs/union-eyes/convergence/register/ue-pre-vs-engineering-completion.json",
@@ -82,8 +82,11 @@
     "UE-OMIT-M04-MEMBER-REQUESTS",
     "UE-OMIT-MAIN-APP-CRONS",
     "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+    "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
     "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
     "UE-OMIT-OHS-REGULATORY-RECORDS",
+    "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+    "UE-OMIT-ORGANIZATION-ONBOARDING",
     "UE-OMIT-PAY-EQUITY-EXERCISES",
     "UE-OMIT-PKI-SIGNING-WORKFLOW",
     "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
@@ -281,6 +284,27 @@
       "operationsHash": "6b878d9c7abb599f60eae09713099d0e8f6b52aaaae6bdd3c0b1a6c3bcb136af",
       "classifiedOperations": 2,
       "reason": "Created by GATE-0B.8 as the engineering capability whose obligation covers operations that tranche classified from source evidence: rewards-redemption-provider-fulfilment."
+    },
+    {
+      "capabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "GATE-0B.9",
+      "operationsHash": "eafe16b5f25727c021f48057d0a164dccc0796ca382183008d8d43d65f5cbcc9",
+      "classifiedOperations": 18,
+      "reason": "Created by GATE-0B.9 as the engineering capability whose obligation covers operations that tranche classified from source evidence: mobile-devices-and-in-app-notifications."
+    },
+    {
+      "capabilityId": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "tranche": "GATE-0B.9",
+      "operationsHash": "eafe16b5f25727c021f48057d0a164dccc0796ca382183008d8d43d65f5cbcc9",
+      "classifiedOperations": 9,
+      "reason": "Created by GATE-0B.9 as the engineering capability whose obligation covers operations that tranche classified from source evidence: organization-record-roster-and-directory."
+    },
+    {
+      "capabilityId": "UE-OMIT-ORGANIZATION-ONBOARDING",
+      "tranche": "GATE-0B.9",
+      "operationsHash": "eafe16b5f25727c021f48057d0a164dccc0796ca382183008d8d43d65f5cbcc9",
+      "classifiedOperations": 6,
+      "reason": "Created by GATE-0B.9 as the engineering capability whose obligation covers operations that tranche classified from source evidence: organization-onboarding-assistance."
     }
   ]
 }
