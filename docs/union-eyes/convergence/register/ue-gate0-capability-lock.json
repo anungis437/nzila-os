@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "lockVersion": 5,
+  "lockVersion": 6,
   "note": "Independent capability lock. The anchored capability set is read from git history at anchorCommit, which an edit to the working tree cannot change. A capability may leave the matrix only through a retirement record here with schemaVersion 2 or later, a reason, and an existing evidence file.",
   "anchorCommit": "2247978bd642a89a7d4f8bd720b978f789cb4437",
   "anchorMatrixPath": "docs/union-eyes/convergence/register/ue-pre-vs-engineering-completion.json",
@@ -70,6 +70,10 @@
     "UE-OMIT-DISPATCH-HALL",
     "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS",
     "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
+    "UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS",
+    "UE-OMIT-EQUITY-SELF-IDENTIFICATION",
+    "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
+    "UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER",
     "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
     "UE-OMIT-FINANCE-UNAVAILABLE",
     "UE-OMIT-M04-LEGAL-DEADLINE",
@@ -225,6 +229,34 @@
       "operationsHash": "0447fff9829a7b19ebf64fd329fe24e19e053a0fe0fd714f9499d82a2e3dd385",
       "classifiedOperations": 9,
       "reason": "Created by GATE-0B.6 as the engineering capability whose obligation covers operations that tranche classified from source evidence: employer-registry-and-communications."
+    },
+    {
+      "capabilityId": "UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS",
+      "tranche": "GATE-0B.7",
+      "operationsHash": "537d1362228dfe64c29e96f531652f2de7a4c8c19a8d10be632d96a633c52f03",
+      "classifiedOperations": 2,
+      "reason": "Created by GATE-0B.7 as the engineering capability whose obligation covers operations that tranche classified from source evidence: enterprise-sso-identity-providers."
+    },
+    {
+      "capabilityId": "UE-OMIT-EQUITY-SELF-IDENTIFICATION",
+      "tranche": "GATE-0B.7",
+      "operationsHash": "537d1362228dfe64c29e96f531652f2de7a4c8c19a8d10be632d96a633c52f03",
+      "classifiedOperations": 6,
+      "reason": "Created by GATE-0B.7 as the engineering capability whose obligation covers operations that tranche classified from source evidence: equity-self-identification-and-monitoring."
+    },
+    {
+      "capabilityId": "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
+      "tranche": "GATE-0B.7",
+      "operationsHash": "537d1362228dfe64c29e96f531652f2de7a4c8c19a8d10be632d96a633c52f03",
+      "classifiedOperations": 46,
+      "reason": "Created by GATE-0B.7 as the engineering capability whose obligation covers operations that tranche classified from source evidence: exit-interview-cognition-analytics."
+    },
+    {
+      "capabilityId": "UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER",
+      "tranche": "GATE-0B.7",
+      "operationsHash": "537d1362228dfe64c29e96f531652f2de7a4c8c19a8d10be632d96a633c52f03",
+      "classifiedOperations": 13,
+      "reason": "Created by GATE-0B.7 as the engineering capability whose obligation covers operations that tranche classified from source evidence: exit-interview-knowledge-transfer."
     }
   ]
 }

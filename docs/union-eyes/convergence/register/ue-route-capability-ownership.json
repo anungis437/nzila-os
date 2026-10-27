@@ -3318,6 +3318,920 @@
       ]
     },
     {
+      "id": "RULE-0B7-EXIT-CORE-RECORDS",
+      "precedence": 40,
+      "prefixes": [
+        "exit-interviews/route.ts",
+        "exit-interviews/[id]/route.ts",
+        "exit-interviews/[id]/submit/route.ts",
+        "exit-interviews/[id]/review/route.ts",
+        "exit-interviews/template/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER",
+      "disposition": "OWNED",
+      "actor": "Steward or officer capturing, submitting and reviewing exit interviews of departing members; member reading published interviews and the interview template",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/infrastructure/exit-interviews.ts",
+          "quote": "export const exitInterviews = pgTable("
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/exit-interviews/schemas.ts",
+          "quote": "retiringEmployeeName: z.string().min(2).max(255),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/exit-interviews/template/route.ts",
+          "quote": "Returns a role-specific template for strategic knowledge extraction interviews."
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-EXIT-CORE-DOCUMENTS",
+      "precedence": 40,
+      "prefixes": [
+        "exit-interviews/[id]/documents/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER",
+      "disposition": "OWNED",
+      "actor": "Steward attaching, and member reading, the documents and transcripts of an exit interview",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/infrastructure/exit-interviews.ts",
+          "quote": "export const exitInterviewDocuments = pgTable("
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/exit-interviews/[id]/documents/route.ts",
+          "quote": " * File upload is handled client-side to Azure Blob Storage (presigned URL flow)."
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-EXIT-CORE-GOVERNANCE-PUBLICATION",
+      "precedence": 40,
+      "prefixes": [
+        "exit-interviews/[id]/governance/route.ts",
+        "exit-interviews/[id]/index/route.ts",
+        "exit-interviews/[id]/publish/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER",
+      "disposition": "OWNED",
+      "actor": "Administrator classifying, recording consent for, publishing and indexing an exit interview",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/governance/consent-controls.ts",
+          "quote": " * Enforces privacy-safe publishing restrictions and consent lifecycle for"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/indexing/semantic-indexer.ts",
+          "quote": " * Generates vector embeddings for published exit interview content and upserts"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/infrastructure/exit-interviews.ts",
+          "quote": "export const exitInterviewSensitivityEnum = pgEnum("
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-EXIT-CORE-SEARCH",
+      "precedence": 40,
+      "prefixes": [
+        "exit-interviews/search/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER",
+      "disposition": "OWNED",
+      "actor": "Member searching the published exit-interview knowledge by keyword and meaning",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/search/hybrid-search.ts",
+          "quote": " * Hybrid Knowledge Search"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/search/hybrid-search.ts",
+          "quote": "export async function hybridKnowledgeSearch("
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-EXIT-CORE-AI-ASSISTANCE",
+      "precedence": 40,
+      "prefixes": [
+        "exit-interviews/[id]/summarize/route.ts",
+        "exit-interviews/copilot/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "disposition": "OWNED",
+      "actor": "Steward generating an AI knowledge summary of a published interview or asking the continuity copilot",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/summaries/knowledge-summarizer.ts",
+          "quote": " * AI Knowledge Summarizer"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/copilot/copilot-engine.ts",
+          "quote": " * Governance Copilot Engine"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/ml/knowledge-transfer-runtime.ts",
+          "quote": "export const ueCopilotConversations = pgTable('ue_copilot_conversations', {"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-EXIT-CORE-COGNITION",
+      "precedence": 40,
+      "prefixes": [
+        "exit-interviews/analytics/route.ts",
+        "exit-interviews/cognition-memory/route.ts",
+        "exit-interviews/graph-query/route.ts",
+        "exit-interviews/mitigation-comparison/route.ts",
+        "exit-interviews/reasoning-sessions/route.ts",
+        "exit-interviews/scenarios/route.ts",
+        "exit-interviews/simulation/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
+      "disposition": "OWNED",
+      "actor": "Steward or officer querying the derived continuity graph, simulations, scenarios and mitigation comparisons, keeping cognition memory and reasoning sessions, and reading the governance timeline",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-store.ts",
+          "quote": " * Cognition Memory Store"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/ml/knowledge-transfer-runtime.ts",
+          "quote": "export const ueReasoningSessions = pgTable('ue_reasoning_sessions', {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/scenarios/scenario-modeler.ts",
+          "quote": " * Resilience Scenario Modeler"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/simulation/continuity-simulator.ts",
+          "quote": " * Continuity Impact Simulator"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-COG-A-MEMORY-PROFILES",
+      "precedence": 40,
+      "prefixes": [
+        "exit-interviews/behavior-patterns/route.ts",
+        "exit-interviews/governance-adaptation/route.ts",
+        "exit-interviews/governance-coherence/route.ts",
+        "exit-interviews/governance-culture/route.ts",
+        "exit-interviews/governance-momentum/route.ts",
+        "exit-interviews/learning-archetypes/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
+      "disposition": "OWNED",
+      "actor": "Officer of an organization holding the union knowledge suite reading the governance behaviour, culture, archetype, adaptation, coherence and momentum profiles that are derived from the cognition memory entries and reasoning sessions the organization saved",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-store.ts",
+          "quote": "Uses the ue_cognition_memory table. The relation is created by platform"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-models.ts",
+          "quote": "This is organizational continuity memory — not employee records."
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/cognition-route.ts",
+          "quote": " * Standard route factory for cognition engines."
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-COG-A-INTERVIEW-DERIVED-ANALYTICS",
+      "precedence": 40,
+      "prefixes": [
+        "exit-interviews/adaptive-resilience/route.ts",
+        "exit-interviews/cascade-analysis/route.ts",
+        "exit-interviews/decision-brief/route.ts",
+        "exit-interviews/expertise-map/route.ts",
+        "exit-interviews/federated-benchmarking/route.ts",
+        "exit-interviews/forecasting/route.ts",
+        "exit-interviews/governance-timeline/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
+      "disposition": "OWNED",
+      "actor": "Officer, and for the expertise map steward, of an organization holding the union knowledge suite reading continuity analytics (resilience, cascade, decision brief, forecast, benchmark, expertise map and governance timeline) that are derived from the organization exit interviews",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/infrastructure/exit-interviews.ts",
+          "quote": "sensitivityLevel: exitInterviewSensitivityEnum('sensitivity_level').notNull().default('public_internal'),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/resilience-index/resilience-calculator.ts",
+          "quote": "export async function calculateResilienceIndex(orgId: string): Promise<OrganizationalResilienceIndex> {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/exit-interviews/expertise-map/route.ts",
+          "quote": " * This reflects ORGANIZATIONAL DEPENDENCY STRUCTURE."
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-COG-A-CROSS-DOMAIN-CORRELATION",
+      "precedence": 40,
+      "prefixes": [
+        "exit-interviews/cross-domain-correlation/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
+      "disposition": "OWNED",
+      "actor": "Officer of an organization holding the union knowledge suite asking for the correlations among its governance, continuity, procedural and trust signals",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/multi-domain-cognition/correlation/index.ts",
+          "quote": "export async function identifyInstitutionalCorrelations(organizationId: string): Promise<CrossDomainCorrelationProfile> {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/multi-domain-cognition/correlation/index.ts",
+          "quote": "export interface CrossDomainCorrelationProfile {"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-COG-A-CONTINUITY-RISK-MODEL",
+      "precedence": 40,
+      "prefixes": [
+        "exit-interviews/continuity-risk/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "disposition": "OWNED",
+      "actor": "Officer of an organization holding the union knowledge suite asking for a model-assisted continuity risk report over its published exit interviews",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/continuity-risk/risk-detector.ts",
+          "quote": "export async function detectContinuityRisks(orgId: string): Promise<OrgContinuityRiskReport> {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/continuity-risk/risk-detector.ts",
+          "quote": "const RISK_ANALYSIS_PROMPT = `You are an organizational continuity risk analyst for a union organization."
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/ai/ai-client.ts",
+          "quote": "export function getAiClient(): AiClient {"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-COG-A-LEGACY-SLUG-REDIRECTS",
+      "precedence": 40,
+      "prefixes": [
+        "exit-interviews/institutional-cognition/route.ts",
+        "exit-interviews/institutional-learning/route.ts",
+        "exit-interviews/institutional-narratives/route.ts",
+        "exit-interviews/institutional-precedent/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
+      "disposition": "OWNED",
+      "actor": "External integration that still calls an institutional-* slug of the exit-interview cognition routes and is sent on to the organizational-* route that holds the data and the guard",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/exit-interviews/institutional-cognition/route.ts",
+          "quote": " * Legacy slug redirect — moved to /api/exit-interviews/organizational-cognition."
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/exit-interviews/institutional-learning/route.ts",
+          "quote": " * Legacy slug redirect — moved to /api/exit-interviews/organizational-learning."
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/exit-interviews/institutional-narratives/route.ts",
+          "quote": " * Legacy slug redirect — moved to /api/exit-interviews/organizational-narratives."
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/exit-interviews/institutional-precedent/route.ts",
+          "quote": " * Legacy slug redirect — moved to /api/exit-interviews/organizational-precedent."
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-COG-B-MEMORY-HISTORY-PROFILES",
+      "precedence": 40,
+      "prefixes": [
+        "exit-interviews/learning-trajectories/route.ts",
+        "exit-interviews/maturity-personalities/route.ts",
+        "exit-interviews/mitigation-effectiveness/route.ts",
+        "exit-interviews/organizational-learning/route.ts",
+        "exit-interviews/resilience-habits/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
+      "disposition": "OWNED",
+      "actor": "Officer reading organization-level learning, trajectory, personality, habit and mitigation profiles computed from the cognition memory entries officers have recorded",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/api/cognition-route.ts",
+          "quote": "export function cognitionRoute<T>(engine: CognitionEngineFn<T>) {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-store.ts",
+          "quote": "export async function loadCognitionMemory("
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts",
+          "quote": "export const learningTrajectoryEngine = defineFoundationalEngine({"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-COG-B-MEMORY-COUNT-DYNAMICS",
+      "precedence": 40,
+      "prefixes": [
+        "exit-interviews/systems-dynamics/route.ts",
+        "exit-interviews/operational-coordination/route.ts",
+        "exit-interviews/operating-rhythms/route.ts",
+        "exit-interviews/response-elasticity/route.ts",
+        "exit-interviews/multi-domain-cognition/route.ts",
+        "exit-interviews/operational-trust/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
+      "disposition": "OWNED",
+      "actor": "Officer reading systems-dynamics, coordination, rhythm, elasticity, multi-domain and trust profiles that the engines derive from the count and type of recorded cognition memory entries",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
+          "quote": "export const systemsDynamicsEngine = adaptLegacyEngine<SystemsDynamicsProfile>({"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
+          "quote": "export const ADVANCED_ORCHESTRATION_STEPS = ["
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-store.ts",
+          "quote": "export async function loadCognitionMemory("
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/org-scope.ts",
+          "quote": "return withRLSContext({ organizationId }, operation);"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/organizational-dynamics/systems-dynamics/systems-engine.ts",
+          "quote": "consistency: 50,"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/organizational-dynamics/systems-dynamics/systems-engine.ts",
+          "quote": "velocity: Math.min(100, (totalEntries / 30) * 100),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/organizational-dynamics/operational-coordination/coordination-engine.ts",
+          "quote": "const efficiency = Math.min(100, (totalEntries / 30) * 100);"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/organizational-dynamics/operational-coordination/coordination-engine.ts",
+          "quote": "governanceResponseTime: 5,"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/organizational-dynamics/rhythms/rhythms-engine.ts",
+          "quote": "adherence: 75,"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/organizational-dynamics/rhythms/rhythms-engine.ts",
+          "quote": "adaptationsPerYear: mitCount + contCount,"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/organizational-dynamics/elasticity/elasticity-engine.ts",
+          "quote": "const responsiveness = Math.min(100, (respCount / Math.max(1, totalEntries)) * 200);"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-COG-B-CONSTANT-PROFILES",
+      "precedence": 40,
+      "prefixes": [
+        "exit-interviews/organizational-precedent/route.ts",
+        "exit-interviews/procedural-continuity/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
+      "disposition": "OWNED",
+      "actor": "Officer reading institutional precedent and procedural continuity profiles that the engines return as fixed content",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/multi-domain-cognition/precedent-intelligence/index.ts",
+          "quote": "export async function analyzeInstitutionalPrecedent(organizationId: string): Promise<InstitutionalPrecedentProfile> {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/multi-domain-cognition/procedural-intelligence/index.ts",
+          "quote": "export async function analyzeProcedualContinuity(organizationId: string): Promise<ProceduralContinuityProfile> {"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-COG-B-AGGREGATE-ORCHESTRATION",
+      "precedence": 40,
+      "prefixes": [
+        "exit-interviews/organizational-cognition/route.ts",
+        "exit-interviews/organizational-narratives/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
+      "disposition": "OWNED",
+      "actor": "Officer opening the institutional operating-intelligence workspace or executive briefing that runs every cognition engine for the organization",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/organizational-operating-intelligence/index.ts",
+          "quote": "export async function runFullInstitutionalCognition("
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/organizational-operating-intelligence/index.ts",
+          "quote": "export const ALL_ORCHESTRATION_STEPS = ["
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/organizational-narratives/index.ts",
+          "quote": "export function narrateEnvelopes("
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-COG-B-INTERVIEW-KNOWLEDGE-GRAPH",
+      "precedence": 40,
+      "prefixes": [
+        "exit-interviews/topic-graph/route.ts",
+        "exit-interviews/propagation/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
+      "disposition": "OWNED",
+      "actor": "Steward reading the topic graph and dependency propagation map computed from the organization published exit interviews",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/topic-graph/topic-graph-builder.ts",
+          "quote": "export async function buildTopicGraph(orgId: string): Promise<TopicGraph> {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/propagation/dependency-propagator.ts",
+          "quote": "export async function buildDependencyPropagationMap(orgId: string): Promise<PropagationMap> {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/governance/consent-controls.ts",
+          "quote": "legal_sensitive: 'admin',"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-COG-B-RESILIENCE-SCORING",
+      "precedence": 40,
+      "prefixes": [
+        "exit-interviews/resilience-index/route.ts",
+        "exit-interviews/resilience-roadmap/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
+      "disposition": "OWNED",
+      "actor": "Officer reading the organizational resilience index and the resilience roadmap computed from the published exit interviews",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/resilience-index/resilience-calculator.ts",
+          "quote": "export async function calculateResilienceIndex(orgId: string): Promise<OrganizationalResilienceIndex> {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/resilience-strategies/strategy-modeler.ts",
+          "quote": "export async function buildResilienceRoadmap(orgId: string): Promise<ResilienceRoadmap> {"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-COG-B-SUCCESSION-MODEL-REPORT",
+      "precedence": 40,
+      "prefixes": [
+        "exit-interviews/succession/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+      "disposition": "OWNED",
+      "actor": "Officer opening the continuity cockpit succession report that a model writes from the published exit interviews",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/succession/succession-analyzer.ts",
+          "quote": "export async function analyzeSuccessionFragility(orgId: string): Promise<SuccessionFragilityReport> {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/succession/succession-analyzer.ts",
+          "quote": "const result = await ai.generate({"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/knowledge-transfer/governance/consent-controls.ts",
+          "quote": "legal_sensitive: 'admin',"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/exit-interviews/[id]/summarize/route.ts",
+          "quote": "const minRole = SENSITIVITY_MIN_ROLE[interview.sensitivityLevel as keyof typeof SENSITIVITY_MIN_ROLE];"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-EXPORTS-REPORT-DEFINITIONS",
+      "precedence": 40,
+      "prefixes": [
+        "exports/route.ts",
+        "exports/[id]/route.ts",
+        "exports/csv/route.ts",
+        "exports/excel/route.ts",
+        "exports/pdf/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "disposition": "OWNED",
+      "actor": "Steward keeping, and member reading, the report definitions that sit behind the export suite entitlement, and any caller of the csv, excel and pdf export paths",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/analytics/reports.ts",
+          "quote": "export const reports = pgTable('reports', {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/analytics/reports.ts",
+          "quote": "config: jsonb('config').notNull(), // Report configuration (data sources, fields, filters, etc.)"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/analytics/reports.ts",
+          "quote": "export const reportFormatEnum = pgEnum('report_format', ["
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/services/platform-economics/entitlement-guard.ts",
+          "quote": "EXPORT_SUITE: 'export_suite',"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-EXPORTS-EVIDENCE-PACK",
+      "precedence": 40,
+      "prefixes": [
+        "evidence/export/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "disposition": "OWNED",
+      "actor": "Staff-level user requesting the evidence pack snapshot that a procurement or security reviewer reads, and the control-plane adapters that consume it",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/evidence/export/route.ts",
+          "quote": " * Returns an evidence pack summary suitable for procurement / security"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/evidence/export/route.ts",
+          "quote": " * `pnpm evidence:all` pipeline (collect → seal → verify). This endpoint"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-EXPORTS-EXTERNAL-PROVIDER-ACCOUNTS",
+      "precedence": 40,
+      "prefixes": [
+        "external-data/route.ts",
+        "external-data/lrb/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "disposition": "OWNED",
+      "actor": "Steward and member reading and adding the chart-of-accounts rows that an accounting provider connection synchronizes into the organization",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/data/accounting.ts",
+          "quote": "export const externalAccounts = pgTable("
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/data/accounting.ts",
+          "quote": "externalProvider: varchar('external_provider', { length: 50 }).notNull(),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/rls-storage-authority/integrations-workers.ts",
+          "quote": "REAL live path: app/api/external-data/route.ts and app/api/external-data/lrb/route.ts are generic crud-factory"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-EXPORTS-EXTERNAL-DOCUMENT-DOWNLOAD",
+      "precedence": 40,
+      "prefixes": [
+        "external/documents/[id]/download/route.ts"
+      ],
+      "capabilityId": "UE-CAP-F-002",
+      "disposition": "OWNED",
+      "actor": "External representative holding a representation authority, a matter grant and a document grant, downloading a document linked to a grievance they represent",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/representation-authority-schema.ts",
+          "quote": "export const externalDocumentAccessGrants = pgTable('external_document_access_grants', {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/representation-authority-schema.ts",
+          "quote": "canDownload: boolean('can_download').notNull().default(false),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/rls-storage-authority/documents-evidence.ts",
+          "quote": "app/api/external/documents/[id]/download/route.ts"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-PLATFORM-PROVIDER-ACCOUNT-LINK-WRITES",
+      "precedence": 40,
+      "prefixes": [
+        "enterprise/integrations/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "disposition": "OWNED",
+      "actor": "Administrator attempting to create an organization integration through the route that is the generic factory over the per-user provider token table",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/user-management-schema.ts",
+          "quote": "export const oauthProviders = userManagementSchema.table(\"oauth_providers\", {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/user-management-schema.ts",
+          "quote": "accessToken: text(\"access_token\"),"
+        }
+      ],
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "id": "RULE-0B7-PLATFORM-INTEGRATION-CONFIGURATIONS",
+      "precedence": 40,
+      "prefixes": [
+        "extensions/[id]/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "disposition": "OWNED",
+      "actor": "Member reading, steward changing and administrator removing the configuration of a third-party HR, payroll or accounting integration of the organization",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/integration-schema.ts",
+          "quote": "export const apiIntegrations = pgTable(\"api_integrations\", {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/integration-schema.ts",
+          "quote": "credentials: jsonb(\"credentials\"), // Encrypted credentials"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/extensions/[id]/route.ts",
+          "quote": " * Integration extensions endpoint"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-PLATFORM-CALENDAR-EVENT-ITEMS",
+      "precedence": 40,
+      "prefixes": [
+        "events/[id]/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "disposition": "OWNED",
+      "actor": "Member reading, and steward or administrator changing, one calendar event of the organization",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/scheduling/calendar.ts",
+          "quote": "export const calendarEvents = pgTable('calendar_events', {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/events/[id]/route.ts",
+          "quote": " * CRUD item route for calendarEvents"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/components/public/event-registration-page.tsx",
+          "quote": "const response = await fetch(`/api/events/${eventSlug}`);"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-PLATFORM-CALENDAR-EVENT-OCCURRENCES",
+      "precedence": 40,
+      "prefixes": [
+        "events/[id]/occurrences/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
+      "disposition": "OWNED",
+      "actor": "Member reading, and steward or administrator changing, one occurrence of a recurring calendar event through a path that addresses the event row",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/scheduling/calendar.ts",
+          "quote": "recurrenceRule: text('recurrence_rule'), // RRULE string"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/scheduling/calendar.ts",
+          "quote": "recurrenceExceptions: jsonb('recurrence_exceptions').$type<string[]>(), // Dates to exclude"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/lib/recurring-events-service.ts",
+          "quote": "export async function addRecurrenceException("
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-PLATFORM-ORGANIZATION-ENTITLEMENTS",
+      "precedence": 40,
+      "prefixes": [
+        "entitlements/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+      "disposition": "OWNED",
+      "actor": "Member whose client gates premium features from the list of feature keys the organization holds",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/finance/contracts.ts",
+          "quote": "export const orgEntitlements = pgTable('org_entitlements', {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/domains/finance/contracts.ts",
+          "quote": "// ORG ENTITLEMENTS  (runtime access — derived from contracts)"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/entitlements/route.ts",
+          "quote": " * Used by client components (e.g. sidebar) to gate premium features."
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-PLATFORM-SSO-PROVIDER-CONFIGURATION",
+      "precedence": 40,
+      "prefixes": [
+        "enterprise/sso/providers/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS",
+      "disposition": "OWNED",
+      "actor": "Member listing, and administrator registering, the SAML or OIDC identity providers of the organization",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/sso-scim-schema.ts",
+          "quote": "export const ssoProviders = pgTable(\"sso_providers\", {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/db/schema/sso-scim-schema.ts",
+          "quote": "roleMapping: jsonb(\"role_mapping\"),"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/app/api/enterprise/sso/providers/route.ts",
+          "quote": " * SSO Providers endpoint"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-PLATFORM-EQUITY-SELF-IDENTIFICATION",
+      "precedence": 40,
+      "prefixes": [
+        "equity/self-identify/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-EQUITY-SELF-IDENTIFICATION",
+      "disposition": "OWNED",
+      "actor": "Member voluntarily self-identifying equity-group membership after consent, and the union holding those answers",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/components/equity/SelfIdentificationForm.tsx",
+          "quote": "const response = await fetch('/api/equity/self-identify', {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/components/equity/SelfIdentificationForm.tsx",
+          "quote": "<li>Individual data is never shared - only aggregated statistics with 10+ member minimum</li>"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/services/financial-service/src/db/schema.ts",
+          "quote": "export const equitySnapshots = pgTable(\"equity_snapshots\", {"
+        }
+      ]
+    },
+    {
+      "id": "RULE-0B7-PLATFORM-EQUITY-MONITORING-AND-SNAPSHOTS",
+      "precedence": 40,
+      "prefixes": [
+        "equity/monitoring/route.ts",
+        "equity/snapshots/route.ts"
+      ],
+      "capabilityId": "UE-OMIT-EQUITY-SELF-IDENTIFICATION",
+      "disposition": "OWNED",
+      "actor": "Officer or steward reading aggregate equity statistics and generating a dated equity snapshot of the membership",
+      "privacy": "CAPABILITY",
+      "evidence": [
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/components/equity/EquityDashboard.tsx",
+          "quote": "const statsRes = await fetch(`/api/equity/monitoring?organizationId=${organizationId}`);"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/components/equity/EquityDashboard.tsx",
+          "quote": "const res = await fetch('/api/equity/snapshots', {"
+        },
+        {
+          "kind": "file",
+          "ref": "apps/union-eyes/services/financial-service/src/db/schema.ts",
+          "quote": "export const equitySnapshots = pgTable(\"equity_snapshots\", {"
+        }
+      ]
+    },
+    {
       "id": "RULE-STUB-H002",
       "precedence": 30,
       "prefixes": [
@@ -5066,108 +5980,108 @@
     ["enterprise/dsr/requests/route.ts","GET","RULE-0B6-PRIVACY-DSR-INTAKE","UE-OMIT-PRIVACY-RIGHTS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Data subject filing, and staff answering, an access, rectification, erasure, portability or restriction request"],
     ["enterprise/dsr/requests/route.ts","POST","RULE-0B6-PRIVACY-DSR-INTAKE","UE-OMIT-PRIVACY-RIGHTS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Data subject filing, and staff answering, an access, rectification, erasure, portability or restriction request"],
     ["enterprise/integrations/route.ts","GET","RULE-0B6-PROVIDER-INTEGRATIONS","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","User whose external provider account and access tokens are linked to the application"],
-    ["enterprise/integrations/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["enterprise/sso/providers/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["enterprise/sso/providers/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["entitlements/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["equity/monitoring/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["equity/monitoring/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["equity/self-identify/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["equity/self-identify/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["equity/snapshots/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["equity/snapshots/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["events/[id]/occurrences/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["events/[id]/occurrences/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["events/[id]/occurrences/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["events/[id]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["events/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["events/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["evidence/export/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["enterprise/integrations/route.ts","POST","RULE-0B7-PLATFORM-PROVIDER-ACCOUNT-LINK-WRITES","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Administrator attempting to create an organization integration through the route that is the generic factory over the per-user provider token table"],
+    ["enterprise/sso/providers/route.ts","GET","RULE-0B7-PLATFORM-SSO-PROVIDER-CONFIGURATION","UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Member listing, and administrator registering, the SAML or OIDC identity providers of the organization"],
+    ["enterprise/sso/providers/route.ts","POST","RULE-0B7-PLATFORM-SSO-PROVIDER-CONFIGURATION","UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Member listing, and administrator registering, the SAML or OIDC identity providers of the organization"],
+    ["entitlements/route.ts","GET","RULE-0B7-PLATFORM-ORGANIZATION-ENTITLEMENTS","UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING","OWNED","ROLE_TITLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Member whose client gates premium features from the list of feature keys the organization holds"],
+    ["equity/monitoring/route.ts","GET","RULE-0B7-PLATFORM-EQUITY-MONITORING-AND-SNAPSHOTS","UE-OMIT-EQUITY-SELF-IDENTIFICATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Officer or steward reading aggregate equity statistics and generating a dated equity snapshot of the membership"],
+    ["equity/monitoring/route.ts","POST","RULE-0B7-PLATFORM-EQUITY-MONITORING-AND-SNAPSHOTS","UE-OMIT-EQUITY-SELF-IDENTIFICATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Officer or steward reading aggregate equity statistics and generating a dated equity snapshot of the membership"],
+    ["equity/self-identify/route.ts","GET","RULE-0B7-PLATFORM-EQUITY-SELF-IDENTIFICATION","UE-OMIT-EQUITY-SELF-IDENTIFICATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member voluntarily self-identifying equity-group membership after consent, and the union holding those answers"],
+    ["equity/self-identify/route.ts","POST","RULE-0B7-PLATFORM-EQUITY-SELF-IDENTIFICATION","UE-OMIT-EQUITY-SELF-IDENTIFICATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member voluntarily self-identifying equity-group membership after consent, and the union holding those answers"],
+    ["equity/snapshots/route.ts","GET","RULE-0B7-PLATFORM-EQUITY-MONITORING-AND-SNAPSHOTS","UE-OMIT-EQUITY-SELF-IDENTIFICATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Officer or steward reading aggregate equity statistics and generating a dated equity snapshot of the membership"],
+    ["equity/snapshots/route.ts","POST","RULE-0B7-PLATFORM-EQUITY-MONITORING-AND-SNAPSHOTS","UE-OMIT-EQUITY-SELF-IDENTIFICATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Officer or steward reading aggregate equity statistics and generating a dated equity snapshot of the membership"],
+    ["events/[id]/occurrences/route.ts","DELETE","RULE-0B7-PLATFORM-CALENDAR-EVENT-OCCURRENCES","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member reading, and steward or administrator changing, one occurrence of a recurring calendar event through a path that addresses the event row"],
+    ["events/[id]/occurrences/route.ts","GET","RULE-0B7-PLATFORM-CALENDAR-EVENT-OCCURRENCES","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member reading, and steward or administrator changing, one occurrence of a recurring calendar event through a path that addresses the event row"],
+    ["events/[id]/occurrences/route.ts","PATCH","RULE-0B7-PLATFORM-CALENDAR-EVENT-OCCURRENCES","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member reading, and steward or administrator changing, one occurrence of a recurring calendar event through a path that addresses the event row"],
+    ["events/[id]/route.ts","DELETE","RULE-0B7-PLATFORM-CALENDAR-EVENT-ITEMS","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member reading, and steward or administrator changing, one calendar event of the organization"],
+    ["events/[id]/route.ts","GET","RULE-0B7-PLATFORM-CALENDAR-EVENT-ITEMS","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Member reading, and steward or administrator changing, one calendar event of the organization"],
+    ["events/[id]/route.ts","PATCH","RULE-0B7-PLATFORM-CALENDAR-EVENT-ITEMS","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Member reading, and steward or administrator changing, one calendar event of the organization"],
+    ["evidence/export/route.ts","GET","RULE-0B7-EXPORTS-EVIDENCE-PACK","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","SESSION_ONLY","NOT_APPLICABLE:READ","CAPABILITY","Staff-level user requesting the evidence pack snapshot that a procurement or security reviewer reads, and the control-plane adapters that consume it"],
     ["executive/dashboard/route.ts","GET","RULE-PERSONA-JOURNEYS","UE-CAP-I-001","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Frozen persona journeys"],
     ["executive/metrics/route.ts","GET","RULE-PERSONA-JOURNEYS","UE-CAP-I-001","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Frozen persona journeys"],
-    ["exit-interviews/[id]/documents/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/[id]/documents/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/[id]/governance/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/[id]/index/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/[id]/publish/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/[id]/review/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/[id]/submit/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/[id]/summarize/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/adaptive-resilience/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/analytics/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/behavior-patterns/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/cascade-analysis/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/cognition-memory/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/cognition-memory/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/continuity-risk/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/copilot/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/copilot/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/cross-domain-correlation/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/decision-brief/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/expertise-map/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/federated-benchmarking/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/forecasting/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/governance-adaptation/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/governance-coherence/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/governance-culture/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/governance-momentum/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/governance-timeline/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/graph-query/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/institutional-cognition/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/institutional-learning/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/institutional-narratives/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/institutional-precedent/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/learning-archetypes/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/learning-trajectories/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/maturity-personalities/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/mitigation-comparison/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/mitigation-effectiveness/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/multi-domain-cognition/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/operating-rhythms/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/operational-coordination/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/operational-trust/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/organizational-cognition/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/organizational-learning/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/organizational-narratives/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/organizational-precedent/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/procedural-continuity/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/propagation/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/reasoning-sessions/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/reasoning-sessions/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/resilience-habits/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/resilience-index/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/resilience-roadmap/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/response-elasticity/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/scenarios/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/search/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/simulation/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/succession/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/systems-dynamics/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/template/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exit-interviews/topic-graph/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exports/[id]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exports/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exports/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exports/csv/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exports/csv/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exports/excel/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exports/excel/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exports/pdf/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exports/pdf/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exports/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["exports/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["extensions/[id]/route.ts","DELETE","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["extensions/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["extensions/[id]/route.ts","PATCH","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["external-data/lrb/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["external-data/lrb/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["external-data/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["external-data/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
-    ["external/documents/[id]/download/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ORGANIZATION_ROLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
+    ["exit-interviews/[id]/documents/route.ts","GET","RULE-0B7-EXIT-CORE-DOCUMENTS","UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Steward attaching, and member reading, the documents and transcripts of an exit interview"],
+    ["exit-interviews/[id]/documents/route.ts","POST","RULE-0B7-EXIT-CORE-DOCUMENTS","UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Steward attaching, and member reading, the documents and transcripts of an exit interview"],
+    ["exit-interviews/[id]/governance/route.ts","PATCH","RULE-0B7-EXIT-CORE-GOVERNANCE-PUBLICATION","UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Administrator classifying, recording consent for, publishing and indexing an exit interview"],
+    ["exit-interviews/[id]/index/route.ts","POST","RULE-0B7-EXIT-CORE-GOVERNANCE-PUBLICATION","UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Administrator classifying, recording consent for, publishing and indexing an exit interview"],
+    ["exit-interviews/[id]/publish/route.ts","POST","RULE-0B7-EXIT-CORE-GOVERNANCE-PUBLICATION","UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Administrator classifying, recording consent for, publishing and indexing an exit interview"],
+    ["exit-interviews/[id]/review/route.ts","POST","RULE-0B7-EXIT-CORE-RECORDS","UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Steward or officer capturing, submitting and reviewing exit interviews of departing members; member reading published interviews and the interview template"],
+    ["exit-interviews/[id]/route.ts","GET","RULE-0B7-EXIT-CORE-RECORDS","UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Steward or officer capturing, submitting and reviewing exit interviews of departing members; member reading published interviews and the interview template"],
+    ["exit-interviews/[id]/route.ts","PATCH","RULE-0B7-EXIT-CORE-RECORDS","UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Steward or officer capturing, submitting and reviewing exit interviews of departing members; member reading published interviews and the interview template"],
+    ["exit-interviews/[id]/submit/route.ts","POST","RULE-0B7-EXIT-CORE-RECORDS","UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Steward or officer capturing, submitting and reviewing exit interviews of departing members; member reading published interviews and the interview template"],
+    ["exit-interviews/[id]/summarize/route.ts","POST","RULE-0B7-EXIT-CORE-AI-ASSISTANCE","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Steward generating an AI knowledge summary of a published interview or asking the continuity copilot"],
+    ["exit-interviews/adaptive-resilience/route.ts","GET","RULE-0B7-COG-A-INTERVIEW-DERIVED-ANALYTICS","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer, and for the expertise map steward, of an organization holding the union knowledge suite reading continuity analytics (resilience, cascade, decision brief, forecast, benchmark, expertise map and governance timeline) that are derived from the organization exit interviews"],
+    ["exit-interviews/analytics/route.ts","GET","RULE-0B7-EXIT-CORE-COGNITION","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Steward or officer querying the derived continuity graph, simulations, scenarios and mitigation comparisons, keeping cognition memory and reasoning sessions, and reading the governance timeline"],
+    ["exit-interviews/behavior-patterns/route.ts","GET","RULE-0B7-COG-A-MEMORY-PROFILES","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer of an organization holding the union knowledge suite reading the governance behaviour, culture, archetype, adaptation, coherence and momentum profiles that are derived from the cognition memory entries and reasoning sessions the organization saved"],
+    ["exit-interviews/cascade-analysis/route.ts","GET","RULE-0B7-COG-A-INTERVIEW-DERIVED-ANALYTICS","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer, and for the expertise map steward, of an organization holding the union knowledge suite reading continuity analytics (resilience, cascade, decision brief, forecast, benchmark, expertise map and governance timeline) that are derived from the organization exit interviews"],
+    ["exit-interviews/cognition-memory/route.ts","GET","RULE-0B7-EXIT-CORE-COGNITION","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Steward or officer querying the derived continuity graph, simulations, scenarios and mitigation comparisons, keeping cognition memory and reasoning sessions, and reading the governance timeline"],
+    ["exit-interviews/cognition-memory/route.ts","POST","RULE-0B7-EXIT-CORE-COGNITION","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Steward or officer querying the derived continuity graph, simulations, scenarios and mitigation comparisons, keeping cognition memory and reasoning sessions, and reading the governance timeline"],
+    ["exit-interviews/continuity-risk/route.ts","GET","RULE-0B7-COG-A-CONTINUITY-RISK-MODEL","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Officer of an organization holding the union knowledge suite asking for a model-assisted continuity risk report over its published exit interviews"],
+    ["exit-interviews/copilot/route.ts","GET","RULE-0B7-EXIT-CORE-AI-ASSISTANCE","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Steward generating an AI knowledge summary of a published interview or asking the continuity copilot"],
+    ["exit-interviews/copilot/route.ts","POST","RULE-0B7-EXIT-CORE-AI-ASSISTANCE","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Steward generating an AI knowledge summary of a published interview or asking the continuity copilot"],
+    ["exit-interviews/cross-domain-correlation/route.ts","GET","RULE-0B7-COG-A-CROSS-DOMAIN-CORRELATION","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer of an organization holding the union knowledge suite asking for the correlations among its governance, continuity, procedural and trust signals"],
+    ["exit-interviews/decision-brief/route.ts","GET","RULE-0B7-COG-A-INTERVIEW-DERIVED-ANALYTICS","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer, and for the expertise map steward, of an organization holding the union knowledge suite reading continuity analytics (resilience, cascade, decision brief, forecast, benchmark, expertise map and governance timeline) that are derived from the organization exit interviews"],
+    ["exit-interviews/expertise-map/route.ts","GET","RULE-0B7-COG-A-INTERVIEW-DERIVED-ANALYTICS","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Officer, and for the expertise map steward, of an organization holding the union knowledge suite reading continuity analytics (resilience, cascade, decision brief, forecast, benchmark, expertise map and governance timeline) that are derived from the organization exit interviews"],
+    ["exit-interviews/federated-benchmarking/route.ts","GET","RULE-0B7-COG-A-INTERVIEW-DERIVED-ANALYTICS","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer, and for the expertise map steward, of an organization holding the union knowledge suite reading continuity analytics (resilience, cascade, decision brief, forecast, benchmark, expertise map and governance timeline) that are derived from the organization exit interviews"],
+    ["exit-interviews/forecasting/route.ts","GET","RULE-0B7-COG-A-INTERVIEW-DERIVED-ANALYTICS","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer, and for the expertise map steward, of an organization holding the union knowledge suite reading continuity analytics (resilience, cascade, decision brief, forecast, benchmark, expertise map and governance timeline) that are derived from the organization exit interviews"],
+    ["exit-interviews/governance-adaptation/route.ts","GET","RULE-0B7-COG-A-MEMORY-PROFILES","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer of an organization holding the union knowledge suite reading the governance behaviour, culture, archetype, adaptation, coherence and momentum profiles that are derived from the cognition memory entries and reasoning sessions the organization saved"],
+    ["exit-interviews/governance-coherence/route.ts","GET","RULE-0B7-COG-A-MEMORY-PROFILES","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer of an organization holding the union knowledge suite reading the governance behaviour, culture, archetype, adaptation, coherence and momentum profiles that are derived from the cognition memory entries and reasoning sessions the organization saved"],
+    ["exit-interviews/governance-culture/route.ts","GET","RULE-0B7-COG-A-MEMORY-PROFILES","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer of an organization holding the union knowledge suite reading the governance behaviour, culture, archetype, adaptation, coherence and momentum profiles that are derived from the cognition memory entries and reasoning sessions the organization saved"],
+    ["exit-interviews/governance-momentum/route.ts","GET","RULE-0B7-COG-A-MEMORY-PROFILES","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer of an organization holding the union knowledge suite reading the governance behaviour, culture, archetype, adaptation, coherence and momentum profiles that are derived from the cognition memory entries and reasoning sessions the organization saved"],
+    ["exit-interviews/governance-timeline/route.ts","GET","RULE-0B7-COG-A-INTERVIEW-DERIVED-ANALYTICS","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Officer, and for the expertise map steward, of an organization holding the union knowledge suite reading continuity analytics (resilience, cascade, decision brief, forecast, benchmark, expertise map and governance timeline) that are derived from the organization exit interviews"],
+    ["exit-interviews/graph-query/route.ts","POST","RULE-0B7-EXIT-CORE-COGNITION","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Steward or officer querying the derived continuity graph, simulations, scenarios and mitigation comparisons, keeping cognition memory and reasoning sessions, and reading the governance timeline"],
+    ["exit-interviews/institutional-cognition/route.ts","GET","RULE-0B7-COG-A-LEGACY-SLUG-REDIRECTS","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","External integration that still calls an institutional-* slug of the exit-interview cognition routes and is sent on to the organizational-* route that holds the data and the guard"],
+    ["exit-interviews/institutional-learning/route.ts","GET","RULE-0B7-COG-A-LEGACY-SLUG-REDIRECTS","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","External integration that still calls an institutional-* slug of the exit-interview cognition routes and is sent on to the organizational-* route that holds the data and the guard"],
+    ["exit-interviews/institutional-narratives/route.ts","GET","RULE-0B7-COG-A-LEGACY-SLUG-REDIRECTS","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","External integration that still calls an institutional-* slug of the exit-interview cognition routes and is sent on to the organizational-* route that holds the data and the guard"],
+    ["exit-interviews/institutional-precedent/route.ts","GET","RULE-0B7-COG-A-LEGACY-SLUG-REDIRECTS","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","External integration that still calls an institutional-* slug of the exit-interview cognition routes and is sent on to the organizational-* route that holds the data and the guard"],
+    ["exit-interviews/learning-archetypes/route.ts","GET","RULE-0B7-COG-A-MEMORY-PROFILES","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer of an organization holding the union knowledge suite reading the governance behaviour, culture, archetype, adaptation, coherence and momentum profiles that are derived from the cognition memory entries and reasoning sessions the organization saved"],
+    ["exit-interviews/learning-trajectories/route.ts","GET","RULE-0B7-COG-B-MEMORY-HISTORY-PROFILES","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer reading organization-level learning, trajectory, personality, habit and mitigation profiles computed from the cognition memory entries officers have recorded"],
+    ["exit-interviews/maturity-personalities/route.ts","GET","RULE-0B7-COG-B-MEMORY-HISTORY-PROFILES","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer reading organization-level learning, trajectory, personality, habit and mitigation profiles computed from the cognition memory entries officers have recorded"],
+    ["exit-interviews/mitigation-comparison/route.ts","POST","RULE-0B7-EXIT-CORE-COGNITION","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Steward or officer querying the derived continuity graph, simulations, scenarios and mitigation comparisons, keeping cognition memory and reasoning sessions, and reading the governance timeline"],
+    ["exit-interviews/mitigation-effectiveness/route.ts","GET","RULE-0B7-COG-B-MEMORY-HISTORY-PROFILES","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer reading organization-level learning, trajectory, personality, habit and mitigation profiles computed from the cognition memory entries officers have recorded"],
+    ["exit-interviews/multi-domain-cognition/route.ts","GET","RULE-0B7-COG-B-MEMORY-COUNT-DYNAMICS","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer reading systems-dynamics, coordination, rhythm, elasticity, multi-domain and trust profiles that the engines derive from the count and type of recorded cognition memory entries"],
+    ["exit-interviews/operating-rhythms/route.ts","GET","RULE-0B7-COG-B-MEMORY-COUNT-DYNAMICS","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer reading systems-dynamics, coordination, rhythm, elasticity, multi-domain and trust profiles that the engines derive from the count and type of recorded cognition memory entries"],
+    ["exit-interviews/operational-coordination/route.ts","GET","RULE-0B7-COG-B-MEMORY-COUNT-DYNAMICS","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer reading systems-dynamics, coordination, rhythm, elasticity, multi-domain and trust profiles that the engines derive from the count and type of recorded cognition memory entries"],
+    ["exit-interviews/operational-trust/route.ts","GET","RULE-0B7-COG-B-MEMORY-COUNT-DYNAMICS","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer reading systems-dynamics, coordination, rhythm, elasticity, multi-domain and trust profiles that the engines derive from the count and type of recorded cognition memory entries"],
+    ["exit-interviews/organizational-cognition/route.ts","GET","RULE-0B7-COG-B-AGGREGATE-ORCHESTRATION","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Officer opening the institutional operating-intelligence workspace or executive briefing that runs every cognition engine for the organization"],
+    ["exit-interviews/organizational-learning/route.ts","GET","RULE-0B7-COG-B-MEMORY-HISTORY-PROFILES","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer reading organization-level learning, trajectory, personality, habit and mitigation profiles computed from the cognition memory entries officers have recorded"],
+    ["exit-interviews/organizational-narratives/route.ts","GET","RULE-0B7-COG-B-AGGREGATE-ORCHESTRATION","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Officer opening the institutional operating-intelligence workspace or executive briefing that runs every cognition engine for the organization"],
+    ["exit-interviews/organizational-precedent/route.ts","GET","RULE-0B7-COG-B-CONSTANT-PROFILES","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer reading institutional precedent and procedural continuity profiles that the engines return as fixed content"],
+    ["exit-interviews/procedural-continuity/route.ts","GET","RULE-0B7-COG-B-CONSTANT-PROFILES","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer reading institutional precedent and procedural continuity profiles that the engines return as fixed content"],
+    ["exit-interviews/propagation/route.ts","GET","RULE-0B7-COG-B-INTERVIEW-KNOWLEDGE-GRAPH","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Steward reading the topic graph and dependency propagation map computed from the organization published exit interviews"],
+    ["exit-interviews/reasoning-sessions/route.ts","GET","RULE-0B7-EXIT-CORE-COGNITION","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Steward or officer querying the derived continuity graph, simulations, scenarios and mitigation comparisons, keeping cognition memory and reasoning sessions, and reading the governance timeline"],
+    ["exit-interviews/reasoning-sessions/route.ts","POST","RULE-0B7-EXIT-CORE-COGNITION","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC_SERVICE","CAPABILITY","Steward or officer querying the derived continuity graph, simulations, scenarios and mitigation comparisons, keeping cognition memory and reasoning sessions, and reading the governance timeline"],
+    ["exit-interviews/resilience-habits/route.ts","GET","RULE-0B7-COG-B-MEMORY-HISTORY-PROFILES","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer reading organization-level learning, trajectory, personality, habit and mitigation profiles computed from the cognition memory entries officers have recorded"],
+    ["exit-interviews/resilience-index/route.ts","GET","RULE-0B7-COG-B-RESILIENCE-SCORING","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Officer reading the organizational resilience index and the resilience roadmap computed from the published exit interviews"],
+    ["exit-interviews/resilience-roadmap/route.ts","GET","RULE-0B7-COG-B-RESILIENCE-SCORING","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer reading the organizational resilience index and the resilience roadmap computed from the published exit interviews"],
+    ["exit-interviews/response-elasticity/route.ts","GET","RULE-0B7-COG-B-MEMORY-COUNT-DYNAMICS","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer reading systems-dynamics, coordination, rhythm, elasticity, multi-domain and trust profiles that the engines derive from the count and type of recorded cognition memory entries"],
+    ["exit-interviews/route.ts","GET","RULE-0B7-EXIT-CORE-RECORDS","UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Steward or officer capturing, submitting and reviewing exit interviews of departing members; member reading published interviews and the interview template"],
+    ["exit-interviews/route.ts","POST","RULE-0B7-EXIT-CORE-RECORDS","UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Steward or officer capturing, submitting and reviewing exit interviews of departing members; member reading published interviews and the interview template"],
+    ["exit-interviews/scenarios/route.ts","POST","RULE-0B7-EXIT-CORE-COGNITION","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Steward or officer querying the derived continuity graph, simulations, scenarios and mitigation comparisons, keeping cognition memory and reasoning sessions, and reading the governance timeline"],
+    ["exit-interviews/search/route.ts","POST","RULE-0B7-EXIT-CORE-SEARCH","UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Member searching the published exit-interview knowledge by keyword and meaning"],
+    ["exit-interviews/simulation/route.ts","POST","RULE-0B7-EXIT-CORE-COGNITION","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:COMPUTE_ONLY","CAPABILITY","Steward or officer querying the derived continuity graph, simulations, scenarios and mitigation comparisons, keeping cognition memory and reasoning sessions, and reading the governance timeline"],
+    ["exit-interviews/succession/route.ts","GET","RULE-0B7-COG-B-SUCCESSION-MODEL-REPORT","UE-OMIT-AI-ADVISORY-GOVERNANCE","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Officer opening the continuity cockpit succession report that a model writes from the published exit interviews"],
+    ["exit-interviews/systems-dynamics/route.ts","GET","RULE-0B7-COG-B-MEMORY-COUNT-DYNAMICS","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","NO_AUTHENTICATION_DECLARED","NOT_APPLICABLE:READ","CAPABILITY","Officer reading systems-dynamics, coordination, rhythm, elasticity, multi-domain and trust profiles that the engines derive from the count and type of recorded cognition memory entries"],
+    ["exit-interviews/template/route.ts","GET","RULE-0B7-EXIT-CORE-RECORDS","UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Steward or officer capturing, submitting and reviewing exit interviews of departing members; member reading published interviews and the interview template"],
+    ["exit-interviews/topic-graph/route.ts","GET","RULE-0B7-COG-B-INTERVIEW-KNOWLEDGE-GRAPH","UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Steward reading the topic graph and dependency propagation map computed from the organization published exit interviews"],
+    ["exports/[id]/route.ts","DELETE","RULE-0B7-EXPORTS-REPORT-DEFINITIONS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward keeping, and member reading, the report definitions that sit behind the export suite entitlement, and any caller of the csv, excel and pdf export paths"],
+    ["exports/[id]/route.ts","GET","RULE-0B7-EXPORTS-REPORT-DEFINITIONS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward keeping, and member reading, the report definitions that sit behind the export suite entitlement, and any caller of the csv, excel and pdf export paths"],
+    ["exports/[id]/route.ts","PATCH","RULE-0B7-EXPORTS-REPORT-DEFINITIONS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward keeping, and member reading, the report definitions that sit behind the export suite entitlement, and any caller of the csv, excel and pdf export paths"],
+    ["exports/csv/route.ts","GET","RULE-0B7-EXPORTS-REPORT-DEFINITIONS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward keeping, and member reading, the report definitions that sit behind the export suite entitlement, and any caller of the csv, excel and pdf export paths"],
+    ["exports/csv/route.ts","POST","RULE-0B7-EXPORTS-REPORT-DEFINITIONS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward keeping, and member reading, the report definitions that sit behind the export suite entitlement, and any caller of the csv, excel and pdf export paths"],
+    ["exports/excel/route.ts","GET","RULE-0B7-EXPORTS-REPORT-DEFINITIONS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward keeping, and member reading, the report definitions that sit behind the export suite entitlement, and any caller of the csv, excel and pdf export paths"],
+    ["exports/excel/route.ts","POST","RULE-0B7-EXPORTS-REPORT-DEFINITIONS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward keeping, and member reading, the report definitions that sit behind the export suite entitlement, and any caller of the csv, excel and pdf export paths"],
+    ["exports/pdf/route.ts","GET","RULE-0B7-EXPORTS-REPORT-DEFINITIONS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward keeping, and member reading, the report definitions that sit behind the export suite entitlement, and any caller of the csv, excel and pdf export paths"],
+    ["exports/pdf/route.ts","POST","RULE-0B7-EXPORTS-REPORT-DEFINITIONS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward keeping, and member reading, the report definitions that sit behind the export suite entitlement, and any caller of the csv, excel and pdf export paths"],
+    ["exports/route.ts","GET","RULE-0B7-EXPORTS-REPORT-DEFINITIONS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward keeping, and member reading, the report definitions that sit behind the export suite entitlement, and any caller of the csv, excel and pdf export paths"],
+    ["exports/route.ts","POST","RULE-0B7-EXPORTS-REPORT-DEFINITIONS","UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward keeping, and member reading, the report definitions that sit behind the export suite entitlement, and any caller of the csv, excel and pdf export paths"],
+    ["extensions/[id]/route.ts","DELETE","RULE-0B7-PLATFORM-INTEGRATION-CONFIGURATIONS","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Member reading, steward changing and administrator removing the configuration of a third-party HR, payroll or accounting integration of the organization"],
+    ["extensions/[id]/route.ts","GET","RULE-0B7-PLATFORM-INTEGRATION-CONFIGURATIONS","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","WITH_API_WRAPPER","NOT_APPLICABLE:READ","CAPABILITY","Member reading, steward changing and administrator removing the configuration of a third-party HR, payroll or accounting integration of the organization"],
+    ["extensions/[id]/route.ts","PATCH","RULE-0B7-PLATFORM-INTEGRATION-CONFIGURATIONS","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","WITH_API_WRAPPER","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Member reading, steward changing and administrator removing the configuration of a third-party HR, payroll or accounting integration of the organization"],
+    ["external-data/lrb/route.ts","GET","RULE-0B7-EXPORTS-EXTERNAL-PROVIDER-ACCOUNTS","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward and member reading and adding the chart-of-accounts rows that an accounting provider connection synchronizes into the organization"],
+    ["external-data/lrb/route.ts","POST","RULE-0B7-EXPORTS-EXTERNAL-PROVIDER-ACCOUNTS","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward and member reading and adding the chart-of-accounts rows that an accounting provider connection synchronizes into the organization"],
+    ["external-data/route.ts","GET","RULE-0B7-EXPORTS-EXTERNAL-PROVIDER-ACCOUNTS","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","NOT_APPLICABLE:READ","CAPABILITY","Steward and member reading and adding the chart-of-accounts rows that an accounting provider connection synchronizes into the organization"],
+    ["external-data/route.ts","POST","RULE-0B7-EXPORTS-EXTERNAL-PROVIDER-ACCOUNTS","UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS","OWNED","GENERIC_CRUD_ROLE_FLOOR","AUDIT_DECLARED_ATOMIC:CRUD_ATOMIC","CAPABILITY","Steward and member reading and adding the chart-of-accounts rows that an accounting provider connection synchronizes into the organization"],
+    ["external/documents/[id]/download/route.ts","GET","RULE-0B7-EXPORTS-EXTERNAL-DOCUMENT-DOWNLOAD","UE-CAP-F-002","OWNED","ORGANIZATION_ROLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","External representative holding a representation authority, a matter grant and a document grant, downloading a document linked to a grievance they represent"],
     ["external/documents/[id]/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ORGANIZATION_ROLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
     ["external/grievances/[id]/documents/route.ts","GET","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ORGANIZATION_ROLE_CHECK","NOT_APPLICABLE:READ","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],
     ["external/grievances/[id]/documents/upload/route.ts","POST","RULE-DOMAIN-SCOPE-UNDECIDED","UE-OMIT-ROUTE-DOMAIN-SCOPE","SCOPE_UNDECIDED","ORGANIZATION_ROLE_CHECK","AUDIT_DECLARED_ATOMIC:ATOMIC","CAPABILITY","Undetermined by any register entry, persona source, or capability-registry record"],

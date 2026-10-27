@@ -1,4 +1,4 @@
-# Gate 0 scope lock (adversarial rework, Gate 0A, Gate 0A.2, Gate 0B.1, Gate 0B.2, Gate 0B.3, Gate 0B.4, Gate 0B.5, and Gate 0B.6)
+# Gate 0 scope lock (adversarial rework, Gate 0A, Gate 0A.2, Gate 0B.1, Gate 0B.2, Gate 0B.3, Gate 0B.4, Gate 0B.5, Gate 0B.6, and Gate 0B.7)
 
 Mission: `UE-FINAL-CONVERGENCE-2026-10`. Verdict: `IN_PROGRESS`.
 
@@ -660,21 +660,110 @@ The lock holds 86 ids and 18 addition records (the six new Gate 0B.6 capabilitie
 
 The Gate 0B.5 suite is anchored to its accepted commit. `ue-gate0-cumulative.test.mjs` asserts the moving totals.
 
+## Gate 0B.7: seventh route-classification tranche
+
+Inventory only. No application source, migration, allowlist or census change. The 0B.1 to 0B.6 manifests, classifications and decision-bound exception register are byte-identical to the commits that accepted them.
+
+### Inventory totals
+
+| Class | Operations |
+| --- | --- |
+| `OWNED` | 1026 |
+| `SCOPE_UNDECIDED`, awaiting source classification | 477 |
+| `DECISION_BOUND_SCOPE_EXCEPTION` | 4 |
+| `RETIRED_501` | 97 |
+| `STUB_501` | 31 |
+| `SYSTEM` | 9 |
+
+The six classes sum to 1,644 and no class was added. The raw `SCOPE_UNDECIDED` count in the ownership register is 481 (477 awaiting classification plus the 4 exceptions). 671 operations are classified.
+
+### Tranche freeze
+
+Tranche `GATE-0B.7`, version 1, frozen in `ue-route-tranche-0b7-manifest.json` with operations hash `537d1362228dfe64c29e96f531652f2de7a4c8c19a8d10be632d96a633c52f03` and a `versionLog`. Anchor commit `cab380c61301152b604f4161d00d14ce81584045` (the accepted Gate 0B.6 state). It holds exactly 100 previously unexamined operations in ascending code-unit order of `<route>|<METHOD>`, `enterprise/integrations/route.ts|POST` through `external/documents/[id]/download/route.ts|GET`, and records the provenance of all six earlier tranches. It carries nothing forward. The GET of `enterprise/integrations` was classified in Gate 0B.6, so only its POST is selected here. No selected operation appears in an earlier tranche or in the decision-bound exception register; the validator recomputes the selection from the anchored register.
+
+### Decision-bound exceptions (4)
+
+Unchanged. The four carbon operations stay `DECISION_BOUND_SCOPE_EXCEPTION`, tied to the outstanding `UE-INST-CARBON-ACCOUNTING-SCOPE`. They were not selected, not re-examined and not converted to `OWNED`; none is adopted, authorized, operationally approved or production ready. `ue-route-decision-bound-exceptions.json` is byte-identical to the Gate 0B.6 acceptance.
+
+### The 100 operations
+
+All 100 are classified with a handler, method, domain, canonical engineering capability, ownership, actual and required authentication and authorization, tenant boundary, privacy, mutation and audit behavior, dependencies, caller evidence and a repair gate. None is unresolved. No capability was invented to reduce the undecided count: 33 operations reuse an existing capability owner and 4 new capabilities own the other 67.
+
+| Area | Operations |
+| --- | --- |
+| Exit interviews and the cognition analytics under them | 64 |
+| Export suite, evidence pack and external representative documents | 17 |
+| Enterprise integrations, SSO, entitlements, equity and calendar events | 19 |
+
+Mutation and audit characterization of the 100: 68 not mutating, 28 atomic audit in the transaction, 3 writes refused by CRUD governance, 1 separate audit event that is not atomic (`external/documents/[id]/download` GET, which also corrects the manifest `mutating` field). No operation records `crossTenantExposure`.
+
+### New capabilities (4)
+
+All have primary gate 14, status `PARTIAL` and a route owner. Each is an engineering owner for existing source and not an adoption of a business scope.
+
+| Capability | Operations | Why the catalog could not own the work |
+| --- | --- | --- |
+| `UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER` | 13 | No existing capability holds the exit-interview record, document, governance, publication, search and template tables. |
+| `UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS` | 46 | The derived analytics, memory profiles, graphs and forecasts read exit-interview text and no existing capability owns derived analytics. |
+| `UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS` | 2 | No capability owns identity-provider registration and its stored configuration. |
+| `UE-OMIT-EQUITY-SELF-IDENTIFICATION` | 6 | No capability owns member self-identification and equity monitoring. |
+
+The other 33 operations reuse `UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS` (14), `UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION` (12), `UE-OMIT-AI-ADVISORY-GOVERNANCE` (5), `UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING` (1) and `UE-CAP-F-002` (1).
+
+### Institutional decisions
+
+Six new outstanding decisions, none adopted: `UE-INST-EXIT-INTERVIEW-RECORD-READERS`, `UE-INST-EXIT-INTERVIEW-DERIVED-ANALYTICS-READERS`, `UE-INST-EXIT-INTERVIEW-DERIVED-ANALYTICS-AUDIENCE`, `UE-INST-EXIT-INTERVIEW-MODEL-PROCESSING-CONSENT`, `UE-INST-EQUITY-DATA-STEWARD` and `UE-INST-IDENTITY-FEDERATION-ADMINISTRATOR`. The 20 decisions are all `OUTSTANDING`.
+
+### Defects
+
+The 276 earlier defects are preserved verbatim. Gate 0B.7 adds 93 (13 high, 61 medium, 19 low), 369 in total, each with one responsible capability whose primary gate equals the repair gate, and none repaired. By repair gate: Gate 14 holds 91 and Gate 6 holds 2.
+
+### Release dispositions for HIGH defects
+
+Severity says how bad a defect is. A release disposition says whether the product may ship with it, and depends on actual exposure, potential impact, activation state and existing containment. From Gate 0B.7 on, every HIGH defect records one of `RELEASE_BLOCKING`, `CONDITIONALLY_BLOCKING` or `NON_BLOCKING_WITH_JUSTIFICATION`, and the validator checks it against the source: the activation evidence and any containment must quote real lines, a `NON_BLOCKING_WITH_JUSTIFICATION` needs a verified containment and cannot cover cross-tenant impact, unauthenticated reach, or wide authenticated reach with a mutation, financial, false-attestation or privacy impact, and a justification that rests on the inventory phase is refused. Being found in an inventory-only phase is never a ground for a lower disposition.
+
+The 13 new HIGH defects: 4 `RELEASE_BLOCKING`, 9 `CONDITIONALLY_BLOCKING`, 0 `NON_BLOCKING_WITH_JUSTIFICATION`.
+
+- `RELEASE_BLOCKING`: `DEF-0B7-EXC-READS-IGNORE-SENSITIVITY-LEVEL`, `DEF-0B7-EXC-PUBLISH-AND-INDEX-COPY-INTERVIEW-TEXT-TO-ORG-WIDE-KNOWLEDGE-BASE`, `DEF-0B7-COGA-CROSS-DOMAIN-CORRELATIONS-ARE-FIXED-LITERALS`, `DEF-0B7-COGB-PRECEDENT-AND-PROCEDURAL-ENGINES-RETURN-CONSTANT-CONTENT-AS-ORGANIZATION-ANALYSIS`.
+- `CONDITIONALLY_BLOCKING`: consent withdrawal that withdraws nothing derived, publish sending interviews to the model without a consent gate or audit, canned scenario simulation, derived aggregates and graphs that ignore interview sensitivity, fixed-rate forecasts, succession sending every published interview to the model, hard-coded evidence-pack attestations, and the extensions item read that returns credentials. Each states its blocking condition.
+
+The four `RELEASE_BLOCKING` dispositions enter gate-acceptance debt as kind `RELEASE_BLOCKING_DEFECT_DISPOSITION`, next to the three release-blocking route exposures. Each disposition is hand-authored from the source and is a judgment that the independent review should test; none depends on an operation's `crossTenantExposure` flag.
+
+### HIGH defects of Gate 0B.1 to Gate 0B.6: review queue
+
+The 71 HIGH defects found by the earlier tranches carry no disposition and are frozen. They are not rewritten. `ue-release-disposition-review-queue.json` lists all 71, each with its original severity, its original release-blocking mark and the sha256 of the frozen record, and leaves the disposition empty until an independent qualification records one. None of the 71 was recorded as release blocking and none is relabelled or downgraded here. The queue is not a disposition and does not say that any of them is non-blocking. The validator refuses a missing entry, a changed hash, a changed severity or mark, a pre-assigned disposition, and a disposition written into a frozen defect.
+
+### Evidence provenance
+
+The Gate 0B.4 provenance rules apply to every record. The 1,493 evidence items are 408 `ROUTE_HANDLER_DIRECT`, 444 `ROUTE_IMPORTED_HELPER`, 377 `SERVICE_IMPLEMENTATION` and 264 `SCHEMA_OR_POLICY`; 145 non-material inferences are recorded apart from the evidence list.
+
+### Capability lock integrity
+
+The lock holds 90 ids and 22 addition records (the four new Gate 0B.7 capabilities each name the frozen tranche, its operations hash and the count of operations owned). `lockVersion` is derived (now 6) and only `ue-gate0-update-lock.mjs` writes the lock. The provenance check recognizes the seventh tranche.
+
+### New validator checks
+
+`validateClassification7` is part of `validateGate0`. It adds the tranche freeze against the anchored register, the shared record rules, preservation of every earlier classification, decision and defect, the release-disposition control, and the review-queue check. The matrix pins the sha256 of the Gate 0B.7 manifest, classification and review queue. The Gate 0B.4 provenance check now also recognizes a plain `export function` as a function boundary.
+
+### Historical tests
+
+The Gate 0B.6 suite is anchored to the Gate 0B.6 acceptance commit for every moving total. `ue-gate0-cumulative.test.mjs` asserts the moving totals.
+
 ## Capabilities
 
-86 capabilities: 52 preserved plus 4 records from Gate 0B.1 and Gate 0A.2R (`UE-OMIT-STEWARD-CANONICAL-ABSENT`, `UE-OMIT-REP-CORRESPONDENCE`, `UE-OMIT-REP-TRANSITION-REASON-LEAK`, `UE-OMIT-ROUTE-DOMAIN-SCOPE`) plus 7 records from Gate 0B.2 plus 5 records from Gate 0B.3 plus 6 records from Gate 0B.4 plus 6 records from Gate 0B.5 plus 6 records from Gate 0B.6. The four earlier records are `UE-OMIT-STEWARD-CANONICAL-ABSENT`, `UE-OMIT-REP-CORRESPONDENCE`, `UE-OMIT-REP-TRANSITION-REASON-LEAK`, and `UE-OMIT-ROUTE-DOMAIN-SCOPE`.
+90 capabilities: 52 preserved plus 4 records from Gate 0B.1 and Gate 0A.2R (`UE-OMIT-STEWARD-CANONICAL-ABSENT`, `UE-OMIT-REP-CORRESPONDENCE`, `UE-OMIT-REP-TRANSITION-REASON-LEAK`, `UE-OMIT-ROUTE-DOMAIN-SCOPE`) plus 7 records from Gate 0B.2 plus 5 records from Gate 0B.3 plus 6 records from Gate 0B.4 plus 6 records from Gate 0B.5 plus 6 records from Gate 0B.6 plus 4 records from Gate 0B.7. The four earlier records are `UE-OMIT-STEWARD-CANONICAL-ABSENT`, `UE-OMIT-REP-CORRESPONDENCE`, `UE-OMIT-REP-TRANSITION-REASON-LEAK`, and `UE-OMIT-ROUTE-DOMAIN-SCOPE`.
 
 | Status | Count |
 | --- | --- |
 | `NOT_IMPLEMENTED` | 13 |
-| `PARTIAL` | 56 |
+| `PARTIAL` | 60 |
 | `SOURCE_IMPLEMENTED` | 2 |
 | `SOURCE_VERIFIED` | 5 |
 | `NATIVE_PENDING` | 2 |
 | `EXTERNAL_GATE` | 4 |
 | `SOURCE_UNSPECIFIED` | 4 |
 
-By primary gate: 1:7, 2:2, 3:1, 4:2, 5:5, 6:7, 7:3, 8:3, 9:6, 10:8, 11:7, 12:2, 13:3, 14:24, 15:5, schema-census:1.
+By primary gate: 1:7, 2:2, 3:1, 4:2, 5:5, 6:7, 7:3, 8:3, 9:6, 10:8, 11:7, 12:2, 13:3, 14:28, 15:5, schema-census:1.
 
 No capability has a native or browser qualification of `PASS`.
 
@@ -743,6 +832,8 @@ The 29 Gate 0B.4 tests in `ue-gate0b4-classification.test.mjs` cover the tranche
 
 The 36 Gate 0B.5 tests in `ue-gate0b5-classification.test.mjs` cover the tranche freeze (4 carry-forward plus 96 new at the Gate 0B.4 commit), the four carbon operations with their scope disposition and gate 8 obligation, the six new capabilities with their lock addition records, the provenance of every record, the 42 new defects and the preserved 136, the byte-identical earlier tranches, the cumulative counts, the Gate 0 validation and pins, and 22 negative cases (frozen membership, order and hash; a carry-forward operation dropped or silently assigned; an adopted, option-less, chosen, access-justifying or obligation-less carbon disposition; a disposition on a classified record; reverted classifications; dropped or altered defects; a defect without an owner at its repair gate; a quote that is absent or has no provenance; a software owner dropped from a preserved decision; a decision adopted; cross-tenant reachability recorded as authorization; a read that writes with no audit record; a capability outside its domain; missing audit, gates or callers; a summary or ledger that disagrees; a lost release-blocking contract). The 0B.2 and 0B.4 suites were anchored to their accepted commits, and the cumulative suite now holds 1644 operations, 826 owned, 681 undecided, 471 classified, 178 defects and 80 capabilities. All `ue-*.test.mjs` suites under `tooling/scripts/lib` ran 353 tests: 347 passed, 0 failed, 6 skipped (pre-existing). Running the build order (ownership, matrix, Gate 0B.5 builder, lock updater, matrix) a second time leaves the tree unchanged. `pnpm test:fast` was not run, by instruction.
 
+The 24 Gate 0B.7 tests in `ue-gate0b7-classification.test.mjs` cover the tranche freeze (100 new at the Gate 0B.6 commit, nothing carried forward, hash pinned), the preserved carbon exceptions, the four new capabilities with their lock additions, handler-specific provenance, the 93 new defects and the preserved 276, the 13 new HIGH dispositions (4 release blocking, 9 conditionally blocking), the 71-entry review queue, byte-identical 0B.1 to 0B.6 files, the six-class inventory and the matrix pins. Eleven negative cases refuse: a dropped, duplicated, extra, reordered, re-hashed, re-anchored or already-examined operation; missing, invented, wrong-method or unprovenanced evidence and an unreal caller; an invented, catch-all or unnamed capability owner; a role floor recorded as a kernel decision and reachable cross-tenant data recorded as authorized; a mutation or audit the source does not support; a HIGH defect with no disposition, a phase excuse, a hollow exposure, a fake activation or containment quote, a blocking-mark mismatch or a conditional with no condition; a `NON_BLOCKING_WITH_JUSTIFICATION` for uncontained, cross-tenant, unauthenticated or widely reachable harm; a deleted, downgraded, relabelled or in-place-dispositioned accepted defect and a review-queue entry removed, re-hashed, pre-assigned or relabelled; a carbon exception converted to owned, classified, adopted or approved; a mutated, reverted or re-owned historical tranche and a lock capability without provenance; and forged inventory counts. The cumulative suite now holds 1644 operations, 1026 owned, 477 awaiting classification, 4 exceptions, 671 classified, 369 defects and 90 capabilities. All 18 `ue-*.test.mjs` suites under `tooling/scripts/lib` ran 403 tests: 397 passed, 0 failed, 6 skipped (pre-existing). Running the build order (ownership, matrix, Gate 0B.7 builder, lock updater, matrix) a second time leaves every register byte-identical. `pnpm validate:docs` reports 0 errors. `node tooling/scripts/check-ue-convergence.mjs` exits 1 on the same two ratchets as before.
+
 The matrix validator returns 0 problems and 5 blockers (3 persona, route scope undecided, uninventoried route). The three unjustified exposures are Gate 14 release-blocking defects, carried in the defect register and counted in gate-acceptance debt. A problem is a rule violation. A blocker is unfinished Gate 0 scope.
 
 ## Remaining Gate 0 blockers
@@ -750,12 +841,12 @@ The matrix validator returns 0 problems and 5 blockers (3 persona, route scope u
 1. Steward: no canonical and no action universe. Open decision: distinct persona or the level-1 role in Representative 2.2.
 2. Representative: canonical 2.2 file absent. 17 identifiers grouped only, `R18` in source conflict, 2 references with no identifier.
 3. Financial Officer: canonical file absent. 28 identifiers unspecified, 6 grouped only, 3 references with no identifier.
-4. 577 route operations are `SCOPE_UNDECIDED` and await source classification, and 4 are `DECISION_BOUND_SCOPE_EXCEPTION` (carbon) that wait on `UE-INST-CARBON-ACCOUNTING-SCOPE`. 14 institutional decisions are outstanding.
+4. 477 route operations are `SCOPE_UNDECIDED` and await source classification, and 4 are `DECISION_BOUND_SCOPE_EXCEPTION` (carbon) that wait on `UE-INST-CARBON-ACCOUNTING-SCOPE`. 20 institutional decisions are outstanding.
 5. `reviews/route.ts` is on disk and not in the route-coverage manifest.
 6. Not a Gate 0 blocker: three unauthenticated system operations (`docs`, `docs/openapi`, `version`) are unjustified exposure and Gate 14 release-blocking implementation defects (`DEF-0B1-DOCS-UNAUTH-API-SURFACE`, `DEF-0B1-VERSION-UNAUTH-TOPOLOGY`). Their exposure contracts and remediation obligations are preserved. The repair is owned by Gate 14 and was not made here.
 
-Gate acceptance debt that is tracked and not a Gate 0 blocker: the four ratchet defects above and the three release-blocking exposures.
+Gate acceptance debt that is tracked and not a Gate 0 blocker: the four ratchet defects above, the three release-blocking exposures and the four `RELEASE_BLOCKING` Gate 0B.7 defect dispositions. The release dispositions of the 71 earlier HIGH defects are queued for independent qualification.
 
 ## Not done
 
-No runtime migration, application source, security allowlist, or census change. No Docker, native PostgreSQL, or Next server run. Migrations 0031–0037 and cache 0028 are not applied. Gate 1 does not start. The next action is an independent adversarial review of the Gate 0B.6 artifacts. No further tranche and no Gate 0C work was started.
+No runtime migration, application source, security allowlist, or census change. No Docker, native PostgreSQL, or Next server run. Migrations 0031–0037 and cache 0028 are not applied. Gate 1 does not start. The next action is an independent adversarial review of the Gate 0B.7 artifacts. No further tranche, no Gate 0C work and no Phase 3B work was started.

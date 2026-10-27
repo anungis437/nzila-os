@@ -14,7 +14,7 @@ import { FILES_0B6, NEW_CAPABILITY_IDS, validateClassification6 } from './ue-gat
 import { ANCHOR_COMMIT, DECISION_BOUND_OPERATIONS, TRANCHE_SIZE } from './ue-gate0b6-ids.mjs'
 import { FILE_EXCEPTIONS, inventoryTotals, inventoryTotalsProblems, validateDecisionBoundExceptions } from './ue-gate0b6-exceptions.mjs'
 import { anchoredEntries } from './ue-gate0b6-build-classification.mjs'
-import { ACCEPTED, fileAt } from './ue-gate0-history.mjs'
+import { ACCEPTED, fileAt, ledgerAt, matrixAt } from './ue-gate0-history.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const base = loadContext(ROOT)
@@ -228,8 +228,10 @@ test('the six new capabilities are justified by classified operations, sit in th
     'UE-OMIT-COPE-POLITICAL-ACTION': 14,
     'UE-OMIT-DISPATCH-HALL': 14,
   })
-  assert.equal(matrix.capabilities.length, 86)
-  assert.equal(lock.capabilityIds.length, 86)
+  const acceptedLock = JSON.parse(fileAt(ACCEPTED['0B.6'], FILES.lock))
+  assert.equal(matrixAt(ACCEPTED['0B.6']).capabilities.length, 86)
+  assert.equal(acceptedLock.capabilityIds.length, 86)
+  assert.ok(acceptedLock.capabilityIds.every((id) => lock.capabilityIds.includes(id)), 'later tranches only add to the lock')
   assert.ok(!NEW_CAPABILITY_IDS.includes('UE-OMIT-ROUTE-DOMAIN-SCOPE'))
 })
 
@@ -246,7 +248,7 @@ test('the 98 new defects each have one responsible capability that owns the repa
   }
   assert.equal(args.classification.defectRegister.length, 276)
   assert.deepEqual(args.classification.defectRegister.slice(0, 178), base.classification0b5.defectRegister)
-  assert.equal(matrix.routeDefects.length, 276)
+  assert.equal(matrixAt(ACCEPTED['0B.6']).routeDefects.length, 276)
   const accepted = JSON.parse(fileAt(ACCEPTED['0B.5'], 'docs/union-eyes/convergence/register/ue-pre-vs-engineering-completion.json')).routeDefects
   assert.equal(accepted.length, 178)
   const current = new Map(matrix.routeDefects.map((defect) => [defect.id, defect]))
@@ -261,7 +263,7 @@ test('earlier tranche files are byte-identical to the accepted commits and the l
   const anchored = JSON.parse(fileAt(ANCHOR_COMMIT, FILES_0B1.ledger))
   for (const [id, owner] of Object.entries(anchored.classified)) assert.equal(args.ledger.classified[id], owner, id)
   for (const [id, tranche] of Object.entries(anchored.classifiedIn)) assert.equal(args.ledger.classifiedIn[id], tranche, id)
-  assert.equal(Object.keys(args.ledger.classified).length, 471 + 100)
+  assert.equal(Object.keys(ledgerAt(ACCEPTED['0B.6']).classified).length, 471 + 100)
   for (const key of ['GATE-0B.1', 'GATE-0B.2', 'GATE-0B.3', 'GATE-0B.4', 'GATE-0B.5']) assert.equal(args.ledger.tranches[key].operationsHash, anchored.tranches[key].operationsHash)
   for (const old of base.anchoredOwnershipEntries0b6.filter((entry) => entry[4] !== 'SCOPE_UNDECIDED')) assert.notEqual(entryOf(args, `${old[0]}|${old[1]}`)[4], 'SCOPE_UNDECIDED')
 })
@@ -274,7 +276,7 @@ test('Gate 0 stays IN_PROGRESS, validates the sixth tranche and keeps the three 
   assert.equal(result.summary.decisionBoundExceptions.exceptions, 4)
   assert.equal(result.gateAcceptanceBlockers.filter((item) => item.kind === 'RELEASE_BLOCKING_ROUTE_EXPOSURE').length, 3)
   assert.ok(!result.blockers.some((item) => item.code === 'ROUTE_UNJUSTIFIED_EXPOSURE'))
-  assert.equal(result.summary.route.scopeUndecidedAwaitingClassification, 577)
+  assert.equal(inventoryTotals(base.anchoredOwnershipEntries0b7, exceptionOperations()).SCOPE_UNDECIDED_AWAITING_CLASSIFICATION, 577)
   assert.equal(result.summary.route.decisionBoundScopeExceptions, 4)
 })
 
@@ -614,7 +616,7 @@ test('NEGATIVE 11: a route-method identity cannot be duplicated, omitted, mis-ke
   assert.ok(hasProblem(run(twice), /does not record GATE-0B.6 in the ledger/))
   const ownershipIds = new Set(base.ownership.entries.map((entry) => `${entry[0]}|${entry[1]}`))
   assert.equal(ownershipIds.size, base.ownership.entries.length, 'no duplicate route-method identity in the ownership register')
-  const partial = base.ownership.entries.filter((entry) => entry[0] === 'enterprise/integrations/route.ts')
+  const partial = base.anchoredOwnershipEntries0b7.filter((entry) => entry[0] === 'enterprise/integrations/route.ts')
   assert.deepEqual(partial.map((entry) => [entry[1], entry[4]]).sort(), [['GET', 'OWNED'], ['POST', 'SCOPE_UNDECIDED']], 'a file only partly in the tranche classifies only its selected method')
 })
 

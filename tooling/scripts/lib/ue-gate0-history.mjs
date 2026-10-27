@@ -17,6 +17,7 @@ export const ACCEPTED = {
   '0B.3': '6dcc66d292d9a10f3713691a93009e7dc82bd610',
   '0B.4': '64d45940c34890eef41cc86c017d99b484dbf71c',
   '0B.5': '00de050b86e1014854e38fc34f51b4c7c85ed747',
+  '0B.6': 'cab380c61301152b604f4161d00d14ce81584045',
 }
 
 const OWNERSHIP = 'docs/union-eyes/convergence/register/ue-route-capability-ownership.json'

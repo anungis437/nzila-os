@@ -95,7 +95,7 @@ export function memberRegion(text, owner, name) {
  * that configuration. A method the file does not export has no region.
  */
 export function handlerRegion(text, method) {
-  const direct = new RegExp(`^export\\s+(?:async\\s+function\\s+${method}\\b|const\\s+${method}\\b)`, 'm').exec(text)
+  const direct = new RegExp(`^export\\s+(?:(?:async\\s+)?function\\s+${method}\\b|const\\s+${method}\\b)`, 'm').exec(text)
   if (direct) {
     const region = regionFrom(text, direct.index)
     const assigned = region.match(/=\s*(\w+)\.(GET|POST|PUT|PATCH|DELETE)\s*;?\s*$/)

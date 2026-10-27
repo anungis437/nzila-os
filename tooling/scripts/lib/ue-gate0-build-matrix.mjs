@@ -30,6 +30,8 @@ import { capabilitiesForTranche4 } from './ue-gate0b4-capabilities.mjs'
 import { FILES_0B5 } from './ue-gate0b5-classification.mjs'
 import { capabilitiesForTranche5 } from './ue-gate0b5-capabilities.mjs'
 import { FILES_0B6 } from './ue-gate0b6-classification.mjs'
+import { FILES_0B7 } from './ue-gate0b7-classification.mjs'
+import { capabilitiesForTranche7 } from './ue-gate0b7-capabilities.mjs'
 import { capabilitiesForTranche6 } from './ue-gate0b6-capabilities.mjs'
 import { DECISION_BOUND_OPERATIONS } from './ue-gate0b6-ids.mjs'
 import { FILE_EXCEPTIONS, inventoryTotals } from './ue-gate0b6-exceptions.mjs'
@@ -432,6 +434,7 @@ distinct.push(
   ...capabilitiesForTranche4(cap),
   ...capabilitiesForTranche5(cap),
   ...capabilitiesForTranche6(cap),
+  ...capabilitiesForTranche7(cap),
 )
 
 // NOT_IMPLEMENTED finance domains cite a service in the narrative. The validator
@@ -737,6 +740,11 @@ const matrix = {
     note: 'Hash pins for the frozen Gate 0B.6 tranche manifest and its source-evidenced classification register. The cumulative ledger is pinned above.',
     files: Object.fromEntries(Object.entries(FILES_0B6).map(([key, file]) => [key, { file, sha256: existsSync(join(ROOT, file)) ? sha256File(ROOT, file) : null }])),
   },
+  routeClassification0b7: {
+    tranche: 'GATE-0B.7',
+    note: 'Hash pins for the frozen Gate 0B.7 tranche manifest, its source-evidenced classification register and the release disposition review queue. The cumulative ledger is pinned above.',
+    files: Object.fromEntries(Object.entries(FILES_0B7).map(([key, file]) => [key, { file, sha256: existsSync(join(ROOT, file)) ? sha256File(ROOT, file) : null }])),
+  },
   decisionBoundExceptions: {
     note: 'Operations Gate 0B.4 and Gate 0B.5 examined, whose evidence is exhausted and whose scope waits on an outstanding institutional decision. They are reported apart from operations awaiting source classification and are never counted as OWNED. The register is pinned here; an exception is not an approval.',
     file: FILE_EXCEPTIONS,
@@ -744,7 +752,7 @@ const matrix = {
     operations: [...DECISION_BOUND_OPERATIONS],
   },
   routeInventoryTotals: inventoryTotals(ownership.entries, new Set(DECISION_BOUND_OPERATIONS)),
-  routeDefects: JSON.parse(readFileSync(join(ROOT, [FILES_0B6, FILES_0B5, FILES_0B4, FILES_0B3].map((files) => files.classification).find((file) => existsSync(join(ROOT, file)))), 'utf8'))
+  routeDefects: JSON.parse(readFileSync(join(ROOT, [FILES_0B7, FILES_0B6, FILES_0B5, FILES_0B4, FILES_0B3].map((files) => files.classification).find((file) => existsSync(join(ROOT, file)))), 'utf8'))
     .defectRegister.map(({ id, gate, severity, ownerCapabilityId, tranche, releaseBlocking }) => ({ id, gate, severity, ownerCapabilityId, tranche, releaseBlocking })),
   outOfScope: [
     {
