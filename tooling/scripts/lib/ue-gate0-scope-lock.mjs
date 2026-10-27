@@ -25,6 +25,7 @@ import { FILES_0B3, validateClassification3 } from './ue-gate0b3-classification.
 import { ANCHOR_COMMIT as ANCHOR_COMMIT_0B3 } from './ue-gate0b3-groups.mjs'
 import { FILES_0B4, validateClassification4 } from './ue-gate0b4-classification.mjs'
 import { ANCHOR_COMMIT as ANCHOR_COMMIT_0B4 } from './ue-gate0b4-groups.mjs'
+import { lockProvenanceProblems } from './ue-gate0-lock-provenance.mjs'
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 
@@ -179,6 +180,18 @@ function anchoredCapabilityIds(root, lock) {
   }
 }
 
+function checkpointCapabilityIds(root, lock) {
+  const out = {}
+  for (const checkpoint of lock?.checkpoints ?? []) {
+    try {
+      out[checkpoint.commit] = JSON.parse(git(root, ['show', `${checkpoint.commit}:${FILES.lock}`])).capabilityIds
+    } catch {
+      out[checkpoint.commit] = null
+    }
+  }
+  return out
+}
+
 function anchoredPersonaFloor(root, recovery) {
   const anchor = recovery?.universeFloorAnchor
   if (!anchor?.commit) return null
@@ -309,6 +322,7 @@ export function loadContext(root = ROOT) {
     anchoredOwnershipEntries0b4: anchoredOwnershipEntries(root, ANCHOR_COMMIT_0B4),
     lock,
     anchorCapabilityIds: anchoredCapabilityIds(root, lock),
+    checkpointCapabilityIds: checkpointCapabilityIds(root, lock),
     evidence: readJsonIfPresent(root, FILES.evidence),
     ratchetFailures: currentRatchetFailures(root),
   }
@@ -625,6 +639,20 @@ export function validateGate0(matrix, ctx = {}) {
       })
     : { problems: ['Gate 0B.4 route classification cannot be validated without the ownership register'], registeredReleaseBlocking: new Set(), releaseBlockingDefects: [], summary: null }
   problems.push(...check0b4.problems)
+  const trancheEvidence = 'trancheEvidence' in ctx ? ctx.trancheEvidence : [
+    ['tranche0b1', 'classification0b1'], ['tranche0b2', 'classification0b2'], ['tranche0b3', 'classification0b3'], ['tranche0b4', 'classification0b4'],
+  ].map(([manifestKey, classificationKey]) => ({
+    manifest: manifestKey in ctx ? ctx[manifestKey] : base[manifestKey],
+    classification: classificationKey in ctx ? ctx[classificationKey] : base[classificationKey],
+  })).map((item) => ({ ...item, tranche: item.manifest?.tranche }))
+  problems.push(...lockProvenanceProblems({
+    lock,
+    byId,
+    anchorIds,
+    checkpointIds: 'checkpointCapabilityIds' in ctx ? ctx.checkpointCapabilityIds : base.checkpointCapabilityIds,
+    tranches: trancheEvidence,
+    deps: { exists, commitExists },
+  }))
   problems.push(...routeDefectProblems(matrix, classification0b4))
   problems.push(...('classificationPinProblems' in ctx ? ctx.classificationPinProblems : classificationPinProblems(matrix, base.root)))
   const routeCheck = validateRouteOwnership({
