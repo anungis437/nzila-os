@@ -43,12 +43,15 @@ const readText = (file) => {
 }
 
 const exceptionOperations = () => new Set(DECISION_BOUND_OPERATIONS)
+const ownershipAtAcceptance = base.anchoredOwnershipEntries0b12
+const acceptedMatrix = matrixAt(ACCEPTED['0B.11'])
+const acceptedLock = JSON.parse(fileAt(ACCEPTED['0B.11'], FILES.lock))
 
 function fixture() {
   return {
     classification: clone(base.classification0b11),
     manifest: clone(base.tranche0b11),
-    ledger: clone(base.ledger0b1),
+    ledger: clone(ledgerAt(ACCEPTED['0B.11'])),
     classification0b1: clone(base.classification0b1),
     classification0b2: clone(base.classification0b2),
     classification0b3: clone(base.classification0b3),
@@ -70,7 +73,7 @@ function fixture() {
     manifest0b9: clone(base.tranche0b9),
     manifest0b10: clone(base.tranche0b10),
     reviewQueue: clone(base.reviewQueue0b7),
-    entries: clone(base.ownership.entries),
+    entries: clone(ownershipAtAcceptance),
     capabilityById: new Map(matrix.capabilities.map((capability) => [capability.id, capability])),
     universe: new Set(routeKeys(base.routes)),
     exists,
@@ -219,7 +222,7 @@ test('the four carbon operations stay decision-bound exceptions: not selected, n
     assert.equal(item.countedAsOwned, false, item.id)
     assert.equal(item.productionReady, false, item.id)
   }
-  assert.equal(base.ownership.entries.filter((entry) => entry[4] === 'SCOPE_UNDECIDED').length, 81, 'the 77 awaiting operations plus the four exceptions')
+  assert.equal(ownershipAtAcceptance.filter((entry) => entry[4] === 'SCOPE_UNDECIDED').length, 81, 'the 77 awaiting operations plus the four exceptions')
 })
 
 test('every classified record cites its route file, states the authorization applied, names callers, audit and dependency gates, and has provenance for each material claim', () => {
@@ -271,8 +274,8 @@ test('the four new capabilities are justified by classified operations, sit in t
     'UE-OMIT-SOCIAL-MEDIA-PUBLISHING': 14,
     'UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY': 14,
   })
-  assert.equal(matrix.capabilities.length, 103)
-  assert.equal(lock.capabilityIds.length, 103)
+  assert.equal(acceptedMatrix.capabilities.length, 103)
+  assert.equal(acceptedLock.capabilityIds.length, 103)
   assert.ok(!NEW_CAPABILITY_IDS.includes('UE-OMIT-ROUTE-DOMAIN-SCOPE'))
 })
 
@@ -291,8 +294,8 @@ test('the 108 new defects each have one responsible capability that owns the rep
   assert.deepEqual(args.classification.defectRegister.slice(0, 609), base.classification0b10.defectRegister)
   const accepted = matrixAt(ACCEPTED['0B.10']).routeDefects
   assert.equal(accepted.length, 609)
-  assert.equal(matrix.routeDefects.length, 717)
-  const current = new Map(matrix.routeDefects.map((defect) => [defect.id, defect]))
+  assert.equal(acceptedMatrix.routeDefects.length, 717)
+  const current = new Map(acceptedMatrix.routeDefects.map((defect) => [defect.id, defect]))
   for (const defect of accepted) assert.deepEqual(current.get(defect.id), defect, defect.id)
   const acceptedHigh = accepted.filter((defect) => defect.severity === 'HIGH').length
   assert.equal(acceptedHigh, 124, '71 earlier HIGH defects plus the 13 of Gate 0B.7, the 12 of Gate 0B.8, the 14 of Gate 0B.9 and the 14 of Gate 0B.10')
@@ -315,7 +318,7 @@ test('every new HIGH defect records a release disposition proved against the sou
   assert.deepEqual(counts, { RELEASE_BLOCKING: 8, CONDITIONALLY_BLOCKING: 8, NON_BLOCKING_WITH_JUSTIFICATION: 0 })
   assert.ok(newDefects(args).filter((defect) => defect.severity !== 'HIGH').every((defect) => defect.releaseBlocking === false || defect.releaseDisposition), 'a non-HIGH defect is release blocking only through a disposition')
   const gate = validateGate0(matrix, { base })
-  assert.equal(gate.gateAcceptanceBlockers.filter((item) => item.kind === 'RELEASE_BLOCKING_DEFECT_DISPOSITION').length, 28, 'four preserved from Gate 0B.7, four from Gate 0B.8, eight from Gate 0B.9, four from Gate 0B.10 and eight recorded here')
+  assert.equal(gate.gateAcceptanceBlockers.filter((item) => item.kind === 'RELEASE_BLOCKING_DEFECT_DISPOSITION' && !/DEF-0B12-/.test(JSON.stringify(item))).length, 28, 'four preserved from Gate 0B.7, four from Gate 0B.8, eight from Gate 0B.9, four from Gate 0B.10 and eight recorded here; the live gate also holds those of Gate 0B.12, excluded here')
   assert.equal(gate.gateAcceptanceBlockers.filter((item) => item.kind === 'RELEASE_BLOCKING_ROUTE_EXPOSURE').length, 3)
 })
 
@@ -359,7 +362,7 @@ test('earlier tranche files are byte-identical to the accepted commits and the l
 })
 
 test('the six inventory classes are preserved, add up to 1644, and the matrix pins the eleventh tranche', () => {
-  const totals = inventoryTotals(base.ownership.entries, exceptionOperations())
+  const totals = inventoryTotals(ownershipAtAcceptance, exceptionOperations())
   assert.deepEqual(totals, {
     OWNED: 1426,
     SCOPE_UNDECIDED_AWAITING_CLASSIFICATION: 77,
@@ -371,18 +374,18 @@ test('the six inventory classes are preserved, add up to 1644, and the matrix pi
   })
   assert.equal(Object.keys(totals).length, 7, 'no inventory class was added')
   assert.equal(1426 + 77 + 4 + 97 + 31 + 9, 1644)
-  assert.deepEqual(matrix.routeInventoryTotals, totals)
+  assert.deepEqual(acceptedMatrix.routeInventoryTotals, totals)
   const before = countsAt(ACCEPTED['0B.10'])
   assert.deepEqual([before.owned, before.undecided, before.classified], [1326, 181, 971])
   assert.equal(before.owned + 100, totals.OWNED)
   assert.equal(before.undecided - 100, totals.SCOPE_UNDECIDED_AWAITING_CLASSIFICATION + totals.DECISION_BOUND_SCOPE_EXCEPTION)
-  assert.equal(matrix.routeClassification0b11.files.manifest.sha256, sha(readText(FILES_0B11.manifest)))
-  assert.equal(matrix.routeClassification0b11.files.classification.sha256, sha(readText(FILES_0B11.classification)))
-  assert.equal(matrix.routeClassification0b10.files.classification.sha256, sha(readText(FILES_0B10.classification)))
+  assert.equal(acceptedMatrix.routeClassification0b11.files.manifest.sha256, sha(readText(FILES_0B11.manifest)))
+  assert.equal(acceptedMatrix.routeClassification0b11.files.classification.sha256, sha(readText(FILES_0B11.classification)))
+  assert.equal(acceptedMatrix.routeClassification0b10.files.classification.sha256, sha(readText(FILES_0B10.classification)))
   assert.equal(matrix.releaseDispositionChallenges.sha256, sha(readText(FILE_CHALLENGES)))
-  assert.equal(matrix.routeClassification0b9.files.classification.sha256, sha(readText(FILES_0B9.classification)))
-  assert.equal(matrix.routeClassification0b8.files.classification.sha256, sha(readText(FILES_0B8.classification)))
-  assert.equal(matrix.routeClassification0b7.files.reviewQueue.sha256, sha(readText(FILES_0B7.reviewQueue)))
+  assert.equal(acceptedMatrix.routeClassification0b9.files.classification.sha256, sha(readText(FILES_0B9.classification)))
+  assert.equal(acceptedMatrix.routeClassification0b8.files.classification.sha256, sha(readText(FILES_0B8.classification)))
+  assert.equal(acceptedMatrix.routeClassification0b7.files.reviewQueue.sha256, sha(readText(FILES_0B7.reviewQueue)))
 })
 
 test('Gate 0 stays IN_PROGRESS, validates the eleventh tranche and keeps the three unjustified exposures and the 4 carbon exceptions distinct', () => {
@@ -392,9 +395,9 @@ test('Gate 0 stays IN_PROGRESS, validates the eleventh tranche and keeps the thr
   assert.equal(result.summary.classification0b11.classified, 100)
   assert.equal(result.summary.decisionBoundExceptions.exceptions, 4)
   assert.ok(!result.blockers.some((item) => item.code === 'ROUTE_UNJUSTIFIED_EXPOSURE'))
-  assert.equal(result.summary.route.scopeUndecidedAwaitingClassification, 77)
+  assert.equal(result.summary.route.scopeUndecidedAwaitingClassification, 0, 'the live total after Gate 0B.12; 77 at acceptance is asserted from the anchored register above')
   assert.equal(result.summary.route.decisionBoundScopeExceptions, 4)
-  assert.equal(result.summary.capabilityCount, 103)
+  assert.equal(result.summary.capabilityCount, 111, 'the live count after Gate 0B.12; 103 at acceptance')
 })
 
 test('adversarial findings are recorded as defects with a later gate and the source facts they rest on', () => {
@@ -782,10 +785,10 @@ test('NEGATIVE 9: a decision-bound carbon exception cannot be converted into own
   const adoptedResult = run(adopted)
   assert.ok(hasProblem(adoptedResult, /is ADOPTED; Gate 0B.11 can record only outstanding decisions/))
   assert.ok(hasProblem(adoptedResult, /was altered or adopted/))
-  const inventory = inventoryTotals(base.ownership.entries.map((entry) => (DECISION_BOUND_OPERATIONS.includes(`${entry[0]}|${entry[1]}`) ? [...entry.slice(0, 4), 'OWNED', ...entry.slice(5)] : entry)), exceptionOperations())
+  const inventory = inventoryTotals(ownershipAtAcceptance.map((entry) => (DECISION_BOUND_OPERATIONS.includes(`${entry[0]}|${entry[1]}`) ? [...entry.slice(0, 4), 'OWNED', ...entry.slice(5)] : entry)), exceptionOperations())
   assert.equal(inventory.DECISION_BOUND_SCOPE_EXCEPTION, 0)
   assert.equal(inventory.OWNED, 1430, 'converting an exception to owned would show as four more owned operations and is caught by the pinned totals')
-  const totals = inventoryTotals(base.ownership.entries, exceptionOperations())
+  const totals = inventoryTotals(ownershipAtAcceptance, exceptionOperations())
   assert.ok(inventoryTotalsProblems(inventory, totals).some((problem) => /INVENTORY-TOTALS-DRIFT/.test(problem)))
   const double = { ...totals, SCOPE_UNDECIDED_AWAITING_CLASSIFICATION: totals.SCOPE_UNDECIDED_AWAITING_CLASSIFICATION + 4 }
   assert.ok(inventoryTotalsProblems(double, totals).some((problem) => /INVENTORY-TOTALS-SUM: the categories add to 1648, not the 1644/.test(problem)))
@@ -821,16 +824,16 @@ test('NEGATIVE 10: a historical tranche cannot be mutated, reverted or re-owned,
   run(edited)
   assert.equal(readText(FILES_0B10.classification), fileAt(ACCEPTED['0B.10'], FILES_0B10.classification))
   assert.equal(readText(FILES_0B10.manifest), fileAt(ACCEPTED['0B.10'], FILES_0B10.manifest))
-  const ownershipIds = new Set(base.ownership.entries.map((entry) => `${entry[0]}|${entry[1]}`))
-  assert.equal(ownershipIds.size, base.ownership.entries.length, 'no duplicate route-method identity in the ownership register')
+  const ownershipIds = new Set(ownershipAtAcceptance.map((entry) => `${entry[0]}|${entry[1]}`))
+  assert.equal(ownershipIds.size, ownershipAtAcceptance.length, 'no duplicate route-method identity in the ownership register')
   const frozen = new Set(base.tranche0b11.operations)
   for (const file of new Set(base.tranche0b11.operations.map((id) => id.split('|')[0]))) {
-    const methods = base.ownership.entries.filter((entry) => entry[0] === file)
+    const methods = ownershipAtAcceptance.filter((entry) => entry[0] === file)
     assert.ok(methods.every((entry) => (frozen.has(`${entry[0]}|${entry[1]}`) ? entry[4] === 'OWNED' : entry[4] === 'SCOPE_UNDECIDED')), `${file}: a method inside the frozen tranche is owned and a method outside it is not touched, so ownership never spills across the tranche boundary`)
     assert.ok(base.anchoredOwnershipEntries0b11.filter((entry) => entry[0] === file).every((entry) => entry[4] === 'SCOPE_UNDECIDED'), `${file} was entirely undecided at the Gate 0B.10 acceptance`)
   }
-  assert.equal(entryOf({ entries: base.ownership.entries }, SPLIT_FILE_UNDECIDED)[4], 'SCOPE_UNDECIDED', 'support/sla POST sorts after the hundredth operation and stays awaiting classification though its file has a frozen GET')
-  assert.equal(entryOf({ entries: base.ownership.entries }, SPLIT_FILE_UNDECIDED)[3], UNDECIDED_OWNER)
+  assert.equal(entryOf({ entries: ownershipAtAcceptance }, SPLIT_FILE_UNDECIDED)[4], 'SCOPE_UNDECIDED', 'support/sla POST sorts after the hundredth operation and stays awaiting classification though its file has a frozen GET')
+  assert.equal(entryOf({ entries: ownershipAtAcceptance }, SPLIT_FILE_UNDECIDED)[3], UNDECIDED_OWNER)
 
   const lock = JSON.parse(readFileSync(join(ROOT, FILES.lock), 'utf8'))
   const stripped = validateGate0(matrix, { base, lock: { ...clone(lock), additions: lock.additions.filter((item) => item.tranche !== 'GATE-0B.11') } })
@@ -964,8 +967,8 @@ test('NEGATIVE 13: the Gate 0B.7 to 0B.10 release dispositions are preserved, a 
   assert.equal(entryOf(fixture(), outsiderId)[4], 'SCOPE_UNDECIDED')
 
   const gate = validateGate0(matrix, { base })
-  const dispositions = gate.gateAcceptanceBlockers.filter((item) => item.kind === 'RELEASE_BLOCKING_DEFECT_DISPOSITION')
-  assert.equal(dispositions.length, 28)
+  const dispositions = gate.gateAcceptanceBlockers.filter((item) => item.kind === 'RELEASE_BLOCKING_DEFECT_DISPOSITION' && !/DEF-0B12-/.test(JSON.stringify(item)))
+  assert.equal(dispositions.length, 28, 'the live gate also holds the Gate 0B.12 dispositions')
   const text = (item) => item.id ?? item.defectId ?? item.detail ?? JSON.stringify(item)
   assert.equal(dispositions.filter((item) => /^DEF-0B7-/.test(text(item))).length, 4)
   assert.equal(dispositions.filter((item) => /^DEF-0B8-/.test(text(item))).length, 4)
@@ -1021,7 +1024,7 @@ test('NEGATIVE 15: ownership cannot spill across the tranche boundary: a file wh
   assert.notEqual(group, entryOf(reasoned, 'support/metrics/route.ts|GET')[2], 'the sla GET has its own method-limited rule, so a whole-file rule cannot cover the later POST')
   assert.ok(base.ownership.rules.find((rule) => rule.id === group).methods?.includes('GET'))
   assert.deepEqual(base.ownership.rules.find((rule) => rule.id === group).methods, ['GET'])
-  const undecided = base.ownership.entries.filter((candidate) => candidate[4] === 'SCOPE_UNDECIDED').map((candidate) => `${candidate[0]}|${candidate[1]}`)
+  const undecided = ownershipAtAcceptance.filter((candidate) => candidate[4] === 'SCOPE_UNDECIDED').map((candidate) => `${candidate[0]}|${candidate[1]}`)
   assert.ok(undecided.includes(SPLIT_FILE_UNDECIDED))
   assert.equal(undecided.length, 81)
 })
@@ -1084,7 +1087,7 @@ test('the independent OPL-01 and OPL-07 challenge validates against the live sou
   assert.deepEqual(blockers.map((item) => item.id), ['CHALLENGE-0B10-OPL-01', 'CHALLENGE-0B10-OPL-07'])
   assert.deepEqual(challengeBlockers(args.register).map((item) => item.id), blockers.map((item) => item.id))
   assert.ok(blockers.every((item) => item.releaseBlocking === true && item.blocksGates.includes(14)))
-  assert.equal(gate.gateAcceptanceBlockers.filter((item) => item.kind === 'RELEASE_BLOCKING_DEFECT_DISPOSITION').length, 28, 'the challenge is a separate kind and does not alter the 28 accepted release-blocking dispositions')
+  assert.equal(gate.gateAcceptanceBlockers.filter((item) => item.kind === 'RELEASE_BLOCKING_DEFECT_DISPOSITION' && !/DEF-0B12-/.test(JSON.stringify(item))).length, 28, 'the challenge is a separate kind and does not alter the 28 accepted release-blocking dispositions')
   assert.equal(gate.summary.verdict, 'IN_PROGRESS')
 })
 

@@ -312,7 +312,7 @@ test('NEGATIVE 1: the selection is exact, so an operation cannot disappear from,
   stray.classification.operations.push({ ...clone(record(stray, AUDIT_POST)), id: 'zzz/route.ts|GET' })
   assert.ok(hasProblem(run(stray), /is not in the frozen tranche/))
   const swapped = fixture()
-  const outsider = swapped.entries.find((entry) => entry[4] === 'SCOPE_UNDECIDED' && !swapped.manifest.operations.includes(`${entry[0]}|${entry[1]}`) && !DECISION_BOUND_OPERATIONS.includes(`${entry[0]}|${entry[1]}`))
+  const outsider = swapped.entries.find((entry) => entry[4] === 'OWNED' && !swapped.manifest.operations.includes(`${entry[0]}|${entry[1]}`) && !DECISION_BOUND_OPERATIONS.includes(`${entry[0]}|${entry[1]}`))
   swapped.manifest.newOperations[0] = `${outsider[0]}|${outsider[1]}`
   assert.ok(hasProblem(run(swapped), /newOperations are not the frozen operations|not the next 100 SCOPE_UNDECIDED operations/))
   const reordered = fixture()

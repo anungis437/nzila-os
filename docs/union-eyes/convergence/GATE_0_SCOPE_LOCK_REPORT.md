@@ -1135,21 +1135,151 @@ The lock holds 103 ids and 35 addition records (the four new Gate 0B.11 capabili
 
 The Gate 0B.7 to 0B.10 suites are anchored to their acceptance commits for every moving total. `ue-gate0-cumulative.test.mjs`, `ue-gate0-lock-provenance.test.mjs` and `ue-gate0-scope-lock.test.mjs` assert the live moving totals.
 
+## Gate 0B.12: final route-classification tranche
+
+Inventory only. No application source, migration, allowlist, schema declaration or persona specification change. The 0B.1 to 0B.11 manifests, classifications, the review queue, the independent challenge register and the decision-bound exception register are byte-identical to the commits that accepted them. Every frozen earlier defect, including the 28 `RELEASE_BLOCKING` dispositions of Gates 0B.7 to 0B.11 and `DEF-0B10-OPL-01` and `DEF-0B10-OPL-07`, is unchanged.
+
+### Inventory totals
+
+| Class | Operations |
+| --- | --- |
+| `OWNED` | 1503 |
+| `SCOPE_UNDECIDED`, awaiting source classification | 0 |
+| `DECISION_BOUND_SCOPE_EXCEPTION` | 4 |
+| `RETIRED_501` | 97 |
+| `STUB_501` | 31 |
+| `SYSTEM` | 9 |
+
+The six classes sum to 1,644 and no class was added. Every operation has exactly one disposition. The raw `SCOPE_UNDECIDED` count in the ownership register is 4, and all four are the carbon exceptions. 1,148 operations are in the classification ledger. 355 owned operations were owned by earlier rules before any source classification and are not in the ledger. Exactly 77 operations moved from awaiting to owned. No retired, stub or system operation changed.
+
+### Tranche freeze
+
+Tranche `GATE-0B.12`, version 1, frozen in `ue-route-tranche-0b12-manifest.json` with operations hash `c94a68dd6a722502aa6dc71836a4379d6967c718a51ebad5414e7c61e8dfd08b` and a `versionLog`. Anchor commit `6db896d31e7cb846cabe9763bd32e5406918832c` (the accepted Gate 0B.11 state). It holds every never-examined operation that remained `SCOPE_UNDECIDED` at the anchor, 77 in ascending code-unit order of `<route>|<METHOD>`, `support/sla/route.ts|POST` through `workspace/telemetry/route.ts|POST`. The selection is not the first N: the validator recomputes it from the anchored register and refuses any other list. It records the provenance of all eleven earlier tranches, carries nothing forward and excludes the four decision-bound exceptions. No selected operation was examined earlier.
+
+### Decision-bound exceptions (4)
+
+Unchanged and separately reported. The four carbon operations stay `DECISION_BOUND_SCOPE_EXCEPTION`, tied to the outstanding `UE-INST-CARBON-ACCOUNTING-SCOPE`. None was selected, re-examined or converted to `OWNED`, and none is adopted, authorized, operationally approved or production ready. They are not counted as owned, classified or covered. The route inventory is therefore not complete: four operations have no ownership by design, and `reviews/route.ts` is on disk and outside the coverage manifest.
+
+### The 77 operations
+
+All 77 are classified. None is unresolved, so no evidence gap forces `REWORK_REQUIRED`. 28 operations reuse an existing capability and 8 new capabilities own the other 49. No capability was invented to reduce the undecided count.
+
+| Area | Operations |
+| --- | --- |
+| Support tickets, support metrics and SLA | 12 |
+| KPI targets | 3 |
+| Tax slips, T106, RL-1 and COPE receipts | 8 |
+| Tenant compatibility wrapper, Django auth diagnostic, queue status and workspace telemetry | 4 |
+| Testimonials | 3 |
+| Triage designations | 3 |
+| Bargaining units and worksites | 10 |
+| Media upload paths | 2 |
+| Signed-in user organization choices | 1 |
+| V2 mirror catch-all | 5 |
+| CUPE vocabulary | 6 |
+| Voice recording and transcription | 2 |
+| WCB claims and employer assessments | 10 |
+| Governance workbook | 8 |
+
+Mutation and audit characterization: 40 not mutating, 28 atomic audit in the transaction, 7 write refused by governance and 2 with no audit (the organizations read that rewrites membership rows, and the public workbook start that creates a pre-claim row). Authorization: 59 role floors, 10 session only, 6 external trust (the queue-status service credential and five workbook routes that rest on a bearer token or holder identifier) and 2 public (workbook start and checkout). No operation records kernel authorization. 50 operations have no caller in tracked product source.
+
+One operation records `crossTenantExposure`: `users/me/organizations/route.ts|GET`. It is unauthorized, cites a defect that records the cross-tenant impact and is not recorded as authorized.
+
+### New capabilities (8)
+
+Each has a route owner and is an engineering owner for existing source, not an adoption of a business scope.
+
+| Capability | Primary gate | Operations |
+| --- | --- | --- |
+| `UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER` | 14 | 10 |
+| `UE-OMIT-CUPE-VOCABULARY-REFERENCE-DATA` | 14 | 6 |
+| `UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT` | 14 | 8 |
+| `UE-OMIT-KPI-TARGET-CONFIGURATION` | 14 | 3 |
+| `UE-OMIT-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTES` | 14 | 7 |
+| `UE-OMIT-PLATFORM-MARKETING-TESTIMONIALS` | 14 | 3 |
+| `UE-OMIT-VOICE-TRANSCRIPTION` | 14 | 2 |
+| `UE-OMIT-WCB-CLAIMS-AND-EMPLOYER-ASSESSMENTS` | 6 | 10 |
+
+Each addition is recorded in the independent lock with the frozen tranche, its operations hash and the count of operations owned, and each is in the matrix. Existing owners used: `UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS` (12), `UE-OMIT-FINANCE-UNAVAILABLE` (8), `UE-OMIT-REPRESENTATION-PROTOCOL-POLICY` (3), `UE-OMIT-CONTENT-LIBRARY-EDITORIAL` (2), `UE-OMIT-PLATFORM-OPERATOR-CONTROLS` (1), `UE-CAP-A-003` (1) and `UE-OMIT-PILOT-PROGRAM-OPERATIONS` (1).
+
+### Institutional decisions
+
+Thirteen new outstanding decisions, none adopted, 79 in all and all 79 outstanding: `UE-INST-TAX-SLIP-AND-RECEIPT-ISSUER-AND-SOURCE-RECORDS`, `UE-INST-BARGAINING-UNIT-AND-WORKSITE-RECORD-AUTHORITY`, `UE-INST-WCB-CLAIM-AND-ASSESSMENT-READERS-AND-WRITERS`, `UE-INST-PLATFORM-MARKETING-CONTENT-OWNER-AND-APPROVAL`, `UE-INST-KPI-TARGET-OWNER-AND-CALCULATION-RULE`, `UE-INST-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTE-DISPOSITION`, `UE-INST-CUPE-VOCABULARY-AUTHORITY-AND-SERVICE-LEVELS`, `UE-INST-VOICE-RECORDING-CONSENT-RETENTION-AND-PROCESSOR`, `UE-INST-QUEUE-STATUS-READERS-AND-SERVICE-CREDENTIAL`, `UE-INST-MEMBERSHIP-LINKING-BY-EMAIL-AND-LEGACY-IDENTITY`, `UE-INST-TRIAGE-DESIGNATION-ELIGIBILITY-AND-EXPIRY-RECORD`, `UE-INST-WORKBOOK-PSEUDONYMOUS-DATA-LIFECYCLE-CONSENT-AND-PROCESSOR` and `UE-INST-WORKBOOK-CLAIM-AND-SAME-ORGANIZATION-PEER-AUTHORITY`. A missing mandate does not prevent an engineering owner, and none of these decisions justifies access.
+
+### Defects
+
+The 717 earlier defects are preserved verbatim. Gate 0B.12 adds 53 (4 high, 30 medium, 19 low), 770 in total (144 high, 481 medium, 145 low), each with one responsible capability whose primary gate equals the repair gate, and none repaired. By repair gate of the new defects: Gate 14 holds 37, Gate 1 holds 4, Gates 2 and 9 hold 3 each and Gates 5, 6 and 11 hold 2 each.
+
+### Release dispositions for HIGH defects
+
+The 4 new HIGH defects are all `RELEASE_BLOCKING`: 0 `CONDITIONALLY_BLOCKING`, 0 `NON_BLOCKING_WITH_JUSTIFICATION`. Three are reachable by any authenticated caller and one by a role-restricted caller. Each quotes real activation evidence and records its containment, and none rests on an assumption about deployment, entitlement, usage or the inventory-only phase.
+
+- The tax slip, T106, RL-1 and COPE receipt paths are generic CRUD routes over the per-capita remittance ledger with a member read floor, so any member receives the whole ledger (`DEF-0B12-CRUD-TAX-PATHS-SERVE-THE-PER-CAPITA-REMITTANCE-LEDGER-TO-ANY-MEMBER`, repair gate 5, owner `UE-OMIT-FINANCE-UNAVAILABLE`).
+- The testimonial item write is conditioned on the id alone, so an administrator of any organization rewrites or deletes any platform testimonial (`DEF-0B12-CRUD-TESTIMONIAL-ITEM-WRITES-ARE-CONDITIONED-ON-THE-ID-ALONE-FOR-AN-ADMIN-OF-ANY-ORGANIZATION`, gate 14).
+- `GET /api/users/me/organizations` in its legacy branch rebinds every membership row that carries the caller's e-mail address to the caller, with no verified-address check and no audit (`DEF-0B12-PLT-ORGANIZATIONS-GET-REBINDS-EVERY-MEMBERSHIP-ROW-OF-AN-E-MAIL-ADDRESS-TO-THE-CALLER-IN-THE-LEGACY-BRANCH`, gate 1, owner `UE-CAP-A-003`). It is a cross-tenant operation and depends on `UE_CANONICAL_BOOTSTRAP_V2` not being `1`, a flag that is a deployment parameter and not a code guard.
+- The `/api/v2/[...path]` catch-all answers HTTP 200 for POST, PUT, PATCH and DELETE, so a caller is told a role change, a report generation or a remittance approval succeeded when nothing was written (`DEF-0B12-PLT-V2-CATCH-ALL-ANSWERS-200-FOR-POST-PUT-PATCH-AND-DELETE-SO-A-CALLER-IS-TOLD-A-WRITE-SUCCEEDED`, gate 14, owner `UE-OMIT-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTES`).
+
+The 28 earlier `RELEASE_BLOCKING` dispositions are preserved and the four above join them: gate-acceptance debt now carries 32 `RELEASE_BLOCKING_DEFECT_DISPOSITION` entries and 41 gate-acceptance blockers in all. The validator refuses an earlier disposition that is altered, removed or downgraded, and a disposition written into a frozen earlier defect. The 71 HIGH defects of Gate 0B.1 to Gate 0B.6 stay in the independent review queue, byte-identical and with no disposition.
+
+Two inconsistencies are recorded and not repaired. The Gate 0B.8 per-capita remittance defect is MEDIUM and the Gate 0B.12 reach of the same table through the tax paths is HIGH. The earlier defect is frozen. Gate 5 must treat the two together.
+
+Runtime assurance: source classification does not claim row-level-security enforcement. The five workbook operations that rely on the shared db client carry a row-level-security screen quoting the user-ownership policy of the closure migration and the context-bound db proxy. A screen is not a runtime qualification.
+
+### Risk-category screen
+
+The eight categories are screened on every operation. Defects carrying each category: derived output 3, publication 0, analytics 0, row-level security 1, audit outside the transaction 1, GET side effect 1, fabricated finding 4, external disclosure 2. 6 category screens on 5 operations (the workbook export, the memory-holder reads and writes) record why a triggered category does not apply or which defect carries it, each backed by a quote that exists in the cited file. The GET side effect is the organizations read that rewrites membership rows.
+
+### Evidence provenance
+
+The 878 evidence items are 289 `ROUTE_HANDLER_DIRECT`, 261 `ROUTE_IMPORTED_HELPER`, 83 `SERVICE_IMPLEMENTATION` and 245 `SCHEMA_OR_POLICY`; 90 non-material inferences are recorded apart from the evidence list. Evidence gaps that stay open: no caller was found for 50 operations, whether the row-level-security policy reaches the runtime role is not established for any route that uses the shared db client, no institutional decision names who may read WCB claims, bargaining units, KPI targets or workbook memory holders, and the Stripe, voice transcription and workbook processor behaviors are not exercised.
+
+### Coverage reconciliation
+
+`ue-gate0b12-coverage.mjs` runs inside `validateClassification12` and checks: exactly one disposition per operation (1,644); no never-examined operation stays `SCOPE_UNDECIDED`; earlier classifications are stable; the four carbon exceptions stay non-authorizing and separately reported; retired, stub and system operations are unchanged from the anchor; no Gate 0B.12 rule owns a method outside the frozen selection; every new capability has independent lock provenance; every new defect has an owner and a gate; institutional decisions keep their adoption state; and the historical tranche and defect hashes remain valid. The coverage summary is part of the classification summary and the validator refuses a summary that does not match.
+
+### Capability lock integrity
+
+The lock holds 111 ids and 43 addition records. `lockVersion` is derived (now 11) and only `ue-gate0-update-lock.mjs` writes the lock.
+
+### New validator checks
+
+`validateClassification12` is part of `validateGate0`. It adds the tranche freeze against the anchored register, the shared record rules, preservation of every earlier classification, decision and defect (including the Gate 0B.7 to 0B.11 dispositions), the release-disposition control for the new HIGH defects, the review-queue check, the risk-category screen, the cross-tenant consistency control, the refusal of an ownership rule that owns an operation outside the frozen tranche, and the coverage reconciliation above.
+
+### Historical tests
+
+The Gate 0B.6 to 0B.11 suites are anchored to their acceptance commits for every moving total. `ue-gate0-cumulative.test.mjs`, `ue-gate0-lock-provenance.test.mjs` and `ue-gate0-scope-lock.test.mjs` assert the live moving totals.
+
+## Gate 0B completion statement (read-only)
+
+This is a statement of the source inventory, not an acceptance. Gate 0 stays `IN_PROGRESS`.
+
+- Operations: 1,644 route-method operations. 1,148 are source-classified in the ledger across Gates 0B.1 to 0B.12 (81, 99, 99, 96, 96, 100, 100, 100, 100, 100, 100 and 77). 355 further owned operations were owned by earlier rules.
+- Six-class counts: 1,503 `OWNED`, 0 awaiting classification, 4 `DECISION_BOUND_SCOPE_EXCEPTION`, 97 `RETIRED_501`, 31 `STUB_501`, 9 `SYSTEM`.
+- Capabilities: 111, of which 43 were added by Gates 0B.4 to 0B.12 under independent lock addition records (6, 6, 6, 4, 3, 3, 3, 4 and 8).
+- Defects: 770 (144 high, 481 medium, 145 low). 73 dispositioned HIGH defects: 32 `RELEASE_BLOCKING` (4, 4, 8, 4, 8 and 4 from Gates 0B.7 to 0B.12) and 41 `CONDITIONALLY_BLOCKING`, none non-blocking. 71 older HIGH defects wait in the review queue with no disposition.
+- Institutional decisions: 79, all outstanding.
+- Carbon exceptions: 4, decision-bound, non-authorizing, outstanding on `UE-INST-CARBON-ACCOUNTING-SCOPE`.
+- Missing route: `apps/union-eyes/app/api/reviews/route.ts` (owner `UE-CAP-REVIEW-INTAKE`) is on disk and outside the coverage manifest. The route inventory is not claimed complete.
+- Persona blockers: steward (no canonical, no action universe), representative (canonical 2.2 absent) and financial officer (canonical file absent). The three proposed baselines are not accepted.
+- Unauthenticated system exposures: 3 (`docs`, `docs/openapi`, `version`), release-blocking.
+- Ratchet failures: 2 (`MUTABLE-REP-IDENTIFIER`, `DIRECT-MANDATORY-AUDIT-IMPORT`), plus the tracked counsel suite and transition reason leak defects.
+- Not performed: native PostgreSQL, browser and full-regression qualification. No row-level-security, deployment or staging proof exists for any classified operation. No capability is `PROVEN_IN_STAGING`.
+
 ## Capabilities
 
-103 capabilities: 52 preserved plus 4 records from Gate 0B.1 and Gate 0A.2R (`UE-OMIT-STEWARD-CANONICAL-ABSENT`, `UE-OMIT-REP-CORRESPONDENCE`, `UE-OMIT-REP-TRANSITION-REASON-LEAK`, `UE-OMIT-ROUTE-DOMAIN-SCOPE`) plus 7 records from Gate 0B.2 plus 5 records from Gate 0B.3 plus 6 records from Gate 0B.4 plus 6 records from Gate 0B.5 plus 6 records from Gate 0B.6 plus 4 records from Gate 0B.7 plus 3 records from Gate 0B.8 plus 3 records from Gate 0B.9 plus 3 records from Gate 0B.10 plus 4 records from Gate 0B.11. The four earlier records are `UE-OMIT-STEWARD-CANONICAL-ABSENT`, `UE-OMIT-REP-CORRESPONDENCE`, `UE-OMIT-REP-TRANSITION-REASON-LEAK`, and `UE-OMIT-ROUTE-DOMAIN-SCOPE`.
+111 capabilities: 52 preserved plus 4 records from Gate 0B.1 and Gate 0A.2R (`UE-OMIT-STEWARD-CANONICAL-ABSENT`, `UE-OMIT-REP-CORRESPONDENCE`, `UE-OMIT-REP-TRANSITION-REASON-LEAK`, `UE-OMIT-ROUTE-DOMAIN-SCOPE`) plus 7 records from Gate 0B.2 plus 5 records from Gate 0B.3 plus 6 records from Gate 0B.4 plus 6 records from Gate 0B.5 plus 6 records from Gate 0B.6 plus 4 records from Gate 0B.7 plus 3 records from Gate 0B.8 plus 3 records from Gate 0B.9 plus 3 records from Gate 0B.10 plus 4 records from Gate 0B.11 plus 8 records from Gate 0B.12. The four earlier records are `UE-OMIT-STEWARD-CANONICAL-ABSENT`, `UE-OMIT-REP-CORRESPONDENCE`, `UE-OMIT-REP-TRANSITION-REASON-LEAK`, and `UE-OMIT-ROUTE-DOMAIN-SCOPE`.
 
 | Status | Count |
 | --- | --- |
 | `NOT_IMPLEMENTED` | 13 |
-| `PARTIAL` | 73 |
+| `PARTIAL` | 81 |
 | `SOURCE_IMPLEMENTED` | 2 |
 | `SOURCE_VERIFIED` | 5 |
 | `NATIVE_PENDING` | 2 |
 | `EXTERNAL_GATE` | 4 |
 | `SOURCE_UNSPECIFIED` | 4 |
 
-By primary gate: 1:7, 2:2, 3:1, 4:2, 5:5, 6:7, 7:3, 8:3, 9:6, 10:8, 11:8, 12:2, 13:3, 14:40, 15:5, schema-census:1.
+By primary gate: 1:7, 2:2, 3:1, 4:2, 5:5, 6:8, 7:3, 8:3, 9:6, 10:8, 11:8, 12:2, 13:3, 14:47, 15:5, schema-census:1.
 
 No capability has a native or browser qualification of `PASS`.
 
@@ -1228,21 +1358,25 @@ The 28 Gate 0B.10 tests in `ue-gate0b10-classification.test.mjs` cover the tranc
 
 The 33 Gate 0B.11 tests in `ue-gate0b11-classification.test.mjs` cover the tranche freeze (100 new at the Gate 0B.10 commit, nothing carried forward, hash pinned, `portal/dues/balance/route.ts|GET` through `support/sla/route.ts|GET`, with `support/sla/route.ts|POST` left undecided), the preserved carbon exceptions, the four new capabilities with their lock additions and primary gates, handler-specific provenance, the 108 new defects and the preserved 609, the 16 new HIGH dispositions (8 release blocking, 8 conditionally blocking) and the preserved Gate 0B.7 to 0B.10 dispositions, the 71-entry review queue, byte-identical 0B.1 to 0B.10 files, the six-class inventory, the six cross-tenant exposures, the risk-category screen, the independent OPL-01 and OPL-07 challenge register and the matrix pins. Seventeen negative cases include the ten shared with Gate 0B.10 (a dropped, duplicated, extra, reordered, re-hashed, re-anchored or already-examined operation; unsupported evidence or an unreal caller; an invented or catch-all owner; a role floor or reachable cross-tenant data recorded as authorization; an unsupported mutation or audit; a HIGH defect without a justified disposition and a non-blocking disposition for uncontained harm; an altered, deleted, downgraded or re-dispositioned earlier defect; a carbon exception converted to scope; a mutated or re-owned historical tranche; an invalid lock addition), and add: a cross-tenant defect not carried by every citing operation, an ownership rule that spills over the tranche boundary into the later method of a split file, a forged challenge (wrong hash, wrong operations, an unreal quotation, claimed containment, an adopted decision or a different position), and a validator run with the challenge register absent, altered or unpinned. The Gate 0B.7 to 0B.10 tests, `ue-gate0-cumulative.test.mjs`, `ue-gate0-lock-provenance.test.mjs` and `ue-gate0-scope-lock.test.mjs` were re-anchored to their acceptance commits or updated for the live totals (1,426 owned, 77 awaiting plus 4 exceptions, 1,071 classified, 717 defects, 103 capabilities).
 
+The 29 Gate 0B.12 tests in `ue-gate0b12-classification.test.mjs` cover the tranche freeze (77 never-examined operations at the Gate 0B.11 commit, recomputed from the anchored register, nothing carried forward, hash pinned, `support/sla/route.ts|POST` through `workspace/telemetry/route.ts|POST`), the preserved and separately reported carbon exceptions, the eight new capabilities with their lock additions and primary gates, handler-specific provenance, the 53 new defects and the preserved 717, the 4 new HIGH dispositions and the preserved 28, the 71-entry review queue, byte-identical 0B.1 to 0B.11 files, the six-class inventory with exactly one disposition per operation, the ten coverage checks, the cross-tenant exposure, the risk-category screen, the pinned matrix hashes and a deterministic rebuild of the manifest, classification and ledger. Thirteen negative cases refuse: a dropped, extra, reordered, re-hashed, re-anchored, partial or already-examined selection; missing, invented, wrong-method or unprovenanced evidence and an unreal caller; an invented, catch-all or unnamed capability owner and an unowned operation left `SCOPE_UNDECIDED` or unresolved; a role floor recorded as a kernel decision and reachable cross-tenant data recorded as authorized; a mutation or audit the source does not support; a HIGH defect with no disposition, a phase excuse, a hollow exposure, a fake activation or containment quote or a downgrade; a mutated, reverted, re-owned, removed or relaxed historical tranche, defect, decision or disposition (Gates 0B.7 to 0B.11); false completeness (a duplicate disposition, an operation dropped from the register, a stale undecided, a carbon exception converted to owned, an unledgered classification, a promoted retired operation, a changed system operation); ownership spilling onto an earlier method or a carbon exception; a lock capability without provenance or an addition record that is stripped, forged or inflated; forged inventory counts; each risk category raised by the source with no defect or verified screen; and a cross-tenant defect whose flag is dropped, hidden or downgraded.
+
+Gate 0B.12 run: every `ue-*.test.mjs` suite was executed separately and ran with 0 failures (541 passed, 6 skipped as before, 547 tests across 23 suites), the Gate 0 scope-lock validator returns 0 problems, `pnpm validate:docs` reports 0 errors, and regenerating every register with the pipeline (ownership, matrix, Gate 0B.12 builder, lock updater, matrix) reproduces byte-identical files. `node tooling/scripts/check-ue-convergence.mjs` still reports the two pre-existing ratchet failures (`MUTABLE-REP-IDENTIFIER` in `case-ownership-backfill.ts` and `DIRECT-MANDATORY-AUDIT-IMPORT` in `election-succession.ts`), which Gate 0B.12 did not touch. The Gate 0B.6 to 0B.11 suites, the cumulative suite, the lock-provenance suite and the scope-lock suite were re-anchored to the new live totals (1503 owned, 0 awaiting, 4 exceptions, 1148 classified, 770 defects, 111 capabilities); Gate 0B.6 to 0B.11 tests that compare against an acceptance commit now read the ownership register, ledger and matrix at that commit.
+
 Gate 0B.11 run: every `ue-*.test.mjs` suite was executed separately and ran with 0 failures (512 passed, 6 skipped as before), the Gate 0 scope-lock validator returns 0 problems, `pnpm validate:docs` passes, and regenerating every register with the pipeline reproduces byte-identical files. `node tooling/scripts/check-ue-convergence.mjs` still reports the two pre-existing ratchet failures (`MUTABLE-REP-IDENTIFIER` in `case-ownership-backfill.ts` and `DIRECT-MANDATORY-AUDIT-IMPORT` in `election-succession.ts`), which Gate 0B.11 did not touch.
 
-The matrix validator returns 0 problems and 6 blockers (3 persona, route scope undecided, decision-bound exceptions, uninventoried route). The three unjustified exposures are Gate 14 release-blocking defects, carried in the defect register and counted in gate-acceptance debt. A problem is a rule violation. A blocker is unfinished Gate 0 scope.
+The matrix validator returns 0 problems and 5 blockers (3 persona, decision-bound exceptions, uninventoried route); route scope undecided is no longer a blocker. The three unjustified exposures are Gate 14 release-blocking defects, carried in the defect register and counted in gate-acceptance debt. A problem is a rule violation. A blocker is unfinished Gate 0 scope.
 
 ## Remaining Gate 0 blockers
 
 1. Steward: no canonical and no action universe. Open decision: distinct persona or the level-1 role in Representative 2.2.
 2. Representative: canonical 2.2 file absent. 17 identifiers grouped only, `R18` in source conflict, 2 references with no identifier.
 3. Financial Officer: canonical file absent. 28 identifiers unspecified, 6 grouped only, 3 references with no identifier.
-4. 77 route operations are `SCOPE_UNDECIDED` and await source classification, and 4 are `DECISION_BOUND_SCOPE_EXCEPTION` (carbon) that wait on `UE-INST-CARBON-ACCOUNTING-SCOPE`. 66 institutional decisions are outstanding.
+4. No route operation awaits source classification. 4 are `DECISION_BOUND_SCOPE_EXCEPTION` (carbon) that wait on `UE-INST-CARBON-ACCOUNTING-SCOPE`. 79 institutional decisions are outstanding.
 5. `reviews/route.ts` is on disk and not in the route-coverage manifest.
 6. Not a Gate 0 blocker: three unauthenticated system operations (`docs`, `docs/openapi`, `version`) are unjustified exposure and Gate 14 release-blocking implementation defects (`DEF-0B1-DOCS-UNAUTH-API-SURFACE`, `DEF-0B1-VERSION-UNAUTH-TOPOLOGY`). Their exposure contracts and remediation obligations are preserved. The repair is owned by Gate 14 and was not made here.
 
-Gate acceptance debt that is tracked and not a Gate 0 blocker: the four ratchet defects above, the three release-blocking exposures and the twenty-eight `RELEASE_BLOCKING` defect dispositions of Gate 0B.7 to Gate 0B.11 (four, four, eight, four and eight), and the two independent review challenges of `DEF-0B10-OPL-01` and `DEF-0B10-OPL-07` (provisional position `RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF`, containment not verified). The release dispositions of the 71 earlier HIGH defects are queued for independent qualification and are separate from both.
+Gate acceptance debt that is tracked and not a Gate 0 blocker: the four ratchet defects above, the three release-blocking exposures and the thirty-two `RELEASE_BLOCKING` defect dispositions of Gate 0B.7 to Gate 0B.12 (four, four, eight, four, eight and four), and the two independent review challenges of `DEF-0B10-OPL-01` and `DEF-0B10-OPL-07` (provisional position `RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF`, containment not verified). The release dispositions of the 71 earlier HIGH defects are queued for independent qualification and are separate from both.
 
 ## Not done
 
-No runtime migration, application source, security allowlist, or census change. No Docker, native PostgreSQL, or Next server run. Migrations 0031–0037 and cache 0028 are not applied. Gate 1 does not start. The next action is an independent adversarial review of the Gate 0B.11 artifacts. No further tranche, no Gate 0C work and no Phase 3B work was started.
+No runtime migration, application source, security allowlist, or census change. No Docker, native PostgreSQL, or Next server run. Migrations 0031–0037 and cache 0028 are not applied. Gate 1 does not start. The next action is an independent adversarial review of the Gate 0B.12 artifacts. Gate 0B.12 is the final route-classification tranche. No Gate 0C work, no Gate 1 work and no Phase 3B work was started.

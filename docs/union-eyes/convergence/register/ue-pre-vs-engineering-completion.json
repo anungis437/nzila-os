@@ -5383,6 +5383,466 @@
       "businessOutcome": "A steward assignment names who is the steward for a unit or worksite and for how long, the appointing office is recorded, a member reads only the contact fields the institution allows a member to read, a steward assignment is created, changed and ended only by the office the institution names and every change commits with its audit record.",
       "sourceStatus": "PARTIAL",
       "gap": "UE-OMIT-STEWARD-CANONICAL-ABSENT (gate 10) records that no steward canonical or steward action-identifier matrix exists; it has no source files and owns no route, so it cannot own the steward routes. UE-OMIT-REPRESENTATION-PROTOCOL-POLICY owns the draft-and-approve representation protocol and the case assignment engine, not the steward directory rows; UE-OMIT-COMMITTEE-WORKSPACE owns committee meetings, minutes and action items; UE-OMIT-ORGANIZATION-ADMINISTRATION owns the organization record and the roster of organization_members (the table that holds the role title steward), and the steward_assignments table is a separate table that no roster route reads; UE-CAP-K-007 owns the generic CRUD factory as a mechanism, not the domain meaning of a table it is configured over; and UE-OMIT-ROUTE-DOMAIN-SCOPE is the undecided catch-all. Two route files, stewards and stewards/[id], read the steward_assignments table at the member floor and are configured at the steward write floor, and no existing capability names the steward assignment rows. This record closes none of the gaps and names no appointing office, which no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        6,
+        10,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/units, app/api/worksites",
+      "httpAction": null,
+      "service": "apps/union-eyes/lib/api/crud-factory.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "The unit and worksite routes are the generic CRUD factory over OPERATIONAL tables, which commits a crud.<table>.<action> audit row in the same tenant transaction for each create, update and archive and lists the field names changed, not the values; reads are not audited.",
+      "privacyClassification": "Unit name and number, certification number, body and dates, contract and next bargaining dates, member count, classifications, chief steward and bargaining chair user ids, notes and custom fields; worksite name, code, address and coordinates, employee and shift counts, site manager name, e-mail address and telephone number, notes and custom fields.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/units/route.ts",
+        "apps/union-eyes/app/api/units/[id]/route.ts",
+        "apps/union-eyes/app/api/worksites/route.ts",
+        "apps/union-eyes/app/api/worksites/[id]/route.ts",
+        "apps/union-eyes/db/schema/union-structure-schema.ts",
+        "apps/union-eyes/components/union-structure/WorksiteManagement.tsx"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/units/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER",
+      "parentRegisterId": "UE-CONV-K-006",
+      "sourceStatus": "PARTIAL",
+      "obligationKey": "bargaining-unit-and-worksite-register",
+      "primaryGate": 14,
+      "actor": "Steward or officer maintaining the register of bargaining units and worksites of the organization, and member reading the parts of it the institution allows a member to read",
+      "businessOutcome": "A bargaining unit and a worksite belong to one organization and one employer, every employer, worksite and steward identifier a row names is verified to belong to the same organization, the certification and contact fields are readable only by the offices the institution names, a register row is created, changed and archived only by the office the institution names and every change commits with its audit record.",
+      "gap": "UE-OMIT-EMPLOYER-RELATIONS-RECORDS owns the employer register, the employer contact directory and the log of communications with the employer, not the bargaining unit or the worksite rows; UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER owns collective agreements and UE-OMIT-BARGAINING-RECORDS owns negotiations, proposals and tentative agreements, neither names the register of units; UE-OMIT-ORGANIZATION-ADMINISTRATION owns the organization record and the roster of organization_members, and UE-OMIT-FEDERATION-LOCAL-HIERARCHY owns the hierarchy of organizations, not the units inside one; UE-CAP-K-007 owns the generic CRUD factory as a mechanism, not the domain meaning of a table it is configured over; UE-OMIT-ROUTE-DOMAIN-SCOPE is the undecided catch-all. Four route files read and write bargaining_units and worksites at the member read floor and the steward write floor and no existing capability names those rows. This record closes none of the gaps and names no register owner, which no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        2,
+        10,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/wcb",
+      "httpAction": null,
+      "service": "apps/union-eyes/lib/api/crud-factory.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "The claim routes write nothing: wcb_claims is DENIED in the CRUD governance list, so the factory refuses every read and write before a query or an audit row exists. The assessment routes are the generic CRUD factory over an OPERATIONAL table, which commits a crud.wcb_employer_assessments.<action> audit row in the same tenant transaction and lists the field names changed, not the values; reads are not audited.",
+      "privacyClassification": "Worker id, jurisdiction, claim type and status, board claim number, incident date and description, body part and nature of injury, hospital, treating physician, prognosis, days lost, return-to-work status and modified duties, wage replacement rate, benefits paid, union representative, grievance link, appeal dates and outcome, witness names and notes; for an assessment, the premium rate, assessable payroll, premium due, experience rating, surcharge or refund and payment dates of the organization.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/wcb/claims/route.ts",
+        "apps/union-eyes/app/api/wcb/claims/[id]/route.ts",
+        "apps/union-eyes/app/api/wcb/assessments/route.ts",
+        "apps/union-eyes/app/api/wcb/assessments/[id]/route.ts",
+        "apps/union-eyes/db/schema/domains/health-safety/provincial-wcb-schema.ts",
+        "apps/union-eyes/lib/api/crud-governance.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/wcb/claims/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-WCB-CLAIMS-AND-EMPLOYER-ASSESSMENTS",
+      "parentRegisterId": "UE-CONV-K-006",
+      "sourceStatus": "PARTIAL",
+      "obligationKey": "wcb-claims-and-employer-assessments",
+      "primaryGate": 6,
+      "actor": "Steward recording the workers compensation claim of an injured worker, officer reading and recording the premium assessments of the organization, and the injured member whose claim it is",
+      "businessOutcome": "A workers compensation claim is readable and changeable only by the representative who holds the member case and the offices the institution names, the medical and prognosis detail of a claim is not readable by any other steward, the premium assessment of the organization is readable only by the officers who manage it, every board identifier and date is validated, and every change commits with its audit record.",
+      "gap": "UE-OMIT-OHS-REGULATORY-RECORDS (gate 6) owns CNESST filings, anti-scab violation reports and joint health and safety committee records, which are regulatory filings of a particular province and a particular board; the wcb tables are a separate model (a claim of a worker with a compensation board, and the premium assessment an employer receives from that board) with no route, service or schema in common with them. UE-OMIT-PRIVACY-RIGHTS owns member privacy requests, UE-OMIT-FINANCE-UNAVAILABLE owns the union budgets, expenses and affiliate remittances and not a board premium the organization is assessed, and UE-OMIT-ROUTE-DOMAIN-SCOPE is the undecided catch-all. Four route files serve wcb_claims and wcb_employer_assessments and no existing capability names those rows. This record closes none of the gaps and names no claim reader or writer, which no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        8,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/testimonials",
+      "httpAction": null,
+      "service": "apps/union-eyes/lib/api/crud-factory.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "The testimonial item route is the generic CRUD factory over an OPERATIONAL table, which commits a crud.testimonials.<action> audit row in the same transaction; the transaction is opened with the organization of the caller, and the table has no organization column, so the audit row names the organization of the administrator who changed platform-wide content.",
+      "privacyClassification": "Testimonial quote, author name, role, organization name and type, photo address, featured flag, visibility, creation and approval times: personal statements attributed to a named person.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/testimonials/[id]/route.ts",
+        "apps/union-eyes/db/schema/domains/marketing.ts",
+        "apps/union-eyes/components/admin/testimonial-approval-actions.tsx",
+        "apps/union-eyes/app/[locale]/(marketing)/proof/page.tsx"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/testimonials/[id]/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-PLATFORM-MARKETING-TESTIMONIALS",
+      "parentRegisterId": "UE-CONV-K-006",
+      "sourceStatus": "PARTIAL",
+      "obligationKey": "platform-marketing-testimonials",
+      "primaryGate": 14,
+      "actor": "Platform marketing staff approving or removing a testimonial shown on the public proof page, and the visitor or member reading approved testimonials",
+      "businessOutcome": "A testimonial is published only after the platform office that owns marketing content has approved it with the evidence of the speaker consent, only that office can change or remove it (not the administrator of a customer organization), a reader who is not that office receives only approved public testimonials, and every change commits with its audit record.",
+      "gap": "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION owns the pre-account sales pipeline of a prospective union (the pilot application, its verification and its commercial state sequence), UE-OMIT-PILOT-PROGRAM-OPERATIONS owns usage telemetry and feedback of an enrolled organization, and UE-OMIT-CONTENT-LIBRARY-EDITORIAL owns the editorial media library of one organization; none names the platform-wide marketing proof content that every visitor sees, which belongs to no tenant. db/rls-storage-authority/reference-latent.ts already records that any tenant own org-admin can edit or delete this platform-wide content and tracks it for follow-up. UE-OMIT-ROUTE-DOMAIN-SCOPE is the undecided catch-all. One route file serves testimonials and no existing capability names the rows. This record closes none of the gaps and names no marketing owner or approver, which no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        8,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/targets",
+      "httpAction": null,
+      "service": "apps/union-eyes/app/api/targets/summary/route.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "Creating a target and switching it on or off each commit a target.create, target.activate or target.deactivate audit row in the same tenant transaction (persistAtomicAudit on the withRLSContext handle). The summary read is not audited.",
+      "privacyClassification": "Target name, description, metric type, data source, calculation record, thresholds, alert flag, alert recipients (user ids or e-mail addresses) and the user id of the creator.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/targets/route.ts",
+        "apps/union-eyes/app/api/targets/[id]/route.ts",
+        "apps/union-eyes/app/api/targets/summary/route.ts",
+        "apps/union-eyes/db/schema/analytics.ts",
+        "apps/union-eyes/components/targets/targets-console.tsx"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/targets/summary/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-KPI-TARGET-CONFIGURATION",
+      "parentRegisterId": "UE-CONV-K-006",
+      "sourceStatus": "PARTIAL",
+      "obligationKey": "kpi-target-configuration",
+      "primaryGate": 14,
+      "actor": "Officer creating and switching on or off a key performance target of the organization, and the member or staff reading the target summary",
+      "businessOutcome": "A key performance target names the stored measurement it is judged against and the direction in which a threshold is crossed, its current value is computed from that measurement and not from an unrelated row, only the office the institution names creates and changes targets, the calculation and alert recipients are readable only by that office, a target that promises an alert sends one, and every change commits with its audit record.",
+      "gap": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION owns the authorization of analytics metrics, engagement summaries and the case metrics report, not the configuration of a target and its health judgement; UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY owns the realtime observability alerts of the platform and sends none for a target; UE-OMIT-ROUTE-DOMAIN-SCOPE is the undecided catch-all. Three route files read and write kpi_configurations and no existing capability names those rows. This record closes none of the gaps and names no target owner, which no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        1,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/v2, app/api/tenant/current, app/api/test-auth",
+      "httpAction": null,
+      "service": "apps/union-eyes/lib/api/deprecation.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "The v2 catch-all calls logDeprecatedAccess, which writes an api.deprecated_access audit event with the path and method and no user or organization, outside any data transaction, and swallows a failure. The tenant wrapper and the diagnostic write nothing.",
+      "privacyClassification": "The requested path and method, the session user id, the organization id and the presence of a token; the diagnostic returns the body the Django /me/ endpoint answers for the caller.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/v2/[...path]/route.ts",
+        "apps/union-eyes/app/api/tenant/current/route.ts",
+        "apps/union-eyes/app/api/test-auth/route.ts",
+        "apps/union-eyes/lib/api/deprecation.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/v2/[...path]/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTES",
+      "parentRegisterId": "UE-CONV-K-006",
+      "sourceStatus": "PARTIAL",
+      "obligationKey": "legacy-compatibility-and-diagnostic-routes",
+      "primaryGate": 14,
+      "actor": "Client still calling a removed or legacy path (the /api/v2 mirror, the legacy tenant current wrapper) and the engineer calling the Django auth-gate diagnostic",
+      "businessOutcome": "A route that no longer performs its function answers with a refusal a client cannot mistake for success (410 or 501), never HTTP 200 for a write, a legacy wrapper returns the figures it names or is removed, and a diagnostic that forwards the session token to a backend is not reachable by every signed-in user in a production build.",
+      "gap": "UE-OMIT-ROUTE-EXPOSURE-HARDENING owns the contract of unauthenticated routes and edge enforcement; the v2 catch-all and the wrapper require a session and the diagnostic is not on the public list. UE-OMIT-ROUTE-DOMAIN-SCOPE is the undecided catch-all, and the capability registry records a v2 consumer (the scheduled reports manager) that falls to an empty state because of the catch-all, without owning the catch-all route. Three route files serve the legacy and diagnostic surface and no existing capability names them. This record closes none of the gaps and names no disposition, which no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        10,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/vocabulary",
+      "httpAction": null,
+      "service": "apps/union-eyes/app/api/vocabulary/route.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "The vocabulary routes write nothing and record nothing; a read of reference data needs no audit record.",
+      "privacyClassification": "None: the response is the same hard-coded reference data for every caller and holds no person or organization row.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/vocabulary/route.ts",
+        "apps/union-eyes/app/api/vocabulary/roles/route.ts",
+        "apps/union-eyes/app/api/vocabulary/statuses/route.ts",
+        "packages/cupe-vocabulary/src/vocabulary.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/vocabulary/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-CUPE-VOCABULARY-REFERENCE-DATA",
+      "parentRegisterId": "UE-CONV-K-006",
+      "sourceStatus": "PARTIAL",
+      "obligationKey": "cupe-vocabulary-reference-data",
+      "primaryGate": 14,
+      "actor": "Client loading the case type, priority, severity, role and status vocabulary of the grievance system",
+      "businessOutcome": "A vocabulary the application serves as institutional reference data (service-level hours, severity legal flags, the roles that may assign, escalate or settle, the status transitions) is owned and approved by the institution, matches the roles and transitions the application enforces, carries the version and date of the approved text and is cached only as its owner permits.",
+      "gap": "UE-CAP-I-001 (gate 10) owns the canonical role names and permissions of the programme, and UE-OMIT-REPRESENTATION-PROTOCOL-POLICY owns the case assignment engine; neither owns a vocabulary package that declares its own roles (chief steward, business agent), service-level hours and status transitions. UE-OMIT-ROUTE-DOMAIN-SCOPE is the undecided catch-all. Six route files serve the vocabulary and no existing capability names it. This record closes none of the gaps and names no vocabulary owner, which no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        8,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/voice",
+      "httpAction": null,
+      "service": "apps/union-eyes/lib/azure-speech.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "Neither voice route writes an audit record: the transcribe route records nothing, and the upload route logs the failure of the processor call and nothing on success.",
+      "privacyClassification": "The audio recording of a member or steward (a spoken description of a claim, which can name a person, an employer and a medical or disciplinary matter), the file name and size, the transcript and its language.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/voice/transcribe/route.ts",
+        "apps/union-eyes/app/api/voice/upload/route.ts",
+        "apps/union-eyes/lib/azure-speech.ts",
+        "apps/union-eyes/components/voice-recorder.tsx"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/voice/transcribe/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-VOICE-TRANSCRIPTION",
+      "parentRegisterId": "UE-CONV-K-006",
+      "sourceStatus": "PARTIAL",
+      "obligationKey": "voice-recording-transcription",
+      "primaryGate": 14,
+      "actor": "Steward dictating a claim description and member uploading an audio file for transcription",
+      "businessOutcome": "A recording is sent to an external speech processor only on a decision the institution has made about consent, processor terms and retention, each transcription is counted against the entitlement that meters it, limited per person and recorded, and the response reports what the processor measured.",
+      "gap": "UE-OMIT-AI-ADVISORY-GOVERNANCE (gate 14) owns advisory AI invoked by stewards, officers and members and the reading of AI usage; neither voice route generates advice, and the transcribe route calls the speech service and not a language model. UE-OMIT-ROUTE-DOMAIN-SCOPE is the undecided catch-all. Two route files transcribe a recording and no existing capability names them. This record closes none of the gaps and names no processor or consent, which no source states."
+    },
+    {
+      "relatedRegisterIds": [
+        "UE-CONV-K-007",
+        "UE-CONV-K-005"
+      ],
+      "registerImplementationOwner": false,
+      "dependencyGates": [
+        1,
+        13
+      ],
+      "lifecycleState": "PARTIAL",
+      "navigationEntrypoint": null,
+      "apiRoute": "app/api/workbook",
+      "httpAction": null,
+      "service": "apps/union-eyes/lib/workbook/access-control.ts",
+      "kernelAction": null,
+      "kernelResource": null,
+      "persistence": null,
+      "auditEvidence": "The claim commits a workbook.claim audit row in the same system transaction (persistAtomicAudit); a write to the memory holders of a claimed workbook commits its audit row on the same executor, a write to an unclaimed workbook is not audited by design, and the start, checkout and export routes write no audit record.",
+      "privacyClassification": "A pseudonymous workbook identifier (a bearer credential until the claim), locale, attribution (UTM) values, an optional consent object, the claimant user id and organization id, and per memory holder a role, a display name, a responsibility, tenure and criticality bands, a successor flag and free-text notes about a named person.",
+      "notificationPolicy": "not_adopted",
+      "negativeAndRecovery": "Fail closed. Do not report success for work that did not persist.",
+      "sourceFiles": [
+        "apps/union-eyes/app/api/workbook/start/route.ts",
+        "apps/union-eyes/app/api/workbook/checkout/route.ts",
+        "apps/union-eyes/app/api/workbook/[id]/claim/route.ts",
+        "apps/union-eyes/app/api/workbook/[id]/export/route.ts",
+        "apps/union-eyes/app/api/workbook/[id]/memory-holders/route.ts",
+        "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts",
+        "apps/union-eyes/lib/workbook/access-control.ts",
+        "apps/union-eyes/lib/workbook/claimed-write-audit.ts",
+        "apps/union-eyes/db/schema/workbook-schema.ts"
+      ],
+      "sourceTests": [],
+      "nativeTestsRequired": "Native PostgreSQL qualification is not recorded.",
+      "browserTestsRequired": "Credentialed browser qualification is not recorded.",
+      "nativeQualification": "PENDING",
+      "browserQualification": "PENDING",
+      "nativeRuntimeEvidence": [],
+      "browserRuntimeEvidence": [],
+      "proof": [
+        {
+          "type": "path",
+          "ref": "apps/union-eyes/app/api/workbook/[id]/claim/route.ts"
+        }
+      ],
+      "externalDependency": null,
+      "operationallyActivated": false,
+      "schemaCensus": false,
+      "individuallyReclassified": false,
+      "censusCount": null,
+      "scopedRoutes": [],
+      "id": "UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT",
+      "parentRegisterId": "UE-CONV-K-006",
+      "sourceStatus": "PARTIAL",
+      "obligationKey": "governance-entropy-workbook-product",
+      "primaryGate": 14,
+      "actor": "Visitor, buyer, claimant and same-organization colleague of the Governance Entropy Workbook product",
+      "businessOutcome": "A workbook is started, bought and claimed only on a decision the institution has made about consent, retention and the payment processor, the claim binds it to a person and organization the institution authorizes, the people it names are recorded on a notice and read and changed only by the roles the institution names, and every identity-linked read and write is limited and recorded.",
+      "gap": "UE-OMIT-ICRA-PUBLIC-ASSESSMENT owns the pseudonymous assessment product and UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING owns the subscription billing of the platform; neither owns the separate Governance Entropy Workbook (its public start and checkout, the claim into an organization and the memory-holder register), and the public start and checkout contracts of the 0B.1 inventory cover only the unauthenticated edge of two of its routes. UE-OMIT-ROUTE-DOMAIN-SCOPE is the undecided catch-all. Six route files serve the workbook and no existing capability names them. This record closes none of the gaps and names no consent, retention or processor, which no source states."
     }
   ],
   "personaActions": [
@@ -7425,7 +7885,7 @@
   },
   "routeOwnership": {
     "file": "docs/union-eyes/convergence/register/ue-route-capability-ownership.json",
-    "entriesHash": "d797d94a4ef7d44750b7063a5597c52bc69e85ff50e5ab8f57f3cd3d39b34344",
+    "entriesHash": "4f87c29ffb545086e411121c0ffbf6bcc12beb4ea38a02a313fc82691026dd99",
     "operations": 1644
   },
   "routeClassification": {
@@ -7442,7 +7902,7 @@
       },
       "ledger": {
         "file": "docs/union-eyes/convergence/register/ue-route-classification-ledger.json",
-        "sha256": "009fedc3ebc7a73a9f92d3a17aeea3908eecf582bd4408fcb5e03cc99fb16302"
+        "sha256": "258e04efd2a8f6b96111e2a90c0e8815fcc6666d616a338a0637a860b4f3e97f"
       }
     }
   },
@@ -7590,6 +8050,20 @@
       }
     }
   },
+  "routeClassification0b12": {
+    "tranche": "GATE-0B.12",
+    "note": "Hash pins for the frozen Gate 0B.12 tranche manifest and its source-evidenced classification register. The cumulative ledger and the release disposition review queue are pinned above.",
+    "files": {
+      "manifest": {
+        "file": "docs/union-eyes/convergence/register/ue-route-tranche-0b12-manifest.json",
+        "sha256": "d8fa6bc8e3606d64f33e53e64097e13855c6cb834fb147d227de3a24c24539df"
+      },
+      "classification": {
+        "file": "docs/union-eyes/convergence/register/ue-route-classification-0b12.json",
+        "sha256": "8ef8f6c67613b03e425e25126016e43f01d43d5fc5f9f91950ec41cb92891dd3"
+      }
+    }
+  },
   "releaseDispositionChallenges": {
     "note": "Independent reviewer challenge of the frozen Gate 0B.10 dispositions of DEF-0B10-OPL-01 and DEF-0B10-OPL-07. It is additional review evidence pinned here; it changes no frozen defect or disposition and claims no remediation.",
     "file": "docs/union-eyes/convergence/register/ue-release-disposition-challenges.json",
@@ -7607,8 +8081,8 @@
     ]
   },
   "routeInventoryTotals": {
-    "OWNED": 1426,
-    "SCOPE_UNDECIDED_AWAITING_CLASSIFICATION": 77,
+    "OWNED": 1503,
+    "SCOPE_UNDECIDED_AWAITING_CLASSIFICATION": 0,
     "DECISION_BOUND_SCOPE_EXCEPTION": 4,
     "RETIRED_501": 97,
     "STUB_501": 31,
@@ -13351,6 +13825,430 @@
       "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
       "tranche": "0B.11",
       "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-CRUD-SUPPORT-TICKET-PATHS-SERVE-NOTIFICATION-ROWS-AND-ASSIGN-AND-COMMENTS-ARE-THE-SAME-ITEM-ROUTE",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-CRUD-SUPPORT-TICKET-ITEM-ROUTES-LET-A-STEWARD-REWRITE-AND-AN-ADMIN-DELETE-ANY-USER-NOTIFICATION",
+      "gate": 11,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-CRUD-UPLOAD-PATH-IS-A-JSON-MEDIA-ROW-INSERT-AND-RECEIVES-NO-FILE-WHILE-THE-JOB-FORM-POSTS-ONE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CONTENT-LIBRARY-EDITORIAL",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-CRUD-TAX-PATHS-SERVE-THE-PER-CAPITA-REMITTANCE-LEDGER-TO-ANY-MEMBER",
+      "gate": 5,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "tranche": "0B.12",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B12-CRUD-TAX-SLIP-RL1-T106-AND-COPE-RECEIPT-PATHS-ISSUE-NOTHING-AND-REFUSE-EVERY-WRITE",
+      "gate": 5,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-CRUD-TESTIMONIAL-ITEM-WRITES-ARE-CONDITIONED-ON-THE-ID-ALONE-FOR-AN-ADMIN-OF-ANY-ORGANIZATION",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-MARKETING-TESTIMONIALS",
+      "tranche": "0B.12",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B12-CRUD-TESTIMONIAL-ITEM-READ-IGNORES-VISIBILITY-AND-APPROVAL",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-MARKETING-TESTIMONIALS",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-CRUD-TESTIMONIAL-APPROVAL-COMPONENT-SENDS-FIELDS-THE-TABLE-DOES-NOT-HAVE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-MARKETING-TESTIMONIALS",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-CRUD-BARGAINING-UNIT-ROWS-READABLE-BY-ANY-MEMBER-WITH-CERTIFICATION-NOTES-AND-CUSTOM-FIELDS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-CRUD-BARGAINING-UNIT-CERTIFICATION-AND-REPRESENTATION-FIELDS-WRITABLE-BY-ANY-STEWARD",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-CRUD-WORKSITE-ROWS-READABLE-BY-ANY-MEMBER-WITH-SITE-MANAGER-CONTACT-AND-NOTES",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-CRUD-UNIT-AND-WORKSITE-FOREIGN-KEYS-ARE-TAKEN-FROM-THE-BODY-WITHOUT-AN-ORGANIZATION-CHECK",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-CRUD-WCB-CLAIM-ROUTES-ARE-CONFIGURED-FOR-STEWARDS-AND-DENIED-FOR-EVERY-CALLER",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-WCB-CLAIMS-AND-EMPLOYER-ASSESSMENTS",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-CRUD-WCB-ASSESSMENT-PREMIUM-AND-PAYROLL-READABLE-BY-ANY-STEWARD",
+      "gate": 6,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-WCB-CLAIMS-AND-EMPLOYER-ASSESSMENTS",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-KPI-SUMMARY-GIVES-EVERY-MEMBER-THE-CALCULATION-ALERT-RECIPIENTS-AND-CREATOR-OF-EVERY-TARGET",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-KPI-TARGET-CONFIGURATION",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-KPI-CURRENT-VALUE-IS-THE-LATEST-ROW-OF-THE-METRIC-TYPE-TEXT-NOT-THE-DECLARED-SOURCE-OR-CALCULATION",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-KPI-TARGET-CONFIGURATION",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-KPI-HEALTH-TREATS-A-LOWER-FIGURE-AS-WORSE-FOR-EVERY-TARGET",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-KPI-TARGET-CONFIGURATION",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-KPI-CALCULATION-AND-ALERT-FLAG-ARE-STORED-AND-APPLIED-BY-NO-CODE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-KPI-TARGET-CONFIGURATION",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-KPI-ITEM-ID-IS-NOT-VALIDATED-AND-A-MALFORMED-ID-IS-A-DATABASE-ERROR",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-KPI-TARGET-CONFIGURATION",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-ORGANIZATIONS-GET-REBINDS-EVERY-MEMBERSHIP-ROW-OF-AN-E-MAIL-ADDRESS-TO-THE-CALLER-IN-THE-LEGACY-BRANCH",
+      "gate": 1,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-CAP-A-003",
+      "tranche": "0B.12",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B12-PLT-ORGANIZATIONS-LEGACY-BRANCH-LISTS-EVERY-ORGANIZATION-TO-A-PLATFORM-ID-AND-LOADS-THE-WHOLE-TABLE-FOR-EVERY-OTHER-CALLER",
+      "gate": 1,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-CAP-A-003",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-ORGANIZATIONS-LEGACY-BRANCH-LOGS-THE-FULL-E-MAIL-ADDRESS",
+      "gate": 1,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-CAP-A-003",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-ORGANIZATIONS-RESPONSE-FABRICATES-A-CREATION-TIME-FOR-A-ROW-WITHOUT-ONE",
+      "gate": 1,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-CAP-A-003",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-V2-CATCH-ALL-ANSWERS-200-FOR-POST-PUT-PATCH-AND-DELETE-SO-A-CALLER-IS-TOLD-A-WRITE-SUCCEEDED",
+      "gate": 14,
+      "severity": "HIGH",
+      "ownerCapabilityId": "UE-OMIT-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTES",
+      "tranche": "0B.12",
+      "releaseBlocking": true
+    },
+    {
+      "id": "DEF-0B12-PLT-V2-CATCH-ALL-ANSWERS-200-WITH-A-DEPRECATION-OBJECT-WHERE-A-CALLER-EXPECTS-DATA",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTES",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-V2-CATCH-ALL-ACCESS-AUDIT-HAS-NO-ACTOR-AND-IS-NOT-AWAITED",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTES",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-V2-CATCH-ALL-SUNSET-DATE-IS-A-CONSTANT-THAT-CHANGES-NO-ANSWER",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTES",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-TENANT-CURRENT-ANSWERS-200-WITH-NULL-NAME-SLUG-AND-TIER-AND-NO-FEATURES",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTES",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-TEST-AUTH-FORWARDS-THE-SESSION-TOKEN-AND-RETURNS-THE-BACKEND-BODY-TO-EVERY-SIGNED-IN-USER",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTES",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-QUEUE-STATUS-GIVES-ANY-SIGNED-IN-SESSION-THE-QUEUE-COUNTS-AND-RECENT-FAILED-TASK-NAMES",
+      "gate": 9,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-QUEUE-STATUS-ANSWERS-AUTHENTICATION-FAILURE-AS-503-AND-RETURNS-THE-ERROR-TEXT",
+      "gate": 9,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-QUEUE-STATUS-SERVICE-KEY-IS-THE-SHARED-AI-KEY-COMPARED-WITH-A-PLAIN-EQUALITY",
+      "gate": 9,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-TRIAGE-GRANT-APPLIES-THE-CASE-ELIGIBILITY-TEST-TO-A-MESSAGES-DESIGNATION",
+      "gate": 2,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-TRIAGE-LAPSED-DESIGNATION-IS-CLOSED-AS-SYSTEM-EXPIRY-WITH-NO-AUDIT-ROW",
+      "gate": 2,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-TRIAGE-REVOKE-CARRIES-THE-DESIGNATION-ID-IN-A-DELETE-BODY",
+      "gate": 2,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-VOCABULARY-SERVES-UNSOURCED-SERVICE-LEVEL-HOURS-ROLE-FLAGS-AND-TRANSITIONS-AS-INSTITUTIONAL-REFERENCE-DATA",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-CUPE-VOCABULARY-REFERENCE-DATA",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-VOCABULARY-ROUTES-SET-A-PUBLIC-ONE-HOUR-CACHE-ON-A-SIGNED-IN-RESPONSE",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-CUPE-VOCABULARY-REFERENCE-DATA",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-VOCABULARY-LAST-UPDATED-IS-THE-TIME-OF-THE-CALL-AND-THE-VERSION-IS-A-CONSTANT",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-CUPE-VOCABULARY-REFERENCE-DATA",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-VOICE-TRANSCRIBE-HAS-NO-RATE-LIMIT-ENTITLEMENT-OR-AUDIT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-VOICE-TRANSCRIPTION",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-VOICE-TRANSCRIBE-RETURNS-THE-FILE-SIZE-IN-BYTES-AS-THE-DURATION",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-VOICE-TRANSCRIPTION",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-VOICE-ROUTES-SEND-THE-RECORDING-TO-AN-EXTERNAL-SERVICE-WITH-NO-CONSENT-OR-RECORD",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-VOICE-TRANSCRIPTION",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-VOICE-UPLOAD-CHECKS-THE-AI-SEARCH-ENTITLEMENT-AND-CONSUMES-NO-CREDIT",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-VOICE-TRANSCRIPTION",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-PLT-WORKSPACE-TELEMETRY-LOGS-UNBOUNDED-CLIENT-STRINGS-AND-HAS-NO-LIMIT",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-WBK-MEMORY-HOLDER-ROUTES-ACCEPT-READS-AND-WRITES-ON-THE-BEARER-ID-OF-AN-UNCLAIMED-WORKBOOK-WITH-NO-LIMIT-AND-NO-AUDIT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-WBK-ANY-MEMBER-OF-THE-CLAIMING-ORGANIZATION-CAN-READ-CHANGE-AND-DELETE-THE-NAMED-PEOPLE-WITH-NO-ROLE-FLOOR-OR-NOTICE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-WBK-START-STORES-AN-OPTIONAL-CONSENT-OBJECT-THAT-NO-ROUTE-READS",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-WBK-PUBLIC-START-AND-CHECKOUT-ARE-LIMITED-BY-A-REQUEST-HEADER-ADDRESS-WITH-NO-BOT-CHALLENGE",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-WBK-CHECKOUT-READS-THE-USER-OWNED-WORKBOOKS-TABLE-OUTSIDE-ANY-DATABASE-CONTEXT",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-WBK-CHECKOUT-SENDS-THE-BEARER-WORKBOOK-ID-TO-STRIPE-IN-THE-REDIRECT-ADDRESSES-AND-METADATA",
+      "gate": 14,
+      "severity": "MEDIUM",
+      "ownerCapabilityId": "UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-WBK-CHECKOUT-REDIRECT-BASE-FALLS-BACK-TO-LOCALHOST-AND-EVERY-CALL-OPENS-A-NEW-SESSION",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-WBK-CLAIM-HAS-NO-RATE-LIMIT-AND-READS-AN-UNCAPPED-BODY",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-WBK-EXPORT-STREAMS-THE-IDENTITY-LINKED-CARRIER-REGISTER-WITH-NO-AUDIT-RECORD",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT",
+      "tranche": "0B.12",
+      "releaseBlocking": false
+    },
+    {
+      "id": "DEF-0B12-WBK-ROUTES-LOG-THE-BEARER-WORKBOOK-ID",
+      "gate": 14,
+      "severity": "LOW",
+      "ownerCapabilityId": "UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT",
+      "tranche": "0B.12",
+      "releaseBlocking": false
     }
   ],
   "outOfScope": [
@@ -13435,6 +14333,7 @@
     "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
     "UE-OMIT-AUDIT-LOG-VISIBILITY",
     "UE-OMIT-BARGAINING-RECORDS",
+    "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER",
     "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
     "UE-OMIT-CBA-INTELLIGENCE-DATASET",
     "UE-OMIT-CLAUSE-LIBRARY-SHARING",
@@ -13447,6 +14346,7 @@
     "UE-OMIT-COMPLIANCE-ASSURANCE",
     "UE-OMIT-CONTENT-LIBRARY-EDITORIAL",
     "UE-OMIT-COPE-POLITICAL-ACTION",
+    "UE-OMIT-CUPE-VOCABULARY-REFERENCE-DATA",
     "UE-OMIT-DEADLINE-OVERDUE",
     "UE-OMIT-DELIVERY-EVIDENCE",
     "UE-OMIT-DISPATCH-HALL",
@@ -13460,7 +14360,10 @@
     "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
     "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
     "UE-OMIT-FINANCE-UNAVAILABLE",
+    "UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT",
     "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+    "UE-OMIT-KPI-TARGET-CONFIGURATION",
+    "UE-OMIT-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTES",
     "UE-OMIT-M04-LEGAL-DEADLINE",
     "UE-OMIT-M04-MEMBER-REQUESTS",
     "UE-OMIT-MAIN-APP-CRONS",
@@ -13477,6 +14380,7 @@
     "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
     "UE-OMIT-PKI-SIGNING-WORKFLOW",
     "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
+    "UE-OMIT-PLATFORM-MARKETING-TESTIMONIALS",
     "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
     "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
     "UE-OMIT-PRIVACY-RIGHTS",
@@ -13489,7 +14393,9 @@
     "UE-OMIT-ROUTE-EXPOSURE-HARDENING",
     "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
     "UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY",
-    "UE-OMIT-STEWARD-CANONICAL-ABSENT"
+    "UE-OMIT-STEWARD-CANONICAL-ABSENT",
+    "UE-OMIT-VOICE-TRANSCRIPTION",
+    "UE-OMIT-WCB-CLAIMS-AND-EMPLOYER-ASSESSMENTS"
   ],
   "routeBaseline": {
     "manifest": "docs/union-eyes/convergence/register/ue-route-coverage-manifest.json",

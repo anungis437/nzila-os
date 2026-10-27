@@ -40,6 +40,8 @@ import { FILES_0B10 } from './ue-gate0b10-classification.mjs'
 import { capabilitiesForTranche10 } from './ue-gate0b10-capabilities.mjs'
 import { FILES_0B11 } from './ue-gate0b11-classification.mjs'
 import { capabilitiesForTranche11 } from './ue-gate0b11-capabilities.mjs'
+import { FILES_0B12 } from './ue-gate0b12-classification.mjs'
+import { capabilitiesForTranche12 } from './ue-gate0b12-capabilities.mjs'
 import { FILE_CHALLENGES } from './ue-gate0b11-challenge.mjs'
 import { capabilitiesForTranche6 } from './ue-gate0b6-capabilities.mjs'
 import { DECISION_BOUND_OPERATIONS } from './ue-gate0b6-ids.mjs'
@@ -448,6 +450,7 @@ distinct.push(
   ...capabilitiesForTranche9(cap),
   ...capabilitiesForTranche10(cap),
   ...capabilitiesForTranche11(cap),
+  ...capabilitiesForTranche12(cap),
 )
 
 // NOT_IMPLEMENTED finance domains cite a service in the narrative. The validator
@@ -778,6 +781,11 @@ const matrix = {
     note: 'Hash pins for the frozen Gate 0B.11 tranche manifest and its source-evidenced classification register. The cumulative ledger and the release disposition review queue are pinned above.',
     files: Object.fromEntries(Object.entries(FILES_0B11).map(([key, file]) => [key, { file, sha256: existsSync(join(ROOT, file)) ? sha256File(ROOT, file) : null }])),
   },
+  routeClassification0b12: {
+    tranche: 'GATE-0B.12',
+    note: 'Hash pins for the frozen Gate 0B.12 tranche manifest and its source-evidenced classification register. The cumulative ledger and the release disposition review queue are pinned above.',
+    files: Object.fromEntries(Object.entries(FILES_0B12).map(([key, file]) => [key, { file, sha256: existsSync(join(ROOT, file)) ? sha256File(ROOT, file) : null }])),
+  },
   releaseDispositionChallenges: {
     note: 'Independent reviewer challenge of the frozen Gate 0B.10 dispositions of DEF-0B10-OPL-01 and DEF-0B10-OPL-07. It is additional review evidence pinned here; it changes no frozen defect or disposition and claims no remediation.',
     file: FILE_CHALLENGES,
@@ -790,7 +798,7 @@ const matrix = {
     operations: [...DECISION_BOUND_OPERATIONS],
   },
   routeInventoryTotals: inventoryTotals(ownership.entries, new Set(DECISION_BOUND_OPERATIONS)),
-  routeDefects: JSON.parse(readFileSync(join(ROOT, [FILES_0B11, FILES_0B10, FILES_0B9, FILES_0B8, FILES_0B7, FILES_0B6, FILES_0B5, FILES_0B4, FILES_0B3].map((files) => files.classification).find((file) => existsSync(join(ROOT, file)))), 'utf8'))
+  routeDefects: JSON.parse(readFileSync(join(ROOT, [FILES_0B12, FILES_0B11, FILES_0B10, FILES_0B9, FILES_0B8, FILES_0B7, FILES_0B6, FILES_0B5, FILES_0B4, FILES_0B3].map((files) => files.classification).find((file) => existsSync(join(ROOT, file)))), 'utf8'))
     .defectRegister.map(({ id, gate, severity, ownerCapabilityId, tranche, releaseBlocking }) => ({ id, gate, severity, ownerCapabilityId, tranche, releaseBlocking })),
   outOfScope: [
     {

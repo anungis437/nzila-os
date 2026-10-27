@@ -15,7 +15,7 @@ test('the committed matrix matches the live inventories', () => {
   assert.deepEqual(result.problems, [])
   assert.equal(result.summary.registerCount, 41)
   assert.deepEqual(result.summary.registerCounts, { OPEN: 12, CLOSED: 8, IN_PROGRESS: 17, EXTERNAL_GATE: 4 })
-  assert.equal(result.summary.capabilityCount, 103)
+  assert.equal(result.summary.capabilityCount, 111)
   assert.equal(result.summary.personaActionsExtracted, 182)
   assert.equal(result.summary.personaActionsMapped, 182)
   const stubs = loadMatrix().capabilities.find((item) => item.id === 'UE-CAP-H-002').scopedRoutes
@@ -135,7 +135,8 @@ test('all seven personas are accounted for and the unresolved ones stop Gate 0',
   assert.equal(result.summary.persona['financial-officer'].unspecified, 28)
   assert.equal(result.summary.verdict, 'IN_PROGRESS')
   assert.ok(result.blockers.some((item) => item.persona === 'steward'))
-  assert.ok(result.blockers.some((item) => item.code === 'ROUTE_SCOPE_UNDECIDED'))
+  assert.ok(!result.blockers.some((item) => item.code === 'ROUTE_SCOPE_UNDECIDED'), 'no never-examined operation remains undecided after Gate 0B.12')
+  assert.ok(result.blockers.some((item) => item.code === 'ROUTE_DECISION_BOUND_SCOPE_EXCEPTION'))
   assert.ok(result.blockers.some((item) => item.code === 'ROUTE_UNINVENTORIED'))
   assert.ok(!(clone().outOfScope ?? []).some((item) => /STEWARD/.test(item.id)), 'the steward gap is a capability, not an out-of-scope record')
 })

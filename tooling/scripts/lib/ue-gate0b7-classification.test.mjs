@@ -345,9 +345,9 @@ test('Gate 0 stays IN_PROGRESS, validates the seventh tranche and keeps the thre
   assert.equal(result.summary.classification0b7.classified, 100)
   assert.equal(result.summary.decisionBoundExceptions.exceptions, 4)
   assert.ok(!result.blockers.some((item) => item.code === 'ROUTE_UNJUSTIFIED_EXPOSURE'))
-  assert.equal(result.summary.route.scopeUndecidedAwaitingClassification, 77, 'the live total after Gate 0B.11; the 477 at acceptance is asserted from the anchored register above')
+  assert.equal(result.summary.route.scopeUndecidedAwaitingClassification, 0, 'the live total after Gate 0B.12; the 477 at acceptance is asserted from the anchored register above')
   assert.equal(result.summary.route.decisionBoundScopeExceptions, 4)
-  assert.equal(result.summary.capabilityCount, 103, 'the live count after Gate 0B.11; 90 at acceptance')
+  assert.equal(result.summary.capabilityCount, 111, 'the live count after Gate 0B.12; 90 at acceptance')
 })
 
 test('adversarial findings are recorded as defects with a later gate and the source facts they rest on', () => {

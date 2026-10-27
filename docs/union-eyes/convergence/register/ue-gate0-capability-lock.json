@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "lockVersion": 10,
+  "lockVersion": 11,
   "note": "Independent capability lock. The anchored capability set is read from git history at anchorCommit, which an edit to the working tree cannot change. A capability may leave the matrix only through a retirement record here with schemaVersion 2 or later, a reason, and an existing evidence file.",
   "anchorCommit": "2247978bd642a89a7d4f8bd720b978f789cb4437",
   "anchorMatrixPath": "docs/union-eyes/convergence/register/ue-pre-vs-engineering-completion.json",
@@ -53,6 +53,7 @@
     "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
     "UE-OMIT-AUDIT-LOG-VISIBILITY",
     "UE-OMIT-BARGAINING-RECORDS",
+    "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER",
     "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS",
     "UE-OMIT-CBA-INTELLIGENCE-DATASET",
     "UE-OMIT-CLAUSE-LIBRARY-SHARING",
@@ -65,6 +66,7 @@
     "UE-OMIT-COMPLIANCE-ASSURANCE",
     "UE-OMIT-CONTENT-LIBRARY-EDITORIAL",
     "UE-OMIT-COPE-POLITICAL-ACTION",
+    "UE-OMIT-CUPE-VOCABULARY-REFERENCE-DATA",
     "UE-OMIT-DEADLINE-OVERDUE",
     "UE-OMIT-DELIVERY-EVIDENCE",
     "UE-OMIT-DISPATCH-HALL",
@@ -78,7 +80,10 @@
     "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
     "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
     "UE-OMIT-FINANCE-UNAVAILABLE",
+    "UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT",
     "UE-OMIT-ICRA-PUBLIC-ASSESSMENT",
+    "UE-OMIT-KPI-TARGET-CONFIGURATION",
+    "UE-OMIT-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTES",
     "UE-OMIT-M04-LEGAL-DEADLINE",
     "UE-OMIT-M04-MEMBER-REQUESTS",
     "UE-OMIT-MAIN-APP-CRONS",
@@ -95,6 +100,7 @@
     "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
     "UE-OMIT-PKI-SIGNING-WORKFLOW",
     "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
+    "UE-OMIT-PLATFORM-MARKETING-TESTIMONIALS",
     "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
     "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
     "UE-OMIT-PRIVACY-RIGHTS",
@@ -107,7 +113,9 @@
     "UE-OMIT-ROUTE-EXPOSURE-HARDENING",
     "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
     "UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY",
-    "UE-OMIT-STEWARD-CANONICAL-ABSENT"
+    "UE-OMIT-STEWARD-CANONICAL-ABSENT",
+    "UE-OMIT-VOICE-TRANSCRIPTION",
+    "UE-OMIT-WCB-CLAIMS-AND-EMPLOYER-ASSESSMENTS"
   ],
   "retirements": [],
   "checkpoints": [
@@ -361,6 +369,62 @@
       "operationsHash": "3c84f3b2b70a4fb9da9bdba327e59bebd490ce60bc90b55570b57c778552f327",
       "classifiedOperations": 5,
       "reason": "Created by GATE-0B.11 as the engineering capability whose obligation covers operations that tranche classified from source evidence: steward-assignment-directory-and-appointment."
+    },
+    {
+      "capabilityId": "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER",
+      "tranche": "GATE-0B.12",
+      "operationsHash": "c94a68dd6a722502aa6dc71836a4379d6967c718a51ebad5414e7c61e8dfd08b",
+      "classifiedOperations": 10,
+      "reason": "Created by GATE-0B.12 as the engineering capability whose obligation covers operations that tranche classified from source evidence: bargaining-unit-and-worksite-register."
+    },
+    {
+      "capabilityId": "UE-OMIT-CUPE-VOCABULARY-REFERENCE-DATA",
+      "tranche": "GATE-0B.12",
+      "operationsHash": "c94a68dd6a722502aa6dc71836a4379d6967c718a51ebad5414e7c61e8dfd08b",
+      "classifiedOperations": 6,
+      "reason": "Created by GATE-0B.12 as the engineering capability whose obligation covers operations that tranche classified from source evidence: cupe-vocabulary-reference-data."
+    },
+    {
+      "capabilityId": "UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT",
+      "tranche": "GATE-0B.12",
+      "operationsHash": "c94a68dd6a722502aa6dc71836a4379d6967c718a51ebad5414e7c61e8dfd08b",
+      "classifiedOperations": 8,
+      "reason": "Created by GATE-0B.12 as the engineering capability whose obligation covers operations that tranche classified from source evidence: governance-entropy-workbook-product."
+    },
+    {
+      "capabilityId": "UE-OMIT-KPI-TARGET-CONFIGURATION",
+      "tranche": "GATE-0B.12",
+      "operationsHash": "c94a68dd6a722502aa6dc71836a4379d6967c718a51ebad5414e7c61e8dfd08b",
+      "classifiedOperations": 3,
+      "reason": "Created by GATE-0B.12 as the engineering capability whose obligation covers operations that tranche classified from source evidence: kpi-target-configuration."
+    },
+    {
+      "capabilityId": "UE-OMIT-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTES",
+      "tranche": "GATE-0B.12",
+      "operationsHash": "c94a68dd6a722502aa6dc71836a4379d6967c718a51ebad5414e7c61e8dfd08b",
+      "classifiedOperations": 7,
+      "reason": "Created by GATE-0B.12 as the engineering capability whose obligation covers operations that tranche classified from source evidence: legacy-compatibility-and-diagnostic-routes."
+    },
+    {
+      "capabilityId": "UE-OMIT-PLATFORM-MARKETING-TESTIMONIALS",
+      "tranche": "GATE-0B.12",
+      "operationsHash": "c94a68dd6a722502aa6dc71836a4379d6967c718a51ebad5414e7c61e8dfd08b",
+      "classifiedOperations": 3,
+      "reason": "Created by GATE-0B.12 as the engineering capability whose obligation covers operations that tranche classified from source evidence: platform-marketing-testimonials."
+    },
+    {
+      "capabilityId": "UE-OMIT-VOICE-TRANSCRIPTION",
+      "tranche": "GATE-0B.12",
+      "operationsHash": "c94a68dd6a722502aa6dc71836a4379d6967c718a51ebad5414e7c61e8dfd08b",
+      "classifiedOperations": 2,
+      "reason": "Created by GATE-0B.12 as the engineering capability whose obligation covers operations that tranche classified from source evidence: voice-recording-transcription."
+    },
+    {
+      "capabilityId": "UE-OMIT-WCB-CLAIMS-AND-EMPLOYER-ASSESSMENTS",
+      "tranche": "GATE-0B.12",
+      "operationsHash": "c94a68dd6a722502aa6dc71836a4379d6967c718a51ebad5414e7c61e8dfd08b",
+      "classifiedOperations": 10,
+      "reason": "Created by GATE-0B.12 as the engineering capability whose obligation covers operations that tranche classified from source evidence: wcb-claims-and-employer-assessments."
     }
   ]
 }

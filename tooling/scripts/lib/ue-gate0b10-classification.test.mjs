@@ -384,9 +384,9 @@ test('Gate 0 stays IN_PROGRESS, validates the tenth tranche and keeps the three 
   assert.equal(result.summary.classification0b10.classified, 100)
   assert.equal(result.summary.decisionBoundExceptions.exceptions, 4)
   assert.ok(!result.blockers.some((item) => item.code === 'ROUTE_UNJUSTIFIED_EXPOSURE'))
-  assert.equal(result.summary.route.scopeUndecidedAwaitingClassification, 77, 'the live total after Gate 0B.11; 177 at acceptance is asserted from the anchored register above')
+  assert.equal(result.summary.route.scopeUndecidedAwaitingClassification, 0, 'the live total after Gate 0B.12; 177 at acceptance is asserted from the anchored register above')
   assert.equal(result.summary.route.decisionBoundScopeExceptions, 4)
-  assert.equal(result.summary.capabilityCount, 103, 'the live count after Gate 0B.11; 99 at acceptance')
+  assert.equal(result.summary.capabilityCount, 111, 'the live count after Gate 0B.12; 99 at acceptance')
 })
 
 test('adversarial findings are recorded as defects with a later gate and the source facts they rest on', () => {
@@ -940,8 +940,8 @@ test('NEGATIVE 13: the Gate 0B.7, 0B.8 and 0B.9 release dispositions are preserv
 
   const gate = validateGate0(matrix, { base })
   const text0 = (item) => item.id ?? item.defectId ?? item.detail ?? JSON.stringify(item)
-  const dispositions = gate.gateAcceptanceBlockers.filter((item) => item.kind === 'RELEASE_BLOCKING_DEFECT_DISPOSITION' && !/^DEF-0B11-/.test(text0(item)))
-  assert.equal(dispositions.length, 20, 'the live gate also holds the Gate 0B.11 dispositions')
+  const dispositions = gate.gateAcceptanceBlockers.filter((item) => item.kind === 'RELEASE_BLOCKING_DEFECT_DISPOSITION' && !/^DEF-0B1[12]-/.test(text0(item)))
+  assert.equal(dispositions.length, 20, 'the live gate also holds the Gate 0B.11 and 0B.12 dispositions')
   const text = (item) => item.id ?? item.defectId ?? item.detail ?? JSON.stringify(item)
   assert.equal(dispositions.filter((item) => /^DEF-0B7-/.test(text(item))).length, 4)
   assert.equal(dispositions.filter((item) => /^DEF-0B8-/.test(text(item))).length, 4)
