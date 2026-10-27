@@ -25,6 +25,8 @@ import { FILES_0B3, validateClassification3 } from './ue-gate0b3-classification.
 import { ANCHOR_COMMIT as ANCHOR_COMMIT_0B3 } from './ue-gate0b3-groups.mjs'
 import { FILES_0B4, validateClassification4 } from './ue-gate0b4-classification.mjs'
 import { ANCHOR_COMMIT as ANCHOR_COMMIT_0B4 } from './ue-gate0b4-groups.mjs'
+import { FILES_0B5, validateClassification5 } from './ue-gate0b5-classification.mjs'
+import { ANCHOR_COMMIT as ANCHOR_COMMIT_0B5 } from './ue-gate0b5-groups.mjs'
 import { lockProvenanceProblems } from './ue-gate0-lock-provenance.mjs'
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
@@ -235,6 +237,7 @@ function classificationPinProblems(matrix, root) {
     ...pinProblems(matrix?.routeClassification0b2, 'routeClassification0b2', FILES_0B2, root),
     ...pinProblems(matrix?.routeClassification0b3, 'routeClassification0b3', FILES_0B3, root),
     ...pinProblems(matrix?.routeClassification0b4, 'routeClassification0b4', FILES_0B4, root),
+    ...pinProblems(matrix?.routeClassification0b5, 'routeClassification0b5', FILES_0B5, root),
   ]
 }
 
@@ -316,10 +319,13 @@ export function loadContext(root = ROOT) {
     classification0b3: readJsonIfPresent(root, FILES_0B3.classification),
     tranche0b4: readJsonIfPresent(root, FILES_0B4.manifest),
     classification0b4: readJsonIfPresent(root, FILES_0B4.classification),
+    tranche0b5: readJsonIfPresent(root, FILES_0B5.manifest),
+    classification0b5: readJsonIfPresent(root, FILES_0B5.classification),
     anchoredOwnershipEntries: anchoredOwnershipEntries(root),
     anchoredOwnershipEntries0b2: anchoredOwnershipEntries(root, ANCHOR_COMMIT_0B2),
     anchoredOwnershipEntries0b3: anchoredOwnershipEntries(root, ANCHOR_COMMIT_0B3),
     anchoredOwnershipEntries0b4: anchoredOwnershipEntries(root, ANCHOR_COMMIT_0B4),
+    anchoredOwnershipEntries0b5: anchoredOwnershipEntries(root, ANCHOR_COMMIT_0B5),
     lock,
     anchorCapabilityIds: anchoredCapabilityIds(root, lock),
     checkpointCapabilityIds: checkpointCapabilityIds(root, lock),
@@ -647,8 +653,31 @@ export function validateGate0(matrix, ctx = {}) {
       })
     : { problems: ['Gate 0B.4 route classification cannot be validated without the ownership register'], registeredReleaseBlocking: new Set(), releaseBlockingDefects: [], summary: null }
   problems.push(...check0b4.problems)
+  const classification0b5 = 'classification0b5' in ctx ? ctx.classification0b5 : base.classification0b5
+  const check0b5 = ownership
+    ? validateClassification5({
+        classification: classification0b5,
+        manifest: 'tranche0b5' in ctx ? ctx.tranche0b5 : base.tranche0b5,
+        ledger: 'ledger0b1' in ctx ? ctx.ledger0b1 : base.ledger0b1,
+        classification0b1: 'classification0b1' in ctx ? ctx.classification0b1 : base.classification0b1,
+        classification0b2,
+        classification0b3,
+        classification0b4,
+        manifest0b1: 'tranche0b1' in ctx ? ctx.tranche0b1 : base.tranche0b1,
+        manifest0b2: 'tranche0b2' in ctx ? ctx.tranche0b2 : base.tranche0b2,
+        manifest0b3: 'tranche0b3' in ctx ? ctx.tranche0b3 : base.tranche0b3,
+        manifest0b4: 'tranche0b4' in ctx ? ctx.tranche0b4 : base.tranche0b4,
+        entries: ownership.entries ?? [],
+        capabilityById: byId,
+        universe: new Set(routes.flatMap((route) => [].concat(route.methods).map((method) => `${route.route}|${method}`))),
+        exists,
+        readText,
+        anchoredEntries: 'anchoredOwnershipEntries0b5' in ctx ? ctx.anchoredOwnershipEntries0b5 : base.anchoredOwnershipEntries0b5,
+      })
+    : { problems: ['Gate 0B.5 route classification cannot be validated without the ownership register'], registeredReleaseBlocking: new Set(), releaseBlockingDefects: [], summary: null }
+  problems.push(...check0b5.problems)
   const trancheEvidence = 'trancheEvidence' in ctx ? ctx.trancheEvidence : [
-    ['tranche0b1', 'classification0b1'], ['tranche0b2', 'classification0b2'], ['tranche0b3', 'classification0b3'], ['tranche0b4', 'classification0b4'],
+    ['tranche0b1', 'classification0b1'], ['tranche0b2', 'classification0b2'], ['tranche0b3', 'classification0b3'], ['tranche0b4', 'classification0b4'], ['tranche0b5', 'classification0b5'],
   ].map(([manifestKey, classificationKey]) => ({
     manifest: manifestKey in ctx ? ctx[manifestKey] : base[manifestKey],
     classification: classificationKey in ctx ? ctx[classificationKey] : base[classificationKey],
@@ -661,7 +690,7 @@ export function validateGate0(matrix, ctx = {}) {
     tranches: trancheEvidence,
     deps: { exists, commitExists },
   }))
-  problems.push(...routeDefectProblems(matrix, classification0b4))
+  problems.push(...routeDefectProblems(matrix, classification0b5))
   problems.push(...('classificationPinProblems' in ctx ? ctx.classificationPinProblems : classificationPinProblems(matrix, base.root)))
   const routeCheck = validateRouteOwnership({
     justifiedUnauthenticated: classificationCheck.justifiedUnauthenticated,
@@ -685,8 +714,8 @@ export function validateGate0(matrix, ctx = {}) {
   const debt = defectProblems(capabilities, ratchetFailures, evidence, { exists, readText })
   problems.push(...debt.problems)
 
-  const exposureBlocked = (blocker) => blocker.code === 'ROUTE_UNJUSTIFIED_EXPOSURE' && blocker.operations.every((operation) => check0b4.registeredReleaseBlocking.has(operation))
-  const releaseBlocking = check0b4.releaseBlockingDefects.map((item) => ({
+  const exposureBlocked = (blocker) => blocker.code === 'ROUTE_UNJUSTIFIED_EXPOSURE' && blocker.operations.every((operation) => check0b5.registeredReleaseBlocking.has(operation))
+  const releaseBlocking = check0b5.releaseBlockingDefects.map((item) => ({
     capabilityId: item.ownerCapabilityId,
     id: item.defectId,
     kind: 'RELEASE_BLOCKING_ROUTE_EXPOSURE',
@@ -708,6 +737,7 @@ export function validateGate0(matrix, ctx = {}) {
   summary.classification0b2 = check0b2.summary
   summary.classification0b3 = check0b3.summary
   summary.classification0b4 = check0b4.summary
+  summary.classification0b5 = check0b5.summary
   summary.persona = Object.fromEntries(PERSONAS.map((persona) => {
     const spec = personaSpecs[persona]
     return [persona, { identifiers: spec.universe.length, individuallyDefined: spec.individuallyDefined.length, groupedOnly: spec.groupedOnly.length, unspecified: spec.unspecified.length, canonicalFileFound: spec.canonicalFileFound, resolved: spec.resolved }]

@@ -160,9 +160,20 @@ function parseImports(text) {
   return out
 }
 
+/**
+ * Workspace packages whose source a route reaches by package name. Only packages named here resolve, so a route
+ * cannot reach arbitrary code by an import specifier; the entry file is the package's own `exports` entry point.
+ */
+export const WORKSPACE_PACKAGES = {
+  '@nzila/ue-cognition': 'packages/ue-cognition/src/index',
+  '@nzila/platform-cognition-core': 'packages/platform-cognition-core/src/index',
+  '@nzila/organizational-cognition-core': 'packages/organizational-cognition-core/src/index',
+}
+
 export function resolveSpec(spec, fromFile, exists) {
   let base
   if (spec.startsWith('@/')) base = `${APP}${spec.slice(2)}`
+  else if (Object.hasOwn(WORKSPACE_PACKAGES, spec)) base = WORKSPACE_PACKAGES[spec]
   else if (spec.startsWith('.')) base = posix.normalize(join(dirname(fromFile), spec).split('\\').join('/'))
   else return null
   base = normalize(base).split('\\').join('/')

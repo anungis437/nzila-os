@@ -16,6 +16,7 @@ import { FILES_0B1 } from './ue-gate0b1-classification.mjs'
 import { FILES_0B2 } from './ue-gate0b2-classification.mjs'
 import { FILES_0B3 } from './ue-gate0b3-classification.mjs'
 import { FILES_0B4 } from './ue-gate0b4-classification.mjs'
+import { FILES_0B5 } from './ue-gate0b5-classification.mjs'
 import { FILES } from './ue-gate0-scope-lock.mjs'
 import { lockProvenanceProblems, updatedLock, lockVersionFor } from './ue-gate0-lock-provenance.mjs'
 
@@ -27,7 +28,7 @@ export function updateLock({ checkpoint } = {}) {
   let lock = readJson(FILES.lock)
   const matrix = readJson(FILES.matrix)
   const matrixById = new Map(matrix.capabilities.map((capability) => [capability.id, capability]))
-  const tranches = [FILES_0B1, FILES_0B2, FILES_0B3, FILES_0B4].map((files) => {
+  const tranches = [FILES_0B1, FILES_0B2, FILES_0B3, FILES_0B4, FILES_0B5].map((files) => {
     const manifest = readJson(files.manifest)
     return { tranche: manifest.tranche, manifest, classification: readJson(files.classification) }
   })
