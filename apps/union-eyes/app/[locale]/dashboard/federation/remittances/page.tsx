@@ -4,6 +4,7 @@ import { Metadata } from 'next';
 import { requireUser } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
+import { CapabilityUnavailable } from '@/components/system/capability-unavailable';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -77,11 +78,12 @@ async function getRemittanceData(federationId: string) {
       const json = await res.json();
       return json;
     }
-    // Fallback to empty state
+    // The service is unavailable: say so. These zeros are not data and must not be read as a collection position.
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
 
     return {
+      unavailable: true,
       remittances: [],
       summary: {
         totalDue: 0,
@@ -97,6 +99,7 @@ async function getRemittanceData(federationId: string) {
     };
   } catch {
     return {
+      unavailable: true,
       remittances: [],
       summary: {
         totalDue: 0,
@@ -171,6 +174,7 @@ export default async function FederationRemittancesPage({
 
   return (
     <div className="container mx-auto py-8 space-y-8">
+      {data.unavailable ? <CapabilityUnavailable locale={locale} capability="federation/remittances" /> : null}
       {/* Page Header */}
       <div className="flex justify-between items-start">
         <div>

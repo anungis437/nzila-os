@@ -95,17 +95,25 @@ export async function processAnniversaryAwards(orgId: string) {
       return { success: true, processed: 0 };
     }
 
-    // Find members with anniversaries today who have not already been given today's award. The job is triggered by a
-    // schedule that can fire more than once a day (retries, overlapping runs); an award already created today for this
-    // member and type, in any state, means this anniversary has been handled.
+    // Two overlapping runs (retries, a slow run still going when the next fires) must not both read "not yet awarded" and
+    // both issue. A transaction-scoped advisory lock keyed on organization and award type makes the second run wait until
+    // the first has committed its awards, and then it sees them. The lock is released when this transaction ends.
+    return await db.transaction(async (lockTx) => {
+    await lockTx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${`anniversary-awards:${orgId}:${anniversaryAwardType.id}`}, 0))`);
+
+    // Find active members with anniversaries today who have not already been given today's award. The job is triggered by a
+    // schedule that can fire more than once a day; an award already created today for this member and type, in any state,
+    // means this anniversary has been handled. Only active members are rewarded: a suspended or removed member is not.
     const query = sql`
       SELECT 
         om.user_id,
-        om.user_name,
+        om.name AS user_name,
         om.joined_at,
         EXTRACT(YEAR FROM AGE(CURRENT_DATE, om.joined_at)) as years_of_service
       FROM organization_members om
       WHERE om.organization_id = ${orgId}
+        AND om.status = 'active'
+        AND om.deleted_at IS NULL
         AND EXTRACT(MONTH FROM om.joined_at) = ${currentMonth}
         AND EXTRACT(DAY FROM om.joined_at) = ${currentDay}
         AND EXTRACT(YEAR FROM AGE(CURRENT_DATE, om.joined_at)) > 0
@@ -118,8 +126,9 @@ export async function processAnniversaryAwards(orgId: string) {
         )
     `;
 
-    const result = await db.execute(query);
-    const anniversaries = result as unknown as AnniversaryRow[];
+    const result = await lockTx.execute(query);
+    const anniversaries = (Array.isArray(result) ? result : (result as { rows?: unknown[] }).rows ?? []) as unknown as AnniversaryRow[];
+    const executor = lockTx as unknown as typeof db;
 
     let processed = 0;
 
@@ -137,6 +146,7 @@ export async function processAnniversaryAwards(orgId: string) {
           recipientUserId: anniversary.user_id,
           issuerUserId: 'system', // System-generated
           reason,
+          executor,
         });
 
         // Automatically approve and issue anniversary awards
@@ -144,6 +154,7 @@ export async function processAnniversaryAwards(orgId: string) {
           await issueAward({
             awardId: award.id,
             orgId,
+            executor,
           });
         }
 
@@ -158,6 +169,7 @@ export async function processAnniversaryAwards(orgId: string) {
     }
 
     return { success: true, processed };
+    });
   } catch (error) {
     logger.error('[Automation] Error processing anniversary awards', { error, orgId });
     return { success: false, error };

@@ -200,6 +200,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "FORCE RLS for the council-election supersession relations created by platform 0033 and 0034. Found by a native bootstrap: without it the catalog preflight left both relations unclassified and runtime grant activation aborted. Proven on native PostgreSQL 15 and 16; not applied to any live database."
+      },
+      {
+        "tag": "0030_precedent_explicit_share_select",
+        "sha256": "f53578b29414fd552810fcac8dbf15ad8dddfdccbe14ce419b04754e4d7ec1a9",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "One additional permissive SELECT policy on arbitration_precedents for the runtime role: an explicit grant in shared_with_org_ids or sharing_level = public. Writes stay owner-only; federation and congress levels stay owner-only at the database. Proven on native PostgreSQL 15 and 16 (grant, revocation, negative disclosure); not applied to any live database."
       }
     ],
     "platform": [

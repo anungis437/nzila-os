@@ -160,7 +160,7 @@ export default function SocialMediaPostComposer() {
   const fetchAccounts = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/v2/social-media/accounts');
+      const res = await fetch('/api/social-media/accounts');
       if (res.ok) {
         const data = await res.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];

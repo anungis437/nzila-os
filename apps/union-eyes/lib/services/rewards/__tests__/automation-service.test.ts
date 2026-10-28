@@ -110,6 +110,10 @@ import {
 describe('automation-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // The anniversary job runs inside one transaction that first takes an advisory lock.
+    mocks.mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+      fn({ execute: async (q: unknown) => (String(q).includes('pg_advisory_xact_lock') ? [] : mocks.mockExecute(q)) }),
+    );
   });
 
   /* ============================= processAnniversaryAwards ============================= */
@@ -157,6 +161,9 @@ describe('automation-service', () => {
       expect(result.processed).toBe(1);
       expect(mocks.mockCreateAwardRequest).toHaveBeenCalledTimes(1);
       expect(mocks.mockIssueAward).toHaveBeenCalledTimes(1);
+      // Both run on the transaction that holds the lock, not on another connection.
+      expect(mocks.mockCreateAwardRequest.mock.calls[0][0].executor).toBeDefined();
+      expect(mocks.mockIssueAward.mock.calls[0][0].executor).toBeDefined();
     });
 
     it('does not issue when award type requires approval', async () => {

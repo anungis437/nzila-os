@@ -96,6 +96,9 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
   const ORG_B = randomUUID()
   const P_A_PRIVATE = randomUUID()
   const P_A_PUBLIC = randomUUID()
+  const P_A_GRANTED = randomUUID()
+  const P_A_FEDERATION = randomUUID()
+  const ORG_C = randomUUID()
   const P_B = randomUUID()
   const S_A = randomUUID()
   const S_A_ENDED = randomUUID()
@@ -128,6 +131,8 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
       )
     await precedent(P_A_PRIVATE, ORG_A, 'private')
     await precedent(P_A_PUBLIC, ORG_A, 'public')
+    await precedent(P_A_GRANTED, ORG_A, 'private', [ORG_B])
+    await precedent(P_A_FEDERATION, ORG_A, 'federation')
     await precedent(P_B, ORG_B, 'private')
     const steward = (id: string, org: string, status: string) =>
       admin.query(
@@ -155,19 +160,52 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
 
     it('the deployed policy hides another organization\'s precedent from the runtime role and refuses its writes', async () => {
       const rows = (await inRole('union_eyes_runtime', ORG_B, (tx) => (tx as unknown as { $client: pg.Client }).$client.query('SELECT id FROM arbitration_precedents'))) as pg.QueryResult
-      expect(rows.rows.map((r: { id: string }) => r.id)).toEqual([P_B])
+      // Own rows, plus rows another organization shared with this one (an explicit grant or public) under 0030; never the rest.
+      expect(rows.rows.map((r: { id: string }) => r.id).sort()).toEqual([P_B, P_A_PUBLIC, P_A_GRANTED].sort())
       const update = (await inRole('union_eyes_runtime', ORG_B, (tx) => (tx as unknown as { $client: pg.Client }).$client.query(`UPDATE arbitration_precedents SET case_title = 'x' WHERE id = $1`, [P_A_PRIVATE]))) as pg.QueryResult
       expect(update.rowCount).toBe(0)
       const del = (await inRole('union_eyes_runtime', ORG_B, (tx) => (tx as unknown as { $client: pg.Client }).$client.query('DELETE FROM arbitration_precedents WHERE id = $1', [P_A_PRIVATE]))) as pg.QueryResult
       expect(del.rowCount).toBe(0)
     })
 
-    it('GET: another organization reads a private or a public precedent as not found (no multi-party policy admits shared rows yet)', async () => {
+    it('GET: a precedent shared by an explicit grant or made public reads to the other organization as a projection, never the owner\'s working material', async () => {
       const { GET } = await import('../../app/api/precedents/[id]/route')
-      await expect((GET as any)(ctx(ORG_B, P_A_PRIVATE))).rejects.toMatchObject({ status: 404 })
-      await expect((GET as any)(ctx(ORG_B, P_A_PUBLIC))).rejects.toMatchObject({ status: 404 })
+      for (const id of [P_A_GRANTED, P_A_PUBLIC]) {
+        const { data } = (await (GET as any)(ctx(ORG_B, id))) as { data: Record<string, unknown> }
+        expect(data, id).toMatchObject({ id, isOwner: false })
+        for (const hidden of ['documentUrl', 'documentPath', 'sharedWithOrgIds', 'createdBy']) expect(data, `${id} ${hidden}`).not.toHaveProperty(hidden)
+        // The fixture has no redacted copy, so a reader is offered no document location at all.
+        expect(data.redactedDocumentUrl).toBeNull()
+      }
     })
 
+    it('GET: negative disclosure: an un-granted private precedent, a federation-level one, and a third organization all read as not found', async () => {
+      const { GET } = await import('../../app/api/precedents/[id]/route')
+      await expect((GET as any)(ctx(ORG_B, P_A_PRIVATE))).rejects.toMatchObject({ status: 404 })
+      await expect((GET as any)(ctx(ORG_B, P_A_FEDERATION))).rejects.toMatchObject({ status: 404 })
+      await expect((GET as any)(ctx(ORG_C, P_A_GRANTED))).rejects.toMatchObject({ status: 404 })
+      // The grant names one organization: a malformed or empty context never matches it.
+      const none = (await inRole('union_eyes_runtime', null, (tx) => (tx as unknown as { $client: pg.Client }).$client.query('SELECT id FROM arbitration_precedents'))) as pg.QueryResult
+      expect(none.rows.map((r: { id: string }) => r.id)).toEqual([P_A_PUBLIC])
+    })
+
+    it('revocation takes effect at once: removing the grant makes the precedent not found again, and restoring it admits it', async () => {
+      const { GET } = await import('../../app/api/precedents/[id]/route')
+      await admin.query('UPDATE arbitration_precedents SET shared_with_org_ids = $2 WHERE id = $1', [P_A_GRANTED, []])
+      await expect((GET as any)(ctx(ORG_B, P_A_GRANTED))).rejects.toMatchObject({ status: 404 })
+      await admin.query('UPDATE arbitration_precedents SET shared_with_org_ids = $2 WHERE id = $1', [P_A_GRANTED, [ORG_B]])
+      expect(((await (GET as any)(ctx(ORG_B, P_A_GRANTED))) as { data: { id: string } }).data.id).toBe(P_A_GRANTED)
+    })
+
+    it('reading a shared precedent never implies writing it: the grantee\'s UPDATE and DELETE touch nothing', async () => {
+      const q = (sqlText: string, params: unknown[]) => inRole('union_eyes_runtime', ORG_B, (tx) => (tx as unknown as { $client: pg.Client }).$client.query(sqlText, params)) as Promise<pg.QueryResult>
+      for (const id of [P_A_GRANTED, P_A_PUBLIC]) {
+        expect((await q(`UPDATE arbitration_precedents SET case_title = 'hijacked' WHERE id = $1`, [id])).rowCount).toBe(0)
+        expect((await q('DELETE FROM arbitration_precedents WHERE id = $1', [id])).rowCount).toBe(0)
+      }
+      expect((await q(`INSERT INTO arbitration_precedents (id, source_organization_id, case_title, decision_date, arbitrator_name, jurisdiction, grievance_type, issue_summary, outcome, decision_summary, sharing_level, created_by)
+        VALUES (gen_random_uuid(), $1, 't', '2026-01-01', 'a', 'ON', 'g', 'i', 'o', 'd', 'private', 'x') RETURNING id`, [ORG_A]).catch((e: Error) => e)) instanceof Error).toBe(true)
+    })
     it('PATCH: a sharing level the owner has no standing for is refused and not stored', async () => {
       const { PATCH } = await import('../../app/api/precedents/[id]/route')
       await expect((PATCH as any)(ctx(ORG_A, P_A_PUBLIC, { sharingLevel: 'federation' }))).rejects.toMatchObject({ status: 403 })
@@ -182,7 +220,7 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
 
     it('PATCH and DELETE by another organization change nothing, whatever the sharing level', async () => {
       const { PATCH, DELETE } = await import('../../app/api/precedents/[id]/route')
-      for (const id of [P_A_PRIVATE, P_A_PUBLIC]) {
+      for (const id of [P_A_PRIVATE, P_A_PUBLIC, P_A_GRANTED]) {
         await expect((PATCH as any)(ctx(ORG_B, id, { caseTitle: 'hijacked' }))).rejects.toMatchObject({ status: 404 })
         await expect((DELETE as any)(ctx(ORG_B, id))).rejects.toMatchObject({ status: 404 })
       }
@@ -334,6 +372,81 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
       expect(other.amount).toBe('40.00')
       const visibleToB = (await inRole('union_eyes_runtime', ORG_B, (tx) => (tx as unknown as { $client: pg.Client }).$client.query('SELECT id FROM dues_transactions'))) as pg.QueryResult
       expect(visibleToB.rows).toEqual([])
+    })
+  })
+
+  describe('dues settlement under real concurrency', () => {
+    const MEMBER = `settle-member-${randomUUID().slice(0, 8)}`
+    let paymentId = ''
+    let intentId = ''
+
+    const intent = async (overrides: Record<string, unknown> = {}) => {
+      const { DUES_PAYMENT_KIND, DUES_CURRENCY } = await import('../../lib/dues/dues-payment-service')
+      return {
+        id: intentId,
+        amount_received: 3000,
+        currency: DUES_CURRENCY,
+        metadata: { ue_payment_kind: DUES_PAYMENT_KIND, ue_dues_payment_id: paymentId, organization_id: ORG_A, member_user_id: MEMBER },
+        ...overrides,
+      }
+    }
+    const settle = async (eventId: string, overrides: Record<string, unknown> = {}) => {
+      const { settleDuesPaymentIntent } = await import('../../lib/dues/dues-settlement')
+      const pi = await intent(overrides)
+      return inRole('union_eyes_system', null, (tx) => settleDuesPaymentIntent(tx as never, pi as never, eventId))
+    }
+    const ledgerRows = async () =>
+      (await admin.query(`SELECT transaction_type, amount::text AS amount, payment_reference FROM member_dues_ledger WHERE user_id = $1 AND organization_id = $2 AND transaction_type = 'payment'`, [MEMBER, ORG_A])).rows
+
+    beforeAll(async () => {
+      await admin.query(
+        `INSERT INTO member_dues_ledger (user_id, organization_id, transaction_type, transaction_date, effective_date, amount, balance_before, balance_after, description, status)
+         VALUES ($1, $2, 'charge', now(), now(), 30, 0, 30, 'monthly dues', 'posted')`,
+        [MEMBER, ORG_A],
+      )
+      const { initiateDuesPayment } = await import('../../lib/dues/dues-payment-service')
+      const created = await initiateDuesPayment({
+        organizationId: ORG_A,
+        userId: MEMBER,
+        providerConfigured: true,
+        gateway: { paymentIntents: { create: async (_p: unknown, o?: { idempotencyKey?: string }) => ({ id: `pi_${o?.idempotencyKey}`, client_secret: 's' }), cancel: async () => ({}) } },
+      })
+      paymentId = created.paymentId
+      intentId = (await scalar(`SELECT processor_payment_id FROM dues_transactions WHERE id = $1`, [paymentId])).processor_payment_id
+    })
+
+    it('a tampered amount, member, organization or provider reference never credits the ledger', async () => {
+      await expect(settle('evt_amount', { amount_received: 1 })).rejects.toMatchObject({ code: 'AMOUNT_MISMATCH' })
+      await expect(settle('evt_ref', { id: 'pi_someone_elses' })).rejects.toMatchObject({ code: 'PROVIDER_REFERENCE_MISMATCH' })
+      await expect(settle('evt_member', { metadata: { ue_dues_payment_id: paymentId, organization_id: ORG_A, member_user_id: 'someone-else' } })).rejects.toMatchObject({ code: 'MEMBER_MISMATCH' })
+      await expect(settle('evt_org', { metadata: { ue_dues_payment_id: paymentId, organization_id: ORG_B, member_user_id: MEMBER } })).rejects.toMatchObject({ code: 'ORGANIZATION_MISMATCH' })
+      expect(await ledgerRows()).toEqual([])
+      expect((await scalar(`SELECT status FROM dues_transactions WHERE id = $1`, [paymentId])).status).toBe('pending')
+    })
+
+    it('ten simultaneous deliveries of the same payment (distinct event ids) credit the ledger once', async () => {
+      const outcomes = await Promise.all(Array.from({ length: 10 }, (_v, i) => settle(`evt_${i}`)))
+      expect(outcomes.filter((o) => o === 'settled')).toHaveLength(1)
+      expect(outcomes.filter((o) => o === 'duplicate')).toHaveLength(9)
+      const rows = await ledgerRows()
+      expect(rows).toHaveLength(1)
+      expect(rows[0]).toMatchObject({ amount: '30.00', payment_reference: intentId })
+      expect((await scalar(`SELECT status FROM dues_transactions WHERE id = $1`, [paymentId])).status).toBe('paid')
+      expect(state.audit.filter((e) => e.action === 'dues.settle')).toHaveLength(1)
+    })
+
+    it('a delayed replay long after settlement, and a replay with the same event id, change nothing', async () => {
+      expect(await settle('evt_late')).toBe('duplicate')
+      expect(await settle('evt_0')).toBe('duplicate')
+      expect(await ledgerRows()).toHaveLength(1)
+    })
+
+    it('a provider failure arriving after settlement does not reverse or re-open it', async () => {
+      const { recordDuesPaymentProviderOutcome } = await import('../../lib/dues/dues-settlement')
+      const pi = await intent()
+      const outcome = await inRole('union_eyes_system', null, (tx) => recordDuesPaymentProviderOutcome(tx as never, pi as never, 'evt_fail', 'failed'))
+      expect(outcome).toBe('ignored')
+      expect((await scalar(`SELECT status FROM dues_transactions WHERE id = $1`, [paymentId])).status).toBe('paid')
     })
   })
 

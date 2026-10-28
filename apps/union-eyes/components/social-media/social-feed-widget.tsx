@@ -101,7 +101,7 @@ export default function SocialFeedWidget() {
   const fetchFeed = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/v2/social-media/feed');
+      const res = await fetch('/api/social-media/feed');
       if (res.ok) {
         const data = await res.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];
@@ -324,7 +324,7 @@ export function SocialFeedCompact() {
 
   const fetchFeed = useCallback(async () => {
     try {
-      const res = await fetch('/api/v2/social-media/feed?limit=3');
+      const res = await fetch('/api/social-media/feed?limit=3');
       if (res.ok) {
         const data = await res.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];

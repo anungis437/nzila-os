@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PGlite } from '@electric-sql/pglite';
 import { drizzle } from 'drizzle-orm/pglite';
+import { sql } from 'drizzle-orm';
 
 // DEF-0B11-PRP-REWARDS-CRON-ANNIVERSARY-AWARDS-REPEAT-ON-EVERY-CALL-ON-AN-ANNIVERSARY-DAY
 // Real SQL: a second run on the same day must not award the same member again.
@@ -21,12 +22,12 @@ vi.mock('@/db', () => ({
 }));
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }));
 vi.mock('../award-service', () => ({
-  createAwardRequest: async (input: { orgId: string; recipientUserId: string; awardTypeId: string }) => {
-    const pg = (globalThis as unknown as { __pg: PGlite }).__pg;
+  createAwardRequest: async (input: { orgId: string; recipientUserId: string; awardTypeId: string; executor?: { execute(q: unknown): Promise<unknown> } }) => {
     const id = crypto.randomUUID();
-    await pg.query(
-      `INSERT INTO recognition_awards (id, org_id, recipient_user_id, award_type_id, status) VALUES ($1::uuid, $2::uuid, $3, $4::uuid, 'approved')`,
-      [id, input.orgId, input.recipientUserId, input.awardTypeId],
+    // The job holds a transaction on the only connection, so the award must be written through the executor it passes.
+    if (!input.executor) throw new Error('the job must write awards through its locking transaction');
+    await input.executor.execute(
+      sql`INSERT INTO recognition_awards (id, org_id, recipient_user_id, award_type_id, status) VALUES (${id}::uuid, ${input.orgId}::uuid, ${input.recipientUserId}, ${input.awardTypeId}::uuid, 'approved')`,
     );
     state.created.push(`${input.orgId}:${input.recipientUserId}`);
     return { id };
@@ -51,7 +52,7 @@ beforeAll(async () => {
   state.db = drizzle(pg);
   await pg.exec(`
     CREATE TABLE organization_members (id uuid primary key default gen_random_uuid(), organization_id uuid not null,
-      user_id text not null, user_name text, joined_at timestamptz);
+      user_id text not null, name text, status text not null default 'active', deleted_at timestamptz, joined_at timestamptz);
     CREATE TABLE recognition_awards (id uuid primary key, org_id uuid not null, recipient_user_id text not null,
       award_type_id uuid not null, status text not null, created_at timestamptz not null default now());
   `);
@@ -72,8 +73,8 @@ beforeEach(async () => {
   state.created.length = 0;
   state.issued.length = 0;
   await pg.exec('TRUNCATE organization_members, recognition_awards');
-  await pg.query(`INSERT INTO organization_members (organization_id, user_id, user_name, joined_at) VALUES ($1::uuid, 'member-1', 'One', CURRENT_DATE - interval '2 years')`, [ORG_A]);
-  await pg.query(`INSERT INTO organization_members (organization_id, user_id, user_name, joined_at) VALUES ($1::uuid, 'member-2', 'Two', CURRENT_DATE - interval '5 years')`, [ORG_A]);
+  await pg.query(`INSERT INTO organization_members (organization_id, user_id, name, joined_at) VALUES ($1::uuid, 'member-1', 'One', CURRENT_DATE - interval '2 years')`, [ORG_A]);
+  await pg.query(`INSERT INTO organization_members (organization_id, user_id, name, joined_at) VALUES ($1::uuid, 'member-2', 'Two', CURRENT_DATE - interval '5 years')`, [ORG_A]);
 });
 
 describe('processAnniversaryAwards — one award per member per anniversary day', () => {
@@ -108,5 +109,13 @@ describe('processAnniversaryAwards — one award per member per anniversary day'
     const result = await processAnniversaryAwards(ORG_A);
     expect(result).toMatchObject({ processed: 1 });
     expect(state.created).toEqual([`${ORG_A}:member-2`]);
+  });
+
+  it('rewards only active members: a suspended or removed member is skipped', async () => {
+    await pg.query(`UPDATE organization_members SET status = 'suspended' WHERE user_id = 'member-1'`);
+    await pg.query(`UPDATE organization_members SET deleted_at = now() WHERE user_id = 'member-2'`);
+    const result = await processAnniversaryAwards(ORG_A);
+    expect(result).toMatchObject({ success: true, processed: 0 });
+    expect(state.created).toEqual([]);
   });
 });

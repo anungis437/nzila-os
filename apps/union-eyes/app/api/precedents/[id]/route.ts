@@ -3,10 +3,10 @@
  *
  * A precedent is owned by `source_organization_id`; the table has no organization_id, so a generic tenant filter never
  * applied and any precedent of any organization could be read, rewritten or deleted by id. Authority is now explicit:
- * - GET reads a precedent the caller's organization owns. The deployed row-level policy admits only the owner's rows, so a
- *   precedent another organization shared reads as not found until a reviewed multi-party policy admits it; when it does,
- *   canReadSharedClause (public, an explicit grant, the same federation/congress) decides and a non-owner gets a projection
- *   without the owner's document location, grant list or author.
+ * - GET reads a precedent the caller's organization owns, or one shared with it. Cache migration 0030 admits, at the database,
+ *   rows with an explicit grant to the caller's organization or sharing_level = 'public'; federation and congress levels stay
+ *   owner-only there until their own reviewed design exists. canReadSharedClause is the second gate, and a non-owner gets a
+ *   projection without the owner's document location, grant list or author.
  * - PATCH and DELETE are owner-only, run under the caller's tenant RLS context, name the owner in their own WHERE
  *   clause, and are audited in the same transaction. Sharing changes are checked against the owner's standing.
  */
@@ -69,9 +69,9 @@ export const GET = withApi(
   },
   async ({ params, organizationId, userId }) => {
     const ctx = requireIds(params, organizationId, userId);
-    // The read runs in the caller's tenant context, so the deployed policy on arbitration_precedents (owner only) is the
-    // first gate; canReadSharedClause is the second, for the day a multi-party policy admits shared rows. The system role
-    // holds no privilege on this table, and none is granted here: cross-organization sharing needs its own reviewed policy.
+    // The read runs in the caller's tenant context, so the deployed policies on arbitration_precedents (owner, plus 0030's
+    // explicit-grant and public read) are the first gate; canReadSharedClause is the second. The system role holds no
+    // privilege on this table, and none is granted here.
     return withRLSContext({ organizationId: ctx.organizationId, userId: ctx.userId }, async (tx) => {
       const row = await readPrecedent(ctx.id, tx);
       if (!row || !(await canReadSharedClause(ctx.organizationId, row))) {
