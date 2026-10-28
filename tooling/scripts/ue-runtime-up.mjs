@@ -4,11 +4,13 @@
  *
  *   node tooling/scripts/ue-runtime-up.mjs up      # database, migrations, seed, platform sandbox DB, app, wait healthy
  *   node tooling/scripts/ue-runtime-up.mjs test    # run the Playwright runtime acceptance (desktop, tablet, mobile)
- *   node tooling/scripts/ue-runtime-up.mjs all     # up, then test
+ *   node tooling/scripts/ue-runtime-up.mjs restart-check  # file a case, restart the app, prove it persisted
+ *   node tooling/scripts/ue-runtime-up.mjs all     # up, then test, then restart-check
  *   node tooling/scripts/ue-runtime-up.mjs down    # stop the app and the database container
  *   node tooling/scripts/ue-runtime-up.mjs env     # print the environment the app and the tests use
  *
- * Needs Docker, Python (Django backend migrations), Node and pnpm. Options: --port-db 55430 --port-app 3002 --fresh
+ * Needs Docker, Python (Django backend migrations), Node and pnpm. Options: --port-db 55430 --port-app 3002 --fresh --prod
+ * (--prod builds and serves the production bundle, the reliable mode for repeated acceptance runs).
  *
  * LOCAL ONLY. It uses a disposable container, synthetic credentials and the QA session cookie that the platform auth honours
  * solely when QA_TEST_ENV=true and UE_ENVIRONMENT=local. The NAR audit store is a local sandbox (never immutable) and the
@@ -32,10 +34,14 @@ const opt = (name, fallback) => {
 const PORT_DB = Number(opt('port-db', '55430'))
 const PORT_APP = Number(opt('port-app', '3002'))
 const FRESH = args.includes('--fresh')
+// A production build (next build + next start) is the reliable runtime: the dev server stalls under repeated acceptance runs.
+const PROD = args.includes('--prod')
 const CONTAINER = 'ue-runtime-pg'
 const APP_DB = 'ue_runtime'
 const PLATFORM_DB = 'ue_platform_sandbox'
 const isWin = process.platform === 'win32'
+// Only the Windows .cmd shims (pnpm, npx) need a shell; with a shell, arguments that contain spaces are split apart.
+const useShell = (cmd) => isWin && /^(pnpm|npx)$/.test(cmd)
 
 /** Disposable credentials, generated on first use and kept (git-ignored) with the runtime state; nothing is committed. */
 function secrets() {
@@ -65,7 +71,7 @@ export function runtimeEnv() {
     AUTH_SECRET: secrets().auth,
     VOTING_SECRET: secrets().voting,
     QA_TEST_ENV: 'true',
-    NODE_ENV: 'development',
+    NODE_ENV: PROD ? 'production' : 'development',
     PLAYWRIGHT_TEST_AUTH: 'true',
     UE_ENVIRONMENT: 'local',
     UE_CANONICAL_BOOTSTRAP_V2: '0',
@@ -81,14 +87,14 @@ export function runtimeEnv() {
 }
 
 function run(cmd, cmdArgs, options = {}) {
-  const result = spawnSync(cmd, cmdArgs, { stdio: 'inherit', shell: isWin, cwd: ROOT, ...options, env: { ...process.env, ...options.env } })
+  const result = spawnSync(cmd, cmdArgs, { stdio: 'inherit', shell: useShell(cmd), cwd: ROOT, ...options, env: { ...process.env, ...options.env } })
   if (result.status !== 0) throw new Error(`${cmd} ${cmdArgs.join(' ')} exited with ${result.status}`)
 }
-const out = (cmd, cmdArgs, options = {}) => spawnSync(cmd, cmdArgs, { encoding: 'utf8', shell: isWin, cwd: ROOT, ...options }).stdout?.trim() ?? ''
+const out = (cmd, cmdArgs, options = {}) => spawnSync(cmd, cmdArgs, { encoding: 'utf8', shell: useShell(cmd), cwd: ROOT, ...options }).stdout?.trim() ?? ''
 const psql = (db, sql) => run('docker', ['exec', CONTAINER, 'psql', '-U', 'postgres', '-d', db, '-v', 'ON_ERROR_STOP=1', '-c', sql])
 const psqlFile = (db, file) => {
   const sql = readFileSync(file, 'utf8').replaceAll('--> statement-breakpoint', '')
-  const result = spawnSync('docker', ['exec', '-i', CONTAINER, 'psql', '-U', 'postgres', '-d', db, '-v', 'ON_ERROR_STOP=1'], { input: sql, encoding: 'utf8', shell: isWin })
+  const result = spawnSync('docker', ['exec', '-i', CONTAINER, 'psql', '-U', 'postgres', '-d', db, '-v', 'ON_ERROR_STOP=1'], { input: sql, encoding: 'utf8' })
   if (result.status !== 0) throw new Error(`psql ${file}: ${result.stderr}`)
 }
 
@@ -111,7 +117,7 @@ async function up() {
   mkdirSync(STATE, { recursive: true })
   const running = out('docker', ['ps', '--filter', `name=${CONTAINER}`, '--format', '{{.Names}}'])
   if (!running) {
-    spawnSync('docker', ['rm', '-f', CONTAINER], { shell: isWin })
+    spawnSync('docker', ['rm', '-f', CONTAINER])
     run('docker', ['run', '-d', '--name', CONTAINER, '-e', `POSTGRES_PASSWORD=${secrets().db}`, '-p', `${PORT_DB}:5432`, 'postgres:16'])
     for (let i = 0; i < 60; i++) {
       if (/accepting connections/.test(out('docker', ['exec', CONTAINER, 'pg_isready', '-U', 'postgres']))) break
@@ -129,7 +135,7 @@ async function up() {
     // Django migrates first, as in production; then the approved Drizzle bootstrap; then the deterministic QA fixtures.
     run('python', ['manage.py', 'migrate', '--noinput'], {
       cwd: join(APP, 'backend'),
-      env: { PGHOST: 'localhost', PGPORT: String(PORT_DB), PGUSER: 'postgres', PGPASSWORD: 'postgres', PGDATABASE: APP_DB },
+      env: { PGHOST: 'localhost', PGPORT: String(PORT_DB), PGUSER: 'postgres', PGPASSWORD: secrets().db, PGDATABASE: APP_DB },
     })
     run('node', ['tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs'], { env: runtimeEnv() })
     run('pnpm', ['--filter', '@nzila/union-eyes', 'seed:test-env'], { env: runtimeEnv() })
@@ -142,40 +148,60 @@ async function up() {
   }
 
   const alive = await fetch(`http://localhost:${PORT_APP}/api/health`, { signal: AbortSignal.timeout(5_000) }).then(() => true, () => false)
-  if (!alive) {
-    const log = openSync(join(STATE, 'app.log'), 'a')
-    const child = spawn('pnpm', ['--filter', '@nzila/union-eyes', 'dev'], {
-      cwd: ROOT, env: { ...process.env, ...runtimeEnv() }, shell: isWin, detached: true, stdio: ['ignore', log, log],
-    })
-    child.unref()
-    writeFileSync(join(STATE, 'app.pid'), String(child.pid))
-  }
+  if (!alive) startApp()
   const body = await healthy(240_000)
   console.log(`[ue-runtime] healthy: ${JSON.stringify(body.checks)}`)
+}
+
+function startApp() {
+  const filter = ['--filter', '@nzila/union-eyes']
+  if (PROD && !existsSync(join(APP, '.next', 'BUILD_ID'))) run('pnpm', [...filter, 'exec', 'next', 'build'], { env: runtimeEnv() })
+  const serve = PROD ? ['exec', 'next', 'start', '--port', String(PORT_APP)] : ['dev']
+  const log = openSync(join(STATE, 'app.log'), 'a')
+  const child = spawn('pnpm', [...filter, ...serve], {
+    cwd: ROOT, env: { ...process.env, ...runtimeEnv() }, shell: useShell('pnpm'), detached: true, stdio: ['ignore', log, log],
+  })
+  child.unref()
+  writeFileSync(join(STATE, 'app.pid'), String(child.pid))
+}
+
+function stopApp() {
+  const pidFile = join(STATE, 'app.pid')
+  if (!existsSync(pidFile)) return
+  const pid = readFileSync(pidFile, 'utf8').trim()
+  if (isWin) spawnSync('taskkill', ['/PID', pid, '/T', '/F'], { stdio: 'ignore' })
+  else try { process.kill(-Number(pid)) } catch { /* already gone */ }
 }
 
 function test() {
   run('npx', ['playwright', 'test', '--config', 'playwright.runtime.config.ts'], { cwd: APP, env: runtimeEnv() })
 }
 
+/** Files a case, stops the application, starts it again, and proves the case, its audit proof and its boundaries survived. */
+async function restartCheck() {
+  run('npx', ['playwright', 'test', '--config', 'playwright.runtime.config.ts', '--project=desktop', 'e2e/runtime/01', '-g', 'journey A'], { cwd: APP, env: runtimeEnv() })
+  stopApp()
+  await new Promise((r) => setTimeout(r, 5_000))
+  startApp()
+  await healthy(300_000)
+  run('npx', ['playwright', 'test', '--config', 'playwright.runtime.config.ts', '--project=desktop', 'e2e/runtime/02'], { cwd: APP, env: runtimeEnv() })
+}
+
 function down() {
-  const pidFile = join(STATE, 'app.pid')
-  if (existsSync(pidFile)) {
-    const pid = readFileSync(pidFile, 'utf8').trim()
-    if (isWin) spawnSync('taskkill', ['/PID', pid, '/T', '/F'], { stdio: 'ignore' })
-    else try { process.kill(-Number(pid)) } catch { /* already gone */ }
-  }
-  spawnSync('docker', ['rm', '-f', CONTAINER], { shell: isWin, stdio: 'inherit' })
+  stopApp()
+  spawnSync('docker', ['rm', '-f', CONTAINER], { stdio: 'inherit' })
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   if (command === 'env') console.log(JSON.stringify(runtimeEnv(), null, 2))
   else if (command === 'up') await up()
   else if (command === 'test') test()
+  else if (command === 'restart-check') await restartCheck()
   else if (command === 'down') down()
   else if (command === 'all') {
     await up()
     test()
+    await restartCheck()
   } else {
     console.error(`unknown command ${command}`)
     process.exit(2)

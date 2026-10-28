@@ -9,6 +9,8 @@
  * the CURRENT behaviour and is named "KNOWN GAP" so the gap cannot pass as a feature.
  */
 import { test, expect, request as pwRequest, type APIRequestContext } from '@playwright/test'
+import { mkdir, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { ageQaCase, countGrievances, inspectCase, inspectFiling, resetQaCase } from '../../scripts/runtime/db-inspect'
 import { UE_TEST_USERS } from '../../tests/fixtures/test-users'
 import { UE_TEST_ORGS } from '../../tests/fixtures/test-orgs'
@@ -17,6 +19,8 @@ import { REQUIRED_VISIBLE_LABELS, STAKEHOLDER_ORDER } from '../helpers/role-fixt
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3002'
 const PRIMARY = UE_TEST_ORGS.primary.id
+// Playwright empties its output directory on every run, so the hand-off to the restart check lives in the git-ignored runtime state directory.
+const STATE_DIR = process.env.UE_RUNTIME_STATE_DIR ?? join(process.cwd(), '..', '..', '.ue-runtime')
 const SECONDARY = UE_TEST_ORGS.secondary.id
 
 async function as(userId: string, orgId: string): Promise<APIRequestContext> {
@@ -90,6 +94,10 @@ test.describe('journey A: member files, authority decides who can see it', () =>
     const body = await response.json()
     caseId = body.claimId
     claimNumber = body.claimNumber
+    if (process.env.UE_RUNTIME_ARTIFACTS) {
+      await mkdir(STATE_DIR, { recursive: true })
+      await writeFile(join(STATE_DIR, 'journey-a-state.json'), JSON.stringify({ caseId, claimNumber, title }))
+    }
     expect(body.status).toBe('submitted')
     expect(body.decision.proof, 'the intake decision carries a sealed proof').toBeTruthy()
   })
@@ -263,9 +271,14 @@ test.describe('landing and navigation by stakeholder, at desktop, tablet and mob
       const nav = page.locator(visibleNavSelector).first()
       const trigger = page.getByRole('button', { name: /open navigation/i }).first()
       // Wait for the page to settle on one of the two layouts, then act: wide layouts show the navigation, narrow ones a trigger.
-      await expect(nav.or(trigger)).toBeVisible()
-      if ((await page.locator(visibleNavSelector).count()) === 0) await trigger.click()
-      await expect(nav).toBeVisible()
+      // A breadcrumb is also a <nav>, so the primary navigation is judged by the drawer when a trigger exists.
+      await expect(nav.or(trigger).first()).toBeVisible()
+      if (await trigger.isVisible()) {
+        await trigger.click()
+        await expect(page.locator('#ue-mobile-drawer')).toBeVisible()
+      } else {
+        await expect(nav).toBeVisible()
+      }
       // The organization selector and the page body must finish loading: a permanent "Loading…" is a defect, not a state.
       await expect(page.getByText(/^Loading(\.\.\.|…)$/).first(), `${role}: a loading placeholder never resolved`).toHaveCount(0, { timeout: 30_000 })
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)

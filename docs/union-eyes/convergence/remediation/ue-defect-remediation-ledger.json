@@ -857,5 +857,153 @@
   "frozenGate0Tooling": "tooling/scripts/lib/ue-gate0b*-classification.test.mjs quote pre-repair source text and fail once that source is repaired (for example crud-governance.ts, the docs routes). They are not CI gates and are not edited: the frozen records describe the pre-repair state.",
   "verdicts": {
     "READY_FOR_STAGING": "NO"
+  },
+  "runtimeFindings": {
+    "note": "Defects found by running the real application over HTTP against native PostgreSQL. They are NOT items of the 150-item release-debt register and do not change the addressed count. Detail and reproduction: docs/union-eyes/convergence/RUNTIME-ACCEPTANCE.md. FIXED_RUNTIME_VERIFIED means the repaired path was exercised by the Playwright runtime suite on the production build; it does not mean CLOSED.",
+    "evidence": "e2e/runtime/01-foundation-and-case-journey.spec.ts and 02-persistence-after-restart.spec.ts, run through tooling/scripts/ue-runtime-up.mjs on a fresh container",
+    "items": [
+      {
+        "id": "R-01",
+        "status": "OPEN",
+        "title": "Raw-handler routes may leak an unmapped EntitlementError as 500 (intake fixed; survey of 62 routes outstanding)"
+      },
+      {
+        "id": "R-02",
+        "status": "OPEN",
+        "title": "Platform audit tables have no storage-authority classification; topology decision outstanding"
+      },
+      {
+        "id": "R-03",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "No audit proof could be created without Azure immutable storage (strictly gated local sandbox store added; never immutable)"
+      },
+      {
+        "id": "R-04",
+        "status": "OPEN",
+        "title": "UE_ENVIRONMENT=local is absent from the environment-validation enum"
+      },
+      {
+        "id": "R-05",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "No case-coordinator fixture: synthetic chief steward and resource-scoped supervisory mandate through the authority store"
+      },
+      {
+        "id": "R-06",
+        "status": "OPEN",
+        "title": "Steward claims console (/api/claims) is empty while /api/cases is not"
+      },
+      {
+        "id": "R-07",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "CSP blocked eval bundles under NODE_ENV=test; production build is now the acceptance runtime"
+      },
+      {
+        "id": "R-08",
+        "status": "OPEN",
+        "title": "Mobile header wraps and duplicates the organization name"
+      },
+      {
+        "id": "R-09",
+        "status": "OPEN",
+        "title": "predev align-org-schema masks canonical schema defects"
+      },
+      {
+        "id": "R-10",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "feature_flags lacked created_by/last_modified_by; every flag evaluation failed (migration 0031)"
+      },
+      {
+        "id": "R-11",
+        "status": "OPEN",
+        "title": "Redis retry loop logs an error every two seconds while health reports ok"
+      },
+      {
+        "id": "R-12",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Dev server instability; resolved by the production-build runtime (33/33, repeatable)"
+      },
+      {
+        "id": "R-13",
+        "status": "OPEN",
+        "title": "Case facts carry no unit/territory, so a scoped supervisory mandate can never cover a newly filed case (KNOWN GAP test)"
+      },
+      {
+        "id": "R-14",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "History writes used the public claim id against the internal-key FK when UE_CANONICAL_BOOTSTRAP_V2=0 (notes, transitions, reassignment 500)"
+      },
+      {
+        "id": "R-15",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Workbench status names were refused by the transition route (CUPE-only vocabulary)"
+      },
+      {
+        "id": "R-16",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "grievances insert failed: Django table has no DB defaults and the ORM emitted default (other Django-managed tables unswept)"
+      },
+      {
+        "id": "R-17",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "grievance_events.actor_user_id was uuid for text principals (migration 0032, UNQUALIFIED)"
+      },
+      {
+        "id": "R-18",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Workflow engine fed malformed signal input (every transition threw) and escalation committed a grievance when the transition was refused"
+      },
+      {
+        "id": "R-19",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Kernel executor passed Date objects to the driver (first assignment 500); no-op reassignment left the assigned_to mirror stale; QA case-assignment rules added"
+      },
+      {
+        "id": "R-20",
+        "status": "OPEN",
+        "title": "Rate limiting fails open without Redis while the start-up log claims fail-closed"
+      },
+      {
+        "id": "R-21",
+        "status": "OPEN",
+        "title": "Cold-route latency after restart; FIPS boundary and env-enum errors on every start"
+      },
+      {
+        "id": "R-22",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Orchestrator defects: hard-coded Django password; Windows shell argument splitting"
+      },
+      {
+        "id": "R-23",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "NAR sandbox gate treated NODE_ENV=production as a deployment signal (aligned with the QA session gate; one test replaced and disclosed)"
+      }
+    ],
+    "summary": {
+      "total": 23,
+      "fixedRuntimeVerified": 13,
+      "open": 10
+    }
+  },
+  "runtimeAcceptance": {
+    "runtime": "production build (next build + next start), native PostgreSQL 16 in a fresh Docker container, orchestrated by tooling/scripts/ue-runtime-up.mjs",
+    "executed": {
+      "passed": 33,
+      "failed": 0,
+      "apiOnlyJourneysSkippedOffDesktop": 30,
+      "durationMinutes": 2.4
+    },
+    "restartPersistence": "passed (case, audit proof, tenant and steward boundaries survive a stop and start)",
+    "stakeholdersWithRuntimeIdentity": [
+      "member",
+      "steward",
+      "case coordinator (chief steward)",
+      "staff",
+      "executive",
+      "governance",
+      "administrator",
+      "auditor (read only)"
+    ],
+    "stakeholderGroupsStillWithoutRuntimeJourney": 9,
+    "zeroOfJourneysAToIComplete": true
   }
 }

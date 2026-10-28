@@ -18,12 +18,18 @@ describe('NAR local sandbox storage gate', () => {
     ['not a QA environment', { ...local, QA_TEST_ENV: 'false' }],
     ['not the local environment', { ...local, UE_ENVIRONMENT: 'staging' }],
     ['a production UE environment', { ...local, UE_ENVIRONMENT: 'production' }],
-    ['NODE_ENV production', { ...local, NODE_ENV: 'production' }],
     ['a production deployment type', { ...local, NZILA_DEPLOYMENT_TYPE: 'production' }],
     ['a production deployment environment', { ...local, DEPLOYMENT_ENVIRONMENT: 'Production eu' }],
     ['a production Vercel environment', { ...local, VERCEL_ENV: 'production' }],
+    ['a production app environment', { ...local, NEXT_PUBLIC_APP_ENV: 'production' }],
+    ['a production NZILA mode', { ...local, NZILA_MODE: 'production' }],
+    ['a production UE deployment type', { ...local, UE_DEPLOYMENT_TYPE: 'production' }],
   ])('is refused for %s', (_label, env) => {
     expect(localSandboxEnabled(env as NodeJS.ProcessEnv)).toBe(false)
+  })
+
+  it('is allowed for a production build run locally, because NODE_ENV describes the build and not the deployment', () => {
+    expect(localSandboxEnabled({ ...local, NODE_ENV: 'production' } as NodeJS.ProcessEnv)).toBe(true)
   })
 
   it('writes an honest, non-immutable reference and never overwrites a record', async () => {
