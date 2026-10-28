@@ -1,7 +1,7 @@
 # UE Full-Platform Convergence — Execution Summary
 
 Mission: `UE-FULL-PLATFORM-CONVERGENCE-TO-STAGING-2026`
-Branch: `agents/ue-cursor-final-closure` (PR #1014) · Baseline: `0b0e363aa` · Recorded at `6a4a6e820`.
+Branch: `agents/ue-cursor-final-closure` (PR #1014) · Baseline: `0b0e363aa` · Recorded at `e0afd3bf9`.
 Frozen Gate 0 evidence is untouched. Per-defect state lives in the machine-readable
 [remediation ledger](./remediation/ue-defect-remediation-ledger.json); this page is the narrative.
 
@@ -9,16 +9,16 @@ Frozen Gate 0 evidence is untouched. Per-defect state lives in the machine-reada
 
 ## Defect position
 
-19 of the 150 release-debt items are repaired and tested. None is `CLOSED`.
+27 of the 150 release-debt items are repaired and tested. None is `CLOSED`.
 
 | State | Count | Meaning |
 |---|---|---|
 | `NATIVE_VERIFIED` | 5 | Ran unmodified on native PostgreSQL 15 and 16, combined schema, runtime role, with an adversarial cross-tenant case |
-| `UNIT_VERIFIED` | 14 | Positive and adversarial tests against mocks or an in-process SQL engine |
+| `UNIT_VERIFIED` | 22 | Positive and adversarial tests against mocks or an in-process SQL engine |
 | `E2E_VERIFIED` | 0 | Needs the running application over HTTP or a browser |
 | `CLOSED` | 0 | Needs every required proof and an independent release decision |
 
-Of the 19: 14 were release-blocking, 4 conditionally blocking, 1 awaiting disposition.
+Of the 27: 22 were release-blocking, 4 conditionally blocking, 1 awaiting disposition. 12 release-blocking items remain.
 
 ## Batches
 
@@ -30,6 +30,7 @@ Of the 19: 14 were release-blocking, 4 conditionally blocking, 1 awaiting dispos
 | 4 | `560f003a1` | `/api/version`, `/api/docs`, v2 catch-all (410), CUPE reset, carbon (501), e-mail membership rebinding |
 | 5 | `af75d9e88` | Tax paths (501) and ledger denial, single open dues payment, anniversary idempotency, signer identity |
 | 6 | `6a4a6e820` | Native tenant-isolation proof (PG15 and PG16, 16 tests each) |
+| 7 | `e0afd3bf9` | Organization reads and roster: item, children, descendants, hierarchy, search, tree, analytics, roster GET and POST bounded to what the caller may read; active-membership-only guard |
 
 ## Native proof
 
@@ -55,9 +56,8 @@ under concurrent grants.
 
 ## Verification at the recorded commit
 
-- Union Eyes `tsc`: clean. Union Eyes suite at `af75d9e88`: 1378 files / 19935 tests passed (batch 6 changed one route and
-  added a native suite that skips without a database; the affected unit suites were re-run and pass). Contract tests:
-  302 files / 10279 passed.
+- Union Eyes `tsc`: clean. Union Eyes suite at `e0afd3bf9`: 1379 files / 19948 tests passed. Contract tests: 302 files /
+  10279 passed.
 - `check-ue-convergence`: passed. `validate:docs`: no critical errors. ESLint on changed files: 0 errors.
 - Deployment-safety tooling tests: 24/24.
 - Frozen `ue-gate0b*-classification.test.mjs` quote pre-repair source text and fail once that source is repaired. They are
@@ -82,7 +82,9 @@ under concurrent grants.
   experiences; accessibility, EN/FR, performance and rate-limit acceptance.
 - Credentialed provider sandboxes.
 - Journeys A–I end to end; clean-checkout Docker reproducibility; staging manifest and rollback plan.
-- The remaining 131 release-debt items.
+- The remaining 123 release-debt items, 12 of them release-blocking (organizing campaign rows, pension retirement list,
+  testimonial writes, cognition literals, interview publication and reads, health-and-safety, ICRA gate, ML metrics).
+- The organization routes have not run natively (their SQL was checked against the native schema).
 
 Queue note: `VS_CODE_EXECUTION_QUEUE.*` still reads `READY_FOR_VS_EXECUTION` for its six items; the evidence file is the
 record of their execution. Queue verdicts remain false.
