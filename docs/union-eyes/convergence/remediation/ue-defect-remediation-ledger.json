@@ -1041,12 +1041,27 @@
         "id": "R-36",
         "status": "FIXED_RUNTIME_VERIFIED",
         "title": "Contract ORG-ENFC-003 (a lexical check for checkOrgRateLimit in proxy.ts) failed once the forgeable limiter was removed. REPLACED, with disclosure, by a stronger check for apps that adopt the edge guard: proxy.ts uses decideApiLimit, the guard file exists and keys no bucket on x-org-id or x-organization-id, proxy.ts reads no rate-limit key from x-org-id, and withApi applies the verified-organization DEFAULT_API_ORG bucket. The original pattern is still accepted for the other apps"
+      },
+      {
+        "id": "R-37",
+        "status": "OPEN",
+        "title": "P4 attestation (omitted suite, now executed): stages 1-4 pass; the post-apply verifier stage fails with 67 gaps in about 20 tables because the current storage-authority manifest expects more than the three frozen historical SQL files provide (deadline_reassignment_convergence, ICRA tables, dues ledgers, django_migrations, ...). Historical-versus-current drift, listed in evidence/vs-native-sweep2-d82edf706.json"
+      },
+      {
+        "id": "R-38",
+        "status": "OPEN",
+        "title": "Gate 0 historical validator cannot pass: the hash-pinned execution logs for UE-CAP-F-001, H-001, H-005, K-001 and K-002 were never committed (**/*.log is git-ignored) and exist nowhere; they cannot be regenerated and frozen history may not be rewritten. Needs recovery of the originals or an owner-authorised new evidence tranche. Evidence: evidence/vs-gate0-historical-run.json"
+      },
+      {
+        "id": "R-39",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Native test infrastructure: sweep v1 leaked DATABASE_URL and QA_TEST_ENV into every suite (false failures); the long-lived PG16 container accumulated ~120 scratch databases and entered crash recovery; two suites could not launch pnpm/npx on Windows; the P4 fixture silently skipped the real django_migrations shape. All repaired or contained, and the suites run in clean child processes"
       }
     ],
     "summary": {
-      "total": 36,
-      "fixedRuntimeVerified": 21,
-      "open": 15
+      "total": 39,
+      "fixedRuntimeVerified": 22,
+      "open": 17
     }
   },
   "runtimeAcceptance": {
@@ -1089,6 +1104,8 @@
       "governance officer / secretary (resolutions and elections: the identity exists, the journey does not)",
       "union administrator / staff operations beyond navigation"
     ],
-    "financeJourney": "complete for the remittance path: roles and titles without a mandate refused (admin, president, steward, member, auditor, another tenant); preparer lists the ledger and prepares a remittance that persists with its audit; malformed input writes nothing; duties segregated (preparer cannot reconcile, reconciler cannot prepare); reconciler reconciles and a caller cannot supply reconciliation outputs; revoking the preparer mandate removes view and prepare at once while the reconciler is unaffected; restoring reissues the mandate through the governed approval workflow. Financial mandates are issued through requestIssuanceApproval -> an independent approver decides -> issueMandate; only the root of trust (the executive_office rule and the approver mandate) is a labelled synthetic fixture. Approve, execute, payroll runs, remittance runs, arrears and tax are not yet exercised"
+    "financeJourney": "complete for the remittance path: roles and titles without a mandate refused (admin, president, steward, member, auditor, another tenant); preparer lists the ledger and prepares a remittance that persists with its audit; malformed input writes nothing; duties segregated (preparer cannot reconcile, reconciler cannot prepare); reconciler reconciles and a caller cannot supply reconciliation outputs; revoking the preparer mandate removes view and prepare at once while the reconciler is unaffected; restoring reissues the mandate through the governed approval workflow. Financial mandates are issued through requestIssuanceApproval -> an independent approver decides -> issueMandate; only the root of trust (the executive_office rule and the approver mandate) is a labelled synthetic fixture. Approve, execute, payroll runs, remittance runs, arrears and tax are not yet exercised",
+    "nativePostgres": "20 suites on PG16: 19 pass in a clean-process sweep (message-lifecycle passes 26 with 1 skipped by design), rls-0108 passes 17/17 standalone, p4-authority-state-attest is PARTIAL (stages 1-4 pass, stage 5 has 67 historical-versus-current gaps, R-37). On PG15 the omitted five, the census, the migrations and the tenant-isolation suite were run: same results. Evidence: evidence/vs-native-sweep2-d82edf706.json",
+    "gate0Historical": "EXECUTED, FAILED: 13 test files at the pinned commit, one root cause (R-38: execution logs were never committed). Not fabricated, not weakened."
   }
 }
