@@ -9,7 +9,7 @@
  *   node tooling/scripts/ue-runtime-up.mjs down    # stop the app and the database container
  *   node tooling/scripts/ue-runtime-up.mjs env     # print the environment the app and the tests use
  *
- * Needs Docker, Python (Django backend migrations), Node and pnpm. Options: --port-db 55430 --port-app 3002 --fresh --prod --rebuild
+ * Needs Docker, Python (Django backend migrations), Node and pnpm. Options: --port-db 55430 --port-app 3002 --fresh --prod --rebuild --redis
  * (--prod builds and serves the production bundle, the reliable mode for repeated acceptance runs).
  *
  * LOCAL ONLY. It uses a disposable container, synthetic credentials and the QA session cookie that the platform auth honours
@@ -37,6 +37,10 @@ const FRESH = args.includes('--fresh')
 // A production build (next build + next start) is the reliable runtime: the dev server stalls under repeated acceptance runs.
 const PROD = args.includes('--prod')
 const REBUILD = args.includes('--rebuild')
+// --redis adds a real Redis container so rate limiting and the cache run against the real dependency (and can be stopped to test degradation).
+const REDIS = args.includes('--redis')
+const PORT_REDIS = Number(opt('port-redis', '56379'))
+const REDIS_CONTAINER = 'ue-runtime-redis'
 const CONTAINER = 'ue-runtime-pg'
 const APP_DB = 'ue_runtime'
 const PLATFORM_DB = 'ue_platform_sandbox'
@@ -80,6 +84,8 @@ export function runtimeEnv() {
     NODE_OPTIONS: '--max-old-space-size=8192',
     NEXT_PUBLIC_APP_URL: `http://localhost:${PORT_APP}`,
     PLAYWRIGHT_BASE_URL: `http://localhost:${PORT_APP}`,
+    ...(REDIS ? { REDIS_URL: `redis://localhost:${PORT_REDIS}` } : {}),
+    UE_RUNTIME_REDIS_CONTAINER: REDIS ? REDIS_CONTAINER : '',
     NAR_SIGNING_SECRET: secrets().nar,
     NAR_SIGNING_KEY_ID: 'local-acceptance',
     NAR_STORAGE_MODE: 'local_sandbox',
@@ -103,7 +109,7 @@ async function healthy(timeoutMs) {
   const until = Date.now() + timeoutMs
   while (Date.now() < until) {
     try {
-      const response = await fetch(`http://localhost:${PORT_APP}/api/health`, { signal: AbortSignal.timeout(20_000) })
+      const response = await fetch(`http://localhost:${PORT_APP}/api/health`, { signal: AbortSignal.timeout(120_000) })
       const body = await response.json().catch(() => ({}))
       if (response.ok && body.ok === true) return body
     } catch {
@@ -116,6 +122,10 @@ async function healthy(timeoutMs) {
 
 async function up() {
   mkdirSync(STATE, { recursive: true })
+  if (REDIS && !out('docker', ['ps', '--filter', `name=${REDIS_CONTAINER}`, '--format', '{{.Names}}'])) {
+    spawnSync('docker', ['rm', '-f', REDIS_CONTAINER])
+    run('docker', ['run', '-d', '--name', REDIS_CONTAINER, '-p', `127.0.0.1:${PORT_REDIS}:6379`, 'redis:7-alpine'])
+  }
   const running = out('docker', ['ps', '--filter', `name=${CONTAINER}`, '--format', '{{.Names}}'])
   if (!running) {
     spawnSync('docker', ['rm', '-f', CONTAINER])
@@ -196,6 +206,7 @@ async function restartCheck() {
 function down() {
   stopApp()
   spawnSync('docker', ['rm', '-f', CONTAINER], { stdio: 'inherit' })
+  spawnSync('docker', ['rm', '-f', REDIS_CONTAINER], { stdio: 'inherit' })
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

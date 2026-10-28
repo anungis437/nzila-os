@@ -879,8 +879,8 @@
       },
       {
         "id": "R-04",
-        "status": "OPEN",
-        "title": "UE_ENVIRONMENT=local is absent from the environment-validation enum"
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "UE_ENVIRONMENT=local was absent from the environment-validation enum (now aligned with lib/runtime/environment.ts); the validation error no longer logs on start"
       },
       {
         "id": "R-05",
@@ -914,8 +914,8 @@
       },
       {
         "id": "R-11",
-        "status": "OPEN",
-        "title": "Redis retry loop logs an error every two seconds while health reports ok"
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Redis retry loop: initRedis silently defaulted to redis://localhost:6379 and reconnected every ~2 s with nothing configured; it now does not reconnect, logs once, and every lookup is a miss"
       },
       {
         "id": "R-12",
@@ -959,13 +959,13 @@
       },
       {
         "id": "R-20",
-        "status": "OPEN",
-        "title": "Rate limiting fails open without Redis while the start-up log claims fail-closed"
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Rate limiting contract (lib/rate-limiter.ts + lib/rate-limit/proxy-api-guard.ts): explicit limits reject, the catch-all fails open, health reports a missing or unreachable Redis as degraded, the startup message no longer contradicts the behaviour; proven with a real Redis healthy, stopped and recovered"
       },
       {
         "id": "R-21",
         "status": "OPEN",
-        "title": "Cold-route latency after restart; FIPS boundary and env-enum errors on every start"
+        "title": "Cold start measured: port open in 5-6 s, first request after a restart 14.6 s before and 0.6 s after a background warm-up that completes about 10 s after the port opens (a request inside that window still pays the load); FIPS boundary warnings (environment prerequisite, FIPS-enabled Node) remain on every start; no latency budget has been set or enforced"
       },
       {
         "id": "R-22",
@@ -1011,21 +1011,31 @@
         "id": "R-30",
         "status": "OPEN",
         "title": "2,124 ORM-declared columns across 168 tables are absent from the physical schema (any select naming them fails); most belong to surfaces not yet exercised. Evidence: docs/union-eyes/convergence/evidence/vs-orm-physical-parity-eba009ba6.json"
+      },
+      {
+        "id": "R-31",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "The proxy mutation limiter was dead code for any request without an Idempotency-Key (an early return preceded it) and, where reachable, was keyed on a client-supplied x-org-id header: a client escaped it by omitting a header, and a caller of one tenant exhausted another tenant's bucket (the legitimate victim received 429). Replaced by an API guard keyed on the presented credential and the client address, covering every API request including public routes. Demonstrated on the vulnerable build, fixed, and re-proven over HTTP"
+      },
+      {
+        "id": "R-32",
+        "status": "OPEN",
+        "title": "Public API routes and several raw-handler write routes had no rate limit of their own (the guard now covers them at the edge); per-route limits for abuse-sensitive public endpoints (public intake, sign-up) and per-user limits for expensive operations should be reviewed route by route"
       }
     ],
     "summary": {
-      "total": 30,
-      "fixedRuntimeVerified": 15,
-      "open": 15
+      "total": 32,
+      "fixedRuntimeVerified": 19,
+      "open": 13
     }
   },
   "runtimeAcceptance": {
     "runtime": "production build (next build + next start), native PostgreSQL 16 in a fresh Docker container, orchestrated by tooling/scripts/ue-runtime-up.mjs",
     "executed": {
-      "passed": 41,
+      "passed": 46,
       "failed": 0,
-      "apiOnlyJourneysSkippedOffDesktop": 46,
-      "durationMinutes": 2.6
+      "apiOnlyJourneysSkippedOffDesktop": 56,
+      "note": "full suite incl. 04 rate limiting with a real Redis container"
     },
     "restartPersistence": "passed (2/2: the filed case, its audit proof, tenant and steward boundaries; and the triage assignments, a revoked then restored coordinator, survive a stop and start)",
     "stakeholdersWithRuntimeIdentity": [
@@ -1044,6 +1054,8 @@
     "zeroOfJourneysAToIComplete": true,
     "journeyAFreshCase": "complete: file, triage sight (metadata only), refused routing for administrator, unmandated steward, read-only supervisor, officer and another tenant, mandated assignment with the mandate named in the audit, steward work and escalation, reassignment to a representative with revocation of the first steward, supervisor oversight, officer aggregate reporting, mandate and designation revocation and restoration",
     "fullUeSuiteOnThisTree": "1416 files, 20221 tests passed, 3 skipped (vitest --maxWorkers=4 with the app server stopped)",
-    "migrationQualification": "cache migrations 0031 and 0032 qualified on native PostgreSQL 16 (upgrade from the preceding schema, idempotency, rollback or refusal, fail-closed, runtime privileges): db/__tests__/migration-0031-*.postgres.test.ts and migration-0032-*.postgres.test.ts, 11 tests; 0030 qualified earlier on PG15 and 16; PG15 not rerun for 0031/0032"
+    "migrationQualification": "cache migrations 0031 and 0032 qualified on native PostgreSQL 16 (upgrade from the preceding schema, idempotency, rollback or refusal, fail-closed, runtime privileges): db/__tests__/migration-0031-*.postgres.test.ts and migration-0032-*.postgres.test.ts, 11 tests; 0030 qualified earlier on PG15 and 16; PG15 not rerun for 0031/0032",
+    "rateLimiting": "proven against a real Redis 7 container started by ue-runtime-up.mjs --redis: credential-keyed mutation limit enforced exactly (60/min) with no organization header and no idempotency key; forged organization header cannot exhaust another tenant; shared mode with Redis up; Redis stopped: health degraded, limit still enforced from memory (exactly 60 allowed) and responses state X-RateLimit-Mode: degraded, reads unaffected; Redis recovered: back on the shared store within the 30 s circuit-breaker cool-down without restarting the app",
+    "auditSandboxContainment": "through the real adapter: no local record and no proof under staging, production, pilot, demo, production deployment type, Vercel production, app-environment production, NZILA mode production, deployment environment production, no QA flag or no sandbox mode; under the explicit local configuration the record is typed local_sandbox with immutable false and no environment variable can make it immutable (13 tests). The production Azure immutable adapter has NOT been exercised: it needs an approved nonproduction Azure integration environment, which is an external dependency"
   }
 }

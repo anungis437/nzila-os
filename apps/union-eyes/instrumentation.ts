@@ -215,7 +215,9 @@ export async function register() {
           }
         }
       } else if (process.env.NODE_ENV === 'production') {
-        logger.error('Redis not configured - rate limiting will fail-closed in production');
+        // The contract (lib/rate-limiter.ts): an explicit per-route limit REJECTS when Redis is missing or down; only the
+        // catch-all organization limit fails open, and it says so on every request. Health reports the degraded state.
+        logger.error('Redis not configured - rate limiting is degraded: explicit per-route limits reject requests, the catch-all organization limit fails open');
       }
     } catch (error) {
       const { logger } = await import('./lib/logger');
@@ -233,6 +235,24 @@ export async function register() {
     }
 
     await import('./sentry.server.config');
+
+    // Warm the paths the first real request would otherwise pay for (loading the 500-table schema module and opening the
+    // first database connection). Fire-and-forget: it never delays or fails startup, and health still reports truthfully.
+    if (process.env.NODE_ENV === 'production') {
+      void (async () => {
+        try {
+          const started = Date.now();
+          const { db } = await import('@nzila/db');
+          const { sql } = await import('drizzle-orm');
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await db.execute(sql`SELECT 1` as any);
+          const { logger } = await import('./lib/logger');
+          logger.info('Startup warm-up complete', { ms: Date.now() - started });
+        } catch {
+          // Warm-up is best effort; the readiness checks remain the authority.
+        }
+      })();
+    }
   }
 
   if (process.env.NEXT_RUNTIME === 'edge') {
