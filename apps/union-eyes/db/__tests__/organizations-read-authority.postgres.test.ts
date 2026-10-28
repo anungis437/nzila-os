@@ -133,6 +133,8 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
     await member('admin-a', LOCAL_A, 'admin')
     await member('admin-fed', FED, 'admin')
     await member('member-b', LOCAL_B, 'member')
+    await member('steward-a', LOCAL_A, 'steward')
+    await member('officer-a', LOCAL_A, 'officer')
     await member('suspended-a', LOCAL_A, 'member', 'suspended')
   }, 120_000)
 
@@ -199,5 +201,61 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
     expect((await (await GET(get(`/api/organizations/${LOCAL_A}`), params(LOCAL_A))).json()).data).toMatchObject({ subscription_tier: 'pro' })
     as('admin-fed')
     expect((await GET(get(`/api/organizations/${LOCAL_A}`), params(LOCAL_A))).status).toBe(200)
+  })
+
+  it('children and descendants list nothing to a stranger or a sibling, and the subtree to the federation administrator', async () => {
+    const children = await import('../../app/api/organizations/[id]/children/route')
+    const descendants = await import('../../app/api/organizations/[id]/descendants/route')
+    as('member-b')
+    expect((await children.GET(get(`/api/organizations/${FED}/children`), params(FED))).status).toBe(404)
+    expect((await descendants.GET(get(`/api/organizations/${FED}/descendants`), params(FED))).status).toBe(404)
+    as('admin-fed')
+    expect(await ids(await children.GET(get(`/api/organizations/${FED}/children`), params(FED)))).toEqual([LOCAL_A, LOCAL_B].sort())
+    expect(await ids(await descendants.GET(get(`/api/organizations/${FED}/descendants`), params(FED)))).toEqual([LOCAL_A, LOCAL_B].sort())
+  })
+
+  it('analytics is refused to a stranger (404) and a plain member (403), and given to an officer and to the administrator above', async () => {
+    const { GET } = await import('../../app/api/organizations/[id]/analytics/route')
+    for (const [user, status] of [['member-b', 404], ['member-a', 403], ['officer-a', 200], ['admin-fed', 200]] as const) {
+      as(user)
+      expect((await GET(get(`/api/organizations/${LOCAL_A}/analytics`), params(LOCAL_A))).status, user).toBe(status)
+    }
+  })
+
+  describe('roster', () => {
+    const rosterGet = async (user: string) => {
+      const { GET } = await import('../../app/api/organizations/[id]/members/route')
+      as(user)
+      return GET(get(`/api/organizations/${LOCAL_A}/members`), params(LOCAL_A))
+    }
+    const rosterPost = async (user: string, body: Record<string, unknown>) => {
+      const { POST } = await import('../../app/api/organizations/[id]/members/route')
+      as(user)
+      return POST(new NextRequest(`http://localhost/api/organizations/${LOCAL_A}/members`, { method: 'POST', body: JSON.stringify(body), headers: { 'content-type': 'application/json' } }), params(LOCAL_A))
+    }
+    const candidate = { user_id: `new-${tag}`, name: 'New Person', email: 'new@example.test' }
+
+    it('a plain member, a suspended member and a stranger cannot read the roster; a steward and the administrator above can', async () => {
+      for (const user of ['member-a', 'suspended-a', 'member-b']) expect((await rosterGet(user)).status, user).toBe(403)
+      const steward = await rosterGet('steward-a')
+      expect(steward.status).toBe(200)
+      expect(((await steward.json()).data as Array<{ organization_id: string }>).every((r) => r.organization_id === LOCAL_A)).toBe(true)
+      expect((await rosterGet('admin-fed')).status).toBe(200)
+    })
+
+    it('no caller grants a role at or above their own, nobody grants admin, and a plain member or stranger adds no one', async () => {
+      for (const [user, role] of [['steward-a', 'steward'], ['steward-a', 'admin'], ['officer-a', 'admin'], ['admin-a', 'admin']] as const) {
+        expect((await rosterPost(user, { ...candidate, role })).status, `${user} -> ${role}`).toBe(403)
+      }
+      for (const user of ['member-a', 'member-b']) expect((await rosterPost(user, { ...candidate, role: 'member' })).status, user).toBe(403)
+      expect((await admin.query('SELECT 1 FROM organization_members WHERE user_id = $1', [candidate.user_id])).rows).toHaveLength(0)
+    })
+
+    it('a steward adds a member only as a pending membership, written as the runtime role under the real row-level policy', async () => {
+      const response = await rosterPost('steward-a', { ...candidate, role: 'member', status: 'active' })
+      expect(response.status).toBe(201)
+      const { rows } = await admin.query('SELECT role, status, organization_id FROM organization_members WHERE user_id = $1', [candidate.user_id])
+      expect(rows).toEqual([{ role: 'member', status: 'pending', organization_id: LOCAL_A }])
+    })
   })
 })

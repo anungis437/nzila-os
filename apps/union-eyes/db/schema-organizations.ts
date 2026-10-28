@@ -288,7 +288,7 @@ export const organizationMembers = pgTable(
     
     role: text('role').notNull(),
     status: text('status').notNull().default('active'),
-    isPrimary: boolean('is_primary').default(false),
+    isPrimary: boolean('is_primary').default(false).$defaultFn(() => false),
     
     // Additional fields
     department: text('department'),
@@ -309,10 +309,11 @@ export const organizationMembers = pgTable(
     exemptionReason: text('exemption_reason'),
     exemptionApprovedBy: varchar('exemption_approved_by', { length: 255 }),
 
-    // Timestamps
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    // Timestamps. The canonical created_at, updated_at and is_primary columns are NOT NULL without a database default (Django
+    // sets them in Python), so an ORM insert that leaves them out fails natively; the ORM supplies the value.
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow().$defaultFn(() => new Date()),
     joinedAt: timestamp('joined_at', { withTimezone: true }).defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().$defaultFn(() => new Date()),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
   (table) => ({
