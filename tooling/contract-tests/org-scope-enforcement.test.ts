@@ -190,8 +190,30 @@ describe('Org-scope enforcement patterns', () => {
         continue
       }
       const mw = readFileSync(mwPath, 'utf-8')
-      if (!mw.includes('checkOrgRateLimit') && !mw.includes('orgRateLimit')) {
+      // Union Eyes replaced the header-keyed org limiter (dead behind an early return and forgeable: a client could omit or forge
+      // x-org-id) with an edge guard keyed on the presented credential and client address (lib/rate-limit/proxy-api-guard.ts, R-31),
+      // and it applies the verified-organization bucket inside withApi. The other apps keep the original pattern.
+      const edgeGuard = mw.includes('decideApiLimit')
+      if (!edgeGuard && !mw.includes('checkOrgRateLimit') && !mw.includes('orgRateLimit')) {
         violations.push(`${app.id}: proxy.ts missing org-scoped rate limiting`)
+      }
+      if (edgeGuard) {
+        const guardPath = join(APPS_DIR, app.id, 'lib', 'rate-limit', 'proxy-api-guard.ts')
+        if (!existsSync(guardPath)) {
+          violations.push(`${app.id}: proxy.ts uses decideApiLimit but lib/rate-limit/proxy-api-guard.ts is missing`)
+        } else {
+          const code = readFileSync(guardPath, 'utf-8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
+          if (/x-org-id|x-organization-id/i.test(code)) {
+            violations.push(`${app.id}: the edge rate-limit guard must not key a bucket on a client-supplied organization header`)
+          }
+        }
+        if (/headers\.get\(\s*['"]x-org-id['"]\s*\)/i.test(mw)) {
+          violations.push(`${app.id}: proxy.ts must not read a rate-limit key from the x-org-id request header`)
+        }
+        const framework = join(APPS_DIR, app.id, 'lib', 'api', 'with-api.ts')
+        if (!existsSync(framework) || !readFileSync(framework, 'utf-8').includes('DEFAULT_API_ORG')) {
+          violations.push(`${app.id}: withApi must apply the verified-organization default rate limit (DEFAULT_API_ORG)`)
+        }
       }
     }
 

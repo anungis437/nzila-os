@@ -1031,12 +1031,22 @@
         "id": "R-34",
         "status": "FIXED_RUNTIME_VERIFIED",
         "title": "Runtime spec isolation: rate-limit probes shared identities with later specs and exhausted their mutation window; probes now use identities no other spec mutates with, and the restart check files its own state instead of depending on an earlier run"
+      },
+      {
+        "id": "R-35",
+        "status": "OPEN",
+        "title": "Outside Union Eyes: apps/console, apps/flow, apps/partners and apps/zonga proxies read x-org-id from the client request and key their org rate-limit bucket on it, the same pattern that was dead and forgeable in Union Eyes (R-31). Not changed here (out of this mission); needs its own review"
+      },
+      {
+        "id": "R-36",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Contract ORG-ENFC-003 (a lexical check for checkOrgRateLimit in proxy.ts) failed once the forgeable limiter was removed. REPLACED, with disclosure, by a stronger check for apps that adopt the edge guard: proxy.ts uses decideApiLimit, the guard file exists and keys no bucket on x-org-id or x-organization-id, proxy.ts reads no rate-limit key from x-org-id, and withApi applies the verified-organization DEFAULT_API_ORG bucket. The original pattern is still accepted for the other apps"
       }
     ],
     "summary": {
-      "total": 34,
-      "fixedRuntimeVerified": 20,
-      "open": 14
+      "total": 36,
+      "fixedRuntimeVerified": 21,
+      "open": 15
     }
   },
   "runtimeAcceptance": {
@@ -1065,7 +1075,7 @@
     "stakeholderGroupsStillWithoutRuntimeJourney": 8,
     "zeroOfJourneysAToIComplete": true,
     "journeyAFreshCase": "complete: file, triage sight (metadata only), refused routing for administrator, unmandated steward, read-only supervisor, officer and another tenant, mandated assignment with the mandate named in the audit, steward work and escalation, reassignment to a representative with revocation of the first steward, supervisor oversight, officer aggregate reporting, mandate and designation revocation and restoration",
-    "fullUeSuiteOnThisTree": "1416 files, 20221 tests passed, 3 skipped (vitest --maxWorkers=4 with the app server stopped)",
+    "fullUeSuiteOnThisTree": "1423 files, 20279 tests passed, 3 skipped (head e5a3ce5ae, app server stopped, --maxWorkers=4); contract tests 302 files: 10278 passed and 1 failed (ORG-ENFC-003, replaced with a stronger check; see R-36) before the replacement, passing after",
     "migrationQualification": "cache migrations 0031 and 0032 qualified on native PostgreSQL 16 (upgrade from the preceding schema, idempotency, rollback or refusal, fail-closed, runtime privileges): db/__tests__/migration-0031-*.postgres.test.ts and migration-0032-*.postgres.test.ts, 11 tests; 0030 qualified earlier on PG15 and 16; PG15 not rerun for 0031/0032",
     "rateLimiting": "proven against a real Redis 7 container started by ue-runtime-up.mjs --redis: credential-keyed mutation limit enforced exactly (60/min) with no organization header and no idempotency key; forged organization header cannot exhaust another tenant; shared mode with Redis up; Redis stopped: health degraded, limit still enforced from memory (exactly 60 allowed) and responses state X-RateLimit-Mode: degraded, reads unaffected; Redis recovered: back on the shared store within the 30 s circuit-breaker cool-down without restarting the app",
     "auditSandboxContainment": "through the real adapter: no local record and no proof under staging, production, pilot, demo, production deployment type, Vercel production, app-environment production, NZILA mode production, deployment environment production, no QA flag or no sandbox mode; under the explicit local configuration the record is typed local_sandbox with immutable false and no environment variable can make it immutable (13 tests). The production Azure immutable adapter has NOT been exercised: it needs an approved nonproduction Azure integration environment, which is an external dependency",
