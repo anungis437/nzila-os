@@ -142,14 +142,36 @@ test.describe('journey A: member files, authority decides who can see it', () =>
     expect([403, 404], await response.text()).toContain(response.status())
   })
 
-  test('KNOWN GAP: no case coordinator exists in the QA fixtures, so the file-to-steward handoff cannot be exercised', async ({}, testInfo) => {
+  test('KNOWN GAP R-13: a freshly filed case cannot be reached by a scoped coordinator mandate (case facts carry no unit or territory)', async ({}, testInfo) => {
     test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
-    // Assignment needs a chief steward holding a supervisory mandate with the assign power (lib/authority). The deterministic
-    // QA seed issues no such mandate and no chief-steward identity. Until a synthetic, clearly-marked fixture exists, the
-    // Member -> Steward -> Representative -> Supervisor -> Officer handoff is NOT proven.
-    const holders = (await (await as(UE_TEST_USERS.adminPrimary.userId, PRIMARY)).get('/api/cases')).status()
-    expect(holders).toBeLessThan(500)
     expect(claimNumber).toMatch(/^CASE-/)
+    const coordinator = await as(UE_TEST_USERS.chiefStewardPrimary.userId, PRIMARY)
+    const response = await coordinator.post(`/api/cases/${caseId}/assign`, { data: { assigneeId: UE_TEST_USERS.stewardPrimary.userId, reason: 'runtime acceptance' } })
+    // Default deny, indistinguishable from a missing case: the supervisory mandate is resource-scoped to the QA cases and the
+    // loader supplies no unit or territory, so no scope other than a named resource can ever cover a new filing.
+    expect(response.status(), await response.text()).toBe(404)
+  })
+
+  test('the case coordinator holding a scoped supervisory mandate hands a case to the steward; the steward works it; the member never sees internal notes', async ({}, testInfo) => {
+    test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
+    const seeded = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1'
+    const coordinator = await as(UE_TEST_USERS.chiefStewardPrimary.userId, PRIMARY)
+    const assigned = await coordinator.post(`/api/cases/${seeded}/assign`, { data: { assigneeId: UE_TEST_USERS.stewardPrimary.userId, reason: 'runtime acceptance' } })
+    expect(assigned.status(), await assigned.text()).toBe(200)
+    expect((await assigned.json()).assignedTo).toBe(UE_TEST_USERS.stewardPrimary.userId)
+
+    const steward = await as(UE_TEST_USERS.stewardPrimary.userId, PRIMARY)
+    expect(ids(await (await steward.get('/api/cases')).json())).toContain(seeded)
+    const secret = `internal steward note ${Date.now()}`
+    const note = await steward.post(`/api/cases/${seeded}/notes`, { data: { text: secret, isInternal: true } })
+    expect(note.status(), await note.text()).toBeLessThan(300)
+
+    const member = await as(UE_TEST_USERS.memberPrimary.userId, PRIMARY)
+    const memberView = await member.get(`/api/cases/${seeded}/notes`)
+    expect(memberView.status()).toBeLessThan(500)
+    expect(await memberView.text()).not.toContain(secret)
+    const stewardView = await steward.get(`/api/cases/${seeded}/notes`)
+    expect(await stewardView.text()).toContain(secret)
   })
 })
 

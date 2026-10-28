@@ -21,6 +21,17 @@ export const UE_TEST_USERS = {
     role: 'steward',
     status: 'active',
   },
+  // Case coordinator: holds a synthetic supervisory mandate (see scripts/seed-test-env-kernel.ts). The role title alone
+  // confers no case authority.
+  chiefStewardPrimary: {
+    userId: 'ue-qa-chief-steward-primary',
+    email: 'ue.qa.chief.steward.primary@nzila.test',
+    firstName: 'QA',
+    lastName: 'ChiefStewardPrimary',
+    orgId: UE_TEST_ORGS.primary.id,
+    role: 'chief_steward',
+    status: 'active',
+  },
   staffPrimary: {
     userId: 'ue-qa-staff-primary',
     email: 'ue.qa.staff.primary@nzila.test',

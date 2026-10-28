@@ -200,7 +200,8 @@ async function seed(): Promise<void> {
       console.warn('[ue:seed:test-env] cleanup skipped, relation missing: audit_security.audit_logs')
     }
 
-    // Remove existing QA orgs and recreate deterministically.
+    // Remove existing QA orgs and recreate deterministically. The synthetic entitlements reference them (ON DELETE RESTRICT).
+    await tx.execute(sql`DELETE FROM org_entitlements WHERE organization_id IN (${sql.join(orgIds.map((id) => sql`${id}::uuid`), sql`, `)})`)
     await tx.delete(organizations).where(inArray(organizations.id, orgIds))
 
     await tx.insert(organizations).values(
