@@ -8,7 +8,7 @@
 import { test, expect, request as pwRequest, type APIRequestContext } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { inspectFiling } from '../../scripts/runtime/db-inspect'
+import { financeRows, inspectFiling } from '../../scripts/runtime/db-inspect'
 import { UE_TEST_USERS } from '../../tests/fixtures/test-users'
 import { UE_TEST_ORGS } from '../../tests/fixtures/test-orgs'
 
@@ -54,5 +54,17 @@ test.describe('persistence after a restart', () => {
     expect((await (await as(UE_TEST_USERS.stewardPrimary.userId, PRIMARY)).get(`/api/cases/${state.second}`)).status(), 'second case, assigned after restoration').toBe(200)
     expect((await (await as(UE_TEST_USERS.chiefStewardPrimary.userId, PRIMARY)).get(`/api/cases/${state.caseId}`)).status(), 'the coordinator still has no read').toBe(404)
     expect((await (await as(UE_TEST_USERS.memberSecondary.userId, SECONDARY)).get(`/api/cases/${state.caseId}`)).status()).toBe(404)
+  })
+
+  test('the prepared and reconciled remittance survives a restart, and the finance duties still hold', async ({}, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop', 'API journey: runs once, at desktop')
+    test.skip(!process.env.DATABASE_URL, 'needs DATABASE_URL')
+    const { remittanceId } = JSON.parse(await readFile(join(STATE_DIR, 'finance-journey-state.json'), 'utf8')) as { remittanceId: string }
+    const [row] = await financeRows(remittanceId)
+    expect(row).toMatchObject({ processing_status: 'requires_review', notes: 'QA review note', is_reconciled: false })
+    const reconciler = await as(UE_TEST_USERS.financeReconciler.userId, PRIMARY)
+    expect((await reconciler.get(`/api/dues/remittances/${remittanceId}`)).status()).toBe(200)
+    const president = await as(UE_TEST_USERS.executivePrimary.userId, PRIMARY)
+    expect((await president.get('/api/dues/remittances')).status(), 'a title still confers no finance duty').toBe(403)
   })
 })

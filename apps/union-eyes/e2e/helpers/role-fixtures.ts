@@ -13,7 +13,8 @@ export type StakeholderRole =
   | 'staff'
   | 'executive'
   | 'governance'
-  | 'admin';
+  | 'admin'
+  | 'finance';
 
 export type StakeholderFixture = {
   key: StakeholderRole;
@@ -71,6 +72,15 @@ export const STAKEHOLDER_FIXTURES: Record<StakeholderRole, StakeholderFixture> =
     locale: 'en-CA',
     expectedExperience: 'governance',
   },
+  finance: {
+    key: 'finance',
+    userRole: 'secretary_treasurer',
+    userId: UE_TEST_USERS.financePreparer.userId,
+    orgId: UE_TEST_USERS.financePreparer.orgId,
+    email: UE_TEST_USERS.financePreparer.email,
+    locale: 'en-CA',
+    expectedExperience: 'executive',
+  },
   admin: {
     key: 'admin',
     userRole: 'admin',
@@ -89,10 +99,23 @@ export const STAKEHOLDER_ORDER: StakeholderRole[] = [
   'executive',
   'governance',
   'admin',
+  'finance',
 ];
 
 // These labels intentionally validate the user-facing IA contract.
+const EXECUTIVE_LABELS = [
+    'Today',
+    'Members & Service',
+    'Governance & Organization',
+    'Bargaining & Collective Action',
+    'Finance & Resources',
+    'Communications & Relations',
+    'Continuity & Intelligence',
+  ];
+
 export const REQUIRED_VISIBLE_LABELS: Record<StakeholderRole, string[]> = {
+  // The treasurer role is in the executive experience; the finance duties come from the mandate, not from this navigation.
+  finance: EXECUTIVE_LABELS,
   member: [
     'Home',
     'My Representation',

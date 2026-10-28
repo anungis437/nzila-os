@@ -105,3 +105,14 @@ export async function inspectCase(claimId: string): Promise<{
 export async function countGrievances(organizationId: string): Promise<number> {
   return withApp(async (db) => Number((await db.query('SELECT count(*) FROM grievances WHERE organization_id = $1', [organizationId])).rows[0].count))
 }
+
+export async function financeRows(remittanceId: string): Promise<Array<Record<string, unknown>>> {
+  return withApp(async (db) => (await db.query('SELECT * FROM employer_remittances WHERE id = $1', [remittanceId])).rows)
+}
+
+/** Audit actions recorded for one finance record. */
+export async function financeAudit(resourceId: string): Promise<Array<{ action: string; user_id: string | null }>> {
+  return withApp(async (db) =>
+    (await db.query(`SELECT action, user_id FROM audit_security.audit_logs WHERE resource_id::text = $1 ORDER BY created_at`, [resourceId])).rows,
+  )
+}

@@ -1021,23 +1021,32 @@
         "id": "R-32",
         "status": "OPEN",
         "title": "Public API routes and several raw-handler write routes had no rate limit of their own (the guard now covers them at the edge); per-route limits for abuse-sensitive public endpoints (public intake, sign-up) and per-user limits for expensive operations should be reviewed route by route"
+      },
+      {
+        "id": "R-33",
+        "status": "OPEN",
+        "title": "The finance routes gate on the secretary_treasurer ROLE (FINANCIAL_MEMBER_DATA_ROLES) before the mandate is consulted, while the authority kernel makes executive, trustee and auditor capacities eligible for finance duties. A president, trustee or auditor holding a valid financial mandate cannot reach the finance routes, so the audit and trustee duties are unreachable over HTTP. The role gate and the kernel disagree; the mandate should be the authority and the role gate removed or aligned"
+      },
+      {
+        "id": "R-34",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Runtime spec isolation: rate-limit probes shared identities with later specs and exhausted their mutation window; probes now use identities no other spec mutates with, and the restart check files its own state instead of depending on an earlier run"
       }
     ],
     "summary": {
-      "total": 32,
-      "fixedRuntimeVerified": 19,
-      "open": 13
+      "total": 34,
+      "fixedRuntimeVerified": 20,
+      "open": 14
     }
   },
   "runtimeAcceptance": {
     "runtime": "production build (next build + next start), native PostgreSQL 16 in a fresh Docker container, orchestrated by tooling/scripts/ue-runtime-up.mjs",
     "executed": {
-      "passed": 46,
+      "passed": 53,
       "failed": 0,
-      "apiOnlyJourneysSkippedOffDesktop": 56,
-      "note": "full suite incl. 04 rate limiting with a real Redis container"
+      "note": "plain test command (post-restart checks run in restart-check): desktop, tablet and mobile, against a real Redis"
     },
-    "restartPersistence": "passed (2/2: the filed case, its audit proof, tenant and steward boundaries; and the triage assignments, a revoked then restored coordinator, survive a stop and start)",
+    "restartPersistence": "passed (3/3 after a self-contained file-route-prepare-restart cycle: the filed case and audit proof, the triage assignments with a revoked then restored coordinator, and the prepared and reconciled remittance)",
     "stakeholdersWithRuntimeIdentity": [
       "member",
       "steward",
@@ -1046,16 +1055,30 @@
       "supervisor (read and monitor mandate)",
       "staff",
       "executive / officer",
+      "financial officer: preparer (secretary_treasurer, prepare + view)",
+      "financial officer: reconciler (secretary_treasurer, reconcile + view)",
+      "independent approver (executive_office mandate)",
       "governance",
       "administrator",
       "auditor (read only)"
     ],
-    "stakeholderGroupsStillWithoutRuntimeJourney": 9,
+    "stakeholderGroupsStillWithoutRuntimeJourney": 8,
     "zeroOfJourneysAToIComplete": true,
     "journeyAFreshCase": "complete: file, triage sight (metadata only), refused routing for administrator, unmandated steward, read-only supervisor, officer and another tenant, mandated assignment with the mandate named in the audit, steward work and escalation, reassignment to a representative with revocation of the first steward, supervisor oversight, officer aggregate reporting, mandate and designation revocation and restoration",
     "fullUeSuiteOnThisTree": "1416 files, 20221 tests passed, 3 skipped (vitest --maxWorkers=4 with the app server stopped)",
     "migrationQualification": "cache migrations 0031 and 0032 qualified on native PostgreSQL 16 (upgrade from the preceding schema, idempotency, rollback or refusal, fail-closed, runtime privileges): db/__tests__/migration-0031-*.postgres.test.ts and migration-0032-*.postgres.test.ts, 11 tests; 0030 qualified earlier on PG15 and 16; PG15 not rerun for 0031/0032",
     "rateLimiting": "proven against a real Redis 7 container started by ue-runtime-up.mjs --redis: credential-keyed mutation limit enforced exactly (60/min) with no organization header and no idempotency key; forged organization header cannot exhaust another tenant; shared mode with Redis up; Redis stopped: health degraded, limit still enforced from memory (exactly 60 allowed) and responses state X-RateLimit-Mode: degraded, reads unaffected; Redis recovered: back on the shared store within the 30 s circuit-breaker cool-down without restarting the app",
-    "auditSandboxContainment": "through the real adapter: no local record and no proof under staging, production, pilot, demo, production deployment type, Vercel production, app-environment production, NZILA mode production, deployment environment production, no QA flag or no sandbox mode; under the explicit local configuration the record is typed local_sandbox with immutable false and no environment variable can make it immutable (13 tests). The production Azure immutable adapter has NOT been exercised: it needs an approved nonproduction Azure integration environment, which is an external dependency"
+    "auditSandboxContainment": "through the real adapter: no local record and no proof under staging, production, pilot, demo, production deployment type, Vercel production, app-environment production, NZILA mode production, deployment environment production, no QA flag or no sandbox mode; under the explicit local configuration the record is typed local_sandbox with immutable false and no environment variable can make it immutable (13 tests). The production Azure immutable adapter has NOT been exercised: it needs an approved nonproduction Azure integration environment, which is an external dependency",
+    "stakeholderGroupsRemaining": [
+      "organizing staff",
+      "employer / external counterparty",
+      "external representative / legal counsel",
+      "WorkAid / specialized service partner",
+      "federation / parent organization",
+      "platform operator / superadmin",
+      "governance officer / secretary (resolutions and elections: the identity exists, the journey does not)",
+      "union administrator / staff operations beyond navigation"
+    ],
+    "financeJourney": "complete for the remittance path: roles and titles without a mandate refused (admin, president, steward, member, auditor, another tenant); preparer lists the ledger and prepares a remittance that persists with its audit; malformed input writes nothing; duties segregated (preparer cannot reconcile, reconciler cannot prepare); reconciler reconciles and a caller cannot supply reconciliation outputs; revoking the preparer mandate removes view and prepare at once while the reconciler is unaffected; restoring reissues the mandate through the governed approval workflow. Financial mandates are issued through requestIssuanceApproval -> an independent approver decides -> issueMandate; only the root of trust (the executive_office rule and the approver mandate) is a labelled synthetic fixture. Approve, execute, payroll runs, remittance runs, arrears and tax are not yet exercised"
   }
 }

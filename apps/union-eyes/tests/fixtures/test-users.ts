@@ -31,6 +31,37 @@ export const UE_TEST_USERS = {
     role: 'steward',
     status: 'active',
   },
+  // Financial officers. The finance routes require the secretary_treasurer role AND a live financial mandate that names the duty;
+  // the two hold different, segregated duties (prepare versus reconcile) on the same account.
+  financePreparer: {
+    userId: 'ue-qa-finance-preparer',
+    email: 'ue.qa.finance.preparer@nzila.test',
+    firstName: 'QA',
+    lastName: 'FinancePreparer',
+    orgId: UE_TEST_ORGS.primary.id,
+    role: 'secretary_treasurer',
+    status: 'active',
+  },
+  financeReconciler: {
+    userId: 'ue-qa-finance-reconciler',
+    email: 'ue.qa.finance.reconciler@nzila.test',
+    firstName: 'QA',
+    lastName: 'FinanceReconciler',
+    orgId: UE_TEST_ORGS.primary.id,
+    role: 'secretary_treasurer',
+    status: 'active',
+  },
+  // Independent approver of financial issuances: holds an executive_office mandate with the approve power (a synthetic root of
+  // trust labelled as a fixture). Distinct from the executive who issues and from the officers who hold the duties.
+  governanceApprover: {
+    userId: 'ue-qa-governance-approver',
+    email: 'ue.qa.governance.approver@nzila.test',
+    firstName: 'QA',
+    lastName: 'GovernanceApprover',
+    orgId: UE_TEST_ORGS.primary.id,
+    role: 'vice_president',
+    status: 'active',
+  },
   // Senior representative / supervisor: oversees cases under a read-and-monitor mandate that carries no routing power.
   supervisorPrimary: {
     userId: 'ue-qa-supervisor-primary',
