@@ -1,7 +1,7 @@
 # UE Full-Platform Convergence — Execution Summary
 
 Mission: `UE-FULL-PLATFORM-CONVERGENCE-TO-STAGING-2026`
-Branch: `agents/ue-cursor-final-closure` (PR #1014) · Baseline: `0b0e363aa` · Recorded at `e0afd3bf9`.
+Branch: `agents/ue-cursor-final-closure` (PR #1014) · Baseline: `0b0e363aa` · Recorded at `66acc8b1e`.
 Frozen Gate 0 evidence is untouched. Per-defect state lives in the machine-readable
 [remediation ledger](./remediation/ue-defect-remediation-ledger.json); this page is the narrative.
 
@@ -9,16 +9,16 @@ Frozen Gate 0 evidence is untouched. Per-defect state lives in the machine-reada
 
 ## Defect position
 
-27 of the 150 release-debt items are repaired and tested. None is `CLOSED`.
+42 of the 150 release-debt items are repaired and tested; every item classed `RELEASE_BLOCKING` now has an executable disposition. None is `CLOSED`.
 
 | State | Count | Meaning |
 |---|---|---|
-| `NATIVE_VERIFIED` | 5 | Ran unmodified on native PostgreSQL 15 and 16, combined schema, runtime role, with an adversarial cross-tenant case |
-| `UNIT_VERIFIED` | 22 | Positive and adversarial tests against mocks or an in-process SQL engine |
+| `NATIVE_VERIFIED` | 6 | Ran unmodified on native PostgreSQL 15 and 16, combined schema, runtime role, with an adversarial cross-tenant case |
+| `UNIT_VERIFIED` | 36 | Positive and adversarial tests against mocks or an in-process SQL engine |
 | `E2E_VERIFIED` | 0 | Needs the running application over HTTP or a browser |
 | `CLOSED` | 0 | Needs every required proof and an independent release decision |
 
-Of the 27: 22 were release-blocking, 4 conditionally blocking, 1 awaiting disposition. 12 release-blocking items remain.
+Of the 42: 34 release-blocking (all 34 in the class), 7 conditionally blocking (including the two challenged items treated as release-blocking), 1 awaiting disposition. 0 items classed release-blocking remain open; 108 items in other classes remain (conditionally blocking, awaiting disposition, tracked debt), and release-blocking repair is not closure: no item is `CLOSED`.
 
 ## Batches
 
@@ -31,6 +31,7 @@ Of the 27: 22 were release-blocking, 4 conditionally blocking, 1 awaiting dispos
 | 5 | `af75d9e88` | Tax paths (501) and ledger denial, single open dues payment, anniversary idempotency, signer identity |
 | 6 | `6a4a6e820` | Native tenant-isolation proof (PG15 and PG16, 16 tests each) |
 | 7 | `e0afd3bf9` | Organization reads and roster: item, children, descendants, hierarchy, search, tree, analytics, roster GET and POST bounded to what the caller may read; active-membership-only guard |
+| 8 | `66acc8b1e` | The 12 remaining release-blocking defects: organizing campaigns, pension retirement eligibility, testimonials, health-and-safety incident read, anonymity and dashboard, exit-interview sensitivity, consent and publication, cognition constants (501), ICRA report gate, operational metrics; plus organization list and tree (OPL-01, OPL-07). Native proof for pension (PG15 and PG16, 17 tests each) |
 
 ## Native proof
 
@@ -39,7 +40,7 @@ database built by Django `migrate` plus the approved Drizzle bootstrap. Only the
 statement runs as `union_eyes_runtime` with `app.current_org_id` set, or as `union_eyes_system`. Cases that run on the
 superuser connection prove the repaired statement carries its own tenant predicate.
 
-Results: PG16 16/16, PG15 16/16. Earlier native suites (combined, thread, atomic-audit, census, document-intake,
+Results: PG16 17/17, PG15 17/17 (16/16 at batch 6; batch 8 adds the pension retirement route). Earlier native suites (combined, thread, atomic-audit, census, document-intake,
 location-retention, finance-duties, message-lifecycle, workaid, auth, election-succession, notification-delivery,
 ownership-backfill) are recorded in [`evidence/vs-native-execution-8f8cb18aa.json`](./evidence/vs-native-execution-8f8cb18aa.json).
 
@@ -56,8 +57,7 @@ under concurrent grants.
 
 ## Verification at the recorded commit
 
-- Union Eyes `tsc`: clean. Union Eyes suite at `e0afd3bf9`: 1379 files / 19948 tests passed. Contract tests: 302 files /
-  10279 passed.
+- Union Eyes `tsc`: clean. Union Eyes suite before the final batch-8 additions: 1379 files; the only failure (a committed schema-mutation program that listed the dashboard as a reader) was corrected, then re-run. Contract tests: 302 files; the one failure (a source-text check of the member interview filter, which moved to the shared interview access policy) was updated to read both files.
 - `check-ue-convergence`: passed. `validate:docs`: no critical errors. ESLint on changed files: 0 errors.
 - Deployment-safety tooling tests: 24/24.
 - Frozen `ue-gate0b*-classification.test.mjs` quote pre-repair source text and fail once that source is repaired. They are
@@ -68,6 +68,9 @@ under concurrent grants.
 - **Deployment secret.** `/api/version` now needs `UE_CANDIDATE_PROBE_TOKEN` to return image digests. The deploy workflow
   injects it; the secret must exist, or digest verification fails closed.
 - **Precedent sharing.** Cross-organization precedent reads need a reviewed multi-party RLS policy migration.
+- **Interview-derived engines.** Derived graphs, aggregates, succession and the fixed-rate forecast still ignore interview sensitivity; the correlation, precedent and procedural engines answer 501 until a real computation exists.
+- **Knowledge base entitlement.** The knowledge-base read routes do not check the `union_knowledge_suite` entitlement.
+- **Institutional defaults.** Officer floors for organizing, pension and campaign data, the anonymous-report actor and the interview indexing levels are engineering defaults awaiting institutional confirmation.
 - **Anniversary awards.** A unique index would exclude concurrent runs at the database; it needs a reviewed migration.
 - **Removed v2 endpoints.** About 30 frontend call sites call `/api/v2/*` routes that no longer exist (reports, analytics,
   CLC remittances, federation, communications). They fail visibly now; each capability must be implemented or retired.
