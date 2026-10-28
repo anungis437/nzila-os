@@ -1025,7 +1025,7 @@
       {
         "id": "R-33",
         "status": "OPEN",
-        "title": "The finance routes gate on the secretary_treasurer ROLE (FINANCIAL_MEMBER_DATA_ROLES) before the mandate is consulted, while the authority kernel makes executive, trustee and auditor capacities eligible for finance duties. A president, trustee or auditor holding a valid financial mandate cannot reach the finance routes, so the audit and trustee duties are unreachable over HTTP. The role gate and the kernel disagree; the mandate should be the authority and the role gate removed or aligned"
+        "title": "Re-examined, not a code change: the finance routes gate on the secretary_treasurer role AND a live financial mandate. That allow-list is pinned by the frozen Financial Officer contract (financial-officer-containment.test.ts, contract ue-persona-access.test.ts) and by the RBAC matrix, so loosening it would contradict a frozen decision. The real gap is that auditors and trustees have no read-only assurance surface (Governance Officer G21), so their duties are unreachable over HTTP. Needs a separate, mandate-gated read-only assurance route set rather than a wider finance gate"
       },
       {
         "id": "R-34",
@@ -1085,9 +1085,12 @@
       "independent approver (executive_office mandate)",
       "governance",
       "administrator",
-      "auditor (read only)"
+      "auditor (read only)",
+      "platform operator (platform_lead; no institutional mandate)",
+      "federation executive (fed_executive, parent-organization tenant; no affiliate mandate)",
+      "federation staff (fed_staff, parent-organization tenant; no affiliate mandate)"
     ],
-    "stakeholderGroupsStillWithoutRuntimeJourney": 8,
+    "stakeholderGroupsStillWithoutRuntimeJourney": 6,
     "zeroOfJourneysAToIComplete": true,
     "journeyAFreshCase": "complete: file, triage sight (metadata only), refused routing for administrator, unmandated steward, read-only supervisor, officer and another tenant, mandated assignment with the mandate named in the audit, steward work and escalation, reassignment to a representative with revocation of the first steward, supervisor oversight, officer aggregate reporting, mandate and designation revocation and restoration",
     "fullUeSuiteOnThisTree": "1423 files, 20279 tests passed, 3 skipped (head e5a3ce5ae, app server stopped, --maxWorkers=4); contract tests 302 files: 10278 passed and 1 failed (ORG-ENFC-003, replaced with a stronger check; see R-36) before the replacement, passing after",
@@ -1099,13 +1102,17 @@
       "employer / external counterparty",
       "external representative / legal counsel",
       "WorkAid / specialized service partner",
-      "federation / parent organization",
-      "platform operator / superadmin",
       "governance officer / secretary (resolutions and elections: the identity exists, the journey does not)",
       "union administrator / staff operations beyond navigation"
     ],
     "financeJourney": "complete for the remittance path: roles and titles without a mandate refused (admin, president, steward, member, auditor, another tenant); preparer lists the ledger and prepares a remittance that persists with its audit; malformed input writes nothing; duties segregated (preparer cannot reconcile, reconciler cannot prepare); reconciler reconciles and a caller cannot supply reconciliation outputs; revoking the preparer mandate removes view and prepare at once while the reconciler is unaffected; restoring reissues the mandate through the governed approval workflow. Financial mandates are issued through requestIssuanceApproval -> an independent approver decides -> issueMandate; only the root of trust (the executive_office rule and the approver mandate) is a labelled synthetic fixture. Approve, execute, payroll runs, remittance runs, arrears and tax are not yet exercised",
     "nativePostgres": "20 suites on PG16: 19 pass in a clean-process sweep (message-lifecycle passes 26 with 1 skipped by design), rls-0108 passes 17/17 standalone, p4-authority-state-attest is PARTIAL (stages 1-4 pass, stage 5 has 67 historical-versus-current gaps, R-37). On PG15 the omitted five, the census, the migrations and the tenant-isolation suite were run: same results. Evidence: evidence/vs-native-sweep2-d82edf706.json",
-    "gate0Historical": "EXECUTED, FAILED: 13 test files at the pinned commit, one root cause (R-38: execution logs were never committed). Not fabricated, not weakened."
+    "gate0Historical": "EXECUTED, FAILED: 13 test files at the pinned commit, one root cause (R-38: execution logs were never committed). Not fabricated, not weakened.",
+    "platformFederationBoundaries": {
+      "spec": "e2e/runtime/06-platform-and-federation-boundaries.spec.ts",
+      "executed": "desktop (API journeys run once, at desktop): 11 passed; landing and navigation matrix for platform and federation: 6 passed across desktop, tablet and mobile",
+      "proves": "a platform operator, a federation executive and federation staff cannot read, route or transition a union case, reach the dues ledger or prepare a remittance, or administer triage designations; a refused request writes nothing; a client-supplied organization header is not an authority grant; an unauthenticated caller is refused the same resources",
+      "notProven": "the POSITIVE journeys: a federation oversight mandate over an affiliate and a platform support-access grant have not been issued in the QA fixtures, so what these groups CAN do is not yet exercised. These groups count as boundary-proven only, not journey-complete"
+    }
   }
 }

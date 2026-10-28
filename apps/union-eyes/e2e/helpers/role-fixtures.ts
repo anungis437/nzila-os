@@ -14,7 +14,9 @@ export type StakeholderRole =
   | 'executive'
   | 'governance'
   | 'admin'
-  | 'finance';
+  | 'finance'
+  | 'platform'
+  | 'federation';
 
 export type StakeholderFixture = {
   key: StakeholderRole;
@@ -90,9 +92,29 @@ export const STAKEHOLDER_FIXTURES: Record<StakeholderRole, StakeholderFixture> =
     locale: 'en-CA',
     expectedExperience: 'admin',
   },
+  platform: {
+    key: 'platform',
+    userRole: 'platform_lead',
+    userId: UE_TEST_USERS.platformOperator.userId,
+    orgId: UE_TEST_USERS.platformOperator.orgId,
+    email: UE_TEST_USERS.platformOperator.email,
+    locale: 'en-CA',
+    expectedExperience: 'admin',
+  },
+  federation: {
+    key: 'federation',
+    userRole: 'fed_executive',
+    userId: UE_TEST_USERS.federationExecutive.userId,
+    orgId: UE_TEST_USERS.federationExecutive.orgId,
+    email: UE_TEST_USERS.federationExecutive.email,
+    locale: 'en-CA',
+    expectedExperience: 'governance',
+  },
 };
 
 export const STAKEHOLDER_ORDER: StakeholderRole[] = [
+  'platform',
+  'federation',
   'member',
   'steward',
   'staff',
@@ -116,6 +138,8 @@ const EXECUTIVE_LABELS = [
 export const REQUIRED_VISIBLE_LABELS: Record<StakeholderRole, string[]> = {
   // The treasurer role is in the executive experience; the finance duties come from the mandate, not from this navigation.
   finance: EXECUTIVE_LABELS,
+  platform: ['Organization', 'Pilot Configuration', 'Policies', 'Audit', 'Exports'],
+  federation: ['Governance Continuity Overview', 'Governance Trust & Explainability', 'Governance Continuity Review', 'OCRA Continuity Signals', 'Institutional Intelligence Reports', 'Profile & Settings'],
   member: [
     'Home',
     'My Representation',
@@ -174,6 +198,8 @@ export const REQUIRED_VISIBLE_LABELS: Record<StakeholderRole, string[]> = {
 };
 
 export const FORBIDDEN_LABELS: Record<StakeholderRole, string[]> = {
+  platform: ['Open Representation Case', 'Raw FSM', 'Workflow Builder'],
+  federation: ['Open Representation Case', 'Raw FSM', 'Workflow Builder', 'System Status'],
   member: [
     'Continuity Insights',
     'Governance Visibility',

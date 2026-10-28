@@ -110,6 +110,35 @@ export const UE_TEST_USERS = {
     role: 'admin',
     status: 'active',
   },
+  // Platform operator: a supported platform role. Holds no institutional mandate, so operating the platform confers no right to read a union's cases.
+  platformOperator: {
+    userId: 'ue-qa-platform-operator',
+    email: 'ue.qa.platform.operator@nzila.test',
+    firstName: 'QA',
+    lastName: 'PlatformOperator',
+    orgId: UE_TEST_ORGS.primary.id,
+    role: 'platform_lead',
+    status: 'active',
+  },
+  // Federation / parent organization: members of a different tenant than the affiliate. No affiliate-oversight mandate has been issued.
+  federationExecutive: {
+    userId: 'ue-qa-federation-executive',
+    email: 'ue.qa.federation.executive@nzila.test',
+    firstName: 'QA',
+    lastName: 'FederationExecutive',
+    orgId: UE_TEST_ORGS.secondary.id,
+    role: 'fed_executive',
+    status: 'active',
+  },
+  federationStaff: {
+    userId: 'ue-qa-federation-staff',
+    email: 'ue.qa.federation.staff@nzila.test',
+    firstName: 'QA',
+    lastName: 'FederationStaff',
+    orgId: UE_TEST_ORGS.secondary.id,
+    role: 'fed_staff',
+    status: 'active',
+  },
   memberSecondary: {
     userId: 'ue-qa-member-secondary',
     email: 'ue.qa.member.secondary@nzila.test',
