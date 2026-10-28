@@ -34,8 +34,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  ACR_NAME: nzilacanadaacr
-  IMAGE_REPO: nzilacanadaacr.azurecr.io/nzila/web
+  ACR_NAME: nzilaventuresacr
+  IMAGE_REPO: nzilaventuresacr.azurecr.io/nzila/web
   PROD_APP: nzila-os-web-prod
   PROD_RG: nzila-canada-prod-rg
   PROD_UNION_EYES_URL: https://app.unioneyes.app
