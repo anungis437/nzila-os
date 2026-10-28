@@ -89,7 +89,16 @@ export async function POST(
       const kernel = await assignPrimaryRepresentative(tx, { organizationId: orgId, grievanceId: claim.claimId, issuerUserId: userId, assigneeUserId: assigneeId });
       // The kernel is the record of who holds the case; the mirror may be stale or empty.
       previousAssignee = kernel.previousUserId;
-      if (previousAssignee === assigneeId) return {unchanged:true as const,claimId:claim.claimId,assignedTo:assigneeId};
+      if (previousAssignee === assigneeId) {
+        // The kernel already names this assignee. The mirror column is read by workflow guards, so repair it if it lags.
+        if (claim.assignedTo !== assigneeId) {
+          await tx
+            .update(claims)
+            .set({ assignedTo: assigneeId, assignedAt: new Date(), updatedAt: new Date() })
+            .where(and(eq(claims.claimId, claim.claimId), eq(claims.organizationId, orgId)));
+        }
+        return {unchanged:true as const,claimId:claim.claimId,assignedTo:assigneeId};
+      }
 
       // Compare-and-set against the row locked above, so a concurrent reassignment cannot be overwritten silently.
       const [changed] = await tx

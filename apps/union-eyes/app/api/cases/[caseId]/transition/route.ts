@@ -75,7 +75,8 @@ export async function PATCH(
       );
     }
 
-    const { targetStatus, reason } = parsed.data;
+    const { reason } = parsed.data;
+    const targetStatus = normalizeTargetStatus(parsed.data.targetStatus);
 
     // 3. Load claim in RLS context (with row lock to prevent TOCTOU race)
     const result = await withRLSContext(async (tx) => {
@@ -313,6 +314,16 @@ function mapDbStatusToCupe(dbStatus: string): string {
     closed: 'closed',
   };
   return mapping[dbStatus] ?? dbStatus;
+}
+
+/**
+ * Callers send either a CUPE vocabulary id or a claim_status name (the workbench and the next-actions route use the
+ * claim vocabulary). A claim name that is not itself a CUPE id is translated; anything else stays unknown and is refused.
+ */
+function normalizeTargetStatus(requested: string): string {
+  if (toLifecycleState('cupe', requested)) return requested;
+  const claimToCupe = mapDbStatusToCupe(requested);
+  return toLifecycleState('cupe', claimToCupe) ? claimToCupe : requested;
 }
 
 /**

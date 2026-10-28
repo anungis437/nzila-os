@@ -1,5 +1,6 @@
 import pg from 'pg'
 import { runAuthorityTransaction, type SqlExecutor } from '@/lib/authority/store/executor'
+import { auditAuthorityMutation } from '@/lib/authority/store/audit'
 import { changeMandateState, insertMandate, insertRelationship } from '@/lib/authority/store/mutations'
 import { UE_TEST_CASES } from '@/tests/fixtures/test-cases'
 import { UE_TEST_USERS } from '@/tests/fixtures/test-users'
@@ -78,6 +79,46 @@ async function seedQaSupervisoryMandate(client: pg.Client, exec: SqlExecutor): P
   return 1
 }
 
+/**
+ * Synthetic case-assignment issuance rules (issue and revoke) for the QA organization. Assigning or reassigning a case needs a
+ * live rule for that operation. Their capacities and powers mirror the platform's reference catalog; they are labelled as a
+ * fixture in their source instrument and adopt no institutional policy.
+ */
+async function seedQaCaseAssignmentRules(client: pg.Client, exec: SqlExecutor): Promise<number> {
+  const organizationId = UE_TEST_USERS.chiefStewardPrimary.orgId
+  const powers = ['read', 'read_internal', 'comment', 'write_notes', 'draft_action', 'upload_evidence', 'modify_document', 'process_ocr', 'read_third_party_restricted']
+  let added = 0
+  for (const [operation, allowed] of [['issue', powers], ['revoke', []]] as const) {
+    const live = await client.query(
+      `SELECT 1 FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = 'case_assignment' AND operation = $2 AND status = 'active'`,
+      [organizationId, operation],
+    )
+    if (live.rowCount) continue
+    await runAuthorityTransaction(exec, { organizationId, userId: UE_TEST_USERS.adminPrimary.userId }, async (tx) => {
+      const inserted = await tx.query<{ id: string }>(
+        `INSERT INTO ue_authority_issuance_rules
+           (organization_id, domain, operation, issuer_capacities, allowed_powers, max_term_days, requires_acceptance,
+            required_independent_approvals, version, status, source_instrument, drafted_by, approved_by, activated_at)
+         VALUES ($1, 'case_assignment', $2, ARRAY['steward','chief_steward','officer']::text[], $3::text[], NULL, false, 0,
+            COALESCE((SELECT max(version) FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = 'case_assignment' AND operation = $2), 0) + 1,
+            'active', 'SYNTHETIC QA FIXTURE - not an institutional rule', $4, ARRAY[$5, $6]::ue_authority_principal[], now())
+         RETURNING id::text AS id`,
+        [organizationId, operation, allowed, UE_TEST_USERS.adminPrimary.userId, UE_TEST_USERS.executivePrimary.userId, UE_TEST_USERS.auditorReadOnly.userId],
+      )
+      // Every authority event needs its canonical audit record in the same transaction.
+      await auditAuthorityMutation(tx, {
+        organizationId,
+        action: 'issuance_rule.fixture_activate',
+        resourceType: 'ue_authority_issuance_rules',
+        resourceId: inserted.rows[0].id,
+        details: { domain: 'case_assignment', operation, fixture: true },
+      })
+    })
+    added += 1
+  }
+  return added
+}
+
 export async function seedQaCaseAssignments(connectionString: string): Promise<number> {
   const client = new pg.Client({ connectionString })
   await client.connect()
@@ -85,6 +126,7 @@ export async function seedQaCaseAssignments(connectionString: string): Promise<n
   let created = 0
   try {
     created += await seedQaSupervisoryMandate(client, exec)
+    created += await seedQaCaseAssignmentRules(client, exec)
     const cases = [UE_TEST_CASES.primarySubmitted, UE_TEST_CASES.primaryAssigned]
     for (const qaCase of cases) {
       const live = await client.query(

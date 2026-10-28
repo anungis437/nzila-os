@@ -21,6 +21,16 @@ export const UE_TEST_USERS = {
     role: 'steward',
     status: 'active',
   },
+  // Second steward in the primary organization: the target of a reassignment, so the first steward's revocation can be proven.
+  stewardPrimaryTwo: {
+    userId: 'ue-qa-steward-primary-two',
+    email: 'ue.qa.steward.primary.two@nzila.test',
+    firstName: 'QA',
+    lastName: 'StewardPrimaryTwo',
+    orgId: UE_TEST_ORGS.primary.id,
+    role: 'steward',
+    status: 'active',
+  },
   // Case coordinator: holds a synthetic supervisory mandate (see scripts/seed-test-env-kernel.ts). The role title alone
   // confers no case authority.
   chiefStewardPrimary: {

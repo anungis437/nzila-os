@@ -16,8 +16,12 @@ import { enforceAuthority, type EnforcementDeps } from './enforce'
 import { canonicalMembershipSource } from './identity'
 import type { SqlExecutor } from './executor'
 
-/** A JS array travels as one Postgres array literal; drizzle would otherwise expand it into a parameter list. */
+/**
+ * A JS array travels as one Postgres array literal (drizzle would otherwise expand it into a parameter list). A Date travels
+ * as its ISO instant: the postgres driver cannot serialise a Date handed to it through a raw, untyped parameter.
+ */
 export function bind(value: unknown): unknown {
+  if (value instanceof Date) return value.toISOString()
   if (!Array.isArray(value)) return value
   return `{${value.map((v) => (v === null ? 'NULL' : `"${String(v).replace(/["\\]/g, (c) => `\\${c}`)}"`)).join(',')}}`
 }

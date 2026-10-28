@@ -78,7 +78,8 @@ export const settlementTypeEnum = pgEnum("settlement_type", [
 
 // Main Grievance Table
 export const grievances = pgTable("grievances", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  // The physical table is Django-managed and carries no database defaults, so every NOT NULL default is also supplied by the ORM.
+  id: uuid("id").primaryKey().defaultRandom().$defaultFn(() => crypto.randomUUID()),
   grievanceNumber: varchar("grievance_number", { length: 50 }).unique().notNull(),
   
   // Classification
@@ -142,17 +143,17 @@ export const grievances = pgTable("grievances", {
   }>>(),
   
   // Flags
-  isGroupGrievance: boolean("is_group_grievance").default(false),
-  isArbitrationEligible: boolean("is_arbitration_eligible").default(false),
-  hasLegalImplications: boolean("has_legal_implications").default(false),
-  isConfidential: boolean("is_confidential").default(false),
+  isGroupGrievance: boolean("is_group_grievance").default(false).$defaultFn(() => false),
+  isArbitrationEligible: boolean("is_arbitration_eligible").default(false).$defaultFn(() => false),
+  hasLegalImplications: boolean("has_legal_implications").default(false).$defaultFn(() => false),
+  isConfidential: boolean("is_confidential").default(false).$defaultFn(() => false),
   
   // Organization
   organizationId: uuid("organization_id").notNull(),
   
   // Metadata
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow().$defaultFn(() => new Date()),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$defaultFn(() => new Date()),
   createdBy: text("created_by"),
   lastUpdatedBy: text("last_updated_by"),
 }, (table) => [

@@ -9,7 +9,7 @@
  * the CURRENT behaviour and is named "KNOWN GAP" so the gap cannot pass as a feature.
  */
 import { test, expect, request as pwRequest, type APIRequestContext } from '@playwright/test'
-import { inspectFiling } from '../../scripts/runtime/db-inspect'
+import { ageQaCase, countGrievances, inspectCase, inspectFiling, resetQaCase } from '../../scripts/runtime/db-inspect'
 import { UE_TEST_USERS } from '../../tests/fixtures/test-users'
 import { UE_TEST_ORGS } from '../../tests/fixtures/test-orgs'
 import { gotoDashboardAsRole } from '../helpers/auth'
@@ -155,6 +155,7 @@ test.describe('journey A: member files, authority decides who can see it', () =>
   test('the case coordinator holding a scoped supervisory mandate hands a case to the steward; the steward works it; the member never sees internal notes', async ({}, testInfo) => {
     test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
     const seeded = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1'
+    if (process.env.DATABASE_URL) await resetQaCase(seeded)
     const coordinator = await as(UE_TEST_USERS.chiefStewardPrimary.userId, PRIMARY)
     const assigned = await coordinator.post(`/api/cases/${seeded}/assign`, { data: { assigneeId: UE_TEST_USERS.stewardPrimary.userId, reason: 'runtime acceptance' } })
     expect(assigned.status(), await assigned.text()).toBe(200)
@@ -172,6 +173,83 @@ test.describe('journey A: member files, authority decides who can see it', () =>
     expect(await memberView.text()).not.toContain(secret)
     const stewardView = await steward.get(`/api/cases/${seeded}/notes`)
     expect(await stewardView.text()).toContain(secret)
+  })
+
+  test('reassignment revokes the first steward at once, the new steward gains access, and the state survives a fresh sign-in', async ({}, testInfo) => {
+    test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
+    const seeded = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2'
+    const first = UE_TEST_USERS.stewardPrimary.userId
+    const second = UE_TEST_USERS.stewardPrimaryTwo.userId
+    const coordinator = await as(UE_TEST_USERS.chiefStewardPrimary.userId, PRIMARY)
+    // Start from the seeded holder so the test is repeatable.
+    expect((await coordinator.post(`/api/cases/${seeded}/assign`, { data: { assigneeId: first, reason: 'runtime acceptance baseline' } })).status()).toBe(200)
+    // Self-assignment by the coordinator is refused by the kernel: a person cannot route a matter to themselves.
+    const self = await coordinator.post(`/api/cases/${seeded}/assign`, { data: { assigneeId: UE_TEST_USERS.chiefStewardPrimary.userId, reason: 'runtime acceptance' } })
+    expect([403, 404]).toContain(self.status())
+
+    const moved = await coordinator.post(`/api/cases/${seeded}/assign`, { data: { assigneeId: second, reason: 'runtime acceptance reassignment' } })
+    expect(moved.status(), await moved.text()).toBe(200)
+    expect((await moved.json()).previousAssignee).toBe(first)
+
+    try {
+      expect((await (await as(first, PRIMARY)).get(`/api/cases/${seeded}`)).status(), 'revoked steward').toBe(404)
+      expect((await (await as(first, PRIMARY)).get(`/api/cases/${seeded}/notes`)).status(), 'revoked steward notes').toBe(404)
+      expect(ids(await (await (await as(first, PRIMARY)).get('/api/cases')).json())).not.toContain(seeded)
+      // A brand-new request context is a fresh sign-in: nothing is held in the client, so this is the persisted state.
+      const fresh = await as(second, PRIMARY)
+      expect((await fresh.get(`/api/cases/${seeded}`)).status()).toBe(200)
+      expect(ids(await (await fresh.get('/api/cases')).json())).toContain(seeded)
+    } finally {
+      const restored = await coordinator.post(`/api/cases/${seeded}/assign`, { data: { assigneeId: first, reason: 'runtime acceptance restore' } })
+      expect(restored.status(), await restored.text()).toBe(200)
+    }
+    expect((await (await as(first, PRIMARY)).get(`/api/cases/${seeded}`)).status()).toBe(200)
+    expect((await (await as(second, PRIMARY)).get(`/api/cases/${seeded}`)).status()).toBe(404)
+  })
+
+  test('the steward moves the case through its lifecycle, a refused escalation writes nothing, and a permitted escalation commits atomically', async ({}, testInfo) => {
+    test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
+    test.skip(!process.env.DATABASE_URL, 'needs DATABASE_URL to inspect persistence')
+    test.setTimeout(240_000)
+    const seeded = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1'
+    await resetQaCase(seeded)
+    const before = await countGrievances(PRIMARY)
+
+    const coordinator = await as(UE_TEST_USERS.chiefStewardPrimary.userId, PRIMARY)
+    const steward = await as(UE_TEST_USERS.stewardPrimary.userId, PRIMARY)
+    const member = await as(UE_TEST_USERS.memberPrimary.userId, PRIMARY)
+    const move = (status: string) => steward.patch(`/api/cases/${seeded}/transition`, { data: { targetStatus: status, reason: 'runtime acceptance' } })
+
+    expect((await coordinator.post(`/api/cases/${seeded}/assign`, { data: { assigneeId: UE_TEST_USERS.stewardPrimary.userId, reason: 'runtime acceptance' } })).status()).toBe(200)
+    expect((await inspectCase(seeded)).assignedTo).toBe(UE_TEST_USERS.stewardPrimary.userId)
+
+    // The workbench sends claim-status names; the route must accept them and still refuse an unknown status.
+    expect((await move('not_a_status')).status()).toBe(403)
+    const nextActions = await (await steward.get(`/api/cases/${seeded}/next-actions`)).json()
+    expect(nextActions.allowedTransitions.length, JSON.stringify(nextActions)).toBeGreaterThan(0)
+
+    // A business rule (minimum time in a status) refuses the escalation and the refusal leaves no grievance behind.
+    const early = await steward.post(`/api/cases/${seeded}/escalate`, { data: { priority: 'high', notes: 'too early' } })
+    expect(early.status(), await early.text()).toBe(422)
+    expect(await countGrievances(PRIMARY)).toBe(before)
+
+    // Walk the lifecycle with time-in-status simulated by backdating the status instant (a disclosed test technique).
+    for (const status of ['under_review', 'investigation']) {
+      await ageQaCase(seeded, 72)
+      const moved = await move(status)
+      expect(moved.status(), `${status}: ${await moved.text()}`).toBe(200)
+      expect((await inspectCase(seeded)).status).toBe(status)
+    }
+
+    await ageQaCase(seeded, 72)
+    const escalated = await steward.post(`/api/cases/${seeded}/escalate`, { data: { priority: 'high', notes: 'runtime acceptance escalation' } })
+    expect(escalated.status(), await escalated.text()).toBeLessThan(300)
+    const persisted = await inspectCase(seeded)
+    expect(persisted).toMatchObject({ status: 'resolved', resolutionOutcome: 'escalated_to_grievance', grievances: 1, grievanceEvents: 1 })
+
+    const timeline = await (await steward.get(`/api/cases/${seeded}/timeline`)).text()
+    expect(timeline).toContain('under_review')
+    expect((await member.get(`/api/cases/${seeded}/timeline`)).status()).toBeLessThan(500)
   })
 })
 
