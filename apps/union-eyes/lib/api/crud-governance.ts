@@ -23,12 +23,16 @@ const SUBJECT_OWNED = ['data_subject_access_requests', 'user_consents', 'consent
 const DENIED = [
   'documents', 'integration_api_keys', 'oauth_providers',
   'external_accounts', 'security_events', 'poll_votes', 'wcb_claims', 'member_employment', 'pending_profiles',
+  // The per-capita remittance ledger is organization financial data with no member-facing owner column; the finance
+  // routes serve it under financial authority. Generic collections over it (tax, arrears, health and welfare) read it
+  // to any member.
+  'per_capita_remittances',
 ] as const
 
 const OWN_ROWS_READ = ['grievances', 'claims', 'claim_deadlines'] as const
 
 const READ_ONLY = [
-  'organization_members', 'organizations', 'per_capita_remittances', 'dues_transactions',
+  'organization_members', 'organizations', 'dues_transactions',
   'external_invoices', 'polls', 'federations', 'data_classification_policy',
 ] as const
 

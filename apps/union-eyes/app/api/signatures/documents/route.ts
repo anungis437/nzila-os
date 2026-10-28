@@ -5,9 +5,10 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
+import { withApiAuth, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
 import { clientErrorResponse } from '@/lib/api/authorization-denial';
-import { SignatureService } from "@/lib/signature/signature-service";
+import { SignatureService, SignatureAuthorityError } from "@/lib/signature/signature-service";
+import { MAX_SIGNING_FILE_BYTES, signerListSchema } from "@/lib/signature/signer-verification";
 import { projectSignaturePayload } from "@/lib/documents/signature-projection";
 
 import {
@@ -39,6 +40,11 @@ export const POST = withApiAuth(async (request: NextRequest) => {
     );
     }
 
+    // Sending a document through the organization's signature provider account is a staff act, not a member's.
+    if (!(await hasMinRole('steward'))) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Sending documents for signature requires a steward or officer role');
+    }
+
     const formData = await request.formData();
     const file = formData.get("file") as File;
     const title = formData.get("title") as string;
@@ -57,14 +63,23 @@ export const POST = withApiAuth(async (request: NextRequest) => {
     );
     }
 
-    let signers;
+    let rawSigners: unknown;
     try {
-      signers = JSON.parse(signersJson);
+      rawSigners = JSON.parse(signersJson);
     } catch {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid signers JSON'
       );
+    }
+    const parsedSigners = signerListSchema.safeParse(rawSigners);
+    if (!parsedSigners.success) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid signers', parsedSigners.error.issues);
+    }
+    const signers = parsedSigners.data;
+
+    if (file.size > MAX_SIGNING_FILE_BYTES) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'The document is too large to send for signature');
     }
 
     // Convert file to buffer
@@ -97,6 +112,12 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       },
     });
   } catch (error) {
+    if (error instanceof SignatureAuthorityError) {
+      return standardErrorResponse(
+        error.code === 'FORBIDDEN' ? ErrorCode.FORBIDDEN : ErrorCode.VALIDATION_ERROR,
+        error.message,
+      );
+    }
     const denied = clientErrorResponse(error);
     if (denied) return denied;
     return standardErrorResponse(

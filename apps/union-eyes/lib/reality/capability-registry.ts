@@ -151,6 +151,18 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     notes: 'No emissions data is collected. A measurement pipeline and a governed methodology must exist before any figure or certification outcome is returned.',
   },
   {
+    id: 'UE-ACTION-TAX-DOCUMENTS',
+    title: 'Tax slips, T106, RL-1 and COPE receipt generation',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/tax/slips/route.ts', 'app/api/tax/t106/route.ts', 'app/api/tax/rl-1/generate/route.ts', 'app/api/tax/cope/receipts/route.ts'],
+    evidence: [
+      'each route.ts throws ApiError.notImplemented → HTTP 501 on GET and POST',
+      'previously a generic CRUD collection over per_capita_remittances readable by any member (DEF-0B12-CRUD-TAX-PATHS-SERVE-THE-PER-CAPITA-REMITTANCE-LEDGER-TO-ANY-MEMBER)',
+    ],
+    targetWave: 5,
+    notes: 'Tax documents need a governed financial mandate, validated amounts and an audit record before generation. The per-capita remittance ledger is served by the finance routes under financial authority.',
+  },
+  {
     id: 'UE-ACTION-TAX-CRA-EXPORT',
     title: 'CRA tax export',
     state: 'NOT_IMPLEMENTED',

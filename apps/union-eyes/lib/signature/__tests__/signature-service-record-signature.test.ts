@@ -75,7 +75,7 @@ describe('SignatureService.recordSignature ownership verification', () => {
     });
     mocks.insertValues.mockResolvedValue(undefined);
     mocks.findMany.mockResolvedValue([{ status: 'pending' }]);
-    mocks.documentFind.mockResolvedValue({ id: 'doc-1', organizationId: 'org-1', status: 'sent' });
+    mocks.documentFind.mockResolvedValue({ id: 'doc-1', organizationId: 'org-1', status: 'sent', provider: 'internal' });
     mocks.audit.mockResolvedValue(undefined);
   });
 

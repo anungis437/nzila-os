@@ -50,10 +50,19 @@ describe('generic CRUD governance (UE-CONV-K-007)', () => {
 
   it.each([
     ['claims', 'OWN_ROWS_READ'], ['grievances', 'OWN_ROWS_READ'], ['documents', 'DENIED'], ['data_subject_access_requests', 'SUBJECT_OWNED'], ['user_consents', 'SUBJECT_OWNED'],
-    ['organization_members', 'READ_ONLY'], ['organizations', 'READ_ONLY'], ['dues_transactions', 'READ_ONLY'], ['per_capita_remittances', 'READ_ONLY'],
+    ['organization_members', 'READ_ONLY'], ['organizations', 'READ_ONLY'], ['dues_transactions', 'READ_ONLY'], ['per_capita_remittances', 'DENIED'],
     ['integration_api_keys', 'DENIED'], ['poll_votes', 'DENIED'], ['security_events', 'DENIED'],
   ])('keeps %s as %s', (name, expected) => {
     expect(CRUD_GOVERNED_TABLES.get(name)).toBe(expected)
+  })
+
+  // DEF-0B12-CRUD-TAX-PATHS-SERVE-THE-PER-CAPITA-REMITTANCE-LEDGER-TO-ANY-MEMBER (and the arrears and health-and-welfare
+  // collections over the same table): the ledger has no owner column, so a member-level read returned the whole ledger.
+  it('refuses every generic read and write over the per-capita remittance ledger', () => {
+    const gate = crudGovernanceFor(schema.perCapitaRemittances)
+    expect(gate.class).toBe('DENIED')
+    expect(() => assertCrudRead(gate)).toThrow()
+    expect(() => assertCrudWrite(gate)).toThrow()
   })
 
   it('refuses generic writes for every class except OPERATIONAL, and generic reads only for DENIED', () => {

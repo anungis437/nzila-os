@@ -25,6 +25,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('../providers', () => ({ default: { getProvider: () => ({ voidEnvelope: m.voidEnvelope }), getDefaultProvider: vi.fn() } }));
+vi.mock('@/db/schema-organizations', () => ({ organizationMembers: {} }));
 vi.mock('@/lib/services/notification-service', () => ({ NotificationService: {} }));
 vi.mock('@/lib/services/document-storage-service', () => ({ default: class {} }));
 

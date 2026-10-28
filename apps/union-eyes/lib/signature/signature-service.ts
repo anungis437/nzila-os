@@ -13,6 +13,8 @@ import {
 import SignatureProviderFactory from "./providers";
 import { decideProviderSync, mayAdvanceSigner } from "./provider-sync";
 import { eq, and, or, desc, inArray, notInArray, isNull } from "drizzle-orm";
+import { organizationMembers } from "@/db/schema-organizations";
+import { signerListSchema, verifySignerList, SignerVerificationError } from "./signer-verification";
 import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { createHash } from "crypto";
@@ -86,6 +88,32 @@ export class SignatureService {
     sequentialSigning?: boolean;
     metadata?: any;
   }): Promise<typeof signatureDocuments.$inferSelect> {
+    // Who may sign is decided before anything leaves the platform: no envelope is created and no file is stored for a
+    // signer list that names someone the organization cannot vouch for.
+    const parsedSigners = signerListSchema.safeParse(data.signers);
+    if (!parsedSigners.success) throw new SignatureAuthorityError("CONFLICT", "The signer list is invalid");
+    const listedUserIds = parsedSigners.data.flatMap((s) => (s.userId ? [s.userId] : []));
+    const activeMembers = listedUserIds.length
+      ? await withRLSContext({ organizationId: data.organizationId }, (tx) =>
+          tx
+            .select({ userId: organizationMembers.userId, name: organizationMembers.name, email: organizationMembers.email })
+            .from(organizationMembers)
+            .where(
+              and(
+                eq(organizationMembers.organizationId, data.organizationId),
+                inArray(organizationMembers.userId, listedUserIds),
+                eq(organizationMembers.status, "active"),
+              ),
+            ),
+        )
+      : [];
+    try {
+      data = { ...data, signers: verifySignerList(parsedSigners.data, activeMembers) };
+    } catch (error) {
+      if (error instanceof SignerVerificationError) throw new SignatureAuthorityError("FORBIDDEN", error.message);
+      throw error;
+    }
+
     // Calculate file hash for integrity
     const fileHash = createHash("sha256").update(data.file).digest("hex");
 
@@ -441,6 +469,11 @@ export class SignatureService {
       where: eq(signatureDocuments.id, existingSigner.documentId),
     });
     if (!document) throw new Error("Document not found");
+    // A document held by a signature provider is signed with that provider. Recording a signature here would mark
+    // signers signed, and the document completed, without the provider ever having been asked.
+    if (document.provider !== "internal") {
+      throw new SignatureAuthorityError("CONFLICT", "This document is signed through its signature provider and cannot be signed here");
+    }
 
     return withRLSContext({ organizationId: document.organizationId }, async (tx) => {
       // A signature lands only on a document that is still open and a signer who has not already settled: a voided

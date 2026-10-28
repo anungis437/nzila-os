@@ -75,22 +75,6 @@ export async function processAnniversaryAwards(orgId: string) {
     const currentMonth = today.getMonth() + 1;
     const currentDay = today.getDate();
 
-    // Find members with anniversaries today
-    const query = sql`
-      SELECT 
-        om.user_id,
-        om.user_name,
-        om.joined_at,
-        EXTRACT(YEAR FROM AGE(CURRENT_DATE, om.joined_at)) as years_of_service
-      FROM organization_members om
-      WHERE om.organization_id = ${orgId}
-        AND EXTRACT(MONTH FROM om.joined_at) = ${currentMonth}
-        AND EXTRACT(DAY FROM om.joined_at) = ${currentDay}
-        AND EXTRACT(YEAR FROM AGE(CURRENT_DATE, om.joined_at)) > 0
-    `;
-
-    const result = await db.execute(query);
-    const anniversaries = result as unknown as AnniversaryRow[];
     // Get anniversary award type (should be configured in settings)
     // ROUND 50 SECURITY FIX: previously matched by name+kind alone with no
     // org filter, so a cron run for one organization could pick up ANOTHER
@@ -110,6 +94,32 @@ export async function processAnniversaryAwards(orgId: string) {
       logger.warn('[Automation] No anniversary award type found', { orgId });
       return { success: true, processed: 0 };
     }
+
+    // Find members with anniversaries today who have not already been given today's award. The job is triggered by a
+    // schedule that can fire more than once a day (retries, overlapping runs); an award already created today for this
+    // member and type, in any state, means this anniversary has been handled.
+    const query = sql`
+      SELECT 
+        om.user_id,
+        om.user_name,
+        om.joined_at,
+        EXTRACT(YEAR FROM AGE(CURRENT_DATE, om.joined_at)) as years_of_service
+      FROM organization_members om
+      WHERE om.organization_id = ${orgId}
+        AND EXTRACT(MONTH FROM om.joined_at) = ${currentMonth}
+        AND EXTRACT(DAY FROM om.joined_at) = ${currentDay}
+        AND EXTRACT(YEAR FROM AGE(CURRENT_DATE, om.joined_at)) > 0
+        AND NOT EXISTS (
+          SELECT 1 FROM recognition_awards ra
+          WHERE ra.org_id = om.organization_id
+            AND ra.recipient_user_id = om.user_id
+            AND ra.award_type_id = ${anniversaryAwardType.id}
+            AND ra.created_at >= date_trunc('day', now())
+        )
+    `;
+
+    const result = await db.execute(query);
+    const anniversaries = result as unknown as AnniversaryRow[];
 
     let processed = 0;
 
