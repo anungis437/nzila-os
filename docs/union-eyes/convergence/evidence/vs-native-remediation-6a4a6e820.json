@@ -1,0 +1,40 @@
+{
+  "record": "UE_VS_NATIVE_EXECUTION_EVIDENCE",
+  "version": 2,
+  "mission": "UE-FULL-PLATFORM-CONVERGENCE-TO-STAGING-2026",
+  "executor": "VS Code Copilot (single integration agent)",
+  "testedCommit": "6a4a6e820778d989248b5ff5d88b27f46eadfeb6",
+  "branch": "agents/ue-cursor-final-closure",
+  "pullRequest": 1014,
+  "environment": {
+    "os": "Windows",
+    "node": "v24.13.1",
+    "docker": "29.2.0",
+    "postgres": ["pgvector/postgres 16 (disposable, port 55416)", "postgres 15 (disposable, port 55415)"],
+    "preparation": "Fresh database per run: Django migrate plus the approved Drizzle bootstrap (tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs), UE_AUTHORITY_COMBINED_URL pointing at an admin connection"
+  },
+  "suite": "apps/union-eyes/db/__tests__/tenant-isolation-remediation.postgres.test.ts",
+  "command": "UE_AUTHORITY_COMBINED_URL=<admin url of a fresh combined database> pnpm exec vitest run --project union-eyes-heavy apps/union-eyes/db/__tests__/tenant-isolation-remediation.postgres.test.ts",
+  "results": { "pg16": "16 passed of 16", "pg15": "16 passed of 16" },
+  "transport": "Route handlers run unmodified. withRLSContext opens a real transaction, SET LOCAL ROLE union_eyes_runtime and sets app.current_org_id; withSystemContext assumes union_eyes_system. Bare db statements run on the admin connection, where row-level security does not apply.",
+  "cases": [
+    "arbitration_precedents: runtime role in another organization sees none of the owner's rows; UPDATE and DELETE affect 0 rows",
+    "precedent route GET: private and public precedent of another organization read as 404; owner reads the full row",
+    "precedent route PATCH/DELETE by another organization: 404, nothing changed, no audit; owner PATCH persists and audits; unsupported federation sharing refused",
+    "steward directory: member projection excludes personal phone, notes, grievance link; other-organization and non-active rows 404; officer read audited; officer of another organization 404",
+    "report executor joins on the admin connection: non-equi, LEFT, RIGHT and FULL joins return no row of another organization; the same statement as the other organization returns its own row",
+    "reconciliation run lookup on the admin connection: another organization receives null",
+    "dues initiation: ten simultaneous initiations on separate connections create one pending payment; another member unaffected; another organization's runtime context sees no payment",
+    "recognition_awards and pilot_events: hidden from another organization with or without a predicate"
+  ],
+  "findings": [
+    "union_eyes_system holds no privilege on arbitration_precedents: the system-role read first written for shared precedents failed with permission denied; the route now reads in the tenant context"
+  ],
+  "notProven": [
+    "The export, settings and profile-role routes have not run natively",
+    "Webhook settlement of dues payments natively",
+    "HTTP-level behaviour of /api/version and /api/docs through the proxy",
+    "Browser, accessibility, performance and rate-limit acceptance"
+  ],
+  "verdicts": { "READY_FOR_STAGING": "NO" }
+}
