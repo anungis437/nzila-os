@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { NextRequest } from 'next/server';
 import type { PGlite } from '@electric-sql/pglite';
 import { campaigns, communicationPreferences, consentRecords, messageLog } from '@/db/schema';
+import { notificationDeliveryLog } from '@/db/schema/domains/communications';
 import { createTableDatabase } from './support/pglite-tables';
 
 // UE-CONV-K-006: the public/callback communications routes run with no tenant bound. Every statement derives the
@@ -87,7 +88,7 @@ async function preference(id: string) {
 }
 
 beforeAll(async () => {
-  const created = await createTableDatabase([campaigns, messageLog, communicationPreferences, consentRecords]);
+  const created = await createTableDatabase([campaigns, messageLog, communicationPreferences, consentRecords, notificationDeliveryLog]);
   pg = created.pg;
   state.db = created.db;
   process.env.COMMUNICATIONS_TRACKING_SECRET = SECRET;

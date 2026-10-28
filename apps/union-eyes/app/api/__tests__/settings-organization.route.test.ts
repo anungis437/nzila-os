@@ -8,7 +8,7 @@ const m = vi.hoisted(() => ({
 
 vi.mock('@/lib/api/framework', () => ({
   withApi: m.withApi,
-  ApiError: { badRequest: () => new Error('bad') },
+  ApiError: { badRequest: (message: string) => Object.assign(new Error(message), { status: 400 }) },
 }));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (fn: (tx: unknown) => Promise<unknown>) => fn(m.db) }));
@@ -54,9 +54,59 @@ describe('settings/organization route', () => {
     const result = await PUT({
       organizationId: 'org_1',
       userId: 'u1',
-      body: { name: 'Updated Org', settings: { theme: 'light' } },
+      body: { name: 'Updated Org', settings: { timezone: 'America/Toronto', showBranding: true } },
     });
     expect(result.updated).toBe(true);
     expect(m.audit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'organization.settings_update', userId: 'u1' }));
+  });
+
+  const put = (settings: unknown) => loadRoute().then(({ PUT }) => PUT({ organizationId: 'org_1', userId: 'u1', body: { settings } }));
+
+  it.each([
+    ['perCapitaRate', 0.01],
+    ['remittanceDay', 28],
+    ['credits', 1_000_000],
+    ['nextCreditRenewal', '2099-01-01'],
+    ['twilioPhoneNumber', '+15550100'],
+  ])('refuses to let an administrator write the authority key %s, saves nothing and audits nothing', async (key, value) => {
+    await expect(put({ timezone: 'America/Toronto', [key]: value })).rejects.toMatchObject({ status: 400, message: expect.stringContaining(key) });
+    expect(m.db.update).not.toHaveBeenCalled();
+    expect(m.audit).not.toHaveBeenCalled();
+  });
+
+  it('refuses an unknown key and never echoes the rejected value', async () => {
+    const attempt = put({ arbitraryKey: 'SECRET-VALUE-123' });
+    await expect(attempt).rejects.toMatchObject({ status: 400 });
+    await expect(attempt).rejects.not.toThrow(/SECRET-VALUE-123/);
+    expect(m.db.update).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [{ sessionTimeout: 0 }],
+    [{ sessionTimeout: 'forever' }],
+    [{ requireMFA: 'yes' }],
+    [{ webhookUrl: 'http://insecure.example/hook' }],
+    [{ webhookUrl: 'javascript:alert(1)' }],
+    [{ primaryColor: 'red; background:url(x)' }],
+    [{ defaultRole: 'system_admin' }],
+    [{ billingCycle: 'free-forever' }],
+  ])('refuses an invalid value for %j', async (settings) => {
+    await expect(put(settings)).rejects.toMatchObject({ status: 400 });
+    expect(m.db.update).not.toHaveBeenCalled();
+  });
+
+  it('records the before and after of every written setting in the audit row', async () => {
+    m.db.select = vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(async () => [{ settings: { timezone: 'UTC', credits: 5 } }]) })) }));
+    const result = await put({ timezone: 'America/Toronto', sessionTimeout: 60 });
+    expect(result.updated).toBe(true);
+    expect(m.audit).toHaveBeenCalledWith(
+      m.db,
+      expect.objectContaining({
+        details: expect.objectContaining({
+          settingsBefore: { timezone: 'UTC', sessionTimeout: null },
+          settingsAfter: { timezone: 'America/Toronto', sessionTimeout: 60 },
+        }),
+      }),
+    );
   });
 });

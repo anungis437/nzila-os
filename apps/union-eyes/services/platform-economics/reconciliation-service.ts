@@ -397,15 +397,17 @@ export async function resolveException(
 // ============================================================================
 
 /**
- * Get a reconciliation run with summary.
+ * Get a reconciliation run with summary. The run is looked up inside the caller's organization: an id from another
+ * organization is indistinguishable from a missing one.
  */
 export async function getReconciliationRun(
   runId: string,
+  organizationId: string,
 ): Promise<ReconciliationRun | null> {
   const [run] = await db
     .select()
     .from(reconciliationRuns)
-    .where(eq(reconciliationRuns.id, runId))
+    .where(and(eq(reconciliationRuns.id, runId), eq(reconciliationRuns.organizationId, organizationId)))
     .limit(1);
   return run ?? null;
 }

@@ -16,6 +16,9 @@ let db: ReturnType<typeof drizzle>
 
 beforeAll(async () => {
   pg = new PGlite()
+  // The columns are `timestamp without time zone` and the sweep compares them with a UTC instant, so the fixture
+  // must not inherit the machine's zone.
+  await pg.exec(`SET TIME ZONE 'UTC'`)
   await pg.exec(`
     CREATE ROLE union_eyes_runtime NOSUPERUSER NOBYPASSRLS NOLOGIN;
     CREATE ROLE union_eyes_system NOSUPERUSER NOBYPASSRLS NOLOGIN;

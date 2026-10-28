@@ -250,4 +250,5 @@ export const NON_CONFERRING_KERNEL_TABLES: Readonly<Record<string, string>> = {
   ue_authority_recusals: 'only ever REMOVES authority',
   ue_authority_financial_steps: 'record of acts already performed; authority comes from the principal’s financial mandate',
   ue_authority_reviews: 'resource facts for governance reviews, not a grant',
+  ue_authority_workaid_consent_text_proposals: 'a proposed consent wording; it confers nothing, and only adoption by a different executive inserts current wording',
 }

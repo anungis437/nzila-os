@@ -5,13 +5,13 @@
  * A skipped run is not evidence. Status stays READY_FOR_VS_EXECUTION.
  * The fixture is synthetic. This file does not execute a protected institutional backfill.
  */
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawnSync } from 'node:child_process'
 import pg from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { executeOwnershipBackfill, planOwnershipBackfill } from '../../lib/authority/store/case-ownership-backfill'
 import { canonicalMembershipSource } from '../../lib/authority/store/identity'
 import { runAuthorityTransaction, type SqlExecutor } from '../../lib/authority/store/executor'
-import { installAuthoritySchema, newUuid, ORG, seedMembership, U, type Db } from './authority-kernel-harness'
+import { installAuthoritySchema, newUuid, ORG, seedCast, seedMembership, U, type Db } from './authority-kernel-harness'
 import { kit } from './authority-kernel-testkit'
 
 const native = process.env.UE_OWNERSHIP_NATIVE_PROOF === '1' ? describe : describe.skip
@@ -24,6 +24,9 @@ native('ownership backfill concurrency on disposable PostgreSQL', () => {
   let admin: pg.Client
   const CASE_A = newUuid()
   const CASE_B = newUuid()
+  // grievances.union_rep_id is a uuid column, so the legacy owners of this fixture are uuid principals.
+  const REP_A = newUuid()
+  const REP_B = newUuid()
 
   function asDb(client: pg.Client): Db {
     return {
@@ -38,17 +41,27 @@ native('ownership backfill concurrency on disposable PostgreSQL', () => {
     const ports = JSON.parse(execFileSync('docker', ['inspect', '--format', '{{json .NetworkSettings.Ports}}', name], { encoding: 'utf8' }))
     const port = Number(ports['5432/tcp'][0].HostPort)
     config = { host: '127.0.0.1', port, user: 'postgres', password: 'synthetic-only', database: 'postgres' }
+    // The image starts a throwaway server to run initdb, stops it, then starts the real one: a connection made between
+    // those two terminates. The real server is up once its readiness line has been logged twice.
+    for (let attempt = 0; ; attempt += 1) {
+      const logged = spawnSync('docker', ['logs', name], { encoding: 'utf8' })
+      const logs = `${logged.stdout}${logged.stderr}`
+      if ((logs.match(/database system is ready to accept connections/g) ?? []).length >= 2) break
+      if (attempt > 120) throw new Error('disposable PostgreSQL did not become ready')
+      await new Promise((resolve) => setTimeout(resolve, 500))
+    }
     admin = new pg.Client(config)
     await admin.connect()
     const db = asDb(admin)
     await installAuthoritySchema(db)
+    await seedCast(db)
     await admin.query('SET ROLE union_eyes_runtime')
     const k = kit(db)
     await k.asAdmin(async () => {
-      await seedMembership(db, U.steward, ORG, 'steward')
-      await seedMembership(db, U.steward2, ORG, 'steward')
-      await db.query(`INSERT INTO public.grievances (id, organization_id, created_by, union_rep_id) VALUES ($1,$2,$3,$4)`, [CASE_A, ORG, U.member, U.steward])
-      await db.query(`INSERT INTO public.grievances (id, organization_id, created_by, union_rep_id) VALUES ($1,$2,$3,$4)`, [CASE_B, ORG, U.member, U.steward2])
+      await seedMembership(db, REP_A, ORG, 'steward')
+      await seedMembership(db, REP_B, ORG, 'steward')
+      await db.query(`INSERT INTO public.grievances (id, organization_id, created_by, union_rep_id) VALUES ($1,$2,$3,$4)`, [CASE_A, ORG, U.member, REP_A])
+      await db.query(`INSERT INTO public.grievances (id, organization_id, created_by, union_rep_id) VALUES ($1,$2,$3,$4)`, [CASE_B, ORG, U.member, REP_B])
     })
     await k.adoptDefaultRules()
     await k.grantMandate('supervisory', U.officer, ['read', 'assign'], { scope: { resourceIds: [CASE_A, CASE_B] } })

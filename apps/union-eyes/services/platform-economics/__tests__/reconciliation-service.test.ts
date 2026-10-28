@@ -67,6 +67,7 @@ vi.mock('@/lib/audit-logger', () => ({
   AuditSeverity: { HIGH: 'high', MEDIUM: 'medium', CRITICAL: 'critical' },
 }));
 
+import { eq } from 'drizzle-orm';
 import {
   getReconciliationRun,
   listExceptions,
@@ -168,12 +169,20 @@ describe('platform-economics/reconciliation-service', () => {
   describe('getReconciliationRun', () => {
     it('returns the run when found', async () => {
       pushSel([{ id: 'run-1' }]);
-      expect(await getReconciliationRun('run-1')).toEqual({ id: 'run-1' });
+      expect(await getReconciliationRun('run-1', 'org-A')).toEqual({ id: 'run-1' });
     });
 
     it('returns null when not found', async () => {
       pushSel([]);
-      expect(await getReconciliationRun('run-x')).toBeNull();
+      expect(await getReconciliationRun('run-x', 'org-A')).toBeNull();
+    });
+
+    it('binds the lookup to the caller organization, so another organization run reads as missing', async () => {
+      vi.mocked(eq).mockClear();
+      pushSel([]);
+      expect(await getReconciliationRun('run-of-org-B', 'org-A')).toBeNull();
+      expect(eq).toHaveBeenCalledWith({ __col: 'id' }, 'run-of-org-B');
+      expect(eq).toHaveBeenCalledWith({ __col: 'organizationId' }, 'org-A');
     });
   });
 

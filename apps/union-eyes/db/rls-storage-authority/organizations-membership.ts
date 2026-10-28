@@ -440,6 +440,7 @@ export const organizationsMembershipEntries: StorageAuthorityEntry[] = [
   },
   {
     table: "org_usage",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
     classification: "LATENT_UNREACHABLE",
     reason: "PR #752 round 8: db/schema-organizations.ts (sibling-file census fix, see 'applications'). Only reference is actions/admin-actions.ts's getSystemStats — that whole module (actions/admin-actions.ts) has zero real importers anywhere in app/lib/actions/services/components (confirmed via grep, no barrel/indirect import found either), matching the round-5 lib/workers/** dead-code precedent. Zero raw-SQL references found either.",
     supportingCapability: [],

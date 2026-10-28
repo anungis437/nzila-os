@@ -9,7 +9,10 @@ const m = vi.hoisted(() => ({
   updates: [] as Record<string, unknown>[],
   stripeCreate: vi.fn(),
   tx: { select: vi.fn(), execute: vi.fn(), update: vi.fn() },
+  mandate: vi.fn(),
 }));
+
+vi.mock('@/lib/finance/require-live-financial-mandate', () => ({ requireLiveFinancialMandate: m.mandate }));
 
 vi.mock('@/lib/api/framework', () => ({
   withApi: m.withApi,
@@ -45,6 +48,7 @@ describe('dues/reconciliation/auto-match', () => {
     m.updates = [];
     m.withApi.mockImplementation((_cfg: unknown, handler: (c: any) => Promise<unknown>) => (c: any) => handler(c));
     m.audit.mockResolvedValue(undefined);
+    m.mandate.mockResolvedValue({});
     m.tx.select.mockReturnValue({ from: () => ({ where: async () => m.pending }) });
     m.tx.execute.mockImplementation(async (q: { vals: unknown[] }) => m.membersByNumber[String(q.vals[1])] ?? []);
     m.tx.update.mockImplementation(() => ({
@@ -79,6 +83,23 @@ describe('dues/reconciliation/auto-match', () => {
   it('writes no audit when there is nothing to match', async () => {
     m.pending = [];
     await run();
+    expect(m.audit).not.toHaveBeenCalled();
+  });
+
+  it('requires a live reconcile mandate on the same transaction before reading or writing', async () => {
+    m.pending = [{ id: 'l1', employeeNumber: 'E1' }];
+    m.membersByNumber = { E1: [{ user_id: 'member-1' }] };
+    await run();
+    expect(m.mandate).toHaveBeenCalledWith(m.tx, { organizationId: 'org_1', userId: 'treasurer', action: 'finance:reconcile', requiresLedger: true });
+  });
+
+  it('matches nothing, writes nothing and audits nothing when the caller holds no reconcile mandate', async () => {
+    m.pending = [{ id: 'l1', employeeNumber: 'E1' }];
+    m.membersByNumber = { E1: [{ user_id: 'member-1' }] };
+    m.mandate.mockRejectedValue(new Error('DUTY_NOT_HELD'));
+    await expect(run()).rejects.toThrow('DUTY_NOT_HELD');
+    expect(m.tx.select).not.toHaveBeenCalled();
+    expect(m.updates).toEqual([]);
     expect(m.audit).not.toHaveBeenCalled();
   });
 

@@ -193,6 +193,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "FORCE RLS for consent-wording proposals created by platform 0036. Does not insert wording. Has not been applied to a native or live database."
+      },
+      {
+        "tag": "0029_election_succession_rls_closure",
+        "sha256": "b61ff67df2af558991847dbc2f13dc4c9fbe48b368310a735d01e91ed639b0ee",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "FORCE RLS for the council-election supersession relations created by platform 0033 and 0034. Found by a native bootstrap: without it the catalog preflight left both relations unclassified and runtime grant activation aborted. Proven on native PostgreSQL 15 and 16; not applied to any live database."
       }
     ],
     "platform": [

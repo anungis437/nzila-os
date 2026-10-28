@@ -715,6 +715,7 @@ export const claimsContinuityEntries: StorageAuthorityEntry[] = [
   },
   {
     table: "grievance_timeline",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
     classification: "TENANT_RLS_REQUIRED",
     reason: "1 non-test reference(s) to 'grievanceTimeline' found (round-7 scope-expansion scan). At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review). RESOLVED (round 11): sole reference app/api/cases/[caseId]/timeline/route.ts (minRole:'member', withRLSContext) — same route family as claim_updates/grievance_events above.",
     supportingCapability: ["app/api/cases/[caseId]/timeline/route.ts"],

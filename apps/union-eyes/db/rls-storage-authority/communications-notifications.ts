@@ -284,6 +284,7 @@ export const communicationsNotificationsEntries: StorageAuthorityEntry[] = [
   },
   {
     table: "notification_history",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
     classification: "LATENT_UNREACHABLE",
     reason: "RECLASSIFIED 2026-09-02 (round 5, from TENANT_RLS_REQUIRED/MIXED): re-verified against the actual imports of lib/services/notification-service.ts — it imports only `notificationQueue`, `notificationDeliveryLog`, `notificationTemplates` from db/schema/domains/communications; `notificationHistory` appears ONLY in a doc comment ('- notificationHistory: Audit log for all notifications'), never as an actual query. Its other cited evidence, lib/workers/{cleanup,email,notification,sms}-worker.ts, has ZERO real (non-test) importers anywhere in app/, actions/, lib/, or services/ — confirmed orphaned by the 2026-02-19 Django Celery migration (see lib/job-queue.ts's own doc comment; same dead-module family as user_sessions/grievance_transitions' prior citations). No other non-test reference to the 'notificationHistory' Drizzle export exists. Resolves the prior entry's own flagged follow-up ('execution authority for the worker path not yet independently confirmed').",
     supportingCapability: ["db/schema/domains/communications/notifications.ts"],

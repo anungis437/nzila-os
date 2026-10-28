@@ -53,9 +53,11 @@ describe('scoped 0013 — journal registration', () => {
     expect(entry!.breakpoints).toBe(true);
   });
 
-  it('is the highest journal index (appended, not inserted mid-lineage)', () => {
-    const maxIdx = Math.max(...JOURNAL.entries.map((e) => e.idx));
-    expect(maxIdx).toBe(24); // 0014 through 0026_workaid_union_side_rls_closure appended after 0013
+  it('keeps 0013 in place and appends every later migration at a contiguous higher index', () => {
+    const indexes = JOURNAL.entries.map((e) => e.idx);
+    // Appended, never inserted mid-lineage: idx values are 0..n-1 in order, so 0013 stays at idx 13 and nothing
+    // later displaces it. A new scoped migration is registered by appending, without editing this test.
+    expect(indexes).toEqual(indexes.map((_, position) => position));
   });
 
   it('splits into exactly three breakpoint-delimited statements', () => {

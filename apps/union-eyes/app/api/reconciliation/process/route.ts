@@ -60,7 +60,9 @@ export const GET = withApi(
     const url = new URL(request.url);
     const runId = url.searchParams.get('runId');
     if (!runId) throw ApiError.badRequest('runId query parameter is required');
-    const run = await getReconciliationRun(runId);
+    if (!z.guid().safeParse(runId).success) throw ApiError.badRequest('runId must be a valid identifier');
+    // The lookup is bound to the caller's organization: another organization's run reads as not found.
+    const run = await getReconciliationRun(runId, organizationId);
     if (!run) throw ApiError.notFound('Reconciliation run not found');
     return run;
   },
