@@ -996,12 +996,27 @@
         "id": "R-27",
         "status": "FIXED_RUNTIME_VERIFIED",
         "title": "Three unit tests encoded the old defective history behaviour (public id in legacy mode, response shape); replaced or updated with disclosure, the legacy test now asserts the internal-key contract against the Django-shaped foreign key"
+      },
+      {
+        "id": "R-28",
+        "status": "OPEN",
+        "title": "ORM/physical parity sweep: 662 NOT NULL columns in 216 tables have no database default while the ORM emits DEFAULT (class of R-16; organization_members and grievances fixed). Evidence: docs/union-eyes/convergence/evidence/vs-orm-physical-parity-eba009ba6.json"
+      },
+      {
+        "id": "R-29",
+        "status": "OPEN",
+        "title": "16 principal columns in 8 tables are text in the ORM and uuid in the database (class of R-17; grievance_events fixed by 0032): external_document_access_grants, external_matter_access_grants, representation_authorities, employer_communications, employer_contacts, cookie_consents, ai_grievance_triages, ai_clause_reasonings, ai_copilot_sessions. They sit under RLS policies and one foreign key, so the repair needs recreated policies and the storage-authority catalog tests; scheduled with the External Counsel/Employer/WorkAid journeys"
+      },
+      {
+        "id": "R-30",
+        "status": "OPEN",
+        "title": "2,124 ORM-declared columns across 168 tables are absent from the physical schema (any select naming them fails); most belong to surfaces not yet exercised. Evidence: docs/union-eyes/convergence/evidence/vs-orm-physical-parity-eba009ba6.json"
       }
     ],
     "summary": {
-      "total": 27,
+      "total": 30,
       "fixedRuntimeVerified": 15,
-      "open": 12
+      "open": 15
     }
   },
   "runtimeAcceptance": {
@@ -1028,6 +1043,7 @@
     "stakeholderGroupsStillWithoutRuntimeJourney": 9,
     "zeroOfJourneysAToIComplete": true,
     "journeyAFreshCase": "complete: file, triage sight (metadata only), refused routing for administrator, unmandated steward, read-only supervisor, officer and another tenant, mandated assignment with the mandate named in the audit, steward work and escalation, reassignment to a representative with revocation of the first steward, supervisor oversight, officer aggregate reporting, mandate and designation revocation and restoration",
-    "fullUeSuiteOnThisTree": "1416 files, 20221 tests passed, 3 skipped (vitest --maxWorkers=4 with the app server stopped)"
+    "fullUeSuiteOnThisTree": "1416 files, 20221 tests passed, 3 skipped (vitest --maxWorkers=4 with the app server stopped)",
+    "migrationQualification": "cache migrations 0031 and 0032 qualified on native PostgreSQL 16 (upgrade from the preceding schema, idempotency, rollback or refusal, fail-closed, runtime privileges): db/__tests__/migration-0031-*.postgres.test.ts and migration-0032-*.postgres.test.ts, 11 tests; 0030 qualified earlier on PG15 and 16; PG15 not rerun for 0031/0032"
   }
 }

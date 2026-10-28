@@ -25,6 +25,10 @@ synthetic module entitlements for the two QA organizations, and a **local sandbo
 
 `up --prod --rebuild`, `test --prod` and `restart-check --prod` against the rebuilt tree: **41 passed, 0 failed, 46 API-only journeys skipped off desktop by design, 2.6 minutes**; restart check 2/2. The full Union Eyes suite on the same tree (app server stopped, `--maxWorkers=4`): 1,416 files, 20,221 tests passed. New specs: `03-intake-triage-assignment.spec.ts` (a freshly filed case from intake through routing, representation and oversight, with refusals and revocation) and the extended `02-persistence-after-restart.spec.ts`.
 
+### Migration qualification (native PostgreSQL 16)
+
+Cache migrations 0031 and 0032 are qualified by `db/__tests__/migration-0031-feature-flags-attribution.postgres.test.ts` and `migration-0032-grievance-events-actor.postgres.test.ts` (11 tests): upgrade from the preceding schema, preserved rows and indexes, idempotency, rollback (0032 refuses when it would lose history), fail-closed without the table, and the runtime role's privileges on the combined database. Migration 0030 was qualified earlier on PG15 and PG16. PG15 was not rerun for 0031 and 0032. No production database was touched.
+
 ## Earlier run: production build, fresh container, via the orchestrator
 
 `ue-runtime-up.mjs up --prod --fresh` provisioned a new PostgreSQL 16 container from nothing (Django migrate, the approved Drizzle bootstrap with ledger verification of 69 rows including cache migrations 0030 to 0032, QA seed, sandbox platform database), built and served the production bundle and reported healthy. `test --prod` then passed **33 of 33 executed tests (30 are API journeys that run once, at desktop, by design) in 2.4 minutes with zero failures**, and `restart-check --prod` stopped the application, started it again, and proved the filed case, its audit proof and its tenant and steward boundaries survived (1/1). The same suite on the development server needed 8.7 minutes and failed a different test on each run.
@@ -85,6 +89,9 @@ operations. **Zero of Journeys A–I are complete.** Journey A now passes the fi
 | R-25 | `/api/grievances/[id]/assign` requires GUID principal ids, but kernel principals are text identifiers, so an escalated grievance cannot be assigned to a text-id representative. | Open. The Representative handoff is proven as a reassignment of the case; grievance-stage assignment is not proven. |
 | R-26 | Two audit stores: kernel authority events go to `public.audit_logs`, route audits to `audit_security.audit_logs` (different columns). | Open: reporting and evidence export must read both; document or consolidate. |
 | R-27 | Three unit tests encoded the old defective history behaviour (R-14) and one the response shape. | Updated with disclosure: the legacy-mode test no longer re-points the foreign key at `claims.claim_id`; it asserts the internal-key contract against the Django-shaped foreign key. |
+| R-28 | ORM/physical parity sweep (`scripts/runtime/orm-physical-parity.ts`, 520 tables): 662 NOT NULL columns in 216 tables have no database default while the ORM emits `DEFAULT` (class of R-16). | Open; `organization_members` and `grievances` fixed. Evidence file `evidence/vs-orm-physical-parity-eba009ba6.json`. Fix by table as journeys reach them, with an insert test each. |
+| R-29 | 16 principal columns in 8 tables are `text` in the ORM and `uuid` in the database (class of R-17), including `external_document_access_grants`, `external_matter_access_grants` and `representation_authorities`. They sit under RLS policies and one foreign key. | Open: needs a migration that recreates the policies and re-runs the storage-authority catalog tests; scheduled with the External Counsel / Employer / WorkAid journeys. |
+| R-30 | 2,124 ORM-declared columns across 168 tables are absent from the physical schema. | Open: triage by surface as journeys reach them. |
 
 ## Stakeholder coverage in the QA fixtures
 
