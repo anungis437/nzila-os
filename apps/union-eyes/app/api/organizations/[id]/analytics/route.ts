@@ -4,6 +4,14 @@ import { db } from '@/db/db'
 import { organizations } from '@/db/schema-organizations'
 import { eq, sql } from 'drizzle-orm'
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context'
+import { ROLE_HIERARCHY } from '@/lib/api-auth-guard'
+import {
+  canAdministerOrganization,
+  canReadOrganization,
+  directRoleIn,
+  resolveOrganizationAccess,
+  UUID_PATTERN,
+} from '@/lib/organizations/read-authority'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,6 +35,17 @@ export async function GET(_req: NextRequest, { params }: Params) {
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
+  if (!UUID_PATTERN.test(id)) return NextResponse.json({ error: 'Invalid organization id' }, { status: 400 })
+
+  // Analytics aggregate an organization's membership and caseload: they belong to its officers, the administrators above
+  // it and the platform, and a signed-in stranger must not learn that the organization exists.
+  const access = await resolveOrganizationAccess(userId)
+  if (!canReadOrganization(access, id)) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  const directRole = directRoleIn(access, id)
+  const officer = (ROLE_HIERARCHY[(directRole ?? '') as keyof typeof ROLE_HIERARCHY] ?? 0) >= ROLE_HIERARCHY.officer
+  if (!canAdministerOrganization(access, id) && !officer) {
+    return NextResponse.json({ error: 'Forbidden: requires officer role' }, { status: 403 })
+  }
 
   // Fetch org
   const [org] = await withSystemContext(() =>

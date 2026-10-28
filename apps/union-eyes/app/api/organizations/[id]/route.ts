@@ -6,6 +6,7 @@ import { eq, sql } from 'drizzle-orm'
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context'
 import { requireUserForOrganization, requireSystemAdmin, ROLE_HIERARCHY } from '@/lib/api-auth-guard'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
+import { canAdministerOrganization, canReadOrganization, resolveOrganizationAccess } from '@/lib/organizations/read-authority'
 
 export const dynamic = 'force-dynamic'
 
@@ -60,6 +61,10 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const { id } = await params
   const invalid = assertOrgIdParam(id)
   if (invalid) return invalid
+  // The organizations table is read as the system role, which is not tenant-scoped: the caller must hold an active
+  // membership here, administer an organization above it, or be a platform administrator. Otherwise it does not exist.
+  const access = await resolveOrganizationAccess(userId)
+  if (!canReadOrganization(access, id)) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   const [row] = await withSystemContext(() =>
     db.select().from(organizations).where(eq(organizations.id, id)),
   )
@@ -80,7 +85,10 @@ export async function GET(_req: NextRequest, { params }: Params) {
     await db.execute(sql`SELECT count(*)::int AS cnt FROM organizations WHERE parent_id = ${id}`),
   ) as Array<{ cnt: number }>
 
-  const mapped = mapOrg(row)
+  // Settings, the billing contact and provenance belong to the organization's administrators.
+  const { settings: _settings, billing_contact_id: _billing, created_by: _createdBy, legacy_org_id: _legacy, subscription_tier: _tier, ...profile } = mapOrg(row)
+  const administrative = canAdministerOrganization(access, id)
+  const mapped = administrative ? mapOrg(row) : profile
   return NextResponse.json({
     data: {
       ...mapped,

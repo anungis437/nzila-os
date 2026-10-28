@@ -879,8 +879,9 @@ export async function getUserContextForOrganization(
   // Membership tables are tenant-RLS org-scoped. Resolve under system
   // authority (filter still binds userId + organizationId in WHERE).
   return withSystemContext(async () => {
+  // Only an ACTIVE membership counts: a pending, suspended or inactive row is not access.
   const membership = await db.query.organizationMembers.findFirst({
-    where: (om, { eq, and }) => and(eq(om.userId, userId), eq(om.organizationId, organizationId)),
+    where: (om, { eq, and }) => and(eq(om.userId, userId), eq(om.organizationId, organizationId), eq(om.status, 'active')),
     columns: { id: true, organizationId: true, role: true },
   });
 
