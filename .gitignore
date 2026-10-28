@@ -288,3 +288,6 @@ apps/trustcore/gtm/
 
 # HubSpot config file
 hubspot.config.yml
+
+# Local runtime acceptance state (tooling/scripts/ue-runtime-up.mjs)
+.ue-runtime/

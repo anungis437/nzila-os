@@ -285,6 +285,10 @@ export async function POST(request: Request) {
   } catch (error) {
     const refused = caseAuthorizationResponse(error);
     if (refused) return refused;
+    // An organization without the module is refused, not reported as a server fault.
+    if ((error as { code?: unknown } | null)?.code === 'ENTITLEMENT_REQUIRED') {
+      return NextResponse.json({ error: 'ENTITLEMENT_REQUIRED', message: 'Module access denied' }, { status: 403 });
+    }
     logger.error('Case intake failed', error as Error);
     return NextResponse.json(
       { error: 'INTERNAL_ERROR', message: 'An unexpected error occurred.' },

@@ -197,6 +197,13 @@
       "when": 1790240000000,
       "tag": "0030_precedent_explicit_share_select",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1790250000000,
+      "tag": "0031_feature_flags_attribution_columns",
+      "breakpoints": true
     }
   ]
 }

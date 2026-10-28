@@ -207,6 +207,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "One additional permissive SELECT policy on arbitration_precedents for the runtime role: an explicit grant in shared_with_org_ids or sharing_level = public. Writes stay owner-only; federation and congress levels stay owner-only at the database. Proven on native PostgreSQL 15 and 16 (grant, revocation, negative disclosure); not applied to any live database."
+      },
+      {
+        "tag": "0031_feature_flags_attribution_columns",
+        "sha256": "854c69b408d6b84b722b6237e5819fc781adfe6229281e21ff59019a73ba0175",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Adds nullable created_by and last_modified_by to feature_flags: the canonical table lacked them while the ORM selected them, so every feature-flag evaluation failed. Found by running the application against native PostgreSQL; not applied to any live database."
       }
     ],
     "platform": [
