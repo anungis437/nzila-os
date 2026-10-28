@@ -3,9 +3,10 @@
  *
  * A precedent is owned by `source_organization_id`; the table has no organization_id, so a generic tenant filter never
  * applied and any precedent of any organization could be read, rewritten or deleted by id. Authority is now explicit:
- * - GET reads a precedent the caller's organization owns, or one the owner shared with it (canReadSharedClause: public,
- *   an explicit grant, or the same federation/congress). Any other row reads as not found, and a non-owner reader gets
- *   a projection without the owner's document location, grant list or author.
+ * - GET reads a precedent the caller's organization owns. The deployed row-level policy admits only the owner's rows, so a
+ *   precedent another organization shared reads as not found until a reviewed multi-party policy admits it; when it does,
+ *   canReadSharedClause (public, an explicit grant, the same federation/congress) decides and a non-owner gets a projection
+ *   without the owner's document location, grant list or author.
  * - PATCH and DELETE are owner-only, run under the caller's tenant RLS context, name the owner in their own WHERE
  *   clause, and are audited in the same transaction. Sharing changes are checked against the owner's standing.
  */
@@ -68,9 +69,10 @@ export const GET = withApi(
   },
   async ({ params, organizationId, userId }) => {
     const ctx = requireIds(params, organizationId, userId);
-    // PRIVILEGED_CROSS_TENANT_REVIEW: federation and congress readers are not visible under the tenant policy, so the
-    // read runs on the system role and is decided by canReadSharedClause. Do not widen the runtime policy.
-    return withSystemContext(async (tx) => {
+    // The read runs in the caller's tenant context, so the deployed policy on arbitration_precedents (owner only) is the
+    // first gate; canReadSharedClause is the second, for the day a multi-party policy admits shared rows. The system role
+    // holds no privilege on this table, and none is granted here: cross-organization sharing needs its own reviewed policy.
+    return withRLSContext({ organizationId: ctx.organizationId, userId: ctx.userId }, async (tx) => {
       const row = await readPrecedent(ctx.id, tx);
       if (!row || !(await canReadSharedClause(ctx.organizationId, row))) {
         throw ApiError.notFound('precedent', ctx.id);
