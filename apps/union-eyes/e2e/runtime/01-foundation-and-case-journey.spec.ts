@@ -150,17 +150,7 @@ test.describe('journey A: member files, authority decides who can see it', () =>
     expect([403, 404], await response.text()).toContain(response.status())
   })
 
-  test('KNOWN GAP R-13: a freshly filed case cannot be reached by a scoped coordinator mandate (case facts carry no unit or territory)', async ({}, testInfo) => {
-    test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
-    expect(claimNumber).toMatch(/^CASE-/)
-    const coordinator = await as(UE_TEST_USERS.chiefStewardPrimary.userId, PRIMARY)
-    const response = await coordinator.post(`/api/cases/${caseId}/assign`, { data: { assigneeId: UE_TEST_USERS.stewardPrimary.userId, reason: 'runtime acceptance' } })
-    // Default deny, indistinguishable from a missing case: the supervisory mandate is resource-scoped to the QA cases and the
-    // loader supplies no unit or territory, so no scope other than a named resource can ever cover a new filing.
-    expect(response.status(), await response.text()).toBe(404)
-  })
-
-  test('the case coordinator holding a scoped supervisory mandate hands a case to the steward; the steward works it; the member never sees internal notes', async ({}, testInfo) => {
+  test('the case coordinator holding a unit-scoped supervisory mandate hands a case to the steward; the steward works it; the member never sees internal notes', async ({}, testInfo) => {
     test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
     const seeded = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1'
     if (process.env.DATABASE_URL) await resetQaCase(seeded)

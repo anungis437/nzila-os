@@ -31,6 +31,16 @@ export const UE_TEST_USERS = {
     role: 'steward',
     status: 'active',
   },
+  // Senior representative / supervisor: oversees cases under a read-and-monitor mandate that carries no routing power.
+  supervisorPrimary: {
+    userId: 'ue-qa-supervisor-primary',
+    email: 'ue.qa.supervisor.primary@nzila.test',
+    firstName: 'QA',
+    lastName: 'SupervisorPrimary',
+    orgId: UE_TEST_ORGS.primary.id,
+    role: 'chief_steward',
+    status: 'active',
+  },
   // Case coordinator: holds a synthetic supervisory mandate (see scripts/seed-test-env-kernel.ts). The role title alone
   // confers no case authority.
   chiefStewardPrimary: {

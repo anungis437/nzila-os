@@ -21,17 +21,24 @@ const HANDLER_PERMISSIONS = ['read', 'read_internal', 'comment', 'write_notes', 
  * source instrument as a fixture, names no issuance rule, and is issued by the QA administrator: it proves the application
  * honours a mandate when one exists, and records no institutional decision.
  */
-async function seedQaSupervisoryMandate(client: pg.Client, exec: SqlExecutor): Promise<number> {
-  const organizationId = UE_TEST_USERS.chiefStewardPrimary.orgId
+async function seedQaSupervisoryMandate(
+  client: pg.Client,
+  exec: SqlExecutor,
+  principal: { userId: string; orgId: string },
+  powers: readonly string[],
+  purpose: string,
+): Promise<number> {
+  const organizationId = principal.orgId
   const live = await client.query(
-    `SELECT id::text AS id, scope FROM ue_authority_mandates
+    `SELECT id::text AS id, scope, powers FROM ue_authority_mandates
       WHERE organization_id = $1 AND principal_user_id = $2 AND kind = 'supervisory' AND status = 'active' AND revoked_at IS NULL`,
-    [organizationId, UE_TEST_USERS.chiefStewardPrimary.userId],
+    [organizationId, principal.userId],
   )
-  const wanted = [UE_TEST_CASES.primarySubmitted.claimId, UE_TEST_CASES.primaryAssigned.claimId]
+  const wanted = organizationId
   const current = live.rows.some((row) => {
-    const ids: unknown = (row.scope as { resourceIds?: unknown } | null)?.resourceIds
-    return Array.isArray(ids) && wanted.every((id) => ids.includes(id))
+    const ids: unknown = (row.scope as { unitIds?: unknown } | null)?.unitIds
+    const held = ((row.powers as string[] | undefined) ?? []).map(String)
+    return Array.isArray(ids) && ids.includes(wanted) && powers.length === held.length && powers.every((power) => held.includes(power))
   })
   if (current) return 0
   // A fixture mandate with a stale scope is revoked through the application's own mandate-state path before it is reissued.
@@ -48,7 +55,7 @@ async function seedQaSupervisoryMandate(client: pg.Client, exec: SqlExecutor): P
       `INSERT INTO ue_authority_issuance_rules
          (organization_id, domain, operation, issuer_capacities, allowed_powers, max_term_days, requires_acceptance,
           required_independent_approvals, version, status, source_instrument, drafted_by, approved_by, activated_at)
-       SELECT $1, 'supervisory', 'issue', ARRAY['executive']::text[], ARRAY['assign']::text[], 400, false, 0,
+       SELECT $1, 'supervisory', 'issue', ARRAY['executive']::text[], ARRAY['read','assign','monitor']::text[], 400, false, 0,
           COALESCE((SELECT max(version) FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = 'supervisory' AND operation = 'issue'), 0) + 1,
           'active', 'SYNTHETIC QA FIXTURE - not an institutional rule', $2, ARRAY[$3, $4]::ue_authority_principal[], now()
        WHERE NOT EXISTS (SELECT 1 FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = 'supervisory' AND operation = 'issue' AND status = 'active')`,
@@ -63,14 +70,14 @@ async function seedQaSupervisoryMandate(client: pg.Client, exec: SqlExecutor): P
     if (!rule) throw new Error('could not establish the synthetic supervisory issuance rule')
     await insertMandate(tx, {
       organizationId,
-      principalUserId: UE_TEST_USERS.chiefStewardPrimary.userId,
+      principalUserId: principal.userId,
       kind: 'supervisory',
-      powers: ['assign'],
-      // Case facts carry no unit or territory, so only a resource-scoped mandate can match a case (finding R-13).
-      scope: { resourceIds: [UE_TEST_CASES.primarySubmitted.claimId, UE_TEST_CASES.primaryAssigned.claimId] },
+      powers,
+      // The unit is the organization that owns the case (see the case-facts loader): one organization, never its descendants.
+      scope: { unitIds: [organizationId] },
       sourceInstrument: 'SYNTHETIC QA FIXTURE - not an institutional mandate',
       grantedBy: UE_TEST_USERS.adminPrimary.userId,
-      justification: 'Runtime acceptance fixture: lets the QA case coordinator assign a filing. Issues no institutional authority.',
+      justification: `Runtime acceptance fixture: ${purpose}. Issues no institutional authority.`,
       effectiveAt: new Date(Date.now() - 60_000),
       expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
       issuanceRuleId: rule.id,
@@ -125,7 +132,8 @@ export async function seedQaCaseAssignments(connectionString: string): Promise<n
   const exec = client as unknown as SqlExecutor
   let created = 0
   try {
-    created += await seedQaSupervisoryMandate(client, exec)
+    created += await seedQaSupervisoryMandate(client, exec, UE_TEST_USERS.chiefStewardPrimary, ['assign'], 'lets the QA case coordinator route a filing')
+    created += await seedQaSupervisoryMandate(client, exec, UE_TEST_USERS.supervisorPrimary, ['read', 'monitor'], 'lets the QA supervisor oversee cases without routing them')
     created += await seedQaCaseAssignmentRules(client, exec)
     const cases = [UE_TEST_CASES.primarySubmitted, UE_TEST_CASES.primaryAssigned]
     for (const qaCase of cases) {

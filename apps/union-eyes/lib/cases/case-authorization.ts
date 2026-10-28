@@ -114,6 +114,8 @@ export interface ReadableCase {
   status: string
   priority: string
   visibility: CaseVisibility
+  /** The sources of authority the kernel relied on for this decision (mandate, relationship, ...), for the audit record. */
+  authority: ReadonlyArray<{ kind: string; id: string; instrument: string }>
 }
 
 /**
@@ -142,7 +144,11 @@ export async function findReadableCase(
 
   const decision = await decideCase(tx, { userId: actor.userId, organizationId: actor.organizationId, caseId: claim.claimId, action })
   if (decision.effect === 'allow') {
-    return { ...claim, visibility: decision.scope.visibility === 'member_visible' ? 'member_visible' : 'internal' }
+    return {
+      ...claim,
+      visibility: decision.scope.visibility === 'member_visible' ? 'member_visible' : 'internal',
+      authority: (decision.authority ?? []).map((a) => ({ kind: a.kind, id: a.id, instrument: a.instrument })),
+    }
   }
   if (action !== 'case:read') {
     const read = await decideCase(tx, { userId: actor.userId, organizationId: actor.organizationId, caseId: claim.claimId, action: 'case:read' })

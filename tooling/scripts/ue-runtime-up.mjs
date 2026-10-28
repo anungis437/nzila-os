@@ -9,7 +9,7 @@
  *   node tooling/scripts/ue-runtime-up.mjs down    # stop the app and the database container
  *   node tooling/scripts/ue-runtime-up.mjs env     # print the environment the app and the tests use
  *
- * Needs Docker, Python (Django backend migrations), Node and pnpm. Options: --port-db 55430 --port-app 3002 --fresh --prod
+ * Needs Docker, Python (Django backend migrations), Node and pnpm. Options: --port-db 55430 --port-app 3002 --fresh --prod --rebuild
  * (--prod builds and serves the production bundle, the reliable mode for repeated acceptance runs).
  *
  * LOCAL ONLY. It uses a disposable container, synthetic credentials and the QA session cookie that the platform auth honours
@@ -36,6 +36,7 @@ const PORT_APP = Number(opt('port-app', '3002'))
 const FRESH = args.includes('--fresh')
 // A production build (next build + next start) is the reliable runtime: the dev server stalls under repeated acceptance runs.
 const PROD = args.includes('--prod')
+const REBUILD = args.includes('--rebuild')
 const CONTAINER = 'ue-runtime-pg'
 const APP_DB = 'ue_runtime'
 const PLATFORM_DB = 'ue_platform_sandbox'
@@ -155,7 +156,7 @@ async function up() {
 
 function startApp() {
   const filter = ['--filter', '@nzila/union-eyes']
-  if (PROD && !existsSync(join(APP, '.next', 'BUILD_ID'))) run('pnpm', [...filter, 'exec', 'next', 'build'], { env: runtimeEnv() })
+  if (PROD && (REBUILD || !existsSync(join(APP, '.next', 'BUILD_ID')))) run('pnpm', [...filter, 'exec', 'next', 'build'], { env: runtimeEnv() })
   const serve = PROD ? ['exec', 'next', 'start', '--port', String(PORT_APP)] : ['dev']
   const log = openSync(join(STATE, 'app.log'), 'a')
   const child = spawn('pnpm', [...filter, ...serve], {
@@ -177,6 +178,11 @@ function test() {
   run('npx', ['playwright', 'test', '--config', 'playwright.runtime.config.ts'], { cwd: APP, env: runtimeEnv() })
 }
 
+/** Re-applies the deterministic QA fixtures (idempotent) to a running database. */
+function seed() {
+  run('pnpm', ['--filter', '@nzila/union-eyes', 'seed:test-env'], { env: runtimeEnv() })
+}
+
 /** Files a case, stops the application, starts it again, and proves the case, its audit proof and its boundaries survived. */
 async function restartCheck() {
   run('npx', ['playwright', 'test', '--config', 'playwright.runtime.config.ts', '--project=desktop', 'e2e/runtime/01', '-g', 'journey A'], { cwd: APP, env: runtimeEnv() })
@@ -195,6 +201,7 @@ function down() {
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   if (command === 'env') console.log(JSON.stringify(runtimeEnv(), null, 2))
   else if (command === 'up') await up()
+  else if (command === 'seed') seed()
   else if (command === 'test') test()
   else if (command === 'restart-check') await restartCheck()
   else if (command === 'down') down()

@@ -68,10 +68,21 @@ export async function resetQaCase(claimId: string): Promise<void> {
   })
 }
 
-/** Simulates the passing of time in the current status, so a minimum-duration business rule can be exercised. */
+/** Simulates the passing of time in the current status, so a minimum-duration business rule can be exercised (QA organization only). */
 export async function ageQaCase(claimId: string, hours: number): Promise<void> {
-  if (!QA_CASE.test(claimId)) throw new Error('ageQaCase only touches the seeded QA cases')
-  await withApp((db) => db.query(`UPDATE claims SET updated_at = now() - ($2 || ' hours')::interval WHERE claim_id = $1`, [claimId, String(hours)]))
+  await withApp((db) =>
+    db.query(
+      `UPDATE claims SET updated_at = now() - ($2 || ' hours')::interval WHERE claim_id = $1 AND organization_id = '11111111-1111-4111-8111-111111111111'`,
+      [claimId, String(hours)],
+    ),
+  )
+}
+
+/** The audit details recorded for the assignments of one case, newest first. */
+export async function assignmentAudit(claimId: string): Promise<Array<{ action: string; user_id: string | null; metadata: Record<string, unknown> }>> {
+  return withApp(async (db) =>
+    (await db.query(`SELECT action, user_id, metadata FROM audit_security.audit_logs WHERE metadata->>'caseId' = $1 AND action = 'case.assign' ORDER BY created_at DESC`, [claimId])).rows,
+  )
 }
 
 export async function inspectCase(claimId: string): Promise<{

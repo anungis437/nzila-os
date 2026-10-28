@@ -142,6 +142,8 @@ export async function POST(
           toAssignee: assigneeId,
           reason: reason ?? null,
           updatedBy: userId,
+          // Who held the authority to route this case, and under which instrument.
+          authority: claim.authority,
         },
       });
 

@@ -924,8 +924,8 @@
       },
       {
         "id": "R-13",
-        "status": "OPEN",
-        "title": "Case facts carry no unit/territory, so a scoped supervisory mandate can never cover a newly filed case (KNOWN GAP test)"
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "A newly filed case could not be routed: case facts carried no jurisdiction. The unit is now the owning organization (server-written at intake, exact match, never inherited); routing needs an explicit unit-scoped supervisory mandate with the assign power, sight of the queue needs a separate cases triage designation; assignment audit names the mandate. Proven on a freshly filed case with denials and revocation"
       },
       {
         "id": "R-14",
@@ -976,34 +976,58 @@
         "id": "R-23",
         "status": "FIXED_RUNTIME_VERIFIED",
         "title": "NAR sandbox gate treated NODE_ENV=production as a deployment signal (aligned with the QA session gate; one test replaced and disclosed)"
+      },
+      {
+        "id": "R-24",
+        "status": "OPEN",
+        "title": "/api/dashboard/stats returns tenant-wide counts (active and pending claims, high-priority claims, member count) to any member, and answers zeros on a query failure"
+      },
+      {
+        "id": "R-25",
+        "status": "OPEN",
+        "title": "Grievance assignment (/api/grievances/[id]/assign) requires GUID principal ids while kernel principals are text, so an escalated grievance cannot be assigned to a text-id representative; the Representative handoff is proven as a case reassignment, not as a grievance-stage assignment"
+      },
+      {
+        "id": "R-26",
+        "status": "OPEN",
+        "title": "Two audit stores: kernel authority events are written to public.audit_logs and route audits to audit_security.audit_logs (different column sets); reporting must read both"
+      },
+      {
+        "id": "R-27",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Three unit tests encoded the old defective history behaviour (public id in legacy mode, response shape); replaced or updated with disclosure, the legacy test now asserts the internal-key contract against the Django-shaped foreign key"
       }
     ],
     "summary": {
-      "total": 23,
-      "fixedRuntimeVerified": 13,
-      "open": 10
+      "total": 27,
+      "fixedRuntimeVerified": 15,
+      "open": 12
     }
   },
   "runtimeAcceptance": {
     "runtime": "production build (next build + next start), native PostgreSQL 16 in a fresh Docker container, orchestrated by tooling/scripts/ue-runtime-up.mjs",
     "executed": {
-      "passed": 33,
+      "passed": 41,
       "failed": 0,
-      "apiOnlyJourneysSkippedOffDesktop": 30,
-      "durationMinutes": 2.4
+      "apiOnlyJourneysSkippedOffDesktop": 46,
+      "durationMinutes": 2.6
     },
-    "restartPersistence": "passed (case, audit proof, tenant and steward boundaries survive a stop and start)",
+    "restartPersistence": "passed (2/2: the filed case, its audit proof, tenant and steward boundaries; and the triage assignments, a revoked then restored coordinator, survive a stop and start)",
     "stakeholdersWithRuntimeIdentity": [
       "member",
       "steward",
+      "representative (second steward)",
       "case coordinator (chief steward)",
+      "supervisor (read and monitor mandate)",
       "staff",
-      "executive",
+      "executive / officer",
       "governance",
       "administrator",
       "auditor (read only)"
     ],
     "stakeholderGroupsStillWithoutRuntimeJourney": 9,
-    "zeroOfJourneysAToIComplete": true
+    "zeroOfJourneysAToIComplete": true,
+    "journeyAFreshCase": "complete: file, triage sight (metadata only), refused routing for administrator, unmandated steward, read-only supervisor, officer and another tenant, mandated assignment with the mandate named in the audit, steward work and escalation, reassignment to a representative with revocation of the first steward, supervisor oversight, officer aggregate reporting, mandate and designation revocation and restoration",
+    "fullUeSuiteOnThisTree": "1416 files, 20221 tests passed, 3 skipped (vitest --maxWorkers=4 with the app server stopped)"
   }
 }

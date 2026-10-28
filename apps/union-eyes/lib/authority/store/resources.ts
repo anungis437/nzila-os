@@ -108,8 +108,11 @@ export async function loadCase(exec: SqlExecutor, req: AuthorityRequest, now: Da
     kind: 'case',
     id: String(row.id),
     organizationId: String(row.organization_id),
-    // No source column for unit, territory or respondents: they stay absent and scoped authority cannot match.
-    unitId: null,
+    // The unit is the organization that owns the claim. It is written by the server from the authenticated membership when the
+    // case is filed and is never accepted from a client, so it is a trusted jurisdiction: a mandate scoped to this unit covers
+    // only this organization's cases (exact match, never inherited through the hierarchy). Territory has no governed source yet
+    // and stays absent, so a territory-scoped mandate cannot match.
+    unitId: String(row.organization_id),
     territoryId: null,
     // Legal implications are the only privilege signal; confidentiality is carried separately.
     classification: row.has_legal_implications === true ? 'privileged' : 'standard',

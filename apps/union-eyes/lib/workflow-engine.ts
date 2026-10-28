@@ -231,7 +231,7 @@ export async function updateClaimStatus(
       timeline: [{ type: 'submitted', timestamp: claimCreatedAt }],
       assignedOfficerId: claim.assignedTo || undefined,
     };
-    const signals = detectAllSignals([signalCase]);
+    const signals = await detectAllSignals([signalCase]);
 
     const hasUnresolvedCriticalSignals = signals.some(
       signal => signal.severity === 'critical' && signal.actionable

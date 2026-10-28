@@ -44,4 +44,15 @@ test.describe('persistence after a restart', () => {
     expect((await outsider.get(`/api/cases/${caseId}`)).status()).toBe(404)
     expect((await (await as(UE_TEST_USERS.stewardPrimary.userId, PRIMARY)).get(`/api/cases/${caseId}`)).status()).toBe(404)
   })
+
+  test('assignments made through triage, and a revoked then restored coordinator, survive a restart', async ({}, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop', 'API journey: runs once, at desktop')
+    const state = JSON.parse(await readFile(join(STATE_DIR, 'triage-journey-state.json'), 'utf8')) as { caseId: string; representative: string; second: string }
+    const representative = await as(state.representative, PRIMARY)
+    expect((await representative.get(`/api/cases/${state.caseId}`)).status(), 'representative still holds the case').toBe(200)
+    expect((await (await as(UE_TEST_USERS.stewardPrimary.userId, PRIMARY)).get(`/api/cases/${state.caseId}`)).status(), 'revoked steward stays revoked').toBe(404)
+    expect((await (await as(UE_TEST_USERS.stewardPrimary.userId, PRIMARY)).get(`/api/cases/${state.second}`)).status(), 'second case, assigned after restoration').toBe(200)
+    expect((await (await as(UE_TEST_USERS.chiefStewardPrimary.userId, PRIMARY)).get(`/api/cases/${state.caseId}`)).status(), 'the coordinator still has no read').toBe(404)
+    expect((await (await as(UE_TEST_USERS.memberSecondary.userId, SECONDARY)).get(`/api/cases/${state.caseId}`)).status()).toBe(404)
+  })
 })
