@@ -4,7 +4,7 @@
   "mission": "UE-FULL-PLATFORM-CONVERGENCE-TO-STAGING-2026",
   "branch": "agents/ue-cursor-final-closure",
   "pullRequest": 1014,
-  "recordedAtCommit": "1df40bbe1",
+  "recordedAtCommit": "bd953b9d7",
   "baseline": "0b0e363aaf5c8b5cc546e6e136af44d78e4fca1a",
   "traceability": "Every defectId is an item of docs/union-eyes/convergence/register/ue-release-debt-index-0c3.json (150 items) and, through it, of the frozen 777-defect register. This ledger adds state; it never edits frozen Gate 0 evidence and counts each defect once.",
   "statusScale": {
@@ -18,8 +18,8 @@
     "releaseDebtItems": 150,
     "addressedThisProgramme": 46,
     "byStatus": {
-      "NATIVE_VERIFIED": 11,
-      "UNIT_VERIFIED": 35,
+      "NATIVE_VERIFIED": 16,
+      "UNIT_VERIFIED": 30,
       "E2E_VERIFIED": 0,
       "CLOSED": 0
     },
@@ -372,49 +372,50 @@
     },
     {
       "defectId": "DEF-0B9-ORG-ANALYTICS-ANY-SIGNED-IN-USER-READS-ANY-ORGANIZATION-NAME-TYPE-CHILD-COUNT-AND-AGGREGATES-BY-PATH-ID",
-      "status": "UNIT_VERIFIED",
+      "status": "NATIVE_VERIFIED",
       "commits": [
-        "e0afd3bf9"
+        "e0afd3bf9",
+        "bd953b9d7"
       ],
       "rootCause": "Analytics by path id with no membership check and no uuid validation.",
       "repair": "uuid validated; organization must be readable; officer, administrator above or platform required.",
       "evidence": [
-        "app/api/__tests__/organizations-read-authority.pglite.test.ts"
+        "app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts (PG15 and PG16, system and runtime roles, 10 tests each)"
       ],
       "remaining": [
-        "Native run",
         "Officer floor is an engineering default, not an issued mandate"
       ]
     },
     {
       "defectId": "DEF-0B9-ORG-CHILDREN-ANY-SIGNED-IN-USER-LISTS-CHILDREN-OF-ANY-ORGANIZATION-AS-SYSTEM",
-      "status": "UNIT_VERIFIED",
+      "status": "NATIVE_VERIFIED",
       "commits": [
-        "e0afd3bf9"
+        "e0afd3bf9",
+        "bd953b9d7"
       ],
       "rootCause": "System-role children read of any organization.",
       "repair": "Parent must be readable and only children the caller may read are returned; bounded.",
       "evidence": [
-        "app/api/__tests__/organizations-read-authority.pglite.test.ts"
+        "app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts (PG15 and PG16, system and runtime roles, 10 tests each)"
       ],
-      "remaining": [
-        "Native run"
-      ]
+      "remaining": []
     },
     {
       "defectId": "DEF-0B9-ORG-DESCENDANTS-ANY-SIGNED-IN-USER-LISTS-WHOLE-SUBTREE-OF-ANY-ORGANIZATION-UNBOUNDED-AS-SYSTEM",
-      "status": "UNIT_VERIFIED",
+      "status": "NATIVE_VERIFIED",
       "commits": [
-        "e0afd3bf9"
+        "e0afd3bf9",
+        "bd953b9d7"
       ],
       "rootCause": "Unbounded system-role subtree read of any organization.",
       "repair": "Root must be readable, result limited to readable organizations and bounded at 2000.",
       "evidence": [
-        "app/api/__tests__/organizations-read-authority.pglite.test.ts"
+        "app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts (PG15 and PG16, system and runtime roles, 10 tests each)"
       ],
-      "remaining": [
-        "Native run"
-      ]
+      "remaining": []
     },
     {
       "defectId": "DEF-0B9-ORG-HIERARCHY-LIST-ANY-SIGNED-IN-USER-ENUMERATES-EVERY-ORGANIZATION-AS-SYSTEM",
@@ -435,33 +436,35 @@
     },
     {
       "defectId": "DEF-0B9-ORG-ROSTER-GET-ANY-ORGANIZATION-MEMBER-READS-FULL-ROSTER-WITH-CONTACT-DETAILS",
-      "status": "UNIT_VERIFIED",
+      "status": "NATIVE_VERIFIED",
       "commits": [
-        "e0afd3bf9"
+        "e0afd3bf9",
+        "bd953b9d7"
       ],
       "rootCause": "Any member, in any status, read the full roster with contact details.",
       "repair": "Steward or above, administrator above or platform; getUserContextForOrganization counts only an active membership.",
       "evidence": [
-        "app/api/__tests__/organizations-read-authority.pglite.test.ts"
+        "app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts (PG15 and PG16, system and runtime roles, 10 tests each)"
       ],
       "remaining": [
-        "Native run",
         "Steward floor is an engineering default, not an issued mandate"
       ]
     },
     {
       "defectId": "DEF-0B9-ORG-ROSTER-POST-STEWARD-GRANTS-ANY-ORGANIZATION-ROLE-TO-ANY-USER-ID-WITHOUT-ACCEPTANCE",
-      "status": "UNIT_VERIFIED",
+      "status": "NATIVE_VERIFIED",
       "commits": [
-        "e0afd3bf9"
+        "e0afd3bf9",
+        "bd953b9d7"
       ],
       "rootCause": "A steward inserted an active membership with any role for any user id.",
-      "repair": "Grantable roles are below the caller's own and never administrator; the membership is always pending.",
+      "repair": "Grantable roles are below the caller's own and never administrator; the membership is always pending. The native run also found that the roster insert (and the six other Drizzle inserts into organization_members) failed on the real schema: created_at, updated_at and is_primary are NOT NULL with no database default, and the ORM left them out. The schema now supplies them in the ORM (the same approach already used for exempt_from_per_capita).",
       "evidence": [
-        "app/api/__tests__/organizations-read-authority.pglite.test.ts"
+        "app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts (PG15 and PG16, system and runtime roles, 10 tests each)"
       ],
       "remaining": [
-        "Native run",
         "The invitation flow that activates a pending membership is not exercised by this suite"
       ]
     },
@@ -848,7 +851,8 @@
     },
     "arrearsAndHealthWelfare": "app/api/arrears and app/api/healthwelfare/plans were generic collections over per_capita_remittances; the capability is not implemented and the routes now refuse.",
     "precedentFederationSharing": "RESOLVED for explicit grants and public precedents: cache migration 0030 adds one read-only policy for the runtime role. Proven on native PG15 and PG16 (projection without the owner's document location, grant list and author; revocation effective at once; a third organization and un-granted or federation-level precedents read as not found; the grantee's UPDATE, DELETE and INSERT touch nothing). NOT resolved: federation and congress levels stay owner-only at the database until their own reviewed design (hierarchy and congress-membership predicates) exists. The migration is registered as UNQUALIFIED and has not been applied to any live database.",
-    "gate0HistoricalTests": "Historical Gate 0 evidence tests are separated from current-source regression tests (docs/union-eyes/convergence/GATE0-TEST-TREATMENT.md; tooling/scripts/run-ue-gate0-historical.mjs). A recorded green run of the historical suite at its pinned commit is still outstanding."
+    "gate0HistoricalTests": "Historical Gate 0 evidence tests are separated from current-source regression tests (docs/union-eyes/convergence/GATE0-TEST-TREATMENT.md; tooling/scripts/run-ue-gate0-historical.mjs). A recorded green run of the historical suite at its pinned commit is still outstanding.",
+    "drizzleInsertDefaults": "organization_members.created_at, updated_at and is_primary are NOT NULL without a database default on the canonical schema. The ORM now supplies them. Other tables whose Drizzle declaration relies on a DEFAULT the canonical table lacks have not been surveyed: only native runs expose them."
   },
   "frozenGate0Tooling": "tooling/scripts/lib/ue-gate0b*-classification.test.mjs quote pre-repair source text and fail once that source is repaired (for example crud-governance.ts, the docs routes). They are not CI gates and are not edited: the frozen records describe the pre-repair state.",
   "verdicts": {

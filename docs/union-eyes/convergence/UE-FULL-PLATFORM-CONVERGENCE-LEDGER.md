@@ -1,7 +1,7 @@
 # UE Full-Platform Convergence — Execution Summary
 
 Mission: `UE-FULL-PLATFORM-CONVERGENCE-TO-STAGING-2026`
-Branch: `agents/ue-cursor-final-closure` (PR #1014) · Baseline: `0b0e363aa` · Recorded at `1df40bbe1`.
+Branch: `agents/ue-cursor-final-closure` (PR #1014) · Baseline: `0b0e363aa` · Recorded at `bd953b9d7`.
 Frozen Gate 0 evidence is untouched. Per-defect state lives in the machine-readable
 [remediation ledger](./remediation/ue-defect-remediation-ledger.json); this page is the narrative.
 
@@ -13,8 +13,8 @@ Frozen Gate 0 evidence is untouched. Per-defect state lives in the machine-reada
 
 | State | Count | Meaning |
 |---|---|---|
-| `NATIVE_VERIFIED` | 11 | Ran unmodified on native PostgreSQL 15 and 16, combined schema, runtime role, with an adversarial cross-tenant case |
-| `UNIT_VERIFIED` | 35 | Positive and adversarial tests against mocks or an in-process SQL engine |
+| `NATIVE_VERIFIED` | 16 | Ran unmodified on native PostgreSQL 15 and 16, combined schema, runtime role, with an adversarial cross-tenant case |
+| `UNIT_VERIFIED` | 30 | Positive and adversarial tests against mocks or an in-process SQL engine |
 | `E2E_VERIFIED` | 0 | Needs the running application over HTTP or a browser |
 | `CLOSED` | 0 | Needs every required proof and an independent release decision |
 
@@ -34,6 +34,7 @@ Of the 46: 34 release-blocking (all 34 in the class), 11 conditionally blocking 
 | 8 | `66acc8b1e` | The 12 remaining release-blocking defects: organizing campaigns, pension retirement eligibility, testimonials, health-and-safety incident read, anonymity and dashboard, exit-interview sensitivity, consent and publication, cognition constants (501), ICRA report gate, operational metrics; plus organization list and tree (OPL-01, OPL-07). Native proof for pension (PG15 and PG16, 17 tests each) |
 | 9 | `8636991de` | Interview sensitivity and consent applied to every derived engine (topic graph, propagation, resilience, simulation, continuity risk, succession, expertise map, governance timeline); forecast no longer fabricates a trend; succession model call audited and schema-validated; native proof for organization list, tree, item, hierarchy and search (PG15 and PG16, 5 tests each) |
 | 10 | `1df40bbe1` | Anniversary job repaired (it selected a column the table does not have) and made concurrency-safe, native proof; precedent sharing policy (cache 0030: explicit grants and public) with native proof; dues settlement concurrency native proof; retired v2 callers repointed or made visible; Gate 0 historical/current separation; native sweep (PG16) of every combined-schema suite |
+| 11 | `bd953b9d7` | Native proof for organization children, descendants, analytics and roster; the roster insert (and six other ORM inserts into organization_members) was failing on the canonical schema for want of created_at, updated_at and is_primary defaults, now supplied by the ORM |
 
 ## Native proof
 
