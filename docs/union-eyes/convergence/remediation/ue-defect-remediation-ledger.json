@@ -4,7 +4,7 @@
   "mission": "UE-FULL-PLATFORM-CONVERGENCE-TO-STAGING-2026",
   "branch": "agents/ue-cursor-final-closure",
   "pullRequest": 1014,
-  "recordedAtCommit": "66acc8b1e",
+  "recordedAtCommit": "8636991de",
   "baseline": "0b0e363aaf5c8b5cc546e6e136af44d78e4fca1a",
   "traceability": "Every defectId is an item of docs/union-eyes/convergence/register/ue-release-debt-index-0c3.json (150 items) and, through it, of the frozen 777-defect register. This ledger adds state; it never edits frozen Gate 0 evidence and counts each defect once.",
   "statusScale": {
@@ -16,15 +16,15 @@
   },
   "summary": {
     "releaseDebtItems": 150,
-    "addressedThisProgramme": 42,
+    "addressedThisProgramme": 46,
     "byStatus": {
-      "NATIVE_VERIFIED": 6,
+      "NATIVE_VERIFIED": 10,
       "UNIT_VERIFIED": 36,
       "E2E_VERIFIED": 0,
       "CLOSED": 0
     },
     "releaseBlockingAddressed": 34,
-    "conditionallyBlockingAddressed": 7,
+    "conditionallyBlockingAddressed": 11,
     "awaitingDispositionAddressed": 1,
     "note": "No defect is CLOSED. CLOSED needs the acceptance condition's runtime proofs and an independent release decision.",
     "trackedEngineeringDebtAddressed": 0
@@ -353,18 +353,18 @@
     },
     {
       "defectId": "DEF-0B9-ORG-ITEM-GET-ANY-SIGNED-IN-USER-READS-ANY-ORGANIZATION-RECORD-AS-SYSTEM",
-      "status": "UNIT_VERIFIED",
+      "status": "NATIVE_VERIFIED",
       "commits": [
-        "e0afd3bf9"
+        "e0afd3bf9",
+        "8636991de"
       ],
       "rootCause": "System-role read of any organization by id after a session-user check.",
       "repair": "Active membership, administrator above, or platform; otherwise 404. Non-administrators get the profile without settings, billing contact, tier or provenance.",
       "evidence": [
-        "app/api/__tests__/organizations-read-authority.pglite.test.ts"
+        "app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts (PG15 and PG16, system role, 5 tests each)"
       ],
-      "remaining": [
-        "Native run"
-      ]
+      "remaining": []
     },
     {
       "defectId": "DEF-0B9-ORG-ANALYTICS-ANY-SIGNED-IN-USER-READS-ANY-ORGANIZATION-NAME-TYPE-CHILD-COUNT-AND-AGGREGATES-BY-PATH-ID",
@@ -414,17 +414,18 @@
     },
     {
       "defectId": "DEF-0B9-ORG-HIERARCHY-LIST-ANY-SIGNED-IN-USER-ENUMERATES-EVERY-ORGANIZATION-AS-SYSTEM",
-      "status": "UNIT_VERIFIED",
+      "status": "NATIVE_VERIFIED",
       "commits": [
-        "e0afd3bf9"
+        "e0afd3bf9",
+        "8636991de"
       ],
       "rootCause": "Up to 500 organizations of every tenant listed to any signed-in user.",
       "repair": "Listing is bound to the organizations the caller may read; the legacy tree is bound the same way (DEF-0B10-OPL-07, legacy branch).",
       "evidence": [
-        "app/api/__tests__/organizations-read-authority.pglite.test.ts"
+        "app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts (PG15 and PG16, system role, 5 tests each)"
       ],
       "remaining": [
-        "Native run",
         "DEF-0B10-OPL-07 is challenged: its legacy branch is repaired, the V2 branch was already scoped"
       ]
     },
@@ -668,34 +669,106 @@
     },
     {
       "defectId": "DEF-0B10-OPL-01",
-      "status": "UNIT_VERIFIED",
+      "status": "NATIVE_VERIFIED",
       "commits": [
-        "66acc8b1e"
+        "66acc8b1e",
+        "8636991de"
       ],
       "rootCause": "GET /api/organizations returned every organization with contact, billing and settings to any signed-in user.",
       "repair": "The list is the caller's memberships, the organizations below one they administer, or everything for a platform administrator; non-administrators get the public profile; filters are validated; result bounded to 1000; grievance counts are administrative.",
       "evidence": [
-        "apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts"
+        "apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts (PG15 and PG16, system role, 5 tests each)"
       ],
       "remaining": [
-        "Native run",
         "Institutional decision on which fields another organization may see"
       ]
     },
     {
       "defectId": "DEF-0B10-OPL-07",
-      "status": "UNIT_VERIFIED",
+      "status": "NATIVE_VERIFIED",
       "commits": [
-        "66acc8b1e"
+        "66acc8b1e",
+        "8636991de"
       ],
       "rootCause": "The legacy tree branch read every organization for any signed-in user.",
       "repair": "Repaired in batch 7 (read authority); covered by a tree test in this batch. The canonical branch was already membership-scoped.",
       "evidence": [
-        "apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts"
+        "apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts (PG15 and PG16, system role, 5 tests each)"
+      ],
+      "remaining": [
+        "Audit of each selection (switch) is not part of this route"
+      ]
+    },
+    {
+      "defectId": "DEF-0B7-COGA-DERIVED-AGGREGATES-IGNORE-INTERVIEW-SENSITIVITY",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "8636991de"
+      ],
+      "rootCause": "The expertise map, cascade analysis, decision brief, continuity risk report and governance timeline aggregated interviews without testing sensitivity or consent.",
+      "repair": "Every derived engine reads only published, consented interviews at public_internal or restricted (an unrecorded level reads as restricted); the officer-floor governance timeline also shows privileged and never the administrator-only levels. These sets are engineering defaults awaiting the institutional decision on which offices read derived analytics.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/interview-derived-analytics.pglite.test.ts",
+        "apps/union-eyes/lib/knowledge-transfer/**/__tests__ (engine logic with the eligibility condition stubbed)"
       ],
       "remaining": [
         "Native run",
-        "Audit of each selection (switch) is not part of this route"
+        "Institutional decision on derived-analytics levels per office",
+        "No minimum cohort before a role is attached to a tag"
+      ]
+    },
+    {
+      "defectId": "DEF-0B7-COGA-FORECAST-PROJECTIONS-ARE-FIXED-RATES-AND-ALWAYS-IMPROVE",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "8636991de"
+      ],
+      "rootCause": "Twelve-month projections from three fixed monthly rates and a literal fallback history made every organization read as improving.",
+      "repair": "The engine reports measured current metrics only: no history, no projection, trend insufficient_data, confidence 0. The decision brief says no trend is reported.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/interview-derived-analytics.pglite.test.ts",
+        "apps/union-eyes/lib/knowledge-transfer/**/__tests__ (engine logic with the eligibility condition stubbed)"
+      ],
+      "remaining": [
+        "A measured history of the dependency map is needed before a trend can be reported"
+      ]
+    },
+    {
+      "defectId": "DEF-0B7-COGB-DERIVED-GRAPHS-IGNORE-INTERVIEW-SENSITIVITY",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "8636991de"
+      ],
+      "rootCause": "The topic graph and propagation map attached topics and roles of administrator-only interviews to nodes for any steward.",
+      "repair": "Same eligibility condition as the other derived engines, applied in the graph builder and the propagator.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/interview-derived-analytics.pglite.test.ts",
+        "apps/union-eyes/lib/knowledge-transfer/**/__tests__ (engine logic with the eligibility condition stubbed)"
+      ],
+      "remaining": [
+        "Native run",
+        "Minimum cohort before a role is attached to a tag",
+        "Inferred edges are not yet labelled as co-occurrence"
+      ]
+    },
+    {
+      "defectId": "DEF-0B7-COGB-SUCCESSION-SENDS-EVERY-PUBLISHED-INTERVIEW-TO-MODEL-IGNORING-SENSITIVITY",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "8636991de"
+      ],
+      "rootCause": "The succession analysis sent every published interview to the model regardless of level or consent, accepted any reply and substituted a canned summary on a parse failure.",
+      "repair": "Only eligible interviews reach the model; the call is audited (requested, completed, failed); the reply is validated against a schema; an unusable reply is a 500, not a canned summary; the report says whether it is model-generated.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/interview-derived-analytics.pglite.test.ts",
+        "apps/union-eyes/lib/knowledge-transfer/**/__tests__ (engine logic with the eligibility condition stubbed)"
+      ],
+      "remaining": [
+        "Native run",
+        "Caching or rate limiting of the model call",
+        "Readiness is still derived from interview counts, not handover records"
       ]
     }
   ],

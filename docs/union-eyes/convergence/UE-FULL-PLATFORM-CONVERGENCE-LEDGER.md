@@ -1,7 +1,7 @@
 # UE Full-Platform Convergence — Execution Summary
 
 Mission: `UE-FULL-PLATFORM-CONVERGENCE-TO-STAGING-2026`
-Branch: `agents/ue-cursor-final-closure` (PR #1014) · Baseline: `0b0e363aa` · Recorded at `66acc8b1e`.
+Branch: `agents/ue-cursor-final-closure` (PR #1014) · Baseline: `0b0e363aa` · Recorded at `8636991de`.
 Frozen Gate 0 evidence is untouched. Per-defect state lives in the machine-readable
 [remediation ledger](./remediation/ue-defect-remediation-ledger.json); this page is the narrative.
 
@@ -9,16 +9,16 @@ Frozen Gate 0 evidence is untouched. Per-defect state lives in the machine-reada
 
 ## Defect position
 
-42 of the 150 release-debt items are repaired and tested; every item classed `RELEASE_BLOCKING` now has an executable disposition. None is `CLOSED`.
+46 of the 150 release-debt items are repaired and tested; every item classed `RELEASE_BLOCKING` now has an executable disposition. None is `CLOSED`.
 
 | State | Count | Meaning |
 |---|---|---|
-| `NATIVE_VERIFIED` | 6 | Ran unmodified on native PostgreSQL 15 and 16, combined schema, runtime role, with an adversarial cross-tenant case |
+| `NATIVE_VERIFIED` | 10 | Ran unmodified on native PostgreSQL 15 and 16, combined schema, runtime role, with an adversarial cross-tenant case |
 | `UNIT_VERIFIED` | 36 | Positive and adversarial tests against mocks or an in-process SQL engine |
 | `E2E_VERIFIED` | 0 | Needs the running application over HTTP or a browser |
 | `CLOSED` | 0 | Needs every required proof and an independent release decision |
 
-Of the 42: 34 release-blocking (all 34 in the class), 7 conditionally blocking (including the two challenged items treated as release-blocking), 1 awaiting disposition. 0 items classed release-blocking remain open; 108 items in other classes remain (conditionally blocking, awaiting disposition, tracked debt), and release-blocking repair is not closure: no item is `CLOSED`.
+Of the 46: 34 release-blocking (all 34 in the class), 11 conditionally blocking (including the two challenged items treated as release-blocking), 1 awaiting disposition. 0 items classed release-blocking remain open; 108 items in other classes remain (conditionally blocking, awaiting disposition, tracked debt), and release-blocking repair is not closure: no item is `CLOSED`.
 
 ## Batches
 
@@ -32,6 +32,7 @@ Of the 42: 34 release-blocking (all 34 in the class), 7 conditionally blocking (
 | 6 | `6a4a6e820` | Native tenant-isolation proof (PG15 and PG16, 16 tests each) |
 | 7 | `e0afd3bf9` | Organization reads and roster: item, children, descendants, hierarchy, search, tree, analytics, roster GET and POST bounded to what the caller may read; active-membership-only guard |
 | 8 | `66acc8b1e` | The 12 remaining release-blocking defects: organizing campaigns, pension retirement eligibility, testimonials, health-and-safety incident read, anonymity and dashboard, exit-interview sensitivity, consent and publication, cognition constants (501), ICRA report gate, operational metrics; plus organization list and tree (OPL-01, OPL-07). Native proof for pension (PG15 and PG16, 17 tests each) |
+| 9 | `8636991de` | Interview sensitivity and consent applied to every derived engine (topic graph, propagation, resilience, simulation, continuity risk, succession, expertise map, governance timeline); forecast no longer fabricates a trend; succession model call audited and schema-validated; native proof for organization list, tree, item, hierarchy and search (PG15 and PG16, 5 tests each) |
 
 ## Native proof
 
@@ -68,7 +69,7 @@ under concurrent grants.
 - **Deployment secret.** `/api/version` now needs `UE_CANDIDATE_PROBE_TOKEN` to return image digests. The deploy workflow
   injects it; the secret must exist, or digest verification fails closed.
 - **Precedent sharing.** Cross-organization precedent reads need a reviewed multi-party RLS policy migration.
-- **Interview-derived engines.** Derived graphs, aggregates, succession and the fixed-rate forecast still ignore interview sensitivity; the correlation, precedent and procedural engines answer 501 until a real computation exists.
+- **Interview-derived engines.** Eligibility (published, consented, public_internal or restricted) now applies to every derived engine; the levels are an engineering default awaiting the institutional decision, there is no minimum cohort before a role is attached to a tag, and the forecast reports no trend until a measured history exists. The correlation, precedent and procedural engines answer 501 until a real computation exists.
 - **Knowledge base entitlement.** The knowledge-base read routes do not check the `union_knowledge_suite` entitlement.
 - **Institutional defaults.** Officer floors for organizing, pension and campaign data, the anonymous-report actor and the interview indexing levels are engineering defaults awaiting institutional confirmation.
 - **Anniversary awards.** A unique index would exclude concurrent runs at the database; it needs a reviewed migration.
