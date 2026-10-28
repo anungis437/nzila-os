@@ -1,7 +1,7 @@
 # UE Full-Platform Convergence — Execution Summary
 
 Mission: `UE-FULL-PLATFORM-CONVERGENCE-TO-STAGING-2026`
-Branch: `agents/ue-cursor-final-closure` (PR #1014) · Baseline: `0b0e363aa` · Recorded at `8636991de`.
+Branch: `agents/ue-cursor-final-closure` (PR #1014) · Baseline: `0b0e363aa` · Recorded at `1df40bbe1`.
 Frozen Gate 0 evidence is untouched. Per-defect state lives in the machine-readable
 [remediation ledger](./remediation/ue-defect-remediation-ledger.json); this page is the narrative.
 
@@ -13,8 +13,8 @@ Frozen Gate 0 evidence is untouched. Per-defect state lives in the machine-reada
 
 | State | Count | Meaning |
 |---|---|---|
-| `NATIVE_VERIFIED` | 10 | Ran unmodified on native PostgreSQL 15 and 16, combined schema, runtime role, with an adversarial cross-tenant case |
-| `UNIT_VERIFIED` | 36 | Positive and adversarial tests against mocks or an in-process SQL engine |
+| `NATIVE_VERIFIED` | 11 | Ran unmodified on native PostgreSQL 15 and 16, combined schema, runtime role, with an adversarial cross-tenant case |
+| `UNIT_VERIFIED` | 35 | Positive and adversarial tests against mocks or an in-process SQL engine |
 | `E2E_VERIFIED` | 0 | Needs the running application over HTTP or a browser |
 | `CLOSED` | 0 | Needs every required proof and an independent release decision |
 
@@ -33,6 +33,7 @@ Of the 46: 34 release-blocking (all 34 in the class), 11 conditionally blocking 
 | 7 | `e0afd3bf9` | Organization reads and roster: item, children, descendants, hierarchy, search, tree, analytics, roster GET and POST bounded to what the caller may read; active-membership-only guard |
 | 8 | `66acc8b1e` | The 12 remaining release-blocking defects: organizing campaigns, pension retirement eligibility, testimonials, health-and-safety incident read, anonymity and dashboard, exit-interview sensitivity, consent and publication, cognition constants (501), ICRA report gate, operational metrics; plus organization list and tree (OPL-01, OPL-07). Native proof for pension (PG15 and PG16, 17 tests each) |
 | 9 | `8636991de` | Interview sensitivity and consent applied to every derived engine (topic graph, propagation, resilience, simulation, continuity risk, succession, expertise map, governance timeline); forecast no longer fabricates a trend; succession model call audited and schema-validated; native proof for organization list, tree, item, hierarchy and search (PG15 and PG16, 5 tests each) |
+| 10 | `1df40bbe1` | Anniversary job repaired (it selected a column the table does not have) and made concurrency-safe, native proof; precedent sharing policy (cache 0030: explicit grants and public) with native proof; dues settlement concurrency native proof; retired v2 callers repointed or made visible; Gate 0 historical/current separation; native sweep (PG16) of every combined-schema suite |
 
 ## Native proof
 
@@ -68,16 +69,21 @@ under concurrent grants.
 
 - **Deployment secret.** `/api/version` now needs `UE_CANDIDATE_PROBE_TOKEN` to return image digests. The deploy workflow
   injects it; the secret must exist, or digest verification fails closed.
-- **Precedent sharing.** Cross-organization precedent reads need a reviewed multi-party RLS policy migration.
+- **Precedent sharing.** Explicit grants and public precedents are readable across organizations through cache migration 0030 (native-proven, UNQUALIFIED, not applied to a live database). Federation and congress levels remain owner-only at the database until their own design exists.
 - **Interview-derived engines.** Eligibility (published, consented, public_internal or restricted) now applies to every derived engine; the levels are an engineering default awaiting the institutional decision, there is no minimum cohort before a role is attached to a tag, and the forecast reports no trend until a measured history exists. The correlation, precedent and procedural engines answer 501 until a real computation exists.
 - **Knowledge base entitlement.** The knowledge-base read routes do not check the `union_knowledge_suite` entitlement.
 - **Institutional defaults.** Officer floors for organizing, pension and campaign data, the anonymous-report actor and the interview indexing levels are engineering defaults awaiting institutional confirmation.
-- **Anniversary awards.** A unique index would exclude concurrent runs at the database; it needs a reviewed migration.
-- **Removed v2 endpoints.** About 30 frontend call sites call `/api/v2/*` routes that no longer exist (reports, analytics,
-  CLC remittances, federation, communications). They fail visibly now; each capability must be implemented or retired.
+- **Anniversary awards.** Overlapping runs are serialized by an advisory lock (native-proven); a unique index would add a second guard and needs a reviewed migration.
+- **Removed v2 endpoints.** Twelve capabilities with a root route were repointed. The other call sites (reports, CLC analytics,
+  remittance approval, communications, aged receivables, scheduled posts) stay retired and are now visible through a bilingual notice and
+  two page alerts; each is still required product functionality unless the institution retires it. See the ledger's `functionalGaps.removedV2CallSites`.
 - **Arrears and health-and-welfare.** Generic collections over the remittance ledger now refuse; the capabilities are not implemented.
 - **Institutional decisions not issued (default deny):** export audience, officer floors for steward directory and
   signature sending, report-source readers.
+
+## Gate 0 historical tests
+
+Separated from current-source tests: see [GATE0-TEST-TREATMENT.md](./GATE0-TEST-TREATMENT.md). A recorded green historical run is outstanding.
 
 ## Not proven
 

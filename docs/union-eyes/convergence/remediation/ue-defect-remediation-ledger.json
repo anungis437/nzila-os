@@ -4,7 +4,7 @@
   "mission": "UE-FULL-PLATFORM-CONVERGENCE-TO-STAGING-2026",
   "branch": "agents/ue-cursor-final-closure",
   "pullRequest": 1014,
-  "recordedAtCommit": "8636991de",
+  "recordedAtCommit": "1df40bbe1",
   "baseline": "0b0e363aaf5c8b5cc546e6e136af44d78e4fca1a",
   "traceability": "Every defectId is an item of docs/union-eyes/convergence/register/ue-release-debt-index-0c3.json (150 items) and, through it, of the frozen 777-defect register. This ledger adds state; it never edits frozen Gate 0 evidence and counts each defect once.",
   "statusScale": {
@@ -18,8 +18,8 @@
     "releaseDebtItems": 150,
     "addressedThisProgramme": 46,
     "byStatus": {
-      "NATIVE_VERIFIED": 10,
-      "UNIT_VERIFIED": 36,
+      "NATIVE_VERIFIED": 11,
+      "UNIT_VERIFIED": 35,
       "E2E_VERIFIED": 0,
       "CLOSED": 0
     },
@@ -274,33 +274,37 @@
       "status": "NATIVE_VERIFIED",
       "commits": [
         "af75d9e88",
-        "6a4a6e820"
+        "6a4a6e820",
+        "1df40bbe1"
       ],
       "rootCause": "Every call inserted a new full-balance payment and intent.",
       "repair": "Per-member advisory lock, one open payment, superseded payment and intent cancelled; settlement flags amounts paid beyond the balance.",
       "evidence": [
         "lib/dues/__tests__/dues-initiation-single-open.pglite.test.ts (4 of 6 fail on the previous service)",
-        "db/__tests__/tenant-isolation-remediation.postgres.test.ts (ten simultaneous initiations on separate connections create one payment)"
+        "db/__tests__/tenant-isolation-remediation.postgres.test.ts (ten simultaneous initiations on separate connections create one payment)",
+        "apps/union-eyes/db/__tests__/tenant-isolation-remediation.postgres.test.ts: settlement under real concurrency (PG15 and PG16): ten simultaneous deliveries with distinct event ids credit once; tampered amount, member, organization or provider reference never credit; a late or replayed event changes nothing; a provider failure after settlement is ignored"
       ],
       "remaining": [
-        "Settlement overpayment handling is verified in-process only",
-        "Native proof of the webhook settlement path"
+        "Webhook route over HTTP with a signed payload (E2E)",
+        "Refund and dispute events are not covered by this suite"
       ]
     },
     {
       "defectId": "DEF-0B11-PRP-REWARDS-CRON-ANNIVERSARY-AWARDS-REPEAT-ON-EVERY-CALL-ON-AN-ANNIVERSARY-DAY",
-      "status": "UNIT_VERIFIED",
+      "status": "NATIVE_VERIFIED",
       "commits": [
-        "af75d9e88"
+        "af75d9e88",
+        "1df40bbe1"
       ],
       "rootCause": "No check for an award already created today.",
-      "repair": "The selection excludes members who already have today's award of the type, in any state, in the same organization.",
+      "repair": "The selection excludes members who already have today's award of the type, in any state, in the same organization. The job also ran against a column organization_members does not have (user_name), so on the real schema it failed on every run and awarded nothing; the query now reads name, only active and non-deleted members. A transaction-scoped advisory lock keyed on organization and award type serializes overlapping runs, and awards are written through that transaction (the services accept an executor).",
       "evidence": [
-        "lib/services/rewards/__tests__/anniversary-idempotency.pglite.test.ts"
+        "lib/services/rewards/__tests__/anniversary-idempotency.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/rewards-anniversary-concurrency.postgres.test.ts (PG15 and PG16: six overlapping runs award three active members exactly once; with the lock removed the same test records 18 awards)"
       ],
       "remaining": [
-        "Concurrent runs are not excluded by the database: a unique index needs a reviewed migration",
-        "The job's date comes from the application clock while the query uses the database date"
+        "A unique index would add a second, schema-level guard; it needs a reviewed migration",
+        "E2E through the scheduler"
       ]
     },
     {
@@ -796,8 +800,55 @@
     }
   ],
   "functionalGaps": {
-    "removedV2CallSites": "Frontend calls to /api/v2/* with no canonical route: admin/reports generate and export, analytics (overview, benchmarks, engagement, scheduled-reports, clc/*), clc compliance metrics, remittance approve and reject, clc sync, communications analytics and push, federation remittances, financial reports, social-media hashtag suggestions and scheduled posts. These capabilities are required product functionality; they must be implemented or explicitly retired. They no longer return a fabricated success.",
-    "arrearsAndHealthWelfare": "app/api/arrears and app/api/healthwelfare/plans were generic collections over per_capita_remittances; the capability is not implemented and the routes now refuse."
+    "removedV2CallSites": {
+      "summary": "Every frontend call to /api/v2/* now has a recorded disposition. Callers whose capability exists at the root API were repointed; the rest are retired and visible: the v2 catch-all answers 410 and the dashboard shows a bilingual notice naming the retired path (RetiredCapabilityNotice, mounted in the dashboard layout); two server-rendered pages that used to show invented zeros now show an alert instead.",
+      "repointedToRootApi": [
+        "analytics/clause-stats",
+        "analytics/org-activity",
+        "analytics/precedent-stats",
+        "clc/remittances (list)",
+        "organization/members",
+        "stewards",
+        "organizing/campaigns (two consoles)",
+        "social-media/accounts",
+        "social-media/analytics",
+        "social-media/campaigns",
+        "social-media/feed",
+        "social-media/posts"
+      ],
+      "retiredAndVisible": [
+        "admin/reports/generate",
+        "admin/reports/export",
+        "analytics/overview",
+        "analytics/benchmarks",
+        "analytics/engagement",
+        "analytics/scheduled-reports",
+        "analytics/clc/sector-signals",
+        "analytics/clc/affiliate-trends",
+        "analytics/clc/knowledge-index",
+        "analytics/clc/governance",
+        "analytics/clc/decision-intelligence",
+        "analytics/clc/executive-brief",
+        "clc/compliance/metrics (page shows an alert, not zeros)",
+        "clc/remittances/{id}/approve",
+        "clc/remittances/{id}/reject",
+        "clc/sync",
+        "communications/analytics",
+        "communications/push/devices",
+        "communications/push/history",
+        "federation/remittances (page shows an alert, not zeros)",
+        "financial/reports/aged-receivables",
+        "social-media/hashtag-suggestions",
+        "social-media/scheduled-posts"
+      ],
+      "needsDecision": [
+        "admin/users/role: the canonical route is /api/admin/users/{userId}; the role-select component sends a different body and is not repointed blindly"
+      ],
+      "notVerified": "The repointed calls were matched on route existence and GET handlers, not exercised in a browser. Each retired capability is still required product functionality unless the institution retires it: this is visibility, not completion."
+    },
+    "arrearsAndHealthWelfare": "app/api/arrears and app/api/healthwelfare/plans were generic collections over per_capita_remittances; the capability is not implemented and the routes now refuse.",
+    "precedentFederationSharing": "RESOLVED for explicit grants and public precedents: cache migration 0030 adds one read-only policy for the runtime role. Proven on native PG15 and PG16 (projection without the owner's document location, grant list and author; revocation effective at once; a third organization and un-granted or federation-level precedents read as not found; the grantee's UPDATE, DELETE and INSERT touch nothing). NOT resolved: federation and congress levels stay owner-only at the database until their own reviewed design (hierarchy and congress-membership predicates) exists. The migration is registered as UNQUALIFIED and has not been applied to any live database.",
+    "gate0HistoricalTests": "Historical Gate 0 evidence tests are separated from current-source regression tests (docs/union-eyes/convergence/GATE0-TEST-TREATMENT.md; tooling/scripts/run-ue-gate0-historical.mjs). A recorded green run of the historical suite at its pinned commit is still outstanding."
   },
   "frozenGate0Tooling": "tooling/scripts/lib/ue-gate0b*-classification.test.mjs quote pre-repair source text and fail once that source is repaired (for example crud-governance.ts, the docs routes). They are not CI gates and are not edited: the frozen records describe the pre-repair state.",
   "verdicts": {
