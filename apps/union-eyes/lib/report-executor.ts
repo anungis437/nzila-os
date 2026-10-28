@@ -211,6 +211,9 @@ function isKnownColumnReference(ref: string): boolean {
   return false;
 }
 
+/** Upper bound on rows one ad-hoc report returns, whatever limit the caller names. */
+const MAX_REPORT_ROWS = 10000;
+
 export class ReportExecutor {
   private organizationId: string;
 
@@ -321,7 +324,13 @@ return {
     const dataSource = DATA_SOURCES.find(ds => ds.id === config.dataSourceId)!;
     const baseTable = dataSource.table;
 
-    // Build SELECT clause
+    // A selected field may be qualified only with the base table or a table this query joins.
+    const queryTables = new Set<string>([baseTable, ...(config.joins ?? []).map((j) => j.table)]);
+    for (const field of config.fields) {
+      if (field.table && !queryTables.has(field.table)) {
+        throw new Error(`Invalid field table: ${field.table}`);
+      }
+    }
     const selectFields = this.buildSelectClause(config.fields, dataSource, config.groupBy);
 
     // Build FROM clause
@@ -329,7 +338,7 @@ return {
 
     // Build JOIN clauses
     if (config.joins && config.joins.length > 0) {
-      fromClause = this.buildJoinClause(fromClause, config.joins);
+      fromClause = this.buildJoinClause(fromClause, config.joins, dataSource);
     }
 
     // Build WHERE clause (filters)
@@ -364,7 +373,7 @@ return {
     }
 
     // Build LIMIT/OFFSET clause
-    const limit = config.limit || 1000; // Default limit
+    const limit = Math.min(Math.max(1, Math.trunc(Number(config.limit)) || 1000), MAX_REPORT_ROWS); // Default 1000
     const offset = config.offset || 0;
 
     // Assemble complete query
@@ -469,11 +478,14 @@ return {
   /**
    * Build JOIN clause
    */
-  private buildJoinClause(fromClause: SQL, joins: JoinConfig[]): SQL {
+  private buildJoinClause(fromClause: SQL, joins: JoinConfig[], baseSource: DataSourceMetadata): SQL {
     const ALLOWED_JOIN_TYPES = ['INNER', 'LEFT', 'RIGHT', 'FULL'];
     const ALLOWED_OPERATORS = ['=', '!=', '>', '<', '>=', '<='];
-    
+
     let result = fromClause;
+    // A table may be joined only from the base source or a source already in the query, along a declared relationship.
+    const reachable = new Set<string>(baseSource.joinable ?? []);
+    const inQuery = new Set<string>([baseSource.table]);
 
     for (const join of joins) {
       const joinType = join.type.toUpperCase();
@@ -490,9 +502,12 @@ return {
       }
 
       // SECURITY FIX: Validate table exists in DATA_SOURCES
-      const tableExists = DATA_SOURCES.some(ds => ds.table === join.table);
-      if (!tableExists) {
+      const joinSource = DATA_SOURCES.find((ds) => ds.table === join.table);
+      if (!joinSource) {
         throw new Error(`Invalid join table: ${join.table}`);
+      }
+      if (!reachable.has(join.table) || inQuery.has(join.table)) {
+        throw new Error(`Invalid join table: ${join.table} is not joinable from ${baseSource.table}`);
       }
 
       // SECURITY (Round 59B): hard-allowlist the join's on-fields against
@@ -504,7 +519,12 @@ return {
         throw new Error(`Invalid join field: ${join.on.rightField}`);
       }
 
-      result = sql`${result} ${sql.raw(joinType)} JOIN ${safeTableName(join.table)} ON ${safeColumnName(join.on.leftField)} ${sql.raw(operator)} ${safeColumnName(join.on.rightField)}`;
+      // SECURITY: the organization predicate on the base table does not reach a joined table, and a caller-chosen
+      // `!=`/`<` join would pair every base row with rows of other organizations. Every joined table is bound to the
+      // caller's organization inside its own ON clause.
+      result = sql`${result} ${sql.raw(joinType)} JOIN ${safeTableName(join.table)} ON ${safeColumnName(join.on.leftField)} ${sql.raw(operator)} ${safeColumnName(join.on.rightField)} AND ${safeTableName(join.table)}.organization_id = ${this.organizationId}`;
+      inQuery.add(join.table);
+      for (const next of joinSource.joinable ?? []) reachable.add(next);
     }
 
     return result;
