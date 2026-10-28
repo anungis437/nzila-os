@@ -13,7 +13,7 @@
  * It NEVER evaluates individual worker performance, value, or productivity.
  */
 
-import { and, eq } from 'drizzle-orm';
+import { derivedAnalyticsCondition } from '../governance/interview-access';
 import { db } from '@/db/db';
 import { exitInterviews } from '@/db/schema';
 import {
@@ -168,12 +168,7 @@ export async function detectContinuityRisks(orgId: string): Promise<OrgContinuit
       topics: exitInterviews.topics,
     })
     .from(exitInterviews)
-    .where(
-      and(
-        eq(exitInterviews.organizationId, orgId),
-        eq(exitInterviews.status, 'published'),
-      ),
-    );
+    .where(derivedAnalyticsCondition(orgId));
 
   const singleSourceTopics = detectSingleSourceTopics(publishedInterviews);
   const isolatedExpertise = detectIsolatedExpertise(publishedInterviews);

@@ -40,6 +40,7 @@ vi.mock('drizzle-orm', async (importOriginal) => {
     eq: vi.fn(() => 'eq'),
     gte: vi.fn(() => 'gte'),
     desc: vi.fn(() => 'desc'),
+    inArray: vi.fn(() => 'inArray'),
   };
 });
 
@@ -69,6 +70,8 @@ describe('exit-interviews/governance-timeline route', () => {
           })),
         })),
       }))
+      // The sub-select that limits events to interviews an officer may see.
+      .mockImplementationOnce(() => ({ from: vi.fn(() => ({ where: vi.fn(() => 'visible-interviews') })) }))
       .mockImplementationOnce(() => ({
         from: vi.fn(() => ({
           where: vi.fn(() => ({

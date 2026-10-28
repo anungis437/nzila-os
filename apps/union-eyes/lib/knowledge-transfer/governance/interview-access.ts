@@ -58,6 +58,34 @@ export function interviewListCondition(reader: InterviewReader): SQL {
   return sql`((${owner}) OR (${levelOk} AND ${visibleState}))`;
 }
 
+/**
+ * Levels whose interviews may feed derived, organization-wide analytics (topic graph, propagation, resilience, forecast,
+ * simulation, continuity risk, succession). The engines serve callers from the steward floor up and attach topics, tags and
+ * roles to what they aggregate, so only levels every such caller may read are used. Interviews above them are left out of
+ * every derivative. This is an engineering default until the institution decides which offices read derived analytics for
+ * each level.
+ */
+export const DERIVED_ANALYTICS_LEVELS = ['public_internal', 'restricted'] as const;
+
+/** Published interviews of the organization with the employee's consent and a level allowed for derived analytics. */
+export function derivedAnalyticsCondition(organizationId: string): SQL {
+  const levels = sql.join(DERIVED_ANALYTICS_LEVELS.map((l) => sql`${l}`), sql`, `);
+  return sql`(${exitInterviews.organizationId} = ${organizationId}::uuid
+    AND ${exitInterviews.status}::text = 'published'
+    AND ${exitInterviews.consentGranted} = true
+    AND coalesce(${exitInterviews.sensitivityLevel}::text, ${UNRECORDED_LEVEL}) IN (${levels}))`;
+}
+
+/** Levels an officer-floor governance view may show: those below the administrator-only levels. */
+export const OFFICER_GOVERNANCE_LEVELS = ['public_internal', 'restricted', 'privileged'] as const;
+
+/** An interview of the organization whose level an officer-floor governance view may show. */
+export function officerGovernanceCondition(organizationId: string): SQL {
+  const levels = sql.join(OFFICER_GOVERNANCE_LEVELS.map((l) => sql`${l}`), sql`, `);
+  return sql`(${exitInterviews.organizationId} = ${organizationId}::uuid
+    AND coalesce(${exitInterviews.sensitivityLevel}::text, ${UNRECORDED_LEVEL}) IN (${levels}))`;
+}
+
 /** What a reader below steward receives of an interview: the content they are entitled to, not the workflow around it. */
 const PUBLIC_FIELDS = [
   'id', 'title', 'summary', 'topics', 'keyLessons', 'bestPractices', 'bargainingAdvice', 'mediationAdvice',

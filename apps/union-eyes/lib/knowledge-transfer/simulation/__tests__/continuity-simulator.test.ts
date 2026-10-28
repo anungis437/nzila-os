@@ -7,6 +7,8 @@
  * Pure helpers from simulation-models are kept REAL.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+// The SQL of the eligibility condition is proven against real SQL in app/api/__tests__/interview-derived-analytics.pglite.test.ts.
+vi.mock('@/lib/knowledge-transfer/governance/interview-access', () => ({ derivedAnalyticsCondition: () => 'derived-analytics-condition' }))
 import type { SimulationScenario, SimulationType } from '../simulation-models';
 
 const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), interviews: [] as unknown[] }));

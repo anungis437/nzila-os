@@ -6,7 +6,7 @@
 
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
 import type { PropagationMap } from '../propagation/propagation-models';
-import { and, eq } from 'drizzle-orm';
+import { derivedAnalyticsCondition } from '../governance/interview-access';
 import { db } from '@/db/db';
 import { exitInterviews } from '@/db/schema';
 
@@ -41,7 +41,7 @@ async function loadPublishedInterviews(orgId: string) {
   return db
     .select()
     .from(exitInterviews)
-    .where(and(eq(exitInterviews.organizationId, orgId), eq(exitInterviews.status, 'published')));
+    .where(derivedAnalyticsCondition(orgId));
 }
 
 export async function calculateResilienceIndex(orgId: string): Promise<OrganizationalResilienceIndex> {

@@ -6,6 +6,8 @@
  * levels, trend heuristic, and recommendation filtering.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+// The SQL of the eligibility condition is proven against real SQL in app/api/__tests__/interview-derived-analytics.pglite.test.ts.
+vi.mock('@/lib/knowledge-transfer/governance/interview-access', () => ({ derivedAnalyticsCondition: () => 'derived-analytics-condition' }))
 
 const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), interviews: [] as unknown[] }));
 

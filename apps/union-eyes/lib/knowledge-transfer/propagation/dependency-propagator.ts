@@ -10,7 +10,7 @@
  * INV-01: All AI calls via @nzila/ai-sdk getAiClient()
  */
 
-import { and, eq } from 'drizzle-orm';
+import { derivedAnalyticsCondition } from '../governance/interview-access';
 import { db } from '@/db/db';
 import { exitInterviews } from '@/db/schema';
 import { buildTopicGraph } from '../topic-graph/topic-graph-builder';
@@ -51,7 +51,7 @@ export async function buildDependencyPropagationMap(orgId: string): Promise<Prop
       summary: exitInterviews.summary,
     })
     .from(exitInterviews)
-    .where(and(eq(exitInterviews.organizationId, orgId), eq(exitInterviews.status, 'published')));
+    .where(derivedAnalyticsCondition(orgId));
 
   if (interviews.length === 0) {
     return {

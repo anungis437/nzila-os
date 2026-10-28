@@ -27,8 +27,8 @@ export const GET = withApi(
         'Organizational succession readiness analysis based on published exit interviews.',
     },
   },
-  async ({ organizationId }) => {
-    const report = await analyzeSuccessionFragility(organizationId!);
+  async ({ organizationId, userId }) => {
+    const report = await analyzeSuccessionFragility(organizationId!, userId ?? undefined);
     return { data: report };
   },
 );

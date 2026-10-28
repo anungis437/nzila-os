@@ -15,9 +15,10 @@
  */
 
 import { withApi } from '@/lib/api/framework';
-import { and, eq, gte, desc } from 'drizzle-orm';
+import { and, eq, gte, desc, inArray } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { exitInterviews, exitInterviewEvents } from '@/db/schema';
+import { officerGovernanceCondition } from '@/lib/knowledge-transfer/governance/interview-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,6 +56,11 @@ export const GET = withApi(
           and(
             eq(exitInterviewEvents.organizationId, orgId),
             gte(exitInterviewEvents.createdAt, since),
+            // Events of an interview above the officer floor (administrator-only levels) are not part of this view.
+            inArray(
+              exitInterviewEvents.interviewId,
+              db.select({ id: exitInterviews.id }).from(exitInterviews).where(officerGovernanceCondition(orgId)),
+            ),
           ),
         )
         .orderBy(desc(exitInterviewEvents.createdAt))
@@ -76,7 +82,7 @@ export const GET = withApi(
         .from(exitInterviews)
         .where(
           and(
-            eq(exitInterviews.organizationId, orgId),
+            officerGovernanceCondition(orgId),
             gte(exitInterviews.createdAt, since),
           ),
         )

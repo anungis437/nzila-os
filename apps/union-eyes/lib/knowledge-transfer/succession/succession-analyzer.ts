@@ -14,8 +14,12 @@
  * INV-01: All AI calls via getAiClient()
  */
 
-import { and, eq } from 'drizzle-orm';
+import { derivedAnalyticsCondition } from '../governance/interview-access';
+import { z } from 'zod';
 import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { ApiError } from '@/lib/api/errors';
 import { exitInterviews } from '@/db/schema';
 import {
   buildOrgAiTrace,
@@ -61,6 +65,8 @@ export interface SuccessionFragilityReport {
   /** Governance changes that would reduce succession fragility */
   governanceMitigations: string[];
   executiveSummary: string;
+  /** True when the narrative fields were written by a model from consented, eligible interviews; false when there was nothing to analyse. */
+  modelGenerated: boolean;
 }
 
 const UNION_ROLES = ['member', 'steward', 'chief_steward', 'officer', 'admin'] as const;
@@ -87,6 +93,15 @@ Return a JSON object:
 
 Return ONLY valid JSON.`;
 
+const stringList = z.array(z.string().max(500)).max(20);
+const ReplySchema = z.object({
+  criticalOperationalGaps: stringList,
+  documentationPriorities: stringList,
+  continuityRecommendations: stringList,
+  governanceMitigations: stringList,
+  executiveSummary: z.string().min(1).max(4000),
+});
+
 function scoreReadiness(interviewCount: number, avgRisk: number): SuccessorReadiness {
   if (interviewCount === 0) return 'none';
   if (interviewCount === 1 && avgRisk >= 70) return 'minimal';
@@ -94,7 +109,7 @@ function scoreReadiness(interviewCount: number, avgRisk: number): SuccessorReadi
   return 'partial';
 }
 
-export async function analyzeSuccessionFragility(orgId: string): Promise<SuccessionFragilityReport> {
+export async function analyzeSuccessionFragility(orgId: string, actorUserId?: string): Promise<SuccessionFragilityReport> {
   const published = await db
     .select({
       id: exitInterviews.id,
@@ -107,12 +122,7 @@ export async function analyzeSuccessionFragility(orgId: string): Promise<Success
       continuityRiskFlags: exitInterviews.continuityRiskFlags,
     })
     .from(exitInterviews)
-    .where(
-      and(
-        eq(exitInterviews.organizationId, orgId),
-        eq(exitInterviews.status, 'published'),
-      ),
-    );
+    .where(derivedAnalyticsCondition(orgId));
 
   // Build per-role statistics
   const roleMap = new Map<
@@ -181,6 +191,8 @@ export async function analyzeSuccessionFragility(orgId: string): Promise<Success
   let governanceMitigations: string[] = [];
   let executiveSummary = '';
 
+  let modelGenerated = false;
+
   if (published.length > 0) {
     const ai = getAiClient();
     const inputText = published
@@ -192,34 +204,47 @@ export async function analyzeSuccessionFragility(orgId: string): Promise<Success
       )
       .join('\n---\n');
 
-    const result = await ai.generate({
-      orgId: UE_SYSTEM_ORG_ID,
-      trace: buildOrgAiTrace(orgId),
-      appKey: UE_APP_KEY,
-      profileKey: UE_PROFILES.CONTINUITY_RISK,
-      input: [
-        { role: 'system', content: SUCCESSION_PROMPT },
-        { role: 'user', content: inputText },
-      ],
-      dataClass: 'internal',
-    });
+    const audit = (action: string, details: Record<string, unknown>) =>
+      actorUserId
+        ? withRLSContext({ organizationId: orgId }, (tx) =>
+            persistAtomicAudit(tx, { organizationId: orgId, userId: actorUserId, action, resourceType: 'exit_interviews', resourceId: orgId, details }),
+          )
+        : Promise.resolve();
+    await audit('exit_interview.succession_analysis.requested', { interviews: published.length, dataClass: 'internal' });
 
+    let result;
     try {
-      const parsed = JSON.parse(result.content) as {
-        criticalOperationalGaps: string[];
-        documentationPriorities: string[];
-        continuityRecommendations: string[];
-        governanceMitigations: string[];
-        executiveSummary: string;
-      };
-      criticalOperationalGaps = parsed.criticalOperationalGaps ?? [];
-      documentationPriorities = parsed.documentationPriorities ?? [];
-      continuityRecommendations = parsed.continuityRecommendations ?? [];
-      governanceMitigations = parsed.governanceMitigations ?? [];
-      executiveSummary = parsed.executiveSummary ?? '';
-    } catch {
-      executiveSummary = `${published.length} exit interviews analyzed. Transition readiness score: ${transitionReadinessScore}/100. Manual review recommended.`;
+      result = await ai.generate({
+        orgId: UE_SYSTEM_ORG_ID,
+        trace: buildOrgAiTrace(orgId),
+        appKey: UE_APP_KEY,
+        profileKey: UE_PROFILES.CONTINUITY_RISK,
+        input: [
+          { role: 'system', content: SUCCESSION_PROMPT },
+          { role: 'user', content: inputText },
+        ],
+        dataClass: 'internal',
+      });
+    } catch (error) {
+      await audit('exit_interview.succession_analysis.failed', { reason: error instanceof Error ? error.name : 'unknown' }).catch(() => undefined);
+      throw error;
     }
+
+    let parsed: z.infer<typeof ReplySchema>;
+    try {
+      parsed = ReplySchema.parse(JSON.parse(result.content));
+    } catch {
+      // An unusable reply is a failure, not a canned summary presented as analysis.
+      await audit('exit_interview.succession_analysis.failed', { reason: 'unusable_model_reply' }).catch(() => undefined);
+      throw ApiError.internal('The succession analysis could not be produced');
+    }
+    criticalOperationalGaps = parsed.criticalOperationalGaps;
+    documentationPriorities = parsed.documentationPriorities;
+    continuityRecommendations = parsed.continuityRecommendations;
+    governanceMitigations = parsed.governanceMitigations;
+    executiveSummary = parsed.executiveSummary;
+    modelGenerated = true;
+    await audit('exit_interview.succession_analysis.completed', { interviews: published.length });
   } else {
     executiveSummary =
       'No published exit interviews to analyze. Capturing organizational knowledge through exit interviews is the critical first step toward organizational continuity.';
@@ -235,5 +260,6 @@ export async function analyzeSuccessionFragility(orgId: string): Promise<Success
     continuityRecommendations,
     governanceMitigations,
     executiveSummary,
+    modelGenerated,
   };
 }

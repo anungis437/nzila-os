@@ -13,7 +13,7 @@
  * ORGANIZATIONALLY FRAMED — not about individuals, about organizational resilience.
  */
 
-import { and, eq } from 'drizzle-orm';
+import { derivedAnalyticsCondition } from '../governance/interview-access';
 import { db } from '@/db/db';
 import { exitInterviews } from '@/db/schema';
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
@@ -38,7 +38,7 @@ async function loadPublishedInterviews(orgId: string) {
   return db
     .select()
     .from(exitInterviews)
-    .where(and(eq(exitInterviews.organizationId, orgId), eq(exitInterviews.status, 'published')));
+    .where(derivedAnalyticsCondition(orgId));
 }
 
 /**
