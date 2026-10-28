@@ -979,8 +979,8 @@
       },
       {
         "id": "R-24",
-        "status": "OPEN",
-        "title": "/api/dashboard/stats returns tenant-wide counts (active and pending claims, high-priority claims, member count) to any member, and answers zeros on a query failure"
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "/api/dashboard/stats returned tenant-wide case counts to any member and returned zeros when its query failed. It now counts only the cases inside the caller's kernel read scope (the same scope as GET /api/cases), withholds the organization member count from an ordinary member as null, ignores a client-supplied organization, and returns an error instead of zeros when the query fails. Verified by spec 07 (9 tests) and 5 route unit tests. The vulnerable behaviour was not re-run on the old build; the administrator and executive zero-total checks would have failed against a tenant-wide aggregate"
       },
       {
         "id": "R-25",
@@ -1060,16 +1060,16 @@
     ],
     "summary": {
       "total": 39,
-      "fixedRuntimeVerified": 22,
-      "open": 17
+      "fixedRuntimeVerified": 23,
+      "open": 16
     }
   },
   "runtimeAcceptance": {
     "runtime": "production build (next build + next start), native PostgreSQL 16 in a fresh Docker container, orchestrated by tooling/scripts/ue-runtime-up.mjs",
     "executed": {
-      "passed": 53,
+      "passed": 79,
       "failed": 0,
-      "note": "plain test command (post-restart checks run in restart-check): desktop, tablet and mobile, against a real Redis"
+      "note": "plain test command on the production build against a real Redis (post-restart checks run in restart-check); 104 skipped are API journeys that run once, at desktop. Includes specs 06 (platform and federation boundaries) and 07 (dashboard statistics scope)"
     },
     "restartPersistence": "passed (3/3 after a self-contained file-route-prepare-restart cycle: the filed case and audit proof, the triage assignments with a revoked then restored coordinator, and the prepared and reconciled remittance)",
     "stakeholdersWithRuntimeIdentity": [
