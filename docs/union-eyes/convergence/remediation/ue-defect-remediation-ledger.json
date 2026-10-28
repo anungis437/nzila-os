@@ -985,7 +985,7 @@
       {
         "id": "R-25",
         "status": "OPEN",
-        "title": "Grievance assignment (/api/grievances/[id]/assign) requires GUID principal ids while kernel principals are text, so an escalated grievance cannot be assigned to a text-id representative; the Representative handoff is proven as a case reassignment, not as a grievance-stage assignment"
+        "title": "PATCH /api/grievances/[id]/assign cannot assign an escalated grievance to a text-id representative. Root cause (traced, not yet fixed): the route validates stewardId as a GUID and uses the SAME value as a steward RECORD id (stewards.id, in assignSteward and steward_assignments, with a caseload counter) and as a user PRINCIPAL (assignPrimaryRepresentative, grievances.union_rep_id). Kernel principals are text, while grievances.union_rep_id is uuid; that column is referenced by 51 files (queries, pglite suites, the Django backend). The fix is a coordinated one: a text principal for the assignment input, a lookup from principal to steward record for the caseload bookkeeping (skipped when no record exists), and a migration of union_rep_id to text with its Django model and readers. It is deliberately not a partial change. Related to R-29"
       },
       {
         "id": "R-26",
