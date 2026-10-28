@@ -24,6 +24,7 @@ import {
   type OrchestrationResult,
 } from '@nzila/organizational-cognition-core';
 
+import { ApiError } from '@/lib/api/errors';
 import {
   analyzeSystemsDynamics,
   evaluateGovernanceCoherence,
@@ -41,10 +42,7 @@ import {
 
 import {
   orchestrateMultiDomainCognition,
-  analyzeProcedualContinuity,
-  analyzeInstitutionalPrecedent,
   analyzeOperationalTrust,
-  identifyInstitutionalCorrelations,
   type MultiDomainCognitionProfile,
   type ProceduralContinuityProfile,
   type InstitutionalPrecedentProfile,
@@ -79,6 +77,18 @@ function adaptLegacyEngine<TPayload>(input: {
       };
     },
   });
+}
+
+/**
+ * An engine whose analysis is not implemented. The previous implementations returned the same literal profile for every
+ * organization (and, for the correlation engine, fixed strengths and a fixed narrative) inside an explainability envelope,
+ * presenting constants as an analysis of the organization's own records. They now fail with 501, which the route returns
+ * and the orchestrator records as an engine failure, until a computation from stored data exists.
+ */
+function notImplementedCompute<T>(analysis: string): (orgId: string) => Promise<T> {
+  return async () => {
+    throw ApiError.notImplemented(`${analysis} is not implemented: it is not computed from the organization's records.`);
+  };
 }
 
 export const systemsDynamicsEngine = adaptLegacyEngine<SystemsDynamicsProfile>({
@@ -140,7 +150,7 @@ export const multiDomainCognitionEngine = adaptLegacyEngine<MultiDomainCognition
 export const proceduralContinuityEngine = adaptLegacyEngine<ProceduralContinuityProfile>({
   engineId: 'procedural-continuity',
   domain: 'procedural_intelligence',
-  compute: analyzeProcedualContinuity,
+  compute: notImplementedCompute<ProceduralContinuityProfile>('Procedural continuity analysis'),
   interpretationGuidance:
     'Procedural knowledge continuity. Identifies where institutional memory is at risk.',
 });
@@ -148,7 +158,7 @@ export const proceduralContinuityEngine = adaptLegacyEngine<ProceduralContinuity
 export const institutionalPrecedentEngine = adaptLegacyEngine<InstitutionalPrecedentProfile>({
   engineId: 'institutional-precedent',
   domain: 'precedent',
-  compute: analyzeInstitutionalPrecedent,
+  compute: notImplementedCompute<InstitutionalPrecedentProfile>('Institutional precedent analysis'),
   interpretationGuidance:
     'Pattern alignment with institutional precedent. Use for governance reasoning, never individual judgement.',
 });
@@ -164,7 +174,7 @@ export const operationalTrustEngine = adaptLegacyEngine<OperationalTrustProfile>
 export const crossDomainCorrelationEngine = adaptLegacyEngine<CrossDomainCorrelationProfile>({
   engineId: 'cross-domain-correlation',
   domain: 'systems_coherence',
-  compute: identifyInstitutionalCorrelations,
+  compute: notImplementedCompute<CrossDomainCorrelationProfile>('Cross-domain correlation analysis'),
   interpretationGuidance:
     'Cross-domain correlations among institutional signals. Highlights leverage points.',
 });

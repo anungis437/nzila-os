@@ -37,6 +37,8 @@ const PDF_ELIGIBLE_TIERS = new Set([
   'institutional_continuity_diagnostic',
 ]);
 
+const REPORTABLE_STATUSES = new Set(['submitted', 'completed']);
+
 interface RouteContext {
   params: Promise<{ assessmentId: string }>;
 }
@@ -83,8 +85,10 @@ export async function GET(request: Request, { params }: RouteContext) {
       );
     }
 
-    if (assessment.status !== 'completed') {
-      return NextResponse.json({ error: 'Assessment not yet completed' }, { status: 422 });
+    // The submit routes write submitted; nothing in the application writes completed, so gating on it refused every
+    // paid assessment. A submitted assessment is the finished one the report is built from.
+    if (!REPORTABLE_STATUSES.has(assessment.status)) {
+      return NextResponse.json({ error: 'Assessment not yet submitted' }, { status: 422 });
     }
 
     if (!PDF_ELIGIBLE_TIERS.has(assessment.reportTierId)) {

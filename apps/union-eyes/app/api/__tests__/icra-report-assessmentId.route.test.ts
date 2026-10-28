@@ -129,4 +129,26 @@ describe('icra/report/[assessmentId] route', () => {
     expect(response.status).toBe(200);
     expect(response.headers.get('content-type')).toBe('application/pdf');
   });
+
+  // DEF-0B8-ICRA-PAID-PDF-REPORT-GATE-REQUIRES-STATUS-COMPLETED-NO-WRITER: the submit routes write submitted, and nothing
+  // writes completed, so every paid assessment answered 422.
+  it('serves the paid PDF for an assessment the submit routes left as submitted', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push(
+      [{ id: 'a1', status: 'submitted', reportTierId: 'executive_continuity_brief', organizationContext: {}, capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }],
+      [{ profilePayload: { dimensions: [], maturityBand: 'band_1' } }],
+    );
+    const response = await GET(req(), { params: Promise.resolve({ assessmentId: ASSESSMENT_ID }) });
+    expect(response.status).toBe(200);
+  });
+
+  it.each(['draft', 'in_progress'])('still refuses an assessment that is %s, and the tier and capability checks still apply', async (status) => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push([{ id: 'a1', status, reportTierId: 'executive_continuity_brief', organizationContext: {}, capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+    expect((await GET(req(), { params: Promise.resolve({ assessmentId: ASSESSMENT_ID }) })).status).toBe(422);
+    m.selectQueue.push([{ id: 'a1', status: 'submitted', reportTierId: 'free_tier', organizationContext: {}, capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+    expect((await GET(req(), { params: Promise.resolve({ assessmentId: ASSESSMENT_ID }) })).status).toBe(403);
+    m.selectQueue.push([{ id: 'a1', status: 'submitted', reportTierId: 'executive_continuity_brief', organizationContext: {}, capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+    expect((await GET(req(false), { params: Promise.resolve({ assessmentId: ASSESSMENT_ID }) })).status).toBe(401);
+  });
 });

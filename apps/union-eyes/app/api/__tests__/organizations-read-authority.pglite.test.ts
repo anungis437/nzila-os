@@ -28,7 +28,7 @@ vi.mock('@/db/db', () => ({
 }));
 vi.mock('@/db/schema', async () => {
   const orgs = await vi.importActual<typeof import('@/db/schema-organizations')>('@/db/schema-organizations');
-  return { organizationMembers: orgs.organizationMembers };
+  return { organizationMembers: orgs.organizationMembers, organizations: orgs.organizations };
 });
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: async (fn: (tx: unknown) => Promise<unknown>) => fn(state.db),
@@ -37,6 +37,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: async (_tx: unknown, e: Record<string, unknown>) => void state.audit.push(e) }));
 vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: () => false }));
 vi.mock('@/lib/api-auth-guard', () => ({
+  auth: async () => ({ userId: state.userId }),
   ROLE_HIERARCHY: { member: 20, steward: 50, officer: 80, admin: 140 },
   isPlatformAdminUser: async (id: string) => state.platformAdmins.has(id),
   requireSystemAdmin: async () => { throw new Error('Forbidden'); },
@@ -178,6 +179,67 @@ describe('children, descendants, hierarchy, search, tree', () => {
     const hierarchy = await import('../organizations/hierarchy/route');
     state.userId = 'u-suspended-a';
     expect(await (await hierarchy.GET(get('/api/organizations/hierarchy'))).json()).toMatchObject({ data: [] });
+  });
+});
+
+describe('GET /api/organizations (list) and /api/organizations/tree', () => {
+  const listed = async (url = '/api/organizations') => {
+    const { GET } = await import('../organizations/route');
+    return GET(get(url));
+  };
+
+  it('lists nothing to a signed-in stranger or a suspended member, and refuses an anonymous caller', async () => {
+    for (const user of ['nobody', 'u-suspended-a']) {
+      state.userId = user;
+      expect(await (await listed()).json(), user).toMatchObject({ data: [] });
+    }
+    state.userId = '';
+    expect((await listed()).status).toBe(401);
+  });
+
+  it('lists only the caller\'s own organization to a member, never a sibling or the federation above', async () => {
+    state.userId = 'u-member-b';
+    expect(await names(await listed())).toEqual([LOCAL_B]);
+    state.userId = 'u-member-a';
+    expect(await names(await listed())).toEqual([LOCAL_A]);
+    expect(await names(await listed(`/api/organizations?parent=${FED}`))).toEqual([LOCAL_A]);
+  });
+
+  it('gives a member the public profile only, and the administrator everything for what they administer', async () => {
+    state.userId = 'u-member-a';
+    const [asMember] = (await (await listed('/api/organizations?include_stats=true')).json()).data;
+    for (const key of ['settings', 'billing_contact_id', 'subscription_tier', 'created_by', 'legacy_org_id', 'email', 'phone', 'address', 'charter_number', 'activeClaims']) {
+      expect(asMember, key).not.toHaveProperty(key);
+    }
+    expect(asMember).toMatchObject({ id: LOCAL_A, childCount: 0 });
+
+    state.userId = 'u-admin-fed';
+    const rows = (await (await listed('/api/organizations?include_stats=true')).json()).data as Array<Record<string, unknown>>;
+    expect(rows.map((r) => r.id).sort()).toEqual([FED, LOCAL_A, LOCAL_B].sort());
+    const local = rows.find((r) => r.id === LOCAL_A);
+    expect(local).toMatchObject({ billing_contact_id: '44444444-4444-4444-8444-444444444444', subscription_tier: 'pro', activeClaims: 1 });
+  });
+
+  it('shows the federation administrator the locals below, and a platform administrator everything', async () => {
+    state.userId = 'platform-1';
+    state.platformAdmins.add('platform-1');
+    expect(await names(await listed())).toEqual([FED, LOCAL_A, LOCAL_B].sort());
+  });
+
+  it('rejects a malformed parent or status filter before any read', async () => {
+    state.userId = 'u-admin-fed';
+    expect((await listed('/api/organizations?parent=not-a-uuid')).status).toBe(400);
+    expect((await listed("/api/organizations?status=active'%20OR%201=1")).status).toBe(400);
+  });
+
+  it('confines the tree to what the caller may read, in the legacy mode', async () => {
+    const { GET } = await import('../organizations/tree/route');
+    state.userId = 'u-member-b';
+    expect(await names(await GET(get('/api/organizations/tree')))).toEqual([LOCAL_B]);
+    state.userId = 'nobody';
+    expect(await (await GET(get('/api/organizations/tree'))).json()).toMatchObject({ data: [] });
+    state.userId = 'u-admin-fed';
+    expect(await names(await GET(get('/api/organizations/tree')))).toEqual([FED, LOCAL_A, LOCAL_B].sort());
   });
 });
 

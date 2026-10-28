@@ -2,11 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth, requireSystemAdmin } from '@/lib/api-auth-guard';
 import { db } from '@/db/db';
 import { organizations } from '@/db/schema';
-import { eq, and, sql, type SQL } from 'drizzle-orm';
+import { eq, and, sql, inArray, asc, type SQL } from 'drizzle-orm';
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import type { RLSTx } from '@/lib/db/with-rls-context';
 import { MAX_HIERARCHY_DEPTH } from '@/lib/utils/hierarchy-validation';
+import {
+  canAdministerOrganization,
+  readableOrganizationIds,
+  resolveOrganizationAccess,
+  UUID_PATTERN,
+} from '@/lib/organizations/read-authority';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +30,19 @@ const _ACTIVE_CLAIM_STATUSES = [
   'response_due', 'response_received', 'escalated', 'mediation', 'arbitration',
 ];
 
-/** GET /api/organizations — query organizations from DB */
+/** Most organizations one list call returns. */
+const MAX_LISTED_ORGANIZATIONS = 1000;
+const STATUS_FILTER_PATTERN = /^[a-z_]{1,32}$/;
+
+/**
+ * GET /api/organizations — the organizations the caller may read.
+ *
+ * Being signed in is not enough. The list is the caller's own active memberships, the organizations below one they
+ * administer, or (for a platform administrator) every organization, read as the system role after that is decided here
+ * rather than left to the connection's database role. Contact details, billing contact, subscription tier, settings and
+ * provenance are returned only for organizations the caller administers; elsewhere the entry is the public profile.
+ * Grievance counts (include_stats) are likewise administrative.
+ */
 export async function GET(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -34,7 +52,15 @@ export async function GET(req: NextRequest) {
   const statusFilter = searchParams.get('status');
   const includeStats = searchParams.get('include_stats') === 'true';
 
+  if (parentId && !UUID_PATTERN.test(parentId)) return NextResponse.json({ error: 'Invalid parent organization id' }, { status: 400 });
+  if (statusFilter && !STATUS_FILTER_PATTERN.test(statusFilter)) return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+
+  const access = await resolveOrganizationAccess(userId);
+  const readable = readableOrganizationIds(access);
+  if (readable && readable.length === 0) return NextResponse.json({ data: [] });
+
   const conditions: SQL[] = [];
+  if (readable) conditions.push(inArray(organizations.id, readable));
   if (parentId) conditions.push(eq(organizations.parentId, parentId));
   if (statusFilter) conditions.push(eq(organizations.status, statusFilter));
 
@@ -42,23 +68,26 @@ export async function GET(req: NextRequest) {
     ? and(...conditions)
     : undefined;
 
-  const mapped = await withRLSContext(async () => {
-    const rows = await db.select().from(organizations).where(where);
+  const mapped = await withSystemContext(async () => {
+    const rows = await db.select().from(organizations).where(where).orderBy(asc(organizations.hierarchyLevel), asc(organizations.name)).limit(MAX_LISTED_ORGANIZATIONS);
 
     // When include_stats is requested, count active claims and children per org
     const claimsByOrg: Record<string, number> = {};
     const childrenByOrg: Record<string, number> = {};
     if (includeStats && rows.length > 0) {
       const orgIds = rows.map(r => r.id);
-      const claimCounts = await db.execute(
-        sql`SELECT organization_id::text as org_id, count(*)::int as cnt
-            FROM grievances
-            WHERE organization_id::text IN (${sql.join(orgIds.map(id => sql`${id}`), sql`,`)})
-              AND status::text IN ('draft','filed','acknowledged','investigating','response_due','response_received','escalated','mediation','arbitration')
-            GROUP BY organization_id`
-      );
-      for (const row of Array.from(claimCounts) as Array<{ org_id: string; cnt: number }>) {
-        claimsByOrg[row.org_id] = Number(row.cnt);
+      const administered = orgIds.filter((id) => canAdministerOrganization(access, id));
+      if (administered.length > 0) {
+        const claimCounts = await db.execute(
+          sql`SELECT organization_id::text as org_id, count(*)::int as cnt
+              FROM grievances
+              WHERE organization_id::text IN (${sql.join(administered.map(id => sql`${id}`), sql`,`)})
+                AND status::text IN ('draft','filed','acknowledged','investigating','response_due','response_received','escalated','mediation','arbitration')
+              GROUP BY organization_id`
+        );
+        for (const row of Array.from(claimCounts) as Array<{ org_id: string; cnt: number }>) {
+          claimsByOrg[row.org_id] = Number(row.cnt);
+        }
       }
 
       const childCounts = await db.execute(
@@ -76,7 +105,9 @@ export async function GET(req: NextRequest) {
     const nameById = new Map(rows.map(r => [r.id, r.name]));
 
     // Map camelCase DB fields to snake_case expected by frontend
-    return rows.map(row => ({
+    return rows.map(row => {
+      const administrative = canAdministerOrganization(access, row.id);
+      return {
       id: row.id,
       name: row.name,
       slug: row.slug,
@@ -89,31 +120,34 @@ export async function GET(req: NextRequest) {
       hierarchy_level: row.hierarchyLevel,
       province_territory: row.provinceTerritory,
       sectors: row.sectors,
-      email: row.email,
-      phone: row.phone,
       website: row.website,
-      address: row.address,
       clc_affiliated: row.clcAffiliated,
       affiliation_date: row.affiliationDate,
-      charter_number: row.charterNumber,
       member_count: row.memberCount,
       memberCount: row.memberCount ?? 0,
       active_member_count: row.activeMemberCount,
       last_member_count_update: row.lastMemberCountUpdate,
-      subscription_tier: row.subscriptionTier,
-      billing_contact_id: row.billingContactId,
-      settings: row.settings ?? {},
       features_enabled: row.featuresEnabled ?? [],
       status: row.status,
       created_at: row.createdAt,
       updated_at: row.updatedAt,
-      created_by: row.createdBy,
-      legacy_org_id: row.legacyOrgId,
-      ...(includeStats ? {
-        activeClaims: claimsByOrg[row.id] ?? 0,
-        childCount: childrenByOrg[row.id] ?? 0,
+      ...(administrative ? {
+        email: row.email,
+        phone: row.phone,
+        address: row.address,
+        charter_number: row.charterNumber,
+        subscription_tier: row.subscriptionTier,
+        billing_contact_id: row.billingContactId,
+        settings: row.settings ?? {},
+        created_by: row.createdBy,
+        legacy_org_id: row.legacyOrgId,
       } : {}),
-    }));
+      ...(includeStats ? {
+        childCount: childrenByOrg[row.id] ?? 0,
+        ...(administrative ? { activeClaims: claimsByOrg[row.id] ?? 0 } : {}),
+      } : {}),
+      };
+    });
   });
 
   return NextResponse.json({ data: mapped });

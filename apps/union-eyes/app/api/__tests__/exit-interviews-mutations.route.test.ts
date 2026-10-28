@@ -28,12 +28,15 @@ vi.mock('@/db/schema', () => ({
 vi.mock('@/lib/api-auth-guard', () => ({
   ROLE_HIERARCHY: { member: 1, steward: 2, admin: 3 },
   normalizeRole: (r: string) => r,
+  // The reader's role decides which sensitivity levels are readable; the caller here is a member or a steward.
+  hasMinRole: async (role: string) => (state.callerRole === 'steward' ? ['member', 'steward'] : ['member']).includes(role),
 }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return { ...actual, and: vi.fn(() => 'and'), eq: vi.fn(() => 'eq'), asc: vi.fn(), sql: Object.assign(vi.fn(() => 'sql'), { mapWith: vi.fn() }) };
 });
 
+const state = vi.hoisted(() => ({ callerRole: 'steward' }));
 const ctx = { params: { id: 'iv1' }, organizationId: 'org_1', userId: 'u1', user: { role: 'steward' } };
 
 describe('exit-interview mutations', () => {
@@ -106,14 +109,34 @@ describe('exit-interview mutations', () => {
     it("keeps a draft's attachments from members who are neither its owner nor steward-level", async () => {
       m.interview = [{ id: 'iv1', status: 'draft', createdBy: 'someone-else' }];
       const { GET } = await import('../exit-interviews/[id]/documents/route');
-      await expect((GET as any)({ ...ctx, user: { role: 'member' } })).rejects.toMatchObject({ status: 403 });
+      state.callerRole = 'member';
+      // A draft the caller may not read does not exist for them.
+      await expect((GET as any)({ ...ctx, user: { role: 'member' } })).rejects.toMatchObject({ status: 404 });
+      state.callerRole = 'steward';
       await expect((GET as any)({ ...ctx, user: { role: 'steward' } })).resolves.toMatchObject({ data: [{ id: 'd1' }] });
     });
 
-    it('shows a published interview\'s attachments to any member', async () => {
-      m.interview = [{ id: 'iv1', status: 'published', createdBy: 'someone-else' }];
+    it('shows a published, consented, public-internal interview\'s attachments to any member', async () => {
+      m.interview = [{ id: 'iv1', status: 'published', createdBy: 'someone-else', sensitivityLevel: 'public_internal', consentGranted: true }];
       const { GET } = await import('../exit-interviews/[id]/documents/route');
+      state.callerRole = 'member';
       await expect((GET as any)({ ...ctx, user: { role: 'member' } })).resolves.toMatchObject({ data: [{ id: 'd1' }] });
+    });
+
+    // DEF-0B7-EXC-READS-IGNORE-SENSITIVITY-LEVEL
+    it('keeps the attachments of a published interview above the caller\'s level, or without consent, from a member', async () => {
+      const { GET } = await import('../exit-interviews/[id]/documents/route');
+      state.callerRole = 'member';
+      for (const facts of [
+        { sensitivityLevel: 'privileged', consentGranted: true },
+        { sensitivityLevel: 'legal_sensitive', consentGranted: true },
+        { sensitivityLevel: 'restricted', consentGranted: true },
+        { sensitivityLevel: 'public_internal', consentGranted: false },
+        { sensitivityLevel: null, consentGranted: true },
+      ]) {
+        m.interview = [{ id: 'iv1', status: 'published', createdBy: 'someone-else', ...facts }];
+        await expect((GET as any)({ ...ctx, user: { role: 'member' } }), JSON.stringify(facts)).rejects.toMatchObject({ status: 404 });
+      }
     });
   });
 });

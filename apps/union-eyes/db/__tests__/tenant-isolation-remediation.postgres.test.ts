@@ -352,4 +352,33 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
       expect(own.rows).toHaveLength(1)
     })
   })
+
+  describe('pension retirement eligibility', () => {
+    it('as the runtime role, lists only the caller organization\'s enrolments, projected, and audits the read', async () => {
+      const plan = randomUUID()
+      const enrol = (org: string, name: string, years: string) =>
+        admin.query(
+          `INSERT INTO pension_members (id, organization_id, plan_id, user_id, name, plan_name, years_of_service, metadata)
+           VALUES (gen_random_uuid(), $1, $2, gen_random_uuid(), $3, 'Plan', $4, '{"sin":"123-456-789"}')`,
+          [org, plan, name, years],
+        )
+      await enrol(ORG_A, 'Alice A', '31.0')
+      await enrol(ORG_A, 'Bob A', '5.0')
+      await enrol(ORG_B, 'Zed B', '44.0')
+      const { GET } = await import('../../app/api/pension/retirement-eligibility/route')
+      const call = (organizationId: string, threshold = '') =>
+        (GET as unknown as (c: unknown) => Promise<{ data: Array<Record<string, unknown>> }>)({
+          request: new Request(`http://localhost/api/pension/retirement-eligibility${threshold}`),
+          organizationId,
+          userId: 'officer-1',
+        })
+      const asA = await call(ORG_A)
+      expect(asA.data.map((r) => r.name)).toEqual(['Alice A'])
+      expect(JSON.stringify(asA)).not.toContain('123-456-789')
+      expect((await call(ORG_A, '?threshold=1')).data.map((r) => r.name)).toEqual(['Alice A', 'Bob A'])
+      expect((await call(ORG_B)).data.map((r) => r.name)).toEqual(['Zed B'])
+      expect(state.audit.map((e) => e.action)).toEqual(Array(3).fill('pension.retirement_eligibility.read'))
+      expect(state.audit[0]).toMatchObject({ organizationId: ORG_A, userId: 'officer-1' })
+    })
+  })
 })

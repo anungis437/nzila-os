@@ -2646,7 +2646,7 @@
       "reachable": true,
       "djangoDefined": true,
       "blockers": [],
-      "holdReason": "A production file reads this relation: app/api/health-safety/dashboard/route.ts, app/api/health-safety/stats/route.ts"
+      "holdReason": "A production file reads this relation: app/api/health-safety/stats/route.ts"
     },
     {
       "table": "security_events",

@@ -7,7 +7,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { withApiAuth, BaseAuthContext, getCurrentUser } from '@/lib/api-auth-guard';
+import { withApiAuth, BaseAuthContext, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
+import { knowledgeBaseSourceCondition, resolveInterviewReader } from '@/lib/knowledge-transfer/governance/interview-access';
 import { db } from '@/db/db';
 import { knowledgeBase } from '@/db/schema';
 import { eq, and, ilike, or, sql, inArray } from 'drizzle-orm';
@@ -33,9 +34,13 @@ export const GET = withApiAuth(async (request: NextRequest, _context: BaseAuthCo
   const sourceType = url.searchParams.get('sourceType');
   const q = url.searchParams.get('q')?.trim();
 
+  // A copy of an exit interview carries the interview's sensitivity and consent, and does not cross to child organizations.
+  const reader = await resolveInterviewReader(user?.id ?? null, false, hasMinRole);
+  const sourceCondition = knowledgeBaseSourceCondition(reader, orgId);
   const conditions = [
     inArray(knowledgeBase.organizationId, orgIds),
     eq(knowledgeBase.isActive, true),
+    sourceCondition,
   ];
 
   if (documentType) {
@@ -81,7 +86,7 @@ export const GET = withApiAuth(async (request: NextRequest, _context: BaseAuthCo
       count: sql<number>`count(*)::int`,
     })
     .from(knowledgeBase)
-    .where(and(inArray(knowledgeBase.organizationId, orgIds), eq(knowledgeBase.isActive, true)))
+    .where(and(inArray(knowledgeBase.organizationId, orgIds), eq(knowledgeBase.isActive, true), sourceCondition))
     .groupBy(knowledgeBase.sourceType);
 
   return NextResponse.json({ data: rows, total: rows.length, counts });

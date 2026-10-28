@@ -41,6 +41,7 @@ vi.mock('@/lib/api/framework', () => ({
   ApiError: {
     notFound: (message: string) => Object.assign(new Error(message), { status: 404 }),
     conflict: (message: string) => Object.assign(new Error(message), { status: 409 }),
+    forbidden: (message: string) => Object.assign(new Error(message), { status: 403 }),
   },
 }));
 
@@ -52,7 +53,8 @@ vi.mock('@/lib/knowledge-transfer/expertise/expertise-extractor', () => ({
   extractExpertise: m.extractExpertise,
   flattenExpertiseTags: m.flattenExpertiseTags,
 }));
-vi.mock('@/lib/knowledge-transfer/governance/consent-controls', () => ({
+vi.mock('@/lib/knowledge-transfer/governance/consent-controls', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/knowledge-transfer/governance/consent-controls')>()),
   isIndexingAllowed: m.isIndexingAllowed,
 }));
 
@@ -165,7 +167,7 @@ describe('exit-interviews/[id]/publish route', () => {
     const json = await response.json();
     expect(json.data.status).toBe('published');
     expect(json.knowledgeAsset.id).toBe('kb_1');
-    expect(m.audit).toHaveBeenCalledWith(mockDb, expect.objectContaining({ action: 'exit_interview.publish', userId: 'u1', details: { knowledgeBaseId: 'kb_1' } }));
+    expect(m.audit).toHaveBeenCalledWith(mockDb, expect.objectContaining({ action: 'exit_interview.publish', userId: 'u1', details: expect.objectContaining({ knowledgeBaseId: 'kb_1', copiedToKnowledgeBase: true }) }));
   });
 
   it('does not publish an interview that has not been reviewed', async () => {
@@ -185,7 +187,7 @@ describe('exit-interviews/[id]/publish route', () => {
 
   it('creates no second asset when a concurrent publication already moved the interview on', async () => {
     const { POST } = await loadRoute();
-    m.selectQueue.push([{ id: 'iv_1', status: 'reviewed', title: 'T', topics: [] }]);
+    m.selectQueue.push([{ id: 'iv_1', status: 'reviewed', title: 'T', topics: [], sensitivityLevel: 'public_internal', consentGranted: true }]);
     m.updateReturningQueue.push([]);
 
     const response = await POST(new NextRequest('http://localhost/api/exit-interviews/iv_1/publish'), {
@@ -196,5 +198,82 @@ describe('exit-interviews/[id]/publish route', () => {
 
     expect(response.status).toBe(409);
     expect(m.audit).not.toHaveBeenCalled();
+  });
+
+  // DEF-0B7-EXC-PUBLISH-AND-INDEX-COPY-INTERVIEW-TEXT-TO-ORG-WIDE-KNOWLEDGE-BASE,
+  // DEF-0B7-EXC-PUBLISH-SENDS-EVERY-INTERVIEW-TO-AI-WITHOUT-CONSENT-GATE-OR-AUDIT
+  describe('publication gates', () => {
+    const reviewed = (over: Record<string, unknown> = {}) => ({
+      id: 'iv_1', status: 'reviewed', title: 'Interview', retiringEmployeeName: 'Jane Doe', roleInUnion: 'Steward', yearsOfService: 12,
+      keyLessons: 'Lessons', summary: 'S', topics: [], reviewedAt: null, reviewedBy: 'reviewer-1', createdBy: 'author-1',
+      sensitivityLevel: 'public_internal', consentGranted: true, ...over,
+    });
+    const publish = async () => {
+      const { POST } = await loadRoute();
+      return POST(new NextRequest('http://localhost/api/exit-interviews/iv_1/publish'), { params: { id: 'iv_1' }, organizationId: 'org_1', userId: 'publisher-1' });
+    };
+    const flush = () => new Promise((resolve) => setTimeout(resolve, 20));
+    // An earlier test's background extraction may still be running; let it finish before this test counts calls.
+    beforeEach(async () => {
+      await flush();
+      m.selectQueue = [];
+      m.insertReturningQueue = [];
+      m.updateReturningQueue = [];
+      vi.clearAllMocks();
+      m.extractExpertise.mockResolvedValue({ continuitySensitivity: 'medium', undocumentedWorkflows: ['workflow-a'] });
+      m.isIndexingAllowed.mockReturnValue(true);
+    });
+
+    it.each([
+      ['no recorded sensitivity level', { sensitivityLevel: null }],
+      ['no consent', { consentGranted: false }],
+      ['unknown consent', { consentGranted: null }],
+      ['a publisher who prepared it', { createdBy: 'publisher-1' }],
+      ['a publisher who reviewed it', { reviewedBy: 'publisher-1' }],
+    ])('refuses %s and writes, sends and audits nothing', async (_label, over) => {
+      m.selectQueue.push([reviewed(over)]);
+      const response = await publish();
+      await flush();
+      expect(response.status).toBe(409);
+      expect(mockDb.insert).not.toHaveBeenCalled();
+      expect(mockDb.update).not.toHaveBeenCalled();
+      expect(m.extractExpertise).not.toHaveBeenCalled();
+      expect(m.audit).not.toHaveBeenCalled();
+    });
+
+    it('does not copy a privileged interview into the shared knowledge base, and never sends it to the AI control plane', async () => {
+      m.selectQueue.push([reviewed({ sensitivityLevel: 'privileged' })]);
+      m.updateReturningQueue.push([{ id: 'iv_1', status: 'published', knowledgeBaseId: null }]);
+      m.isIndexingAllowed.mockReturnValue(false);
+      const response = await publish();
+      await flush();
+      expect(response.status).toBe(200);
+      expect((await response.json()).knowledgeAsset).toBeUndefined();
+      expect(mockDb.insert).not.toHaveBeenCalledWith(expect.objectContaining({ _name: 'knowledge_base' }));
+      expect(m.extractExpertise).not.toHaveBeenCalled();
+      expect(m.audit).toHaveBeenCalledWith(mockDb, expect.objectContaining({ details: expect.objectContaining({ copiedToKnowledgeBase: false, sensitivityLevel: 'privileged' }) }));
+    });
+
+    it('audits the intent and the outcome of the AI extraction for an interview that may be indexed', async () => {
+      m.selectQueue.push([reviewed()]);
+      m.insertReturningQueue.push([{ id: 'kb_1' }]);
+      m.updateReturningQueue.push([{ id: 'iv_1', status: 'published', knowledgeBaseId: 'kb_1' }]);
+      await publish();
+      await flush();
+      const actions = m.audit.mock.calls.map((c) => (c[1] as { action: string }).action);
+      expect(actions).toEqual(expect.arrayContaining(['exit_interview.publish', 'exit_interview.ai_extraction.requested', 'exit_interview.ai_extraction.completed']));
+      expect(m.extractExpertise).toHaveBeenCalledTimes(1);
+    });
+
+    it('records a failed extraction instead of swallowing it', async () => {
+      m.selectQueue.push([reviewed()]);
+      m.insertReturningQueue.push([{ id: 'kb_1' }]);
+      m.updateReturningQueue.push([{ id: 'iv_1', status: 'published', knowledgeBaseId: 'kb_1' }]);
+      m.extractExpertise.mockRejectedValue(new Error('model down'));
+      await publish();
+      await flush();
+      const actions = m.audit.mock.calls.map((c) => (c[1] as { action: string }).action);
+      expect(actions).toContain('exit_interview.ai_extraction.failed');
+    });
   });
 });

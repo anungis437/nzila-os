@@ -18,7 +18,8 @@ import { db } from '@/db/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { exitInterviews, exitInterviewDocuments } from '@/db/schema';
-import { ROLE_HIERARCHY, normalizeRole } from '@/lib/api-auth-guard';
+import { ROLE_HIERARCHY, normalizeRole, hasMinRole } from '@/lib/api-auth-guard';
+import { canReadInterview, resolveInterviewReader } from '@/lib/knowledge-transfer/governance/interview-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -130,7 +131,7 @@ export const GET = withApi(
   async ({ params, organizationId, userId, user }) => {
     // Ensure interview is in this org
     const [interview] = await db
-      .select({ id: exitInterviews.id, status: exitInterviews.status, createdBy: exitInterviews.createdBy })
+      .select({ id: exitInterviews.id, status: exitInterviews.status, createdBy: exitInterviews.createdBy, sensitivityLevel: exitInterviews.sensitivityLevel, consentGranted: exitInterviews.consentGranted })
       .from(exitInterviews)
       .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!)))
       .limit(1);
@@ -139,9 +140,10 @@ export const GET = withApi(
 
     // The attachments (including transcripts) of a draft are as private as the draft: the interview route shows an
     // unpublished interview only to its owner and to steward-level users, and so does this one.
-    const isPublished = interview.status === 'published' || interview.status === 'archived';
-    if (!isPublished && interview.createdBy !== userId && !hasStewardPrivileges(user?.role ?? null)) {
-      throw ApiError.forbidden('You do not have permission to access this interview');
+    // The attachments (transcripts, file locations) follow the interview's sensitivity floor and consent as well.
+    const reader = await resolveInterviewReader(userId ?? null, hasStewardPrivileges(user?.role ?? null), hasMinRole);
+    if (!canReadInterview(interview, reader)) {
+      throw ApiError.notFound('Exit interview');
     }
 
     const docs = await db

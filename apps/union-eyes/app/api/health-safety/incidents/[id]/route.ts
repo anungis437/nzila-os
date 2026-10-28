@@ -11,7 +11,9 @@ const { GET, PATCH, DELETE } = crudRoutes({
   tags: ["Health-safety"],
   orgScoped: true,
   itemRoute: true,
-  readRole: 'member',
+  // The collection already requires health_safety_rep: an incident row carries the narrative, injury details,
+  // witnesses and reporter contact, so the item read matches it instead of the member floor.
+  readRole: 'health_safety_rep',
   writeRole: 'admin',
 });
 export { GET, PATCH, DELETE };

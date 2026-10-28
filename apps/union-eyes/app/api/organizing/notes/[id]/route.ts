@@ -12,7 +12,7 @@ const { GET, PATCH, DELETE } = crudRoutes({
   tags: ["Organization"],
   orgScoped: true,
   itemRoute: true,
-  readRole: 'member',
-  writeRole: 'steward',
+  readRole: 'officer',
+  writeRole: 'officer',
 });
 export { GET, PATCH, DELETE };

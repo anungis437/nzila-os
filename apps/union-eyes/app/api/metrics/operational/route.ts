@@ -1,63 +1,52 @@
 /**
  * GET /api/metrics/operational
  *
- * Exposes operational metrics for observability dashboards:
- * - request_count (proxy — relies on external APM; returns placeholder)
- * - error_rate
- * - workflow_transition_rate
- * - queue_depth
- * - sla_violations
+ * Platform-wide operational counters for observability dashboards: workflow transitions in the last 24 hours, claims past
+ * their SLA, queue depth and failure-like claim updates.
+ *
+ * These count every organization's claims, so they are for the platform operator only: a caller presenting the service
+ * key (compared in constant time) or a platform administrator. An ordinary signed-in user of any organization is refused.
+ * The route used to count claims across all organizations for any signed-in user and for anyone holding the AI service key,
+ * and it reported a lifetime claim count as `request_count` and a ratio of claim-update text matches as `error_rate`.
+ * Neither is measured here: they are not returned, rather than returned as proxies. A failed read is an error, not zero.
  */
 import { NextResponse } from 'next/server'
 import { db } from '@/db/db'
 import { claims, claimUpdates } from '@/db/schema'
 import { eq, sql, count, gte, and } from 'drizzle-orm'
 import { getAllQueueStats } from '@/lib/job-queue'
-import { requireApiAuth } from '@/lib/api-auth-guard'
+import { requireApiAuth, isPlatformAdminUser } from '@/lib/api-auth-guard'
+import { constantTimeEquals } from '@/lib/security/constant-time'
 
 export const dynamic = 'force-dynamic'
 
+async function isPlatformOperator(req: Request): Promise<{ ok: true } | { ok: false; status: 401 | 403 }> {
+  if (constantTimeEquals(req.headers.get('x-service-key'), process.env.AI_SERVICE_KEY)) return { ok: true }
+  let userId: string | undefined
+  try {
+    userId = (await requireApiAuth()).userId ?? undefined
+  } catch {
+    return { ok: false, status: 401 }
+  }
+  if (!userId) return { ok: false, status: 401 }
+  return (await isPlatformAdminUser(userId)) ? { ok: true } : { ok: false, status: 403 }
+}
+
 export async function GET(req: Request) {
+  const denial = await isPlatformOperator(req)
+  if (!denial.ok) {
+    return NextResponse.json({ error: denial.status === 401 ? 'Unauthorized' : 'Forbidden' }, { status: denial.status })
+  }
+
   const now = new Date()
   const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
 
-  // Auth check must be outside the data-query try-catch so auth errors are
-  // returned as 401/403, not swallowed as a generic 500.
-  const svcKey = process.env.AI_SERVICE_KEY
-  const isServiceRequest = !!svcKey && req.headers.get('x-service-key') === svcKey
-  if (!isServiceRequest) {
-    try {
-      await requireApiAuth()
-    } catch (authErr) {
-      const msg = authErr instanceof Error ? authErr.message : String(authErr)
-      const status = msg.toLowerCase().includes('forbidden') ? 403 : 401
-      return NextResponse.json({ error: msg }, { status })
-    }
-  }
-
   try {
-    const [
-      totalClaimsResult,
-      recentTransitionsResult,
-      slaViolationsResult,
-      queueStatsResult,
-      recentErrorsResult,
-    ] = await Promise.allSettled([
-      // Total claims
-      db.select({ count: count() }).from(claims),
-
-      // Workflow transitions in last 24h
+    const [transitions, slaViolations, failureLike, queueStats] = await Promise.all([
       db
         .select({ count: count() })
         .from(claimUpdates)
-        .where(
-          and(
-            eq(claimUpdates.updateType, 'status_change'),
-            gte(claimUpdates.createdAt, oneDayAgo),
-          ),
-        ),
-
-      // SLA violations: claims past their deadline that aren't closed
+        .where(and(eq(claimUpdates.updateType, 'status_change'), gte(claimUpdates.createdAt, oneDayAgo))),
       db
         .select({ count: count() })
         .from(claims)
@@ -67,55 +56,33 @@ export async function GET(req: Request) {
             sql`${claims.updatedAt} < NOW() - INTERVAL '5 days'`,
           ),
         ),
-
-      // Queue depth from Celery
-      getAllQueueStats().catch(() => [] as Awaited<ReturnType<typeof getAllQueueStats>>),
-
-      // Error-like updates in last 24h (crude proxy)
-      db.select({ count: count() }).from(claimUpdates).where(
-        and(
-          sql`${claimUpdates.message} ILIKE '%error%' OR ${claimUpdates.message} ILIKE '%failed%'`,
-          gte(claimUpdates.createdAt, oneDayAgo),
+      db
+        .select({ count: count() })
+        .from(claimUpdates)
+        .where(
+          and(
+            sql`(${claimUpdates.message} ILIKE '%error%' OR ${claimUpdates.message} ILIKE '%failed%')`,
+            gte(claimUpdates.createdAt, oneDayAgo),
+          ),
         ),
-      ),
+      getAllQueueStats(),
     ])
 
-    const totalClaims =
-      totalClaimsResult.status === 'fulfilled' ? totalClaimsResult.value[0]?.count ?? 0 : 0
-    const transitionRate =
-      recentTransitionsResult.status === 'fulfilled'
-        ? recentTransitionsResult.value[0]?.count ?? 0
-        : 0
-    const slaViolations =
-      slaViolationsResult.status === 'fulfilled'
-        ? slaViolationsResult.value[0]?.count ?? 0
-        : 0
-    const queueStats =
-      queueStatsResult.status === 'fulfilled' ? queueStatsResult.value : []
-    const errorCount =
-      recentErrorsResult.status === 'fulfilled'
-        ? recentErrorsResult.value[0]?.count ?? 0
-        : 0
-
-    const queueDepth = queueStats.reduce(
-      (sum, q) => sum + (q.active ?? 0) + (q.reserved ?? 0) + (q.scheduled ?? 0),
-      0,
-    )
+    const queueDepth = queueStats.reduce((sum, q) => sum + (q.active ?? 0) + (q.reserved ?? 0) + (q.scheduled ?? 0), 0)
 
     return NextResponse.json({
-      request_count: totalClaims, // lifetime claim count as proxy
-      error_rate: totalClaims > 0 ? +(errorCount / Math.max(transitionRate, 1)).toFixed(4) : 0,
-      workflow_transition_rate: transitionRate,
+      scope: 'platform',
+      workflow_transition_rate: transitions[0]?.count ?? 0,
+      sla_violations: slaViolations[0]?.count ?? 0,
+      failure_like_updates: failureLike[0]?.count ?? 0,
       queue_depth: queueDepth,
-      sla_violations: slaViolations,
+      // Request and error rates come from the observability system; this route does not measure them.
+      request_count: null,
+      error_rate: null,
       window: '24h',
       generated_at: now.toISOString(),
     })
-  } catch (err) {
-    return NextResponse.json(
-      { error: 'Failed to compute metrics', detail: String(err) },
-      { status: 500 },
-    )
+  } catch {
+    return NextResponse.json({ error: 'Failed to compute metrics' }, { status: 500 })
   }
 }
-

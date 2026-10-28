@@ -103,5 +103,7 @@ const { GET, POST } = crudRoutes({
   readRole: 'health_safety_rep',
   writeRole: 'health_safety_rep',
   beforeCreate: (values) => buildIncidentCreateValues(values),
+  // A report filed as anonymous is not attributed to the session user in the row or the audit entry.
+  anonymousCreate: (values) => (values.metadata as { isAnonymous?: unknown } | undefined)?.isAnonymous === true,
 });
 export { GET, POST };

@@ -3,7 +3,7 @@
  * Dashboard aggregation for the HealthSafetyDashboard component.
  * Returns { success: true, metrics: SafetyMetrics }.
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -33,7 +33,8 @@ export const GET = withApi(
     const url = new URL(request.url);
     const period = url.searchParams.get('period') || '30d';
     const startDate = getStartDate(period);
-    const orgFilter = organizationId ? sql`organization_id = ${organizationId}` : sql`1=1`;
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    const orgFilter = sql`organization_id = ${organizationId}`;
     const dateFilter = sql`created_at >= ${startDate}::timestamptz`;
 
     try {
@@ -69,27 +70,28 @@ export const GET = withApi(
         await db.execute(sql`SELECT count(*)::int AS cnt FROM safety_inspections WHERE ${orgFilter} AND status = 'completed' AND ${dateFilter}`)
       );
       const inspectionsCompleted = Number((inspCompRows[0] as Record<string, unknown>)?.cnt ?? 0);
+      // No inspections in the period is not a 100% rate: it is no measurement.
       const inspectionComplianceRate = inspectionsDue > 0
         ? Math.round((inspectionsCompleted / inspectionsDue) * 100)
-        : 100;
+        : null;
 
       const lastRows = Array.from(
         await db.execute(sql`SELECT max(created_at)::text AS last_dt FROM workplace_incidents WHERE ${orgFilter}`)
       );
       const lastDt = (lastRows[0] as Record<string, unknown>)?.last_dt as string | null;
+      // No incident on record is not 90 days: it is no measurement.
       const daysWithoutIncident = lastDt
         ? Math.max(0, Math.floor((Date.now() - new Date(lastDt).getTime()) / 86_400_000))
-        : 90;
+        : null;
 
       const critRows = Array.from(
         await db.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND severity = 'critical' AND status != 'closed'`)
       );
       const criticalAlerts = Number((critRows[0] as Record<string, unknown>)?.cnt ?? 0);
 
-      const trainRows = Array.from(
-        await db.execute(sql`SELECT count(*)::int AS cnt FROM safety_training_records WHERE ${orgFilter}`)
-      );
-      const trainingCompliance = Number((trainRows[0] as Record<string, unknown>)?.cnt ?? 0) > 0 ? 92 : 100;
+      // safety_training_records holds no completion, due-date or status column, so a compliance rate cannot be computed
+      // from it. It used to be the constant 92 (or 100 with no rows). It is reported as not measured.
+      const trainingCompliance = null;
 
       const ppeRows = Array.from(
         await db.execute(sql`SELECT count(*)::int AS cnt FROM ppe_equipment WHERE ${orgFilter} AND quantity_in_stock < reorder_level`)
@@ -115,25 +117,10 @@ export const GET = withApi(
     };
     }); // withRLSContext
     } catch (error) {
+      // A failed query is an error, not a dashboard of zeros with success: true.
       const { logger: log } = await import('@/lib/logger');
       log.error('Health-safety dashboard query failed', { error: error instanceof Error ? error.message : 'Unknown' });
-      return {
-        success: true,
-        metrics: {
-          totalIncidents: 0,
-          incidentTrend: 'stable' as const,
-          incidentChange: 0,
-          openHazards: 0,
-          hazardTrend: 'stable' as const,
-          inspectionsDue: 0,
-          inspectionsCompleted: 0,
-          inspectionComplianceRate: 100,
-          daysWithoutIncident: 90,
-          criticalAlerts: 0,
-          trainingCompliance: 100,
-          ppeInventoryLow: 0,
-        },
-      };
+      throw ApiError.internal('Failed to load health and safety metrics');
     }
   },
 );

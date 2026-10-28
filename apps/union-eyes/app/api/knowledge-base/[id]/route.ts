@@ -4,7 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { withApiAuth, BaseAuthContext, getCurrentUser } from '@/lib/api-auth-guard';
+import { withApiAuth, BaseAuthContext, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
+import { knowledgeBaseSourceCondition, resolveInterviewReader } from '@/lib/knowledge-transfer/governance/interview-access';
 import { db } from '@/db/db';
 import { knowledgeBase } from '@/db/schema';
 import { eq, and, sql, inArray } from 'drizzle-orm';
@@ -29,6 +30,7 @@ export const GET = withApiAuth(async (
   const parentId = parentRow[0]?.parent_id as string | undefined;
   const orgIds = parentId ? [orgId, parentId] : [orgId];
 
+  const reader = await resolveInterviewReader(user?.id ?? null, false, hasMinRole);
   const [row] = await db
     .select({
       id: knowledgeBase.id,
@@ -50,6 +52,7 @@ export const GET = withApiAuth(async (
         eq(knowledgeBase.id, id),
         inArray(knowledgeBase.organizationId, orgIds),
         eq(knowledgeBase.isActive, true),
+        knowledgeBaseSourceCondition(reader, orgId),
       ),
     );
 

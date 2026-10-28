@@ -99,6 +99,11 @@ export interface CrudOptions {
     ctx: { organizationId?: string | null; userId?: string | null },
   ) => Record<string, unknown> | Promise<Record<string, unknown>>;
   /**
+   * Declares that a create is anonymous: the row's createdBy and the audit entry's actor are recorded as
+   * ANONYMOUS_ACTOR instead of the session user. Receives the values returned by beforeCreate.
+   */
+  anonymousCreate?: (values: Record<string, unknown>) => boolean;
+  /**
    * Optional transform applied to the PATCH payload, after
    * `blockedPatchFields` have been stripped, before `.set(...)`. Receives
    * the row's CURRENT (pre-update) values via one extra SELECT — only
@@ -188,6 +193,9 @@ function getTableName(table: PgTable): string {
  * the authenticated request context, never from a hook's return value.
  * Exported for direct unit testing of this invariant in isolation.
  */
+/** Recorded as the creator and audit actor of a record filed anonymously. */
+export const ANONYMOUS_ACTOR = 'anonymous';
+
 export function enforceCreateSecurityInvariants(
   transformed: Record<string, unknown>,
   guard: {
@@ -476,10 +484,16 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           hasCreatedByColumn: Boolean(createdByCol),
         });
 
+        // A record the reporter chose to file anonymously is not attributed to them: neither the row nor the audit entry
+        // carries the session user. This is the one sanctioned override of the created-by invariant, and only the route
+        // that declares it can use it.
+        const anonymous = opts.anonymousCreate?.(transformed) === true;
+        if (anonymous && createdByCol) finalValues.createdBy = ANONYMOUS_ACTOR;
+
         // A below-staff caller can only create rows about themselves.
         if (lowRole.forcedOwner) finalValues[lowRole.forcedOwner.name] = lowRole.forcedOwner.value;
 
-        const row = await audited(organizationId, userId, 'create', Object.keys(finalValues), async (tx) => (await tx.insert(table).values(finalValues).returning())[0] as Record<string, unknown> | undefined);
+        const row = await audited(organizationId, anonymous ? ANONYMOUS_ACTOR : userId, 'create', Object.keys(finalValues), async (tx) => (await tx.insert(table).values(finalValues).returning())[0] as Record<string, unknown> | undefined);
         return { data: row };
       },
     );
