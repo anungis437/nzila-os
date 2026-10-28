@@ -2,13 +2,13 @@
  "register": "UE-CONV-K-008",
  "summary": {
   "routes": 994,
-  "mutating": 719,
+  "mutating": 717,
   "kernel": 62,
   "byGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 12,
    "CRON_SECRET": 3,
-   "CRUD_FACTORY": 296,
+   "CRUD_FACTORY": 294,
    "DELEGATED": 23,
    "NONE": 51,
    "ORG_AUTH": 53,
@@ -17,14 +17,14 @@
    "ROLE_AUTH": 125,
    "SESSION_AUTH": 64,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 278,
+   "WITH_API": 280,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 8,
    "CRON_SECRET": 2,
-   "CRUD_FACTORY": 296,
+   "CRUD_FACTORY": 294,
    "DELEGATED": 16,
    "NONE": 8,
    "ORG_AUTH": 32,
@@ -39,7 +39,7 @@
    "ATOMIC": 143,
    "ATOMIC_SERVICE": 144,
    "COMPUTE_ONLY": 35,
-   "CRUD_ATOMIC": 298,
+   "CRUD_ATOMIC": 296,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 23,
    "NO_WRITES_FOUND": 14,
@@ -47,7 +47,7 @@
   },
   "mutatingByData": {
    "AMBIENT_DB": 14,
-   "CRUD_TENANT_TX": 298,
+   "CRUD_TENANT_TX": 296,
    "NONE": 196,
    "SYSTEM_CONTEXT": 58,
    "TENANT_TX": 153
@@ -11621,29 +11621,26 @@
   {
    "route": "stewards/[id]/route.ts",
    "methods": [
-    "DELETE",
-    "GET",
-    "PATCH"
+    "GET"
    ],
-   "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "mutating": false,
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "TENANT_TX",
+   "audit": "READ_ONLY"
   },
   {
    "route": "stewards/route.ts",
    "methods": [
-    "GET",
-    "POST"
+    "GET"
    ],
-   "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "mutating": false,
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "TENANT_TX",
+   "audit": "READ_ONLY"
   },
   {
    "route": "storage/cleanup/route.ts",

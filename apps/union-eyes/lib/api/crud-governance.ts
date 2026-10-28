@@ -28,7 +28,7 @@ const DENIED = [
 const OWN_ROWS_READ = ['grievances', 'claims', 'claim_deadlines'] as const
 
 const READ_ONLY = [
-  'organization_members', 'organizations', 'steward_assignments', 'per_capita_remittances', 'dues_transactions',
+  'organization_members', 'organizations', 'per_capita_remittances', 'dues_transactions',
   'external_invoices', 'polls', 'federations', 'data_classification_policy',
 ] as const
 

@@ -19,6 +19,12 @@ Branch: `agents/ue-cursor-final-closure` (PR #1014) · Baseline: `0b0e363aa` · 
 
 Evidence: [`evidence/vs-native-execution-8f8cb18aa.json`](./evidence/vs-native-execution-8f8cb18aa.json).
 
+## Batch 2 — steward directory disclosure
+
+| Item | Root cause | Repair | Proof |
+|---|---|---|---|
+| DEF-0B11-IDS-STEWARD-ASSIGNMENT-ROWS-READABLE-BY-ANY-MEMBER… | Generic CRUD GET at `member` returned whole `steward_assignments` rows (personal phone, notes, grievance link) | Dedicated `GET /api/stewards` and `/api/stewards/[id]`: members get an allow-listed projection of active rows (`lib/stewards/steward-directory.ts`); officers get full rows with an atomic audit; other-organization or non-active rows read as 404; writes answer 405 (no appointment route exists) | `stewards-directory.route.test.ts` (10); UE suite, contract tests (10289) and convergence check pass |
+
 Queue note: `VS_CODE_EXECUTION_QUEUE.*` still reads `READY_FOR_VS_EXECUTION` for its six items; the evidence file above is the record of their execution. Queue verdicts remain false.
 
 ## Open (not proven)
