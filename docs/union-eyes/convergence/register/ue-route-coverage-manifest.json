@@ -10,11 +10,11 @@
    "CRON_SECRET": 3,
    "CRUD_FACTORY": 293,
    "DELEGATED": 23,
-   "NONE": 51,
+   "NONE": 49,
    "ORG_AUTH": 53,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 67,
-   "ROLE_AUTH": 125,
+   "RETIRED": 70,
+   "ROLE_AUTH": 124,
    "SESSION_AUTH": 64,
    "WEBHOOK_SIGNATURE": 4,
    "WITH_API": 281,
@@ -29,8 +29,8 @@
    "NONE": 8,
    "ORG_AUTH": 32,
    "PLATFORM_AUTH_HANDLER": 7,
-   "RETIRED": 60,
-   "ROLE_AUTH": 74,
+   "RETIRED": 61,
+   "ROLE_AUTH": 73,
    "SESSION_AUTH": 34,
    "WEBHOOK_SIGNATURE": 4,
    "WITH_API": 172
@@ -2720,7 +2720,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -2732,7 +2732,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -2741,11 +2741,10 @@
   {
    "route": "carbon/validate/route.ts",
    "methods": [
-    "GET",
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -5088,7 +5087,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -5100,7 +5099,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",

@@ -139,6 +139,18 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     notes: 'Financial submission: requires a governed remittance approval record (see the finance source findings) and an external acknowledgement before it may report success.',
   },
   {
+    id: 'UE-ACTION-CARBON-ACCOUNTING',
+    title: 'Carbon accounting: dashboard, infrastructure monitoring and claim validation',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: ['app/api/carbon/dashboard/route.ts', 'app/api/carbon/infrastructure/route.ts', 'app/api/carbon/validate/route.ts'],
+    evidence: [
+      'each route.ts throws ApiError.notImplemented → HTTP 501',
+      'previously returned literal emissions totals, renewable percentages and a certification-eligibility verdict with success true and status 200 (DEF-0B4-CARBON-FABRICATED-MEASUREMENTS-RETURNED-200)',
+    ],
+    targetWave: 7,
+    notes: 'No emissions data is collected. A measurement pipeline and a governed methodology must exist before any figure or certification outcome is returned.',
+  },
+  {
     id: 'UE-ACTION-TAX-CRA-EXPORT',
     title: 'CRA tax export',
     state: 'NOT_IMPLEMENTED',

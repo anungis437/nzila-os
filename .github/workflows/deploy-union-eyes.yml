@@ -2211,6 +2211,7 @@ jobs:
             "GITHUB_SHA=${{ needs.build-push.outputs.source_sha }}"
             "UE_FRONTEND_IMAGE_DIGEST=${{ needs.build-push.outputs.frontend_digest }}"
             "UE_BACKEND_IMAGE_DIGEST=${{ needs.build-push.outputs.backend_digest }}"
+            "UE_CANDIDATE_PROBE_TOKEN=${{ secrets.UE_CANDIDATE_PROBE_TOKEN }}"
             "RELEASE_ID=${{ needs.plan.outputs.release_id }}"
             "BUILD_TIME=${{ needs.plan.outputs.build_time }}"
             "BUILD_TIMESTAMP=${{ needs.plan.outputs.build_time }}"

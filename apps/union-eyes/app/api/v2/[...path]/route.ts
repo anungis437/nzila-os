@@ -1,19 +1,14 @@
 /**
  * Catch-all deprecation route for /api/v2/*
  *
- * All 568 v2 mirror routes have been removed.
- * This catch-all intercepts any remaining v2 traffic,
- * logs the access, and returns a deprecation response
- * pointing to the canonical root API equivalent.
+ * All 568 v2 mirror routes have been removed. This catch-all intercepts any remaining v2 traffic, logs the access and
+ * answers 410 Gone for every method. It never answers 2xx: a 200 here told a caller that a write (a role change, a
+ * remittance approval, a generated report) had succeeded when nothing was processed or persisted.
  *
  * Phase 9 — Deprecation System
  */
 import { withApi } from '@/lib/api/with-api';
-import {
-  logDeprecatedAccess,
-  deprecatedResponse,
-  resolveV2Canonical,
-} from '@/lib/api/deprecation';
+import { logDeprecatedAccess, goneResponse, resolveV2Canonical } from '@/lib/api/deprecation';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,7 +30,10 @@ const handler = withApi(
     // Fire-and-forget usage logging
     logDeprecatedAccess(v2Path, request.method, canonical);
 
-    return deprecatedResponse(v2Path, canonical);
+    return goneResponse(
+      v2Path,
+      'The request was not processed and nothing was changed. Use the root API route, if one exists for this capability.',
+    );
   },
 );
 

@@ -15,12 +15,14 @@ import { withSystemContext } from '@/lib/db/with-rls-context';
 import { organizations } from '@/db/schema-organizations';
 import { organizationMembers, pilotChecklistItems, pilotEvents } from '@/db/schema';
 import { grievances } from '@/db/schema/domains/claims/grievances';
-import { eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { assertPilotDemoMutationRuntime } from '@/lib/config/pilot-demo-runtime';
 
 const bodySchema = z.object({
   reset: z.boolean().default(false),
+  // A reset names the organization it will clear, so it cannot be triggered by a stray or replayed request.
+  confirmReset: z.string().optional(),
   includeDemoScript: z.boolean().default(true),
 });
 
@@ -68,6 +70,9 @@ export const POST = withApi(
     };
 
     const slug = fixture.org.slug ?? 'cupe-local-123';
+    if (body.reset && body.confirmReset !== slug) {
+      throw ApiError.badRequest('reset requires confirmReset to name the organization slug');
+    }
 
     // Every write below, and the audit record, is one system transaction: a failure leaves no half-seeded organization.
     const outcome = await withSystemContext(async (tx) => {
@@ -79,10 +84,36 @@ export const POST = withApi(
 
       let orgId = existingOrg[0]?.id;
 
+      let resetCounts: { grievances: number; members: number } | null = null;
       if (orgId && body.reset) {
-        await tx.delete(grievances).where(eq(grievances.organizationId, orgId));
-        await tx.delete(organizationMembers).where(eq(organizationMembers.organizationId, orgId));
+        // A reset removes only the rows this bootstrap seeds. If the organization holds any member or grievance that is
+        // not a fixture row, it is no longer a demo organization and the reset is refused rather than deleting it.
+        const fixtureMemberIds = fixture.members.map((m) => m.id);
+        const fixtureCaseNumbers = fixture.cases.map((c) => c.number);
+        const heldMembers = await tx
+          .select({ userId: organizationMembers.userId })
+          .from(organizationMembers)
+          .where(eq(organizationMembers.organizationId, orgId));
+        const heldCases = await tx
+          .select({ number: grievances.grievanceNumber })
+          .from(grievances)
+          .where(eq(grievances.organizationId, orgId));
+        if (
+          heldMembers.some((row) => !fixtureMemberIds.includes(row.userId as string)) ||
+          heldCases.some((row) => !fixtureCaseNumbers.includes(row.number as string))
+        ) {
+          throw ApiError.conflict('Reset refused: the organization holds data that this bootstrap did not seed');
+        }
+        const removedGrievances = await tx
+          .delete(grievances)
+          .where(and(eq(grievances.organizationId, orgId), inArray(grievances.grievanceNumber, fixtureCaseNumbers)))
+          .returning({ id: grievances.id });
+        const removedMembers = await tx
+          .delete(organizationMembers)
+          .where(and(eq(organizationMembers.organizationId, orgId), inArray(organizationMembers.userId, fixtureMemberIds)))
+          .returning({ id: organizationMembers.id });
         await tx.delete(pilotChecklistItems).where(eq(pilotChecklistItems.organizationId, orgId));
+        resetCounts = { grievances: removedGrievances.length, members: removedMembers.length };
       }
 
       if (!orgId) {
@@ -201,6 +232,7 @@ export const POST = withApi(
           membersInserted,
           casesInserted,
           worksites: fixture.worksites.length,
+          ...(resetCounts ? { removed: resetCounts } : {}),
         },
       });
 
