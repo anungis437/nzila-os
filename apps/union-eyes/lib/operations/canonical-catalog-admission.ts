@@ -6,6 +6,7 @@ import {
   AUTH_ROLE_MEMBERSHIP_EXPECTATIONS,
 } from '@nzila/db/auth-storage-authority'
 import baseContract from './catalog-authority-contract.json'
+import v2Decisions from './catalog-v2-decisions.json'
 import { catalogContractDigest, type CatalogRow } from './catalog-admission-core.mjs'
 import { CASE_ASSIGNEE_CATALOG_QUERY, CASE_ASSIGNEE_PREDICATE_OWNER, caseAssigneePredicateViolations } from '@/db/auth/case-assignee-predicate'
 import { CONVERSATION_ASSIGNEE_CATALOG_QUERY, CONVERSATION_ASSIGNEE_PREDICATE_OWNER, conversationAssigneePredicateViolations } from '@/db/auth/conversation-assignee-predicate'
@@ -34,12 +35,13 @@ export function canonicalCatalogContract(base = baseContract) {
   payload.entries.push({ table: 'platform_identity_bindings', classification: 'PLATFORM_METADATA_DEDICATED_EXECUTION_CONTEXT', runtime: [], system: [] })
   // Installer-owned receipt: every privilege is revoked from the business roles.
   payload.entries.push({ table: 'ue_v2_bootstrap_receipt', classification: 'CONTAINED_NO_AUTHORITY', runtime: [], system: [] })
-  // Documented V2 decisions that differ from the legacy manifest (scripts/bootstrap-v2/current-authority.ts): donations is
-  // organization-owned tenant metadata with runtime CRUD under organization RLS; the evidence pack builder seals a pack by UPDATE.
+  // Documented V2 decisions that differ from the legacy manifest. They live in data (see the file's note) and are applied by table.
+  const decided = new Map(v2Decisions.entries.map(({ table, ...change }) => [table, change]))
   payload.entries = payload.entries.map(entry => {
-    if (entry.table === 'donations') return { ...entry, classification: 'TENANT_RLS_REQUIRED', runtime: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'], system: [] }
-    if (entry.table === 'evidence_packs') return { ...entry, runtime: ['SELECT', 'INSERT', 'UPDATE'] }
-    return entry
+    const change = decided.get(entry.table)
+    if (!change) return entry
+    const { decision: _decision, ...applied } = change as Record<string, unknown>
+    return { ...entry, ...applied }
   })
   for (const [role, tables] of Object.entries(AUTH_PRIVILEGE_EXPECTATIONS)) {
     for (const [table, grants] of Object.entries(tables)) {

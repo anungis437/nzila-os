@@ -1181,12 +1181,17 @@
         "id": "R-50",
         "status": "FIXED_UNIT_VERIFIED",
         "title": "Earlier full Union Eyes suite figures (about 1,425 files / 20,29x tests) were a directory subset, not the whole app. The v4 driver whole-app run found two pre-existing failing files (11 tests): app/api/version/route.test.ts called the version route without the deployment-probe credential that repair DEF-0B1 requires for topology disclosure, and organizations/__tests__/route.post-system-boundary.test.ts mocked api-auth-guard without ROLE_HIERARCHY and asserted a superseded read design. Both tests were adapted and disclosed (version: all six original assertions kept with the credential presented, plus two anonymous-caller tests proven to fail when a topology field is injected; organizations: mock completed and the GET test now asserts a membership-less caller reads nothing and the creation authority is never consulted). Measured whole app: 1,522 files passed, 4 skipped, 21,073 tests passed, 28 skipped, 0 failed. The driver contract step failed 2 tests only because bash resolved to the WSL relay; with Git bash the contract suite passes 302 files / 10,280 tests. Unit-level proof only"
+      },
+      {
+        "id": "R-51",
+        "status": "FIXED_UNIT_VERIFIED",
+        "title": "R-44 class audit of the shared CRUD factory (indirect references and silent scope loss). Findings: (1) crud-factory dropped its tenant or owner scope without saying so when the table had no organizationId column (orgScoped defaults to true) or when ownerColumn named a column the table lacks; 16 route modules were mounted that way. (2) bargaining_proposals has no organization column, only negotiation_id, so GET, PATCH, DELETE and POST on /api/bargaining/proposals were not tenant-scoped at the route and a create could attach a proposal to another organization's negotiation (a database RLS policy is the only backstop, and the legacy QA topology has none). (3) cnesst preventive-withdrawals and right-of-refusal declared ownerColumn workerId, a column that does not exist; harmless today only because their steward floor already excludes below-staff callers, but it switched the low-role guard off. Repairs: the factory now refuses to build a route whose scope resolves to nothing (declare parentScope, or unscopedByDesign with a reason); parentScope limits read, update and delete to rows whose parent belongs to the caller organization, requires a create to name an owned parent, and strips the parent column from PATCH so a row cannot be re-parented; the two dead ownerColumn declarations were removed; arbitration precedents, data classification policy, pending profiles, oauth providers and the data-subject routes now declare unscopedByDesign with the governance reason. Verified: 10 new factory tests, two mutations (parent condition removed, re-parent strip removed) fail them; all 289 route modules still build. Test adaptations (disclosed): bargaining-proposals route test mock gains negotiations; onboarding and data-classification-policy route tests expect the new unscopedByDesign option (original assertions retained). Side finding: the R-46 overlay named donations in a reachable module and flipped the schema-mutation-batch reachability ratchet to a false positive; the decisions now live in lib/operations/catalog-v2-decisions.json. NOT done: hand-written routes that do not use the factory (for example claims/bulk) and bulk or indirect-reference review beyond the factory; no authenticated HTTP test of /api/bargaining/proposals yet. Unit-level proof only"
       }
     ],
     "summary": {
-      "total": 50,
+      "total": 51,
       "fixedRuntimeVerified": 30,
-      "fixedUnitVerified": 1,
+      "fixedUnitVerified": 2,
       "open": 19
     }
   },

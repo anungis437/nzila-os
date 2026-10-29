@@ -27,6 +27,7 @@ const { GET, POST } = crudRoutes({
   pk: 'id',
   tags: ['Auth'],
   orgScoped: true,
+  unscopedByDesign: 'pending_profiles is refused by CRUD governance (DENIED); it has no organization discriminator',
   readRole: 'support_agent',
   writeRole: 'steward',
 });

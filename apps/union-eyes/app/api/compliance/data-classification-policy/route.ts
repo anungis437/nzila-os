@@ -20,6 +20,7 @@ const { GET, POST } = crudRoutes({
   pk: 'id',
   tags: ["Compliance"],
   orgScoped: true,
+  unscopedByDesign: 'global classification policy with no organization discriminator; read-only through the generic interface (CRUD governance READ_ONLY)',
   readRole: 'member',
   writeRole: 'compliance_manager',
 });

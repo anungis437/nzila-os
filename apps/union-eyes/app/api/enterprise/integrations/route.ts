@@ -11,6 +11,7 @@ const { GET, POST } = crudRoutes({
   pk: 'providerId',
   tags: ["Auth"],
   orgScoped: true,
+  unscopedByDesign: 'oauth_providers is refused by CRUD governance (DENIED); it has no organization discriminator',
   readRole: 'member',
   writeRole: 'admin',
 });

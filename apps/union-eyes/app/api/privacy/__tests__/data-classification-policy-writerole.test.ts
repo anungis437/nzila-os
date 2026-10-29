@@ -26,6 +26,7 @@ describe('compliance/data-classification-policy route (platform classification d
       pk: 'id',
       tags: ['Compliance'],
       orgScoped: true,
+      unscopedByDesign: expect.any(String),
       readRole: 'member',
       writeRole: 'compliance_manager',
     });

@@ -11,6 +11,7 @@ const { GET, POST } = crudRoutes({
   pk: 'id',
   tags: ["Bargaining"],
   orgScoped: true,
+  unscopedByDesign: 'shared cross-tenant reference data with no organization discriminator; writes require a platform-elevated role',
   readRole: 'member',
   // arbitration_decisions is shared, cross-tenant reference data (no org
   // discriminator - orgScoped is a no-op here). writeRole must therefore be

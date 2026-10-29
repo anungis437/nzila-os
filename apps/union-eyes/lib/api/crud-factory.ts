@@ -33,7 +33,7 @@ import { ApiError } from './errors';
 import { db } from '@/db/db';
 import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { eq, and, desc, count, sql, type SQL } from 'drizzle-orm';
+import { eq, and, desc, count, sql, inArray, type SQL } from 'drizzle-orm';
 import type { PgTable, PgColumn } from 'drizzle-orm/pg-core';
 import type { NextRequest } from 'next/server';
 import { ROLE_HIERARCHY, type UserRole } from '@/lib/api-auth-guard';
@@ -59,6 +59,18 @@ export interface CrudOptions {
   tags: string[];
   /** Whether the table has an organization_id column for scoping */
   orgScoped?: boolean;
+  /**
+   * A tenant table with no organization column is scoped through a parent row its organization owns: every read, update and
+   * delete is limited to rows whose `column` points at a parent in the caller's organization, a create must name such a
+   * parent, and the column cannot be changed afterwards.
+   */
+  parentScope?: { column: string; parent: PgTable; parentKey?: string; parentOrgColumn?: string };
+  /**
+   * Required, with a reason, when an org-scoped route is mounted over a table that has no organization column and no
+   * `parentScope` (shared reference data, or a table the governance class already refuses). Without it the factory refuses
+   * to build the route rather than serve every tenant's rows.
+   */
+  unscopedByDesign?: string;
   /** Column name to auto-filter by authenticated userId (e.g. 'memberId'). Restricts reads to the current user's own rows. */
   ownerColumn?: string;
   /** Whether this is an item route ([id]/route.ts) vs collection */
@@ -329,6 +341,25 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
 
   const orgCol = orgScoped ? getColumn(table, 'organizationId') : undefined;
   const ownerCol = opts.ownerColumn ? getColumn(table, opts.ownerColumn) : undefined;
+  // A scope that silently resolves to nothing would expose every tenant's rows (or every owner's), so a route that asks
+  // for one and names a column the table does not have is refused when it is built, not served unscoped.
+  const parentColumn = opts.parentScope ? getColumn(table, opts.parentScope.column) : undefined;
+  const parentKeyColumn = opts.parentScope ? getColumn(opts.parentScope.parent, opts.parentScope.parentKey ?? 'id') : undefined;
+  const parentOrgColumn = opts.parentScope ? getColumn(opts.parentScope.parent, opts.parentScope.parentOrgColumn ?? 'organizationId') : undefined;
+  if (opts.parentScope && !(parentColumn && parentKeyColumn && parentOrgColumn)) {
+    throw new Error(`crud-factory: "${resourceName}" parentScope names a column that does not exist`);
+  }
+  if (orgScoped && !orgCol && !parentColumn && !opts.unscopedByDesign) {
+    throw new Error(`crud-factory: "${resourceName}" is org-scoped but has no organizationId column; declare a parentScope, or unscopedByDesign with the reason`);
+  }
+
+  /** Limits a query to rows whose parent belongs to the caller's organization. */
+  function parentCondition(organizationId: string | null | undefined): SQL | undefined {
+    if (!parentColumn || !parentKeyColumn || !parentOrgColumn) return undefined;
+    if (!organizationId) throw ApiError.forbidden();
+    return inArray(parentColumn, db.select({ key: parentKeyColumn }).from(opts.parentScope!.parent).where(eq(parentOrgColumn, organizationId)));
+  }
+  if (opts.ownerColumn && !ownerCol) throw new Error(`crud-factory: "${resourceName}" declares ownerColumn "${opts.ownerColumn}" which the table does not have`);
   const orderCol = getColumn(table, orderBy);
   const lowRoleMode = lowRoleModeFor(table, Boolean(opts.ownerColumn));
   const governance = { ...crudGovernanceFor(table), hasOwnerColumn: Boolean(opts.ownerColumn) };
@@ -395,6 +426,8 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         if (orgScoped && orgCol && organizationId) {
           conditions.push(eq(orgCol, organizationId));
         }
+        const parentScoped = parentCondition(organizationId);
+        if (parentScoped) conditions.push(parentScoped);
         if (ownerCol && userId) {
           conditions.push(eq(ownerCol, userId));
         }
@@ -493,7 +526,17 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         // A below-staff caller can only create rows about themselves.
         if (lowRole.forcedOwner) finalValues[lowRole.forcedOwner.name] = lowRole.forcedOwner.value;
 
-        const row = await audited(organizationId, anonymous ? ANONYMOUS_ACTOR : userId, 'create', Object.keys(finalValues), async (tx) => (await tx.insert(table).values(finalValues).returning())[0] as Record<string, unknown> | undefined);
+        const row = await audited(organizationId, anonymous ? ANONYMOUS_ACTOR : userId, 'create', Object.keys(finalValues), async (tx) => {
+          if (parentColumn && parentKeyColumn && parentOrgColumn && opts.parentScope) {
+            // An indirect reference is checked like a direct one: the named parent must belong to the caller's organization.
+            const parentId = finalValues[opts.parentScope.column];
+            const owned = typeof parentId === 'string' && organizationId
+              ? await tx.select({ key: parentKeyColumn }).from(opts.parentScope.parent).where(and(eq(parentKeyColumn, parentId), eq(parentOrgColumn, organizationId))).limit(1)
+              : [];
+            if (owned.length === 0) throw ApiError.forbidden();
+          }
+          return (await tx.insert(table).values(finalValues).returning())[0] as Record<string, unknown> | undefined;
+        });
         return { data: row };
       },
     );
@@ -523,6 +566,8 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         if (orgScoped && orgCol && organizationId) {
           conditions.push(eq(orgCol, organizationId));
         }
+        const parentScoped = parentCondition(organizationId);
+        if (parentScoped) conditions.push(parentScoped);
         if (ownerCol && userId) {
           conditions.push(eq(ownerCol, userId));
         }
@@ -549,7 +594,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       async ({ body, params, organizationId, userId }) => {
         assertCrudWrite(governance);
         const id = params[paramName];
-        let updates = stripBlockedPatchFields(body, { pk, orgScoped, blockedPatchFields });
+        let updates = stripBlockedPatchFields(body, { pk, orgScoped, blockedPatchFields: opts.parentScope ? [...blockedPatchFields, opts.parentScope.column] : blockedPatchFields });
 
         // Fail closed BEFORE opening a transaction or running any hook: a
         // merge column can only ever be safely converted into a JSONB
@@ -563,6 +608,8 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         if (orgScoped && orgCol && organizationId) {
           conditions.push(eq(orgCol, organizationId));
         }
+        const parentScoped = parentCondition(organizationId);
+        if (parentScoped) conditions.push(parentScoped);
         if (ownerCol && userId) {
           conditions.push(eq(ownerCol, userId));
         }
@@ -662,6 +709,8 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         if (orgScoped && orgCol && organizationId) {
           conditions.push(eq(orgCol, organizationId));
         }
+        const parentScoped = parentCondition(organizationId);
+        if (parentScoped) conditions.push(parentScoped);
         if (ownerCol && userId) {
           conditions.push(eq(ownerCol, userId));
         }

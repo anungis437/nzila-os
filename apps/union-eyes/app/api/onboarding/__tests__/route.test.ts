@@ -27,6 +27,7 @@ describe('onboarding route (pendingProfilesTable)', () => {
       pk: 'id',
       tags: ['Auth'],
       orgScoped: true,
+      unscopedByDesign: expect.any(String),
       readRole: 'support_agent',
       writeRole: 'steward',
     });
