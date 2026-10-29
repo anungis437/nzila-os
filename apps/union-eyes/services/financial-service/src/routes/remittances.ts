@@ -7,7 +7,7 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import multer from 'multer';
 import { db, schema } from '../db';
-import { eq, and, desc, sql, isNull } from 'drizzle-orm';
+import { eq, and, desc, inArray, isNull } from 'drizzle-orm';
 import { RemittanceParser } from '@union-claims/financial';
 
 const router = Router();
@@ -300,7 +300,7 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
         .where(
           and(
             eq(schema.duesTransactions.organizationId, scopedOrgId),
-            sql`${schema.duesTransactions.id} = ANY(${validatedData.transactionIds})`,
+            inArray(schema.duesTransactions.id, validatedData.transactionIds),
             isNull(schema.duesTransactions.paidDate)
           )
         );
@@ -365,7 +365,7 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
         .where(and(
           eq(schema.duesTransactions.organizationId, scopedOrgId),
           isNull(schema.duesTransactions.paidDate),
-          sql`${schema.duesTransactions.id} = ANY(${transactionsToMatch.map((t) => t.id)})`,
+          inArray(schema.duesTransactions.id, transactionsToMatch.map((t) => t.id)),
         ))
         .returning({ id: schema.duesTransactions.id });
       if (updatedTransactions.length !== transactionsToMatch.length) {
