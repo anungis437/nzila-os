@@ -1159,8 +1159,8 @@
       },
       {
         "id": "R-46",
-        "status": "OPEN",
-        "title": "The canonical V2 acceptance ends FAIL on its last step: the application's own catalog admission rejects the V2 database with 25 violations (evidence/vs-v2-real-login-smoke.json lists them): union_eyes_runtime holds schema USAGE on user_management; deadline_reassignment_convergence, document_versions, donations, evidence_packs, geofence_events, location_deletion_log, location_tracking and message_threads carry privileges or policies the contract does not match; ue_v2_bootstrap_receipt is unclassified; commercial_contracts and external_data_sync_log carry unapproved column ACLs for union_eyes_system; nzila_auth_system_mutation lacks its organization_members column grants; and the case-assignee and conversation-assignee predicate functions are missing from the V2 build. The V2 source plan has drifted from the catalog contract. The plan is a frozen digest-bound artifact, so this needs a deliberate plan regeneration, not an ad hoc patch. ROOT CAUSE FOUND (not yet fixed): the plan embeds a STALE snapshot of the storage-authority manifest. For example its deadline_reassignment_convergence authority still carries the old \"system-only D1\" text and grants runtime nothing, while the manifest was reclassified on 2026-10-21 to runtime SELECT/INSERT (the assign route inserts the convergence task inside the tenant transaction), and the manifest and the digest-pinned catalog contract agree with each other on the 8 flagged tables. So admission is right and the plan is behind. Two further causes are independent of the plan: the canonical overlay leaves the runtime schema-USAGE contract at its legacy value although the canonical auth topology requires runtime USAGE on user_management, and the V2 bootstrap receipt table is unclassified. Regenerating the plan needs the hash-pinned offline wheelhouse, which was built from requirements.lock outside the repository (87 wheels). A fast reproduction (scripts/runtime/v2-admission-probe.ts) yields exactly the harness's 25 violations in about two minutes"
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "FIXED. The canonical V2 acceptance ended FAIL on its last step with 25 catalog-admission violations. Causes: the V2 source plan embedded a stale snapshot of the storage-authority manifest (and lacked 24 authority-kernel and document tables); the canonical overlay kept the legacy runtime schema USAGE and left the bootstrap receipt unclassified; the two documented V2 privilege decisions (donations, evidence_packs) and the two generated system column reads were not in the contract; and the installer did not apply the member-access projection or the case and conversation assignee predicates. Repair: plan regenerated, overlay extended, installer applies the companions after the security statements, manifest-security approves exactly those two functions. Verified: admission 0 violations, /api/health 200, 33 of 33 HTTP steps as expected, contract suite 302 files / 10,280 tests, identity contract and V2 unit tests pass (evidence/vs-v2-real-login-after-r46.json). Disclosed test changes: canonical-catalog-admission.test.ts pins the two decided entries instead of requiring the legacy manifest verbatim; the identity census baseline drops grievance_timeline.created_by, which the current source no longer declares. The harness still reports HTTP_SMOKE_PASS_FINAL_ACCEPTANCE_NOT_PROVEN and exits 1 by design; this is smoke, not final acceptance"
       },
       {
         "id": "R-47",
@@ -1185,9 +1185,9 @@
     ],
     "summary": {
       "total": 50,
-      "fixedRuntimeVerified": 29,
+      "fixedRuntimeVerified": 30,
       "fixedUnitVerified": 1,
-      "open": 20
+      "open": 19
     }
   },
   "runtimeAcceptance": {
