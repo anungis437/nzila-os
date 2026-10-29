@@ -9,7 +9,7 @@
  * PostgreSQL acceptance remains separately required.
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { pgTable, text, uuid, timestamp, boolean } from 'drizzle-orm/pg-core'
+import { pgTable, text, uuid, timestamp, boolean, type PgTable } from 'drizzle-orm/pg-core'
 
 const m = vi.hoisted(() => ({
   handlers: new Map<string, (ctx: Record<string, unknown>) => Promise<unknown>>(),
@@ -96,7 +96,7 @@ const auth = async (row: Record<string, unknown>, ctx: { userId?: string | null 
     ? { ok: false as const, status: 403 as const }
     : { ok: true as const }
 }
-async function mount(table = personal) {
+async function mount(table: PgTable = personal) {
   const { crudRoutes } = await import('../crud-factory')
   crudRoutes({ table, tags: ['Scheduling'], orgScoped: true, itemRoute: true,
     writeRole: 'steward', lockedAuthCheck: auth })
@@ -119,7 +119,7 @@ describe('R-52: lockedAuthCheck is mandatory for all generic writes', () => {
 
   it('PATCH without beforeUpdate or mergeJsonColumns denies a foreign personal calendar before any write or audit', async () => {
     await mount()
-    await expect(handler('Update')(context())).rejects.toMatchObject({ status: 403 })
+    await expect(handler('Update')(context())).rejects.toMatchObject({ code: 'FORBIDDEN' })
     expect(m.steps).toEqual(['transaction', 'lock', 'authorize'])
     expect(m.update).not.toHaveBeenCalled()
     expect(m.audit).not.toHaveBeenCalled()
@@ -127,7 +127,7 @@ describe('R-52: lockedAuthCheck is mandatory for all generic writes', () => {
 
   it('DELETE without a status column denies a foreign personal calendar before delete or audit', async () => {
     await mount()
-    await expect(handler('Delete')(context())).rejects.toMatchObject({ status: 403 })
+    await expect(handler('Delete')(context())).rejects.toMatchObject({ code: 'FORBIDDEN' })
     expect(m.steps).toEqual(['transaction', 'lock', 'authorize'])
     expect(m.remove).not.toHaveBeenCalled()
     expect(m.audit).not.toHaveBeenCalled()
@@ -135,7 +135,7 @@ describe('R-52: lockedAuthCheck is mandatory for all generic writes', () => {
 
   it('DELETE with a status column denies a foreign personal calendar before soft deletion', async () => {
     await mount(withStatus)
-    await expect(handler('Delete')(context())).rejects.toMatchObject({ status: 403 })
+    await expect(handler('Delete')(context())).rejects.toMatchObject({ code: 'FORBIDDEN' })
     expect(m.update).not.toHaveBeenCalled()
     expect(m.audit).not.toHaveBeenCalled()
   })
@@ -168,8 +168,8 @@ describe('R-52: lockedAuthCheck is mandatory for all generic writes', () => {
   it('cannot mutate when the scoped row does not exist', async () => {
     m.lockedRow = null
     await mount()
-    await expect(handler('Update')(context())).rejects.toMatchObject({ status: 404 })
-    await expect(handler('Delete')(context())).rejects.toMatchObject({ status: 404 })
+    await expect(handler('Update')(context())).rejects.toMatchObject({ code: 'NOT_FOUND' })
+    await expect(handler('Delete')(context())).rejects.toMatchObject({ code: 'NOT_FOUND' })
     expect(m.update).not.toHaveBeenCalled()
     expect(m.remove).not.toHaveBeenCalled()
     expect(m.audit).not.toHaveBeenCalled()
