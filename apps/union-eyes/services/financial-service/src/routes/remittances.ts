@@ -363,7 +363,10 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
           matchedAmount: matchedTotal,
         },
       } as any as Partial<typeof schema.employerRemittances.$inferInsert>)
-      .where(eq(schema.employerRemittances.id, id))
+      .where(and(
+        eq(schema.employerRemittances.id, id),
+        eq(schema.employerRemittances.tenantId, scopedOrgId),
+      ))
       .returning();
 
     res.json({
