@@ -134,8 +134,14 @@ export default function MigrationDetailConsole({ batchId }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ batch_id: batchId }),
       });
-      const data = await res.json();
-      setRetryResult(data.message ?? "Retry completed");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setRetryResult("Retry request failed; no completed replay is confirmed.");
+        return;
+      }
+      // The server only moves failed ingestion records back to pending.
+      // Never label a queued retry as a completed or successful import.
+      setRetryResult(data.message ?? "Retry request accepted; records queued for processing.");
       await fetchDetail();
     } catch {
       setRetryResult("Retry failed");
