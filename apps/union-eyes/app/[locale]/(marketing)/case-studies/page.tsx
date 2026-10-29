@@ -44,6 +44,7 @@ import { HumanCenteredCallout } from '@/components/marketing/human-centered-call
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { logger } from '@/lib/logger';
+import { caseStudyRows } from '@/lib/marketing/case-study-response';
 
 const CASE_STUDIES_COPY: Record<string, {
   loading: string;
@@ -124,9 +125,10 @@ export default function LocaleCaseStudiesPage() {
       try {
         const response = await fetch('/api/case-studies?status=published');
         if (response.ok) {
-          const data = await response.json();
-          setCaseStudies(data.caseStudies || []);
-          setFilteredStudies(data.caseStudies || []);
+          const payload: unknown = await response.json();
+          const studies = caseStudyRows<CaseStudy>(payload);
+          setCaseStudies(studies);
+          setFilteredStudies(studies);
         }
       } catch (error) {
         logger.error('Failed to load case studies:', error);
