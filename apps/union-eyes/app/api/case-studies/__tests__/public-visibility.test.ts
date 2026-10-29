@@ -99,7 +99,7 @@ describe('R-54 public case-studies publication boundary', () => {
   })
 
   it('global item routes require the platform content role for both reads and writes', async () => {
-    await import('../../[slug]/route')
+    await import('../[slug]/route')
     expect(m.factoryOptions[0]).toMatchObject({ readRole: 'content_manager', writeRole: 'content_manager' })
   })
 })
