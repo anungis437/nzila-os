@@ -76,6 +76,7 @@ const personal = pgTable('calendars', {
   id: uuid('id').primaryKey(),
   organizationId: uuid('organization_id').notNull(),
   ownerId: text('owner_id'),
+  createdBy: text('created_by'),
   isPersonal: boolean('is_personal'),
   title: text('title'),
 })
@@ -174,4 +175,52 @@ describe('R-52: lockedAuthCheck is mandatory for all generic writes', () => {
     expect(m.remove).not.toHaveBeenCalled()
     expect(m.audit).not.toHaveBeenCalled()
   })
+  it('protects the detected primary key, not a wrongly supplied pk option', async () => {
+    const alternate = pgTable('alternate_calendars', {
+      recordId: uuid('record_id').primaryKey(),
+      organizationId: uuid('organization_id').notNull(),
+      ownerId: text('owner_id'),
+      createdBy: text('created_by'),
+      title: text('title'),
+    })
+    const { crudRoutes } = await import('../crud-factory')
+    crudRoutes({
+      table: alternate, pk: 'id', tags: ['Scheduling'], orgScoped: true,
+      itemRoute: true, writeRole: 'steward', ownerColumn: 'ownerId',
+    })
+    await handler('Update')(context({
+      recordId: 'malicious-pk', createdBy: 'malicious-creator',
+      ownerId: 'malicious-new-owner', title: 'Allowed title',
+    }))
+    expect(m.update).toHaveBeenCalledOnce()
+    expect(m.update.mock.calls[0][0]).toMatchObject({ title: 'Allowed title' })
+    expect(m.update.mock.calls[0][0]).not.toHaveProperty('recordId')
+    expect(m.update.mock.calls[0][0]).not.toHaveProperty('ownerId')
+    expect(m.update.mock.calls[0][0]).not.toHaveProperty('createdBy')
+  })
+
+  it('sanitizes server-managed PK, tenant and owner fields reintroduced by a beforeUpdate hook', async () => {
+    m.lockedRow = { id: 'cal-1', isPersonal: true, ownerId: user }
+    const { crudRoutes } = await import('../crud-factory')
+    crudRoutes({
+      table: personal, pk: 'id', tags: ['Scheduling'], orgScoped: true,
+      itemRoute: true, writeRole: 'steward', lockedAuthCheck: auth,
+      ownerColumn: 'ownerId',
+      beforeUpdate: async (updates) => ({
+        ...updates,
+        id: 'malicious-pk',
+        organizationId: 'malicious-tenant',
+        ownerId: 'malicious-new-owner',
+        createdBy: 'malicious-creator',
+      }),
+    })
+    await handler('Update')(context({ title: 'Allowed title' }))
+    expect(m.steps).toEqual(['transaction', 'lock', 'authorize', 'update', 'audit'])
+    const written = m.update.mock.calls[0][0] as Record<string, unknown>
+    expect(written.title).toBe('Allowed title')
+    for (const key of ['id', 'organizationId', 'ownerId', 'createdBy']) {
+      expect(written, `hook reintroduced ${key}`).not.toHaveProperty(key)
+    }
+  })
+
 })
