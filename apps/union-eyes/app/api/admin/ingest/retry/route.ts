@@ -75,9 +75,10 @@ export const POST = withApi(
     if (failedRecords.length === 0) {
       return {
         retried: 0,
+        queued: 0,
         succeeded: 0,
         failed: 0,
-        message: 'No failed records found to retry',
+        message: 'No failed records found to queue for retry',
       };
     }
 
@@ -102,14 +103,14 @@ export const POST = withApi(
         details: { recordCount: failedRecords.length, recordIds: body.record_ids ?? 'all_failed' },
       });
     });
-    const retrySucceeded = failedRecords.length;
-    const retryFailed = 0;
-
+    // Re-queuing is NOT processing: report pending work, never a successful replay.
+    // The legacy 'retried' count is retained as an alias for callers already using it.
     return {
       retried: failedRecords.length,
-      succeeded: retrySucceeded,
-      failed: retryFailed,
-      message: `${retrySucceeded} records queued for retry`,
+      queued: failedRecords.length,
+      succeeded: 0,
+      failed: 0,
+      message: `${failedRecords.length} records queued for retry; processing has not completed`,
     };
   },
 );
