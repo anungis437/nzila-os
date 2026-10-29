@@ -194,8 +194,11 @@ function stopApp() {
 }
 
 function test() {
-  // The post-restart persistence checks belong to restart-check: they need state filed before the application was restarted.
-  run('npx', ['playwright', 'test', '--config', 'playwright.runtime.config.ts', '--grep-invert', 'persistence after a restart'], { cwd: APP, env: runtimeEnv() })
+  // Separate machine-readable reports ensure later Playwright invocations never overwrite earlier proof.
+  // They stay under the ignored disposable state directory and must be selectively uploaded (no secrets.json).
+  run('npx', ['playwright', 'test', '--config', 'playwright.runtime.config.ts', '--grep-invert', 'persistence after a restart'], {
+    cwd: APP, env: { ...runtimeEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-main.json') },
+  })
 }
 
 /** Re-applies the deterministic QA fixtures (idempotent) to a running database. */
@@ -207,13 +210,19 @@ function seed() {
 async function restartCheck() {
   // File, route, escalate and prepare everything the restart check then looks for, so it does not depend on an earlier run.
   const desktop = ['playwright', 'test', '--config', 'playwright.runtime.config.ts', '--project=desktop']
-  run('npx', [...desktop, 'e2e/runtime/01', '-g', 'journey A'], { cwd: APP, env: runtimeEnv() })
-  run('npx', [...desktop, 'e2e/runtime/03', 'e2e/runtime/05'], { cwd: APP, env: runtimeEnv() })
+  run('npx', [...desktop, 'e2e/runtime/01', '-g', 'journey A'], {
+    cwd: APP, env: { ...runtimeEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-restart-pre-case.json') },
+  })
+  run('npx', [...desktop, 'e2e/runtime/03', 'e2e/runtime/05'], {
+    cwd: APP, env: { ...runtimeEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-restart-pre-mandates.json') },
+  })
   stopApp()
   await new Promise((r) => setTimeout(r, 5_000))
   startApp()
   await healthy(300_000)
-  run('npx', ['playwright', 'test', '--config', 'playwright.runtime.config.ts', '--project=desktop', 'e2e/runtime/02'], { cwd: APP, env: runtimeEnv() })
+  run('npx', ['playwright', 'test', '--config', 'playwright.runtime.config.ts', '--project=desktop', 'e2e/runtime/02'], {
+    cwd: APP, env: { ...runtimeEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-restart-persistence.json') },
+  })
 }
 
 function down() {
