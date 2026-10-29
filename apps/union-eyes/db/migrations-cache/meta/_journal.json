@@ -218,6 +218,13 @@
       "when": 1790270000000,
       "tag": "0033_external_authority_principals_text",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1790280000000,
+      "tag": "0034_remaining_principal_columns_text",
+      "breakpoints": true
     }
   ]
 }

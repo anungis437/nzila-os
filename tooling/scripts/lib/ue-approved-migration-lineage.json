@@ -228,6 +228,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Changes the nine principal columns of representation_authorities, external_matter_access_grants and external_document_access_grants from uuid to text (R-29): application principals are text identifiers, so no external counsel or specialist could ever be recorded. The four policies that name the columns are dropped and recreated unchanged. Not applied to any live database."
+      },
+      {
+        "tag": "0034_remaining_principal_columns_text",
+        "sha256": "4d67bb343548a209182560b9d6a10eaab18645d0b52eb40d612dbaf4fa38a590",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Changes six more principal columns (employer_communications.sender_user_id and created_by, employer_contacts.created_by, ai_grievance_triages.reviewed_by, ai_clause_reasonings.reviewed_by, ai_copilot_sessions.user_id) from uuid to text (R-29). No policy, view or key depends on them, so nothing is dropped. cookie_consents.user_id is deliberately unchanged because it is a foreign key to profiles(id). Not applied to any live database."
       }
     ],
     "platform": [
