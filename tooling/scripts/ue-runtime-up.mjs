@@ -60,7 +60,7 @@ function secrets() {
 }
 
 function dbUrl(db) {
-  const url = new URL('postgresql://localhost') // gitleaks:allow (credentials are generated at runtime, never committed)
+  const url = new URL('postgresql://127.0.0.1') // gitleaks:allow (credentials are generated at runtime, never committed)
   url.username = 'postgres'
   url.password = secrets().db
   url.port = String(PORT_DB)
@@ -82,9 +82,9 @@ export function runtimeEnv() {
     UE_CANONICAL_BOOTSTRAP_V2: '0',
     UE_E2E_RISK_BYPASS: 'true',
     NODE_OPTIONS: '--max-old-space-size=8192',
-    NEXT_PUBLIC_APP_URL: `http://localhost:${PORT_APP}`,
-    PLAYWRIGHT_BASE_URL: `http://localhost:${PORT_APP}`,
-    ...(REDIS ? { REDIS_URL: `redis://localhost:${PORT_REDIS}` } : {}),
+    NEXT_PUBLIC_APP_URL: `http://127.0.0.1:${PORT_APP}`,
+    PLAYWRIGHT_BASE_URL: `http://127.0.0.1:${PORT_APP}`,
+    ...(REDIS ? { REDIS_URL: `redis://127.0.0.1:${PORT_REDIS}` } : {}),
     UE_RUNTIME_REDIS_CONTAINER: REDIS ? REDIS_CONTAINER : '',
     NAR_SIGNING_SECRET: secrets().nar,
     NAR_SIGNING_KEY_ID: 'local-acceptance',
@@ -109,7 +109,7 @@ async function healthy(timeoutMs) {
   const until = Date.now() + timeoutMs
   while (Date.now() < until) {
     try {
-      const response = await fetch(`http://localhost:${PORT_APP}/api/health`, { signal: AbortSignal.timeout(120_000) })
+      const response = await fetch(`http://127.0.0.1:${PORT_APP}/api/health`, { signal: AbortSignal.timeout(120_000) })
       const body = await response.json().catch(() => ({}))
       if (response.ok && body.ok === true) return body
     } catch {
@@ -129,7 +129,7 @@ async function up() {
   const running = out('docker', ['ps', '--filter', `name=${CONTAINER}`, '--format', '{{.Names}}'])
   if (!running) {
     spawnSync('docker', ['rm', '-f', CONTAINER])
-    run('docker', ['run', '-d', '--name', CONTAINER, '-e', `POSTGRES_PASSWORD=${secrets().db}`, '-p', `${PORT_DB}:5432`, 'postgres:16'])
+    run('docker', ['run', '-d', '--name', CONTAINER, '-e', `POSTGRES_PASSWORD=${secrets().db}`, '-p', `127.0.0.1:${PORT_DB}:5432`, 'postgres:16'])
     for (let i = 0; i < 60; i++) {
       if (/accepting connections/.test(out('docker', ['exec', CONTAINER, 'pg_isready', '-U', 'postgres']))) break
       await new Promise((r) => setTimeout(r, 2_000))
@@ -146,7 +146,7 @@ async function up() {
     // Django migrates first, as in production; then the approved Drizzle bootstrap; then the deterministic QA fixtures.
     run('python', ['manage.py', 'migrate', '--noinput'], {
       cwd: join(APP, 'backend'),
-      env: { PGHOST: 'localhost', PGPORT: String(PORT_DB), PGUSER: 'postgres', PGPASSWORD: secrets().db, PGDATABASE: APP_DB },
+      env: { PGHOST: '127.0.0.1', PGPORT: String(PORT_DB), PGUSER: 'postgres', PGPASSWORD: secrets().db, PGDATABASE: APP_DB },
     })
     run('node', ['tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs'], { env: runtimeEnv() })
     run('pnpm', ['--filter', '@nzila/union-eyes', 'seed:test-env'], { env: runtimeEnv() })
@@ -158,7 +158,7 @@ async function up() {
     psqlFile(PLATFORM_DB, join(ROOT, 'tooling/sql/ue-runtime-sandbox-nar-relax.sql'))
   }
 
-  const alive = await fetch(`http://localhost:${PORT_APP}/api/health`, { signal: AbortSignal.timeout(5_000) }).then(() => true, () => false)
+  const alive = await fetch(`http://127.0.0.1:${PORT_APP}/api/health`, { signal: AbortSignal.timeout(5_000) }).then(() => true, () => false)
   const startedAt = Date.now()
   if (!alive) startApp()
   // Cold start on a loaded workstation has exceeded 240 s on some runs (finding R-21); the wait is bounded and the elapsed time is reported, not hidden.
@@ -169,7 +169,7 @@ async function up() {
 function startApp() {
   const filter = ['--filter', '@nzila/union-eyes']
   if (PROD && (REBUILD || !existsSync(join(APP, '.next', 'BUILD_ID')))) run('pnpm', [...filter, 'exec', 'next', 'build'], { env: runtimeEnv() })
-  const serve = PROD ? ['exec', 'next', 'start', '--port', String(PORT_APP)] : ['dev']
+  const serve = PROD ? ['exec', 'next', 'start', '--hostname', '127.0.0.1', '--port', String(PORT_APP)] : ['dev']
   const log = openSync(join(STATE, 'app.log'), 'a')
   const child = spawn('pnpm', [...filter, ...serve], {
     cwd: ROOT, env: { ...process.env, ...runtimeEnv() }, shell: useShell('pnpm'), detached: true, stdio: ['ignore', log, log],
