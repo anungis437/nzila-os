@@ -353,6 +353,16 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
     throw new Error(`crud-factory: "${resourceName}" is org-scoped but has no organizationId column; declare a parentScope, or unscopedByDesign with the reason`);
   }
 
+  /**
+   * Tenant and subject scope are mandatory, not optional filters.  The generic API wrapper
+   * normally supplies both, but an absent membership/organization may never silently
+   * turn a SELECT into an unscoped query (nor invoke a beforeCreate hook).
+   */
+  function assertRequiredScope(organizationId: string | null | undefined, userId: string | null | undefined): void {
+    if (orgScoped && !organizationId) throw ApiError.forbidden();
+    if (ownerCol && !userId) throw ApiError.forbidden();
+  }
+
   /** Limits a query to rows whose parent belongs to the caller's organization. */
   function parentCondition(organizationId: string | null | undefined): SQL | undefined {
     if (!parentColumn || !parentKeyColumn || !parentOrgColumn) return undefined;
@@ -417,6 +427,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         },
       },
       async ({ request, organizationId, userId }) => {
+        assertRequiredScope(organizationId, userId);
         const url = new URL(request.url);
         const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
         const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || String(defaultLimit))));
@@ -483,6 +494,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         },
       },
       async ({ body, organizationId, userId }) => {
+        assertRequiredScope(organizationId, userId);
         const values: Record<string, unknown> =
           body && typeof body === 'object' && !Array.isArray(body)
             ? { ...(body as Record<string, unknown>) }
@@ -561,6 +573,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         },
       },
       async ({ params, organizationId, userId }) => {
+        assertRequiredScope(organizationId, userId);
         const id = params[paramName];
         const conditions: SQL[] = [eq(pkCol, id)];
         if (orgScoped && orgCol && organizationId) {
@@ -592,6 +605,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         },
       },
       async ({ body, params, organizationId, userId }) => {
+        assertRequiredScope(organizationId, userId);
         assertCrudWrite(governance);
         const id = params[paramName];
         let updates = stripBlockedPatchFields(body, { pk, orgScoped, blockedPatchFields: opts.parentScope ? [...blockedPatchFields, opts.parentScope.column] : blockedPatchFields });
@@ -703,6 +717,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         },
       },
       async ({ params, organizationId, userId }) => {
+        assertRequiredScope(organizationId, userId);
         assertCrudWrite(governance);
         const id = params[paramName];
         const conditions: SQL[] = [eq(pkCol, id)];
