@@ -616,7 +616,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         const lowRole = await resolveLowRoleScope(lowRoleMode, userId, organizationId);
         if (lowRole.condition) conditions.push(lowRole.condition);
 
-        if (opts.beforeUpdate || mergeJsonColumns.length > 0) {
+        if (opts.beforeUpdate || mergeJsonColumns.length > 0 || opts.lockedAuthCheck) {
           // Locked read-then-write: the row cannot change between the hook
           // seeing it and the final write, closing the lost-update race a
           // plain read-then-`.set()` (below) cannot. `mergeJsonColumns`
@@ -713,6 +713,28 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         if (parentScoped) conditions.push(parentScoped);
         if (ownerCol && userId) {
           conditions.push(eq(ownerCol, userId));
+        }
+
+        // A route may declare lockedAuthCheck without beforeUpdate/mergeJsonColumns (e.g. personal calendars).
+        // The callback must run against THIS row under SELECT ... FOR UPDATE inside the write/audit transaction.
+        // Checking an earlier unlocked row, or ignoring the callback on DELETE, permits same-org IDOR.
+        if (opts.lockedAuthCheck) {
+          const row = await audited(organizationId, userId, 'delete', ['status'], (outer) => outer.transaction(async (tx) => {
+            const [existingRow] = await tx.select().from(table).where(and(...conditions)).limit(1).for('update');
+            if (!existingRow) throw ApiError.notFound(`${resourceName} not found`);
+            const authResult = await opts.lockedAuthCheck!(existingRow as Record<string, unknown>, {
+              id, organizationId, userId,
+            });
+            if (!authResult.ok) {
+              throw authResult.status === 401 ? ApiError.unauthorized() : ApiError.forbidden();
+            }
+            const statusCol = getColumn(table, 'status');
+            return statusCol
+              ? (await tx.update(table).set({ status: 'archived', updatedAt: new Date() } as Record<string, unknown>).where(and(...conditions)).returning())[0] as Record<string, unknown> | undefined
+              : (await tx.delete(table).where(and(...conditions)).returning())[0] as Record<string, unknown> | undefined;
+          }));
+          if (!row) throw ApiError.notFound(`${resourceName} not found`);
+          return { data: row };
         }
 
         // Try soft delete first (status → archived), fall back to hard delete
