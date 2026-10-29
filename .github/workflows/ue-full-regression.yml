@@ -7,14 +7,6 @@ on:
       - 'packages/**'
       - 'tooling/contract-tests/**'
       - '.github/workflows/ue-full-regression.yml'
-  push:
-    branches:
-      - agents/ue-cursor-final-closure
-    paths:
-      - 'apps/union-eyes/**'
-      - 'packages/**'
-      - 'tooling/contract-tests/**'
-      - '.github/workflows/ue-full-regression.yml'
   workflow_dispatch:
 
 permissions:
