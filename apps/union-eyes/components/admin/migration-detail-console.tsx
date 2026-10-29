@@ -139,9 +139,10 @@ export default function MigrationDetailConsole({ batchId }: Props) {
         setRetryResult("Retry request failed; no completed replay is confirmed.");
         return;
       }
-      // The server only moves failed ingestion records back to pending.
-      // Never label a queued retry as a completed or successful import.
-      setRetryResult(data.message ?? "Retry request accepted; records queued for processing.");
+      // withApi wraps successful responses under "data". The server only moves
+      // failed records back to pending; never report an import as completed.
+      const result = data?.success === true && data?.data ? data.data : data;
+      setRetryResult(result?.message ?? "Retry request accepted; records queued for processing.");
       await fetchDetail();
     } catch {
       setRetryResult("Retry failed");
