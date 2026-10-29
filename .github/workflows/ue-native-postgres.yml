@@ -96,7 +96,7 @@ jobs:
             db/__tests__/migration-0034-remaining-principals.postgres.test.ts \
             db/__tests__/tenant-isolation-remediation.postgres.test.ts \
             --reporter=default --reporter=json \
-            --outputFile=artifacts/ue-native-pg/results.json
+            --outputFile=../../artifacts/ue-native-pg/results.json
 
       - name: Verify required tests actually ran and write proof
         shell: bash
