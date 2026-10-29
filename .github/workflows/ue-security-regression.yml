@@ -49,7 +49,7 @@ jobs:
       - name: Lint changed security files
         shell: bash
         run: |
-          pnpm exec eslint             apps/union-eyes/lib/api/crud-factory.ts             apps/union-eyes/lib/api/__tests__/crud-factory-locked-auth.test.ts             apps/union-eyes/lib/api/__tests__/crud-factory-scope.test.ts             apps/union-eyes/app/api/calendars/'[id]'/route.ts apps/union-eyes/app/api/case-studies/route.ts apps/union-eyes/app/api/case-studies/'[slug]'/route.ts apps/union-eyes/app/api/case-studies/__tests__/public-visibility.test.ts
+          pnpm --filter @nzila/union-eyes exec eslint             lib/api/crud-factory.ts             lib/api/__tests__/crud-factory-locked-auth.test.ts             lib/api/__tests__/crud-factory-scope.test.ts             app/api/calendars/'[id]'/route.ts app/api/case-studies/route.ts app/api/case-studies/'[slug]'/route.ts app/api/case-studies/__tests__/public-visibility.test.ts
 
       - name: Execute actual CRUD authorization regression
         shell: bash
