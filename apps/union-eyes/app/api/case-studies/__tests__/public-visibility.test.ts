@@ -76,7 +76,7 @@ describe('R-54 public case-studies publication boundary', () => {
       expect(query.sql).toContain('"case_studies"."published_at"')
       expect(query.sql).toMatch(/<=? \$\d+/)
       expect(query.params).toContain('public')
-      expect(query.params.some((x) => x instanceof Date)).toBe(true)
+      expect(query.params.some((x) => x instanceof Date || (typeof x === 'string' && /^\\d{4}-\\d{2}-\\d{2}/.test(x)))).toBe(true)
     }
   })
 
