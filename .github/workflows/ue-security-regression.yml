@@ -1,0 +1,94 @@
+name: Union Eyes Security Regression
+
+on:
+  pull_request:
+    paths:
+      - 'apps/union-eyes/**'
+      - 'packages/**'
+      - '.github/workflows/ue-security-regression.yml'
+  push:
+    branches:
+      - agents/ue-cursor-final-closure
+    paths:
+      - 'apps/union-eyes/**'
+      - 'packages/**'
+      - '.github/workflows/ue-security-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ue-security-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  r51-r52:
+    name: R-51/R-52 CRUD scope and locked authorization
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact source commit (not synthetic PR merge)
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup-monorepo
+
+      - name: Verify exact checked out commit
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Typecheck Union Eyes
+        run: pnpm --filter @nzila/union-eyes typecheck
+
+      - name: Lint changed security files
+        shell: bash
+        run: |
+          pnpm exec eslint             apps/union-eyes/lib/api/crud-factory.ts             apps/union-eyes/lib/api/__tests__/crud-factory-locked-auth.test.ts             apps/union-eyes/lib/api/__tests__/crud-factory-scope.test.ts             apps/union-eyes/app/api/calendars/'[id]'/route.ts
+
+      - name: Execute actual CRUD authorization regression
+        shell: bash
+        run: |
+          mkdir -p artifacts/ue-security-regression
+          pnpm exec vitest run --project union-eyes             apps/union-eyes/lib/api/__tests__/crud-factory-scope.test.ts             apps/union-eyes/lib/api/__tests__/crud-factory-locked-auth.test.ts             apps/union-eyes/app/api/calendars/'[id]'/__tests__/route.test.ts             --reporter=json             --outputFile=artifacts/ue-security-regression/vitest.json
+
+      - name: Require complete, non-skipped test execution and write receipt
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs')
+          const p = 'artifacts/ue-security-regression/vitest.json'
+          const result = JSON.parse(fs.readFileSync(p, 'utf8'))
+          const total = result.numTotalTests || 0
+          const passed = result.numPassedTests || 0
+          const failed = result.numFailedTests || 0
+          const pending = result.numPendingTests || 0
+          if (total < 20 || failed || pending || total !== passed || result.success !== true) {
+            throw new Error('R-51/R-52 tests must execute and all pass; skipped tests do not qualify')
+          }
+          fs.writeFileSync('artifacts/ue-security-regression/receipt.json', JSON.stringify({
+            kind: 'UE-R51-R52-SECURITY-PROOF',
+            sourceSha: process.env.EXPECTED_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            total, passed, failed, pending,
+            evidenceClass: 'UNIT_VERIFIED',
+            note: 'Does not establish real HTTP/native PostgreSQL or staging readiness',
+          }, null, 2) + '\n')
+          NODE
+
+      - name: Upload exact-SHA test receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-security-regression-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/ue-security-regression/
+          if-no-files-found: warn
+          retention-days: 30
