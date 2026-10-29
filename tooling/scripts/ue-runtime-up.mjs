@@ -513,6 +513,10 @@ async function healthy(timeoutMs) {
     await new Promise((r) => setTimeout(r, 4_000))
   }
   checkLoopbackPort(CONTAINER, PORT_DB, 5432)
+  const actualImage = out('docker', ['inspect', '--format', '{{.Config.Image}}', CONTAINER])
+  if (actualImage !== `postgres:${POSTGRES_VERSION}`) {
+    throw new Error('Refusing to reuse a PostgreSQL QA container with the wrong major version')
+  }
   const exists = (db) => out('docker', ['exec', CONTAINER, 'psql', '-U', 'postgres', '-tAc', `SELECT 1 FROM pg_database WHERE datname='${db}'`]) === '1'
   const seeded = exists(APP_DB)
   if (seeded && FRESH) {
