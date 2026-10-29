@@ -929,7 +929,7 @@
     "READY_FOR_STAGING": "NO"
   },
   "runtimeFindings": {
-    "note": "Defects found by running the real application over HTTP against native PostgreSQL. They are NOT items of the 150-item release-debt register and do not change the addressed count. Detail and reproduction: docs/union-eyes/convergence/RUNTIME-ACCEPTANCE.md. FIXED_RUNTIME_VERIFIED means the repaired path was exercised by the Playwright runtime suite on the production build; it does not mean CLOSED.",
+    "note": "Defects found by running the real application over HTTP against native PostgreSQL. They are NOT items of the 150-item release-debt register and do not change the addressed count. Detail and reproduction: docs/union-eyes/convergence/RUNTIME-ACCEPTANCE.md. FIXED_RUNTIME_VERIFIED means the repaired path was exercised by the Playwright runtime suite on the production build; it does not mean CLOSED. R-52–R-55 have exact-SHA UNIT-only proof in GitHub Actions run 40950669012 (39/39 tests, 0 skipped) against e75d4c07; none is yet native/HTTP/browser qualified.",
     "evidence": "e2e/runtime/01-foundation-and-case-journey.spec.ts and 02-persistence-after-restart.spec.ts, run through tooling/scripts/ue-runtime-up.mjs on a fresh container",
     "items": [
       {
@@ -1185,13 +1185,33 @@
       {
         "id": "R-51",
         "status": "FIXED_UNIT_VERIFIED",
-        "title": "R-44 class audit of the shared CRUD factory (indirect references and silent scope loss). Findings: (1) crud-factory dropped its tenant or owner scope without saying so when the table had no organizationId column (orgScoped defaults to true) or when ownerColumn named a column the table lacks; 16 route modules were mounted that way. (2) bargaining_proposals has no organization column, only negotiation_id, so GET, PATCH, DELETE and POST on /api/bargaining/proposals were not tenant-scoped at the route and a create could attach a proposal to another organization's negotiation (a database RLS policy is the only backstop, and the legacy QA topology has none). (3) cnesst preventive-withdrawals and right-of-refusal declared ownerColumn workerId, a column that does not exist; harmless today only because their steward floor already excludes below-staff callers, but it switched the low-role guard off. Repairs: the factory now refuses to build a route whose scope resolves to nothing (declare parentScope, or unscopedByDesign with a reason); parentScope limits read, update and delete to rows whose parent belongs to the caller organization, requires a create to name an owned parent, and strips the parent column from PATCH so a row cannot be re-parented; the two dead ownerColumn declarations were removed; arbitration precedents, data classification policy, pending profiles, oauth providers and the data-subject routes now declare unscopedByDesign with the governance reason. Verified: 10 new factory tests, two mutations (parent condition removed, re-parent strip removed) fail them; all 289 route modules still build. Test adaptations (disclosed): bargaining-proposals route test mock gains negotiations; onboarding and data-classification-policy route tests expect the new unscopedByDesign option (original assertions retained). Side finding: the R-46 overlay named donations in a reachable module and flipped the schema-mutation-batch reachability ratchet to a false positive; the decisions now live in lib/operations/catalog-v2-decisions.json. NOT done: hand-written routes that do not use the factory (for example claims/bulk) and bulk or indirect-reference review beyond the factory; no authenticated HTTP test of /api/bargaining/proposals yet. Unit-level proof only"
+        "title": "R-44 class audit of the shared CRUD factory (indirect references and silent scope loss). Findings: (1) crud-factory dropped its tenant or owner scope without saying so when the table had no organizationId column (orgScoped defaults to true) or when ownerColumn named a column the table lacks; 16 route modules were mounted that way. (2) bargaining_proposals has no organization column, only negotiation_id, so GET, PATCH, DELETE and POST on /api/bargaining/proposals were not tenant-scoped at the route and a create could attach a proposal to another organization's negotiation (a database RLS policy is the only backstop, and the legacy QA topology has none). (3) cnesst preventive-withdrawals and right-of-refusal declared ownerColumn workerId, a column that does not exist; harmless today only because their steward floor already excludes below-staff callers, but it switched the low-role guard off. Repairs: the factory now refuses to build a route whose scope resolves to nothing (declare parentScope, or unscopedByDesign with a reason); parentScope limits read, update and delete to rows whose parent belongs to the caller organization, requires a create to name an owned parent, and strips the parent column from PATCH so a row cannot be re-parented; the two dead ownerColumn declarations were removed; arbitration precedents, data classification policy, pending profiles, oauth providers and the data-subject routes now declare unscopedByDesign with the governance reason. Verified: 10 new factory tests, two mutations (parent condition removed, re-parent strip removed) fail them; all 289 route modules still build. Test adaptations (disclosed): bargaining-proposals route test mock gains negotiations; onboarding and data-classification-policy route tests expect the new unscopedByDesign option (original assertions retained). Side finding: the R-46 overlay named donations in a reachable module and flipped the schema-mutation-batch reachability ratchet to a false positive; the decisions now live in lib/operations/catalog-v2-decisions.json. NOT done: hand-written routes that do not use the factory (for example claims/bulk) and bulk or indirect-reference review beyond the factory; no authenticated HTTP test of /api/bargaining/proposals yet. Unit-level proof only Follow-up: a disposable-native-QA HTTP test now exists at e2e/runtime/11-bargaining-proposals-tenant-scope.spec.ts for list/read/create/update/delete/re-parent; it has NOT been executed and is NOT HTTP-verified."
+      },
+      {
+        "id": "R-52",
+        "status": "FIXED_UNIT_VERIFIED",
+        "title": "Factory lockedAuthCheck was ignored on ordinary PATCH and every DELETE, so another same-organization steward could mutate a member's personal calendar by ID. PATCH now uses a locked transaction whenever a lockedAuthCheck is configured; DELETE now locks, evaluates authorization against the fresh row and mutates with audit atomically. CI unit proof on e75d4c07, Union Eyes Security Regression run 40950669012; native/HTTP proof remains open."
+      },
+      {
+        "id": "R-53",
+        "status": "FIXED_UNIT_VERIFIED",
+        "title": "Generic PATCH sanitized the configured pk rather than resolvedPk, enabling detected physical-key mutation, and beforeUpdate could reintroduce protected tenant/owner/creator/parent fields. Factory now strips protected fields using actual PK both before and after hooks. CI unit proof on e75d4c07, run 40950669012; native/HTTP proof remains open."
+      },
+      {
+        "id": "R-54",
+        "status": "FIXED_UNIT_VERIFIED",
+        "title": "Public case-studies API listed drafts, scheduled and authenticated-only records because it filtered an absent status column; both rows and count are now constrained to visibility public AND published_at <= request time. Invalid draft status query is rejected; global case-study item reads and edits require content_manager instead of union member/admin. CI unit proof on e75d4c07, run 40950669012; HTTP/native proof remains open."
+      },
+      {
+        "id": "R-55",
+        "status": "FIXED_UNIT_VERIFIED",
+        "title": "Public marketing case-studies page treated the withApi nested success envelope as a top-level caseStudies array, hiding real published content. A typed response normalizer now recognizes current/legacy successful envelopes and refuses erroneous/malformed responses. CI unit proof on e75d4c07, run 40950669012; browser acceptance remains open."
       }
     ],
     "summary": {
-      "total": 51,
+      "total": 55,
       "fixedRuntimeVerified": 30,
-      "fixedUnitVerified": 2,
+      "fixedUnitVerified": 6,
       "open": 19
     }
   },
