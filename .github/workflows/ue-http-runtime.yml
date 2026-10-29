@@ -27,6 +27,11 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
 
+      - name: Verify JavaScript parser accepts runtime entrypoint before any dependencies or Docker
+        run: |
+          node --check tooling/scripts/ue-runtime-up.mjs
+          node --check tooling/scripts/lib/ue-disposable-container-ownership.mjs
+
       - uses: ./.github/actions/setup-monorepo
 
       - uses: actions/setup-python@v6
