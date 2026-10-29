@@ -42,8 +42,9 @@ vi.mock('@/lib/db/with-rls-context', () => ({
     const tx = {
       select: () => ({ from: () => ({ where: () => ({ limit: () => Promise.resolve(captured.parentRows) }) }) }),
       insert: () => ({ values: (values: Record<string, unknown>) => { captured.inserts.push(values); return { returning: () => Promise.resolve([{ id: 'new', ...values }]) }; } }),
-      update: () => ({ set: (values: Record<string, unknown>) => { captured.sets.push(values); return { where: () => ({ returning: () => Promise.resolve([{ id: 'row' }]) }) }; } }),
+      update: () => ({ set: (values: Record<string, unknown>) => { captured.sets.push(values); return { where: (clause: unknown) => { captured.wheres.push(clause); return { returning: () => Promise.resolve([{ id: 'row' }]) }; } }; } }),
     };
+    tx.delete = () => ({ where: (clause: unknown) => { captured.wheres.push(clause); return { returning: () => Promise.resolve([{ id: 'row' }]) }; } });
     return operation(tx);
   },
 }));
@@ -122,8 +123,10 @@ describe('crud-factory parent scope (rows owned through a parent)', () => {
     crudRoutes({ ...options, itemRoute: true });
     for (const verb of ['Get', 'Update', 'Delete']) {
       captured.wheres.length = 0;
-      await captured.handlers.get(verb)!(ctx({ body: { title: 'x' } })).catch(() => undefined);
-      if (verb === 'Get') expect(render(captured.wheres[0]).sql, verb).toContain('"negotiations"."organization_id"');
+      await captured.handlers.get(verb)!(ctx({ body: { title: 'x' } }));
+      expect(captured.wheres, `${verb} must include a scoped WHERE predicate`).not.toHaveLength(0);
+      expect(render(captured.wheres[0]).sql, verb).toContain('"negotiations"."organization_id"');
+      expect(render(captured.wheres[0]).params, verb).toContain(ORG);
     }
   });
 
@@ -159,4 +162,27 @@ describe('crud-factory parent scope (rows owned through a parent)', () => {
     expect(captured.sets[0]).toMatchObject({ title: 'renamed' });
     expect(captured.sets[0]).not.toHaveProperty('negotiationId');
   });
+  it('refuses a collection read without a resolved organizational context before querying', async () => {
+    const crudRoutes = await factory();
+    crudRoutes(options);
+    await expect(captured.handlers.get('List')!(ctx({ organizationId: null }))).rejects.toMatchObject({ code: 'FORBIDDEN' });
+    expect(captured.wheres).toHaveLength(0);
+  });
+
+  it('refuses a direct organization-scoped item read without an organization', async () => {
+    const crudRoutes = await factory();
+    const directlyScoped = pgTable('scoped_proposals', { id: uuid('id').primaryKey(), organizationId: uuid('organization_id').notNull() });
+    crudRoutes({ table: directlyScoped, tags: ['t'], orgScoped: true, itemRoute: true });
+    await expect(captured.handlers.get('Get')!(ctx({ organizationId: null }))).rejects.toMatchObject({ code: 'FORBIDDEN' });
+    expect(captured.wheres).toHaveLength(0);
+  });
+
+  it('refuses an owner-scoped read with no authenticated subject', async () => {
+    const crudRoutes = await factory();
+    const owned = pgTable('owned_proposals', { id: uuid('id').primaryKey(), createdBy: text('created_by') });
+    crudRoutes({ table: owned, tags: ['t'], orgScoped: false, ownerColumn: 'createdBy', itemRoute: true });
+    await expect(captured.handlers.get('Get')!(ctx({ userId: null }))).rejects.toMatchObject({ code: 'FORBIDDEN' });
+    expect(captured.wheres).toHaveLength(0);
+  });
+
 });
