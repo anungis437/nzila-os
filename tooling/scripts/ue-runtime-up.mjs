@@ -3,6 +3,7 @@
  * Reproducible local runtime for Union Eyes acceptance: the real Next.js app, native PostgreSQL, deterministic QA fixtures.
  *
  *   node tooling/scripts/ue-runtime-up.mjs up      # database, migrations, seed, platform sandbox DB, app, wait healthy
+ *   node tooling/scripts/ue-runtime-up.mjs db      # only the native combined DB fixture; no Next server
  *   node tooling/scripts/ue-runtime-up.mjs test    # run the Playwright runtime acceptance (desktop, tablet, mobile)
  *   node tooling/scripts/ue-runtime-up.mjs restart-check  # file a case, restart the app, prove it persisted
  *   node tooling/scripts/ue-runtime-up.mjs all     # up, then test, then restart-check
@@ -43,6 +44,8 @@ const PORT_REDIS = Number(opt('port-redis', '56379'))
 const REDIS_CONTAINER = 'ue-runtime-redis'
 const CONTAINER = 'ue-runtime-pg'
 const APP_DB = 'ue_runtime'
+const POSTGRES_VERSION = opt('postgres-version', '16')
+if (!['15', '16'].includes(POSTGRES_VERSION)) throw new Error('Only PostgreSQL 15 and 16 are supported for disposable QA fixtures')
 const PLATFORM_DB = 'ue_platform_sandbox'
 const isWin = process.platform === 'win32'
 // Only the Windows .cmd shims (pnpm, npx) need a shell; with a shell, arguments that contain spaces are split apart.
@@ -95,7 +98,8 @@ export function runtimeEnv() {
 
 function run(cmd, cmdArgs, options = {}) {
   const result = spawnSync(cmd, cmdArgs, { stdio: 'inherit', shell: useShell(cmd), cwd: ROOT, ...options, env: { ...process.env, ...options.env } })
-  if (result.status !== 0) throw new Error(`${cmd} ${cmdArgs.join(' ')} exited with ${result.status}`)
+  // Never print command arguments on failure: Docker arguments can contain generated database credentials.
+  if (result.status !== 0) throw new Error(`${cmd} exited with ${result.status ?? 'unknown'} (arguments withheld)`)
 }
 const out = (cmd, cmdArgs, options = {}) => spawnSync(cmd, cmdArgs, { encoding: 'utf8', shell: useShell(cmd), cwd: ROOT, ...options }).stdout?.trim() ?? ''
 const psql = (db, sql) => run('docker', ['exec', CONTAINER, 'psql', '-U', 'postgres', '-d', db, '-v', 'ON_ERROR_STOP=1', '-c', sql])
@@ -129,7 +133,7 @@ async function up() {
   const running = out('docker', ['ps', '--filter', `name=${CONTAINER}`, '--format', '{{.Names}}'])
   if (!running) {
     spawnSync('docker', ['rm', '-f', CONTAINER])
-    run('docker', ['run', '-d', '--name', CONTAINER, '-e', `POSTGRES_PASSWORD=${secrets().db}`, '-p', `127.0.0.1:${PORT_DB}:5432`, 'postgres:16'])
+    run('docker', ['run', '-d', '--name', CONTAINER, '-e', `POSTGRES_PASSWORD=${secrets().db}`, '-p', `127.0.0.1:${PORT_DB}:5432`, `postgres:${POSTGRES_VERSION}`])
     for (let i = 0; i < 60; i++) {
       if (/accepting connections/.test(out('docker', ['exec', CONTAINER, 'pg_isready', '-U', 'postgres']))) break
       await new Promise((r) => setTimeout(r, 2_000))
@@ -157,6 +161,9 @@ async function up() {
     psqlFile(PLATFORM_DB, join(ROOT, 'migrations/platform/20260502_nar_phase3_hardening.sql'))
     psqlFile(PLATFORM_DB, join(ROOT, 'tooling/sql/ue-runtime-sandbox-nar-relax.sql'))
   }
+
+  // CI's native database gate needs migrations and seed but must never start Next.js.
+  if (command === 'db') return
 
   const alive = await fetch(`http://127.0.0.1:${PORT_APP}/api/health`, { signal: AbortSignal.timeout(5_000) }).then(() => true, () => false)
   const startedAt = Date.now()
@@ -217,7 +224,7 @@ function down() {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   if (command === 'env') console.log(JSON.stringify(runtimeEnv(), null, 2))
-  else if (command === 'up') await up()
+  else if (command === 'up' || command === 'db') await up()
   else if (command === 'seed') seed()
   else if (command === 'test') test()
   else if (command === 'restart-check') await restartCheck()
