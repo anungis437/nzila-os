@@ -5,13 +5,7 @@ on:
     paths:
       - 'apps/union-eyes/**'
       - 'tooling/scripts/ue-runtime-up.mjs'
-      - '.github/workflows/ue-http-runtime.yml'
-  push:
-    branches:
-      - agents/ue-cursor-final-closure
-    paths:
-      - 'apps/union-eyes/**'
-      - 'tooling/scripts/ue-runtime-up.mjs'
+      - 'tooling/scripts/lib/ue-disposable-container-ownership*.mjs'
       - '.github/workflows/ue-http-runtime.yml'
   workflow_dispatch:
 
@@ -46,6 +40,9 @@ jobs:
 
       - name: Install browser binaries and system dependencies
         run: pnpm --filter @nzila/union-eyes exec playwright install --with-deps chromium
+
+      - name: Verify disposable runtime ownership contracts
+        run: node --test tooling/scripts/lib/ue-disposable-container-ownership.test.mjs
 
       - name: Assert this runner owns every disposable name and no local port is already bound
         shell: bash
