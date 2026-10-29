@@ -92,13 +92,13 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p artifacts/ue-native-pg
-          pnpm exec vitest run --project union-eyes --maxWorkers=1 \
-            apps/union-eyes/db/__tests__/migration-0030-precedent-explicit-share-select.postgres.test.ts \
-            apps/union-eyes/db/__tests__/migration-0031-feature-flags-attribution.postgres.test.ts \
-            apps/union-eyes/db/__tests__/migration-0032-grievance-events-actor.postgres.test.ts \
-            apps/union-eyes/db/__tests__/migration-0033-external-authority-principals.postgres.test.ts \
-            apps/union-eyes/db/__tests__/migration-0034-remaining-principals.postgres.test.ts \
-            apps/union-eyes/db/__tests__/tenant-isolation-remediation.postgres.test.ts \
+          pnpm --filter @nzila/union-eyes exec vitest run --config vitest.native.config.ts --maxWorkers=1 \
+            db/__tests__/migration-0030-precedent-explicit-share-select.postgres.test.ts \
+            db/__tests__/migration-0031-feature-flags-attribution.postgres.test.ts \
+            db/__tests__/migration-0032-grievance-events-actor.postgres.test.ts \
+            db/__tests__/migration-0033-external-authority-principals.postgres.test.ts \
+            db/__tests__/migration-0034-remaining-principals.postgres.test.ts \
+            db/__tests__/tenant-isolation-remediation.postgres.test.ts \
             --reporter=default --reporter=json \
             --outputFile=artifacts/ue-native-pg/results.json
 
