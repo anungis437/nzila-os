@@ -33,3 +33,17 @@ export function calculateRemittanceVariance(
     exactMatch: varianceCents === 0,
   }
 }
+
+/**
+ * A completed remittance must carry an explicit transaction reference list.
+ * A count alone is not proof that any particular member payment was applied.
+ */
+export function readMatchedTransactionIds(metadata: unknown): string[] | null {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return null
+  const ids = (metadata as Record<string, unknown>).matchedTransactionIds
+  if (!Array.isArray(ids) || ids.length === 0 || ids.length > 500) return null
+  const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+  if (!ids.every((id) => typeof id === 'string' && uuid.test(id))) return null
+  if (new Set(ids).size !== ids.length) return null
+  return ids as string[]
+}
