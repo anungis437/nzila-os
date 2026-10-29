@@ -505,18 +505,25 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
         role = 'app_owner';
       } else if (pgUser.organizationId) {
         try {
-          const [membership] = await db
-            .select({ role: organizationMembers.role })
-            .from(organizationMembers)
-            .where(
-              and(
-                eq(organizationMembers.userId, pgUser.id),
-                eq(organizationMembers.organizationId, pgUser.organizationId),
-                eq(organizationMembers.status, 'active'),
-                isNull(organizationMembers.deletedAt),
-              ),
-            )
-            .limit(1);
+          // The membership policy needs the org in the RLS context; on the bare connection it matches no row and the role
+          // would silently become 'member', refusing every steward, officer and administrator on a role-floor route.
+          const { withRLSContext } = await import('@/lib/db/with-rls-context');
+          const [membership] = await withRLSContext(
+            { organizationId: pgUser.organizationId, userId: pgUser.id },
+            async (tx) =>
+              tx
+                .select({ role: organizationMembers.role })
+                .from(organizationMembers)
+                .where(
+                  and(
+                    eq(organizationMembers.userId, pgUser.id),
+                    eq(organizationMembers.organizationId, pgUser.organizationId!),
+                    eq(organizationMembers.status, 'active'),
+                    isNull(organizationMembers.deletedAt),
+                  ),
+                )
+                .limit(1),
+          );
           if (membership?.role) {
             role = membership.role;
           }

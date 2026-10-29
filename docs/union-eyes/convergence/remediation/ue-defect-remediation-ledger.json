@@ -19,8 +19,8 @@
     "addressedThisProgramme": 46,
     "byStatus": {
       "NATIVE_VERIFIED": 16,
-      "UNIT_VERIFIED": 30,
-      "E2E_VERIFIED": 0,
+      "UNIT_VERIFIED": 22,
+      "E2E_VERIFIED": 8,
       "CLOSED": 0
     },
     "releaseBlockingAddressed": 34,
@@ -32,7 +32,7 @@
   "entries": [
     {
       "defectId": "DEF-0B11-PRP-REWARDS-EXPORT-RETURNS-EVERY-MEMBER-LEDGER-AWARD-AND-BUDGET-ROW-TO-ANY-MEMBER",
-      "status": "UNIT_VERIFIED",
+      "status": "E2E_VERIFIED",
       "commits": [
         "8f8cb18aa"
       ],
@@ -45,7 +45,12 @@
       "remaining": [
         "Run the export route natively",
         "Institutional decision on the export audience (administrator is an engineering default, not a mandate)"
-      ]
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "rewards export: administrator receives a no-store text/csv; a member, a steward and an anonymous caller are refused (403, 403, 401). Not proven over HTTP: the same-transaction audit and formula neutralisation (still unit-level), and the institutional decision on the export audience",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
     },
     {
       "defectId": "DEF-0B11-PRP-RECONCILIATION-PROCESS-GET-RETURNS-ANY-ORGANIZATION-RUN-BY-ID",
@@ -80,7 +85,7 @@
     },
     {
       "defectId": "DEF-0B11-PRP-PROFILE-ROLES-GET-LISTS-EVERY-USER-BILLING-PROFILE-TO-STEWARD-AND-ABOVE-OF-ANY-ORGANIZATION",
-      "status": "UNIT_VERIFIED",
+      "status": "E2E_VERIFIED",
       "commits": [
         "8f8cb18aa"
       ],
@@ -89,7 +94,12 @@
       "evidence": [
         "app/api/__tests__/profile-roles.route.test.ts"
       ],
-      "remaining": []
+      "remaining": [],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "a steward who names another user receives only their own role; the named user id is absent from the response",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
     },
     {
       "defectId": "DEF-0B11-IDS-STEWARD-ASSIGNMENT-ROWS-READABLE-BY-ANY-MEMBER-WITH-PERSONAL-PHONE-NOTES-AND-GRIEVANCE-LINK",
@@ -163,7 +173,7 @@
     },
     {
       "defectId": "DEF-0B1-DOCS-UNAUTH-API-SURFACE",
-      "status": "UNIT_VERIFIED",
+      "status": "E2E_VERIFIED",
       "commits": [
         "560f003a1"
       ],
@@ -174,11 +184,16 @@
       ],
       "remaining": [
         "HTTP-level proof through the proxy (E2E)"
-      ]
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "anonymous GET /api/docs and /api/docs/openapi are 401; a member is 403. The administrator success path is not exercised (R-42)",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
     },
     {
       "defectId": "DEF-0B1-VERSION-UNAUTH-TOPOLOGY",
-      "status": "UNIT_VERIFIED",
+      "status": "E2E_VERIFIED",
       "commits": [
         "560f003a1"
       ],
@@ -191,11 +206,16 @@
       "remaining": [
         "Deployment requirement: the secret UE_CANDIDATE_PROBE_TOKEN must exist and be injected (the workflow now injects it); without it digest verification fails closed",
         "HTTP-level proof (E2E)"
-      ]
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "anonymous GET /api/version returns exactly app, appVersion, gitSha, buildTimestamp, releaseId and artifactId and no host, database, cache, cloud or credential text",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
     },
     {
       "defectId": "DEF-0B12-PLT-V2-CATCH-ALL-ANSWERS-200-FOR-POST-PUT-PATCH-AND-DELETE-SO-A-CALLER-IS-TOLD-A-WRITE-SUCCEEDED",
-      "status": "UNIT_VERIFIED",
+      "status": "E2E_VERIFIED",
       "commits": [
         "560f003a1"
       ],
@@ -206,7 +226,12 @@
       ],
       "remaining": [
         "Frontend callers of removed /api/v2 endpoints now fail visibly; see functionalGaps"
-      ]
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "every method on /api/v2/* answers 410 to an authenticated caller and 401 to an anonymous one; none answers 200",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
     },
     {
       "defectId": "DEF-0B10-PIL-CUPE-BOOTSTRAP-RESET-DELETES-ALL-GRIEVANCES-MEMBERS-AND-CHECKLIST-ROWS-OF-THE-ORGANIZATION-AT-THE-FIXTURE-SLUG-WITH-NO-DEMO-MARKER",
@@ -225,7 +250,7 @@
     },
     {
       "defectId": "DEF-0B4-CARBON-FABRICATED-MEASUREMENTS-RETURNED-200",
-      "status": "UNIT_VERIFIED",
+      "status": "E2E_VERIFIED",
       "commits": [
         "560f003a1"
       ],
@@ -236,7 +261,12 @@
       ],
       "remaining": [
         "The superseded carbon-validate test asserted the fabricated 200/400 and was removed"
-      ]
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "the three carbon routes answer 501 and the body carries none of the formerly fabricated measurement, recommendation or certification values",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
     },
     {
       "defectId": "DEF-0B12-PLT-ORGANIZATIONS-GET-REBINDS-EVERY-MEMBERSHIP-ROW-OF-AN-E-MAIL-ADDRESS-TO-THE-CALLER-IN-THE-LEGACY-BRANCH",
@@ -255,7 +285,7 @@
     },
     {
       "defectId": "DEF-0B12-CRUD-TAX-PATHS-SERVE-THE-PER-CAPITA-REMITTANCE-LEDGER-TO-ANY-MEMBER",
-      "status": "UNIT_VERIFIED",
+      "status": "E2E_VERIFIED",
       "commits": [
         "af75d9e88"
       ],
@@ -267,7 +297,12 @@
       ],
       "remaining": [
         "Arrears and health-and-welfare collections now answer 403; their capabilities are not implemented"
-      ]
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "the four tax paths answer 501 to GET and POST for a member and an administrator; the per-capita ledger is not served",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
     },
     {
       "defectId": "DEF-0B11-PRP-DUES-PAY-POST-CREATES-A-NEW-FULL-BALANCE-PAYMENT-AND-INTENT-ON-EVERY-CALL-AND-SETTLEMENT-DOES-NOT-RECHECK-THE-BALANCE",
@@ -660,7 +695,7 @@
     },
     {
       "defectId": "DEF-0B9-ML-OPERATIONAL-METRICS-COUNT-EVERY-ORGANIZATIONS-CLAIMS-FOR-ANY-SIGNED-IN-CALLER-OR-THE-SERVICE-KEY",
-      "status": "UNIT_VERIFIED",
+      "status": "E2E_VERIFIED",
       "commits": [
         "66acc8b1e"
       ],
@@ -672,7 +707,12 @@
       "remaining": [
         "Native run",
         "Real request and error figures from the observability system"
-      ]
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "an anonymous caller is refused (401); a member, steward, organization administrator and executive are refused (403). The platform-administrator and service-key success paths are not exercised over HTTP",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
     },
     {
       "defectId": "DEF-0B10-OPL-01",
@@ -965,7 +1005,7 @@
       {
         "id": "R-21",
         "status": "OPEN",
-        "title": "Cold start measured: port open in 5-6 s, first request after a restart 14.6 s before and 0.6 s after a background warm-up that completes about 10 s after the port opens (a request inside that window still pays the load); FIPS boundary warnings (environment prerequisite, FIPS-enabled Node) remain on every start; no latency budget has been set or enforced. Observed this session: 3 of the last 6 orchestrator starts exceeded the 240 s health budget on the loaded workstation although the app reported healthy within minutes afterwards; the cause is not yet measured. The orchestrator now waits up to 480 s and reports the elapsed time instead of hiding it"
+        "title": "Cold start measured: port open in 5-6 s, first request after a restart 14.6 s before and 0.6 s after a background warm-up that completes about 10 s after the port opens (a request inside that window still pays the load); FIPS boundary warnings (environment prerequisite, FIPS-enabled Node) remain on every start; no latency budget has been set or enforced. Observed this session: 3 of the last 6 orchestrator starts exceeded the 240 s health budget on the loaded workstation although the app reported healthy within minutes afterwards; the cause is not yet measured. The orchestrator now waits up to 480 s and reports the elapsed time instead of hiding it. Cold start after a fresh seed measured 293 s and 346 s on the last two starts (health reported ok only after that long); the cause is unprofiled"
       },
       {
         "id": "R-22",
@@ -1066,20 +1106,30 @@
         "id": "R-41",
         "status": "OPEN",
         "title": "External counsel cannot be granted access through the product. (1) No HTTP route issues, activates or revokes a representation authority or an external matter grant: the service functions exist but are wired to no route, so the legacy external routes are readable only for rows inserted directly into the database. (2) Two overlapping external-access designs exist: the legacy representation_authorities / matter-grant tables behind /api/external/*, and the kernel counsel engagement register, whose model is that counsel works in a SEPARATE system and the union only receives signed assertions. (3) The kernel assertion verifier is an injected port with no implementation, so every counsel assertion is refused. Which model is canonical is a product decision; building issuance on the legacy model would extend the second design, so it was not built. Spec 09 proves the READ side only, against a labelled synthetic database fixture (scripts/runtime/external-admin.ts)"
+      },
+      {
+        "id": "R-42",
+        "status": "OPEN",
+        "title": "The runtime authenticates only through the QA acceptance session shim, whose identity carries no role, so getCurrentUser() reports \"member\" for every caller and every withRoleAuth route above the member floor (55 routes: admin, officer and steward floors) refuses EVERY caller, including a genuine steward or administrator (observed: /api/docs, /api/pilot/*, /api/ai/copilot/query). withApi routes are unaffected because withApi resolves the role from the database. Separately, and latent in the real password-session path, getCurrentUser() read the membership role on a bare database connection where row-level security matches no row (verified: the runtime role sees 0 rows without an organization context), so the role would also default to member; the lookup now runs inside the caller's own RLS context (unit-tested, 3 new tests) but that repair is NOT proven at runtime because the real login cannot run (R-43). Consequence: the telemetry-scope repairs (DEF-0B10-PIL) and every other role-floor route cannot be promoted from UNIT_VERIFIED yet"
+      },
+      {
+        "id": "R-43",
+        "status": "OPEN",
+        "title": "Real password login cannot run in the runtime: POST /api/auth/login returns 500 \"AUTH_DATABASE_URL is required for scoped auth execution; ordinary/system fallback is forbidden\". The orchestrator provisions DATABASE_URL, SYSTEM_DATABASE_URL and PLATFORM_DATABASE_URL but not the dedicated auth-gateway role, which the canonical bootstrap-v2 acceptance harness (scripts/bootstrap-v2/next-acceptance.ts) does provision. Every runtime journey therefore uses the QA session shim and the real login, session, MFA and organization-selection path has no runtime proof. Fixing it means provisioning the auth roles in the orchestrator or running the bootstrap-v2 harness; it is an environment prerequisite, not an application defect, but it blocks the qualification of the login path"
       }
     ],
     "summary": {
-      "total": 41,
+      "total": 43,
       "fixedRuntimeVerified": 24,
-      "open": 17
+      "open": 19
     }
   },
   "runtimeAcceptance": {
     "runtime": "production build (next build + next start), native PostgreSQL 16 in a fresh Docker container, orchestrated by tooling/scripts/ue-runtime-up.mjs",
     "executed": {
-      "passed": 92,
+      "passed": 99,
       "failed": 0,
-      "note": "plain test command on the production build against a real Redis (post-restart checks run in restart-check); 130 skipped are API journeys that run once, at desktop. Includes specs 06 (platform and federation), 07 (dashboard statistics), 08 (assurance ledger) and 09 (external counsel read path)"
+      "note": "plain test command on the production build against a real Redis (post-restart checks run in restart-check); 144 skipped are API journeys that run once, at desktop. Includes specs 06 to 10 (spec 10: 7 promotions). Measured on the final tree before commit"
     },
     "restartPersistence": "passed (3/3 after a self-contained file-route-prepare-restart cycle: the filed case and audit proof, the triage assignments with a revoked then restored coordinator, and the prepared and reconciled remittance)",
     "stakeholdersWithRuntimeIdentity": [
