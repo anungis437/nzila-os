@@ -1,0 +1,153 @@
+name: Union Eyes Full Regression
+
+on:
+  pull_request:
+    paths:
+      - 'apps/union-eyes/**'
+      - 'packages/**'
+      - 'tooling/contract-tests/**'
+      - '.github/workflows/ue-full-regression.yml'
+  push:
+    branches:
+      - agents/ue-cursor-final-closure
+    paths:
+      - 'apps/union-eyes/**'
+      - 'packages/**'
+      - 'tooling/contract-tests/**'
+      - '.github/workflows/ue-full-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ue-full-regression-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  whole-app:
+    name: UE Whole Application Test Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      NODE_OPTIONS: --max-old-space-size=6144
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup-monorepo
+
+      - name: Confirm exact feature-branch SHA
+        env:
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+
+      - name: Run the full declared Union Eyes Vitest project, not a directory subset
+        shell: bash
+        run: |
+          mkdir -p artifacts/ue-full-regression
+          pnpm exec vitest run --project union-eyes --maxWorkers=2 \
+            --reporter=default --reporter=json \
+            --outputFile=artifacts/ue-full-regression/whole-app.json
+
+      - name: Validate result counts and record limitations
+        if: success()
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs')
+          const file = 'artifacts/ue-full-regression/whole-app.json'
+          const r = JSON.parse(fs.readFileSync(file, 'utf8'))
+          const total = Number(r.numTotalTests ?? 0)
+          const passed = Number(r.numPassedTests ?? 0)
+          const failed = Number(r.numFailedTests ?? 0)
+          const skipped = Number(r.numPendingTests ?? 0)
+          if (!r.success || failed !== 0 || passed < 18000 || total !== passed + skipped) {
+            throw new Error(`Incomplete whole-app regression: total=${total}, passed=${passed}, failed=${failed}, skipped=${skipped}`)
+          }
+          fs.writeFileSync('artifacts/ue-full-regression/whole-app-receipt.json', JSON.stringify({
+            kind: 'UE-FULL-APPLICATION-REGRESSION',
+            sourceSha: process.env.SOURCE_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            total, passed, failed, skipped,
+            status: skipped > 0 ? 'PASS_WITH_SKIPS' : 'PASS',
+            evidenceClass: 'TEST_REGRESSION_ONLY',
+            limitation: 'A passing suite is not native, browser, immutable-audit or staging proof',
+          }, null, 2) + '\n')
+          NODE
+
+      - name: Retain exact-SHA whole-app evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-whole-app-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/ue-full-regression/
+          if-no-files-found: warn
+          retention-days: 30
+
+  contracts:
+    name: UE Whole Contract Test Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      NODE_OPTIONS: --max-old-space-size=6144
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup-monorepo
+
+      - name: Confirm exact feature-branch SHA
+        env:
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+
+      - name: Run full contract-tests Vitest project
+        shell: bash
+        run: |
+          mkdir -p artifacts/ue-contract-regression
+          pnpm exec vitest run --project contract-tests --maxWorkers=2 \
+            --reporter=default --reporter=json \
+            --outputFile=artifacts/ue-contract-regression/contracts.json
+
+      - name: Validate result counts and record limitations
+        if: success()
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs')
+          const r = JSON.parse(fs.readFileSync('artifacts/ue-contract-regression/contracts.json', 'utf8'))
+          const total = Number(r.numTotalTests ?? 0)
+          const passed = Number(r.numPassedTests ?? 0)
+          const failed = Number(r.numFailedTests ?? 0)
+          const skipped = Number(r.numPendingTests ?? 0)
+          if (!r.success || failed !== 0 || passed < 9000 || total !== passed + skipped) {
+            throw new Error(`Incomplete contract regression: total=${total}, passed=${passed}, failed=${failed}, skipped=${skipped}`)
+          }
+          fs.writeFileSync('artifacts/ue-contract-regression/contracts-receipt.json', JSON.stringify({
+            kind: 'UE-WHOLE-CONTRACT-REGRESSION',
+            sourceSha: process.env.SOURCE_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            total, passed, failed, skipped,
+            status: skipped > 0 ? 'PASS_WITH_SKIPS' : 'PASS',
+            evidenceClass: 'TEST_REGRESSION_ONLY',
+            limitation: 'Passing contracts do not qualify real deployment or stakeholder journeys',
+          }, null, 2) + '\n')
+          NODE
+
+      - name: Retain exact-SHA contract evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-whole-contracts-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/ue-contract-regression/
+          if-no-files-found: warn
+          retention-days: 30
