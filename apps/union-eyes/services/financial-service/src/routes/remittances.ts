@@ -359,7 +359,10 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
 
     // Financial values are NUMERIC(..., 2): reconcile exact integer cents.
     const { matchedAmount: matchedTotal, expectedAmount: expectedTotal, variance, varianceAmount, exactMatch } =
-      calculateRemittanceVariance(remittance.totalAmount, transactionsToMatch.map((t) => t.totalAmount));
+      calculateRemittanceVariance(remittance.totalAmount, transactionsToMatch.map((t) => {
+        if (t.totalAmount == null) throw new Error('Dues transaction total missing')
+        return t.totalAmount
+      }));
 
     // Transaction updates and reconciliation evidence must commit or roll back together.
     // The tenant and remittance predicates are repeated inside the transaction.
