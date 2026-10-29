@@ -101,6 +101,8 @@ describe('generic CRUD governance (UE-CONV-K-007)', () => {
   it('performs every generic write inside the audited transaction, never directly on the shared connection', () => {
     const factory = readFileSync(join(ROOT, 'lib', 'api', 'crud-factory.ts'), 'utf8')
     expect(factory).not.toMatch(/\bdb\s*\.\s*(insert|update|delete)\(/)
-    expect((factory.match(/await audited\(/g) ?? []).length).toBe(5)
+    // R-52 added a separate audited locked DELETE path alongside the original
+    // soft/hard-delete fallbacks; each generic write still uses audited(...).
+    expect((factory.match(/await audited\\(/g) ?? []).length).toBe(6)
   })
 })
