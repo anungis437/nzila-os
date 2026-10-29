@@ -477,8 +477,35 @@ function canonicalAuthUser(context: {
   };
 }
 
-export async function getCurrentUser(): Promise<AuthUser | null> {
-  if (currentStateContextEnabled()) {
+/**
+ * The caller's active membership role in one organization, read inside that organization's own RLS context. On a bare
+ * connection the membership policy matches no row, which used to turn every role into 'member'. Null when there is no
+ * active membership or the lookup fails; callers then keep the least-privileged default.
+ */
+async function membershipRoleInOwnContext(userId: string, organizationId: string): Promise<string | null> {
+  try {
+    const { withRLSContext } = await import('@/lib/db/with-rls-context');
+    const [membership] = await withRLSContext({ organizationId, userId }, async (tx) =>
+      tx
+        .select({ role: organizationMembers.role })
+        .from(organizationMembers)
+        .where(
+          and(
+            eq(organizationMembers.userId, userId),
+            eq(organizationMembers.organizationId, organizationId),
+            eq(organizationMembers.status, 'active'),
+            isNull(organizationMembers.deletedAt),
+          ),
+        )
+        .limit(1),
+    );
+    return membership?.role ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getCurrentUser(): Promise<AuthUser | null> {  if (currentStateContextEnabled()) {
     const passwordActor = await getCanonicalPasswordActor();
     if (passwordActor && !passwordActor.organizationId)
       return canonicalAuthUser({
@@ -504,32 +531,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       if (platformAdminIds.includes(pgUser.id)) {
         role = 'app_owner';
       } else if (pgUser.organizationId) {
-        try {
-          // The membership policy needs the org in the RLS context; on the bare connection it matches no row and the role
-          // would silently become 'member', refusing every steward, officer and administrator on a role-floor route.
-          const { withRLSContext } = await import('@/lib/db/with-rls-context');
-          const [membership] = await withRLSContext(
-            { organizationId: pgUser.organizationId, userId: pgUser.id },
-            async (tx) =>
-              tx
-                .select({ role: organizationMembers.role })
-                .from(organizationMembers)
-                .where(
-                  and(
-                    eq(organizationMembers.userId, pgUser.id),
-                    eq(organizationMembers.organizationId, pgUser.organizationId!),
-                    eq(organizationMembers.status, 'active'),
-                    isNull(organizationMembers.deletedAt),
-                  ),
-                )
-                .limit(1),
-          );
-          if (membership?.role) {
-            role = membership.role;
-          }
-        } catch {
-          // DB lookup failed — fall through with default role
-        }
+        role = (await membershipRoleInOwnContext(pgUser.id, pgUser.organizationId)) ?? role;
       }
 
       return {
@@ -663,14 +665,19 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       }
     }
 
-    // Resolve role: PLATFORM_ADMIN_USER_IDS override → auth metadata → default
-    let role = (publicMetadata.role as string) || (privateMetadata.role as string) || 'member';
+    // Resolve role: PLATFORM_ADMIN_USER_IDS override → auth metadata → active membership → default
+    let role = (publicMetadata.role as string) || (privateMetadata.role as string) || '';
     const platformAdminIds = (process.env.PLATFORM_ADMIN_USER_IDS || '')
       .split(',')
       .map(id => id.trim())
       .filter(Boolean);
     if (platformAdminIds.includes(userId)) {
       role = 'app_owner';
+    } else if (!role) {
+      // An identity that asserts no role (the password-session shim, a provider without role claims) used to become
+      // 'member' here, which refused every steward, officer and administrator on a role-floor route (R-42). The role comes
+      // from the caller's own active membership, never from anything the client sent; no membership still means member.
+      role = (resolvedOrganizationId && (await membershipRoleInOwnContext(userId, resolvedOrganizationId))) || 'member';
     }
 
     return {

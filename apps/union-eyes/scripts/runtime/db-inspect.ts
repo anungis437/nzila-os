@@ -116,3 +116,22 @@ export async function financeAudit(resourceId: string): Promise<Array<{ action: 
     (await db.query(`SELECT action, user_id FROM audit_security.audit_logs WHERE resource_id::text = $1 ORDER BY created_at`, [resourceId])).rows,
   )
 }
+
+/** A shared (non-organization) testimonial row, for proving that no organization administrator can delete it. */
+export async function seedTestimonial(id: string): Promise<void> {
+  await withApp(async (db) => {
+    await db.query('DELETE FROM testimonials WHERE id = $1', [id])
+    await db.query(
+      `INSERT INTO testimonials (id, updated_at, type, quote, author, role, featured, visibility, created_at)
+       VALUES ($1, now(), 'member', 'QA shared testimonial', 'QA', 'member', false, 'internal', now())`,
+      [id],
+    )
+  })
+}
+
+export async function testimonialState(id: string): Promise<{ exists: boolean; visibility: string | null }> {
+  return withApp(async (db) => {
+    const row = (await db.query('SELECT visibility FROM testimonials WHERE id = $1', [id])).rows[0]
+    return { exists: Boolean(row), visibility: row?.visibility ?? null }
+  })
+}

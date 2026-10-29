@@ -19,8 +19,8 @@
     "addressedThisProgramme": 46,
     "byStatus": {
       "NATIVE_VERIFIED": 16,
-      "UNIT_VERIFIED": 22,
-      "E2E_VERIFIED": 8,
+      "UNIT_VERIFIED": 16,
+      "E2E_VERIFIED": 14,
       "CLOSED": 0
     },
     "releaseBlockingAddressed": 34,
@@ -70,7 +70,7 @@
     },
     {
       "defectId": "DEF-0B11-IDS-SETTINGS-PUT-MERGES-ANY-KEY-INTO-THE-JSON-THAT-HOLDS-THE-CREDIT-LEDGER-AND-THE-PER-CAPITA-RATE",
-      "status": "UNIT_VERIFIED",
+      "status": "E2E_VERIFIED",
       "commits": [
         "8f8cb18aa"
       ],
@@ -81,7 +81,12 @@
       ],
       "remaining": [
         "Native run of the PUT under the runtime role"
-      ]
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "organization settings: the administrator writes an allowed key (persisted); perCapitaRate, creditLedger and an arbitrary key are refused with 400, echo no value and leave the stored settings unchanged; a steward, member, executive and another tenant are refused (403) and change nothing",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
     },
     {
       "defectId": "DEF-0B11-PRP-PROFILE-ROLES-GET-LISTS-EVERY-USER-BILLING-PROFILE-TO-STEWARD-AND-ABOVE-OF-ANY-ORGANIZATION",
@@ -156,7 +161,7 @@
     },
     {
       "defectId": "DEF-0B10-PIL-USAGE-TELEMETRY-ROUTES-READ-ANY-ORGANIZATION-NAMED-IN-THE-QUERY-AT-AN-ADMIN-FLOOR-AND-RETURN-PER-USER-IDS-THROUGH-THE-BARE-DB-IMPORT",
-      "status": "UNIT_VERIFIED",
+      "status": "E2E_VERIFIED",
       "commits": [
         "f866548e1"
       ],
@@ -169,7 +174,12 @@
       "remaining": [
         "The services still read through the bare db import",
         "Per-user ids within the caller's own organization remain visible to administrators"
-      ]
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "pilot champions, readiness, friction and metrics: the organization administrator reads their own organization (200); naming another organization is refused; a member and a steward are refused (403); an anonymous caller is refused (401)",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
     },
     {
       "defectId": "DEF-0B1-DOCS-UNAUTH-API-SURFACE",
@@ -360,7 +370,7 @@
     },
     {
       "defectId": "DEF-0B11-SOC-ANY-AUTHENTICATED-USER-SENDS-AN-UPLOADED-FILE-TO-TYPED-ADDRESSES-THROUGH-THE-ORGANIZATION-SIGNATURE-PROVIDER-ACCOUNT",
-      "status": "UNIT_VERIFIED",
+      "status": "E2E_VERIFIED",
       "scope": "PARTIAL",
       "commits": [
         "af75d9e88"
@@ -372,7 +382,12 @@
       ],
       "remaining": [
         "No approval step and no rate limit; the offices that may send are an institutional decision     (steward floor is an engineering default)"
-      ]
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "signatures: a member is refused sending a document for signature (403) and an anonymous caller 401. The steward and officer success path and the typed-address handling are not exercised over HTTP",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
     },
     {
       "defectId": "DEF-0B10-OPL-05",
@@ -505,7 +520,7 @@
     },
     {
       "defectId": "DEF-0B10-ORG-CAMPAIGN-ROWS-READABLE-BY-ANY-MEMBER-WITH-STRATEGY-EMPLOYER-VULNERABILITIES-TEAM-AND-SUPPORT-COUNTS",
-      "status": "UNIT_VERIFIED",
+      "status": "E2E_VERIFIED",
       "commits": [
         "66acc8b1e"
       ],
@@ -517,7 +532,12 @@
       "remaining": [
         "Native run",
         "Institutional confirmation of the officer floor"
-      ]
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "organizing campaigns: a member and a steward are refused (403) and an anonymous caller 401. The officer and administrator read paths are not exercised over HTTP",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
     },
     {
       "defectId": "DEF-0B10-PEN-RETIREMENT-ELIGIBILITY-LISTS-EVERY-PENSION-ENROLMENT-OF-THE-ORGANIZATION-TO-ANY-MEMBER",
@@ -538,7 +558,7 @@
     },
     {
       "defectId": "DEF-0B12-CRUD-TESTIMONIAL-ITEM-WRITES-ARE-CONDITIONED-ON-THE-ID-ALONE-FOR-AN-ADMIN-OF-ANY-ORGANIZATION",
-      "status": "UNIT_VERIFIED",
+      "status": "E2E_VERIFIED",
       "commits": [
         "66acc8b1e"
       ],
@@ -550,7 +570,12 @@
       "remaining": [
         "Native run",
         "Real behaviour of the content_manager role in a deployed identity provider"
-      ]
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "testimonials: a shared row cannot be changed or deleted by an organization administrator, steward or member (403) and survives every refused write. DISCOVERED BY THIS TEST: the repair covered PATCH only; the crud-factory DELETE handler still hard-coded an administrator floor, so an organization administrator could delete any shared row by id (R-44). Demonstrated on the pre-fix build, fixed, and re-run green",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
     },
     {
       "defectId": "DEF-0B7-COGA-CROSS-DOMAIN-CORRELATIONS-ARE-FIXED-LITERALS",
@@ -665,7 +690,7 @@
     },
     {
       "defectId": "DEF-0B8-HS-INCIDENT-ITEM-READ-MEMBER-FLOOR-WHOLE-ROW",
-      "status": "UNIT_VERIFIED",
+      "status": "E2E_VERIFIED",
       "commits": [
         "66acc8b1e"
       ],
@@ -676,7 +701,12 @@
       ],
       "remaining": [
         "Native run"
-      ]
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "health and safety incidents: a member is refused the list and the single-record read (403); an anonymous caller 401; the administrator reads the list (200). A real incident row is not read over HTTP, so the whole-row projection is still unit-level",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
     },
     {
       "defectId": "DEF-0B8-ICRA-PAID-PDF-REPORT-GATE-REQUIRES-STATUS-COMPLETED-NO-WRITER",
@@ -1109,27 +1139,32 @@
       },
       {
         "id": "R-42",
-        "status": "OPEN",
-        "title": "The runtime authenticates only through the QA acceptance session shim, whose identity carries no role, so getCurrentUser() reports \"member\" for every caller and every withRoleAuth route above the member floor (55 routes: admin, officer and steward floors) refuses EVERY caller, including a genuine steward or administrator (observed: /api/docs, /api/pilot/*, /api/ai/copilot/query). withApi routes are unaffected because withApi resolves the role from the database. Separately, and latent in the real password-session path, getCurrentUser() read the membership role on a bare database connection where row-level security matches no row (verified: the runtime role sees 0 rows without an organization context), so the role would also default to member; the lookup now runs inside the caller's own RLS context (unit-tested, 3 new tests) but that repair is NOT proven at runtime because the real login cannot run (R-43). Consequence: the telemetry-scope repairs (DEF-0B10-PIL) and every other role-floor route cannot be promoted from UNIT_VERIFIED yet"
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "FIXED for the session and identity-provider paths, proven over HTTP. Root cause (found by tracing, not the first hypothesis): getCurrentUser() resolved the role from the identity provider, and an identity that asserts no role (the QA acceptance session, a provider without role claims) defaulted to member, so every withRoleAuth route above the member floor (55 routes) refused every caller. The role now comes from the caller's own active membership, read inside that organization's RLS context (a bare connection matches no row), only when the identity asserts none; no membership still means member, and an asserted role is never overridden. Verified: spec 10 (administrator reaches /api/docs, the pilot telemetry routes and organization settings; steward passes the steward role gate; member, steward and executive are refused where they must be) plus 6 unit tests. NOT proven: the real password-session path, which cannot run (R-43)"
       },
       {
         "id": "R-43",
         "status": "OPEN",
         "title": "Real password login cannot run in the runtime: POST /api/auth/login returns 500 \"AUTH_DATABASE_URL is required for scoped auth execution; ordinary/system fallback is forbidden\". The orchestrator provisions DATABASE_URL, SYSTEM_DATABASE_URL and PLATFORM_DATABASE_URL but not the dedicated auth-gateway role, which the canonical bootstrap-v2 acceptance harness (scripts/bootstrap-v2/next-acceptance.ts) does provision. Every runtime journey therefore uses the QA session shim and the real login, session, MFA and organization-selection path has no runtime proof. Fixing it means provisioning the auth roles in the orchestrator or running the bootstrap-v2 harness; it is an environment prerequisite, not an application defect, but it blocks the qualification of the login path"
+      },
+      {
+        "id": "R-44",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "crud-factory DELETE hard-coded an administrator floor and ignored writeRole, so on a table whose writes are reserved for an elevated role an organization administrator could still delete any row by id. Found by promoting DEF-0B12-CRUD-TESTIMONIAL-ITEM-WRITES to HTTP: the historical repair raised the PATCH floor to content_manager but left DELETE at admin, and the route unit tests mocked the factory away and could not see it. Demonstrated on the pre-fix production build (the administrator's DELETE was not refused), fixed (delete floor is the higher of administrator and the write role), and re-run green. A unit test now inspects the factory's real floors (it fails without the fix). Other tables with an elevated writeRole share the factory: arbitration precedents and search (content_manager), data-classification policy (compliance_manager) and security events (security_manager)"
       }
     ],
     "summary": {
-      "total": 43,
-      "fixedRuntimeVerified": 24,
-      "open": 19
+      "total": 44,
+      "fixedRuntimeVerified": 26,
+      "open": 18
     }
   },
   "runtimeAcceptance": {
     "runtime": "production build (next build + next start), native PostgreSQL 16 in a fresh Docker container, orchestrated by tooling/scripts/ue-runtime-up.mjs",
     "executed": {
-      "passed": 99,
+      "passed": 110,
       "failed": 0,
-      "note": "plain test command on the production build against a real Redis (post-restart checks run in restart-check); 144 skipped are API journeys that run once, at desktop. Includes specs 06 to 10 (spec 10: 7 promotions). Measured on the final tree before commit"
+      "note": "plain test command on the production build against a real Redis (post-restart checks run in restart-check); 166 skipped are API journeys that run once, at desktop. Includes specs 06 to 10. Measured on the final tree before commit"
     },
     "restartPersistence": "passed (3/3 after a self-contained file-route-prepare-restart cycle: the filed case and audit proof, the triage assignments with a revoked then restored coordinator, and the prepared and reconciled remittance)",
     "stakeholdersWithRuntimeIdentity": [

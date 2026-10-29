@@ -36,7 +36,7 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { eq, and, desc, count, sql, type SQL } from 'drizzle-orm';
 import type { PgTable, PgColumn } from 'drizzle-orm/pg-core';
 import type { NextRequest } from 'next/server';
-import type { UserRole } from '@/lib/api-auth-guard';
+import { ROLE_HIERARCHY, type UserRole } from '@/lib/api-auth-guard';
 import { lowRoleModeFor, ownRowsScope, resolveLowRoleScope } from './crud-low-role-guard';
 import { assertCrudRead, assertCrudWrite, crudGovernanceFor } from './crud-governance';
 
@@ -639,9 +639,14 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       },
     );
 
+    // Deleting needs at least an administrator, and never LESS than the role that may write: a table whose writes are
+    // reserved for an elevated role (shared reference or marketing content) must not be deletable by an organization
+    // administrator, who could otherwise remove any organization's row by id.
+    const deleteRole: MinRole = (ROLE_HIERARCHY[writeRole] ?? 0) > ROLE_HIERARCHY.admin ? writeRole : 'admin';
+
     const DELETE = withApi(
       {
-        auth: { required: true, minRole: 'admin' },
+        auth: { required: true, minRole: deleteRole },
         entitlement: opts.entitlement,
         rlsOrgContext: orgScoped,
         openapi: {

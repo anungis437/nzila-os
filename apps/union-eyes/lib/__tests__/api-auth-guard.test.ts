@@ -326,6 +326,39 @@ describe('ApiAuthGuard', () => {
       expect(user!.role).toBe('app_owner');
     });
 
+    describe('identity that asserts no role (R-42)', () => {
+      const ORG = '11111111-1111-4111-8111-111111111111';
+      const noRole = { ...authUser, publicMetadata: {}, privateMetadata: {} };
+      const withOrg = () => {
+        mocks.mockAuth.mockResolvedValue({ userId: 'user_123', orgId: ORG });
+        mocks.mockSelect.mockReturnValue(chain([{ id: ORG }]));
+      };
+
+      it('takes the role from the caller\'s own active membership, read in their RLS context', async () => {
+        mocks.mockCurrentUser.mockResolvedValue(noRole);
+        withOrg();
+        mocks.mockWithRLSContext.mockResolvedValue([{ role: 'admin' }]);
+        const user = await getCurrentUser();
+        expect(mocks.mockWithRLSContext).toHaveBeenCalledWith({ organizationId: ORG, userId: 'user_123' }, expect.any(Function));
+        expect(user!.role).toBe('admin');
+      });
+
+      it('never lets a membership override a role the identity does assert', async () => {
+        withOrg();
+        mocks.mockWithRLSContext.mockResolvedValue([{ role: 'admin' }]);
+        expect((await getCurrentUser())!.role).toBe('steward');
+        expect(mocks.mockWithRLSContext).not.toHaveBeenCalled();
+      });
+
+      it('stays member with no active membership, or when the lookup fails', async () => {
+        mocks.mockCurrentUser.mockResolvedValue(noRole);
+        withOrg();
+        mocks.mockWithRLSContext.mockResolvedValue([]);
+        expect((await getCurrentUser())!.role).toBe('member');
+        mocks.mockWithRLSContext.mockRejectedValue(new Error('unavailable'));
+        expect((await getCurrentUser())!.role).toBe('member');
+      });
+    });
     it('throws on auth system error', async () => {
       mocks.mockAuth.mockRejectedValue(new Error('boom'));
       await expect(getCurrentUser()).rejects.toThrow('Service temporarily unavailable');
