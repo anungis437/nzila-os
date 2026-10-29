@@ -1176,11 +1176,17 @@
         "id": "R-49",
         "status": "FIXED_RUNTIME_VERIFIED",
         "title": "The disposable runtime published its services on every interface: the orchestrator ran Postgres with -p 55430:5432 and Next on all interfaces, and the native-sweep helper did the same with a fixed password. Now Postgres, Redis, the native PG15/PG16 containers and the app (next start --hostname 127.0.0.1) all bind IPv4 loopback only, and every URL uses 127.0.0.1. Side effect found and resolved: once a container is published on IPv4 loopback only, \"localhost\" resolves to ::1 first on this Windows host and connections stall, which made the Django-audit native suite hang for ~400 s and fail 3 of 4; with explicit 127.0.0.1 it passes 4 of 4 in 18 s. That was an artefact of my own change, not a product regression. Verified: full runtime suite 110 passed, 0 failed on the loopback-only stack. NOT changed: an unrelated container ue-local-pg that this work did not create is still published on 0.0.0.0:55440; it was left alone and is flagged for its owner"
+      },
+      {
+        "id": "R-50",
+        "status": "FIXED_UNIT_VERIFIED",
+        "title": "Earlier full Union Eyes suite figures (about 1,425 files / 20,29x tests) were a directory subset, not the whole app. The v4 driver whole-app run found two pre-existing failing files (11 tests): app/api/version/route.test.ts called the version route without the deployment-probe credential that repair DEF-0B1 requires for topology disclosure, and organizations/__tests__/route.post-system-boundary.test.ts mocked api-auth-guard without ROLE_HIERARCHY and asserted a superseded read design. Both tests were adapted and disclosed (version: all six original assertions kept with the credential presented, plus two anonymous-caller tests proven to fail when a topology field is injected; organizations: mock completed and the GET test now asserts a membership-less caller reads nothing and the creation authority is never consulted). Measured whole app: 1,522 files passed, 4 skipped, 21,073 tests passed, 28 skipped, 0 failed. The driver contract step failed 2 tests only because bash resolved to the WSL relay; with Git bash the contract suite passes 302 files / 10,280 tests. Unit-level proof only"
       }
     ],
     "summary": {
-      "total": 49,
+      "total": 50,
       "fixedRuntimeVerified": 29,
+      "fixedUnitVerified": 1,
       "open": 20
     }
   },

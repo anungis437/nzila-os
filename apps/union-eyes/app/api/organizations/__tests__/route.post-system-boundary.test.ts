@@ -31,6 +31,9 @@ const m = vi.hoisted(() => ({
 vi.mock('@/lib/api-auth-guard', () => ({
   auth: m.auth,
   requireSystemAdmin: m.requireSystemAdmin,
+  // read at import time by lib/organizations/read-authority.ts
+  ROLE_HIERARCHY: { member: 1, steward: 2, officer: 3, admin: 4, system_admin: 5 },
+  isPlatformAdminUser: vi.fn().mockResolvedValue(false),
 }));
 
 vi.mock('@/lib/db/with-rls-context', () => ({
@@ -140,15 +143,19 @@ describe('GET /api/organizations — unchanged tenant-scoped read path', () => {
     m.selectWhere.mockResolvedValue([]);
   });
 
-  it('GET still executes through withRLSContext (tenant runtime), never withSystemContext — creation authority does not leak into the read path', async () => {
+  // The read path was redesigned (lib/organizations/read-authority.ts): the route decides the caller's readable set first,
+  // then reads as the system role. The original "never withSystemContext" assertion described the superseded design; the
+  // property it protected — creation authority does not leak into reads — is asserted directly instead.
+  it('GET grants no read access to a signed-in caller without a membership, and never consults the creation authority', async () => {
     m.auth.mockResolvedValue({ userId: 'member-1' });
 
     const { GET } = await import('../route');
     const { NextRequest } = await import('next/server');
     const req = new NextRequest('http://localhost/api/organizations');
-    await GET(req);
+    const response = await GET(req);
 
-    expect(m.withRLSContext).toHaveBeenCalled();
-    expect(m.withSystemContext).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ data: [] });
+    expect(m.requireSystemAdmin).not.toHaveBeenCalled();
   });
 });
