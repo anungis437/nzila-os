@@ -5,14 +5,7 @@ on:
     paths:
       - 'apps/union-eyes/**'
       - 'tooling/scripts/ue-runtime-up.mjs'
-      - 'tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs'
-      - '.github/workflows/ue-native-postgres.yml'
-  push:
-    branches:
-      - agents/ue-cursor-final-closure
-    paths:
-      - 'apps/union-eyes/**'
-      - 'tooling/scripts/ue-runtime-up.mjs'
+      - 'tooling/scripts/lib/ue-disposable-container-ownership*.mjs'
       - 'tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs'
       - '.github/workflows/ue-native-postgres.yml'
   workflow_dispatch:
@@ -49,6 +42,9 @@ jobs:
 
       - name: Install exact locked Django bootstrap dependencies
         run: python -m pip install --require-hashes -r apps/union-eyes/backend/requirements.lock
+
+      - name: Prove disposable Docker ownership contracts
+        run: node --test tooling/scripts/lib/ue-disposable-container-ownership.test.mjs
 
       - name: Prove runner is disposable and owns the selected Docker names
         shell: bash
