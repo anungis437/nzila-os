@@ -7,7 +7,7 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import multer from 'multer';
 import { db, schema } from '../db';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, sql, isNull } from 'drizzle-orm';
 import { RemittanceParser } from '@union-claims/financial';
 
 const router = Router();
@@ -31,7 +31,7 @@ type TxSummaryRow = {
 };
 
 function getAuthUser(req: Request): AuthUser {
-  return (req as any as { user: AuthUser }).user;
+  return (req as unknown as { user?: AuthUser }).user ?? {};
 }
 
 const ALLOWED_MIME_TYPES = new Set([
@@ -73,7 +73,7 @@ const createRemittanceSchema = z.object({
 });
 
 const reconcileSchema = z.object({
-  transactionIds: z.array(z.guid()).optional(),
+  transactionIds: z.array(z.guid()).max(500).refine((ids) => new Set(ids).size === ids.length, 'Duplicate transaction IDs are not allowed').optional(),
   autoMatch: z.boolean().default(true),
 });
 
@@ -300,7 +300,8 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
         .where(
           and(
             eq(schema.duesTransactions.organizationId, scopedOrgId),
-            sql`${schema.duesTransactions.id} = ANY(${validatedData.transactionIds})`
+            sql`${schema.duesTransactions.id} = ANY(${validatedData.transactionIds})`,
+            isNull(schema.duesTransactions.paidDate)
           )
         );
     } else if (validatedData.autoMatch) {
@@ -312,9 +313,14 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
           and(
             eq(schema.duesTransactions.organizationId, scopedOrgId),
             eq(schema.duesTransactions.periodStart, remittance.remittancePeriodStart),
-            eq(schema.duesTransactions.periodEnd, remittance.remittancePeriodEnd)
+            eq(schema.duesTransactions.periodEnd, remittance.remittancePeriodEnd),
+            isNull(schema.duesTransactions.paidDate)
           )
         );
+    }
+
+    if (validatedData.transactionIds && transactionsToMatch.length !== validatedData.transactionIds.length) {
+      return res.status(409).json({ success: false, error: 'One or more transactions are unavailable for reconciliation' });
     }
 
     if (transactionsToMatch.length === 0) {
@@ -350,7 +356,7 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
         throw new Error('Remittance changed while reconciling');
       }
 
-      await tx
+      const updatedTransactions = await tx
         .update(schema.duesTransactions)
         .set({
           paidDate: remittance.remittanceDate,
@@ -358,8 +364,13 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
         } as any as Partial<typeof schema.duesTransactions.$inferInsert>)
         .where(and(
           eq(schema.duesTransactions.organizationId, scopedOrgId),
+          isNull(schema.duesTransactions.paidDate),
           sql`${schema.duesTransactions.id} = ANY(${transactionsToMatch.map((t) => t.id)})`,
-        ));
+        ))
+        .returning({ id: schema.duesTransactions.id });
+      if (updatedTransactions.length !== transactionsToMatch.length) {
+        throw new Error('Transactions changed while reconciling');
+      }
 
       const [updated] = await tx
         .update(schema.employerRemittances)
@@ -483,7 +494,10 @@ router.put('/:id', async (req: Request, res: Response) => {
  */
 router.post('/upload', upload.single('file'), async (req: Request, res: Response) => {
   try {
-    const { role } = getAuthUser(req);
+    const { role, organizationId, tenantId } = getAuthUser(req);
+    if (!(organizationId ?? tenantId)) {
+      return res.status(401).json({ success: false, error: 'Missing organization context' });
+    }
 
     const effectiveRole = role ?? '';
     if (!['admin', 'financial_admin'].includes(effectiveRole)) {
