@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { NextResponse } from 'next/server';
+import { readBoundedJson, RequestBodyTooLargeError } from '@/lib/api/bounded-json';
 import { db } from '@/db/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { grievances } from '@/db/schema/domains/claims/grievances';
@@ -17,6 +19,10 @@ import { and, eq, sql } from 'drizzle-orm';
 const recordInOrganization = (organizationId: string) =>
   sql`${ingestionRecords.batchId} IN (SELECT id FROM ingestion_batches WHERE organization_id = ${organizationId})`;
 
+// Bounds apply before any batch is created, not just to individual rows.
+const MAX_IMPORT_BODY_BYTES = 2 * 1024 * 1024;
+const MAX_IMPORT_ROWS = 500;
+
 const grievanceTypeValues = [
   'individual', 'group', 'policy', 'contract', 'harassment',
   'discrimination', 'safety', 'seniority', 'discipline', 'termination', 'other',
@@ -25,7 +31,7 @@ const grievanceTypeValues = [
 const importItemSchema = z.object({
   type: z.enum(grievanceTypeValues).default('other'),
   title: z.string().min(5).max(500),
-  description: z.string().min(10),
+  description: z.string().min(10).max(10_000),
   priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
   grievantName: z.string().max(255).optional(),
   grievantEmail: z.string().email().max(255).optional(),
@@ -34,13 +40,16 @@ const importItemSchema = z.object({
   cbaArticle: z.string().max(100).optional(),
   cbaSection: z.string().max(100).optional(),
   incidentDate: z.string().datetime({ offset: true }).optional().or(z.string().date().optional()),
-  desiredOutcome: z.string().optional(),
+  desiredOutcome: z.string().max(5_000).optional(),
   createOfficialCase: z.boolean().optional(),
 });
 
 const importRequestSchema = z.object({
   format: z.enum(['json', 'csv']),
-  payload: z.union([z.string(), z.array(z.record(z.string(), z.unknown()))]),
+  payload: z.union([
+    z.string().max(MAX_IMPORT_BODY_BYTES),
+    z.array(z.record(z.string(), z.unknown())).max(MAX_IMPORT_ROWS),
+  ]),
   sourceSystem: z.string().min(2).max(100).default('unioneyes_manual_import'),
   importSessionId: z.guid().optional(),
   resumeFailedOnly: z.boolean().optional(),
@@ -159,10 +168,16 @@ export const POST = withOrganizationAuth(async (request, context) => {
     return standardErrorResponse(ErrorCode.FORBIDDEN, 'Importing cases requires an officer or executive capacity');
   }
 
-  let rawBody: any;
+  let rawBody: unknown;
   try {
-    rawBody = await request.json();
-  } catch {
+    rawBody = await readBoundedJson(request, MAX_IMPORT_BODY_BYTES);
+  } catch (error) {
+    if (error instanceof RequestBodyTooLargeError) {
+      return NextResponse.json({
+        code: 'PAYLOAD_TOO_LARGE',
+        message: 'Import request exceeds the 2 MiB limit. Split it into smaller batches.',
+      }, { status: 413, headers: { 'Cache-Control': 'private, no-store' } });
+    }
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid JSON request body');
   }
 
@@ -180,6 +195,9 @@ export const POST = withOrganizationAuth(async (request, context) => {
 
   if (sourceRows.length === 0) {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'No rows found in import payload');
+  }
+  if (sourceRows.length > MAX_IMPORT_ROWS) {
+    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Import exceeds 500 rows. Split it into smaller batches.');
   }
 
   let batchId = parsed.data.importSessionId;
