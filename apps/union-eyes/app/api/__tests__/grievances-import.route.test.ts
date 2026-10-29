@@ -172,6 +172,47 @@ describe('grievances/import route', () => {
     });
   });
 
+  it('rejects an oversized authenticated import before creating a batch', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/grievances/import', {
+      method: 'POST',
+      body: JSON.stringify({ format: 'csv', payload: 'x'.repeat(2 * 1024 * 1024) }),
+      headers: { 'content-type': 'application/json' },
+    }));
+    expect(response.status).toBe(413);
+    expect(await response.json()).toMatchObject({ code: 'PAYLOAD_TOO_LARGE' });
+    expect(mockDb.insert).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('rejects more than 500 rows without any database writes', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/grievances/import', {
+      method: 'POST',
+      body: JSON.stringify({
+        format: 'json',
+        payload: Array.from({ length: 501 }, () => ({ title: 'Valid title', description: 'Valid description' })),
+      }),
+      headers: { 'content-type': 'application/json' },
+    }));
+    expect(response.status).toBe(400);
+    expect(mockDb.insert).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('rejects an oversized CSV row count before any batch is created', async () => {
+    const { POST } = await loadRoute();
+    const csv = ['title,description', ...Array.from({ length: 501 }, (_, i) => `Title ${i},Description sufficient for import`)].join('\\n');
+    const response = await POST(new NextRequest('http://localhost/api/grievances/import', {
+      method: 'POST',
+      body: JSON.stringify({ format: 'csv', payload: csv }),
+      headers: { 'content-type': 'application/json' },
+    }));
+    expect(response.status).toBe(400);
+    expect(mockDb.insert).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
   it('rejects unknown import sessions when importSessionId is supplied', async () => {
     const { POST } = await loadRoute();
     m.queueSelect([]);
