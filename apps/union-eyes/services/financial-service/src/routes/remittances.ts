@@ -625,7 +625,10 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
             paidDate: remittance.remittanceDate, // Already a string
             notes: `Paid via remittance ${id}`,
           } as any as Partial<typeof schema.duesTransactions.$inferInsert>)
-          .where(eq(schema.duesTransactions.id, match.transactionId));
+          .where(and(
+            eq(schema.duesTransactions.id, match.transactionId),
+            eq(schema.duesTransactions.organizationId, scopedOrgId),
+          ));
       }
 
       // Update remittance status
@@ -639,7 +642,10 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
             totalVariance: reconciliationResult.summary.totalVariance,
           },
         } as any as Partial<typeof schema.employerRemittances.$inferInsert>)
-        .where(eq(schema.employerRemittances.id, id));
+        .where(and(
+          eq(schema.employerRemittances.id, id),
+          eq(schema.employerRemittances.tenantId, scopedOrgId),
+        ));
     }
 
     // Generate report
