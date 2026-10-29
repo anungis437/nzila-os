@@ -103,6 +103,6 @@ describe('generic CRUD governance (UE-CONV-K-007)', () => {
     expect(factory).not.toMatch(/\bdb\s*\.\s*(insert|update|delete)\(/)
     // R-52 added a separate audited locked DELETE path alongside the original
     // soft/hard-delete fallbacks; each generic write still uses audited(...).
-    expect((factory.match(/await audited\\(/g) ?? []).length).toBe(6)
+    expect((factory.match(/await audited\(/g) ?? []).length).toBe(6)
   })
 })
