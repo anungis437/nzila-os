@@ -9,6 +9,7 @@ import multer from 'multer';
 import { db, schema } from '../db';
 import { eq, and, desc, inArray, isNull } from 'drizzle-orm';
 import { RemittanceParser } from '@union-claims/financial';
+import { calculateRemittanceVariance } from './remittance-reconciliation-policy';
 
 const router = Router();
 type AuthUser = {
@@ -330,17 +331,13 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
       });
     }
 
-    // Calculate matched total
-    const matchedTotal = transactionsToMatch.reduce(
-      (sum, t) => sum + Number(t.totalAmount),
-      0
-    );
-    const expectedTotal = Number(remittance.totalAmount);
-    const variance = expectedTotal - matchedTotal;
+    // Financial values are NUMERIC(..., 2): reconcile exact integer cents.
+    const { matchedAmount: matchedTotal, expectedAmount: expectedTotal, variance, varianceAmount, exactMatch } =
+      calculateRemittanceVariance(remittance.totalAmount, transactionsToMatch.map((t) => t.totalAmount));
 
     // Transaction updates and reconciliation evidence must commit or roll back together.
     // The tenant and remittance predicates are repeated inside the transaction.
-    const newStatus = Math.abs(variance) < 0.01 ? 'reconciled' : 'variance_detected';
+    const newStatus = exactMatch ? 'reconciled' : 'variance_detected';
     const updatedRemittance = await db.transaction(async (tx) => {
       const [current] = await tx
         .select({ id: schema.employerRemittances.id, reconciliationStatus: schema.employerRemittances.reconciliationStatus })
@@ -376,7 +373,7 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
         .update(schema.employerRemittances)
         .set({
           reconciliationStatus: newStatus,
-          varianceAmount: variance.toString(),
+          varianceAmount,
           reconciliationDate: new Date().toISOString(),
           reconciledBy: userId ?? fallbackUserId,
           metadata: {
