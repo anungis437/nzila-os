@@ -82,6 +82,26 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+  financial-remittance:
+    name: UE Financial Remittance Regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup-monorepo
+
+      # The union-eyes Vitest project explicitly excludes services/financial-service.
+      # This dedicated job prevents a passing whole-app count from concealing
+      # regressions in employer remittance settlement and tenant-scoped writes.
+      - name: Test the dedicated remittance policy
+        run: pnpm --filter financial-service exec vitest run src/tests/remittance-reconciliation-policy.test.ts --maxWorkers=1
+
+      - name: Typecheck the financial service
+        run: pnpm --filter financial-service typecheck
+
   contracts:
     name: UE Whole Contract Test Suite
     runs-on: ubuntu-latest
