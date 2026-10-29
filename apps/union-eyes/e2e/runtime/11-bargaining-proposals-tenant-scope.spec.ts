@@ -8,7 +8,7 @@
  * This is distinct from mocked SQL-compiler/unit tests.
  */
 import { randomUUID } from 'node:crypto'
-import pg from 'pg'
+import { cleanupBargainingQaRecords, type BargainingQaRecord } from '../../scripts/runtime/bargaining-proposals-cleanup'
 import { test, expect, request as pwRequest, type APIRequestContext } from '@playwright/test'
 import { UE_TEST_USERS } from '../../tests/fixtures/test-users'
 import { UE_TEST_ORGS } from '../../tests/fixtures/test-orgs'
@@ -53,36 +53,12 @@ const readIds = async (api: APIRequestContext): Promise<string[]> => {
   return rows.map((row) => row.id)
 }
 
-/** Only discard records created by this one test, on the explicitly disposable local database. */
-async function cleanup(records: Array<{ table: 'negotiations' | 'bargaining_proposals'; id: string; org: string }>): Promise<void> {
-  const url = new URL(process.env.DATABASE_URL ?? '')
-  if (!['localhost', '127.0.0.1'].includes(url.hostname) || url.pathname !== '/ue_runtime' ||
-      process.env.QA_TEST_ENV !== 'true' || process.env.UE_ENVIRONMENT !== 'local') {
-    throw new Error('Refusing cleanup outside isolated local Union Eyes QA database')
-  }
-  const db = new pg.Client({ connectionString: url.toString() })
-  await db.connect()
-  try {
-    for (const row of records.filter((r) => r.table === 'bargaining_proposals')) {
-      await db.query(
-        'DELETE FROM bargaining_proposals WHERE id = $1 AND negotiation_id IN (SELECT id FROM negotiations WHERE organization_id = $2)',
-        [row.id, row.org],
-      )
-    }
-    for (const row of records.filter((r) => r.table === 'negotiations')) {
-      await db.query('DELETE FROM negotiations WHERE id = $1 AND organization_id = $2', [row.id, row.org])
-    }
-  } finally {
-    await db.end()
-  }
-}
-
 test('R-51: bargaining proposal CRUD enforces its parent negotiation organization over real HTTP', async ({}, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'API journey runs once at desktop')
   test.skip(!process.env.DATABASE_URL || process.env.QA_TEST_ENV !== 'true' ||
     process.env.UE_ENVIRONMENT !== 'local', 'requires disposable native QA runtime')
   test.setTimeout(240_000)
-  const records: Array<{ table: 'negotiations' | 'bargaining_proposals'; id: string; org: string }> = []
+  const records: BargainingQaRecord[] = []
   const primary = await as(U.stewardPrimary)
   const secondary = await as(U.wrongOrgSteward)
   const admin = await as(U.adminPrimary)
@@ -135,7 +111,7 @@ test('R-51: bargaining proposal CRUD enforces its parent negotiation organizatio
     expect(fresh.title).toBe('Legitimate text amendment')
     expect((await secondary.get(`/api/bargaining/proposals/${pPrimary}`)).status()).not.toBe(200)
   } finally {
-    await cleanup(records)
+    await cleanupBargainingQaRecords(records)
     await Promise.all([primary.dispose(), secondary.dispose(), admin.dispose()])
   }
 })
