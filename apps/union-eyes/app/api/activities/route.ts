@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: true, minRole: 'member' },
+    auth: { required: true, minRole: 'admin' },
     openapi: {
       tags: ['System'],
       summary: 'List recent activity / audit log entries',
