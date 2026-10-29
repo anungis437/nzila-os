@@ -288,12 +288,59 @@ export async function runNextHttpSmoke(
   const claimNumber = JSON.stringify(claimCreated.body).match(/CLM-\d{8}-\d{4}/)?.[0]
   assert.ok(claimNumber, 'claim number was not returned')
   const claimRows = await seed.query(
-    'SELECT organization_id::text,member_id FROM public.claims WHERE claim_number=$1 AND organization_id=$2',
+    'SELECT id::text,organization_id::text,member_id FROM public.claims WHERE claim_number=$1 AND organization_id=$2',
     [claimNumber, organizations[1]],
   )
   assert.equal(claimRows.rowCount, 1, 'claim did not persist exactly once')
   assert.equal(claimRows.rows[0].organization_id, organizations[1])
   assert.equal(claimRows.rows[0].member_id, actor)
+  // Real-login authority checks (R-42 class): the role is read from the caller's own ACTIVE membership in the SELECTED
+  // organization, so neither another organization's role, a client-supplied tenant header, a forged cookie, a cross-tenant
+  // administrator nor a suspended identity can widen what the session may do.
+  const claimId = claimRows.rows[0].id as string
+  const otherOrg = await request('multi-org-switch-to-member-organization', '/api/organizations/switch', [200], {
+    method: 'POST',
+    cookie,
+    body: { organizationId: organizations[0] },
+  })
+  const memberHere = cookies(otherOrg.response)
+  await request('steward-elsewhere-is-only-member-here', '/api/claims', [403], {
+    method: 'POST',
+    cookie: memberHere,
+    body: journeyClaim,
+  })
+  const backToStewardOrg = await request('multi-org-switch-back', '/api/organizations/switch', [200], {
+    method: 'POST',
+    cookie: memberHere,
+    body: { organizationId: organizations[1] },
+  })
+  cookie = cookies(backToStewardOrg.response)
+  const hostileHeader = await request('client-tenant-header-does-not-select-organization', '/api/notifications/preferences', [200, 404], {
+    cookie,
+    headers: { 'x-org-id': organizations[2], 'x-organization-id': organizations[2] },
+  })
+  assert.ok(!JSON.stringify(hostileHeader.body).includes(organizations[2]), 'a client tenant header selected an organization')
+  const forged = cookie.replace(/=([^;]+)/, (_match, value: string) => `=${value.slice(0, -4)}AAAA`)
+  assert.notEqual(forged, cookie)
+  await request('forged-session-cookie-denied', '/api/notifications/preferences', [401], { cookie: forged })
+  const bystander = await request('cross-tenant-administrator-claim-read-denied', `/api/claims/${claimId}`, [403, 404], {
+    cookie: adminCookie,
+  })
+  assert.ok(!JSON.stringify(bystander.body).includes(claimNumber), 'a cross-tenant administrator read another organization claim')
+  await seed.query(
+    "UPDATE user_management.users SET lifecycle_state='suspended', is_active=false WHERE user_id=$1",
+    [actor],
+  )
+  await request('suspended-identity-session-denied', '/api/claims', [401, 403], { cookie })
+  await request('suspended-identity-login-denied', '/api/auth/login', [401, 403], {
+    method: 'POST',
+    body: { email: `${actor}@example.invalid`, password },
+  })
+  await seed.query(
+    "UPDATE user_management.users SET lifecycle_state='active', is_active=true WHERE user_id=$1",
+    [actor],
+  )
+  await request('reinstated-identity-session-allowed', '/api/notifications/preferences', [200], { cookie })
   await seed.query(
     "UPDATE user_management.organization_users SET role='member' WHERE user_id=$1 AND organization_id=$2",
     [actor, organizations[1]],
