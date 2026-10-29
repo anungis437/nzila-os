@@ -9,9 +9,28 @@ import multer from 'multer';
 import { db, schema } from '../db';
 import { eq, and, desc, inArray, isNull } from 'drizzle-orm';
 import { RemittanceParser } from '@union-claims/financial';
-import { calculateRemittanceVariance } from './remittance-reconciliation-policy';
+import { calculateRemittanceVariance, readMatchedTransactionIds } from './remittance-reconciliation-policy';
 
 const router = Router();
+
+async function loadMatchedTransactions(
+  remittance: typeof schema.employerRemittances.$inferSelect,
+  organizationId: string,
+): Promise<TxSummaryRow[] | null> {
+  const ids = readMatchedTransactionIds(remittance.metadata)
+  if (!ids) {
+    // An unreconciled remittance truthfully has no matched payments. Never
+    // fabricate a zero-match report for one marked as already reconciled.
+    return ['reconciled', 'variance_detected', 'completed', 'needs_review'].includes(
+      String(remittance.reconciliationStatus),
+    ) ? null : []
+  }
+  const rows = await db.select().from(schema.duesTransactions).where(and(
+    eq(schema.duesTransactions.organizationId, organizationId),
+    inArray(schema.duesTransactions.id, ids),
+  )).limit(500)
+  return rows.length === ids.length ? rows : null
+}
 type AuthUser = {
   organizationId?: string;
   tenantId?: string;
@@ -74,7 +93,7 @@ const createRemittanceSchema = z.object({
 });
 
 const reconcileSchema = z.object({
-  transactionIds: z.array(z.guid()).max(500).refine((ids) => new Set(ids).size === ids.length, 'Duplicate transaction IDs are not allowed').optional(),
+  transactionIds: z.array(z.guid()).min(1).max(500).refine((ids) => new Set(ids).size === ids.length, 'Duplicate transaction IDs are not allowed').optional(),
   autoMatch: z.boolean().default(true),
 });
 
@@ -157,9 +176,10 @@ router.get('/:id', async (req: Request, res: Response) => {
       });
     }
 
-    // Fetch matched transactions - note: remittanceId doesn't exist in schema
-    // Would need to add this column or use metadata for tracking
-    const transactions: TxSummaryRow[] = [];
+    const transactions = await loadMatchedTransactions(remittance, scopedOrgId);
+    if (!transactions) {
+      return res.status(409).json({ success: false, error: 'Reconciliation evidence unavailable' });
+    }
 
     res.json({
       success: true,
@@ -302,6 +322,7 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
           and(
             eq(schema.duesTransactions.organizationId, scopedOrgId),
             inArray(schema.duesTransactions.id, validatedData.transactionIds),
+            eq(schema.duesTransactions.transactionType, 'charge'),
             isNull(schema.duesTransactions.paidDate)
           )
         );
@@ -315,6 +336,7 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
             eq(schema.duesTransactions.organizationId, scopedOrgId),
             eq(schema.duesTransactions.periodStart, remittance.remittancePeriodStart),
             eq(schema.duesTransactions.periodEnd, remittance.remittancePeriodEnd),
+            eq(schema.duesTransactions.transactionType, 'charge'),
             isNull(schema.duesTransactions.paidDate)
           )
         );
@@ -322,6 +344,10 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
 
     if (validatedData.transactionIds && transactionsToMatch.length !== validatedData.transactionIds.length) {
       return res.status(409).json({ success: false, error: 'One or more transactions are unavailable for reconciliation' });
+    }
+
+    if (transactionsToMatch.length > 500) {
+      return res.status(413).json({ success: false, error: 'Reconciliation batch limit exceeded' });
     }
 
     if (transactionsToMatch.length === 0) {
@@ -340,7 +366,7 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
     const newStatus = exactMatch ? 'reconciled' : 'variance_detected';
     const updatedRemittance = await db.transaction(async (tx) => {
       const [current] = await tx
-        .select({ id: schema.employerRemittances.id, reconciliationStatus: schema.employerRemittances.reconciliationStatus })
+        .select({ id: schema.employerRemittances.id, reconciliationStatus: schema.employerRemittances.reconciliationStatus, metadata: schema.employerRemittances.metadata })
         .from(schema.employerRemittances)
         .where(and(
           eq(schema.employerRemittances.id, id),
@@ -349,7 +375,7 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
         .for('update')
         .limit(1);
 
-      if (!current || current.reconciliationStatus === 'reconciled') {
+      if (!current || current.reconciliationStatus === 'reconciled' || current.reconciliationStatus === 'variance_detected') {
         throw new Error('Remittance changed while reconciling');
       }
 
@@ -377,7 +403,9 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
           reconciliationDate: new Date().toISOString(),
           reconciledBy: userId ?? fallbackUserId,
           metadata: {
+            ...(current.metadata && typeof current.metadata === 'object' && !Array.isArray(current.metadata) ? current.metadata : {}),
             matchedTransactions: transactionsToMatch.length,
+            matchedTransactionIds: transactionsToMatch.map((t) => t.id),
             matchedAmount: matchedTotal,
           },
         } as any as Partial<typeof schema.employerRemittances.$inferInsert>)
@@ -596,10 +624,10 @@ router.get('/:id/report', async (req: Request, res: Response) => {
       });
     }
 
-    // Fetch matched transactions
-    // Fetch matched transactions - remittanceId doesn't exist
-    // Would need to query by notes or metadata
-    const transactions: TxSummaryRow[] = [];
+    const transactions = await loadMatchedTransactions(remittance, scopedOrgId);
+    if (!transactions) {
+      return res.status(409).json({ success: false, error: 'Reconciliation evidence unavailable' });
+    }
 
     const reportData = {
       remittance: {
