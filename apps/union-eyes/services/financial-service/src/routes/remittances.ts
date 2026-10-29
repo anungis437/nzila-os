@@ -323,6 +323,7 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
             eq(schema.duesTransactions.organizationId, scopedOrgId),
             inArray(schema.duesTransactions.id, validatedData.transactionIds),
             eq(schema.duesTransactions.transactionType, 'charge'),
+            inArray(schema.duesTransactions.status, ['pending', 'overdue']),
             isNull(schema.duesTransactions.paidDate)
           )
         );
@@ -386,10 +387,12 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
         .update(schema.duesTransactions)
         .set({
           paidDate: remittance.remittanceDate,
+          status: 'paid',
           notes: `Paid via remittance ${id}`,
         } as any as Partial<typeof schema.duesTransactions.$inferInsert>)
         .where(and(
           eq(schema.duesTransactions.organizationId, scopedOrgId),
+          inArray(schema.duesTransactions.status, ['pending', 'overdue']),
           isNull(schema.duesTransactions.paidDate),
           inArray(schema.duesTransactions.id, transactionsToMatch.map((t) => t.id)),
         ))
