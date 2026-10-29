@@ -202,7 +202,7 @@ describe('grievances/import route', () => {
 
   it('rejects an oversized CSV row count before any batch is created', async () => {
     const { POST } = await loadRoute();
-    const csv = ['title,description', ...Array.from({ length: 501 }, (_, i) => `Title ${i},Description sufficient for import`)].join('\\n');
+    const csv = ['title,description', ...Array.from({ length: 501 }, (_, i) => `Title ${i},Description sufficient for import`)].join('\n');
     const response = await POST(new NextRequest('http://localhost/api/grievances/import', {
       method: 'POST',
       body: JSON.stringify({ format: 'csv', payload: csv }),
