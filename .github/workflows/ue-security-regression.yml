@@ -7,14 +7,6 @@ on:
       - 'docs/union-eyes/convergence/remediation/**'
       - 'packages/**'
       - '.github/workflows/ue-security-regression.yml'
-  push:
-    branches:
-      - agents/ue-cursor-final-closure
-    paths:
-      - 'apps/union-eyes/**'
-      - 'docs/union-eyes/convergence/remediation/**'
-      - 'packages/**'
-      - '.github/workflows/ue-security-regression.yml'
   workflow_dispatch:
 
 permissions:
