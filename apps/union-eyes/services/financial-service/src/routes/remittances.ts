@@ -8,7 +8,7 @@ import { z } from 'zod';
 import multer from 'multer';
 import { db, schema } from '../db';
 import { eq, and, desc, sql } from 'drizzle-orm';
-import { RemittanceParser, ReconciliationEngine } from '@union-claims/financial';
+import { RemittanceParser } from '@union-claims/financial';
 
 const router = Router();
 type AuthUser = {
@@ -528,134 +528,6 @@ router.post('/upload', upload.single('file'), async (req: Request, res: Response
         parsedRecords: parseResult.records,
         summary: parseResult.summary,
         errors: parseResult.errors,
-      },
-    });
-  } catch (_error) {
-    res.status(500).json({
-      success: false,
-      error: 'Internal server error',
-    });
-  }
-});
-
-/**
- * POST /api/remittances/:id/reconcile
- * Auto-reconcile remittance with transactions
- */
-router.post('/:id/reconcile', async (req: Request, res: Response) => {
-  try {
-    const { organizationId: organizationIdFromUser, tenantId: legacyTenantId, role } = getAuthUser(req);
-    const scopedOrgId = organizationIdFromUser ?? legacyTenantId;
-    const { id } = req.params;
-
-    if (!scopedOrgId) {
-      return res.status(401).json({ success: false, error: 'Missing organization context' });
-    }
-
-    const effectiveRole = role ?? '';
-    if (!['admin', 'financial_admin'].includes(effectiveRole)) {
-      return res.status(403).json({
-        success: false,
-        error: 'Insufficient permissions',
-      });
-    }
-
-    // Fetch remittance
-    const [remittance] = await db
-      .select()
-      .from(schema.employerRemittances)
-      .where(
-        and(
-          eq(schema.employerRemittances.id, id),
-          eq(schema.employerRemittances.tenantId, scopedOrgId)
-        )
-      )
-      .limit(1);
-
-    if (!remittance) {
-      return res.status(404).json({
-        success: false,
-        error: 'Remittance not found',
-      });
-    }
-
-    // Fetch remittance details (parsed records should be stored in JSON field or separate table)
-    // For now, assuming they're in req.body.records
-    const remittanceRecords = req.body.records || [];
-
-    if (remittanceRecords.length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'No remittance records provided. Upload and parse file first.',
-      });
-    }
-
-    // Fetch existing transactions for the billing period
-    const transactions = await db
-      .select()
-      .from(schema.duesTransactions)
-      .where(
-        and(
-          eq(schema.duesTransactions.organizationId, scopedOrgId),
-          eq(schema.duesTransactions.transactionType, 'charge'),
-          sql`${schema.duesTransactions.periodStart} >= ${remittance.remittancePeriodStart}`,
-          sql`${schema.duesTransactions.periodEnd} <= ${remittance.remittancePeriodEnd}`
-        )
-      );
-
-    // Run reconciliation
-    const reconciliationEngine = new ReconciliationEngine();
-    const reconciliationResult = await reconciliationEngine.reconcile({
-      remittanceRecords,
-      existingTransactions: transactions.map((t) => ({
-        id: t.id,
-        memberId: t.memberId,
-        amount: Number(t.amount),
-        periodStart: t.periodStart,
-        periodEnd: t.periodEnd,
-      })),
-    });
-
-    // If auto-apply is enabled, update matched transactions
-    if (req.body.autoApply !== false && reconciliationResult.success) {
-      for (const match of reconciliationResult.matches) {
-        await db
-          .update(schema.duesTransactions)
-          .set({
-            paidDate: remittance.remittanceDate, // Already a string
-            notes: `Paid via remittance ${id}`,
-          } as any as Partial<typeof schema.duesTransactions.$inferInsert>)
-          .where(and(
-            eq(schema.duesTransactions.id, match.transactionId),
-            eq(schema.duesTransactions.organizationId, scopedOrgId),
-          ));
-      }
-
-      // Update remittance status
-      await db
-        .update(schema.employerRemittances)
-        .set({
-          reconciliationStatus: reconciliationResult.variances.length === 0 ? 'completed' : 'needs_review',
-          varianceAmount: reconciliationResult.summary.totalVariance.toString(),
-          metadata: {
-            matchedCount: reconciliationResult.summary.matchedCount,
-            totalVariance: reconciliationResult.summary.totalVariance,
-          },
-        } as any as Partial<typeof schema.employerRemittances.$inferInsert>)
-        .where(and(
-          eq(schema.employerRemittances.id, id),
-          eq(schema.employerRemittances.tenantId, scopedOrgId),
-        ));
-    }
-
-    // Generate report
-    const report = reconciliationEngine.generateReport(reconciliationResult);
-
-    res.json({
-      success: true,
-      data: {
-        reconciliation: reconciliationResult,
-        report,
       },
     });
   } catch (_error) {
