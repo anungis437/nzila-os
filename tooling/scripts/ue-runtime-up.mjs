@@ -63,7 +63,7 @@ function secrets() {
   return JSON.parse(readFileSync(file, 'utf8'))
 }
 
-/** Immutable per-worktree identity: an unrelated container sharing our name is NEVER disposable by this script. */
+/** Opaque per-worktree owner key. Only containers with this exact label may be reused or removed. */
 function runtimeOwnerToken() {
   mkdirSync(STATE, { recursive: true })
   const file = join(STATE, 'runtime-owner.txt')
@@ -73,21 +73,20 @@ function runtimeOwnerToken() {
   return token
 }
 
-/** Inspect a named container before reusing or removing it; wrong labels are a hard error. */
 function isOwnedContainer(name) {
-  const check = spawnSync('docker', ['inspect', '--format', '{{json .Config.Labels}}', name], {
+  const result = spawnSync('docker', ['inspect', '--format', '{{json .Config.Labels}}', name], {
     cwd: ROOT, encoding: 'utf8',
   })
-  if (check.status !== 0) {
-    if (/No such object|No such container/i.test(check.stderr ?? '')) return false
-    throw new Error(`Unable to verify Docker container ownership for ${name}`)
+  if (result.status !== 0) {
+    if (/No such object|No such container/i.test(result.stderr ?? '')) return false
+    throw new Error(`Unable to inspect Docker ownership for ${name}`)
   }
   let labels
-  try { labels = JSON.parse(check.stdout) } catch {
-    throw new Error(`Unparseable Docker ownership labels for ${name}`)
+  try { labels = JSON.parse(result.stdout) } catch {
+    throw new Error(`Unparseable Docker labels for ${name}`)
   }
   if (!hasOwnedContainerLabels(labels, runtimeOwnerToken())) {
-    throw new Error(`Refusing to reuse/remove an unowned Docker container: ${name}`)
+    throw new Error(`Refusing to reuse/remove unowned Docker container ${name}`)
   }
   return true
 }
@@ -165,344 +164,17 @@ async function up() {
   mkdirSync(STATE, { recursive: true })
   const owner = runtimeOwnerToken()
   const labels = ['--label', `nzila.mission=${UE_DISPOSABLE_MISSION}`, '--label', `nzila.qualification-owner=${owner}`]
-  // Check ALL existing containers before any destructive operation. Exact-name matching matters.
   const redisExists = isOwnedContainer(REDIS_CONTAINER)
   const pgExists = isOwnedContainer(CONTAINER)
   if (REDIS) {
-    const redisRunning = out('docker', ['ps', '--filter', `name=^/${REDIS_CONTAINER}#!/usr/bin/env node
-/**
- * Reproducible local runtime for Union Eyes acceptance: the real Next.js app, native PostgreSQL, deterministic QA fixtures.
- *
- *   node tooling/scripts/ue-runtime-up.mjs up      # database, migrations, seed, platform sandbox DB, app, wait healthy
- *   node tooling/scripts/ue-runtime-up.mjs db      # only the native combined DB fixture; no Next server
- *   node tooling/scripts/ue-runtime-up.mjs test    # run the Playwright runtime acceptance (desktop, tablet, mobile)
- *   node tooling/scripts/ue-runtime-up.mjs restart-check  # file a case, restart the app, prove it persisted
- *   node tooling/scripts/ue-runtime-up.mjs all     # up, then test, then restart-check
- *   node tooling/scripts/ue-runtime-up.mjs down    # stop the app and the database container
- *   node tooling/scripts/ue-runtime-up.mjs env     # print the environment the app and the tests use
- *
- * Needs Docker, Python (Django backend migrations), Node and pnpm. Options: --port-db 55430 --port-app 3002 --fresh --prod --rebuild --redis
- * (--prod builds and serves the production bundle, the reliable mode for repeated acceptance runs).
- *
- * LOCAL ONLY. It uses a disposable container, synthetic credentials and the QA session cookie that the platform auth honours
- * solely when QA_TEST_ENV=true and UE_ENVIRONMENT=local. The NAR audit store is a local sandbox (never immutable) and the
- * sandbox platform database refuses the relaxation unless its name ends in _sandbox.
- */
-import { spawn, spawnSync } from 'node:child_process'
-import { randomBytes } from 'node:crypto'
-import { existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
-import { hasOwnedContainerLabels, UE_DISPOSABLE_MISSION } from './lib/ue-disposable-container-ownership.mjs'
-import { fileURLToPath } from 'node:url'
-
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
-const APP = join(ROOT, 'apps', 'union-eyes')
-const STATE = join(ROOT, '.ue-runtime')
-const args = process.argv.slice(2)
-const command = args.find((a) => !a.startsWith('--')) ?? 'all'
-const opt = (name, fallback) => {
-  const i = args.indexOf(`--${name}`)
-  return i >= 0 ? args[i + 1] : fallback
-}
-const PORT_DB = Number(opt('port-db', '55430'))
-const PORT_APP = Number(opt('port-app', '3002'))
-const FRESH = args.includes('--fresh')
-// A production build (next build + next start) is the reliable runtime: the dev server stalls under repeated acceptance runs.
-const PROD = args.includes('--prod')
-const REBUILD = args.includes('--rebuild')
-// --redis adds a real Redis container so rate limiting and the cache run against the real dependency (and can be stopped to test degradation).
-const REDIS = args.includes('--redis')
-const PORT_REDIS = Number(opt('port-redis', '56379'))
-const REDIS_CONTAINER = 'ue-runtime-redis'
-const CONTAINER = 'ue-runtime-pg'
-const APP_DB = 'ue_runtime'
-const POSTGRES_VERSION = opt('postgres-version', '16')
-if (!['15', '16'].includes(POSTGRES_VERSION)) throw new Error('Only PostgreSQL 15 and 16 are supported for disposable QA fixtures')
-const PLATFORM_DB = 'ue_platform_sandbox'
-const isWin = process.platform === 'win32'
-// Only the Windows .cmd shims (pnpm, npx) need a shell; with a shell, arguments that contain spaces are split apart.
-const useShell = (cmd) => isWin && /^(pnpm|npx)$/.test(cmd)
-
-/** Disposable credentials, generated on first use and kept (git-ignored) with the runtime state; nothing is committed. */
-function secrets() {
-  mkdirSync(STATE, { recursive: true })
-  const file = join(STATE, 'secrets.json')
-  if (!existsSync(file)) {
-    const token = () => randomBytes(24).toString('hex')
-    writeFileSync(file, JSON.stringify({ db: token(), auth: token(), voting: token(), nar: token() }), { mode: 0o600 })
-  }
-  return JSON.parse(readFileSync(file, 'utf8'))
-}
-
-/** Immutable per-worktree identity: an unrelated container sharing our name is NEVER disposable by this script. */
-function runtimeOwnerToken() {
-  mkdirSync(STATE, { recursive: true })
-  const file = join(STATE, 'runtime-owner.txt')
-  if (!existsSync(file)) writeFileSync(file, randomBytes(16).toString('hex'), { mode: 0o600, flag: 'wx' })
-  const token = readFileSync(file, 'utf8').trim()
-  if (!/^[a-f0-9]{32}$/.test(token)) throw new Error('Malformed disposable runtime owner token')
-  return token
-}
-
-/** Inspect a named container before reusing or removing it; wrong labels are a hard error. */
-function isOwnedContainer(name) {
-  const check = spawnSync('docker', ['inspect', '--format', '{{json .Config.Labels}}', name], {
-    cwd: ROOT, encoding: 'utf8',
-  })
-  if (check.status !== 0) {
-    if (/No such object|No such container/i.test(check.stderr ?? '')) return false
-    throw new Error(`Unable to verify Docker container ownership for ${name}`)
-  }
-  let labels
-  try { labels = JSON.parse(check.stdout) } catch {
-    throw new Error(`Unparseable Docker ownership labels for ${name}`)
-  }
-  if (!hasOwnedContainerLabels(labels, runtimeOwnerToken())) {
-    throw new Error(`Refusing to reuse/remove an unowned Docker container: ${name}`)
-  }
-  return true
-}
-
-function checkLoopbackPort(name, port, containerPort) {
-  const actual = out('docker', ['port', name, `${containerPort}/tcp`])
-  if (actual !== `127.0.0.1:${port}`) {
-    throw new Error(`Refusing non-loopback or mismatched Docker binding for ${name}`)
-  }
-}
-
-function dbUrl(db) {
-  const url = new URL('postgresql://127.0.0.1') // gitleaks:allow (credentials are generated at runtime, never committed)
-  url.username = 'postgres'
-  url.password = secrets().db
-  url.port = String(PORT_DB)
-  url.pathname = `/${db}`
-  return url.toString()
-}
-
-export function runtimeEnv() {
-  return {
-    DATABASE_URL: dbUrl(APP_DB),
-    SYSTEM_DATABASE_URL: dbUrl(APP_DB),
-    PLATFORM_DATABASE_URL: dbUrl(PLATFORM_DB),
-    AUTH_SECRET: secrets().auth,
-    VOTING_SECRET: secrets().voting,
-    QA_TEST_ENV: 'true',
-    NODE_ENV: PROD ? 'production' : 'development',
-    PLAYWRIGHT_TEST_AUTH: 'true',
-    UE_ENVIRONMENT: 'local',
-    UE_CANONICAL_BOOTSTRAP_V2: '0',
-    UE_E2E_RISK_BYPASS: 'true',
-    NODE_OPTIONS: '--max-old-space-size=8192',
-    NEXT_PUBLIC_APP_URL: `http://127.0.0.1:${PORT_APP}`,
-    PLAYWRIGHT_BASE_URL: `http://127.0.0.1:${PORT_APP}`,
-    ...(REDIS ? { REDIS_URL: `redis://127.0.0.1:${PORT_REDIS}` } : {}),
-    UE_RUNTIME_REDIS_CONTAINER: REDIS ? REDIS_CONTAINER : '',
-    NAR_SIGNING_SECRET: secrets().nar,
-    NAR_SIGNING_KEY_ID: 'local-acceptance',
-    NAR_STORAGE_MODE: 'local_sandbox',
-    NAR_LOCAL_SANDBOX_DIR: join(STATE, 'nar-sandbox'),
-  }
-}
-
-function run(cmd, cmdArgs, options = {}) {
-  const result = spawnSync(cmd, cmdArgs, { stdio: 'inherit', shell: useShell(cmd), cwd: ROOT, ...options, env: { ...process.env, ...options.env } })
-  // Never print command arguments on failure: Docker arguments can contain generated database credentials.
-  if (result.status !== 0) throw new Error(`${cmd} exited with ${result.status ?? 'unknown'} (arguments withheld)`)
-}
-const out = (cmd, cmdArgs, options = {}) => spawnSync(cmd, cmdArgs, { encoding: 'utf8', shell: useShell(cmd), cwd: ROOT, ...options }).stdout?.trim() ?? ''
-const psql = (db, sql) => run('docker', ['exec', CONTAINER, 'psql', '-U', 'postgres', '-d', db, '-v', 'ON_ERROR_STOP=1', '-c', sql])
-const psqlFile = (db, file) => {
-  const sql = readFileSync(file, 'utf8').replaceAll('--> statement-breakpoint', '')
-  const result = spawnSync('docker', ['exec', '-i', CONTAINER, 'psql', '-U', 'postgres', '-d', db, '-v', 'ON_ERROR_STOP=1'], { input: sql, encoding: 'utf8' })
-  if (result.status !== 0) throw new Error(`psql ${file}: ${result.stderr}`)
-}
-
-async function healthy(timeoutMs) {
-  const until = Date.now() + timeoutMs
-  while (Date.now() < until) {
-    try {
-      const response = await fetch(`http://127.0.0.1:${PORT_APP}/api/health`, { signal: AbortSignal.timeout(120_000) })
-      const body = await response.json().catch(() => ({}))
-      if (response.ok && body.ok === true) return body
-    } catch {
-      /* not up yet */
-    }
-    await new Promise((r) => setTimeout(r, 3_000))
-  }
-  throw new Error('the application did not report healthy in time')
-}
-
-, '--format', '{{.Names}}'])
+    const redisRunning = out('docker', ['ps', '--filter', `name=^/${REDIS_CONTAINER}$`, '--format', '{{.Names}}'])
     if (!redisRunning) {
       if (redisExists) run('docker', ['rm', '-f', REDIS_CONTAINER])
       run('docker', ['run', '-d', '--name', REDIS_CONTAINER, ...labels, '-p', `127.0.0.1:${PORT_REDIS}:6379`, 'redis:7-alpine'])
     }
     checkLoopbackPort(REDIS_CONTAINER, PORT_REDIS, 6379)
   }
-  const running = out('docker', ['ps', '--filter', `name=^/${CONTAINER}#!/usr/bin/env node
-/**
- * Reproducible local runtime for Union Eyes acceptance: the real Next.js app, native PostgreSQL, deterministic QA fixtures.
- *
- *   node tooling/scripts/ue-runtime-up.mjs up      # database, migrations, seed, platform sandbox DB, app, wait healthy
- *   node tooling/scripts/ue-runtime-up.mjs db      # only the native combined DB fixture; no Next server
- *   node tooling/scripts/ue-runtime-up.mjs test    # run the Playwright runtime acceptance (desktop, tablet, mobile)
- *   node tooling/scripts/ue-runtime-up.mjs restart-check  # file a case, restart the app, prove it persisted
- *   node tooling/scripts/ue-runtime-up.mjs all     # up, then test, then restart-check
- *   node tooling/scripts/ue-runtime-up.mjs down    # stop the app and the database container
- *   node tooling/scripts/ue-runtime-up.mjs env     # print the environment the app and the tests use
- *
- * Needs Docker, Python (Django backend migrations), Node and pnpm. Options: --port-db 55430 --port-app 3002 --fresh --prod --rebuild --redis
- * (--prod builds and serves the production bundle, the reliable mode for repeated acceptance runs).
- *
- * LOCAL ONLY. It uses a disposable container, synthetic credentials and the QA session cookie that the platform auth honours
- * solely when QA_TEST_ENV=true and UE_ENVIRONMENT=local. The NAR audit store is a local sandbox (never immutable) and the
- * sandbox platform database refuses the relaxation unless its name ends in _sandbox.
- */
-import { spawn, spawnSync } from 'node:child_process'
-import { randomBytes } from 'node:crypto'
-import { existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
-import { hasOwnedContainerLabels, UE_DISPOSABLE_MISSION } from './lib/ue-disposable-container-ownership.mjs'
-import { fileURLToPath } from 'node:url'
-
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
-const APP = join(ROOT, 'apps', 'union-eyes')
-const STATE = join(ROOT, '.ue-runtime')
-const args = process.argv.slice(2)
-const command = args.find((a) => !a.startsWith('--')) ?? 'all'
-const opt = (name, fallback) => {
-  const i = args.indexOf(`--${name}`)
-  return i >= 0 ? args[i + 1] : fallback
-}
-const PORT_DB = Number(opt('port-db', '55430'))
-const PORT_APP = Number(opt('port-app', '3002'))
-const FRESH = args.includes('--fresh')
-// A production build (next build + next start) is the reliable runtime: the dev server stalls under repeated acceptance runs.
-const PROD = args.includes('--prod')
-const REBUILD = args.includes('--rebuild')
-// --redis adds a real Redis container so rate limiting and the cache run against the real dependency (and can be stopped to test degradation).
-const REDIS = args.includes('--redis')
-const PORT_REDIS = Number(opt('port-redis', '56379'))
-const REDIS_CONTAINER = 'ue-runtime-redis'
-const CONTAINER = 'ue-runtime-pg'
-const APP_DB = 'ue_runtime'
-const POSTGRES_VERSION = opt('postgres-version', '16')
-if (!['15', '16'].includes(POSTGRES_VERSION)) throw new Error('Only PostgreSQL 15 and 16 are supported for disposable QA fixtures')
-const PLATFORM_DB = 'ue_platform_sandbox'
-const isWin = process.platform === 'win32'
-// Only the Windows .cmd shims (pnpm, npx) need a shell; with a shell, arguments that contain spaces are split apart.
-const useShell = (cmd) => isWin && /^(pnpm|npx)$/.test(cmd)
-
-/** Disposable credentials, generated on first use and kept (git-ignored) with the runtime state; nothing is committed. */
-function secrets() {
-  mkdirSync(STATE, { recursive: true })
-  const file = join(STATE, 'secrets.json')
-  if (!existsSync(file)) {
-    const token = () => randomBytes(24).toString('hex')
-    writeFileSync(file, JSON.stringify({ db: token(), auth: token(), voting: token(), nar: token() }), { mode: 0o600 })
-  }
-  return JSON.parse(readFileSync(file, 'utf8'))
-}
-
-/** Immutable per-worktree identity: an unrelated container sharing our name is NEVER disposable by this script. */
-function runtimeOwnerToken() {
-  mkdirSync(STATE, { recursive: true })
-  const file = join(STATE, 'runtime-owner.txt')
-  if (!existsSync(file)) writeFileSync(file, randomBytes(16).toString('hex'), { mode: 0o600, flag: 'wx' })
-  const token = readFileSync(file, 'utf8').trim()
-  if (!/^[a-f0-9]{32}$/.test(token)) throw new Error('Malformed disposable runtime owner token')
-  return token
-}
-
-/** Inspect a named container before reusing or removing it; wrong labels are a hard error. */
-function isOwnedContainer(name) {
-  const check = spawnSync('docker', ['inspect', '--format', '{{json .Config.Labels}}', name], {
-    cwd: ROOT, encoding: 'utf8',
-  })
-  if (check.status !== 0) {
-    if (/No such object|No such container/i.test(check.stderr ?? '')) return false
-    throw new Error(`Unable to verify Docker container ownership for ${name}`)
-  }
-  let labels
-  try { labels = JSON.parse(check.stdout) } catch {
-    throw new Error(`Unparseable Docker ownership labels for ${name}`)
-  }
-  if (!hasOwnedContainerLabels(labels, runtimeOwnerToken())) {
-    throw new Error(`Refusing to reuse/remove an unowned Docker container: ${name}`)
-  }
-  return true
-}
-
-function checkLoopbackPort(name, port, containerPort) {
-  const actual = out('docker', ['port', name, `${containerPort}/tcp`])
-  if (actual !== `127.0.0.1:${port}`) {
-    throw new Error(`Refusing non-loopback or mismatched Docker binding for ${name}`)
-  }
-}
-
-function dbUrl(db) {
-  const url = new URL('postgresql://127.0.0.1') // gitleaks:allow (credentials are generated at runtime, never committed)
-  url.username = 'postgres'
-  url.password = secrets().db
-  url.port = String(PORT_DB)
-  url.pathname = `/${db}`
-  return url.toString()
-}
-
-export function runtimeEnv() {
-  return {
-    DATABASE_URL: dbUrl(APP_DB),
-    SYSTEM_DATABASE_URL: dbUrl(APP_DB),
-    PLATFORM_DATABASE_URL: dbUrl(PLATFORM_DB),
-    AUTH_SECRET: secrets().auth,
-    VOTING_SECRET: secrets().voting,
-    QA_TEST_ENV: 'true',
-    NODE_ENV: PROD ? 'production' : 'development',
-    PLAYWRIGHT_TEST_AUTH: 'true',
-    UE_ENVIRONMENT: 'local',
-    UE_CANONICAL_BOOTSTRAP_V2: '0',
-    UE_E2E_RISK_BYPASS: 'true',
-    NODE_OPTIONS: '--max-old-space-size=8192',
-    NEXT_PUBLIC_APP_URL: `http://127.0.0.1:${PORT_APP}`,
-    PLAYWRIGHT_BASE_URL: `http://127.0.0.1:${PORT_APP}`,
-    ...(REDIS ? { REDIS_URL: `redis://127.0.0.1:${PORT_REDIS}` } : {}),
-    UE_RUNTIME_REDIS_CONTAINER: REDIS ? REDIS_CONTAINER : '',
-    NAR_SIGNING_SECRET: secrets().nar,
-    NAR_SIGNING_KEY_ID: 'local-acceptance',
-    NAR_STORAGE_MODE: 'local_sandbox',
-    NAR_LOCAL_SANDBOX_DIR: join(STATE, 'nar-sandbox'),
-  }
-}
-
-function run(cmd, cmdArgs, options = {}) {
-  const result = spawnSync(cmd, cmdArgs, { stdio: 'inherit', shell: useShell(cmd), cwd: ROOT, ...options, env: { ...process.env, ...options.env } })
-  // Never print command arguments on failure: Docker arguments can contain generated database credentials.
-  if (result.status !== 0) throw new Error(`${cmd} exited with ${result.status ?? 'unknown'} (arguments withheld)`)
-}
-const out = (cmd, cmdArgs, options = {}) => spawnSync(cmd, cmdArgs, { encoding: 'utf8', shell: useShell(cmd), cwd: ROOT, ...options }).stdout?.trim() ?? ''
-const psql = (db, sql) => run('docker', ['exec', CONTAINER, 'psql', '-U', 'postgres', '-d', db, '-v', 'ON_ERROR_STOP=1', '-c', sql])
-const psqlFile = (db, file) => {
-  const sql = readFileSync(file, 'utf8').replaceAll('--> statement-breakpoint', '')
-  const result = spawnSync('docker', ['exec', '-i', CONTAINER, 'psql', '-U', 'postgres', '-d', db, '-v', 'ON_ERROR_STOP=1'], { input: sql, encoding: 'utf8' })
-  if (result.status !== 0) throw new Error(`psql ${file}: ${result.stderr}`)
-}
-
-async function healthy(timeoutMs) {
-  const until = Date.now() + timeoutMs
-  while (Date.now() < until) {
-    try {
-      const response = await fetch(`http://127.0.0.1:${PORT_APP}/api/health`, { signal: AbortSignal.timeout(120_000) })
-      const body = await response.json().catch(() => ({}))
-      if (response.ok && body.ok === true) return body
-    } catch {
-      /* not up yet */
-    }
-    await new Promise((r) => setTimeout(r, 3_000))
-  }
-  throw new Error('the application did not report healthy in time')
-}
-
-, '--format', '{{.Names}}'])
+  const running = out('docker', ['ps', '--filter', `name=^/${CONTAINER}$`, '--format', '{{.Names}}'])
   if (!running) {
     if (pgExists) run('docker', ['rm', '-f', CONTAINER])
     run('docker', ['run', '-d', '--name', CONTAINER, ...labels, '-e', `POSTGRES_PASSWORD=${secrets().db}`, '-p', `127.0.0.1:${PORT_DB}:5432`, `postgres:${POSTGRES_VERSION}`])
@@ -515,7 +187,7 @@ async function healthy(timeoutMs) {
   checkLoopbackPort(CONTAINER, PORT_DB, 5432)
   const actualImage = out('docker', ['inspect', '--format', '{{.Config.Image}}', CONTAINER])
   if (actualImage !== `postgres:${POSTGRES_VERSION}`) {
-    throw new Error('Refusing to reuse a PostgreSQL QA container with the wrong major version')
+    throw new Error('Refusing PostgreSQL QA container with wrong major version')
   }
   const exists = (db) => out('docker', ['exec', CONTAINER, 'psql', '-U', 'postgres', '-tAc', `SELECT 1 FROM pg_database WHERE datname='${db}'`]) === '1'
   const seeded = exists(APP_DB)
@@ -603,10 +275,11 @@ async function restartCheck() {
 }
 
 function down() {
+  const pgOwned = isOwnedContainer(CONTAINER)
+  const redisOwned = isOwnedContainer(REDIS_CONTAINER)
   stopApp()
-  // Never delete a container that was not created under this worktree's token.
-  if (isOwnedContainer(CONTAINER)) run('docker', ['rm', '-f', CONTAINER])
-  if (isOwnedContainer(REDIS_CONTAINER)) run('docker', ['rm', '-f', REDIS_CONTAINER])
+  if (pgOwned) run('docker', ['rm', '-f', CONTAINER])
+  if (redisOwned) run('docker', ['rm', '-f', REDIS_CONTAINER])
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
