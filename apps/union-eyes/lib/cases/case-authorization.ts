@@ -12,7 +12,7 @@ import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger'
 import { caseActionAllowed, casePolicyRole } from './case-permissions'
 import { liveDesignationExists } from '@/lib/triage/designations'
 import { decideCase, drizzleExecutor, kernelCaseRelationshipScope } from '@/lib/authority/store/route-adapter'
-import { canonicalMembershipSource } from '@/lib/authority/store/identity'
+import { activeMembershipSource } from '@/lib/authority/store/active-membership-source'
 import type { Action, Capacity } from '@/lib/authority/ontology'
 
 /**
@@ -178,7 +178,7 @@ const FILING_CAPACITIES: Record<'member' | 'handler' | 'bulk', readonly Capacity
 }
 
 export async function requireCaseFilingCapacity(tx: RLSTx, who: { userId: string; organizationId: string }, mode: keyof typeof FILING_CAPACITIES): Promise<void> {
-  const rows = await canonicalMembershipSource(drizzleExecutor(tx), who.organizationId, [who.userId])
+  const rows = await activeMembershipSource(drizzleExecutor(tx), who.organizationId, [who.userId])
   const membership = rows.find((m) => m.userId === who.userId && m.organizationId === who.organizationId && m.status === 'active')
   if (!membership || !membership.capacities.some((c) => FILING_CAPACITIES[mode].includes(c))) throw ApiError.forbidden()
 }

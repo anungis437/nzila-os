@@ -173,7 +173,9 @@ export async function runNextHttpSmoke(
     },
   )
   cookie = cookies(switched.response)
-  await request('ordinary-preference-write', '/api/notifications/preferences', [200], {
+  // Client-supplied organization and user identifiers are never an authority: the route's strict schema now REFUSES them
+  // outright (it previously ignored them). Nothing may be written for a refused request.
+  await request('hostile-identity-fields-in-preference-write-refused', '/api/notifications/preferences', [400], {
     method: 'PUT',
     cookie,
     body: {
@@ -182,6 +184,16 @@ export async function runNextHttpSmoke(
       organizationId: organizations[2],
       userId: administrator,
     },
+  })
+  assert.equal(
+    (await seed.query('SELECT 1 FROM public.user_notification_preferences WHERE user_id=ANY($1)', [[actor, administrator]])).rowCount,
+    0,
+    'A refused preference write persisted a row',
+  )
+  await request('ordinary-preference-write', '/api/notifications/preferences', [200], {
+    method: 'PUT',
+    cookie,
+    body: { email: `${actor}@example.invalid`, emailEnabled: false },
   })
   const rows = await seed.query(
     `SELECT organization_id::text,user_id,email_enabled

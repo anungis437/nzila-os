@@ -13,7 +13,7 @@ import { PgDialect } from 'drizzle-orm/pg-core'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import type { Action, Decision } from '../ontology'
 import { enforceAuthority, type EnforcementDeps } from './enforce'
-import { canonicalMembershipSource } from './identity'
+import { activeMembershipSource } from './active-membership-source'
 import type { SqlExecutor } from './executor'
 
 /**
@@ -48,7 +48,7 @@ export function drizzleExecutor(tx: RLSTx): SqlExecutor {
   }
 }
 
-export const kernelDeps: EnforcementDeps = { memberships: canonicalMembershipSource }
+export const kernelDeps: EnforcementDeps = { memberships: activeMembershipSource }
 
 export interface KernelCaseRequest {
   userId: string

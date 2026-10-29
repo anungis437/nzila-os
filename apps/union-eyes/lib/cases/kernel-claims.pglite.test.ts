@@ -21,6 +21,9 @@ vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: vi.fn() }))
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: vi.fn(), getUserRoleInOrganization: vi.fn() }))
 vi.mock('@/lib/audit-logger', () => ({ auditLog: m.audit, AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }))
 vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: () => m.v2.on }))
+// The in-process database here is legacy-shaped, so membership is read from the tables directly whichever way the V2 toggle is set;
+// the topology-aware source (definer function under V2) has its own tests.
+vi.mock('@/lib/authority/store/active-membership-source', async () => ({ activeMembershipSource: (await import('@/lib/authority/store/identity')).canonicalMembershipSource }))
 
 import { CONVERSATION_ASSIGNEE_ROLES } from '@/lib/authority/capacity'
 import { caseReadScope, caseTriageQueueScope, findReadableCase, type CaseActor } from './case-authorization'

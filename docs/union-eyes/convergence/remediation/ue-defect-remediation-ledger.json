@@ -1145,18 +1145,38 @@
       {
         "id": "R-43",
         "status": "OPEN",
-        "title": "Real password login cannot run in the runtime: POST /api/auth/login returns 500 \"AUTH_DATABASE_URL is required for scoped auth execution; ordinary/system fallback is forbidden\". The orchestrator provisions DATABASE_URL, SYSTEM_DATABASE_URL and PLATFORM_DATABASE_URL but not the dedicated auth-gateway role, which the canonical bootstrap-v2 acceptance harness (scripts/bootstrap-v2/next-acceptance.ts) does provision. Every runtime journey therefore uses the QA session shim and the real login, session, MFA and organization-selection path has no runtime proof. Fixing it means provisioning the auth roles in the orchestrator or running the bootstrap-v2 harness; it is an environment prerequisite, not an application defect, but it blocks the qualification of the login path"
+        "title": "Real password login cannot run in the orchestrator's runtime (POST /api/auth/login returns 500: AUTH_DATABASE_URL, the dedicated auth-gateway role, is not provisioned). An attempt to provision it in that database was made and DELIBERATELY ABANDONED: the legacy-bootstrapped database is not a valid canonical topology (R-45) and the application's own catalog admission rejects it, correctly failing closed. The real login path IS exercised by the existing canonical V2 acceptance harness (next-acceptance.ts), whose evidence is recorded separately (evidence/vs-v2-real-login-smoke.json) and must not be merged with the synthetic-session runtime evidence. Remaining: that harness still ends FAIL (R-46)"
       },
       {
         "id": "R-44",
         "status": "FIXED_RUNTIME_VERIFIED",
         "title": "crud-factory DELETE hard-coded an administrator floor and ignored writeRole, so on a table whose writes are reserved for an elevated role an organization administrator could still delete any row by id. Found by promoting DEF-0B12-CRUD-TESTIMONIAL-ITEM-WRITES to HTTP: the historical repair raised the PATCH floor to content_manager but left DELETE at admin, and the route unit tests mocked the factory away and could not see it. Demonstrated on the pre-fix production build (the administrator's DELETE was not refused), fixed (delete floor is the higher of administrator and the write role), and re-run green. A unit test now inspects the factory's real floors (it fails without the fix). Other tables with an elevated writeRole share the factory: arbitration precedents and search (content_manager), data-classification policy (compliance_manager) and security events (security_manager)"
+      },
+      {
+        "id": "R-45",
+        "status": "OPEN",
+        "title": "The orchestrator's legacy-bootstrapped database cannot host the canonical authentication topology. Found by trying to provision the nzila_auth_* gateway roles in it: oauth_providers sits in public (canonical: user_management); magic_links lacks three nullable columns the canonical declaration has (requested_ip, consumed_ip, requested_user_agent); platform_identity_bindings does not exist; legacy bootstrap policies on the auth tables block the canonical bootstrap (\"explicit reconciliation\"); and after forced reconciliation the application's catalog admission still rejected it (legacy catalog contract vs canonical auth grants). So the QA runtime and the V2 topology are two different systems, and everything proven in the QA runtime is evidence about the legacy topology only"
+      },
+      {
+        "id": "R-46",
+        "status": "OPEN",
+        "title": "The canonical V2 acceptance ends FAIL on its last step: the application's own catalog admission rejects the V2 database with 25 violations (evidence/vs-v2-real-login-smoke.json lists them): union_eyes_runtime holds schema USAGE on user_management; deadline_reassignment_convergence, document_versions, donations, evidence_packs, geofence_events, location_deletion_log, location_tracking and message_threads carry privileges or policies the contract does not match; ue_v2_bootstrap_receipt is unclassified; commercial_contracts and external_data_sync_log carry unapproved column ACLs for union_eyes_system; nzila_auth_system_mutation lacks its organization_members column grants; and the case-assignee and conversation-assignee predicate functions are missing from the V2 build. The V2 source plan has drifted from the catalog contract. The plan is a frozen digest-bound artifact, so this needs a deliberate plan regeneration, not an ad hoc patch"
+      },
+      {
+        "id": "R-47",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Under the canonical V2 topology every kernel-decided route returned 500: the authority kernel read membership straight from user_management.organization_users, but the V2 runtime role holds no grant on the identity relations (\"permission denied for table organization_users\"). The reader-owned SECURITY DEFINER source (membershipSourceViaDefiner, compileAuthorityMembershipReaderSql) existed only in native and in-process tests and was neither installed by the V2 bootstrap nor used by the application. Found by the V2 real-login acceptance (a steward's POST /api/claims). Fixed: an activeMembershipSource selects the definer function under V2 and the direct read on the legacy lineage (3 unit tests); the V2 installer now installs the reader function and its expectation is registered with the catalog contract. Verified: the V2 acceptance steps steward-claim-create (200), member-claim-create-denied (403) and role-revoked-claim-create-denied (403) pass over the real login path. Two in-process suites that mock V2 over a legacy-shaped database were adapted to read membership directly (disclosed)"
+      },
+      {
+        "id": "R-48",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Catalog admission raised on a topology without an audit_security schema (has_schema_privilege on a missing schema), failing the whole admission instead of reporting violations; it now inspects only schemas that exist. Whether the V2 topology should HAVE an audit_security schema (the ORM audit writers target it) is not decided. Separately the V2 smoke's ordinary-preference-write step was stale: the route now refuses client-supplied organizationId and userId with 400. The step now asserts that refusal and that nothing was persisted, then performs the legitimate write (a strengthening of a historical acceptance step, disclosed)"
       }
     ],
     "summary": {
-      "total": 44,
-      "fixedRuntimeVerified": 26,
-      "open": 18
+      "total": 48,
+      "fixedRuntimeVerified": 28,
+      "open": 20
     }
   },
   "runtimeAcceptance": {
@@ -1210,6 +1230,11 @@
       "executed": "desktop (API journeys run once, at desktop): 11 passed; landing and navigation matrix for platform and federation: 6 passed across desktop, tablet and mobile",
       "proves": "a platform operator, a federation executive and federation staff cannot read, route or transition a union case, reach the dues ledger or prepare a remittance, or administer triage designations; a refused request writes nothing; a client-supplied organization header is not an authority grant; an unauthenticated caller is refused the same resources",
       "notProven": "the POSITIVE journeys: a federation oversight mandate over an affiliate and a platform support-access grant have not been issued in the QA fixtures, so what these groups CAN do is not yet exercised. These groups count as boundary-proven only, not journey-complete"
+    },
+    "v2RealLogin": {
+      "evidence": "docs/union-eyes/convergence/evidence/vs-v2-real-login-smoke.json",
+      "result": "FAIL (33 HTTP steps recorded; every functional step passed; the final health step fails catalog admission, R-46)",
+      "separateFrom": "the synthetic-session runtime evidence; never merged"
     }
   }
 }

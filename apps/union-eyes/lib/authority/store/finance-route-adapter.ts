@@ -33,7 +33,7 @@ import type { Action, AuthorityRequest, Decision } from '../ontology'
 import { FINANCE_CAPACITIES } from '../policies/finance'
 import { enforceAuthority, type EnforcementDeps } from './enforce'
 import { AuthorityStoreError, isUuid, type SqlExecutor } from './executor'
-import { canonicalMembershipSource } from './identity'
+import { activeMembershipSource } from './active-membership-source'
 import { financeSourceReadiness, loadFinancialTransaction } from './resources'
 import { drizzleExecutor, kernelDeps } from './route-adapter'
 import { recordFinancialStep, type FinancialStep } from './workflow'
@@ -166,7 +166,7 @@ export async function assertLiveFinancialMandate(exec: SqlExecutor, organization
 }
 
 async function holdsFinancialCapacity(exec: SqlExecutor, organizationId: string, userId: string): Promise<boolean> {
-  const rows = await canonicalMembershipSource(exec, organizationId, [userId])
+  const rows = await activeMembershipSource(exec, organizationId, [userId])
   return rows.some(
     (m) => m.userId === userId && m.organizationId === organizationId && m.status === 'active' && m.capacities.some((c) => FINANCE_CAPACITIES.includes(c)),
   )
