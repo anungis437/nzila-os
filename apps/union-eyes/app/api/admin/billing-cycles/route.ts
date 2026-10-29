@@ -186,18 +186,13 @@ export const GET = withApiAuth(async (request: NextRequest) => {
       );
     }
 
-    // Billing cycle history - returns cycles from the billing system
-    // No dedicated billing_cycle_history table exists yet; return empty with proper semantics
-
-    logger.info('Retrieving billing cycle history', {
-      organizationId,
-      userId: user.id,
-    });
-
-    return standardSuccessResponse({
-      cycles: [],
-      total: 0,
-    });
+    // There is no authoritative billing-cycle history store. An HTTP 200
+    // with [] would falsely certify that this organization has no history.
+    logger.warn('Billing cycle history unavailable', { organizationId, userId: user.id });
+    return NextResponse.json(
+      { success: false, error: { code: 'NOT_IMPLEMENTED', message: 'Billing-cycle history is not implemented' }, capabilityState: 'NOT_IMPLEMENTED' },
+      { status: 501 },
+    );
   } catch (error) {
     logger.error('Error retrieving billing cycle history', { error });
 
