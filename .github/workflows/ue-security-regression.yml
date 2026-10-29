@@ -24,7 +24,7 @@ concurrency:
 
 jobs:
   r51-r54:
-    name: R-51–R-54 CRUD scope, lock and publication
+    name: R-51–R-55 CRUD, publication and UI contract
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -49,13 +49,13 @@ jobs:
       - name: Lint changed security files
         shell: bash
         run: |
-          pnpm --filter @nzila/union-eyes exec eslint             lib/api/crud-factory.ts             lib/api/__tests__/crud-factory-locked-auth.test.ts             lib/api/__tests__/crud-factory-scope.test.ts             app/api/calendars/'[id]'/route.ts app/api/case-studies/route.ts app/api/case-studies/'[slug]'/route.ts app/api/case-studies/__tests__/public-visibility.test.ts
+          pnpm --filter @nzila/union-eyes exec eslint             lib/api/crud-factory.ts             lib/api/__tests__/crud-factory-locked-auth.test.ts             lib/api/__tests__/crud-factory-scope.test.ts             app/api/calendars/'[id]'/route.ts app/api/case-studies/route.ts app/api/case-studies/'[slug]'/route.ts app/api/case-studies/__tests__/public-visibility.test.ts lib/marketing/case-study-response.ts lib/marketing/__tests__/case-study-response.test.ts
 
       - name: Execute actual CRUD authorization regression
         shell: bash
         run: |
           mkdir -p artifacts/ue-security-regression
-          pnpm exec vitest run --project union-eyes             apps/union-eyes/lib/api/__tests__/crud-factory-scope.test.ts             apps/union-eyes/lib/api/__tests__/crud-factory-locked-auth.test.ts             apps/union-eyes/app/api/calendars/'[id]'/__tests__/route.test.ts apps/union-eyes/app/api/case-studies/__tests__/public-visibility.test.ts             --reporter=json             --outputFile=artifacts/ue-security-regression/vitest.json
+          pnpm exec vitest run --project union-eyes             apps/union-eyes/lib/api/__tests__/crud-factory-scope.test.ts             apps/union-eyes/lib/api/__tests__/crud-factory-locked-auth.test.ts             apps/union-eyes/app/api/calendars/'[id]'/__tests__/route.test.ts apps/union-eyes/app/api/case-studies/__tests__/public-visibility.test.ts apps/union-eyes/lib/marketing/__tests__/case-study-response.test.ts             --reporter=json             --outputFile=artifacts/ue-security-regression/vitest.json
 
       - name: Require complete, non-skipped test execution and write receipt
         shell: bash
@@ -70,11 +70,11 @@ jobs:
           const passed = result.numPassedTests || 0
           const failed = result.numFailedTests || 0
           const pending = result.numPendingTests || 0
-          if (total < 25 || failed || pending || total !== passed || result.success !== true) {
-            throw new Error('R-51–R-54 tests must execute and all pass; skipped tests do not qualify')
+          if (total < 30 || failed || pending || total !== passed || result.success !== true) {
+            throw new Error('R-51–R-55 tests must execute and all pass; skipped tests do not qualify')
           }
           fs.writeFileSync('artifacts/ue-security-regression/receipt.json', JSON.stringify({
-            kind: 'UE-R51-R54-SECURITY-PROOF',
+            kind: 'UE-R51-R55-SECURITY-PROOF',
             sourceSha: process.env.EXPECTED_SHA,
             runId: process.env.GITHUB_RUN_ID,
             runAttempt: process.env.GITHUB_RUN_ATTEMPT,
