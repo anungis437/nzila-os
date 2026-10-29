@@ -211,6 +211,13 @@
       "when": 1790260000000,
       "tag": "0032_grievance_events_actor_text",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1790270000000,
+      "tag": "0033_external_authority_principals_text",
+      "breakpoints": true
     }
   ]
 }

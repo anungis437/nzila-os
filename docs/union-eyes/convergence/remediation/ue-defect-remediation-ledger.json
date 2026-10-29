@@ -965,7 +965,7 @@
       {
         "id": "R-21",
         "status": "OPEN",
-        "title": "Cold start measured: port open in 5-6 s, first request after a restart 14.6 s before and 0.6 s after a background warm-up that completes about 10 s after the port opens (a request inside that window still pays the load); FIPS boundary warnings (environment prerequisite, FIPS-enabled Node) remain on every start; no latency budget has been set or enforced"
+        "title": "Cold start measured: port open in 5-6 s, first request after a restart 14.6 s before and 0.6 s after a background warm-up that completes about 10 s after the port opens (a request inside that window still pays the load); FIPS boundary warnings (environment prerequisite, FIPS-enabled Node) remain on every start; no latency budget has been set or enforced. Observed this session: 3 of the last 6 orchestrator starts exceeded the 240 s health budget on the loaded workstation although the app reported healthy within minutes afterwards; the cause is not yet measured. The orchestrator now waits up to 480 s and reports the elapsed time instead of hiding it"
       },
       {
         "id": "R-22",
@@ -1005,7 +1005,7 @@
       {
         "id": "R-29",
         "status": "OPEN",
-        "title": "16 principal columns in 8 tables are text in the ORM and uuid in the database (class of R-17; grievance_events fixed by 0032): external_document_access_grants, external_matter_access_grants, representation_authorities, employer_communications, employer_contacts, cookie_consents, ai_grievance_triages, ai_clause_reasonings, ai_copilot_sessions. They sit under RLS policies and one foreign key, so the repair needs recreated policies and the storage-authority catalog tests; scheduled with the External Counsel/Employer/WorkAid journeys"
+        "title": "PARTLY FIXED. Principal columns declared text in the ORM but uuid in the database: migration 0033 now retypes the nine columns of representation_authorities, external_matter_access_grants and external_document_access_grants to text (the four policies naming them are dropped and recreated unchanged), proven on native PG15 and PG16 (7 tests each, including the combined database where it applied for real) and at HTTP in spec 09. SEVEN columns in five tables remain uuid: employer_communications (sender_user_id, created_by), employer_contacts.created_by, cookie_consents.user_id, ai_grievance_triages.reviewed_by, ai_clause_reasonings.reviewed_by, ai_copilot_sessions.user_id"
       },
       {
         "id": "R-30",
@@ -1061,20 +1061,25 @@
         "id": "R-40",
         "status": "OPEN",
         "title": "Authority-kernel bootstrap gap: the auditor and trustee capacities are appointment-only (earned from a live mandate), yet issuing the first financial mandate requires the holder to ALREADY hold one of financial_officer, executive, trustee or auditor. A genuinely independent person with only the member capacity can therefore never be appointed auditor or trustee through the kernel. The QA auditor fixture works around it by carrying the executive capacity through its stored role (disclosed in tests/fixtures/test-users.ts) and holds only the audit power. A product decision is needed on how an independent auditor is first appointed (for example a governed appointment instrument that confers the capacity); the issuance policy was not changed"
+      },
+      {
+        "id": "R-41",
+        "status": "OPEN",
+        "title": "External counsel cannot be granted access through the product. (1) No HTTP route issues, activates or revokes a representation authority or an external matter grant: the service functions exist but are wired to no route, so the legacy external routes are readable only for rows inserted directly into the database. (2) Two overlapping external-access designs exist: the legacy representation_authorities / matter-grant tables behind /api/external/*, and the kernel counsel engagement register, whose model is that counsel works in a SEPARATE system and the union only receives signed assertions. (3) The kernel assertion verifier is an injected port with no implementation, so every counsel assertion is refused. Which model is canonical is a product decision; building issuance on the legacy model would extend the second design, so it was not built. Spec 09 proves the READ side only, against a labelled synthetic database fixture (scripts/runtime/external-admin.ts)"
       }
     ],
     "summary": {
-      "total": 40,
+      "total": 41,
       "fixedRuntimeVerified": 24,
-      "open": 16
+      "open": 17
     }
   },
   "runtimeAcceptance": {
     "runtime": "production build (next build + next start), native PostgreSQL 16 in a fresh Docker container, orchestrated by tooling/scripts/ue-runtime-up.mjs",
     "executed": {
-      "passed": 84,
+      "passed": 92,
       "failed": 0,
-      "note": "plain test command on the production build against a real Redis (post-restart checks run in restart-check); 114 skipped are API journeys that run once, at desktop. Includes specs 06 (platform and federation boundaries), 07 (dashboard statistics scope) and 08 (assurance ledger)"
+      "note": "plain test command on the production build against a real Redis (post-restart checks run in restart-check); 130 skipped are API journeys that run once, at desktop. Includes specs 06 (platform and federation), 07 (dashboard statistics), 08 (assurance ledger) and 09 (external counsel read path)"
     },
     "restartPersistence": "passed (3/3 after a self-contained file-route-prepare-restart cycle: the filed case and audit proof, the triage assignments with a revoked then restored coordinator, and the prepared and reconciled remittance)",
     "stakeholdersWithRuntimeIdentity": [
@@ -1094,19 +1099,20 @@
       "platform operator (platform_lead; no institutional mandate)",
       "federation executive (fed_executive, parent-organization tenant; no affiliate mandate)",
       "federation staff (fed_staff, parent-organization tenant; no affiliate mandate)",
-      "independent auditor (vice_president stored role for the executive capacity; audit-only financial mandate)"
+      "independent auditor (vice_president stored role for the executive capacity; audit-only financial mandate)",
+      "external counsel (synthetic grant fixture; read path only)"
     ],
     "stakeholderGroupsStillWithoutRuntimeJourney": 6,
     "zeroOfJourneysAToIComplete": true,
     "journeyAFreshCase": "complete: file, triage sight (metadata only), refused routing for administrator, unmandated steward, read-only supervisor, officer and another tenant, mandated assignment with the mandate named in the audit, steward work and escalation, reassignment to a representative with revocation of the first steward, supervisor oversight, officer aggregate reporting, mandate and designation revocation and restoration",
     "fullUeSuiteOnThisTree": "1423 files, 20279 tests passed, 3 skipped (head e5a3ce5ae, app server stopped, --maxWorkers=4); contract tests 302 files: 10278 passed and 1 failed (ORG-ENFC-003, replaced with a stronger check; see R-36) before the replacement, passing after",
-    "migrationQualification": "cache migrations 0031 and 0032 qualified on native PostgreSQL 16 (upgrade from the preceding schema, idempotency, rollback or refusal, fail-closed, runtime privileges): db/__tests__/migration-0031-*.postgres.test.ts and migration-0032-*.postgres.test.ts, 11 tests; 0030 qualified earlier on PG15 and 16; PG15 not rerun for 0031/0032",
+    "migrationQualification": "cache migrations 0031 and 0032 qualified on native PostgreSQL 16 (upgrade from the preceding schema, idempotency, rollback or refusal, fail-closed, runtime privileges): db/__tests__/migration-0031-*.postgres.test.ts and migration-0032-*.postgres.test.ts, 11 tests; 0030 qualified earlier on PG15 and 16; PG15 not rerun for 0031/0032. Migration 0033 (external authority principals to text, R-29): native PG15 and PG16, 7 tests each (preceding-shape upgrade, text principals accepted, runtime-role row-level policies still enforce, idempotent, rollback refuses to lose history, fails closed, combined database); registered UNQUALIFIED in the lineage; not applied to any live database.",
     "rateLimiting": "proven against a real Redis 7 container started by ue-runtime-up.mjs --redis: credential-keyed mutation limit enforced exactly (60/min) with no organization header and no idempotency key; forged organization header cannot exhaust another tenant; shared mode with Redis up; Redis stopped: health degraded, limit still enforced from memory (exactly 60 allowed) and responses state X-RateLimit-Mode: degraded, reads unaffected; Redis recovered: back on the shared store within the 30 s circuit-breaker cool-down without restarting the app",
     "auditSandboxContainment": "through the real adapter: no local record and no proof under staging, production, pilot, demo, production deployment type, Vercel production, app-environment production, NZILA mode production, deployment environment production, no QA flag or no sandbox mode; under the explicit local configuration the record is typed local_sandbox with immutable false and no environment variable can make it immutable (13 tests). The production Azure immutable adapter has NOT been exercised: it needs an approved nonproduction Azure integration environment, which is an external dependency",
     "stakeholderGroupsRemaining": [
       "organizing staff",
       "employer / external counterparty",
-      "external representative / legal counsel",
+      "external representative / legal counsel (READ path proven against a synthetic grant; the grant cannot be issued through the product, R-41)",
       "WorkAid / specialized service partner",
       "governance officer / secretary (resolutions and elections: the identity exists, the journey does not)",
       "union administrator / staff operations beyond navigation"

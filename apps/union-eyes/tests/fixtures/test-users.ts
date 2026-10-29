@@ -123,6 +123,17 @@ export const UE_TEST_USERS = {
     role: 'vice_president',
     status: 'active',
   },
+  // Synthetic external counsel: a member of a DIFFERENT tenant than the union whose matter they may be granted. Holds no
+  // institutional authority; any access comes only from a representation authority and a matter grant (see external-admin.ts).
+  externalCounsel: {
+    userId: 'ue-qa-external-counsel',
+    email: 'ue.qa.external.counsel@nzila.test',
+    firstName: 'QA',
+    lastName: 'ExternalCounsel',
+    orgId: UE_TEST_ORGS.secondary.id,
+    role: 'member',
+    status: 'active',
+  },
   platformOperator: {
     userId: 'ue-qa-platform-operator',
     email: 'ue.qa.platform.operator@nzila.test',

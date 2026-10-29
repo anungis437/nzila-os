@@ -159,9 +159,11 @@ async function up() {
   }
 
   const alive = await fetch(`http://localhost:${PORT_APP}/api/health`, { signal: AbortSignal.timeout(5_000) }).then(() => true, () => false)
+  const startedAt = Date.now()
   if (!alive) startApp()
-  const body = await healthy(240_000)
-  console.log(`[ue-runtime] healthy: ${JSON.stringify(body.checks)}`)
+  // Cold start on a loaded workstation has exceeded 240 s on some runs (finding R-21); the wait is bounded and the elapsed time is reported, not hidden.
+  const body = await healthy(480_000)
+  console.log(`[ue-runtime] healthy after ${Math.round((Date.now() - startedAt) / 1000)} s: ${JSON.stringify(body.checks)}`)
 }
 
 function startApp() {

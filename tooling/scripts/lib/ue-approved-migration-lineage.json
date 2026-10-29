@@ -221,6 +221,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Changes grievance_events.actor_user_id from uuid to text: every principal is a text identifier, so recording an escalation event failed for any non-uuid actor and rolled the escalation back. Found by running the escalation journey against native PostgreSQL; proven on PG16 only; not applied to any live database."
+      },
+      {
+        "tag": "0033_external_authority_principals_text",
+        "sha256": "7a65b28bd9a044184df9dc3c3a89a0447977b86b07254ff886169b0f4b81f8c8",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Changes the nine principal columns of representation_authorities, external_matter_access_grants and external_document_access_grants from uuid to text (R-29): application principals are text identifiers, so no external counsel or specialist could ever be recorded. The four policies that name the columns are dropped and recreated unchanged. Not applied to any live database."
       }
     ],
     "platform": [
