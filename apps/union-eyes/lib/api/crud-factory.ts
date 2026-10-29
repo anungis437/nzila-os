@@ -608,7 +608,15 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         assertRequiredScope(organizationId, userId);
         assertCrudWrite(governance);
         const id = params[paramName];
-        let updates = stripBlockedPatchFields(body, { pk, orgScoped, blockedPatchFields: opts.parentScope ? [...blockedPatchFields, opts.parentScope.column] : blockedPatchFields });
+        // Resolve the *physical* primary key and protect all factory-managed ownership fields.
+        // A caller-supplied pk may be wrong; findPrimaryKeyColumn then picks resolvedPk instead.
+        const protectedFields = [
+          ...blockedPatchFields,
+          ...(opts.parentScope ? [opts.parentScope.column] : []),
+          ...(opts.ownerColumn ? [opts.ownerColumn] : []),
+          ...(getColumn(table, 'createdBy') ? ['createdBy'] : []),
+        ];
+        let updates = stripBlockedPatchFields(body, { pk: resolvedPk, orgScoped, blockedPatchFields: protectedFields });
 
         // Fail closed BEFORE opening a transaction or running any hook: a
         // merge column can only ever be safely converted into a JSONB
@@ -667,6 +675,11 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
                 organizationId,
                 userId,
                 existing: existingRow as Record<string, unknown>,
+              });
+              // A normalizer must not reintroduce a primary key, owner, parent or other
+              // server-managed field after the first sanitization step.
+              updates = stripBlockedPatchFields(updates, {
+                pk: resolvedPk, orgScoped, blockedPatchFields: protectedFields,
               });
             }
 
