@@ -19,7 +19,8 @@ import { guardPublicIntake } from '@/lib/public-intake/guard';
 const gdprCookieConsentSchema = z.object({
   consentId: z.guid('Invalid consentId'),
   organizationId: z.guid('Invalid organizationId'),
-  essential: z.boolean().optional(),
+  // Necessary cookies are not an optional marketing preference.
+  essential: z.literal(true).optional(),
   functional: z.boolean().optional(),
   analytics: z.boolean().optional(),
   marketing: z.boolean().optional(),
@@ -40,7 +41,7 @@ export const POST = async (request: NextRequest) => {
       return NextResponse.json({ error: 'Invalid request data' }, { status: 400 });
     }
     
-    const { consentId, organizationId, essential, functional, analytics, marketing, userAgent } = validation.data;
+    const { consentId, organizationId, functional, analytics, marketing, userAgent } = validation.data;
 
     const ipAddress = request.headers.get("x-forwarded-for") || 
                       request.headers.get("x-real-ip") || 
@@ -60,7 +61,7 @@ export const POST = async (request: NextRequest) => {
         userId,
         organizationId,
         consentId,
-        essential: essential ?? true,
+        essential: true,
         functional: functional ?? false,
         analytics: analytics ?? false,
         marketing: marketing ?? false,
