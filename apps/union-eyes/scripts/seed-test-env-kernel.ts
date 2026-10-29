@@ -280,6 +280,8 @@ export async function seedQaCaseAssignments(connectionString: string): Promise<n
     const ledger = { resourceIds: [UE_TEST_FINANCE.organizationId], accountIds: [UE_TEST_FINANCE.accountId] }
     created += await seedQaFinancialMandate(client, exec, UE_TEST_USERS.financePreparer, ['view', 'prepare'], ledger)
     created += await seedQaFinancialMandate(client, exec, UE_TEST_USERS.financeReconciler, ['view', 'reconcile'], ledger)
+    // The independent auditor holds only the audit power; it confers no preparation, approval, execution or reconciliation.
+    created += await seedQaFinancialMandate(client, exec, UE_TEST_USERS.assuranceAuditor, ['audit'], ledger)
     created += await seedQaCaseAssignmentRules(client, exec)
     const cases = [UE_TEST_CASES.primarySubmitted, UE_TEST_CASES.primaryAssigned]
     for (const qaCase of cases) {

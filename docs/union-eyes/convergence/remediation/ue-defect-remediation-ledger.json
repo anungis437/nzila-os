@@ -1024,8 +1024,8 @@
       },
       {
         "id": "R-33",
-        "status": "OPEN",
-        "title": "Re-examined, not a code change: the finance routes gate on the secretary_treasurer role AND a live financial mandate. That allow-list is pinned by the frozen Financial Officer contract (financial-officer-containment.test.ts, contract ue-persona-access.test.ts) and by the RBAC matrix, so loosening it would contradict a frozen decision. The real gap is that auditors and trustees have no read-only assurance surface (Governance Officer G21), so their duties are unreachable over HTTP. Needs a separate, mandate-gated read-only assurance route set rather than a wider finance gate"
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Auditor duties were unreachable over HTTP. The finance routes keep their frozen role allow-list (pinned by the Financial Officer contract, so not loosened). A separate read-only route, GET /api/assurance/finance/ledger, now serves the independent auditor: authority is a live financial mandate holding the audit power on the organization ledger, issued through the governed workflow; every read is audited; it accepts no write. Verified over HTTP on the production build (spec 08: the auditor reads and the read is audited; the audit duty confers nothing else; finance duties, an auditor-titled user without a mandate, approver, administrator, executive, steward, member, another tenant, platform identity and unauthenticated caller are refused; revocation removes access at once and restoration reissues it). Trustees are NOT exercised: there is no trustee role in the platform role model and no trustee route"
       },
       {
         "id": "R-34",
@@ -1056,20 +1056,25 @@
         "id": "R-39",
         "status": "FIXED_RUNTIME_VERIFIED",
         "title": "Native test infrastructure: sweep v1 leaked DATABASE_URL and QA_TEST_ENV into every suite (false failures); the long-lived PG16 container accumulated ~120 scratch databases and entered crash recovery; two suites could not launch pnpm/npx on Windows; the P4 fixture silently skipped the real django_migrations shape. All repaired or contained, and the suites run in clean child processes"
+      },
+      {
+        "id": "R-40",
+        "status": "OPEN",
+        "title": "Authority-kernel bootstrap gap: the auditor and trustee capacities are appointment-only (earned from a live mandate), yet issuing the first financial mandate requires the holder to ALREADY hold one of financial_officer, executive, trustee or auditor. A genuinely independent person with only the member capacity can therefore never be appointed auditor or trustee through the kernel. The QA auditor fixture works around it by carrying the executive capacity through its stored role (disclosed in tests/fixtures/test-users.ts) and holds only the audit power. A product decision is needed on how an independent auditor is first appointed (for example a governed appointment instrument that confers the capacity); the issuance policy was not changed"
       }
     ],
     "summary": {
-      "total": 39,
-      "fixedRuntimeVerified": 23,
+      "total": 40,
+      "fixedRuntimeVerified": 24,
       "open": 16
     }
   },
   "runtimeAcceptance": {
     "runtime": "production build (next build + next start), native PostgreSQL 16 in a fresh Docker container, orchestrated by tooling/scripts/ue-runtime-up.mjs",
     "executed": {
-      "passed": 79,
+      "passed": 84,
       "failed": 0,
-      "note": "plain test command on the production build against a real Redis (post-restart checks run in restart-check); 104 skipped are API journeys that run once, at desktop. Includes specs 06 (platform and federation boundaries) and 07 (dashboard statistics scope)"
+      "note": "plain test command on the production build against a real Redis (post-restart checks run in restart-check); 114 skipped are API journeys that run once, at desktop. Includes specs 06 (platform and federation boundaries), 07 (dashboard statistics scope) and 08 (assurance ledger)"
     },
     "restartPersistence": "passed (3/3 after a self-contained file-route-prepare-restart cycle: the filed case and audit proof, the triage assignments with a revoked then restored coordinator, and the prepared and reconciled remittance)",
     "stakeholdersWithRuntimeIdentity": [
@@ -1088,7 +1093,8 @@
       "auditor (read only)",
       "platform operator (platform_lead; no institutional mandate)",
       "federation executive (fed_executive, parent-organization tenant; no affiliate mandate)",
-      "federation staff (fed_staff, parent-organization tenant; no affiliate mandate)"
+      "federation staff (fed_staff, parent-organization tenant; no affiliate mandate)",
+      "independent auditor (vice_president stored role for the executive capacity; audit-only financial mandate)"
     ],
     "stakeholderGroupsStillWithoutRuntimeJourney": 6,
     "zeroOfJourneysAToIComplete": true,

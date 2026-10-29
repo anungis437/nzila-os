@@ -1,7 +1,7 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 994,
+  "routes": 995,
   "mutating": 717,
   "kernel": 62,
   "byGuard": {
@@ -17,7 +17,7 @@
    "ROLE_AUTH": 124,
    "SESSION_AUTH": 64,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 281,
+   "WITH_API": 282,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -1998,6 +1998,18 @@
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
    "audit": "CRUD_ATOMIC"
+  },
+  {
+   "route": "assurance/finance/ledger/route.ts",
+   "methods": [
+    "GET"
+   ],
+   "mutating": false,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "READ_ONLY"
   },
   {
    "route": "audits/[id]/route.ts",

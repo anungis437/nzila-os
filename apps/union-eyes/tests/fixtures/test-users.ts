@@ -111,6 +111,18 @@ export const UE_TEST_USERS = {
     status: 'active',
   },
   // Platform operator: a supported platform role. Holds no institutional mandate, so operating the platform confers no right to read a union's cases.
+  // Holder of the audit-only financial mandate. The kernel cannot issue the FIRST audit mandate to a holder with no finance
+  // capacity (auditor is appointment-only, yet issuance requires a finance capacity already), so this fixture carries the
+  // executive capacity through its stored role. It holds no executive, approval or finance duty: only the audit power.
+  assuranceAuditor: {
+    userId: 'ue-qa-assurance-auditor',
+    email: 'ue.qa.assurance.auditor@nzila.test',
+    firstName: 'QA',
+    lastName: 'AssuranceAuditor',
+    orgId: UE_TEST_ORGS.primary.id,
+    role: 'vice_president',
+    status: 'active',
+  },
   platformOperator: {
     userId: 'ue-qa-platform-operator',
     email: 'ue.qa.platform.operator@nzila.test',
