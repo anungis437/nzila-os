@@ -332,42 +332,55 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
     const expectedTotal = Number(remittance.totalAmount);
     const variance = expectedTotal - matchedTotal;
 
-    // Update transactions - remittanceId doesn't exist in schema
-    // Store remittance link in metadata or notes field
-    await db
-      .update(schema.duesTransactions)
-      .set({
-        paidDate: remittance.remittanceDate, // Already a string from date column
-        notes: `Paid via remittance ${id}`,
-      } as any as Partial<typeof schema.duesTransactions.$inferInsert>)
-      .where(
-        and(
-          eq(schema.duesTransactions.organizationId, scopedOrgId),
-          sql`${schema.duesTransactions.id} = ANY(${transactionsToMatch.map((t) => t.id)})`
-        )
-      );
-
-    // Update remittance status
+    // Transaction updates and reconciliation evidence must commit or roll back together.
+    // The tenant and remittance predicates are repeated inside the transaction.
     const newStatus = Math.abs(variance) < 0.01 ? 'reconciled' : 'variance_detected';
-    
-    const [updatedRemittance] = await db
-      .update(schema.employerRemittances)
-      .set({
-        reconciliationStatus: newStatus,
-        varianceAmount: variance.toString(),
-        reconciliationDate: new Date().toISOString(),
-        reconciledBy: userId ?? fallbackUserId,
-        // Store match details in metadata
-        metadata: {
-          matchedTransactions: transactionsToMatch.length,
-          matchedAmount: matchedTotal,
-        },
-      } as any as Partial<typeof schema.employerRemittances.$inferInsert>)
-      .where(and(
-        eq(schema.employerRemittances.id, id),
-        eq(schema.employerRemittances.tenantId, scopedOrgId),
-      ))
-      .returning();
+    const updatedRemittance = await db.transaction(async (tx) => {
+      const [current] = await tx
+        .select({ id: schema.employerRemittances.id, reconciliationStatus: schema.employerRemittances.reconciliationStatus })
+        .from(schema.employerRemittances)
+        .where(and(
+          eq(schema.employerRemittances.id, id),
+          eq(schema.employerRemittances.tenantId, scopedOrgId),
+        ))
+        .for('update')
+        .limit(1);
+
+      if (!current || current.reconciliationStatus === 'reconciled') {
+        throw new Error('Remittance changed while reconciling');
+      }
+
+      await tx
+        .update(schema.duesTransactions)
+        .set({
+          paidDate: remittance.remittanceDate,
+          notes: `Paid via remittance ${id}`,
+        } as any as Partial<typeof schema.duesTransactions.$inferInsert>)
+        .where(and(
+          eq(schema.duesTransactions.organizationId, scopedOrgId),
+          sql`${schema.duesTransactions.id} = ANY(${transactionsToMatch.map((t) => t.id)})`,
+        ));
+
+      const [updated] = await tx
+        .update(schema.employerRemittances)
+        .set({
+          reconciliationStatus: newStatus,
+          varianceAmount: variance.toString(),
+          reconciliationDate: new Date().toISOString(),
+          reconciledBy: userId ?? fallbackUserId,
+          metadata: {
+            matchedTransactions: transactionsToMatch.length,
+            matchedAmount: matchedTotal,
+          },
+        } as any as Partial<typeof schema.employerRemittances.$inferInsert>)
+        .where(and(
+          eq(schema.employerRemittances.id, id),
+          eq(schema.employerRemittances.tenantId, scopedOrgId),
+        ))
+        .returning();
+      if (!updated) throw new Error('Remittance update failed');
+      return updated;
+    });
 
     res.json({
       success: true,
