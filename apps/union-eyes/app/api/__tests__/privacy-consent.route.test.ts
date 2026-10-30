@@ -67,6 +67,40 @@ describe('privacy/consent route', () => {
     expect(response.status).toBe(400);
   });
 
+  it.each(['implicit', 'opt_out'])('POST rejects a positive Quebec consent based on %s', async (method) => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/privacy/consent', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({
+        province: 'QC', consentType: 'marketing', consentGiven: true,
+        consentText: 'long enough consent text', consentLanguage: 'fr', consentMethod: method,
+      }),
+    }));
+    expect(response.status).toBe(400);
+    expect(m.recordConsent).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('POST never records caller-spoofed forwarding headers as verified network evidence', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/privacy/consent', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-forwarded-for': '1.2.3.4', 'x-real-ip': '1.2.3.4' },
+      body: JSON.stringify({
+        province: 'ON', consentType: 'marketing', consentGiven: true,
+        consentText: 'long enough consent text', consentLanguage: 'en',
+      }),
+    }));
+    expect(response.status).toBe(200);
+    expect(m.recordConsent).toHaveBeenCalledWith(expect.objectContaining({
+      ipAddress: undefined, userAgent: undefined,
+    }), m.tx);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.tx, expect.objectContaining({
+      details: expect.objectContaining({
+        consentTextSource: 'CALLER_SUBMITTED_UNVERIFIED', networkEvidenceVerified: false,
+      }),
+    }));
+  });
+
   it('POST records consent successfully', async () => {
     const { POST } = await loadRoute();
 
@@ -103,12 +137,33 @@ describe('privacy/consent route', () => {
     expect(response.status).toBe(400);
   });
 
+  it.each([
+    '/api/privacy/consent?province=INVALID&consentType=marketing',
+    '/api/privacy/consent?province=QC&consentType=',
+  ])('GET refuses invalid consent lookup parameters: %s', async (path) => {
+    const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost' + path));
+    expect(response.status).toBe(400);
+    expect(m.hasValidConsent).not.toHaveBeenCalled();
+  });
+
   it('GET returns consent lookup result', async () => {
     const { GET } = await loadRoute();
     const response = await GET(new NextRequest('http://localhost/api/privacy/consent?province=QC&consentType=marketing'));
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.hasConsent).toBe(true);
+  });
+
+  it('DELETE rejects invalid province or unknown fields before any mutation', async () => {
+    const { DELETE } = await loadRoute();
+    const response = await DELETE(new NextRequest('http://localhost/api/privacy/consent', {
+      method: 'DELETE', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ province: 'UNREAL', consentType: 'marketing', userId: 'another-user' }),
+    }));
+    expect(response.status).toBe(400);
+    expect(m.revokeConsent).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('DELETE revokes consent', async () => {

@@ -11,16 +11,18 @@ import {
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
 
+const provinceSchema = z.enum(['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT']);
+const consentTypeSchema = z.string().trim().min(1).max(100);
+const lookupSchema = z.object({ province: provinceSchema, consentType: consentTypeSchema }).strict();
+
 const consentSchema = z.object({
-  province: z.enum(['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'], {
-    error: 'Invalid province code'
-  }),
-  consentType: z.string().min(1, 'Consent type is required'),
+  province: provinceSchema,
+  consentType: consentTypeSchema,
   consentGiven: z.boolean(),
-  consentText: z.string().min(10, 'Consent text must be at least 10 characters'),
+  consentText: z.string().min(10, 'Consent text must be at least 10 characters').max(8000),
   consentLanguage: z.enum(['en', 'fr', 'it', 'pt']).default('en'),
   consentMethod: z.enum(['explicit_checkbox', 'opt_in', 'opt_out', 'implicit']).default('explicit_checkbox'),
-});
+}).strict();
 /**
  * POST /api/privacy/consent
  * Record user consent for provincial privacy compliance
@@ -55,10 +57,17 @@ export async function POST(request: NextRequest) {
         'Quebec consent records must be submitted in French (consentLanguage=fr).'
       );
     }
+    // Positive consent cannot be evidenced by a prechecked/implicit/opt-out
+    // method. Fail before storage and audit when the actual route enum is used.
+    if (province === 'QC' && consentGiven && !['explicit_checkbox', 'opt_in'].includes(consentMethod)) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Quebec positive consent requires an explicit opt-in action');
+    }
 
-    // Get user IP and user agent for audit trail
-    const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined;
-    const userAgent = request.headers.get("user-agent") || undefined;
+    // Never treat caller-supplied forwarding headers as verified evidence of
+    // the user's network identity. A trusted ingress attestation is required
+    // before IP or device identifiers can be recorded as consent evidence.
+    const ipAddress = undefined;
+    const userAgent = undefined;
 
     const organizationId = await getOrganizationIdForUser(userId);
     const consent = await withRLSContext({ organizationId }, async (tx) => {
@@ -82,7 +91,8 @@ export async function POST(request: NextRequest) {
         action: 'privacy.consent.record',
         resourceType: 'provincial_consent',
         resourceId: recorded.id,
-        details: { province, consentType, consentGiven, consentMethod },
+        details: { province, consentType, consentGiven, consentMethod,
+          consentTextSource: 'CALLER_SUBMITTED_UNVERIFIED', networkEvidenceVerified: false },
       });
       return recorded;
     });
@@ -115,15 +125,14 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const province = searchParams.get("province") as Province;
-    const consentType = searchParams.get("consentType");
-
-    if (!province || !consentType) {
-      return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      'Missing province or consentType'
-    );
+    const parsed = lookupSchema.safeParse({
+      province: searchParams.get('province'),
+      consentType: searchParams.get('consentType'),
+    });
+    if (!parsed.success) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Valid province and consentType are required');
     }
+    const { province, consentType } = parsed.data;
 
     const hasConsent = await ProvincialPrivacyService.hasValidConsent(
       userId,
@@ -154,15 +163,12 @@ export async function DELETE(request: NextRequest) {
     );
     }
 
-    const body = await request.json();
-    const { province, consentType } = body;
-
-    if (!province || !consentType) {
-      return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      'Missing required fields'
-    );
+    const body = await request.json().catch(() => null);
+    const parsed = lookupSchema.safeParse(body);
+    if (!parsed.success) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Valid province and consentType are required');
     }
+    const { province, consentType } = parsed.data;
 
     const organizationId = await getOrganizationIdForUser(userId);
     const revoked = await withRLSContext({ organizationId }, async (tx) => {

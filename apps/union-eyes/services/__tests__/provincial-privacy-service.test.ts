@@ -82,12 +82,23 @@ describe('provincial-privacy-service', () => {
   describe('recordConsent', () => {
     const base = {
       userId: 'u1', province: 'QC' as const, consentType: 'marketing', consentGiven: true,
-      consentMethod: 'explicit', consentText: 't', consentLanguage: 'en' as const,
+      consentMethod: 'explicit_checkbox', consentText: 't', consentLanguage: 'en' as const,
     };
 
     it('rejects implied consent in Quebec', async () => {
       pushSel([]); // getProvinceConfig → default QC (explicitOptIn true)
       await expect(S.recordConsent({ ...base, consentMethod: 'implied_action' })).rejects.toThrow('explicit consent');
+    });
+
+    it.each(['implicit', 'opt_out', 'implied_action'])('rejects non-express positive QC consent method %s', async (method) => {
+      pushSel([]);
+      await expect(S.recordConsent({ ...base, consentMethod: method })).rejects.toThrow('explicit consent');
+    });
+
+    it('allows a negative opt-out record without converting it into affirmative consent', async () => {
+      pushSel([], [{ id: 'denial-1', consentGiven: false }]);
+      const result = await S.recordConsent({ ...base, consentGiven: false, consentMethod: 'opt_out' });
+      expect(result).toMatchObject({ consentGiven: false });
     });
 
     it('defaults QC consent language to fr and records consent', async () => {

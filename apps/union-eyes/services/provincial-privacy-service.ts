@@ -166,8 +166,12 @@ export class ProvincialPrivacyService {
     const config = await this.getProvinceConfig(request.province);
 
     // Validate Quebec explicit consent requirement
-    if (config.explicitOptIn && request.consentMethod === "implied_action") {
-      throw new Error("Quebec Law 25 requires explicit consent, not implied consent");
+    // The API accepts 'implicit' and 'opt_out' (not 'implied_action').
+    // In jurisdictions configured for express opt-in, a positive grant must
+    // reflect an actual explicit user action even when called outside the API.
+    if (config.explicitOptIn && request.consentGiven &&
+      !['explicit_checkbox', 'opt_in'].includes(request.consentMethod)) {
+      throw new Error("Express opt-in requires explicit consent, not implicit or opt-out consent");
     }
 
     // Quebec Bill 96 / Law 25: French is the default language for consent.
