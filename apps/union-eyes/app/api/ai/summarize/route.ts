@@ -91,7 +91,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       if (!doc) {
         return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
       }
-      if (doc.organizationId !== orgId && !doc.isPublic) {
+      if (doc.organizationId !== orgId) {
         return standardErrorResponse(ErrorCode.FORBIDDEN, 'Access denied to this document');
       }
 
