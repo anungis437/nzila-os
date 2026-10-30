@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 32,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 70,
-    "engineeringRemaining": 707,
+    "engineeringCorrected": 82,
+    "engineeringRemaining": 695,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 8
   },
@@ -288,6 +288,10 @@
     {
       "sha": "e3e78730dc069820da3ac14355168ee95eae80be",
       "description": "AI audit legacy/canonical tenant isolation with unit regression; typecheck fixes for classify, feedback, trustee meeting and copilot sensitive-classification contract; runtime bargaining reparenting regression now requires 400 and valid title-only PATCH. CI at this exact HEAD pending."
+    },
+    {
+      "sha": "3905e595052356ec66493b51d77bc058483b37b6",
+      "description": "H&S dashboard tenant-bound RLS, incident time regex, hazard item role and anonymous hazard reporting; PGlite and strict safety-form regressions committed. Source-level only; exact-HEAD CI and runtime pending."
     }
   ],
   "records": [
@@ -7333,7 +7337,15 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "HS-PRIVACY-AND-METRIC-INTEGRITY",
+        "path": "apps/union-eyes/app/api/health-safety/hazards/[id]/route.ts",
+        "regressionPath": "apps/union-eyes/app/api/health-safety/hazards/__tests__/route.test.ts",
+        "explanation": "Item reads now require health_safety_rep, matching collection authorization and preventing member-level exposure of reporter contact and hazard details.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-HS-ANONYMOUS-REPORTER-STAMPED-IN-CREATED-BY",
@@ -7364,7 +7376,15 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "HS-PRIVACY-AND-METRIC-INTEGRITY",
+        "path": "apps/union-eyes/app/api/health-safety/hazards/route.ts",
+        "regressionPath": "apps/union-eyes/app/api/__tests__/health-safety-incident-anonymity.pglite.test.ts",
+        "explanation": "Both incident and hazard POST declare anonymousCreate, which sets createdBy and the mandatory audit actor to the anonymous sentinel rather than the session user; PGlite regression covers both paths.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-HS-INCIDENT-CREATE-SILENTLY-NORMALISES-SEVERITY-TYPE-AND-DATE",
@@ -7544,7 +7564,15 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "HS-PRIVACY-AND-METRIC-INTEGRITY",
+        "path": "apps/union-eyes/app/api/health-safety/dashboard/route.ts",
+        "regressionPath": "apps/union-eyes/app/api/__tests__/health-safety-dashboard.route.test.ts",
+        "explanation": "Dashboard errors throw a non-success error rather than returning a fabricated clean dashboard; all eight SQL reads execute inside the authenticated organization's RLS transaction.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-HS-DASHBOARD-TRAINING-COMPLIANCE-IS-A-CONSTANT",
@@ -7573,7 +7601,15 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "HS-PRIVACY-AND-METRIC-INTEGRITY",
+        "path": "apps/union-eyes/app/api/health-safety/dashboard/route.ts",
+        "regressionPath": "apps/union-eyes/app/api/__tests__/health-safety-dashboard.route.test.ts",
+        "explanation": "No training compliance rate is claimed without completion and due-date evidence; unmeasured values are null, and the tenant-bound dashboard regression covers this.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-HS-DASHBOARD-METRICS-DERIVED-FROM-RECORD-CREATION-AND-DEFAULTS",
