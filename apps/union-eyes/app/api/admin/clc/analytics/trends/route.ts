@@ -37,7 +37,8 @@ export const GET = withRoleAuth('admin', async (request, context) => {
         }
 
         const searchParams = request.nextUrl.searchParams;
-        const years = parseInt(searchParams.get('years') || '3');
+        const yearsInput = searchParams.get('years') ?? '3';
+        const years = /^(3|5|10)$/.test(yearsInput) ? Number(yearsInput) : NaN;
         
         if (![3, 5, 10].includes(years)) {
           logApiAuditEvent({

@@ -68,7 +68,10 @@ export const POST = withApi({
       completionPercentage: '100.00',
       registrationStatus: 'completed',
       updatedAt: new Date().toISOString(),
-    }).where(condition).returning({ id: courseRegistrations.id, completed: courseRegistrations.completed });
+    }).where(and(
+      eq(courseRegistrations.organizationId, organizationId),
+      eq(courseRegistrations.id, body.registrationId),
+    )).returning({ id: courseRegistrations.id, completed: courseRegistrations.completed });
     if (!updated) throw ApiError.conflict('Registration changed');
     await persistAtomicAudit(tx, {
       organizationId, userId,

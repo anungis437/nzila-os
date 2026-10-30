@@ -34,7 +34,8 @@ export const GET = withRoleAuth('admin', async (request, context) => {
     }
 
     const searchParams = request.nextUrl.searchParams;
-    const year = parseInt(searchParams.get('year') || new Date().getFullYear().toString());
+    const yearInput = searchParams.get('year') ?? String(new Date().getFullYear());
+    const year = /^\d{4}$/.test(yearInput) ? Number(yearInput) : NaN;
 
     if (isNaN(year) || year < 2000 || year > 2100) {
       logApiAuditEvent({

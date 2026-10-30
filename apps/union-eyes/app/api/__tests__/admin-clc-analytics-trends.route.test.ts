@@ -19,7 +19,7 @@ vi.mock('@/lib/rate-limiter', () => ({
 vi.mock('@/services/clc/compliance-reports', () => ({ analyzeMultiYearTrends: m.analyzeMultiYearTrends }));
 vi.mock('@/lib/middleware/api-security', () => ({ logApiAuditEvent: m.logApiAuditEvent }));
 vi.mock('@/lib/api/standardized-responses', () => ({
-  ErrorCode: { VALIDATION_ERROR: 'VALIDATION_ERROR', INTERNAL_ERROR: 'INTERNAL_ERROR' },
+  ErrorCode: { VALIDATION_ERROR: 'VALIDATION_ERROR', INTERNAL_ERROR: 'INTERNAL_ERROR', AUTH_REQUIRED: 'AUTH_REQUIRED', FORBIDDEN: 'FORBIDDEN' },
   standardErrorResponse: m.standardErrorResponse,
 }));
 
@@ -31,12 +31,12 @@ describe('admin/clc/analytics/trends route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.withRoleAuth.mockImplementation((_role: string, handler: any) =>
-      (request: NextRequest, context: any = { userId: 'u1' }) => handler(request, context));
+      (request: NextRequest, context: any = { userId: 'u1', organizationId: 'org-a' }) => handler(request, context));
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0 });
     m.createRateLimitHeaders.mockReturnValue({ 'x-ratelimit-remaining': '49' });
     m.analyzeMultiYearTrends.mockResolvedValue({ years: 3, trend: [] });
     m.standardErrorResponse.mockImplementation((code: string, message: string) =>
-      new Response(JSON.stringify({ code, message }), { status: code === 'VALIDATION_ERROR' ? 400 : 500 }));
+      new Response(JSON.stringify({ code, message }), { status: code === 'VALIDATION_ERROR' ? 400 : code === 'FORBIDDEN' ? 403 : code === 'AUTH_REQUIRED' ? 401 : 500 }));
   });
 
   it('returns 429 when rate limited', async () => {
@@ -64,7 +64,21 @@ describe('admin/clc/analytics/trends route', () => {
 
     expect(response.status).toBe(200);
     expect(payload).toMatchObject({ years: 3, trend: [] });
-    expect(m.analyzeMultiYearTrends).toHaveBeenCalledWith({ years: 5 });
+    expect(m.analyzeMultiYearTrends).toHaveBeenCalledWith({ years: 5, organizationId: 'org-a' });
+  });
+
+  it('refuses missing organization context without reading tenant reports', async () => {
+    const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/trends?years=5'), { userId: 'u1', organizationId: null });
+    expect(response.status).toBe(403);
+    expect(m.analyzeMultiYearTrends).not.toHaveBeenCalled();
+  });
+
+  it('rejects trailing characters in a trend period', async () => {
+    const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/trends?years=5junk'));
+    expect(response.status).toBe(400);
+    expect(m.analyzeMultiYearTrends).not.toHaveBeenCalled();
   });
 
   it('returns 500 when trend analysis fails', async () => {
