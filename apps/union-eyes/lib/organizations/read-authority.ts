@@ -1,5 +1,4 @@
 import { and, eq, isNull, sql } from 'drizzle-orm';
-import { db } from '@/db/db';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { isPlatformAdminUser, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
@@ -34,8 +33,8 @@ async function directMemberships(userId: string): Promise<Array<{ organizationId
     const choices = await getCanonicalOrganizationChoices();
     return choices.memberships.map((m: { organizationId: string; role: string }) => ({ organizationId: m.organizationId, role: m.role }));
   }
-  return withSystemContext(() =>
-    db
+  return withSystemContext((tx) =>
+    tx
       .select({ organizationId: organizationMembers.organizationId, role: organizationMembers.role })
       .from(organizationMembers)
       .where(and(
@@ -55,8 +54,8 @@ export async function resolveOrganizationAccess(userId: string): Promise<Organiz
 
   let descendants = new Set<string>();
   if (administered.length > 0) {
-    const rows = await withSystemContext(() =>
-      db
+    const rows = await withSystemContext((tx) =>
+      tx
         .select({ id: organizations.id })
         .from(organizations)
         .where(sql`${organizations.hierarchyPath}::text[] && ARRAY[${sql.join(administered.map((id) => sql`${id}::text`), sql`, `)}]::text[]`)
