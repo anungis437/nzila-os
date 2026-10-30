@@ -98,7 +98,7 @@ describe('organizations/switch route', () => {
   it('POST returns 403 when non-admin user has no membership', async () => {
     const { POST } = await loadRoute();
     m.selectQueue.push(
-      [{ id: 'org_1', name: 'Org 1', slug: 'org-1' }],
+      [{ id: 'org_1', name: 'Org 1', slug: 'org-1', status: 'active' }],
       [],
       [],
     );
@@ -114,14 +114,14 @@ describe('organizations/switch route', () => {
     expect(response.status).toBe(403);
   });
 
-  it('POST allows platform admin to switch without membership', async () => {
+  it('POST denies platform admin switching without a direct active membership', async () => {
     const { POST } = await loadRoute();
     process.env.PLATFORM_ADMIN_USER_IDS = 'user_1,other_user';
     m.selectQueue.push([
       {
         id: 'org_1',
         name: 'Org 1',
-        slug: 'org-1',
+        slug: 'org-1', status: 'active',
         organizationType: 'union',
         parentId: null,
         sectors: ['healthcare'],
@@ -140,17 +140,14 @@ describe('organizations/switch route', () => {
       }),
     );
 
-    expect(response.status).toBe(200);
-    const json = await response.json();
-    expect(json.success).toBe(true);
-    expect(json.organization).toMatchObject({ id: 'org_1', name: 'Org 1', slug: 'org-1' });
+    expect(response.status).toBe(403);
   });
 
   it('POST allows member user with UUID membership', async () => {
     const { POST } = await loadRoute();
     m.selectQueue.push(
-      [{ id: 'org_1', name: 'Org 1', slug: 'org-1' }],
-      [{ id: 'membership_1', userId: 'user_1', organizationId: 'org_1' }],
+      [{ id: 'org_1', name: 'Org 1', slug: 'org-1', status: 'active' }],
+      [{ id: 'membership_1', userId: 'user_1', organizationId: 'org_1', status: 'active' }],
     );
 
     const response = await POST(
@@ -169,7 +166,7 @@ describe('organizations/switch route', () => {
   it('POST denies a member when the UUID membership is absent', async () => {
     const { POST } = await loadRoute();
     m.selectQueue.push(
-      [{ id: 'org_1', name: 'Org 1', slug: 'org-1' }],
+      [{ id: 'org_1', name: 'Org 1', slug: 'org-1', status: 'active' }],
       [],
     );
 
@@ -183,4 +180,28 @@ describe('organizations/switch route', () => {
 
     expect(response.status).toBe(403);
   });
+  it('POST denies suspended membership even if the legacy DB adapter returns it', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue.push(
+      [{ id: 'org_1', name: 'Org 1', slug: 'org-1', status: 'active' }],
+      [{ id: 'membership_1', userId: 'user_1', organizationId: 'org_1', status: 'suspended' }],
+    );
+    const response = await POST(new NextRequest('http://localhost/api/organizations/switch', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ organizationId: 'org_1' }),
+    }));
+    expect(response.status).toBe(403);
+  });
+
+  it('POST denies an inactive organization despite an apparently valid membership', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue.push([{ id: 'org_1', status: 'archived' }]);
+    const response = await POST(new NextRequest('http://localhost/api/organizations/switch', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ organizationId: 'org_1' }),
+    }));
+    expect(response.status).toBe(404);
+    expect(mockDb.select).toHaveBeenCalledTimes(1);
+  });
+
 });

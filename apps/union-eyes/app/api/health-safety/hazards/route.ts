@@ -47,6 +47,10 @@ export function buildHazardCreateValues(values: Record<string, unknown>): Record
     );
   }
 
+  if (raw.isAnonymous !== undefined && typeof raw.isAnonymous !== 'boolean') {
+    throw ApiError.badRequest('isAnonymous must be a boolean');
+  }
+
   return {
     reportNumber: raw.reportNumber ?? generateReportNumber(),
     hazardCategory: raw.hazardCategory ?? (hazardType && HAZARD_TYPE_TO_CATEGORY[hazardType]) ?? 'other',
@@ -55,7 +59,7 @@ export function buildHazardCreateValues(values: Record<string, unknown>): Record
     hazardDescription,
     potentialConsequences: raw.potentialConsequences,
     suggestedCorrections: raw.suggestedCorrections ?? raw.recommendedAction,
-    isAnonymous: raw.isAnonymous ?? false,
+    isAnonymous: raw.isAnonymous === true,
     reportedByName: raw.isAnonymous ? undefined : (raw.reportedByName ?? raw.reporterName),
     reporterContactInfo: raw.isAnonymous ? undefined : (raw.reporterContactInfo ?? raw.reporterContact),
     organizationId: raw.organizationId,
@@ -74,5 +78,7 @@ const { GET, POST } = crudRoutes({
   readRole: 'health_safety_rep',
   writeRole: 'health_safety_rep',
   beforeCreate: (values) => buildHazardCreateValues(values),
+  // Do not attribute anonymous reports to the signed-in reporter in the row or durable audit.
+  anonymousCreate: (values) => values.isAnonymous === true,
 });
 export { GET, POST };
