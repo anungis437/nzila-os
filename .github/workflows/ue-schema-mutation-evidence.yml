@@ -24,6 +24,10 @@ jobs:
         run: |
           cd apps/union-eyes
           pnpm exec tsx scripts/emit-schema-mutation-evidence.ts
+          cd ../..
+          echo 'UE_SCHEMA_PROGRAM_BEGIN'
+          cat artifacts/ue-schema-mutation-program.json
+          echo 'UE_SCHEMA_PROGRAM_END'
       - name: Retain source-derived evidence without modifying ratchets
         if: always()
         uses: actions/upload-artifact@v4
