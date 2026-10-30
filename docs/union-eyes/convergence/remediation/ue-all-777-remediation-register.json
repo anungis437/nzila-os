@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 249,
-    "engineeringRemaining": 528,
+    "engineeringCorrected": 272,
+    "engineeringRemaining": 505,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 35
+    "engineeringPartial": 39
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -1899,9 +1899,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/bargaining-notes/route.ts; apps/union-eyes/app/api/__tests__/cbas-bargaining-notes.route.test.ts; apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts",
+        "explanation": "The special summary views use the same confidentiality policy as the list, which shows only public and internal notes (upstream's change); an existing test covers the list and a source contract pins the summary modes.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B3-BARGAINING-NOTE-ITEM-ROUTE-BYPASSES-CONFIDENTIALITY",
@@ -1916,9 +1923,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/bargaining-notes/[id]/route.ts; apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts",
+        "explanation": "The item read applies the same confidentiality filter (upstream's change). Only a source contract pins it; the item route has no behavioural test.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B3-TENTATIVE-AGREEMENT-REFERENCES-UNVERIFIED",
@@ -1974,9 +1988,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/billing/credits/check-expired/route.ts; apps/union-eyes/app/api/__tests__/billing-credits-check-expired.route.test.ts",
+        "explanation": "The route answers 501 and cancels nothing: it asked a placeholder that always answered \"no payment method\", so a page load by any steward cancelled a trial that had one. Test disclosure: the three tests that asserted the placeholder behaviour were replaced by one that asserts the 501 and that no trial is expired.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B3-SEND-INVOICE-NOT-SENT",
@@ -2971,9 +2992,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/clc/sync/route.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "The sync-log facade answers 501; its table is no longer reachable through a generic route (batches B09 and B15).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-OHS-FILINGS-OWNER-FILTER-INCONSISTENT",
@@ -3206,9 +3234,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/cbas/[id]/route.ts; apps/union-eyes/app/api/__tests__/cbas-bargaining-notes.route.test.ts",
+        "explanation": "The agreement detail embeds only the notes the caller may see and keeps privileged notes from other members (upstream's change, existing test).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CBAS-CBA-NUMBER-GLOBALLY-UNIQUE",
@@ -3394,9 +3429,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/carbon/validate/route.ts; apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts",
+        "explanation": "Claim validation answers 501: no claim is assessed and no certification outcome is given. The dashboard and infrastructure routes do the same.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B5-OHS-OWNER-COLUMN-WORKERID-ABSENT",
@@ -7686,9 +7728,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/extensions/[id]/route.ts; apps/union-eyes/app/api/__tests__/extensions-item.route.test.ts",
+        "explanation": "The item read is an administrator's and, like the PATCH response, omits the credentials document and the SFTP host, port and path.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-PLT-EXT-PATCH-STEWARD-FLOOR-REWRITES-ENDPOINT-AND-MAPPING",
@@ -7754,9 +7803,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/events/[id]/route.ts; apps/union-eyes/app/api/calendar/events/[id]/route.ts; apps/union-eyes/app/api/__tests__/hs-calendar-tenant-privacy.contract.test.ts",
+        "explanation": "The event item routes delegate to the canonical calendar item, which applies owner, visibility and tenant predicates and selects no meeting password (upstream's change, existing contract test).",
+        "remaining": "The privacy test is a source contract; there is no real-SQL test of a private event read by a non-owner.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-PLT-EVENT-ITEM-PUBLIC-REGISTRATION-CALLER-EXPECTS-PUBLIC-EVENT",
@@ -7952,9 +8009,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/equity/monitoring/route.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "The equity routes answer 501 (batch B09), so no private segment is returned to anyone.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-PLT-EQUITY-CONSENT-AND-PRIVACY-PROMISES-NOT-BACKED-BY-SERVER",
@@ -9158,9 +9222,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/locals/route.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "The locals facade answers 501 (batch B15).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-FED-LOCALS-WRITES-ANY-STEWARD-ANY-FIELD-REFERENCES-NOT-ORG-CHECKED",
@@ -10078,9 +10149,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/route.ts; apps/union-eyes/app/api/__tests__/ml-sla-breach-risk.route.test.ts; apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts",
+        "explanation": "The list is read at the steward floor behind the same AI feature gate and safety check as the POST, and reads nothing when the gate refuses.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ML-QUERY-SENDS-FREE-TEXT-AND-ARBITRARY-CONTEXT-TO-AN-EXTERNAL-SERVICE-WITH-NO-DISCLOSURE-DECISION",
@@ -11389,9 +11467,16 @@
         ]
       },
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/organizations/[id]/members/route.ts; apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "explanation": "A steward may add a member only as a pending membership at the member role, proven on real SQL (upstream's change, existing test).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ORG-ROSTER-POST-DUPLICATE-USER-ID-AND-INVALID-JSON-HANDLING-LEAVES-UNHANDLED-ERRORS",
@@ -11481,9 +11566,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/organizations/current/route.ts; apps/union-eyes/app/api/__tests__/organizations-current.route.test.ts; apps/union-eyes/scripts/codemods/f07-org-current.cjs",
+        "explanation": "The route needs an active membership (404 otherwise) and returns settings, billing contact, subscription tier and provenance only to the organization's administrators; every other member gets the public profile. The sibling /api/org/current already returns a four-field projection.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ORG-HIERARCHY-LIST-ANY-SIGNED-IN-USER-ENUMERATES-EVERY-ORGANIZATION-AS-SYSTEM",
@@ -11806,9 +11898,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/organizations/[id]/analytics/route.ts",
+        "explanation": "Analytics are officer-level and an undefined rate is null rather than 0 or 100 (batch B11).",
+        "remaining": "No small-group suppression threshold is applied to counts and rates.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ORG-ACCESS-LOGS-ROUTE-IS-ORGANIZATIONS-ROW-CRUD-NOT-A-CROSS-ORGANIZATION-ACCESS-LOG",
@@ -11910,9 +12010,16 @@
         "repair": "Both aliases now enforce administrator authentication and exact active-organization identity before explicitly returning HTTP 501; unrelated organizations rows and generic PATCH/DELETE operations are no longer served. Route inventory reconciled.",
         "limits": "This is containment, not completion: actual cross_org_access_log filters/pagination and governed sharing-settings GET/PUT remain to be implemented, tested on PG15/16, and proven over real HTTP with tenant personas. No user journey accepted. Real HTTP regression added but not yet executed at exact SHA."
       },
-      "currentHeadVerification": "SOURCE_CONTAINMENT_NOT_VERIFIED_AT_CURRENT_HEAD",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/organizations/[id]/children/route.ts; apps/union-eyes/app/api/__tests__/organization-directory-privacy.contract.test.ts; apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "explanation": "The organization facades return projected fields, require read authority and expose membership totals and contact details only to administrative readers (existing contract and real-SQL tests).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ORG-ORGANIZATION-ROW-FACADES-CONFIGURE-STEWARD-WRITES-OVER-ORGANIZATIONS-REFUSED-ONLY-BY-GOVERNANCE-LIST",
@@ -12020,9 +12127,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/organizing/card-check/route.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "The card-check and support-percentage routes answer 501 (batch B09); nothing caller-asserted is stored as a result.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-ORG-NLRB-AND-LABOUR-BOARD-FILING-ROUTES-RECORD-NO-FILING-AND-TRANSMIT-NOTHING",
@@ -12071,9 +12185,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/organizing/notes/[id]/route.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "The note, sequence, enrolment and assignment item routes answer 501 (batch B09), so none can rewrite or archive a campaign.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-ORG-CAMPAIGN-CODE-UNIQUE-ACROSS-ALL-ORGANIZATIONS-AND-REQUIRED-COLUMNS-FAIL-AS-500",
@@ -12105,9 +12226,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/organizing/assignments/route.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "The assignment routes answer 501 (batch B09); no lead-organizer or team column is writable through them.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-ORG-CLIENTS-CALL-CAMPAIGN-ITEM-AND-V2-ROUTES-THAT-ANSWER-NO-CAMPAIGN-DATA",
@@ -12211,9 +12339,16 @@
         ]
       },
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/pension/retirement-eligibility/route.ts; apps/union-eyes/app/api/__tests__/pension-retirement-eligibility.pglite.test.ts",
+        "explanation": "The list needs an officer, returns an allow-listed projection, is bound to the organization and records who read it, proven on real SQL (upstream's change).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-PEN-RETIREMENT-ELIGIBILITY-IS-A-YEARS-OF-SERVICE-COMPARISON-WITH-A-FIXED-DEFAULT-OF-25",
@@ -12408,9 +12543,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/pension/benefits/route.ts",
+        "explanation": "A claim is always filed as pending and carries no decision, and a member reads only their own claims (upstream's change).",
+        "remaining": "There is still no trustee decision or payment workflow: a filed claim cannot be approved, denied or paid.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-PEN-PENSION-ROUTES-APPLY-NO-RATE-LIMIT",
@@ -12517,9 +12660,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/portal/documents/route.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "The portal document list answers 501 (batch B15): it was the generic factory over every CMS page.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-PEN-PORTAL-UPLOAD-ROUTE-RECEIVES-NO-FILE-AND-STORES-A-CALLER-WRITTEN-FILE-URL",
@@ -12558,9 +12708,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/portal/documents/upload/route.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "The portal upload answers 501 (batch B15), so no steward can publish or set access columns through it.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-PIL-COMMERCIAL-TRANSITION-RECORDS-SIGNED-ACTIVE-CONTRACTS-AND-ISSUED-INVOICES-WITH-NO-COUNTERPART-ACCEPTANCE-AND-ADVANCES-STATE-WHEN-EFFECTS-ARE-ONLY-STAGED",
@@ -13181,9 +13338,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/organizations/switch/route.ts; apps/union-eyes/app/api/__tests__/organizations-switch.route.test.ts; apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts",
+        "explanation": "The legacy switch requires an active, non-removed membership of an active organization, matching the resolver that later reads the selection; an archived organization is a 404. A platform administrator still switches without membership, as the platform mandate allows.",
+        "remaining": "The legacy route still stores nothing server side: it validates and returns metadata, and the client writes the selection cookie.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-OPL-10",
@@ -13860,9 +14025,16 @@
         ]
       },
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/rewards/export/route.ts; apps/union-eyes/app/api/__tests__/rewards-export.route.test.ts",
+        "explanation": "The export is an administrator's, refuses a member before any query, is audited with the file, bounded and formula-safe (upstream's change, existing test).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-PRP-REWARDS-EXPORT-CSV-DOES-NOT-NEUTRALISE-SPREADSHEET-FORMULAS",
@@ -14589,9 +14761,16 @@
         ]
       },
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/signatures/documents/route.ts; apps/union-eyes/app/api/__tests__/signatures-documents.route.test.ts",
+        "explanation": "Sending needs a steward, bounds the upload and the signer list, and every platform signer must be an active member of the organization (upstream's change, existing tests).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-SOC-INTERNAL-SIGNATURE-PROVIDER-IS-A-STUB-THAT-SENDS-NOTHING-AND-THE-REQUEST-IS-RECORDED-AS-SENT",
@@ -15661,9 +15840,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/support/tickets/[id]/route.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "The support-ticket item routes answer 501 (batch B09); they were the notification factory.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-CRUD-UPLOAD-PATH-IS-A-JSON-MEDIA-ROW-INSERT-AND-RECEIVES-NO-FILE-WHILE-THE-JOB-FORM-POSTS-ONE",
@@ -16325,9 +16511,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/lib/triage/designations.ts; apps/union-eyes/app/api/triage-designations/route.ts; apps/union-eyes/app/api/__tests__/triage-designations.route.test.ts",
+        "explanation": "A messages designation is judged as a conversation assignee (live membership with a conversation-assignee role); only a cases designation uses the case-assignee test.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-PLT-TRIAGE-LAPSED-DESIGNATION-IS-CLOSED-AS-SYSTEM-EXPIRY-WITH-NO-AUDIT-ROW",

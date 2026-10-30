@@ -120,4 +120,29 @@ describe('ml/predictions/sla-breach-risk route', () => {
       }),
     }), { organizationId: 'org_1', userId: 'u1' })).rejects.toThrow('audit down');
   });
+
+  // DEF-0B9-ML-SLA-LIST-GET-SKIPS-THE-FEATURE-GATE-AND-SAFETY-CHECK-THE-POST-APPLIES
+  describe('GET list', () => {
+    const list = async () => {
+      const { GET } = await loadRoute();
+      return GET(new NextRequest('http://localhost/api/ml/predictions/sla-breach-risk'), { organizationId: 'org_1', userId: 'u1' });
+    };
+    const rows = () => m.db.select.mockReset().mockReturnValue({ from: vi.fn(() => ({ where: vi.fn(() => ({ orderBy: vi.fn(() => ({ limit: vi.fn(async () => [{ id: 'p1' }]) })) })) })) } as any);
+
+    it('applies the feature gate and the safety check before reading', async () => {
+      rows();
+      const result = await list();
+      expect(result).toEqual({ predictions: [{ id: 'p1' }] });
+      expect(m.guardAiFeature).toHaveBeenCalled();
+      expect(m.enforceAISafety).toHaveBeenCalledWith(expect.objectContaining({ origin: 'sla-breach-risk', action: 'GET' }));
+    });
+
+    it('returns the gate refusal and reads nothing when the feature is off', async () => {
+      const refusal = { blocked: true };
+      m.guardAiFeature.mockResolvedValueOnce(refusal);
+      m.db.select.mockClear();
+      expect(await list()).toBe(refusal);
+      expect(m.db.select).not.toHaveBeenCalled();
+    });
+  });
 });

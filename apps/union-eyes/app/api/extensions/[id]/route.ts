@@ -22,9 +22,19 @@ const updateIntegrationSchema = z.object({
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * An integration row holds the credentials document and the connection's SFTP host, port and path. None of that is returned: the
+ * configuration an administrator needs to see is the connection's identity, its mapping and its sync state.
+ */
+function publicIntegration<T extends Record<string, unknown>>(row: T) {
+  const { credentials: _credentials, sftpHost: _host, sftpPort: _port, sftpPath: _path, ...safe } = row;
+  return safe;
+}
+
 export const GET = withApi(
   {
-    auth: { required: true, minRole: 'member' },
+    // The connection's endpoint, mapping and sync state are an administrator's, not every member's.
+    auth: { required: true, minRole: 'admin' },
     openapi: {
       tags: ['Integrations'],
       summary: 'Get integration by ID',
@@ -46,7 +56,7 @@ export const GET = withApi(
 
     if (!integration) throw ApiError.notFound('Integration');
 
-    return integration;
+    return publicIntegration(integration);
   },
 );
 
@@ -94,7 +104,7 @@ export const PATCH = withApi(
         details: { fields: Object.keys(updates).filter((k) => k !== 'updatedAt') },
       });
 
-      return updated;
+      return publicIntegration(updated);
     });
   },
 );

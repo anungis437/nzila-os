@@ -73,6 +73,15 @@ function membershipStillEligible(organizationId: SQL | string, userId: SQL | str
   )`
 }
 
+/**
+ * Whether a user may hold a messages designation: a live conversation-assignee membership. The case-assignee test is a
+ * different capacity (it asks whether the person may add case notes), so a messages designation must not be judged by it.
+ */
+export async function conversationAssigneeEligible(tx: RLSTx, organizationId: string, userId: string): Promise<boolean> {
+  const [row] = await tx.execute(sql`SELECT ${membershipStillEligible(organizationId, userId)} AS allowed`)
+  return (row as { allowed?: unknown } | undefined)?.allowed === true
+}
+
 /** The caller's live designation, as a predicate for use inside another query (no round trip, no rank). */
 export function liveDesignationExists(actor: TriageActor, scope: TriageScope): SQL {
   return sql`EXISTS (

@@ -10,7 +10,7 @@ import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { caseAssigneeEligible, getCaseActor } from '@/lib/cases/case-authorization';
-import { grantDesignation, listDesignations, revokeDesignation } from '@/lib/triage/designations';
+import { conversationAssigneeEligible, grantDesignation, listDesignations, revokeDesignation } from '@/lib/triage/designations';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +39,8 @@ export const POST = withApi(
         tx,
         actor,
         { scope: body.scope, userId: body.userId, expiresAt: new Date(body.expiresAt) },
-        { assigneeEligible: (userId) => caseAssigneeEligible(tx, actor, userId) },
+        // Eligibility is the capacity the scope is for: a messages designation is judged as a conversation assignee, a cases designation as a case assignee.
+        { assigneeEligible: (userId) => (body.scope === 'messages' ? conversationAssigneeEligible(tx, actor.organizationId, userId) : caseAssigneeEligible(tx, actor, userId)) },
       ),
     );
     switch (result.kind) {

@@ -151,7 +151,8 @@ export const POST = withApi(
 
 export const GET = withApi(
   {
-    auth: { minRole: 'member' },
+    // The list is the same model output the POST produces, so it is read at the same floor and behind the same gate and safety check.
+    auth: { minRole: 'steward' },
     entitlement: 'grievance_case_suite',
     rateLimit: RATE_LIMITS.ML_PREDICTIONS,
     openapi: {
@@ -159,8 +160,16 @@ export const GET = withApi(
       summary: 'List latest SLA breach risk predictions',
     },
   },
-  async ({ organizationId }) => {
+  async ({ organizationId, userId }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
+
+    const blocked = await guardAiFeature(AI_FEATURES.GRIEVANCE_TRIAGE, {
+      organizationId,
+      userId: userId ?? '',
+    });
+    if (blocked) return blocked;
+
+    enforceAISafety({ origin: 'sla-breach-risk', action: 'GET', organizationId, userId: userId ?? '', userRole: 'steward', dataClass: 'confidential' });
 
     const predictions = await db
       .select()

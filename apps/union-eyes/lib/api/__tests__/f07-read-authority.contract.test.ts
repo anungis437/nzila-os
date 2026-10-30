@@ -99,6 +99,26 @@ describe('F07 read authority beyond a role floor', () => {
   });
 
   // DEF-0B7-PLT-SSO-LIST-DISCLOSES-PROVIDER-CONFIGURATION-AT-MEMBER-FLOOR
+  it('bargaining notes and the agreement detail read through the confidentiality policy', () => {
+    expect(read('bargaining-notes')).toContain("inArray(bargainingNotes.confidentialityLevel, ['public', 'internal'])");
+    expect(read('bargaining-notes/[id]')).toContain("inArray(bargainingNotes.confidentialityLevel, ['public', 'internal'])");
+  });
+
+  // DEF-0B4-CARBON-VALIDATE-ATTESTS-CALLER-DATA / DEF-0B9-ML-SLA-LIST-GET-SKIPS-THE-FEATURE-GATE-AND-SAFETY-CHECK-THE-POST-APPLIES
+  it('carbon claim validation answers 501 and the SLA-breach route has no ungated list read', () => {
+    for (const route of ['carbon/validate', 'carbon/dashboard', 'carbon/infrastructure']) expect(read(route)).toContain('ApiError.notImplemented');
+    expect(read('ml/predictions/sla-breach-risk')).toMatch(/export const GET = withApi\(\s*\{\s*\/\/[^\n]*\n\s*auth: \{ minRole: 'steward' \}/);
+  });
+
+  // DEF-0B10-OPL-09
+  it('a legacy organization switch needs an active, non-removed membership of an active organization', () => {
+    const text = read('organizations/switch');
+    expect(text).toContain("eq(organizationMembers.status, 'active')");
+    expect(text).toContain('isNull(organizationMembers.deletedAt)');
+    expect(text).toContain("(org.status ?? 'active') !== 'active'");
+  });
+
+  // DEF-0B7-PLT-SSO-LIST-DISCLOSES-PROVIDER-CONFIGURATION-AT-MEMBER-FLOOR
   it('the SSO provider list is an administrator read', () => {
     expect(read('enterprise/sso/providers')).toMatch(/GET = withApi\(\s*\{\s*(\/\/[^\n]*\n\s*)?auth: \{ required: true, minRole: 'admin' \}/);
   });

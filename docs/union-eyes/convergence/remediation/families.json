@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 249,
- "partial": 35,
- "outstanding": 528,
- "accountedFor": 528,
+ "corrected": 272,
+ "partial": 39,
+ "outstanding": 505,
+ "accountedFor": 505,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -150,26 +150,24 @@
   {
    "family": "F07-AUTHORIZATION-ROLE-FLOOR-AND-OBJECT-LEVEL",
    "purpose": "Authorization beyond a role floor: object-level ownership, sensitivity and kernel decisions",
-   "defects": 48,
+   "defects": 25,
    "severity": {
-    "HIGH": 13,
-    "MEDIUM": 33,
-    "LOW": 2
+    "HIGH": 4,
+    "MEDIUM": 20,
+    "LOW": 1
    },
-   "namedRoutes": 9,
+   "namedRoutes": 4,
    "namedFiles": 2,
    "tranches": {
     "0B.1": 1,
-    "0B.3": 4,
-    "0B.4": 6,
+    "0B.3": 1,
+    "0B.4": 3,
     "0B.5": 4,
     "0B.6": 2,
-    "0B.7": 8,
-    "0B.8": 4,
-    "0B.9": 6,
-    "0B.10": 9,
-    "0B.11": 2,
-    "0B.12": 2
+    "0B.7": 6,
+    "0B.8": 3,
+    "0B.9": 2,
+    "0B.10": 3
    }
   },
   {
@@ -1514,24 +1512,8 @@
     "severity": "HIGH"
    },
    {
-    "id": "DEF-0B3-BARGAINING-NOTES-SUMMARY-MODES-IGNORE-CONFIDENTIALITY",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B3-BARGAINING-NOTE-ITEM-ROUTE-BYPASSES-CONFIDENTIALITY",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B3-TRIAL-EXPIRY-PLACEHOLDER-PAYMENT-CHECK",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B4-CLAUSE-LIBRARY-FEDERATION-PREDICATES-DISAGREE",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B4-CLC-SYNC-LOG-MEMBER-READ-AND-FORGEABLE-VERIFICATION",
-    "severity": "HIGH"
    },
    {
     "id": "DEF-0B4-OHS-FILINGS-NO-CASE-AUTHORITY",
@@ -1539,14 +1521,6 @@
    },
    {
     "id": "DEF-0B4-OHS-ANTI-SCAB-RECORD-NO-AUTHOR-OR-CASE-AUTHORITY",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B4-CBAS-DETAIL-EMBEDS-INTERNAL-NOTES-FOR-MEMBERS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B4-CARBON-VALIDATE-ATTESTS-CALLER-DATA",
     "severity": "MEDIUM"
    },
    {
@@ -1593,29 +1567,18 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B7-PLT-EXT-GET-RETURNS-WHOLE-INTEGRATION-ROW-WITH-CREDENTIALS",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B7-PLT-EVENT-ITEM-IGNORES-PRIVATE-VISIBILITY-AND-RETURNS-MEETING-PASSWORD",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B7-PLT-EVENT-ITEM-PUBLIC-REGISTRATION-CALLER-EXPECTS-PUBLIC-EVENT",
     "severity": "LOW"
    },
    {
-    "id": "DEF-0B7-PLT-EQUITY-READS-RETURN-PRIVATE-SEGMENTS-TO-ANY-MEMBER",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B8-HS-STATUS-AND-OUTCOME-FIELDS-WRITABLE-WITHOUT-WORKFLOW",
     "severity": "MEDIUM",
     "partial": true
-   },
-   {
-    "id": "DEF-0B8-FED-LOCALS-READABLE-AT-MEMBER-FLOOR-WITH-NOTES-AND-OFFICER-IDS",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B8-FED-EXTERNAL-UPLOAD-ATTACHES-ANY-ORGANIZATION-BLOB-TO-GRIEVANCE",
@@ -1626,57 +1589,19 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B9-ML-SLA-LIST-GET-SKIPS-THE-FEATURE-GATE-AND-SAFETY-CHECK-THE-POST-APPLIES",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B9-MOB-TWO-DEVICE-TABLES-NO-ROUTE-REMOVES-A-DEVICE-AND-NO-SENDER-READS-EITHER",
     "severity": "MEDIUM",
     "partial": true
    },
    {
-    "id": "DEF-0B9-ORG-ROSTER-POST-STEWARD-GRANTS-ANY-ORGANIZATION-ROLE-TO-ANY-USER-ID-WITHOUT-ACCEPTANCE",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B9-ORG-CURRENT-ROW-READ-AT-ANY-MEMBER-FLOOR-RETURNS-SETTINGS-AND-BILLING-CONTACT",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B9-ORG-ANALYTICS-ZERO-AND-HUNDRED-PERCENT-DEFAULTS-MEMBER-FLOOR-AND-NO-GROUP-SIZE-SUPPRESSION",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B9-ORG-ORGANIZATION-ROW-FACADES-RETURN-WHOLE-ORGANIZATION-ROW-AT-STEWARD-OR-ADMIN-FLOOR",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-ORG-CARD-COUNTS-ELECTION-RESULT-AND-CAMPAIGN-STATUS-ARE-CALLER-ASSERTED-WITH-NO-CARD-RECORDS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-ORG-ITEM-ROUTES-NAMED-FOR-NOTE-ENROLMENT-SEQUENCE-AND-ASSIGNMENT-REWRITE-OR-ARCHIVE-WHOLE-CAMPAIGN",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-ORG-ASSIGNMENT-IS-LEAD-ORGANIZER-AND-TEAM-COLUMNS-WRITABLE-WITH-UNVERIFIED-USER-IDS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-PEN-RETIREMENT-ELIGIBILITY-LISTS-EVERY-PENSION-ENROLMENT-OF-THE-ORGANIZATION-TO-ANY-MEMBER",
-    "severity": "HIGH"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B10-PEN-BENEFIT-CLAIMS-CAN-BE-FILED-BUT-NO-ROUTE-CAN-DECIDE-OR-PAY-THEM",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-PEN-PORTAL-DOCUMENT-LIST-RETURNS-EVERY-PAGE-ROW-AND-IGNORES-ROLE-AND-AUTH-COLUMNS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-PEN-PORTAL-POST-LETS-A-STEWARD-SET-STATUS-PUBLISHED-AND-ACCESS-COLUMNS-AROUND-THE-EDITORIAL-WORKFLOW",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B10-PIL-PLATFORM-TIER-OF-THE-PILOT-ROUTES-IS-ANY-ROLE-TITLE-AT-OR-ABOVE-SYSTEM-ADMIN-LEVEL-AND-NOT-A-PLATFORM-MANDATE",
@@ -1684,23 +1609,8 @@
    },
    {
     "id": "DEF-0B10-OPL-09",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-PRP-REWARDS-EXPORT-RETURNS-EVERY-MEMBER-LEDGER-AWARD-AND-BUDGET-ROW-TO-ANY-MEMBER",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B11-SOC-ANY-AUTHENTICATED-USER-SENDS-AN-UPLOADED-FILE-TO-TYPED-ADDRESSES-THROUGH-THE-ORGANIZATION-SIGNATURE-PROVIDER-ACCOUNT",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B12-CRUD-SUPPORT-TICKET-ITEM-ROUTES-LET-A-STEWARD-REWRITE-AND-AN-ADMIN-DELETE-ANY-USER-NOTIFICATION",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-PLT-TRIAGE-GRANT-APPLIES-THE-CASE-ELIGIBILITY-TEST-TO-A-MESSAGES-DESIGNATION",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    }
   ],
   "F08-PII-DISCLOSURE-AND-PROJECTION": [

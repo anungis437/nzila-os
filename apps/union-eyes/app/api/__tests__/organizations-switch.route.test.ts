@@ -166,6 +166,22 @@ describe('organizations/switch route', () => {
     expect(json.success).toBe(true);
   });
 
+  // DEF-0B10-OPL-09
+  it('POST answers 404 to a member for an organization that is not active', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue.push([{ id: 'org_1', name: 'Org 1', slug: 'org-1', status: 'archived' }], [{ id: 'membership_1', userId: 'user_1', organizationId: 'org_1' }]);
+
+    const response = await POST(
+      new NextRequest('http://localhost/api/organizations/switch', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ organizationId: 'org_1' }),
+      }),
+    );
+
+    expect(response.status).toBe(404);
+  });
+
   it('POST denies a member when the UUID membership is absent', async () => {
     const { POST } = await loadRoute();
     m.selectQueue.push(
