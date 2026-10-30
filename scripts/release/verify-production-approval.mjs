@@ -31,11 +31,14 @@ export function verifyProductionApproval({environment,run,approvals,expectedRunI
   if (!entitled.size) deny('no individually verifiable required human reviewers')
   if (!Array.isArray(approvals)) deny('run approvals API unavailable')
   const initiators=new Set([userName(run.actor),userName(run.triggering_actor)].filter(Boolean))
-  if (!initiators.size) deny('run initiator not authenticated')
+  if (!userName(run.actor) || !userName(run.triggering_actor)) deny('run initiator not authenticated')
   const started=Date.parse(run.created_at ?? ''), end=now.getTime()
   if (!Number.isFinite(started) || started > end+300000) deny('invalid run time')
   const reviews=approvals.filter(matches).filter(a=>['approved','rejected'].includes(String(a?.state??'').toLowerCase()))
     .sort((a,b)=>Date.parse(a.created_at??'')-Date.parse(b.created_at??''))
+  // Missing or malformed review IDs/timestamps cannot become durable approval receipts.
+  if (reviews.some(a => !Number.isSafeInteger(a.id) || a.id <= 0 ||
+      !Number.isFinite(Date.parse(a.created_at ?? '')))) deny('malformed environment review history')
   const last=reviews.at(-1)
   if (!last || String(last.state).toLowerCase()!=='approved') deny('no current approved environment review')
   const reviewer=userName(last.user), at=Date.parse(last.created_at ?? '')
@@ -44,7 +47,7 @@ export function verifyProductionApproval({environment,run,approvals,expectedRunI
   return Object.freeze({
     verdict:'APPROVED',source:'github_environment_run_review_api',
     runId:String(expectedRunId),sourceSha:expectedSha,environment:'production',
-    reviewer,approvalRef:String(last.id??''),reviewedAt:new Date(at).toISOString(),
+    reviewer,approvalRef:String(last.id),reviewedAt:new Date(at).toISOString(),
   })
 }
 
