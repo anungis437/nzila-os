@@ -96,7 +96,7 @@ export const POST = withRoleAuth("member", async (req) => {
     }
     const event = body.event;
 
-    if (!event || !ALLOWED_EVENTS.has(event)) {
+    if (typeof event !== "string" || !ALLOWED_EVENTS.has(event)) {
       return NextResponse.json(
         { error: `Invalid event. Allowed: ${[...ALLOWED_EVENTS].join(", ")}` },
         { status: 400 },
