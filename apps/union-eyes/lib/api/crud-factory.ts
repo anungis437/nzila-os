@@ -116,6 +116,13 @@ export interface CrudOptions {
    * by a bug in a future hook) — those two fields are always taken from the
    * authenticated request context, never from this hook's return value.
    */
+  /**
+   * Optional legacy-client input normalization BEFORE schema-column validation.
+   * Use only for explicitly documented aliases. The normalized result still
+   * passes assertGenericWritePayload and writableFields, so no identity,
+   * tenancy, lifecycle or unknown column can be mass-assigned.
+   */
+  preprocessCreateBody?: (body: unknown) => unknown;
   beforeCreate?: (
     values: Record<string, unknown>,
     ctx: { organizationId?: string | null; userId?: string | null },
@@ -564,7 +571,8 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       },
       async ({ body, organizationId, userId }) => {
         assertRequiredScope(organizationId, userId);
-        const values = assertGenericWritePayload(body, table, {
+        const normalizedBody = opts.preprocessCreateBody ? opts.preprocessCreateBody(body) : body;
+        const values = assertGenericWritePayload(normalizedBody, table, {
           primaryKey: resolvedPk,
           ownerColumn: opts.ownerColumn,
           blockedFields: blockedPatchFields,
