@@ -236,7 +236,7 @@ describe('clc compliance-reports', () => {
   });
 
   it('generateStatCanAnnualReport aggregates financial + membership data', async () => {
-    const report = await generateStatCanAnnualReport(YEAR);
+    const report = await generateStatCanAnnualReport(YEAR, 'org-a');
     expect(report.fiscalYear).toBe(YEAR);
     expect(report.organizationInfo.name).toBe('Org A');
     expect(report.financialSummary.category020_perCapitaRevenue).toBeGreaterThan(0);
@@ -247,9 +247,19 @@ describe('clc compliance-reports', () => {
     expect(generateStatCanReport).toBe(generateStatCanAnnualReport);
   });
 
+  it('refuses unscoped StatCan remittance exports and keeps every query tenant-bound', async () => {
+    await expect(generateStatCanAnnualReport(YEAR, '')).rejects.toThrow(/Organization context is mandatory/);
+    expect(state.remittancePredicates).toHaveLength(0);
+    await generateStatCanAnnualReport(YEAR, 'org-a');
+    expect(state.remittancePredicates).toHaveLength(1);
+    const predicate = JSON.stringify(state.remittancePredicates[0]);
+    expect(predicate).toContain('fromOrganizationId');
+    expect(predicate).toContain('org-a');
+  });
+
   it('generateStatCanAnnualReport tolerates empty congress org (fallback defaults)', async () => {
     state.orgs = []; // no congress org found
-    const report = await generateStatCanAnnualReport(YEAR);
+    const report = await generateStatCanAnnualReport(YEAR, 'org-a');
     expect(report.organizationInfo.name).toBe('Canadian Labour Congress');
     expect(report.organizationInfo.charterNumber).toBe('CLC-001');
   });

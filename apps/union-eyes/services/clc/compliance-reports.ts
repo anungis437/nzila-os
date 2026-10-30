@@ -250,19 +250,21 @@ export async function generateAnnualComplianceReport(year: number, organizationI
 /**
  * Generate StatCan LAB-05302 annual report for fiscal year
  */
-export async function generateStatCanAnnualReport(fiscalYear: number): Promise<StatCanAnnualReport> {
+export async function generateStatCanAnnualReport(fiscalYear: number, organizationId: string): Promise<StatCanAnnualReport> {
+  if (!organizationId) throw new Error('Organization context is mandatory for StatCan remittance reports');
   // Fiscal year typically runs April 1 - March 31
   // Query spans two calendar years: fiscalYear (Apr-Dec) and fiscalYear+1 (Jan-Mar)
   const remittances = await db
     .select()
     .from(perCapitaRemittances)
-    .where(
+    .where(and(
+      eq(perCapitaRemittances.fromOrganizationId, organizationId),
       sql`(
         (${perCapitaRemittances.remittanceYear} = ${fiscalYear} AND ${perCapitaRemittances.remittanceMonth} >= 4)
         OR
         (${perCapitaRemittances.remittanceYear} = ${fiscalYear + 1} AND ${perCapitaRemittances.remittanceMonth} <= 3)
-      )`
-    );
+      )`,
+    ));
 
   // Aggregate financial data by StatCan categories
   const financialSummary = await aggregateStatCanFinancialData(remittances, fiscalYear);
@@ -274,7 +276,7 @@ export async function generateStatCanAnnualReport(fiscalYear: number): Promise<S
   const clcOrg = await db
     .select()
     .from(organizations)
-    .where(eq(organizations.organizationType, 'congress'))
+    .where(eq(organizations.id, organizationId))
     .limit(1);
 
   const organizationInfo: StatCanOrganizationInfo = {
