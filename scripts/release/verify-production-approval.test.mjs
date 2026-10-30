@@ -14,7 +14,9 @@ function fixture() {
       protection_rules:[{type:'required_reviewers',reviewers:[{type:'User',reviewer:{login:'security-reviewer'}}]}],
     },
     run:{id:12345,head_sha:SHA,name:'Deploy Production',event:'workflow_dispatch',
-      actor:{login:'developer'},triggering_actor:{login:'developer'},created_at:'2026-10-30T14:00:00Z'},
+      actor:{login:'developer'},triggering_actor:{login:'developer'},head_branch:'main',
+      run_attempt:1,created_at:'2026-10-30T14:00:00Z',
+      run_started_at:'2026-10-30T14:01:00Z'},
     approvals:[{id:890,state:'approved',user:{login:'security-reviewer'},
       created_at:'2026-10-30T14:15:00Z',environments:[{name:'production'}]}],
     expectedRunId:'12345',expectedSha:SHA,now:NOW,
@@ -69,6 +71,21 @@ test('both run actor and rerun triggering actor must be authenticated',()=>{
   for (const key of ['actor','triggering_actor']) {
     const f=fixture();f.run[key]=null
     assert.throws(()=>verifyProductionApproval(f),/run initiator not authenticated/)
+  }
+})
+
+test('a rerun cannot reuse a prior attempt production approval',()=> {
+  const f=fixture();f.run.run_attempt=2
+  assert.throws(()=>verifyProductionApproval(f),/run attempt lacks independently attributable approval/)
+})
+test('manual dispatch from an unprotected feature branch is denied',()=> {
+  const f=fixture();f.run.head_branch='feature/unsafe-release'
+  assert.throws(()=>verifyProductionApproval(f),/not from protected main/)
+})
+test('missing or inconsistent current run-attempt start time is denied',()=> {
+  for (const start of [undefined,'2026-10-30T13:00:00Z','2026-11-01T14:00:00Z']) {
+    const f=fixture();f.run.run_started_at=start
+    assert.throws(()=>verifyProductionApproval(f),/untrusted current run-attempt start time/)
   }
 })
 

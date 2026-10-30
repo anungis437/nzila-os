@@ -20,6 +20,22 @@ export function verifyProductionApproval({environment,run,approvals,expectedRunI
       run?.name !== 'Deploy Production' || !['push','workflow_dispatch'].includes(run?.event)) {
     deny('untrusted workflow run or source SHA')
   }
+  // GitHub's run approvals API does not bind each approval to a run attempt.
+  // A rerun must not reuse an approval granted to an earlier attempt.
+  if (!Number.isSafeInteger(run.run_attempt) || run.run_attempt !== 1) {
+    deny('run attempt lacks independently attributable approval evidence')
+  }
+  // Manual dispatch must originate from the protected default branch. Signed
+  // release-tag pushes have a separate ancestry/signature gate in the workflow.
+  if (run.event === 'workflow_dispatch' && run.head_branch !== 'main') {
+    deny('manual production dispatch is not from protected main')
+  }
+  const attemptStarted = Date.parse(run.run_started_at ?? '')
+  if (!Number.isFinite(attemptStarted) ||
+      attemptStarted < Date.parse(run.created_at ?? '') ||
+      attemptStarted > now.getTime() + 300000) {
+    deny('untrusted current run-attempt start time')
+  }
   if (environment?.name !== 'production' || !Array.isArray(environment.protection_rules)) {
     deny('no live production environment protection evidence')
   }
