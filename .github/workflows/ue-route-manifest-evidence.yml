@@ -1,0 +1,50 @@
+name: UE Route Manifest Evidence (no repository writes)
+
+on:
+  pull_request:
+    paths:
+      - 'apps/union-eyes/app/api/**'
+      - 'apps/union-eyes/scripts/lib/route-coverage-scan.ts'
+      - 'docs/union-eyes/convergence/register/ue-route-coverage-manifest.json'
+      - '.github/workflows/ue-route-manifest-evidence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup-monorepo
+      - name: Generate actual source-derived manifest without pushing
+        run: |
+          cd apps/union-eyes
+          pnpm exec tsx scripts/generate-route-manifest.ts
+          cd ../..
+          echo 'UE_ROUTE_MANIFEST_BEGIN'
+          cat docs/union-eyes/convergence/register/ue-route-coverage-manifest.json
+          echo 'UE_ROUTE_MANIFEST_END'
+      - name: Assert audit and kernel ratchets remain zero
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const p = 'docs/union-eyes/convergence/register/ue-route-coverage-manifest.json';
+          const d = JSON.parse(fs.readFileSync(p, 'utf8'));
+          if (d.routes.length < 995) throw new Error('Unexpected route loss');
+          const gap = d.routes.filter(x => x.mutating && ['NONE', 'BEST_EFFORT'].includes(x.audit) && !['RETIRED','PLATFORM_AUTH_HANDLER'].includes(x.guard));
+          if (gap.length) throw new Error('Unaudited mutating routes: ' + gap.map(x=>x.route).join(', '));
+          if (d.routes.length !== new Set(d.routes.map(x=>x.route)).size) throw new Error('Duplicate route');
+          NODE
+      - name: Upload source-derived manifest evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-route-manifest-${{ github.event.pull_request.head.sha || github.sha }}
+          path: docs/union-eyes/convergence/register/ue-route-coverage-manifest.json
+          retention-days: 7
