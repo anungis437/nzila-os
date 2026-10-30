@@ -111,6 +111,7 @@ export const COMPUTE_ONLY_ROUTES: Record<string, string[]> = {
 export const READ_ONLY_POST_ROUTES = [
   'ai/classify/route.ts', 'ai/mamba/route.ts', 'ai/match-precedents/route.ts', 'ai/pension/plans/[id]/trustee-summary/route.ts',
   'ai/search/route.ts', 'ai/semantic-search/route.ts', 'ai/summarize/route.ts', 'carbon/validate/route.ts',
+  'calendar-sync/connections/route.ts',
   'clause-library/search/route.ts', 'cognition/precedents/route.ts', 'compliance/validate/route.ts', 'emergency/pipeda/route.ts',
   'exit-interviews/graph-query/route.ts', 'exit-interviews/mitigation-comparison/route.ts', 'exit-interviews/scenarios/route.ts',
   'exit-interviews/search/route.ts', 'exit-interviews/simulation/route.ts', 'labour-standards/[jurisdiction]/compliance-check/route.ts',
@@ -198,6 +199,14 @@ function auditOf(route: string, source: string, guard: RouteGuard, mutating: boo
   if (BALLOT_SECRECY_EXEMPT_ROUTES.includes(route)) return 'EXEMPT_BALLOT_SECRECY'
   if (route in COMPUTE_ONLY_ROUTES || READ_ONLY_POST_ROUTES.includes(route)) return 'COMPUTE_ONLY'
   if (route in UNATTRIBUTABLE_WRITE_ROUTES) return 'EXEMPT_UNATTRIBUTABLE'
+  // The legacy event item API delegates PATCH/DELETE to the canonical handler, whose tenant-locked
+  // transaction commits its mutation and mandatory audit together. This is a narrow, pinned alias:
+  // the manifest ratchet checks both the delegate and the canonical audited implementation.
+  if (route === 'events/[id]/route.ts' &&
+      /from ['"]@\\/app\\/api\\/calendar\\/events\\/\\[id\\]\\/route['"]/.test(source) &&
+      /canonicalPATCH\\(request/.test(source) && /canonicalDELETE\\(request/.test(source)) {
+    return 'ATOMIC_SERVICE'
+  }
   if (guard === 'CRUD_FACTORY') return 'CRUD_ATOMIC'
   if (ATOMIC_AUDIT.test(source)) return 'ATOMIC'
   if (imports.some((f) => ATOMIC_AUDIT.test(readFileSync(f, 'utf8')))) return 'ATOMIC_SERVICE'
