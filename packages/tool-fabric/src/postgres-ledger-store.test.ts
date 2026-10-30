@@ -69,7 +69,7 @@ describe('P0 Postgres Trust Ledger CAS adapter',()=>{
     const validHash=computeAuditHash(LEDGER_GENESIS_HASH,hashable)
     const expected={revision:0,headHash:LEDGER_GENESIS_HASH}
     await expect(store.compareAndAppend(ORG,expected,{
-      ...hashable,prevHash:LEDGER_GENESIS_HASH,hash:validHash.replace(/^./,'b'),hashVersion:2,
+      ...hashable,prevHash:LEDGER_GENESIS_HASH,hash:(validHash[0] === 'b' ? 'a' : 'b') + validHash.slice(1),hashVersion:2,
     })).rejects.toBeInstanceOf(LedgerConflictError)
     await expect(store.compareAndAppend(ORG,expected,{
       ...hashable,prevHash:LEDGER_GENESIS_HASH,hash:validHash,hashVersion:1,
