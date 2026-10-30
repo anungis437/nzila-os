@@ -119,6 +119,15 @@ describe('BillingCycleService', () => {
     expect(result.totalDues).toBe(60);
   });
 
+  it('requires a non-deleted membership for any dues billing candidate', async () => {
+    const { readFileSync } = await import('node:fs');
+    const { resolve } = await import('node:path');
+    const source = readFileSync(resolve(__dirname, '..', 'billing-cycle-service.ts'), 'utf8');
+    expect(source).toContain('isNull(organizationMembers.deletedAt)');
+    expect(source).toContain("eq(organizationMembers.status, 'active')");
+    expect(source).toContain('eq(organizationMembers.organizationId, organizationId)');
+  });
+
   it('supports all billing frequencies', () => {
     const frequencies = ['monthly', 'bi_weekly', 'weekly', 'quarterly', 'annual'];
     frequencies.forEach((freq) => {

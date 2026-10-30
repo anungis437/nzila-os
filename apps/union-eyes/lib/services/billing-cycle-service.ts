@@ -20,7 +20,7 @@ import { organizationMembers } from '@/db/schema-organizations';
 import { memberEmployment } from '@/db/schema/domains/member/member-employment';
 import { duesTransactions } from '@/db/schema/domains/finance/dues';
 import { DuesCalculationEngine } from '@/lib/dues-calculation-engine';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, isNull } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { moneyToNumber } from '@/lib/decimal-safe';
@@ -269,7 +269,9 @@ export class BillingCycleService {
       .where(
         and(
           eq(organizationMembers.organizationId, organizationId),
-          eq(organizationMembers.status, 'active')
+          eq(organizationMembers.status, 'active'),
+          // An active status is not sufficient once an identity is soft-deleted.
+          isNull(organizationMembers.deletedAt)
         )
       );
 
