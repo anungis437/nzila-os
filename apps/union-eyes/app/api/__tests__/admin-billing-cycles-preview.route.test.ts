@@ -5,11 +5,16 @@ const m = vi.hoisted(() => ({
   withApiAuth: vi.fn(),
   getCurrentUser: vi.fn(),
   hasMinRole: vi.fn(),
+  requireAuthorizedBillingPreview: vi.fn(),
   BillingCycleService: { calculatePeriodDates: vi.fn(), generateBillingCycle: vi.fn() },
   logger: { info: vi.fn(), error: vi.fn() },
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({ withApiAuth: m.withApiAuth, getCurrentUser: m.getCurrentUser, hasMinRole: m.hasMinRole }));
+vi.mock('@/lib/finance/billing-cycle-preview-authority', () => ({
+  requireAuthorizedBillingPreview: m.requireAuthorizedBillingPreview,
+  BillingPreviewAuthorityError: class BillingPreviewAuthorityError extends Error {},
+}));
 vi.mock('@/lib/services/billing-cycle-service', () => ({ BillingCycleService: m.BillingCycleService }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('@/lib/api/standardized-responses', () => ({
@@ -28,6 +33,7 @@ describe('admin/billing-cycles/preview route', () => {
     m.withApiAuth.mockImplementation((handler: any) => (request: NextRequest) => handler(request));
     m.getCurrentUser.mockResolvedValue({ id: 'u1' });
     m.hasMinRole.mockResolvedValue(true);
+    m.requireAuthorizedBillingPreview.mockResolvedValue(undefined);
     m.BillingCycleService.calculatePeriodDates.mockReturnValue({ periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31') });
     m.BillingCycleService.generateBillingCycle.mockResolvedValue({ cycleId: 'bc_1', transactionsCreated: 5, totalAmount: 1000 });
   });
@@ -68,6 +74,7 @@ describe('admin/billing-cycles/preview route', () => {
     expect(response.status).toBe(200);
     expect(payload.preview).toBe(true);
     expect(m.BillingCycleService.generateBillingCycle).toHaveBeenCalledWith(expect.objectContaining({ dryRun: true, executedBy: 'u1' }));
+    expect(m.requireAuthorizedBillingPreview).toHaveBeenCalledWith('u1', '11111111-1111-1111-1111-111111111111');
   });
 
   it('returns 500 when preview generation fails', async () => {

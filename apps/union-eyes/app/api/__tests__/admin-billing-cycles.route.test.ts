@@ -5,12 +5,17 @@ const m = vi.hoisted(() => ({
   withApiAuth: vi.fn(),
   getCurrentUser: vi.fn(),
   hasMinRole: vi.fn(),
+  requireAuthorizedBillingPreview: vi.fn(),
   BillingCycleService: { calculatePeriodDates: vi.fn(), generateBillingCycle: vi.fn() },
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   performAuditedOperation: vi.fn(),
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({ withApiAuth: m.withApiAuth, getCurrentUser: m.getCurrentUser, hasMinRole: m.hasMinRole }));
+vi.mock('@/lib/finance/billing-cycle-preview-authority', () => ({
+  requireAuthorizedBillingPreview: m.requireAuthorizedBillingPreview,
+  BillingPreviewAuthorityError: class BillingPreviewAuthorityError extends Error {},
+}));
 vi.mock('@/lib/services/billing-cycle-service', () => ({ BillingCycleService: m.BillingCycleService }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('@/lib/audit/operation-audit', () => ({
@@ -34,6 +39,7 @@ describe('admin/billing-cycles route', () => {
     m.withApiAuth.mockImplementation((handler: any) => (request: NextRequest) => handler(request));
     m.getCurrentUser.mockResolvedValue({ id: 'u1' });
     m.hasMinRole.mockResolvedValue(true);
+    m.requireAuthorizedBillingPreview.mockResolvedValue(undefined);
     m.performAuditedOperation.mockImplementation((_op: unknown, run: () => unknown) => run());
     m.BillingCycleService.calculatePeriodDates.mockReturnValue({ periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31') });
     m.BillingCycleService.generateBillingCycle.mockResolvedValue({ cycleId: 'bc_1', transactionsCreated: 5, totalAmount: 1000 });
@@ -59,33 +65,25 @@ describe('admin/billing-cycles route', () => {
     expect(response.status).toBe(403);
   });
 
-  it('generates billing cycle', async () => {
+  it('refuses live billing execution until financial mandates and charge lifecycle exist', async () => {
     const { POST } = await loadRoute();
     const response = await POST(new NextRequest('http://localhost/api/admin/billing-cycles', {
       method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ organizationId: '11111111-1111-1111-1111-111111111111', frequency: 'monthly' }),
     }));
-    expect(response.status).toBe(200);
-    expect(m.BillingCycleService.generateBillingCycle).toHaveBeenCalled();
-    expect(m.performAuditedOperation).toHaveBeenCalledWith(
-      expect.objectContaining({
-        organizationId: '11111111-1111-1111-1111-111111111111',
-        userId: 'u1',
-        scope: 'system',
-        action: 'platform.billing_cycle.generate',
-      }),
-      expect.any(Function),
-    );
+    expect(response.status).toBe(501);
+    expect(await response.json()).toMatchObject({ code: 'BILLING_CYCLE_EXECUTION_UNQUALIFIED' });
+    expect(m.BillingCycleService.generateBillingCycle).not.toHaveBeenCalled();
+    expect(m.performAuditedOperation).not.toHaveBeenCalled();
   });
 
-  it('creates nothing when the intent cannot be recorded', async () => {
+  it('does not attempt non-preview writes even when an audit wrapper would report success', async () => {
     const { POST } = await loadRoute();
-    m.performAuditedOperation.mockRejectedValueOnce(new Error('audit down'));
     const response = await POST(new NextRequest('http://localhost/api/admin/billing-cycles', {
       method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ organizationId: '11111111-1111-1111-1111-111111111111', frequency: 'monthly' }),
+      body: JSON.stringify({ organizationId: '11111111-1111-1111-1111-111111111111', frequency: 'monthly', dryRun: false }),
     }));
-    expect(response.status).toBeGreaterThanOrEqual(400);
+    expect(response.status).toBe(501);
     expect(m.BillingCycleService.generateBillingCycle).not.toHaveBeenCalled();
   });
 
@@ -100,6 +98,7 @@ describe('admin/billing-cycles route', () => {
     expect(response.status).toBe(200);
     expect(payload.preview).toBe(true);
     expect(m.performAuditedOperation).not.toHaveBeenCalled();
+    expect(m.requireAuthorizedBillingPreview).toHaveBeenCalledWith('u1', '11111111-1111-1111-1111-111111111111');
   });
 
   it('returns 400 when POST payload is invalid', async () => {

@@ -10,6 +10,7 @@ function makeChain(rows: unknown[]) {
   const chain: any = {
     from: vi.fn(() => chain),
     where: vi.fn(() => chain),
+    limit: vi.fn(async () => rows),
     $dynamic: vi.fn(() => chain),
     groupBy: vi.fn(() => chain),
     then: (resolve: (value: unknown[]) => unknown, reject?: (reason: unknown) => unknown) =>
@@ -24,7 +25,13 @@ const mockDb = {
 
 vi.mock('@/lib/api/framework', () => ({
   withApi: m.withApi,
+  ApiError: { forbidden: (message: string) => Object.assign(new Error(message), { status: 403 }) },
 }));
+vi.mock('@/lib/organizations/read-authority', () => ({
+  resolveOrganizationAccess: async () => ({ platform: false, direct: new Map([['org_1', 'admin']]), descendants: new Set() }),
+  isAdministrativeRole: (role?: string) => role === 'admin',
+}));
+
 
 vi.mock('@/db/db', () => ({ db: mockDb }));
 
@@ -52,7 +59,7 @@ describe('admin/organizations route', () => {
     m.withApi.mockImplementation(
       (_config: unknown, handler: (ctx: any) => Promise<unknown>) =>
         async (request: NextRequest, ctx: any = {}) => {
-          const data = await handler({ request, ...ctx });
+          const data = await handler({ request, userId: 'u1', organizationId: 'org_1', ...ctx });
           return new Response(JSON.stringify(data), { status: 200 });
         },
     );
