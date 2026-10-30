@@ -76,7 +76,7 @@
     "note": "Milestones and evidence are transcribed as prior claims; this run has not independently re-executed those proofs."
   },
   "lastInspectedBranch": "agents/ue-cursor-final-closure",
-  "lastInspectedCommit": "2dc17f3b686f1c9444ddb2e7bf3a293a613d0082",
+  "lastInspectedCommit": "fc4d4769c556fda1b3ecf5053c3e731aa30c2637",
   "summary": {
     "allRecordedDefects": 777,
     "bySeverity": {
@@ -86,7 +86,7 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 17,
+    "withCurrentRunSourceOrRegressionWork": 18,
     "closed": 0,
     "overallGO": false
   },
@@ -247,6 +247,10 @@
     {
       "sha": "8ab92583650e1f63417b19b5eaad7b69e36b9afe",
       "description": "Add disposable native-runtime HTTP tests for unauthenticated/admin OpenAPI, cross-org/low-role access-log and sharing-settings denial, honest 501 and absent generic writes; pending exact-SHA execution."
+    },
+    {
+      "sha": "f94d7ddfe6eeb32496ec71526a1f3fc0c2c64f3e",
+      "description": "Remove orphan generic CRUD organizations policy after governed access-log and sharing-settings containment, correct stale authorization and governance regressions, and fail closed for all dashboard CSV exports (0B.6 defect) rather than returning fabricated empty 200 outside production; new focused route regression added. Latest source unverified."
     }
   ],
   "records": [
@@ -4503,8 +4507,19 @@
       "title": "The CSV export is guarded by authentication alone, with no organization, role or entitlement, and its data source is not wired: production answers 501, every other environment answers 200 with an empty file; once wired the case export would carry case ids, assignees and worksites with no organization predicate in the route.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_CONTAINMENT_PENDING_EXACT_SHA_VERIFICATION",
+        "paths": [
+          "apps/union-eyes/app/api/dashboard/export-csv/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/dashboard-export-csv-containment.route.test.ts"
+        ],
+        "engineeringHead": "f94d7ddfe6eeb32496ec71526a1f3fc0c2c64f3e",
+        "repair": "Removed the authentication-only CSV handler and its fabricated empty 200 responses in nonproduction. The route now requires admin eligibility plus an active organization context and explicitly refuses export with no-store HTTP 501 until a real scoped data source and governed export exist.",
+        "limits": "This is security and truthfulness containment, not a working CSV export. Institutional export mandate, tenant-scoped query, row bounds, atomic audit, formula neutralization, PG15/16, and real HTTP/browser acceptance remain open."
+      },
+      "currentHeadVerification": "SOURCE_CONTAINMENT_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
     },
@@ -14501,6 +14516,20 @@
       "unit": "FAIL_3_ROUTE_COVERAGE_TESTS",
       "contract": "PASS",
       "native": "PASS",
+      "security": "PASS",
+      "httpBrowser": "PASS",
+      "appFloor": "PASS",
+      "governance": "PASS",
+      "go": "NO_GO"
+    },
+    {
+      "inspectedSha": "fc4d4769c556fda1b3ecf5053c3e731aa30c2637",
+      "evidence": "Exact-SHA GitHub Actions 2026-10-30: whole Vitest FAIL 2 tests (21208 pass, 28 skipped): obsolete organizations CRUD-policy expectation and stale sharing-settings generic CRUD mock; whole contract and financial PASS, security PASS, native PostgreSQL 15/16 PASS, disposable HTTP/browser PASS, App Floor PASS, governance PASS. Follow-up f94d7dd source/tests not verified by this evidence.",
+      "source": "PATCHED_AFTER_SHA",
+      "unit": "FAIL_2_STALE_TESTS",
+      "contract": "PASS",
+      "financial": "PASS",
+      "native": "PASS_PG15_AND_PG16",
       "security": "PASS",
       "httpBrowser": "PASS",
       "appFloor": "PASS",
