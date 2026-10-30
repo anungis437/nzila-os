@@ -98,7 +98,7 @@ async function requestMicrosoftTokens(params: URLSearchParams): Promise<Microsof
 /**
  * Generate authorization URL
  */
-export async function getAuthorizationUrl(userId: string): Promise<string> {
+export async function getAuthorizationUrl(state: string): Promise<string> {
   assertMicrosoftCalendarConfig();
 
   const params = new URLSearchParams({
@@ -107,7 +107,7 @@ export async function getAuthorizationUrl(userId: string): Promise<string> {
     redirect_uri: MICROSOFT_REDIRECT_URI,
     response_mode: 'query',
     scope: SCOPES.join(' '),
-    state: userId,
+    state,
   });
 
   return `${MICROSOFT_AUTH_BASE}/authorize?${params.toString()}`;
