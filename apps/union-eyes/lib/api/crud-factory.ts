@@ -244,6 +244,21 @@ const FACTORY_MANAGED_FIELDS = new Set([
   'submittedAt', 'reviewedAt', 'reviewedBy', 'publishedAt', 'publishedBy',
 ]);
 
+/** Strict, bounded pagination for every collection backed by the CRUD factory. */
+export function parseCrudPagination(params: URLSearchParams, defaultLimit = 50): { page: number; limit: number; offset: number } {
+  const rawPage = params.get('page') ?? '1';
+  const rawLimit = params.get('limit') ?? String(defaultLimit);
+  if (!/^[1-9]\d*$/.test(rawPage) || !/^[1-9]\d*$/.test(rawLimit)) {
+    throw ApiError.badRequest('Invalid pagination parameters');
+  }
+  const page = Number(rawPage);
+  const limit = Number(rawLimit);
+  if (!Number.isSafeInteger(page) || page > 10000 || !Number.isSafeInteger(limit) || limit > 100) {
+    throw ApiError.badRequest('Pagination out of bounds');
+  }
+  return { page, limit, offset: (page - 1) * limit };
+}
+
 export function assertGenericWritePayload(
   body: unknown,
   table: PgTable,
@@ -461,17 +476,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       async ({ request, organizationId, userId }) => {
         assertRequiredScope(organizationId, userId);
         const url = new URL(request.url);
-        const rawPage = url.searchParams.get('page') ?? '1';
-        const rawLimit = url.searchParams.get('limit') ?? String(defaultLimit);
-        if (!/^[1-9]\d*$/.test(rawPage) || !/^[1-9]\d*$/.test(rawLimit)) {
-          throw ApiError.badRequest('Invalid pagination parameters');
-        }
-        const page = Number(rawPage);
-        const limit = Number(rawLimit);
-        if (!Number.isSafeInteger(page) || page > 10000 || !Number.isSafeInteger(limit) || limit > 100) {
-          throw ApiError.badRequest('Pagination out of bounds');
-        }
-        const offset = (page - 1) * limit;
+        const { page, limit, offset } = parseCrudPagination(url.searchParams, defaultLimit);
 
         const conditions: SQL[] = [];
         if (orgScoped && orgCol && organizationId) {
