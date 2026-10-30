@@ -17,7 +17,7 @@ import {
 } from '@/lib/api/standardized-responses';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
-import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
+import { requireAuthorizedBillingPreview, BillingPreviewAuthorityError } from '@/lib/finance/billing-cycle-preview-authority';
 
 export const runtime = 'nodejs';
 
@@ -69,6 +69,17 @@ export const POST = withApiAuth(async (request: NextRequest) => {
 
     const { organizationId, frequency, periodStart, periodEnd, dryRun } = validation.data;
 
+    // Non-preview cycles must use the kernel financial workflow: a title and an
+    // audit intent do not confer authority to create dues charges.
+    if (!dryRun) {
+      return NextResponse.json({
+        error: 'Billing cycle execution requires the canonical financial mandate and charge lifecycle',
+        code: 'BILLING_CYCLE_EXECUTION_UNQUALIFIED',
+      }, { status: 501 });
+    }
+    // A dry run still reveals the target union's workforce and dues forecast.
+    await requireAuthorizedBillingPreview(user.id, organizationId);
+
     // Calculate period dates if not provided
     let start: Date;
     let end: Date;
@@ -101,21 +112,7 @@ export const POST = withApiAuth(async (request: NextRequest) => {
         executedBy: user.id,
       });
 
-    // A real cycle creates dues charges for every member of the target organization. The intent is recorded against
-    // that organization before anything is created; a preview writes nothing and is not audited.
-    const result = dryRun
-      ? await generate()
-      : await performAuditedOperation(
-          {
-            organizationId,
-            userId: user.id,
-            scope: 'system',
-            action: 'platform.billing_cycle.generate',
-            resourceType: 'billing_cycle',
-            details: { frequency, periodStart: start.toISOString(), periodEnd: end.toISOString() },
-          },
-          generate,
-        );
+    const result = await generate();
 
     if (dryRun) {
       logger.info('Billing cycle preview completed', {
@@ -143,8 +140,9 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       message: `Billing cycle generated successfully. Created ${result.transactionsCreated} transactions totaling $${result.totalAmount}.`,
     });
   } catch (error) {
-    const refused = operationAuditResponse(error);
-    if (refused) return NextResponse.json(refused.body, { status: refused.status });
+    if (error instanceof BillingPreviewAuthorityError) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, error.message);
+    }
     logger.error('Error generating billing cycle', { error });
 
     return standardErrorResponse(

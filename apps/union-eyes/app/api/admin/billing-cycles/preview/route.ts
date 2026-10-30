@@ -16,6 +16,7 @@ import {
 } from '@/lib/api/standardized-responses';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
+import { requireAuthorizedBillingPreview, BillingPreviewAuthorityError } from '@/lib/finance/billing-cycle-preview-authority';
 
 export const runtime = 'nodejs';
 
@@ -57,6 +58,8 @@ export const POST = withApiAuth(async (request: NextRequest) => {
 
     const { organizationId, frequency, periodStart, periodEnd } = validation.data;
 
+    await requireAuthorizedBillingPreview(user.id, organizationId);
+
     // Calculate period dates if not provided
     let start: Date;
     let end: Date;
@@ -94,6 +97,9 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       message: `Preview: Would create ${result.transactionsCreated} transactions totaling $${result.totalAmount}`,
     });
   } catch (error) {
+    if (error instanceof BillingPreviewAuthorityError) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, error.message);
+    }
     logger.error('Error previewing billing cycle', { error });
 
     return standardErrorResponse(
