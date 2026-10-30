@@ -68,6 +68,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: SyncR
         and(
           eq(externalCalendarConnections.id, params.id),
           eq(externalCalendarConnections.organizationId, organizationId),
+          eq(externalCalendarConnections.userId, userId),
           eq(externalCalendarConnections.isActive, true),
         ),
       )
@@ -84,6 +85,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: SyncR
         and(
           eq(calendars.id, localCalendarId),
           eq(calendars.organizationId, organizationId),
+          eq(calendars.ownerId, userId),
         ),
       )
       .limit(1)
@@ -91,7 +93,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: SyncR
     if (!calendar) {
       return standardErrorResponse(
         ErrorCode.FORBIDDEN,
-        'Local calendar is outside your organization scope',
+        'Only the calendar owner can authorize provider sync',
       )
     }
 
@@ -117,7 +119,12 @@ export const POST = withOrganizationAuth(async (request, context, params?: SyncR
       const [event] = await db
         .select({ id: calendarEvents.id })
         .from(calendarEvents)
-        .where(and(eq(calendarEvents.id, localEventId), eq(calendarEvents.organizationId, organizationId)))
+        .where(and(
+          eq(calendarEvents.id, localEventId),
+          eq(calendarEvents.organizationId, organizationId),
+          eq(calendarEvents.calendarId, localCalendarId),
+          eq(calendarEvents.organizerId, userId),
+        ))
         .limit(1)
       if (!event) {
         return standardErrorResponse(ErrorCode.NOT_FOUND, 'Local event not found')
@@ -171,6 +178,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: SyncR
               and(
                 eq(externalCalendarConnections.id, connection.id),
                 eq(externalCalendarConnections.organizationId, organizationId),
+                eq(externalCalendarConnections.userId, userId),
               ),
             )
 
