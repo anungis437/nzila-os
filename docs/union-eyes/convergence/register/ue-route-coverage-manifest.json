@@ -8,23 +8,23 @@
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 12,
    "CRON_SECRET": 3,
-   "CRUD_FACTORY": 280,
+   "CRUD_FACTORY": 279,
    "DELEGATED": 23,
-   "NONE": 49,
+   "NONE": 48,
    "ORG_AUTH": 53,
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 75,
-   "ROLE_AUTH": 124,
+   "ROLE_AUTH": 125,
    "SESSION_AUTH": 64,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 290,
+   "WITH_API": 291,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 8,
    "CRON_SECRET": 2,
-   "CRUD_FACTORY": 280,
+   "CRUD_FACTORY": 279,
    "DELEGATED": 16,
    "NONE": 8,
    "ORG_AUTH": 32,
@@ -33,13 +33,13 @@
    "ROLE_AUTH": 73,
    "SESSION_AUTH": 34,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 180
+   "WITH_API": 181
   },
   "mutatingByAudit": {
    "ATOMIC": 150,
    "ATOMIC_SERVICE": 145,
-   "COMPUTE_ONLY": 36,
-   "CRUD_ATOMIC": 282,
+   "COMPUTE_ONLY": 37,
+   "CRUD_ATOMIC": 281,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 23,
    "NO_WRITES_FOUND": 14,
@@ -47,8 +47,8 @@
   },
   "mutatingByData": {
    "AMBIENT_DB": 15,
-   "CRUD_TENANT_TX": 282,
-   "NONE": 201,
+   "CRUD_TENANT_TX": 281,
+   "NONE": 202,
    "SYSTEM_CONTEXT": 59,
    "TENANT_TX": 160
   }
@@ -548,11 +548,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "admin/ingest/batches/[id]/route.ts",
@@ -5087,7 +5087,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
