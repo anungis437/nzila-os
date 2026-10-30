@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 32,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 82,
-    "engineeringRemaining": 695,
+    "engineeringCorrected": 84,
+    "engineeringRemaining": 693,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 8
   },
@@ -292,6 +292,10 @@
     {
       "sha": "3905e595052356ec66493b51d77bc058483b37b6",
       "description": "H&S dashboard tenant-bound RLS, incident time regex, hazard item role and anonymous hazard reporting; PGlite and strict safety-form regressions committed. Source-level only; exact-HEAD CI and runtime pending."
+    },
+    {
+      "sha": "873e993fc0bcf08e6072c94f199a950899db34e1",
+      "description": "Calendar provider sync now enforces actor, connection owner, local calendar owner and exported event organizer; regression coverage added. Source-level only, exact-HEAD CI and provider runtime acceptance pending."
     }
   ],
   "records": [
@@ -2087,7 +2091,15 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "CALENDAR-OWNER-BOUND-SYNC",
+        "path": "apps/union-eyes/app/api/calendar-sync/connections/[id]/sync/route.ts",
+        "regressionPath": "apps/union-eyes/app/api/calendar-sync/connections/[id]/sync/route.test.ts",
+        "explanation": "Sync requires the authenticated connection owner and organization, with the provider operation audited before execution.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CALENDAR-SYNC-NO-PERSONAL-CALENDAR-CHECK",
@@ -2104,7 +2116,15 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "CALENDAR-OWNER-BOUND-SYNC",
+        "path": "apps/union-eyes/app/api/calendar-sync/connections/[id]/sync/route.ts",
+        "regressionPath": "apps/union-eyes/app/api/calendar-sync/connections/[id]/sync/route.test.ts",
+        "explanation": "Sync requires local calendar ownership and exported event membership in that calendar plus the caller's organizer identity, preventing personal calendar/event access by other organization members.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CALENDAR-SYNC-AUDIT-NOT-ATOMIC",
