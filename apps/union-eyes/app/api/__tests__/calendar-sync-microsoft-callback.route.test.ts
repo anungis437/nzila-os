@@ -129,6 +129,15 @@ describe('calendar-sync/microsoft/callback route', () => {
     expect(m.exchangeCodeForTokens).not.toHaveBeenCalled();
   });
 
+  it('fails closed when the mandatory connection audit cannot be written', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push([]);
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/microsoft/callback?code=oauth_code&state=signed-state'));
+    expect(response.status).toBe(500);
+    expect(m.persistAtomicAudit).toHaveBeenCalled();
+  });
+
   it('returns service unavailable when no refresh token exists for new connection', async () => {
     const { GET } = await loadRoute();
     m.selectQueue.push([]);
