@@ -102,6 +102,33 @@ test('identical immutable aliases remain valid and malformed prefixed references
     assert.throws(() => x.verify(), /mutable or conflicting/)
   } finally { x.cleanup() }
 })
+test('duplicate signed deployment identities cannot choose different images for one destination', () => {
+  const x = makeFixture()
+  try {
+    x.manifest.deployTargets = [
+      { name: 'demo', image: IMAGE },
+      { containerAppName: 'demo', image: 'example.invalid/other@sha256:' + 'f'.repeat(64) },
+    ]
+    x.write()
+    assert.throws(() => x.verify(), /duplicated/)
+  } finally { x.cleanup() }
+})
+test('conflicting target identity aliases are rejected before promotion', () => {
+  const x = makeFixture()
+  try {
+    x.manifest.deployTargets = [{
+      containerAppName: 'demo', app: 'other-destination', name: 'demo', image: IMAGE,
+    }]
+    x.write()
+    assert.throws(() => x.verify(), /conflicting/)
+    x.manifest.deployTargets = [{ containerAppName: 'demo', image: IMAGE }]
+    x.write()
+    assert.equal(x.verify().targetCount, 1)
+    x.manifest.deployTargets = [{ name: 'demo\\nother', image: IMAGE }]
+    x.write()
+    assert.throws(() => x.verify(), /conflicting/)
+  } finally { x.cleanup() }
+})
 test('non-CycloneDX SBOM rejected', () => {
   const x = makeFixture()
   try {

@@ -90,15 +90,29 @@ export function verifyPromotionEvidence({ directory, expectedCommit, expectedRun
   // Require every supplied alias to be the same complete immutable reference.
   const pinned = ref => typeof ref === 'string' &&
     /^[a-zA-Z0-9][a-zA-Z0-9._:/-]*@sha256:[0-9a-f]{64}$/i.test(ref)
+  // The production deployer resolves target identity by containerAppName,
+  // then app, then name. Reject conflicting aliases and duplicate resolved
+  // identities: otherwise a signed manifest can describe two images for the
+  // same destination and a later selector may silently choose a different one.
+  const seenTargets = new Set()
   if (!Array.isArray(manifest.deployTargets) || !manifest.deployTargets.length ||
       manifest.deployTargets.some(target => {
         if (!target || typeof target !== 'object' || Array.isArray(target)) return true
+        const identities = ['containerAppName', 'app', 'name']
+          .filter(key => target[key] !== undefined && target[key] !== null)
+          .map(key => target[key])
+        if (!identities.length || identities.some(id =>
+          typeof id !== 'string' || !id.trim() || id !== id.trim() ||
+          /[\\x00-\\x1f\\x7f]/.test(id)) || new Set(identities).size !== 1) return true
+        const identity = identities[0]
+        if (seenTargets.has(identity)) return true
+        seenTargets.add(identity)
         const refs = ['image', 'imageRef', 'digest']
           .filter(key => target[key] !== undefined && target[key] !== null)
           .map(key => target[key])
         return refs.length === 0 || refs.some(ref => !pinned(ref)) ||
           new Set(refs).size !== 1
-      })) deny('deployment target is absent, mutable or conflicting')
+      })) deny('deployment target is absent, mutable, conflicting or duplicated')
   return {
     commitSha: expectedCommit,
     attestationDigest: digest,
