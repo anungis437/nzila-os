@@ -13,6 +13,7 @@ import { join } from 'node:path'
 import { APP_REGISTRY } from '@nzila/platform-contracts/registry'
 
 import { isRetiredNoOpRoute } from './retired-routes'
+import { isAuthorizedRouteReexport } from './authorized-route-reexport'
 const ROOT = join(__dirname, '..', '..')
 const APPS_DIR = join(ROOT, 'apps')
 
@@ -111,6 +112,7 @@ describe('Org-scope enforcement patterns', () => {
         const content = readFileSync(route, 'utf-8')
         const hasOrgGuard =
           isRetiredNoOpRoute(content) ||
+          isAuthorizedRouteReexport(route) ||
           content.includes('withOrgScope') ||
           content.includes('requireOrgAccess') ||
           /await\s+getCaseActor\s*\(/.test(content) ||

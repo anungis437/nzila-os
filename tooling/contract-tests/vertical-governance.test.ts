@@ -14,6 +14,7 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { join, relative } from 'node:path'
 
 import { isRetiredNoOpRoute } from './retired-routes'
+import { isAuthorizedRouteReexport } from './authorized-route-reexport'
 const ROOT = join(__dirname, '..', '..')
 const APPS_DIR = join(ROOT, 'apps')
 
@@ -208,7 +209,7 @@ describe('INV-11 — Every API route has authorization', () => {
         const content = readFileSync(route, 'utf-8')
 
         // Route must contain at least one auth pattern
-        const hasAuth = AUTH_PATTERNS.some((pattern) => content.includes(pattern)) || isRetiredNoOpRoute(content)
+        const hasAuth = AUTH_PATTERNS.some((pattern) => content.includes(pattern)) || isRetiredNoOpRoute(content) || isAuthorizedRouteReexport(route)
 
         expect(
           hasAuth,

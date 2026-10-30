@@ -12,6 +12,7 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 
 import { isRetiredNoOpRoute } from './retired-routes'
+import { isAuthorizedRouteReexport } from './authorized-route-reexport'
 const ROOT = resolve(__dirname, '../..')
 
 function readContent(path: string): string {
@@ -109,7 +110,7 @@ describe('PR9: Org isolation — authorize() called in protected routes', () => 
       for (const routeFile of routeFiles) {
         if (isPublicRoute(routeFile)) continue  // health endpoints are intentionally public
         const content = readContent(routeFile)
-        const hasAuth = AUTH_CALL_PATTERNS.some(p => p.test(content)) || isRetiredNoOpRoute(content)
+        const hasAuth = AUTH_CALL_PATTERNS.some(p => p.test(content)) || isRetiredNoOpRoute(content) || isAuthorizedRouteReexport(routeFile)
         expect(
           hasAuth,
           `${routeFile.replace(ROOT, '')} missing auth call`
