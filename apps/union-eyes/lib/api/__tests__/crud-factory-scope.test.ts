@@ -157,7 +157,11 @@ describe('crud-factory parent scope (rows owned through a parent)', () => {
   it('does not let an update move a row under a different parent', async () => {
     const crudRoutes = await factory();
     crudRoutes({ ...options, itemRoute: true });
-    await captured.handlers.get('Update')!(ctx({ body: { title: 'renamed', negotiationId: FOREIGN_NEGOTIATION } }));
+    await expect(captured.handlers.get('Update')!(ctx({ body: { title: 'renamed', negotiationId: FOREIGN_NEGOTIATION } })))
+      .rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    expect(captured.sets).toHaveLength(0);
+    // Valid amendments remain possible without permitting parent reassignment.
+    await captured.handlers.get('Update')!(ctx({ body: { title: 'renamed' } }));
     expect(captured.sets).toHaveLength(1);
     expect(captured.sets[0]).toMatchObject({ title: 'renamed' });
     expect(captured.sets[0]).not.toHaveProperty('negotiationId');
