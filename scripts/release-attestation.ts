@@ -22,9 +22,10 @@
  *
  * @module scripts/release-attestation
  */
-import { createHash, sign, verify, generateKeyPairSync } from 'node:crypto'
-import { writeFileSync, readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
+import { createHash, sign, verify } from 'node:crypto'
+import { writeFileSync, readFileSync, existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
+import { hashDirectory } from './release/artifact-tree.mjs'
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -39,6 +40,10 @@ export interface ReleaseAttestation {
   sloGateResult: 'pass' | 'fail' | 'skipped'
   /** SHA-256 digest of the SBOM file (null if not available) */
   sbomDigest: string | null
+  /** Raw staging manifest SHA-256, binding deploy target image digests to signature */
+  manifestDigest: string | null
+  /** GitHub Actions run ID of the staging artifact build */
+  stagingRunId: string | null
   /** Trivy vulnerability scan summary */
   trivySummary: TrivySummary
   /** Secret scan summary */
@@ -115,6 +120,12 @@ function computeSbomDigest(): string | null {
   return null
 }
 
+function computeManifestDigest(): string | null {
+  const path = join(ROOT, 'artifact-manifest.json')
+  if (!existsSync(path)) return null
+  return createHash('sha256').update(readFileSync(path)).digest('hex')
+}
+
 function parseTrivyResults(): TrivySummary {
   const trivyPaths = [
     join(ROOT, 'trivy-results.json'),
@@ -158,9 +169,22 @@ function parseSecretScanResults(): SecretScanSummary {
   return { ran: false, findings: 0, clean: true }
 }
 
+function deepCanonical(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(deepCanonical)
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.keys(value as Record<string, unknown>)
+        .sort()
+        .map(key => [key, deepCanonical((value as Record<string, unknown>)[key])]),
+    )
+  }
+  return value
+}
+
 function computeAttestationDigest(attestation: Omit<ReleaseAttestation, 'attestationDigest' | 'signature'>): string {
-  const canonical = JSON.stringify(attestation, Object.keys(attestation).sort(), 0)
-  return createHash('sha256').update(canonical).digest('hex')
+  // A top-level JSON.stringify replacer drops nested security fields. Recursive
+  // canonicalisation is mandatory before signing any release evidence.
+  return createHash('sha256').update(JSON.stringify(deepCanonical(attestation))).digest('hex')
 }
 
 /**
@@ -189,29 +213,7 @@ function computeArtifactDigests(): ArtifactDigest[] {
   return digests
 }
 
-function hashDirectory(dir: string): { digest: string; fileCount: number } {
-  const hash = createHash('sha256')
-  let fileCount = 0
-
-  function walk(d: string) {
-    const entries = readdirSync(d, { withFileTypes: true })
-    for (const entry of entries) {
-      const full = join(d, entry.name)
-      if (entry.isDirectory()) {
-        if (!['node_modules', '.git', 'cache'].includes(entry.name)) {
-          walk(full)
-        }
-      } else if (entry.isFile()) {
-        const content = readFileSync(full)
-        hash.update(content)
-        fileCount++
-      }
-    }
-  }
-
-  walk(dir)
-  return { digest: hash.digest('hex'), fileCount }
-}
+// Deterministic, path-bound, domain-separated hashing is in release/artifact-tree.mjs.
 
 /**
  * Compute SHA-256 hash of the pnpm lockfile for supply-chain provenance.
@@ -271,6 +273,8 @@ export function generateReleaseAttestation(opts: GenerateAttestationOptions): Re
     contractTestResult: opts.contractTestResult ?? 'skipped',
     sloGateResult: opts.sloGateResult ?? 'skipped',
     sbomDigest: computeSbomDigest(),
+    manifestDigest: computeManifestDigest(),
+    stagingRunId: process.env.GITHUB_RUN_ID ?? null,
     trivySummary: parseTrivyResults(),
     secretScanSummary: parseSecretScanResults(),
     artifactDigests: computeArtifactDigests(),

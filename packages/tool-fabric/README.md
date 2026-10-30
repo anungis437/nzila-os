@@ -39,3 +39,29 @@ No approved durable adapter or authenticated fleet source is supplied. The in-me
 adapter is test-only and not exported from the barrel. Realpath/reparse confinement,
 one-time approval consumption, sandbox/network/resource enforcement and live audit rollout
 remain external proofs. See the [consolidated acceptance report](../../docs/architecture/TOOL_FABRIC_CONVERGENCE.md).
+
+### Persistent ledger rollback protection (P0 #1037)
+
+A `HOST_ATTESTED_PERSISTENT` store now **fails closed** unless the host supplies a
+separately managed `TrustLedgerHeadWitness`. Every load checks the exact
+revision/head hash against that independent high-watermark; every successful
+CAS append must seal the committed head. A fully rewritten but internally valid
+hash chain, missing witness, stale witness, failed sealing, or unavailable
+witness cannot be accepted as successful.
+
+The adapter interface does not create an independent persistence/authority
+service. In-memory tests remain explicitly NON_DURABLE_CONTRACT_ONLY. Tool
+execution and installation remain disabled pending separately controlled
+production identity, store, sandbox, revocation and containment proof.
+
+### PostgreSQL CAS storage adapter (P0 #1037)
+
+The canonical PostgreSQL migration lives at `sql/001_trust_ledger_pg.sql`.
+`PostgresAtomicTrustLedgerStore` implements a transactional stream CAS using
+`SELECT FOR UPDATE` and an entry plus head update in one SQL transaction.
+It never initializes a missing stream at runtime. The host supplies its own
+least-privileged authenticated transaction client. The schema must be applied
+through governed migrations and independently verified against PostgreSQL.
+This adapter **does not** by itself satisfy independently controlled witness,
+secrets, network, identity or runtime broker containment; `BROKER_READINESS`
+remains HOLD until those controls are proven in the target environment.

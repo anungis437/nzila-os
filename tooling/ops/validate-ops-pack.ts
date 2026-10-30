@@ -160,6 +160,9 @@ export function validateOpsPack(repoRoot: string): ValidationResult {
         } else {
           const ageMs = Date.now() - generatedAt.getTime()
           const ageDays = ageMs / (1000 * 60 * 60 * 24)
+          if (ageMs < -5 * 60 * 1000) {
+            errors.push('reports/ops/snapshot.json is dated in the future')
+          }
           if (ageDays > SNAPSHOT_MAX_AGE_DAYS) {
             errors.push(
               `reports/ops/snapshot.json is stale (${ageDays.toFixed(1)} days old; max ${SNAPSHOT_MAX_AGE_DAYS}). Run pnpm ops:evidence.`,
@@ -169,9 +172,61 @@ export function validateOpsPack(repoRoot: string): ValidationResult {
       }
 
       const metrics = snapshot.metrics ?? {}
+      // The wrapper timestamp is NOT the observation timestamp. A recently
+      // regenerated file cannot turn a stale repository export into measured
+      // current-window evidence. This catches direct validator invocations
+      // as well as future CI regressions that skip the source collector.
+      const verifyLocalEvidenceFreshness = (sourcePath: string, metric: string): void => {
+        if (!/^[a-z0-9-]+\.json$/.test(sourcePath)) {
+          errors.push('Invalid local operational evidence path for ' + metric)
+          return
+        }
+        const fullPath = join(repoRoot, 'ops/outputs', sourcePath)
+        if (!existsSync(fullPath)) {
+          errors.push('Missing local operational evidence export for ' + metric + ': ' + sourcePath)
+          return
+        }
+        let observedAt: unknown
+        try {
+          const parsed = JSON.parse(readFileSync(fullPath, 'utf8')) as { collected_at?: unknown }
+          observedAt = parsed.collected_at
+        } catch {
+          errors.push('Unparseable local operational evidence export for ' + metric + ': ' + sourcePath)
+          return
+        }
+        const instant = typeof observedAt === 'string' ? Date.parse(observedAt) : NaN
+        const age = Date.now() - instant
+        if (!Number.isFinite(instant) || age < -5 * 60000 ||
+            age > SNAPSHOT_MAX_AGE_DAYS * 86400000) {
+          errors.push('Source observation is missing, future-dated or stale for ' + metric +
+            ' (ops/outputs/' + sourcePath + ')')
+        }
+      }
+
       for (const metricKey of REQUIRED_OPS_METRIC_KEYS) {
-        if (!(metricKey in metrics)) {
-          errors.push(`reports/ops/snapshot.json missing required metric key: ${metricKey}`)
+        const entry = metrics[metricKey]
+        if (!entry || typeof entry !== 'object') {
+          errors.push(`reports/ops/snapshot.json missing structured metric key: ${metricKey}`)
+          continue
+        }
+        const item = entry as { value?: unknown; source?: unknown; source_needed?: unknown }
+        if (typeof item.source !== 'string' || item.source.trim().length === 0) {
+          errors.push(`reports/ops/snapshot.json missing provenance for ${metricKey}`)
+        }
+        if (item.value === null) {
+          if (typeof item.source_needed !== 'string' || item.source_needed.trim().length === 0) {
+            errors.push(`reports/ops/snapshot.json ${metricKey} has null value without source_needed`)
+          }
+        } else if (typeof item.value !== 'number' || !Number.isFinite(item.value)) {
+          errors.push(`reports/ops/snapshot.json ${metricKey} is not a finite measured number or explicit null`)
+        }
+        // Only measured numeric values require a current observation export.
+        // Unknown/null values retain an explicit source_needed without
+        // falsely refreshing measurements from old files.
+        if (typeof item.value === 'number' && Number.isFinite(item.value) &&
+            typeof item.source === 'string') {
+          const local = /^ops\/outputs\/([a-z0-9-]+\.json):/.exec(item.source)
+          if (local) verifyLocalEvidenceFreshness(local[1], metricKey)
         }
       }
     } catch (error) {

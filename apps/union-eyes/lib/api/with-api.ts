@@ -41,6 +41,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { readBoundedJson, JsonBodyBudgetError } from './bounded-json';
 import { logger } from '@/lib/logger';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { AuthOrgBindingError } from '@nzila/platform-auth/org-binding';
@@ -261,7 +262,8 @@ function generateTraceId(): string {
  * handlers and legacy wrappers that delegate here and still call `request.json()`.
  */
 function bodyReader(request: NextRequest): { json(): Promise<unknown> } {
-  return typeof request.clone === 'function' ? request.clone() : request;
+  const clone = typeof request.clone === 'function' ? request.clone() : request;
+  return { json: () => readBoundedJson(clone) };
 }
 
 /**
@@ -560,13 +562,11 @@ export function withApi<
           // Parse a clone: handlers (and legacy wrappers delegating here) may still read the body.
           // Parse a clone: handlers may still read the body.
           rawBody = await bodyReader(request).json();
-        } catch {
-          return standardErrorResponse(
-            ErrorCode.INVALID_FORMAT,
-            'Request body must be valid JSON',
-            undefined,
-            traceId,
-          );
+        } catch (error) {
+          if (error instanceof JsonBodyBudgetError) {
+            return standardErrorResponse(ErrorCode.PAYLOAD_TOO_LARGE, 'Request JSON exceeds resource limits', undefined, traceId);
+          }
+          return standardErrorResponse(ErrorCode.INVALID_FORMAT, 'Request body must be valid JSON', undefined, traceId);
         }
 
         const result = options.body.safeParse(rawBody);
@@ -586,11 +586,18 @@ export function withApi<
       } else if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
         // No Zod schema provided — still parse JSON body so handlers can
         // access it via ctx.body without calling request.json() themselves.
-        try {
-          body = await bodyReader(request).json();
-        } catch {
-          // Body may be empty or non-JSON — leave as undefined
+        const contentType = request.headers.get('content-type')?.toLowerCase() ?? '';
+        if (!contentType || contentType.includes('/json') || contentType.includes('+json')) {
+          try {
+            body = await bodyReader(request).json();
+          } catch (error) {
+            if (error instanceof JsonBodyBudgetError) {
+              return standardErrorResponse(ErrorCode.PAYLOAD_TOO_LARGE, 'Request JSON exceeds resource limits', undefined, traceId);
+            }
+            // Empty/invalid JSON without a declared schema retains legacy semantics.
+          }
         }
+        // Non-JSON multipart bodies remain untouched for dedicated ingestion limits.
       }
 
       // ── 7. Parse & validate query params ───────────────────────────────

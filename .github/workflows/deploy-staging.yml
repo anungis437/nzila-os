@@ -49,6 +49,11 @@ jobs:
   pre-deploy-gates:
     runs-on: ubuntu-latest
     name: Staging Pre-Deploy Gates
+    # These outputs are derived from actual executed steps, not from a flag
+    # supplied by an agent or release requester.
+    outputs:
+      contract_verified: ${{ steps.contract_tests.outcome == 'success' }}
+      slo_verified: ${{ steps.slo_gate.outcome == 'success' }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -115,14 +120,10 @@ jobs:
 
       - name: Generate SBOM
         run: |
-          npx @cyclonedx/cyclonedx-npm --output-file sbom.json || echo '{}' > sbom.json
-
-      - name: Generate build attestation
-        run: |
-          node --import tsx scripts/release-attestation.ts \
-            --sha ${{ github.sha }} \
-            --contract-pass --slo-pass \
-            --env staging
+          set -euo pipefail
+          # Never disguise an SBOM generator failure as a successful empty BOM.
+          npx @cyclonedx/cyclonedx-npm --output-file sbom.json
+          node -e "const s=require('./sbom.json'); if(s.bomFormat!=='CycloneDX'||!Array.isArray(s.components)||!s.components.length) process.exit(1)"
 
       - name: Compute artifact digest
         id: digest
@@ -147,11 +148,32 @@ jobs:
             "sbom_hash": "${{ steps.digest.outputs.digest }}",
             "attestation_ref": "release-attestation.json",
             "commit_sha": "${{ github.sha }}",
+            "run_id": "${{ github.run_id }}",
             "built_at": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)",
             "source_workflow": "deploy-staging",
             "deployTargets": ${DEPLOY_TARGETS_JSON}
           }
           EOF
+
+      - name: Generate build attestation
+        env:
+          # Enforced by production promotion verifier: unsigned attestations
+          # are never production evidence.
+          ATTESTATION_SIGNING_KEY: ${{ secrets.ATTESTATION_SIGNING_KEY }}
+        run: |
+          set -euo pipefail
+          # Source of PASS is the successful pre-deploy gate job, not an
+          # unconditional argument to the attestation generator.
+          test "${{ needs.pre-deploy-gates.outputs.contract_verified }}" = "true" || {
+            echo "::error::Contract-test success proof absent"; exit 1;
+          }
+          test "${{ needs.pre-deploy-gates.outputs.slo_verified }}" = "true" || {
+            echo "::error::Staging SLO success proof absent"; exit 1;
+          }
+          node --import tsx scripts/release-attestation.ts \
+            --sha ${{ github.sha }} \
+            --contract-pass --slo-pass \
+            --env staging
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -214,10 +236,13 @@ jobs:
       - name: ACR login
         run: az acr login --name nzilacanadaacr
 
-      - name: Deploy to staging
+      - name: Require real staging deployment implementation
         run: |
-          echo "Deploying artifact ${{ needs.build-artifact.outputs.artifact_digest }} to STAGING"
-          # Container image build & push for each service would go here
+          set -euo pipefail
+          # This emergency path has no image build/push or deployment. It must
+          # never pass by echoing a deployment or by probing a prior revision.
+          echo "::error::Emergency staging deployment is not implemented. Use the canonical GitOps deployer and obtain independent runtime evidence."
+          exit 1
 
       - name: Run smoke tests
         run: pnpm tsx scripts/release/run-smoke.ts --env staging --apps "${{ github.event.inputs.apps || 'all' }}"

@@ -123,6 +123,17 @@ jobs:
             exit 1
           fi
 
+          # GitHub is the independent source for the workflow run identity. A
+          # caller-supplied run ID must not substitute another SHA or workflow.
+          RUN_JSON=$(gh run view "$SOURCE_RUN_ID" --json headSha,headBranch,workflowName,conclusion)
+          echo "$RUN_JSON" | jq -e --arg sha "$GITHUB_SHA" '
+            .headSha == $sha and .headBranch == "main" and
+            .workflowName == "Deploy Staging" and .conclusion == "success"
+          ' >/dev/null || {
+            echo "::error::Selected staging run does not match the exact release commit and trusted workflow"
+            exit 1
+          }
+
           echo "source_run_id=$SOURCE_RUN_ID" >> "$GITHUB_OUTPUT"
 
           echo "### Production Promotion Plan" >> "$GITHUB_STEP_SUMMARY"
@@ -138,7 +149,7 @@ jobs:
           mkdir -p staging-artifacts
           gh run download "${{ steps.resolve.outputs.source_run_id }}" --name staging-build-artifacts --dir ./staging-artifacts
 
-      - name: Verify artifact digest
+      - name: Parse artifact manifest and apply app policy filter
         run: |
           set -euo pipefail
           test -f staging-artifacts/artifact-manifest.json
@@ -162,17 +173,14 @@ jobs:
 
           echo "Artifact manifest verified"
 
-      - name: Verify SBOM
+      - name: Verify signed staging provenance and exact artifact continuity
+        env:
+          ATTESTATION_VERIFY_PUBLIC_KEY: ${{ secrets.ATTESTATION_VERIFY_PUBLIC_KEY }}
         run: |
           set -euo pipefail
-          test -f staging-artifacts/sbom.json
-          echo "SBOM verified: $(wc -c < staging-artifacts/sbom.json) bytes"
-
-      - name: Verify attestation
-        run: |
-          set -euo pipefail
-          test -f staging-artifacts/release-attestation.json
-          echo "Attestation verified"
+          # Fail closed for missing keys, invalid/unsigned or stale evidence,
+          # source SHA drift, missing independent scans or mutable images.
+          node scripts/release/verify-promotion-evidence.mjs staging-artifacts "${GITHUB_SHA}" "${{ steps.resolve.outputs.source_run_id }}"
 
       - name: Verify release signature
         run: |
@@ -200,11 +208,13 @@ jobs:
           mkdir -p staging-artifacts
           gh run download "${{ needs.verify-artifact.outputs.source_run_id }}" --name staging-build-artifacts --dir ./staging-artifacts
 
-      - name: Generate SLSA provenance
+      # A Git commit SHA is NOT a SHA-256 digest of the deployable image.
+      # Attest only the actual downloaded SBOM subject; image provenance
+      # remains a separate release prerequisite and must not be inferred.
+      - name: Attest downloaded staging SBOM
         uses: actions/attest-build-provenance@v2
         with:
-          subject-name: nzila-os
-          subject-digest: sha256:${{ github.sha }}
+          subject-path: staging-artifacts/sbom.json
 
   # ── W2-9: Human Approval Gate ──────────────────────────────────────────────
   deploy-production:
@@ -216,6 +226,37 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
+      # Environment declarations are insufficient proof of human authorization.
+      # Reject absent review rules, admin bypass, wrong run/SHA, and self-review.
+      - name: Verify authenticated independent production approval
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/nzila-production-review"
+          gh api "repos/${GITHUB_REPOSITORY}/environments/production" > "$RUNNER_TEMP/nzila-production-review/environment.json"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" > "$RUNNER_TEMP/nzila-production-review/run.json"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/approvals" > "$RUNNER_TEMP/nzila-production-review/approvals.json"
+          mkdir -p ops/deploy-evidence
+          node scripts/release/verify-production-approval.mjs "$RUNNER_TEMP/nzila-production-review" "$GITHUB_RUN_ID" "$GITHUB_SHA" "ops/deploy-evidence/production-approval-${GITHUB_RUN_ID}.json"
+
+      # Jobs have isolated filesystems: download again after the independent
+      # GitHub Environment approval, then re-verify the exact signed artifact.
+      - name: Download approved staging artifact set
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p staging-artifacts
+          gh run download "${{ needs.verify-artifact.outputs.source_run_id }}" --name staging-build-artifacts --dir ./staging-artifacts
+
+      - name: Reverify signed artifact after human approval
+        env:
+          ATTESTATION_VERIFY_PUBLIC_KEY: ${{ secrets.ATTESTATION_VERIFY_PUBLIC_KEY }}
+        run: |
+          set -euo pipefail
+          node scripts/release/verify-promotion-evidence.mjs staging-artifacts "${GITHUB_SHA}" "${{ needs.verify-artifact.outputs.source_run_id }}"
+
       - name: Azure login (OIDC)
         uses: azure/login@v3
         with:
@@ -318,9 +359,9 @@ jobs:
           {
             "environment": "PRODUCTION",
             "commit": "${{ github.sha }}",
-            "artifact_digest": "promoted-from-staging",
-            "sbom_hash": "promoted-from-staging",
-            "policy_engine_status": "pass",
+            "artifact_digest": "$(sha256sum staging-artifacts/sbom.json | cut -d ' ' -f 1)",
+            "sbom_hash": "$(sha256sum staging-artifacts/sbom.json | cut -d ' ' -f 1)",
+            "policy_engine_status": "not_independently_attested",
             "change_record_ref": "$TAG_NAME",
             "timestamp": "$RELEASE_DATE"
           }
@@ -355,7 +396,13 @@ jobs:
         with:
           name: production-deploy-evidence
           path: |
+            # Includes the minimal GitHub API-verified human approval receipt.
             ops/deploy-evidence/*.json
+            # Include the EXACT verified upstream attestation and image
+            # manifest, never substitute a locally asserted green report.
+            staging-artifacts/release-attestation.json
+            staging-artifacts/artifact-manifest.json
+            staging-artifacts/sbom.json
             ops/evidence/*.json
             ops/governance-snapshots/governance-snapshot-prod-*.json
             ops/releases/release-*.json

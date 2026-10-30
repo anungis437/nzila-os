@@ -3,7 +3,8 @@
  *
  * Enforces that:
  *   1. The release attestation generator script exists.
- *   2. All deploy workflows generate and upload attestation artifacts.
+ *   2. Build workflows generate and upload attestation artifacts;
+ *      production promotion verifies and retains the SAME signed artifact.
  *   3. Attestation includes required fields (SHA, contract test, SLO, SBOM, trivy, secret-scan).
  *
  * @invariant RELEASE_ATTESTATION_REQUIRED_001
@@ -67,7 +68,7 @@ describe('RELEASE_ATTESTATION_REQUIRED_001 — Release Attestation on Deploy', (
     ).toBe(true)
   })
 
-  // 2. All deploy workflows must reference release attestation
+  // 2. Build workflows generate; promotion cryptographically verifies the staged artifact
   it('RELEASE_ATTESTATION_REQUIRED_001: all deploy workflows generate release attestation', () => {
     const workflowDir = join(ROOT, '.github', 'workflows')
     if (!existsSync(workflowDir)) {
@@ -86,7 +87,16 @@ describe('RELEASE_ATTESTATION_REQUIRED_001 — Release Attestation on Deploy', (
     for (const wf of deployWorkflows) {
       const content = readContent(`.github/workflows/${wf}`)
 
-      if (!content.includes('release-attestation')) {
+      if (wf === 'deploy-production.yml') {
+        // Production promotion must not generate another self-claimed PASS.
+        // It consumes verified signed staging evidence and binds image digest.
+        if (!content.includes('verify-promotion-evidence.mjs') ||
+            !content.includes('staging-artifacts/release-attestation.json') ||
+            !content.includes('staging-artifacts/artifact-manifest.json') ||
+            !content.includes('staging-artifacts/sbom.json')) {
+          violations.push(wf)
+        }
+      } else if (!content.includes('scripts/release-attestation.ts')) {
         violations.push(wf)
       }
     }
@@ -97,7 +107,7 @@ describe('RELEASE_ATTESTATION_REQUIRED_001 — Release Attestation on Deploy', (
     ).toEqual([])
   })
 
-  // 3. Deploy workflows must upload attestation as artifact
+  // 3. The same exact verified attestation must survive production promotion
   it('RELEASE_ATTESTATION_REQUIRED_001: deploy workflows upload attestation artifact', () => {
     const workflowDir = join(ROOT, '.github', 'workflows')
     if (!existsSync(workflowDir)) return

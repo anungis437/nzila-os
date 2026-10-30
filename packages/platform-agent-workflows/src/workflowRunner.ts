@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import type { AgentWorkflow, WorkflowStep, WorkflowStatus } from './types'
 import { recordAuditEvent } from '@nzila/platform-governance'
+import { isVerifiedOutcomeFor, serializeOutcomeProof, hasAuthenticatedCompletedHistory, carryAuthenticatedHistory, type VerifiedOutcomeProof } from './outcome-proof'
+import { isVerifiedPolicyPermitFor, type VerifiedPolicyPermit } from './policy-permit'
 
 export function createWorkflow(params: {
   name: string
@@ -23,7 +25,6 @@ export function createWorkflow(params: {
     })),
     createdAt: new Date().toISOString(),
   }
-
   recordAuditEvent({
     eventType: 'workflow_created',
     actor: 'agent-workflow-runner',
@@ -33,59 +34,82 @@ export function createWorkflow(params: {
     commitHash: 'runtime',
     details: { workflowId: workflow.id, workflowName: params.name, triggerEvent: params.triggerEvent },
   })
-
   return workflow
 }
 
+/**
+ * FAIL CLOSED: neither a policy assertion nor arbitrary step output proves a
+ * result. Completion requires a runtime-minted, scope-bound independent proof.
+ * The proof's trusted verifier must be configured by the host, not the agent.
+ */
 export function executeStep(
   workflow: AgentWorkflow,
   stepId: string,
   params: {
     policyCheck?: { policyId: string; result: 'allow' | 'deny' | 'requires_approval' }
+    verifiedOutcome?: VerifiedOutcomeProof
+    verifiedPolicy?: VerifiedPolicyPermit
     output?: Record<string, unknown>
   },
 ): AgentWorkflow {
-  const updatedSteps = workflow.steps.map((step) => {
+  const target = workflow.steps.find(step => step.id === stepId)
+  if (!target) throw new Error('Workflow step does not exist')
+  if (!hasAuthenticatedCompletedHistory(workflow)) throw new Error('Existing completed outcomes require trusted re-verification')
+  if (target.status === 'completed') {
+    throw new Error('Completed steps are immutable; a new workflow revision is required')
+  }
+  const policyAllows = params.policyCheck?.result === 'allow' &&
+    Boolean(params.policyCheck.policyId) &&
+    isVerifiedPolicyPermitFor(params.verifiedPolicy, workflow, stepId, params.policyCheck.policyId)
+  const evidenceValid = isVerifiedOutcomeFor(params.verifiedOutcome, workflow, stepId) &&
+    params.verifiedOutcome?.request.executingAgentId === params.verifiedPolicy?.request.executingAgentId
+  const completes = policyAllows && evidenceValid
+  const reason = !policyAllows
+    ? 'Independently authorized policy ALLOW is required'
+    : !evidenceValid
+      ? 'Independent outcome proof is required'
+      : undefined
+  const updatedSteps: WorkflowStep[] = workflow.steps.map((step) => {
     if (step.id !== stepId) return step
-
-    if (params.policyCheck?.result === 'deny') {
-      return { ...step, status: 'blocked' as WorkflowStatus, policyCheck: params.policyCheck }
+    if (!completes) return {
+      ...step,
+      status: 'blocked',
+      policyCheck: params.policyCheck,
+      error: reason,
     }
-
-    if (params.policyCheck?.result === 'requires_approval') {
-      return { ...step, status: 'blocked' as WorkflowStatus, policyCheck: params.policyCheck }
-    }
-
     return {
       ...step,
-      status: 'completed' as WorkflowStatus,
+      status: 'completed',
       policyCheck: params.policyCheck,
+      outcomeEvidence: serializeOutcomeProof(params.verifiedOutcome!),
       output: params.output,
+      error: undefined,
     }
   })
-
-  const allCompleted = updatedSteps.every((s) => s.status === 'completed')
-  const anyFailed = updatedSteps.some((s) => s.status === 'failed')
-  const anyBlocked = updatedSteps.some((s) => s.status === 'blocked')
-
+  const allCompleted = updatedSteps.length > 0 && updatedSteps.every(s => s.status === 'completed')
+  const anyFailed = updatedSteps.some(s => s.status === 'failed')
+  const anyBlocked = updatedSteps.some(s => s.status === 'blocked')
   let status: WorkflowStatus = 'running'
   if (allCompleted) status = 'completed'
   else if (anyFailed) status = 'failed'
   else if (anyBlocked) status = 'blocked'
-
-  const policyResult = anyBlocked || anyFailed ? 'fail' : 'pass'
-  emitStepAuditEvent(workflow, stepId, policyResult, {
-    stepStatus: updatedSteps.find((s) => s.id === stepId)?.status,
+  emitStepAuditEvent(workflow, stepId, completes ? 'pass' : 'fail', {
+    stepStatus: updatedSteps.find(s => s.id === stepId)?.status,
     workflowStatus: status,
     policyCheck: params.policyCheck,
+    verificationRef: completes ? params.verifiedOutcome?.evidence.verificationRef : undefined,
+    failureReason: reason,
   })
-
-  return {
+  const updated: AgentWorkflow = {
     ...workflow,
     steps: updatedSteps,
     status,
-    completedAt: status === 'completed' ? new Date().toISOString() : undefined,
+    completedAt: allCompleted ? new Date().toISOString() : undefined,
   }
+  carryAuthenticatedHistory(workflow, updated, stepId,
+    completes ? params.verifiedOutcome : undefined,
+    completes ? params.verifiedPolicy : undefined)
+  return updated
 }
 
 function emitStepAuditEvent(

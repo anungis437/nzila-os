@@ -2,7 +2,7 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(__dirname, '../..')
@@ -13,6 +13,25 @@ const SNAPSHOT_MD = resolve(ROOT, 'reports/ops/snapshot.md')
 function readJsonIfExists(path) {
   if (!existsSync(path)) return null
   return JSON.parse(readFileSync(path, 'utf8'))
+}
+
+/**
+ * A newly generated wrapper must NOT present two-month-old source exports as
+ * observations from the current 30-day window. Stale sources become explicit
+ * null with documented remediation, not fabricated current measurements.
+ */
+const SOURCE_MAX_AGE_DAYS = 7
+export function requireFreshSource(data, label, now = Date.now()) {
+  if (!data) return { data: null, reason: `Missing ${label} source export` }
+  const collected = Date.parse(data.collected_at ?? '')
+  if (!Number.isFinite(collected)) {
+    return { data: null, reason: `${label} source has no verifiable collected_at timestamp` }
+  }
+  const age = now - collected
+  if (age < -5 * 60 * 1000 || age > SOURCE_MAX_AGE_DAYS * 86400000) {
+    return { data: null, reason: `${label} source export is outside the verified seven-day freshness window; recollect the upstream source` }
+  }
+  return { data, reason: null }
 }
 
 function toNumber(value) {
@@ -42,76 +61,76 @@ function source(value, source, sourceNeeded = null) {
   }
 }
 
-async function fetchBuildMetricsFromGitHub() {
-  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN
-  const repo = process.env.GITHUB_REPOSITORY
-  if (!token || !repo) {
-    return {
-      buildSuccessRate: null,
-      medianBuildMinutes: null,
-      sourceNeeded: 'Set GITHUB_TOKEN/GH_TOKEN and GITHUB_REPOSITORY to query GitHub Actions build history.',
-      source: 'GitHub Actions API (not available in current execution context)',
-    }
-  }
-
-  const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
-  const url = `https://api.github.com/repos/${repo}/actions/workflows/ci.yml/runs?per_page=100&branch=main&created=>=${since}`
-
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-    },
+/**
+ * GitHub metrics are observational input, not a source of fabricated PASS.
+ * An API outage emits explicit null with source debt rather than crashing the
+ * documentation check. Runtime readiness still needs separate measurements.
+ */
+export async function fetchBuildMetricsFromGitHub({
+  env = process.env,
+  httpGet = fetch,
+  now = Date.now(),
+} = {}) {
+  const token = env.GITHUB_TOKEN || env.GH_TOKEN
+  const repo = env.GITHUB_REPOSITORY
+  const fallback = (reason, origin = 'GitHub Actions API') => ({
+    buildSuccessRate: null,
+    medianBuildMinutes: null,
+    sourceNeeded: reason,
+    source: origin,
   })
-
-  if (!res.ok) {
-    return {
-      buildSuccessRate: null,
-      medianBuildMinutes: null,
-      sourceNeeded: `GitHub API request failed (${res.status}); verify token scopes/actions visibility.`,
-      source: 'GitHub Actions API',
-    }
+  if (!token || !repo) {
+    return fallback('Authenticated GITHUB_TOKEN/GH_TOKEN and GITHUB_REPOSITORY are required to query CI history.',
+      'GitHub Actions API (not available in current execution context)')
   }
-
-  const data = await res.json()
-  const runs = Array.isArray(data.workflow_runs) ? data.workflow_runs : []
-  const completed = runs.filter((r) => r.status === 'completed')
-
-  if (completed.length === 0) {
-    return {
-      buildSuccessRate: null,
-      medianBuildMinutes: null,
-      sourceNeeded: 'No completed ci.yml workflow runs found for the last 30 days.',
-      source: 'GitHub Actions API',
-    }
+  if (!/^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/.test(repo)) {
+    return fallback('GITHUB_REPOSITORY is not an owner/repository identifier')
   }
-
-  const successes = completed.filter((r) => r.conclusion === 'success').length
-  const successRate = round((successes / completed.length) * 100, 2)
-
-  const durationsMinutes = completed
-    .map((r) => {
-      if (!r.run_started_at || !r.updated_at) return null
-      const started = new Date(r.run_started_at).getTime()
-      const ended = new Date(r.updated_at).getTime()
-      if (!Number.isFinite(started) || !Number.isFinite(ended) || ended < started) return null
-      return (ended - started) / 60000
+  const since = new Date(now - 30 * 86400000).toISOString()
+  const url = 'https://api.github.com/repos/' + repo +
+    '/actions/workflows/ci.yml/runs?per_page=100&branch=main&created=>=' + encodeURIComponent(since)
+  let data
+  try {
+    const res = await httpGet(url, {
+      headers: {
+        Authorization: 'Bearer ' + token,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+      signal: AbortSignal.timeout(15000),
     })
-    .filter((v) => v !== null)
-    .sort((a, b) => a - b)
-
-  const median = durationsMinutes.length === 0
-    ? null
-    : durationsMinutes.length % 2 === 1
-      ? durationsMinutes[(durationsMinutes.length - 1) / 2]
-      : (durationsMinutes[durationsMinutes.length / 2 - 1] + durationsMinutes[durationsMinutes.length / 2]) / 2
-
+    if (!res.ok) {
+      return fallback('GitHub Actions API HTTP ' + res.status + ': provider unavailable or token lacks scope.')
+    }
+    data = await res.json()
+  } catch (error) {
+    const code = error instanceof Error ? error.name : 'UNKNOWN'
+    return fallback('Unable to obtain authenticated GitHub Actions evidence (' + code + '); no metrics inferred.')
+  }
+  const runs = Array.isArray(data?.workflow_runs) ? data.workflow_runs : []
+  const completed = runs.filter(r => {
+    if (r?.status !== 'completed') return false
+    if (!['success', 'failure', 'cancelled', 'timed_out', 'action_required'].includes(r.conclusion)) return false
+    const finished = Date.parse(r.updated_at ?? '')
+    return Number.isFinite(finished) && finished >= now - 30 * 86400000 && finished <= now + 5 * 60000
+  })
+  if (!completed.length) return fallback('No verifiable completed ci.yml workflow runs in the last 30 days.')
+  const successCount = completed.filter(r => r.conclusion === 'success').length
+  const durations = completed.map(r => {
+    const started = Date.parse(r.run_started_at ?? '')
+    const ended = Date.parse(r.updated_at ?? '')
+    return Number.isFinite(started) && Number.isFinite(ended) && ended >= started
+      ? (ended - started) / 60000 : null
+  }).filter(v => v !== null).sort((a, b) => a - b)
+  const mid = Math.floor(durations.length / 2)
+  const median = !durations.length ? null : durations.length % 2
+    ? durations[mid] : (durations[mid - 1] + durations[mid]) / 2
+  const origin = 'GitHub Actions API ci.yml runs on main (30d window, completed runs: ' + completed.length + ')'
   return {
-    buildSuccessRate: successRate,
+    buildSuccessRate: round(successCount / completed.length * 100, 2),
     medianBuildMinutes: round(median, 2),
-    sourceNeeded: null,
-    source: `GitHub Actions API ci.yml runs on main (30d window, completed runs: ${completed.length})`,
+    sourceNeeded: median === null ? 'Run duration unavailable; source requires run_started_at and updated_at.' : null,
+    source: origin,
   }
 }
 
@@ -171,13 +190,24 @@ function renderMarkdown(snapshot) {
 }
 
 async function main() {
-  const dora = readJsonIfExists(resolve(OPS_OUTPUTS, 'dora-metrics.json'))
-  const cost = readJsonIfExists(resolve(OPS_OUTPUTS, 'cost-allocation.json'))
+  const doraSource = requireFreshSource(
+    readJsonIfExists(resolve(OPS_OUTPUTS, 'dora-metrics.json')),
+    'DORA metrics',
+  )
+  const costSource = requireFreshSource(
+    readJsonIfExists(resolve(OPS_OUTPUTS, 'cost-allocation.json')),
+    'Cost allocation',
+  )
+  const dora = doraSource.data
+  const cost = costSource.data
   const build = await fetchBuildMetricsFromGitHub()
 
   const deploysPerWeek = toNumber(dora?.metrics?.deployment_frequency?.value)
   const changeFailureRate = toNumber(dora?.metrics?.change_failure_rate?.value)
-  const mttrHours = toNumber(dora?.metrics?.mttr?.value)
+  // The existing export may substitute vulnerability-remediation MTTR for
+  // incident recovery. Never present that proxy as actual service MTTR.
+  const mttrHours = dora?.metrics?.mttr?.source?.includes('mttr-dashboard')
+    ? null : toNumber(dora?.metrics?.mttr?.value)
   const mttrMinutes = mttrHours === null ? null : round(mttrHours * 60, 2)
 
   const costMonthly = toNumber(cost?.total_monthly_cost_usd)
@@ -194,7 +224,7 @@ async function main() {
       deploy_frequency_30d: source(
         deploysPerWeek,
         dora ? 'ops/outputs/dora-metrics.json: metrics.deployment_frequency.value (deploys/week)' : 'ops/outputs/dora-metrics.json',
-        dora ? null : 'Run pnpm collect:dora to generate ops/outputs/dora-metrics.json.',
+        dora ? null : `${doraSource.reason}. Run pnpm collect:dora with authoritative access.`,
       ),
       build_success_rate_30d: source(
         build.buildSuccessRate,
@@ -209,12 +239,12 @@ async function main() {
       change_failure_rate_30d: source(
         changeFailureRate,
         dora ? 'ops/outputs/dora-metrics.json: metrics.change_failure_rate.value' : 'ops/outputs/dora-metrics.json',
-        dora ? null : 'Run pnpm collect:dora to generate ops/outputs/dora-metrics.json.',
+        dora ? null : `${doraSource.reason}. Run pnpm collect:dora with authoritative access.`,
       ),
       mttr_minutes: source(
         mttrMinutes,
         dora ? 'ops/outputs/dora-metrics.json: metrics.mttr.value (hours -> minutes)' : 'ops/outputs/dora-metrics.json',
-        mttrMinutes === null ? 'Incident tracker integration required; dora-metrics currently reports null mttr.' : null,
+        mttrMinutes === null ? 'Incident tracker integration required. Historical vulnerability MTTR is not incident recovery time.' : null,
       ),
       uptime_30d: source(
         null,
@@ -244,7 +274,7 @@ async function main() {
       monthly_infra_cost_estimate: source(
         costMonthly,
         cost ? 'ops/outputs/cost-allocation.json: total_monthly_cost_usd' : 'ops/outputs/cost-allocation.json',
-        costMonthly === null ? 'Run pnpm collect:cost with Azure API enabled to populate real monthly cost.' : null,
+        costMonthly === null ? `${costSource.reason}. Run pnpm collect:cost using Azure Cost Management.` : null,
       ),
       incidents_last_30d: source(
         null,
@@ -265,7 +295,7 @@ async function main() {
   console.log(`- build_success_rate_30d: ${snapshot.metrics.build_success_rate_30d.value ?? 'null'}`)
 }
 
-main().catch((error) => {
+if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) main().catch((error) => {
   console.error('Failed to generate ops evidence snapshot:', error)
   process.exit(1)
 })
