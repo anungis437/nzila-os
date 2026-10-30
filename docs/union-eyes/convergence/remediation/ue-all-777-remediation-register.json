@@ -62,7 +62,7 @@
     "note": "Milestones and evidence are transcribed as prior claims; this run has not independently re-executed those proofs."
   },
   "lastInspectedBranch": "agents/ue-cursor-final-closure",
-  "lastInspectedCommit": "24de152858f2d01f76353fd6ae3c781b92ee71d7",
+  "lastInspectedCommit": "3a2c0089d233fa8ff79a68923471929599eb5c1e",
   "summary": {
     "allRecordedDefects": 777,
     "bySeverity": {
@@ -165,6 +165,14 @@
     {
       "sha": "24de152858f2d01f76353fd6ae3c781b92ee71d7",
       "description": "Add evidence forwarding, confidentiality and fail-closed unit regressions; not yet CI verified."
+    },
+    {
+      "sha": "87377a8ca3e1e4974f9bc23d8b2ad81ab3694c90",
+      "description": "Correct scanner's remaining overescaped alias-import regex; source-level regex tested against actual delegated route."
+    },
+    {
+      "sha": "3a2c0089d233fa8ff79a68923471929599eb5c1e",
+      "description": "Correct generic CRUD governance ratchet's remaining overescaped status-column regex."
     }
   ],
   "records": [
@@ -14178,6 +14186,17 @@
     {
       "inspectedSha": "24de152858f2d01f76353fd6ae3c781b92ee71d7",
       "evidence": "Seven source/test/config commits pushed; no exact-SHA GitHub Actions runs observed at checkpoint. Evidence bridge end-to-end persistence unproven.",
+      "source": "PATCHED_UNVERIFIED",
+      "unit": "PENDING",
+      "contract": "PENDING",
+      "native": "PENDING",
+      "security": "PENDING",
+      "httpBrowser": "PENDING",
+      "go": "NO_GO"
+    },
+    {
+      "inspectedSha": "3a2c0089d233fa8ff79a68923471929599eb5c1e",
+      "evidence": "Eight source/test/config commits after 49172; scanner alias regex manually compiled and matched against canonical source; no exact-SHA CI, native or HTTP/browser acceptance available yet.",
       "source": "PATCHED_UNVERIFIED",
       "unit": "PENDING",
       "contract": "PENDING",
