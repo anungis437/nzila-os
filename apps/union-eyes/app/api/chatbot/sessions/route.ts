@@ -35,6 +35,7 @@ export const GET = withApi(
     });
     const sessions = await sessionManager.getUserSessions(userId!, {
       organizationId: organizationId ?? undefined,
+      status: 'active', // Archived/deleted conversations are not readable through the active inbox.
     });
     return { data: sessions };
   },

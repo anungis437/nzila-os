@@ -373,7 +373,7 @@ export class ChatbotService {
     }
     // A chat session belongs to exactly one user within one organization —
     // never trust a client-supplied sessionId without verifying both.
-    if (session.userId !== data.userId || session.organizationId !== data.organizationId) {
+    if (session.userId !== data.userId || session.organizationId !== data.organizationId || session.status !== 'active') {
       throw new Error("Session not found");
     }
     
@@ -541,7 +541,7 @@ export class ChatbotService {
     // A chat session belongs to exactly one user within one organization —
     // never trust a client-supplied sessionId without verifying both.
     const session = await this.sessionManager.getSession(sessionId);
-    if (!session || session.userId !== owner.userId || session.organizationId !== owner.organizationId) {
+    if (!session || session.status !== 'active' || session.userId !== owner.userId || session.organizationId !== owner.organizationId) {
       throw new Error("Session not found");
     }
 

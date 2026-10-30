@@ -143,6 +143,7 @@ const session = {
   userId: "user-1",
   organizationId: "org-1",
   title: "Test chat",
+  status: "active",
   model: "gpt-4",
   temperature: "0.7",
   messageCount: 0,
@@ -480,6 +481,23 @@ describe("ChatbotService", () => {
     const result = await bot.getMessages("sess-1", { userId: "user-1", organizationId: "org-1" });
     // reverse() is called, so first should be m-1
     expect(result[0].id).toBe("m-1");
+  });
+
+  it.each(["archived", "deleted"])("getMessages refuses %s sessions before reading messages", async (status) => {
+    mocks.mockSelectLimit.mockResolvedValueOnce([{ ...session, status }]);
+    await expect(
+      bot.getMessages("sess-1", { userId: "user-1", organizationId: "org-1" }),
+    ).rejects.toThrow("Session not found");
+    expect(mocks.mockSelectOffset).not.toHaveBeenCalled();
+  });
+
+  it.each(["archived", "deleted"])("sendMessage refuses %s sessions before AI generation", async (status) => {
+    mocks.mockSelectLimit.mockResolvedValueOnce([{ ...session, status }]);
+    await expect(
+      bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "hi" }),
+    ).rejects.toThrow("Session not found");
+    expect(mocks.operation).not.toHaveBeenCalled();
+    expect(mocks.mockAiGenerate).not.toHaveBeenCalled();
   });
 
   it("getMessages throws when the caller does not own the session", async () => {
