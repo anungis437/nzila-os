@@ -93,4 +93,18 @@ describe('lib/knowledge-transfer/search/hybrid-search', () => {
     expect(results[0].keywordScore).toBe(1);
     expect(h.execute).not.toHaveBeenCalled();
   });
+  it('always filters keyword, vector and semantic-only reads to current consent', async () => {
+    const { readFileSync } = await import('node:fs');
+    const { resolve } = await import('node:path');
+    const source = readFileSync(resolve(__dirname, '../hybrid-search.ts'), 'utf8');
+    const keyword = source.slice(source.indexOf('async function keywordSearch'), source.indexOf('async function semanticSearch'));
+    const semantic = source.slice(source.indexOf('async function semanticSearch'), source.indexOf('export async function hybridKnowledgeSearch'));
+    const union = source.slice(source.indexOf('const semanticOnlyIds'), source.indexOf('for (const r of semanticRows)'));
+    expect(keyword).toContain('eq(exitInterviews.consentGranted, true)');
+    expect(semantic).toContain('ei.consent_granted = true');
+    expect(semantic).toContain('ei.organization_id = ${orgId}');
+    expect(union).toContain('eq(exitInterviews.consentGranted, true)');
+  });
+
+
 });

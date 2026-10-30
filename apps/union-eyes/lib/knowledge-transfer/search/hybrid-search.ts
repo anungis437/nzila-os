@@ -103,6 +103,7 @@ async function keywordSearch(
       and(
         eq(exitInterviews.organizationId, orgId),
         eq(exitInterviews.status, 'published'),
+        eq(exitInterviews.consentGranted, true),
         or(
           ilike(exitInterviews.title, pattern),
           ilike(exitInterviews.keyLessons, pattern),
@@ -153,9 +154,11 @@ async function semanticSearch(
       FROM knowledge_base kb
       INNER JOIN exit_interviews ei ON ei.id::text = kb.source_id
       WHERE kb.organization_id = ${orgId}
+        AND ei.organization_id = ${orgId}
         AND kb.source_type = 'exit_interview'
         AND kb.is_active = true
         AND ei.status = 'published'
+        AND ei.consent_granted = true
         AND ei.sensitivity_level = ANY(${allowedSensitivityLevels}::text[])
         AND kb.embedding IS NOT NULL
       ORDER BY kb.embedding <=> ${sql.raw(embeddingLiteral)}
@@ -218,6 +221,7 @@ export async function hybridKnowledgeSearch(
           and(
             eq(exitInterviews.organizationId, orgId),
             eq(exitInterviews.status, 'published'),
+            eq(exitInterviews.consentGranted, true),
             sql`${exitInterviews.id} = ANY(${semanticOnlyIds}::uuid[])`,
           ),
         );
