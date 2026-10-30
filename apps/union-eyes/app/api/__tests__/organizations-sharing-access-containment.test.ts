@@ -103,6 +103,34 @@ describe('organization sharing settings — policy containment', () => {
     expect(m.rls).toHaveBeenCalledWith({ organizationId: ORG_ID }, expect.any(Function));
   });
 
+  it('distinguishes safe unconfigured defaults from persisted policy', async () => {
+    const { GET } = await import('../organizations/[id]/sharing-settings/route');
+    const unconfigured = await GET(new NextRequest(url + '/sharing-settings'), params);
+    expect((await unconfigured.json())).toMatchObject({
+      storageStatus: 'UNCONFIGURED', governanceStatus: 'HOLD_UNRATIFIED',
+    });
+    m.rows = [{ id: 'sharing-record-1', organizationId: ORG_ID }];
+    const configured = await GET(new NextRequest(url + '/sharing-settings'), params);
+    expect((await configured.json())).toMatchObject({
+      storageStatus: 'PERSISTED', governanceStatus: 'HOLD_UNRATIFIED',
+    });
+  });
+
+  it('exposes no SQL fault details when the sharing storage shape or runtime grant is unqualified', async () => {
+    const { GET, PATCH } = await import('../organizations/[id]/sharing-settings/route');
+    m.rls.mockRejectedValueOnce(Object.assign(new Error('missing private column name'), { code: '42703' }));
+    const read = await GET(new NextRequest(url + '/sharing-settings'), params);
+    expect(read.status).toBe(503);
+    expect((await read.json()).code).toBe('SHARING_POLICY_STORAGE_UNQUALIFIED');
+    m.rls.mockRejectedValueOnce(Object.assign(new Error('permission denied'), { code: '42501' }));
+    const write = await PATCH(new NextRequest(url + '/sharing-settings', {
+      method: 'PATCH', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ allowCongressSharing: false }),
+    }), params);
+    expect(write.status).toBe(503);
+    expect(m.audit).not.toHaveBeenCalled();
+  });
+
   it('rejects unratified sharing enablement, identity fields and arbitrary organization PATCH', async () => {
     const { PATCH } = await import('../organizations/[id]/sharing-settings/route');
     for (const payload of [

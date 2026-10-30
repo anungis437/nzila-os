@@ -47,6 +47,19 @@ async function permittedOrganization(params: Params): Promise<{ id: string; user
   return { id, userId };
 }
 
+/** A missing column, relation or RLS grant is a deployment qualification failure. */
+function storageNotQualified(error: unknown): boolean {
+  const cause = error as { code?: string; cause?: { code?: string } } | null;
+  return ['42703', '42P01', '42501'].includes(cause?.code ?? cause?.cause?.code ?? '');
+}
+
+function unavailableResponse() {
+  return NextResponse.json({
+    error: 'Organization sharing policy storage has not completed qualification',
+    code: 'SHARING_POLICY_STORAGE_UNQUALIFIED',
+  }, { status: 503 });
+}
+
 const safeDefaults = {
   allowFederationSharing: false,
   allowSectorSharing: false,
@@ -64,11 +77,20 @@ const safeDefaults = {
 export async function GET(_req: NextRequest, params: Params) {
   const access = await permittedOrganization(params);
   if (access instanceof Response) return access;
-  const [row] = await withRLSContext({ organizationId: access.id }, async tx =>
+  const rows = await withRLSContext({ organizationId: access.id }, async tx =>
     tx.select().from(organizationSharingSettings)
       .where(eq(organizationSharingSettings.organizationId, access.id)).limit(1),
-  );
-  return NextResponse.json({ data: row ?? { organizationId: access.id, ...safeDefaults } });
+  ).catch(error => {
+    if (storageNotQualified(error)) return null;
+    throw error;
+  });
+  if (!rows) return unavailableResponse();
+  const row = rows[0];
+  return NextResponse.json({
+    data: row ?? { organizationId: access.id, ...safeDefaults },
+    storageStatus: row ? 'PERSISTED' : 'UNCONFIGURED',
+    governanceStatus: 'HOLD_UNRATIFIED',
+  });
 }
 
 export async function PATCH(req: NextRequest, params: Params) {
@@ -129,6 +151,11 @@ export async function PATCH(req: NextRequest, params: Params) {
       details: { changedKeys: Object.keys(patch) },
     });
     return { data: updated } as const;
+  }).catch(error => {
+    if (storageNotQualified(error)) {
+      return { error: 'Organization sharing policy storage has not completed qualification', status: 503 } as const;
+    }
+    throw error;
   });
   if ('error' in result) {
     return NextResponse.json({ error: result.error }, { status: result.status });
