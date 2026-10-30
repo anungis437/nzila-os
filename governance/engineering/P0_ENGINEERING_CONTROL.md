@@ -185,3 +185,13 @@ records the missing evidence as unknown and retains it as an output artifact;
 the independent production/readiness gates still require real supporting data.
 The Node negative tests run with both ops-pack paths so this distinction
 remains verifiable even when source APIs are unavailable.
+
+## Bounded API JSON during Zod 3-to-4 migration
+
+The Union Eyes withApi JSON boundary now counts actual streamed bytes (512 KiB)
+and rejects deeply nested and oversized JSON collections before invoking Zod 3.
+A dedicated 413 response and negative tests enforce this containment. Non-JSON
+multipart ingestion retains separate streaming limits. This is a mitigating
+control only: it does **not** remove the vulnerable Zod 3 runtime dependency or
+clear advisory GHSA-mrhx-c7xc-m3w5. P0 issue #1040 requires a genuine
+Zod 4 migration, refreshed lockfile and independent dependency audit PASS.
