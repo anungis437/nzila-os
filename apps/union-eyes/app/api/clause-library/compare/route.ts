@@ -18,18 +18,11 @@ import { and, eq, inArray, sql } from 'drizzle-orm';
 import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { canReadSharedClause } from '@/lib/clause-library/sharing-authority';
+import { commonKeywords } from '@/lib/clause-library/common-keywords';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: true, minRole: 'steward' },
-    openapi: { tags: ['Clause-library'], summary: 'Compare endpoint (GET stub)' },
-  },
-  async () => {
-    return { message: 'Use POST with clauseIds array to compare clauses' };
-  },
-);
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const POST = withApi(
   {
@@ -37,12 +30,15 @@ export const POST = withApi(
     openapi: { tags: ['Clause-library'], summary: 'Compare multiple clauses' },
   },
   async ({ request, userId, organizationId }) => {
-    const body = await request.json();
-    const { clauseIds } = body;
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    const body = await request.json().catch(() => null);
+    const clauseIds: unknown = body?.clauseIds;
 
-    if (!clauseIds || !Array.isArray(clauseIds) || clauseIds.length < 2) {
+    if (!Array.isArray(clauseIds) || clauseIds.length < 2) {
       throw ApiError.badRequest('At least 2 clause IDs are required');
+    }
+    if (!clauseIds.every((id) => typeof id === 'string' && UUID.test(id))) {
+      throw ApiError.badRequest('Every clause ID must be a valid id');
     }
 
     if (clauseIds.length > 10) {
@@ -138,7 +134,7 @@ export const POST = withApi(
             uniqueTypes: types.size,
             uniqueSectors: sectorSet.size,
           },
-          commonKeywords: [],
+          commonKeywords: commonKeywords(clauses.map((c) => c.clauseText)),
         },
       };
     });

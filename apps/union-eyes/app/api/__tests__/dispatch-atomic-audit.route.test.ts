@@ -17,6 +17,11 @@ vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomic
 vi.mock('@/lib/services/dispatch-engine', () => ({
   assignWorkersToDispatch: m.assignWorkersToDispatch,
   createDispatchRequest: m.createDispatchRequest,
+  DispatchAssignmentError: class DispatchAssignmentError extends Error {
+    constructor(readonly reason: string, message: string) {
+      super(message);
+    }
+  },
 }));
 
 const REQ = '11111111-1111-4111-8111-111111111111';

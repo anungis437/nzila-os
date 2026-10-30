@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 139,
- "partial": 18,
- "outstanding": 638,
- "accountedFor": 638,
+ "corrected": 153,
+ "partial": 21,
+ "outstanding": 624,
+ "accountedFor": 624,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -31,24 +31,21 @@
   {
    "family": "F02-PLACEHOLDER-FABRICATED-OR-NOT-IMPLEMENTED",
    "purpose": "Stubs, fabricated figures and false-success answers: return 501 or implement for real",
-   "defects": 25,
+   "defects": 11,
    "severity": {
-    "HIGH": 1,
-    "MEDIUM": 23,
-    "LOW": 1
+    "HIGH": 0,
+    "MEDIUM": 11,
+    "LOW": 0
    },
-   "namedRoutes": 2,
+   "namedRoutes": 1,
    "namedFiles": 1,
    "tranches": {
-    "0B.3": 2,
-    "0B.4": 2,
-    "0B.5": 1,
-    "0B.6": 5,
+    "0B.3": 1,
+    "0B.6": 1,
     "0B.7": 2,
-    "0B.8": 3,
-    "0B.9": 5,
-    "0B.11": 3,
-    "0B.12": 2
+    "0B.8": 1,
+    "0B.9": 3,
+    "0B.11": 3
    }
   },
   {
@@ -358,42 +355,11 @@
   "F02-PLACEHOLDER-FABRICATED-OR-NOT-IMPLEMENTED": [
    {
     "id": "DEF-0B3-EXTERNAL-INVOICES-WRITE-ADVERTISED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B3-SEND-INVOICE-NOT-SENT",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B4-CBA-EXPORT-SILENTLY-TRUNCATED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B4-CLAUSE-LIBRARY-COMPARE-GET-STUB-AND-EMPTY-KEYWORDS",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B5-COMMITTEE-INTELLIGENCE-PLACEHOLDER-RETURNED-AS-RESULT",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-CMP-FIREWALL-POLICY-NO-WRITER-OR-ENFORCER",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B6-CMP-DISPATCH-RULES-ENGINE-NEVER-APPLIED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-CMP-DASHBOARD-STATS-FAILURE-RETURNS-ZEROS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-CMP-EXPORT-CSV-AUTHENTICATION-ONLY-AND-EMPTY-200-OUTSIDE-PRODUCTION",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-SYS-CONTINUITY-ALIASES-ARE-THE-DOCUMENT-REPOSITORY-WITH-PLACEHOLDER-GUARD",
     "severity": "MEDIUM",
     "partial": true
    },
@@ -408,16 +374,9 @@
     "partial": true
    },
    {
-    "id": "DEF-0B8-ICRA-PAID-PDF-REPORT-GATE-REQUIRES-STATUS-COMPLETED-NO-WRITER",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B8-ICRA-CHECKOUT-SELLS-A-TIER-WITHOUT-REQUIRING-A-SUBMITTED-ASSESSMENT",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B8-ICRA-INTEGRATION-CREDENTIALS-NEVER-STORED-OR-RESOLVED-YET-REPORTED-STORED",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B9-ML-SLA-CASE-ID-IS-NEVER-VERIFIED-AND-NOT-STORED-WITH-THE-PREDICTION",
@@ -434,16 +393,9 @@
     "partial": true
    },
    {
-    "id": "DEF-0B9-ASM-FEDERATION-MATCH-IGNORES-THE-SECTOR-AND-REPORTS-SIMILAR-SIZE-FOR-ANY-RATIO",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B9-ASM-SMART-DEFAULTS-ARE-A-LITERAL-TABLE-OF-FEATURES-AND-INTEGRATIONS-NO-OTHER-CODE-DEFINES-OR-READS",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B11-PRP-RECONCILIATION-RUNS-ARE-NOT-REPEATABLE-AND-THE-BILLING-PERIOD-IS-NOT-BOUND-TO-THE-ORGANIZATION",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B11-SOC-INTERNAL-SIGNATURE-PROVIDER-IS-A-STUB-THAT-SENDS-NOTHING-AND-THE-REQUEST-IS-RECORDED-AS-SENT",
@@ -454,14 +406,6 @@
     "id": "DEF-0B11-SOC-ANALYTICS-AND-ENGAGEMENT-FIGURES-HAVE-NO-WRITER-SO-EVERY-METRIC-IS-ZERO-OR-EMPTY",
     "severity": "MEDIUM",
     "partial": true
-   },
-   {
-    "id": "DEF-0B12-CRUD-TESTIMONIAL-APPROVAL-COMPONENT-SENDS-FIELDS-THE-TABLE-DOES-NOT-HAVE",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-PLT-VOCABULARY-SERVES-UNSOURCED-SERVICE-LEVEL-HOURS-ROLE-FLAGS-AND-TRANSITIONS-AS-INSTITUTIONAL-REFERENCE-DATA",
-    "severity": "MEDIUM"
    }
   ],
   "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE": [

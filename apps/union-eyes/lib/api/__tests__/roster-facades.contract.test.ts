@@ -41,7 +41,7 @@ describe('roster facade routes', () => {
       'organizing/sequences/[id]/enroll', 'organizing/support-percentage', 'organizing/workplace-mapping', 'continuity/inheritance',
       'onboarding/readiness', 'onboarding/transfers', 'reports/[id]/share', 'upload', 'enterprise/integrations', 'events/[id]/occurrences',
       'ml/monitoring/drift', 'ml/monitoring/usage', 'ml/predictions/claim-outcome', 'ml/predictions/timeline', 'ml/predictions/workload-forecast',
-      'ml/recommendations', 'ml/predictions/churn-risk', 'ml/monitoring/alerts',
+      'ml/recommendations', 'ml/predictions/churn-risk', 'ml/monitoring/alerts', 'billing/send-invoice', 'compliance/data-classification-policy', 'onboarding/smart-defaults', 'continuity/archives', 'continuity/docs',
     ];
     for (const route of converted) {
       const file = files.find((f) => f.route === route);
@@ -50,5 +50,16 @@ describe('roster facade routes', () => {
       expect(file!.text).toMatch(/auth: \{ required: true, minRole: '[a-z_]+' \}/);
       expect(file!.text).toMatch(/export const (GET|POST|PATCH|DELETE) = handler;/);
     }
+  });
+
+  // DEF-0B3-EXTERNAL-INVOICES-WRITE-ADVERTISED: an external invoice is a copy of a provider record; the collection keeps its mandate-checked read and no longer writes through the factory.
+  it('the external invoice collection keeps its read and answers 501 to a write', () => {
+    const file = files.find((f) => f.route === 'billing/invoices');
+    expect(file, 'billing/invoices exists').toBeTruthy();
+    expect(file!.text).toContain('ApiError.notImplemented');
+    expect(file!.text).not.toContain('crudRoutes');
+    expect(file!.text).toContain('requireLiveFinancialMandate');
+    expect(file!.text).toMatch(/export const POST = withApi/);
+    expect(file!.text).toMatch(/export const GET = withApi/);
   });
 });

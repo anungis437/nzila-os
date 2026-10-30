@@ -2,7 +2,6 @@
  * External invoices are financial records; a generic member-facing CRUD
  * collection is not an appropriate read surface for customer/balance data.
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
 import { withApi, ApiError } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
@@ -13,18 +12,16 @@ import { desc } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-// Legacy creation is restricted to financial officers. Provider ingestion
-// requires separate integration authorization and remains a release concern.
-const { POST } = crudRoutes({
-  table: externalInvoices,
-  pk: 'id',
-  tags: ['Finance'],
-  orgScoped: true,
-  readRole: 'secretary_treasurer',
-  writeRole: 'secretary_treasurer',
+// An external invoice is a copy of a record held by the billing provider. Nothing here ingests one, and a hand-written row would be a
+// financial record with no source, so a write answers 501 until provider ingestion exists.
+export const POST = withApi({
+  auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
   entitlement: 'financial_intelligence_suite',
+  requireOrg: true,
+  openapi: { tags: ['Finance'], summary: 'Create an external invoice (not implemented)' },
+}, async () => {
+  throw ApiError.notImplemented('External invoices are ingested from the billing provider; creating one by hand is not supported.');
 });
-export { POST };
 
 export const GET = withApi({
   auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },

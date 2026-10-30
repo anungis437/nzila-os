@@ -31,6 +31,7 @@ const h = vi.hoisted(() => {
     insert: () => makeChain(),
     select: () => makeChain(),
     update: () => makeChain(),
+    execute: async () => [],
   };
   const db = {
     select: () => makeChain(),
@@ -96,6 +97,8 @@ describe('platform-economics/reconciliation-service', () => {
       const fee1 = { id: 'fee1', settlementBatchId: 'sb1', feeAmountCad: '1.00' };
       const fee2 = { id: 'fee2', settlementBatchId: null, feeAmountCad: '1.00' };
 
+      pushSel([{ id: 'bp1' }]); // 0a the billing period is the organization's
+      pushSel([]); // 0b no earlier run for the period
       pushSel([{ id: 'run-1' }]); // 1 insert run returning
       pushSel([inv1, inv2]); // 2 invoices
       pushSel([pmt1, pmt2, pmt3]); // 3 payments
@@ -143,6 +146,28 @@ describe('platform-economics/reconciliation-service', () => {
       expect(result.varianceCad).toBe('500.00');
       // base completed audit + critical variance audit
       expect(h.auditLog).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  // DEF-0B11-PRP-RECONCILIATION-RUNS-ARE-NOT-REPEATABLE-AND-THE-BILLING-PERIOD-IS-NOT-BOUND-TO-THE-ORGANIZATION
+  describe('runReconciliation guards', () => {
+    const period = { periodStart: new Date('2025-01-01'), periodEnd: new Date('2025-01-31') };
+
+    it('refuses a billing period that is not the organization\u2019s own, before creating a run', async () => {
+      pushSel([]); // the billing period is not found for this organization
+      await expect(runReconciliation({ organizationId: 'o1', billingPeriodId: 'someone-elses', ...period })).rejects.toMatchObject({ code: 'NOT_FOUND' });
+      expect(h.queue).toEqual([]);
+      expect(h.auditLog).not.toHaveBeenCalled();
+    });
+
+    it('refuses to reconcile the same organization and period twice, naming the earlier run', async () => {
+      pushSel([{ id: 'run-0' }]); // an earlier run exists
+      await expect(runReconciliation({ organizationId: 'o1', ...period })).rejects.toMatchObject({ code: 'CONFLICT', details: { runId: 'run-0' } });
+      expect(h.auditLog).not.toHaveBeenCalled();
+    });
+
+    it('refuses a period that ends before it starts', async () => {
+      await expect(runReconciliation({ organizationId: 'o1', periodStart: period.periodEnd, periodEnd: period.periodStart })).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
     });
   });
 

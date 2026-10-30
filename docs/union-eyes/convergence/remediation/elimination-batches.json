@@ -839,12 +839,11 @@
         },
         {
           "prefix": "DEF-0B6-SYS-CONTINUITY-ALIASES-ARE-THE-DOCUMENT-REPOSITORY-WITH-PLACEHOLDER-GUARD",
-          "status": "PARTIAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
           "files": [
             "apps/union-eyes/app/api/continuity/inheritance/route.ts"
           ],
-          "explanation": "The inheritance alias is removed (501). The archives and docs aliases still wrap the document repository and are not yet changed.",
-          "remaining": "continuity/archives and continuity/docs remain placeholder-guard wrappers over the document repository."
+          "explanation": "The inheritance, archives and docs aliases (the pending-profile table and the document repository behind a guard that always returned true) all answer 501; the document repository itself is reached at /api/documents/repository."
         },
         {
           "prefix": "DEF-0B9-ORG-CURRENT-CONTEXT-ROUTE-RETURNS-PLACEHOLDER-ORGANIZATION",
@@ -1161,6 +1160,194 @@
             "apps/union-eyes/app/api/__tests__/settings-organization.route.test.ts"
           ],
           "explanation": "name (1-200), shortName (at most 50) and provinceTerritory (at most 100) are validated before anything is read; a missing body or organization is a 400, not a server error. The settings merge reads the row under FOR UPDATE and writes in the same transaction, and a missing row is a 404 with no audit."
+        }
+      ]
+    },
+    {
+      "id": "B12-F02-FINANCE-CBA-COMPLIANCE-ICRA-ONBOARDING",
+      "family": "F02: invoices, CBA export and comparison, committee intelligence, dispatch, ICRA checkout, onboarding, reconciliation, testimonials and vocabulary state only what they do",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B3-EXTERNAL-INVOICES-WRITE-ADVERTISED",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/billing/invoices/route.ts",
+            "apps/union-eyes/lib/api/crud-governance.ts",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+            "apps/union-eyes/db/__tests__/rls-storage-authority-round39-contained-cohort.test.ts"
+          ],
+          "explanation": "An external invoice is a copy of a provider record, and nothing ingests one. The collection keeps its mandate-checked read; POST answers 501 instead of writing a hand-made financial row through the generic factory, and the table's governance entry was removed with its last binding. The round-39 cohort ratchet that required a crud-factory route for the table was rewritten to require the mandate-checked read and the absence of the factory.",
+          "remaining": "The storage-authority manifest still lists INSERT for the tenant runtime role on external_invoices, which nothing in the tenant runtime now uses; reducing it needs a grant migration and is not done."
+        },
+        {
+          "prefix": "DEF-0B3-SEND-INVOICE-NOT-SENT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+            "apps/union-eyes/app/api/billing/send-invoice/route.ts",
+            "apps/union-eyes/app/api/__tests__/billing-send-invoice.route.test.ts"
+          ],
+          "explanation": "The route generated a platform invoice and delivered nothing. It answers 501 behind the steward floor (generation remains POST /api/finance/invoices and the billing batch). Its test, which asserted the generation, was replaced by an assertion of the 501 and of the absence of the generator."
+        },
+        {
+          "prefix": "DEF-0B4-CBA-EXPORT-SILENTLY-TRUNCATED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/cba-intelligence/agreements/export/route.ts",
+            "apps/union-eyes/app/api/__tests__/cba-agreements-export.route.test.ts"
+          ],
+          "explanation": "The export asked for 10000 rows but the list serves at most 100 a page, so the file silently held the first page. It reads every page and refuses (400) a result set over 10000, naming the count, instead of cutting it."
+        },
+        {
+          "prefix": "DEF-0B4-CLAUSE-LIBRARY-COMPARE-GET-STUB-AND-EMPTY-KEYWORDS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/clause-library/compare/route.ts",
+            "apps/union-eyes/lib/clause-library/common-keywords.ts",
+            "apps/union-eyes/lib/clause-library/__tests__/common-keywords.test.ts",
+            "apps/union-eyes/app/api/__tests__/clause-library-compare.route.test.ts"
+          ],
+          "explanation": "The GET stub (a 200 with a usage hint) is removed (405). commonKeywords is now computed from the compared clause texts (words of four letters or more, not stop words, present in every clause, ranked by frequency; English and French). Clause ids are validated as ids and a malformed body is a 400. The route test fixtures use real ids now."
+        },
+        {
+          "prefix": "DEF-0B5-COMMITTEE-INTELLIGENCE-PLACEHOLDER-RETURNED-AS-RESULT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/committees/[id]/intelligence/route.ts"
+          ],
+          "explanation": "POST stored a snapshot whose summary said synthesis was pending and whose themes, positions and recommendations were empty. It checks authority and then answers 501; nothing is stored. The snapshot list is unchanged."
+        },
+        {
+          "prefix": "DEF-0B6-CMP-FIREWALL-POLICY-NO-WRITER-OR-ENFORCER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+            "apps/union-eyes/app/api/compliance/data-classification-policy/route.ts",
+            "apps/union-eyes/app/api/privacy/__tests__/data-classification-policy-writerole.test.ts",
+            "docs/union-eyes/convergence/register/ue-schema-mutation-batches.json"
+          ],
+          "explanation": "The route served a table no route writes and nothing enforces under the name of an employer data firewall. It answers 501 and the table's governance entry was removed. The writeRole test for the route was rewritten to assert the 501 and the absence of the table binding, and the committed schema mutation program was regenerated because the table is now unreachable from any route."
+        },
+        {
+          "prefix": "DEF-0B6-CMP-DISPATCH-RULES-ENGINE-NEVER-APPLIED",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/services/dispatch-engine.ts",
+            "apps/union-eyes/app/api/dispatch/assign/route.ts",
+            "apps/union-eyes/app/api/__tests__/dispatch-assignment.pglite.test.ts",
+            "apps/union-eyes/lib/services/__tests__/dispatch-engine.test.ts"
+          ],
+          "explanation": "An assignment accepted any member ids for a request in any state, in any number, with no check that they were members, and counted the request filled from the ids of one call. It now requires an open or partly filled request of the caller's organization (row locked), active members of that organization, no worker already offered or placed, and no more offers than workers requested, with a distinct status for each refusal. Proven on real SQL. Three mock-chain tests of assignWorkersToDispatch were removed because the mocks cannot express these queries; the pglite suite replaces them.",
+          "remaining": "rankCandidates still scores a candidate list nothing supplies (no source of member skills or availability), and the assignment is an officer's explicit selection, not engine-ranked."
+        },
+        {
+          "prefix": "DEF-0B6-CMP-DASHBOARD-STATS-FAILURE-RETURNS-ZEROS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/dashboard/stats/route.ts",
+            "apps/union-eyes/app/api/__tests__/dashboard-stats.route.test.ts"
+          ],
+          "explanation": "A failed query is an error and the member count is null for an ordinary member, not zero; upstream's change, covered by an existing test."
+        },
+        {
+          "prefix": "DEF-0B6-CMP-EXPORT-CSV-AUTHENTICATION-ONLY-AND-EMPTY-200-OUTSIDE-PRODUCTION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/dashboard/export-csv/route.ts",
+            "apps/union-eyes/app/api/__tests__/dashboard-export-csv-containment.route.test.ts"
+          ],
+          "explanation": "The export answers 501 in every environment; upstream's change, covered by an existing test."
+        },
+        {
+          "prefix": "DEF-0B8-ICRA-PAID-PDF-REPORT-GATE-REQUIRES-STATUS-COMPLETED-NO-WRITER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/icra/report/[assessmentId]/route.ts",
+            "apps/union-eyes/app/api/__tests__/icra-report-assessmentId.route.test.ts"
+          ],
+          "explanation": "The report gate accepts submitted as well as completed, so a paid report is no longer refused for a status nothing writes; upstream's change, covered by an existing test."
+        },
+        {
+          "prefix": "DEF-0B8-ICRA-CHECKOUT-SELLS-A-TIER-WITHOUT-REQUIRING-A-SUBMITTED-ASSESSMENT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/icra/checkout/route.ts",
+            "apps/union-eyes/app/api/__tests__/icra-checkout.route.test.ts"
+          ],
+          "explanation": "Checkout now reads the assessment status and answers 409 with no Stripe session unless the assessment is submitted or completed, so a buyer is never charged for a report the report route would refuse."
+        },
+        {
+          "prefix": "DEF-0B8-ICRA-INTEGRATION-CREDENTIALS-NEVER-STORED-OR-RESOLVED-YET-REPORTED-STORED",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/integrations/control-plane.ts",
+            "apps/union-eyes/lib/integrations/__tests__/control-plane-audit.test.ts"
+          ],
+          "explanation": "The public configuration no longer reports credentialsStored: true for every integration: it reports false, with credentialsResolvable false, because only a reference is held.",
+          "remaining": "A credentialRef is still accepted and stored and nothing resolves it to a secret; a vault-backed resolution path does not exist."
+        },
+        {
+          "prefix": "DEF-0B9-MOB-MEETING-ROOM-BOOKING-RULES-ARE-STORED-BUT-NO-ROUTE-OR-SERVICE-ENFORCES-A-BOOKING",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts",
+            "apps/union-eyes/lib/services/room-booking-rules.ts"
+          ],
+          "explanation": "The bookings route answers 501 and reads and writes nothing; the booking rules are implemented and tested in room-booking-rules.ts.",
+          "remaining": "The physical room_bookings table lacks the columns the application declares and has no runtime grant; booking needs that migration before the rules can be wired in."
+        },
+        {
+          "prefix": "DEF-0B9-ASM-FEDERATION-MATCH-IGNORES-THE-SECTOR-AND-REPORTS-SIMILAR-SIZE-FOR-ANY-RATIO",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/utils/smart-onboarding.ts",
+            "apps/union-eyes/lib/__tests__/smart-onboarding.test.ts"
+          ],
+          "explanation": "The sector now scores (25, case-insensitive match against the federation's sectors) and \"Similar size\" is stated only when the smaller count is at least half the larger. The reason text \"Similar size category\", which was given for any ratio, is gone and its test was changed to the new text."
+        },
+        {
+          "prefix": "DEF-0B9-ASM-SMART-DEFAULTS-ARE-A-LITERAL-TABLE-OF-FEATURES-AND-INTEGRATIONS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+            "apps/union-eyes/app/api/onboarding/smart-defaults/route.ts",
+            "apps/union-eyes/app/api/__tests__/onboarding-smart-defaults.route.test.ts"
+          ],
+          "explanation": "The route served a literal table of features, integrations and limits by organization type that nothing defines or applies. It answers 501; its test of the table was replaced by an assertion of the 501."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-RECONCILIATION-RUNS-ARE-NOT-REPEATABLE-AND-THE-BILLING-PERIOD-IS-NOT-BOUND-TO-THE-ORGANIZATION",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/services/platform-economics/reconciliation-service.ts",
+            "apps/union-eyes/services/platform-economics/__tests__/reconciliation-service.test.ts"
+          ],
+          "explanation": "For an organization run, the period is locked, a billing period named in the request must be the organization's own (404), and a second run for the same period is refused (409, naming the earlier run) instead of adding a second set of exceptions. A period that ends before it starts is refused. The existing mocked test of a run gained the two new checks in its queue; three tests were added.",
+          "remaining": "The service still accepts a run with no organization, which reconciles every organization together; no route uses that mode, but it is not removed."
+        },
+        {
+          "prefix": "DEF-0B12-CRUD-TESTIMONIAL-APPROVAL-COMPONENT-SENDS-FIELDS-THE-TABLE-DOES-NOT-HAVE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/components/admin/testimonial-approval-actions.tsx",
+            "apps/union-eyes/app/api/testimonials/[id]/route.ts",
+            "apps/union-eyes/app/api/__tests__/testimonials-approval.route.test.ts"
+          ],
+          "explanation": "The component sent status, reviewedAt, reviewedBy, rejectionReason and isFeatured; the table has approvedAt and featured only. It now sends those, the route stamps the approval with the server clock once, and the reject flow is removed because the table cannot record a rejection (the component has no importer)."
+        },
+        {
+          "prefix": "DEF-0B12-PLT-VOCABULARY-SERVES-UNSOURCED-SERVICE-LEVEL-HOURS-ROLE-FLAGS-AND-TRANSITIONS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/vocabulary/public-vocabulary.ts",
+            "apps/union-eyes/lib/vocabulary/__tests__/public-vocabulary.test.ts",
+            "apps/union-eyes/app/api/vocabulary/route.ts"
+          ],
+          "explanation": "The six vocabulary routes serve identifiers, labels, descriptions and categories only. Service-level hours, escalation, legal and settlement flags, role permissions, default priority and severity, and status transitions are no longer served as institutional reference data; the case state machine still reads them from the package server-side."
         }
       ]
     }

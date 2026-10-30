@@ -111,7 +111,10 @@ function toPublicConfig(row: IntegrationConfigRow) {
     lastSyncAt: row.lastSyncAt,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
-    credentialsStored: true,
+    // No secret is stored or resolved: the credentials column holds only a reference, and nothing turns it into a credential. The
+    // field used to say true for every configuration, which a client read as an integration that could authenticate.
+    credentialsStored: false,
+    credentialsResolvable: false,
   };
 }
 

@@ -48,6 +48,11 @@ const FACADES = {
   'ml/recommendations': 'the generic CRUD factory over ml_predictions (a row list under a recommendations name; nothing is recommended)',
   'ml/predictions/churn-risk': 'a score from a randomly initialised network pre-trained on generated examples and presented as a trained churn model',
   'ml/monitoring/alerts': 'a query over columns and a table that do not exist, plus a fixed drift alert (PSI 0.28) that was stated whenever an organization had enough claims',
+  'billing/send-invoice': 'a route named for sending an invoice that generated one and delivered nothing (generation is POST /api/finance/invoices; delivery is not implemented)',
+  'compliance/data-classification-policy': 'the generic CRUD factory over data_classification_policy, a table no route writes and nothing enforces (no employer data firewall exists)',
+  'onboarding/smart-defaults': 'a literal table of features, integrations and limits keyed by organization type, presented as intelligent defaults that no other code defines or reads',
+  'continuity/archives': 'a wrapper over the document repository handlers behind a guard that always passes (no continuity archive exists)',
+  'continuity/docs': 'a wrapper over the document repository handlers behind a guard that always passes (no continuity document exists)',
   'events/[id]/occurrences': 'a byte-for-byte copy of the event item route, so its path value was the event, not an occurrence',
 }
 

@@ -1,6 +1,9 @@
-import { withApi, z } from "@/lib/api/framework";
+import { withApi, ApiError, z } from "@/lib/api/framework";
 import { listAgreements } from "@/lib/services/cba-intelligence/extraction-service";
 import { NextResponse } from "next/server";
+
+const LIST_PAGE_SIZE = 100;
+const MAX_EXPORT_ROWS = 10000;
 
 // ---------------------------------------------------------------------------
 // GET /api/cba-intelligence/agreements/export — CSV export
@@ -51,7 +54,21 @@ export const GET = withApi(
     },
   },
   async ({ query }) => {
-    const { items: rows } = await listAgreements(query, { page: 1, limit: 10000 });
+    // listAgreements serves at most 100 rows a page whatever limit is asked, so the export reads every page. When the
+    // matching set is larger than the export bound the request is refused: a file that silently stops at the first page is not
+    // the export that was asked for.
+    const first = await listAgreements(query, { page: 1, limit: LIST_PAGE_SIZE });
+    if (first.total > MAX_EXPORT_ROWS) {
+      throw ApiError.badRequest(
+        `The export would contain ${first.total} agreements, over the limit of ${MAX_EXPORT_ROWS}. Narrow the filters and try again.`,
+      );
+    }
+    const rows = [...first.items];
+    for (let page = 2; rows.length < first.total; page += 1) {
+      const next = await listAgreements(query, { page, limit: LIST_PAGE_SIZE });
+      if (next.items.length === 0) break;
+      rows.push(...next.items);
+    }
 
     const header = CSV_COLUMNS.join(",");
     const lines = rows.map((row) =>

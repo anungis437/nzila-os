@@ -105,6 +105,16 @@ describe('integration control plane — audit', () => {
     expect(JSON.stringify(m.persistAtomicAudit.mock.calls)).not.toContain('vault/secret-1');
   });
 
+  it('never reports credentials as stored or resolvable: only a reference is held and nothing resolves it', async () => {
+    const config = await configureIntegrationForOrg(
+      'org_1',
+      { provider: IntegrationProvider.BAMBOOHR, type: IntegrationType.HRIS, settings: { region: 'ca' }, credentialRef: 'vault://x' },
+      'u1',
+    );
+    expect(config.credentialsStored).toBe(false);
+    expect(config.credentialsResolvable).toBe(false);
+  });
+
   const existing = { ...config, enabled: true, settings: { region: 'ca' }, webhookUrl: 'https://hooks.example/x', credentials: { credentialRef: 'vault/old' } };
 
   it('changing only the credential reference leaves enabled, settings and webhook URL as they were', async () => {

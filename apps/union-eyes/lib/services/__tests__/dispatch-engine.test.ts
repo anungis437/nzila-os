@@ -49,7 +49,9 @@ vi.mock("@/db/schema/domains/dispatch/dispatch", () => ({
     priority: "priority",
   },
 }));
+vi.mock("@/db/schema-organizations", () => ({ organizationMembers: { id: "id", organizationId: "organizationId", status: "status" } }));
 vi.mock("drizzle-orm", () => ({
+  inArray: vi.fn((c, v) => ({ _type: "inArray", c, v })),
   eq: vi.fn((_c, v) => ({ _type: "eq", v })),
   and: vi.fn((...a: any[]) => ({ _type: "and", a })),
   asc: vi.fn((c) => ({ _type: "asc", c })),
@@ -62,7 +64,6 @@ import {
   listDispatchQueue,
   loadDispatchRules,
   rankCandidates,
-  assignWorkersToDispatch,
   type MemberCandidate,
 } from "../dispatch-engine";
 
@@ -288,58 +289,7 @@ describe("dispatch-engine", () => {
   });
 
   // ── assignWorkersToDispatch ──────────────────────────────────────────────
-  describe("assignWorkersToDispatch", () => {
-    it("inserts assignments and updates request status", async () => {
-      const assignments = [
-        { requestId: "r1", memberId: "m1", status: "offered" },
-        { requestId: "r1", memberId: "m2", status: "offered" },
-      ];
-      mocks.mockReturning.mockResolvedValueOnce(assignments);
-
-      // select for request ownership check
-      const requestWhere = vi.fn().mockResolvedValue([
-        { id: "r1", requestedWorkers: 2 },
-      ]);
-      const requestFrom = vi.fn().mockReturnValue({ where: requestWhere });
-      mocks.mockDb.select.mockReturnValue({ from: requestFrom });
-
-      const setWhere = vi.fn().mockResolvedValue(undefined);
-      const setFn = vi.fn().mockReturnValue({ where: setWhere });
-      mocks.mockDb.update.mockReturnValue({ set: setFn });
-
-      const result = await assignWorkersToDispatch("org-1", "r1", ["m1", "m2"]);
-      expect(result).toEqual(assignments);
-    });
-
-    it("sets partially_filled when fewer workers than requested", async () => {
-      mocks.mockReturning.mockResolvedValueOnce([{ requestId: "r1", memberId: "m1" }]);
-      const requestWhere = vi.fn().mockResolvedValue([
-        { id: "r1", requestedWorkers: 5 },
-      ]);
-      const requestFrom = vi.fn().mockReturnValue({ where: requestWhere });
-      mocks.mockDb.select.mockReturnValue({ from: requestFrom });
-
-      const setWhere = vi.fn().mockResolvedValue(undefined);
-      const setFn = vi.fn().mockReturnValue({ where: setWhere });
-      mocks.mockDb.update.mockReturnValue({ set: setFn });
-
-      await assignWorkersToDispatch("org-1", "r1", ["m1"]);
-      expect(setFn).toHaveBeenCalledWith(expect.objectContaining({ status: "partially_filled" }));
-    });
-
-    // ROUND 50 REGRESSION: assignWorkersToDispatch() previously took no
-    // orgId and performed no ownership check at all, letting one
-    // organization inject assignment rows into another organization's
-    // dispatch request (cross-tenant IDOR).
-    it("throws and never inserts when the request does not belong to the caller organization", async () => {
-      const requestWhere = vi.fn().mockResolvedValue([]);
-      const requestFrom = vi.fn().mockReturnValue({ where: requestWhere });
-      mocks.mockDb.select.mockReturnValue({ from: requestFrom });
-
-      await expect(
-        assignWorkersToDispatch("org-1", "other-orgs-request", ["m1"]),
-      ).rejects.toThrow("Dispatch request not found.");
-      expect(mocks.mockInsert).not.toHaveBeenCalled();
-    });
-  });
+  // The assignment (request ownership and state, active membership, duplicates, capacity, the row lock and the filled status) is proven
+  // against real SQL in app/api/__tests__/dispatch-assignment.pglite.test.ts. The three tests that stood here asserted the same
+  // behaviour through chained mocks that cannot express those queries, and were replaced by it.
 });

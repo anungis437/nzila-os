@@ -1317,7 +1317,7 @@
         "COLUMNS_MISSING",
         "REQUIRED_UNDECLARED"
       ],
-      "reachable": true,
+      "reachable": false,
       "djangoDefined": true,
       "blockers": [
         "required-undeclared:allow_greivance_participation"

@@ -9,7 +9,7 @@ import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
 import { withRLSContext } from "@/lib/db/with-rls-context";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
-import { assignWorkersToDispatch } from "@/lib/services/dispatch-engine";
+import { assignWorkersToDispatch, DispatchAssignmentError } from "@/lib/services/dispatch-engine";
 import {
   ErrorCode,
   standardErrorResponse,
@@ -57,8 +57,10 @@ export const POST = withOrganizationAuth(async (request, context) => {
 
     return standardSuccessResponse(assignments);
   } catch (error) {
-    if (error instanceof Error && error.message === "Dispatch request not found.") {
-      return standardErrorResponse(ErrorCode.NOT_FOUND, "Dispatch request not found");
+    if (error instanceof DispatchAssignmentError) {
+      if (error.reason === "not_found") return standardErrorResponse(ErrorCode.NOT_FOUND, "Dispatch request not found");
+      if (error.reason === "not_members") return standardErrorResponse(ErrorCode.VALIDATION_ERROR, error.message);
+      return standardErrorResponse(ErrorCode.CONFLICT, error.message);
     }
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Failed to assign dispatch workers");
   }
