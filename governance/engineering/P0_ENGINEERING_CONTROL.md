@@ -270,3 +270,14 @@ This artifact is a **GitHub-sourced audit snapshot**, not a cryptographically
 signed independent authority ledger. Its existence cannot override environment
 protection, repository rulesets, or the runtime release-attestation prerequisites
 in #1036–#1038. Production promotion remains HOLD.
+
+## Protected-branch post-deployment housekeeping
+
+The production housekeeping job no longer requests repository write access or
+runs a direct `git push origin HEAD:main || true`. Its generated changelog and
+dashboard are retained as a run-scoped GitHub Actions artifact instead.
+Publishing them into the protected repository requires a separately reviewed
+pull request. The P0 static guard rejects regression to direct pushes or
+unretained post-deploy output. This prevents the workflow from silently
+attempting a branch-protection bypass; it does **not** resolve the repository
+administrator's outstanding code-owner ruleset work (#1036).
