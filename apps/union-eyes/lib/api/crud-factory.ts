@@ -240,6 +240,8 @@ export function enforceCreateSecurityInvariants(
 const FACTORY_MANAGED_FIELDS = new Set([
   'organizationId', 'createdBy', 'updatedBy', 'deletedBy',
   'createdAt', 'updatedAt', 'deletedAt', 'archivedAt',
+  'verifiedAt', 'verifiedBy', 'approvedAt', 'approvedBy',
+  'submittedAt', 'reviewedAt', 'reviewedBy', 'publishedAt', 'publishedBy',
 ]);
 
 export function assertGenericWritePayload(
