@@ -26,6 +26,13 @@ export const PRIORITY_TO_HAZARD_LEVEL: Record<string, string> = {
   critical: 'critical',
 };
 
+const VALID_HAZARD_CATEGORIES = new Set([
+  'biological', 'chemical', 'ergonomic', 'physical', 'psychosocial',
+  'safety', 'environmental', 'electrical', 'fire', 'confined_space',
+  'working_at_heights', 'machinery', 'other',
+]);
+const VALID_HAZARD_LEVELS = new Set(['low', 'moderate', 'high', 'critical', 'extreme']);
+
 export function generateReportNumber(): string {
   const year = new Date().getFullYear();
   return `HAZ-${year}-${crypto.randomUUID()}`;
@@ -74,6 +81,15 @@ export function buildHazardCreateValues(values: Record<string, unknown>): Record
   const hazardType = typeof raw.hazardType === 'string' ? raw.hazardType : undefined;
   const priority = typeof raw.priority === 'string' ? raw.priority : undefined;
 
+  const category = raw.hazardCategory ?? (hazardType && HAZARD_TYPE_TO_CATEGORY[hazardType]);
+  const level = raw.hazardLevel ?? (priority && PRIORITY_TO_HAZARD_LEVEL[priority]);
+  if (typeof category !== 'string' || !VALID_HAZARD_CATEGORIES.has(category)) {
+    throw ApiError.badRequest('A valid hazard category or hazardType is required');
+  }
+  if (typeof level !== 'string' || !VALID_HAZARD_LEVELS.has(level)) {
+    throw ApiError.badRequest('A valid hazard level or priority is required');
+  }
+
   const specificLocation = String(raw.specificLocation ?? raw.location ?? '').trim();
   const hazardDescription = String(raw.hazardDescription ?? raw.description ?? '').trim();
 
@@ -87,8 +103,8 @@ export function buildHazardCreateValues(values: Record<string, unknown>): Record
 
   return {
     reportNumber: generateReportNumber(),
-    hazardCategory: raw.hazardCategory ?? (hazardType && HAZARD_TYPE_TO_CATEGORY[hazardType]) ?? 'other',
-    hazardLevel: raw.hazardLevel ?? (priority && PRIORITY_TO_HAZARD_LEVEL[priority]) ?? 'moderate',
+    hazardCategory: category,
+    hazardLevel: level,
     specificLocation,
     hazardDescription,
     potentialConsequences: raw.potentialConsequences,
