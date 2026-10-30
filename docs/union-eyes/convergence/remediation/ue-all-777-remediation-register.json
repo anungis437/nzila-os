@@ -76,7 +76,7 @@
     "note": "Milestones and evidence are transcribed as prior claims; this run has not independently re-executed those proofs."
   },
   "lastInspectedBranch": "agents/ue-cursor-final-closure",
-  "lastInspectedCommit": "e3e78730dc069820da3ac14355168ee95eae80be",
+  "lastInspectedCommit": "2cc437284bef13b9c7e454014ac1b2a881c953fa",
   "summary": {
     "allRecordedDefects": 777,
     "bySeverity": {
@@ -15964,6 +15964,20 @@
       "httpBrowser": "PASS",
       "appFloor": "PASS",
       "governance": "PASS",
+      "go": "NO_GO"
+    },
+    {
+      "inspectedSha": "2cc437284bef13b9c7e454014ac1b2a881c953fa",
+      "evidence": "Calendar OAuth state, callback audit and regression changes committed. GitHub Actions runs for recent code SHAs are queued at inspection; no exact-HEAD unit, contract, security, PG15/16, HTTP/browser or staging result. Earlier passing or failing workflows apply only to their own SHAs. Institutional Gate 0C.4 reviewer/persona/authority gates remain open.",
+      "source": "PATCHED_AND_INSPECTED",
+      "unit": "PENDING",
+      "contract": "PENDING",
+      "financial": "PENDING",
+      "native": "PENDING_PG15_PG16",
+      "security": "PENDING",
+      "httpBrowser": "PENDING",
+      "appFloor": "PENDING",
+      "governance": "PENDING",
       "go": "NO_GO"
     }
   ]
