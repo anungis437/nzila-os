@@ -54,6 +54,34 @@ describe('DEF-0B10-PEN-TRUSTEE-MEETING-READS confidential read containment', () 
     expect(m.options[0]).not.toMatchObject({ auth: { minRole: 'member' } })
   })
 
+
+  it('refuses unversioned trustee meeting amendments rather than overwriting confidential minutes', async () => {
+    const { PATCH } = await import('../pension/trustee-meetings/[id]/route')
+    expect(m.options[1]).toMatchObject({ auth: { required: true, roles: ['secretary_treasurer'] } })
+    const response = await (PATCH as any)({
+      organizationId: 'org-a', userId: 'user-a', params: { id: 'meeting-a' },
+      body: { minutes: 'replace existing approved minutes', attendees: [] },
+    })
+    expect(response.status).toBe(501)
+    expect(response.headers.get('Cache-Control')).toContain('no-store')
+    expect(await response.json()).toMatchObject({ error: 'TRUSTEE_MEETING_REVISION_NOT_IMPLEMENTED' })
+    expect(m.rls).not.toHaveBeenCalled()
+    expect(m.audit).not.toHaveBeenCalled()
+  })
+
+  it('refuses destructive trustee meeting deletion without an approved retention workflow', async () => {
+    const { DELETE } = await import('../pension/trustee-meetings/[id]/route')
+    expect(m.options[2]).toMatchObject({ auth: { required: true, roles: ['secretary_treasurer'] } })
+    const response = await (DELETE as any)({
+      organizationId: 'org-a', userId: 'user-a', params: { id: 'meeting-a' },
+    })
+    expect(response.status).toBe(501)
+    expect(response.headers.get('Cache-Control')).toContain('no-store')
+    expect(await response.json()).toMatchObject({ error: 'TRUSTEE_MEETING_REVISION_NOT_IMPLEMENTED' })
+    expect(m.rls).not.toHaveBeenCalled()
+    expect(m.audit).not.toHaveBeenCalled()
+  })
+
   it('binds list reads to the authenticated tenant, paginates, and atomically audits the reader', async () => {
     const { GET } = await import('../pension/trustee-meetings/route')
     const result = await (GET as any)({ organizationId: 'org-a', userId: 'user-a', request: { url: 'http://localhost/api/pension/trustee-meetings?page=2&pageSize=20&organizationId=org-b' } })
