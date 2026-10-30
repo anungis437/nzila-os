@@ -46,14 +46,14 @@ export const GET = withRoleAuth('member', async (request, _context) => {
       const { searchParams } = new URL(request.url);
       
       const page = boundedPositiveInt(searchParams.get("page"), 1, 10000);
-      const limit = boundedPositiveInt(searchParams.get("limit"), 20, 100);
+      const mostCited = searchParams.get("mostCited") === "true";
+      const limit = boundedPositiveInt(searchParams.get("limit"), mostCited ? 10 : 20, 100);
       if (page === null || limit === null) {
         return NextResponse.json({ error: "Invalid pagination: page must be 1..10000 and limit 1..100" }, { status: 400 });
       }
 
       // Check for special modes
       const statistics = searchParams.get("statistics") === "true";
-      const mostCited = searchParams.get("mostCited") === "true";
       const issueType = searchParams.get("issueType");
 
       // Return statistics
@@ -149,7 +149,7 @@ export const GET = withRoleAuth('member', async (request, _context) => {
         return NextResponse.json({ error: "Invalid sort field or order" }, { status: 400 });
       }
 
-      const result = await listPrecedents(filters, { page, limit, sortBy, sortOrder });
+      const result = await listPrecedents(filters, { page, limit, sortBy, sortOrder: sortOrder as "asc" | "desc" });
 
       return NextResponse.json(result);
     } catch (error) {
