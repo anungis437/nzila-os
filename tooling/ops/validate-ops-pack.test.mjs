@@ -3,7 +3,11 @@ import assert from 'node:assert/strict'
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, dirname } from 'node:path'
-import { validateOpsPack } from './validate-ops-pack.ts'
+// The ops validator is a TS module in a CJS-scoped tooling package.
+// Node + tsx exposes its exported bindings via the default CJS namespace.
+import * as opsValidator from './validate-ops-pack.ts'
+const validateOpsPack = opsValidator.validateOpsPack ?? opsValidator.default?.validateOpsPack
+if (typeof validateOpsPack !== 'function') throw new Error('Ops validator export unavailable')
 
 const required = [
   'ops/runbooks/README.md', 'ops/oncall/README.md', 'ops/incident-response/README.md',
