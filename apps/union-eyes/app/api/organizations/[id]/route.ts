@@ -4,9 +4,9 @@ import { db } from '@/db/db'
 import { organizations } from '@/db/schema-organizations'
 import { eq, sql } from 'drizzle-orm'
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context'
-import { requireUserForOrganization, requireSystemAdmin, ROLE_HIERARCHY } from '@/lib/api-auth-guard'
+import { requireUserForOrganization, ROLE_HIERARCHY } from '@/lib/api-auth-guard'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
-import { canAdministerOrganization, canReadOrganization, resolveOrganizationAccess } from '@/lib/organizations/read-authority'
+import { canAdministerOrganization, canReadOrganization, isAdministrativeRole, resolveOrganizationAccess } from '@/lib/organizations/read-authority'
 
 export const dynamic = 'force-dynamic'
 
@@ -64,7 +64,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
   // The organizations table is read as the system role, which is not tenant-scoped: the caller must hold an active
   // membership here, administer an organization above it, or be a platform administrator. Otherwise it does not exist.
   const access = await resolveOrganizationAccess(userId)
-  if (!canReadOrganization(access, id)) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  // A platform title or parent-body authority alone grants no private tenant record access.
+  if (!canReadOrganization(access, id) || !access.direct.has(id)) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   const [row] = await withSystemContext(() =>
     db.select().from(organizations).where(eq(organizations.id, id)),
   )
@@ -119,6 +120,13 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Forbidden: requires admin role' }, { status: 403 })
   }
 
+  // Only a direct active administrator, not a platform admin or parent-body role,
+  // may modify its organization record on this endpoint.
+  const access = await resolveOrganizationAccess(userCtx.userId)
+  if (!isAdministrativeRole(access.direct.get(id))) {
+    return NextResponse.json({ error: 'Forbidden: direct organization administrator required' }, { status: 403 })
+  }
+
   const body = await req.json()
 
   const updates: Record<string, unknown> = {}
@@ -142,16 +150,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     // organization's own administrator may resubmit the current values but may not change them.
     const parentChanged = body.parent_id !== undefined && (body.parent_id ?? null) !== (current.parentId ?? null)
     const statusChanged = body.status !== undefined && body.status !== current.status
-    if (parentChanged || statusChanged) {
-      try {
-        await requireSystemAdmin()
-      } catch {
-        return 'forbidden' as const
-      }
-    } else {
-      delete updates.parentId
-      delete updates.status
-    }
+    // Parent changes require both organizations' consent; lifecycle changes
+    // require a separate verified dual-review. A platform role alone cannot
+    // substitute for those instruments. This route has neither approval proof.
+    if (parentChanged || statusChanged) return 'forbidden' as const
+    delete updates.parentId
+    delete updates.status
 
     const [row] = await tx.update(organizations).set(updates).where(eq(organizations.id, id)).returning()
     if (!row) return null
@@ -167,7 +171,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   })
   if (updated === 'forbidden') {
     return NextResponse.json(
-      { error: 'Forbidden: changing parent affiliation or status requires platform governance' },
+      { error: 'Forbidden: parent and lifecycle changes require governed, independently approved workflow' },
       { status: 403 },
     )
   }
@@ -175,42 +179,20 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   return NextResponse.json({ data: mapOrg(updated) })
 }
 
+// Organization archival is not a single-admin DELETE action. Until a separate
+// governed workflow records board/second-officer review, contract retention and
+// legal-hold checks, refuse the mutation without claiming an archive occurred.
 export async function DELETE(_req: NextRequest, { params }: Params) {
   const { id } = await params
-  {
-    const invalid = assertOrgIdParam(id)
-    if (invalid) return invalid
-  }
-
-  // Require caller to be a member of THIS org with admin+ role
-  let userCtx
-  try {
-    userCtx = await requireUserForOrganization(id)
-  } catch {
+  const invalid = assertOrgIdParam(id)
+  if (invalid) return invalid
+  const { userId } = await auth()
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const access = await resolveOrganizationAccess(userId)
+  if (!isAdministrativeRole(access.direct.get(id))) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
-  const userRole = userCtx.roles[0] || 'member'
-  if ((ROLE_HIERARCHY[userRole as keyof typeof ROLE_HIERARCHY] ?? 0) < ROLE_HIERARCHY.admin) {
-    return NextResponse.json({ error: 'Forbidden: requires admin role' }, { status: 403 })
-  }
-
-  const archived = await withRLSContext(async (tx) => {
-    const [row] = await tx
-      .update(organizations)
-      .set({ status: 'archived', updatedAt: new Date() })
-      .where(eq(organizations.id, id))
-      .returning()
-    if (!row) return null
-    await persistAtomicAudit(tx, {
-      organizationId: id,
-      userId: userCtx.userId,
-      action: 'organization.archive',
-      resourceType: 'organizations',
-      resourceId: id,
-      details: { status: 'archived' },
-    })
-    return row
-  })
-  if (!archived) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  return NextResponse.json({ data: mapOrg(archived) })
+  return NextResponse.json({
+    error: 'Archival requires a separately approved lifecycle request with two independent reviewers, retention and legal-hold verification. No change was made.',
+  }, { status: 409 })
 }
