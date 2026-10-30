@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
 import {
   buildHazardCreateValues,
   generateReportNumber,
@@ -120,5 +121,14 @@ describe('health-safety/hazards route helpers', () => {
     it('rejects a submission with a whitespace-only description', () => {
       expect(() => buildHazardCreateValues({ hazardType: 'other', priority: 'low', location: 'Site A', description: '   ' })).toThrow();
     });
+  });
+});
+
+
+describe('hazard item disclosure floor', () => {
+  it('requires health and safety representative authority for an individual hazard row', () => {
+    const itemRoute = readFileSync(new URL('../[id]/route.ts', import.meta.url), 'utf8');
+    expect(itemRoute).toContain("readRole: 'health_safety_rep'");
+    expect(itemRoute).not.toContain("readRole: 'member'");
   });
 });
