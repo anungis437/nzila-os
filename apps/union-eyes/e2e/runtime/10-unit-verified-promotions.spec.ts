@@ -21,6 +21,23 @@ const apiOnly = (testInfo: { project: { name: string } }) => testInfo.project.na
 const status = async (api: APIRequestContext, method: 'get' | 'post' | 'put' | 'patch' | 'delete', path: string) =>
   (await api[method](path, method === 'get' || method === 'delete' ? undefined : { data: {} })).status()
 
+// Rate limiting is a safety control, not a route acceptance result. Respect it
+// and retry within a bounded window; never count 429 as proof of HTTP 501.
+const statusAfterThrottle = async (api: APIRequestContext, method: 'get' | 'post', path: string): Promise<number> => {
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const response = await api[method](path, method === 'get' ? undefined : { data: {} })
+    if (response.status() !== 429) return response.status()
+    if (attempt === 7) break
+    const seconds = Number(response.headers()['retry-after'])
+    const waitMs = Number.isFinite(seconds) && seconds > 0
+      ? Math.min(32_000, Math.max(1000, seconds * 1000))
+      : Math.min(32_000, 1000 * 2 ** attempt)
+    await new Promise((resolve) => setTimeout(resolve, waitMs))
+  }
+  throw new Error(`Rate limiting prevented verification of ${method.toUpperCase()} ${path}; no route acceptance claimed`)
+}
+
+
 test.describe('promotions: rewards export, profile roles, operational metrics, public surface', () => {
   test('DEF-0B11-PRP rewards export: administrator only, as a no-store CSV; a member, a steward and an anonymous caller are refused', async ({}, testInfo) => {
     test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
@@ -86,11 +103,12 @@ test.describe('promotions: retired and unimplemented surfaces never claim succes
 
   test('DEF-0B12-CRUD tax paths: 501 for every caller, and the per-capita ledger is not served', async ({}, testInfo) => {
     test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
+    test.setTimeout(180_000)
     for (const who of [U.memberPrimary, U.adminPrimary]) {
       const api = await as(who)
       for (const path of ['/api/tax/slips', '/api/tax/t106', '/api/tax/rl-1/generate', '/api/tax/cope/receipts']) {
-        expect(await status(api, 'get', path), `${who.userId} GET ${path}`).toBe(501)
-        expect(await status(api, 'post', path), `${who.userId} POST ${path}`).toBe(501)
+        expect(await statusAfterThrottle(api, 'get', path), `${who.userId} GET ${path}`).toBe(501)
+        expect(await statusAfterThrottle(api, 'post', path), `${who.userId} POST ${path}`).toBe(501)
       }
     }
   })
