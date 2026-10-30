@@ -1,0 +1,45 @@
+{
+  "record": "UE_GATE0_SOURCE_PATCHES_AWAITING_QUALIFICATION",
+  "date": "2026-10-30",
+  "branch": "agents/ue-cursor-final-closure",
+  "sourceCommit": "cf016442e77748bfedee4ce19fd32dbbfb28c4b4",
+  "qualification": "NOT_ESTABLISHED",
+  "countedAsEngineeringCorrected": false,
+  "note": "This additive evidence record is NOT a change to frozen Gate 0 defect provenance, the accepted qualification artifacts, or the 777-defect counts. Both patches need executable test results at their exact SHA before the cumulative elimination register can credit them.",
+  "items": [
+    {
+      "defectId": "DEF-0B12-PLT-VOICE-TRANSCRIBE-RETURNS-THE-FILE-SIZE-IN-BYTES-AS-THE-DURATION",
+      "files": [
+        "apps/union-eyes/app/api/voice/transcribe/route.ts",
+        "apps/union-eyes/app/api/__tests__/voice-transcribe.route.test.ts"
+      ],
+      "sourceCorrection": "Removed byte-length-as-duration claim; successful transcription returns only measured text and selected language.",
+      "source": "PATCHED",
+      "unit": "PENDING",
+      "native": "NOT_APPLICABLE_TO_ROUTE_BEHAVIOUR",
+      "http": "PENDING",
+      "staging": "PENDING",
+      "closed": false
+    },
+    {
+      "defectId": "DEF-0B12-PLT-WORKSPACE-TELEMETRY-LOGS-UNBOUNDED-CLIENT-STRINGS-AND-HAS-NO-LIMIT",
+      "files": [
+        "apps/union-eyes/app/api/workspace/telemetry/route.ts",
+        "apps/union-eyes/app/api/__tests__/workspace-telemetry.route.test.ts"
+      ],
+      "sourceCorrection": "Actual stream capped at 2048 bytes, malformed JSON refused, tab constrained to canonical identifiers, event time server-issued, arbitrary payload keys dropped and routes constrained to known static paths.",
+      "source": "PATCHED",
+      "unit": "PENDING",
+      "native": "NOT_APPLICABLE_TO_ROUTE_BEHAVIOUR",
+      "http": "PENDING",
+      "staging": "PENDING",
+      "closed": false
+    }
+  ],
+  "overallGate": "NO_GO",
+  "outstandingHumanGates": [
+    "independent reviewer",
+    "owner persona ratification",
+    "institutional authority decisions"
+  ]
+}
