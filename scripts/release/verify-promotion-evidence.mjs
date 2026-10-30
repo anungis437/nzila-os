@@ -112,7 +112,7 @@ export function verifyPromotionEvidence({ directory, expectedCommit, expectedRun
           .map(key => target[key])
         return refs.length === 0 || refs.some(ref => !pinned(ref)) ||
           new Set(refs).size !== 1
-      })) deny('deployment target is absent, mutable, conflicting or duplicated')
+      })) deny('deployment target is absent, mutable or conflicting (including duplicated identities)')
   return {
     commitSha: expectedCommit,
     attestationDigest: digest,
