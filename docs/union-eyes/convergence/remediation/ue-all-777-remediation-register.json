@@ -76,7 +76,7 @@
     "note": "Milestones and evidence are transcribed as prior claims; this run has not independently re-executed those proofs."
   },
   "lastInspectedBranch": "agents/ue-cursor-final-closure",
-  "lastInspectedCommit": "08b6ddc24b9bf1446ed4b0da5ab6bcb88212b471",
+  "lastInspectedCommit": "e3e78730dc069820da3ac14355168ee95eae80be",
   "summary": {
     "allRecordedDefects": 777,
     "bySeverity": {
@@ -86,11 +86,11 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 23,
+    "withCurrentRunSourceOrRegressionWork": 25,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 12,
-    "engineeringRemaining": 765,
+    "engineeringCorrected": 13,
+    "engineeringRemaining": 764,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately."
   },
   "verificationPolicy": {
@@ -283,6 +283,10 @@
     {
       "sha": "08b6ddc24b9bf1446ed4b0da5ab6bcb88212b471",
       "description": "Add fail-closed trustee meeting PATCH/DELETE tests, no data writes, no-store; source-level only."
+    },
+    {
+      "sha": "e3e78730dc069820da3ac14355168ee95eae80be",
+      "description": "AI audit legacy/canonical tenant isolation with unit regression; typecheck fixes for classify, feedback, trustee meeting and copilot sensitive-classification contract; runtime bargaining reparenting regression now requires 400 and valid title-only PATCH. CI at this exact HEAD pending."
     }
   ],
   "records": [
@@ -580,10 +584,32 @@
       "title": "On the legacy path the AI-usage query reads audit_security rows for every organization with no organization predicate.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/admin/ai-usage/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/admin-ai-usage.route.test.ts",
+          "apps/union-eyes/app/api/__tests__/admin-ai-usage-list.route.test.ts"
+        ],
+        "commits": [
+          "0cf46e8315120cccca359624b7acfd0e36bef949",
+          "4cdc1e4a8d91b24eaa1621a6e59586fa2e92d8f0",
+          "6b7bc91c7fb3558a89be82792089ef1a7785b226"
+        ],
+        "repair": "Both canonical and legacy AI audit listing and count SQL now enforce organization_id = authenticated organization, and missing organization context is refused. Unit regression checks both schema paths and absent context.",
+        "limits": "Source patch and regression authored; no exact-HEAD unit, native PG15/16, real HTTP, browser or institutional acceptance evidence yet."
+      },
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/admin/ai-usage/route.ts",
+        "explanation": "Four AI usage queries, including legacy audit_security listing/count, now explicitly require caller-organization predicate; missing organization context denied.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B1-ORGANIZATIONS-CROSS-ORG-CONTACTS",
