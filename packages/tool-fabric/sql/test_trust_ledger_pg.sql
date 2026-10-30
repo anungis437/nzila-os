@@ -70,7 +70,31 @@ UPDATE tool_fabric_trust_stream
 SET revision = 2, head_hash = repeat('2', 64), updated_at = now()
 WHERE stream_id = 'platform:tool-fabric:trust' AND revision = 1;
 
-DO $$
+-- A failed head CAS must roll back the preceding receipt INSERT in the
+-- same PostgreSQL transaction. The nested PL/pgSQL block is a subtransaction:
+-- catching 42501 must not leave an orphaned seq=3 receipt behind.
+DO $
+BEGIN
+  BEGIN
+    INSERT INTO tool_fabric_trust_entry (stream_id, seq, audit_id, entry_hash, entry)
+    VALUES ('platform:tool-fabric:trust', 3, '00000000-0000-4000-8000-000000000003',
+            repeat('3',64), '{"seq":3}'::jsonb);
+    UPDATE tool_fabric_trust_stream
+      SET revision = 3, head_hash = repeat('f',64), updated_at = now()
+      WHERE stream_id = 'platform:tool-fabric:trust' AND revision = 2;
+    RAISE EXCEPTION 'SECURITY FAILURE: mismatched receipt/head CAS succeeded';
+  EXCEPTION WHEN insufficient_privilege THEN
+    NULL;
+  END;
+  IF EXISTS (SELECT 1 FROM tool_fabric_trust_entry WHERE seq = 3)
+     OR (SELECT revision FROM tool_fabric_trust_stream
+         WHERE stream_id = 'platform:tool-fabric:trust') <> 2 THEN
+    RAISE EXCEPTION 'SECURITY FAILURE: failed CAS left a partial durable write';
+  END IF;
+END;
+$;
+
+DO $
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM tool_fabric_trust_stream
