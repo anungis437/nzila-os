@@ -228,7 +228,7 @@ export class RAGService {
     createdBy: string;
   }): Promise<void> {
     // Generate embedding for the document
-    const embedding = await aiEmbed(data.content);
+    const embedding = await aiEmbed(data.content, data.organizationId);
     
     await db.insert(knowledgeBase).values({
       ...data,
@@ -245,7 +245,7 @@ export class RAGService {
   async searchDocuments(
     query: string,
     options: {
-      organizationId?: string;
+      organizationId: string;
       documentTypes?: string[];
       limit?: number;
       similarityThreshold?: number;
@@ -258,26 +258,29 @@ export class RAGService {
       excerpt: string;
     }>
   > {
-    // Generate embedding for query
-    const queryEmbedding = await aiEmbed(query);
-    
-    // Perform vector similarity search
-    // Note: This is a simplified version. In production, use pgvector's <-> operator
-    const results = await db
-      .select({
+    // Never embed or retrieve a tenant's knowledge without a tenant context.
+    // The query text itself may be confidential, so refuse before calling AI.
+    if (!options.organizationId?.trim()) {
+      throw new Error('Organization context required for knowledge search');
+    }
+    const queryEmbedding = await aiEmbed(query, options.organizationId);
+
+    // Both the SQL predicate and the transaction RLS context bind the read.
+    // Do not let an omitted organization broaden the query to every tenant.
+    const results = await withRLSContext({ organizationId: options.organizationId }, async (tx) =>
+      tx.select({
         id: knowledgeBase.id,
         title: knowledgeBase.title,
         content: knowledgeBase.content,
         embedding: knowledgeBase.embedding,
       })
-      .from(knowledgeBase)
-      .where(
-        and(
+        .from(knowledgeBase)
+        .where(and(
           eq(knowledgeBase.isActive, true),
-          options.organizationId ? eq(knowledgeBase.organizationId, options.organizationId) : undefined
-        )
-      )
-      .limit(options.limit || 5);
+          eq(knowledgeBase.organizationId, options.organizationId),
+        ))
+        .limit(options.limit || 5),
+    );
     
     // Calculate cosine similarity (simplified)
     const scored = results.map((doc) => {
