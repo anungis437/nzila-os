@@ -4,17 +4,7 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { PENSION_ADMIN_ROLES } from '@/lib/pension/pension-authority';
 import { pensionTrusteeMeetings } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { z } from 'zod';
-
-const updateMeetingSchema = z.object({
-  title: z.string().max(255).optional(),
-  scheduledDate: z.coerce.date().optional(),
-  location: z.string().max(255).optional(),
-  agenda: z.string().optional(),
-  minutes: z.string().optional(),
-  status: z.enum(['scheduled', 'completed', 'cancelled']).optional(),
-  attendees: z.array(z.unknown()).optional(),
-});
+import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,59 +34,42 @@ export const GET = withApi(
   },
 );
 
+/**
+ * DEF-0B10-PEN-TRUSTEE-MEETING-MINUTES-CAN-BE-REWRITTEN-OR-DELETED-WITHOUT-HISTORY
+ * An ordinary audit entry recording field names does not preserve the original
+ * minutes, agenda or attendees, and hard deletion destroys the primary record.
+ * No governed immutable revision or retention model has been accepted yet.
+ * Keep reads available to authorized pension administrators, but fail closed
+ * on edits and deletions rather than silently destroy meeting evidence.
+ */
+const unavailableMutation = () => NextResponse.json(
+  {
+    error: 'TRUSTEE_MEETING_REVISION_NOT_IMPLEMENTED',
+    message: 'Trustee meeting amendments and deletion require governed version history, retention and institutional approval.',
+  },
+  { status: 501, headers: { 'Cache-Control': 'private, no-store' } },
+);
+
 export const PATCH = withApi(
   {
     auth: { required: true, roles: PENSION_ADMIN_ROLES },
-    openapi: { tags: ['Pension'], summary: 'Update trustee meeting', description: 'Update an existing trustee meeting' },
+    openapi: {
+      tags: ['Pension'],
+      summary: 'Amend trustee meeting (not implemented)',
+      description: 'Refused until immutable minutes revisions and an approved amendment mandate exist.',
+    },
   },
-  async ({ params, body, organizationId, userId }) => {
-    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
-    const id = params.id;
-    const changes = updateMeetingSchema.parse(body);
-    return withRLSContext({ organizationId }, async (tx) => {
-      const [meeting] = await tx
-        .update(pensionTrusteeMeetings)
-        .set({ ...changes, updatedAt: new Date() })
-        .where(and(eq(pensionTrusteeMeetings.id, id), eq(pensionTrusteeMeetings.organizationId, organizationId)))
-        .returning();
-      if (!meeting) throw ApiError.notFound('Trustee meeting');
-      await persistAtomicAudit(tx, {
-        organizationId,
-        userId,
-        action: 'pension.trustee_meeting.update',
-        resourceType: 'pension_trustee_meetings',
-        resourceId: id,
-        details: { fields: Object.keys(changes), status: changes.status },
-      });
-      return meeting;
-    });
-  },
+  unavailableMutation,
 );
 
 export const DELETE = withApi(
   {
     auth: { required: true, roles: PENSION_ADMIN_ROLES },
-    openapi: { tags: ['Pension'], summary: 'Delete trustee meeting', description: 'Delete a trustee meeting' },
+    openapi: {
+      tags: ['Pension'],
+      summary: 'Delete trustee meeting (not implemented)',
+      description: 'Refused until retention, legal holds and governed disposal authorization exist.',
+    },
   },
-  async ({ params, organizationId, userId }) => {
-    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
-    const id = params.id;
-    return withRLSContext({ organizationId }, async (tx) => {
-      const [meeting] = await tx
-        .delete(pensionTrusteeMeetings)
-        .where(and(eq(pensionTrusteeMeetings.id, id), eq(pensionTrusteeMeetings.organizationId, organizationId)))
-        .returning();
-      if (!meeting) throw ApiError.notFound('Trustee meeting');
-      await persistAtomicAudit(tx, {
-        organizationId,
-        userId,
-        action: 'pension.trustee_meeting.delete',
-        resourceType: 'pension_trustee_meetings',
-        resourceId: id,
-        details: { title: meeting.title },
-      });
-      return meeting;
-    });
-  },
+  unavailableMutation,
 );
-
