@@ -2074,6 +2074,305 @@
           "remaining": "Secure verified-asset ingestion and an approved media-publishing journey must be built before X media publishing is available."
         }
       ]
+    },
+    {
+      "id": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "family": "F07: a role floor is eligibility, not authority; reads and writes need the mandate, ownership, sensitivity or workflow that the record belongs to",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B7-PLT-SSO-LIST-DISCLOSES-PROVIDER-CONFIGURATION-AT-MEMBER-FLOOR",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/enterprise/sso/providers/route.ts",
+            "apps/union-eyes/app/api/enterprise/sso/providers/__tests__/route.test.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "The provider list (issuer, endpoints, client id, attribute mapping) is an administrator read; credential columns were already reduced to a boolean."
+        },
+        {
+          "prefix": "DEF-0B12-PLT-TEST-AUTH-FORWARDS-THE-SESSION-TOKEN",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/test-auth/route.ts",
+            "apps/union-eyes/app/api/__tests__/test-auth.route.test.ts"
+          ],
+          "explanation": "The diagnostic is a platform administrator's: anyone else gets 403 and the backend is never called; the response carries backend statuses only, never the backend bodies. Test disclosure: two tests added, the existing one now mocks platform-admin authority."
+        },
+        {
+          "prefix": "DEF-0B11-RPT-DEFINITION-READS-RETURN-EVERY-REPORT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/reports/route.ts",
+            "apps/union-eyes/app/api/reports/[id]/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "Report definitions (which sources and filters a report reads) are read at the steward floor, not by any member. No UI consumes these collection routes."
+        },
+        {
+          "prefix": "DEF-0B11-RPT-TEMPLATES-ROUTE-LISTS-EVERY-REPORT-DEFINITION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/reports/templates/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "The templates route no longer fronts the whole report table: it lists only rows marked as templates with an allow-listed projection, and a create is always stored as an organization template through a strict body schema, in the tenant context and audited."
+        },
+        {
+          "prefix": "DEF-0B11-RPT-DATA-SOURCE-REGISTRY-IS-SERVED-TO-ANY-SIGNED-IN-USER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/reports/datasources/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "The registry is served at the officer floor, the same floor that can execute a report over it."
+        },
+        {
+          "prefix": "DEF-0B5-COMMITTEE-INTERNAL-NOTES-READ-BY-ANY-MEMBER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/committees/route.ts",
+            "apps/union-eyes/app/api/committees/[id]/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "The committee routes omit the internal notes and custom fields from every response."
+        },
+        {
+          "prefix": "DEF-0B5-COMMITTEE-READ-IGNORES-MEMBERSHIP",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/committees/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "Internal working fields are no longer returned to every member.",
+          "remaining": "A committee is still listed to every member of the organization: there is no committee-membership scope on the generic read."
+        },
+        {
+          "prefix": "DEF-0B3-KPI-ALERT-RECIPIENTS-MEMBER-READ",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/analytics/kpis/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "alertRecipients (user ids and emails of staff notified) is omitted from every KPI response."
+        },
+        {
+          "prefix": "DEF-0B3-BARGAINING-NEGOTIATION-RECORDS-MEMBER-READ",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/bargaining/negotiation-route-rules.ts",
+            "apps/union-eyes/app/api/bargaining/proposals/route.ts",
+            "apps/union-eyes/app/api/bargaining/proposals/[id]/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "Negotiations are read at the steward floor through shared rules (upstream's change); bargaining proposals, which carry unreleased positions, now match it."
+        },
+        {
+          "prefix": "DEF-0B3-ALERT-INBOX-MEMBER-FLOOR-NO-REDACTION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/alerts/realtime/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "The realtime alert inbox needs an officer, since each execution carries the rule's trigger data."
+        },
+        {
+          "prefix": "DEF-0B4-OHS-COMMITTEE-ROSTER-MEMBER-READ",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/cnesst/hs-committees/route.ts",
+            "apps/union-eyes/app/api/cnesst/hs-committees/[id]/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "The joint health-and-safety committee roster is read at the steward floor."
+        },
+        {
+          "prefix": "DEF-0B5-SMS-STEWARD-READS-ALL-MEMBER-MESSAGES",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/communications/sms/route.ts",
+            "apps/union-eyes/app/api/communications/sms/conversations/route.ts",
+            "apps/union-eyes/app/api/communications/sms/conversations/[conversationId]/read/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "SMS messages and conversations are read and written at the officer floor."
+        },
+        {
+          "prefix": "DEF-0B5-SMS-CAMPAIGN-READ-BY-ANY-MEMBER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/communications/sms/campaigns/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "SMS campaigns are read and written at the officer floor."
+        },
+        {
+          "prefix": "DEF-0B5-SURVEY-DRAFTS-READABLE-BY-MEMBERS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/api/crud-factory.ts",
+            "apps/union-eyes/app/api/communications/surveys/route.ts",
+            "apps/union-eyes/app/api/communications/surveys/[surveyId]/route.ts",
+            "apps/union-eyes/lib/api/__tests__/crud-factory-staff-read.test.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "The generic factory gained belowStaffReadCondition, applied to GET for a caller below the steward floor. Surveys add status != draft, so a member reads published surveys only; staff still read drafts."
+        },
+        {
+          "prefix": "DEF-0B5-SURVEY-RESPONSES-IDENTIFY-RESPONDENTS-TO-STEWARDS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/route.ts"
+          ],
+          "explanation": "The responses route exports POST only and its header states no individual identity, address or response row is returned to a steward; no read exposes respondents (upstream's change)."
+        },
+        {
+          "prefix": "DEF-0B6-EDU-OWNER-SCOPED-READS-HIDE-MEMBER-RECORDS-FROM-STAFF",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/api/crud-factory.ts",
+            "apps/union-eyes/app/api/education/registrations/route.ts",
+            "apps/union-eyes/app/api/education/certifications/route.ts",
+            "apps/union-eyes/lib/api/__tests__/crud-factory-staff-read.test.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "The factory gained staffReadsAll: with an owner column, a steward or above reads every member's registration or certification on GET while a member keeps their own; writes keep the owner scope."
+        },
+        {
+          "prefix": "DEF-0B6-EDU-SESSION-READ-EXPOSES-ACCESS-CODE-AND-COSTS",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/education/sessions/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "The virtual-meeting access code, session budget and actual cost are omitted from every session response.",
+          "remaining": "The factory has no per-role column view, so staff also cannot read the cost columns through this route."
+        },
+        {
+          "prefix": "DEF-0B6-EDU-CONTENT-DRAFTS-AND-ARCHIVED-READABLE-BY-MEMBER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/education/courses/route.ts",
+            "apps/union-eyes/lib/api/__tests__/crud-factory-staff-read.test.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "A member reads only active courses; draft and archived ones are visible to staff."
+        },
+        {
+          "prefix": "DEF-0B6-CMP-COPE-FUNDRAISING-TOTALS-WRITABLE-BY-STEWARD",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/cope/campaigns/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "A campaign body is limited to an allow-list; the amount raised, the status and the payment-provider identifiers can no longer be set by a steward."
+        },
+        {
+          "prefix": "DEF-0B8-HS-STATUS-AND-OUTCOME-FIELDS-WRITABLE-WITHOUT-WORKFLOW",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/health-safety/incidents/[id]/route.ts",
+            "apps/union-eyes/app/api/health-safety/hazards/[id]/route.ts",
+            "apps/union-eyes/app/api/health-safety/inspections/[id]/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "A PATCH can no longer set status, closure, verification, investigation outcome or scoring fields on incidents, hazards and inspections.",
+          "remaining": "No dedicated workflow route yet performs the investigation, verification and closure transitions that the blocked fields now require."
+        },
+        {
+          "prefix": "DEF-0B8-HS-PPE-ISSUEE-NAMES-READABLE-AT-MEMBER-FLOOR",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/health-safety/ppe/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "The PPE register, which names the member each item is issued to, is read at the health-and-safety representative floor."
+        },
+        {
+          "prefix": "DEF-0B8-FED-FLAGS-ANY-SIGNED-IN-USER-CAN-PROBE-ANY-FLAG-NAME",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/feature-flags/route.ts",
+            "apps/union-eyes/app/api/__tests__/feature-flags.route.test.ts"
+          ],
+          "explanation": "A single-flag probe answers only flags the application defines (plus pilot-mode); an unknown name is a 404 and is not evaluated."
+        },
+        {
+          "prefix": "DEF-0B11-SOC-STEWARD-CONNECTS-THE-ORGANIZATION-PUBLISHING-IDENTITY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/social-media/accounts/route.ts",
+            "apps/union-eyes/app/api/social-media/accounts/callback/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+          ],
+          "explanation": "Connecting and disconnecting a publishing identity, and its OAuth callback, need an administrator; the business-management and organization-admin scopes are no longer requested; a connection is made only when the account manages exactly one Page, instead of picking the first."
+        },
+        {
+          "prefix": "DEF-0B7-EXC-PUBLISH-PARSE-FAILURE-STORES-DEFAULT-MEDIUM-RISK-SCORE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/expertise/expertise-extractor.ts",
+            "apps/union-eyes/lib/knowledge-transfer/expertise/__tests__/expertise-extractor.test.ts"
+          ],
+          "explanation": "An unparseable or malformed model answer now throws ExpertiseExtractionError; publish records the failed extraction and stores no score. Test disclosure: the test that asserted the default medium profile was replaced by two that assert refusal."
+        },
+        {
+          "prefix": "DEF-0B7-EXC-READS-IGNORE-SENSITIVITY-LEVEL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/governance/interview-access.ts",
+            "apps/union-eyes/app/api/__tests__/exit-interviews-read-gates.pglite.test.ts"
+          ],
+          "explanation": "Reads of interviews apply the sensitivity floor and consent condition (upstream's change), proven on real SQL by an existing test."
+        },
+        {
+          "prefix": "DEF-0B7-EXC-PUBLISH-AND-INDEX-COPY-INTERVIEW-TEXT-TO-ORG-WIDE-KNOWLEDGE-BASE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/exit-interviews/[id]/publish/route.ts",
+            "apps/union-eyes/app/api/__tests__/exit-interviews-publish.route.test.ts"
+          ],
+          "explanation": "Only a level that permits indexing is copied to the knowledge base, without the employee's name; sensitivity and consent travel with the source id (upstream's change, existing test)."
+        },
+        {
+          "prefix": "DEF-0B7-EXC-NEW-INTERVIEWS-DEFAULT-PUBLIC-INTERNAL-WITH-NO-CLASSIFICATION-STEP",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/exit-interviews/route.ts",
+            "apps/union-eyes/app/api/__tests__/exit-interviews-mutations.route.test.ts"
+          ],
+          "explanation": "A new interview is created at the restricted level (UNRECORDED_LEVEL) instead of the public_internal column default; an administrator classifies it through the governance step, and publication refuses an unclassified level."
+        },
+        {
+          "prefix": "DEF-0B7-EXC-DERIVED-VIEWS-IGNORE-SENSITIVITY-AND-CONSENT",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/exit-interviews/analytics/route.ts",
+            "apps/union-eyes/lib/knowledge-transfer/governance/interview-access.ts",
+            "apps/union-eyes/app/api/__tests__/exit-interviews-analytics.route.test.ts"
+          ],
+          "explanation": "The analytics aggregate takes a content-derived risk score only from interviews that are published, consented and at a derived-analytics level; the other derived views already read through that condition. The analytics test mocks the database, so the CASE expression is not exercised against real SQL.",
+          "remaining": "The analytics SQL expression has no real-database test."
+        },
+        {
+          "prefix": "DEF-0B7-COGB-SUCCESSION-SENDS-EVERY-PUBLISHED-INTERVIEW-TO-MODEL-IGNORING-SENSITIVITY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/succession/succession-analyzer.ts",
+            "apps/union-eyes/lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts"
+          ],
+          "explanation": "The succession analyzer selects interviews through the derived-analytics condition before anything reaches a model (upstream's change, existing test)."
+        },
+        {
+          "prefix": "DEF-0B7-COGB-DERIVED-GRAPHS-IGNORE-INTERVIEW-SENSITIVITY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/topic-graph/topic-graph-builder.ts",
+            "apps/union-eyes/lib/knowledge-transfer/topic-graph/__tests__/topic-graph-builder.test.ts"
+          ],
+          "explanation": "The topic graph reads interviews through the derived-analytics condition (upstream's change, existing test)."
+        }
+      ]
     }
   ]
 }

@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 223,
- "partial": 31,
- "outstanding": 554,
- "accountedFor": 554,
+ "corrected": 249,
+ "partial": 35,
+ "outstanding": 528,
+ "accountedFor": 528,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -150,26 +150,26 @@
   {
    "family": "F07-AUTHORIZATION-ROLE-FLOOR-AND-OBJECT-LEVEL",
    "purpose": "Authorization beyond a role floor: object-level ownership, sensitivity and kernel decisions",
-   "defects": 74,
+   "defects": 48,
    "severity": {
-    "HIGH": 19,
-    "MEDIUM": 46,
-    "LOW": 9
+    "HIGH": 13,
+    "MEDIUM": 33,
+    "LOW": 2
    },
-   "namedRoutes": 13,
+   "namedRoutes": 9,
    "namedFiles": 2,
    "tranches": {
     "0B.1": 1,
-    "0B.3": 7,
-    "0B.4": 7,
-    "0B.5": 9,
-    "0B.6": 5,
-    "0B.7": 15,
-    "0B.8": 6,
+    "0B.3": 4,
+    "0B.4": 6,
+    "0B.5": 4,
+    "0B.6": 2,
+    "0B.7": 8,
+    "0B.8": 4,
     "0B.9": 6,
     "0B.10": 9,
-    "0B.11": 6,
-    "0B.12": 3
+    "0B.11": 2,
+    "0B.12": 2
    }
   },
   {
@@ -1510,10 +1510,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B3-KPI-ALERT-RECIPIENTS-MEMBER-READ",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B3-ARBITRATION-RECORD-NO-CASE-AUTHORITY",
     "severity": "HIGH"
    },
@@ -1526,16 +1522,8 @@
     "severity": "HIGH"
    },
    {
-    "id": "DEF-0B3-BARGAINING-NEGOTIATION-RECORDS-MEMBER-READ",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B3-TRIAL-EXPIRY-PLACEHOLDER-PAYMENT-CHECK",
     "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B3-ALERT-INBOX-MEMBER-FLOOR-NO-REDACTION",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B4-CLAUSE-LIBRARY-FEDERATION-PREDICATES-DISAGREE",
@@ -1552,10 +1540,6 @@
    {
     "id": "DEF-0B4-OHS-ANTI-SCAB-RECORD-NO-AUTHOR-OR-CASE-AUTHORITY",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B4-OHS-COMMITTEE-ROSTER-MEMBER-READ",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B4-CBAS-DETAIL-EMBEDS-INTERNAL-NOTES-FOR-MEMBERS",
@@ -1579,62 +1563,16 @@
    },
    {
     "id": "DEF-0B5-COMMITTEE-READ-IGNORES-MEMBERSHIP",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B5-COMMITTEE-INTERNAL-NOTES-READ-BY-ANY-MEMBER",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B5-SMS-STEWARD-READS-ALL-MEMBER-MESSAGES",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B5-SMS-CAMPAIGN-READ-BY-ANY-MEMBER",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B5-SURVEY-DRAFTS-READABLE-BY-MEMBERS",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B5-SURVEY-RESPONSES-IDENTIFY-RESPONDENTS-TO-STEWARDS",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B6-EDU-OWNER-SCOPED-READS-HIDE-MEMBER-RECORDS-FROM-STAFF",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B6-EDU-SESSION-READ-EXPOSES-ACCESS-CODE-AND-COSTS",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B6-EDU-CONTENT-COMPLETIONS-COUNT-ATTENDED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-EDU-CONTENT-DRAFTS-AND-ARCHIVED-READABLE-BY-MEMBER",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-CMP-COPE-FUNDRAISING-TOTALS-WRITABLE-BY-STEWARD",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-EXC-READS-IGNORE-SENSITIVITY-LEVEL",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B7-EXC-PUBLISH-AND-INDEX-COPY-INTERVIEW-TEXT-TO-ORG-WIDE-KNOWLEDGE-BASE",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B7-EXC-PUBLISH-PARSE-FAILURE-STORES-DEFAULT-MEDIUM-RISK-SCORE",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-EXC-NEW-INTERVIEWS-DEFAULT-PUBLIC-INTERNAL-WITH-NO-CLASSIFICATION-STEP",
     "severity": "MEDIUM"
    },
    {
@@ -1643,19 +1581,12 @@
    },
    {
     "id": "DEF-0B7-EXC-DERIVED-VIEWS-IGNORE-SENSITIVITY-AND-CONSENT",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B7-EXC-REASONING-SESSIONS-HAVE-NO-OWNER-AND-ARE-READABLE-BY-ANY-STEWARD",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-COGB-SUCCESSION-SENDS-EVERY-PUBLISHED-INTERVIEW-TO-MODEL-IGNORING-SENSITIVITY",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B7-COGB-DERIVED-GRAPHS-IGNORE-INTERVIEW-SENSITIVITY",
-    "severity": "HIGH"
    },
    {
     "id": "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE",
@@ -1674,20 +1605,13 @@
     "severity": "LOW"
    },
    {
-    "id": "DEF-0B7-PLT-SSO-LIST-DISCLOSES-PROVIDER-CONFIGURATION-AT-MEMBER-FLOOR",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B7-PLT-EQUITY-READS-RETURN-PRIVATE-SEGMENTS-TO-ANY-MEMBER",
     "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B8-HS-STATUS-AND-OUTCOME-FIELDS-WRITABLE-WITHOUT-WORKFLOW",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B8-HS-PPE-ISSUEE-NAMES-READABLE-AT-MEMBER-FLOOR",
-    "severity": "LOW"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B8-FED-LOCALS-READABLE-AT-MEMBER-FLOOR-WITH-NOTES-AND-OFFICER-IDS",
@@ -1696,10 +1620,6 @@
    {
     "id": "DEF-0B8-FED-EXTERNAL-UPLOAD-ATTACHES-ANY-ORGANIZATION-BLOB-TO-GRIEVANCE",
     "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B8-FED-FLAGS-ANY-SIGNED-IN-USER-CAN-PROBE-ANY-FLAG-NAME",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B8-JUR-STATUTORY-RULE-TABLES-ARE-UNVERSIONED-LITERALS-SERVED-WITH-STATUTE-CITATIONS",
@@ -1771,31 +1691,11 @@
     "severity": "HIGH"
    },
    {
-    "id": "DEF-0B11-RPT-DEFINITION-READS-RETURN-EVERY-REPORT-OF-THE-ORGANIZATION-TO-ANY-MEMBER-AND-NO-ROUTE-READS-IS-PUBLIC",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-RPT-TEMPLATES-ROUTE-LISTS-EVERY-REPORT-DEFINITION-AND-STORES-A-NON-TEMPLATE-BY-DEFAULT",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-RPT-DATA-SOURCE-REGISTRY-IS-SERVED-TO-ANY-SIGNED-IN-USER-WHILE-EXECUTION-NEEDS-AN-OFFICER",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B11-SOC-ANY-AUTHENTICATED-USER-SENDS-AN-UPLOADED-FILE-TO-TYPED-ADDRESSES-THROUGH-THE-ORGANIZATION-SIGNATURE-PROVIDER-ACCOUNT",
     "severity": "HIGH"
    },
    {
-    "id": "DEF-0B11-SOC-STEWARD-CONNECTS-THE-ORGANIZATION-PUBLISHING-IDENTITY-WITH-ADMIN-LEVEL-SCOPES-AND-PICKS-THE-FIRST-PAGE-AUTOMATICALLY",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B12-CRUD-SUPPORT-TICKET-ITEM-ROUTES-LET-A-STEWARD-REWRITE-AND-AN-ADMIN-DELETE-ANY-USER-NOTIFICATION",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-PLT-TEST-AUTH-FORWARDS-THE-SESSION-TOKEN-AND-RETURNS-THE-BACKEND-BODY-TO-EVERY-SIGNED-IN-USER",
     "severity": "MEDIUM"
    },
    {

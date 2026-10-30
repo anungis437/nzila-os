@@ -2,8 +2,8 @@ const fs = require('fs')
 const path = require('path')
 const file = path.resolve(__dirname, '../../../../docs/union-eyes/convergence/remediation/elimination-batches.json')
 const ledger = JSON.parse(fs.readFileSync(file, 'utf8'))
-const ID = 'B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR'
-if (ledger.batches.some((b) => b.id === ID)) { console.log('B19 present'); process.exit(0) }
+const ID = 'B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR'
+if (ledger.batches.some((b) => b.id === ID)) { console.log('B20 present'); process.exit(0) }
 const A = 'apps/union-eyes/'
 const CONTRACT = A + 'lib/api/__tests__/f07-read-authority.contract.test.ts'
 const FACTORY_TEST = A + 'lib/api/__tests__/crud-factory-staff-read.test.ts'
@@ -80,4 +80,4 @@ ledger.batches.push({
   ],
 })
 fs.writeFileSync(file, JSON.stringify(ledger, null, 2) + '\n')
-console.log('B19 added')
+console.log('B20 added')
