@@ -226,6 +226,18 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
     expect(await ids(await descendants.GET(get(`/api/organizations/${FED}/descendants`), params(FED)))).toEqual([LOCAL_A, LOCAL_B].sort())
   })
 
+  it('legacy breadcrumb path denies foreign organizations and filters inaccessible ancestors', async () => {
+    const { GET } = await import('../../app/api/organizations/[id]/path/route')
+    as('member-b')
+    expect((await GET(get(`/api/organizations/${LOCAL_A}/path`), params(LOCAL_A))).status).toBe(404)
+    as('member-a')
+    const memberPath = await GET(get(`/api/organizations/${LOCAL_A}/path`), params(LOCAL_A))
+    expect((await memberPath.json()).data.map((row: { id: string }) => row.id)).toEqual([LOCAL_A])
+    as('admin-fed')
+    const adminPath = await GET(get(`/api/organizations/${LOCAL_A}/path`), params(LOCAL_A))
+    expect((await adminPath.json()).data.map((row: { id: string }) => row.id)).toEqual([FED, LOCAL_A])
+  })
+
   it('ancestry denies foreign organizations and only projects authorized ancestors', async () => {
     const { GET } = await import('../../app/api/organizations/[id]/ancestors/route')
     as('member-b')
