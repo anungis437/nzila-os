@@ -31,6 +31,44 @@ export function generateReportNumber(): string {
   return `HAZ-${year}-${crypto.randomUUID()}`;
 }
 
+/**
+ * Normalize the documented mobile/legacy hazard form aliases before the
+ * generic factory validates schema columns. Unknown and privileged fields
+ * are deliberately left intact so the factory rejects them (400).
+ */
+export function preprocessHazardCreateBody(body: unknown): unknown {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return body;
+  const raw = { ...(body as Record<string, unknown>) };
+  const aliases: Record<string, string> = {
+    location: 'specificLocation',
+    description: 'hazardDescription',
+    recommendedAction: 'suggestedCorrections',
+    reporterName: 'reportedByName',
+    reporterContact: 'reporterContactInfo',
+  };
+  for (const [alias, canonical] of Object.entries(aliases)) {
+    if (!(alias in raw)) continue;
+    if (canonical in raw) throw ApiError.badRequest(`Conflicting fields: ${alias} and ${canonical}`);
+    raw[canonical] = raw[alias];
+    delete raw[alias];
+  }
+  if ('hazardType' in raw) {
+    if ('hazardCategory' in raw) throw ApiError.badRequest('Conflicting hazard category fields');
+    const category = HAZARD_TYPE_TO_CATEGORY[String(raw.hazardType)];
+    if (!category) throw ApiError.badRequest('Unsupported hazard type');
+    raw.hazardCategory = category;
+    delete raw.hazardType;
+  }
+  if ('priority' in raw) {
+    if ('hazardLevel' in raw) throw ApiError.badRequest('Conflicting hazard level fields');
+    const level = PRIORITY_TO_HAZARD_LEVEL[String(raw.priority)];
+    if (!level) throw ApiError.badRequest('Unsupported hazard priority');
+    raw.hazardLevel = level;
+    delete raw.priority;
+  }
+  return raw;
+}
+
 export function buildHazardCreateValues(values: Record<string, unknown>): Record<string, unknown> {
   const raw = values;
   const hazardType = typeof raw.hazardType === 'string' ? raw.hazardType : undefined;
@@ -48,7 +86,7 @@ export function buildHazardCreateValues(values: Record<string, unknown>): Record
   }
 
   return {
-    reportNumber: raw.reportNumber ?? generateReportNumber(),
+    reportNumber: generateReportNumber(),
     hazardCategory: raw.hazardCategory ?? (hazardType && HAZARD_TYPE_TO_CATEGORY[hazardType]) ?? 'other',
     hazardLevel: raw.hazardLevel ?? (priority && PRIORITY_TO_HAZARD_LEVEL[priority]) ?? 'moderate',
     specificLocation,
@@ -73,6 +111,13 @@ const { GET, POST } = crudRoutes({
   // broader 'member' (20) or the stricter 'admin' (140).
   readRole: 'health_safety_rep',
   writeRole: 'health_safety_rep',
+  preprocessCreateBody: preprocessHazardCreateBody,
+  writableFields: [
+    'hazardCategory', 'hazardLevel', 'specificLocation', 'hazardDescription',
+    'potentialConsequences', 'suggestedCorrections', 'isAnonymous',
+    'reportedByName', 'reporterContactInfo', 'workplaceName',
+    'department', 'whoIsAtRisk', 'existingControls', 'photoUrls',
+  ],
   beforeCreate: (values) => buildHazardCreateValues(values),
 });
 export { GET, POST };
