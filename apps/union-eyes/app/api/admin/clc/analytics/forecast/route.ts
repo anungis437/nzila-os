@@ -16,7 +16,7 @@ import {
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
 export const GET = withRoleAuth('admin', async (request, context) => {
-    const { userId } = context as { userId: string };
+    const { userId, organizationId } = context;
 
   try {
         const searchParams = request.nextUrl.searchParams;
@@ -37,7 +37,8 @@ export const GET = withRoleAuth('admin', async (request, context) => {
     );
         }
 
-        const forecast = await forecastRemittances(monthsAhead);
+        if (!organizationId) return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
+        const forecast = await forecastRemittances(monthsAhead, organizationId);
 
         logApiAuditEvent({
           timestamp: new Date().toISOString(), userId,
@@ -50,7 +51,7 @@ export const GET = withRoleAuth('admin', async (request, context) => {
 
         return NextResponse.json(forecast, {
           headers: {
-            'Cache-Control': 'public, max-age=7200' // Cache for 2 hours
+            'Cache-Control': 'private, no-store' // Cache for 2 hours
           }
         });
 
