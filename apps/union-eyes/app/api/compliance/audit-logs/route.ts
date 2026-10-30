@@ -58,10 +58,10 @@ export const POST = withApi(
         resourceType: body.resourceType,
         resourceId: body.resourceId,
         details: {
-          ...(body.metadata ?? {}),
           declaredAction: body.action,
           declaredSeverity: body.severity,
           declaredOutcome: body.outcome,
+          untrustedMetadata: body.metadata ?? {},
         },
       });
       return { recorded: true };
