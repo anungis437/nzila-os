@@ -1561,6 +1561,184 @@
           "remaining": "It remains a directory of federations by name and member count, readable by any organization's officer; whether that directory may be shown to every organization is an institutional decision."
         }
       ]
+    },
+    {
+      "id": "B15-F04-DOMAIN-FACADES",
+      "family": "F04: generic-CRUD facades advertising another capability answer 501 behind their original role floor",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B4-CLC-ROUTES-FACADE-OVER-SYNC-LOG",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "clc/dashboard, clc/remittances and clc/sync served clc_sync_log rows under dashboard, remittance and sync names; all answer 501. Their tables lost their last generic binding, so the governance entries for grievances, clc_sync_log, cms_media_library, cms_pages and organizer_tasks were removed (an unlisted table is refused by the fail-closed default); the \"keeps grievances as OWN_ROWS_READ\" case was removed from the governance test for that reason."
+        },
+        {
+          "prefix": "DEF-0B4-CLAUSES-SEARCH-FACADE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "clauses/search listed the clause table without searching; it answers 501."
+        },
+        {
+          "prefix": "DEF-0B6-EDU-FACADE-PATHS-ARE-COURSE-CATALOG-CRUD",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "Certificate generation, renewal reminders, completion certificates and notification preferences were the training-course factory; all answer 501. The admin certification manager that posts to renewal-reminders now receives the 501 instead of a course row."
+        },
+        {
+          "prefix": "DEF-0B6-CMP-COPE-ROUTES-ARE-DONATION-CAMPAIGN-FACADE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "cope/canvassing and cope/officials served donation-campaign rows; they answer 501. cope/campaigns, the legitimate campaign collection, is unchanged. The canvassing interface component now receives the 501."
+        },
+        {
+          "prefix": "DEF-0B7-EXP-EXPORT-ROUTES-ARE-REPORT-DEFINITION-CRUD-NO-FILE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "exports, its item, csv, excel and pdf routes were report-definition CRUD that produced no file; all answer 501."
+        },
+        {
+          "prefix": "DEF-0B8-FED-FEDERATION-SUBRESOURCE-PATHS-ARE-FEDERATION-ITEM-COPIES",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "Affiliates, dashboard, meetings and remittances under a federation were copies of the federation item route; all answer 501."
+        },
+        {
+          "prefix": "DEF-0B8-FED-BENCHMARK-ROUTE-IS-GENERIC-GRIEVANCE-CRUD-NOT-A-BENCHMARK",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "federations/benchmark/grievances answered grievance rows as a benchmark; it answers 501."
+        },
+        {
+          "prefix": "DEF-0B8-FED-LOCALS-PATHS-SERVE-BARGAINING-UNITS-NOT-LOCAL-UNIONS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "locals and locals/[id] served bargaining units as local unions; both answer 501."
+        },
+        {
+          "prefix": "DEF-0B8-FED-LOCALS-WRITES-ANY-STEWARD-ANY-FIELD",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "The locals routes no longer write bargaining-unit fields at the steward floor; they answer 501."
+        },
+        {
+          "prefix": "DEF-0B8-JUR-CLC-AND-DEADLINE-PATHS-ARE-BARGAINING-UNIT-CRUD-NO-VALIDATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "jurisdiction/clc-compliance and validate-deadline served bargaining-unit rows with no validation; both answer 501. The deadline calculation paths the UI uses are separate routes and are unchanged."
+        },
+        {
+          "prefix": "DEF-0B8-JUR-HEALTH-WELFARE-PLANS-PATH-IS-THE-PER-CAPITA-REMITTANCE-LEDGER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "healthwelfare/plans answered the per-capita remittance ledger under a plan name at the member floor; it answers 501."
+        },
+        {
+          "prefix": "DEF-0B9-ML-MOVEMENT-TRENDS-ROUTE-IS-NOT-THE-CONSENT-GATED-AGGREGATE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "movement-insights/trends served stored analytics rows, not the consent-gated aggregate the dashboard uses; it answers 501."
+        },
+        {
+          "prefix": "DEF-0B10-ORG-ORGANIZER-IMPACT-ROUTE-IS-ORGANIZER-TASK-CRUD-NOT-IMPACT-METRICS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "organizer/impact served organizer task rows as impact metrics; it answers 501."
+        },
+        {
+          "prefix": "DEF-0B10-PEN-PORTAL-DOCUMENT-PATHS-ARE-CMS-PAGE-CRUD-WITH-NO-PORTAL-PRINCIPAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "portal/documents served CMS pages with no portal principal; it answers 501."
+        },
+        {
+          "prefix": "DEF-0B10-PEN-PORTAL-UPLOAD-ROUTE-RECEIVES-NO-FILE-AND-STORES-A-CALLER-WRITTEN-FILE-URL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "portal/documents/upload received no file and stored a caller-written URL; it answers 501, so no URL is stored."
+        },
+        {
+          "prefix": "DEF-0B11-IDS-STORAGE-USAGE-AND-CLEANUP-ROUTES-SERVE-MEDIA-LIBRARY-ROWS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "storage/usage and storage/cleanup served media-library rows and computed or deleted nothing; both answer 501."
+        },
+        {
+          "prefix": "DEF-0B11-RPT-RUN-AND-EXECUTE-ITEM-PATHS-ARE-REPORT-DEFINITION-CRUD",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "reports/[id]/run and reports/[id]/execute were the report item route, so their DELETE removed the report; both answer 501. Ad-hoc execution is POST /api/reports/execute."
+        },
+        {
+          "prefix": "DEF-0B3-ARBITRATION-DECISION-SUBRESOURCES-FACADE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "Search, citations and documents under arbitration precedents were the decision table or copies of its item route; all answer 501. The writerole test for those three routes was replaced by assertions of the 501 and of the absence of the table binding; the precedents collection and item keep their content_manager write role."
+        },
+        {
+          "prefix": "DEF-0B11-IDS-SUPPORT-METRICS-POST-LETS-A-STEWARD-STORE-A-NOTIFICATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "support/metrics answers 501 (batch B09), so a steward can no longer store a notification for any user through it."
+        }
+      ]
     }
   ]
 }

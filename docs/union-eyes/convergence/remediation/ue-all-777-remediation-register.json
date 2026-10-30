@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 42,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 178,
-    "engineeringRemaining": 599,
+    "engineeringCorrected": 197,
+    "engineeringRemaining": 580,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 24
   },
@@ -1463,9 +1463,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B15-F04-DOMAIN-FACADES",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "Search, citations and documents under arbitration precedents were the decision table or copies of its item route; all answer 501. The writerole test for those three routes was replaced by assertions of the 501 and of the absence of the table binding; the precedents collection and item keep their content_manager write role.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B3-ARBITRATION-DECISIONS-NON-PUBLIC-READABLE-CROSS-TENANT",
@@ -2908,9 +2915,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B15-F04-DOMAIN-FACADES",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "clc/dashboard, clc/remittances and clc/sync served clc_sync_log rows under dashboard, remittance and sync names; all answer 501. Their tables lost their last generic binding, so the governance entries for grievances, clc_sync_log, cms_media_library, cms_pages and organizer_tasks were removed (an unlisted table is refused by the fail-closed default); the \"keeps grievances as OWN_ROWS_READ\" case was removed from the governance test for that reason.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CLC-SYNC-LOG-MEMBER-READ-AND-FORGEABLE-VERIFICATION",
@@ -3095,9 +3109,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B15-F04-DOMAIN-FACADES",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "clauses/search listed the clause table without searching; it answers 501.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CLAUSES-COMPARE-PLACEHOLDER-RECOMMENDATIONS",
@@ -4072,9 +4093,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B15-F04-DOMAIN-FACADES",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "Certificate generation, renewal reminders, completion certificates and notification preferences were the training-course factory; all answer 501. The admin certification manager that posts to renewal-reminders now receives the 501 instead of a course row.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-EDU-ITEM-FACADES-REWRITE-OR-DELETE-COURSE-BY-PATH-ID",
@@ -4970,9 +4998,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B15-F04-DOMAIN-FACADES",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "cope/canvassing and cope/officials served donation-campaign rows; they answer 501. cope/campaigns, the legitimate campaign collection, is unchanged. The canvassing interface component now receives the 501.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-CMP-COPE-FUNDRAISING-TOTALS-WRITABLE-BY-STEWARD",
@@ -7201,9 +7236,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B15-F04-DOMAIN-FACADES",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "exports, its item, csv, excel and pdf routes were report-definition CRUD that produced no file; all answer 501.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-EXP-REPORT-DEFINITIONS-READABLE-AT-MEMBER-FLOOR",
@@ -8777,9 +8819,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B15-F04-DOMAIN-FACADES",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "Affiliates, dashboard, meetings and remittances under a federation were copies of the federation item route; all answer 501.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-FED-FEDERATION-WRITES-REFUSED-NO-ROUTE-MAINTAINS-THE-REGISTER",
@@ -8811,9 +8860,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B15-F04-DOMAIN-FACADES",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "federations/benchmark/grievances answered grievance rows as a benchmark; it answers 501.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-FED-LOCALS-PATHS-SERVE-BARGAINING-UNITS-NOT-LOCAL-UNIONS",
@@ -8828,9 +8884,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B15-F04-DOMAIN-FACADES",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "locals and locals/[id] served bargaining units as local unions; both answer 501.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-FED-LOCALS-READABLE-AT-MEMBER-FLOOR-WITH-NOTES-AND-OFFICER-IDS",
@@ -8862,9 +8925,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B15-F04-DOMAIN-FACADES",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "The locals routes no longer write bargaining-unit fields at the steward floor; they answer 501.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-FED-LOCALS-DELETE-ARCHIVES-STATUS-WITHOUT-ARCHIVED-AT",
@@ -9140,9 +9210,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B15-F04-DOMAIN-FACADES",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "jurisdiction/clc-compliance and validate-deadline served bargaining-unit rows with no validation; both answer 501. The deadline calculation paths the UI uses are separate routes and are unchanged.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-JUR-ALIAS-WRAPPERS-CARRY-AN-ALWAYS-TRUE-ORG-GUARD",
@@ -9368,9 +9445,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B15-F04-DOMAIN-FACADES",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "healthwelfare/plans answered the per-capita remittance ledger under a plan name at the member floor; it answers 501.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-JUR-MEETING-ROOM-BOOKINGS-PATH-IS-THE-ROOM-ITEM-DELETE-ARCHIVES-THE-ROOM",
@@ -9977,9 +10061,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B15-F04-DOMAIN-FACADES",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "movement-insights/trends served stored analytics rows, not the consent-gated aggregate the dashboard uses; it answers 501.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-MOB-NOTIFICATION-READS-ANSWER-200-WITH-NO-NOTIFICATIONS-WHEN-THE-QUERY-FAILS",
@@ -11756,9 +11847,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B15-F04-DOMAIN-FACADES",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "organizer/impact served organizer task rows as impact metrics; it answers 501.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-ORG-ORGANIZER-TASKS-READABLE-BY-EVERY-STEWARD-WITH-MEMBER-CASE-AND-GRIEVANCE-REFERENCES",
@@ -12103,9 +12201,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B15-F04-DOMAIN-FACADES",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "portal/documents served CMS pages with no portal principal; it answers 501.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-PEN-PORTAL-DOCUMENT-LIST-RETURNS-EVERY-PAGE-ROW-AND-IGNORES-ROLE-AND-AUTH-COLUMNS",
@@ -12137,9 +12242,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B15-F04-DOMAIN-FACADES",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "portal/documents/upload received no file and stored a caller-written URL; it answers 501, so no URL is stored.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-PEN-PORTAL-POST-LETS-A-STEWARD-SET-STATUS-PUBLISHED-AND-ACCESS-COLUMNS-AROUND-THE-EDITORIAL-WORKFLOW",
@@ -13761,9 +13873,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B15-F04-DOMAIN-FACADES",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "reports/[id]/run and reports/[id]/execute were the report item route, so their DELETE removed the report; both answer 501. Ad-hoc execution is POST /api/reports/execute.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-RPT-SHARE-ITEM-PATH-SHARES-NOTHING-AND-ITS-DELETE-REMOVES-THE-REPORT",
@@ -14963,9 +15082,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B15-F04-DOMAIN-FACADES",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "storage/usage and storage/cleanup served media-library rows and computed or deleted nothing; both answer 501.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-IDS-STORAGE-POST-INSERTS-A-CALLER-WRITTEN-MEDIA-ROW-WITH-ANY-FILE-URL-SIZE-AND-UPLOADER",
@@ -15038,9 +15164,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B15-F04-DOMAIN-FACADES",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "support/metrics answers 501 (batch B09), so a steward can no longer store a notification for any user through it.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-CRUD-SUPPORT-TICKET-PATHS-SERVE-NOTIFICATION-ROWS-AND-ASSIGN-AND-COMMENTS-ARE-THE-SAME-ITEM-ROUTE",

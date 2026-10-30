@@ -41,6 +41,13 @@ describe('roster facade routes', () => {
       'organizing/sequences/[id]/enroll', 'organizing/support-percentage', 'organizing/workplace-mapping', 'continuity/inheritance',
       'onboarding/readiness', 'onboarding/transfers', 'reports/[id]/share', 'upload', 'enterprise/integrations', 'events/[id]/occurrences',
       'ml/monitoring/drift', 'ml/monitoring/usage', 'ml/predictions/claim-outcome', 'ml/predictions/timeline', 'ml/predictions/workload-forecast',
+      'clc/dashboard', 'clc/remittances', 'clc/sync', 'cope/canvassing', 'cope/officials', 'education/certifications/generate',
+      'education/certifications/renewal-reminders', 'education/completions/certificates', 'education/notification-preferences', 'exports', 'exports/[id]',
+      'exports/csv', 'exports/excel', 'exports/pdf', 'federations/[id]/affiliates', 'federations/[id]/dashboard', 'federations/[id]/meetings',
+      'federations/[id]/remittances', 'federations/benchmark/grievances', 'jurisdiction/clc-compliance', 'jurisdiction/validate-deadline', 'locals',
+      'locals/[id]', 'organizer/impact', 'portal/documents', 'portal/documents/upload', 'storage/cleanup', 'storage/usage', 'clauses/search',
+      'movement-insights/trends', 'arbitration/precedents/[id]/citations', 'arbitration/precedents/[id]/documents', 'arbitration/precedents/search',
+      'reports/[id]/execute', 'reports/[id]/run', 'healthwelfare/plans',
       'ml/recommendations', 'ml/predictions/churn-risk', 'ml/monitoring/alerts', 'billing/send-invoice', 'compliance/data-classification-policy', 'onboarding/smart-defaults', 'continuity/archives', 'continuity/docs',
     ];
     for (const route of converted) {

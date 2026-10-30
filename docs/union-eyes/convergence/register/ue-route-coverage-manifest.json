@@ -8,12 +8,12 @@
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 12,
    "CRON_SECRET": 2,
-   "CRUD_FACTORY": 197,
+   "CRUD_FACTORY": 161,
    "DELEGATED": 19,
    "NONE": 48,
    "ORG_AUTH": 53,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 163,
+   "RETIRED": 199,
    "ROLE_AUTH": 120,
    "SESSION_AUTH": 64,
    "WEBHOOK_SIGNATURE": 4,
@@ -24,12 +24,12 @@
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 8,
    "CRON_SECRET": 1,
-   "CRUD_FACTORY": 197,
+   "CRUD_FACTORY": 161,
    "DELEGATED": 12,
    "NONE": 8,
    "ORG_AUTH": 32,
    "PLATFORM_AUTH_HANDLER": 7,
-   "RETIRED": 159,
+   "RETIRED": 195,
    "ROLE_AUTH": 71,
    "SESSION_AUTH": 35,
    "WEBHOOK_SIGNATURE": 4,
@@ -39,16 +39,16 @@
    "ATOMIC": 147,
    "ATOMIC_SERVICE": 151,
    "COMPUTE_ONLY": 35,
-   "CRUD_ATOMIC": 198,
+   "CRUD_ATOMIC": 162,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 23,
    "NO_WRITES_FOUND": 14,
-   "NONE": 156
+   "NONE": 192
   },
   "mutatingByData": {
    "AMBIENT_DB": 14,
-   "CRUD_TENANT_TX": 198,
-   "NONE": 293,
+   "CRUD_TENANT_TX": 162,
+   "NONE": 329,
    "SYSTEM_CONTEXT": 63,
    "TENANT_TX": 158
   }
@@ -1834,11 +1834,11 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "arbitration/precedents/[id]/documents/route.ts",
@@ -1848,11 +1848,11 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "arbitration/precedents/[id]/route.ts",
@@ -1888,11 +1888,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "arbitrations/[id]/route.ts",
@@ -3508,11 +3508,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "clc/dashboard/route.ts",
@@ -3521,11 +3521,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "clc/remittances/route.ts",
@@ -3534,11 +3534,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "clc/sync/route.ts",
@@ -3547,11 +3547,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "cnesst/anti-scab/[id]/route.ts",
@@ -4539,11 +4539,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "cope/officials/route.ts",
@@ -4552,11 +4552,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "correspondence/[id]/approve/route.ts",
@@ -5658,11 +5658,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "education/certifications/renewal-reminders/route.ts",
@@ -5671,11 +5671,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "education/certifications/route.ts",
@@ -5697,11 +5697,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "education/completions/route.ts",
@@ -5736,11 +5736,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "education/programs/[id]/enrollments/route.ts",
@@ -6914,11 +6914,11 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "exports/csv/route.ts",
@@ -6927,11 +6927,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "exports/excel/route.ts",
@@ -6940,11 +6940,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "exports/pdf/route.ts",
@@ -6953,11 +6953,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "exports/route.ts",
@@ -6966,11 +6966,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "extensions/[id]/route.ts",
@@ -7092,11 +7092,11 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "federations/[id]/dashboard/route.ts",
@@ -7106,11 +7106,11 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "federations/[id]/meetings/route.ts",
@@ -7120,11 +7120,11 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "federations/[id]/remittances/route.ts",
@@ -7134,11 +7134,11 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "federations/[id]/route.ts",
@@ -7161,11 +7161,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "federations/route.ts",
@@ -8343,11 +8343,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "icra/[assessmentId]/answer/route.ts",
@@ -8651,11 +8651,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "jurisdiction/validate-deadline/route.ts",
@@ -8664,11 +8664,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "knowledge-base/[id]/route.ts",
@@ -8738,11 +8738,11 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "locals/route.ts",
@@ -8751,11 +8751,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "location/consent/route.ts",
@@ -9538,11 +9538,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "negotiations/route.ts",
@@ -10177,11 +10177,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "organizing/assignments/[id]/route.ts",
@@ -10927,11 +10927,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "portal/documents/upload/route.ts",
@@ -10940,11 +10940,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "portal/dues/balance/route.ts",
@@ -11170,11 +11170,11 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "reports/[id]/route.ts",
@@ -11198,11 +11198,11 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "reports/[id]/share/route.ts",
@@ -11673,11 +11673,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "storage/usage/route.ts",
@@ -11686,11 +11686,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "strike-fund/dashboard/route.ts",

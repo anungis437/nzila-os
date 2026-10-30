@@ -49,7 +49,7 @@ describe('generic CRUD governance (UE-CONV-K-007)', () => {
   })
 
   it.each([
-    ['claims', 'OWN_ROWS_READ'], ['grievances', 'OWN_ROWS_READ'], ['documents', 'DENIED'], ['data_subject_access_requests', 'SUBJECT_OWNED'], ['user_consents', 'SUBJECT_OWNED'],
+    ['claims', 'OWN_ROWS_READ'], ['documents', 'DENIED'], ['data_subject_access_requests', 'SUBJECT_OWNED'], ['user_consents', 'SUBJECT_OWNED'],
     ['organization_members', 'READ_ONLY'], ['dues_transactions', 'READ_ONLY'], ['per_capita_remittances', 'DENIED'],
     ['integration_api_keys', 'DENIED'], ['poll_votes', 'DENIED'], ['security_events', 'DENIED'],
   ])('keeps %s as %s', (name, expected) => {

@@ -29,7 +29,7 @@ const DENIED = [
   'per_capita_remittances',
 ] as const
 
-const OWN_ROWS_READ = ['grievances', 'claims', 'claim_deadlines'] as const
+const OWN_ROWS_READ = ['claims', 'claim_deadlines'] as const
 
 const READ_ONLY = [
   // Analytics metrics are computed evidence, not steward-authored records. A generic role floor must never
@@ -43,11 +43,11 @@ const READ_ONLY = [
 const OPERATIONAL = [
   'anti_scab_violations', 'arbitration_decisions', 'arbitrations',
   'bargaining_proposals', 'bargaining_units', 'break_policies', 'calendar_events', 'calendars', 'campaigns', 'case_studies',
-  'cba_clauses', 'clc_sync_log', 'cms_media_library', 'cms_pages', 'cnesst_filings', 'committees', 'communication_preferences',
+  'cba_clauses', 'cnesst_filings', 'committees', 'communication_preferences',
   'course_registrations', 'course_sessions', 'donation_campaigns', 'employers', 'hazard_reports',
   'insight_recommendations', 'joint_hs_committees', 'kpi_configurations', 'meeting_rooms',
   'member_certifications', 'member_segments', 'message_templates', 'negotiations', 'newsletter_distribution_lists',
-  'organizer_tasks', 'organizing_campaigns', 'pay_equity_exercises', 'pilot_applications', 'ppe_equipment',
+  'organizing_campaigns', 'pay_equity_exercises', 'pilot_applications', 'ppe_equipment',
   'preventive_withdrawals', 'push_devices', 'reports', 'right_of_refusal_events', 'safety_inspections',
   'sms_campaigns', 'sms_conversations', 'sms_messages', 'survey_responses', 'surveys', 'testimonials', 'training_courses',
   'training_programs', 'trend_analyses', 'user_notification_preferences', 'wcb_employer_assessments', 'workplace_incidents', 'worksites',

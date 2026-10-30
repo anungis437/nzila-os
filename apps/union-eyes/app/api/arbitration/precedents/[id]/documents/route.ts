@@ -1,23 +1,27 @@
 /**
- * CRUD item route for arbitrationDecisions
+ * GET PATCH DELETE /api/arbitration/precedents/:id/documents
+ *
+ * Not implemented. This path advertises an operation of its own but was a byte-for-byte copy of the arbitration decision item route (the decision row, not its documents). It answered with that other behaviour as though
+ * it were the operation, so it now answers HTTP 501 and changes and returns nothing.
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { arbitrationDecisions } from '@/db/schema';
+import { withApi, ApiError } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, PATCH, DELETE } = crudRoutes({
-  table: arbitrationDecisions,
-  pk: 'id',
-  tags: ["Bargaining"],
-  orgScoped: true,
-  unscopedByDesign: 'shared cross-tenant reference data with no organization discriminator; writes require a platform-elevated role',
-  itemRoute: true,
-  readRole: 'member',
-  // arbitration_decisions is shared, cross-tenant reference data (no org
-  // discriminator - orgScoped is a no-op here). writeRole must therefore be
-  // a genuine platform-elevated role, never an ordinary per-tenant role
-  // (round 58D fix; same defect class round 52 fixed for dataClassificationPolicy).
-  writeRole: 'content_manager',
-});
-export { GET, PATCH, DELETE };
+const handler = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ['Bargaining'],
+      summary: '/api/arbitration/precedents/:id/documents (not implemented)',
+      description: 'Not implemented: answers 501.',
+    },
+  },
+  async () => {
+    throw ApiError.notImplemented('/api/arbitration/precedents/:id/documents is not implemented: it performed no operation of its own.');
+  },
+);
+
+export const GET = handler;
+export const PATCH = handler;
+export const DELETE = handler;
