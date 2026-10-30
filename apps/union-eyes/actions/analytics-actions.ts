@@ -88,7 +88,7 @@ export async function calculateMetrics(params: {
         );
         metricValue = claimsCount.length;
         metricUnit = 'count';
-        metadata = { claimIds: claimsCount.map(c => c.claimId) };
+        metadata = { claimsCount: claimsCount.length };
         break;
         
       case 'resolution_time':
