@@ -94,6 +94,7 @@ test('CLI writes a minimal, non-overwritable receipt only after authenticated re
   try {
     const f=fixture(), now=Date.now()
     f.run.created_at=new Date(now-600000).toISOString()
+    f.run.run_started_at=new Date(now-590000).toISOString()
     f.approvals[0].created_at=new Date(now-300000).toISOString()
     for (const name of ['environment','run','approvals']) {
       writeFileSync(join(dir,name+'.json'),JSON.stringify(f[name]))
