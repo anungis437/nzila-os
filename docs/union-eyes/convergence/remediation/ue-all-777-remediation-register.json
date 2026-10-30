@@ -76,7 +76,7 @@
     "note": "Milestones and evidence are transcribed as prior claims; this run has not independently re-executed those proofs."
   },
   "lastInspectedBranch": "agents/ue-cursor-final-closure",
-  "lastInspectedCommit": "3bf040002bd32de32843e15bd0662c1c933ee7fc",
+  "lastInspectedCommit": "08b6ddc24b9bf1446ed4b0da5ab6bcb88212b471",
   "summary": {
     "allRecordedDefects": 777,
     "bySeverity": {
@@ -86,7 +86,7 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 22,
+    "withCurrentRunSourceOrRegressionWork": 23,
     "closed": 0,
     "overallGO": false
   },
@@ -255,17 +255,31 @@
     {
       "sha": "3924e6b7914a7c716d713265370a38c36a199089",
       "description": "Fix 0B.8 health-safety incident trend cross-tenant aggregation: authenticated tenant only, explicit SQL predicate in daily/monthly queries, transaction RLS binding, no query-selected org or unscoped fallback; new adversarial unit tests pending exact-SHA CI."
-    }
-  ,
+    },
     {
       "sha": "56d01efc994254cfbc4fe00aa2c492dd110fab7c",
       "sourceSha": "ac79a84d423427b3edc89f3beefc6c940604d776",
       "description": "Contain two 0B.10 HIGH findings: platform MRR/churn/unit-economics now return honest 501 rather than fabricated zeros; confidential pension trustee meeting GETs require pension financial administrator, tenant-bound transaction and mandatory read audit with bounded pagination. Add adversarial unit tests and reconcile dashboard export guard in mutable 995-route manifest. No native/runtime or institutional acceptance claimed."
-    }
-  ,
+    },
     {
       "sha": "af1600433a9a509fa5b0def23f1a712c22c51f62",
       "description": "Fail closed for 0B.10 pension T4A fabricated-generation defect: remove unaudited administrator-typed income generation, return honest 501 pending authoritative payment reconciliation and tax slip workflow; preserve restricted GET, add focused regression and reconcile route-coverage scanner/manifest. No runtime acceptance or institutional authorization claimed."
+    },
+    {
+      "sha": "c7c78bdd03305f26ab718b681b141b5f9b830c58",
+      "description": "Fix trustee pagination regex rejecting valid numeric page/pageSize and bind trustee meeting POST RLS to authenticated actor; source only."
+    },
+    {
+      "sha": "d607f04d510e480881f9d344a9afcd87125b5fdf",
+      "description": "Adversarial trustee pagination, cross-tenant body spoofing, actor-bound write and mandatory audit failure tests; CI pending."
+    },
+    {
+      "sha": "cc37df3d658cf295479ea27f0eb452e39d604593",
+      "description": "Contain recorded trustee minutes overwrite/hard-delete defect: explicit 501 for PATCH/DELETE until governed immutable revision and retention; preserve restricted reads."
+    },
+    {
+      "sha": "08b6ddc24b9bf1446ed4b0da5ab6bcb88212b471",
+      "description": "Add fail-closed trustee meeting PATCH/DELETE tests, no data writes, no-store; source-level only."
     }
   ],
   "records": [
@@ -10386,8 +10400,12 @@
         ],
         "sourceCommit": "ac79a84d423427b3edc89f3beefc6c940604d776",
         "testCommit": "56d01efc994254cfbc4fe00aa2c492dd110fab7c",
-        "repair": "Restricts confidential meeting list and item GET to existing pension financial administrator role, binds tenant and actor in RLS transaction, audits read before response, paginates list, refuses missing context and unknown item.",
-        "limits": "Engineering role floor is not an issued trustee mandate. Native PG15/16, actual member/treasurer HTTP/browser isolation, audit persistence and full trustee administration journeys are not yet verified."
+        "repair": "Restricts confidential meeting list and item GET to existing pension financial administrator role, binds tenant and actor in RLS transaction, audits read before response, paginates list, refuses missing context and unknown item. Fixed overescaped numeric pagination regex and bound meeting POST transaction to authenticated actor. Added valid pagination, identity-spoofing and audit-failure regressions.",
+        "limits": "Latest source/test changes unverified in CI, native PG15/16 and real HTTP/browser. Engineering role floor remains unratified; full trustee journey and durable audit acceptance outstanding.",
+        "commits": [
+          "c7c78bdd03305f26ab718b681b141b5f9b830c58",
+          "d607f04d510e480881f9d344a9afcd87125b5fdf"
+        ]
       },
       "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
@@ -10405,8 +10423,22 @@
       "title": "PATCH and DELETE on /api/pension/trustee-meetings/[id] let the secretary_treasurer rewrite the minutes, agenda, attendees, date and status of a meeting that is already completed, or delete it permanently, with no state rule, no approval of the minutes, no version of the previous text and no trustee involvement; the audit row lists only the changed field names and the status or the title, so the previous minutes cannot be recovered or compared, and the attendees and minutes are unbounded untyped input.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_CONTAINED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/pension/trustee-meetings/[id]/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/pension-trustee-meeting-confidentiality.route.test.ts"
+        ],
+        "commits": [
+          "cc37df3d658cf295479ea27f0eb452e39d604593",
+          "08b6ddc24b9bf1446ed4b0da5ab6bcb88212b471"
+        ],
+        "repair": "Removed mutable PATCH and destructive DELETE behavior for confidential trustee meeting minutes, agenda and attendees. Authenticated pension-admin endpoints explicitly return 501 with no-store until version history, legal retention, amendments and disposal are governed.",
+        "limits": "Containment only; legitimate amendments and governed disposal journey not implemented. Test changes unverified at this SHA; no native or HTTP/browser acceptance and no institutional mandate."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
     },
@@ -14611,6 +14643,20 @@
       "financial": "PASS",
       "native": "PASS_PG15_AND_PG16",
       "security": "PASS",
+      "httpBrowser": "PASS",
+      "appFloor": "PASS",
+      "governance": "PASS",
+      "go": "NO_GO"
+    },
+    {
+      "inspectedSha": "5e3557415339c32184716ecf891b687ec3f5a933",
+      "evidence": "Exact-SHA GitHub Actions on 2026-10-30: whole application Vitest FAIL 2 trustee meeting confidentiality tests (21228 passed, 28 skipped); root cause overescaped pagination digit regex. Whole contract, financial, security, native PostgreSQL 15/16, disposable HTTP/browser, App Floor and governance attestation PASS. Subsequent patches and tests not verified by these results.",
+      "source": "PATCHED_AFTER_SHA",
+      "unit": "FAIL_2_PAGINATION_TESTS",
+      "contract": "PASS",
+      "financial": "PASS",
+      "security": "PASS",
+      "native": "PASS_PG15_AND_PG16",
       "httpBrowser": "PASS",
       "appFloor": "PASS",
       "governance": "PASS",
