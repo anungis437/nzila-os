@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 23,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 2,
-    "engineeringRemaining": 775,
+    "engineeringCorrected": 5,
+    "engineeringRemaining": 772,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately."
   },
   "verificationPolicy": {
@@ -1164,7 +1164,13 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/breaks/route.ts",
+        "explanation": "Dedicated break collection and item handlers resolve active organization_members.id from authenticated userId and scope reads/amendments to that member.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B3-BREAKS-CREATE-FOR-OTHER-MEMBER",
@@ -1181,7 +1187,13 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/breaks/route.ts",
+        "explanation": "Strict create schema rejects caller-supplied memberId and binds insert memberId to authenticated active organization member; transaction includes atomic audit.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B3-KPI-ALERT-RECIPIENTS-MEMBER-READ",
@@ -1933,7 +1945,13 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/lib/api/crud-factory.ts",
+        "explanation": "Generic item PATCH enters locked transaction whenever lockedAuthCheck exists; DELETE independently acquires FOR UPDATE and invokes lockedAuthCheck before mutation.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CALENDAR-EVENTS-PERSONAL-CALENDAR-LEAK",
