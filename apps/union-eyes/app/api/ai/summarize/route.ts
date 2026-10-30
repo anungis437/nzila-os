@@ -16,11 +16,12 @@ import { db } from '@/db/db';
 import { knowledgeBase, exitInterviews } from '@/db/schema';
 import { SENSITIVITY_MIN_ROLE } from '@/lib/knowledge-transfer/governance/consent-controls';
 import { eq, and } from 'drizzle-orm';
-import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_SYSTEM_ORG_ID, UE_PROFILES } from '@/lib/ai/ai-client';
+import { buildOrgAiTrace, toGatewayDataClass, getAiClient, UE_APP_KEY, UE_SYSTEM_ORG_ID, UE_PROFILES } from '@/lib/ai/ai-client';
 import { logger } from '@/lib/logger';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { enforceAISafety } from '@nzila/policies';
+import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -124,7 +125,13 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       : `Summarize the following text concisely in approximately ${max_length} characters. Focus on the most important points.`;
 
     const ai = getAiClient();
-    const result = await ai.generate({
+    const result = await performAuditedOperation({
+      organizationId: orgId,
+      userId: context.userId,
+      action: 'ai.summarize.generate',
+      resourceType: 'ai_invocations',
+      ...(document_id ? { resourceId: document_id } : {}),
+    }, () => ai.generate({
       orgId: UE_SYSTEM_ORG_ID,
       trace: buildOrgAiTrace(orgId),
       appKey: UE_APP_KEY,
@@ -133,9 +140,9 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         { role: 'system', content: systemPrompt },
         { role: 'user', content: textToSummarize },
       ],
-      dataClass: 'internal',
+      dataClass: toGatewayDataClass('confidential'),
       params: { temperature: 0.3, maxTokens: Math.min(max_length, 2000) },
-    });
+    }));
 
     return NextResponse.json(buildCanonicalAiOutput({
       payload: {
@@ -166,6 +173,8 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       domain: 'labour',
     }));
   } catch (error) {
+    const refused = operationAuditResponse(error);
+    if (refused) return NextResponse.json(refused.body, { status: refused.status });
     logger.error('Summarization failed', { error });
     return NextResponse.json({ error: 'Summarization failed' }, { status: 500 });
   }
