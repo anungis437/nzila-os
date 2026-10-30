@@ -278,8 +278,9 @@ describe("ChatbotService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     bot = new ChatbotService();
-    // Session lookup
-    mocks.mockSelectLimit.mockReturnValue(limitResult([session]));
+    // Reset queued one-shot lookups: a fail-closed moderation rejection must not
+    // leak an unused history lookup into the next test's session ownership check.
+    mocks.mockSelectLimit.mockReset().mockReturnValue(limitResult([session]));
     mocks.mockSelectOffset.mockResolvedValue([]);
     // AI responses
     mocks.mockAiGenerate.mockResolvedValue({
@@ -301,8 +302,15 @@ describe("ChatbotService", () => {
     ]);
     mocks.mockInsertValues.mockReturnValue({ returning: mocks.mockInsertReturning });
     mocks.mockUpdateWhere.mockResolvedValue(undefined);
-    // No OPENAI_API_KEY → skip safety check
-    delete process.env.OPENAI_API_KEY;
+    // Use an explicit, valid moderation-provider response. A missing key must
+    // fail closed in production; it must not silently disable moderation in tests.
+    process.env.OPENAI_API_KEY = "test-key";
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        results: [{ flagged: false, categories: {}, category_scores: {} }],
+      }),
+    }));
   });
 
   it("sendMessage throws if session not found", async () => {
@@ -324,6 +332,26 @@ describe("ChatbotService", () => {
     await expect(
       bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-2", content: "hi" }),
     ).rejects.toThrow("Session not found");
+  });
+
+  it("sendMessage refuses missing moderation credentials without calling the model or storing messages", async () => {
+    delete process.env.OPENAI_API_KEY;
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]);
+    await expect(bot.sendMessage({
+      sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "hello",
+    })).rejects.toThrow("Content safety system unavailable");
+    expect(mocks.mockAiGenerate).not.toHaveBeenCalled();
+    expect(mocks.mockInsertValues).not.toHaveBeenCalled();
+  });
+
+  it("sendMessage refuses a malformed moderation response without calling the model", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ results: [] }) }));
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]);
+    await expect(bot.sendMessage({
+      sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "hello",
+    })).rejects.toThrow("Content safety system unavailable");
+    expect(mocks.mockAiGenerate).not.toHaveBeenCalled();
+    expect(mocks.mockInsertValues).not.toHaveBeenCalled();
   });
 
   it("sendMessage returns assistant message", async () => {
@@ -401,6 +429,7 @@ describe("ChatbotService", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
+        ok: true,
         json: () => Promise.resolve({
           results: [
             {
