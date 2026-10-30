@@ -594,7 +594,7 @@ describe('PERSONA_ACCESS_001 — API routes backing dashboard have auth and DB s
           // An unavailable business journey must not masquerade as a working database-backed API.
           // Preserve its explicit 501 until a real notes model, authority and storage are implemented.
           expect(content).toContain('ApiError.notImplemented(')
-          expect(content).toMatch(/required:\\s*true/)
+          expect(content).toMatch(/required:\s*true/)
           expect(content).not.toContain('crudRoutes(')
           return
         }
