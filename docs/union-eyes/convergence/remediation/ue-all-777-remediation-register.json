@@ -10182,7 +10182,9 @@
         ],
         "commits": [
           "8feaa297fb53bb7a177d5cd91aa76e190f985330",
-          "e3917975efa9ec7880f9d2a353514a2e23bd3624"
+          "e3917975efa9ec7880f9d2a353514a2e23bd3624",
+          "88d36be7a636534bea817a655b80ed29027546bf",
+          "2fd946cada1b33a4c053e3347fcdd9680f28e56e"
         ],
         "limits": "Exact-HEAD native PG15/16 and HTTP/browser acceptance pending."
       },
@@ -10192,7 +10194,7 @@
       "engineeringCorrection": {
         "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "path": "apps/union-eyes/app/api/organizations/[id]/route.ts",
-        "explanation": "Grievance aggregates now execute in explicit tenant RLS transaction bound to authorized path organization, while child counts execute under explicit system context; no bare pooled query.",
+        "explanation": "Claims aggregates execute in explicit tenant RLS context for direct members or in a system transaction after verified platform/parent-admin authority; both paths predicate the target organization. Child counts execute in explicit system context. No bare pooled query or silent tenant mismatch.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
