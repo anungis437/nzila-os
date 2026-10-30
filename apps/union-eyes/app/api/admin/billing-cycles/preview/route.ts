@@ -8,6 +8,7 @@
 
 import { NextRequest } from 'next/server';
 import { BillingCycleService } from '@/lib/services/billing-cycle-service';
+import { requireBillingCycleAuthority } from '@/lib/finance/billing-cycle-authority';
 import { withApiAuth, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
 import {
   ErrorCode,
@@ -56,6 +57,12 @@ export const POST = withApiAuth(async (request: NextRequest) => {
     }
 
     const { organizationId, frequency, periodStart, periodEnd } = validation.data;
+
+    try {
+      await requireBillingCycleAuthority(organizationId, user.id);
+    } catch {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Live financial execution mandate required for target organization');
+    }
 
     // Calculate period dates if not provided
     let start: Date;
