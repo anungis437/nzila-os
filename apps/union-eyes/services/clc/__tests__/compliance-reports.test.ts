@@ -171,6 +171,10 @@ describe('clc compliance-reports', () => {
   });
 
   it('enforces a tenant predicate on every CLC report and forecasting read', async () => {
+    // The table-aware mock does not apply SQL WHERE clauses by itself.
+    // Limit this fixture to the authorized tenant before checking every
+    // captured SQL predicate; otherwise the mock invents foreign-org rows.
+    state.remittances = state.remittances.filter((r) => r.fromOrganizationId === 'org-a');
     await generateAnnualComplianceReport(YEAR, 'org-a');
     await analyzeMultiYearTrends({ years: 3, endYear: YEAR, organizationId: 'org-a' });
     await forecastRemittances(2, 'org-a');

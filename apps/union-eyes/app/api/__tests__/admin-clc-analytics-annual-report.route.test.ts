@@ -19,7 +19,7 @@ vi.mock('@/lib/rate-limiter', () => ({
 vi.mock('@/services/clc/compliance-reports', () => ({ generateAnnualComplianceReport: m.generateAnnualComplianceReport }));
 vi.mock('@/lib/middleware/api-security', () => ({ logApiAuditEvent: m.logApiAuditEvent }));
 vi.mock('@/lib/api/standardized-responses', () => ({
-  ErrorCode: { VALIDATION_ERROR: 'VALIDATION_ERROR', INTERNAL_ERROR: 'INTERNAL_ERROR' },
+  ErrorCode: { VALIDATION_ERROR: 'VALIDATION_ERROR', FORBIDDEN: 'FORBIDDEN', INTERNAL_ERROR: 'INTERNAL_ERROR' },
   standardErrorResponse: m.standardErrorResponse,
 }));
 
@@ -31,12 +31,12 @@ describe('admin/clc/analytics/annual-report route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.withRoleAuth.mockImplementation((_role: string, handler: any) =>
-      (request: NextRequest, context: any = { userId: 'u1' }) => handler(request, context));
+      (request: NextRequest, context: any = { userId: 'u1', organizationId: 'org-a' }) => handler(request, context));
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0 });
     m.createRateLimitHeaders.mockReturnValue({ 'x-ratelimit-remaining': '49' });
     m.generateAnnualComplianceReport.mockResolvedValue({ year: 2026, findings: [] });
     m.standardErrorResponse.mockImplementation((code: string, message: string) =>
-      new Response(JSON.stringify({ code, message }), { status: code === 'VALIDATION_ERROR' ? 400 : 500 }));
+      new Response(JSON.stringify({ code, message }), { status: code === 'VALIDATION_ERROR' ? 400 : code === 'FORBIDDEN' ? 403 : 500 }));
   });
 
   it('returns 429 when rate limit is exceeded', async () => {
@@ -74,4 +74,13 @@ describe('admin/clc/analytics/annual-report route', () => {
 
     expect(response.status).toBe(500);
   });
+  it('denies a report when the authenticated administrator has no organization context', async () => {
+    const { GET } = await loadRoute();
+    m.withRoleAuth.mockImplementationOnce((_role: string, handler: any) =>
+      (request: NextRequest) => handler(request, { userId: 'u1', organizationId: null }));
+    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/annual-report?year=2026'));
+    expect(response.status).toBe(403);
+    expect(m.generateAnnualComplianceReport).not.toHaveBeenCalled();
+  });
+
 });
