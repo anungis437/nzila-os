@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 23,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 11,
-    "engineeringRemaining": 766,
+    "engineeringCorrected": 12,
+    "engineeringRemaining": 765,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately."
   },
   "verificationPolicy": {
@@ -911,7 +911,13 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/lib/ai/grievance-triage.ts; apps/union-eyes/lib/ai/clause-reasoning.ts; apps/union-eyes/lib/ai/steward-copilot.ts",
+        "explanation": "All three grievance-context AI services now require live kernel-backed effective case access for the caller before fetching case content or invoking a model, including direct service calls.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B2-AI-DATA-CLASS-DOWNGRADE",
