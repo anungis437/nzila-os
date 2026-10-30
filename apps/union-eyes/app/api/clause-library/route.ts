@@ -87,6 +87,7 @@ export const GET = withApi(
             clauseText: sharedClauseLibrary.clauseText,
             clauseType: sharedClauseLibrary.clauseType,
             sharingLevel: sharedClauseLibrary.sharingLevel,
+            isAnonymized: sharedClauseLibrary.isAnonymized,
             sector: sharedClauseLibrary.sector,
             province: sharedClauseLibrary.province,
             effectiveDate: sharedClauseLibrary.effectiveDate,
@@ -136,10 +137,11 @@ export const GET = withApi(
         effectiveDate: r.effectiveDate,
         expiryDate: r.expiryDate,
         viewCount: r.viewCount,
-        sourceOrganization: {
-          id: r.sourceOrganizationId,
-          organizationName: r.organizationName,
-        },
+        // A shared anonymized clause must not reveal its source union by
+        // returning the organization id/name in the collection response.
+        sourceOrganization: r.isAnonymized && r.sourceOrganizationId !== organizationId
+          ? undefined
+          : { id: r.sourceOrganizationId, organizationName: r.organizationName },
         createdAt: r.createdAt,
       }));
 
