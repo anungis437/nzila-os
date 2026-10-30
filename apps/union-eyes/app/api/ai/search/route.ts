@@ -17,12 +17,13 @@ import { buildCanonicalAiOutput } from '@nzila/ai-sdk';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { generateEmbedding } from '@/lib/services/ai/vector-search-service';
-import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_SYSTEM_ORG_ID, UE_PROFILES } from '@/lib/ai/ai-client';
+import { buildOrgAiTrace, toGatewayDataClass, getAiClient, UE_APP_KEY, UE_SYSTEM_ORG_ID, UE_PROFILES } from '@/lib/ai/ai-client';
 import { logger } from '@/lib/logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { enforceAISafety } from '@nzila/policies';
+import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -157,15 +158,21 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
           .join('\n\n');
 
         const ai = getAiClient();
-        const gen = await ai.generate({
+        const gen = await performAuditedOperation({
+      organizationId: orgId,
+      userId: context.userId,
+      action: 'ai.search-answer.generate',
+      resourceType: 'ai_invocations',
+      
+    }, () => ai.generate({
           orgId: UE_SYSTEM_ORG_ID,
           trace: buildOrgAiTrace(orgId),
           appKey: UE_APP_KEY,
           profileKey: UE_PROFILES.CHATBOT,
           input: `Answer the following question based ONLY on the provided context documents. If the documents don't contain enough information, say so.\n\nQuestion: ${query}\n\nContext:\n${contextText}`,
-          dataClass: 'internal',
+          dataClass: toGatewayDataClass('confidential'),
           params: { temperature: 0.3, maxTokens: 500 },
-        });
+        }));
         answer = gen.content;
       } catch (err) {
         logger.warn('AI answer generation failed, returning search results only', { error: err });
@@ -201,6 +208,8 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       count: hits.length,
     });
   } catch (error) {
+    const refused = operationAuditResponse(error);
+    if (refused) return NextResponse.json(refused.body, { status: refused.status });
     logger.error('Knowledge base search failed', { error });
     return NextResponse.json({ error: 'Search failed' }, { status: 500 });
   }
