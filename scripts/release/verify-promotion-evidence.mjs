@@ -22,8 +22,9 @@ export function computeSignedPayloadDigest(attestation) {
   const { signature, attestationDigest, ...payload } = attestation
   return sha256(Buffer.from(JSON.stringify(canonical(payload))))
 }
-export function verifyPromotionEvidence({ directory, expectedCommit, publicKeyPem, now = new Date() }) {
+export function verifyPromotionEvidence({ directory, expectedCommit, expectedRunId, publicKeyPem, now = new Date() }) {
   if (!/^[0-9a-f]{40}$/i.test(expectedCommit ?? '')) deny('missing/invalid expected commit SHA')
+  if (!/^[1-9][0-9]*$/.test(String(expectedRunId ?? ''))) deny('missing/invalid trusted staging run ID')
   if (!publicKeyPem || !publicKeyPem.includes('BEGIN PUBLIC KEY')) deny('independently provisioned verification key unavailable')
   const load = name => {
     let raw
@@ -32,12 +33,16 @@ export function verifyPromotionEvidence({ directory, expectedCommit, publicKeyPe
     try { obj = JSON.parse(raw.toString('utf8')) } catch { deny('malformed ' + name) }
     return { obj, raw }
   }
-  const manifest = load('artifact-manifest.json').obj
+  const manifestFile = load('artifact-manifest.json')
+  const manifest = manifestFile.obj
   const sbom = load('sbom.json')
   const attestation = load('release-attestation.json').obj
   if (manifest.source_workflow !== 'deploy-staging' ||
       manifest.commit_sha !== expectedCommit ||
       attestation.commitSha !== expectedCommit ||
+      String(manifest.run_id) !== String(expectedRunId) ||
+      String(attestation.stagingRunId) !== String(expectedRunId) ||
+      attestation.manifestDigest !== sha256(manifestFile.raw) ||
       manifest.attestation_ref !== 'release-attestation.json' ||
       attestation.version !== '2.0' ||
       attestation.environment !== 'staging') deny('source commit or provenance does not match')
@@ -61,7 +66,10 @@ export function verifyPromotionEvidence({ directory, expectedCommit, publicKeyPe
       attestation.sloGateResult !== 'pass' ||
       attestation.secretScanSummary?.ran !== true ||
       attestation.secretScanSummary?.clean !== true ||
-      attestation.trivySummary?.ran !== true) deny('mandatory recorded quality/security proof absent')
+      attestation.secretScanSummary?.findings !== 0 ||
+      attestation.trivySummary?.ran !== true ||
+      attestation.trivySummary?.critical !== 0 ||
+      attestation.trivySummary?.high !== 0) deny('mandatory recorded quality/security proof absent')
   if (!/^[0-9a-f]{64}$/i.test(attestation.lockfileHash ?? '') ||
       !Array.isArray(attestation.artifactDigests) ||
       !attestation.artifactDigests.length ||
@@ -92,7 +100,7 @@ if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.m
   const expectedCommit = process.argv[3]
   try {
     const result = verifyPromotionEvidence({
-      directory, expectedCommit,
+      directory, expectedCommit, expectedRunId: process.argv[4],
       publicKeyPem: process.env.ATTESTATION_VERIFY_PUBLIC_KEY,
     })
     console.log('Signed staging evidence verified for ' + result.commitSha)
