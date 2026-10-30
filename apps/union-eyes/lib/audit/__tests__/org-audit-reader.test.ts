@@ -58,8 +58,8 @@ describe('UE-INST-AUDIT-HISTORY-READERS — full audit exposure floor', () => {
       const src = readFileSync(resolve(appRoot, relativePath), 'utf8');
       expect(src).toContain('requireOrganizationAuditReader(userId, organizationId)');
       expect(src).toContain('.select(ORGANIZATION_AUDIT_PROJECTION)');
-      expect(src).not.toMatch(/\\.select\\(\\)/);
-      expect(src).toMatch(/rlsOrgContext:\\s*true/);
+      expect(src).not.toMatch(/\.select\(\)/);
+      expect(src).toMatch(/rlsOrgContext:\s*true/);
     }
   });
 
