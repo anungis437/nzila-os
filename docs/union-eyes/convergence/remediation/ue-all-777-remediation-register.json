@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 25,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 14,
-    "engineeringRemaining": 763,
+    "engineeringCorrected": 15,
+    "engineeringRemaining": 762,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately."
   },
   "verificationPolicy": {
@@ -1608,10 +1608,27 @@
       "title": "The audit item route returns the complete audit_logs row, with details and any recorded address and agent, to an officer role floor with no redaction by reader.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
+      "currentRun": {
+        "source": [
+          "apps/union-eyes/app/api/audits/[id]/route.ts"
+        ],
+        "tests": [
+          "apps/union-eyes/app/api/__tests__/audit-item-redaction.route.test.ts"
+        ],
+        "sourceState": "PATCHED_NOT_ACCEPTED",
+        "unitState": "PENDING_AT_EXACT_HEAD",
+        "nativeState": "PENDING_AT_EXACT_HEAD",
+        "runtimeState": "PENDING_AT_EXACT_HEAD"
+      },
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/audits/[id]/route.ts",
+        "explanation": "Officer-gated item read now uses tenant-bound transaction, explicit non-sensitive field projection and mandatory audit-read evidence; rejects invalid identifiers and missing organization.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B3-AUDITS-LEGACY-TABLE-NOT-CANONICAL",
