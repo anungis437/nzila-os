@@ -123,7 +123,7 @@ describe('ConversionRequestSchema', () => {
 describe('EntityCurrencyConfigSchema', () => {
   it('accepts valid config with defaults', () => {
     const result = EntityCurrencyConfigSchema.parse({
-      orgId: '00000000-0000-0000-0000-000000000001',
+      orgId: '00000000-0000-4000-8000-000000000001',
     })
     expect(result.functionalCurrency).toBe('CAD')
     expect(result.transactionCurrencies).toEqual(['CAD'])
@@ -133,7 +133,7 @@ describe('EntityCurrencyConfigSchema', () => {
 
   it('accepts full config', () => {
     const result = EntityCurrencyConfigSchema.parse({
-      orgId: '00000000-0000-0000-0000-000000000001',
+      orgId: '00000000-0000-4000-8000-000000000001',
       functionalCurrency: 'USD',
       transactionCurrencies: ['USD', 'CAD', 'EUR'],
       rateSource: 'ecb',
@@ -142,6 +142,13 @@ describe('EntityCurrencyConfigSchema', () => {
     expect(result.functionalCurrency).toBe('USD')
     expect(result.rateSource).toBe('ecb')
     expect(result.autoRevalue).toBe(true)
+  })
+
+  it('rejects legacy UUID-shaped identifiers without RFC 4122 version and variant bits', () => {
+    // Zod 4 deliberately rejects this formerly accepted, nonconformant fixture.
+    expect(() => EntityCurrencyConfigSchema.parse({
+      orgId: '00000000-0000-0000-0000-000000000001',
+    })).toThrow()
   })
 
   it('rejects non-UUID orgId', () => {
