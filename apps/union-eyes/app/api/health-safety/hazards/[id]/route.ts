@@ -11,7 +11,7 @@ const { GET, PATCH, DELETE } = crudRoutes({
   tags: ["Health-safety"],
   orgScoped: true,
   itemRoute: true,
-  readRole: 'member',
+  readRole: 'health_safety_rep',
   writeRole: 'admin',
 });
 export { GET, PATCH, DELETE };
