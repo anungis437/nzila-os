@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "invariant": "INV-31b \u2014 Raw DB import is distinguished from UNSAFE raw DB import. Every sensitive-domain route that touches the database directly must carry an explicit classification. Unclassified sensitive direct DB usage and forbidden-direct-db usage fail the contract test; all other classifications are tolerated (some are migration-tracked).",
+  "invariant": "INV-31b — Raw DB import is distinguished from UNSAFE raw DB import. Every sensitive-domain route that touches the database directly must carry an explicit classification. Unclassified sensitive direct DB usage and forbidden-direct-db usage fail the contract test; all other classifications are tolerated (some are migration-tracked).",
   "scope": {
     "appRoot": "apps/union-eyes",
     "sensitiveDomains": [
@@ -50,6 +50,10 @@
     "app/api/admin/ai-usage/route.ts": {
       "category": "allowed-admin-route",
       "reason": "Admin AI-usage analytics; RLS-guarded + admin auth."
+    },
+    "app/api/admin/organizations/route.ts": {
+      "category": "requires-rls-context",
+      "reason": "Tenant-scoped admin directory: withApi requires auth and a current organization, RLS org context is set, direct active organization administrator role is checked, and every organization/member query is explicitly restricted to that organization. Platform title alone is not authority."
     },
     "app/api/admin/database/health/route.ts": {
       "category": "allowed-admin-route",
