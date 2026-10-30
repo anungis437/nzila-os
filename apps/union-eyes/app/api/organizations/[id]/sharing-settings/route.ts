@@ -8,7 +8,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { organizationSharingSettings } from '@/db/schema';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -93,13 +93,16 @@ export async function PATCH(req: NextRequest, params: Params) {
     const existing = await tx.select({ id: organizationSharingSettings.id })
       .from(organizationSharingSettings)
       .where(eq(organizationSharingSettings.organizationId, access.id))
-      .limit(2);
+      .limit(2).for('update');
     if (existing.length !== 1) {
       return { error: 'The organization sharing record requires single-owner storage reconciliation', status: 409 } as const;
     }
     const [updated] = await tx.update(organizationSharingSettings)
       .set({ ...patch, updatedAt: new Date() })
-      .where(eq(organizationSharingSettings.id, existing[0].id))
+      .where(and(
+        eq(organizationSharingSettings.id, existing[0].id),
+        eq(organizationSharingSettings.organizationId, access.id),
+      ))
       .returning();
     if (!updated) {
       return { error: 'The organization sharing record changed concurrently', status: 409 } as const;

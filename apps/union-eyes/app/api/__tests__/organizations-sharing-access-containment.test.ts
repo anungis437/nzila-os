@@ -9,6 +9,7 @@ const m = vi.hoisted(() => ({
   audit: vi.fn(),
   select: vi.fn(),
   update: vi.fn(),
+  mutationPredicate: null as unknown,
   rows: [] as Record<string, unknown>[],
 }));
 
@@ -19,7 +20,7 @@ vi.mock('@/lib/organizations/read-authority', () => ({
   UUID_PATTERN: /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
 }));
 vi.mock('@/db/schema', () => ({
-  organizationSharingSettings: { organizationId: 'sharing_org_id' },
+  organizationSharingSettings: { id: 'sharing_record_id', organizationId: 'sharing_org_id' },
   crossOrgAccessLog: {
     id: 'id', userOrganizationId: 'userOrg', resourceType: 'resourceType',
     resourceId: 'resourceId', accessType: 'accessType', accessGrantedVia: 'grant',
@@ -29,6 +30,7 @@ vi.mock('@/db/schema', () => ({
 }));
 vi.mock('drizzle-orm', () => ({
   eq: (a: unknown, b: unknown) => ({ a, b }),
+  and: (...predicates: unknown[]) => ({ predicates }),
   desc: (a: unknown) => ({ desc: a }),
 }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.rls }));
@@ -40,6 +42,7 @@ const url = 'http://localhost/api/organizations/' + ORG_ID;
 beforeEach(() => {
   vi.clearAllMocks();
   m.rows = [];
+  m.mutationPredicate = null;
   m.auth.mockResolvedValue({ userId: 'caller' });
   m.orgAccess.mockResolvedValue({ platform: false, direct: new Map([[ORG_ID, 'admin']]), descendants: new Set() });
   m.audit.mockResolvedValue(undefined);
@@ -50,14 +53,17 @@ beforeEach(() => {
     }),
   };
   const whereChain = {
-    limit: async (_limit: number) => m.rows,
+    limit: (_limit: number) => ({
+      for: async (_mode: string) => m.rows,
+      then: (resolve: (value: unknown) => unknown) => Promise.resolve(m.rows).then(resolve),
+    }),
     orderBy: (_value: unknown) => orderChain,
   };
   m.select.mockReturnValue({ from: () => ({ where: () => whereChain }) });
   m.update.mockReturnValue({
     set: (_value: unknown) => ({
-      where: () => ({
-        returning: async () => [{ id: 'sharing-record-1', organizationId: ORG_ID }],
+      where: (predicate: unknown) => ({
+        returning: async () => { m.mutationPredicate = predicate; return [{ id: 'sharing-record-1', organizationId: ORG_ID }]; },
       }),
     }),
   });
@@ -139,6 +145,9 @@ describe('organization sharing settings — policy containment', () => {
     }), params);
     expect(res.status).toBe(200);
     expect(m.update).toHaveBeenCalled();
+    expect(JSON.stringify(m.mutationPredicate)).toContain('sharing_record_id');
+    expect(JSON.stringify(m.mutationPredicate)).toContain('sharing_org_id');
+    expect(JSON.stringify(m.mutationPredicate)).toContain(ORG_ID);
     expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
       userId: 'caller', organizationId: ORG_ID, action: 'organization.sharing_settings_restrict',
     }));
