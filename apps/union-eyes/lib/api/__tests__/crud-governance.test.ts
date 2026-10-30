@@ -76,11 +76,11 @@ describe('generic CRUD governance (UE-CONV-K-007)', () => {
     expect(() => assertCrudWrite(gate)).toThrow()
     for (const route of ['metrics/route.ts', 'analytics/refresh/route.ts']) {
       const source = readFileSync(join(API, route), 'utf8')
-      expect(source).toMatch(/table:\\s*analyticsMetrics/)
-      expect(source).toMatch(/crudRoutes\\(/)
+      expect(source).toMatch(/table:\s*analyticsMetrics/)
+      expect(source).toMatch(/crudRoutes\(/)
     }
     const factory = readFileSync(join(ROOT, 'lib', 'api', 'crud-factory.ts'), 'utf8')
-    expect(factory).toMatch(/assertCrudWrite\\(governance\\)/)
+    expect(factory).toMatch(/assertCrudWrite\(governance\)/)
   })
 
   it('denies invented archived enum values rather than raising 500 or deleting institutional bargaining history', () => {
