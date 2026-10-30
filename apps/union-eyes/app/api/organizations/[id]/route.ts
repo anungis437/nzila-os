@@ -70,20 +70,20 @@ export async function GET(_req: NextRequest, { params }: Params) {
   )
   if (!row) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  // Compute stats
-  const claimRows = Array.from(
-    await db.execute(
-      sql`SELECT
-            count(*)::int AS total,
-            count(*) FILTER (WHERE status::text IN ('draft','filed','acknowledged','investigating','response_due','response_received','escalated','mediation','arbitration'))::int AS active
-          FROM grievances WHERE organization_id = ${id}`,
-    ),
-  ) as Array<{ total: number; active: number }>
+  // Counts are computed under explicit authority. A bare pooled connection has no
+  // tenant identity and can silently return zero or leak cross-tenant aggregates.
+  const [claimRows, childRows] = await Promise.all([
+    withRLSContext({ organizationId: id }, async (tx) => Array.from(
+      await tx.execute(sql`SELECT
+        count(*)::int AS total,
+        count(*) FILTER (WHERE status::text IN ('draft','filed','acknowledged','investigating','response_due','response_received','escalated','mediation','arbitration'))::int AS active
+        FROM grievances WHERE organization_id = ${id}`),
+    ) as Array<{ total: number; active: number }>),
+    withSystemContext(async () => Array.from(
+      await db.execute(sql`SELECT count(*)::int AS cnt FROM organizations WHERE parent_id = ${id}`),
+    ) as Array<{ cnt: number }>),
+  ])
   const claims = claimRows[0] ?? { total: 0, active: 0 }
-
-  const childRows = Array.from(
-    await db.execute(sql`SELECT count(*)::int AS cnt FROM organizations WHERE parent_id = ${id}`),
-  ) as Array<{ cnt: number }>
 
   // Settings, the billing contact and provenance belong to the organization's administrators.
   const { settings: _settings, billing_contact_id: _billing, created_by: _createdBy, legacy_org_id: _legacy, subscription_tier: _tier, ...profile } = mapOrg(row)
