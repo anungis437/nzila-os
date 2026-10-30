@@ -23,8 +23,9 @@ export const GET = withApi(
       description: 'Returns satisfaction surveys pending completion for the current user.',
     },
   },
-  async ({ userId }) => {
-    const surveys = await getPendingSurveys(userId!);
+  async ({ userId, organizationId }) => {
+    if (!userId || !organizationId) throw ApiError.badRequest('Organization context required');
+    const surveys = await getPendingSurveys(userId, organizationId);
     return { surveys, count: surveys.length };
   }
 );

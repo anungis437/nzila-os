@@ -8,7 +8,7 @@ import { db } from '@/db/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { organizationMembers } from '@/db/schema/organization-members-schema';
-import { eq } from 'drizzle-orm';
+import { and, asc, count as countRows, eq, isNull } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,19 +52,25 @@ export const GET = withApi(
     if (params.organizationId !== organizationId) throw ApiError.notFound('Organization');
     const orgId = organizationId;
     const url = new URL(request.url);
-    const startIndex = Math.max(1, parseInt(url.searchParams.get('startIndex') || '1', 10));
-    const count = Math.min(100, parseInt(url.searchParams.get('count') || '50', 10));
+    const startIndex = Math.max(1, Number.parseInt(url.searchParams.get('startIndex') || '1', 10) || 1);
+    const count = Math.min(100, Math.max(0, Number.parseInt(url.searchParams.get('count') || '50', 10) || 0));
 
-    const members = await db
-      .select()
-      .from(organizationMembers)
-      .where(eq(organizationMembers.organizationId, orgId));
-
-    const paged = members.slice(startIndex - 1, startIndex - 1 + count);
+    // A removed member is not a user of the organization, and the page is read in SQL with the count, not by loading the whole roster.
+    const live = and(eq(organizationMembers.organizationId, orgId), isNull(organizationMembers.deletedAt));
+    const [{ total }] = await db.select({ total: countRows() }).from(organizationMembers).where(live);
+    const paged = count === 0
+      ? []
+      : await db
+          .select()
+          .from(organizationMembers)
+          .where(live)
+          .orderBy(asc(organizationMembers.createdAt), asc(organizationMembers.id))
+          .limit(count)
+          .offset(startIndex - 1);
 
     return {
         schemas: ['urn:ietf:params:scim:api:messages:2.0:ListResponse'],
-        totalResults: members.length,
+        totalResults: Number(total),
         startIndex,
         itemsPerPage: paged.length,
         Resources: paged.map(toScimUser),
@@ -109,7 +115,9 @@ export const POST = withApi(
           email: primaryEmail ?? userName,
           name: fullName,
           role: 'member',
-          status: 'active',
+          // Provisioning names a user; it does not give that user access. The membership is pending until the person accepts, as for a
+          // member added through the roster route, and the SCIM representation reports it as not active.
+          status: 'pending',
         })
         .onConflictDoNothing()
         .returning();

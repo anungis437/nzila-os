@@ -157,7 +157,7 @@ describe('SatisfactionService', () => {
       const pending = [{ id: 's-1', status: 'pending' }, { id: 's-2', status: 'pending' }];
       mocks.mockSelect.mockReturnValueOnce(chain(pending));
       const { getPendingSurveys } = await import('../satisfaction-service');
-      expect(await getPendingSurveys('m-1')).toEqual(pending);
+      expect(await getPendingSurveys('m-1', 'org-1')).toEqual(pending);
     });
   });
 

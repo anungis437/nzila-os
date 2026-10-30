@@ -19,9 +19,9 @@ vi.mock('@/lib/rate-limiter', () => ({
   createRateLimitHeaders: vi.fn(() => ({ 'x-rate-limit': '1' })),
 }));
 vi.mock('@/lib/api/standardized-responses', () => ({
-  ErrorCode: { VALIDATION_ERROR: 'VALIDATION_ERROR' },
+  ErrorCode: { VALIDATION_ERROR: 'VALIDATION_ERROR', FORBIDDEN: 'FORBIDDEN', RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND' },
   standardErrorResponse: (code: string, message: string, details?: unknown) =>
-    new Response(JSON.stringify({ code, message, details }), { status: 400 }),
+    new Response(JSON.stringify({ code, message, details }), { status: code === 'RESOURCE_NOT_FOUND' ? 404 : code === 'FORBIDDEN' ? 403 : 400 }),
 }));
 
 async function loadRoute() {
@@ -47,7 +47,7 @@ describe('onboarding/suggest-clauses route', () => {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ organizationId: '550e8400-e29b-41d4-a716-446655440000' }),
       }),
-      { userId: 'u1', organizationId: 'org_1' },
+      { userId: 'u1', organizationId: '550e8400-e29b-41d4-a716-446655440000' },
     );
 
     expect(response.status).toBe(200);
@@ -64,9 +64,21 @@ describe('onboarding/suggest-clauses route', () => {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ organizationId: '550e8400-e29b-41d4-a716-446655440000' }),
       }),
-      { userId: 'u1', organizationId: 'org_1' },
+      { userId: 'u1', organizationId: '550e8400-e29b-41d4-a716-446655440000' },
     );
 
     expect(response.status).toBe(429);
+  });
+
+  it('answers 404 and suggests nothing for another organization named in the body, and 403 with no organization', async () => {
+    const { POST } = await loadRoute();
+    const request = () => new NextRequest('http://localhost/api/onboarding/suggest-clauses', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ organizationId: '660e8400-e29b-41d4-a716-446655440000' }),
+    });
+    expect((await POST(request(), { userId: 'u1', organizationId: '550e8400-e29b-41d4-a716-446655440000' })).status).toBe(404);
+    expect((await POST(request(), { userId: 'u1', organizationId: null })).status).toBe(403);
+    expect(m.suggestRelevantClauses).not.toHaveBeenCalled();
   });
 });

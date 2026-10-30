@@ -299,6 +299,20 @@ describe('roster', () => {
     expect((await rosterGet('u-admin-fed')).status).toBe(200);
   });
 
+  // DEF-0B9-ORG-ROSTER-GET-INCLUDES-REMOVED-MEMBERS-AND-IS-UNBOUNDED
+  it('leaves a removed member off the roster and reads it a page at a time in a stable order', async () => {
+    await pg.query(`UPDATE organization_members SET deleted_at = now() WHERE user_id = 'u-member-a'`);
+    const { GET } = await import('../organizations/[id]/members/route');
+    state.userId = 'u-steward-a';
+    const all = (await (await GET(get(`/api/organizations/${LOCAL_A}/members`), params(LOCAL_A))).json()).data as Array<{ user_id: string }>;
+    expect(all.map((r) => r.user_id)).not.toContain('u-member-a');
+    const first = (await (await GET(get(`/api/organizations/${LOCAL_A}/members?limit=2&page=1`), params(LOCAL_A))).json()).data as Array<{ user_id: string }>;
+    const second = (await (await GET(get(`/api/organizations/${LOCAL_A}/members?limit=2&page=2`), params(LOCAL_A))).json()).data as Array<{ user_id: string }>;
+    expect(first).toHaveLength(2);
+    expect([...first, ...second].map((r) => r.user_id)).toEqual(all.slice(0, first.length + second.length).map((r) => r.user_id));
+    expect(new Set([...first, ...second].map((r) => r.user_id)).size).toBe(first.length + second.length);
+  });
+
   const candidate = { user_id: 'new-user', name: 'New Person', email: 'new@x.example' };
 
   it('a steward may add a member, but only as a pending membership; naming a user id grants no access', async () => {

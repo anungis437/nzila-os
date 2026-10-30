@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { db } from '@/db/db';
 import { organizationMembers } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { and, asc, eq, isNull } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { z } from 'zod';
 import { requireUserForOrganization, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
@@ -30,7 +30,9 @@ const createMemberSchema = z.object({
   membership_number: z.string().max(100).optional(),
 });
 
-export async function GET(_req: NextRequest, { params }: Params) {
+const ROSTER_PAGE_SIZE = 200;
+
+export async function GET(req: NextRequest, { params }: Params) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -49,8 +51,19 @@ export async function GET(_req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
   }
+  // A removed member is not on the roster, and the roster is read a page at a time in a stable order, so a large organization is neither
+  // truncated silently nor read whole in one request.
+  const url = new URL(req.url);
+  const limit = Math.min(ROSTER_PAGE_SIZE, Math.max(1, Number.parseInt(url.searchParams.get('limit') ?? '', 10) || ROSTER_PAGE_SIZE));
+  const page = Math.max(1, Number.parseInt(url.searchParams.get('page') ?? '', 10) || 1);
   const rows = await withRLSContext({ organizationId: id }, async () =>
-    db.select().from(organizationMembers).where(eq(organizationMembers.organizationId, id)),
+    db
+      .select()
+      .from(organizationMembers)
+      .where(and(eq(organizationMembers.organizationId, id), isNull(organizationMembers.deletedAt)))
+      .orderBy(asc(organizationMembers.createdAt), asc(organizationMembers.id))
+      .limit(limit)
+      .offset((page - 1) * limit),
   );
 
   const mapped = rows.map(row => ({
@@ -70,7 +83,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     updated_at: row.updatedAt,
   }));
 
-  return NextResponse.json({ data: mapped });
+  return NextResponse.json({ data: mapped, page, limit });
 }
 
 export async function POST(req: NextRequest, { params }: Params) {

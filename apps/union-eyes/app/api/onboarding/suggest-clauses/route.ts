@@ -28,7 +28,7 @@ const onboardingSuggestClausesSchema = z.object({
 });
 
 export const POST = withRoleAuth('officer' as MemberRole, async (request, context) => {
-  const { userId, organizationId: _organizationId } = context;
+  const { userId, organizationId } = context;
 
   try {
     const rateLimit = await checkRateLimit(userId, RATE_LIMITS.ONBOARDING);
@@ -54,7 +54,14 @@ export const POST = withRoleAuth('officer' as MemberRole, async (request, contex
       );
     }
     
-    const { organizationId: reqOrgId } = validation.data;
+    // Suggestions are drawn for the caller's own organization; another organization named in the body reads as not found.
+    if (!organizationId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
+    }
+    if (validation.data.organizationId !== organizationId) {
+      return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Organization not found');
+    }
+    const reqOrgId = organizationId;
 
     const suggestions = await suggestRelevantClauses(reqOrgId);
 

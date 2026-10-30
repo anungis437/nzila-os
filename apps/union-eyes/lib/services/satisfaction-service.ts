@@ -133,13 +133,14 @@ export async function getOwnSatisfactionSurvey(
 /**
  * Get pending surveys for a member
  */
-export async function getPendingSurveys(memberId: string): Promise<SatisfactionSurvey[]> {
+export async function getPendingSurveys(memberId: string, organizationId: string): Promise<SatisfactionSurvey[]> {
   return db
     .select()
     .from(satisfactionSurveys)
     .where(
       and(
         eq(satisfactionSurveys.memberId, memberId),
+        eq(satisfactionSurveys.organizationId, organizationId),
         eq(satisfactionSurveys.status, 'pending')
       )
     )

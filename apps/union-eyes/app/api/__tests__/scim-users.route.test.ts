@@ -6,20 +6,24 @@ const m = vi.hoisted(() => ({
   selectRows: [] as any[],
   createdRows: [] as any[],
   persistAtomicAudit: vi.fn(),
+  page: null as null | { limit: number; offset: number },
+  inserted: null as unknown,
 }));
 
+// The route counts the live members, then reads one ordered page of them.
+const pagedChain = () => ({ orderBy: () => ({ limit: (n: number) => ({ offset: async (o: number) => { m.page = { limit: n, offset: o }; return m.selectRows; } }) }) });
 const mockDb = {
-  select: vi.fn(() => ({
+  select: vi.fn((fields?: unknown) => ({
     from: vi.fn(() => ({
-      where: vi.fn(async () => m.selectRows),
+      where: vi.fn(() => (fields ? Promise.resolve([{ total: m.selectRows.length }]) : pagedChain())),
     })),
   })),
 };
 const mockTx = {
   insert: vi.fn(() => ({
-    values: vi.fn(() => ({
+    values: vi.fn((v: unknown) => { m.inserted = v; return {
       onConflictDoNothing: vi.fn(() => ({ returning: vi.fn(async () => m.createdRows) })),
-    })),
+    }; }),
   })),
 };
 
@@ -158,5 +162,21 @@ describe('scim users route', () => {
     m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
 
     await expect(POST(provision({ userName: 'jane@example.com' }), ctx)).rejects.toThrow('audit unavailable');
+  });
+
+  // DEF-0B11-IDS-SCIM-LIST-INCLUDES-REMOVED-MEMBERS-AS-ACTIVE-AND-READS-THE-WHOLE-ROSTER-BEFORE-PAGING
+  it('GET pages in SQL from the requested start index and reports the live total', async () => {
+    const { GET } = await loadRoute();
+    m.selectRows = [{ id: 'm1', userId: 'a', email: 'a@example.com', name: 'A B', status: 'active', joinedAt: null, createdAt: 'x', updatedAt: 'x' }];
+    const result = await GET(new NextRequest('http://localhost/api/scim/v2/org_1/Users?startIndex=21&count=10'), ctx);
+    expect(m.page).toEqual({ limit: 10, offset: 20 });
+    expect(result.totalResults).toBe(1);
+  });
+
+  // DEF-0B11-IDS-SCIM-PROVISION-STORES-THE-USERNAME-STRING-AS-THE-USER-ID-AND-ACTIVATES-WITHOUT-ACCEPTANCE
+  it('POST creates a pending membership: naming a user does not activate it', async () => {
+    const { POST } = await loadRoute();
+    await POST(provision({ userName: 'jane@example.com' }), ctx);
+    expect(m.inserted).toMatchObject({ status: 'pending', role: 'member', organizationId: 'org_1' });
   });
 });

@@ -29,9 +29,11 @@ vi.mock('@/lib/api/standardized-responses', () => ({
   ErrorCode: {
     MISSING_REQUIRED_FIELD: 'MISSING_REQUIRED_FIELD',
     INTERNAL_ERROR: 'INTERNAL_ERROR',
+    FORBIDDEN: 'FORBIDDEN',
+    RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND',
   },
   standardErrorResponse: (code: string, msg: string, err?: unknown) => ({
-    status: 400,
+    status: code === 'RESOURCE_NOT_FOUND' ? 404 : code === 'FORBIDDEN' ? 403 : 400,
     json: async () => ({ code, message: msg, error: err }),
   }),
 }));
@@ -63,14 +65,29 @@ describe('onboarding/peer-benchmarks route', () => {
     expect(m.withRoleAuth).toHaveBeenCalled();
   });
 
-  it('GET requires organizationId query parameter', async () => {
+  // DEF-0B9-ASM-PEER-BENCHMARKS-AND-CLAUSE-SUGGESTIONS-TAKE-THE-TARGET-ORGANIZATION-FROM-THE-REQUEST-AND-NEVER-COMPARE-IT-TO-THE-CALLER
+  it('GET compares the caller\u2019s own organization when none is named', async () => {
+    const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost/api/onboarding/peer-benchmarks'), { userId: 'u1', organizationId: 'org1' });
+    expect(response.status).toBe(200);
+    expect(m.getPeerBenchmarks).toHaveBeenCalledWith('org1');
+  });
+
+  it('GET answers 404 and reads nothing for another organization named in the query', async () => {
     const { GET } = await loadRoute();
     const response = await GET(
-      new NextRequest('http://localhost/api/onboarding/peer-benchmarks'),
+      new NextRequest('http://localhost/api/onboarding/peer-benchmarks?organizationId=someone-elses'),
       { userId: 'u1', organizationId: 'org1' },
     );
+    expect(response.status).toBe(404);
+    expect(m.getPeerBenchmarks).not.toHaveBeenCalled();
+  });
 
-    expect(response.status).toBeGreaterThanOrEqual(400);
+  it('GET refuses a caller with no organization context', async () => {
+    const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost/api/onboarding/peer-benchmarks'), { userId: 'u1', organizationId: null });
+    expect(response.status).toBe(403);
+    expect(m.getPeerBenchmarks).not.toHaveBeenCalled();
   });
 
   it('GET returns 429 when rate limit exceeded', async () => {
