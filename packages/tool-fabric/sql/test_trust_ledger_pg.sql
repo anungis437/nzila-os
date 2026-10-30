@@ -73,7 +73,7 @@ WHERE stream_id = 'platform:tool-fabric:trust' AND revision = 1;
 -- A failed head CAS must roll back the preceding receipt INSERT in the
 -- same PostgreSQL transaction. The nested PL/pgSQL block is a subtransaction:
 -- catching 42501 must not leave an orphaned seq=3 receipt behind.
-DO $
+DO $$
 BEGIN
   BEGIN
     INSERT INTO tool_fabric_trust_entry (stream_id, seq, audit_id, entry_hash, entry)
@@ -92,9 +92,9 @@ BEGIN
     RAISE EXCEPTION 'SECURITY FAILURE: failed CAS left a partial durable write';
   END IF;
 END;
-$;
+$$;
 
-DO $
+DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM tool_fabric_trust_stream
