@@ -128,7 +128,6 @@ jobs:
         run: |
           node --import tsx scripts/release-attestation.ts \
             --sha ${{ github.sha }} \
-            --contract-pass --slo-pass \
             --env staging
 
       - name: Compute artifact digest
