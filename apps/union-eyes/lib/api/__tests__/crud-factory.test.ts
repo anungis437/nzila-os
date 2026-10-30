@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { SQL } from 'drizzle-orm';
 import type { PgTable } from 'drizzle-orm/pg-core';
-import { enforceCreateSecurityInvariants, stripBlockedPatchFields, buildMergeSetValues, validateMergeJsonColumnValues } from '../crud-factory';
+import { enforceCreateSecurityInvariants, assertGenericWritePayload, stripBlockedPatchFields, buildMergeSetValues, validateMergeJsonColumnValues } from '../crud-factory';
 
 describe('crud-factory enforceCreateSecurityInvariants', () => {
   it('applies organizationId/createdBy when a hook returns a clean object without them', () => {
@@ -233,5 +233,21 @@ describe('crud-factory validateMergeJsonColumnValues (PR #752 round 25)', () => 
 
   it('only validates columns actually listed in mergeJsonColumns', () => {
     expect(() => validateMergeJsonColumnValues({ notes: [] }, ['responses'])).not.toThrow();
+  });
+});
+
+
+describe('generic CRUD mass-assignment gate', () => {
+  const table = { id: { name: 'id' }, name: { name: 'name' }, organizationId: { name: 'organization_id' }, createdBy: { name: 'created_by' }, status: { name: 'status' } } as unknown as PgTable;
+  const options = { primaryKey: 'id', blockedFields: ['status'] };
+  it('accepts only ordinary schema-backed business fields', () => {
+    expect(assertGenericWritePayload({ name: 'Valid' }, table, options)).toEqual({ name: 'Valid' });
+  });
+  it.each(['id', 'organizationId', 'createdBy', 'createdAt', 'updatedAt', 'status', 'unknownField'])('rejects caller-controlled %s', (field) => {
+    expect(() => assertGenericWritePayload({ [field]: 'attacker' }, table, options)).toThrow();
+  });
+  it('rejects non-object payloads', () => {
+    expect(() => assertGenericWritePayload([], table, options)).toThrow();
+    expect(() => assertGenericWritePayload(null, table, options)).toThrow();
   });
 });
