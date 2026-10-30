@@ -48,7 +48,15 @@ vi.mock('@/db/db', () => ({
   },
 }));
 
+// The list route reads through the transaction handed to it by withSystemContext, a chain that ends in the readable set.
+const listTx = {
+  select: () => ({ from: () => ({ where: () => Object.assign(Promise.resolve([]), { orderBy: () => ({ limit: async () => [] }) }) }) }),
+  execute: async () => [],
+};
+
 vi.mock('@/db/schema', () => ({ organizations: {} }));
+// The legacy membership read is the path under test; the canonical identity-scope read is covered with its own suite.
+vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: () => false }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn().mockResolvedValue(undefined) }));
 vi.mock('@/lib/utils/hierarchy-validation', () => ({ MAX_HIERARCHY_DEPTH: 10 }));
 
@@ -138,7 +146,7 @@ describe('POST /api/organizations — creation authority + execution boundary (P
 describe('GET /api/organizations — unchanged tenant-scoped read path', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withSystemContext.mockImplementation(async (fn: (tx?: unknown) => unknown) => fn({}));
+    m.withSystemContext.mockImplementation(async (fn: (tx?: unknown) => unknown) => fn(listTx));
     m.withRLSContext.mockImplementation(async (fn: (tx?: unknown) => unknown) => fn({}));
     m.selectWhere.mockResolvedValue([]);
   });

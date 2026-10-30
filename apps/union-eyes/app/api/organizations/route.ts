@@ -16,6 +16,10 @@ import {
 
 export const dynamic = 'force-dynamic';
 
+/** A raw query answers an array on the production driver and { rows } on others; both are rows. */
+const rowsOf = <T,>(result: unknown): T[] =>
+  Array.isArray(result) ? (result as T[]) : ((result as { rows?: T[] } | null)?.rows ?? Array.from((result ?? []) as Iterable<T>));
+
 /** Canonical organization types (see types/organization.ts) */
 const ORGANIZATION_TYPES = ['platform', 'congress', 'federation', 'union', 'local', 'region', 'district'] as const;
 type OrganizationType = typeof ORGANIZATION_TYPES[number];
@@ -85,7 +89,7 @@ export async function GET(req: NextRequest) {
                 AND status::text IN ('draft','filed','acknowledged','investigating','response_due','response_received','escalated','mediation','arbitration')
               GROUP BY organization_id`
         );
-        for (const row of Array.from(claimCounts) as Array<{ org_id: string; cnt: number }>) {
+        for (const row of rowsOf<{ org_id: string; cnt: number }>(claimCounts)) {
           claimsByOrg[row.org_id] = Number(row.cnt);
         }
       }
@@ -96,7 +100,7 @@ export async function GET(req: NextRequest) {
             WHERE parent_id::text IN (${sql.join(orgIds.map(id => sql`${id}`), sql`,`)})
             GROUP BY parent_id`
       );
-      for (const row of Array.from(childCounts) as Array<{ parent: string; cnt: number }>) {
+      for (const row of rowsOf<{ parent: string; cnt: number }>(childCounts)) {
         childrenByOrg[row.parent] = Number(row.cnt);
       }
     }

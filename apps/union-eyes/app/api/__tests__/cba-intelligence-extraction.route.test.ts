@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   extractDocument: vi.fn(),
   runBulkExtraction: vi.fn(),
   operation: vi.fn(),
+  requireSystemAdmin: vi.fn(),
 }));
 
 vi.mock('@/lib/api/framework', () => ({
@@ -12,6 +13,7 @@ vi.mock('@/lib/api/framework', () => ({
   z: require('zod'),
   ApiError: { conflict: (message: string) => Object.assign(new Error(message), { status: 409 }) },
 }));
+vi.mock('@/lib/api-auth-guard', () => ({ requireSystemAdmin: () => m.requireSystemAdmin() }));
 vi.mock('@/lib/audit/operation-audit', () => ({
   performAuditedOperation: m.operation,
   operationAuditResponse: (e: unknown) =>
@@ -31,6 +33,7 @@ async function loadRoute() {
 describe('cba-intelligence/extraction route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.requireSystemAdmin.mockResolvedValue(undefined);
     m.withApi.mockImplementation((_cfg: unknown, handler: any) => (ctx: any = {}) => handler(ctx));
     m.extractDocument.mockResolvedValue({ status: 'extracted', documentId: 'd1' });
     m.runBulkExtraction.mockResolvedValue({ processed: 3 });
@@ -64,5 +67,15 @@ describe('cba-intelligence/extraction route', () => {
     const { POST } = await loadRoute();
     const result = await POST({ body: { documentId: '11111111-1111-1111-1111-111111111111' } });
     expect(result.data).toBeDefined();
+  });
+
+  // DEF-0B4-CBA-INTEL-TENANT-ADMIN-WRITES-SHARED-DATASET: extraction writes the platform-wide dataset, so an organization administrator is refused.
+  it('refuses a caller who is not a platform administrator and extracts nothing', async () => {
+    m.requireSystemAdmin.mockRejectedValue(Object.assign(new Error('System administrator privileges required'), { status: 403 }));
+    const { POST } = await loadRoute();
+    await expect(POST({ body: {}, userId: 'u1', organizationId: 'org-1' })).rejects.toMatchObject({ status: 403 });
+    expect(m.operation).not.toHaveBeenCalled();
+    expect(m.extractDocument).not.toHaveBeenCalled();
+    expect(m.runBulkExtraction).not.toHaveBeenCalled();
   });
 });

@@ -10,14 +10,14 @@
    "CRON_SECRET": 2,
    "CRUD_FACTORY": 197,
    "DELEGATED": 19,
-   "NONE": 49,
+   "NONE": 48,
    "ORG_AUTH": 53,
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 163,
    "ROLE_AUTH": 120,
    "SESSION_AUTH": 64,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 296,
+   "WITH_API": 297,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -11970,7 +11970,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "NONE",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",

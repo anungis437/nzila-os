@@ -10,6 +10,7 @@ const h = vi.hoisted(() => ({
   compareInOrg: vi.fn(),
   saveComparison: vi.fn(),
   submitReview: vi.fn(),
+  requireSystemAdmin: vi.fn(),
   createJob: vi.fn(),
   getSource: vi.fn(),
   updateSource: vi.fn(),
@@ -35,6 +36,7 @@ vi.mock('@/lib/api/framework', () => ({
   },
 }));
 vi.mock('@/lib/api-auth-guard', () => ({
+  requireSystemAdmin: () => h.requireSystemAdmin(),
   withRoleAuth: (role: string, handler: (req: NextRequest, ctx: unknown) => Promise<Response>) => {
     h.roles.push(role);
     return (req: NextRequest, ctx: Record<string, unknown> = {}) =>
@@ -109,7 +111,7 @@ beforeEach(() => {
   h.compareInOrg.mockReset();
   h.saveComparison.mockReset();
   h.submitReview.mockReset();
-  h.createJob.mockReset();
+  h.requireSystemAdmin.mockReset().mockResolvedValue(undefined);
   h.getSource.mockReset();
   h.updateSource.mockReset();
   h.deactivateSource.mockReset();
@@ -177,6 +179,17 @@ describe('ml/monitoring/alerts', () => {
   });
 });
 describe('cba-intelligence routes', () => {
+  // DEF-0B4-CBA-INTEL-TENANT-STEWARD-REVIEWS-SHARED-DATASET / ...-TENANT-ADMIN-WRITES-SHARED-DATASET: the extracted CBA dataset has no organization column, so a
+  // decision changes what every organization reads. Reviewing is platform authority; an organization's steward or administrator is refused.
+  it('review POST and the review queue refuse a caller who is not a platform administrator, writing and reading nothing', async () => {
+    h.requireSystemAdmin.mockRejectedValue(Object.assign(new Error('System administrator privileges required'), { status: 403 }));
+    const mod = await import('../cba-intelligence/review/route');
+    await expect((mod.POST as never as (c: unknown) => Promise<unknown>)({ body: { targetType: 'agreement', targetId: '11111111-1111-4111-8111-111111111111', decision: 'approved' }, userId: 'u1', organizationId: 'org-1' })).rejects.toMatchObject({ status: 403 });
+    await expect((mod.GET as never as (c: unknown) => Promise<unknown>)({ query: {}, userId: 'u1', organizationId: 'org-1' })).rejects.toMatchObject({ status: 403 });
+    expect(h.submitReview).not.toHaveBeenCalled();
+    expect(h.audit).not.toHaveBeenCalled();
+  });
+
   it('review POST records the decision and the audit on the same transaction', async () => {
     const { POST } = await import('../cba-intelligence/review/route');
     h.submitReview.mockResolvedValue({ id: 'd1' });

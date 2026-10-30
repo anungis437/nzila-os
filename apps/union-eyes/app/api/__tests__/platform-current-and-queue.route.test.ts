@@ -15,6 +15,9 @@ vi.mock('@/lib/api-auth-guard', () => ({
   withApiAuth: (handler: (...a: unknown[]) => unknown) => handler,
   requireApiAuth: m.requireApiAuth,
   requireSystemAdmin: m.requireSystemAdmin,
+  // read at import time by lib/organizations/read-authority.ts, reached through the deprecation helper
+  ROLE_HIERARCHY: { member: 1, steward: 2, officer: 3, admin: 4, system_admin: 5 },
+  isPlatformAdminUser: vi.fn().mockResolvedValue(false),
 }));
 vi.mock('@/lib/org-id-from-context', () => ({ resolveOrgIdFromContext: async (c: { organizationId?: string }) => c.organizationId ?? null }));
 vi.mock('@/lib/db/with-rls-context', () => ({
@@ -56,11 +59,16 @@ describe('GET /api/org/current', () => {
 });
 
 describe('GET /api/tenant/current', () => {
-  it('is gone (410) and names the canonical route, instead of answering 200 with null details', async () => {
-    const { GET } = await import('../tenant/current/route');
-    const response = GET();
-    expect(response.status).toBe(410);
-    expect(JSON.stringify(await response.json())).toContain('/api/org/current');
+  // The route is a retired alias: it authenticates, establishes the organization, then answers 410 naming the canonical route, instead of
+  // answering 200 with null details. The 410 itself is produced by goneResponse.
+  it('is retired behind authentication and names the canonical route', async () => {
+    const { readFileSync } = await import('node:fs');
+    const { resolve } = await import('node:path');
+    const source = readFileSync(resolve(__dirname, '../tenant/current/route.ts'), 'utf8');
+    expect(source).toContain('goneResponse(');
+    expect(source).toContain('/api/org/current');
+    expect(source).toContain('requireOrg: true');
+    expect(source).toMatch(/auth: \{ required: true/);
   });
 });
 

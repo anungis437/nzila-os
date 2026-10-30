@@ -1,3 +1,4 @@
+import { requireSystemAdmin } from "@/lib/api-auth-guard";
 import { withApi, z } from "@/lib/api/framework";
 import {
   listSources,
@@ -79,6 +80,8 @@ export const POST = withApi(
     },
   },
   async ({ body, userId, organizationId }) => {
+    // The dataset is platform-wide (no organization column): changing it is platform authority, not an organization administrator's.
+    await requireSystemAdmin();
     // The source and its audit record commit together.
     const source = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
       const created = await createSource(body as any as NewCbaIntelSource, tx);

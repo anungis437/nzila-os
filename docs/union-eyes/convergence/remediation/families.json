@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 158,
- "partial": 21,
- "outstanding": 619,
- "accountedFor": 619,
+ "corrected": 165,
+ "partial": 22,
+ "outstanding": 612,
+ "accountedFor": 612,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -51,9 +51,9 @@
   {
    "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
    "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
-   "defects": 74,
+   "defects": 68,
    "severity": {
-    "HIGH": 31,
+    "HIGH": 25,
     "MEDIUM": 30,
     "LOW": 13
    },
@@ -61,8 +61,8 @@
    "namedFiles": 2,
    "tranches": {
     "0B.2": 1,
-    "0B.3": 3,
-    "0B.4": 12,
+    "0B.3": 1,
+    "0B.4": 8,
     "0B.5": 4,
     "0B.6": 12,
     "0B.7": 4,
@@ -179,16 +179,15 @@
   {
    "family": "F08-PII-DISCLOSURE-AND-PROJECTION",
    "purpose": "Personal-data disclosure: project, redact or restrict returned fields",
-   "defects": 45,
+   "defects": 44,
    "severity": {
-    "HIGH": 4,
+    "HIGH": 3,
     "MEDIUM": 28,
     "LOW": 13
    },
    "namedRoutes": 11,
    "namedFiles": 1,
    "tranches": {
-    "0B.1": 1,
     "0B.3": 1,
     "0B.4": 5,
     "0B.6": 3,
@@ -417,24 +416,9 @@
     "severity": "HIGH"
    },
    {
-    "id": "DEF-0B3-ARBITRATION-DECISIONS-ORG-ADMIN-DELETES-SHARED-ROW",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B3-BARGAINING-PROPOSALS-NO-TENANT-PREDICATE",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B4-CBA-INTEL-SHARED-DATASET-NO-TENANT-PREDICATE",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B4-CBA-INTEL-TENANT-ADMIN-WRITES-SHARED-DATASET",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B4-CBA-INTEL-TENANT-STEWARD-REVIEWS-SHARED-DATASET",
-    "severity": "HIGH"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B4-CLAUSE-LIBRARY-SYSTEM-ROLE-CROSS-TENANT-READS",
@@ -463,14 +447,6 @@
    {
     "id": "DEF-0B4-CBAS-CBA-NUMBER-GLOBALLY-UNIQUE",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B4-CASE-STUDIES-ORG-ADMIN-WRITES-GLOBAL-CONTENT",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B4-CASE-STUDIES-READ-IGNORES-PUBLICATION-STATE",
-    "severity": "HIGH"
    },
    {
     "id": "DEF-0B5-COGNITION-SNAPSHOTS-IN-LOCAL-FILES",
@@ -2017,10 +1993,6 @@
    }
   ],
   "F08-PII-DISCLOSURE-AND-PROJECTION": [
-   {
-    "id": "DEF-0B1-ORGANIZATIONS-CROSS-ORG-CONTACTS",
-    "severity": "HIGH"
-   },
    {
     "id": "DEF-0B3-CALENDAR-DISCONNECT-ADMIN-FLOOR-NO-REVOKE",
     "severity": "MEDIUM"

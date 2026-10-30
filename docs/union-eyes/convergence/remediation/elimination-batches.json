@@ -1350,6 +1350,106 @@
           "explanation": "The six vocabulary routes serve identifiers, labels, descriptions and categories only. Service-level hours, escalation, legal and settlement flags, role permissions, default priority and severity, and status transitions are no longer served as institutional reference data; the case state machine still reads them from the package server-side."
         }
       ]
+    },
+    {
+      "id": "B13-F03-SHARED-DATASET-AUTHORITY",
+      "family": "F03: platform-wide datasets are changed only with platform authority; an organization's role floor is not authority over rows every organization reads",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B4-CBA-INTEL-TENANT-ADMIN-WRITES-SHARED-DATASET",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/cba-intelligence/review/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/extraction/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/ingestion/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/ingestion/run/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/ingestion/seed/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/sources/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/sources/[id]/route.ts",
+            "apps/union-eyes/scripts/codemods/f03-cba-intel-platform.cjs",
+            "apps/union-eyes/lib/api/__tests__/shared-dataset-authority.contract.test.ts",
+            "apps/union-eyes/app/api/__tests__/ae-audit-misc.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/cba-intelligence-extraction.route.test.ts"
+          ],
+          "explanation": "The extracted CBA dataset (agreements, findings, wage adjustments, clauses, sources, ingestion) has no organization column. Extraction, ingestion (create, run, seed) and source create/update were open to an organization's administrator; each now calls requireSystemAdmin() first. A contract test checks all seven mutating handlers. The extraction route test gained the platform-admin mock and a refusal test."
+        },
+        {
+          "prefix": "DEF-0B4-CBA-INTEL-TENANT-STEWARD-REVIEWS-SHARED-DATASET",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/cba-intelligence/review/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/extraction/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/ingestion/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/ingestion/run/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/ingestion/seed/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/sources/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/sources/[id]/route.ts",
+            "apps/union-eyes/scripts/codemods/f03-cba-intel-platform.cjs",
+            "apps/union-eyes/lib/api/__tests__/shared-dataset-authority.contract.test.ts",
+            "apps/union-eyes/app/api/__tests__/ae-audit-misc.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/cba-intelligence-extraction.route.test.ts"
+          ],
+          "explanation": "The review queue and review decisions (approve, reject, supersede) changed rows every organization reads at the steward floor of any one organization. Both methods now require a platform administrator and the reviewer role recorded is platform_administrator, not a literal \"steward\". A refusal test covers the queue and the decision, which write and read nothing."
+        },
+        {
+          "prefix": "DEF-0B4-CBA-INTEL-SHARED-DATASET-NO-TENANT-PREDICATE",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/cba-intelligence/review/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/extraction/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/ingestion/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/ingestion/run/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/ingestion/seed/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/sources/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/sources/[id]/route.ts",
+            "apps/union-eyes/scripts/codemods/f03-cba-intel-platform.cjs",
+            "apps/union-eyes/lib/api/__tests__/shared-dataset-authority.contract.test.ts",
+            "apps/union-eyes/app/api/__tests__/ae-audit-misc.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/cba-intelligence-extraction.route.test.ts"
+          ],
+          "explanation": "Writes and review are now platform authority. The dataset is shared by design (no organization column), so a tenant predicate does not apply to its reads.",
+          "remaining": "Reads (agreements list and detail, benchmark, documents, freshness) remain open to any entitled member or steward of any organization; whether the shared dataset may be read that widely, and under which entitlement, is an institutional decision."
+        },
+        {
+          "prefix": "DEF-0B3-ARBITRATION-DECISIONS-ORG-ADMIN-DELETES-SHARED-ROW",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/arbitration/precedents/[id]/route.ts",
+            "apps/union-eyes/lib/api/__tests__/shared-dataset-authority.contract.test.ts"
+          ],
+          "explanation": "The collection and item routes already require the platform content_manager role to write; upstream's change, now pinned by a contract test."
+        },
+        {
+          "prefix": "DEF-0B4-CASE-STUDIES-ORG-ADMIN-WRITES-GLOBAL-CONTENT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/case-studies/route.ts",
+            "apps/union-eyes/app/api/case-studies/[slug]/route.ts",
+            "apps/union-eyes/lib/api/__tests__/shared-dataset-authority.contract.test.ts"
+          ],
+          "explanation": "Case-study writes need content_manager and the item route (read and write) is limited to it; upstream's change, pinned by a contract test."
+        },
+        {
+          "prefix": "DEF-0B4-CASE-STUDIES-READ-IGNORES-PUBLICATION-STATE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/case-studies/route.ts",
+            "apps/union-eyes/lib/api/__tests__/shared-dataset-authority.contract.test.ts"
+          ],
+          "explanation": "The public list is limited to public, already published rows for both the rows and the count, and a status other than published is refused; upstream's change, pinned by a contract test."
+        },
+        {
+          "prefix": "DEF-0B3-BARGAINING-PROPOSALS-NO-TENANT-PREDICATE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/bargaining/proposals/route.ts",
+            "apps/union-eyes/app/api/bargaining/proposals/[id]/route.ts",
+            "apps/union-eyes/lib/api/__tests__/shared-dataset-authority.contract.test.ts"
+          ],
+          "explanation": "Proposals are scoped through their negotiation (parentScope), because the table has no organization column; upstream's change, pinned by a contract test."
+        }
+      ]
     }
   ]
 }

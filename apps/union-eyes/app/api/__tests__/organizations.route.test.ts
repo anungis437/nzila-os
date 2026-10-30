@@ -71,7 +71,7 @@ describe('organizations route', () => {
     m.audit.mockResolvedValue(undefined);
     m.requireSystemAdmin.mockResolvedValue(undefined);
     m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
-    m.withSystemContext.mockImplementation(async (fn: (tx?: unknown) => unknown) => fn({}));
+    m.withSystemContext.mockImplementation(async (fn: (tx?: unknown) => unknown) => fn(mockDb));
   });
 
   it('GET returns 401 when unauthenticated', async () => {
