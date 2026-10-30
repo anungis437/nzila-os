@@ -165,7 +165,7 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
     as('admin-fed')
     const rows = (await (await GET(get('/api/organizations'))).json()).data as Array<Record<string, unknown>>
     expect(rows.filter((r) => [FED, LOCAL_A, LOCAL_B].includes(r.id as string)).map((r) => r.id).sort()).toEqual([FED, LOCAL_A, LOCAL_B].sort())
-    expect(rows.find((r) => r.id === LOCAL_A)).toMatchObject({ subscription_tier: 'pro' })
+    expect(rows.find((r) => r.id === LOCAL_A)).not.toHaveProperty('subscription_tier')
   })
 
   it('a platform-only title does not enumerate any member organizations', async () => {
