@@ -96,3 +96,5 @@
 
 /scripts/release/verify-promotion-evidence.mjs @nzila/security @nzila/platform
 /scripts/release-attestation.ts @nzila/security @nzila/platform
+
+/scripts/release/verify-production-approval.mjs @nzila/security @nzila/platform
