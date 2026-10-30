@@ -18,8 +18,16 @@ test('skills never grant execution authority', () => {
   assert.throws(() => validateFirstPartySkill(good.replace('version: 1', 'auto-approve: true\\nversion: 1')), /authority/)
 })
 test('production housekeeping cannot silently bypass protected branch review', () => {
-  const safe = 'name: Deploy Production\\n  post-deploy:\\n    permissions:\\n      contents: read\\n    steps:\\n      - uses: actions/upload-artifact@v4\\n'
+  const safe = [
+    'name: Deploy Production',
+    '  post-deploy:',
+    '    permissions:',
+    '      contents: read',
+    '    steps:',
+    '      - uses: actions/upload-artifact@v4',
+  ].join('\n') + '\n'
   assert.equal(validateProtectedReleaseWorkflow(safe), true)
+  assert.throws(() => validateProtectedReleaseWorkflow('name: Deploy Production\n'), /post-deploy evidence job missing/)
   assert.throws(() => validateProtectedReleaseWorkflow(safe.replace('contents: read','contents: write')), /must not push/)
   assert.throws(() => validateProtectedReleaseWorkflow(safe + '      - run: git push origin HEAD:main\\n'), /must not push/)
   assert.throws(() => validateProtectedReleaseWorkflow(safe.replace('actions/upload-artifact@v4','actions/checkout@v5')), /retain outputs/)
