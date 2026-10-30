@@ -27,6 +27,8 @@ export interface TrustedPolicyDecision {
   boundApp: string
   boundOrgId: string
   boundPolicyId: string
+  /** The trusted authority must attest the executor, not just the workflow scope. */
+  boundExecutingAgentId: string
 }
 
 export interface TrustedPolicyAuthority {
@@ -66,7 +68,8 @@ export async function verifyOutcomePolicy(
       result.boundStepId !== request.stepId ||
       result.boundApp !== request.app ||
       result.boundOrgId !== request.orgId ||
-      result.boundPolicyId !== request.policyId) {
+      result.boundPolicyId !== request.policyId ||
+      result.boundExecutingAgentId !== request.executingAgentId) {
     throw new Error('Trusted policy ALLOW was not established')
   }
   const permit = Object.freeze({
@@ -91,5 +94,6 @@ export function isVerifiedPolicyPermitFor(
     p.request.app === workflow.app &&
     p.request.orgId === workflow.orgId &&
     p.request.policyId === policyId &&
+    p.decision.boundExecutingAgentId === p.request.executingAgentId &&
     Date.parse(p.decision.expiresAt) > now.getTime()
 }
