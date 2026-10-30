@@ -40,6 +40,8 @@ describe('roster facade routes', () => {
       'organizing/nlrb-filings', 'organizing/notes', 'organizing/notes/[id]', 'organizing/sequences', 'organizing/sequences/[id]',
       'organizing/sequences/[id]/enroll', 'organizing/support-percentage', 'organizing/workplace-mapping', 'continuity/inheritance',
       'onboarding/readiness', 'onboarding/transfers', 'reports/[id]/share', 'upload', 'enterprise/integrations', 'events/[id]/occurrences',
+      'ml/monitoring/drift', 'ml/monitoring/usage', 'ml/predictions/claim-outcome', 'ml/predictions/timeline', 'ml/predictions/workload-forecast',
+      'ml/recommendations', 'ml/predictions/churn-risk', 'ml/monitoring/alerts',
     ];
     for (const route of converted) {
       const file = files.find((f) => f.route === route);

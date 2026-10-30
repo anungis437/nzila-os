@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 41,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 116,
-    "engineeringRemaining": 661,
+    "engineeringCorrected": 125,
+    "engineeringRemaining": 652,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 14
+    "engineeringPartial": 16
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -5872,9 +5872,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B10-F02-ML-AND-COGNITION-HONESTY",
+        "path": "apps/union-eyes/lib/knowledge-transfer/summaries/knowledge-summarizer.ts; apps/union-eyes/lib/knowledge-transfer/summaries/__tests__/knowledge-summarizer.test.ts",
+        "explanation": "Model output is validated (non-empty summary, at most five handoff points); anything else is a 502 and nothing is stored. The former fallback text (\"Manual review of source content is recommended\") that was stored as a generated summary is gone, and its test was replaced.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-EXC-SUMMARIZE-SENDS-ANY-CONSENT-STATE-TO-MODEL-AS-INTERNAL",
@@ -5889,9 +5896,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B10-F02-ML-AND-COGNITION-HONESTY",
+        "path": "apps/union-eyes/lib/knowledge-transfer/summaries/knowledge-summarizer.ts; apps/union-eyes/lib/knowledge-transfer/summaries/__tests__/knowledge-summarizer.test.ts",
+        "explanation": "Nothing is sent to the provider unless the retiring employee consented (409 otherwise); interviews above the restricted level go as confidential rather than internal.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-EXC-AI-ROUTES-APPLY-NO-FEATURE-GATE-SAFETY-CHECK-OR-USER-RATE-LIMIT",
@@ -5991,9 +6005,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B10-F02-ML-AND-COGNITION-HONESTY",
+        "path": "apps/union-eyes/lib/knowledge-transfer/simulation/continuity-simulator.ts; apps/union-eyes/lib/knowledge-transfer/simulation/__tests__/continuity-simulator.test.ts",
+        "explanation": "The preset scenarios name roles and no nodes, so every one of them reached the canned minimal result. Roles are now honoured, and a preset that matches nothing in the organization is refused rather than modelled.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-EXC-SIMULATION-UNMATCHED-NODES-RETURN-REASSURING-RESULT-AND-ROLES-ARE-IGNORED",
@@ -6008,9 +6029,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B10-F02-ML-AND-COGNITION-HONESTY",
+        "path": "apps/union-eyes/lib/knowledge-transfer/simulation/continuity-simulator.ts; apps/union-eyes/lib/knowledge-transfer/simulation/__tests__/continuity-simulator.test.ts",
+        "explanation": "A scenario that matches no node or role is refused with 400 instead of a canned low-severity result (impact 20, probability 85). Affected roles now select the nodes associated with them. The test that asserted the canned minimal result was replaced by tests for the refusal and for role selection.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-EXC-MITIGATION-PROJECTIONS-ARE-FIXED-MULTIPLIERS-WITH-CONSTANT-CONFIDENCE",
@@ -6154,9 +6182,16 @@
         ]
       },
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B10-F02-ML-AND-COGNITION-HONESTY",
+        "path": "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/constant-engines-not-implemented.test.ts",
+        "explanation": "The correlation engine already refuses with NOT_IMPLEMENTED for every organization; the source change was upstream's and is covered by an existing test.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-COGA-FORECAST-PROJECTIONS-ARE-FIXED-RATES-AND-ALWAYS-IMPROVE",
@@ -6218,9 +6253,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B10-F02-ML-AND-COGNITION-HONESTY",
+        "path": "apps/union-eyes/lib/knowledge-transfer/continuity-risk/risk-detector.ts; apps/union-eyes/app/api/__tests__/interview-derived-analytics.pglite.test.ts",
+        "explanation": "The detector already reads only interviews selected by derivedAnalyticsCondition (published, consented, open levels), proved against real SQL by an existing test; that change was upstream's.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-COGA-PROFILES-MEASURE-ENTERED-MEMORY-ROWS-NOT-GOVERNANCE",
@@ -6252,9 +6294,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B10-F02-ML-AND-COGNITION-HONESTY",
+        "path": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts; apps/union-eyes/scripts/codemods/f02-dynamics-engines-501.cjs",
+        "explanation": "The default confidence of 60 is gone: an engine states a confidence only when it supplies one (otherwise 0), and the two remaining engines state evidence volume (cognition-memory entries analysed, capped at 100).",
+        "remaining": "The explainability envelope's evidence and reasoning lists are still not populated by these engines.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-COGA-FEDERATED-PERCENTILE-FROM-UNSOURCED-LITERALS",
@@ -6656,9 +6706,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B10-F02-ML-AND-COGNITION-HONESTY",
+        "path": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts; apps/union-eyes/scripts/codemods/f02-dynamics-engines-501.cjs",
+        "explanation": "The systems-dynamics, governance-coherence, operational-coordination, operating-rhythm, multi-domain and operational-trust engines embedded fixed frequencies, response times, integration scores and narrative claims (for example \"Consistent governance behavior\") and presented them as measurements. They now fail with 501 through the same refusal as the correlation engine.",
+        "remaining": "The response-elasticity and governance-momentum engines remain: they derive scores from counts of cognition-memory entries with arbitrary scaling. They hold no fixed claim, but the scaling is not a validated measure.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-COGB-ENTRY-COUNT-PROXIES-LABELLED-AS-COORDINATION-RHYTHM-ELASTICITY-AND-TRUST",
@@ -9031,9 +9089,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B10-F02-ML-AND-COGNITION-HONESTY",
+        "path": "apps/union-eyes/app/api/metrics/operational/route.ts; apps/union-eyes/app/api/__tests__/metrics-operational.route.test.ts",
+        "explanation": "The route already reports error_rate as null and no longer names a claim count as a request count; the source change was upstream's and is covered by an existing test.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ML-OPERATIONAL-METRICS-SERVICE-KEY-COMPARED-WITH-EQUALITY-AND-ERROR-TEXT-RETURNED",
@@ -9065,9 +9130,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B10-F02-ML-AND-COGNITION-HONESTY",
+        "path": "apps/union-eyes/app/api/ml/predictions/churn-risk/route.ts; apps/union-eyes/app/api/__tests__/ml-churn-risk.route.test.ts",
+        "explanation": "The churn route scored members with a randomly initialised network pre-trained on generated examples and stored the score. GET and POST now answer 501 behind the officer floor. The extensive route test, which exercised that scoring with mocks, was replaced by a test of the 501 and of the absence of the generated-example model.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ML-CHURN-SQL-NAMES-COLUMNS-AND-STATUS-VALUES-THE-REPOSITORY-DOES-NOT-DEFINE",
@@ -9382,9 +9454,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B10-F02-ML-AND-COGNITION-HONESTY",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "ml/monitoring/drift, monitoring/usage, predictions/claim-outcome, predictions/timeline, predictions/workload-forecast and ml/recommendations were the generic factory over ml_predictions under six model names; all answer 501 and ml_predictions has no generic binding (its governance entry was removed). The monitoring alerts route (GET queried columns and a table that no schema defines and stated a fixed PSI 0.28 drift alert; POST wrote to a table no migration creates) also answers 501; its three POST tests were replaced by one assertion of the 501.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ML-STEWARD-CAN-STORE-ANY-PREDICTION-ROW-THAT-THE-SLA-LIST-ALERT-SWEEP-AND-INSIGHTS-READ",

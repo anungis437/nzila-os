@@ -40,6 +40,14 @@ const FACADES = {
   'reports/[id]/share': 'the generic CRUD factory over reports, which has no recipient or grant (nothing is shared and its DELETE removed the report)',
   'upload': 'a JSON insert of a media library row that receives no file',
   'enterprise/integrations': 'the generic CRUD factory over oauth_providers, a per-user table of provider account ids and tokens with no organization',
+  'ml/monitoring/drift': 'the generic CRUD factory over ml_predictions (a row list under a drift name; no drift is measured)',
+  'ml/monitoring/usage': 'the generic CRUD factory over ml_predictions (a row list under a usage name; no usage is measured)',
+  'ml/predictions/claim-outcome': 'the generic CRUD factory over ml_predictions (a row list under a model name; no model is run)',
+  'ml/predictions/timeline': 'the generic CRUD factory over ml_predictions (a row list under a model name; no model is run)',
+  'ml/predictions/workload-forecast': 'the generic CRUD factory over ml_predictions (a row list under a model name; no model is run)',
+  'ml/recommendations': 'the generic CRUD factory over ml_predictions (a row list under a recommendations name; nothing is recommended)',
+  'ml/predictions/churn-risk': 'a score from a randomly initialised network pre-trained on generated examples and presented as a trained churn model',
+  'ml/monitoring/alerts': 'a query over columns and a table that do not exist, plus a fixed drift alert (PSI 0.28) that was stated whenever an organization had enough claims',
   'events/[id]/occurrences': 'a byte-for-byte copy of the event item route, so its path value was the event, not an occurrence',
 }
 
@@ -70,7 +78,7 @@ for (const [route, was] of Object.entries(FACADES)) {
   }
   const methods = exportedMethods(text)
   if (methods.length === 0) throw new Error(`no exported methods in ${route}`)
-  const floor = (text.match(/(?:readRole|minRole): ['"]([a-z_]+)['"]/) || [])[1] || 'member'
+  const floor = (text.match(/(?:readRole|minRole): ['"]([a-z_]+)['"]/) || text.match(/withRoleAuth\(\s*['"]([a-z_]+)['"]/) || [])[1] || 'member'
   const tag = (text.match(/tags: \[['"]([^'"]+)['"]\]/) || [])[1] || 'Not implemented'
   const name = route.replace(/\[(\w+)\]/g, ':$1')
   const body = `/**

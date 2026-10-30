@@ -37,7 +37,6 @@ const READ_ONLY = [
   'analytics_metrics', 'organization_members', 'dues_transactions',
   // A prediction is a computed output that the SLA list, the realtime alert sweep and the insights generator consume as one. A
   // steward-chosen row would be stored with no provenance and read as a model result, so only the dedicated scoring routes write it.
-  'ml_predictions',
   'external_invoices', 'polls', 'federations', 'data_classification_policy',
 ] as const
 

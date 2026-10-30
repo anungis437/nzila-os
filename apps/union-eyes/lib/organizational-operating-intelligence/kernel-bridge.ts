@@ -26,10 +26,6 @@ import {
 
 import { ApiError } from '@/lib/api/errors';
 import {
-  analyzeSystemsDynamics,
-  evaluateGovernanceCoherence,
-  modelCoordinationBehavior,
-  analyzeInstitutionalRhythms,
   measureOrganizationalElasticity,
   modelGovernanceMomentum,
   type SystemsDynamicsProfile,
@@ -41,8 +37,6 @@ import {
 } from '../organizational-dynamics';
 
 import {
-  orchestrateMultiDomainCognition,
-  analyzeOperationalTrust,
   type MultiDomainCognitionProfile,
   type ProceduralContinuityProfile,
   type InstitutionalPrecedentProfile,
@@ -69,7 +63,8 @@ function adaptLegacyEngine<TPayload>(input: {
     domain: input.domain,
     compute: async (orgId: string) => {
       const payload = await input.compute(orgId);
-      const confidenceScore = input.confidenceFromPayload?.(payload) ?? 60;
+      // No constant: a confidence is stated only when the engine says what it rests on.
+      const confidenceScore = input.confidenceFromPayload?.(payload) ?? 0;
       return {
         payload,
         confidenceScore,
@@ -82,7 +77,9 @@ function adaptLegacyEngine<TPayload>(input: {
 /**
  * An engine whose analysis is not implemented. The previous implementations returned the same literal profile for every
  * organization (and, for the correlation engine, fixed strengths and a fixed narrative) inside an explainability envelope,
- * presenting constants as an analysis of the organization's own records. They now fail with 501, which the route returns
+ * presenting constants as an analysis of the organization's own records. The systems, coherence, coordination, rhythm,
+ * multi-domain and trust engines embedded fixed frequencies, response times, integration scores and narratives in the same way.
+ * They now fail with 501, which the route returns
  * and the orchestrator records as an engine failure, until a computation from stored data exists.
  */
 function notImplementedCompute<T>(analysis: string): (orgId: string) => Promise<T> {
@@ -91,10 +88,15 @@ function notImplementedCompute<T>(analysis: string): (orgId: string) => Promise<
   };
 }
 
+/** Confidence reflects evidence volume only: one point per cognition-memory entry analysed, capped at 100. */
+function evidenceVolumeConfidence(payload: { entriesAnalyzed: number }): number {
+  return Math.max(0, Math.min(100, Math.round(payload.entriesAnalyzed)));
+}
+
 export const systemsDynamicsEngine = adaptLegacyEngine<SystemsDynamicsProfile>({
   engineId: 'systems-dynamics',
   domain: 'systems_coherence',
-  compute: analyzeSystemsDynamics,
+  compute: notImplementedCompute<SystemsDynamicsProfile>('Systems dynamics analysis'),
   interpretationGuidance:
     'Systemic dynamics across coupled institutional subsystems. Use to detect coupling fragility before it cascades.',
 });
@@ -102,7 +104,7 @@ export const systemsDynamicsEngine = adaptLegacyEngine<SystemsDynamicsProfile>({
 export const governanceCoherenceEngine = adaptLegacyEngine<GovernanceCoherenceProfile>({
   engineId: 'governance-coherence',
   domain: 'governance',
-  compute: evaluateGovernanceCoherence,
+  compute: notImplementedCompute<GovernanceCoherenceProfile>('Governance coherence analysis'),
   interpretationGuidance:
     'Governance coherence across decision streams. Low coherence indicates institutional drift.',
 });
@@ -110,7 +112,7 @@ export const governanceCoherenceEngine = adaptLegacyEngine<GovernanceCoherencePr
 export const operationalCoordinationEngine = adaptLegacyEngine<OperationalCoordinationProfile>({
   engineId: 'operational-coordination',
   domain: 'coordination',
-  compute: modelCoordinationBehavior,
+  compute: notImplementedCompute<OperationalCoordinationProfile>('Operational coordination analysis'),
   interpretationGuidance:
     'Cross-team coordination behavior at organizational scope. Never used for individual evaluation.',
 });
@@ -118,7 +120,7 @@ export const operationalCoordinationEngine = adaptLegacyEngine<OperationalCoordi
 export const operatingRhythmsEngine = adaptLegacyEngine<OperatingRhythmProfile>({
   engineId: 'operating-rhythms',
   domain: 'systems_coherence',
-  compute: analyzeInstitutionalRhythms,
+  compute: notImplementedCompute<OperatingRhythmProfile>('Operating rhythm analysis'),
   interpretationGuidance:
     'Institutional cadence and rhythm health. Use to spot rhythm breakdowns that erode continuity.',
 });
@@ -127,6 +129,7 @@ export const responseElasticityEngine = adaptLegacyEngine<OrganizationalResponse
   engineId: 'response-elasticity',
   domain: 'resilience',
   compute: measureOrganizationalElasticity,
+  confidenceFromPayload: evidenceVolumeConfidence,
   interpretationGuidance:
     'Organizational ability to absorb stress and recover. Inputs into resilience modeling.',
 });
@@ -135,6 +138,7 @@ export const governanceMomentumEngine = adaptLegacyEngine<GovernanceMomentumProf
   engineId: 'governance-momentum',
   domain: 'governance',
   compute: modelGovernanceMomentum,
+  confidenceFromPayload: evidenceVolumeConfidence,
   interpretationGuidance:
     'Direction and speed of governance trajectory. Negative momentum requires human review.',
 });
@@ -142,7 +146,7 @@ export const governanceMomentumEngine = adaptLegacyEngine<GovernanceMomentumProf
 export const multiDomainCognitionEngine = adaptLegacyEngine<MultiDomainCognitionProfile>({
   engineId: 'multi-domain-cognition',
   domain: 'institutional_memory',
-  compute: orchestrateMultiDomainCognition,
+  compute: notImplementedCompute<MultiDomainCognitionProfile>('Multi-domain cognition synthesis'),
   interpretationGuidance:
     'Cross-domain cognition synthesis. Surfaces intersectional institutional dynamics.',
 });
@@ -166,7 +170,7 @@ export const institutionalPrecedentEngine = adaptLegacyEngine<InstitutionalPrece
 export const operationalTrustEngine = adaptLegacyEngine<OperationalTrustProfile>({
   engineId: 'operational-trust',
   domain: 'operational_trust',
-  compute: analyzeOperationalTrust,
+  compute: notImplementedCompute<OperationalTrustProfile>('Operational trust analysis'),
   interpretationGuidance:
     'Organizational-level trust signals. Aggregated only — no individual trust scoring.',
 });
