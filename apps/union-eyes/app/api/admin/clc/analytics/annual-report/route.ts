@@ -15,7 +15,7 @@ import {
 } from '@/lib/api/standardized-responses';
 
 export const GET = withRoleAuth('admin', async (request, context) => {
-  const { userId } = context as { userId: string };
+  const { userId, organizationId } = context;
 
   try {
     const rateLimitResult = await checkRateLimit(userId, RATE_LIMITS.CLC_OPERATIONS);
@@ -51,7 +51,8 @@ export const GET = withRoleAuth('admin', async (request, context) => {
       );
     }
 
-    const report = await generateAnnualComplianceReport(year);
+    if (!organizationId) return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
+    const report = await generateAnnualComplianceReport(year, organizationId);
 
     logApiAuditEvent({
       timestamp: new Date().toISOString(),
@@ -65,7 +66,7 @@ export const GET = withRoleAuth('admin', async (request, context) => {
 
     return NextResponse.json(report, {
       headers: {
-        'Cache-Control': 'public, max-age=3600',
+        'Cache-Control': 'private, no-store',
       },
     });
   } catch (error) {
