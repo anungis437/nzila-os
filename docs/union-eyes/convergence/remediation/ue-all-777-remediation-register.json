@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 331,
-    "engineeringRemaining": 446,
+    "engineeringCorrected": 335,
+    "engineeringRemaining": 442,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 51
+    "engineeringPartial": 52
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -5068,9 +5068,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B28-F12-F06-COMPLIANCE-VERDICTS-AND-UNSCOPED-AGGREGATES",
+        "path": "apps/union-eyes/app/api/compliance/audit-logs/route.ts; apps/union-eyes/app/api/__tests__/write-routes-atomic-audit.route.test.ts",
+        "explanation": "The organization audit records are read at the administrator floor, tenant-scoped, bounded to 100 and read-audited (upstream's change, existing test).",
+        "remaining": "The read still returns the whole audit row; a field projection for the administrator view is not defined.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-CMP-AUDIT-MANUAL-ENTRY-FREE-REFERENCE",
@@ -5085,9 +5093,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B28-F12-F06-COMPLIANCE-VERDICTS-AND-UNSCOPED-AGGREGATES",
+        "path": "apps/union-eyes/app/api/compliance/audit-logs/route.ts; apps/union-eyes/app/api/__tests__/write-routes-atomic-audit.route.test.ts",
+        "explanation": "A manual entry is recorded as compliance.manual_entry attributed to the administrator who wrote it, with the declared fields kept as untrusted details, so it cannot pass for a system record (upstream's change, existing test).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-CMP-CONTRACT-READ-AT-MEMBER-FLOOR",
@@ -5226,9 +5241,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B28-F12-F06-COMPLIANCE-VERDICTS-AND-UNSCOPED-AGGREGATES",
+        "path": "apps/union-eyes/app/api/compliance/validate/route.ts; apps/union-eyes/app/api/__tests__/compliance-validate.route.test.ts; apps/union-eyes/lib/api/__tests__/f12-hs-compliance.contract.test.ts",
+        "explanation": "The strike-vote and certification checks no longer return compliant, warning or violation from numbers the caller typed against thresholds written into the route; each reports the arithmetic, says no validated rule is configured and that the figures are unchecked, as info. Test disclosure: one test added; the existing tests did not assert a verdict.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-CMP-VALIDATE-LITERAL-THRESHOLDS-AND-SWALLOWED-LOOKUP",
@@ -5243,9 +5265,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B28-F12-F06-COMPLIANCE-VERDICTS-AND-UNSCOPED-AGGREGATES",
+        "path": "apps/union-eyes/app/api/compliance/validate/route.ts; apps/union-eyes/lib/api/__tests__/f12-hs-compliance.contract.test.ts",
+        "explanation": "The literal thresholds are removed and there is no rule lookup to swallow.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-CMP-VALIDATE-INPUT-NOT-VALIDATED",
@@ -9677,9 +9706,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B28-F12-F06-COMPLIANCE-VERDICTS-AND-UNSCOPED-AGGREGATES",
+        "path": "apps/union-eyes/app/api/compliance/validate/route.ts; apps/union-eyes/lib/api/__tests__/f12-hs-compliance.contract.test.ts",
+        "explanation": "The response carries the number of checks evaluated and, when none applied, a notice that this is not a finding of compliance.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-JUR-STATUTORY-RULE-TABLES-ARE-UNVERSIONED-LITERALS-SERVED-WITH-STATUTE-CITATIONS",

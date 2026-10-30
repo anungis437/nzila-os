@@ -3,7 +3,7 @@
  * Recent completed inspection findings for the InspectionFindingsCard UI.
  * Returns { findings: InspectionFinding[] }.
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -27,7 +27,9 @@ export const GET = withApi(
     },
   },
   async ({ organizationId }) => {
-    const orgFilter = organizationId ? sql`organization_id = ${organizationId}` : sql`1=1`;
+    // With no organization the query used to run unscoped (1=1) and count every tenant's rows; it now refuses.
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    const orgFilter = sql`organization_id = ${organizationId}`;
 
     const rows = Array.from(
       await withRLSContext(async () =>
