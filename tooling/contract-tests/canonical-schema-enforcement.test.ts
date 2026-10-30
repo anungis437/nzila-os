@@ -58,7 +58,17 @@ describe('CANON-001: Event routes reference canonical schemas', () => {
           src.includes('withSpan') ||
           src.includes('crudRoutes') ||
           src.includes('createEvent') ||
-          src.includes('listEvents')
+          src.includes('listEvents') ||
+          // A legacy event alias is acceptable only when it delegates to the real canonical
+          // calendar handler, which itself must enforce tenant scope and structured event fields.
+          (app === 'union-eyes' && src.includes("@/app/api/calendar/events/[id]/route") &&
+            src.includes('canonicalGET') && src.includes('requireOrg: true') &&
+            (() => {
+              const canonical = readSafe(join(APPS_DIR, app, 'app', 'api', 'calendar', 'events', '[id]', 'route.ts'))
+              return canonical.includes('calendarEvents.eventType') &&
+                canonical.includes('eq(calendarEvents.organizationId, organizationId)') &&
+                canonical.includes('canSeeCalendarEvent')
+            })())
         )
       })
       expect(
