@@ -86,11 +86,11 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 40,
+    "withCurrentRunSourceOrRegressionWork": 41,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 91,
-    "engineeringRemaining": 686,
+    "engineeringCorrected": 92,
+    "engineeringRemaining": 685,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 9
   },
@@ -10172,10 +10172,29 @@
       "title": "After the organization row is read inside withSystemContext, GET /api/organizations/[id] computes activeClaims, totalClaims and childCount with db.execute outside any withRLSContext or withSystemContext callback, so the grievances and organizations statements run on the pooled connection with no app.current_org_id set: under the 0108 tenant policy they return no rows (so the counts are zero for every organization, including the caller own), and on a connection role that bypasses the policy they return the real counts of whatever organization id the caller named; the route returns either an unisolated or a silently zero figure and cannot be relied on for either.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/organizations/[id]/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/organizations-id.route.test.ts"
+        ],
+        "commits": [
+          "8feaa297fb53bb7a177d5cd91aa76e190f985330",
+          "e3917975efa9ec7880f9d2a353514a2e23bd3624"
+        ],
+        "limits": "Exact-HEAD native PG15/16 and HTTP/browser acceptance pending."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/organizations/[id]/route.ts",
+        "explanation": "Grievance aggregates now execute in explicit tenant RLS transaction bound to authorized path organization, while child counts execute under explicit system context; no bare pooled query.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ORG-ITEM-PATCH-BODY-UNVALIDATED-SETTINGS-AND-SLUG-REPLACED-WHOLESALE",
