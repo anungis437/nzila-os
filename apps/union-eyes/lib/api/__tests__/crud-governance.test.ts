@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { getTableName } from 'drizzle-orm'
 import * as schema from '@/db/schema'
-import { CRUD_GOVERNED_TABLES, assertCrudRead, assertCrudWrite, crudGovernanceFor } from '../crud-governance'
+import { CRUD_GOVERNED_TABLES, assertCrudRead, assertCrudWrite, crudGovernanceFor, supportsGenericArchive } from '../crud-governance'
 import { lowRoleModeFor, ownRowsScope } from '../crud-low-role-guard'
 
 const ROOT = join(__dirname, '..', '..', '..')
@@ -63,6 +63,24 @@ describe('generic CRUD governance (UE-CONV-K-007)', () => {
     expect(gate.class).toBe('DENIED')
     expect(() => assertCrudRead(gate)).toThrow()
     expect(() => assertCrudWrite(gate)).toThrow()
+  })
+
+  it('denies invented archived enum values rather than raising 500 or deleting institutional bargaining history', () => {
+    expect(schema.proposalStatusEnum.enumValues).not.toContain('archived')
+    expect(supportsGenericArchive(schema.bargainingProposals.status)).toBe(false)
+    expect(supportsGenericArchive(schema.negotiations.status)).toBe(false)
+    expect(supportsGenericArchive({ enumValues: ['draft', 'archived'] })).toBe(true)
+    expect(supportsGenericArchive({ enumValues: ['draft', 'withdrawn'] })).toBe(false)
+    expect(supportsGenericArchive({})).toBe(true) // unbounded text status supports archived
+    expect(supportsGenericArchive(undefined)).toBe(false) // separate hard-delete branch
+    const factory = readFileSync(join(ROOT, 'lib', 'api', 'crud-factory.ts'), 'utf8')
+    expect(factory).toMatch(/statusCol && !supportsGenericArchive\\(statusCol\\)/)
+    expect(factory).toMatch(/throw ApiError\\.forbidden\\(`Generic deletion is unavailable/)
+  })
+
+  it('leaves dedicated confidential notes and OAuth connections denied by default generic CRUD', () => {
+    expect(crudGovernanceFor(schema.bargainingNotes).class).toBe('DENIED')
+    expect(crudGovernanceFor(schema.externalCalendarConnections).class).toBe('DENIED')
   })
 
   it('refuses generic writes for every class except OPERATIONAL, and generic reads only for DENIED', () => {
