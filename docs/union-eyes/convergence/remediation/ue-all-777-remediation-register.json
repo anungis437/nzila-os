@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 41,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 125,
-    "engineeringRemaining": 652,
+    "engineeringCorrected": 126,
+    "engineeringRemaining": 651,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 16
+    "engineeringPartial": 17
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -296,6 +296,10 @@
     {
       "sha": "873e993fc0bcf08e6072c94f199a950899db34e1",
       "description": "Calendar provider sync now enforces actor, connection owner, local calendar owner and exported event organizer; regression coverage added. Source-level only, exact-HEAD CI and provider runtime acceptance pending."
+    },
+    {
+      "sha": "f38291484559977f8bb9810ee912a1483839a473",
+      "description": "Calendar OAuth provider state now uses signed, expiring browser-bound nonce (partial until durable single-use consumption); Google/Microsoft callbacks perform tenant-bound credential mutations with mandatory atomic audit. Unit and PGlite regressions authored; exact-HEAD CI and provider runtime pending."
     }
   ],
   "records": [
@@ -1989,7 +1993,23 @@
       "title": "The Google and Microsoft authorization routes pass the session user id as the OAuth state and the callbacks compare the returned state with that same id, and accept a callback with no state at all, so the state is neither unguessable nor single-use and gives no protection against a forged callback.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
+      "currentRun": {
+        "state": "PARTIAL_SOURCE_HARDENING_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/lib/external-calendar-sync/oauth-state.ts",
+          "apps/union-eyes/app/api/calendar-sync/google/auth/route.ts",
+          "apps/union-eyes/app/api/calendar-sync/google/callback/route.ts",
+          "apps/union-eyes/app/api/calendar-sync/microsoft/auth/route.ts",
+          "apps/union-eyes/app/api/calendar-sync/microsoft/callback/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/external-calendar-sync/__tests__/oauth-state.test.ts",
+          "apps/union-eyes/app/api/__tests__/calendar-sync-google-auth.route.test.ts",
+          "apps/union-eyes/app/api/__tests__/calendar-sync-microsoft-auth.route.test.ts"
+        ],
+        "repair": "Replaced predictable user-id state with signed 256-bit nonce, ten-minute expiry, provider/user/org binding and HttpOnly SameSite browser cookie; rejects missing/mismatched state before token exchange and clears browser state on terminal responses.",
+        "limits": "Not counted as fully engineering-corrected: durable one-time nonce consumption across concurrent callbacks/instances is not yet implemented; exact-SHA CI and real provider acceptance pending."
+      },
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
@@ -2006,10 +2026,30 @@
       "title": "The provider callbacks are GET handlers that exchange a code and insert or update the connection row holding the provider tokens, and neither the callback nor the member-floor wrapper writes an audit record for the connection, so a state-changing GET leaves no audit evidence.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/calendar-sync/google/callback/route.ts",
+          "apps/union-eyes/app/api/calendar-sync/microsoft/callback/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/calendar-sync-google-callback.route.test.ts",
+          "apps/union-eyes/app/api/__tests__/calendar-sync-microsoft-callback.route.test.ts",
+          "apps/union-eyes/app/api/__tests__/calendar-sync-callbacks-mutation-isolation.pglite.test.ts"
+        ],
+        "repair": "Provider OAuth token writes now carry an atomic, tenant-scoped mandatory audit record; failure aborts transaction.",
+        "limits": "Source and regression authored; no exact-HEAD unit, native PG15/16, HTTP/browser or real provider acceptance yet."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B10-CALENDAR-OAUTH-AUDIT",
+        "path": "apps/union-eyes/app/api/calendar-sync/google/callback/route.ts; apps/union-eyes/app/api/calendar-sync/microsoft/callback/route.ts",
+        "explanation": "Both provider callbacks now perform the credential mutation and mandatory audit within the same organization-bound RLS transaction, with the connection id and actor. An audit failure prevents the transaction from committing. Callback unit regressions cover both providers and audit failure; exact-SHA CI and real provider acceptance remain pending.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CALENDAR-TOKEN-PLAINTEXT-FALLBACK",
