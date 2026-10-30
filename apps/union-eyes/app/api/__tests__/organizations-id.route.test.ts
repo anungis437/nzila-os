@@ -4,7 +4,7 @@ import { NextRequest } from 'next/server';
 // The organization read authority is proven in organizations-read-authority.route.test.ts; these tests exercise the
 // route's own behaviour as a caller who may read and administer the organization.
 vi.mock('@/lib/organizations/read-authority', () => ({
-  resolveOrganizationAccess: async () => ({ platform: true, direct: new Map(), descendants: new Set() }),
+  resolveOrganizationAccess: async () => ({ platform: false, direct: new Map([['11111111-1111-4111-8111-111111111111', 'member']]), descendants: new Set() }),
   canReadOrganization: () => true,
   canAdministerOrganization: () => true,
   readableOrganizationIds: () => null,
