@@ -123,6 +123,17 @@ jobs:
             exit 1
           fi
 
+          # GitHub is the independent source for the workflow run identity. A
+          # caller-supplied run ID must not substitute another SHA or workflow.
+          RUN_JSON=$(gh run view "$SOURCE_RUN_ID" --json headSha,headBranch,workflowName,conclusion)
+          echo "$RUN_JSON" | jq -e --arg sha "$GITHUB_SHA" '
+            .headSha == $sha and .headBranch == "main" and
+            .workflowName == "Deploy Staging" and .conclusion == "success"
+          ' >/dev/null || {
+            echo "::error::Selected staging run does not match the exact release commit and trusted workflow"
+            exit 1
+          }
+
           echo "source_run_id=$SOURCE_RUN_ID" >> "$GITHUB_OUTPUT"
 
           echo "### Production Promotion Plan" >> "$GITHUB_STEP_SUMMARY"
@@ -138,7 +149,7 @@ jobs:
           mkdir -p staging-artifacts
           gh run download "${{ steps.resolve.outputs.source_run_id }}" --name staging-build-artifacts --dir ./staging-artifacts
 
-      - name: Verify artifact digest
+      - name: Parse artifact manifest and apply app policy filter
         run: |
           set -euo pipefail
           test -f staging-artifacts/artifact-manifest.json
@@ -162,18 +173,6 @@ jobs:
 
           echo "Artifact manifest verified"
 
-      - name: Verify SBOM
-        run: |
-          set -euo pipefail
-          test -f staging-artifacts/sbom.json
-          echo "SBOM verified: $(wc -c < staging-artifacts/sbom.json) bytes"
-
-      - name: Verify attestation
-        run: |
-          set -euo pipefail
-          test -f staging-artifacts/release-attestation.json
-          echo "Attestation verified"
-
       - name: Verify signed staging provenance and exact artifact continuity
         env:
           ATTESTATION_VERIFY_PUBLIC_KEY: ${{ secrets.ATTESTATION_VERIFY_PUBLIC_KEY }}
@@ -181,7 +180,7 @@ jobs:
           set -euo pipefail
           # Fail closed for missing keys, invalid/unsigned or stale evidence,
           # source SHA drift, missing independent scans or mutable images.
-          node scripts/release/verify-promotion-evidence.mjs staging-artifacts "${GITHUB_SHA}"
+          node scripts/release/verify-promotion-evidence.mjs staging-artifacts "${GITHUB_SHA}" "${{ steps.resolve.outputs.source_run_id }}"
 
       - name: Verify release signature
         run: |
@@ -225,6 +224,23 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
+      # Jobs have isolated filesystems: download again after the independent
+      # GitHub Environment approval, then re-verify the exact signed artifact.
+      - name: Download approved staging artifact set
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p staging-artifacts
+          gh run download "${{ needs.verify-artifact.outputs.source_run_id }}" --name staging-build-artifacts --dir ./staging-artifacts
+
+      - name: Reverify signed artifact after human approval
+        env:
+          ATTESTATION_VERIFY_PUBLIC_KEY: ${{ secrets.ATTESTATION_VERIFY_PUBLIC_KEY }}
+        run: |
+          set -euo pipefail
+          node scripts/release/verify-promotion-evidence.mjs staging-artifacts "${GITHUB_SHA}" "${{ needs.verify-artifact.outputs.source_run_id }}"
+
       - name: Azure login (OIDC)
         uses: azure/login@v3
         with:
@@ -327,9 +343,9 @@ jobs:
           {
             "environment": "PRODUCTION",
             "commit": "${{ github.sha }}",
-            "artifact_digest": "promoted-from-staging",
-            "sbom_hash": "promoted-from-staging",
-            "policy_engine_status": "pass",
+            "artifact_digest": "$(sha256sum staging-artifacts/sbom.json | cut -d ' ' -f 1)",
+            "sbom_hash": "$(sha256sum staging-artifacts/sbom.json | cut -d ' ' -f 1)",
+            "policy_engine_status": "not_independently_attested",
             "change_record_ref": "$TAG_NAME",
             "timestamp": "$RELEASE_DATE"
           }
