@@ -32,12 +32,14 @@ const DENIED = [
 const OWN_ROWS_READ = ['grievances', 'claims', 'claim_deadlines'] as const
 
 const READ_ONLY = [
-  'organization_members', 'organizations', 'dues_transactions',
+  // Analytics metrics are computed evidence, not steward-authored records. A generic role floor must never
+  // permit inserting or altering reported measures; ingestion requires a dedicated, audited computation path.
+  'analytics_metrics', 'organization_members', 'organizations', 'dues_transactions',
   'external_invoices', 'polls', 'federations', 'data_classification_policy',
 ] as const
 
 const OPERATIONAL = [
-  'analytics_metrics', 'anti_scab_violations', 'arbitration_decisions', 'arbitrations',
+  'anti_scab_violations', 'arbitration_decisions', 'arbitrations',
   'bargaining_proposals', 'bargaining_units', 'break_policies', 'calendar_events', 'calendars', 'campaigns', 'case_studies',
   'cba_clauses', 'clc_sync_log', 'cms_media_library', 'cms_pages', 'cnesst_filings', 'committees', 'communication_preferences',
   'course_registrations', 'course_sessions', 'donation_campaigns', 'employers', 'hazard_reports',
