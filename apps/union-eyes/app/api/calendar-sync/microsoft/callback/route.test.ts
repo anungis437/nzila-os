@@ -19,9 +19,9 @@ const mocks = vi.hoisted(() => {
       }),
     })),
     insert: vi.fn(() => ({
-      values: vi.fn(async (payload: any) => {
+      values: vi.fn((payload: any) => {
         ;(db as any as { _lastInsertPayload: any })._lastInsertPayload = payload
-        return undefined
+        return { returning: vi.fn(async () => [{ id: 'new-conn' }]) }
       }),
     })),
     _lastInsertPayload: null as any,
@@ -32,15 +32,23 @@ const mocks = vi.hoisted(() => {
   return {
     db,
     exchangeCodeForTokens: vi.fn(),
+    verifyCalendarOAuthState: vi.fn((_request: unknown, _provider: string, state: string | null) => state === 'signed-state'),
+    clearCalendarOAuthStateCookie: vi.fn(),
+    persistAtomicAudit: vi.fn(async () => undefined),
   }
 })
 
+vi.mock('@/lib/external-calendar-sync/oauth-state', () => ({
+  verifyCalendarOAuthState: mocks.verifyCalendarOAuthState,
+  clearCalendarOAuthStateCookie: mocks.clearCalendarOAuthStateCookie,
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mocks.persistAtomicAudit }));
 vi.mock('@/lib/api-auth-guard', () => ({
   withRoleAuth: vi.fn((_requiredRole: string, handler: (...args: any[]) => unknown) => handler),
 }))
 
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: vi.fn((fn: () => Promise<any>) => fn()),
+  withRLSContext: vi.fn((_context: unknown, fn: (tx: unknown) => Promise<any>) => fn(mocks.db)),
 }))
 
 vi.mock('@/db/db', () => ({ db: mocks.db }))
@@ -68,12 +76,13 @@ describe('GET /api/calendar-sync/microsoft/callback', () => {
     })
     mocks.db._selectQueue.push([])
 
-    const req = new NextRequest('https://example.com/api/calendar-sync/microsoft/callback?code=abc&state=user-1')
+    const req = new NextRequest('https://example.com/api/calendar-sync/microsoft/callback?code=abc&state=signed-state')
     const res = await GET(req, { userId: 'user-1', organizationId: 'org-1' })
 
     expect(res.status).toBe(307)
     expect(res.headers.get('location')).toContain('/calendar?sync=connected&provider=microsoft')
     expect(mocks.db.insert).toHaveBeenCalledTimes(1)
+    expect(mocks.persistAtomicAudit).toHaveBeenCalled()
     expect(mocks.db._lastInsertPayload).toMatchObject({
       userId: 'user-1',
       organizationId: 'org-1',
@@ -83,7 +92,7 @@ describe('GET /api/calendar-sync/microsoft/callback', () => {
   })
 
   it('returns validation error when code is missing', async () => {
-    const req = new NextRequest('https://example.com/api/calendar-sync/microsoft/callback?state=user-1')
+    const req = new NextRequest('https://example.com/api/calendar-sync/microsoft/callback?state=signed-state')
     const res = await GET(req, { userId: 'user-1', organizationId: 'org-1' })
     const body = await res.json()
 
@@ -100,7 +109,7 @@ describe('GET /api/calendar-sync/microsoft/callback', () => {
     })
     mocks.db._selectQueue.push([])
 
-    const req = new NextRequest('https://example.com/api/calendar-sync/microsoft/callback?code=abc&state=user-1')
+    const req = new NextRequest('https://example.com/api/calendar-sync/microsoft/callback?code=abc&state=signed-state')
     const res = await GET(req, { userId: 'user-1', organizationId: 'org-1' })
     const body = await res.json()
 
