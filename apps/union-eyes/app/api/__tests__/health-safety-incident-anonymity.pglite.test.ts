@@ -74,7 +74,7 @@ describe('POST /api/health-safety/incidents', () => {
   });
 
   it('does not attribute an anonymous report to the session user anywhere', async () => {
-    await post({ ...base, isAnonymous: true, reportedBy: 'Jo', reporterContact: 'jo@example.ca' });
+    await post({ ...base, isAnonymous: true, reportedBy: 'Jo' });
     const [row] = await stored();
     expect(row.created_by).toBe('anonymous');
     expect(JSON.stringify(row.metadata)).not.toContain('Jo');
@@ -82,10 +82,20 @@ describe('POST /api/health-safety/incidents', () => {
     expect(JSON.stringify(audit.mock.calls.map((c) => c[1]))).not.toContain('steward-1');
   });
 
-  it('cannot be made anonymous by a client-supplied createdBy, nor un-attributed by a hostile createdBy', async () => {
-    await post({ ...base, createdBy: 'anonymous' });
-    await post({ ...base, isAnonymous: true, createdBy: 'someone-else' });
+  it('rejects forged creator attribution before writing either ordinary or anonymous incidents', async () => {
+    await expect(post({ ...base, createdBy: 'anonymous' })).rejects.toThrow(/createdBy cannot be assigned/);
+    await expect(post({ ...base, isAnonymous: true, createdBy: 'someone-else' })).rejects.toThrow(/createdBy cannot be assigned/);
+    expect(await stored()).toEqual([]);
+
+    await post({ ...base });
+    await post({ ...base, isAnonymous: true });
     const rows = await stored();
     expect(rows.map((r) => r.created_by).sort()).toEqual(['anonymous', 'steward-1']);
   });
+
+  it('rejects unsupported reporter contact rather than silently dropping a sensitive field', async () => {
+    await expect(post({ ...base, reporterContact: 'jo@example.ca' })).rejects.toThrow(/reporterContact cannot be assigned/);
+    expect(await stored()).toEqual([]);
+  });
+
 });
