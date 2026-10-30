@@ -3,7 +3,8 @@
  * never an implication of the steward title or tenant membership.
  * Fail before reading any grievance data or invoking an external provider.
  */
-import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
+import { getEffectiveCaseAccess, kernelCaseAccess } from '@/lib/services/case-access-service';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 
 export class GrievanceAiCaseAccessDenied extends Error {
   readonly code = 'GRIEVANCE_AI_CASE_ACCESS_DENIED';
@@ -25,4 +26,18 @@ export async function requireGrievanceAiCaseAccess(input: {
   // Its own DB errors fail closed to canViewCase=false.
   const decision = await getEffectiveCaseAccess(input);
   if (!decision.canViewCase) throw new GrievanceAiCaseAccessDenied();
+}
+
+/** Reviewers need explicit case action rights, not merely case visibility.
+ * Evaluate live case relationships using the SAME tenant transaction as mutation.
+ */
+export async function requireGrievanceAiCaseReview(
+  tx: RLSTx,
+  input: { userId: string; organizationId: string; grievanceId: string },
+): Promise<void> {
+  if (!input.userId || !input.organizationId || !input.grievanceId)
+    throw new GrievanceAiCaseAccessDenied();
+  const decision = await kernelCaseAccess(tx, input);
+  if (!decision.canViewCase || !decision.canDraftActions)
+    throw new GrievanceAiCaseAccessDenied();
 }

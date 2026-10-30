@@ -173,7 +173,7 @@ describe("Clause Reasoning AI", () => {
 
   describe("getClauseReasoningHistory", () => {
     it("returns an array", async () => {
-      const result = await getClauseReasoningHistory("gr-1", "org-1");
+      const result = await getClauseReasoningHistory("gr-1", "org-1", "user-1");
       expect(Array.isArray(result)).toBe(true);
     });
   });

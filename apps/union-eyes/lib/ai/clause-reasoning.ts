@@ -15,7 +15,7 @@
 
 import { randomUUID } from 'crypto';
 import { db } from '@/db/db';
-import { requireGrievanceAiCaseAccess } from '@/lib/ai/require-grievance-ai-case';
+import { requireGrievanceAiCaseAccess, requireGrievanceAiCaseReview } from '@/lib/ai/require-grievance-ai-case';
 import { eq, and, desc } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -259,7 +259,7 @@ export async function reviewClauseReasoning(opts: {
   // The read, the guard, the update and the audit record share one transaction
   await withRLSContext({ organizationId }, async (tx) => {
     const [existing] = await tx
-      .select({ id: aiClauseReasonings.id, status: aiClauseReasonings.status })
+      .select({ id: aiClauseReasonings.id, grievanceId: aiClauseReasonings.grievanceId, status: aiClauseReasonings.status })
       .from(aiClauseReasonings)
       .where(
         and(
@@ -272,6 +272,7 @@ export async function reviewClauseReasoning(opts: {
     if (!existing) {
       throw new Error(`Clause reasoning ${clauseReasoningId} not found in org ${organizationId}`);
     }
+    await requireGrievanceAiCaseReview(tx, { grievanceId: existing.grievanceId, organizationId, userId: reviewedBy });
     if (existing.status !== 'suggested') {
       throw new Error(
         `Clause reasoning ${clauseReasoningId} is already '${existing.status}' and cannot be re-reviewed.`,
@@ -316,7 +317,9 @@ export async function reviewClauseReasoning(opts: {
 export async function getClauseReasoningHistory(
   grievanceId: string,
   organizationId: string,
+  userId: string,
 ) {
+  await requireGrievanceAiCaseAccess({ grievanceId, organizationId, userId });
   return db.query.aiClauseReasonings.findMany({
     where: and(
       eq(aiClauseReasonings.grievanceId, grievanceId),

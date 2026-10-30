@@ -169,7 +169,7 @@ describe("Grievance Triage AI", () => {
 
   describe("getTriageHistory", () => {
     it("returns an array", async () => {
-      const result = await getTriageHistory("gr-1", "org-1");
+      const result = await getTriageHistory("gr-1", "org-1", "user-1");
       expect(Array.isArray(result)).toBe(true);
     });
   });

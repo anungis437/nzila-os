@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-const m = vi.hoisted(() => ({ access: vi.fn() }));
-vi.mock('@/lib/services/case-access-service', () => ({ getEffectiveCaseAccess: m.access }));
-import { requireGrievanceAiCaseAccess, GrievanceAiCaseAccessDenied } from '../require-grievance-ai-case';
+const m = vi.hoisted(() => ({ access: vi.fn(), kernel: vi.fn() }));
+vi.mock('@/lib/services/case-access-service', () => ({ getEffectiveCaseAccess: m.access, kernelCaseAccess: m.kernel }));
+import { requireGrievanceAiCaseAccess, requireGrievanceAiCaseReview, GrievanceAiCaseAccessDenied } from '../require-grievance-ai-case';
 
 const subject = { userId: 'u1', organizationId: 'org-a', grievanceId: 'case-1' };
 beforeEach(() => vi.clearAllMocks());
@@ -25,4 +25,22 @@ describe('AI grievance processing case authority', () => {
     m.access.mockRejectedValue(new Error('authority database down'));
     await expect(requireGrievanceAiCaseAccess(subject)).rejects.toThrow('authority database down');
   });
+  it('denies a view-only reviewer even inside the case mutation transaction', async () => {
+    const tx = { marker: 'tx' };
+    m.kernel.mockResolvedValue({ canViewCase: true, canDraftActions: false });
+    await expect(requireGrievanceAiCaseReview(tx as never, subject)).rejects.toBeInstanceOf(GrievanceAiCaseAccessDenied);
+    expect(m.kernel).toHaveBeenCalledWith(tx, subject);
+  });
+  it('allows case suggestion review only to a live case drafter', async () => {
+    const tx = { marker: 'tx' };
+    m.kernel.mockResolvedValue({ canViewCase: true, canDraftActions: true });
+    await expect(requireGrievanceAiCaseReview(tx as never, subject)).resolves.toBeUndefined();
+    expect(m.kernel).toHaveBeenCalledWith(tx, subject);
+  });
+  it('rejects a missing case-review actor before invoking the kernel', async () => {
+    await expect(requireGrievanceAiCaseReview({} as never, { ...subject, userId: '' }))
+      .rejects.toBeInstanceOf(GrievanceAiCaseAccessDenied);
+    expect(m.kernel).not.toHaveBeenCalled();
+  });
+
 });

@@ -20,7 +20,7 @@
 
 import { randomUUID } from 'crypto';
 import { db } from '@/db/db';
-import { requireGrievanceAiCaseAccess } from '@/lib/ai/require-grievance-ai-case';
+import { requireGrievanceAiCaseAccess, requireGrievanceAiCaseReview } from '@/lib/ai/require-grievance-ai-case';
 import { eq, and, desc } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -189,7 +189,9 @@ export async function analyzeGrievance(
 export async function getTriageHistory(
   grievanceId: string,
   organizationId: string,
+  userId: string,
 ) {
+  await requireGrievanceAiCaseAccess({ grievanceId, organizationId, userId });
   return db.query.aiGrievanceTriages.findMany({
     where: and(
       eq(aiGrievanceTriages.grievanceId, grievanceId),
@@ -220,7 +222,7 @@ export async function reviewTriage(
   await withRLSContext({ organizationId }, async (tx) => {
     // Guard: only pending triages may be reviewed
     const [existing] = await tx
-      .select({ id: aiGrievanceTriages.id, status: aiGrievanceTriages.status, suggestedPriority: aiGrievanceTriages.suggestedPriority })
+      .select({ id: aiGrievanceTriages.id, grievanceId: aiGrievanceTriages.grievanceId, status: aiGrievanceTriages.status, suggestedPriority: aiGrievanceTriages.suggestedPriority })
       .from(aiGrievanceTriages)
       .where(and(eq(aiGrievanceTriages.id, triageId), eq(aiGrievanceTriages.organizationId, organizationId)))
       .limit(1);
@@ -228,6 +230,7 @@ export async function reviewTriage(
     if (!existing) {
       throw new Error(`Triage ${triageId} not found in org ${organizationId}`);
     }
+    await requireGrievanceAiCaseReview(tx, { grievanceId: existing.grievanceId, organizationId, userId: reviewedBy });
     if (existing.status !== 'pending') {
       throw new Error(
         `Triage ${triageId} is already '${existing.status}' and cannot be re-reviewed. Create a new triage to get a fresh AI assessment.`,
