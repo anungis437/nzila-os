@@ -47,4 +47,15 @@ jobs:
             apps/union-eyes/db/__tests__/schema-mutation-batches.test.ts \
             apps/union-eyes/services/clc/__tests__/compliance-reports.test.ts \
             apps/union-eyes/app/api/__tests__/admin-clc-analytics-annual-report.route.test.ts \
-            apps/union-eyes/app/api/__tests__/admin-clc-analytics-trends.route.test.ts
+            apps/union-eyes/app/api/__tests__/admin-clc-analytics-trends.route.test.ts \
+            apps/union-eyes/lib/ai/__tests__/require-grievance-ai-case.test.ts \
+            apps/union-eyes/lib/ai/__tests__/grievance-triage.test.ts \
+            apps/union-eyes/lib/ai/__tests__/clause-reasoning.test.ts \
+            apps/union-eyes/app/api/__tests__/privacy-consent.route.test.ts \
+            apps/union-eyes/services/__tests__/provincial-privacy-service.test.ts \
+            apps/union-eyes/lib/audit/__tests__/org-audit-reader.test.ts \
+            apps/union-eyes/lib/knowledge-transfer/governance/__tests__/interview-access-revocation.test.ts \
+            apps/union-eyes/app/api/__tests__/exit-interviews-governance.route.test.ts \
+            apps/union-eyes/app/api/__tests__/exit-interviews-read-gates.pglite.test.ts \
+            apps/union-eyes/lib/knowledge-transfer/search/__tests__/hybrid-search.test.ts \
+            apps/union-eyes/app/api/__tests__/exit-interviews-summary-consent-gate.test.ts
