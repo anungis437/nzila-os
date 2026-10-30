@@ -3,8 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const m = vi.hoisted(() => ({
   requireUser: vi.fn(),
   hasMinRole: vi.fn(),
-  isPlatformAdminUser: vi.fn(),
-  getOrganizationIdForUser: vi.fn(),
+  resolveOrganizationAccess: vi.fn(),
   withSystemContext: vi.fn(),
   logger: { error: vi.fn() },
   selectQueue: [] as unknown[][],
@@ -28,14 +27,13 @@ const mockDb = {
 vi.mock('@/lib/api-auth-guard', () => ({
   requireUser: m.requireUser,
   hasMinRole: m.hasMinRole,
-  isPlatformAdminUser: m.isPlatformAdminUser,
+}));
+vi.mock('@/lib/organizations/read-authority', () => ({
+  resolveOrganizationAccess: m.resolveOrganizationAccess,
+  isAdministrativeRole: (role?: string) => role === 'admin',
 }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
-vi.mock('@/lib/organization-utils', () => ({
-  getOrganizationIdForUser: m.getOrganizationIdForUser,
-  DEFAULT_ORGANIZATION_ID: 'platform_org',
-}));
 vi.mock('@/lib/api/standardized-responses', () => ({
   ErrorCode: { FORBIDDEN: 'FORBIDDEN', INTERNAL_ERROR: 'INTERNAL_ERROR' },
   standardErrorResponse: (code: string, message: string) =>
@@ -54,34 +52,40 @@ describe('pilot/overview route', () => {
     m.executeQueue = [];
     m.requireUser.mockResolvedValue({ userId: 'u1' });
     m.hasMinRole.mockResolvedValue(true);
-    m.isPlatformAdminUser.mockResolvedValue(false);
-    m.getOrganizationIdForUser.mockResolvedValue('platform_org');
+    m.resolveOrganizationAccess.mockResolvedValue({ platform: false, direct: new Map([['org_1', 'admin']]), descendants: new Set() });
     m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
   });
   afterEach(() => vi.unstubAllEnvs());
 
-  it('V2 denies a platform-organization match without canonical administrator authority', async () => {
-    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1');
+  it('denies a platform administrator title without a direct active union mandate', async () => {
     const { GET } = await loadRoute();
-
+    m.resolveOrganizationAccess.mockResolvedValueOnce({
+      platform: true, direct: new Map(), descendants: new Set(),
+    });
     const response = await GET();
-
     expect(response.status).toBe(403);
-    expect(m.isPlatformAdminUser).toHaveBeenCalledWith('u1');
-    expect(m.getOrganizationIdForUser).not.toHaveBeenCalled();
     expect(m.withSystemContext).not.toHaveBeenCalled();
   });
 
-  it('V2 permits canonical platform administration without legacy organization authority', async () => {
-    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1');
-    m.isPlatformAdminUser.mockResolvedValueOnce(true);
+  it('permits a direct administrator of a pilot organization, regardless of platform title', async () => {
     const { GET } = await loadRoute();
-
     const response = await GET();
-
     expect(response.status).toBe(200);
-    expect(m.getOrganizationIdForUser).not.toHaveBeenCalled();
+    expect(m.resolveOrganizationAccess).toHaveBeenCalledWith('u1');
     expect(m.withSystemContext).toHaveBeenCalledOnce();
+  });
+
+  it('denies ordinary officers and federation-only administrators from cross-tenant details', async () => {
+    const { GET } = await loadRoute();
+    for (const access of [
+      { platform: false, direct: new Map([['org_1', 'officer']]), descendants: new Set() },
+      { platform: false, direct: new Map([['federation', 'admin']]), descendants: new Set(['org_1']) },
+    ]) {
+      m.resolveOrganizationAccess.mockResolvedValueOnce(access);
+      const response = await GET();
+      if (access.direct.has('org_1')) expect(response.status).toBe(403);
+      else expect((await response.json()).organizations).toHaveLength(0);
+    }
   });
 
   it('GET returns 403 when role check fails', async () => {
@@ -92,13 +96,16 @@ describe('pilot/overview route', () => {
     expect(response.status).toBe(403);
   });
 
-  it('GET returns 403 when non-platform org requests overview', async () => {
+  it('returns no data when an unrelated organization is not in the authenticated grant set', async () => {
     const { GET } = await loadRoute();
-    m.getOrganizationIdForUser.mockResolvedValueOnce('local_org');
-    process.env.PLATFORM_ADMIN_USER_IDS = 'someone_else';
-
+    m.selectQueue.push([{
+      enrollment: { id: 'foreign', organizationId: 'other-org', status: 'active' },
+      orgName: 'Other Org', orgSlug: 'other',
+    }]);
     const response = await GET();
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(200);
+    expect((await response.json()).organizations).toHaveLength(0);
+    expect(mockDb.execute).not.toHaveBeenCalled();
   });
 
   it('GET returns organizations metrics for active enrollments', async () => {

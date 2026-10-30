@@ -1,13 +1,12 @@
 /**
  * GET /api/pilot/overview
  *
- * Returns pilot metrics for ALL enrolled organizations.
- * Only accessible by NZILA Ventures (platform owner) users.
+ * Returns pilot metrics only for organizations in which the caller is a direct
+ * active administrator. Platform title alone never authorizes cross-tenant metrics.
  */
 
 import { NextResponse } from "next/server";
-import { requireUser, hasMinRole, isPlatformAdminUser } from "@/lib/api-auth-guard";
-import { currentStateContextEnabled } from "@/lib/auth/canonical-bootstrap";
+import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import {
   ErrorCode,
   standardErrorResponse,
@@ -16,9 +15,9 @@ import { db } from "@/db/db";
 import { pilotEnrollments } from "@/db/schema/domains/pilot/pilot-enrollments";
 import { pilotMilestones } from "@/db/schema/domains/pilot/pilot-milestones";
 import { organizations } from "@/db/schema-organizations";
-import { eq, sql } from "drizzle-orm";
+import { eq, inArray, and, sql } from "drizzle-orm";
 import { withSystemContext } from "@/lib/db/with-rls-context";
-import { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } from "@/lib/organization-utils";
+import { resolveOrganizationAccess, isAdministrativeRole } from "@/lib/organizations/read-authority";
 import type { PilotMilestone } from "@/types/marketing";
 
 export const dynamic = "force-dynamic";
@@ -35,15 +34,14 @@ export async function GET() {
       );
     }
 
-    // Only NZILA Ventures (platform owner) or platform admins can see the overview
-    const platformAdmin = await isPlatformAdminUser(user.userId);
-    const platformOrganization = !currentStateContextEnabled() &&
-      (await getOrganizationIdForUser(user.userId)) === DEFAULT_ORGANIZATION_ID;
-    if (!platformAdmin && !platformOrganization) {
-      return standardErrorResponse(
-        ErrorCode.FORBIDDEN,
-        "Only the platform organization can view the pilot overview"
-      );
+    // No standing platform-owner exception. A verified, purpose-bound cross-
+    // tenant institutional mandate must be implemented separately.
+    const access = await resolveOrganizationAccess(user.userId);
+    const permittedOrgIds = [...access.direct.entries()]
+      .filter(([, role]) => isAdministrativeRole(role))
+      .map(([id]) => id);
+    if (permittedOrgIds.length === 0) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, "Direct organization administrator mandate required");
     }
 
     return await withSystemContext(async () => {
@@ -56,10 +54,18 @@ export async function GET() {
         })
         .from(pilotEnrollments)
         .innerJoin(organizations, eq(pilotEnrollments.organizationId, organizations.id))
-        .where(eq(pilotEnrollments.status, "active"));
+        .where(and(
+          eq(pilotEnrollments.status, "active"),
+          inArray(pilotEnrollments.organizationId, permittedOrgIds),
+        )).limit(100);
+
+      // Defensive row filtering also protects against misconfigured or mocked
+      // system-role data adapters that fail to apply the SQL predicate.
+      const scopedEnrollments = enrollments.filter(({ enrollment }) =>
+        permittedOrgIds.includes(enrollment.organizationId));
 
       const orgMetrics = await Promise.all(
-        enrollments.map(async ({ enrollment, orgName, orgSlug }) => {
+        scopedEnrollments.map(async ({ enrollment, orgName, orgSlug }) => {
           const orgId = enrollment.organizationId;
 
           // Fetch milestones
