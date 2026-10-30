@@ -5,8 +5,14 @@ const m = vi.hoisted(() => ({
   withRoleAuth: vi.fn(),
   getAuthorizationUrl: vi.fn(),
   standardErrorResponse: vi.fn(),
+  issueCalendarOAuthState: vi.fn(),
+  setCalendarOAuthStateCookie: vi.fn(),
 }));
 
+vi.mock('@/lib/external-calendar-sync/oauth-state', () => ({
+  issueCalendarOAuthState: m.issueCalendarOAuthState,
+  setCalendarOAuthStateCookie: m.setCalendarOAuthStateCookie,
+}));
 vi.mock('@/lib/api-auth-guard', () => ({ withRoleAuth: m.withRoleAuth, BaseAuthContext: {} }));
 vi.mock('@/lib/external-calendar-sync/google-calendar-service', () => ({ getAuthorizationUrl: m.getAuthorizationUrl }));
 vi.mock('@/lib/api/standardized-responses', () => ({
@@ -21,6 +27,7 @@ async function loadRoute() {
 describe('calendar-sync/google/auth route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.issueCalendarOAuthState.mockReturnValue('signed-state');
     m.withRoleAuth.mockImplementation((_role: string, handler: any) => (request: NextRequest, context: any = { userId: 'u1' }) => handler(request, context));
     m.getAuthorizationUrl.mockReturnValue('https://accounts.google.com/o/oauth2/v2/auth');
     m.standardErrorResponse.mockImplementation((code: string, message: string) =>
@@ -38,11 +45,12 @@ describe('calendar-sync/google/auth route', () => {
   it('redirects to Google authorization URL for authenticated users', async () => {
     const { GET } = await loadRoute();
 
-    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/google/auth'), { userId: 'u1' });
+    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/google/auth'), { userId: 'u1', organizationId: 'org-1' });
 
     expect(response.status).toBe(307);
     expect(response.headers.get('location')).toContain('accounts.google.com');
-    expect(m.getAuthorizationUrl).toHaveBeenCalledWith('u1');
+    expect(m.getAuthorizationUrl).toHaveBeenCalledWith('signed-state');
+    expect(m.setCalendarOAuthStateCookie).toHaveBeenCalledWith(response, 'google', 'signed-state');
   });
 
   it('returns internal error when URL generation fails', async () => {
@@ -51,7 +59,7 @@ describe('calendar-sync/google/auth route', () => {
       throw new Error('oauth unavailable');
     });
 
-    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/google/auth'), { userId: 'u1' });
+    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/google/auth'), { userId: 'u1', organizationId: 'org-1' });
 
     expect(response.status).toBe(500);
   });
