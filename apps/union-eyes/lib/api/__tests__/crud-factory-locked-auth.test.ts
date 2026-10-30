@@ -32,6 +32,7 @@ vi.mock('../crud-governance', () => ({
   crudGovernanceFor: () => ({ name: 'calendar', class: 'STANDARD' }),
   assertCrudRead: vi.fn(),
   assertCrudWrite: vi.fn(),
+  supportsGenericArchive: (column: { enumValues?: readonly string[] } | undefined) => Boolean(column && (!Array.isArray(column.enumValues) || column.enumValues.includes('archived'))),
 }))
 vi.mock('../crud-low-role-guard', () => ({
   lowRoleModeFor: () => 'NONE',
