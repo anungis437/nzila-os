@@ -192,6 +192,7 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
           eq(aiUsageMetrics.requestId, queryId),
           eq(aiUsageMetrics.operation, 'feedback'),
           eq(aiUsageMetrics.organizationId, context.organizationId),
+          eq(aiUsageMetrics.userId, context.userId),
         ),
       );
 
