@@ -21,7 +21,14 @@ UPDATE tool_fabric_trust_stream
 SET revision = 1, head_hash = repeat('1', 64), updated_at = now()
 WHERE stream_id = 'platform:tool-fabric:trust' AND revision = 0;
 
-DO $$
+-- Flush the deferred receipt/head constraint before testing TRUNCATE: PostgreSQL
+-- refuses TRUNCATE on tables with pending trigger events (SQLSTATE 55000),
+-- which would otherwise mask the actual append-only TRUNCATE guard (42501).
+-- Return to DEFERRED so the subsequent insert-then-head CAS remains atomic.
+SET CONSTRAINTS tool_fabric_receipt_requires_head IMMEDIATE;
+SET CONSTRAINTS tool_fabric_receipt_requires_head DEFERRED;
+
+DO $
 BEGIN
   BEGIN
     UPDATE tool_fabric_trust_entry SET entry = '{"tampered":true}'::jsonb WHERE seq = 1;
