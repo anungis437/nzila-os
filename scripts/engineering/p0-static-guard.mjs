@@ -25,6 +25,11 @@ export function validateMcpConfig(text) {
   if (Object.keys(v.mcpServers).length > 0) {
     fail('MCP servers are closed pending Tool Fabric broker readiness')
   }
+  // Alternate top-level keys can be interpreted as executable providers by
+  // other clients. A deny-only project config must not carry shadow settings.
+  if (Object.keys(v).length !== 1) {
+    fail('MCP configuration contains unapproved top-level keys')
+  }
   return true
 }
 
@@ -36,7 +41,7 @@ export function validateFirstPartySkill(raw) {
   for (const key of ['name:', 'description:', 'license:', 'version:']) {
     if (!front.includes(key)) fail('skill missing ' + key)
   }
-  if (/^(allowed-tools|permissions|approved|trust|grant|auto_approve):/mi.test(front)) {
+  if (/^\\s*(allowed[-_]?tools|permissions|approved|trust|grants?|auto[-_]?approve|capabilities|mcpServers|command|shell|execution)\\s*:/mi.test(front)) {
     fail('skill attempts to encode authority')
   }
   if (raw.length > 256 * 1024) fail('skill exceeds size limit')
