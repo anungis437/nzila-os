@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 25,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 13,
-    "engineeringRemaining": 764,
+    "engineeringCorrected": 14,
+    "engineeringRemaining": 763,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately."
   },
   "verificationPolicy": {
@@ -1217,7 +1217,13 @@
       "title": "The break collection declares ownerColumn memberId, which references organization_members.id, and the factory compares it with the session user id for every caller; the item routes hold callers below steward to the same memberId comparison. The source does not show these are the same identifier, and on the collection staff are held to the same filter so no steward can review member breaks through it.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
+      "currentRun": {
+        "additionalHardening": "Break item PATCH now repeats tenant and member predicates on UPDATE; regression added for membership and mutation ownership.",
+        "additionalRegression": "apps/union-eyes/app/api/__tests__/break-self-report-tenant-scope.route.test.ts",
+        "unitState": "PENDING_AT_EXACT_HEAD",
+        "nativeState": "PENDING_AT_EXACT_HEAD",
+        "runtimeState": "PENDING_AT_EXACT_HEAD"
+      },
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
@@ -1240,7 +1246,13 @@
       "title": "Break creation at the member floor does not force memberId from the session because the collection route declares an explicit ownerColumn, which sets the factory low-role mode to open, so a member can record a break, with its denial and compliance fields, for another member.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
+      "currentRun": {
+        "additionalHardening": "Break item PATCH now repeats tenant and member predicates on UPDATE; regression added for membership and mutation ownership.",
+        "additionalRegression": "apps/union-eyes/app/api/__tests__/break-self-report-tenant-scope.route.test.ts",
+        "unitState": "PENDING_AT_EXACT_HEAD",
+        "nativeState": "PENDING_AT_EXACT_HEAD",
+        "runtimeState": "PENDING_AT_EXACT_HEAD"
+      },
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
@@ -13750,10 +13762,28 @@
       "title": "GET /api/targets/summary is configured at the member floor and returns every kpi_configurations row of the organization with the whole row spread into the response (`...cfg`): the calculation record (formula, aggregation and filters), the alert recipients (user ids or e-mail addresses), the id of the creator and the dashboard layout reach any member of the organization, not the officers who create targets, with no field projection and no read audit.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
+      "currentRun": {
+        "source": [
+          "apps/union-eyes/app/api/targets/summary/route.ts"
+        ],
+        "tests": [
+          "apps/union-eyes/app/api/__tests__/targets-summary-authority.route.test.ts"
+        ],
+        "note": "Source correction and adversarial route tests committed; exact-HEAD CI and VS/runtime acceptance pending.",
+        "sourceState": "PATCHED_NOT_ACCEPTED",
+        "unitState": "PENDING_AT_EXACT_HEAD",
+        "nativeState": "PENDING_AT_EXACT_HEAD",
+        "runtimeState": "PENDING_AT_EXACT_HEAD"
+      },
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/targets/summary/route.ts",
+        "explanation": "Officer-only authorization, explicit non-sensitive projection, tenant-bound database context and mandatory read audit remove member exposure of calculation, alert recipients, creator and dashboard layout.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-PLT-KPI-CURRENT-VALUE-IS-THE-LATEST-ROW-OF-THE-METRIC-TYPE-TEXT-NOT-THE-DECLARED-SOURCE-OR-CALCULATION",
