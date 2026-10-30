@@ -2,9 +2,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
 
 const mocks = vi.hoisted(() => ({
-  getAuthorizationUrl: vi.fn<(userId: string) => string>(),
+  getAuthorizationUrl: vi.fn<(state: string) => string>(),
+  issueCalendarOAuthState: vi.fn(() => 'signed-state'),
+  setCalendarOAuthStateCookie: vi.fn(),
 }))
 
+vi.mock('@/lib/external-calendar-sync/oauth-state', () => ({
+  issueCalendarOAuthState: mocks.issueCalendarOAuthState,
+  setCalendarOAuthStateCookie: mocks.setCalendarOAuthStateCookie,
+}));
 vi.mock('@/lib/api-auth-guard', () => ({
   withRoleAuth: vi.fn((_requiredRole: string, handler: (...args: any[]) => unknown) => handler),
 }))
@@ -24,11 +30,11 @@ describe('GET /api/calendar-sync/google/auth', () => {
     mocks.getAuthorizationUrl.mockReturnValue('https://accounts.google.com/o/oauth2/auth?x=1')
 
     const req = new NextRequest('https://example.com/api/calendar-sync/google/auth')
-    const res = await GET(req, { userId: 'user-1' })
+    const res = await GET(req, { userId: 'user-1', organizationId: 'org-1' })
 
     expect(res.status).toBe(307)
     expect(res.headers.get('location')).toContain('accounts.google.com')
-    expect(mocks.getAuthorizationUrl).toHaveBeenCalledWith('user-1')
+    expect(mocks.getAuthorizationUrl).toHaveBeenCalledWith('signed-state')
   })
 
   it('returns auth required when userId is missing from context', async () => {
