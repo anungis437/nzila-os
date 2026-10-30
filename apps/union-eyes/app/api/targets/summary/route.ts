@@ -1,7 +1,8 @@
-import { db } from '@/db/db';
 import { kpiConfigurations, analyticsMetrics } from '@/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,10 +22,13 @@ function computeHealth(
 }
 
 export const GET = withApi(
-  { auth: { minRole: 'member' } },
-  async ({ organizationId }) => {
-    // Fetch all KPI configurations for the org
-    const configs = await db
+  { auth: { minRole: 'officer' }, requireOrg: true },
+  async ({ organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.forbidden('Organization officer context required');
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+    // Officer-only target summary: members must not receive financial target
+    // configurations, alert recipients, formulas or creator identifiers.
+    const configs = await tx
       .select()
       .from(kpiConfigurations)
       .where(eq(kpiConfigurations.organizationId, organizationId!))
@@ -33,7 +37,7 @@ export const GET = withApi(
     // For each KPI, grab the latest matching analytic metric to derive current value
     const enriched = await Promise.all(
       configs.map(async (cfg) => {
-        const [latestMetric] = await db
+        const [latestMetric] = await tx
           .select()
           .from(analyticsMetrics)
           .where(
@@ -59,7 +63,15 @@ export const GET = withApi(
             : null;
 
         return {
-          ...cfg,
+          id: cfg.id,
+          name: cfg.name,
+          description: cfg.description,
+          metricType: cfg.metricType,
+          dataSource: cfg.dataSource,
+          visualizationType: cfg.visualizationType,
+          targetValue: cfg.targetValue,
+          isActive: cfg.isActive,
+          displayOrder: cfg.displayOrder,
           health,
           currentValue,
           progress,
@@ -81,6 +93,13 @@ export const GET = withApi(
       }, {}),
     };
 
+    await persistAtomicAudit(tx, {
+      organizationId, userId,
+      action: 'target.summary.read',
+      resourceType: 'kpi_configurations',
+      details: { targetCount: enriched.length },
+    });
     return { summary, targets: enriched };
+    });
   },
 );
