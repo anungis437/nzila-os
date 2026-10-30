@@ -101,6 +101,16 @@ beforeEach(async () => {
   await pg.query(`INSERT INTO grievances (organization_id, status) VALUES ($1::uuid, 'filed'), ($1::uuid, 'closed')`, [LOCAL_A]);
 });
 
+describe('deleted membership authorization', () => {
+  it('revokes organization visibility when a formerly active membership is soft-deleted', async () => {
+    const { GET } = await import('../organizations/[id]/route');
+    state.userId = 'u-member-a';
+    expect((await GET(get(`/api/organizations/${LOCAL_A}`), params(LOCAL_A))).status).toBe(200);
+    await pg.query(`UPDATE organization_members SET deleted_at = now() WHERE user_id = $1 AND organization_id = $2::uuid`, ['u-member-a', LOCAL_A]);
+    expect((await GET(get(`/api/organizations/${LOCAL_A}`), params(LOCAL_A))).status).toBe(404);
+  });
+});
+
 describe('GET /api/organizations/[id]', () => {
   it('a signed-in stranger reads another organization as not found, and a suspended member too', async () => {
     const { GET } = await import('../organizations/[id]/route');

@@ -1,4 +1,4 @@
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
 import { withSystemContext } from '@/lib/db/with-rls-context';
@@ -10,7 +10,7 @@ import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
  *
  * Organization routes read the `organizations` table as the system role, which is not tenant-scoped, so the route has to
  * decide. Being signed in is not enough: a caller may read an organization they hold an ACTIVE membership in, the
- * descendants of an organization where they are an administrator, and (for a platform administrator) every organization.
+ * descendants of an organization where they are an administrator. Platform titles alone do not confer tenant access.
  * Anything else reads as not found.
  */
 export interface OrganizationAccess {
@@ -38,7 +38,7 @@ async function directMemberships(userId: string): Promise<Array<{ organizationId
     db
       .select({ organizationId: organizationMembers.organizationId, role: organizationMembers.role })
       .from(organizationMembers)
-      .where(and(eq(organizationMembers.userId, userId), eq(organizationMembers.status, 'active'))),
+      .where(and(eq(organizationMembers.userId, userId), eq(organizationMembers.status, 'active'), isNull(organizationMembers.deletedAt))),
   );
 }
 
