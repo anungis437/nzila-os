@@ -240,6 +240,14 @@ describe("RAGService", () => {
     expect(mocks.mockAiEmbed).toHaveBeenCalled();
   });
 
+  it("searchDocuments fails closed before embedding or SQL when organization is absent", async () => {
+    await expect(rag.searchDocuments("grievance", { organizationId: "" })).rejects.toThrow(
+      "Organization context required for knowledge search",
+    );
+    expect(mocks.mockAiEmbed).not.toHaveBeenCalled();
+    expect(mocks.mockSelectFrom).not.toHaveBeenCalled();
+  });
+
   it("searchDocuments returns scored results", async () => {
     mocks.mockSelectLimit.mockResolvedValueOnce([
       {
@@ -249,7 +257,7 @@ describe("RAGService", () => {
         embedding: JSON.stringify(Array(384).fill(0.1)),
       },
     ]);
-    const results = await rag.searchDocuments("grievance", { limit: 5 });
+    const results = await rag.searchDocuments("grievance", { organizationId: "org-1", limit: 5 });
     expect(Array.isArray(results)).toBe(true);
   });
 
@@ -262,7 +270,7 @@ describe("RAGService", () => {
         embedding: JSON.stringify(Array(384).fill(0)),
       },
     ]);
-    const results = await rag.searchDocuments("grievance", { similarityThreshold: 0.99 });
+    const results = await rag.searchDocuments("grievance", { organizationId: "org-1", similarityThreshold: 0.99 });
     expect(results).toHaveLength(0);
   });
 
