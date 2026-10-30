@@ -2008,6 +2008,72 @@
           "explanation": "The campaign route reads and writes at the officer floor; upstream's change, pinned by an existing test."
         }
       ]
+    },
+    {
+      "id": "B19-PILOT-TRUTHFULNESS-SOCIAL-CONTROLS",
+      "family": "F01/F03/F05/F04/F12: truthful pilot bootstrap, bounded social reads, typed campaigns, fail-closed remote media",
+      "evidenceCommit": "ec396551a80050734d4d50515c5cb313a300a966",
+      "items": [
+        {
+          "prefix": "DEF-0B10-PIL-CUPE-BOOTSTRAP-RESET-DELETES-ALL-GRIEVANCES-MEMBERS-AND-CHECKLIST-ROWS-OF-THE-ORGANIZATION-AT-THE-FIXTURE-SLUG-WITH-NO-DEMO-MARKER",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/pilot/bootstrap/cupe/route.ts",
+            "apps/union-eyes/app/api/__tests__/pilot-bootstrap-cupe.route.test.ts"
+          ],
+          "explanation": "Existing fixture-slug organizations now require a durable route-origin marker before bootstrap/reset, and reset preserves all onboarding checklist rows. Non-fixture members and grievances are refused before deletion. This is containment, not a fully governed safe reset.",
+          "remaining": "Per-row immutable fixture provenance, changed fixture-row protection, related-record handling, dry-run and independent approval are still absent."
+        },
+        {
+          "prefix": "DEF-0B10-PIL-CUPE-BOOTSTRAP-REPORTS-WORKSITES-IT-NEVER-WRITES-AND-LITERAL-ONBOARDING-COUNTS-FOR-CHECKLIST-IDS-THE-ONBOARDING-ROUTE-DOES-NOT-READ",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/pilot/bootstrap/cupe/route.ts",
+            "apps/union-eyes/lib/pilot/cupe-bootstrap-report.ts",
+            "apps/union-eyes/lib/pilot/__tests__/cupe-bootstrap-report.test.ts",
+            "apps/union-eyes/app/api/__tests__/pilot-bootstrap-cupe.route.test.ts"
+          ],
+          "explanation": "The response now reports zero worksites actually written and separately identifies unseeded fixture worksites; member and grievance counts use INSERT RETURNING, not attempts; onboarding uses the seven canonical persisted checklist IDs and no invented completed tasks."
+        },
+        {
+          "prefix": "DEF-0B11-SOC-LIMIT-AND-OFFSET-ARE-PARSED-FROM-THE-QUERY-WITH-NO-NUMBER-CHECK-OR-UPPER-BOUND",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/social-media/posts/route.ts",
+            "apps/union-eyes/lib/social-media/social-post-pagination.ts",
+            "apps/union-eyes/lib/social-media/__tests__/social-post-pagination.test.ts"
+          ],
+          "explanation": "Social post pagination rejects NaN, negative, fractional, oversized, zero-limit and malformed values before SQL, with a maximum page of 100 and offset of 10,000."
+        },
+        {
+          "prefix": "DEF-0B11-SOC-CAMPAIGN-CREATE-VALIDATES-GOALS-AND-STATUS-THEN-DISCARDS-THEM-AND-REPORTS-SUCCESS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/social-media/campaigns/route.ts",
+            "apps/union-eyes/app/api/__tests__/social-media-campaigns.route.test.ts"
+          ],
+          "explanation": "Campaign creation now validates recognized goal metrics and status and persists impressions, engagement rate, conversions and requested status in real columns. Unsupported/duplicate goals and unknown fields are refused instead of being silently discarded."
+        },
+        {
+          "prefix": "DEF-0B11-SOC-CAMPAIGN-UPDATE-APPLIES-UNVALIDATED-BODY-FIELDS-INCLUDING-STATUS-AND-PLATFORMS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/social-media/campaigns/route.ts",
+            "apps/union-eyes/app/api/__tests__/social-media-campaigns.route.test.ts"
+          ],
+          "explanation": "Campaign updates now pass through a strict typed schema, reject unknown/privileged fields and invalid status/platforms, and persist validated goal columns rather than passing untrusted body values to SQL."
+        },
+        {
+          "prefix": "DEF-0B11-SOC-X-MEDIA-URL-IS-FETCHED-BY-THE-SERVER-WITH-ONLY-A-SCHEME-CHECK-AND-THE-BODY-IS-UPLOADED-TO-THE-PLATFORM",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/social-media/social-media-service.ts",
+            "apps/union-eyes/lib/social-media/__tests__/social-media-service.test.ts"
+          ],
+          "explanation": "Removed all arbitrary server-side X media URL fetching and uploading; the route explicitly refuses remote media ingestion while retaining text-only X publishing. Regression cases cover metadata IPs, loopback, redirects and file schemes without invoking fetch.",
+          "remaining": "Secure verified-asset ingestion and an approved media-publishing journey must be built before X media publishing is available."
+        }
+      ]
     }
   ]
 }

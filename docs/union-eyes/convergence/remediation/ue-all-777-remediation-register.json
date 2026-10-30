@@ -76,7 +76,7 @@
     "note": "Milestones and evidence are transcribed as prior claims; this run has not independently re-executed those proofs."
   },
   "lastInspectedBranch": "agents/ue-cursor-final-closure",
-  "lastInspectedCommit": "2cc437284bef13b9c7e454014ac1b2a881c953fa",
+  "lastInspectedCommit": "ec396551a80050734d4d50515c5cb313a300a966",
   "summary": {
     "allRecordedDefects": 777,
     "bySeverity": {
@@ -86,13 +86,13 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 42,
+    "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 219,
-    "engineeringRemaining": 558,
+    "engineeringCorrected": 223,
+    "engineeringRemaining": 554,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 29
+    "engineeringPartial": 31
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -332,6 +332,10 @@
     {
       "sha": "b46d981ef6ce6ce706eeddd693dbd43b9459b0b8",
       "description": "Shared anonymized clause item and list projections now hide original employer and owner identifiers from non-owners. Free-text de-identification and stakeholder acceptance remain unproven; no defect marked CLOSED."
+    },
+    {
+      "sha": "ec396551a80050734d4d50515c5cb313a300a966",
+      "description": "Gate 0 B19: CUPE bootstrap marker and truthful persisted onboarding counts, bounded social post pagination, typed persisted campaign goals/updates, and explicit refusal of arbitrary X media fetching. Source and regression tests committed; exact-HEAD acceptance pending; no defect CLOSED."
     }
   ],
   "records": [
@@ -12657,9 +12661,18 @@
         ]
       },
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B19-PILOT-TRUTHFULNESS-SOCIAL-CONTROLS",
+        "path": "apps/union-eyes/app/api/pilot/bootstrap/cupe/route.ts; apps/union-eyes/app/api/__tests__/pilot-bootstrap-cupe.route.test.ts",
+        "explanation": "Existing fixture-slug organizations now require a durable route-origin marker before bootstrap/reset, and reset preserves all onboarding checklist rows. Non-fixture members and grievances are refused before deletion. This is containment, not a fully governed safe reset.",
+        "remaining": "Per-row immutable fixture provenance, changed fixture-row protection, related-record handling, dry-run and independent approval are still absent.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "sourceCommit": "ec396551a80050734d4d50515c5cb313a300a966"
+      }
     },
     {
       "defectId": "DEF-0B10-PIL-CUPE-BOOTSTRAP-REPORTS-WORKSITES-IT-NEVER-WRITES-AND-LITERAL-ONBOARDING-COUNTS-FOR-CHECKLIST-IDS-THE-ONBOARDING-ROUTE-DOES-NOT-READ",
@@ -12674,9 +12687,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B19-PILOT-TRUTHFULNESS-SOCIAL-CONTROLS",
+        "path": "apps/union-eyes/app/api/pilot/bootstrap/cupe/route.ts; apps/union-eyes/lib/pilot/cupe-bootstrap-report.ts; apps/union-eyes/lib/pilot/__tests__/cupe-bootstrap-report.test.ts; apps/union-eyes/app/api/__tests__/pilot-bootstrap-cupe.route.test.ts",
+        "explanation": "The response now reports zero worksites actually written and separately identifies unseeded fixture worksites; member and grievance counts use INSERT RETURNING, not attempts; onboarding uses the seven canonical persisted checklist IDs and no invented completed tasks.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "sourceCommit": "ec396551a80050734d4d50515c5cb313a300a966"
+      }
     },
     {
       "defectId": "DEF-0B10-PIL-DEMO-DATA-INSERTS-FICTIONAL-GRIEVANCES-AND-NAMED-FEDERAL-EMPLOYERS-INTO-THE-LIVE-TABLES-WITH-NO-ROW-MARKER-AND-DELETES-BY-NUMBER-AND-EMAIL-PATTERN",
@@ -14573,9 +14594,18 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B19-PILOT-TRUTHFULNESS-SOCIAL-CONTROLS",
+        "path": "apps/union-eyes/lib/social-media/social-media-service.ts; apps/union-eyes/lib/social-media/__tests__/social-media-service.test.ts",
+        "explanation": "Removed all arbitrary server-side X media URL fetching and uploading; the route explicitly refuses remote media ingestion while retaining text-only X publishing. Regression cases cover metadata IPs, loopback, redirects and file schemes without invoking fetch.",
+        "remaining": "Secure verified-asset ingestion and an approved media-publishing journey must be built before X media publishing is available.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "sourceCommit": "ec396551a80050734d4d50515c5cb313a300a966"
+      }
     },
     {
       "defectId": "DEF-0B11-SOC-OAUTH-CALLBACK-IS-A-GET-THAT-INSERTS-THE-CREDENTIAL-CLEARS-ITS-COOKIES-BEFORE-VALIDATION-AND-AUDITS-AFTER-COMMIT-TO-A-LOG-LINE",
@@ -14768,9 +14798,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B19-PILOT-TRUTHFULNESS-SOCIAL-CONTROLS",
+        "path": "apps/union-eyes/app/api/social-media/campaigns/route.ts; apps/union-eyes/app/api/__tests__/social-media-campaigns.route.test.ts",
+        "explanation": "Campaign creation now validates recognized goal metrics and status and persists impressions, engagement rate, conversions and requested status in real columns. Unsupported/duplicate goals and unknown fields are refused instead of being silently discarded.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "sourceCommit": "ec396551a80050734d4d50515c5cb313a300a966"
+      }
     },
     {
       "defectId": "DEF-0B11-SOC-CAMPAIGN-UPDATE-APPLIES-UNVALIDATED-BODY-FIELDS-INCLUDING-STATUS-AND-PLATFORMS",
@@ -14785,9 +14823,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B19-PILOT-TRUTHFULNESS-SOCIAL-CONTROLS",
+        "path": "apps/union-eyes/app/api/social-media/campaigns/route.ts; apps/union-eyes/app/api/__tests__/social-media-campaigns.route.test.ts",
+        "explanation": "Campaign updates now pass through a strict typed schema, reject unknown/privileged fields and invalid status/platforms, and persist validated goal columns rather than passing untrusted body values to SQL.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "sourceCommit": "ec396551a80050734d4d50515c5cb313a300a966"
+      }
     },
     {
       "defectId": "DEF-0B11-SOC-ANALYTICS-EXPORT-IS-A-DELETE-VERB-READ-AT-MEMBER-FLOOR-WITH-UNBOUNDED-ROWS-UNNEUTRALISED-CSV-AND-MISMATCHED-COLUMNS",
@@ -14836,9 +14882,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B19-PILOT-TRUTHFULNESS-SOCIAL-CONTROLS",
+        "path": "apps/union-eyes/app/api/social-media/posts/route.ts; apps/union-eyes/lib/social-media/social-post-pagination.ts; apps/union-eyes/lib/social-media/__tests__/social-post-pagination.test.ts",
+        "explanation": "Social post pagination rejects NaN, negative, fractional, oversized, zero-limit and malformed values before SQL, with a maximum page of 100 and offset of 10,000.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "sourceCommit": "ec396551a80050734d4d50515c5cb313a300a966"
+      }
     },
     {
       "defectId": "DEF-0B11-SOC-POST-DELETE-REMOVES-THE-PLATFORM-POST-BEFORE-THE-LOCAL-ROW-AND-AUDITS-INTENT-AND-OUTCOME-ONLY",
@@ -16834,6 +16888,20 @@
       "httpBrowser": "PASS",
       "appFloor": "PASS",
       "governance": "PASS",
+      "go": "NO_GO"
+    },
+    {
+      "inspectedSha": "ec396551a80050734d4d50515c5cb313a300a966",
+      "evidence": "Six frozen defects reconciled to source: four engineering-corrected pending qualification, two partially contained. New tests authored, but no exact-HEAD test or runtime acceptance claimed. All 777 preserved. Independent institutional ratifications absent.",
+      "source": "PATCHED_AND_INSPECTED",
+      "unit": "PENDING",
+      "contract": "PENDING",
+      "financial": "PENDING",
+      "native": "PENDING_PG15_PG16",
+      "security": "PENDING",
+      "httpBrowser": "PENDING",
+      "appFloor": "PENDING",
+      "governance": "PENDING",
       "go": "NO_GO"
     }
   ]
