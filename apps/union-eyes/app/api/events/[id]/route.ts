@@ -1,18 +1,5 @@
 /**
- * CRUD item route for calendarEvents
+ * Legacy event item URL shares the canonical privacy and audit enforcement.
+ * Never expose generic CRUD for another user's personal calendar.
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { calendarEvents } from '@/db/schema';
-
-export const dynamic = 'force-dynamic';
-
-const { GET, PATCH, DELETE } = crudRoutes({
-  table: calendarEvents,
-  pk: 'id',
-  tags: ["Scheduling"],
-  orgScoped: true,
-  itemRoute: true,
-  readRole: 'member',
-  writeRole: 'steward',
-});
-export { GET, PATCH, DELETE };
+export { GET, PATCH, DELETE } from '@/app/api/calendar/events/[id]/route';
