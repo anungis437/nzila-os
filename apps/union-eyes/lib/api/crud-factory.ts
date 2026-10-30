@@ -417,7 +417,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
     operation: (tx: RLSTx) => Promise<T | undefined>,
   ): Promise<T | undefined> {
     if (!organizationId || !userId) throw ApiError.forbidden();
-    return withRLSContext({ organizationId }, async (tx) => {
+    return withRLSContext({ organizationId, userId: userId === ANONYMOUS_ACTOR ? undefined : userId }, async (tx) => {
       const row = await operation(tx);
       if (row) {
         await persistAtomicAudit(tx, {
