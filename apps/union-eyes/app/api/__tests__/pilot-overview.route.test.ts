@@ -14,7 +14,10 @@ function makeSelectChain(rows: unknown[]) {
   const chain: any = {
     from: vi.fn(() => chain),
     innerJoin: vi.fn(() => chain),
-    where: vi.fn(async () => rows),
+    where: vi.fn(() => chain),
+    limit: vi.fn(async () => rows),
+    then: (resolve: (value: unknown[]) => unknown, reject?: (reason: unknown) => unknown) =>
+      Promise.resolve(rows).then(resolve, reject),
   };
   return chain;
 }
