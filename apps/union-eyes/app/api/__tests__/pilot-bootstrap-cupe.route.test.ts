@@ -30,7 +30,7 @@ const mockDb: any = {
   insert: vi.fn(() => ({
     values: vi.fn(() => ({
       returning: vi.fn(async () => [{ id: 'org_new' }]),
-      onConflictDoNothing: vi.fn(async () => undefined),
+      onConflictDoNothing: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 'inserted' }]) })),
     })),
   })),
 };
@@ -105,7 +105,7 @@ describe('pilot/bootstrap/cupe route', () => {
   });
 
   it('creates org when missing and returns seeded summary, auditing on the same system transaction', async () => {
-    m.selectQueue.push([]);
+    m.selectQueue.push([], [{ itemId: 'org-seeded', completed: true }]);
 
     const response = await call({ reset: false, includeDemoScript: true });
 
@@ -114,6 +114,9 @@ describe('pilot/bootstrap/cupe route', () => {
     expect(json.success).toBe(true);
     expect(json.organizationId).toBe('org_new');
     expect(json.seeded.members).toBe(1);
+    expect(json.seeded.worksites).toBe(0);
+    expect(json.seeded.worksitesAvailableInFixtureNotSeeded).toBe(1);
+    expect(json.onboarding).toEqual({ checklistInitialized: 1, completed: 1, pending: 6, total: 7 });
     expect(m.withSystemContext).toHaveBeenCalledTimes(1);
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(
       mockDb,
@@ -127,11 +130,11 @@ describe('pilot/bootstrap/cupe route', () => {
   });
 
   describe('reset', () => {
-    const existingOrg = () => m.selectQueue.push([{ id: 'org_existing' }]);
+    const existingOrg = () => m.selectQueue.push([{ id: 'org_existing' }], [{ id: 'bootstrap-marker' }]);
 
     it('removes only the seeded fixture rows of a demo organization and reports what it removed', async () => {
       existingOrg();
-      m.selectQueue.push([{ userId: 'u1' }], [{ number: 'G-1' }]);
+      m.selectQueue.push([{ userId: 'u1' }], [{ number: 'G-1' }], [{ itemId: 'org-seeded', completed: true }]);
 
       const response = await call({ reset: true, includeDemoScript: false, confirmReset: 'cupe-local-123' });
 
@@ -139,11 +142,19 @@ describe('pilot/bootstrap/cupe route', () => {
       const json = await response.json();
       expect(json.reset).toBe(true);
       expect(json.demoScript).toHaveLength(0);
-      expect(mockDb.delete).toHaveBeenCalledTimes(3);
+      expect(mockDb.delete).toHaveBeenCalledTimes(2);
       expect(m.persistAtomicAudit).toHaveBeenCalledWith(
         mockDb,
         expect.objectContaining({ details: expect.objectContaining({ reset: true, removed: { grievances: 1, members: 1 } }) }),
       );
+    });
+
+    it('refuses an existing organization without a durable CUPE bootstrap marker', async () => {
+      m.selectQueue.push([{ id: 'org_existing' }], []);
+      const response = await call({ reset: true, includeDemoScript: false, confirmReset: 'cupe-local-123' });
+      expect(response.status).toBe(409);
+      expect(mockDb.delete).not.toHaveBeenCalled();
+      expect(mockDb.insert).not.toHaveBeenCalled();
     });
 
     it('refuses a reset that does not name the organization, before touching the database', async () => {
