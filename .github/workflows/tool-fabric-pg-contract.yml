@@ -1,0 +1,58 @@
+name: Tool Fabric PostgreSQL Trust Ledger Contract
+
+on:
+  pull_request:
+    paths:
+      - 'packages/tool-fabric/sql/**'
+      - '.github/workflows/tool-fabric-pg-contract.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'packages/tool-fabric/sql/**'
+      - '.github/workflows/tool-fabric-pg-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  postgres-trust-ledger:
+    name: PostgreSQL trust receipt immutability (contract only)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: tool_fabric_contract
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d tool_fabric_contract"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: tool_fabric_contract
+    steps:
+      - uses: actions/checkout@v5
+      - name: Ensure PostgreSQL client exists
+        run: |
+          set -euo pipefail
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y postgresql-client
+          fi
+      - name: Apply governed migration scripts to ephemeral PostgreSQL 16 only
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/001_trust_ledger_pg.sql
+          psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/002_trust_ledger_pg_immutability.sql
+      - name: Verify append-only receipts and monotonic head CAS on live PostgreSQL
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/test_trust_ledger_pg.sql

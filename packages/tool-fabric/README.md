@@ -57,6 +57,9 @@ production identity, store, sandbox, revocation and containment proof.
 ### PostgreSQL CAS storage adapter (P0 #1037)
 
 The canonical PostgreSQL migration lives at `sql/001_trust_ledger_pg.sql`.
+The separately DBA-applied `sql/002_trust_ledger_pg_immutability.sql` adds
+append-only receipt triggers and a monotonic head/receipt CAS guard. Its ephemeral
+PostgreSQL 16 contract test does not certify production grants or durability.
 `PostgresAtomicTrustLedgerStore` implements a transactional stream CAS using
 `SELECT FOR UPDATE` and an entry plus head update in one SQL transaction.
 It never initializes a missing stream at runtime. The host supplies its own
