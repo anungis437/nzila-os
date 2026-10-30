@@ -50,7 +50,7 @@ export const POST = withApi(
     // The claim must be this organization's, and the survey must go to the claim's own member.
     const [claim] = await withRLSContext({ organizationId }, (tx) =>
       tx
-        .select({ memberId: claims.memberId, assignedTo: claims.assignedTo })
+        .select({ memberId: claims.memberId, assignedTo: claims.assignedTo, status: claims.status })
         .from(claims)
         .where(and(eq(claims.id, body.claimId), eq(claims.organizationId, organizationId)))
         .limit(1),
@@ -59,7 +59,15 @@ export const POST = withApi(
     if (claim.memberId !== body.memberId) {
       throw ApiError.badRequest('The survey can only be sent to the member who filed the claim');
     }
-    if (claim.assignedTo && claim.assignedTo !== body.lroId) {
+    // A survey rates the service of a finished claim by the representative who handled it. On a claim still in progress, or one
+    // with no assigned representative, there is nothing to rate and no one whose rating it would be.
+    if (claim.status !== 'resolved' && claim.status !== 'closed') {
+      throw ApiError.conflict('A satisfaction survey can only be created for a resolved or closed claim');
+    }
+    if (!claim.assignedTo) {
+      throw ApiError.badRequest('The claim has no assigned representative to rate');
+    }
+    if (claim.assignedTo !== body.lroId) {
       throw ApiError.badRequest('The survey must rate the representative assigned to the claim');
     }
 

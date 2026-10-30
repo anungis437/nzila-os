@@ -197,6 +197,27 @@ export async function POST(req: NextRequest) {
 
   const parentId: string | null = body.parent_id ?? body.parentId ?? body.parentOrganizationId ?? null;
 
+  // The record fields the creation form carries. Each is stored when supplied; a value of the wrong shape is refused rather
+  // than dropped, so a caller is never told the organization was created with a charter it does not have.
+  const optionalText = (...keys: string[]): string | null | 'invalid' => {
+    for (const key of keys) {
+      const value = body[key];
+      if (value === undefined || value === null || value === '') continue;
+      return typeof value === 'string' && value.length <= 2000 ? value.trim() : 'invalid';
+    }
+    return null;
+  };
+  const description = optionalText('description');
+  const provinceTerritory = optionalText('province_territory', 'provinceTerritory');
+  const charterNumber = optionalText('charter_number', 'charterNumber');
+  const affiliationDate = optionalText('affiliation_date', 'affiliationDate');
+  if ([description, provinceTerritory, charterNumber, affiliationDate].includes('invalid')) {
+    return NextResponse.json({ error: 'description, province_territory, charter_number and affiliation_date must be text' }, { status: 400 });
+  }
+  if (affiliationDate && (!/^\d{4}-\d{2}-\d{2}$/.test(affiliationDate as string) || Number.isNaN(Date.parse(affiliationDate as string)))) {
+    return NextResponse.json({ error: 'affiliation_date must be a calendar date (YYYY-MM-DD)' }, { status: 400 });
+  }
+
   // PR #752 round 8: parent lookup + hierarchy derivation + INSERT now run
   // inside ONE withSystemContext transaction (previously two independent
   // transactions) — closes a TOCTOU window where a concurrent write to the
@@ -237,6 +258,10 @@ export async function POST(req: NextRequest) {
           name: body.name,
           slug: body.slug,
           displayName: body.display_name,
+          description: description as string | null,
+          provinceTerritory: provinceTerritory as string | null,
+          charterNumber: charterNumber as string | null,
+          affiliationDate: affiliationDate as string | null,
           organizationType: requestedType,
           parentId,
           hierarchyPath,

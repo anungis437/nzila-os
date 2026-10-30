@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 import { withRoleAuth } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
-import { ReportExecutor, type ReportConfig } from '@/lib/report-executor';
+import { ReportExecutor, getDataSource, type ReportConfig } from '@/lib/report-executor';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
 
 import {
@@ -116,7 +116,23 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
     const executor = new ReportExecutor(organizationId);
     const result = await executor.execute(config);
 
-    // Log successful execution
+    // A refused configuration is the caller's error and a failed query is ours; neither is a 200, and neither is recorded as a success.
+    if (!result.success) {
+      const refused = result.kind === 'invalid';
+      logApiAuditEvent({
+        timestamp: new Date().toISOString(),
+        userId,
+        endpoint: '/api/reports/execute',
+        method: 'POST',
+        eventType: refused ? 'validation_failed' : 'failure',
+        severity: refused ? 'medium' : 'high',
+        details: { dataSource: config.dataSourceId, organizationId, reason: result.error ?? 'Report execution failed' },
+      });
+      return refused
+        ? NextResponse.json({ error: result.error ?? 'Invalid report configuration' }, { status: 400 })
+        : standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to execute report');
+    }
+
     logApiAuditEvent({
       timestamp: new Date().toISOString(),
       userId,
@@ -130,13 +146,12 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
         filterCount: config.filters?.length || 0,
         rowCount: result.rowCount,
         executionTime: result.executionTimeMs,
-        success: result.success,
         organizationId,
       },
     });
 
     return NextResponse.json({
-      success: result.success,
+      success: true,
       data: result.data,
       rowCount: result.rowCount,
       executionTime: result.executionTimeMs,
@@ -147,7 +162,7 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
       userId: userId || 'unknown',
       endpoint: '/api/reports/execute',
       method: 'POST',
-      eventType: 'auth_failed',
+      eventType: 'failure',
       severity: 'high',
       details: {
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -164,16 +179,9 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
 });
 
 /**
- * SECURITY: Allowlisted tables and their valid columns
+ * SECURITY: the data sources and columns a report may use are those of the executor's registry (the same ones /api/reports/datasources
+ * advertises); the executor refuses anything else, so this route keeps no second, different list.
  */
-const ALLOWED_TABLES: Record<string, string[]> = {
-  'claims': ['id', 'claim_number', 'status', 'amount', 'created_at', 'organization_id', 'claimant_name', 'claim_type'],
-  'members': ['id', 'first_name', 'last_name', 'email', 'status', 'created_at', 'organization_id', 'membership_number'],
-  'organization_members': ['id', 'first_name', 'last_name', 'email', 'status', 'created_at', 'organization_id'],
-  'deadlines': ['id', 'title', 'due_date', 'status', 'created_at', 'organization_id', 'priority'],
-  'grievances': ['id', 'grievance_number', 'status', 'created_at', 'organization_id', 'grievance_type'],
-};
-
 const ALLOWED_AGGREGATIONS = ['count', 'sum', 'avg', 'min', 'max', 'distinct'];
 const ALLOWED_OPERATORS = ['equals', 'not_equals', 'contains', 'greater_than', 'less_than', 'between', 'in'];
 const ALLOWED_SORT_DIRECTIONS = ['asc', 'desc'];
@@ -182,12 +190,12 @@ const ALLOWED_SORT_DIRECTIONS = ['asc', 'desc'];
  * SECURITY: Validate report configuration against allowlists
  */
 function validateReportConfig(config: ReportConfig): string | null {
-  // Validate table name
-  if (!ALLOWED_TABLES[config.dataSourceId]) {
+  const source = getDataSource(config.dataSourceId);
+  if (!source) {
     return `Invalid data source: ${config.dataSourceId}`;
   }
 
-  const allowedColumns = ALLOWED_TABLES[config.dataSourceId];
+  const allowedColumns = source.fields.map((field) => field.id);
 
   // SECURITY: Block custom formulas (P0 protection)
   for (const field of config.fields) {

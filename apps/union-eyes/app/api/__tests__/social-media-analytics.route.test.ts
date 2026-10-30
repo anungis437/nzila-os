@@ -18,6 +18,7 @@ const m = vi.hoisted(() => {
     const chain = {
       from: vi.fn(() => chain),
       leftJoin: vi.fn(() => chain),
+      innerJoin: vi.fn(() => chain),
       where: vi.fn(() => chain),
       orderBy: vi.fn(() => chain),
       limit: vi.fn(() => chain),
@@ -87,6 +88,24 @@ describe('social-media/analytics route', () => {
     await expect(response.json()).resolves.toMatchObject({ code: 'RATE_LIMIT_EXCEEDED' });
   });
 
+  // DEF-0B11-SOC-ANALYTICS-AND-ENGAGEMENT-FIGURES-HAVE-NO-WRITER-SO-EVERY-METRIC-IS-ZERO-OR-EMPTY
+  it('says that nothing has been collected, rather than reading an empty range as no activity', async () => {
+    const { GET } = await loadRoute();
+    m.queueSelect([], []);
+    const response = await GET(new NextRequest('http://localhost/api/social-media/analytics'));
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({ accounts: [], data_collected: false });
+    expect(body.message).toContain('have not been collected');
+  });
+
+  it('distinguishes an empty range from an organization whose analytics were collected earlier', async () => {
+    const { GET } = await loadRoute();
+    m.queueSelect([], [{ id: 'earlier-row' }]);
+    const body = await (await GET(new NextRequest('http://localhost/api/social-media/analytics'))).json();
+    expect(body).toMatchObject({ accounts: [], data_collected: true });
+    expect(body).not.toHaveProperty('message');
+  });
   it('returns grouped account analytics summary on GET success', async () => {
     const { GET } = await loadRoute();
     m.queueSelect([

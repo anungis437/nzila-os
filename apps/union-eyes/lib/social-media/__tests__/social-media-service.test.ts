@@ -357,19 +357,17 @@ describe('fetchAnalytics', () => {
     await expect(svc.fetchAnalytics('org-1', 'acct-x', new Date(), new Date())).rejects.toThrow(/Account not found/);
   });
 
-  it('fetches LinkedIn analytics (empty unified set)', async () => {
-    state.selects.socialAccounts = [account({ platform: 'linkedin' })];
+  // DEF-0B11-SOC-ANALYTICS-AND-ENGAGEMENT-FIGURES-HAVE-NO-WRITER-SO-EVERY-METRIC-IS-ZERO-OR-EMPTY: the platform responses are fetched but not
+  // transformed, so an empty result used to be returned as a successful collection and nothing was written. It is a 501 now.
+  it.each([
+    ['linkedin', () => clients.linkedin.getOrganizationStatistics],
+    ['facebook', () => clients.meta.getPageInsights],
+    ['instagram', () => clients.meta.getInstagramInsights],
+  ])('refuses with 501, not an empty success, when the %s response cannot be turned into analytics', async (platform, called) => {
+    state.selects.socialAccounts = [account({ platform })];
     const svc = new SocialMediaService();
-    const result = await svc.fetchAnalytics('org-1', 'acct-1', new Date('2025-01-01'), new Date('2025-01-31'));
-    expect(Array.isArray(result)).toBe(true);
-    expect(clients.linkedin.getOrganizationStatistics).toHaveBeenCalled();
-  });
-
-  it('fetches Facebook page insights', async () => {
-    state.selects.socialAccounts = [account({ platform: 'facebook' })];
-    const svc = new SocialMediaService();
-    await svc.fetchAnalytics('org-1', 'acct-1', new Date('2025-01-01'), new Date('2025-01-31'));
-    expect(clients.meta.getPageInsights).toHaveBeenCalled();
+    await expect(svc.fetchAnalytics('org-1', 'acct-1', new Date('2025-01-01'), new Date('2025-01-31'))).rejects.toMatchObject({ code: 'NOT_IMPLEMENTED' });
+    expect(called()).toHaveBeenCalled();
   });
 });
 

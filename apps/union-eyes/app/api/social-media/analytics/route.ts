@@ -142,12 +142,27 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
         }
       });
 
+      // An empty range is not the same as nothing ever collected: no collector writes platform analytics yet, so say which it is
+      // rather than let the dashboard read the absence of rows as zero activity.
+      let dataCollected = analytics.length > 0;
+      if (!dataCollected) {
+        const [anyRow] = await db
+          .select({ id: socialAnalytics.id })
+          .from(socialAnalytics)
+          .innerJoin(socialAccounts, eq(socialAnalytics.accountId, socialAccounts.id))
+          .where(eq(socialAccounts.organizationId, organizationId))
+          .limit(1);
+        dataCollected = Boolean(anyRow);
+      }
+
       return NextResponse.json({
         accounts: Object.values(accountAnalytics),
         date_range: {
           start_date: startDate,
           end_date: endDate,
         },
+        data_collected: dataCollected,
+        ...(dataCollected ? {} : { message: 'Platform analytics have not been collected for this organization, so no figure is available.' }),
       });
     } catch (_error) {
 return NextResponse.json(

@@ -86,6 +86,8 @@ export interface ExecutionResult {
   rowCount?: number;
   executionTimeMs: number;
   error?: string;
+  /** `invalid` when the configuration was refused before any query ran; `failed` when the query itself failed. */
+  kind?: 'invalid' | 'failed';
   sql?: string; // For debugging
 }
 
@@ -131,9 +133,9 @@ export const DATA_SOURCES: DataSourceMetadata[] = [
       { id: 'resolved_at', name: 'Resolved Date', column: 'resolved_at', type: 'date', aggregatable: true, filterable: true, sortable: true, nullable: true },
       { id: 'member_id', name: 'Member ID', column: 'member_id', type: 'string', aggregatable: true, filterable: true, sortable: true, nullable: false },
       { id: 'assigned_to', name: 'Assigned To', column: 'assigned_to', type: 'string', aggregatable: true, filterable: true, sortable: true, nullable: true },
-      { id: 'outcome', name: 'Outcome', column: 'outcome', type: 'string', aggregatable: true, filterable: true, sortable: true, nullable: true },
+      { id: 'outcome', name: 'Outcome', column: 'resolution_outcome', type: 'string', aggregatable: true, filterable: true, sortable: true, nullable: true },
     ],
-    joinable: ['organization_members', 'claim_deadlines', 'claim_notes'],
+    joinable: ['organization_members', 'claim_deadlines'],
   },
   {
     id: 'organization_members',
@@ -141,8 +143,7 @@ export const DATA_SOURCES: DataSourceMetadata[] = [
     table: 'organization_members',
     fields: [
       { id: 'id', name: 'Member ID', column: 'id', type: 'string', aggregatable: false, filterable: true, sortable: true, nullable: false },
-      { id: 'first_name', name: 'First Name', column: 'first_name', type: 'string', aggregatable: false, filterable: true, sortable: true, nullable: false },
-      { id: 'last_name', name: 'Last Name', column: 'last_name', type: 'string', aggregatable: false, filterable: true, sortable: true, nullable: false },
+      { id: 'name', name: 'Name', column: 'name', type: 'string', aggregatable: false, filterable: true, sortable: true, nullable: false },
       { id: 'email', name: 'Email', column: 'email', type: 'string', aggregatable: false, filterable: true, sortable: true, nullable: false },
       { id: 'hire_date', name: 'Hire Date', column: 'hire_date', type: 'date', aggregatable: true, filterable: true, sortable: true, nullable: true },
       { id: 'role', name: 'Role', column: 'role', type: 'string', aggregatable: true, filterable: true, sortable: true, nullable: false },
@@ -159,7 +160,7 @@ export const DATA_SOURCES: DataSourceMetadata[] = [
       { id: 'id', name: 'Deadline ID', column: 'id', type: 'string', aggregatable: false, filterable: true, sortable: true, nullable: false },
       { id: 'claim_id', name: 'Claim ID', column: 'claim_id', type: 'string', aggregatable: false, filterable: true, sortable: true, nullable: false },
       { id: 'deadline_type', name: 'Type', column: 'deadline_type', type: 'string', aggregatable: true, filterable: true, sortable: true, nullable: false },
-      { id: 'current_deadline', name: 'Deadline Date', column: 'current_deadline', type: 'date', aggregatable: true, filterable: true, sortable: true, nullable: false },
+      { id: 'current_deadline', name: 'Deadline Date', column: 'due_date', type: 'date', aggregatable: true, filterable: true, sortable: true, nullable: false },
       { id: 'status', name: 'Status', column: 'status', type: 'string', aggregatable: true, filterable: true, sortable: true, nullable: false },
       { id: 'priority', name: 'Priority', column: 'priority', type: 'string', aggregatable: true, filterable: true, sortable: true, nullable: false },
       { id: 'completed_at', name: 'Completed Date', column: 'completed_at', type: 'date', aggregatable: true, filterable: true, sortable: true, nullable: true },
@@ -227,32 +228,31 @@ export class ReportExecutor {
   async execute(config: ReportConfig): Promise<ExecutionResult> {
     const startTime = Date.now();
 
+    let query: SQL;
     try {
-      // Validate configuration
       this.validateConfig(config);
+      query = this.buildQuery(config);
+    } catch (error) {
+      return {
+        success: false,
+        executionTimeMs: Date.now() - startTime,
+        error: error instanceof Error && error.message ? error.message : 'Invalid report configuration',
+        kind: 'invalid',
+      };
+    }
 
-      // Build SQL query from config
-      const query = this.buildQuery(config);
-
-      // Execute query
+    try {
       const results = await db.execute(query);
-
-      const executionTimeMs = Date.now() - startTime;
-
       return {
         success: true,
         data: results as unknown as Record<string, unknown>[],
         rowCount: results.length,
-        executionTimeMs,
+        executionTimeMs: Date.now() - startTime,
         sql: query.queryChunks.join(' '), // For debugging
       };
-    } catch (error) {
-      const executionTimeMs = Date.now() - startTime;
-return {
-        success: false,
-        executionTimeMs,
-        error: error.message || 'Report execution failed',
-      };
+    } catch {
+      // The database message can name tables and columns; the caller is told only that the report failed.
+      return { success: false, executionTimeMs: Date.now() - startTime, error: 'Report execution failed', kind: 'failed' };
     }
   }
 

@@ -255,6 +255,26 @@ describe('analytics', () => {
     state.userId = 'u-admin-fed';
     expect((await GET(get(`/api/organizations/${LOCAL_A}/analytics`), params(LOCAL_A))).status).toBe(200);
   });
+
+  // DEF-0B9-ORG-ANALYTICS-METRIC-QUERIES-RUN-IN-SESSION-ORGANIZATION-CONTEXT-FILTERED-BY-PATH-ID-RETURNING-ZEROS: the figures are those of the
+  // organization in the path whoever reads them, including the administrator of the federation above, whose own organization has none.
+  it('reports the figures of the organization in the path to its officer and to the federation administrator above it', async () => {
+    const { GET } = await import('../organizations/[id]/analytics/route');
+    for (const user of ['u-officer-a', 'u-admin-fed']) {
+      state.userId = user;
+      const { data } = await (await GET(get(`/api/organizations/${LOCAL_A}/analytics`), params(LOCAL_A))).json();
+      expect(data, user).toMatchObject({
+        organizationId: LOCAL_A,
+        totalMembers: 5,
+        activeMembers: 4,
+        totalClaims: 2,
+        activeClaims: 1,
+        resolvedClaims: 1,
+        childOrganizations: 0,
+        claimsByStatus: { filed: 1, closed: 1 },
+      });
+    }
+  });
 });
 
 describe('roster', () => {

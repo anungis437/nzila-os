@@ -82,7 +82,7 @@ export class SignatureService {
       role?: string;
       signingOrder?: number;
     }>;
-    provider?: "docusign" | "hellosign" | "internal";
+    provider?: "docusign" | "hellosign";
     expirationDays?: number;
     requireAuthentication?: boolean;
     sequentialSigning?: boolean;
@@ -301,7 +301,7 @@ export class SignatureService {
     let status;
     try {
       const provider = SignatureProviderFactory.getProvider(
-        document.provider as "docusign" | "hellosign" | "internal"
+        document.provider as "docusign" | "hellosign"
       );
       status = await provider.getEnvelopeStatus(document.providerEnvelopeId);
     } catch (_error) {
@@ -589,7 +589,7 @@ export class SignatureService {
     if (document.providerEnvelopeId) {
       try {
         const provider = SignatureProviderFactory.getProvider(
-          document.provider as "docusign" | "hellosign" | "internal"
+          document.provider as "docusign" | "hellosign"
         );
         await provider.voidEnvelope(document.providerEnvelopeId, reason);
       } catch (_error) {

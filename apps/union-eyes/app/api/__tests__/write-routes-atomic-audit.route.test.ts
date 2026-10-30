@@ -123,7 +123,7 @@ describe('targets POST', () => {
 describe('satisfaction POST (a steward creating a survey by hand)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.selected = [{ memberId: 'member_1', assignedTo: 'lro_1' }];
+    m.selected = [{ memberId: 'member_1', assignedTo: 'lro_1', status: 'closed' }];
     m.createSatisfactionSurvey.mockResolvedValue({ id: 'srv1' });
   });
 
@@ -146,10 +146,18 @@ describe('satisfaction POST (a steward creating a survey by hand)', () => {
     m.selected = [];
     await expect(POST({ ...caller, body })).rejects.toMatchObject({ status: 404 });
 
-    m.selected = [{ memberId: 'someone_else', assignedTo: 'lro_1' }];
+    m.selected = [{ memberId: 'someone_else', assignedTo: 'lro_1', status: 'closed' }];
     await expect(POST({ ...caller, body })).rejects.toMatchObject({ status: 400 });
 
-    m.selected = [{ memberId: 'member_1', assignedTo: 'another_lro' }];
+    m.selected = [{ memberId: 'member_1', assignedTo: 'another_lro', status: 'closed' }];
+    await expect(POST({ ...caller, body })).rejects.toMatchObject({ status: 400 });
+
+    // DEF-0B11-IDS-SATISFACTION-CREATE-DOES-NOT-CHECK-CLAIM-STATE-AND-ACCEPTS-ANY-REPRESENTATIVE-ID-ON-AN-UNASSIGNED-CLAIM
+    for (const status of ['submitted', 'under_review', 'assigned', 'investigation', 'pending_documentation', 'rejected']) {
+      m.selected = [{ memberId: 'member_1', assignedTo: 'lro_1', status }];
+      await expect(POST({ ...caller, body }), status).rejects.toMatchObject({ status: 409 });
+    }
+    m.selected = [{ memberId: 'member_1', assignedTo: null, status: 'resolved' }];
     await expect(POST({ ...caller, body })).rejects.toMatchObject({ status: 400 });
 
     expect(m.createSatisfactionSurvey).not.toHaveBeenCalled();

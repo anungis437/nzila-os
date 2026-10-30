@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 125,
- "partial": 16,
- "outstanding": 652,
- "accountedFor": 652,
+ "corrected": 136,
+ "partial": 18,
+ "outstanding": 641,
+ "accountedFor": 641,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -31,13 +31,13 @@
   {
    "family": "F02-PLACEHOLDER-FABRICATED-OR-NOT-IMPLEMENTED",
    "purpose": "Stubs, fabricated figures and false-success answers: return 501 or implement for real",
-   "defects": 36,
+   "defects": 25,
    "severity": {
     "HIGH": 1,
-    "MEDIUM": 32,
-    "LOW": 3
+    "MEDIUM": 23,
+    "LOW": 1
    },
-   "namedRoutes": 11,
+   "namedRoutes": 2,
    "namedFiles": 1,
    "tranches": {
     "0B.3": 2,
@@ -46,9 +46,8 @@
     "0B.6": 5,
     "0B.7": 2,
     "0B.8": 3,
-    "0B.9": 7,
-    "0B.10": 2,
-    "0B.11": 10,
+    "0B.9": 5,
+    "0B.11": 3,
     "0B.12": 2
    }
   },
@@ -443,60 +442,18 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B9-ORG-HIERARCHY-ROUTES-PASS-UNVALIDATED-PATH-ID-TO-UUID-COLUMN-AND-ANSWER-EMPTY-200-FOR-UNKNOWN-ORGANIZATION",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B9-ORG-ANALYTICS-METRIC-QUERIES-RUN-IN-SESSION-ORGANIZATION-CONTEXT-FILTERED-BY-PATH-ID-RETURNING-ZEROS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-OPL-03",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-OPL-08",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B11-PRP-RECONCILIATION-RUNS-ARE-NOT-REPEATABLE-AND-THE-BILLING-PERIOD-IS-NOT-BOUND-TO-THE-ORGANIZATION",
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B11-RPT-EXECUTE-ROUTE-ALLOWLIST-CHECKS-FILTER-FIELD-ID-BUT-THE-EXECUTOR-EVALUATES-FIELD-NAME-AND-JOINS-HAVING-LIMIT-AND-TABLE-QUALIFIER-ARE-NOT-CHECKED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-RPT-EXECUTE-FAILURE-IS-ANSWERED-200-WITH-NO-MESSAGE-AND-AUDITED-AS-SUCCESS-OR-AUTH-FAILED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-RPT-DATA-SOURCE-REGISTRY-ADVERTISES-SOURCES-AND-COLUMNS-THE-EXECUTE-ROUTE-REFUSES-OR-THE-TABLES-DO-NOT-HAVE",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B11-SOC-INTERNAL-SIGNATURE-PROVIDER-IS-A-STUB-THAT-SENDS-NOTHING-AND-THE-REQUEST-IS-RECORDED-AS-SENT",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B11-SOC-ANALYTICS-AND-ENGAGEMENT-FIGURES-HAVE-NO-WRITER-SO-EVERY-METRIC-IS-ZERO-OR-EMPTY",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-IDS-STEWARD-ROUTES-SERVE-ASSIGNMENT-ROWS-AND-NO-ROUTE-APPOINTS-OR-ENDS-A-STEWARD",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-IDS-SATISFACTION-REPRESENTATIVE-FIGURES-FOR-AN-UNKNOWN-OR-UNRATED-ID-ARE-200-WITH-ZERO-AVERAGES",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-IDS-SATISFACTION-CREATE-DOES-NOT-CHECK-CLAIM-STATE-AND-ACCEPTS-ANY-REPRESENTATIVE-ID-ON-AN-UNASSIGNED-CLAIM",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-IDS-SETTINGS-PUT-IS-UNVALIDATED-AND-MERGES-OUTSIDE-THE-TRANSACTION",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B12-CRUD-TESTIMONIAL-APPROVAL-COMPONENT-SENDS-FIELDS-THE-TABLE-DOES-NOT-HAVE",

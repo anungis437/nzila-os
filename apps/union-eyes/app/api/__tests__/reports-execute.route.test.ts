@@ -19,7 +19,9 @@ vi.mock('@/lib/rate-limiter', () => ({
   RATE_LIMITS: { REPORT_EXECUTION: { requests: 30, window: 60 } },
 }));
 
-vi.mock('@/lib/report-executor', () => ({
+vi.mock('@/lib/report-executor', async (importOriginal) => ({
+  // The data source registry is real: the route validates against it. Only the executor is replaced.
+  getDataSource: (await importOriginal<typeof import('@/lib/report-executor')>()).getDataSource,
   ReportExecutor: class MockExecutor {
     constructor(_organizationId: string) {}
     execute = m.execute;
@@ -145,5 +147,36 @@ describe('reports/execute route', () => {
     );
 
     expect(response.status).toBe(500);
+  });
+
+  // DEF-0B11-RPT-EXECUTE-FAILURE-IS-ANSWERED-200-WITH-NO-MESSAGE-AND-AUDITED-AS-SUCCESS-OR-AUTH-FAILED
+  describe('a report that does not run', () => {
+    const run = async () => {
+      const { POST } = await loadRoute();
+      return POST(
+        new NextRequest('http://localhost/api/reports/execute', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ config: { dataSourceId: 'claims', fields: [{ fieldId: 'status' }] } }),
+        }),
+        { userId: 'u1', organizationId: 'org_1' },
+      );
+    };
+    const events = () => m.logApiAuditEvent.mock.calls.map(([event]) => event.eventType);
+
+    it('answers 400 with the reason for a configuration the executor refuses, audited as a validation failure', async () => {
+      m.execute.mockResolvedValue({ success: false, kind: 'invalid', error: 'Invalid field: nope', executionTimeMs: 1 });
+      const response = await run();
+      expect(response.status).toBe(400);
+      expect((await response.json()).error).toBe('Invalid field: nope');
+      expect(events()).toEqual(['validation_failed']);
+    });
+
+    it('answers 500, not 200, for a query that failed, audited as a failure and never as a success', async () => {
+      m.execute.mockResolvedValue({ success: false, kind: 'failed', error: 'Report execution failed', executionTimeMs: 1 });
+      const response = await run();
+      expect(response.status).toBe(500);
+      expect(events()).toEqual(['failure']);
+    });
   });
 });

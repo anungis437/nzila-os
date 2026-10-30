@@ -37,14 +37,13 @@ describe('organizations/[id]/analytics route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.auth.mockResolvedValue({ userId: 'u1' });
-    m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.withRLSContext.mockImplementation(async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(m.db));
     m.db.select.mockReturnValue({ from: vi.fn(() => ({ where: vi.fn(async () => [{ id: '11111111-1111-4111-8111-111111111111', name: 'Union', organizationType: 'union' }]) })) } as any);
     m.db.execute
-      .mockResolvedValueOnce([{ total: 10, active: 8, new_this_month: 2 }])
+      .mockResolvedValueOnce([{ cnt: 2 }])
+      .mockResolvedValueOnce([{ total: 10, active: 8, new_this_month: 2, prev: 6 }])
       .mockResolvedValueOnce([{ total: 5, active: 3, resolved: 2, this_month: 1 }])
       .mockResolvedValueOnce([{ avg_days: 7 }])
-      .mockResolvedValueOnce([{ cnt: 2 }])
-      .mockResolvedValueOnce([{ prev: 6, total: 10 }])
       .mockResolvedValueOnce([{ status: 'open', cnt: 4 }, { status: 'closed', cnt: 2 }]);
   });
 
@@ -62,7 +61,7 @@ describe('organizations/[id]/analytics route', () => {
       totalClaims: 5,
       avgResolutionDays: 7,
       childOrganizations: 2,
-      memberGrowthRate: expect.any(Number),
+      memberGrowthRate: 66.7,
     });
   });
 });

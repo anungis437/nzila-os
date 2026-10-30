@@ -12,6 +12,7 @@ import { MetaAPIClient, createMetaClient } from './meta-api-client';
 import { TwitterAPIClient, createTwitterClient } from './twitter-api-client';
 import { LinkedInAPIClient, createLinkedInClient } from './linkedin-api-client';
 import { db } from '@/db';
+import { ApiError } from '@/lib/api/errors';
 import { socialAccounts, socialPosts, socialAnalytics } from '@/db/schema/social-media-schema';
 import { eq, and, inArray } from 'drizzle-orm';
 import type {
@@ -526,6 +527,14 @@ export class SocialMediaService {
           // Transform LinkedIn stats to unified format
           break;
         }
+      }
+
+      // The platform responses above are fetched but not yet transformed, so nothing was collected. Returning an empty list as a
+      // successful collection would leave the analytics table unwritten and every dashboard figure at zero without saying so.
+      if (analytics.length === 0) {
+        throw ApiError.notImplemented(
+          `Analytics collection for ${typedAccount.platform} is not implemented: the platform response is not transformed, so nothing was collected.`,
+        );
       }
 
       // Save analytics to database

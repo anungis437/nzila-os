@@ -10,6 +10,7 @@ import { auth } from '@nzila/platform-auth/entra/server';
 import { db } from '@/db/db';
 import { organizations } from '@/db/schema-organizations';
 import { asc, inArray } from 'drizzle-orm';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { readableOrganizationIds, resolveOrganizationAccess } from '@/lib/organizations/read-authority';
 
@@ -34,12 +35,15 @@ export async function GET(_req: NextRequest) {
   const readable = readableOrganizationIds(access);
   if (readable && readable.length === 0) return NextResponse.json({ data: [] });
 
-  const orgs = await db
-    .select()
-    .from(organizations)
-    .where(readable ? inArray(organizations.id, readable) : undefined)
-    .orderBy(asc(organizations.hierarchyLevel), asc(organizations.name))
-    .limit(1000);
+  // Read as the system role, bounded to the organizations the caller may read; the ambient connection role is not tenant-scoped.
+  const orgs = await withSystemContext(() =>
+    db
+      .select()
+      .from(organizations)
+      .where(readable ? inArray(organizations.id, readable) : undefined)
+      .orderBy(asc(organizations.hierarchyLevel), asc(organizations.name))
+      .limit(1000),
+  );
 
   return NextResponse.json({
     data: orgs.map((o) => ({

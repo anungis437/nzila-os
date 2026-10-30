@@ -78,6 +78,11 @@ export const POST = withApiAuth(async (request: NextRequest) => {
     }
     const signers = parsedSigners.data;
 
+    // Only a configured external provider can send a document; there is no built-in one to name.
+    if (provider && provider !== 'docusign' && provider !== 'hellosign') {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'provider must be docusign or hellosign');
+    }
+
     if (file.size > MAX_SIGNING_FILE_BYTES) {
       return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'The document is too large to send for signature');
     }
@@ -96,7 +101,7 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       fileName: file.name,
       sentBy: userId,
       signers,
-      provider: (provider as "internal" | "docusign" | "hellosign" | null) || undefined,
+      provider: (provider as "docusign" | "hellosign" | null) || undefined,
       expirationDays: expirationDays ? parseInt(expirationDays) : undefined,
       requireAuthentication: requireAuthentication === "true",
       sequentialSigning: sequentialSigning === "true",
