@@ -4,6 +4,7 @@
  */
 import { withApi, ApiError, z } from '@/lib/api/framework';
 import { db } from '@/db/db';
+import { requireOrganizationAuditReader, ORGANIZATION_AUDIT_PROJECTION } from '@/lib/audit/org-audit-reader';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { auditLogs } from '@/db/schema/audit-security-schema';
@@ -12,12 +13,13 @@ import { eq, desc } from 'drizzle-orm';
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
-  { auth: { required: true, minRole: 'officer' } },
-  async ({ organizationId }) => {
+  { auth: { required: true, minRole: 'admin' }, requireOrg: true, rlsOrgContext: true },
+  async ({ organizationId, userId }) => {
+    const scope = await requireOrganizationAuditReader(userId, organizationId);
     const rows = await db
-      .select()
+      .select(ORGANIZATION_AUDIT_PROJECTION)
       .from(auditLogs)
-      .where(eq(auditLogs.organizationId, organizationId!))
+      .where(eq(auditLogs.organizationId, scope))
       .orderBy(desc(auditLogs.createdAt))
       .limit(100);
     return rows;
@@ -27,6 +29,7 @@ export const GET = withApi(
 export const POST = withApi(
   {
     auth: { required: true, minRole: 'admin' },
+    requireOrg: true,
     body: z.object({
       action: z.string().min(1).max(100),
       resourceType: z.string().min(1).max(50),
@@ -37,13 +40,13 @@ export const POST = withApi(
     }),
   },
   async ({ body, organizationId, userId }) => {
-    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    const auditScope = await requireOrganizationAuditReader(userId, organizationId);
     // A manual entry is recorded as exactly that: attributed to the administrator who wrote it, with the declared
     // fields kept as details, so it cannot pass for a system-generated record of another action.
-    return withRLSContext({ organizationId }, async (tx) => {
+    return withRLSContext({ organizationId: auditScope }, async (tx) => {
       await persistAtomicAudit(tx, {
-        organizationId,
-        userId,
+        organizationId: auditScope,
+        userId: userId!,
         action: 'compliance.manual_entry',
         resourceType: body.resourceType,
         resourceId: body.resourceId,

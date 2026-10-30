@@ -4,18 +4,20 @@
  */
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
+import { requireOrganizationAuditReader, ORGANIZATION_AUDIT_PROJECTION } from '@/lib/audit/org-audit-reader';
 import { auditLogs } from '@/db/schema/audit-security-schema';
 import { eq, desc } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
-  { auth: { required: true, minRole: 'officer' } },
-  async ({ organizationId }) => {
+  { auth: { required: true, minRole: 'admin' }, requireOrg: true, rlsOrgContext: true },
+  async ({ organizationId, userId }) => {
+    const scope = await requireOrganizationAuditReader(userId, organizationId);
     const rows = await db
-      .select()
+      .select(ORGANIZATION_AUDIT_PROJECTION)
       .from(auditLogs)
-      .where(eq(auditLogs.organizationId, organizationId!))
+      .where(eq(auditLogs.organizationId, scope))
       .orderBy(desc(auditLogs.createdAt))
       .limit(100);
     return {
