@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 23,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 9,
-    "engineeringRemaining": 768,
+    "engineeringCorrected": 11,
+    "engineeringRemaining": 766,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately."
   },
   "verificationPolicy": {
@@ -1717,7 +1717,10 @@
       "title": "calculateMetrics stores claim identifiers in the metric metadata and the metrics GET returns that metadata to every member at the member floor.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
+      "currentRun": {
+        "state": "SOURCE_PATCHED_HISTORICAL_DATA_REMEDIATION_PENDING",
+        "repair": "New calculated claims-volume metrics store only aggregate count, not claim IDs. Existing historical metadata still requires migration/redaction before full closure."
+      },
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
@@ -8767,7 +8770,13 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/ml/monitoring/metrics/route.ts",
+        "explanation": "Query uses actual schema columns and organization predicates for model metadata and prediction subqueries.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ML-MONITORING-METRICS-SUBSTITUTE-LITERAL-FIGURES-AND-REPORT-HEALTHY-WHEN-NOTHING-IS-MEASURED",
@@ -8784,7 +8793,13 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/ml/monitoring/metrics/route.ts",
+        "explanation": "No invented precision, recall, F1, health or trend; unevaluated values explicitly null/unknown.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ML-PREDICTION-ROUTES-ARE-ONE-GENERIC-ROW-LIST-UNDER-SIX-MODEL-NAMES",
