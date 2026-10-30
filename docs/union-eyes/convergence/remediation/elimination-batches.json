@@ -499,6 +499,63 @@
           "remaining": "The HMAC still uses one global SHOPIFY_WEBHOOK_SECRET for every organization; per-organization secrets (shopify_config.webhook_secret_ref) need the secret store. The address key is only as trustworthy as the front proxy that sets the header."
         }
       ]
+    },
+    {
+      "id": "B06-SLA-OBSERVABILITY-CALENDAR",
+      "family": "F01 Scheduled jobs that alert or import: durable deduplicated alerts, one transaction per alert, paged and leased imports",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B6-SYS-SLA-WATCHDOG-EVENTS-HAVE-NO-SUBSCRIBER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/cron/sla-watchdog/route.ts",
+            "apps/union-eyes/lib/workflow/sla-alerts.ts",
+            "apps/union-eyes/db/migrations/20261103_in_app_notifications_dedupe_key.sql",
+            "apps/union-eyes/lib/workflow/__tests__/sla-alerts.pglite.test.ts"
+          ],
+          "explanation": "The in-process bus events are replaced by a durable inbox alert for the steward each late or at-risk claim is assigned to, written inside that organization's own context and deduplicated by a unique index over (organization, user, claim+kind+deadline) from migration 20261103: a rerun, retry or overlapping run adds nothing; a new deadline or escalation alerts again. Unassigned claims are counted in the result. Real-SQL tested; mutation-proved (dedupe, recipient). Native PostgreSQL qualification of the migration is still to run."
+        },
+        {
+          "prefix": "DEF-0B6-SYS-SLA-WATCHDOG-UNBOUNDED-SCAN-AND-UNAWAITED-DUPLICATE-METRICS",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/cron/sla-watchdog/route.ts",
+            "apps/union-eyes/lib/workflow/sla-alerts.ts"
+          ],
+          "explanation": "The scan is keyset-paged (500 per page, bounded page count that fails the run rather than truncating silently), each claim is assessed once, and the metrics are awaited with their failures reported through the job result (500 naming the organization). Metrics are keyed by organization and clock hour.",
+          "remaining": "recordPilotMetricEvent does not deduplicate by trace id, so two runs in one hour still record two metric rows; an idempotency key needs support in @nzila/platform-pilot-metrics."
+        },
+        {
+          "prefix": "DEF-0B3-ALERT-SWEEP-AUDIT-ATOMICITY-UNPROVEN",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/services/observability/realtime-alerting-service.ts",
+            "apps/union-eyes/services/observability/__tests__/realtime-alerting-service.pglite.test.ts"
+          ],
+          "explanation": "The rule, inbox notices, execution record and audit entry are all written on the sweep's transaction handle in one savepoint per signal (the module-level db handle is no longer used for writes). Proved on PostgreSQL: an audit failure leaves no inbox row and no execution for that alert while other organizations' alerts are kept, and the next run completes it."
+        },
+        {
+          "prefix": "DEF-0B6-SYS-OBSERVABILITY-SWEEP-RECORDS-EMAIL-SUCCESS-WITHOUT-SENDING",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/services/observability/realtime-alerting-service.ts",
+            "apps/union-eyes/app/api/cron/observability-alerts/route.ts"
+          ],
+          "explanation": "The never-read pending notification_tracking row is no longer written and an execution records only the channel that delivered (in_app, with the recipient count) and its measured time. The alert goes to the organization's active administrators and president; an alert nobody can receive is a failed execution and a failed job (500), not a success. Reruns in the same hour alert nobody twice. No e-mail is sent or claimed; delivering alerts by e-mail is not part of this fix."
+        },
+        {
+          "prefix": "DEF-0B6-SYS-CALENDAR-SYNC-FIRST-PAGE-ONLY-AND-NO-CLAIM-OF-DUE-CONNECTIONS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/external-calendar-sync/google-calendar-service.ts",
+            "apps/union-eyes/app/api/cron/calendar-sync/route.ts",
+            "apps/union-eyes/lib/external-calendar-sync/__tests__/google-calendar-service.test.ts",
+            "apps/union-eyes/app/api/cron/calendar-sync/route.test.ts"
+          ],
+          "explanation": "The Google import follows every page (250 per call, 50-page bound that fails instead of truncating), the cron passes the stored sync token (without the window and ordering Google rejects with one), a 410 falls back to a full sync, and the new token is stored only when every page was read and every event applied; otherwise the import throws and the connection is recorded as failed with a retry time. Per-event and token-store errors are no longer swallowed. The due connections are locked FOR UPDATE SKIP LOCKED and leased for 15 minutes in the same transaction, each lease bound to the row's organization. Google only: the Microsoft import has the same shape and is not yet changed."
+        }
+      ]
     }
   ]
 }

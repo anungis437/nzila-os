@@ -147,7 +147,7 @@ export const UNATTRIBUTABLE_WRITE_ROUTES: Record<string, { why: string; control:
   'cron/location-retention/route.ts': { why: 'Platform-wide 24-hour retention sweep over user-scoped location rows; no acting organization. Its evidence row (location_deletion_log) commits in the same system transaction, so a failed evidence write keeps the data for the next run.', control: /cron:\s*true/ },
   'whop/create-checkout/route.ts': { why: 'Creates a payment-provider checkout session for the signed-in user, who may hold no organization yet; nothing is stored here.', control: /requireUser/ },
   'organizations/switch/route.ts': { why: 'Session rotation is owned and audited by platform-auth; the legacy branch only validates membership and stores nothing.', control: /auth\(\)/ },
-  'cron/sla-watchdog/route.ts': { why: 'Emits deadline events and metrics only; no acting organization.', control: /cron:\s*true|CRON_SECRET|verifyCronAuth|cronAuth/i },
+  'cron/sla-watchdog/route.ts': { why: 'Platform-wide scan with no acting organization; it writes one deduplicated inbox alert per claim, kind and deadline inside each organization\'s own context (an audit row per alert would double every alert), plus metrics.', control: /cron:\s*true|CRON_SECRET|verifyCronAuth|cronAuth/i },
 }
 
 const ATOMIC_AUDIT = /persistAtomicAudit|appendMandatoryAudit/

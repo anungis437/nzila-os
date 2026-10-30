@@ -1,32 +1,39 @@
 /**
  * POST /api/cron/sla-watchdog
  *
- * Background worker invoked on a cron schedule (every minute via external
- * scheduler or Vercel / Azure cron). Scans all non-terminal claims, checks
- * SLA compliance, and emits alert events for claims nearing or past breach.
+ * Background worker run by the scheduler (see lib/operations/scheduled-jobs.json). Scans the non-terminal claims, assesses each
+ * against its SLA once, writes a durable inbox alert for the steward each late or at-risk claim is assigned to, and records the
+ * organization's SLA metrics.
  *
- * Protected by withApi cron auth (Phase 7 — Workflow Realignment).
+ * Protected by withApi cron auth.
+ *
+ * The claims are read across organizations by SYSTEM authority (a cross-organization SELECT on claims only). The alerts are
+ * tenant rows, so each organization's alerts are written inside that organization's own context. A claim with no assignee has no
+ * one to alert; it is counted in the result so the gap is visible instead of silent.
  */
+import { and, asc, gt, sql } from 'drizzle-orm'
 import { db } from '@/db/db'
-import { withSystemContext } from '@/lib/db/with-rls-context'
+import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context'
 import { claims } from '@/db/schema'
-import { sql } from 'drizzle-orm'
-import { eventBus } from '@/lib/events/event-bus'
 import { logger } from '@/lib/logger'
 import { withApi } from '@/lib/api/framework'
-import { getSLADeadlineHours, type CasePriority } from '@/lib/workflow/case-lifecycle'
-import { toLifecycleState } from '@/lib/workflow/state-bridge'
 import { recordUnionEyesSlaCompliance, recordUnionEyesSlaWatchdog } from '@/lib/pilot-metrics'
+import { jobResponse, type JobFailure } from '@/lib/operations/job-result'
+import {
+  MAX_ALERTS_PER_ORGANIZATION,
+  MAX_SCAN_PAGES,
+  SCAN_PAGE_SIZE,
+  assessClaim,
+  emptyTally,
+  tally,
+  writeSlaAlerts,
+  type OrganizationTally,
+  type ScannedClaim,
+} from '@/lib/workflow/sla-alerts'
 
 export const dynamic = 'force-dynamic'
 
-function slaDeadline(status: string, priority: string, statusChangedAt: Date): Date {
-  const lifecycleState = toLifecycleState('claim', status) ?? 'submitted'
-  const hours = getSLADeadlineHours(lifecycleState, (priority as CasePriority) || 'medium')
-  const d = new Date(statusChangedAt)
-  d.setHours(d.getHours() + hours)
-  return d
-}
+const WATCHDOG_ACTOR = 'system:sla-watchdog'
 
 export const POST = withApi(
   {
@@ -34,182 +41,105 @@ export const POST = withApi(
     openapi: { tags: ['Cron'], summary: 'SLA watchdog — scan claims for SLA compliance' },
   },
   async () => {
-    // Fetch all active (non-terminal) claims. This job is authorized only for a
-    // cross-organization SELECT on claims; it emits events and metrics but does not
-    // write tenant tables (pilot_events), which SYSTEM authority does not imply.
-    const activeClaims = await withSystemContext(async () =>
-      db
-        .select({
-          claimId: claims.claimId,
-          claimNumber: claims.claimNumber,
-          status: claims.status,
-          priority: claims.priority,
-          organizationId: claims.organizationId,
-          assignedTo: claims.assignedTo,
-          updatedAt: claims.updatedAt,
-          createdAt: claims.createdAt,
-        })
-        .from(claims)
-        .where(sql`${claims.status} NOT IN ('closed', 'resolved', 'rejected')`),
-    )
-
     const now = new Date()
-    let atRiskCount = 0
-    let breachedCount = 0
+    const failures: JobFailure[] = []
+    const organizations = new Map<string, OrganizationTally>()
+    let scanned = 0
+    let withoutOrganization = 0
 
-    for (const c of activeClaims) {
-      const status = c.status
-      const priority = (c.priority as CasePriority) || 'medium'
-      const changedAt = c.updatedAt ?? c.createdAt ?? now
-
-      const deadline = slaDeadline(status, priority, changedAt)
-      const msRemaining = deadline.getTime() - now.getTime()
-      const hoursRemaining = msRemaining / (1000 * 60 * 60)
-      const totalHours = getSLADeadlineHours(
-        toLifecycleState('claim', status) ?? 'submitted',
-        priority,
-      )
-
-      // At-risk: less than 20% of SLA time remaining
-      const atRisk = hoursRemaining > 0 && hoursRemaining < totalHours * 0.2
-      const breached = hoursRemaining <= 0
-
-      if (breached) {
-        breachedCount++
-        eventBus.emit(
-          'claim_events',
-          {
-            claim_id: c.claimId,
-            event_type: 'sla_breached',
-            actor: 'system:sla-watchdog',
-            timestamp: now.toISOString(),
-            payload: {
-              claimNumber: c.claimNumber,
-              status,
-              priority,
-              deadline: deadline.toISOString(),
-              hoursOverdue: Math.abs(hoursRemaining).toFixed(1),
-              organizationId: c.organizationId,
-              assignedTo: c.assignedTo,
-            },
-          },
-          {
-            organizationId: c.organizationId ?? undefined,
-            source: 'sla-watchdog',
-          },
-        )
-      } else if (atRisk) {
-        atRiskCount++
-        eventBus.emit(
-          'claim_events',
-          {
-            claim_id: c.claimId,
-            event_type: 'sla_at_risk',
-            actor: 'system:sla-watchdog',
-            timestamp: now.toISOString(),
-            payload: {
-              claimNumber: c.claimNumber,
-              status,
-              priority,
-              deadline: deadline.toISOString(),
-              hoursRemaining: hoursRemaining.toFixed(1),
-              organizationId: c.organizationId,
-              assignedTo: c.assignedTo,
-            },
-          },
-          {
-            organizationId: c.organizationId ?? undefined,
-            source: 'sla-watchdog',
-          },
-        )
-
-        eventBus.emit(
-          'claim_events',
-          {
-            claim_id: c.claimId,
-            event_type: 'sla_breach_risk',
-            actor: 'system:sla-watchdog',
-            timestamp: now.toISOString(),
-            payload: {
-              claimNumber: c.claimNumber,
-              status,
-              priority,
-              deadline: deadline.toISOString(),
-              hoursRemaining: hoursRemaining.toFixed(1),
-              organizationId: c.organizationId,
-              assignedTo: c.assignedTo,
-            },
-          },
-          {
-            organizationId: c.organizationId ?? undefined,
-            source: 'sla-watchdog',
-          },
-        )
+    // Keyset-paged so a run never holds every active claim, and each page is bounded.
+    let after: string | null = null
+    let pages = 0
+    for (;;) {
+      if (pages >= MAX_SCAN_PAGES) {
+        failures.push({ scope: 'scan', reason: `stopped after ${MAX_SCAN_PAGES} pages; the remaining claims were not assessed` })
+        break
       }
+      const cursor: string | null = after
+      const page: ScannedClaim[] = await withSystemContext(async () =>
+        db
+          .select({
+            claimId: claims.claimId,
+            claimNumber: claims.claimNumber,
+            status: claims.status,
+            priority: claims.priority,
+            organizationId: claims.organizationId,
+            assignedTo: claims.assignedTo,
+            updatedAt: claims.updatedAt,
+            createdAt: claims.createdAt,
+          })
+          .from(claims)
+          .where(and(sql`${claims.status} NOT IN ('closed', 'resolved', 'rejected')`, cursor ? gt(claims.claimId, cursor) : undefined))
+          .orderBy(asc(claims.claimId))
+          .limit(SCAN_PAGE_SIZE),
+      )
+      pages += 1
+      for (const claim of page) {
+        scanned += 1
+        if (!claim.organizationId) {
+          withoutOrganization += 1
+          continue
+        }
+        const entry = organizations.get(claim.organizationId) ?? emptyTally()
+        tally(entry, claim, assessClaim(claim, now))
+        organizations.set(claim.organizationId, entry)
+      }
+      if (page.length < SCAN_PAGE_SIZE) break
+      after = page[page.length - 1].claimId
     }
 
-    logger.info('SLA watchdog run complete', {
-      totalActive: activeClaims.length,
-      atRisk: atRiskCount,
-      breached: breachedCount,
+    // The trace id is the organization and the hour, so a rerun in the same hour reports under the same trace.
+    const hour = now.toISOString().slice(0, 13)
+    let atRisk = 0
+    let breached = 0
+    let alertsWritten = 0
+    let alertsDeferred = 0
+    let unassigned = 0
+
+    for (const [organizationId, counts] of organizations) {
+      atRisk += counts.atRisk
+      breached += counts.breached
+      unassigned += counts.unassigned
+
+      const batch = counts.alerts.slice(0, MAX_ALERTS_PER_ORGANIZATION)
+      alertsDeferred += counts.alerts.length - batch.length
+      try {
+        alertsWritten += await withRLSContext({ organizationId, userId: WATCHDOG_ACTOR }, (tx) => writeSlaAlerts(tx, organizationId, batch))
+      } catch (error) {
+        logger.error('SLA alerts were not written', { organizationId, error: String(error) })
+        failures.push({ scope: `alerts:${organizationId}`, reason: 'alert write failed' })
+      }
+
+      const traceId = `sla-watchdog:${organizationId}:${hour}`
+      const results = await Promise.allSettled([
+        recordUnionEyesSlaWatchdog(organizationId, counts.breached, counts.atRisk, traceId),
+        recordUnionEyesSlaCompliance(organizationId, counts.compliant, counts.scanned, traceId),
+      ])
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          logger.warn('Pilot metric emit failed', { error: String(result.reason), metric: index === 0 ? 'sla_breach_count' : 'sla_compliance_rate', organizationId })
+          failures.push({ scope: `metrics:${organizationId}`, reason: 'pilot metric not recorded' })
+        }
+      })
+    }
+
+    logger.info('SLA watchdog run complete', { scanned, atRisk, breached, alertsWritten, alertsDeferred, unassigned, withoutOrganization })
+
+    return jobResponse({
+      job: 'sla-watchdog',
+      attempted: organizations.size,
+      succeeded: organizations.size - new Set(failures.map((f) => f.scope.split(':')[1]).filter(Boolean)).size,
+      failures,
+      details: {
+        scanned,
+        at_risk: atRisk,
+        breached,
+        alerts_written: alertsWritten,
+        alerts_deferred: alertsDeferred,
+        unassigned_claims: unassigned,
+        claims_without_organization: withoutOrganization,
+        timestamp: now.toISOString(),
+      },
     })
-
-    const watchdogTraceId = `sla-watchdog:${now.toISOString()}`
-    const orgCounts = new Map<
-      string,
-      { breached: number; atRisk: number; compliant: number; scanned: number }
-    >()
-    for (const c of activeClaims) {
-      if (!c.organizationId) continue
-      const current = orgCounts.get(c.organizationId) ?? {
-        breached: 0,
-        atRisk: 0,
-        compliant: 0,
-        scanned: 0,
-      }
-      const status = c.status
-      const priority = (c.priority as CasePriority) || 'medium'
-      const changedAt = c.updatedAt ?? c.createdAt ?? now
-      const deadline = slaDeadline(status, priority, changedAt)
-      const hoursRemaining = (deadline.getTime() - now.getTime()) / (1000 * 60 * 60)
-      const totalHours = getSLADeadlineHours(
-        toLifecycleState('claim', status) ?? 'submitted',
-        priority,
-      )
-      current.scanned += 1
-      if (hoursRemaining <= 0) current.breached += 1
-      else {
-        current.compliant += 1
-        if (hoursRemaining < totalHours * 0.2) current.atRisk += 1
-      }
-      orgCounts.set(c.organizationId, current)
-    }
-
-    for (const [orgId, counts] of orgCounts.entries()) {
-      recordUnionEyesSlaWatchdog(orgId, counts.breached, counts.atRisk, watchdogTraceId).catch(
-        (err) =>
-          logger.warn('Pilot metric emit failed', {
-            error: String(err),
-            metric: 'sla_breach_count',
-            orgId,
-          }),
-      )
-
-      recordUnionEyesSlaCompliance(orgId, counts.compliant, counts.scanned, watchdogTraceId).catch(
-        (err) =>
-          logger.warn('Pilot metric emit failed', {
-            error: String(err),
-            metric: 'sla_compliance_rate',
-            orgId,
-          }),
-      )
-    }
-
-    return {
-      scanned: activeClaims.length,
-      at_risk: atRiskCount,
-      breached: breachedCount,
-      timestamp: now.toISOString(),
-    }
   },
 )

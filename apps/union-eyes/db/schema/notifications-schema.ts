@@ -7,7 +7,8 @@
  * - Notification history/audit log
  */
 
-import { pgTable, text, timestamp, boolean, jsonb, uuid, pgEnum, integer } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, boolean, jsonb, uuid, pgEnum, integer, uniqueIndex } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { organizations } from '../schema-organizations';
 
 // ============================================
@@ -178,7 +179,10 @@ export const inAppNotifications = pgTable('in_app_notifications', {
   // Timestamps
   createdAt: timestamp('created_at').notNull().defaultNow(),
   expiresAt: timestamp('expires_at'), // Optional expiration
-});
+}, (table) => ({
+  // A system-written notice carries data.dedupeKey, so writing it twice stores it once (migration 20261103).
+  dedupeUq: uniqueIndex('uq_in_app_notifications_dedupe').on(table.organizationId, table.userId, sql`(${table.data}->>'dedupeKey')`).where(sql`${table.data} ? 'dedupeKey'`),
+}));
 
 // notification_history is not declared in this barrel. The physical relation stays.
 // services/financial-service still declares its own notification_history. Do not DROP it.

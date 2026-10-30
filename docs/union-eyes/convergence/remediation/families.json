@@ -1,27 +1,26 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 66,
- "partial": 7,
- "outstanding": 711,
- "accountedFor": 711,
+ "corrected": 70,
+ "partial": 8,
+ "outstanding": 707,
+ "accountedFor": 707,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
    "purpose": "Scheduled and provider-driven jobs: method, secret, scheduling, replay and failure reporting",
-   "defects": 26,
+   "defects": 22,
    "severity": {
-    "HIGH": 4,
-    "MEDIUM": 17,
+    "HIGH": 2,
+    "MEDIUM": 15,
     "LOW": 5
    },
    "namedRoutes": 7,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 1,
-    "0B.3": 1,
     "0B.5": 1,
-    "0B.6": 5,
+    "0B.6": 2,
     "0B.7": 1,
     "0B.8": 6,
     "0B.9": 3,
@@ -305,10 +304,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B3-ALERT-SWEEP-AUDIT-ATOMICITY-UNPROVEN",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B5-COGNITION-KPI-ROI-FROM-ASSUMED-HOURS",
     "severity": "LOW"
    },
@@ -317,20 +312,9 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B6-SYS-CALENDAR-SYNC-FIRST-PAGE-ONLY-AND-NO-CLAIM-OF-DUE-CONNECTIONS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-SYS-OBSERVABILITY-SWEEP-RECORDS-EMAIL-SUCCESS-WITHOUT-SENDING",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B6-SYS-SLA-WATCHDOG-EVENTS-HAVE-NO-SUBSCRIBER",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B6-SYS-SLA-WATCHDOG-UNBOUNDED-SCAN-AND-UNAWAITED-DUPLICATE-METRICS",
-    "severity": "LOW"
+    "severity": "LOW",
+    "partial": true
    },
    {
     "id": "DEF-0B7-PLT-EQUITY-SNAPSHOT-SCHEMA-HAS-NO-SMALL-CELL-RULE",

@@ -23,6 +23,7 @@ import {
 } from '@/db/schema/calendar-schema';
 import { eq, and } from 'drizzle-orm';
 import { decryptCalendarToken, encryptCalendarToken } from './token-crypto';
+import { logger } from '@/lib/logger';
 
 const calendar = google.calendar('v3');
 
@@ -203,8 +204,30 @@ throw error;
 // EVENT SYNC
 // ============================================================================
 
+/** Events per list call; Google pages the rest, and the import follows every page. */
+export const GOOGLE_PAGE_SIZE = 250;
+/** Upper bound on pages per import (12,500 events). An import that hits it is incomplete and says so. */
+export const GOOGLE_MAX_PAGES = 50;
+
+export class CalendarImportError extends Error {
+  constructor(message: string, readonly detail: { failed: number; pages: number; incomplete: boolean }) {
+    super(message);
+    this.name = 'CalendarImportError';
+  }
+}
+
+const isGone = (error: unknown) => {
+  const e = error as { code?: number; status?: number; response?: { status?: number } };
+  return e?.code === 410 || e?.status === 410 || e?.response?.status === 410;
+};
+
 /**
- * Import events from Google Calendar
+ * Import events from Google Calendar.
+ *
+ * Every page is followed. The sync token Google returns with the last page is stored only when every page was read and every event
+ * was applied; otherwise the import throws, so the caller records a failed sync and the next run starts from the same point rather
+ * than the connection being marked synced with events missing. A stored token that Google no longer accepts (410) is dropped and
+ * the import falls back to a full sync.
  */
 export async function importGoogleEvents(
   connectionId: string,
@@ -215,102 +238,125 @@ export async function importGoogleEvents(
     timeMax?: Date;
     syncToken?: string;
   }
-) {
-  try {
-    const { oauth2Client, organizationId } = await getAuthenticatedClient(connectionId);
-    
+): Promise<{ imported: number; updated: number; deleted: number; total: number; pages: number; incremental: boolean }> {
+  const { oauth2Client, organizationId } = await getAuthenticatedClient(connectionId);
+
+  const [localCalendar] = await db
+    .select()
+    .from(calendars)
+    .where(and(eq(calendars.id, localCalendarId), eq(calendars.organizationId, organizationId)))
+    .limit(1);
+  // The query is organization-scoped; the explicit check keeps a mis-scoped row from ever being imported into.
+  if (!localCalendar || localCalendar.organizationId !== organizationId) {
+    throw new Error('Local calendar not found');
+  }
+
+  const listParams = (syncToken: string | undefined, pageToken: string | undefined): calendar_v3.Params$Resource$Events$List => {
     const params: calendar_v3.Params$Resource$Events$List = {
       auth: oauth2Client,
       calendarId: googleCalendarId,
       singleEvents: true,
-      orderBy: 'startTime',
+      maxResults: GOOGLE_PAGE_SIZE,
+      ...(pageToken ? { pageToken } : {}),
     };
-
-    if (options?.syncToken) {
-      // Incremental sync
-      params.syncToken = options.syncToken;
+    if (syncToken) {
+      // An incremental list accepts neither a time window nor an ordering; Google answers 400 if they are sent with a sync token.
+      params.syncToken = syncToken;
     } else {
-      // Full sync
+      params.orderBy = 'startTime';
       params.timeMin = options?.timeMin?.toISOString() || new Date().toISOString();
-      if (options?.timeMax) {
-        params.timeMax = options.timeMax.toISOString();
-      }
-      params.maxResults = 2500;
+      if (options?.timeMax) params.timeMax = options.timeMax.toISOString();
     }
+    return params;
+  };
 
-    const response = await calendar.events.list(params);
-    const events = response.data.items || [];
-    const newSyncToken = response.data.nextSyncToken;
+  let imported = 0;
+  let updated = 0;
+  let deleted = 0;
+  let total = 0;
+  let failed = 0;
+  let pages = 0;
+  let nextSyncToken: string | null | undefined;
+  let incomplete = false;
+  let syncToken = options?.syncToken;
+  const incremental = Boolean(syncToken);
 
-    // Get local calendar
-    const [localCalendar] = await db
-      .select()
-      .from(calendars)
-      .where(eq(calendars.id, localCalendarId))
-      .limit(1);
-
-    if (!localCalendar || localCalendar.organizationId !== organizationId) {
-      throw new Error('Local calendar not found');
-    }
-
-    let importedCount = 0;
-    let updatedCount = 0;
-    let deletedCount = 0;
-
+  const applyPage = async (events: calendar_v3.Schema$Event[]) => {
     for (const googleEvent of events) {
+      total += 1;
       try {
-        // Check if event is deleted
         if (googleEvent.status === 'cancelled') {
           await handleDeletedGoogleEvent(localCalendarId, googleEvent.id!, organizationId);
-          deletedCount++;
+          deleted += 1;
           continue;
         }
-
-        // Check if event already exists
         const [existingEvent] = await db
           .select()
           .from(calendarEvents)
-          .where(
-            and(
-              eq(calendarEvents.calendarId, localCalendarId),
-              eq(calendarEvents.externalEventId, googleEvent.id!)
-            )
-          )
+          .where(and(
+            eq(calendarEvents.calendarId, localCalendarId),
+            eq(calendarEvents.organizationId, organizationId),
+            eq(calendarEvents.externalEventId, googleEvent.id!),
+          ))
           .limit(1);
-
         const eventData = mapGoogleEventToLocal(googleEvent, localCalendarId, localCalendar.organizationId);
-
         if (existingEvent) {
-          // Update existing event
           await db
             .update(calendarEvents)
-            .set({
-              ...eventData,
-              updatedAt: new Date(),
-            })
+            .set({ ...eventData, updatedAt: new Date() })
             .where(and(eq(calendarEvents.id, existingEvent.id), eq(calendarEvents.organizationId, organizationId)));
-          updatedCount++;
+          updated += 1;
         } else {
-          // Create new event
           await db.insert(calendarEvents).values(eventData);
-          importedCount++;
+          imported += 1;
         }
-      } catch (_error) {
-}
+      } catch (error) {
+        failed += 1;
+        logger.error('Google calendar event was not applied', { connectionId, eventId: googleEvent.id, error: String(error) });
+      }
     }
+  };
 
-    // Update sync token
-    await updateSyncToken(connectionId, organizationId, googleCalendarId, newSyncToken || null);
+  const readAllPages = async () => {
+    let pageToken: string | undefined;
+    do {
+      if (pages >= GOOGLE_MAX_PAGES) {
+        incomplete = true;
+        return;
+      }
+      const response = await calendar.events.list(listParams(syncToken, pageToken));
+      pages += 1;
+      await applyPage(response.data.items || []);
+      pageToken = response.data.nextPageToken || undefined;
+      // Google returns the sync token only with the last page.
+      nextSyncToken = response.data.nextSyncToken ?? nextSyncToken;
+    } while (pageToken);
+  };
 
-    return {
-      imported: importedCount,
-      updated: updatedCount,
-      deleted: deletedCount,
-      total: events.length,
-    };
+  try {
+    await readAllPages();
   } catch (error) {
-throw error;
+    if (!syncToken || !isGone(error)) throw error;
+    // The stored token expired: start again with a full sync over the window and replace the token with the new one.
+    logger.warn('Google sync token expired; falling back to a full sync', { connectionId });
+    syncToken = undefined;
+    imported = updated = deleted = total = failed = pages = 0;
+    nextSyncToken = undefined;
+    await readAllPages();
   }
+
+  if (failed > 0 || incomplete) {
+    throw new CalendarImportError(
+      incomplete
+        ? `Google calendar import stopped after ${GOOGLE_MAX_PAGES} pages; the remaining events were not read`
+        : `${failed} of ${total} Google calendar events were not applied`,
+      { failed, pages, incomplete },
+    );
+  }
+
+  await updateSyncToken(connectionId, organizationId, googleCalendarId, nextSyncToken || null);
+
+  return { imported, updated, deleted, total, pages, incremental };
 }
 
 /**
@@ -475,38 +521,33 @@ function mapLocalEventToGoogle(localEvent: CalendarEvent): calendar_v3.Schema$Ev
 // ============================================================================
 
 /**
- * Handle deleted Google event
+ * Handle deleted Google event. A failure propagates to the import, which counts it and fails the sync rather than leaving a
+ * cancelled event looking scheduled.
  */
 async function handleDeletedGoogleEvent(calendarId: string, googleEventId: string, organizationId: string) {
-  try {
-    const [event] = await db
-      .select()
-      .from(calendarEvents)
-      .where(
-        and(
-          eq(calendarEvents.calendarId, calendarId),
-          eq(calendarEvents.organizationId, organizationId),
-          eq(calendarEvents.externalEventId, googleEventId)
-        )
+  const [event] = await db
+    .select()
+    .from(calendarEvents)
+    .where(
+      and(
+        eq(calendarEvents.calendarId, calendarId),
+        eq(calendarEvents.organizationId, organizationId),
+        eq(calendarEvents.externalEventId, googleEventId)
       )
-      .limit(1);
+    )
+    .limit(1);
 
-    if (event) {
-      await db
-        .update(calendarEvents)
-        .set({
-          status: 'cancelled',
-          cancelledAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .where(and(eq(calendarEvents.id, event.id), eq(calendarEvents.organizationId, organizationId)));
-    }
-  } catch (_error) {
-}
+  if (event) {
+    await db
+      .update(calendarEvents)
+      .set({ status: 'cancelled', cancelledAt: new Date(), updatedAt: new Date() })
+      .where(and(eq(calendarEvents.id, event.id), eq(calendarEvents.organizationId, organizationId)));
+  }
 }
 
 /**
- * Update sync token for incremental sync
+ * Store the sync token for incremental sync. A failure is not swallowed: the next import would otherwise start from the old token
+ * and silently repeat or miss work while the connection reads as synced. The sync status itself is the caller's to set.
  */
 async function updateSyncToken(
   connectionId: string,
@@ -514,41 +555,24 @@ async function updateSyncToken(
   googleCalendarId: string,
   syncToken: string | null
 ) {
-  try {
-    const [connection] = await db
-      .select({ calendarMappings: externalCalendarConnections.calendarMappings })
-      .from(externalCalendarConnections)
-      .where(and(eq(externalCalendarConnections.id, connectionId), eq(externalCalendarConnections.organizationId, organizationId)))
-      .limit(1);
+  const [connection] = await db
+    .select({ calendarMappings: externalCalendarConnections.calendarMappings })
+    .from(externalCalendarConnections)
+    .where(and(eq(externalCalendarConnections.id, connectionId), eq(externalCalendarConnections.organizationId, organizationId)))
+    .limit(1);
 
-    const mappings: CalendarMapping[] = Array.isArray(connection?.calendarMappings)
-      ? (connection.calendarMappings as CalendarMapping[])
-      : [];
+  const mappings: CalendarMapping[] = Array.isArray(connection?.calendarMappings)
+    ? (connection.calendarMappings as CalendarMapping[])
+    : [];
 
-    let found = false;
-    const updatedMappings = mappings.map((mapping) => {
-      if (mapping.externalId !== googleCalendarId) {
-        return mapping;
-      }
+  const updatedMappings = mappings.map((mapping) =>
+    mapping.externalId === googleCalendarId ? { ...mapping, syncToken: syncToken || undefined } : mapping,
+  );
 
-      found = true;
-      return {
-        ...mapping,
-        syncToken: syncToken || undefined,
-      };
-    });
-
-    await db
-      .update(externalCalendarConnections)
-      .set({
-        calendarMappings: found ? updatedMappings : mappings,
-        lastSyncAt: new Date(),
-        syncStatus: 'synced',
-        updatedAt: new Date(),
-      })
-      .where(and(eq(externalCalendarConnections.id, connectionId), eq(externalCalendarConnections.organizationId, organizationId)));
-  } catch (_error) {
-}
+  await db
+    .update(externalCalendarConnections)
+    .set({ calendarMappings: updatedMappings, lastSyncAt: new Date(), updatedAt: new Date() })
+    .where(and(eq(externalCalendarConnections.id, connectionId), eq(externalCalendarConnections.organizationId, organizationId)));
 }
 
 /**
