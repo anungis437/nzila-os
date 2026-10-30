@@ -68,8 +68,8 @@ export async function GET(req: NextRequest) {
     ? and(...conditions)
     : undefined;
 
-  const mapped = await withSystemContext(async () => {
-    const rows = await db.select().from(organizations).where(where).orderBy(asc(organizations.hierarchyLevel), asc(organizations.name)).limit(MAX_LISTED_ORGANIZATIONS);
+  const mapped = await withSystemContext(async (tx) => {
+    const rows = await tx.select().from(organizations).where(where).orderBy(asc(organizations.hierarchyLevel), asc(organizations.name)).limit(MAX_LISTED_ORGANIZATIONS);
 
     // When include_stats is requested, count active claims and children per org
     const claimsByOrg: Record<string, number> = {};
@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
       const orgIds = rows.map(r => r.id);
       const administered = orgIds.filter((id) => canAdministerOrganization(access, id));
       if (administered.length > 0) {
-        const claimCounts = await db.execute(
+        const claimCounts = await tx.execute(
           sql`SELECT organization_id::text as org_id, count(*)::int as cnt
               FROM grievances
               WHERE organization_id::text IN (${sql.join(administered.map(id => sql`${id}`), sql`,`)})
@@ -90,7 +90,7 @@ export async function GET(req: NextRequest) {
         }
       }
 
-      const childCounts = await db.execute(
+      const childCounts = await tx.execute(
         sql`SELECT parent_id::text as parent, count(*)::int as cnt
             FROM organizations
             WHERE parent_id::text IN (${sql.join(orgIds.map(id => sql`${id}`), sql`,`)})
@@ -123,15 +123,15 @@ export async function GET(req: NextRequest) {
       website: row.website,
       clc_affiliated: row.clcAffiliated,
       affiliation_date: row.affiliationDate,
-      member_count: row.memberCount,
-      memberCount: row.memberCount ?? 0,
-      active_member_count: row.activeMemberCount,
-      last_member_count_update: row.lastMemberCountUpdate,
       features_enabled: row.featuresEnabled ?? [],
       status: row.status,
       created_at: row.createdAt,
       updated_at: row.updatedAt,
       ...(administrative ? {
+        member_count: row.memberCount,
+        memberCount: row.memberCount ?? 0,
+        active_member_count: row.activeMemberCount,
+        last_member_count_update: row.lastMemberCountUpdate,
         email: row.email,
         phone: row.phone,
         address: row.address,
