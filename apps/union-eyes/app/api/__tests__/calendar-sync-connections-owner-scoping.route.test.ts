@@ -49,6 +49,9 @@ vi.mock('@/lib/audit/atomic-audit', () => ({
 
 const ID = '2b30c6d7-2222-4222-8222-aaaaaaaaaaaa';
 const actor = { organizationId: 'org-1', userId: 'user-1' };
+// The framework is mocked to invoke its handler with a context object, not an HTTP Request.
+const invoke = <T>(handler: unknown, ctx: unknown): Promise<T> =>
+  (handler as (context: unknown) => Promise<T>)(ctx);
 const scoped = (value: unknown) => {
   const expression = JSON.stringify(value);
   expect(expression).toContain('connection.organizationId');
@@ -79,7 +82,7 @@ describe('calendar connection owner and credential boundary', () => {
 
   it('lists only the caller own connections and never selects OAuth secrets', async () => {
     const { GET } = await import('@/app/api/calendar-sync/connections/route');
-    const result = await GET(actor);
+    const result = await invoke<{ connections: unknown[] }>(GET, actor);
     expect(result.connections).toHaveLength(1);
     noCredentials(m.select.mock.calls[0][0]);
     scoped(m.where.mock.calls[0][0]);
@@ -91,14 +94,14 @@ describe('calendar connection owner and credential boundary', () => {
     expect(config).toBeDefined();
     expect(config.body.safeParse({ provider: 'google', accessToken: 'forged' }).success).toBe(false);
     expect(config.body.safeParse({ provider: 'google', refreshToken: 'forged' }).success).toBe(false);
-    const result = await POST({ ...actor, body: { provider: 'google' } });
+    const result = await invoke<{ connectUrl: string; connectionCreated: boolean }>(POST, { ...actor, body: { provider: 'google' } });
     expect(result).toEqual({ connectUrl: '/api/calendar-sync/google/auth', connectionCreated: false });
     expect(m.select).not.toHaveBeenCalled();
   });
 
   it('item GET enforces organization and user predicates and omits all credentials', async () => {
     const { GET } = await import('@/app/api/calendar-sync/connections/[id]/route');
-    const result = await GET({ ...actor, params: { id: ID } });
+    const result = await invoke<{ data: { id: string } }>(GET, { ...actor, params: { id: ID } });
     expect(result.data.id).toBe(ID);
     noCredentials(m.select.mock.calls[0][0]);
     scoped(m.where.mock.calls[0][0]);
@@ -115,7 +118,7 @@ describe('calendar connection owner and credential boundary', () => {
 
   it('DELETE is scoped to the caller, audited in the transaction, and does not claim provider revocation', async () => {
     const { DELETE } = await import('@/app/api/calendar-sync/connections/[id]/route');
-    const result = await DELETE({ ...actor, params: { id: ID } });
+    const result = await invoke<{ deleted: boolean; id: string; providerRevocationVerified: boolean }>(DELETE, { ...actor, params: { id: ID } });
     expect(result).toEqual({ deleted: true, id: ID, providerRevocationVerified: false });
     scoped(m.where.mock.calls[0][0]);
     expect(m.withRLSContext).toHaveBeenCalledWith(actor, expect.any(Function));
