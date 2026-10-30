@@ -34,7 +34,7 @@ const OWN_ROWS_READ = ['grievances', 'claims', 'claim_deadlines'] as const
 const READ_ONLY = [
   // Analytics metrics are computed evidence, not steward-authored records. A generic role floor must never
   // permit inserting or altering reported measures; ingestion requires a dedicated, audited computation path.
-  'analytics_metrics', 'organization_members', 'organizations', 'dues_transactions',
+  'analytics_metrics', 'organization_members', 'dues_transactions',
   'external_invoices', 'polls', 'federations', 'data_classification_policy',
 ] as const
 
