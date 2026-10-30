@@ -15,6 +15,7 @@ import {
   pgEnum,
   index,
   check,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { relations } from 'drizzle-orm';
@@ -372,7 +373,10 @@ export const shopifyConfig = pgTable('shopify_config', {
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+}, (table) => ({
+  // A webhook is routed to its organization by shop domain (migration 20261101), so a shop belongs to exactly one organization.
+  shopDomainUq: uniqueIndex('uq_shopify_config_shop_domain').on(sql`lower(${table.shopDomain})`),
+}));
 
 /**
  * Webhook Receipts

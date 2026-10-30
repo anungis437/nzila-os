@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 35,
-    "partial": 6,
+    "implementedPendingQualification": 40,
+    "partial": 7,
     "qualificationVerified": 0,
-    "unresolved": 742,
+    "unresolved": 737,
     "externalBlockers": 0
   },
   "batches": [
@@ -50,6 +50,15 @@
       "outstandingBefore": 747,
       "newlyImplemented": 5,
       "outstandingAfter": 742,
+      "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B05-SHOPIFY-REDEMPTION-WEBHOOK",
+      "family": "F01 Provider webhooks: Shopify redemption lifecycle - one code format, shop-bound organization, retryable and idempotent, proportional refunds, no purchaser data",
+      "outstandingBefore": 742,
+      "newlyImplemented": 5,
+      "outstandingAfter": 737,
       "partial": 1,
       "evidenceCommit": null
     }
@@ -441,6 +450,84 @@
         "apps/union-eyes/db/schema/domains/communications/campaigns.ts"
       ],
       "explanation": "Migration 20261031 creates a unique (provider, provider_message_id) index when no pair repeats, otherwise a plain index with the duplicate count reported; both branches and idempotence executed on PostgreSQL (pglite). The webhook locks the row (FOR UPDATE) and refuses with 409 when two rows carry the id. Native PostgreSQL qualification of the migration is still to run."
+    },
+    "DEF-0B8-ICRA-SHOPIFY-DISCOUNT-CODE-NEVER-MATCHES-THE-WEBHOOK-EXTRACTOR": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B05-SHOPIFY-REDEMPTION-WEBHOOK",
+      "files": [
+        "apps/union-eyes/app/api/integrations/shopify/webhooks/route.ts",
+        "apps/union-eyes/lib/services/rewards/webhook-service.ts",
+        "apps/union-eyes/lib/services/rewards/redemption-service.ts",
+        "apps/union-eyes/lib/services/rewards/shopify-redemption-rules.ts",
+        "apps/union-eyes/app/api/__tests__/integrations-shopify-webhooks.pglite.test.ts",
+        "apps/union-eyes/lib/services/rewards/shopify-service.ts"
+      ],
+      "explanation": "The code issued and the code parsed are defined together (shopify-redemption-rules): UE plus the 32 hex characters of the redemption id, lossless. The parser also accepts the dashed form and resolves a legacy 12-character code only as a prefix inside the shop's organization among redemptions awaiting payment, and only when exactly one matches, so codes already issued still complete. Round trip unit-tested; the full paid, fulfilled, refunded lifecycle runs against PostgreSQL (pglite)."
+    },
+    "DEF-0B8-ICRA-SHOPIFY-WEBHOOK-ACKNOWLEDGES-FAILURES-WITH-200-AND-RECORDS-IGNORED-AS-PROCESSED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B05-SHOPIFY-REDEMPTION-WEBHOOK",
+      "files": [
+        "apps/union-eyes/app/api/integrations/shopify/webhooks/route.ts",
+        "apps/union-eyes/lib/services/rewards/webhook-service.ts",
+        "apps/union-eyes/lib/services/rewards/redemption-service.ts",
+        "apps/union-eyes/lib/services/rewards/shopify-redemption-rules.ts",
+        "apps/union-eyes/app/api/__tests__/integrations-shopify-webhooks.pglite.test.ts"
+      ],
+      "explanation": "A failure answers 500; an event that cannot be applied yet (a fulfilment or refund for an order not recorded as paid) answers 503 with Retry-After; neither records a receipt, so the redelivery is applied. A receipt is recorded only after the handler, only for a final outcome, and tolerates a concurrent duplicate. The handlers are idempotent on their own state (an order already applied is a success), so the separate receipt transaction cannot lose or double-apply an event. Mutation-proved."
+    },
+    "DEF-0B8-ICRA-SHOPIFY-ANY-REFUND-EVENT-RETURNS-ALL-CREDITS": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B05-SHOPIFY-REDEMPTION-WEBHOOK",
+      "files": [
+        "apps/union-eyes/app/api/integrations/shopify/webhooks/route.ts",
+        "apps/union-eyes/lib/services/rewards/webhook-service.ts",
+        "apps/union-eyes/lib/services/rewards/redemption-service.ts",
+        "apps/union-eyes/lib/services/rewards/shopify-redemption-rules.ts",
+        "apps/union-eyes/app/api/__tests__/integrations-shopify-webhooks.pglite.test.ts"
+      ],
+      "explanation": "A refund returns its share of the credits (floor of creditsSpent x refunded line-item subtotal / order line-item total), a later refund returns its own share, each Shopify refund id is applied once, the redemption becomes refunded only when everything spent has come back, and the total returned never exceeds the credits spent. Refunds are recorded in the stored payload and in the audit entry. Mutation-proved."
+    },
+    "DEF-0B8-ICRA-SHOPIFY-WEBHOOK-STORES-FULL-PAYLOAD-AND-CUSTOMER-DATA-IN-A-GLOBAL-TABLE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B05-SHOPIFY-REDEMPTION-WEBHOOK",
+      "files": [
+        "apps/union-eyes/app/api/integrations/shopify/webhooks/route.ts",
+        "apps/union-eyes/lib/services/rewards/webhook-service.ts",
+        "apps/union-eyes/lib/services/rewards/redemption-service.ts",
+        "apps/union-eyes/lib/services/rewards/shopify-redemption-rules.ts",
+        "apps/union-eyes/app/api/__tests__/integrations-shopify-webhooks.pglite.test.ts",
+        "apps/union-eyes/db/migrations/20261102_redact_shopify_purchaser_data.sql",
+        "apps/union-eyes/db/__tests__/migration-20261102-shopify-redaction.test.ts"
+      ],
+      "explanation": "The receipt keeps only the topic, shop domain and the order or refund id; the redemption keeps order facts (number, currency, totals, product and variant ids, quantity, price) and no customer id, e-mail, name or line-item title; discount codes are no longer logged. Migration 20261102 irreversibly redacts what was already stored in webhook_receipts and reward_redemptions (executed on PostgreSQL pglite, repeatable)."
+    },
+    "DEF-0B8-ICRA-SHOPIFY-WEBHOOK-QUERIES-TENANT-RLS-TABLES-WITH-NO-ORGANIZATION-CONTEXT": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B05-SHOPIFY-REDEMPTION-WEBHOOK",
+      "files": [
+        "apps/union-eyes/app/api/integrations/shopify/webhooks/route.ts",
+        "apps/union-eyes/lib/services/rewards/webhook-service.ts",
+        "apps/union-eyes/lib/services/rewards/redemption-service.ts",
+        "apps/union-eyes/lib/services/rewards/shopify-redemption-rules.ts",
+        "apps/union-eyes/app/api/__tests__/integrations-shopify-webhooks.pglite.test.ts",
+        "apps/union-eyes/db/migrations/20261101_shopify_shop_domain_routing.sql"
+      ],
+      "explanation": "Every lookup and write of the handler runs inside withRLSContext bound to the shop's organization, and the redemption's organization is checked against it. The organization comes from the shop domain through migration 20261101: a unique index on the lower-cased domain and a column-level SELECT (org_id, shop_domain) grant with a read-only policy for the system role; the token and secret references stay unreadable (executed with real roles and RLS on pglite). The runtime-role behaviour under the real application roles is still to be qualified on native PostgreSQL."
+    },
+    "DEF-0B8-ICRA-SHOPIFY-SHOP-DOMAIN-NEVER-CHECKED-ONE-GLOBAL-SECRET-AND-HEADER-KEYED-LIMIT": {
+      "status": "PARTIAL",
+      "batch": "B05-SHOPIFY-REDEMPTION-WEBHOOK",
+      "files": [
+        "apps/union-eyes/app/api/integrations/shopify/webhooks/route.ts",
+        "apps/union-eyes/lib/services/rewards/webhook-service.ts",
+        "apps/union-eyes/lib/services/rewards/redemption-service.ts",
+        "apps/union-eyes/lib/services/rewards/shopify-redemption-rules.ts",
+        "apps/union-eyes/app/api/__tests__/integrations-shopify-webhooks.pglite.test.ts",
+        "apps/union-eyes/db/migrations/20261101_shopify_shop_domain_routing.sql"
+      ],
+      "explanation": "The shop domain header must belong to exactly one organization or the signed event is refused (403, logged), each shop has its own rate-limit allowance, and the pre-signature limit is keyed on one normalised address instead of the whole forwarded-for string.",
+      "remaining": "The HMAC still uses one global SHOPIFY_WEBHOOK_SECRET for every organization; per-organization secrets (shopify_config.webhook_secret_ref) need the secret store. The address key is only as trustworthy as the front proxy that sets the header."
     }
   }
 }

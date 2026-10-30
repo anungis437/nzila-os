@@ -20,6 +20,7 @@ import { db } from '@/db';
 import { shopifyConfig } from '@/db/schema/recognition-rewards-schema';
 import { eq } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
+import { discountCodeFor } from './shopify-redemption-rules';
 
 // Shopify configuration
 const SHOPIFY_SHOP_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN || 'shop-moi-ca.myshopify.com';
@@ -331,7 +332,8 @@ export async function createDiscountCode(
   currency: string = 'CAD'
 ): Promise<DiscountCodeResult> {
   try {
-    const code = `UE${redemptionId.replace(/-/g, '').substring(0, 12).toUpperCase()}`;
+    // The webhook resolves the redemption from this code, so it is defined with its parser in shopify-redemption-rules.
+    const code = discountCodeFor(redemptionId);
 
     // Create price rule first (discount amount)
     const priceRule = await createPriceRule(amount, currency, code);

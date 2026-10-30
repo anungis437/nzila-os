@@ -48,9 +48,9 @@
   "mutatingByData": {
    "AMBIENT_DB": 15,
    "CRUD_TENANT_TX": 275,
-   "NONE": 213,
+   "NONE": 212,
    "SYSTEM_CONTEXT": 62,
-   "TENANT_TX": 161
+   "TENANT_TX": 162
   }
  },
  "routes": [
@@ -8560,14 +8560,13 @@
   {
    "route": "integrations/shopify/webhooks/route.ts",
    "methods": [
-    "GET",
     "POST"
    ],
    "mutating": true,
    "guard": "WEBHOOK_SIGNATURE",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "ATOMIC_SERVICE"
   },
   {

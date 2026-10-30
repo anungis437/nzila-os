@@ -3,7 +3,8 @@ import {
   verifyShopifySignature,
   parseShopifyHeaders,
   processWebhookIdempotent,
-  extractRedemptionIdFromDiscount,
+  resolveShopOrganization,
+  type WebhookOutcome,
 } from '@/lib/services/rewards/webhook-service';
 import {
   markRedemptionOrdered,
@@ -11,8 +12,16 @@ import {
   processRedemptionRefund,
   getRedemptionByOrderId,
   getRedemptionByIdInternal,
+  getAwaitingRedemptionByIdPrefix,
 } from '@/lib/services/rewards/redemption-service';
+import {
+  clientAddress,
+  minimalOrderFacts,
+  parseDiscountReference,
+  receiptSummary,
+} from '@/lib/services/rewards/shopify-redemption-rules';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 import { toCents } from '@/lib/decimal-safe';
 
@@ -21,301 +30,226 @@ import {
   standardErrorResponse,
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
+
+export const dynamic = 'force-dynamic';
+
+const WEBHOOK_ACTOR = 'system:shopify-webhook';
+
 /**
  * Shopify Webhook Handler
- * 
- * Handles all Shopify webhooks for the Recognition & Rewards system.
- * 
+ *
+ * Handles the Shopify webhooks of the Recognition & Rewards system.
+ *
  * Supported Topics:
  * - orders/paid: Mark redemption as ordered when payment confirmed
  * - orders/fulfilled: Mark redemption as fulfilled when order ships
- * - refunds/create: Process credit refund when order refunded
- * 
+ * - refunds/create: Return the refunded share of the credits
+ *
  * Security:
  * - HMAC signature verification (timing-safe)
- * - Idempotency via X-Shopify-Webhook-Id header
- * 
+ * - The shop domain must belong to exactly one organization; every lookup and write runs inside that organization's context
+ * - Idempotency via X-Shopify-Webhook-Id header, recorded only for an outcome that is final
+ *
+ * Shopify retries only on a non-2xx answer, so a failure or an event that cannot be applied yet answers non-2xx. Only an
+ * event that was applied, or that is final and does not concern us, answers 200.
+ *
  * @see docs/recognition/api-contracts.md
  */
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting (using IP address as key for webhooks)
-    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-    const rateLimitResult = await checkRateLimit(
-      `webhook-shopify:${ip}`,
-      RATE_LIMITS.WEBHOOK_CALLS
-    );
+    // The limit is keyed on one normalised address, not the whole forwarded-for string, so lengthening the header mints no new allowance.
+    const address = clientAddress(request.headers.get('x-forwarded-for'), request.headers.get('x-real-ip'));
+    const rateLimitResult = await checkRateLimit(`webhook-shopify:${address}`, RATE_LIMITS.WEBHOOK_CALLS);
 
     if (!rateLimitResult.allowed) {
-      logger.warn("Shopify webhook rate limit exceeded", { ip });
+      logger.warn('Shopify webhook rate limit exceeded', { address });
       return NextResponse.json(
-        { error: "Rate limit exceeded", resetIn: rateLimitResult.resetIn },
-        {
-          status: 429,
-          headers: createRateLimitHeaders(rateLimitResult),
-        }
+        { error: 'Rate limit exceeded', resetIn: rateLimitResult.resetIn },
+        { status: 429, headers: createRateLimitHeaders(rateLimitResult) }
       );
     }
 
-    // 1. Extract raw body for signature verification
+    // 1. Raw body for signature verification
     const rawBody = await request.text();
-    
-    // 2. Parse Shopify headers
-    const headers = parseShopifyHeaders(request.headers);
-    const { topic, webhookId, hmac } = headers || {};
 
-    if (!topic || !webhookId || !hmac) {
-      return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      'Missing required Shopify headers'
-    );
+    // 2. Shopify headers
+    const headers = parseShopifyHeaders(request.headers);
+    const { topic, webhookId, hmac, shopDomain } = headers || {};
+
+    if (!topic || !webhookId || !hmac || !shopDomain) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing required Shopify headers');
     }
 
-    // 3. Verify HMAC signature
+    // 3. HMAC signature
     const webhookSecret = process.env.SHOPIFY_WEBHOOK_SECRET;
     if (!webhookSecret) {
-      return NextResponse.json(
-        { error: 'Webhook secret not configured' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });
     }
 
-    const isValid = verifyShopifySignature(
-      rawBody,
-      hmac,
-      webhookSecret
-    );
-
-    if (!isValid) {
+    if (!verifyShopifySignature(rawBody, hmac, webhookSecret)) {
       logger.warn('Invalid Shopify webhook signature', { topic, webhookId });
-      return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      'Invalid signature'
-    );
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid signature');
     }
 
-    // 4. Parse webhook payload
+    // 4. Payload
     let payload: Record<string, unknown>;
     try {
       payload = JSON.parse(rawBody) as Record<string, unknown>;
     } catch {
       logger.error('Shopify webhook payload is not valid JSON', { topic, webhookId });
-      return standardErrorResponse(
-        ErrorCode.VALIDATION_ERROR,
-        'Invalid payload format'
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid payload format');
+    }
+
+    // 5. The shop must belong to one organization. A signed event from a shop nobody has configured is refused rather than
+    // acknowledged, so a misconfigured integration is visible instead of silently losing paid orders.
+    const organizationId = await resolveShopOrganization(shopDomain);
+    if (!organizationId) {
+      logger.error('[Webhook] Shopify shop is not configured for exactly one organization', { shopDomain, topic, webhookId });
+      return NextResponse.json({ error: 'Shop is not configured' }, { status: 403 });
+    }
+
+    // The signed shop is allowed its own allowance, independent of the address it arrives from.
+    const shopLimit = await checkRateLimit(`webhook-shopify-shop:${shopDomain.toLowerCase()}`, RATE_LIMITS.WEBHOOK_CALLS);
+    if (!shopLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded', resetIn: shopLimit.resetIn },
+        { status: 429, headers: createRateLimitHeaders(shopLimit) }
       );
     }
 
-    // 5. Route by topic with idempotency
-    const result = await processWebhookIdempotent(
-      'shopify',
-      webhookId,
-      topic,
-      payload,
-      async () => {
-        switch (topic) {
-          case 'orders/paid':
-            return await handleOrderPaid(payload);
-          
-          case 'orders/fulfilled':
-            return await handleOrderFulfilled(payload);
-          
-          case 'refunds/create':
-            return await handleRefundCreated(payload);
-          
-          default:
-            logger.warn('[Webhook] Unhandled topic', { topic, webhookId });
-            return { status: 'ignored', reason: 'unsupported_topic' };
+    // 6. Route by topic with idempotency, inside the organization's context (reward_redemptions is fail-closed without one).
+    const result = await withRLSContext({ organizationId, userId: WEBHOOK_ACTOR }, async () =>
+      processWebhookIdempotent(
+        'shopify',
+        webhookId,
+        topic,
+        receiptSummary(topic, shopDomain, payload),
+        async (): Promise<WebhookOutcome> => {
+          switch (topic) {
+            case 'orders/paid':
+              return handleOrderPaid(payload, organizationId);
+            case 'orders/fulfilled':
+              return handleOrderFulfilled(payload, organizationId);
+            case 'refunds/create':
+              return handleRefundCreated(payload, organizationId);
+            default:
+              logger.warn('[Webhook] Unhandled topic', { topic, webhookId });
+              return { status: 'ignored', reason: 'unsupported_topic' };
+          }
         }
-      }
+      )
     );
 
-    // 6. Return success
-    return standardSuccessResponse(
-      { status: 'ok', result }
-    );
+    // An event that cannot be applied yet is not acknowledged: Shopify redelivers it, and by then the order that creates the
+    // redemption has usually been processed.
+    if (result !== 'already_processed' && result.retryable) {
+      logger.warn('[Webhook] Event cannot be applied yet; asking Shopify to redeliver', { topic, webhookId, reason: result.reason });
+      return NextResponse.json({ status: 'retry', reason: result.reason }, { status: 503, headers: { 'Retry-After': '60' } });
+    }
 
+    return standardSuccessResponse({ status: 'ok', result });
   } catch (error) {
+    // A failed event is a failed delivery: a non-2xx lets Shopify redeliver it, and the handlers are idempotent.
     logger.error('[Webhook] Processing error', { error });
-    // Always return 200 to prevent Shopify retries on internal errors
-    return NextResponse.json({ received: true, error: 'Internal processing error' }, { status: 200 });
+    return NextResponse.json({ error: 'Internal processing error' }, { status: 500 });
   }
 }
 
 /**
- * Handle orders/paid webhook
- * 
- * When a Shopify order is paid, mark the redemption as "ordered".
- * This confirms that the member completed checkout successfully.
+ * Handle orders/paid: mark the redemption ordered. The discount code names the redemption; a code issued before the format was
+ * fixed names only its first 12 characters and is resolved inside the shop's organization.
  */
-async function handleOrderPaid(payload: Record<string, unknown>) {
+async function handleOrderPaid(payload: Record<string, unknown>, organizationId: string): Promise<WebhookOutcome> {
   const orderId = String(payload.id);
-  const orderNumber = payload.order_number;
-  const discountCodes = (payload.discount_codes || []) as Array<{ code: string; amount?: string }>;
+  const discountCodes = (Array.isArray(payload.discount_codes) ? payload.discount_codes : []) as Array<{ code?: unknown }>;
 
-  logger.info('[Webhook] orders/paid', { orderId, orderNumber, discountCodes });
+  logger.info('[Webhook] orders/paid', { orderId, orderNumber: payload.order_number });
 
-  // Extract redemption ID from discount code
-  const redemptionId = extractRedemptionIdFromDiscount(discountCodes);
-  
-  if (!redemptionId) {
-    logger.warn('[Webhook] No UnionEyes discount code found', { orderId });
+  const reference = parseDiscountReference(discountCodes);
+  if (!reference) {
+    logger.warn('[Webhook] No UnionEyes discount code on the order', { orderId });
     return { status: 'ignored', reason: 'no_redemption_discount' };
   }
 
-  const redemption = await getRedemptionByIdInternal(redemptionId);
-  if (!redemption) {
-    logger.warn('[Webhook] Redemption not found for discount code', { redemptionId });
+  const redemption = reference.kind === 'id'
+    ? await getRedemptionByIdInternal(reference.id)
+    : await getAwaitingRedemptionByIdPrefix(reference.prefix, organizationId);
+  // The organization context already hides other tenants' rows; the explicit check keeps the rule visible and tested.
+  if (!redemption || redemption.orgId !== organizationId) {
+    logger.warn('[Webhook] Redemption not found for the order', { orderId });
     return { status: 'ignored', reason: 'redemption_not_found' };
   }
 
-  await markRedemptionOrdered(
-    redemptionId,
-    redemption.orgId,
-    orderId,
-    {
-      order_number: orderNumber,
-      total_price: payload.total_price,
-      currency: payload.currency,
-      line_items: (payload.line_items as Array<Record<string, unknown>> | undefined)?.map((item) => ({
-        product_id: item.product_id,
-        variant_id: item.variant_id,
-        title: item.title,
-        quantity: item.quantity,
-        price: item.price,
-      })),
-      customer: {
-        id: (payload.customer as Record<string, unknown> | undefined)?.id,
-        email: (payload.customer as Record<string, unknown> | undefined)?.email,
-        first_name: (payload.customer as Record<string, unknown> | undefined)?.first_name,
-        last_name: (payload.customer as Record<string, unknown> | undefined)?.last_name,
-      },
-      paid_at: payload.created_at,
-    }
-  );
+  // A redelivery of an order already applied is a success, not an error.
+  if (redemption.providerOrderId === orderId && (redemption.status === 'ordered' || redemption.status === 'fulfilled' || redemption.status === 'refunded')) {
+    return { status: 'processed', redemption_id: redemption.id, order_id: orderId, already_applied: true };
+  }
 
-  return { 
-    status: 'processed', 
-    redemption_id: redemptionId,
-    order_id: orderId 
-  };
+  await markRedemptionOrdered(redemption.id, redemption.orgId, orderId, minimalOrderFacts(payload), WEBHOOK_ACTOR);
+
+  return { status: 'processed', redemption_id: redemption.id, order_id: orderId };
 }
 
-/**
- * Handle orders/fulfilled webhook
- * 
- * When a Shopify order is fulfilled (shipped), mark the redemption as "fulfilled".
- * This completes the redemption lifecycle.
- */
-async function handleOrderFulfilled(payload: Record<string, unknown>) {
+/** Handle orders/fulfilled: mark the redemption fulfilled. An order we have not recorded as paid yet is retried, not dropped. */
+async function handleOrderFulfilled(payload: Record<string, unknown>, organizationId: string): Promise<WebhookOutcome> {
   const orderId = String(payload.id);
-  const orderNumber = payload.order_number;
-  const fulfillments = (payload.fulfillments || []) as Array<Record<string, unknown>>;
+  const fulfillments = (Array.isArray(payload.fulfillments) ? payload.fulfillments : []) as Array<Record<string, unknown>>;
 
-  logger.info('[Webhook] orders/fulfilled', { orderId, orderNumber, fulfillments: fulfillments.length });
+  logger.info('[Webhook] orders/fulfilled', { orderId, fulfillments: fulfillments.length });
 
-  // Find redemption by order ID
-  const redemption = await getRedemptionByOrderId(orderId);
-  
+  const redemption = await getRedemptionByOrderId(orderId, organizationId);
   if (!redemption) {
-    logger.warn('[Webhook] Redemption not found for order', { orderId });
-    return { status: 'ignored', reason: 'redemption_not_found' };
+    // The paid event may simply not have been applied yet; it is the one that records the order id.
+    return { status: 'ignored', reason: 'redemption_not_found', retryable: true };
+  }
+  if (redemption.status === 'fulfilled' || redemption.status === 'refunded') {
+    return { status: 'processed', redemption_id: redemption.id, order_id: orderId, already_applied: true };
   }
 
-  // Extract fulfillment details
-  const latestFulfillment = fulfillments[fulfillments.length - 1];
-  const fulfillmentDetails = latestFulfillment ? {
-    fulfillment_id: String(latestFulfillment.id),
-    tracking_company: latestFulfillment.tracking_company,
-    tracking_number: latestFulfillment.tracking_number,
-    tracking_url: latestFulfillment.tracking_url,
-    status: latestFulfillment.status,
-    fulfilled_at: latestFulfillment.created_at,
-  } : undefined;
-
-  // Mark redemption as fulfilled
+  const latest = fulfillments[fulfillments.length - 1];
   await markRedemptionFulfilled(
     redemption.id,
     redemption.orgId,
-    fulfillmentDetails || {}
+    latest ? {
+      fulfillment_id: String(latest.id),
+      tracking_company: latest.tracking_company,
+      tracking_number: latest.tracking_number,
+      tracking_url: latest.tracking_url,
+      status: latest.status,
+      fulfilled_at: latest.created_at,
+    } : {},
+    WEBHOOK_ACTOR
   );
 
-  return { 
-    status: 'processed', 
-    redemption_id: redemption.id,
-    order_id: orderId 
-  };
+  return { status: 'processed', redemption_id: redemption.id, order_id: orderId };
 }
 
-/**
- * Handle refunds/create webhook
- * 
- * When a Shopify order is refunded, return credits to the member's wallet.
- * This ensures members aren&apos;t charged for cancelled/returned orders.
- */
-async function handleRefundCreated(payload: Record<string, unknown>) {
+/** Handle refunds/create: return the share of the credits this refund covers, once per refund. */
+async function handleRefundCreated(payload: Record<string, unknown>, organizationId: string): Promise<WebhookOutcome> {
   const refundId = String(payload.id);
   const orderId = String(payload.order_id);
-  const refundLineItems = (payload.refund_line_items || []) as Array<Record<string, unknown>>;
+  const refundLineItems = (Array.isArray(payload.refund_line_items) ? payload.refund_line_items : []) as Array<Record<string, unknown>>;
 
   logger.info('[Webhook] refunds/create', { refundId, orderId, lineItems: refundLineItems.length });
 
-  // Find redemption by order ID
-  const redemption = await getRedemptionByOrderId(orderId);
-  
+  const redemption = await getRedemptionByOrderId(orderId, organizationId);
   if (!redemption) {
-    logger.warn('[Webhook] Redemption not found for refund', { orderId, refundId });
-    return { status: 'ignored', reason: 'redemption_not_found' };
+    return { status: 'ignored', reason: 'redemption_not_found', retryable: true };
   }
 
-  // Calculate total refund amount (in cents/minor units)
-  const totalRefundCents = refundLineItems.reduce((sum: number, item: Record<string, unknown>) => {
-    return sum + toCents(String(item.subtotal || 0));
-  }, 0);
-  const totalRefund = totalRefundCents / 100;
+  const refundCents = refundLineItems.reduce((sum: number, item: Record<string, unknown>) => sum + toCents(String(item.subtotal || 0)), 0);
 
-  // Process refund (returns credits to wallet)
-  await processRedemptionRefund(
+  const outcome = await processRedemptionRefund(
     redemption.id,
     redemption.orgId,
-    {
-      refund_id: refundId,
-      refund_amount: totalRefund,
-      currency: payload.currency || 'CAD',
-      refund_line_items: refundLineItems.map((item: Record<string, unknown>) => ({
-        line_item_id: item.line_item_id,
-        quantity: item.quantity,
-        subtotal: item.subtotal,
-        total_tax: item.total_tax,
-      })),
-      refunded_at: payload.created_at,
-      note: payload.note,
-    }
+    { refund_id: refundId, refund_cents: refundCents, currency: payload.currency || 'CAD' },
+    WEBHOOK_ACTOR
   );
 
-  return { 
-    status: 'processed', 
+  return {
+    status: 'processed',
     redemption_id: redemption.id,
     refund_id: refundId,
-    credits_refunded: redemption.creditsSpent 
+    credits_returned: outcome.creditsReturned,
   };
 }
-
-/**
- * GET handler - Health check endpoint
- * 
- * Returns 200 OK to verify webhook endpoint is reachable.
- * Shopify may check this during webhook setup.
- */
-export async function GET(_request: NextRequest) {
-  return standardSuccessResponse({
-    status: 'ok',
-    endpoint: 'shopify-webhooks',
-    supported_topics: [
-      'orders/paid',
-      'orders/fulfilled',
-      'refunds/create'
-    ]
-  });
-}
-
