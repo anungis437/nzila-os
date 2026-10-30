@@ -7,7 +7,7 @@ import {
   provincialDataHandling,
   dataSubjectAccessRequests,
 } from "@/db/schema/provincial-privacy-schema";
-import { eq, and, lte, isNull } from "drizzle-orm";
+import { eq, and, lte, isNull, desc } from "drizzle-orm";
 import { organizationMembers } from "@/db/schema/organization-members-schema";
 import { NotificationService } from "@/lib/services/notification-service";
 import { logger } from "@/lib/logger";
@@ -220,24 +220,26 @@ export class ProvincialPrivacyService {
    * Check if user has valid consent for a specific action
    */
   static async hasValidConsent(userId: string, province: Province, consentType: string): Promise<boolean> {
-    const consents = await db
-      .select()
+    // The latest decision (grant OR refusal) governs. Filtering for positive
+    // grants first would silently ignore a newer consentGiven=false record.
+    const [latestConsent] = await db
+      .select({
+        id: provincialConsent.id,
+        consentGiven: provincialConsent.consentGiven,
+        revokedAt: provincialConsent.revokedAt,
+        expiresAt: provincialConsent.expiresAt,
+      })
       .from(provincialConsent)
-      .where(
-        and(
-          eq(provincialConsent.userId, userId),
-          eq(provincialConsent.province, province),
-          eq(provincialConsent.consentType, consentType),
-          eq(provincialConsent.consentGiven, true)
-        )
-      )
-      .orderBy(provincialConsent.createdAt);
+      .where(and(
+        eq(provincialConsent.userId, userId),
+        eq(provincialConsent.province, province),
+        eq(provincialConsent.consentType, consentType),
+      ))
+      .orderBy(desc(provincialConsent.createdAt), desc(provincialConsent.id))
+      .limit(1);
 
-    if (consents.length === 0) return false;
-
-    const latestConsent = consents[consents.length - 1];
-
-    // Check if consent has been revoked
+    if (!latestConsent || latestConsent.consentGiven !== true) return false;
+    // Revocation always defeats a positive grant.
     if (latestConsent.revokedAt) return false;
 
     // Check if consent has expired (Quebec Law 25)

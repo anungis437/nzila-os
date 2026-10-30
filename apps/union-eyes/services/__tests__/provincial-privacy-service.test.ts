@@ -120,18 +120,36 @@ describe('provincial-privacy-service', () => {
       expect(await S.hasValidConsent('u1', 'QC', 'marketing')).toBe(false);
     });
 
+    it('rejects an explicit refusal even if an older positive grant exists', async () => {
+      pushSel([{ id: 'denial-newest', consentGiven: false, revokedAt: null, expiresAt: null }]);
+      expect(await S.hasValidConsent('u1', 'QC', 'marketing')).toBe(false);
+    });
+
+    it('queries the single latest decision without removing consentGiven=false rows', async () => {
+      pushSel([{ id: 'denial-newest', consentGiven: false }]);
+      await S.hasValidConsent('u1', 'QC', 'marketing');
+      const chain = h.db.select.mock.results.at(-1)?.value as Record<string, ReturnType<typeof vi.fn>>;
+      expect(chain.limit).toHaveBeenCalledWith(1);
+      const { readFileSync } = await import('node:fs');
+      const { resolve } = await import('node:path');
+      const source = readFileSync(resolve(__dirname, '../provincial-privacy-service.ts'), 'utf8');
+      const lookup = source.slice(source.indexOf('static async hasValidConsent'), source.indexOf('static async revokeConsent'));
+      expect(lookup).not.toContain('eq(provincialConsent.consentGiven, true)');
+      expect(lookup).toContain('latestConsent.consentGiven !== true');
+    });
+
     it('returns false when the latest consent is revoked', async () => {
-      pushSel([{ revokedAt: new Date() }]);
+      pushSel([{ consentGiven: true, revokedAt: new Date() }]);
       expect(await S.hasValidConsent('u1', 'QC', 'marketing')).toBe(false);
     });
 
     it('returns false when consent has expired', async () => {
-      pushSel([{ revokedAt: null, expiresAt: new Date('2000-01-01') }]);
+      pushSel([{ consentGiven: true, revokedAt: null, expiresAt: new Date('2000-01-01') }]);
       expect(await S.hasValidConsent('u1', 'QC', 'marketing')).toBe(false);
     });
 
     it('returns true for a valid consent', async () => {
-      pushSel([{ revokedAt: null, expiresAt: new Date('2999-01-01') }]);
+      pushSel([{ consentGiven: true, revokedAt: null, expiresAt: new Date('2999-01-01') }]);
       expect(await S.hasValidConsent('u1', 'QC', 'marketing')).toBe(true);
     });
   });
