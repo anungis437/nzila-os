@@ -16,6 +16,7 @@ import {
 
 export const GET = withRoleAuth('admin', async (request, context) => {
   const { userId, organizationId } = context;
+  if (!userId) return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
   try {
     const rateLimitResult = await checkRateLimit(userId, RATE_LIMITS.CLC_OPERATIONS);
