@@ -83,44 +83,16 @@ const GOVERNANCE_TELEMETRY_RESPONSE = {
 
 // ─── Fixture: evidence export contract shape ─────────────────────────────────
 
-const EVIDENCE_EXPORT_RESPONSE = {
+const EVIDENCE_EXPORT_UNAVAILABLE = {
+  app: 'union-eyes',
   org_id: '11111111-1111-4111-8111-111111111111',
-  generated_at: '2025-01-01T00:00:00.000Z',
-  sbom: {
-    app: 'union-eyes',
-    version: '1.0.0',
-    platform: 'nzila-os',
-    db_schema: 'drizzle-managed',
-    auth: 'platform-auth',
-    storage: 'azure-blob',
-    policy_engine: 'nzila-policy-runtime',
-  },
-  policy_checks: {
-    total_evaluations: 450,
-    denied_count: 3,
-    allowed_count: 447,
-    denial_rate_pct: 0.67,
-  },
-  workflow_audit_events: {
-    total_events: 142,
-    unique_actors: 12,
-    event_types: ['case.created', 'case.escalated', 'case.resolved'],
-  },
-  lifecycle_statuses: {
-    submitted: 5,
-    assigned: 3,
-    resolved: 12,
-  },
-  org_isolation: {
-    enforced: true,
-    mechanism: 'row-level org_id filter on all queries',
-    last_audit: '2025-01-01',
-  },
-  pipeline: {
-    evidence_exports_today: 1,
-    avg_export_ms: 210,
-    last_export_at: '2025-01-01T00:00:00.000Z',
-  },
+  status: 'not_attested',
+  verified: false,
+  error: 'VERIFIED_EVIDENCE_UNAVAILABLE',
+  sbom: { status: 'not_attested', artifact: null },
+  policy_checks: { status: 'not_attested', results: null },
+  org_isolation: { status: 'not_attested', results: null },
+  build: { status: 'not_attested', commit: null, timestamp: null },
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -284,75 +256,38 @@ describe('UE Ops - /api/governance/telemetry source implementation contract', ()
 // Evidence export contract tests
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe('UE Ops - /api/evidence/export response contract', () => {
-  it('response carries all top-level procurement fields (EVIDENCE-EXPORT-TOP-LEVEL-FIELDS)', () => {
-    const required = [
-      'org_id',
-      'generated_at',
-      'sbom',
-      'policy_checks',
-      'workflow_audit_events',
-      'lifecycle_statuses',
-      'org_isolation',
-      'pipeline',
-    ] as const
-    for (const field of required) {
-      expect(EVIDENCE_EXPORT_RESPONSE).toHaveProperty(field)
-    }
-  })
-
-  it('sbom declares app, version, auth provider, policy engine (EVIDENCE-EXPORT-SBOM-FIELDS)', () => {
-    expect(EVIDENCE_EXPORT_RESPONSE.sbom).toHaveProperty('app')
-    expect(EVIDENCE_EXPORT_RESPONSE.sbom).toHaveProperty('version')
-    expect(EVIDENCE_EXPORT_RESPONSE.sbom).toHaveProperty('auth')
-    expect(EVIDENCE_EXPORT_RESPONSE.sbom).toHaveProperty('policy_engine')
-  })
-
-  it('policy_checks carries total_evaluations, denied_count, allowed_count, denial_rate_pct (EVIDENCE-EXPORT-POLICY-FIELDS)', () => {
-    expect(typeof EVIDENCE_EXPORT_RESPONSE.policy_checks.total_evaluations).toBe('number')
-    expect(typeof EVIDENCE_EXPORT_RESPONSE.policy_checks.denied_count).toBe('number')
-    expect(typeof EVIDENCE_EXPORT_RESPONSE.policy_checks.allowed_count).toBe('number')
-    expect(typeof EVIDENCE_EXPORT_RESPONSE.policy_checks.denial_rate_pct).toBe('number')
-  })
-
-  it('denied + allowed = total evaluations (EVIDENCE-EXPORT-POLICY-COUNTS-CONSISTENT)', () => {
-    const { total_evaluations, denied_count, allowed_count } = EVIDENCE_EXPORT_RESPONSE.policy_checks
-    expect(denied_count + allowed_count).toBe(total_evaluations)
-  })
-
-  it('org_isolation.enforced is explicitly true (EVIDENCE-EXPORT-ORG-ISOLATION-ENFORCED)', () => {
-    expect(EVIDENCE_EXPORT_RESPONSE.org_isolation.enforced).toBe(true)
-    expect(typeof EVIDENCE_EXPORT_RESPONSE.org_isolation.mechanism).toBe('string')
-    expect(EVIDENCE_EXPORT_RESPONSE.org_isolation.mechanism.length).toBeGreaterThan(0)
-  })
-
-  it('generated_at is an ISO 8601 timestamp (EVIDENCE-EXPORT-TIMESTAMP)', () => {
-    expect(EVIDENCE_EXPORT_RESPONSE.generated_at).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)
-  })
-
-  it('workflow_audit_events.event_types is a non-empty array (EVIDENCE-EXPORT-EVENT-TYPES)', () => {
-    expect(Array.isArray(EVIDENCE_EXPORT_RESPONSE.workflow_audit_events.event_types)).toBe(true)
-    expect(EVIDENCE_EXPORT_RESPONSE.workflow_audit_events.event_types.length).toBeGreaterThan(0)
-  })
-})
-
-describe('UE Ops - /api/evidence/export source implementation contract', () => {
+describe('UE Ops - /api/evidence/export unavailable contract', () => {
   const exportSrc = readRoute('app/api/evidence/export/route.ts')
 
-  it('calls recordEvidenceExport() on each request (EVIDENCE-EXPORT-TELEMETRY-HOOK)', () => {
-    expect(exportSrc).toContain('recordEvidenceExport')
+  it('never asserts unverified evidence as genuine', () => {
+    expect(EVIDENCE_EXPORT_UNAVAILABLE.verified).toBe(false)
+    expect(EVIDENCE_EXPORT_UNAVAILABLE.status).toBe('not_attested')
+    expect(EVIDENCE_EXPORT_UNAVAILABLE.sbom.artifact).toBeNull()
+    expect(EVIDENCE_EXPORT_UNAVAILABLE.policy_checks.results).toBeNull()
+    expect(EVIDENCE_EXPORT_UNAVAILABLE.org_isolation.results).toBeNull()
   })
 
-  it('enforces org_id scoping (EVIDENCE-EXPORT-ORG-SCOPE)', () => {
-    expect(exportSrc).toContain('orgId')
+  it('requires authenticated officer authorization through the canonical API framework', () => {
+    expect(exportSrc).toContain("auth: { minRole: 'officer' }")
+    expect(exportSrc).toContain('requireOrg: true')
   })
 
-  it('requires authentication (EVIDENCE-EXPORT-AUTH-REQUIRED)', () => {
-    expect(exportSrc).toContain('authenticateUser')
+  it('rejects a caller-selected organization different from the verified session', () => {
+    expect(exportSrc).toContain('requestedOrg !== organizationId')
+    expect(exportSrc).toContain('ApiError.forbidden')
   })
 
-  it('response includes org_isolation.enforced=true (EVIDENCE-EXPORT-ORG-ISOLATION-FIELD)', () => {
-    expect(exportSrc).toContain('org_isolation')
-    expect(exportSrc).toContain('enforced: true')
+  it('persists an actor- and organization-scoped audit before refusing the export', () => {
+    expect(exportSrc).toContain('withRLSContext({ organizationId, userId }')
+    expect(exportSrc).toContain('persistAtomicAudit(tx')
+    expect(exportSrc).toContain("action: 'evidence.export.unavailable'")
+  })
+
+  it('returns HTTP 503 with no-store instead of a fabricated successful evidence pack', () => {
+    expect(exportSrc).toContain('status: 503')
+    expect(exportSrc).toContain("'Cache-Control': 'private, no-store'")
+    expect(exportSrc).toContain('VERIFIED_EVIDENCE_UNAVAILABLE')
+    expect(exportSrc).toContain("org_isolation: { status: 'not_attested', results: null }")
+    expect(exportSrc).not.toContain('enforced: true')
   })
 })
