@@ -463,7 +463,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         const url = new URL(request.url);
         const rawPage = url.searchParams.get('page') ?? '1';
         const rawLimit = url.searchParams.get('limit') ?? String(defaultLimit);
-        if (!/^[1-9]\\d*$/.test(rawPage) || !/^[1-9]\\d*$/.test(rawLimit)) {
+        if (!/^[1-9]\d*$/.test(rawPage) || !/^[1-9]\d*$/.test(rawLimit)) {
           throw ApiError.badRequest('Invalid pagination parameters');
         }
         const page = Number(rawPage);
