@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { isAssessmentId } from '@/lib/icra/assessment-id'
 import { eq } from 'drizzle-orm'
 import {
   icraAssessments,
@@ -25,6 +26,7 @@ interface RouteContext {
 
 export async function POST(request: Request, { params }: RouteContext) {
   const { assessmentId } = await params
+  if (!isAssessmentId(assessmentId)) return NextResponse.json({ error: 'Assessment not found' }, { status: 404 })
   // The capability token is the only protection here; slow guessing before any lookup.
   const intake = await guardPublicIntake(request, { bucket: 'capability', readBody: false })
   if (!intake.ok) return intake.response

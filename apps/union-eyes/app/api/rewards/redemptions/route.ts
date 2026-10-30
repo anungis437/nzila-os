@@ -26,11 +26,13 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context) 
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status') || undefined;
-    const limit = Math.min(
-      parseInt(searchParams.get('limit') || '20', 10),
-      100
-    );
-    const offset = parseInt(searchParams.get('offset') || '0', 10);
+    // A non-numeric or negative value is the default, never NaN or a negative offset handed to the query.
+    const boundedInt = (raw: string | null, fallback: number, min: number, max: number) => {
+      const parsed = Number.parseInt(raw ?? '', 10);
+      return Number.isFinite(parsed) ? Math.min(Math.max(parsed, min), max) : fallback;
+    };
+    const limit = boundedInt(searchParams.get('limit'), 20, 1, 100);
+    const offset = boundedInt(searchParams.get('offset'), 0, 0, 1_000_000);
 
     const validStatuses = ['pending', 'ordered', 'fulfilled', 'cancelled', 'refunded'];
     if (status && !validStatuses.includes(status)) {
@@ -49,7 +51,8 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context) 
 
     return NextResponse.json(
       {
-        redemptions: result.redemptions,
+        // The provider's order payload and checkout identifiers are the processor's record, not the member's: they are not returned.
+        redemptions: result.redemptions.map(({ providerPayloadJson: _payload, providerCheckoutId: _checkout, ...redemption }) => redemption),
         pagination: {
           limit,
           offset,

@@ -10,6 +10,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { isAssessmentId } from '@/lib/icra/assessment-id'
 import { z } from 'zod';
 import { and, eq, gt, isNull, or } from 'drizzle-orm';
 import { auth } from '@nzila/platform-auth/entra/server';
@@ -32,6 +33,7 @@ export async function POST(
   { params }: { params: Promise<{ assessmentId: string }> },
 ) {
   const { assessmentId } = await params;
+  if (!isAssessmentId(assessmentId)) return NextResponse.json({ error: 'Assessment not found' }, { status: 404 })
 
   const { userId } = await auth();
   if (!userId) {

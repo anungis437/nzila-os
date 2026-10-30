@@ -14,8 +14,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { clientAddress } from '@/lib/public-intake/guard';
 import { fireAndForgetEvent, hashIp, type IcraEventKind } from '@/lib/icra/observability'
-import { rateLimit } from '@/lib/rate-limit'
+import { checkRateLimit } from '@/lib/rate-limiter'
 
 const ALLOWED_KINDS: ReadonlySet<IcraEventKind> = new Set<IcraEventKind>([
   'assessment_started',
@@ -42,8 +43,14 @@ interface TelemetryBody {
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   // Generous limit — flow emits roughly 1 event per section transition.
-  const rl = rateLimit(req, { maxRequests: 60, windowSeconds: 60 })
-  if (!rl.success) {
+  // Telemetry is best effort: a refusal or an unavailable limiter drops the event silently.
+  const rl = await checkRateLimit(`icra-telemetry:${clientAddress(req)}`, {
+    limit: 60,
+    window: 60,
+    identifier: 'icra-telemetry',
+    failOpen: process.env.NODE_ENV !== 'production',
+  })
+  if (!rl.allowed) {
     return new NextResponse(null, { status: 204 })
   }
 
@@ -86,7 +93,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (entries.length > 0) metadata = Object.fromEntries(entries)
   }
 
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
+  const ip = clientAddress(req)
   fireAndForgetEvent({
     kind,
     sectionId,

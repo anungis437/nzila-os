@@ -13,6 +13,7 @@ import { workbooks } from '@/db/schema/workbook-schema';
 import { generateWorkbookPdf } from '@/lib/workbook-pdf/generateWorkbookPdf';
 import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
 import { logger } from '@/lib/logger';
+import { opaqueRef } from '@/lib/icra/opaque-ref';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -90,7 +91,7 @@ export async function GET(
       },
     });
   } catch (err) {
-    logger.error('[workbook-export] render error', { workbookId, err });
+    logger.error('[workbook-export] render error', { workbookRef: opaqueRef(workbookId), err });
     return NextResponse.json(
       { error: 'Failed to render workbook PDF' },
       { status: 503 },

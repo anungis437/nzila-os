@@ -1,4 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+// The route answers a path value that is not a UUID as not found, so the tests use a real identifier.
+const A1 = '00000000-0000-4000-8000-0000000000a1';
 import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
@@ -72,7 +75,7 @@ describe('icra/[assessmentId]/claim route', () => {
 
     const response = await POST(new NextRequest('http://localhost/api/icra/a1/claim', {
       method: 'POST', body: JSON.stringify({ claimToken: 'valid_token_xxxx' }),
-    }), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    }), { params: Promise.resolve({ assessmentId: A1 }) });
 
     expect(response.status).toBe(401);
   });
@@ -81,7 +84,7 @@ describe('icra/[assessmentId]/claim route', () => {
     const { POST } = await loadRoute();
     const response = await POST(new NextRequest('http://localhost/api/icra/a1/claim', {
       method: 'POST', body: '{bad-json',
-    }), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    }), { params: Promise.resolve({ assessmentId: A1 }) });
 
     expect(response.status).toBe(400);
   });
@@ -90,7 +93,7 @@ describe('icra/[assessmentId]/claim route', () => {
     const { POST } = await loadRoute();
     const response = await POST(new NextRequest('http://localhost/api/icra/a1/claim', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ claimToken: 'short' }),
-    }), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    }), { params: Promise.resolve({ assessmentId: A1 }) });
 
     expect(response.status).toBe(422);
   });
@@ -101,7 +104,7 @@ describe('icra/[assessmentId]/claim route', () => {
 
     const response = await POST(new NextRequest('http://localhost/api/icra/a1/claim', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ claimToken: 'valid_token_xxxx' }),
-    }), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    }), { params: Promise.resolve({ assessmentId: A1 }) });
 
     expect(response.status).toBe(403);
   });
@@ -112,7 +115,7 @@ describe('icra/[assessmentId]/claim route', () => {
 
     const response = await POST(new NextRequest('http://localhost/api/icra/a1/claim', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ claimToken: 'valid_token_xxxx' }),
-    }), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    }), { params: Promise.resolve({ assessmentId: A1 }) });
 
     expect(response.status).toBe(404);
   });
@@ -120,11 +123,11 @@ describe('icra/[assessmentId]/claim route', () => {
   it('returns 409 when assessment is already claimed', async () => {
     const { POST } = await loadRoute();
     m.updateQueue.push([]);
-    m.selectQueue.push([{ id: 'a1', claimToken: 'valid_token_xxxx', claimedAt: new Date(), claimTokenExpiresAt: new Date() }]);
+    m.selectQueue.push([{ id: A1, claimToken: 'valid_token_xxxx', claimedAt: new Date(), claimTokenExpiresAt: new Date() }]);
 
     const response = await POST(new NextRequest('http://localhost/api/icra/a1/claim', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ claimToken: 'valid_token_xxxx' }),
-    }), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    }), { params: Promise.resolve({ assessmentId: A1 }) });
 
     expect(response.status).toBe(409);
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
@@ -133,12 +136,12 @@ describe('icra/[assessmentId]/claim route', () => {
   it('returns 410 when claim token is expired', async () => {
     const { POST } = await loadRoute();
     m.updateQueue.push([]);
-    m.selectQueue.push([{ id: 'a1', claimToken: 'valid_token_xxxx', claimedAt: null, claimTokenExpiresAt: new Date() }]);
+    m.selectQueue.push([{ id: A1, claimToken: 'valid_token_xxxx', claimedAt: null, claimTokenExpiresAt: new Date() }]);
     m.isClaimExpired.mockReturnValueOnce(true);
 
     const response = await POST(new NextRequest('http://localhost/api/icra/a1/claim', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ claimToken: 'valid_token_xxxx' }),
-    }), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    }), { params: Promise.resolve({ assessmentId: A1 }) });
 
     expect(response.status).toBe(410);
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
@@ -146,11 +149,11 @@ describe('icra/[assessmentId]/claim route', () => {
 
   it('claims assessment successfully with the audit on the same transaction', async () => {
     const { POST } = await loadRoute();
-    m.updateQueue.push([{ id: 'a1' }]);
+    m.updateQueue.push([{ id: A1 }]);
 
     const response = await POST(new NextRequest('http://localhost/api/icra/a1/claim', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ claimToken: 'valid_token_xxxx' }),
-    }), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    }), { params: Promise.resolve({ assessmentId: A1 }) });
 
     expect(response.status).toBe(200);
     const json = await response.json();
@@ -164,19 +167,19 @@ describe('icra/[assessmentId]/claim route', () => {
         userId: 'u1',
         action: 'icra.assessment.claim',
         resourceType: 'icra_assessments',
-        resourceId: 'a1',
+        resourceId: A1,
       }),
     );
   });
 
   it('fails the claim when its audit record cannot be written', async () => {
     const { POST } = await loadRoute();
-    m.updateQueue.push([{ id: 'a1' }]);
+    m.updateQueue.push([{ id: A1 }]);
     m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
 
     const response = await POST(new NextRequest('http://localhost/api/icra/a1/claim', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ claimToken: 'valid_token_xxxx' }),
-    }), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    }), { params: Promise.resolve({ assessmentId: A1 }) });
 
     expect(response.status).toBe(500);
   });
@@ -189,7 +192,7 @@ describe('icra/[assessmentId]/claim route', () => {
 
     const response = await POST(new NextRequest('http://localhost/api/icra/a1/claim', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ claimToken: 'valid_token_xxxx' }),
-    }), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    }), { params: Promise.resolve({ assessmentId: A1 }) });
 
     expect(response.status).toBe(500);
     expect(m.logger.error).toHaveBeenCalled();

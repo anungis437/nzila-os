@@ -13,6 +13,7 @@ import { workbookMemoryHolders } from '@/db/schema/workbook-schema';
 import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
 import { auditClaimedWorkbookWrite } from '@/lib/workbook/claimed-write-audit';
 import { logger } from '@/lib/logger';
+import { opaqueRef } from '@/lib/icra/opaque-ref';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -105,7 +106,7 @@ export async function PATCH(
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    logger.error('[workbook-memory-holder:patch] DB error', { workbookId, holderId, err });
+    logger.error('[workbook-memory-holder:patch] DB error', { workbookRef: opaqueRef(workbookId), holderId, err });
     return NextResponse.json({ error: 'Failed to update memory holder' }, { status: 503 });
   }
 }
@@ -155,7 +156,7 @@ export async function DELETE(
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    logger.error('[workbook-memory-holder:delete] DB error', { workbookId, holderId, err });
+    logger.error('[workbook-memory-holder:delete] DB error', { workbookRef: opaqueRef(workbookId), holderId, err });
     return NextResponse.json({ error: 'Failed to delete memory holder' }, { status: 503 });
   }
 }

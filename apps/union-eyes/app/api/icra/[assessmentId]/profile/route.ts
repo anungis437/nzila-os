@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { isAssessmentId } from '@/lib/icra/assessment-id'
 import { eq } from 'drizzle-orm';
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
@@ -14,6 +15,7 @@ interface RouteContext {
 
 export async function GET(request: Request, { params }: RouteContext) {
   const { assessmentId } = await params;
+  if (!isAssessmentId(assessmentId)) return NextResponse.json({ error: 'Assessment not found' }, { status: 404 })
 
   return withSystemContext(async (tx) => {
     const [assessment] = await tx

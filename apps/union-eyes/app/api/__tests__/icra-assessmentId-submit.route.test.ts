@@ -1,4 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+// The route answers a path value that is not a UUID as not found, so the tests use a real identifier.
+const A1 = '00000000-0000-4000-8000-0000000000a1';
 import { createHash } from 'crypto';
 
 const TOKEN = 'test-capability-token';
@@ -78,7 +81,7 @@ describe('icra/[assessmentId]/submit route', () => {
       return fn(tx);
     });
 
-    const response = await POST(req(), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await POST(req(), { params: Promise.resolve({ assessmentId: A1 }) });
     expect(response.status).toBe(404);
   });
 
@@ -99,7 +102,7 @@ describe('icra/[assessmentId]/submit route', () => {
       return fn(tx);
     });
 
-    const response = await POST(req(false), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await POST(req(false), { params: Promise.resolve({ assessmentId: A1 }) });
     expect(response.status).toBe(401);
   });
 
@@ -127,7 +130,7 @@ describe('icra/[assessmentId]/submit route', () => {
       return fn(tx);
     });
 
-    const response = await POST(req(), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await POST(req(), { params: Promise.resolve({ assessmentId: A1 }) });
     expect(response.status).toBe(400);
   });
 
@@ -169,7 +172,7 @@ describe('icra/[assessmentId]/submit route', () => {
       return fn(tx);
     });
 
-    const response = await POST(req(), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await POST(req(), { params: Promise.resolve({ assessmentId: A1 }) });
     const payload = await response.json();
 
     expect(response.status).toBe(200);
@@ -199,7 +202,7 @@ describe('icra/[assessmentId]/submit route', () => {
       return fn(tx);
     });
 
-    const response = await POST(req(), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await POST(req(), { params: Promise.resolve({ assessmentId: A1 }) });
     const payload = await response.json();
 
     expect(response.status).toBe(200);
@@ -226,7 +229,7 @@ describe('icra/[assessmentId]/submit route', () => {
       return fn(tx);
     });
 
-    const response = await POST(req(), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await POST(req(), { params: Promise.resolve({ assessmentId: A1 }) });
     expect(response.status).toBe(409);
   });
 
@@ -234,7 +237,7 @@ describe('icra/[assessmentId]/submit route', () => {
     const { POST } = await loadRoute();
     m.withSystemContext.mockRejectedValueOnce(new Error('db down'));
 
-    const response = await POST(req(), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await POST(req(), { params: Promise.resolve({ assessmentId: A1 }) });
     expect(response.status).toBe(500);
   });
 });

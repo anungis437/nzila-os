@@ -10,6 +10,7 @@ import { db } from '@/db';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { hasMinRole } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS_PER_IP } from '@/lib/rate-limiter';
+import { clientAddress } from '@/lib/public-intake/guard';
 import { logger } from '@/lib/logger';
 import { sanitizeResponsesForPublicCreate } from '@/lib/pilot/responses-authority';
 import { upsertContact, createDeal } from '@/lib/services/crm-service';
@@ -89,9 +90,7 @@ export async function POST(request: NextRequest) {
   // endpoints (see RATE_LIMITS_PER_IP), and fails CLOSED (rejects, not
   // allows) when Redis itself is unavailable, since this route has no other
   // abuse control.
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    || request.headers.get('x-real-ip')
-    || 'unknown';
+  const ip = clientAddress(request);
   const rl = await checkRateLimit(ip, RATE_LIMITS_PER_IP.PILOT_APPLY);
   if (!rl.allowed) {
     return NextResponse.json(

@@ -72,6 +72,8 @@ beforeAll(async () => {
   const created = await createTableDatabase([organizations, organizationMembers], ['CREATE TABLE grievances (organization_id uuid, status text, created_at timestamptz default now(), resolved_at timestamptz, closed_at timestamptz)']);
   pg = created.pg;
   state.db = created.db;
+  // The table helper creates columns only; the production uniqueness of a user on a roster is a separate index.
+  await pg.exec('CREATE UNIQUE INDEX unique_org_membership ON organization_members (organization_id, user_id)');
 });
 
 afterAll(async () => { await pg.close(); });
@@ -321,6 +323,14 @@ describe('roster', () => {
     const { rows } = await pg.query('SELECT role, status FROM organization_members WHERE user_id = $1', ['new-user']);
     expect(rows).toEqual([{ role: 'member', status: 'pending' }]);
     expect(state.audit).toContainEqual(expect.objectContaining({ action: 'membership.create', details: expect.objectContaining({ status: 'pending' }) }));
+  });
+
+  // DEF-0B9-ORG-ROSTER-POST-DUPLICATE-USER-ID-AND-INVALID-JSON-HANDLING-LEAVES-UNHANDLED-ERRORS
+  it('answers 409, not a server error, when the user is already on the roster, and keeps the one row', async () => {
+    expect((await rosterPost('u-steward-a', { ...candidate, role: 'member' })).status).toBe(201);
+    const again = await rosterPost('u-steward-a', { ...candidate, role: 'member' });
+    expect(again.status).toBe(409);
+    expect((await pg.query('SELECT 1 FROM organization_members WHERE user_id = $1', ['new-user'])).rows).toHaveLength(1);
   });
 
   it('no caller may grant a role at or above their own, and nobody grants admin through this route', async () => {

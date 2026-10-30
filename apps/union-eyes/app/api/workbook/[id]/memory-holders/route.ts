@@ -23,6 +23,7 @@ import { runStewardshipCartography } from '@/lib/workbook/engines/stewardshipCar
 import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
 import { auditClaimedWorkbookWrite } from '@/lib/workbook/claimed-write-audit';
 import { logger } from '@/lib/logger';
+import { opaqueRef } from '@/lib/icra/opaque-ref';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -86,7 +87,7 @@ export async function GET(
     }
     return NextResponse.json(access.value);
   } catch (err) {
-    logger.error('[workbook-memory-holders:get] DB error', { workbookId, err });
+    logger.error('[workbook-memory-holders:get] DB error', { workbookRef: opaqueRef(workbookId), err });
     return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
   }
 }
@@ -152,7 +153,7 @@ export async function POST(
 
     return NextResponse.json(access.value, { status: 201 });
   } catch (err) {
-    logger.error('[workbook-memory-holders:post] DB error', { workbookId, err });
+    logger.error('[workbook-memory-holders:post] DB error', { workbookRef: opaqueRef(workbookId), err });
     return NextResponse.json({ error: 'Failed to add memory holder' }, { status: 503 });
   }
 }

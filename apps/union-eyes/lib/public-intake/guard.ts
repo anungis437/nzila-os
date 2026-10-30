@@ -21,10 +21,19 @@ export type PublicIntakeBucket = keyof typeof PUBLIC_INTAKE_BUCKETS
 
 export const PUBLIC_INTAKE_MAX_BODY_BYTES = 16 * 1024
 
+/**
+ * The client address a limiter may key on. The edge-set headers win. Otherwise the forwarded-for list is read from the right,
+ * at the number of trusted proxy hops (TRUSTED_PROXY_HOPS, default 1): the first entry is whatever the client typed, so keying on
+ * it let a caller pick a fresh bucket on every request.
+ */
 export function clientAddress(request: Request): string {
   const direct = request.headers.get('cf-connecting-ip') ?? request.headers.get('x-real-ip')
   if (direct) return direct
-  return request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+  const chain = (request.headers.get('x-forwarded-for') ?? '').split(',').map((part) => part.trim()).filter(Boolean)
+  if (chain.length === 0) return 'unknown'
+  const parsed = Number(process.env.TRUSTED_PROXY_HOPS ?? '1')
+  const hops = Number.isInteger(parsed) && parsed >= 1 ? parsed : 1
+  return chain[Math.max(0, chain.length - hops)]
 }
 
 export type PublicIntake = { ok: true; json: unknown } | { ok: false; response: NextResponse }

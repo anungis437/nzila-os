@@ -11,9 +11,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { clientAddress } from '@/lib/public-intake/guard';
 import type { Answer, ConsentRecord } from '@/lib/icra/types'
 import { buildAnswer, scoreAssessment } from '@/lib/icra/scoring'
-import { rateLimit } from '@/lib/rate-limit'
+import { checkRateLimit } from '@/lib/rate-limiter'
 import { fireAndForgetEvent, hashIp } from '@/lib/icra/observability'
 import { verifyTurnstileToken } from '@/lib/icra/turnstile'
 import { DOCTRINE_VERSION } from '@/lib/icra/copy'
@@ -108,14 +109,19 @@ function validateBody(body: unknown): body is SubmitBody {
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
+  const ip = clientAddress(req)
   const ipHash = hashIp(ip)
 
-  const rl = rateLimit(req, { maxRequests: 3, windowSeconds: 60 * 60 })
-  if (!rl.success) {
+  const rl = await checkRateLimit(`icra-submit:${ip}`, {
+    limit: 3,
+    window: 60 * 60,
+    identifier: 'icra-submit',
+    failOpen: process.env.NODE_ENV !== 'production',
+  })
+  if (!rl.allowed) {
     return NextResponse.json(
-      { error: 'Too many submissions. Please try again later.' },
-      { status: 429 },
+      { error: rl.error ? 'Submissions are temporarily unavailable.' : 'Too many submissions. Please try again later.' },
+      { status: rl.error ? 503 : 429 },
     )
   }
 

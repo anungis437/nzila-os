@@ -10,6 +10,15 @@ import { NextResponse } from 'next/server'
 import { getAllQueueStats, getFailedJobs } from '@/lib/job-queue'
 import { requireApiAuth, requireSystemAdmin } from '@/lib/api-auth-guard'
 import { logger } from '@/lib/logger'
+import { timingSafeEqual } from 'node:crypto'
+
+// A shared secret is compared in constant time, so response timing does not reveal how much of a guess was right.
+function sameSecret(presented: string | null, expected: string): boolean {
+  if (!presented) return false
+  const a = Buffer.from(presented)
+  const b = Buffer.from(expected)
+  return a.length === b.length && timingSafeEqual(a, b)
+}
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +27,7 @@ export async function GET(req: Request) {
     // Queue counts and failed task names are platform-wide operational data, not an organization's: the control plane (service key)
     // or a platform administrator may read them, and a signed-in member may not.
     const svcKey = process.env.AI_SERVICE_KEY
-    const isServiceRequest = !!svcKey && req.headers.get('x-service-key') === svcKey
+    const isServiceRequest = !!svcKey && sameSecret(req.headers.get('x-service-key'), svcKey)
     if (!isServiceRequest) {
       try {
         await requireApiAuth()

@@ -125,7 +125,14 @@ export async function POST(req: NextRequest, { params }: Params) {
   }
   const status = 'pending' as const;
 
-  const [created] = await withRLSContext({ organizationId: id }, async (tx) => {
+  // A user already on the roster (in any status) is a conflict the caller can act on, not a database error.
+  const isUniqueViolation = (error: unknown) => {
+    const code = (error as { code?: string; cause?: { code?: string } } | null);
+    return code?.code === '23505' || code?.cause?.code === '23505';
+  };
+  let created: Array<typeof organizationMembers.$inferSelect>;
+  try {
+    created = await withRLSContext({ organizationId: id }, async (tx) => {
     const inserted = await tx
       .insert(organizationMembers)
       .values({
@@ -151,6 +158,10 @@ export async function POST(req: NextRequest, { params }: Params) {
     });
     return inserted;
   });
+  } catch (error) {
+    if (isUniqueViolation(error)) return NextResponse.json({ error: 'This user is already a member of the organization' }, { status: 409 });
+    throw error;
+  }
 
   return NextResponse.json({ data: created }, { status: 201 });
 }

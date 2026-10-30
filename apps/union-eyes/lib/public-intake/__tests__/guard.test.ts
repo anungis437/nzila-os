@@ -22,8 +22,17 @@ describe('public intake guard', () => {
 
   it('keys the bucket on the client address, preferring the edge-set header', async () => {
     expect(clientAddress(post('{}', { 'cf-connecting-ip': '1.1.1.1', 'x-forwarded-for': '2.2.2.2' }))).toBe('1.1.1.1')
-    expect(clientAddress(post('{}', { 'x-forwarded-for': '2.2.2.2, 3.3.3.3' }))).toBe('2.2.2.2')
     expect(clientAddress(post('{}'))).toBe('unknown')
+  })
+
+  // DEF-0B8-ICRA-RATE-LIMITS-PER-PROCESS-AND-KEYED-ON-REQUEST-HEADER-ADDRESS
+  // Replaced: this test expected the first (client-typed) forwarded-for entry.
+  it('reads the forwarded-for list from the right, so a client-typed first entry does not choose the bucket', async () => {
+    expect(clientAddress(post('{}', { 'x-forwarded-for': '9.9.9.9, 2.2.2.2' }))).toBe('2.2.2.2')
+    expect(clientAddress(post('{}', { 'x-forwarded-for': '1.2.3.4' }))).toBe('1.2.3.4')
+    vi.stubEnv('TRUSTED_PROXY_HOPS', '2')
+    expect(clientAddress(post('{}', { 'x-forwarded-for': '9.9.9.9, 2.2.2.2, 3.3.3.3' }))).toBe('2.2.2.2')
+    vi.unstubAllEnvs()
   })
 
   it('answers 429 over the limit, and never reads the body', async () => {

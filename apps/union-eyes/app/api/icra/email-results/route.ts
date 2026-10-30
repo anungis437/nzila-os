@@ -29,6 +29,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { clientAddress } from '@/lib/public-intake/guard';
 import { createHash } from 'crypto'
 import { eq } from 'drizzle-orm'
 import { icraAssessments } from '@/db/schema/icra-schema'
@@ -38,7 +39,7 @@ import {
   checkCapability,
   capabilityDenialStatus,
 } from '@/lib/icra/assessment-capability'
-import { rateLimit } from '@/lib/rate-limit'
+import { checkRateLimit } from '@/lib/rate-limiter'
 import { sendEmail, isValidEmail } from '@/lib/email-service'
 import { fireAndForgetEvent, hashIp } from '@/lib/icra/observability'
 import { logger } from '@/lib/logger'
@@ -47,6 +48,7 @@ interface RequestBody {
   assessmentId?: any
   email?: any
   locale?: any
+  acknowledgeLinkAccess?: any
 }
 
 const COPY = {
@@ -71,14 +73,20 @@ const COPY = {
 } as const
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
+  const ip = clientAddress(req)
   const ipHash = hashIp(ip)
 
-  const rl = rateLimit(req, { maxRequests: 5, windowSeconds: 60 * 60 })
-  if (!rl.success) {
+  // The shared, durable limiter: a per-process counter let every instance and restart start again from zero.
+  const rl = await checkRateLimit(`icra-email-results:${ip}`, {
+    limit: 5,
+    window: 60 * 60,
+    identifier: 'icra-email-results',
+    failOpen: process.env.NODE_ENV !== 'production',
+  })
+  if (!rl.allowed) {
     return NextResponse.json(
-      { error: 'Too many email requests. Please try again later.' },
-      { status: 429 },
+      { error: rl.error ? 'Email sending is temporarily unavailable.' : 'Too many email requests. Please try again later.' },
+      { status: rl.error ? 503 : 429 },
     )
   }
 
@@ -100,6 +108,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
   if (!isValidEmail(email)) {
     return NextResponse.json({ error: 'Invalid email address.' }, { status: 400 })
+  }
+  // The link carries the access capability, so mailing it to a typed address is a disclosure the respondent must decide on.
+  if (body.acknowledgeLinkAccess !== true) {
+    return NextResponse.json(
+      { error: 'Confirm that anyone with the link can open the results before it is sent.', code: 'LINK_ACCESS_ACKNOWLEDGEMENT_REQUIRED' },
+      { status: 400 },
+    )
   }
 
   // Confirm the assessment exists AND the caller presents a currently valid

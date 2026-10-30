@@ -65,4 +65,21 @@ describe('queue status route', () => {
     expect(body.availability).toBe('error')
     expect(body.queue).toBeNull()
   })
+
+  // DEF-0B12-PLT-QUEUE-STATUS-SERVICE-KEY-IS-THE-SHARED-AI-KEY-COMPARED-WITH-A-PLAIN-EQUALITY
+  it('accepts the control-plane service key, and refuses a wrong or different-length key without the admin path', async () => {
+    process.env.AI_SERVICE_KEY = 'service-key-value'
+    process.env.DJANGO_API_URL = 'https://django.local'
+    mocks.getAllQueueStats.mockResolvedValue([])
+    mocks.getFailedJobs.mockResolvedValue([])
+    mocks.requireApiAuth.mockRejectedValue(new Error('no session'))
+
+    const ok = await GET(new Request('http://localhost/api/union-eyes/queue-status', { headers: { 'x-service-key': 'service-key-value' } }))
+    expect(ok.status).toBe(200)
+    for (const wrong of ['service-key-valuX', 'short', '']) {
+      const refused = await GET(new Request('http://localhost/api/union-eyes/queue-status', { headers: { 'x-service-key': wrong } }))
+      expect(refused.status).toBe(401)
+    }
+    delete process.env.AI_SERVICE_KEY
+  })
 })

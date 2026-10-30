@@ -12,6 +12,7 @@ import { withSystemContext } from '@/lib/db/with-rls-context';
 import { workbooks, workbookModules, WORKBOOK_MODULE_IDS } from '@/db/schema/workbook-schema';
 import { logger } from '@/lib/logger';
 import { guardPublicIntake } from '@/lib/public-intake/guard';
+import { opaqueRef } from '@/lib/icra/opaque-ref';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -87,7 +88,7 @@ export async function POST(request: NextRequest) {
     if (!wb) {
       return NextResponse.json({ error: 'Failed to create workbook' }, { status: 500 });
     }
-    logger.info('[workbook-start] Workbook created', { workbookId: wb.id, locale });
+    logger.info('[workbook-start] Workbook created', { workbookRef: opaqueRef(wb.id), locale });
 
     return NextResponse.json({ workbookId: wb.id });
   } catch (err) {

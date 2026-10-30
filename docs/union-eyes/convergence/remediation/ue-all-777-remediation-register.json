@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 272,
-    "engineeringRemaining": 505,
+    "engineeringCorrected": 283,
+    "engineeringRemaining": 494,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 39
+    "engineeringPartial": 42
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -5405,9 +5405,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
+        "path": "apps/union-eyes/app/api/debug/user-role/route.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "The debug route answers 501 and returns no roster rows (batch B09), pinned by the facade contract test.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-SYS-RESEND-UNMATCHED-EVENTS-ACKNOWLEDGED-AND-DROPPED",
@@ -8610,9 +8617,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
+        "path": "apps/union-eyes/lib/public-intake/guard.ts; apps/union-eyes/lib/public-intake/__tests__/guard.test.ts; apps/union-eyes/app/api/icra/[assessmentId]/answer/route.ts; apps/union-eyes/app/api/icra/[assessmentId]/capability/exchange/route.ts; apps/union-eyes/app/api/icra/email-results/route.ts; apps/union-eyes/app/api/icra/submit/route.ts; apps/union-eyes/app/api/icra/telemetry/route.ts; apps/union-eyes/app/api/icra/results/[id]/route.ts; apps/union-eyes/lib/api/__tests__/f08-public-limiters.contract.test.ts",
+        "explanation": "Every ICRA limiter now uses the shared (Redis) limiter, failing closed in production, and keys on one trusted client address: the edge header, else the forwarded-for entry at the configured number of trusted hops from the right (TRUSTED_PROXY_HOPS, default 1), never the client-typed first entry. A ratchet fails if a public route imports the per-process limiter. Test disclosure: the guard test that expected the leftmost forwarded-for entry was replaced, the exchange 21-call test was replaced by two limiter tests, and the answer, submit, results and telemetry tests now mock the shared limiter.",
+        "remaining": "x-real-ip is still trusted when present, which is correct only behind a platform that overwrites it; the deployment must be configured so.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-ICRA-PUBLIC-WRITES-HAVE-NO-BOT-CHALLENGE-AND-TURNSTILE-IS-OPTIONAL",
@@ -8712,9 +8727,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
+        "path": "apps/union-eyes/app/api/icra/email-results/route.ts; apps/union-eyes/components/icra/EmailResultsCard.tsx; apps/union-eyes/app/api/__tests__/icra-email-results.route.test.ts",
+        "explanation": "The link is mailed only after the respondent acknowledges that anyone holding it can open the results (a required checkbox in English and French; the route answers 400 without acknowledgeLinkAccess), on a durable rate limit. The capability, the ownership proof and the no-storage rule are unchanged.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-ICRA-EVENT-SINK-WRITES-A-TABLE-NO-SCHEMA-DEFINES-AND-SWALLOWS-FAILURE",
@@ -8829,9 +8851,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
+        "path": "apps/union-eyes/lib/icra/assessment-id.ts; apps/union-eyes/app/api/icra/[assessmentId]/answer/route.ts; apps/union-eyes/app/api/__tests__/icra-assessmentId-answer.route.test.ts; apps/union-eyes/app/api/__tests__/icra-capability-exchange.route.test.ts",
+        "explanation": "A path value that is not a UUID is a 404 in the answer, claim, profile, submit and exchange routes before any limiter or query; an answer value the question cannot take, or a note the deployment forbids, is a 400 and touches no row. Test disclosure: the ICRA route tests now use a real UUID where they used the string a1.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-ICRA-CHECKOUT-REDIRECT-DEFAULTS-TO-LOCALHOST-AND-PRICE-MAY-DIFFER-FROM-DISPLAYED",
@@ -10894,9 +10923,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
+        "path": "apps/union-eyes/app/api/ocra/email-results/route.ts; apps/union-eyes/app/api/icra/email-results/route.ts; apps/union-eyes/app/api/__tests__/ocra-aliases.route.test.ts",
+        "explanation": "The OCRA path re-exports the ICRA route, so it carries the same acknowledgement requirement and limiter.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ASM-PEER-BENCHMARKS-AND-CLAUSE-SUGGESTIONS-TAKE-THE-TARGET-ORGANIZATION-FROM-THE-REQUEST-AND-NEVER-COMPARE-IT-TO-THE-SESSION",
@@ -11491,9 +11527,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
+        "path": "apps/union-eyes/app/api/organizations/[id]/members/route.ts; apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "explanation": "A user already on the roster is a 409 with the one row kept, proven on real SQL against the unique membership index; invalid JSON was already a 400.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ORG-DIRECTORY-PROJECTION-FILLS-MISSING-FIELDS-WITH-CANNED-DEPARTMENT-POSITION-AND-ZERO-SENIORITY",
@@ -12783,9 +12826,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
+        "path": "apps/union-eyes/app/api/pilot/apply/route.ts; apps/union-eyes/lib/public-intake/guard.ts; apps/union-eyes/lib/api/__tests__/f08-public-limiters.contract.test.ts",
+        "explanation": "The pilot application limiter keys on the trusted client address instead of the first forwarded-for value.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-PIL-PUBLIC-APPLICATION-SENDS-THE-TYPED-CONTACT-TO-HUBSPOT-WITH-NO-PROOF-OF-THE-ADDRESS-AND-NO-CONSENT-DECISION",
@@ -14316,9 +14366,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
+        "path": "apps/union-eyes/app/api/rewards/redemptions/route.ts; apps/union-eyes/app/api/__tests__/rewards-redemptions-list.route.test.ts",
+        "explanation": "The list omits the provider payload and checkout identifier, and a non-numeric or negative page request becomes the bounded default instead of NaN.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-PRP-REDEMPTIONS-POST-IS-NAMED-FOR-INITIATION-BUT-CANCELS-AND-DISCARDS-THE-VALIDATED-BODY",
@@ -15969,9 +16026,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
+        "path": "apps/union-eyes/app/api/testimonials/[id]/route.ts; apps/union-eyes/app/api/__tests__/wave1-route-floors.test.ts",
+        "explanation": "The unscoped draft item is read and written only at the platform content-manager floor, so a member cannot fetch an unpublished testimonial by id (upstream's change, existing floor test).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-CRUD-TESTIMONIAL-APPROVAL-COMPONENT-SENDS-FIELDS-THE-TABLE-DOES-NOT-HAVE",
@@ -16494,9 +16558,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
+        "path": "apps/union-eyes/app/api/union-eyes/queue-status/route.ts; apps/union-eyes/app/api/__tests__/queue-status.route.test.ts",
+        "explanation": "The service key is compared in constant time; a wrong, short or empty key falls to the platform-administrator path.",
+        "remaining": "The control plane still authenticates with the shared AI service key rather than a key dedicated to queue status.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-PLT-TRIAGE-GRANT-APPLIES-THE-CASE-ELIGIBILITY-TEST-TO-A-MESSAGES-DESIGNATION",
@@ -16763,9 +16835,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
+        "path": "apps/union-eyes/lib/public-intake/guard.ts; apps/union-eyes/lib/public-intake/__tests__/guard.test.ts",
+        "explanation": "The workbook start and checkout buckets key on the trusted address (they use the shared guard).",
+        "remaining": "There is still no bot challenge on workbook start or checkout.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-WBK-CHECKOUT-READS-THE-USER-OWNED-WORKBOOKS-TABLE-OUTSIDE-ANY-DATABASE-CONTEXT",
@@ -16814,9 +16894,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
+        "path": "apps/union-eyes/app/api/workbook/checkout/route.ts; apps/union-eyes/app/api/__tests__/workbook-checkout.route.test.ts",
+        "explanation": "Production refuses to open a session without NEXT_PUBLIC_APP_URL (503) and the session is created with an idempotency key per workbook, tier and 30-minute window, so a repeat reuses it.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-WBK-CLAIM-HAS-NO-RATE-LIMIT-AND-READS-AN-UNCAPPED-BODY",
@@ -16831,9 +16918,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
+        "path": "apps/union-eyes/app/api/workbook/[id]/claim/route.ts; apps/union-eyes/app/api/__tests__/workbook-id-claim.route.test.ts",
+        "explanation": "The claim runs through the public-intake guard: rate limited (429, or 503 when the limiter is down in production) and body capped (413) before it is parsed.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-WBK-EXPORT-STREAMS-THE-IDENTITY-LINKED-CARRIER-REGISTER-WITH-NO-AUDIT-RECORD",
@@ -16865,9 +16959,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
+        "path": "apps/union-eyes/lib/icra/opaque-ref.ts; apps/union-eyes/app/api/workbook/checkout/route.ts; apps/union-eyes/app/api/workbook/[id]/claim/route.ts; apps/union-eyes/app/api/workbook/[id]/export/route.ts; apps/union-eyes/app/api/workbook/start/route.ts; apps/union-eyes/app/api/__tests__/workbook-id-claim.route.test.ts; apps/union-eyes/app/api/__tests__/workbook-checkout.route.test.ts",
+        "explanation": "Workbook routes log a one-way 12-character reference of the identifier, never the identifier, which acts as a capability. Test disclosure: the claim test expectations for the two log calls changed to the reference.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0C1-REV-REVIEW-ROWS-ARE-PROTECTED-BY-AN-ORGANIZATION-ONLY-RLS-POLICY-SO-ADVERSE-PARTY-COMPLAINANT-AND-PRIVILEGE-CONFIDENTIALITY-IS-APPLICATION-CODE-ONLY",

@@ -24,6 +24,7 @@ import { WORKBOOK_TIERS } from '@/lib/icra/tiers';
 import { getStripeClient } from '@nzila/payments-stripe';
 import { logger } from '@/lib/logger';
 import { guardPublicIntake } from '@/lib/public-intake/guard';
+import { opaqueRef } from '@/lib/icra/opaque-ref';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -33,6 +34,7 @@ const bodySchema = z.object({
 });
 
 const SELF_GUIDED_TIER_ID = 'workbook_self_guided' as const;
+const CHECKOUT_REUSE_WINDOW_MS = 30 * 60 * 1000;
 
 export async function POST(request: NextRequest) {
   const intake = await guardPublicIntake(request, { bucket: 'checkout' });
@@ -62,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
     existingTierId = row.reportTierId ?? null;
   } catch (err) {
-    logger.error('[workbook-checkout] DB lookup failed', { workbookId, err });
+    logger.error('[workbook-checkout] DB lookup failed', { workbookRef: opaqueRef(workbookId), err });
     return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
   }
 
@@ -79,8 +81,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Tier not available for self-serve checkout' }, { status: 400 });
   }
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? 'http://localhost:3000';
+  // A payment redirect to localhost would strand the buyer after paying, so production refuses to open a session without a public base URL.
+  const configuredBase = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '');
+  if (!configuredBase && process.env.NODE_ENV === 'production') {
+    logger.error('[workbook-checkout] NEXT_PUBLIC_APP_URL is not configured', { workbookRef: opaqueRef(workbookId) });
+    return NextResponse.json({ error: 'Checkout is temporarily unavailable' }, { status: 503 });
+  }
+  const baseUrl = configuredBase ?? 'http://localhost:3000';
   const successUrl = `${baseUrl}/workbook/${workbookId}?tier_unlocked=${SELF_GUIDED_TIER_ID}`;
   const cancelUrl = `${baseUrl}/workbook/${workbookId}`;
 
@@ -112,6 +119,9 @@ export async function POST(request: NextRequest) {
         product: 'workbook',
       },
       customer_creation: 'if_required',
+    }, {
+      // A repeated request in the same window gets the session already opened instead of a new one.
+      idempotencyKey: `workbook-checkout:${workbookId}:${SELF_GUIDED_TIER_ID}:${Math.floor(Date.now() / CHECKOUT_REUSE_WINDOW_MS)}`,
     });
 
     if (!session.url) {
@@ -119,14 +129,14 @@ export async function POST(request: NextRequest) {
     }
 
     logger.info('[workbook-checkout] Checkout session created', {
-      workbookId,
+      workbookRef: opaqueRef(workbookId),
       tierId: SELF_GUIDED_TIER_ID,
       sessionId: session.id,
     });
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
-    logger.error('[workbook-checkout] Stripe session creation failed', { workbookId, err });
+    logger.error('[workbook-checkout] Stripe session creation failed', { workbookRef: opaqueRef(workbookId), err });
     return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 });
   }
 }
