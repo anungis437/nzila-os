@@ -59,6 +59,9 @@ export const POST = withOrganizationAuth(async (request, context, params?: SyncR
     }
 
     const { organizationId, userId } = context
+    if (!organizationId || !userId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'An authenticated calendar owner is required')
+    }
     const { localCalendarId, externalCalendarId, mode, localEventId, since } = parsed.data
 
     const [connection] = await db
