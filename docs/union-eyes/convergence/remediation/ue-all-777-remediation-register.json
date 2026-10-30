@@ -76,7 +76,7 @@
     "note": "Milestones and evidence are transcribed as prior claims; this run has not independently re-executed those proofs."
   },
   "lastInspectedBranch": "agents/ue-cursor-final-closure",
-  "lastInspectedCommit": "bce9b61c62a1c363d03af70110809843ae30ffad",
+  "lastInspectedCommit": "16d7731927f8aa1b3de7562d4bbb701ce9180cf4",
   "summary": {
     "allRecordedDefects": 777,
     "bySeverity": {
@@ -86,7 +86,7 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 8,
+    "withCurrentRunSourceOrRegressionWork": 9,
     "closed": 0,
     "overallGO": false
   },
@@ -215,6 +215,10 @@
     {
       "sha": "bce9b61c62a1c363d03af70110809843ae30ffad",
       "description": "Replace fabricated weekly-summary AI invocation/confidence/impact with explicit deterministic aggregation and regression tests; leave human triage pending."
+    },
+    {
+      "sha": "16d7731927f8aa1b3de7562d4bbb701ce9180cf4",
+      "description": "Correct workers-compensation vs arbitration deadline domain, fail closed on legal compliance claims and add route regressions."
     }
   ],
   "records": [
@@ -7870,8 +7874,24 @@
       "title": "The jurisdiction rules route serves, for every jurisdiction that has a workers compensation board entry, a rule named WCB Claim Filing Deadline under the category arbitration_deadline whose deadline_days is the claimDeadlineDays constant, and that constant is documented in its own notes as the period within which the employer must report an injury (Alberta 72 hours stored as 72 in a field named days, Saskatchewan and Manitoba 5 business days, New Brunswick 3 days) while getClaimDeadlineDays describes it as calendar days; the fallback of 30 can never apply because the function always returns a number, and the ComplianceChecker component reads the first arbitration_deadline rule and renders the arbitration scheduling gap as compliant or violation against that number.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/jurisdiction-rules/route.ts",
+          "apps/union-eyes/app/api/compliance/validate/route.ts",
+          "apps/union-eyes/components/jurisdiction/compliance-checker.tsx"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/compliance-validate.route.test.ts",
+          "apps/union-eyes/app/api/__tests__/jurisdiction-rules-deadline.route.test.ts"
+        ],
+        "commits": [
+          "16d7731927f8aa1b3de7562d4bbb701ce9180cf4"
+        ],
+        "repair": "Separated workers-compensation board reference from arbitration deadlines; removed unverified WCB days and default 30-day arbitration deadline; server and client fallback now return informational verification-required outcome, not fabricated compliant/violation determinations.",
+        "limits": "Not a jurisdictional rulepack or legal advice. Statutory deadlines require counsel-validated rules, versioned authority and runtime/browser verification. Source and tests unverified."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
     },
@@ -14302,6 +14322,19 @@
     {
       "inspectedSha": "bce9b61c62a1c363d03af70110809843ae30ffad",
       "evidence": "Weekly summary fabricated AI claim patched with regression coverage; new exact-SHA CI and runtime not yet evaluated; no independent qualification.",
+      "source": "PATCHED",
+      "unit": "PENDING_EXACT_SHA",
+      "contract": "PENDING_EXACT_SHA",
+      "native": "PENDING_EXACT_SHA",
+      "security": "PENDING_EXACT_SHA",
+      "httpBrowser": "PENDING_EXACT_SHA",
+      "appFloor": "PENDING_EXACT_SHA",
+      "governance": "PENDING_EXACT_SHA",
+      "go": "NO_GO"
+    },
+    {
+      "inspectedSha": "16d7731927f8aa1b3de7562d4bbb701ce9180cf4",
+      "evidence": "WCB/arbitration source and unit regressions committed; exact-SHA CI pending. Previous weekly-summary patch ca6b9ee: App Floor and governance passed; full Vitest, native PG15/16, security and HTTP/browser still in progress when inspected. No independent legal or institutional validation.",
       "source": "PATCHED",
       "unit": "PENDING_EXACT_SHA",
       "contract": "PENDING_EXACT_SHA",
