@@ -98,3 +98,6 @@
 /scripts/release-attestation.ts @nzila/security @nzila/platform
 
 /scripts/release/verify-production-approval.mjs @nzila/security @nzila/platform
+
+/packages/tool-fabric/src/ledger-store.ts @nzila/platform @nzila/security
+/packages/tool-fabric/src/ledger.ts @nzila/platform @nzila/security

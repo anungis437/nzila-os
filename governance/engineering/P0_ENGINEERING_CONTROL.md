@@ -209,3 +209,12 @@ or replayed as fresh proof. Negative regressions cover these boundaries.
 These checks do **not** implement durable host trust, policy revocation,
 identity authentication or independently administered audit persistence.
 Issue #1037 remains a blocker, and no broker/installer capability is opened.
+
+## Tool trust rollback protection — Issue #1037
+
+A persistent trust store must now present an independent high-watermark witness.
+The system refuses a self-consistent but rolled-back hash chain and rejects
+missing/mismatched witnesses before replay. Append success is conditional on
+sealing the new revision and head digest to independent host-controlled storage.
+No persistent adapter or independently administered witness is provisioned by
+this change. Production broker and installer remain **HOLD**.

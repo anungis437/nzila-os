@@ -14,6 +14,25 @@ export interface LedgerSnapshot extends LedgerHead {
 }
 
 /**
+ * Rollback witness MUST be independently administered from persistent CAS
+ * storage (separate account/secret/durability domain). Hash chains alone do
+ * not detect a fully replaced but internally valid ledger history.
+ *
+ * The host adapter must compare both the revision and hash on every read, and
+ * advance its witness with CAS after the durable append. Missing/mismatched
+ * witnesses are terminal errors; a partially committed append cannot be
+ * silently acknowledged as successful.
+ */
+export interface TrustLedgerHeadWitness {
+  verifyCurrentHead(orgId: string, head: Readonly<LedgerHead>): Promise<boolean>
+  sealCommittedHead(
+    orgId: string,
+    previous: Readonly<LedgerHead>,
+    committed: Readonly<LedgerHead>,
+  ): Promise<boolean>
+}
+
+/**
  * Host-injected storage boundary. Implementations MUST atomically read a complete,
  * isolated snapshot, and atomically compare BOTH expected head fields and insert
  * exactly one entry. Failed/conflicting writes must leave the stream unchanged.

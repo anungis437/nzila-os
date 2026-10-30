@@ -62,7 +62,7 @@ export {
   LedgerConflictError,
   LedgerDuplicateError,
 } from './ledger-store'
-export type { AtomicTrustLedgerStore, LedgerHead, LedgerSnapshot } from './ledger-store'
+export type { AtomicTrustLedgerStore, LedgerHead, LedgerSnapshot, TrustLedgerHeadWitness } from './ledger-store'
 export { AuditEngineToolAuditSink, TOOL_AUDIT_ORG, scrubReason } from './audit'
 export type { ToolAuditEvent, ToolAuditSink } from './audit'
 export { GovernedToolGate } from './gate'
