@@ -63,7 +63,8 @@ export function projectDirectoryMember(m: DirectoryMemberFields, access: MemberD
     position: m.position || 'Union Member',
     hireDate: access.includeSensitive ? m.hireDate?.toISOString() ?? null : null,
     seniority: access.includeSensitive ? m.seniority ?? 0 : null,
-    membershipNumber: m.membershipNumber || '',
+    // Membership numbers are private enrollment identifiers, not steward work-contact data.
+    membershipNumber: access.includeSensitive ? (m.membershipNumber || '') : '',
     unionJoinDate: access.includeSensitive ? m.unionJoinDate?.toISOString() ?? null : null,
     createdAt: m.createdAt?.toISOString() ?? null,
     metadata,
