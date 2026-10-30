@@ -19,8 +19,15 @@ function request(state: string | null, cookie: string | null = state) {
 }
 
 describe('calendar OAuth CSRF state', () => {
+  const originalStateKey = process.env.CALENDAR_OAUTH_STATE_SECRET;
+  const originalTokenKey = process.env.CALENDAR_TOKEN_ENCRYPTION_KEY;
   beforeEach(() => { process.env.CALENDAR_OAUTH_STATE_SECRET = SECRET; });
-  afterEach(() => { delete process.env.CALENDAR_OAUTH_STATE_SECRET; });
+  afterEach(() => {
+    if (originalStateKey === undefined) delete process.env.CALENDAR_OAUTH_STATE_SECRET;
+    else process.env.CALENDAR_OAUTH_STATE_SECRET = originalStateKey;
+    if (originalTokenKey === undefined) delete process.env.CALENDAR_TOKEN_ENCRYPTION_KEY;
+    else process.env.CALENDAR_TOKEN_ENCRYPTION_KEY = originalTokenKey;
+  });
 
   it('issues a different unpredictable state for every flow and binds it to the browser', () => {
     const first = issueCalendarOAuthState('google', 'user-1', 'org-a', now);
