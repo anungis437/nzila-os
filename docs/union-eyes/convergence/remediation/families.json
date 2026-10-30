@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 321,
- "partial": 46,
- "outstanding": 456,
- "accountedFor": 456,
+ "corrected": 331,
+ "partial": 51,
+ "outstanding": 446,
+ "accountedFor": 446,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -50,11 +50,11 @@
   {
    "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
    "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
-   "defects": 48,
+   "defects": 47,
    "severity": {
     "HIGH": 12,
     "MEDIUM": 25,
-    "LOW": 11
+    "LOW": 10
    },
    "namedRoutes": 10,
    "namedFiles": 1,
@@ -65,7 +65,7 @@
     "0B.5": 2,
     "0B.6": 11,
     "0B.7": 4,
-    "0B.8": 3,
+    "0B.8": 2,
     "0B.9": 3,
     "0B.10": 6,
     "0B.11": 7,
@@ -96,13 +96,13 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 109,
+   "defects": 104,
    "severity": {
-    "HIGH": 14,
-    "MEDIUM": 58,
+    "HIGH": 12,
+    "MEDIUM": 55,
     "LOW": 37
    },
-   "namedRoutes": 23,
+   "namedRoutes": 20,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 1,
@@ -110,11 +110,11 @@
     "0B.3": 1,
     "0B.4": 4,
     "0B.5": 4,
-    "0B.6": 16,
-    "0B.7": 25,
+    "0B.6": 15,
+    "0B.7": 24,
     "0B.8": 9,
     "0B.9": 7,
-    "0B.10": 15,
+    "0B.10": 12,
     "0B.11": 19,
     "0B.12": 4
    }
@@ -122,25 +122,25 @@
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 80,
+   "defects": 76,
    "severity": {
     "HIGH": 5,
-    "MEDIUM": 63,
+    "MEDIUM": 59,
     "LOW": 12
    },
-   "namedRoutes": 13,
+   "namedRoutes": 12,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 3,
     "0B.2": 3,
     "0B.3": 3,
     "0B.4": 7,
-    "0B.5": 2,
-    "0B.6": 9,
-    "0B.7": 8,
+    "0B.5": 1,
+    "0B.6": 8,
+    "0B.7": 7,
     "0B.8": 12,
     "0B.9": 5,
-    "0B.10": 8,
+    "0B.10": 7,
     "0B.11": 14,
     "0B.12": 6
    }
@@ -506,10 +506,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B8-JUR-KNOWLEDGE-BASE-ITEM-GET-INCREMENTS-VIEW-COUNT-IN-SYSTEM-CONTEXT-WITHOUT-ORG-PREDICATE",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B9-ASM-FEDERATION-DISCOVERY-LISTS-FEDERATIONS-AND-CONGRESSES-BY-NAME-AND-MEMBER-COUNT-WITH-NO-ORGANIZATION-PREDICATE",
     "severity": "MEDIUM",
     "partial": true
@@ -658,7 +654,8 @@
    },
    {
     "id": "DEF-0B3-SUBSCRIPTION-ROLE-TITLE-AND-MEMBER-READ",
-    "severity": "HIGH"
+    "severity": "HIGH",
+    "partial": true
    },
    {
     "id": "DEF-0B4-CLAUSE-LIBRARY-BODY-FIELDS-UNVALIDATED",
@@ -706,7 +703,8 @@
    },
    {
     "id": "DEF-0B6-EMP-TIMESHEET-INGEST-STEWARD-FLOOR-UNBOUNDED",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B6-EMP-COMPLIANCE-EVENT-FORGEABLE-BY-STEWARD",
@@ -725,12 +723,9 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B6-CMP-CONTRACT-READ-AT-MEMBER-FLOOR",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B6-CMP-CONTRACT-CREATE-REFERENCES-UNVERIFIED",
-    "severity": "HIGH"
+    "severity": "HIGH",
+    "partial": true
    },
    {
     "id": "DEF-0B6-CMP-COMPLIANCE-LISTS-UNBOUNDED",
@@ -762,10 +757,6 @@
    },
    {
     "id": "DEF-0B7-EXC-CONSENT-IS-ADMIN-ASSERTED-AND-RECLASSIFICATION-HAS-NO-REVIEW",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-EXC-SEARCH-LIMITS-BEFORE-FILTERING-BY-SENSITIVITY",
     "severity": "MEDIUM"
    },
    {
@@ -925,18 +916,6 @@
    },
    {
     "id": "DEF-0B10-PEN-RETIREMENT-ELIGIBILITY-IS-A-YEARS-OF-SERVICE-COMPARISON-WITH-A-FIXED-DEFAULT-OF-25",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-PEN-T4A-POST-STORES-AN-ADMINISTRATOR-TYPED-INCOME-AS-A-GENERATED-TAX-RECORD",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B10-PEN-TRUSTEE-MEETING-READS-RETURN-AGENDA-MINUTES-AND-ATTENDEES-TO-ANY-MEMBER",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B10-PEN-TRUSTEE-MEETING-MINUTES-CAN-BE-REWRITTEN-OR-DELETED-WITHOUT-HISTORY",
     "severity": "MEDIUM"
    },
    {
@@ -1146,10 +1125,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B5-COMMS-SUBSCRIBER-EMAILS-READ-BY-ANY-MEMBER",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B6-EMP-PAYROLL-POSTED-IS-STATUS-ONLY",
     "severity": "MEDIUM"
    },
@@ -1168,10 +1143,6 @@
    {
     "id": "DEF-0B6-CMP-AUDIT-MANUAL-ENTRY-FREE-REFERENCE",
     "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B6-CMP-CONTRACT-AUDIT-NOT-ATOMIC",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B6-CMP-VALIDATE-ATTESTS-FROM-CALLER-DATA",
@@ -1200,10 +1171,6 @@
    },
    {
     "id": "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-BEARER-LINK-NOT-BOUND-TO-GRANT",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-PLT-EXT-PATCH-STEWARD-FLOOR-REWRITES-ENDPOINT-AND-MAPPING",
     "severity": "MEDIUM"
    },
    {
@@ -1288,10 +1255,6 @@
    },
    {
     "id": "DEF-0B10-ORG-ORGANIZER-TASKS-READABLE-BY-EVERY-STEWARD-WITH-MEMBER-CASE-AND-GRIEVANCE-REFERENCES",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-PEN-PLAN-DELETE-REMOVES-THE-PLAN-ROW-WITH-NO-DEPENDENT-CHECK-OR-SNAPSHOT",
     "severity": "MEDIUM"
    },
    {
@@ -1385,11 +1348,13 @@
    },
    {
     "id": "DEF-0B12-PLT-VOICE-TRANSCRIBE-HAS-NO-RATE-LIMIT-ENTITLEMENT-OR-AUDIT",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B12-WBK-MEMORY-HOLDER-ROUTES-ACCEPT-READS-AND-WRITES-ON-THE-BEARER-ID-OF-AN-UNCLAIMED-WORKBOOK-WITH-NO-LIMIT-AND-NO-AUDIT",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B12-WBK-ANY-MEMBER-OF-THE-CLAIMING-ORGANIZATION-CAN-READ-CHANGE-AND-DELETE-THE-NAMED-PEOPLE-WITH-NO-ROLE-FLOOR-OR-NOTICE",

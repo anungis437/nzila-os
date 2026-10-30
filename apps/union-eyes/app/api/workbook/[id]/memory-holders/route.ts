@@ -24,6 +24,7 @@ import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
 import { auditClaimedWorkbookWrite } from '@/lib/workbook/claimed-write-audit';
 import { logger } from '@/lib/logger';
 import { opaqueRef } from '@/lib/icra/opaque-ref';
+import { guardPublicIntake } from '@/lib/public-intake/guard';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -71,10 +72,13 @@ async function loadCartography(workbookId: string) {
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id: workbookId } = await params;
+  // The identifier of an unclaimed workbook is its only credential, so reads are slowed like every other bearer route.
+  const intake = await guardPublicIntake(request, { bucket: 'capability', readBody: false });
+  if (!intake.ok) return intake.response;
   try {
     // Authorization is resolved first; the protected cartography read then runs
     // inside the DB execution context that matches the resolved authority.
@@ -98,14 +102,11 @@ export async function POST(
 ) {
   const { id: workbookId } = await params;
 
-  // Parse + validate before establishing any DB execution context so no
-  // transaction is held open across the request body read.
-  let body: any;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
-  }
+  // Rate limited and body capped before the body is parsed, and before any DB execution context so no transaction is held open across
+  // the request body read.
+  const intake = await guardPublicIntake(request, { bucket: 'capability' });
+  if (!intake.ok) return intake.response;
+  const body: unknown = intake.json;
 
   const parse = createSchema.safeParse(body);
   if (!parse.success) {

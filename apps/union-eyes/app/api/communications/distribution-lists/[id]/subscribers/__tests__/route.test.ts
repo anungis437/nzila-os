@@ -9,7 +9,7 @@ const h = vi.hoisted(() => {
   const queue: unknown[] = [];
   const makeChain = () => {
     const chain: Record<string, unknown> = {};
-    for (const m of ['select', 'from', 'where', 'orderBy']) {
+    for (const m of ['select', 'from', 'where', 'orderBy', 'limit']) {
       chain[m] = () => chain;
     }
     chain.then = (res: (v: unknown) => unknown, rej: (e: unknown) => unknown) => {

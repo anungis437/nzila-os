@@ -62,7 +62,8 @@ export const GET = withApi(
 
 export const PATCH = withApi(
   {
-    auth: { required: true, minRole: 'steward' },
+    // Rewriting an integration's endpoint and field mapping redirects where organization data is sent: an administrator's act, as the delete is.
+    auth: { required: true, minRole: 'admin' },
     openapi: {
       tags: ['Integrations'],
       summary: 'Update integration',

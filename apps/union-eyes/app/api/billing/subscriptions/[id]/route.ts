@@ -18,7 +18,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { minRole: 'member' },
+    auth: { minRole: 'officer' },
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Billing'], summary: 'Get a subscription by ID' },
   },

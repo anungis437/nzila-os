@@ -19,6 +19,8 @@ import {
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
 
+const MAX_ANALYTICS_ROWS = 5000;
+
 export const GET = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
   try {
       const { userId, organizationId } = context;
@@ -49,6 +51,18 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
       const startDate = searchParams.get('start_date') || format(subDays(new Date(), 30), 'yyyy-MM-dd');
       const endDate = searchParams.get('end_date') || format(new Date(), 'yyyy-MM-dd');
       const accountId = searchParams.get('account_id');
+
+      // The range and the account id are validated and bounded before they reach a query.
+      const isDay = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value));
+      if (!isDay(startDate) || !isDay(endDate) || startDate > endDate) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'start_date and end_date must be valid YYYY-MM-DD dates in order');
+      }
+      if ((Date.parse(endDate) - Date.parse(startDate)) / 86_400_000 > 366) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'The date range may not exceed 366 days');
+      }
+      if (accountId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(accountId)) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'account_id must be a valid id');
+      }
 
       // Build query with Drizzle
       const analyticsConditions: SQL[] = [
@@ -86,7 +100,8 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
         .from(socialAnalytics)
         .leftJoin(socialAccounts, eq(socialAnalytics.accountId, socialAccounts.id))
         .where(and(...analyticsConditions))
-        .orderBy(asc(socialAnalytics.analyticsDate));
+        .orderBy(asc(socialAnalytics.analyticsDate))
+        .limit(MAX_ANALYTICS_ROWS);
 
       // Group analytics by account
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

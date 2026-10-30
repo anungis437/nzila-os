@@ -6,19 +6,23 @@ import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { and, desc, eq, ne } from "drizzle-orm";
 import { normalizeCsv, sha256 } from "../_lib";
 
+const MAX_CSV_CHARACTERS = 2_000_000;
+
 const createSchema = z.object({
   employerId: z.guid(),
   worksiteId: z.guid().optional(),
   bargainingUnitId: z.guid().optional(),
-  periodStart: z.string(),
-  periodEnd: z.string(),
-  sourceFileName: z.string(),
-  csvContent: z.string(),
-});
+  // Dates are calendar dates, the file name is a bounded label and the CSV is capped: an uncapped string was hashed, parsed and stored whole.
+  periodStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'periodStart must be YYYY-MM-DD'),
+  periodEnd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'periodEnd must be YYYY-MM-DD'),
+  sourceFileName: z.string().trim().min(1).max(255),
+  csvContent: z.string().min(1).max(MAX_CSV_CHARACTERS),
+}).refine((value) => value.periodStart <= value.periodEnd, { message: 'periodStart must not be after periodEnd', path: ['periodEnd'] });
 
 export const GET = withApi(
   {
-    auth: { minRole: "member" },
+    // A batch names the employer's workers and their hours: a financial reader's data, not a member's.
+    auth: { minRole: "officer" },
     entitlement: "employer_timesheet_ingest",
     openapi: { tags: ["Employer Execution"], summary: "List timesheet batches" },
   },
@@ -28,7 +32,8 @@ export const GET = withApi(
       .select()
       .from(employerTimesheetBatches)
       .where(eq(employerTimesheetBatches.organizationId, organizationId))
-      .orderBy(desc(employerTimesheetBatches.createdAt));
+      .orderBy(desc(employerTimesheetBatches.createdAt))
+      .limit(200);
     return { data: rows };
   },
 );

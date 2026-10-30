@@ -10,7 +10,8 @@ import {
   createContract,
 } from '@/services/platform-economics';
 import { db } from '@/db';
-import { commercialContracts } from '@/db/schema';
+import { commercialContracts, billingAccounts, orgSubscriptions } from '@/db/schema';
+import { assertOrganizationOwns } from '@/lib/api/org-references';
 import { eq, desc } from 'drizzle-orm';
 
 const createContractSchema = z.object({
@@ -41,7 +42,8 @@ const createContractSchema = z.object({
 
 export const GET = withApi(
   {
-    auth: { minRole: 'member' },
+    // Contract value, term and renewal conditions are the organization's commercial position: an officer reads them.
+    auth: { minRole: 'officer' },
     entitlement: 'commercial_reporting',
     openapi: {
       tags: ['Contracts'],
@@ -72,6 +74,11 @@ export const POST = withApi(
   },
   async ({ body, organizationId, userId }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
+    // The billing account and the subscription must be the caller's organization's: a contract provisions entitlements from its lines.
+    await assertOrganizationOwns([
+      { field: 'billingAccountId', value: body.billingAccountId, table: billingAccounts },
+      { field: 'subscriptionId', value: body.subscriptionId, table: orgSubscriptions },
+    ], organizationId);
     const result = await createContract({
       ...body,
       organizationId,

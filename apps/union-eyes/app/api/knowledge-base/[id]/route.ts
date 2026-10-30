@@ -34,6 +34,7 @@ export const GET = withApiAuth(async (
   const [row] = await db
     .select({
       id: knowledgeBase.id,
+      organizationId: knowledgeBase.organizationId,
       title: knowledgeBase.title,
       content: knowledgeBase.content,
       documentType: knowledgeBase.documentType,
@@ -63,10 +64,12 @@ export const GET = withApiAuth(async (
   // Bump view count (fire-and-forget). Log failures so a broken index or
   // permissions issue is visible instead of silently never recording views.
   withSystemContext(() => db.execute(
-    sql`UPDATE knowledge_base SET view_count = view_count + 1 WHERE id = ${id}::uuid`,
+    // The counter is bumped on the exact row that was read, with its organization in the predicate: the system context is not tenant-scoped.
+    sql`UPDATE knowledge_base SET view_count = view_count + 1 WHERE id = ${id}::uuid AND organization_id = ${row.organizationId}::uuid`,
   )).catch((error) => {
     logger.warn('knowledge-base: failed to increment view_count', { id, error: error instanceof Error ? error.message : String(error) });
   });
 
-  return NextResponse.json({ data: row });
+  const { organizationId: _owner, ...visible } = row;
+  return NextResponse.json({ data: visible });
 });

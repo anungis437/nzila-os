@@ -11,7 +11,8 @@ const { GET, POST } = crudRoutes({
   pk: 'id',
   tags: ["Communications"],
   orgScoped: true,
-  readRole: 'member',
+  // A distribution list names its audience and carries its filter criteria: staff read it.
+  readRole: 'steward',
   writeRole: 'steward',
 });
 export { GET, POST };
