@@ -341,13 +341,13 @@ describe('analytics-actions', () => {
       ]);
       const result = await getAnalyticsMetrics({});
       expect(result.success).toBe(true);
-      if (!result.success) throw new Error('Metrics read failed');
-      expect(result.metrics.map((metric) => metric.metadata)).toEqual([
+      const metrics = result.metrics ?? [];
+      expect(metrics.map((metric) => metric.metadata)).toEqual([
         { claimsCount: 3 }, { claimsResolved: 2 }, {},
       ]);
-      expect(JSON.stringify(result.metrics)).not.toContain('case-secret');
-      expect(JSON.stringify(result.metrics)).not.toContain('other-secret');
-      expect(JSON.stringify(result.metrics)).not.toContain('private@example.invalid');
+      expect(JSON.stringify(metrics)).not.toContain('case-secret');
+      expect(JSON.stringify(metrics)).not.toContain('other-secret');
+      expect(JSON.stringify(metrics)).not.toContain('private@example.invalid');
     });
 
     it('returns metrics with no filters', async () => {
