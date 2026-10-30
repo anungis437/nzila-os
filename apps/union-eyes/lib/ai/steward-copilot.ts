@@ -22,6 +22,7 @@ import { randomUUID } from 'crypto';
 import { db } from '@/db/db';
 import { eq, and, desc } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { performAuditedOperation } from '@/lib/audit/operation-audit';
 import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
@@ -63,6 +64,11 @@ export async function executeCopilotAction(
   input: CopilotInput,
 ): Promise<AiResponseEnvelope<CopilotResult>> {
   const { organizationId, userId, userRole, actionType, relatedEntityType, relatedEntityId, query } = input;
+
+  if (relatedEntityType === 'grievance' && relatedEntityId) {
+    const access = await getEffectiveCaseAccess({ organizationId, grievanceId: relatedEntityId, userId });
+    if (!access.canViewCase) throw new Error('Case access denied');
+  }
 
   // 1. Build context-aware prompt
   const prompt = await buildCopilotPrompt(input);
