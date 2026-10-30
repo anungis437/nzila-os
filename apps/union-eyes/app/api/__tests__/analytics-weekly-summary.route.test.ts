@@ -5,7 +5,7 @@ const m = vi.hoisted(() => ({
   withRLSContext: vi.fn(),
   dbExecute: vi.fn(),
   dbInsert: vi.fn(),
-  auditAIInvocation: vi.fn(),
+  insertValues: vi.fn(),
   audit: vi.fn(),
 }));
 
@@ -23,9 +23,6 @@ vi.mock('@/db', () => ({
   },
 }));
 vi.mock('@/db/schema', () => ({ insightRecommendations: {} }));
-vi.mock('@/lib/audit-logger', () => ({
-  auditAIInvocation: m.auditAIInvocation,
-}));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('drizzle-orm', () => ({ sql: vi.fn(() => 'sql') }));
@@ -40,13 +37,9 @@ describe('analytics/insights/weekly-summary route', () => {
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
     const tx = { insert: m.dbInsert };
     m.withRLSContext.mockImplementation(async (...args: unknown[]) => (args[args.length - 1] as (t: unknown) => Promise<unknown>)(tx));
-    m.auditAIInvocation.mockResolvedValue('ai_ref_1');
     m.audit.mockResolvedValue(undefined);
-    m.dbInsert.mockReturnValue({
-      values: vi.fn(() => ({
-        returning: vi.fn(async () => [{ id: 'insight_1' }]),
-      })),
-    });
+    m.insertValues.mockImplementation(() => ({ returning: vi.fn(async () => [{ id: 'insight_1' }]) }));
+    m.dbInsert.mockReturnValue({ values: m.insertValues });
   });
 
   it('throws when organization context is missing', async () => {
@@ -79,7 +72,14 @@ describe('analytics/insights/weekly-summary route', () => {
     expect(result.topFrictionPoints).toHaveLength(2);
     expect(result.recommendations[0]).toContain('onboarding');
     expect(result.insightId).toBe('insight_1');
-    expect(m.auditAIInvocation).toHaveBeenCalledWith(expect.objectContaining({ organizationId: 'org_1', userId: 'user_1' }));
+    expect(result.generationMethod).toBe('deterministic_aggregation');
+    expect(result.aiUsed).toBe(false);
+    expect(result.confidenceScore).toBeNull();
+    expect(m.insertValues).toHaveBeenCalledWith(expect.objectContaining({
+      aiReferenceId: null, confidenceScore: null, estimatedBenefit: null,
+      actionRequired: false, priority: 'low',
+      dataSource: expect.objectContaining({ method: 'deterministic_aggregation', aiUsed: false }),
+    }));
     expect(m.audit).toHaveBeenCalledWith(
       expect.objectContaining({ insert: m.dbInsert }),
       expect.objectContaining({ organizationId: 'org_1', userId: 'user_1', action: 'insight.weekly_summary.generate', resourceId: 'insight_1' }),
@@ -111,7 +111,19 @@ describe('analytics/insights/weekly-summary route', () => {
     const result = await POST({ organizationId: 'org_2', userId: 'user_2' });
 
     expect(result.topFrictionPoints).toEqual([]);
-    expect(result.recommendations[0]).toContain('No critical friction spikes detected');
+    expect(result.recommendations[0]).toContain('friction cannot be assessed');
+    expect(m.insertValues).toHaveBeenCalledWith(expect.objectContaining({ confidenceScore: null, aiReferenceId: null }));
     expect(m.dbInsert).toHaveBeenCalled();
+  });
+
+  it('does not invent a zero rating for feedback without a rating', async () => {
+    const { POST } = await loadRoute();
+    m.dbExecute.mockResolvedValueOnce([{ total_events: 1, sessions_started: 1, cases_created: 0, documents_uploaded: 0, active_users: 1 }])
+      .mockResolvedValueOnce([{ category: 'navigation', cnt: 1, avg_rating: null }]);
+    const result = await POST({ organizationId: 'org_1', userId: 'user_1' });
+    expect(result.topFrictionPoints).toEqual([{ category: 'navigation', count: 1, avgRating: null }]);
+    expect(m.insertValues).toHaveBeenCalledWith(expect.objectContaining({
+      relatedEntities: { topFrictionPoints: [{ category: 'navigation', count: 1, avgRating: null }] },
+    }));
   });
 });

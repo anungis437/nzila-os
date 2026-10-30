@@ -2,7 +2,6 @@ import { withApi, RATE_LIMITS, ApiError } from '@/lib/api/framework';
 import { db } from '@/db';
 import { insightRecommendations } from '@/db/schema';
 import { sql } from 'drizzle-orm';
-import { auditAIInvocation } from '@/lib/audit-logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
@@ -57,24 +56,13 @@ export const POST = withApi(
     const topFrictionPoints = frictionRows.map((r) => ({
       category: r.category,
       count: Number(r.cnt),
-      avgRating: Number(r.avg_rating),
+      avgRating: r.avg_rating === null ? null : Number(r.avg_rating), // Unknown is not zero.
     }));
 
-    const recommendations = [
-      ...(topFrictionPoints.length > 0
-        ? [`Prioritize UX fixes for ${topFrictionPoints[0].category} flow in next sprint.`]
-        : ['No critical friction spikes detected; continue current rollout cadence.']),
-      'Promote guided onboarding for first-session users to improve activation.',
-      'Review org-level case SLA trend and escalate high-risk queues proactively.',
-    ];
-
-    const aiRefId = await auditAIInvocation({
-      userId: userId ?? undefined,
-      organizationId,
-      origin: 'analytics/insights/weekly-summary',
-      model: 'analytics-engine',
-      dataClass: 'internal',
-    });
+    // Deterministic database rollup: no model call, AI confidence or verified impact.
+    const recommendations = topFrictionPoints.length > 0
+      ? [`Review the ${topFrictionPoints[0].category} feedback category (${topFrictionPoints[0].count} reports) before deciding on corrective action.`]
+      : ['No feedback was recorded in the last seven days; friction cannot be assessed.'];
 
     const insight = await withRLSContext({ organizationId }, async (tx) => {
       const [created] = await tx
@@ -83,13 +71,15 @@ export const POST = withApi(
           organizationId,
           insightType: 'optimization',
           category: 'operations',
-          priority: topFrictionPoints.length > 0 ? 'high' : 'medium',
+          priority: 'low', // Human triage must establish urgency.
           title: 'Weekly Engagement and Friction Summary',
-          description: 'Automated weekly synthesis of adoption, usage intensity, and feedback friction points.',
-          aiReferenceId: aiRefId,
+          description: 'Deterministic seven-day counts from pilot events and feedback. No model, impact estimate, or risk assessment was performed.',
+          aiReferenceId: null,
           dataSource: {
             source: 'pilot_events + pilot_feedback',
             window: '7d',
+            method: 'deterministic_aggregation',
+            aiUsed: false,
           },
           metrics: {
             totalEvents: Number(eventRollup?.total_events ?? 0),
@@ -100,12 +90,12 @@ export const POST = withApi(
             engagementScore,
           },
           recommendations,
-          confidenceScore: '0.83',
+          confidenceScore: null,
           relatedEntities: {
             topFrictionPoints,
           },
-          actionRequired: topFrictionPoints.length > 0,
-          estimatedBenefit: 'Improved activation and reduced support burden through targeted UX remediation.',
+          actionRequired: false, // No action assigned without human triage.
+          estimatedBenefit: null,
         })
         .returning();
 
@@ -118,12 +108,17 @@ export const POST = withApi(
         details: {
           engagementScore,
           topFrictionPoints,
+          generationMethod: 'deterministic_aggregation',
+          aiUsed: false,
         },
       });
       return created;
     });
     return {
       window: '7d',
+      generationMethod: 'deterministic_aggregation',
+      aiUsed: false,
+      confidenceScore: null,
       engagement: {
         totalEvents: Number(eventRollup?.total_events ?? 0),
         activeUsers: Number(eventRollup?.active_users ?? 0),
