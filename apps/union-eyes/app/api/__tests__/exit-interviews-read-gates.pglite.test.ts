@@ -105,7 +105,8 @@ describe('exit interview list', () => {
 
   it('a steward sees public-internal and restricted rows (and unrecorded), never privileged or above', async () => {
     const ids = await listIds('steward', 'u-steward');
-    expect(ids).toEqual(expect.arrayContaining([id(1), id(2), id(6), id(7), id(8)]));
+    expect(ids).toEqual(expect.arrayContaining([id(1), id(2), id(7), id(8)]));
+    expect(ids).not.toContain(id(6)); // revoked consent defeats steward-level access
     for (const forbidden of [3, 4, 5, 9]) expect(ids).not.toContain(id(forbidden));
   });
 
@@ -138,7 +139,7 @@ describe('exit interview item and attachments', () => {
 
   it('refuses, as not found, an interview above the caller\'s level or without consent', async () => {
     for (const n of [2, 3, 4, 5, 6, 7, 8]) await expect(item(n, 'member'), `interview ${n}`).rejects.toMatchObject({ status: 404 });
-    for (const n of [3, 4, 5]) await expect(item(n, 'steward', 'u-steward'), `steward ${n}`).rejects.toMatchObject({ status: 404 });
+    for (const n of [3, 4, 5, 6]) await expect(item(n, 'steward', 'u-steward'), `steward ${n}`).rejects.toMatchObject({ status: 404 });
     await expect(item(4, 'officer', 'u-officer')).rejects.toMatchObject({ status: 404 });
     await expect(item(4, 'admin', 'u-admin')).resolves.toMatchObject({ data: { id: id(4) } });
   });

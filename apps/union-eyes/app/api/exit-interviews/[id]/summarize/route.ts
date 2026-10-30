@@ -63,6 +63,13 @@ export const POST = withApi(
     if (interview.status !== 'published') {
       throw ApiError.conflict('Summaries can only be generated for published interviews');
     }
+    // A revoked interview must not reach an AI provider or create new
+    // derivatives even if the caller remains a steward or administrator.
+    // Separate model-processing consent remains a distinct unimplemented
+    // requirement; this is the minimum revocation floor.
+    if (interview.consentGranted !== true) {
+      throw ApiError.conflict('Retiree consent has not been granted or has been withdrawn');
+    }
 
     let summary: Awaited<ReturnType<typeof generateKnowledgeSummary>>;
     try {
