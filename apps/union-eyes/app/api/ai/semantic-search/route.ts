@@ -17,6 +17,7 @@ import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { checkEntitlement } from '@/lib/services/entitlements';
 import { db } from '@/db/db';
+import { eq } from 'drizzle-orm';
 import { cbaClause } from '@/db/schema/cba-clauses-schema';
 import { arbitrationPrecedents } from '@/db/schema/arbitration-precedents-schema';
 
@@ -194,16 +195,21 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
 });
 
 export const GET = withRoleAuth('member', async (_request: NextRequest, _context: BaseAuthContext) => {
+  if (!_context.organizationId) return NextResponse.json({ error: 'Organization context required' }, { status: 403 });
+  const blocked = await guardAiFeature(AI_FEATURES.AI_SEMANTIC_SEARCH, { userId: _context.userId, organizationId: _context.organizationId });
+  if (blocked) return blocked;
   try {
     const clauseRows = await db
       .select({ id: cbaClause.id, embedding: cbaClause.embedding })
-      .from(cbaClause);
+      .from(cbaClause)
+      .where(eq(cbaClause.organizationId, _context.organizationId));
     const clauseTotal = clauseRows.length;
     const clauseWithEmbed = clauseRows.filter((r) => r.embedding !== null).length;
 
     const precedentRows = await db
       .select({ id: arbitrationPrecedents.id })
-      .from(arbitrationPrecedents);
+      .from(arbitrationPrecedents)
+      .where(eq(arbitrationPrecedents.sourceOrganizationId, _context.organizationId));
     const precedentTotal = precedentRows.length;
 
     return NextResponse.json({
