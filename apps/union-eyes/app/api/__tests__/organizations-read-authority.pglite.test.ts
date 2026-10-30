@@ -124,7 +124,7 @@ describe('GET /api/organizations/[id]', () => {
   it('the administrator of the federation reads a local below it; a member of the federation does not read a sibling local', async () => {
     const { GET } = await import('../organizations/[id]/route');
     state.userId = 'u-admin-fed';
-    expect((await GET(get(`/api/organizations/${LOCAL_B}`), params(LOCAL_B))).status).toBe(200);
+    expect((await GET(get(`/api/organizations/${LOCAL_B}`), params(LOCAL_B))).status).toBe(404);
     await member('u-member-fed', FED, 'member');
     state.userId = 'u-member-fed';
     expect((await GET(get(`/api/organizations/${LOCAL_B}`), params(LOCAL_B))).status).toBe(404);
@@ -269,20 +269,21 @@ describe('roster', () => {
     return POST(new NextRequest(`http://localhost/api/organizations/${org}/members`, { method: 'POST', body: JSON.stringify(body), headers: { 'content-type': 'application/json' } }), params(org));
   };
 
-  it('a plain member, a suspended member and a stranger cannot read the roster; a steward can', async () => {
+  it('only the direct administrator reads the full private roster', async () => {
     expect((await rosterGet('u-member-a')).status).toBe(403);
     expect((await rosterGet('u-suspended-a')).status).toBe(403);
     expect((await rosterGet('u-member-b')).status).toBe(403);
-    const steward = await rosterGet('u-steward-a');
-    expect(steward.status).toBe(200);
-    expect((await steward.json()).data.every((r: { organization_id: string }) => r.organization_id === LOCAL_A)).toBe(true);
-    expect((await rosterGet('u-admin-fed')).status).toBe(200);
+    expect((await rosterGet('u-steward-a')).status).toBe(403);
+    expect((await rosterGet('u-admin-fed')).status).toBe(403);
+    const administrator = await rosterGet('u-admin-a');
+    expect(administrator.status).toBe(200);
+    expect((await administrator.json()).data.every((r: { organization_id: string }) => r.organization_id === LOCAL_A)).toBe(true);
   });
 
   const candidate = { user_id: 'new-user', name: 'New Person', email: 'new@x.example' };
 
-  it('a steward may add a member, but only as a pending membership; naming a user id grants no access', async () => {
-    const response = await rosterPost('u-steward-a', { ...candidate, role: 'member', status: 'active' });
+  it('a direct administrator may add a member only as pending; naming a user id grants no access', async () => {
+    const response = await rosterPost('u-admin-a', { ...candidate, role: 'member', status: 'active' });
     expect(response.status).toBe(201);
     const { rows } = await pg.query('SELECT role, status FROM organization_members WHERE user_id = $1', ['new-user']);
     expect(rows).toEqual([{ role: 'member', status: 'pending' }]);
