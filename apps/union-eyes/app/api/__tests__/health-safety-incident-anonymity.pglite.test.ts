@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PGlite } from '@electric-sql/pglite';
-import { workplaceIncidents } from '@/db/schema';
+import { workplaceIncidents, hazardReports } from '@/db/schema';
 import { createTableDatabase } from './support/pglite-tables';
 
 // DEF-0B8-HS-ANONYMOUS-REPORTER-STAMPED-IN-CREATED-BY: the real incident POST (crudRoutes) against real SQL.
@@ -35,7 +35,7 @@ const post = async (body: Record<string, unknown>) => {
 };
 
 beforeAll(async () => {
-  const created = await createTableDatabase([workplaceIncidents]);
+  const created = await createTableDatabase([workplaceIncidents, hazardReports]);
   pg = created.pg;
   // The mocked withApi skips the body coercion the real one applies, so timestamps arrive as ISO strings.
   const real = created.db as any;
@@ -59,7 +59,7 @@ beforeAll(async () => {
 afterAll(async () => { await pg.close(); });
 beforeEach(async () => {
   audit.mockClear();
-  await pg.exec('TRUNCATE workplace_incidents');
+  await pg.exec('TRUNCATE workplace_incidents, hazard_reports');
 });
 
 const base = { description: 'Guard missing on press', locationDescription: 'Line 3', incidentType: 'near_miss', severity: 'minor', incidentDate: '2026-10-29T13:00:00.000Z' };
@@ -98,4 +98,40 @@ describe('POST /api/health-safety/incidents', () => {
     expect(await stored()).toEqual([]);
   });
 
+});
+
+// The hazard create path must honor the same privacy boundary as incident reporting.
+const postHazard = async (body: Record<string, unknown>) => {
+  const { POST } = await import('../health-safety/hazards/route');
+  return (POST as any)({
+    organizationId: ORG,
+    userId: 'steward-1',
+    request: { json: async () => body },
+    body,
+  });
+};
+const hazardBase = { hazardType: 'fire', priority: 'high', location: 'Line 3', description: 'Sparks at panel' };
+const storedHazards = async () => (await pg.query<{ created_by: string; reported_by_name: string | null; reporter_contact_info: string | null }>('SELECT created_by, reported_by_name, reporter_contact_info FROM hazard_reports')).rows;
+
+describe('POST /api/health-safety/hazards anonymity', () => {
+  it('attributes a named report to the authenticated actor', async () => {
+    await postHazard({ ...hazardBase, reporterName: 'Jo' });
+    expect((await storedHazards())[0]).toMatchObject({ created_by: 'steward-1', reported_by_name: 'Jo' });
+    expect(audit.mock.calls[0][1]).toMatchObject({ userId: 'steward-1' });
+  });
+
+  it('does not persist or audit the identity of an anonymous reporter', async () => {
+    await postHazard({ ...hazardBase, isAnonymous: true, reporterName: 'Jo', reporterContact: 'jo@example.ca' });
+    expect((await storedHazards())[0]).toMatchObject({
+      created_by: 'anonymous', reported_by_name: null, reporter_contact_info: null,
+    });
+    expect(JSON.stringify(audit.mock.calls.map((c) => c[1]))).not.toContain('steward-1');
+    expect(JSON.stringify(audit.mock.calls.map((c) => c[1]))).not.toContain('jo@example.ca');
+  });
+
+  it('rejects client-supplied creator identity for both anonymous and named reports', async () => {
+    await expect(postHazard({ ...hazardBase, createdBy: 'someone-else' })).rejects.toThrow(/createdBy cannot be assigned/);
+    await expect(postHazard({ ...hazardBase, isAnonymous: true, createdBy: 'anonymous' })).rejects.toThrow(/createdBy cannot be assigned/);
+    expect(await storedHazards()).toEqual([]);
+  });
 });
