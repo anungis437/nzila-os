@@ -308,6 +308,10 @@
     {
       "sha": "a3ddf8d68cde0aef2065f0ef2aa637a38cec7f92",
       "description": "Billing-cycle POST and preview require live target-ledger finance:execute mandate, with fail-closed regressions. KPI PATCH malformed UUID rejected but target editing/rename/delete remains open. Source-level only; exact HEAD CI pending."
+    },
+    {
+      "sha": "20979bdf7d242049382b12b82bf6588078564e0a",
+      "description": "BillingCycleService now binds its transaction to the target organization and actor, with regression asserting RLS context. Exact-HEAD CI pending; separate billing atomicity/idempotency concerns remain open."
     }
   ],
   "records": [
@@ -485,12 +489,14 @@
         "paths": [
           "apps/union-eyes/lib/finance/billing-cycle-authority.ts",
           "apps/union-eyes/app/api/admin/billing-cycles/route.ts",
-          "apps/union-eyes/app/api/admin/billing-cycles/preview/route.ts"
+          "apps/union-eyes/app/api/admin/billing-cycles/preview/route.ts",
+          "apps/union-eyes/lib/services/billing-cycle-service.ts"
         ],
         "regressionPaths": [
           "apps/union-eyes/lib/finance/__tests__/billing-cycle-authority.test.ts",
           "apps/union-eyes/app/api/__tests__/admin-billing-cycles.route.test.ts",
-          "apps/union-eyes/app/api/__tests__/admin-billing-cycles-preview.route.test.ts"
+          "apps/union-eyes/app/api/__tests__/admin-billing-cycles-preview.route.test.ts",
+          "apps/union-eyes/lib/services/__tests__/billing-cycle-service.test.ts"
         ],
         "commits": [
           "215c41e36e8ef222f91e23e33108b039e74b5610",
@@ -498,9 +504,11 @@
           "8d3ae8b453b08043ac6e630ed889188b4a0fbedd",
           "484a7fb389b7434691604ac74f43e714a18184c8",
           "50b64afb4d6539167bba41ef6ce94a91f0acb08a",
-          "a3ddf8d68cde0aef2065f0ef2aa637a38cec7f92"
+          "a3ddf8d68cde0aef2065f0ef2aa637a38cec7f92",
+          "65acbecdc8a6d09ad330f2eaa5ef2db75e6ca1df",
+          "20979bdf7d242049382b12b82bf6588078564e0a"
         ],
-        "repair": "Both caller-selected billing-cycle execution and preview now demand a live, tenant-bound, ledger-wide finance:execute mandate for the exact target organization and actor before calculating or charging; role title alone cannot authorize.",
+        "repair": "Both caller-selected billing-cycle execution and preview now demand a live, tenant-bound, ledger-wide finance:execute mandate for the exact target organization and actor before calculating or charging; role title alone cannot authorize. BillingCycleService now executes its member read/write transaction under the explicit target organization and actor RLS context.",
         "limits": "Source-level only, unit/PG15/16/HTTP validation pending. Scheduled cross-org trigger and non-atomic billing-cycle processing are separate open obligations."
       },
       "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
@@ -509,8 +517,8 @@
       "engineeringCorrection": {
         "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B11-FINANCIAL-TARGET-MANDATE",
-        "path": "apps/union-eyes/lib/finance/billing-cycle-authority.ts; apps/union-eyes/app/api/admin/billing-cycles/route.ts; apps/union-eyes/app/api/admin/billing-cycles/preview/route.ts",
-        "explanation": "Both caller-selected billing-cycle execution and preview now demand a live, tenant-bound, ledger-wide finance:execute mandate for the exact target organization and actor before calculating or charging; role title alone cannot authorize.",
+        "path": "apps/union-eyes/lib/finance/billing-cycle-authority.ts; apps/union-eyes/app/api/admin/billing-cycles/route.ts; apps/union-eyes/app/api/admin/billing-cycles/preview/route.ts; apps/union-eyes/lib/services/billing-cycle-service.ts",
+        "explanation": "Both caller-selected billing-cycle execution and preview now demand a live, tenant-bound, ledger-wide finance:execute mandate for the exact target organization and actor before calculating or charging; role title alone cannot authorize. BillingCycleService now executes its member read/write transaction under the explicit target organization and actor RLS context.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
