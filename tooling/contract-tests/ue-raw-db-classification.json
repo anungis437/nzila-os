@@ -270,8 +270,8 @@
       "reason": "Pilot onboarding scoped to the actor's org under org-scope + withRLSContext."
     },
     "app/api/pilot/overview/route.ts": {
-      "category": "requires-rls-context",
-      "reason": "Pilot overview under withRLSContext + auth."
+      "category": "requires-org-scope-wrapper",
+      "reason": "Pilot overview uses system execution for cross-table aggregates, but its entrypoint first checks direct active organization-admin memberships, limits enrollment SELECT to those tenant IDs, and tenant-binds milestone/member/grievance queries. No platform-wide entitlement or unqualified raw RLS guarantee."
     },
     "app/api/organizations/current/route.ts": {
       "category": "requires-rls-context",
