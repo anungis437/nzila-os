@@ -195,3 +195,17 @@ multipart ingestion retains separate streaming limits. This is a mitigating
 control only: it does **not** remove the vulnerable Zod 3 runtime dependency or
 clear advisory GHSA-mrhx-c7xc-m3w5. P0 issue #1040 requires a genuine
 Zod 4 migration, refreshed lockfile and independent dependency audit PASS.
+
+## Completed-step receipt and freshness hardening
+
+A completed step's process-local authenticated history now retains both the
+independent outcome proof **and** the independently minted policy permit.
+Executor identities must match, and any subsequent step fails closed if a
+prior completed step's policy, output or evidence changes, or if its permit
+expires. Outcome-verifier timestamps are checked for a five-minute window
+with at most 30 seconds of clock skew; stale/future receipts cannot be minted
+or replayed as fresh proof. Negative regressions cover these boundaries.
+
+These checks do **not** implement durable host trust, policy revocation,
+identity authentication or independently administered audit persistence.
+Issue #1037 remains a blocker, and no broker/installer capability is opened.

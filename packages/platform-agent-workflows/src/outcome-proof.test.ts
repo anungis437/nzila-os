@@ -20,7 +20,7 @@ async function validProof(wf: ReturnType<typeof createWorkflow>, stepId: string)
     verify: async r => ({
       verdict: 'PASS', verificationRef: 'ci://independent-verifier/1',
       verifierId: 'independent-checker', source: 'trusted-host',
-      verifiedAt: '2026-10-30T12:00:00.000Z',
+      verifiedAt: new Date().toISOString(),
       checkedCommitSha: r.commitSha, checkedArtifactDigest: r.artifactDigest,
       checkedEvidenceRefs: r.evidenceRefs,
     }),
@@ -151,6 +151,25 @@ describe('platform-agent-workflows P0 outcome controls', () => {
     expect(() => executeStep(alteredOutput, alteredOutput.steps[1].id, {}))
       .toThrow('trusted re-verification')
     expect(executeStep(completed, completed.steps[1].id, {}).status).toBe('blocked')
+  })
+
+  it('rejects stale and future independent verifier timestamps and expired proofs', async () => {
+    const wf = make()
+    const proof = await validProof(wf, wf.steps[0].id)
+    const verifyAt = (time: string) => verifyOutcomeEvidence(proof.request, {
+      verify: async r => ({
+        verdict: 'PASS', verificationRef: 'ci://verifier/2',
+        verifierId: 'independent-checker', source: 'trusted-host',
+        verifiedAt: time, checkedCommitSha: r.commitSha,
+        checkedArtifactDigest: r.artifactDigest, checkedEvidenceRefs: r.evidenceRefs,
+      }),
+    })
+    await expect(verifyAt(new Date(Date.now() - 6 * 60_000).toISOString()))
+      .rejects.toThrow('not established')
+    await expect(verifyAt(new Date(Date.now() + 60_000).toISOString()))
+      .rejects.toThrow('not established')
+    expect(isVerifiedOutcomeFor(proof, wf, wf.steps[0].id, new Date(Date.now() + 6 * 60_000)))
+      .toBe(false)
   })
 
   it('prevents proof replay across workflow/step/org and rejects mismatched evidence', async () => {

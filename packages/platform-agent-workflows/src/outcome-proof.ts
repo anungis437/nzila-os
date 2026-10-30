@@ -43,6 +43,8 @@ export interface VerifiedOutcomeProof {
 
 /** Runtime minted receipts are unforgeable by plain JSON or object casts. */
 const minted = new WeakSet<object>()
+const MAX_OUTCOME_PROOF_AGE_MS = 5 * 60_000
+const MAX_CLOCK_SKEW_MS = 30_000
 /**
  * Fail-closed process-local completion history. A restored or forged JSON
  * workflow must be re-verified by the trusted host before subsequent steps.
@@ -127,7 +129,12 @@ export async function verifyOutcomeEvidence(
     ...request,
     evidenceRefs: Object.freeze([...request.evidenceRefs]),
   }))
-  if (result.verdict !== 'PASS' ||
+  const verifiedAt = Date.parse(result.verifiedAt)
+  const now = Date.now()
+  if (!Number.isFinite(verifiedAt) ||
+      verifiedAt > now + MAX_CLOCK_SKEW_MS ||
+      now - verifiedAt > MAX_OUTCOME_PROOF_AGE_MS ||
+      result.verdict !== 'PASS' ||
       result.verifierId === request.executingAgentId ||
       result.checkedCommitSha !== request.commitSha ||
       result.checkedArtifactDigest !== request.artifactDigest ||
@@ -157,6 +164,7 @@ export function isVerifiedOutcomeFor(
   proof: unknown,
   workflow: AgentWorkflow,
   stepId: string,
+  now = new Date(),
 ): proof is VerifiedOutcomeProof {
   if (!proof || typeof proof !== 'object' || !minted.has(proof)) return false
   const p = proof as VerifiedOutcomeProof
@@ -165,6 +173,8 @@ export function isVerifiedOutcomeFor(
     p.request.app === workflow.app &&
     p.request.orgId === workflow.orgId &&
     p.evidence.phase === 'VERIFIED' &&
+    Date.parse(p.evidence.verifiedAt) > now.getTime() - MAX_OUTCOME_PROOF_AGE_MS &&
+    Date.parse(p.evidence.verifiedAt) <= now.getTime() + MAX_CLOCK_SKEW_MS &&
     p.evidence.commitSha === p.request.commitSha &&
     p.evidence.artifactDigest === p.request.artifactDigest
 }
