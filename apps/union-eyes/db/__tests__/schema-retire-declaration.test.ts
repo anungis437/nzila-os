@@ -3,7 +3,7 @@
  * The census file still names them. The physical relations are not dropped.
  * Django still defines the two signature tables.
  */
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { getTableConfig, PgTable } from 'drizzle-orm/pg-core'
@@ -14,23 +14,20 @@ const APP = path.resolve(__dirname, '../..')
 const RETIRED = ['org_usage', 'signature_templates', 'signature_webhooks_log'] as const
 const REGISTER = path.resolve(__dirname, '../../../../docs/union-eyes/convergence/register')
 
+// Directories that hold dependencies or build output, never source: skipping them keeps the scan fast when the machine is busy.
+const SKIPPED = new Set(['node_modules', '.next', 'dist', '.git', '.venv', 'venv', '__pycache__', 'coverage', 'test-results', 'playwright-report', '.turbo', 'out', 'build'])
+
 function walk(dir: string, out: string[] = []): string[] {
-  let names: string[]
+  let entries
   try {
-    names = readdirSync(dir)
+    entries = readdirSync(dir, { withFileTypes: true })
   } catch {
     return out
   }
-  for (const name of names) {
-    if (name === 'node_modules' || name === '.next' || name === 'dist') continue
-    const full = path.join(dir, name)
-    let st
-    try {
-      st = statSync(full)
-    } catch {
-      continue
-    }
-    if (st.isDirectory()) walk(full, out)
+  for (const entry of entries) {
+    if (SKIPPED.has(entry.name)) continue
+    const full = path.join(dir, entry.name)
+    if (entry.isDirectory()) walk(full, out)
     else out.push(full)
   }
   return out
