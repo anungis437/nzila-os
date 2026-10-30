@@ -42,6 +42,37 @@ export interface VerifiedOutcomeProof {
 
 /** Runtime minted receipts are unforgeable by plain JSON or object casts. */
 const minted = new WeakSet<object>()
+/**
+ * Fail-closed process-local completion history. A restored or forged JSON
+ * workflow must be re-verified by the trusted host before subsequent steps.
+ */
+const verifiedHistory = new WeakMap<AgentWorkflow, Map<string, VerifiedOutcomeProof>>()
+
+export function hasAuthenticatedCompletedHistory(workflow: AgentWorkflow): boolean {
+  const history = verifiedHistory.get(workflow)
+  return workflow.steps.every(step => {
+    if (step.status !== 'completed') return true
+    if (step.policyCheck?.result !== 'allow' || !step.outcomeEvidence) return false
+    const proof = history?.get(step.id)
+    if (!isVerifiedOutcomeFor(proof, workflow, step.id)) return false
+    return JSON.stringify(proof.evidence) === JSON.stringify(step.outcomeEvidence)
+  })
+}
+
+export function carryAuthenticatedHistory(
+  previous: AgentWorkflow,
+  updated: AgentWorkflow,
+  stepId: string,
+  proof: VerifiedOutcomeProof | undefined,
+): void {
+  if (!hasAuthenticatedCompletedHistory(previous)) throw new Error('Untrusted completed-step history')
+  const next = new Map(verifiedHistory.get(previous) ?? [])
+  if (proof) {
+    if (!isVerifiedOutcomeFor(proof, updated, stepId)) throw new Error('Outcome proof scope mismatch')
+    next.set(stepId, proof)
+  }
+  verifiedHistory.set(updated, next)
+}
 
 function requireScope(value: string, field: string): void {
   if (!value || value.length > 256 || /[\u0000-\u001f]/.test(value)) {

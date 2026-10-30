@@ -73,10 +73,15 @@ describe('platform-agent-workflows P0 outcome controls', () => {
     expect(result.status).toBe('completed')
     expect(result.steps[0].outcomeEvidence?.phase).toBe('VERIFIED')
     expect(agentWorkflowSchema.safeParse(result).success).toBe(true)
+    const restored = JSON.parse(JSON.stringify(result))
+    expect(isVerifiedOutcomeFor(restored.steps[0].outcomeEvidence, wf, wf.steps[0].id)).toBe(false)
     expect(getAuditTimeline({ eventType: 'workflow_step_executed' })[0].policyResult).toBe('pass')
     const forged = JSON.parse(JSON.stringify(proof))
     expect(isVerifiedOutcomeFor(forged, wf, wf.steps[0].id)).toBe(false)
-    expect(executeStep(make(), wf.steps[0].id, { verifiedOutcome: proof }).status).toBe('blocked')
+    const forgedWorkflow = { ...wf, id: 'another-workflow', orgId: 'another-org' }
+    expect(executeStep(forgedWorkflow, wf.steps[0].id, {
+      policyCheck: { policyId: 'p1', result: 'allow' }, verifiedOutcome: proof,
+    }).status).toBe('blocked')
     expect(() => executeStep(result, result.steps[0].id, { verifiedOutcome: proof })).toThrow('immutable')
   })
 

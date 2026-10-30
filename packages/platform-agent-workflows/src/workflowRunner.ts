@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import type { AgentWorkflow, WorkflowStep, WorkflowStatus } from './types'
 import { recordAuditEvent } from '@nzila/platform-governance'
-import { isVerifiedOutcomeFor, serializeOutcomeProof, type VerifiedOutcomeProof } from './outcome-proof'
+import { isVerifiedOutcomeFor, serializeOutcomeProof, hasAuthenticatedCompletedHistory, carryAuthenticatedHistory, type VerifiedOutcomeProof } from './outcome-proof'
 
 export function createWorkflow(params: {
   name: string
@@ -52,6 +52,7 @@ export function executeStep(
 ): AgentWorkflow {
   const target = workflow.steps.find(step => step.id === stepId)
   if (!target) throw new Error('Workflow step does not exist')
+  if (!hasAuthenticatedCompletedHistory(workflow)) throw new Error('Existing completed outcomes require trusted re-verification')
   if (target.status === 'completed') {
     throw new Error('Completed steps are immutable; a new workflow revision is required')
   }
@@ -95,12 +96,14 @@ export function executeStep(
     verificationRef: completes ? params.verifiedOutcome?.evidence.verificationRef : undefined,
     failureReason: reason,
   })
-  return {
+  const updated: AgentWorkflow = {
     ...workflow,
     steps: updatedSteps,
     status,
     completedAt: allCompleted ? new Date().toISOString() : undefined,
   }
+  carryAuthenticatedHistory(workflow, updated, stepId, completes ? params.verifiedOutcome : undefined)
+  return updated
 }
 
 function emitStepAuditEvent(
