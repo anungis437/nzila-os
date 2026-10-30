@@ -76,7 +76,7 @@
     "note": "Milestones and evidence are transcribed as prior claims; this run has not independently re-executed those proofs."
   },
   "lastInspectedBranch": "agents/ue-cursor-final-closure",
-  "lastInspectedCommit": "16d7731927f8aa1b3de7562d4bbb701ce9180cf4",
+  "lastInspectedCommit": "e9d614509e54d32380de9f1e82a565c2b9de5304",
   "summary": {
     "allRecordedDefects": 777,
     "bySeverity": {
@@ -86,7 +86,7 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 9,
+    "withCurrentRunSourceOrRegressionWork": 11,
     "closed": 0,
     "overallGO": false
   },
@@ -219,6 +219,18 @@
     {
       "sha": "16d7731927f8aa1b3de7562d4bbb701ce9180cf4",
       "description": "Correct workers-compensation vs arbitration deadline domain, fail closed on legal compliance claims and add route regressions."
+    },
+    {
+      "sha": "e2db2ee8910804327bc8c7e648a09957273c1ee4",
+      "description": "Deny generic analytics_metrics writes by READ_ONLY governance while retaining scoped reads; regression ratchet added and corrected."
+    },
+    {
+      "sha": "c1e51e59dd95f121597bee8887a154ae18186235",
+      "description": "Replace inert super-admin repair CRUD facade with authenticated system-admin-only explicit HTTP 501; no roster or fabricated repair."
+    },
+    {
+      "sha": "e9d614509e54d32380de9f1e82a565c2b9de5304",
+      "description": "Add source regression for admin repair role requirement, 501 and no membership CRUD; tests not yet CI verified."
     }
   ],
   "records": [
@@ -251,8 +263,23 @@
       "title": "The super-admin role repair route is the generic CRUD factory over organization_members; its documented repair does nothing and POST is refused.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/admin/fix-super-admin-roles/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/admin-role-repair-fail-closed.test.ts"
+        ],
+        "commits": [
+          "c1e51e59dd95f121597bee8887a154ae18186235",
+          "f13368e284092cbe52b7c450f4470778e7bfc462",
+          "e9d614509e54d32380de9f1e82a565c2b9de5304"
+        ],
+        "repair": "Removed misleading generic membership CRUD from administrator role repair route. GET and POST now require system_admin minimum and explicitly return HTTP 501; no roster disclosure or fake role repair success.",
+        "limits": "No governed privileged role restoration workflow yet. Source-level only, test and HTTP auth/runtime acceptance pending; human institutional authority cannot be inferred."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
     },
@@ -268,8 +295,23 @@
       "title": "The CLC organization analytics route is the generic CRUD factory over analytics_metrics, an OPERATIONAL table; any steward can create arbitrary analytics metric rows.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/lib/api/crud-governance.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/api/__tests__/crud-governance.test.ts"
+        ],
+        "commits": [
+          "e2db2ee8910804327bc8c7e648a09957273c1ee4",
+          "3bb0ac9b5d97c6ab73e5438746c0c9590c0035ac",
+          "bbbde40d6586405ae12da89c4764a04dfde80877"
+        ],
+        "repair": "Classified analytics_metrics as READ_ONLY, denying all generic metric writes while retaining tenant-scoped reads. Added regression ratchet for metric and refresh CRUD aliases.",
+        "limits": "Source-only; CI, PG15/16 and HTTP/browser not verified at this SHA. Governed metric ingestion and CLC reporting journeys remain unqualified."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
     },
@@ -14335,6 +14377,19 @@
     {
       "inspectedSha": "16d7731927f8aa1b3de7562d4bbb701ce9180cf4",
       "evidence": "WCB/arbitration source and unit regressions committed; exact-SHA CI pending. Previous weekly-summary patch ca6b9ee: App Floor and governance passed; full Vitest, native PG15/16, security and HTTP/browser still in progress when inspected. No independent legal or institutional validation.",
+      "source": "PATCHED",
+      "unit": "PENDING_EXACT_SHA",
+      "contract": "PENDING_EXACT_SHA",
+      "native": "PENDING_EXACT_SHA",
+      "security": "PENDING_EXACT_SHA",
+      "httpBrowser": "PENDING_EXACT_SHA",
+      "appFloor": "PENDING_EXACT_SHA",
+      "governance": "PENDING_EXACT_SHA",
+      "go": "NO_GO"
+    },
+    {
+      "inspectedSha": "e9d614509e54d32380de9f1e82a565c2b9de5304",
+      "evidence": "At previous d19cecf3: App Floor, governance, native PG15/16 and security PASS; full regression CANCELLED after subsequent commits, disposable HTTP/browser IN_PROGRESS when inspected. New analytics and admin-repair source/tests committed, exact-SHA CI not yet available. No 777-defect CLOSED or institutional acceptance.",
       "source": "PATCHED",
       "unit": "PENDING_EXACT_SHA",
       "contract": "PENDING_EXACT_SHA",
