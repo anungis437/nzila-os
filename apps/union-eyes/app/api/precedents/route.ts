@@ -32,10 +32,25 @@ import {
   standardErrorResponse,
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
+// DEF-0B11-PRP-PRECEDENT-COLLECTION-GET-TAKES-UNBOUNDED-LIMIT-AND-PAGE-FROM-THE-QUERY-STRING
+// Reject rather than silently clamp invalid pagination: a caller must not request an unbounded scan.
+function boundedPositiveInt(raw: string | null, fallback: number, max: number): number | null {
+  if (raw === null) return fallback;
+  if (!/^[1-9][0-9]{0,5}$/.test(raw)) return null;
+  const parsed = Number(raw);
+  return Number.isSafeInteger(parsed) && parsed <= max ? parsed : null;
+}
+
 export const GET = withRoleAuth('member', async (request, _context) => {
   try {
       const { searchParams } = new URL(request.url);
       
+      const page = boundedPositiveInt(searchParams.get("page"), 1, 10000);
+      const limit = boundedPositiveInt(searchParams.get("limit"), 20, 100);
+      if (page === null || limit === null) {
+        return NextResponse.json({ error: "Invalid pagination: page must be 1..10000 and limit 1..100" }, { status: 400 });
+      }
+
       // Check for special modes
       const statistics = searchParams.get("statistics") === "true";
       const mostCited = searchParams.get("mostCited") === "true";
@@ -49,14 +64,14 @@ export const GET = withRoleAuth('member', async (request, _context) => {
 
       // Return most cited
       if (mostCited) {
-        const limit = parseInt(searchParams.get("limit") || "10");
+        // Reuse validated, bounded collection limit.
         const precedents = await getMostCitedPrecedents(limit);
         return NextResponse.json({ precedents });
       }
 
       // Return by issue type
       if (issueType) {
-        const limit = parseInt(searchParams.get("limit") || "20");
+        // Reuse validated, bounded collection limit.
         const precedents = await getPrecedentsByIssueType(issueType, limit);
         return NextResponse.json({ precedents, count: precedents.length });
       }
@@ -127,10 +142,12 @@ export const GET = withRoleAuth('member', async (request, _context) => {
       }
 
       // Pagination
-      const page = parseInt(searchParams.get("page") || "1");
-      const limit = parseInt(searchParams.get("limit") || "20");
+      // Reuse validated, bounded collection page and limit.
       const sortBy = searchParams.get("sortBy") || "decisionDate";
-      const sortOrder = (searchParams.get("sortOrder") || "desc") as "asc" | "desc";
+      const sortOrder = searchParams.get("sortOrder") || "desc";
+      if (!["decisionDate", "citationCount", "createdAt"].includes(sortBy) || !["asc", "desc"].includes(sortOrder)) {
+        return NextResponse.json({ error: "Invalid sort field or order" }, { status: 400 });
+      }
 
       const result = await listPrecedents(filters, { page, limit, sortBy, sortOrder });
 

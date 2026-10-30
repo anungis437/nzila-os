@@ -51,6 +51,30 @@ describe('precedents route', () => {
     m.createPrecedentAudited.mockResolvedValue({ id: 'p4' });
   });
 
+  it('bounds pagination on all list modes before calling the service', async () => {
+    const { GET } = await loadRoute();
+    for (const suffix of [
+      '?limit=1000000', '?page=-1', '?page=1junk', '?limit=0',
+      '?mostCited=true&limit=999999', '?issueType=discipline&limit=101',
+      '?sortBy=unknown', '?sortOrder=sideways',
+    ]) {
+      const response = await GET(new NextRequest('http://localhost/api/precedents' + suffix));
+      expect(response.status, suffix).toBe(400);
+    }
+    expect(m.listPrecedents).not.toHaveBeenCalled();
+    expect(m.getMostCitedPrecedents).not.toHaveBeenCalled();
+    expect(m.getPrecedentsByIssueType).not.toHaveBeenCalled();
+  });
+
+  it('passes validated page and limit to the listing and bounded special modes', async () => {
+    const { GET } = await loadRoute();
+    expect((await GET(new NextRequest('http://localhost/api/precedents?page=2&limit=30'))).status).toBe(200);
+    expect(m.listPrecedents).toHaveBeenCalledWith(expect.any(Object), expect.objectContaining({ page: 2, limit: 30 }));
+    m.getMostCitedPrecedents.mockResolvedValue([]);
+    expect((await GET(new NextRequest('http://localhost/api/precedents?mostCited=true&limit=100'))).status).toBe(200);
+    expect(m.getMostCitedPrecedents).toHaveBeenCalledWith(100);
+  });
+
   it('returns precedent statistics', async () => {
     const { GET } = await loadRoute();
     const response = await GET(new NextRequest('http://localhost/api/precedents?statistics=true'));
