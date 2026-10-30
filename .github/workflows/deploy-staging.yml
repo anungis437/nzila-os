@@ -221,10 +221,13 @@ jobs:
       - name: ACR login
         run: az acr login --name nzilacanadaacr
 
-      - name: Deploy to staging
+      - name: Require real staging deployment implementation
         run: |
-          echo "Deploying artifact ${{ needs.build-artifact.outputs.artifact_digest }} to STAGING"
-          # Container image build & push for each service would go here
+          set -euo pipefail
+          # This emergency path has no image build/push or deployment. It must
+          # never pass by echoing a deployment or by probing a prior revision.
+          echo "::error::Emergency staging deployment is not implemented. Use the canonical GitOps deployer and obtain independent runtime evidence."
+          exit 1
 
       - name: Run smoke tests
         run: pnpm tsx scripts/release/run-smoke.ts --env staging --apps "${{ github.event.inputs.apps || 'all' }}"
