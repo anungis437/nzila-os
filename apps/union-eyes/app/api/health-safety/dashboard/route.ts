@@ -4,7 +4,6 @@
  * Returns { success: true, metrics: SafetyMetrics }.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 
@@ -38,16 +37,16 @@ export const GET = withApi(
     const dateFilter = sql`created_at >= ${startDate}::timestamptz`;
 
     try {
-    return await withRLSContext(async () => {
+    return await withRLSContext({ organizationId }, async (tx) => {
     const incidentRows = Array.from(
-        await db.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND ${dateFilter}`)
+        await tx.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND ${dateFilter}`)
       );
       const totalIncidents = Number((incidentRows[0] as Record<string, unknown>)?.cnt ?? 0);
 
       const startMs = new Date(startDate).getTime();
       const prevStart = new Date(startMs - (Date.now() - startMs)).toISOString();
       const prevRows = Array.from(
-        await db.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND created_at >= ${prevStart}::timestamptz AND created_at < ${startDate}::timestamptz`)
+        await tx.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND created_at >= ${prevStart}::timestamptz AND created_at < ${startDate}::timestamptz`)
       );
       const prevIncidents = Number((prevRows[0] as Record<string, unknown>)?.cnt ?? 0);
       const incidentChange = prevIncidents > 0
@@ -56,18 +55,18 @@ export const GET = withApi(
       const incidentTrend = incidentChange > 0 ? 'up' : incidentChange < 0 ? 'down' : 'stable';
 
       const hazardRows = Array.from(
-        await db.execute(sql`SELECT count(*)::int AS cnt FROM hazard_reports WHERE ${orgFilter} AND (status IS NULL OR status NOT IN ('resolved','closed'))`)
+        await tx.execute(sql`SELECT count(*)::int AS cnt FROM hazard_reports WHERE ${orgFilter} AND (status IS NULL OR status NOT IN ('resolved','closed'))`)
       );
       const openHazards = Number((hazardRows[0] as Record<string, unknown>)?.cnt ?? 0);
       const hazardTrend = openHazards > 3 ? 'up' : openHazards === 0 ? 'down' : 'stable';
 
       const inspDueRows = Array.from(
-        await db.execute(sql`SELECT count(*)::int AS cnt FROM safety_inspections WHERE ${orgFilter} AND ${dateFilter}`)
+        await tx.execute(sql`SELECT count(*)::int AS cnt FROM safety_inspections WHERE ${orgFilter} AND ${dateFilter}`)
       );
       const inspectionsDue = Number((inspDueRows[0] as Record<string, unknown>)?.cnt ?? 0);
 
       const inspCompRows = Array.from(
-        await db.execute(sql`SELECT count(*)::int AS cnt FROM safety_inspections WHERE ${orgFilter} AND status = 'completed' AND ${dateFilter}`)
+        await tx.execute(sql`SELECT count(*)::int AS cnt FROM safety_inspections WHERE ${orgFilter} AND status = 'completed' AND ${dateFilter}`)
       );
       const inspectionsCompleted = Number((inspCompRows[0] as Record<string, unknown>)?.cnt ?? 0);
       // No inspections in the period is not a 100% rate: it is no measurement.
@@ -76,7 +75,7 @@ export const GET = withApi(
         : null;
 
       const lastRows = Array.from(
-        await db.execute(sql`SELECT max(created_at)::text AS last_dt FROM workplace_incidents WHERE ${orgFilter}`)
+        await tx.execute(sql`SELECT max(created_at)::text AS last_dt FROM workplace_incidents WHERE ${orgFilter}`)
       );
       const lastDt = (lastRows[0] as Record<string, unknown>)?.last_dt as string | null;
       // No incident on record is not 90 days: it is no measurement.
@@ -85,7 +84,7 @@ export const GET = withApi(
         : null;
 
       const critRows = Array.from(
-        await db.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND severity = 'critical' AND status != 'closed'`)
+        await tx.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND severity = 'critical' AND status != 'closed'`)
       );
       const criticalAlerts = Number((critRows[0] as Record<string, unknown>)?.cnt ?? 0);
 
@@ -94,7 +93,7 @@ export const GET = withApi(
       const trainingCompliance = null;
 
       const ppeRows = Array.from(
-        await db.execute(sql`SELECT count(*)::int AS cnt FROM ppe_equipment WHERE ${orgFilter} AND quantity_in_stock < reorder_level`)
+        await tx.execute(sql`SELECT count(*)::int AS cnt FROM ppe_equipment WHERE ${orgFilter} AND quantity_in_stock < reorder_level`)
       );
       const ppeInventoryLow = Number((ppeRows[0] as Record<string, unknown>)?.cnt ?? 0);
 
