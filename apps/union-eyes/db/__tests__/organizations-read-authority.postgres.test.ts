@@ -226,6 +226,17 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
     expect(await ids(await descendants.GET(get(`/api/organizations/${FED}/descendants`), params(FED)))).toEqual([LOCAL_A, LOCAL_B].sort())
   })
 
+  it('ancestry denies foreign organizations and only projects authorized ancestors', async () => {
+    const { GET } = await import('../../app/api/organizations/[id]/ancestors/route')
+    as('member-b')
+    expect((await GET(get(`/api/organizations/${LOCAL_A}/ancestors`), params(LOCAL_A))).status).toBe(404)
+    as('member-a')
+    expect(await ids(await GET(get(`/api/organizations/${LOCAL_A}/ancestors`), params(LOCAL_A)))).toEqual([])
+    as('platform-1')
+    expect(await ids(await GET(get(`/api/organizations/${LOCAL_A}/ancestors`), params(LOCAL_A)))).toEqual([FED])
+    expect((await GET(get('/api/organizations/not-a-uuid/ancestors'), params('not-a-uuid'))).status).toBe(400)
+  })
+
   it('analytics is refused to a stranger (404) and a plain member (403), and given to an officer and to the administrator above', async () => {
     const { GET } = await import('../../app/api/organizations/[id]/analytics/route')
     for (const [user, status] of [['member-b', 404], ['member-a', 403], ['officer-a', 200], ['admin-fed', 200]] as const) {
