@@ -6,6 +6,7 @@ on:
       - 'apps/union-eyes/**'
       - 'tooling/scripts/ue-runtime-up.mjs'
       - 'tooling/scripts/lib/ue-disposable-container-ownership*.mjs'
+      - 'tooling/scripts/lib/ue-runtime-restart-handoff*.mjs'
       - '.github/workflows/ue-http-runtime.yml'
   workflow_dispatch:
 
@@ -31,6 +32,7 @@ jobs:
         run: |
           node --check tooling/scripts/ue-runtime-up.mjs
           node --check tooling/scripts/lib/ue-disposable-container-ownership.mjs
+          node --check tooling/scripts/lib/ue-runtime-restart-handoff.mjs
 
       - uses: ./.github/actions/setup-monorepo
 
@@ -48,6 +50,9 @@ jobs:
 
       - name: Verify disposable runtime ownership contracts
         run: node --test tooling/scripts/lib/ue-disposable-container-ownership.test.mjs
+
+      - name: Verify fresh restart filing hand-off fails closed
+        run: node --test tooling/scripts/lib/ue-runtime-restart-handoff.test.mjs
 
       - name: Assert this runner owns every disposable name and no local port is already bound
         shell: bash
