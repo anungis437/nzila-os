@@ -62,6 +62,18 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
     }
   });
 
+  it('treats the legacy event write alias as audited only while the canonical route remains tenant-scoped and atomically audited', () => {
+    const alias = readFileSync(join(ROOT, 'app', 'api', 'events', '[id]', 'route.ts'), 'utf8')
+    const canonical = readFileSync(join(ROOT, 'app', 'api', 'calendar', 'events', '[id]', 'route.ts'), 'utf8')
+    expect(alias).toMatch(/canonicalPATCH\\(request/)
+    expect(alias).toMatch(/canonicalDELETE\\(request/)
+    expect(alias).toMatch(/from ['"]@\\/app\\/api\\/calendar\\/events\\/\\[id\\]\\/route['"] /)
+    expect(canonical).toMatch(/withRLSContext\\(\\{ organizationId, userId \\}/)
+    expect(canonical).toMatch(/eq\\(calendarEvents\\.organizationId, organizationId\\)/)
+    expect((canonical.match(/await persistAtomicAudit\\(tx,/g) ?? []).length).toBe(2)
+    expect(fresh.find((e) => e.route === 'events/[id]/route.ts')?.audit).toBe('ATOMIC_SERVICE')
+  })
+
   it('never lets the audit gap grow: a new mutating route needs route-level atomic audit', () => {
     const current = fresh.filter(auditGap).map((e) => e.route)
     expect(current.filter((r) => !baselines.auditGap.includes(r))).toEqual([])
