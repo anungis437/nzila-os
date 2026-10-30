@@ -417,7 +417,8 @@
       "@opentelemetry/exporter-prometheus": ">=0.217.0",
       "websocket-driver": ">=0.7.5",
       "adm-zip": ">=0.6.1",
-      "@sentry/nextjs": "10.75.2"
+      "@sentry/nextjs": "10.75.2",
+      "@azure/msal-node@>=5.0.0-beta.0 <7.1.2": "7.1.2"
     }
   },
   "dependencies": {}
