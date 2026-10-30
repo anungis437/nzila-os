@@ -119,3 +119,29 @@ automatically attach successful security scan reports. The production verifier
 therefore refuses release until a trusted signing key and complete real
 evidence are supplied. No fabricated scan outputs or self-claimed PASS allowed.
 Human GitHub Environment approval is a separate requirement.
+
+
+## Promotion continuity hardening — implementation candidate
+
+The staging artifact manifest is now assembled **before** signing. Its exact raw
+SHA-256 is included in the signed release attestation, together with the
+staging GitHub Actions run ID. Production obtains the selected run's workflow
+name, successful conclusion, branch and exact commit from GitHub; it checks
+these against the release commit and re-downloads/re-verifies the same signed
+artifact set **after** the human production-environment approval. The
+production job cannot rely on files from the separate verification job.
+
+The previous provenance step incorrectly represented a 40-character Git SHA
+as a SHA-256 artifact digest; it now attests the downloaded SBOM file itself.
+This is **SBOM provenance only**, not container-image build provenance.
+The emergency staging job's previous echo-only deployment now fails closed.
+
+**Not yet independently certified:** the staging artifact builder does not
+build and publish the pinned container images, establish a deployed staging
+revision, or supply independently verified runtime and scan provenance.
+A signed manifest can establish integrity of recorded targets, but does not
+prove that those targets were built, scanned and exercised in staging.
+GitHub Environment reviewer enforcement must be verified by an administrator.
+Issue #1038 remains open and production promotion remains **HOLD** until these
+external proofs and the end-to-end release exercise are completed. A CI PASS
+must never be interpreted as production authorization.
