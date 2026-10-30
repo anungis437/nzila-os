@@ -243,7 +243,7 @@ describe('generic CRUD mass-assignment gate', () => {
   it('accepts only ordinary schema-backed business fields', () => {
     expect(assertGenericWritePayload({ name: 'Valid' }, table, options)).toEqual({ name: 'Valid' });
   });
-  it.each(['id', 'organizationId', 'createdBy', 'createdAt', 'updatedAt', 'status', 'unknownField'])('rejects caller-controlled %s', (field) => {
+  it.each(['id', 'organizationId', 'createdBy', 'createdAt', 'updatedAt', 'approvedBy', 'verifiedAt', 'status', 'unknownField'])('rejects caller-controlled %s', (field) => {
     expect(() => assertGenericWritePayload({ [field]: 'attacker' }, table, options)).toThrow();
   });
   it('rejects non-object payloads', () => {
