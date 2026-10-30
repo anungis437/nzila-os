@@ -86,13 +86,13 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 32,
+    "withCurrentRunSourceOrRegressionWork": 34,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 84,
-    "engineeringRemaining": 693,
+    "engineeringCorrected": 85,
+    "engineeringRemaining": 692,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 8
+    "engineeringPartial": 9
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -10206,8 +10206,23 @@
       "title": "DELETE /api/organizations/[id] lets the administrator of an organization set the status of that organization to archived with no further check, although the PATCH on the same route refuses any change of status unless the caller is a system administrator because lifecycle status defines the institution standing: the delete takes no reason or confirmation, does not look at child organizations (the parent_id foreign key restricts deletion, not archiving), does not require a second approver, and the archived status removes the organization from the canonical organization choices (only status active organizations are offered) and from the billing scheduler, so one organization administrator can take the whole organization out of service.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "PARTIAL_SOURCE_CONTAINMENT_WORKFLOW_OPEN",
+        "paths": [
+          "apps/union-eyes/app/api/organizations/[id]/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/organizations-id.route.test.ts"
+        ],
+        "commits": [
+          "897a33180dfb619572da0107ddee039bfee53bf8",
+          "d41a7f7a25d30c2bcff5f3e52d97ce8bec7123e0",
+          "24e3918ad395c2aacc9e319e5df3b7b6c893a60a"
+        ],
+        "repair": "Direct DELETE archival now refuses local administrators and returns explicit HTTP 501 even for platform administrators; no archive write occurs without an independent institutional approval workflow.",
+        "limits": "The durable two-person approval, reason, confirmation, descendant and billing lifecycle handling remain unimplemented; cannot count this as engineering-corrected or CLOSED."
+      },
+      "currentHeadVerification": "SOURCE_CONTAINED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
     },
@@ -10223,10 +10238,35 @@
       "title": "The organization-scoped guard that the item and roster routes call (requireUserForOrganization, through getUserContextForOrganization) finds the caller membership with only the user id and the organization id in the where clause, with no status and no deleted_at condition, so in the legacy (non-canonical) mode a member whose status is suspended or inactive, or whose row is soft-deleted, still passes as a member of the organization with the role the row keeps: they can read the full roster, update or archive the organization when the kept role is admin, and add roster members when it is steward or above; other lookups in organization-utils require status active.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/lib/api-auth-guard.ts",
+          "apps/union-eyes/lib/organizations/read-authority.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/__tests__/api-auth-guard.test.ts",
+          "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts"
+        ],
+        "commits": [
+          "50d2f3a96045eeafa8a242a54f24db6524d9b2dc",
+          "2be9b68141f26304a034d7ef1b27528870a8af88",
+          "ea998131eb3cbc0740a90fd3333e67c37d9539a7",
+          "e48698e53de62f9b23e9942b3a27fa33769aa014",
+          "1142b713293dd5d18553fec653b54fa767f5cee4"
+        ],
+        "repair": "Reject suspended, inactive, and removed memberships before organization read, roster, and role authority is granted.",
+        "limits": "Source and regression committed. Unit, PG15/16 and HTTP/browser validation pending at exact HEAD."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/lib/api-auth-guard.ts",
+        "explanation": "Legacy organization guards and role lookup require active membership and deleted_at IS NULL; shared organization read-authority also excludes soft-deleted membership. Adversarial unit and native PG regression added; CI not yet verified at current HEAD.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ORG-ROSTER-GET-ANY-ORGANIZATION-MEMBER-READS-FULL-ROSTER-WITH-CONTACT-DETAILS",
