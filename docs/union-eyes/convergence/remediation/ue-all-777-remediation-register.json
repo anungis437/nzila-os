@@ -37,8 +37,15 @@
       {
         "id": "P0-F2-TRANSITION-REASON-LEAK",
         "title": "SOURCE_DEFECT apps/union-eyes/app/api/cases/[caseId]/transition/route.ts",
-        "state": "NOT_ACCEPTED",
+        "state": "SOURCE_PATCHED_UNVERIFIED",
         "source": "apps/union-eyes/app/api/cases/[caseId]/transition/route.ts"
+      },
+      {
+        "id": "EVIDENCE-PACK-ARTIFACTS-IGNORED",
+        "title": "Union Eyes evidence bridge accepts artifacts but never forwards them to the os-core evidence builder; metadata-only pack can be sealed",
+        "state": "NOT_ACCEPTED",
+        "source": "apps/union-eyes/lib/evidence.ts",
+        "risk": "No claim that a caller-supplied artifact was preserved may be accepted without end-to-end proof"
       }
     ]
   },
@@ -55,7 +62,7 @@
     "note": "Milestones and evidence are transcribed as prior claims; this run has not independently re-executed those proofs."
   },
   "lastInspectedBranch": "agents/ue-cursor-final-closure",
-  "lastInspectedCommit": "e18fe8d979e2e6995bab783f331d0c011e7153b6",
+  "lastInspectedCommit": "78813ec4f8e17343ba266ecd08a4ffea9215e047",
   "summary": {
     "allRecordedDefects": 777,
     "bySeverity": {
@@ -106,6 +113,18 @@
     {
       "sha": "e18fe8d979e2e6995bab783f331d0c011e7153b6",
       "description": "Correct CLC SQL mock tenant fixture so predicate regression checks do not evaluate foreign rows excluded by real SQL"
+    },
+    {
+      "sha": "5001b524906131c19e9fff5a2752b6b965f177e6",
+      "description": "Remove confidential staff transition reason from member-visible case history message and metadata; retain restricted atomic audit"
+    },
+    {
+      "sha": "afc096cd3d403a30b27950abf1d805fa7cd4ffc2",
+      "description": "Add source-level regression ratchet for case transition reason privacy"
+    },
+    {
+      "sha": "78813ec4f8e17343ba266ecd08a4ffea9215e047",
+      "description": "Correct misleading evidence-pack comment after discovering bridge ignores supplied artifact payloads"
     }
   ],
   "records": [
@@ -14051,6 +14070,16 @@
     {
       "inspectedSha": "e18fe8d979e2e6995bab783f331d0c011e7153b6",
       "evidence": "GitHub Actions queued or running at time of ledger update",
+      "unit": "PENDING",
+      "contract": "PENDING",
+      "native": "PENDING",
+      "security": "PENDING",
+      "httpBrowser": "PENDING",
+      "go": "NO_GO"
+    },
+    {
+      "inspectedSha": "78813ec4f8e17343ba266ecd08a4ffea9215e047",
+      "evidence": "Source changes committed; exact-SHA CI verification not yet complete",
       "unit": "PENDING",
       "contract": "PENDING",
       "native": "PENDING",
