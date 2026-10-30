@@ -24,36 +24,35 @@ describe('health-safety/incidents route helpers', () => {
       expect(parsed.getMinutes()).toBe(30);
     });
 
-    it('falls back to now when incidentDate is missing or invalid', () => {
-      const iso = resolveIncidentDate({});
-      expect(() => new Date(iso).toISOString()).not.toThrow();
-      expect(new Date(iso).getTime()).toBeLessThanOrEqual(Date.now());
+    it('rejects missing or invalid incident dates instead of inventing an incident time', () => {
+      expect(() => resolveIncidentDate({})).toThrow();
+      expect(() => resolveIncidentDate({ incidentDate: 'not-a-date' })).toThrow();
+      expect(() => resolveIncidentDate({ incidentDate: '2026-03-15T00:00:00.000Z', incidentTime: '25:99' })).toThrow();
     });
   });
 
   describe('buildIncidentCreateValues', () => {
     it('maps every known client incidentType to a valid incidentType enum value', () => {
       for (const [incidentType, expected] of Object.entries(INCIDENT_TYPE_MAP)) {
-        const result = buildIncidentCreateValues({ incidentType, severity: 'minor', location: 'Site A', description: 'desc' });
+        const result = buildIncidentCreateValues({ incidentDate: '2026-03-15T10:00:00.000Z', incidentType, severity: 'minor', location: 'Site A', description: 'desc' });
         expect(result.incidentType).toBe(expected);
       }
     });
 
     it('maps every known client severity to a valid severity enum value', () => {
       for (const [severity, expected] of Object.entries(SEVERITY_MAP)) {
-        const result = buildIncidentCreateValues({ incidentType: 'other', severity, location: 'Site A', description: 'desc' });
+        const result = buildIncidentCreateValues({ incidentDate: '2026-03-15T10:00:00.000Z', incidentType: 'other', severity, location: 'Site A', description: 'desc' });
         expect(result.severity).toBe(expected);
       }
     });
 
-    it('falls back to other/minor for unrecognized values', () => {
-      const result = buildIncidentCreateValues({ incidentType: 'unknown', severity: 'unknown', location: 'Site A', description: 'desc' });
-      expect(result.incidentType).toBe('other');
-      expect(result.severity).toBe('minor');
+    it('rejects unrecognized incident types and severities rather than silently downgrading them', () => {
+      expect(() => buildIncidentCreateValues({ incidentDate: '2026-03-15T10:00:00.000Z', incidentType: 'unknown', severity: 'minor', location: 'Site A', description: 'desc' })).toThrow();
+      expect(() => buildIncidentCreateValues({ incidentDate: '2026-03-15T10:00:00.000Z', incidentType: 'other', severity: 'unknown', location: 'Site A', description: 'desc' })).toThrow();
     });
 
     it('maps location/description to schema column names', () => {
-      const result = buildIncidentCreateValues({
+      const result = buildIncidentCreateValues({ incidentDate: '2026-03-15T10:00:00.000Z',
         incidentType: 'injury',
         severity: 'minor',
         location: 'Loading dock',
@@ -66,17 +65,18 @@ describe('health-safety/incidents route helpers', () => {
     });
 
     it('generates an incidentNumber when the client does not supply one', () => {
-      const result = buildIncidentCreateValues({ incidentType: 'injury', severity: 'minor', location: 'Site A', description: 'desc' });
+      const result = buildIncidentCreateValues({ incidentDate: '2026-03-15T10:00:00.000Z', incidentType: 'injury', severity: 'minor', location: 'Site A', description: 'desc' });
       expect(result.incidentNumber).toMatch(/^INC-\d{4}-[0-9a-f-]{36}$/);
     });
 
-    it('preserves a client-supplied incidentNumber', () => {
-      const result = buildIncidentCreateValues({ incidentType: 'injury', severity: 'minor', location: 'Site A', description: 'desc', incidentNumber: 'INC-2020-000001' });
-      expect(result.incidentNumber).toBe('INC-2020-000001');
+    it('generates an authoritative incident number even if the caller supplies one', () => {
+      const result = buildIncidentCreateValues({ incidentDate: '2026-03-15T10:00:00.000Z', incidentType: 'injury', severity: 'minor', location: 'Site A', description: 'desc', incidentNumber: 'INC-2020-000001' });
+      expect(result.incidentNumber).not.toBe('INC-2020-000001');
+      expect(result.incidentNumber).toMatch(/^INC-\d{4}-[0-9a-f-]{36}$/);
     });
 
     it('suppresses reporter identity fields in metadata when isAnonymous is true', () => {
-      const result = buildIncidentCreateValues({
+      const result = buildIncidentCreateValues({ incidentDate: '2026-03-15T10:00:00.000Z',
         incidentType: 'injury',
         severity: 'minor',
         location: 'Site A',
@@ -85,13 +85,12 @@ describe('health-safety/incidents route helpers', () => {
         reportedBy: 'Jane Doe',
         reporterContact: 'jane@example.com',
       });
-      const metadata = result.metadata as Record<string, unknown>;
-      expect(metadata.reportedBy).toBeUndefined();
-      expect(metadata.reporterContact).toBeUndefined();
+      expect(result.reportedByName).toBeUndefined();
+      expect(result.metadata).toBeUndefined();
     });
 
     it('preserves organizationId and createdBy passed through by the crud factory', () => {
-      const result = buildIncidentCreateValues({
+      const result = buildIncidentCreateValues({ incidentDate: '2026-03-15T10:00:00.000Z',
         incidentType: 'injury',
         severity: 'minor',
         location: 'Site A',
@@ -104,15 +103,15 @@ describe('health-safety/incidents route helpers', () => {
     });
 
     it('rejects a submission with no location and no description at all', () => {
-      expect(() => buildIncidentCreateValues({ incidentType: 'injury', severity: 'minor' })).toThrow();
+      expect(() => buildIncidentCreateValues({ incidentDate: '2026-03-15T10:00:00.000Z', incidentType: 'injury', severity: 'minor' })).toThrow();
     });
 
     it('rejects a submission with a whitespace-only location', () => {
-      expect(() => buildIncidentCreateValues({ incidentType: 'injury', severity: 'minor', location: '   ', description: 'A real description' })).toThrow();
+      expect(() => buildIncidentCreateValues({ incidentDate: '2026-03-15T10:00:00.000Z', incidentType: 'injury', severity: 'minor', location: '   ', description: 'A real description' })).toThrow();
     });
 
     it('rejects a submission with a whitespace-only description', () => {
-      expect(() => buildIncidentCreateValues({ incidentType: 'injury', severity: 'minor', location: 'Site A', description: '   ' })).toThrow();
+      expect(() => buildIncidentCreateValues({ incidentDate: '2026-03-15T10:00:00.000Z', incidentType: 'injury', severity: 'minor', location: 'Site A', description: '   ' })).toThrow();
     });
   });
 });
