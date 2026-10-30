@@ -461,8 +461,16 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       async ({ request, organizationId, userId }) => {
         assertRequiredScope(organizationId, userId);
         const url = new URL(request.url);
-        const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
-        const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || String(defaultLimit))));
+        const rawPage = url.searchParams.get('page') ?? '1';
+        const rawLimit = url.searchParams.get('limit') ?? String(defaultLimit);
+        if (!/^[1-9]\\d*$/.test(rawPage) || !/^[1-9]\\d*$/.test(rawLimit)) {
+          throw ApiError.badRequest('Invalid pagination parameters');
+        }
+        const page = Number(rawPage);
+        const limit = Number(rawLimit);
+        if (!Number.isSafeInteger(page) || page > 10000 || !Number.isSafeInteger(limit) || limit > 100) {
+          throw ApiError.badRequest('Pagination out of bounds');
+        }
         const offset = (page - 1) * limit;
 
         const conditions: SQL[] = [];
