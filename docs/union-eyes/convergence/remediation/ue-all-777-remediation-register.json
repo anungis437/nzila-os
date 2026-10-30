@@ -62,7 +62,7 @@
     "note": "Milestones and evidence are transcribed as prior claims; this run has not independently re-executed those proofs."
   },
   "lastInspectedBranch": "agents/ue-cursor-final-closure",
-  "lastInspectedCommit": "78813ec4f8e17343ba266ecd08a4ffea9215e047",
+  "lastInspectedCommit": "37917374a90ab8703bff3c253fd1e496e9f30909",
   "summary": {
     "allRecordedDefects": 777,
     "bySeverity": {
@@ -72,7 +72,7 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 6,
+    "withCurrentRunSourceOrRegressionWork": 7,
     "closed": 0,
     "overallGO": false
   },
@@ -125,6 +125,18 @@
     {
       "sha": "78813ec4f8e17343ba266ecd08a4ffea9215e047",
       "description": "Correct misleading evidence-pack comment after discovering bridge ignores supplied artifact payloads"
+    },
+    {
+      "sha": "6713b21ee08bcc0145de0114cd890ccabee399ff",
+      "description": "Generic DELETE now rejects domain status enums without archived rather than generating a database 500 or silently hard-deleting bargaining history; dedicated lifecycle remains required."
+    },
+    {
+      "sha": "148b4b52bd4fdca29313068a9470b16228363797",
+      "description": "Route coverage scanner distinguishes read-only OAuth initiation from writes and pins audited canonical event delegation; adversarial ratchet added."
+    },
+    {
+      "sha": "37917374a90ab8703bff3c253fd1e496e9f30909",
+      "description": "Updated mutable 995-route coverage manifest for replaced dedicated routes; removed obsolete generic CRUD classification for confidential notes and OAuth connections. CI pending."
     }
   ],
   "records": [
@@ -909,7 +921,22 @@
       "title": "The generic CRUD delete sets status archived on any table with a status column, but the break_status, negotiation_status, proposal_status and arbitration_status enums contain no archived value, so deletion of those records cannot succeed as designed and the failure is not shown by any source.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
+      "currentRun": {
+        "source": [
+          "apps/union-eyes/lib/api/crud-factory.ts",
+          "apps/union-eyes/lib/api/crud-governance.ts"
+        ],
+        "tests": [
+          "apps/union-eyes/lib/api/__tests__/crud-governance.test.ts",
+          "apps/union-eyes/e2e/runtime/11-bargaining-proposals-tenant-scope.spec.ts"
+        ],
+        "note": "Source guard now denies generic DELETE for status enums without archived; does not implement a governed withdrawal/supersession journey. Earlier HTTP 500 confirmed at 7c28099; latest patch not yet runtime qualified.",
+        "engineeringHead": "37917374a90ab8703bff3c253fd1e496e9f30909",
+        "sourceState": "PATCHED_NOT_ACCEPTED",
+        "unitState": "PENDING_AT_EXACT_HEAD",
+        "nativeState": "PENDING_AT_EXACT_HEAD",
+        "runtimeState": "PENDING_AT_EXACT_HEAD"
+      },
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
@@ -1155,9 +1182,9 @@
         "tests": [
           "apps/union-eyes/e2e/runtime/11-bargaining-proposals-tenant-scope.spec.ts"
         ],
-        "note": "At a327f69, real HTTP test refused foreign GET/PATCH but foreign DELETE returned 500 rather than expected 403/404. No source fix proven; remains blocked.",
-        "engineeringHead": "e18fe8d979e2e6995bab783f331d0c011e7153b6",
-        "sourceState": "INSPECTED_OR_PATCHED_NOT_ACCEPTED",
+        "note": "Parent-organization predicates are present; 7c28099 real HTTP still returned 500 on foreign DELETE due unsupported archived proposal enum. Source now rejects unsupported generic delete before write, but full HTTP proof pending.",
+        "engineeringHead": "37917374a90ab8703bff3c253fd1e496e9f30909",
+        "sourceState": "PATCHED_NOT_ACCEPTED",
         "unitState": "PENDING_AT_EXACT_HEAD",
         "nativeState": "PENDING_AT_EXACT_HEAD",
         "runtimeState": "PENDING_AT_EXACT_HEAD"
@@ -14080,6 +14107,26 @@
     {
       "inspectedSha": "78813ec4f8e17343ba266ecd08a4ffea9215e047",
       "evidence": "Source changes committed; exact-SHA CI verification not yet complete",
+      "unit": "PENDING",
+      "contract": "PENDING",
+      "native": "PENDING",
+      "security": "PENDING",
+      "httpBrowser": "PENDING",
+      "go": "NO_GO"
+    },
+    {
+      "inspectedSha": "7c2809993ca8613681606a4387c2e32d0c17058a",
+      "evidence": "GitHub Actions completed: full regression run 40987741922, HTTP/browser run 40987741934, security 40987741969, native 40987741926, App Floor 40987741920, governance 40987741977",
+      "unit": "FAILED_3_TESTS_2_FILES_21185_PASSED_28_SKIPPED",
+      "contract": "PASS",
+      "native": "PASS",
+      "security": "PASS",
+      "httpBrowser": "FAILED_FOREIGN_BARGAINING_DELETE_HTTP_500_AND_SETTINGS_AUTH_TEST_HTTP_429",
+      "go": "NO_GO"
+    },
+    {
+      "inspectedSha": "37917374a90ab8703bff3c253fd1e496e9f30909",
+      "evidence": "Source and regression patches committed; exact-SHA Actions queued/pending at inspection; no runtime acceptance inferred",
       "unit": "PENDING",
       "contract": "PENDING",
       "native": "PENDING",
