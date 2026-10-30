@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 317,
-    "engineeringRemaining": 460,
+    "engineeringCorrected": 321,
+    "engineeringRemaining": 456,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 46
   },
@@ -2244,9 +2244,16 @@
         "repair": "Replaced predictable user-id state with signed 256-bit nonce, ten-minute expiry, provider/user/org binding and HttpOnly SameSite browser cookie; rejects missing/mismatched state before token exchange and clears browser state on terminal responses.",
         "limits": "Not counted as fully engineering-corrected: durable one-time nonce consumption across concurrent callbacks/instances is not yet implemented; exact-SHA CI and real provider acceptance pending."
       },
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B26-F12-VERIFIED-CREDITS-EDUCATION-ANALYTICS-CALENDAR",
+        "path": "apps/union-eyes/lib/external-calendar-sync/oauth-state.ts; apps/union-eyes/lib/external-calendar-sync/__tests__/oauth-state.test.ts; apps/union-eyes/app/api/calendar-sync/google/auth/route.ts; apps/union-eyes/app/api/calendar-sync/microsoft/auth/route.ts",
+        "explanation": "The OAuth state is an unpredictable signed value bound to the browser, provider, user and organization, expiring, carried in an HttpOnly cookie and verified before any token exchange; it fails closed without a signing key (upstream's change, existing test).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CALENDAR-CALLBACK-GET-WRITES-TOKENS-NO-AUDIT",
@@ -4407,9 +4414,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B26-F12-VERIFIED-CREDITS-EDUCATION-ANALYTICS-CALENDAR",
+        "path": "apps/union-eyes/app/api/education/registrations/route.ts; apps/union-eyes/app/api/education/registrations/__tests__/route.test.ts",
+        "explanation": "A registration forces the member identity and the registered state and ignores every client-sent completion, payment, attendance, grade, certification and subsidy field; its course and session must belong to the organization (upstream's change, existing test).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-EDU-REGISTRATION-NO-CAPACITY-DUPLICATE-OR-SESSION-COURSE-CHECK",
@@ -4483,9 +4497,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B26-F12-VERIFIED-CREDITS-EDUCATION-ANALYTICS-CALENDAR",
+        "path": "apps/union-eyes/app/api/education/certifications/route.ts; apps/union-eyes/lib/api/__tests__/f12-education-certification.contract.test.ts",
+        "explanation": "A certification is created only from a completed, passed registration of the organization for a course that issues one, as a pending candidate with no verifier, verification date, badge or certificate URL (upstream's change). Only a source contract pins it; the route has no behavioural test.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-EDU-GLOBAL-UNIQUE-CODES-ACROSS-ORGANIZATIONS",
@@ -12049,9 +12070,16 @@
         ]
       },
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B26-F12-VERIFIED-CREDITS-EDUCATION-ANALYTICS-CALENDAR",
+        "path": "apps/union-eyes/app/api/organizations/[id]/analytics/route.ts; apps/union-eyes/app/api/__tests__/organizations-id-analytics.route.test.ts; apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "explanation": "The analytics route answers 404 to a caller with no read authority over the organization named in the path and is officer-level for those who have it (batch B11 and upstream, existing tests including real SQL).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ORG-ANALYTICS-METRIC-QUERIES-RUN-IN-SESSION-ORGANIZATION-CONTEXT-FILTERED-BY-PATH-ID-RETURNING-ZEROS",

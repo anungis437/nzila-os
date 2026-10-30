@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 317,
+ "corrected": 321,
  "partial": 46,
- "outstanding": 460,
- "accountedFor": 460,
+ "outstanding": 456,
+ "accountedFor": 456,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -253,24 +253,24 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 110,
+   "defects": 106,
    "severity": {
-    "HIGH": 10,
+    "HIGH": 6,
     "MEDIUM": 73,
     "LOW": 27
    },
-   "namedRoutes": 16,
+   "namedRoutes": 15,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 6,
     "0B.2": 1,
     "0B.3": 3,
-    "0B.4": 9,
+    "0B.4": 8,
     "0B.5": 19,
-    "0B.6": 19,
+    "0B.6": 17,
     "0B.7": 11,
     "0B.8": 14,
-    "0B.9": 2,
+    "0B.9": 1,
     "0B.10": 8,
     "0B.11": 7,
     "0B.12": 11
@@ -1788,10 +1788,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B4-CALENDAR-OAUTH-STATE-IS-USER-ID",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B4-CALENDAR-EVENT-CALENDAR-ID-UNVERIFIED",
     "severity": "MEDIUM"
    },
@@ -1900,16 +1896,8 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B6-EDU-REGISTRATION-MEMBER-SETS-COMPLETION-FEE-AND-APPROVAL-FIELDS",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B6-EDU-REGISTRATION-NO-CAPACITY-DUPLICATE-OR-SESSION-COURSE-CHECK",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-EDU-CERTIFICATION-ISSUED-WITHOUT-COMPLETION-OR-VERIFICATION",
-    "severity": "HIGH"
    },
    {
     "id": "DEF-0B6-EDU-CRON-QUERIES-REFERENCE-COLUMNS-ABSENT-FROM-SCHEMA",
@@ -2078,10 +2066,6 @@
    {
     "id": "DEF-0B9-ASM-OCI-PATHS-WRAP-THE-OCRA-HANDLERS-BEHIND-AN-ORG-ACCESS-FUNCTION-THAT-RETURNS-TRUE-FOR-EVERY-REQUEST",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B9-ORG-ANALYTICS-ANY-SIGNED-IN-USER-READS-ANY-ORGANIZATION-NAME-TYPE-CHILD-COUNT-AND-AGGREGATES-BY-PATH-ID",
-    "severity": "HIGH"
    },
    {
     "id": "DEF-0B10-ORG-NLRB-AND-LABOUR-BOARD-FILING-ROUTES-RECORD-NO-FILING-AND-TRANSMIT-NOTHING",

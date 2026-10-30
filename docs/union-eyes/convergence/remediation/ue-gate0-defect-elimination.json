@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 265,
+    "implementedPendingQualification": 269,
     "partial": 45,
     "qualificationVerified": 0,
-    "unresolved": 512,
+    "unresolved": 508,
     "externalBlockers": 0
   },
   "batches": [
@@ -240,6 +240,15 @@
       "newlyImplemented": 10,
       "outstandingAfter": 512,
       "partial": 2,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B26-F12-VERIFIED-CREDITS-EDUCATION-ANALYTICS-CALENDAR",
+      "family": "F12: route-specific defects already repaired in source, credited only where an existing or new test pins the repair",
+      "outstandingBefore": 512,
+      "newlyImplemented": 4,
+      "outstandingAfter": 508,
+      "partial": 0,
       "evidenceCommit": null
     }
   ],
@@ -3226,6 +3235,45 @@
         "apps/union-eyes/app/api/__tests__/dispatch-assignment.pglite.test.ts"
       ],
       "explanation": "Dispatch assignment verifies the request and every worker id against the organization with the request locked, proven on real SQL (batch B12)."
+    },
+    "DEF-0B6-EDU-REGISTRATION-MEMBER-SETS-COMPLETION-FEE-AND-APPROVAL-FIELDS": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B26-F12-VERIFIED-CREDITS-EDUCATION-ANALYTICS-CALENDAR",
+      "files": [
+        "apps/union-eyes/app/api/education/registrations/route.ts",
+        "apps/union-eyes/app/api/education/registrations/__tests__/route.test.ts"
+      ],
+      "explanation": "A registration forces the member identity and the registered state and ignores every client-sent completion, payment, attendance, grade, certification and subsidy field; its course and session must belong to the organization (upstream's change, existing test)."
+    },
+    "DEF-0B6-EDU-CERTIFICATION-ISSUED-WITHOUT-COMPLETION-OR-VERIFICATION": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B26-F12-VERIFIED-CREDITS-EDUCATION-ANALYTICS-CALENDAR",
+      "files": [
+        "apps/union-eyes/app/api/education/certifications/route.ts",
+        "apps/union-eyes/lib/api/__tests__/f12-education-certification.contract.test.ts"
+      ],
+      "explanation": "A certification is created only from a completed, passed registration of the organization for a course that issues one, as a pending candidate with no verifier, verification date, badge or certificate URL (upstream's change). Only a source contract pins it; the route has no behavioural test."
+    },
+    "DEF-0B9-ORG-ANALYTICS-ANY-SIGNED-IN-USER-READS-ANY-ORGANIZATION-NAME-TYPE-CHILD-COUNT-AND-AGGREGATES-BY-PATH-ID": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B26-F12-VERIFIED-CREDITS-EDUCATION-ANALYTICS-CALENDAR",
+      "files": [
+        "apps/union-eyes/app/api/organizations/[id]/analytics/route.ts",
+        "apps/union-eyes/app/api/__tests__/organizations-id-analytics.route.test.ts",
+        "apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts"
+      ],
+      "explanation": "The analytics route answers 404 to a caller with no read authority over the organization named in the path and is officer-level for those who have it (batch B11 and upstream, existing tests including real SQL)."
+    },
+    "DEF-0B4-CALENDAR-OAUTH-STATE-IS-USER-ID": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B26-F12-VERIFIED-CREDITS-EDUCATION-ANALYTICS-CALENDAR",
+      "files": [
+        "apps/union-eyes/lib/external-calendar-sync/oauth-state.ts",
+        "apps/union-eyes/lib/external-calendar-sync/__tests__/oauth-state.test.ts",
+        "apps/union-eyes/app/api/calendar-sync/google/auth/route.ts",
+        "apps/union-eyes/app/api/calendar-sync/microsoft/auth/route.ts"
+      ],
+      "explanation": "The OAuth state is an unpredictable signed value bound to the browser, provider, user and organization, expiring, carried in an HttpOnly cookie and verified before any token exchange; it fails closed without a signing key (upstream's change, existing test)."
     }
   }
 }
