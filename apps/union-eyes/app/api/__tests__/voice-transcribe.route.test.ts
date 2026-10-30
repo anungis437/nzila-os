@@ -108,6 +108,10 @@ describe('voice/transcribe route', () => {
       language: 'fr-CA',
       success: true,
     });
+    // DEF-0B12-PLT-VOICE-TRANSCRIBE-RETURNS-THE-FILE-SIZE-IN-BYTES-AS-THE-DURATION
+    // Neither bytes nor a guessed duration may be reported as a measured audio duration.
+    expect(payload).not.toHaveProperty('duration');
+    expect(payload).not.toHaveProperty('durationSeconds');
   });
 
   it('returns internal error when transcription throws', async () => {

@@ -6,6 +6,7 @@ import {
   WORKSPACE_CLIENT_TELEMETRY_EVENTS,
   WORKSPACE_TELEMETRY_PAYLOAD_KEYS,
   isAllowedTelemetryRoute,
+  WORKSPACE_TABS,
   type WorkspaceClientTelemetryEvent,
 } from "@/components/workspace/workspace-config";
 
@@ -29,6 +30,8 @@ import {
 
 const ALLOWED_EVENTS = new Set<string>(WORKSPACE_CLIENT_TELEMETRY_EVENTS);
 const ALLOWED_PAYLOAD_KEYS = new Set<string>(WORKSPACE_TELEMETRY_PAYLOAD_KEYS);
+const ALLOWED_TABS = new Set<string>(WORKSPACE_TABS.map(tab => tab.id));
+const MAX_BODY_BYTES = 2048;
 
 function sanitizePayload(input: unknown): Record<string, string> {
   const safe: Record<string, string> = {};
@@ -44,18 +47,54 @@ function sanitizePayload(input: unknown): Record<string, string> {
       }
       continue;
     }
-    safe[key] = value;
+    if (key === "tab") {
+      if (ALLOWED_TABS.has(value)) safe.tab = value;
+      continue;
+    }
+    // The client does not attest to event time or workspace identity.
+    // Accept neither an arbitrary timestamp nor a forged workspace name.
   }
 
-  // Workspace identifier is always canonical.
   safe.workspace = WORKSPACE_ID;
+  safe.timestamp = new Date().toISOString();
   return safe;
 }
 
 export const POST = withRoleAuth("member", async (req) => {
   try {
-    const body = await req.json();
-    const event = body?.event as string | undefined;
+    // Bound the actual streamed body, not only Content-Length (which can be absent or forged).
+    const declaredLength = Number(req.headers.get("content-length") ?? "0");
+    if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
+      return NextResponse.json({ error: "Telemetry payload too large" }, { status: 413 });
+    }
+    const reader = req.body?.getReader();
+    const decoder = new TextDecoder();
+    let raw = "";
+    let total = 0;
+    if (reader) {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        total += value.byteLength;
+        if (total > MAX_BODY_BYTES) {
+          await reader.cancel();
+          return NextResponse.json({ error: "Telemetry payload too large" }, { status: 413 });
+        }
+        raw += decoder.decode(value, { stream: true });
+      }
+      raw += decoder.decode();
+    }
+    let body: Record<string, unknown>;
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        return NextResponse.json({ error: "Invalid telemetry payload" }, { status: 400 });
+      }
+      body = parsed as Record<string, unknown>;
+    } catch {
+      return NextResponse.json({ error: "Invalid telemetry JSON" }, { status: 400 });
+    }
+    const event = body.event;
 
     if (!event || !ALLOWED_EVENTS.has(event)) {
       return NextResponse.json(
@@ -64,7 +103,7 @@ export const POST = withRoleAuth("member", async (req) => {
       );
     }
 
-    const payload = sanitizePayload(body?.payload);
+    const payload = sanitizePayload(body.payload);
 
     logger.info("[workspace/telemetry] event", {
       event: event as WorkspaceClientTelemetryEvent,
