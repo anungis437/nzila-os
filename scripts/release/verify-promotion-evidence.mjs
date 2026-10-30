@@ -94,6 +94,11 @@ export function verifyPromotionEvidence({ directory, expectedCommit, expectedRun
   // then app, then name. Reject conflicting aliases and duplicate resolved
   // identities: otherwise a signed manifest can describe two images for the
   // same destination and a later selector may silently choose a different one.
+  // Azure Container Apps destinations are canonical lowercase resource names.
+  // Reject control characters, escapes, lookalikes, and ambiguous aliases even
+  // when the manifest itself carries a valid signature.
+  const canonicalContainerAppName = id => typeof id === 'string' &&
+    /^[a-z](?!.*--)[a-z0-9-]{0,30}[a-z0-9]$/.test(id)
   const seenTargets = new Set()
   if (!Array.isArray(manifest.deployTargets) || !manifest.deployTargets.length ||
       manifest.deployTargets.some(target => {
@@ -102,8 +107,7 @@ export function verifyPromotionEvidence({ directory, expectedCommit, expectedRun
           .filter(key => target[key] !== undefined && target[key] !== null)
           .map(key => target[key])
         if (!identities.length || identities.some(id =>
-          typeof id !== 'string' || !id.trim() || id !== id.trim() ||
-          /[\\x00-\\x1f\\x7f]/.test(id)) || new Set(identities).size !== 1) return true
+          !canonicalContainerAppName(id)) || new Set(identities).size !== 1) return true
         const identity = identities[0]
         if (seenTargets.has(identity)) return true
         seenTargets.add(identity)

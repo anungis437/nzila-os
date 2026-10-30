@@ -129,6 +129,23 @@ test('conflicting target identity aliases are rejected before promotion', () => 
     assert.throws(() => x.verify(), /conflicting/)
   } finally { x.cleanup() }
 })
+test('signed destination identities must be canonical Azure Container App names', () => {
+  const x = makeFixture()
+  try {
+    for (const name of [
+      'demo\nother', 'demo\rother', 'demo\u0000evil', 'demo\u007fevil',
+      'demo\\nother', 'Demo', 'demo/other', 'demo--other',
+      '-demo', 'demo-', 'd', 'a'.repeat(33),
+    ]) {
+      x.manifest.deployTargets = [{ name, image: IMAGE }]
+      x.write()
+      assert.throws(() => x.verify(), /deployment target is absent, mutable or conflicting/, name)
+    }
+    x.manifest.deployTargets = [{ name: 'demo-prod-2', image: IMAGE }]
+    x.write()
+    assert.equal(x.verify().targetCount, 1)
+  } finally { x.cleanup() }
+})
 test('non-CycloneDX SBOM rejected', () => {
   const x = makeFixture()
   try {
