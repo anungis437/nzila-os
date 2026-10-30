@@ -126,18 +126,13 @@ export function buildIncidentCreateValues(values: Record<string, unknown>): Reco
     correctiveActionsRequired: Boolean(raw.correctiveActions),
     organizationId: raw.organizationId,
     createdBy: raw.createdBy,
-    metadata: {
-      rawIncidentType: incidentType,
-      injuriesOccurred: raw.injuriesOccurred,
-      injuryDetails: raw.injuryDetails,
-      witnessesPresent: raw.witnessesPresent,
-      witnessNames: raw.witnessNames,
-      witnessContacts: raw.witnessContacts,
-      preventiveMeasures: raw.preventiveMeasures,
-      isAnonymous: raw.isAnonymous,
-      reportedBy: raw.isAnonymous ? undefined : raw.reportedBy,
-      reporterContact: raw.isAnonymous ? undefined : raw.reporterContact,
-    },
+    injuredPersonName: raw.injuredPersonName,
+    bodyPartAffected: raw.bodyPartAffected,
+    injuryNature: raw.injuryNature,
+    treatmentProvided: raw.treatmentProvided,
+    witnessesPresent: raw.witnessesPresent,
+    witnessNames: raw.witnessNames,
+    witnessStatements: raw.witnessStatements,
   };
 }
 
@@ -155,10 +150,12 @@ const { GET, POST } = crudRoutes({
     'incidentType', 'severity', 'locationDescription', 'description',
     'departmentName', 'rootCauseAnalysis', 'correctiveActionsSummary',
     'isAnonymous', 'reportedByName', 'workplaceName', 'whatHappened',
-    'witnessesPresent', 'witnessNames', 'immediateActionsToken', 'incidentDate',
+    'witnessesPresent', 'witnessNames', 'witnessStatements',
+    'injuredPersonName', 'bodyPartAffected', 'injuryNature', 'treatmentProvided',
+    'immediateActionsToken', 'incidentDate',
   ],
   beforeCreate: (values) => buildIncidentCreateValues(values),
   // A report filed as anonymous is not attributed to the session user in the row or the audit entry.
-  anonymousCreate: (values) => (values.metadata as { isAnonymous?: unknown } | undefined)?.isAnonymous === true,
+  anonymousCreate: (values) => values.isAnonymous === true,
 });
 export { GET, POST };
