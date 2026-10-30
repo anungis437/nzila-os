@@ -235,6 +235,36 @@ export function enforceCreateSecurityInvariants(
  * whatever platform-only flow was supposed to be the only writer of that
  * column (e.g. `verifiedOrganizationId`, FSM-governed `status`).
  */
+/** Restrict generic writes to real schema columns and prevent client assignment of
+ * framework-owned identity, tenancy, attribution and lifecycle metadata. */
+const FACTORY_MANAGED_FIELDS = new Set([
+  'organizationId', 'createdBy', 'updatedBy', 'deletedBy',
+  'createdAt', 'updatedAt', 'deletedAt', 'archivedAt',
+]);
+
+export function assertGenericWritePayload(
+  body: unknown,
+  table: PgTable,
+  options: { primaryKey: string; ownerColumn?: string; parentColumn?: string; blockedFields?: string[] },
+): Record<string, unknown> {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    throw ApiError.badRequest('A JSON object is required');
+  }
+  const payload = body as Record<string, unknown>;
+  const forbidden = new Set([
+    ...FACTORY_MANAGED_FIELDS, options.primaryKey,
+    ...(options.ownerColumn ? [options.ownerColumn] : []),
+    ...(options.parentColumn ? [options.parentColumn] : []),
+    ...(options.blockedFields ?? []),
+  ]);
+  for (const key of Object.keys(payload)) {
+    if (!getColumn(table, key) || forbidden.has(key)) {
+      throw ApiError.badRequest(`Field ${key} cannot be assigned through generic CRUD`);
+    }
+  }
+  return { ...payload };
+}
+
 export function stripBlockedPatchFields(
   body: unknown,
   guard: { pk: string; orgScoped: boolean; blockedPatchFields: string[] },
@@ -495,10 +525,11 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       },
       async ({ body, organizationId, userId }) => {
         assertRequiredScope(organizationId, userId);
-        const values: Record<string, unknown> =
-          body && typeof body === 'object' && !Array.isArray(body)
-            ? { ...(body as Record<string, unknown>) }
-            : {};
+        const values = assertGenericWritePayload(body, table, {
+          primaryKey: resolvedPk,
+          ownerColumn: opts.ownerColumn,
+          blockedFields: blockedPatchFields,
+        });
 
         if (orgScoped && orgCol && organizationId) {
           values.organizationId = organizationId;
@@ -616,7 +647,13 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           ...(opts.ownerColumn ? [opts.ownerColumn] : []),
           ...(getColumn(table, 'createdBy') ? ['createdBy'] : []),
         ];
-        let updates = stripBlockedPatchFields(body, { pk: resolvedPk, orgScoped, blockedPatchFields: protectedFields });
+        const checkedUpdates = assertGenericWritePayload(body, table, {
+          primaryKey: resolvedPk,
+          ownerColumn: opts.ownerColumn,
+          parentColumn: opts.parentScope?.column,
+          blockedFields: protectedFields,
+        });
+        let updates = stripBlockedPatchFields(checkedUpdates, { pk: resolvedPk, orgScoped, blockedPatchFields: protectedFields });
 
         // Fail closed BEFORE opening a transaction or running any hook: a
         // merge column can only ever be safely converted into a JSONB
