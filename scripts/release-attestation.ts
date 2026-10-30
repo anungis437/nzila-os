@@ -39,6 +39,10 @@ export interface ReleaseAttestation {
   sloGateResult: 'pass' | 'fail' | 'skipped'
   /** SHA-256 digest of the SBOM file (null if not available) */
   sbomDigest: string | null
+  /** Raw staging manifest SHA-256, binding deploy target image digests to signature */
+  manifestDigest: string | null
+  /** GitHub Actions run ID of the staging artifact build */
+  stagingRunId: string | null
   /** Trivy vulnerability scan summary */
   trivySummary: TrivySummary
   /** Secret scan summary */
@@ -113,6 +117,12 @@ function computeSbomDigest(): string | null {
     }
   }
   return null
+}
+
+function computeManifestDigest(): string | null {
+  const path = join(ROOT, 'artifact-manifest.json')
+  if (!existsSync(path)) return null
+  return createHash('sha256').update(readFileSync(path)).digest('hex')
 }
 
 function parseTrivyResults(): TrivySummary {
@@ -284,6 +294,8 @@ export function generateReleaseAttestation(opts: GenerateAttestationOptions): Re
     contractTestResult: opts.contractTestResult ?? 'skipped',
     sloGateResult: opts.sloGateResult ?? 'skipped',
     sbomDigest: computeSbomDigest(),
+    manifestDigest: computeManifestDigest(),
+    stagingRunId: process.env.GITHUB_RUN_ID ?? null,
     trivySummary: parseTrivyResults(),
     secretScanSummary: parseSecretScanResults(),
     artifactDigests: computeArtifactDigests(),
