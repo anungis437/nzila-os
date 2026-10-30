@@ -14,8 +14,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@azure/storage-blob": "^12.26.0",
-    "zod": "^3.24.0"
+    "@azure/storage-blob": "^12.26.0"
   },
   "devDependencies": {
     "@types/node": "^25",

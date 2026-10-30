@@ -3912,9 +3912,6 @@ importers:
 
   packages/ai-sdk:
     dependencies:
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
     devDependencies:
       '@types/node':
         specifier: ^25
@@ -3973,9 +3970,6 @@ importers:
       '@azure/storage-blob':
         specifier: ^12.26.0
         version: 12.31.0
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
     devDependencies:
       '@types/node':
         specifier: ^25
@@ -5109,8 +5103,8 @@ importers:
   packages/fx:
     dependencies:
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@types/node':
         specifier: ^25
@@ -5358,8 +5352,8 @@ importers:
   packages/hq-domain:
     dependencies:
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@nzila/config':
         specifier: workspace:*
@@ -7533,8 +7527,8 @@ importers:
         specifier: workspace:*
         version: link:../db
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@types/node':
         specifier: ^25
