@@ -194,6 +194,14 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Forbidden: requires admin role' }, { status: 403 })
   }
 
+  // Archiving changes institutional standing. Local administrators cannot retire their own organization.
+  // The same platform-governance authority required for PATCH status transitions is mandatory here.
+  try {
+    await requireSystemAdmin()
+  } catch {
+    return NextResponse.json({ error: 'Forbidden: organization archival requires platform governance' }, { status: 403 })
+  }
+
   const archived = await withRLSContext(async (tx) => {
     const [row] = await tx
       .update(organizations)
