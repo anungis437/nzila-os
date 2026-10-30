@@ -204,7 +204,7 @@ function auditOf(route: string, source: string, guard: RouteGuard, mutating: boo
   // the manifest ratchet checks both the delegate and the canonical audited implementation.
   if (route === 'events/[id]/route.ts' &&
       /from ['"]@\\/app\\/api\\/calendar\\/events\\/\\[id\\]\\/route['"]/.test(source) &&
-      /canonicalPATCH\\(request/.test(source) && /canonicalDELETE\\(request/.test(source)) {
+      /canonicalPATCH\(request/.test(source) && /canonicalDELETE\(request/.test(source)) {
     return 'ATOMIC_SERVICE'
   }
   if (guard === 'CRUD_FACTORY') return 'CRUD_ATOMIC'
