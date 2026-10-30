@@ -36,10 +36,11 @@ describe('member directory access policy', () => {
       unionJoinDate: new Date('2019-01-01'), createdAt: new Date('2018-01-01'), metadata: { compensation: 1, medical: 'x' },
     };
     const limited = projectDirectoryMember(row, { scope: 'case-context', includeSensitive: false });
-    expect(limited).toMatchObject({ hireDate: null, seniority: null, unionJoinDate: null, metadata: {} });
+    expect(limited).toMatchObject({ hireDate: null, seniority: null, unionJoinDate: null, metadata: {}, membershipNumber: '' });
     const full = projectDirectoryMember(row, { scope: 'organization', includeSensitive: true });
     expect(full.metadata).toEqual({ compensation: 1, medical: 'x' });
     expect(full.seniority).toBe(9);
+    expect(full.membershipNumber).toBe('M1');
   });
 });
 
