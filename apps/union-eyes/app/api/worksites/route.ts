@@ -12,6 +12,8 @@ const { GET, POST } = crudRoutes({
   tags: ["Organization"],
   orgScoped: true,
   readRole: 'member',
+  // The site manager's name, e-mail and telephone, the notes and the custom fields are working records, not a directory entry.
+  omitFromResponse: ['siteManagerName', 'siteManagerEmail', 'siteManagerPhone', 'notes', 'customFields'],
   writeRole: 'steward',
 });
 export { GET, POST };

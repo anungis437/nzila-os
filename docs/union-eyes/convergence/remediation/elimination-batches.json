@@ -2896,6 +2896,175 @@
           "explanation": "The program enrolment item answers 501 for every method, so a program id can no longer rewrite or delete a training course."
         }
       ]
+    },
+    {
+      "id": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
+      "family": "F04: a generic CRUD route names the fields a body may write and the columns a response omits, and a path that the factory cannot serve answers 501 instead of refusing every request under another name",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B12-CRUD-BARGAINING-UNIT-CERTIFICATION-AND-REPRESENTATION-FIELDS-WRITABLE-BY-ANY-STEWARD",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/units/route.ts",
+            "apps/union-eyes/app/api/units/[id]/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f04-factory-fields.contract.test.ts"
+          ],
+          "explanation": "A create accepts an allow-list that excludes certification, representation, status and count fields, and a PATCH blocks them; they have no source yet.",
+          "remaining": "No dedicated route records a certification or changes representation, so those fields are unwritable until one exists."
+        },
+        {
+          "prefix": "DEF-0B12-CRUD-BARGAINING-UNIT-ROWS-READABLE-BY-ANY-MEMBER-WITH-CERTIFICATION-NOTES-AND-CUSTOM-FIELDS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/units/route.ts",
+            "apps/union-eyes/app/api/units/[id]/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f04-factory-fields.contract.test.ts"
+          ],
+          "explanation": "Notes and custom fields are omitted from every unit response."
+        },
+        {
+          "prefix": "DEF-0B12-CRUD-WORKSITE-ROWS-READABLE-BY-ANY-MEMBER-WITH-SITE-MANAGER-CONTACT-AND-NOTES",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/worksites/route.ts",
+            "apps/union-eyes/app/api/worksites/[id]/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f04-factory-fields.contract.test.ts"
+          ],
+          "explanation": "The site manager's name, e-mail and telephone, the notes and the custom fields are omitted from every worksite response."
+        },
+        {
+          "prefix": "DEF-0B12-CRUD-WCB-ASSESSMENT-PREMIUM-AND-PAYROLL-READABLE-BY-ANY-STEWARD",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/wcb/assessments/route.ts",
+            "apps/union-eyes/app/api/wcb/assessments/[id]/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f04-factory-fields.contract.test.ts"
+          ],
+          "explanation": "The assessment (premium rate, assessable payroll, premium due) is read at the officer floor."
+        },
+        {
+          "prefix": "DEF-0B12-CRUD-WCB-CLAIM-ROUTES-ARE-CONFIGURED-FOR-STEWARDS-AND-DENIED-FOR-EVERY-CALLER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/wcb/claims/route.ts",
+            "apps/union-eyes/app/api/wcb/claims/[id]/route.ts",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "The WCB claim routes answer 501 explicitly instead of refusing every request through the governance denial; the table no longer has a generic route and its governance entry was removed."
+        },
+        {
+          "prefix": "DEF-0B11-SOC-FEED-ROUTE-SERVES-THE-COMMUNICATIONS-CAMPAIGNS-TABLE-TO-ANY-MEMBER-AS-A-SOCIAL-FEED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/social-media/feed/route.ts",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "The feed answers 501; it was the generic factory over the communications campaigns table."
+        },
+        {
+          "prefix": "DEF-0B7-EXP-EXTERNAL-DATA-ROUTES-REFUSE-EVERY-REQUEST-AND-MISNAMED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/external-data/route.ts",
+            "apps/union-eyes/app/api/external-data/lrb/route.ts",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "Both routes answer 501 (they were the factory over external accounts under a labour-board name, refused for every caller)."
+        },
+        {
+          "prefix": "DEF-0B8-ICRA-API-KEYS-ROUTES-REFUSE-EVERY-REQUEST-WHILE-THE-AUTHORITY-REGISTER-CALLS-THEM-LIVE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/integrations/api-keys/route.ts",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "The API-key route answers 501 explicitly: no key is issued, listed or revoked through it."
+        },
+        {
+          "prefix": "DEF-0B9-ASM-ONBOARDING-ROOT-IS-PENDING-PROFILES-REFUSED-BY-GOVERNANCE-WHILE-THE-ONBOARDING-FORM-POSTS-TO-IT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/onboarding/route.ts",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "The onboarding root answers 501 instead of refusing every form submission through the governance denial of the pending-profiles table."
+        },
+        {
+          "prefix": "DEF-0B7-EXP-REPORT-WRITES-ANY-STEWARD-ANY-FIELD",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/reports/route.ts",
+            "apps/union-eyes/app/api/reports/[id]/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f04-factory-fields.contract.test.ts"
+          ],
+          "explanation": "A report body writes only name, description, type, category, configuration and template reference; creator, counters, last run, organization and template flag are the server's."
+        },
+        {
+          "prefix": "DEF-0B3-BULK-IMPORT-INERT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/members/bulk/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f04-factory-fields.contract.test.ts"
+          ],
+          "explanation": "The bulk member route answers 501 for POST and GET rather than reporting an operation it never performed (upstream's change)."
+        },
+        {
+          "prefix": "DEF-0B2-UPDATE-ROLE-INERT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/admin/update-role/route.ts",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+            "apps/union-eyes/lib/api/__tests__/f04-factory-fields.contract.test.ts"
+          ],
+          "explanation": "The update-role route answers 501 and returns no roster rows (batch B09)."
+        },
+        {
+          "prefix": "DEF-0B1-FIX-SUPER-ADMIN-INERT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/admin/fix-super-admin-roles/route.ts",
+            "apps/union-eyes/app/api/__tests__/admin-role-repair-fail-closed.test.ts",
+            "apps/union-eyes/lib/api/__tests__/f04-factory-fields.contract.test.ts"
+          ],
+          "explanation": "The role-repair route answers 501 at the system-administrator floor and no roster is exposed (upstream's change, existing test)."
+        },
+        {
+          "prefix": "DEF-0B9-MOB-PUSH-DEVICE-REGISTRATION-REQUIRES-A-STEWARD-SO-A-MEMBER-DEVICE-IS-REFUSED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/mobile/devices/route.ts"
+          ],
+          "explanation": "The person who holds the phone registers it at the member floor, every row is the caller's own, and the token is never returned (batch B02)."
+        },
+        {
+          "prefix": "DEF-0B11-IDS-STORAGE-POST-INSERTS-A-CALLER-WRITTEN-MEDIA-ROW-WITH-ANY-FILE-URL-SIZE-AND-UPLOADER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/storage/usage/route.ts",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "The storage routes answer 501 (batch B15); no caller-written media row is inserted."
+        },
+        {
+          "prefix": "DEF-0B12-CRUD-TAX-PATHS-SERVE-THE-PER-CAPITA-REMITTANCE-LEDGER-TO-ANY-MEMBER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/api/crud-governance.ts",
+            "apps/union-eyes/lib/api/__tests__/crud-governance.test.ts"
+          ],
+          "explanation": "The per-capita remittance ledger is DENIED for every generic read and write, and the tax paths no longer read it (upstream's change, existing test)."
+        },
+        {
+          "prefix": "DEF-0B12-CRUD-TAX-SLIP-RL1-T106-AND-COPE-RECEIPT-PATHS-ISSUE-NOTHING-AND-REFUSE-EVERY-WRITE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/tax/t106/route.ts",
+            "apps/union-eyes/app/api/tax/slips/route.ts"
+          ],
+          "explanation": "The slip, RL-1, T106 and COPE receipt paths answer 501 (upstream's change); a slip is not issued by any route."
+        }
+      ]
     }
   ]
 }

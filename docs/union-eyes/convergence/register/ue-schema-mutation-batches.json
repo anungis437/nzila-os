@@ -3219,7 +3219,7 @@
       "defects": [
         "TABLE_ABSENT"
       ],
-      "reachable": true,
+      "reachable": false,
       "djangoDefined": false,
       "blockers": [
         "table-absent"

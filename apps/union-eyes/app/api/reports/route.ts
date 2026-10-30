@@ -13,6 +13,7 @@ const { GET, POST } = crudRoutes({
   orgScoped: true,
   // A report definition names the data sources and filters it reads, and the registry executes only at an officer floor.
   readRole: 'steward',
+  writableFields: ['name', 'description', 'reportType', 'category', 'config', 'templateId'],
   writeRole: 'steward',
 });
 export { GET, POST };

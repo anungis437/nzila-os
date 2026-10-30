@@ -35,6 +35,8 @@ describe('worksites item route', () => {
       orgScoped: true,
       itemRoute: true,
       readRole: 'member',
+      // The site manager's contact and the working notes are omitted from every response (batch B24).
+      omitFromResponse: ['siteManagerName', 'siteManagerEmail', 'siteManagerPhone', 'notes', 'customFields'],
       writeRole: 'steward',
     });
   });

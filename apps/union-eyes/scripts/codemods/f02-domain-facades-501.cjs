@@ -95,6 +95,13 @@ const FACADES = {
   'reports/scheduled': 'the generic CRUD factory over report definitions (no schedule row, recipient or next run exists behind it)',
   'reports/scheduled/[id]': 'the generic CRUD factory over report definitions (a definition item under a schedule name; its DELETE removed the report)',
   'reports/datasources/sample': 'the generic CRUD factory over report definitions (no sample rows are read from any data source)',
+  'wcb/claims': 'the generic CRUD factory over WCB claims, which the governance policy denies for every caller (so it refused every request)',
+  'wcb/claims/[id]': 'the generic CRUD factory over WCB claims, which the governance policy denies for every caller (so it refused every request)',
+  'social-media/feed': 'the generic CRUD factory over the communications campaigns table (no social post or feed exists behind it)',
+  'external-data': 'the generic CRUD factory over external accounts, which the governance policy denies for every caller (so it refused every request)',
+  'external-data/lrb': 'the generic CRUD factory over external accounts under a labour-board name (no labour-board data is read)',
+  'integrations/api-keys': 'the generic CRUD factory over integration API keys, which the governance policy denies for every caller (so it refused every request)',
+  'onboarding': 'the generic CRUD factory over the pre-signup pending-profiles table, which the governance policy denies, while the onboarding form posts to it (so every submission was refused)',
   'events/[id]/occurrences': 'a byte-for-byte copy of the event item route, so its path value was the event, not an occurrence',
 }
 

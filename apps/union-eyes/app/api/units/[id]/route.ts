@@ -14,5 +14,8 @@ const { GET, PATCH, DELETE } = crudRoutes({
   itemRoute: true,
   readRole: 'member',
   writeRole: 'steward',
+  omitFromResponse: ['notes', 'customFields'],
+  // Certification, representation and lifecycle facts come from the certification and the roster, not from a steward's body.
+  blockedPatchFields: ['certificationNumber', 'certificationDate', 'certificationBody', 'certificationExpiryDate', 'currentCollectiveAgreementId', 'chiefStewardId', 'bargainingChairId', 'status', 'memberCount', 'archivedAt'],
 });
 export { GET, PATCH, DELETE };

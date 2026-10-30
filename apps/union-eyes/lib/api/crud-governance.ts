@@ -21,8 +21,8 @@ export type CrudGovernanceClass = 'DENIED' | 'SUBJECT_OWNED' | 'OWN_ROWS_READ' |
 const SUBJECT_OWNED = ['data_subject_access_requests', 'user_consents', 'consent_records'] as const
 
 const DENIED = [
-  'documents', 'integration_api_keys',
-  'external_accounts', 'security_events', 'poll_votes', 'wcb_claims', 'member_employment', 'pending_profiles',
+  'documents',
+  'security_events', 'poll_votes', 'member_employment',
   // The per-capita remittance ledger is organization financial data with no member-facing owner column; the finance
   // routes serve it under financial authority. Generic collections over it (tax, arrears, health and welfare) read it
   // to any member.

@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 292,
-    "engineeringRemaining": 485,
+    "engineeringCorrected": 307,
+    "engineeringRemaining": 470,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 44
+    "engineeringPartial": 45
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -393,7 +393,14 @@
       },
       "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
+        "path": "apps/union-eyes/app/api/admin/fix-super-admin-roles/route.ts; apps/union-eyes/app/api/__tests__/admin-role-repair-fail-closed.test.ts; apps/union-eyes/lib/api/__tests__/f04-factory-fields.contract.test.ts",
+        "explanation": "The role-repair route answers 501 at the system-administrator floor and no roster is exposed (upstream's change, existing test).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B1-CLC-ANALYTICS-WRITABLE",
@@ -973,9 +980,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
+        "path": "apps/union-eyes/app/api/admin/update-role/route.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts; apps/union-eyes/lib/api/__tests__/f04-factory-fields.contract.test.ts",
+        "explanation": "The update-role route answers 501 and returns no roster rows (batch B09).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B2-ANALYTICS-CRUD-FACADE",
@@ -1464,9 +1478,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
+        "path": "apps/union-eyes/app/api/members/bulk/route.ts; apps/union-eyes/lib/api/__tests__/f04-factory-fields.contract.test.ts",
+        "explanation": "The bulk member route answers 501 for POST and GET rather than reporting an operation it never performed (upstream's change).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B3-ARBITRATION-DECISION-SUBRESOURCES-FACADE",
@@ -7588,9 +7609,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
+        "path": "apps/union-eyes/app/api/reports/route.ts; apps/union-eyes/app/api/reports/[id]/route.ts; apps/union-eyes/lib/api/__tests__/f04-factory-fields.contract.test.ts",
+        "explanation": "A report body writes only name, description, type, category, configuration and template reference; creator, counters, last run, organization and template flag are the server's.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-EXP-REPORT-HARD-DELETE-AUDIT-NAMES-NO-FIELDS",
@@ -7726,9 +7754,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
+        "path": "apps/union-eyes/app/api/external-data/route.ts; apps/union-eyes/app/api/external-data/lrb/route.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "Both routes answer 501 (they were the factory over external accounts under a labour-board name, refused for every caller).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-BEARER-LINK-NOT-BOUND-TO-GRANT",
@@ -9042,9 +9077,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
+        "path": "apps/union-eyes/app/api/integrations/api-keys/route.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "The API-key route answers 501 explicitly: no key is issued, listed or revoked through it.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-ICRA-SHOPIFY-DISCOUNT-CODE-NEVER-MATCHES-THE-WEBHOOK-EXTRACTOR",
@@ -11249,9 +11291,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
+        "path": "apps/union-eyes/app/api/onboarding/route.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "The onboarding root answers 501 instead of refusing every form submission through the governance denial of the pending-profiles table.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ASM-ONBOARDING-ROOT-ORG-SCOPE-NO-OP-ON-PENDING-PROFILES",
@@ -15440,9 +15489,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
+        "path": "apps/union-eyes/app/api/social-media/feed/route.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "The feed answers 501; it was the generic factory over the communications campaigns table.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-IDS-STEWARD-ASSIGNMENT-ROWS-READABLE-BY-ANY-MEMBER-WITH-PERSONAL-PHONE-NOTES-AND-GRIEVANCE-LINK",
@@ -15870,9 +15926,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
+        "path": "apps/union-eyes/app/api/storage/usage/route.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "The storage routes answer 501 (batch B15); no caller-written media row is inserted.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-IDS-SUPPORT-METRICS-AND-SLA-ROUTES-SERVE-NOTIFICATION-ROWS-NOT-SUPPORT-FIGURES",
@@ -16039,9 +16102,16 @@
         ]
       },
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
+        "path": "apps/union-eyes/lib/api/crud-governance.ts; apps/union-eyes/lib/api/__tests__/crud-governance.test.ts",
+        "explanation": "The per-capita remittance ledger is DENIED for every generic read and write, and the tax paths no longer read it (upstream's change, existing test).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-CRUD-TAX-SLIP-RL1-T106-AND-COPE-RECEIPT-PATHS-ISSUE-NOTHING-AND-REFUSE-EVERY-WRITE",
@@ -16056,9 +16126,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
+        "path": "apps/union-eyes/app/api/tax/t106/route.ts; apps/union-eyes/app/api/tax/slips/route.ts",
+        "explanation": "The slip, RL-1, T106 and COPE receipt paths answer 501 (upstream's change); a slip is not issued by any route.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-CRUD-TESTIMONIAL-ITEM-WRITES-ARE-CONDITIONED-ON-THE-ID-ALONE-FOR-AN-ADMIN-OF-ANY-ORGANIZATION",
@@ -16153,9 +16230,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
+        "path": "apps/union-eyes/app/api/units/route.ts; apps/union-eyes/app/api/units/[id]/route.ts; apps/union-eyes/lib/api/__tests__/f04-factory-fields.contract.test.ts",
+        "explanation": "Notes and custom fields are omitted from every unit response.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-CRUD-BARGAINING-UNIT-CERTIFICATION-AND-REPRESENTATION-FIELDS-WRITABLE-BY-ANY-STEWARD",
@@ -16170,9 +16254,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
+        "path": "apps/union-eyes/app/api/units/route.ts; apps/union-eyes/app/api/units/[id]/route.ts; apps/union-eyes/lib/api/__tests__/f04-factory-fields.contract.test.ts",
+        "explanation": "A create accepts an allow-list that excludes certification, representation, status and count fields, and a PATCH blocks them; they have no source yet.",
+        "remaining": "No dedicated route records a certification or changes representation, so those fields are unwritable until one exists.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-CRUD-WORKSITE-ROWS-READABLE-BY-ANY-MEMBER-WITH-SITE-MANAGER-CONTACT-AND-NOTES",
@@ -16187,9 +16279,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
+        "path": "apps/union-eyes/app/api/worksites/route.ts; apps/union-eyes/app/api/worksites/[id]/route.ts; apps/union-eyes/lib/api/__tests__/f04-factory-fields.contract.test.ts",
+        "explanation": "The site manager's name, e-mail and telephone, the notes and the custom fields are omitted from every worksite response.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-CRUD-UNIT-AND-WORKSITE-FOREIGN-KEYS-ARE-TAKEN-FROM-THE-BODY-WITHOUT-AN-ORGANIZATION-CHECK",
@@ -16221,9 +16320,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
+        "path": "apps/union-eyes/app/api/wcb/claims/route.ts; apps/union-eyes/app/api/wcb/claims/[id]/route.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "The WCB claim routes answer 501 explicitly instead of refusing every request through the governance denial; the table no longer has a generic route and its governance entry was removed.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-CRUD-WCB-ASSESSMENT-PREMIUM-AND-PAYROLL-READABLE-BY-ANY-STEWARD",
@@ -16238,9 +16344,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
+        "path": "apps/union-eyes/app/api/wcb/assessments/route.ts; apps/union-eyes/app/api/wcb/assessments/[id]/route.ts; apps/union-eyes/lib/api/__tests__/f04-factory-fields.contract.test.ts",
+        "explanation": "The assessment (premium rate, assessable payroll, premium due) is read at the officer floor.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-PLT-KPI-SUMMARY-GIVES-EVERY-MEMBER-THE-CALCULATION-ALERT-RECIPIENTS-AND-CREATOR-OF-EVERY-TARGET",
