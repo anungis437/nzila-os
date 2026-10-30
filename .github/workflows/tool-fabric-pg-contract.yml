@@ -52,7 +52,23 @@ jobs:
           set -euo pipefail
           psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/001_trust_ledger_pg.sql
           psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/002_trust_ledger_pg_immutability.sql
+          psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/003_trust_ledger_pg_commit_guard.sql
       - name: Verify append-only receipts and monotonic head CAS on live PostgreSQL
         run: |
           set -euo pipefail
           psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/test_trust_ledger_pg.sql
+      - name: Prove durable append and orphan denial across PostgreSQL sessions
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/test_trust_ledger_pg_durable.sql
+          # This is a NEW psql process/connection. It verifies committed rows,
+          # not a database restart, PITR, external witness, or broker authority.
+          observed="$(psql -X -At -v ON_ERROR_STOP=1 -c "SELECT
+            s.revision = 2 AND s.head_hash = repeat('2',64)
+            AND (SELECT count(*) FROM tool_fabric_trust_entry e
+                 WHERE e.stream_id = s.stream_id) = 2
+            AND (SELECT entry_hash FROM tool_fabric_trust_entry e
+                 WHERE e.stream_id = s.stream_id AND e.seq = 2) = repeat('2',64)
+            FROM tool_fabric_trust_stream s
+            WHERE s.stream_id = 'platform:tool-fabric:trust'")"
+          test "$observed" = "t"
