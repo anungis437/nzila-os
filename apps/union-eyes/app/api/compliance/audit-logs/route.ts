@@ -15,14 +15,21 @@ export const GET = withApi(
   async ({ organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.forbidden('Organization audit context required');
     return withRLSContext({ organizationId, userId }, async (tx) => {
-    const rows = await tx
-      .select()
-      .from(auditLogs)
-      .where(eq(auditLogs.organizationId, organizationId!))
-      .orderBy(desc(auditLogs.createdAt))
-      .limit(100);
-    await persistAtomicAudit(tx, { organizationId, userId, action: 'compliance.audit_log.read', resourceType: 'audit_logs', resourceId: organizationId, details: { count: rows.length } });
-    return rows;
+      const rows = await tx
+        .select()
+        .from(auditLogs)
+        .where(eq(auditLogs.organizationId, organizationId))
+        .orderBy(desc(auditLogs.createdAt))
+        .limit(100);
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'compliance.audit_log.read',
+        resourceType: 'audit_logs',
+        resourceId: organizationId,
+        details: { count: rows.length },
+      });
+      return rows;
     });
   },
 );
