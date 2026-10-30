@@ -13,7 +13,7 @@
  * INV-01: All AI calls routed through @nzila/ai-sdk via getAiClient()
  */
 
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { exitInterviews, exitInterviewEvents, knowledgeBase } from '@/db/schema';
 import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -29,7 +29,7 @@ import { logger } from '@/lib/logger';
 import type { ExitInterview } from '@/db/schema';
 
 // Sensitivity levels that bypass RAG indexing regardless of consent
-const INDEXING_BLOCKED_SENSITIVITY = new Set(['legal_sensitive', 'executive_confidential'] as const);
+const INDEXING_BLOCKED_SENSITIVITY = new Set(['privileged', 'legal_sensitive', 'executive_confidential'] as const);
 
 async function generateEmbedding(text: string, _orgId?: string): Promise<number[]> {
   const cached = await embeddingCache.getCachedEmbedding(text, 'ai-sdk');
@@ -107,6 +107,15 @@ export async function indexExitInterview(
         .update(exitInterviews)
         .set({ indexingStatus: 'skipped', updatedAt: new Date() })
         .where(and(eq(exitInterviews.id, interviewId), eq(exitInterviews.organizationId, orgId)));
+      // Suppress any pre-existing indexed copy once consent or classification
+      // disallows future retrieval. Keep retained evidence for legal-hold review.
+      await tx.update(knowledgeBase)
+        .set({ isActive: false, updatedAt: new Date() })
+        .where(and(
+          eq(knowledgeBase.organizationId, orgId),
+          eq(knowledgeBase.sourceType, 'exit_interview'),
+          eq(knowledgeBase.sourceId, interviewId),
+        ));
       await audit(tx, 'exit_interview.index.skipped', { reason });
       return { indexed: false, reason };
     });
@@ -200,10 +209,15 @@ export async function indexExitInterview(
             eq(exitInterviews.id, interviewId),
             eq(exitInterviews.organizationId, orgId),
             eq(exitInterviews.status, 'published'),
+            // The consent/classification check is repeated at the commit
+            // boundary. If withdrawn while embedding ran, this throws and
+            // rolls back the KB upsert in the same transaction.
+            eq(exitInterviews.consentGranted, true),
+            inArray(exitInterviews.sensitivityLevel, ['public_internal', 'restricted']),
           ),
         )
         .returning({ id: exitInterviews.id });
-      if (!marked) throw new Error('Interview is no longer published');
+      if (!marked) throw new Error('Interview no longer permits semantic indexing; knowledge-base write rolled back');
 
       if (options.eventNotes) {
         await tx.insert(exitInterviewEvents).values({

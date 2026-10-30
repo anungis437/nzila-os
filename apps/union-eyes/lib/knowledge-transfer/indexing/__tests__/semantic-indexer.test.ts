@@ -31,7 +31,7 @@ vi.mock('@/db/schema', () => ({
   exitInterviewEvents: new Proxy({}, { get: (_t, p) => String(p) }),
   knowledgeBase: new Proxy({}, { get: (_t, p) => String(p) }),
 }));
-vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a }));
+vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a, inArray: (...a: unknown[]) => a }));
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: () => ({ embed: h.embed }),
   UE_APP_KEY: 'ue', UE_SYSTEM_ORG_ID: 'sys', UE_PROFILES: { EMBEDDINGS: 'emb' },
@@ -121,6 +121,24 @@ describe('lib/knowledge-transfer/indexing/semantic-indexer', () => {
     expect((result as { reason: string }).reason).toContain('blocks indexing');
     expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'exit_interview.index.skipped' }), 'success');
     expect(h.operation).not.toHaveBeenCalled();
+  });
+
+  it('does not embed privileged content despite an old generic consent flag', async () => {
+    h.queue.push([interview({ sensitivityLevel: 'privileged', consentGranted: true })], undefined);
+    const result = await indexExitInterview('i1', 'org-1', 'user-1');
+    expect(result.indexed).toBe(false);
+    expect(h.operation).not.toHaveBeenCalled();
+    expect(h.embed).not.toHaveBeenCalled();
+  });
+
+  it('enforces the latest consent and sensitivity again at the final database commit', async () => {
+    const { readFileSync } = await import('node:fs');
+    const { resolve } = await import('node:path');
+    const src = readFileSync(resolve(__dirname, '../semantic-indexer.ts'), 'utf8');
+    const mutation = src.slice(src.indexOf('const [marked] = await tx'), src.indexOf('if (!marked)'));
+    expect(mutation).toContain('eq(exitInterviews.consentGranted, true)');
+    expect(mutation).toContain("inArray(exitInterviews.sensitivityLevel, ['public_internal', 'restricted'])");
+    expect(src).toContain("eq(knowledgeBase.sourceId, interviewId)");
   });
 
   it('skips when consent not granted and sends nothing to the AI provider', async () => {
