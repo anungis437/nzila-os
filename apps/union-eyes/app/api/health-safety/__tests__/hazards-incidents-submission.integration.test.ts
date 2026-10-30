@@ -163,6 +163,7 @@ describe('health-safety hazards/incidents submission — role gating', () => {
 
     const res = await POST(postRequest('http://localhost/api/health-safety/incidents', {
       incidentType: 'injury',
+      incidentDate: '2026-10-29T13:00:00.000Z',
       severity: 'minor',
       location: 'Loading dock',
       description: 'Worker slipped on wet floor',
@@ -197,6 +198,7 @@ describe('health-safety hazards/incidents submission — role gating', () => {
 
     const res = await POST(postRequest('http://localhost/api/health-safety/incidents', {
       incidentType: 'injury',
+      incidentDate: '2026-10-29T13:00:00.000Z',
       severity: 'minor',
       location: 'Loading dock',
       description: 'Worker slipped on wet floor',
@@ -231,6 +233,7 @@ describe('health-safety hazards/incidents submission — role gating', () => {
 
     const response = await POST(postRequest('http://localhost/api/health-safety/incidents', {
       incidentType: 'injury',
+      incidentDate: '2026-10-29T13:00:00.000Z',
       severity: 'minor',
       location: 'Loading dock',
       description: 'Worker slipped on wet floor',
@@ -285,6 +288,7 @@ describe('health-safety hazards/incidents submission — role gating', () => {
 
     await POST(postRequest('http://localhost/api/health-safety/incidents', {
       incidentType: 'injury',
+      incidentDate: '2026-10-29T13:00:00.000Z',
       severity: 'minor',
       location: 'Loading dock',
       description: 'Worker slipped on wet floor',
@@ -319,11 +323,50 @@ describe('health-safety hazards/incidents submission — role gating', () => {
     m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep'));
     const capture = mockInsertCapture();
     const response = await POST(postRequest('http://localhost/api/health-safety/incidents', {
-      incidentType: 'injury', severity: 'minor', location: 'Dock A',
+      incidentType: 'injury',
+      incidentDate: '2026-10-29T13:00:00.000Z', severity: 'minor', location: 'Dock A',
       locationDescription: 'Dock B', description: 'Worker slipped',
     }));
     expect(response.status).toBe(400);
     expect(capture()).toBeUndefined();
+  });
+
+  it('6c. refuses missing or invalid incident dates rather than inventing the reporting time', async () => {
+    const { POST } = await import('../incidents/route');
+    m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep'));
+    const capture = mockInsertCapture();
+    for (const bad of [undefined, 'not-a-date']) {
+      const body: Record<string, unknown> = {
+        incidentType: 'near_miss', severity: 'near_miss',
+        location: 'Line 3', description: 'Guard missing on press',
+      };
+      if (bad !== undefined) body.incidentDate = bad;
+      const response = await POST(postRequest('http://localhost/api/health-safety/incidents', body));
+      expect(response.status).toBe(400);
+      expect(capture()).toBeUndefined();
+    }
+  });
+
+  it('6d. preserves fatal severity, structured injury and witness fields without hiding them in metadata', async () => {
+    const { POST } = await import('../incidents/route');
+    m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep'));
+    const capture = mockInsertCapture();
+    const response = await POST(postRequest('http://localhost/api/health-safety/incidents', {
+      incidentType: 'fall', severity: 'fatal', incidentDate: '2026-10-29T13:00:00.000Z',
+      location: 'Line 3', description: 'Fall from height',
+      injuredPersonName: 'Protected Person', bodyPartAffected: 'head',
+      injuryNature: 'other', treatmentProvided: 'Emergency response',
+      witnessesPresent: true, witnessNames: ['Witness One'],
+    }));
+    expect(response.status).toBe(200);
+    expect(capture()).toMatchObject({
+      organizationId: ORG_A, incidentType: 'fall', severity: 'fatal',
+      injuredPersonName: 'Protected Person', bodyPartAffected: 'head',
+      treatmentProvided: 'Emergency response', witnessesPresent: true,
+      witnessNames: ['Witness One'],
+    });
+    expect(JSON.stringify(capture()?.metadata ?? {})).not.toContain('Protected Person');
+    expect(JSON.stringify(capture()?.metadata ?? {})).not.toContain('Witness One');
   });
 
   it('7. malformed required input (no location, no description) is rejected — never silently normalized into a valid record', async () => {
@@ -347,6 +390,7 @@ describe('health-safety hazards/incidents submission — role gating', () => {
 
     const res = await POST(postRequest('http://localhost/api/health-safety/incidents', {
       incidentType: 'injury',
+      incidentDate: '2026-10-29T13:00:00.000Z',
       severity: 'minor',
     }));
 
