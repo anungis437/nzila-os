@@ -48,7 +48,7 @@ import type { NextRequest } from "next/server";
 import createIntlMiddleware from 'next-intl/middleware';
 import { locales, defaultLocale } from './lib/locales';
 import { CRON_API_ROUTES, isPublicRoute as isPublicApiRoute } from './lib/public-routes';
-import { decideApiLimit, isGuardExempt, logDegradedOnce, presentedCredential } from './lib/rate-limit/proxy-api-guard';
+import { decideApiLimit, isDisposableQaRateProfile, isGuardExempt, logDegradedOnce, presentedCredential } from './lib/rate-limit/proxy-api-guard';
 import { checkRateLimit, RATE_LIMITS } from './lib/rate-limiter';
 
 // Edge-safe logger — os-core's createLogger uses Node.js APIs (process.stdout,
@@ -290,6 +290,14 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
           shared: checkRateLimit,
           memory: (await import('@nzila/os-core/rateLimit')).checkRateLimit,
           onDegraded: (info) => logDegradedOnce((message, context) => logger.warn(message, { ...context, requestId }), info),
+          profile: isDisposableQaRateProfile({
+            environment: process.env.UE_ENVIRONMENT,
+            qaTestEnv: process.env.QA_TEST_ENV,
+            syntheticSession: process.env.PLAYWRIGHT_TEST_AUTH,
+            hostname: req.nextUrl.hostname,
+            hostHeader: req.headers.get('host'),
+            forwardedHost: req.headers.get('x-forwarded-host'),
+          }) ? 'disposable-qa' : 'standard',
         },
       );
       limiterMode.set(req, limit.mode);

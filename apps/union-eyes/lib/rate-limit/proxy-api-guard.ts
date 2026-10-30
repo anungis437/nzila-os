@@ -37,6 +37,31 @@ export const API_GROUP_LIMITS: Readonly<Record<RouteGroup, GroupLimit>> = {
 /** The address bucket is a ceiling over every credential a caller could present from one place. */
 export const IP_CEILING_MULTIPLIER = 5
 
+/**
+ * Disposable production-build QA has a high-volume synthetic session matrix
+ * sharing the same loopback address. Keep the exact production limits for
+ * every non-local request; do not disable the two-bucket limiter in QA.
+ */
+export const DISPOSABLE_QA_LIMIT_MULTIPLIER = 100;
+
+export function isDisposableQaRateProfile(input: {
+  environment?: string;
+  qaTestEnv?: string;
+  syntheticSession?: string;
+  hostname: string;
+  hostHeader: string | null;
+  forwardedHost: string | null;
+}): boolean {
+  if (input.environment !== 'local' || input.qaTestEnv !== 'true' || input.syntheticSession !== 'true') return false;
+  const host = input.hostname.toLowerCase();
+  if (host !== '127.0.0.1' && host !== 'localhost') return false;
+  const presented = (input.hostHeader ?? '').split(':')[0].toLowerCase();
+  if (presented !== host) return false;
+  const forwarded = input.forwardedHost?.split(',')[0].trim().split(':')[0].toLowerCase();
+  return !forwarded || forwarded === host;
+}
+
+
 export interface ApiLimitInput {
   pathname: string
   method: string
@@ -62,6 +87,8 @@ export interface GuardDeps {
   memory: typeof checkMemory
   /** Called when a decision is degraded, so the condition is recorded. */
   onDegraded?: (info: { group: RouteGroup; scope: LimitScope }) => void
+  /** Only granted by the Edge proxy's strict local synthetic QA identity gate. */
+  profile?: 'standard' | 'disposable-qa'
 }
 
 const defaultDeps: GuardDeps = { shared: checkShared, memory: checkMemory }
@@ -102,7 +129,10 @@ async function checkBucket(
 
 export async function decideApiLimit(input: ApiLimitInput, deps: GuardDeps = defaultDeps): Promise<ApiLimitDecision> {
   const group = classifyRoute(input.pathname, input.method)
-  const base = API_GROUP_LIMITS[group]
+  const standard = API_GROUP_LIMITS[group];
+  const base: GroupLimit = deps.profile === 'disposable-qa' && group !== 'auth'
+    ? { ...standard, max: standard.max * DISPOSABLE_QA_LIMIT_MULTIPLIER }
+    : standard;
   const credential = input.credential && input.credential.length <= 4096 ? input.credential : null
 
   const checks: Array<{ scope: LimitScope; key: string; limit: GroupLimit }> = []
