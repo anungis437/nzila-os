@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { createWorkflow, executeStep } from '../src/workflowRunner'
 import { verifyOutcomeEvidence, isVerifiedOutcomeFor } from '../src/outcome-proof'
+import { verifyOutcomePolicy } from '../src/policy-permit'
 import { agentWorkflowSchema } from '../src/types'
 import { generateRecommendations } from '../src/recommendations'
 import * as packageExports from '../src/index'
@@ -25,6 +26,22 @@ async function validProof(wf: ReturnType<typeof createWorkflow>, stepId: string)
     }),
   })
 }
+async function validPolicy(wf: ReturnType<typeof createWorkflow>, stepId: string, policyId = 'p1') {
+  const request = {
+    workflowId: wf.id, stepId, app: wf.app, orgId: wf.orgId,
+    policyId, executingAgentId: 'implementer-agent',
+  }
+  return verifyOutcomePolicy(request, {
+    resolve: async r => ({
+      verdict: 'ALLOW', decisionRef: 'policy://test/1', authoritySource: 'trusted-host-policy',
+      issuedAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 60_000).toISOString(),
+      boundWorkflowId: r.workflowId, boundStepId: r.stepId,
+      boundApp: r.app, boundOrgId: r.orgId, boundPolicyId: r.policyId,
+    }),
+  })
+}
+
 const make = (app = 'cfo', steps = ['step-1']) => createWorkflow({
   name: 'test', triggerEvent: 'test', app, orgId: 'org-1',
   steps: steps.map(name => ({ name })),
@@ -50,6 +67,16 @@ describe('platform-agent-workflows P0 outcome controls', () => {
     expect(getAuditTimeline({ eventType: 'workflow_step_executed' })[0].policyResult).toBe('fail')
   })
 
+  it('a claimed policy ALLOW is not an authorization receipt', async () => {
+    const wf = make()
+    const proof = await validProof(wf, wf.steps[0].id)
+    const spoof = { request: { workflowId: wf.id, stepId: wf.steps[0].id }, decision: { verdict: 'ALLOW' } }
+    expect(executeStep(wf, wf.steps[0].id, {
+      policyCheck: { policyId: 'p1', result: 'allow' },
+      verifiedPolicy: spoof as never, verifiedOutcome: proof,
+    }).status).toBe('blocked')
+  })
+
   it('rejects completion without explicit policy allow', async () => {
     const wf = make()
     const proof = await validProof(wf, wf.steps[0].id)
@@ -65,9 +92,11 @@ describe('platform-agent-workflows P0 outcome controls', () => {
   it('accepts only minted, scope-bound independently verified proof', async () => {
     const wf = make()
     const proof = await validProof(wf, wf.steps[0].id)
+    const permit = await validPolicy(wf, wf.steps[0].id)
     const result = executeStep(wf, wf.steps[0].id, {
       policyCheck: { policyId: 'p1', result: 'allow' },
       verifiedOutcome: proof,
+      verifiedPolicy: permit,
       output: { done: true },
     })
     expect(result.status).toBe('completed')
@@ -80,7 +109,8 @@ describe('platform-agent-workflows P0 outcome controls', () => {
     expect(isVerifiedOutcomeFor(forged, wf, wf.steps[0].id)).toBe(false)
     const forgedWorkflow = { ...wf, id: 'another-workflow', orgId: 'another-org' }
     expect(executeStep(forgedWorkflow, wf.steps[0].id, {
-      policyCheck: { policyId: 'p1', result: 'allow' }, verifiedOutcome: proof,
+      policyCheck: { policyId: 'p1', result: 'allow' },
+      verifiedOutcome: proof, verifiedPolicy: permit,
     }).status).toBe('blocked')
     expect(() => executeStep(result, result.steps[0].id, { verifiedOutcome: proof })).toThrow('immutable')
   })
@@ -118,6 +148,7 @@ describe('platform-agent-workflows P0 outcome controls', () => {
   })
 
   it('exports outcome proof functionality but not any release-authorizing function', () => {
+    expect(packageExports.verifyOutcomePolicy).toBeTypeOf('function')
     expect(packageExports.verifyOutcomeEvidence).toBeTypeOf('function')
     expect(packageExports.executeStep).toBeTypeOf('function')
     expect('authorizeRelease' in packageExports).toBe(false)

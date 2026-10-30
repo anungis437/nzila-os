@@ -19,3 +19,6 @@ export type {
   TrustedOutcomeVerifier, VerifiedOutcomeProof,
 } from './outcome-proof'
 export { generateRecommendations } from './recommendations'
+
+export { verifyOutcomePolicy, isVerifiedPolicyPermitFor } from './policy-permit'
+export type { PolicyPermitRequest, TrustedPolicyDecision, TrustedPolicyAuthority, VerifiedPolicyPermit } from './policy-permit'

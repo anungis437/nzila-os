@@ -73,6 +73,8 @@ export function checkRepository() {
   requireText('packages/tool-fabric/src/gate.ts', 'installAuthorized: false')
   requireText('packages/tool-fabric/src/gate.ts', 'allowed: false')
   requireText('packages/platform-agent-workflows/src/workflowRunner.ts', 'isVerifiedOutcomeFor')
+  requireText('packages/platform-agent-workflows/src/workflowRunner.ts', 'isVerifiedPolicyPermitFor')
+  requireText('packages/platform-agent-workflows/src/policy-permit.ts', 'TrustedPolicyAuthority')
   requireText('packages/platform-agent-workflows/src/workflowRunner.ts', "params.policyCheck?.result === 'allow'")
   requireText('packages/platform-agent-workflows/src/workflowRunner.ts', 'serializeOutcomeProof')
   requireText('packages/platform-agent-workflows/src/types.ts', 'outcomeEvidenceSchema')

@@ -22,3 +22,7 @@ An engineering result consists of four separately attributable records:
 
 Batch by shared root cause. Preserve every defect ID rather than inflating
 closure counts by grouping. Use the canonical register as the denominator.
+
+The workflow runner requires two independent capabilities from trusted host
+wiring: (1) a policy ALLOW permit; (2) an evidence verification proof. Agent
+claims, skill metadata and JSON copies never mint either one.

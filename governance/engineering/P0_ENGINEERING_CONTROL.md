@@ -94,3 +94,13 @@ Agora-style progressive disclosure is adapted to product and engineering
 workflows. Skills live under \`skills/nzila\`, while Tool Fabric remains the
 capability and authority boundary. Skills cannot override product or platform
 policy. This document and the machine policy are canonical P0 invariants.
+
+## Additional fail-closed policy boundary
+
+An agent-asserted `policyCheck: {result:'allow'}` has **zero authority**. The
+workflow runner now also requires `verifyOutcomePolicy` to mint an unforgeable
+process-local policy permit from a trusted, independently configured host
+policy authority. Results are bound to organization, app, workflow, step,
+policy ID, and expire within five minutes. An injected test fake is not
+production authorization; deployments still require an authoritative identity
+and policy resolver. Absence of that resolver denies completion.

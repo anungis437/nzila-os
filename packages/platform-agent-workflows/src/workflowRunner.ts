@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import type { AgentWorkflow, WorkflowStep, WorkflowStatus } from './types'
 import { recordAuditEvent } from '@nzila/platform-governance'
 import { isVerifiedOutcomeFor, serializeOutcomeProof, hasAuthenticatedCompletedHistory, carryAuthenticatedHistory, type VerifiedOutcomeProof } from './outcome-proof'
+import { isVerifiedPolicyPermitFor, type VerifiedPolicyPermit } from './policy-permit'
 
 export function createWorkflow(params: {
   name: string
@@ -47,6 +48,7 @@ export function executeStep(
   params: {
     policyCheck?: { policyId: string; result: 'allow' | 'deny' | 'requires_approval' }
     verifiedOutcome?: VerifiedOutcomeProof
+    verifiedPolicy?: VerifiedPolicyPermit
     output?: Record<string, unknown>
   },
 ): AgentWorkflow {
@@ -57,11 +59,12 @@ export function executeStep(
     throw new Error('Completed steps are immutable; a new workflow revision is required')
   }
   const policyAllows = params.policyCheck?.result === 'allow' &&
-    Boolean(params.policyCheck.policyId)
+    Boolean(params.policyCheck.policyId) &&
+    isVerifiedPolicyPermitFor(params.verifiedPolicy, workflow, stepId, params.policyCheck.policyId)
   const evidenceValid = isVerifiedOutcomeFor(params.verifiedOutcome, workflow, stepId)
   const completes = policyAllows && evidenceValid
   const reason = !policyAllows
-    ? 'Explicit policy ALLOW is required'
+    ? 'Independently authorized policy ALLOW is required'
     : !evidenceValid
       ? 'Independent outcome proof is required'
       : undefined
