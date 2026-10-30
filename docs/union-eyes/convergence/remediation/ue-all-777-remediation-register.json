@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 41,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 139,
-    "engineeringRemaining": 638,
+    "engineeringCorrected": 140,
+    "engineeringRemaining": 637,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 18
+    "engineeringPartial": 2
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -304,6 +304,10 @@
     {
       "sha": "7ede4dc71c7c95d80936db02e8ad21170fc751fb",
       "description": "Reconciled existing calendar connection owner-scoped projections and strict non-secret mutation boundaries against two frozen defects; existing behavioral regressions inspected, exact-SHA CI and provider runtime pending. No new production changes for these two defects."
+    },
+    {
+      "sha": "a3ddf8d68cde0aef2065f0ef2aa637a38cec7f92",
+      "description": "Billing-cycle POST and preview require live target-ledger finance:execute mandate, with fail-closed regressions. KPI PATCH malformed UUID rejected but target editing/rename/delete remains open. Source-level only; exact HEAD CI pending."
     }
   ],
   "records": [
@@ -476,10 +480,39 @@
       "title": "The target organization of a billing operation is caller-supplied and the guard checks only the caller role title, not authority over that organization.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/lib/finance/billing-cycle-authority.ts",
+          "apps/union-eyes/app/api/admin/billing-cycles/route.ts",
+          "apps/union-eyes/app/api/admin/billing-cycles/preview/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/finance/__tests__/billing-cycle-authority.test.ts",
+          "apps/union-eyes/app/api/__tests__/admin-billing-cycles.route.test.ts",
+          "apps/union-eyes/app/api/__tests__/admin-billing-cycles-preview.route.test.ts"
+        ],
+        "commits": [
+          "215c41e36e8ef222f91e23e33108b039e74b5610",
+          "b6d7858ef1f4d56b7de0ddc267f700fc7cc3e797",
+          "8d3ae8b453b08043ac6e630ed889188b4a0fbedd",
+          "484a7fb389b7434691604ac74f43e714a18184c8",
+          "50b64afb4d6539167bba41ef6ce94a91f0acb08a",
+          "a3ddf8d68cde0aef2065f0ef2aa637a38cec7f92"
+        ],
+        "repair": "Both caller-selected billing-cycle execution and preview now demand a live, tenant-bound, ledger-wide finance:execute mandate for the exact target organization and actor before calculating or charging; role title alone cannot authorize.",
+        "limits": "Source-level only, unit/PG15/16/HTTP validation pending. Scheduled cross-org trigger and non-atomic billing-cycle processing are separate open obligations."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B11-FINANCIAL-TARGET-MANDATE",
+        "path": "apps/union-eyes/lib/finance/billing-cycle-authority.ts; apps/union-eyes/app/api/admin/billing-cycles/route.ts; apps/union-eyes/app/api/admin/billing-cycles/preview/route.ts",
+        "explanation": "Both caller-selected billing-cycle execution and preview now demand a live, tenant-bound, ledger-wide finance:execute mandate for the exact target organization and actor before calculating or charging; role title alone cannot authorize.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY",
@@ -15041,8 +15074,22 @@
       "title": "PATCH /api/targets/<id> compares the path id with the uuid column kpi_configurations.id without a shape check, so a malformed id raises a database error that the wrapper answers as a 500 instead of a 404, and the route offers no way to edit, rename or delete a target: the only change available after creation is the active flag.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "PARTIAL_SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/targets/[id]/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/targets-id.route.test.ts"
+        ],
+        "commits": [
+          "0fa1dd3efe7ff4851c8c607346fbec1014636bc7",
+          "4213983912452bc0872936bc7c42fad1b0c24c8b"
+        ],
+        "repair": "Reject malformed target IDs before UUID database predicate and audit; added regression proving no DB call.",
+        "limits": "The same frozen defect also requires edit/rename/delete capabilities; these remain unimplemented. Do not count as engineering-corrected."
+      },
+      "currentHeadVerification": "SOURCE_PARTIAL_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
     },
@@ -16062,6 +16109,20 @@
     {
       "inspectedSha": "2cc437284bef13b9c7e454014ac1b2a881c953fa",
       "evidence": "Calendar OAuth state, callback audit and regression changes committed. GitHub Actions runs for recent code SHAs are queued at inspection; no exact-HEAD unit, contract, security, PG15/16, HTTP/browser or staging result. Earlier passing or failing workflows apply only to their own SHAs. Institutional Gate 0C.4 reviewer/persona/authority gates remain open.",
+      "source": "PATCHED_AND_INSPECTED",
+      "unit": "PENDING",
+      "contract": "PENDING",
+      "financial": "PENDING",
+      "native": "PENDING_PG15_PG16",
+      "security": "PENDING",
+      "httpBrowser": "PENDING",
+      "appFloor": "PENDING",
+      "governance": "PENDING",
+      "go": "NO_GO"
+    },
+    {
+      "inspectedSha": "a3ddf8d68cde0aef2065f0ef2aa637a38cec7f92",
+      "evidence": "App Floor Check pending for code SHA at inspection; other workflows not yet observed for code SHA. Source and tests committed, no exact-HEAD Vitest, contract, PG15/16, HTTP/browser or staging evidence. Gate 0C.4 institutional approvals still absent.",
       "source": "PATCHED_AND_INSPECTED",
       "unit": "PENDING",
       "contract": "PENDING",
