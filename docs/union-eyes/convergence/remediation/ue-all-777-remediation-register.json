@@ -86,11 +86,11 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 34,
+    "withCurrentRunSourceOrRegressionWork": 39,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 85,
-    "engineeringRemaining": 692,
+    "engineeringCorrected": 90,
+    "engineeringRemaining": 687,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 9
   },
@@ -10138,10 +10138,27 @@
         "e2eEvidence": [],
         "remaining": []
       },
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/organizations/[id]/route.ts",
+          "apps/union-eyes/lib/organizations/read-authority.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts"
+        ],
+        "repair": "Item read checks active organization read authority before system-role query and withholds administrator-only fields from members.",
+        "limits": "Native PG15/16 and HTTP/browser acceptance at exact current HEAD still pending; this is source-level only."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/organizations/[id]/route.ts",
+        "explanation": "Item read checks active organization read authority before system-role query and withholds administrator-only fields from members.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ORG-ITEM-GET-STATISTICS-RUN-ON-BARE-DB-AFTER-SYSTEM-READ-WITHOUT-ORGANIZATION-CONTEXT",
@@ -10458,10 +10475,27 @@
           "DEF-0B10-OPL-07 is challenged: its legacy branch is repaired, the V2 branch was already scoped"
         ]
       },
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/organizations/hierarchy/route.ts",
+          "apps/union-eyes/lib/organizations/read-authority.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts"
+        ],
+        "repair": "System-role hierarchy read is constrained to verified active membership and administered descendants, including rootOrgId filter.",
+        "limits": "Native PG15/16 and HTTP/browser acceptance at exact current HEAD still pending; this is source-level only."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/organizations/hierarchy/route.ts",
+        "explanation": "System-role hierarchy read is constrained to verified active membership and administered descendants, including rootOrgId filter.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ORG-HIERARCHY-LIST-HARD-CODED-RLS-FLAG-AND-SILENT-FIVE-HUNDRED-ROW-CAP",
@@ -10504,10 +10538,27 @@
         "e2eEvidence": [],
         "remaining": []
       },
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/organizations/[id]/children/route.ts",
+          "apps/union-eyes/lib/organizations/read-authority.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts"
+        ],
+        "repair": "Parent read authority is checked before system query; child projection is filtered to caller-readable organizations.",
+        "limits": "Native PG15/16 and HTTP/browser acceptance at exact current HEAD still pending; this is source-level only."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/organizations/[id]/children/route.ts",
+        "explanation": "Parent read authority is checked before system query; child projection is filtered to caller-readable organizations.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ORG-DESCENDANTS-ANY-SIGNED-IN-USER-LISTS-WHOLE-SUBTREE-OF-ANY-ORGANIZATION-UNBOUNDED-AS-SYSTEM",
@@ -10533,10 +10584,27 @@
         "e2eEvidence": [],
         "remaining": []
       },
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/organizations/[id]/descendants/route.ts",
+          "apps/union-eyes/lib/organizations/read-authority.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts"
+        ],
+        "repair": "Parent read authority is checked before system query, descendants are filtered to readable organizations and the query is bounded to 2000 rows.",
+        "limits": "Native PG15/16 and HTTP/browser acceptance at exact current HEAD still pending; this is source-level only."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/organizations/[id]/descendants/route.ts",
+        "explanation": "Parent read authority is checked before system query, descendants are filtered to readable organizations and the query is bounded to 2000 rows.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ORG-ANCESTORS-ANY-SIGNED-IN-USER-READS-ANCESTRY-OF-ANY-ORGANIZATION-AS-SYSTEM",
@@ -10550,10 +10618,27 @@
       "title": "GET /api/organizations/[id]/ancestors reads the hierarchy_path of the path organization and then its ancestor rows inside withSystemContext after checking only that a session user exists, so any signed-in user learns which federations and congress an organization they do not belong to is affiliated with (name, slug, type, level, status of each ancestor), and the response is the same empty list whether the organization is unknown, a root, or one the caller may not see.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/organizations/[id]/ancestors/route.ts",
+          "apps/union-eyes/lib/organizations/read-authority.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts"
+        ],
+        "repair": "Malformed and inaccessible organization IDs are rejected; only authorized ancestors are queried and projected.",
+        "limits": "Native PG15/16 and HTTP/browser acceptance at exact current HEAD still pending; this is source-level only."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/organizations/[id]/ancestors/route.ts",
+        "explanation": "Malformed and inaccessible organization IDs are rejected; only authorized ancestors are queried and projected.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ORG-HIERARCHY-ROUTES-PASS-UNVALIDATED-PATH-ID-TO-UUID-COLUMN-AND-ANSWER-EMPTY-200-FOR-UNKNOWN-ORGANIZATION",
