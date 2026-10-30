@@ -18,6 +18,7 @@ const state = vi.hoisted(() => ({
   remittances: [] as Record<string, unknown>[],
   orgs: [] as Record<string, unknown>[],
   aggregates: [] as Record<string, unknown>[],
+  remittancePredicates: [] as unknown[],
 }));
 
 vi.mock('drizzle-orm', () => ({
@@ -49,7 +50,10 @@ vi.mock('@/db', () => {
       chain._table = t;
       return chain;
     };
-    chain.where = () => chain;
+    chain.where = (predicate: unknown) => {
+      if ((chain._table as { __name?: string } | undefined)?.__name === 'rem') state.remittancePredicates.push(predicate);
+      return chain;
+    };
     chain.limit = () => chain;
     chain.groupBy = () => chain;
     chain.orderBy = () => chain;
@@ -162,11 +166,24 @@ function seedRichData() {
 describe('clc compliance-reports', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    state.remittancePredicates = [];
     seedRichData();
   });
 
+  it('enforces a tenant predicate on every CLC report and forecasting read', async () => {
+    await generateAnnualComplianceReport(YEAR, 'org-a');
+    await analyzeMultiYearTrends({ years: 3, endYear: YEAR, organizationId: 'org-a' });
+    await forecastRemittances(2, 'org-a');
+    expect(state.remittancePredicates.length).toBeGreaterThanOrEqual(5);
+    for (const predicate of state.remittancePredicates) {
+      const encoded = JSON.stringify(predicate);
+      expect(encoded).toContain('fromOrganizationId');
+      expect(encoded).toContain('org-a');
+    }
+  });
+
   it('generateAnnualComplianceReport assembles all sections', async () => {
-    const report = await generateAnnualComplianceReport(YEAR);
+    const report = await generateAnnualComplianceReport(YEAR, 'org-a');
     expect(report.year).toBe(YEAR);
     expect(report.summary.totalRemittances).toBe(state.remittances.length);
     expect(report.summary.totalOrganizations).toBe(3);
@@ -234,7 +251,7 @@ describe('clc compliance-reports', () => {
   });
 
   it('analyzeMultiYearTrends computes trends, forecast, and insights', async () => {
-    const trends = await analyzeMultiYearTrends({ years: 5, endYear: YEAR });
+    const trends = await analyzeMultiYearTrends({ years: 5, endYear: YEAR, organizationId: 'org-a' });
     expect(trends.years.length).toBe(5);
     expect(trends.totalRemittancesTrend.length).toBe(5);
     expect(trends.totalAmountTrend.length).toBe(5);
@@ -247,7 +264,7 @@ describe('clc compliance-reports', () => {
 
   it('analyzeMultiYearTrends with default endYear and single year (insufficient data path)', async () => {
     state.remittances = [rem({ org: 'org-a', month: 1, paidDelayDays: 0, submittedDelayDays: 0 })];
-    const trends = await analyzeMultiYearTrends({ years: 1 });
+    const trends = await analyzeMultiYearTrends({ years: 1, organizationId: 'org-a' });
     expect(trends.years.length).toBe(1);
     // forecast falls back to latest values; insights mention insufficient data
     expect(trends.forecastNextYear.confidenceLevel).toBe(0);
@@ -255,7 +272,7 @@ describe('clc compliance-reports', () => {
   });
 
   it('forecastRemittances produces moving-average forecasts with confidence bounds', async () => {
-    const forecast = await forecastRemittances(3);
+    const forecast = await forecastRemittances(3, 'org-a');
     expect(forecast.length).toBe(3);
     expect(forecast[0].method).toBe('moving_average');
     expect(forecast[0].confidenceLevel).toBe(85);
@@ -265,7 +282,7 @@ describe('clc compliance-reports', () => {
 
   it('forecastRemittances handles sparse history (insufficient_data method)', async () => {
     state.aggregates = [{ month: 1, year: YEAR, totalAmount: 5000, remittanceCount: 5 }];
-    const forecast = await forecastRemittances(2);
+    const forecast = await forecastRemittances(2, 'org-a');
     expect(forecast.length).toBe(2);
     expect(forecast[0].method).toBe('insufficient_data');
     expect(forecast[0].confidenceLevel).toBe(50);
@@ -273,7 +290,7 @@ describe('clc compliance-reports', () => {
 
   it('forecastRemittances handles empty history', async () => {
     state.aggregates = [];
-    const forecast = await forecastRemittances(1);
+    const forecast = await forecastRemittances(1, 'org-a');
     expect(forecast.length).toBe(1);
     expect(forecast[0].forecastAmount).toBe(0);
   });
@@ -284,7 +301,7 @@ describe('clc compliance-reports', () => {
       rem({ org: 'org-c', month: 1, status: 'pending', paidDelayDays: null, submittedDelayDays: 40, dueOverdue: true, amount: 9000 }),
       rem({ org: 'org-c', month: 2, paidDelayDays: 80, submittedDelayDays: 40, amount: 9000 }),
     ];
-    const report = await generateAnnualComplianceReport(YEAR);
+    const report = await generateAnnualComplianceReport(YEAR, 'org-a');
     expect(report.recommendations.some((r) => r.includes('URGENT') || r.includes('Outstanding'))).toBe(true);
   });
 });
