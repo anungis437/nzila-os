@@ -1,5 +1,10 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { mkdtempSync, writeFileSync, readFileSync, existsSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { spawnSync } from 'node:child_process'
 import { verifyProductionApproval } from './verify-production-approval.mjs'
 const SHA='a'.repeat(40), NOW=new Date('2026-10-30T16:00:00Z')
 function fixture() {
@@ -65,4 +70,35 @@ test('both run actor and rerun triggering actor must be authenticated',()=>{
     const f=fixture();f.run[key]=null
     assert.throws(()=>verifyProductionApproval(f),/run initiator not authenticated/)
   }
+})
+
+test('CLI writes a minimal, non-overwritable receipt only after authenticated review',()=>{
+  const dir=mkdtempSync(join(tmpdir(),'nzila-approval-'))
+  try {
+    const f=fixture(), now=Date.now()
+    f.run.created_at=new Date(now-600000).toISOString()
+    f.approvals[0].created_at=new Date(now-300000).toISOString()
+    for (const name of ['environment','run','approvals']) {
+      writeFileSync(join(dir,name+'.json'),JSON.stringify(f[name]))
+    }
+    const cli=fileURLToPath(new URL('./verify-production-approval.mjs',import.meta.url))
+    const receipt=join(dir,'verified-approval.json')
+    const args=[cli,dir,'12345',SHA,receipt]
+    const ok=spawnSync(process.execPath,args,{encoding:'utf8'})
+    assert.equal(ok.status,0,ok.stderr)
+    const saved=JSON.parse(readFileSync(receipt,'utf8'))
+    assert.equal(saved.schemaVersion,1)
+    assert.equal(saved.approvalRef,'890')
+    assert.equal(saved.reviewer,'security-reviewer')
+    assert.equal(saved.sourceSha,SHA)
+    assert.equal('approvals' in saved,false)
+    const replay=spawnSync(process.execPath,args,{encoding:'utf8'})
+    assert.notEqual(replay.status,0,'receipt overwrite must be refused')
+    f.approvals[0].user.login='developer'
+    writeFileSync(join(dir,'approvals.json'),JSON.stringify(f.approvals))
+    const denied=join(dir,'denied-approval.json')
+    const failed=spawnSync(process.execPath,[cli,dir,'12345',SHA,denied],{encoding:'utf8'})
+    assert.notEqual(failed.status,0,'self-approval must be rejected')
+    assert.equal(existsSync(denied),false,'denied approval must leave no receipt')
+  } finally { rmSync(dir,{recursive:true,force:true}) }
 })
