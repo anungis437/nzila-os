@@ -86,7 +86,7 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 13,
+    "withCurrentRunSourceOrRegressionWork": 17,
     "closed": 0,
     "overallGO": false
   },
@@ -239,6 +239,10 @@
     {
       "sha": "8d1770a6bd5819c53480e4ed4d4bdb444b1a3f9b",
       "description": "Add actual version-handler confidentiality regression for anonymous, invalid/valid probe credential and unset token; no version source change."
+    },
+    {
+      "sha": "7f40ed0ba7d8fde3ea4ae07b269e5a7e851b2404",
+      "description": "Remove two generic organization-row facades under access logs and sharing settings, explicitly fail closed with scoped 501, add regressions, reconcile mutable 995-route inventory. Canonical journeys still open."
     }
   ],
   "records": [
@@ -9908,8 +9912,20 @@
       "title": "The /api/organizations/[id]/access-logs route is crudRoutes over the organizations table (itemRoute true, orgScoped false) wrapped by requireOwnOrganizationItem: it never reads the cross_org_access_log table, applies none of the page, pageSize, resourceType, accessType, fromDate and toDate parameters the access log viewer sends, and answers with the organizations row of the caller own organization as {data: row} while the viewer reads logs, pagination and stats, so the viewer shows no log and no other organization access to the resources of the organization is ever reported.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "DANGEROUS_FACADE_REMOVED_CANONICAL_JOURNEY_OPEN",
+        "paths": [
+          "apps/union-eyes/app/api/organizations/[id]/access-logs/route.ts",
+          "apps/union-eyes/app/api/organizations/[id]/sharing-settings/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/__tests__/organization-facade-fail-closed.test.ts"
+        ],
+        "engineeringHead": "7f40ed0ba7d8fde3ea4ae07b269e5a7e851b2404",
+        "repair": "Both aliases now enforce administrator authentication and exact active-organization identity before explicitly returning HTTP 501; unrelated organizations rows and generic PATCH/DELETE operations are no longer served. Route inventory reconciled.",
+        "limits": "This is containment, not completion: actual cross_org_access_log filters/pagination and governed sharing-settings GET/PUT remain to be implemented, tested on PG15/16, and proven over real HTTP with tenant personas. No user journey accepted."
+      },
+      "currentHeadVerification": "SOURCE_CONTAINMENT_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
     },
@@ -9925,8 +9941,20 @@
       "title": "The /api/organizations/[id]/sharing-settings route is crudRoutes over the organizations table wrapped by requireOwnOrganizationItem: it never reads or writes organization_sharing_settings, answers GET with the organizations row of the own organization instead of the sharing flags, refuses PATCH and DELETE with 403 because the organizations table is READ_ONLY in the CRUD governance table, and exports no PUT although the sharing settings form sends PUT, so the sharing flags (federation, sector, province and congress sharing, anonymization, approval) cannot be read or changed through the HTTP surface and no sharing decision is recorded.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "DANGEROUS_FACADE_REMOVED_CANONICAL_JOURNEY_OPEN",
+        "paths": [
+          "apps/union-eyes/app/api/organizations/[id]/access-logs/route.ts",
+          "apps/union-eyes/app/api/organizations/[id]/sharing-settings/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/__tests__/organization-facade-fail-closed.test.ts"
+        ],
+        "engineeringHead": "7f40ed0ba7d8fde3ea4ae07b269e5a7e851b2404",
+        "repair": "Both aliases now enforce administrator authentication and exact active-organization identity before explicitly returning HTTP 501; unrelated organizations rows and generic PATCH/DELETE operations are no longer served. Route inventory reconciled.",
+        "limits": "This is containment, not completion: actual cross_org_access_log filters/pagination and governed sharing-settings GET/PUT remain to be implemented, tested on PG15/16, and proven over real HTTP with tenant personas. No user journey accepted."
+      },
+      "currentHeadVerification": "SOURCE_CONTAINMENT_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
     },
@@ -9942,8 +9970,20 @@
       "title": "The GET of the access-logs route (declared member floor, raised to steward by the low-role guard because the organizations table has email, phone and address columns) and of the sharing-settings route (admin floor) return the complete organizations row of the own organization (settings JSON, billing_contact_id, subscription tier, enabled features, created_by, legacy_org_id, contact fields) under the name of an access log and of sharing settings, so a steward who opens the access-log tab receives billing and configuration data that the name does not announce and that the admin-floor item route is meant to restrict.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "DANGEROUS_FACADE_REMOVED_CANONICAL_JOURNEY_OPEN",
+        "paths": [
+          "apps/union-eyes/app/api/organizations/[id]/access-logs/route.ts",
+          "apps/union-eyes/app/api/organizations/[id]/sharing-settings/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/__tests__/organization-facade-fail-closed.test.ts"
+        ],
+        "engineeringHead": "7f40ed0ba7d8fde3ea4ae07b269e5a7e851b2404",
+        "repair": "Both aliases now enforce administrator authentication and exact active-organization identity before explicitly returning HTTP 501; unrelated organizations rows and generic PATCH/DELETE operations are no longer served. Route inventory reconciled.",
+        "limits": "This is containment, not completion: actual cross_org_access_log filters/pagination and governed sharing-settings GET/PUT remain to be implemented, tested on PG15/16, and proven over real HTTP with tenant personas. No user journey accepted."
+      },
+      "currentHeadVerification": "SOURCE_CONTAINMENT_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
     },
@@ -9959,8 +9999,20 @@
       "title": "The access-logs route configures PATCH at the steward write floor and the sharing-settings route at the admin floor over the organizations table with no blocked patch fields, and both configure the administrator DELETE that archives the organization; the only thing that makes them answer 403 today is the entry of organizations in the READ_ONLY list of the CRUD governance table, so one edit of that list would let a steward rewrite parent_id, status, settings and slug of the organization through a route named for logs, bypassing the system-administrator check that the organizations item route applies to parent and status.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "DANGEROUS_FACADE_REMOVED_CANONICAL_JOURNEY_OPEN",
+        "paths": [
+          "apps/union-eyes/app/api/organizations/[id]/access-logs/route.ts",
+          "apps/union-eyes/app/api/organizations/[id]/sharing-settings/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/__tests__/organization-facade-fail-closed.test.ts"
+        ],
+        "engineeringHead": "7f40ed0ba7d8fde3ea4ae07b269e5a7e851b2404",
+        "repair": "Both aliases now enforce administrator authentication and exact active-organization identity before explicitly returning HTTP 501; unrelated organizations rows and generic PATCH/DELETE operations are no longer served. Route inventory reconciled.",
+        "limits": "This is containment, not completion: actual cross_org_access_log filters/pagination and governed sharing-settings GET/PUT remain to be implemented, tested on PG15/16, and proven over real HTTP with tenant personas. No user journey accepted."
+      },
+      "currentHeadVerification": "SOURCE_CONTAINMENT_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
     },
