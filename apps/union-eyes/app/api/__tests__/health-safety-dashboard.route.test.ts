@@ -35,7 +35,7 @@ describe('health-safety/dashboard route (PR #752 round 17)', () => {
     vi.clearAllMocks();
     m.sqlCalls.length = 0;
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
-    m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.withRLSContext.mockImplementation(async (_scope: unknown, fn: (tx: typeof m.db) => Promise<unknown>) => fn(m.db));
     m.db.execute.mockImplementation(async () => [{ cnt: 0, training_due: 0, last_dt: null }]);
   });
 
@@ -55,6 +55,7 @@ describe('health-safety/dashboard route (PR #752 round 17)', () => {
       expect(call.values).toEqual(['org-context-resolved']);
     }
     expect(m.sqlCalls.some((c) => c.values.includes('org-attacker-supplied'))).toBe(false);
+    expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-context-resolved' }, expect.any(Function));
   });
 
   // DEF-0B8-HS-DASHBOARD-TRAINING-COMPLIANCE-IS-A-CONSTANT
