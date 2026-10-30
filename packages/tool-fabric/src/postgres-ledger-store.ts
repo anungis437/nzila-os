@@ -11,7 +11,7 @@
  * mandatory (ToolTrustLedger); this DB is not its own trust anchor.
  */
 import type { AuditEntry } from '@nzila/audit'
-import { auditEntrySchema, computeAuditHash } from '@nzila/audit'
+import { auditEntrySchema, computeAuditHash, verifyChain } from '@nzila/audit'
 import {
   LEDGER_GENESIS_HASH, LedgerConflictError, LedgerDuplicateError,
   LedgerStoreUnavailableError, type AtomicTrustLedgerStore,
@@ -95,6 +95,14 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
       })
       if ((entries.at(-1)?.hash ?? LEDGER_GENESIS_HASH) !== head.headHash) {
         throw new LedgerStoreUnavailableError('Persistent trust head does not match stored events')
+      }
+      // Do not expose a self-consistent head whose intermediate audit records
+      // were altered, downgraded, duplicated or replayed. The higher-level
+      // ToolTrustLedger additionally verifies event-body and policy semantics.
+      if (entries.some(entry => entry.orgId !== orgId) ||
+          new Set(entries.map(entry => entry.id)).size !== entries.length ||
+          !verifyChain(entries, { requireFullCoverage: true }).valid) {
+        throw new LedgerStoreUnavailableError('Persistent trust audit chain failed integrity verification')
       }
       return structuredClone({ revision: head.revision, headHash: head.headHash, entries })
     })

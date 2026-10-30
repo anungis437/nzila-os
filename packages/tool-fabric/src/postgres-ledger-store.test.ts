@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { randomUUID } from 'node:crypto'
-import { computeAuditHash } from '@nzila/audit'
+import { computeAuditHash, type AuditEntry } from '@nzila/audit'
 import { PostgresAtomicTrustLedgerStore } from './postgres-ledger-store'
 import { LedgerStoreUnavailableError, LedgerConflictError, LEDGER_GENESIS_HASH } from './ledger-store'
 
@@ -25,6 +25,16 @@ function fake(opts: { revision?: number; hash?: string; entries?: unknown[]; ini
     get commits() { return commits },
   }
 }
+function auditRecord(prevHash: string, seq: number, orgId = ORG, id = randomUUID()): AuditEntry {
+  const body = {
+    id, timestamp: '2026-10-30T15:00:00.000Z', actorId: 'host-actor', orgId,
+    action: 'tool_fabric.ledger.tool_registered', resource: 'tool-fabric-tool',
+    resourceId: 'sample-tool',
+    payload: { seq, prevEventHash: LEDGER_GENESIS_HASH, eventHash: 'a'.repeat(64) },
+  }
+  return { ...body, prevHash, hashVersion: 2, hash: computeAuditHash(prevHash, body) }
+}
+
 describe('P0 Postgres Trust Ledger CAS adapter',()=>{
   it('rejects missing authenticated transactional client',()=>{
     expect(()=>new PostgresAtomicTrustLedgerStore({} as never)).toThrow(LedgerStoreUnavailableError)
@@ -77,4 +87,32 @@ describe('P0 Postgres Trust Ledger CAS adapter',()=>{
     expect(db.commits).toBe(0)
   })
 
+  it('verifies every stored audit hash before returning a PostgreSQL snapshot', async () => {
+    const entry = auditRecord(LEDGER_GENESIS_HASH, 1)
+    const store = new PostgresAtomicTrustLedgerStore(fake({
+      revision: 1, hash: entry.hash, entries: [entry],
+    }))
+    await expect(store.readSnapshot(ORG)).resolves.toEqual({
+      revision: 1, headHash: entry.hash, entries: [entry],
+    })
+    const altered = { ...entry, payload: { ...entry.payload, seq: 999 } }
+    const poisoned = new PostgresAtomicTrustLedgerStore(fake({
+      revision: 1, hash: entry.hash, entries: [altered],
+    }))
+    await expect(poisoned.readSnapshot(ORG)).rejects.toThrow('audit chain failed integrity')
+  })
+  it('rejects foreign-stream, legacy-v1 and duplicated audit records on snapshot reads', async () => {
+    const foreign = auditRecord(LEDGER_GENESIS_HASH, 1, 'foreign-org')
+    await expect(new PostgresAtomicTrustLedgerStore(fake({
+      revision: 1, hash: foreign.hash, entries: [foreign],
+    })).readSnapshot(ORG)).rejects.toThrow('audit chain failed integrity')
+    const first = auditRecord(LEDGER_GENESIS_HASH, 1)
+    await expect(new PostgresAtomicTrustLedgerStore(fake({
+      revision: 1, hash: first.hash, entries: [{ ...first, hashVersion: 1 }],
+    })).readSnapshot(ORG)).rejects.toThrow('audit chain failed integrity')
+    const duplicate = auditRecord(first.hash, 2, ORG, first.id)
+    await expect(new PostgresAtomicTrustLedgerStore(fake({
+      revision: 2, hash: duplicate.hash, entries: [first, duplicate],
+    })).readSnapshot(ORG)).rejects.toThrow('audit chain failed integrity')
+  })
 })
