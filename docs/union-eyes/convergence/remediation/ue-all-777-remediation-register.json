@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 23,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 5,
-    "engineeringRemaining": 772,
+    "engineeringCorrected": 9,
+    "engineeringRemaining": 768,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately."
   },
   "verificationPolicy": {
@@ -996,7 +996,13 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/ai/classify/route.ts",
+        "explanation": "Classification now checks AI feature gate and enforceAISafety before invoking classification services.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B2-AI-PUBLIC-KNOWLEDGE-CROSS-TENANT",
@@ -1013,7 +1019,13 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/ai/search/route.ts",
+        "explanation": "Search restricts knowledge retrieval to caller organization regardless of is_public; summarization document lookup also requires same organization.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B2-AI-SEMANTIC-STATS-UNSCOPED",
@@ -1030,7 +1042,13 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/ai/semantic-search/route.ts",
+        "explanation": "Semantic index status counts only caller organization clauses and source-organization precedents, requires org context and AI feature gate.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B2-AI-FEEDBACK-READ-OTHER-USERS",
@@ -1047,7 +1065,13 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/ai/feedback/route.ts",
+        "explanation": "GET now filters feedback by authenticated userId in addition to query, operation and organization.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B2-AI-RAG-INDEX-PROCESS-LOCAL",
