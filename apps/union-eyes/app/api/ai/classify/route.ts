@@ -21,6 +21,7 @@ import { checkEntitlement } from '@/lib/services/entitlements';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { enforceAISafety } from '@nzila/policies';
+import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 
 import {
   ErrorCode,
@@ -96,6 +97,12 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         decision,
       } = validation.data;
 
+      return await performAuditedOperation({
+        organizationId: context.organizationId,
+        userId: context.userId,
+        action: 'ai.classification.' + action,
+        resourceType: 'ai_invocations',
+      }, async () => {
       switch (action) {
         case 'classify-clause':
           if (!content) {
@@ -206,7 +213,10 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
             { status: 400 }
           );
       }
-    } catch {
+      });
+    } catch (error) {
+      const refused = operationAuditResponse(error);
+      if (refused) return NextResponse.json(refused.body, { status: refused.status });
 return NextResponse.json(
         {
           error: 'Classification failed',
