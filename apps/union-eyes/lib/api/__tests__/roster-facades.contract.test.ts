@@ -47,7 +47,7 @@ describe('roster facade routes', () => {
       'federations/[id]/remittances', 'federations/benchmark/grievances', 'jurisdiction/clc-compliance', 'jurisdiction/validate-deadline', 'locals',
       'locals/[id]', 'organizer/impact', 'portal/documents', 'portal/documents/upload', 'storage/cleanup', 'storage/usage', 'clauses/search',
       'movement-insights/trends', 'arbitration/precedents/[id]/citations', 'arbitration/precedents/[id]/documents', 'arbitration/precedents/search',
-      'reports/[id]/execute', 'reports/[id]/run', 'healthwelfare/plans',
+      'reports/[id]/execute', 'reports/[id]/run', 'healthwelfare/plans', 'reconciliation/bank', 'reconciliation/upload',
       'ml/recommendations', 'ml/predictions/churn-risk', 'ml/monitoring/alerts', 'billing/send-invoice', 'compliance/data-classification-policy', 'onboarding/smart-defaults', 'continuity/archives', 'continuity/docs',
     ];
     for (const route of converted) {

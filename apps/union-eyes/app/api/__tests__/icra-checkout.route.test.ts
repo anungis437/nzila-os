@@ -124,6 +124,24 @@ describe('icra/checkout route', () => {
     expect(m.stripeCreate).not.toHaveBeenCalled();
   });
 
+  // DEF-0B8-ICRA-CHECKOUT-REDIRECT-DEFAULTS-TO-LOCALHOST-AND-PRICE-MAY-DIFFER-FROM-DISPLAYED
+  it('refuses, creating no checkout session, when production has no application URL configured', async () => {
+    const { POST } = await loadRoute();
+    const previousUrl = process.env.NEXT_PUBLIC_APP_URL;
+    const previousEnv = process.env.NODE_ENV;
+    delete process.env.NEXT_PUBLIC_APP_URL;
+    (process.env as Record<string, string>).NODE_ENV = 'production';
+    try {
+      m.selectQueue.push([{ reportTierId: 'continuity_reflection', status: 'submitted', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+      const response = await POST(req(body()));
+      expect(response.status).toBe(503);
+      expect(m.stripeCreate).not.toHaveBeenCalled();
+    } finally {
+      process.env.NEXT_PUBLIC_APP_URL = previousUrl;
+      (process.env as Record<string, string>).NODE_ENV = previousEnv as string;
+    }
+  });
+
   it('returns checkout url on successful session creation', async () => {
     const { POST } = await loadRoute();
     m.selectQueue.push([{ reportTierId: 'continuity_reflection', status: 'submitted', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);

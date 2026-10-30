@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 197,
- "partial": 24,
- "outstanding": 580,
- "accountedFor": 580,
+ "corrected": 202,
+ "partial": 25,
+ "outstanding": 575,
+ "accountedFor": 575,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -199,13 +199,13 @@
   {
    "family": "F09-RATE-LIMIT-IDEMPOTENCY-REPLAY",
    "purpose": "Abuse controls: rate limits, idempotency keys and replay protection",
-   "defects": 9,
+   "defects": 8,
    "severity": {
-    "HIGH": 1,
+    "HIGH": 0,
     "MEDIUM": 5,
     "LOW": 3
    },
-   "namedRoutes": 2,
+   "namedRoutes": 1,
    "namedFiles": 1,
    "tranches": {
     "0B.4": 1,
@@ -213,19 +213,19 @@
     "0B.6": 3,
     "0B.7": 1,
     "0B.10": 1,
-    "0B.11": 2
+    "0B.11": 1
    }
   },
   {
    "family": "F10-FINANCIAL-AND-PAYMENT",
    "purpose": "Financial and payment integrity",
-   "defects": 12,
+   "defects": 8,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 10,
-    "LOW": 2
+    "MEDIUM": 7,
+    "LOW": 1
    },
-   "namedRoutes": 6,
+   "namedRoutes": 2,
    "namedFiles": 0,
    "tranches": {
     "0B.3": 1,
@@ -233,7 +233,7 @@
     "0B.8": 1,
     "0B.9": 1,
     "0B.10": 3,
-    "0B.11": 5
+    "0B.11": 1
    }
   },
   {
@@ -2076,10 +2076,6 @@
     "severity": "LOW"
    },
    {
-    "id": "DEF-0B11-PRP-DUES-PAY-POST-CREATES-A-NEW-FULL-BALANCE-PAYMENT-AND-INTENT-ON-EVERY-CALL-AND-SETTLEMENT-DOES-NOT-RECHECK-THE-BALANCE",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B11-PRP-RECONCILIATION-ENGINE-FABRICATES-FEE-SETTLEMENT-MATCHES-AND-SUMS-REFUNDED-PAYMENTS-AS-RECEIVED",
     "severity": "MEDIUM"
    }
@@ -2095,7 +2091,8 @@
    },
    {
     "id": "DEF-0B8-ICRA-CHECKOUT-REDIRECT-DEFAULTS-TO-LOCALHOST-AND-PRICE-MAY-DIFFER-FROM-DISPLAYED",
-    "severity": "LOW"
+    "severity": "LOW",
+    "partial": true
    },
    {
     "id": "DEF-0B9-ASM-NATIONAL-AVERAGE-BENCHMARK-FALLS-BACK-TO-HARD-CODED-LITERALS-WITH-NO-INDICATION",
@@ -2111,22 +2108,6 @@
    },
    {
     "id": "DEF-0B10-OPL-15",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-PRP-DUES-BALANCE-TAKES-THE-ORGANIZATION-FROM-THE-CLIENT-WITH-NO-MEMBERSHIP-CHECK-AND-NO-TENANT-CONTEXT",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-PRP-DUES-BALANCE-CREDIT-STATUS-IS-UNREACHABLE",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B11-PRP-RECONCILIATION-BANK-AND-UPLOAD-PATHS-ARE-NAMED-FOR-BANK-FEEDS-BUT-LIST-RUNS-AND-EXCEPTIONS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-PRP-REWARDS-EXPORT-CSV-DOES-NOT-NEUTRALISE-SPREADSHEET-FORMULAS",
     "severity": "MEDIUM"
    },
    {

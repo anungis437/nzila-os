@@ -13,11 +13,11 @@
    "NONE": 48,
    "ORG_AUTH": 53,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 199,
+   "RETIRED": 201,
    "ROLE_AUTH": 120,
    "SESSION_AUTH": 64,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 297,
+   "WITH_API": 295,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -11119,10 +11119,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -11156,10 +11156,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {

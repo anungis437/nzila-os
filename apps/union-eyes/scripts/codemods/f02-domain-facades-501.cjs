@@ -89,6 +89,8 @@ const FACADES = {
   'reports/[id]/execute': 'the generic CRUD factory over report definitions (a report row; nothing is executed and its DELETE removed the report)',
   'reports/[id]/run': 'the generic CRUD factory over report definitions (a report row; nothing is run and its DELETE removed the report)',
   'healthwelfare/plans': 'the generic CRUD factory over the per-capita remittance ledger (remittance rows under a plan name, at the member floor)',
+  'reconciliation/bank': 'a list of reconciliation runs under a bank-feed name (no bank feed is read)',
+  'reconciliation/upload': 'a list of reconciliation exceptions under an upload name (no file is received)',
   'events/[id]/occurrences': 'a byte-for-byte copy of the event item route, so its path value was the event, not an occurrence',
 }
 

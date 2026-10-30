@@ -1739,6 +1739,70 @@
           "explanation": "support/metrics answers 501 (batch B09), so a steward can no longer store a notification for any user through it."
         }
       ]
+    },
+    {
+      "id": "B16-F09-F10-DUES-RECONCILIATION-ICRA",
+      "family": "F09/F10: payment initiation is idempotent, exports are formula-safe, and routes named for an intake or feed that does not exist answer 501",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B11-PRP-DUES-PAY-POST-CREATES-A-NEW-FULL-BALANCE-PAYMENT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/dues/dues-payment-service.ts",
+            "apps/union-eyes/lib/dues/__tests__/dues-initiation-single-open.pglite.test.ts",
+            "apps/union-eyes/app/api/dues/create-payment-intent/route.ts"
+          ],
+          "explanation": "Initiation is server-owned (no client amount, organization or member) and returns the same open payment for a repeated or concurrent call, cancelling and reopening only when the balance changed; upstream's change, covered by an existing real-SQL test."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-DUES-BALANCE-TAKES-THE-ORGANIZATION-FROM-THE-CLIENT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/dues/balance/route.ts",
+            "apps/union-eyes/app/api/__tests__/dues-balance.route.test.ts"
+          ],
+          "explanation": "The balance reads the authenticated member and organization from the session only and never fabricates a balance when there is no ledger activity; upstream's change, covered by an existing test."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-DUES-BALANCE-CREDIT-STATUS-IS-UNREACHABLE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/dues/balance/route.ts",
+            "apps/union-eyes/app/api/__tests__/dues-balance.route.test.ts"
+          ],
+          "explanation": "A credit balance is reported when posted payments exceed posted charges; upstream's change, covered by an existing test."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-REWARDS-EXPORT-CSV-DOES-NOT-NEUTRALISE-SPREADSHEET-FORMULAS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/rewards/export/route.ts",
+            "apps/union-eyes/app/api/__tests__/rewards-export.route.test.ts"
+          ],
+          "explanation": "The export neutralises formula cells, is bounded, role-checked and audited in the reading transaction; upstream's change, covered by an existing test."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-RECONCILIATION-BANK-AND-UPLOAD-PATHS-ARE-NAMED-FOR-BANK-FEEDS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs",
+            "apps/union-eyes/app/api/__tests__/reconciliation-upload.route.test.ts",
+            "apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts"
+          ],
+          "explanation": "reconciliation/bank and reconciliation/upload listed runs and exceptions under names promising a bank feed and a file intake; both answer 501 behind the officer floor. The upload route test, which asserted the exception list, was replaced by an assertion of the 501."
+        },
+        {
+          "prefix": "DEF-0B8-ICRA-CHECKOUT-REDIRECT-DEFAULTS-TO-LOCALHOST-AND-PRICE-MAY-DIFFER-FROM-DISPLAYED",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/icra/checkout/route.ts",
+            "apps/union-eyes/app/api/__tests__/icra-checkout.route.test.ts"
+          ],
+          "explanation": "In production a missing NEXT_PUBLIC_APP_URL is a 503 with no Stripe session instead of a redirect to localhost.",
+          "remaining": "The charged amount comes from a Stripe price id or a built-in default and is not compared with the price the page displays."
+        }
+      ]
     }
   ]
 }

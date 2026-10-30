@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 42,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 197,
-    "engineeringRemaining": 580,
+    "engineeringCorrected": 202,
+    "engineeringRemaining": 575,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 24
+    "engineeringPartial": 25
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -8540,9 +8540,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B16-F09-F10-DUES-RECONCILIATION-ICRA",
+        "path": "apps/union-eyes/app/api/icra/checkout/route.ts; apps/union-eyes/app/api/__tests__/icra-checkout.route.test.ts",
+        "explanation": "In production a missing NEXT_PUBLIC_APP_URL is a 503 with no Stripe session instead of a redirect to localhost.",
+        "remaining": "The charged amount comes from a Stripe price id or a built-in default and is not compared with the price the page displays.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-ICRA-INTEGRATION-CREDENTIALS-NEVER-STORED-OR-RESOLVED-YET-REPORTED-STORED",
@@ -13007,9 +13015,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B16-F09-F10-DUES-RECONCILIATION-ICRA",
+        "path": "apps/union-eyes/app/api/dues/balance/route.ts; apps/union-eyes/app/api/__tests__/dues-balance.route.test.ts",
+        "explanation": "The balance reads the authenticated member and organization from the session only and never fabricates a balance when there is no ledger activity; upstream's change, covered by an existing test.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-PRP-DUES-BALANCE-CREDIT-STATUS-IS-UNREACHABLE",
@@ -13024,9 +13039,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B16-F09-F10-DUES-RECONCILIATION-ICRA",
+        "path": "apps/union-eyes/app/api/dues/balance/route.ts; apps/union-eyes/app/api/__tests__/dues-balance.route.test.ts",
+        "explanation": "A credit balance is reported when posted payments exceed posted charges; upstream's change, covered by an existing test.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-PRP-DUES-PAY-GET-RETURNS-EVERY-LEDGER-ENTRY-TYPE-AS-PAYMENTS-AND-OMITS-PENDING-ATTEMPTS",
@@ -13075,9 +13097,16 @@
         ]
       },
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B16-F09-F10-DUES-RECONCILIATION-ICRA",
+        "path": "apps/union-eyes/lib/dues/dues-payment-service.ts; apps/union-eyes/lib/dues/__tests__/dues-initiation-single-open.pglite.test.ts; apps/union-eyes/app/api/dues/create-payment-intent/route.ts",
+        "explanation": "Initiation is server-owned (no client amount, organization or member) and returns the same open payment for a repeated or concurrent call, cancelling and reopening only when the balance changed; upstream's change, covered by an existing real-SQL test.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-PRP-DUES-PAY-POST-INITIATION-AUDIT-COMMITS-BEFORE-THE-PROCESSOR-CALL-AND-THE-LATER-STATE-CHANGES-ARE-UNAUDITED",
@@ -13462,9 +13491,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B16-F09-F10-DUES-RECONCILIATION-ICRA",
+        "path": "apps/union-eyes/scripts/codemods/f02-domain-facades-501.cjs; apps/union-eyes/app/api/__tests__/reconciliation-upload.route.test.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts",
+        "explanation": "reconciliation/bank and reconciliation/upload listed runs and exceptions under names promising a bank feed and a file intake; both answer 501 behind the officer floor. The upload route test, which asserted the exception list, was replaced by an assertion of the 501.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-PRP-RECONCILIATION-LISTS-ARE-UNBOUNDED-AND-THE-EXCEPTION-STATUS-FILTER-IS-AN-UNVALIDATED-CAST",
@@ -13528,9 +13564,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B16-F09-F10-DUES-RECONCILIATION-ICRA",
+        "path": "apps/union-eyes/app/api/rewards/export/route.ts; apps/union-eyes/app/api/__tests__/rewards-export.route.test.ts",
+        "explanation": "The export neutralises formula cells, is bounded, role-checked and audited in the reading transaction; upstream's change, covered by an existing test.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-PRP-REWARDS-EXPORT-IS-UNBOUNDED-AND-WRITES-NO-AUDIT-RECORD",

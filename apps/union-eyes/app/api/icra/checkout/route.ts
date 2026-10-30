@@ -161,8 +161,14 @@ export async function POST(request: NextRequest) {
   }
 
   // Build the checkout session
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? 'http://localhost:3000';
+  // The buyer is sent back to this origin after paying. Outside development a missing configuration is a refusal, not a redirect to a
+  // host that is not the application: a customer would pay and land on localhost.
+  const configuredBase = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '');
+  if (!configuredBase && process.env.NODE_ENV === 'production') {
+    logger.error('[icra-checkout] NEXT_PUBLIC_APP_URL is not configured');
+    return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
+  }
+  const baseUrl = configuredBase ?? 'http://localhost:3000';
   const successUrl = `${baseUrl}/${locale}/continuity-assessment/results/${assessmentId}?tier_unlocked=${tierId}`;
   const cancelUrl = `${baseUrl}/${locale}/continuity-assessment/results/${assessmentId}`;
 
