@@ -237,32 +237,35 @@ describe('publishPost', () => {
     expect(results[0].error).toMatch(/require at least one image/);
   });
 
-  it('publishes a Twitter post with uploaded media via fetch', async () => {
+  it.each([
+    'https://img.example.com/picture.jpg',
+    'http://127.0.0.1/admin',
+    'http://169.254.169.254/latest/meta-data',
+    'https://example.com/redirect-to-private',
+    'file:///etc/passwd',
+  ])('refuses server-side X media fetching for untrusted URL %s', async url => {
     state.selects.socialAccounts = [account({ platform: 'twitter' })];
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      arrayBuffer: async () => new ArrayBuffer(8),
-      headers: new Headers({ 'content-type': 'image/jpeg' }),
-    }));
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
     const svc = new SocialMediaService();
     const results = await svc.publishPost(
       'org-1',
-      { text: 'tweet', media_urls: ['https://img/1.jpg'], platforms: ['twitter'] },
-      'user-1',
-    );
-    expect(results[0]).toMatchObject({ platform: 'twitter', success: true, post_id: 'tw-post-1' });
-    expect(clients.twitter.uploadMedia).toHaveBeenCalled();
-  });
-
-  it('blocks a Twitter media URL with a disallowed scheme (SSRF guard)', async () => {
-    state.selects.socialAccounts = [account({ platform: 'twitter' })];
-    const svc = new SocialMediaService();
-    const results = await svc.publishPost(
-      'org-1',
-      { text: 'tweet', media_urls: ['file:///etc/passwd'], platforms: ['twitter'] },
+      { text: 'tweet', media_urls: [url], platforms: ['twitter'] },
       'user-1',
     );
     expect(results[0].success).toBe(false);
-    expect(results[0].error).toMatch(/Blocked media URL scheme/);
+    expect(results[0].error).toMatch(/remote media URL ingestion is disabled/);
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(clients.twitter.uploadMedia).not.toHaveBeenCalled();
+    expect(clients.twitter.postTweet).not.toHaveBeenCalled();
+  });
+
+  it('keeps the text-only X publishing journey available', async () => {
+    state.selects.socialAccounts = [account({ platform: 'twitter' })];
+    const svc = new SocialMediaService();
+    const results = await svc.publishPost('org-1', { text: 'safe text', platforms: ['twitter'] }, 'user-1');
+    expect(results[0]).toMatchObject({ platform: 'twitter', success: true, post_id: 'tw-post-1' });
+    expect(clients.twitter.postTweet).toHaveBeenCalledWith({ text: 'safe text' });
   });
 
   it('publishes a LinkedIn link post', async () => {

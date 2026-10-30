@@ -283,28 +283,19 @@ export class SocialMediaService {
           case 'twitter': {
             const twitterClient = client as TwitterAPIClient;
             
-            // Upload media if present
-            let mediaIds: string[] | undefined;
+            // No arbitrary remote media URL may be fetched by the application server.
+            // A scheme check does not prevent redirects, DNS rebinding, private-IP access,
+            // oversized responses or unsupported content types. Until trusted uploaded
+            // asset IDs are supported, refuse media publishing explicitly and preserve
+            // the fully functional text-only publishing path.
             if (content.media_urls && content.media_urls.length > 0) {
-              mediaIds = [];
-              for (const url of content.media_urls) {
-                // Validate media URL to prevent SSRF
-                const parsed = new URL(url);
-                if (!['http:', 'https:'].includes(parsed.protocol)) {
-                  throw new Error(`Blocked media URL scheme: ${parsed.protocol}`);
-                }
-                // Fetch and upload media
-                const mediaResponse = await fetch(url);
-                const mediaBuffer = Buffer.from(await mediaResponse.arrayBuffer());
-                const mediaType = mediaResponse.headers.get('content-type') as 'image/jpeg' | 'image/png' | 'image/gif' | 'video/mp4';
-                const media = await twitterClient.uploadMedia(mediaBuffer, mediaType);
-                mediaIds.push(media.media_id_string);
-              }
+              throw ApiError.notImplemented(
+                'X media publishing requires verified uploaded assets; remote media URL ingestion is disabled',
+              );
             }
 
             const tweet = await twitterClient.postTweet({
               text: content.text,
-              media_ids: mediaIds,
             });
             postId = tweet.id;
             permalink = `https://twitter.com/i/web/status/${tweet.id}`;
