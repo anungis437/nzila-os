@@ -136,6 +136,8 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
     await member('steward-a', LOCAL_A, 'steward')
     await member('officer-a', LOCAL_A, 'officer')
     await member('suspended-a', LOCAL_A, 'member', 'suspended')
+    await member('removed-a', LOCAL_A, 'admin')
+    await admin.query('UPDATE organization_members SET deleted_at = now() WHERE user_id = $1 AND organization_id = $2', ['removed-a', LOCAL_A])
   }, 120_000)
 
   afterAll(async () => {
@@ -153,6 +155,16 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
     expect(await ids(await GET(get('/api/organizations')))).toEqual([LOCAL_B])
     as('member-a')
     expect(await ids(await GET(get('/api/organizations')))).toEqual([LOCAL_A])
+  })
+
+  it('soft-deleted administrator membership confers no organization or descendant visibility', async () => {
+    const { GET } = await import('../../app/api/organizations/route')
+    const hierarchy = await import('../../app/api/organizations/hierarchy/route')
+    const item = await import('../../app/api/organizations/[id]/route')
+    as('removed-a')
+    expect(await ids(await GET(get('/api/organizations')))).toEqual([])
+    expect(await ids(await hierarchy.GET(get('/api/organizations/hierarchy')))).toEqual([])
+    expect((await item.GET(get(`/api/organizations/${LOCAL_A}`), params(LOCAL_A))).status).toBe(404)
   })
 
   it('gives a member the public profile and the administrator of the federation everything below it', async () => {
