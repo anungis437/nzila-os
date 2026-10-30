@@ -6,7 +6,7 @@ const m = vi.hoisted(() => ({
   getCurrentUser: vi.fn(),
   hasMinRole: vi.fn(),
   BillingCycleService: { calculatePeriodDates: vi.fn(), generateBillingCycle: vi.fn() },
-  logger: { info: vi.fn(), error: vi.fn() },
+  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   performAuditedOperation: vi.fn(),
 }));
 
@@ -138,13 +138,19 @@ describe('admin/billing-cycles route', () => {
     expect(response.status).toBe(400);
   });
 
-  it('returns billing history payload from GET', async () => {
+  it('returns an honest 501 rather than a fabricated empty billing history', async () => {
     const { GET } = await loadRoute();
 
     const response = await GET(new NextRequest('http://localhost/api/admin/billing-cycles?organizationId=11111111-1111-1111-1111-111111111111'));
     const payload = await response.json();
 
-    expect(response.status).toBe(200);
-    expect(payload).toMatchObject({ cycles: [], total: 0 });
+    expect(response.status).toBe(501);
+    expect(payload).toMatchObject({
+      success: false,
+      capabilityState: 'NOT_IMPLEMENTED',
+      error: { code: 'NOT_IMPLEMENTED' },
+    });
+    expect(payload).not.toHaveProperty('cycles');
+    expect(m.BillingCycleService.generateBillingCycle).not.toHaveBeenCalled();
   });
 });
