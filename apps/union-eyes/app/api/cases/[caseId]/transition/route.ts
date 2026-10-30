@@ -148,9 +148,10 @@ export async function PATCH(
       await tx.insert(claimUpdates).values({
         claimId: claimHistoryReference(claim.claimId),
         updateType: 'status_change',
-        message: reason
-          ? `Status changed: ${fromStatus} → ${toDbStatus}. Reason: ${reason}`
-          : `Status changed: ${fromStatus} → ${toDbStatus}`,
+        // Member-visible history must not contain the staff's transition reason:
+        // it may include confidential evidence, third-party identity or legal strategy.
+        // The reason remains in the restricted atomic audit and evidence pack.
+        message: `Status changed: ${fromStatus} → ${toDbStatus}`,
         createdBy: userId,
         isInternal: false,
         visibilityScope: 'member',
@@ -159,7 +160,6 @@ export async function PATCH(
           toStatus: toDbStatus,
           cupeFromStatus: cupeCurrentStatus,
           cupeToStatus: targetStatus,
-          reason: reason ?? null,
         },
       });
 
