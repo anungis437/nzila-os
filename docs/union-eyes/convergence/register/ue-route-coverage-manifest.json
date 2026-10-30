@@ -36,9 +36,9 @@
    "WITH_API": 181
   },
   "mutatingByAudit": {
-   "ATOMIC": 150,
+   "ATOMIC": 149,
    "ATOMIC_SERVICE": 145,
-   "COMPUTE_ONLY": 37,
+   "COMPUTE_ONLY": 38,
    "CRUD_ATOMIC": 279,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 23,
@@ -10514,7 +10514,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "ATOMIC"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "pension/trustee-meetings/[id]/route.ts",
