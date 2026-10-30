@@ -19,6 +19,9 @@ on:
       - 'ARCHITECTURE.md'
       - 'SECURITY.md'
       - 'tooling/ops/**'
+      - 'tooling/scripts/generate-ops-evidence.mjs'
+      - 'tooling/scripts/generate-ops-evidence.test.mjs'
+      - '.github/workflows/ops-pack.yml'
   # Also run weekly to catch staleness
   schedule:
     - cron: '0 9 * * 1'
