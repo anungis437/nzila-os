@@ -90,12 +90,25 @@ export async function PATCH(req: NextRequest, params: Params) {
     // Django's legacy stub did not declare the Drizzle unique constraint.
     // Never use ON CONFLICT without a proven unique key; and never update
     // multiple rows if the historic table contains duplicates.
-    const existing = await tx.select({ id: organizationSharingSettings.id })
+    const existing = await tx.select({
+      id: organizationSharingSettings.id,
+      maxSharedClauses: organizationSharingSettings.maxSharedClauses,
+      maxSharedPrecedents: organizationSharingSettings.maxSharedPrecedents,
+    })
       .from(organizationSharingSettings)
       .where(eq(organizationSharingSettings.organizationId, access.id))
       .limit(2).for('update');
     if (existing.length !== 1) {
       return { error: 'The organization sharing record requires single-owner storage reconciliation', status: 409 } as const;
+    }
+    // Numeric caps are restrictive only when they stay the same or decrease.
+    // A syntactically valid larger cap would still broaden publication policy.
+    for (const key of ['maxSharedClauses', 'maxSharedPrecedents'] as const) {
+      const previous = existing[0][key];
+      const requested = patch[key];
+      if (requested !== undefined && previous !== null && previous !== undefined && requested > previous) {
+        return { error: 'Increasing a publication cap requires union ratification', status: 409 } as const;
+      }
     }
     const [updated] = await tx.update(organizationSharingSettings)
       .set({ ...patch, updatedAt: new Date() })

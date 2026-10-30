@@ -136,6 +136,32 @@ describe('organization sharing settings — policy containment', () => {
     expect(m.audit).not.toHaveBeenCalled();
   });
 
+  it('refuses an increase to any existing shared-resource cap', async () => {
+    const { PATCH } = await import('../organizations/[id]/sharing-settings/route');
+    m.rows = [{ id: 'sharing-record-1', maxSharedClauses: 5, maxSharedPrecedents: 8 }];
+    for (const payload of [{ maxSharedClauses: 6 }, { maxSharedPrecedents: 9 }]) {
+      const res = await PATCH(new NextRequest(url + '/sharing-settings', {
+        method: 'PATCH', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload),
+      }), params);
+      expect(res.status).toBe(409);
+    }
+    expect(m.update).not.toHaveBeenCalled();
+    expect(m.audit).not.toHaveBeenCalled();
+  });
+
+  it('permits a lower cap under the direct administrator and retains the tenant predicate', async () => {
+    const { PATCH } = await import('../organizations/[id]/sharing-settings/route');
+    m.rows = [{ id: 'sharing-record-1', maxSharedClauses: 5, maxSharedPrecedents: 8 }];
+    const res = await PATCH(new NextRequest(url + '/sharing-settings', {
+      method: 'PATCH', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ maxSharedClauses: 4, maxSharedPrecedents: 7 }),
+    }), params);
+    expect(res.status).toBe(200);
+    expect(JSON.stringify(m.mutationPredicate)).toContain(ORG_ID);
+    expect(m.audit).toHaveBeenCalledTimes(1);
+  });
+
   it('restrictive settings persist under own tenant with mandatory atomic audit', async () => {
     const { PATCH } = await import('../organizations/[id]/sharing-settings/route');
     m.rows = [{ id: 'sharing-record-1' }];
