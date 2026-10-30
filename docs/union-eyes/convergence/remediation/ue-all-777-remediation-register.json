@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 42,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 145,
-    "engineeringRemaining": 632,
+    "engineeringCorrected": 148,
+    "engineeringRemaining": 629,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 19
   },
@@ -320,6 +320,10 @@
     {
       "sha": "3da958e3983a54ae749104aab9f07bbc0c9700ce",
       "description": "Organization directory and search now redact member counts from non-administrative views and bind system reads to explicit transactions. Added cross-org privacy regression contract; exact HEAD CI, native PG15/16 and HTTP/browser acceptance pending."
+    },
+    {
+      "sha": "5fa80b00ac12611834db0915c7ba19bf48b4e001",
+      "description": "Reconciled three previously implemented sensitive incident item, incident trends and personal calendar access fixes with new source-level regression contracts. No exact-HEAD test, native database or HTTP/browser verdict; no human acceptance."
     }
   ],
   "records": [
@@ -2347,7 +2351,16 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "GATE0-HS-CALENDAR-PRIVACY-RECONCILIATION",
+        "path": "apps/union-eyes/app/api/calendar/events/route.ts; apps/union-eyes/app/api/calendar/events/[id]/route.ts; apps/union-eyes/lib/calendar/event-visibility.ts",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/hs-calendar-tenant-privacy.contract.test.ts",
+        "explanation": "Event collection joins calendars and enforces tenant, personal-calendar owner and private-event visibility; item reads and mutations apply per-event visibility and organizer authority under tenant RLS.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "sourceCommit": "5fa80b00ac12611834db0915c7ba19bf48b4e001"
+      }
     },
     {
       "defectId": "DEF-0B4-CALENDAR-EVENT-CALENDAR-ID-UNVERIFIED",
@@ -7614,7 +7627,16 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "GATE0-HS-CALENDAR-PRIVACY-RECONCILIATION",
+        "path": "apps/union-eyes/app/api/health-safety/incidents/[id]/route.ts; apps/union-eyes/app/api/health-safety/incidents/route.ts",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/hs-calendar-tenant-privacy.contract.test.ts",
+        "explanation": "Sensitive incident item reads now require the same health_safety_rep floor as the incident collection; member-floor item access is removed.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "sourceCommit": "5fa80b00ac12611834db0915c7ba19bf48b4e001"
+      }
     },
     {
       "defectId": "DEF-0B8-HS-HAZARD-ITEM-READ-MEMBER-FLOOR-WHOLE-ROW",
@@ -8014,9 +8036,18 @@
         "repair": "Both daily and monthly aggregates now derive organizationId solely from authenticated context, require it, bind the exact organization in withRLSContext and include an unconditional organization_id SQL predicate. The caller's organizationId query string is ignored and unsupported periods are refused.",
         "limits": "New source and adversarial mocked regression are committed but not yet unit-, PG15/16-, or real HTTP/browser-verified. Full health-safety persona authorization and aggregate correctness remain subject to acceptance."
       },
-      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
+      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "GATE0-HS-CALENDAR-PRIVACY-RECONCILIATION",
+        "path": "apps/union-eyes/app/api/health-safety/incidents/trends/route.ts",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/hs-calendar-tenant-privacy.contract.test.ts",
+        "explanation": "Incident trend aggregates ignore caller-supplied organization identifiers, bind the authenticated organization to RLS and predicate both day and month SQL paths on organization_id.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "sourceCommit": "5fa80b00ac12611834db0915c7ba19bf48b4e001"
+      }
     },
     {
       "defectId": "DEF-0B8-ICRA-PAID-PDF-REPORT-GATE-REQUIRES-STATUS-COMPLETED-NO-WRITER",
