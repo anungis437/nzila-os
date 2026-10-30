@@ -48,7 +48,7 @@ export function resolveIncidentDate(raw: Record<string, unknown>): string {
   if (Number.isNaN(base.getTime())) throw ApiError.badRequest('Invalid incidentDate');
   const incidentTime = raw.incidentTime;
   if (incidentTime !== undefined) {
-    if (typeof incidentTime !== 'string' || !/^(?:[01]\\d|2[0-3]):[0-5]\\d$/.test(incidentTime)) {
+    if (typeof incidentTime !== 'string' || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(incidentTime)) {
       throw ApiError.badRequest('Invalid incidentTime');
     }
     const [hours, minutes] = incidentTime.split(':').map(Number);
