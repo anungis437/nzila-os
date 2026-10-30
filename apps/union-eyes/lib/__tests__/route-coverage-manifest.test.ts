@@ -67,7 +67,7 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
     const canonical = readFileSync(join(ROOT, 'app', 'api', 'calendar', 'events', '[id]', 'route.ts'), 'utf8')
     expect(alias).toMatch(/canonicalPATCH\\(request/)
     expect(alias).toMatch(/canonicalDELETE\\(request/)
-    expect(alias).toMatch(/from ['"]@\\/app\\/api\\/calendar\\/events\\/\\[id\\]\\/route['"] /)
+    expect(alias).toMatch(/from ['"]@\\/app\\/api\\/calendar\\/events\\/\\[id\\]\\/route['"]/)
     expect(canonical).toMatch(/withRLSContext\\(\\{ organizationId, userId \\}/)
     expect(canonical).toMatch(/eq\\(calendarEvents\\.organizationId, organizationId\\)/)
     expect((canonical.match(/await persistAtomicAudit\\(tx,/g) ?? []).length).toBe(2)
