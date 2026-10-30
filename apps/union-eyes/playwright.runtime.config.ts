@@ -12,8 +12,10 @@ process.env.PLAYWRIGHT_TEST_AUTH ??= 'true'
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3002'
 
 export default defineConfig({
-  testDir: '.',
-  testMatch: ['e2e/runtime/**/*.spec.ts'],
+  // Keep generated .next/standalone copies out of discovery: duplicate tests can run
+  // against the same disposable state and invalidate restart-persistence evidence.
+  testDir: 'e2e/runtime',
+  testMatch: '**/*.spec.ts',
   fullyParallel: false,
   workers: 1,
   retries: 0,
