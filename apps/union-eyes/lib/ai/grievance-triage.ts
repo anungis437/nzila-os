@@ -22,6 +22,7 @@ import { randomUUID } from 'crypto';
 import { db } from '@/db/db';
 import { eq, and, desc } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { performAuditedOperation } from '@/lib/audit/operation-audit';
 import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
@@ -91,6 +92,9 @@ export async function analyzeGrievance(
   input: TriageInput,
 ): Promise<AiResponseEnvelope<TriageResult>> {
   const { grievanceId, organizationId, userId } = input;
+
+  const access = await getEffectiveCaseAccess({ organizationId, grievanceId, userId });
+  if (!access.canViewCase) throw new Error('Case access denied');
 
   // 1. Fetch grievance
   const grievance = await db.query.grievances.findFirst({
