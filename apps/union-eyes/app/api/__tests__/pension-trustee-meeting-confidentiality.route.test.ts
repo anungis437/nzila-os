@@ -67,7 +67,7 @@ describe('DEF-0B10-PEN-TRUSTEE-MEETING-READS confidential read containment', () 
 
   it('requires actor and tenant and rejects unbounded or malformed pagination', async () => {
     const { GET } = await import('../pension/trustee-meetings/route')
-    for (const [organizationId, userId, query] of [[null, 'user-a', ''], ['org-a', null, ''], ['org-a', 'user-a', '?page=-1'], ['org-a', 'user-a', '?pageSize=101'], ['org-a', 'user-a', '?page=abc']]) {
+    for (const [organizationId, userId, query] of [[null, 'user-a', ''], ['org-a', null, ''], ['org-a', 'user-a', '?page=-1'], ['org-a', 'user-a', '?pageSize=101'], ['org-a', 'user-a', '?page=abc'], ['org-a', 'user-a', '?page=01'], ['org-a', 'user-a', '?pageSize=0'], ['org-a', 'user-a', '?page=1.5'], ['org-a', 'user-a', '?page=1e2']]) {
       await expect((GET as any)({ organizationId, userId, request: { url: 'http://localhost/api/pension/trustee-meetings' + query } })).rejects.toMatchObject({ status: organizationId && userId ? 400 : 403 })
     }
     expect(m.rls).not.toHaveBeenCalled()
@@ -89,4 +89,53 @@ describe('DEF-0B10-PEN-TRUSTEE-MEETING-READS confidential read containment', () 
     m.audit.mockRejectedValueOnce(new Error('audit unavailable'))
     await expect((GET as any)({ organizationId: 'org-a', userId: 'user-a', request: { url: 'http://localhost/api/pension/trustee-meetings' } })).rejects.toThrow('audit unavailable')
   })
+  it('binds trustee meeting creation to the authenticated actor and tenant, ignoring spoofed body identities', async () => {
+    const { POST } = await import('../pension/trustee-meetings/route')
+    let inserted: Record<string, unknown> | undefined
+    m.rls.mockImplementationOnce(async (context: unknown, operation: (tx: unknown) => Promise<unknown>) => {
+      expect(context).toEqual({ organizationId: 'org-a', userId: 'user-a' })
+      return operation({
+        insert: () => ({
+          values: (value: Record<string, unknown>) => {
+            inserted = value
+            return { returning: async () => [{ id: 'meeting-new', ...value }] }
+          },
+        }),
+      })
+    })
+    const result = await (POST as any)({
+      organizationId: 'org-a', userId: 'user-a',
+      body: {
+        title: 'Trustee review', scheduledDate: '2026-11-01',
+        organizationId: 'org-b', userId: 'user-b',
+      },
+    })
+    expect(inserted).toMatchObject({ organizationId: 'org-a', title: 'Trustee review' })
+    expect(inserted).not.toHaveProperty('userId')
+    expect(result).toMatchObject({ id: 'meeting-new', organizationId: 'org-a' })
+    expect(m.audit).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        organizationId: 'org-a', userId: 'user-a',
+        action: 'pension.trustee_meeting.schedule', resourceId: 'meeting-new',
+      }),
+    )
+  })
+
+  it('does not claim trustee meeting creation succeeded if mandatory audit persistence fails', async () => {
+    const { POST } = await import('../pension/trustee-meetings/route')
+    m.rls.mockImplementationOnce(async (_context: unknown, operation: (tx: unknown) => Promise<unknown>) =>
+      operation({
+        insert: () => ({
+          values: () => ({ returning: async () => [{ id: 'meeting-new' }] }),
+        }),
+      }),
+    )
+    m.audit.mockRejectedValueOnce(new Error('audit unavailable'))
+    await expect((POST as any)({
+      organizationId: 'org-a', userId: 'user-a',
+      body: { title: 'Trustee review', scheduledDate: '2026-11-01' },
+    })).rejects.toThrow('audit unavailable')
+  })
+
 })
