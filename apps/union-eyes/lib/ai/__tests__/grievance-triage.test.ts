@@ -1,10 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockFindFirst, mockInsertValues, mockGenerate } = vi.hoisted(() => ({
+const { mockFindFirst, mockInsertValues, mockGenerate, mockCaseAccess } = vi.hoisted(() => ({
   mockFindFirst: vi.fn(),
   mockInsertValues: vi.fn(),
   mockGenerate: vi.fn(),
+  mockCaseAccess: vi.fn(),
 }));
+
+vi.mock('@/lib/services/case-access-service', () => ({ getEffectiveCaseAccess: mockCaseAccess }));
 
 vi.mock('@/db/db', () => ({
   db: {
@@ -26,6 +29,7 @@ vi.mock('@/lib/ai/ai-client', () => ({
     component: 'test',
     action: 'mock',
   })),
+  toGatewayDataClass: vi.fn(() => 'regulated'),
   UE_APP_KEY: 'union-eyes',
   UE_PROFILES: { GRIEVANCE_TRIAGE: 'ue-grievance-triage' },
   UE_SYSTEM_ORG_ID: '00000000-0000-0000-0000-000000000000',
@@ -64,6 +68,7 @@ import { analyzeGrievance } from '../grievance-triage';
 describe('analyzeGrievance', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockCaseAccess.mockResolvedValue({ canViewCase: true });
     audit.mockResolvedValue(undefined);
     operation.mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn());
     mockFindFirst.mockResolvedValue({
@@ -84,6 +89,13 @@ describe('analyzeGrievance', () => {
       }),
     });
     mockInsertValues.mockResolvedValue(undefined);
+  });
+
+  it('refuses case access before any AI call or write', async () => {
+    mockCaseAccess.mockResolvedValueOnce({ canViewCase: false });
+    await expect(analyzeGrievance({ grievanceId: 'grv-1', organizationId: 'org-1', userId: 'user-1' })).rejects.toThrow('Case access denied');
+    expect(mockGenerate).not.toHaveBeenCalled();
+    expect(mockInsertValues).not.toHaveBeenCalled();
   });
 
   it('returns an AI envelope with triage result', async () => {

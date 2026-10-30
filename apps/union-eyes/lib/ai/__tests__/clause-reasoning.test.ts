@@ -1,10 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockFindFirst, mockInsertValues, mockGenerate } = vi.hoisted(() => ({
+const { mockFindFirst, mockInsertValues, mockGenerate, mockCaseAccess } = vi.hoisted(() => ({
   mockFindFirst: vi.fn(),
   mockInsertValues: vi.fn(),
   mockGenerate: vi.fn(),
+  mockCaseAccess: vi.fn(),
 }));
+
+vi.mock('@/lib/services/case-access-service', () => ({ getEffectiveCaseAccess: mockCaseAccess }));
 
 vi.mock('@/db/db', () => ({
   db: {
@@ -26,6 +29,7 @@ vi.mock('@/lib/ai/ai-client', () => ({
     component: 'test',
     action: 'mock',
   })),
+  toGatewayDataClass: vi.fn(() => 'regulated'),
   UE_APP_KEY: 'union-eyes',
   UE_PROFILES: { CLAUSE_REASONING: 'ue-clause-reasoning' },
   UE_SYSTEM_ORG_ID: '00000000-0000-0000-0000-000000000000',
@@ -64,6 +68,7 @@ import { suggestClausesForGrievance } from '../clause-reasoning';
 describe('suggestClausesForGrievance', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockCaseAccess.mockResolvedValue({ canViewCase: true });
     audit.mockResolvedValue(undefined);
     operation.mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn());
     mockFindFirst.mockResolvedValue({
@@ -89,6 +94,13 @@ describe('suggestClausesForGrievance', () => {
       }),
     });
     mockInsertValues.mockResolvedValue(undefined);
+  });
+
+  it('refuses unassigned grievance content before model invocation', async () => {
+    mockCaseAccess.mockResolvedValueOnce({ canViewCase: false });
+    await expect(suggestClausesForGrievance({ grievanceId: 'grv-1', organizationId: 'org-1', userId: 'user-1' })).rejects.toThrow('Case access denied');
+    expect(mockGenerate).not.toHaveBeenCalled();
+    expect(mockInsertValues).not.toHaveBeenCalled();
   });
 
   it('returns an AI envelope with clause suggestions', async () => {
