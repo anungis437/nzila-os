@@ -6,6 +6,7 @@ const m = vi.hoisted(() => ({
   documentFind: vi.fn(),
   voidEnvelope: vi.fn(),
   open: [] as unknown[],
+  queue: [] as unknown[][],
   signerUpdate: [] as unknown[],
   voidUpdate: [] as unknown[],
   tx: {} as Record<string, any>,
@@ -19,7 +20,7 @@ vi.mock('@/db/schema', () => {
   const t = (name: string) => new Proxy({}, { get: (_t, p) => `${name}.${String(p)}` });
   return { signatureDocuments: t('signatureDocuments'), documentSigners: t('documentSigners'), signatureAuditTrail: t('signatureAuditTrail') };
 });
-vi.mock('drizzle-orm', () => ({ eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and'), or: vi.fn(() => 'or'), desc: vi.fn(), notInArray: vi.fn(() => 'notIn'), inArray: vi.fn(() => 'in') }));
+vi.mock('drizzle-orm', () => ({ eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and'), or: vi.fn(() => 'or'), desc: vi.fn(), notInArray: vi.fn(() => 'notIn'), inArray: vi.fn(() => 'in'), lt: vi.fn(() => 'lt') }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (_org: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(m.tx),
 }));
@@ -39,12 +40,13 @@ describe('SignatureService authority and atomic audit', () => {
     vi.clearAllMocks();
     m.trail = [];
     m.open = [{ id: 'd1' }];
+    m.queue = [];
     m.signerUpdate = [{ ...SIGNER, status: 'signed' }];
     m.voidUpdate = [{ id: 'd1' }];
     m.audit.mockResolvedValue(undefined);
     m.signerFind.mockResolvedValue(SIGNER);
     m.documentFind.mockResolvedValue({ ...DOC, signers: [SIGNER] });
-    m.tx.select = vi.fn(() => ({ from: () => ({ where: async () => m.open }) }));
+    m.tx.select = vi.fn(() => ({ from: () => ({ where: async () => (m.queue.length ? m.queue.shift()! : m.open) }) }));
     m.tx.update = vi.fn((table: string) => ({
       set: () => ({
         where: () => ({
@@ -83,6 +85,15 @@ describe('SignatureService authority and atomic audit', () => {
       expect(m.audit).toHaveBeenCalledWith(m.tx, expect.objectContaining({ action: 'signature.document.void', userId: 'sender', organizationId: 'o1' }));
     });
 
+    // DEF-0B11-SOC-VOID-SWALLOWS-THE-PROVIDER-FAILURE-AND-RECORDS-VOIDED-WHILE-THE-ENVELOPE-CAN-STILL-BE-SIGNED
+    it('does not record a void, or audit one, when the provider could not void the envelope', async () => {
+      m.documentFind.mockResolvedValue({ ...DOC, provider: 'docusign', providerEnvelopeId: 'env-1' });
+      m.voidEnvelope.mockRejectedValue(new Error('provider down'));
+      await expect(SignatureService.voidDocument('d1', 'sender', 'why')).rejects.toMatchObject({ code: 'CONFLICT' });
+      expect(m.tx.update).not.toHaveBeenCalled();
+      expect(m.audit).not.toHaveBeenCalled();
+    });
+
     it('is a conflict with no audit when the document completed in the meantime', async () => {
       m.voidUpdate = [];
       await expect(SignatureService.voidDocument('d1', 'sender', 'why')).rejects.toBeInstanceOf(SignatureAuthorityError);
@@ -92,6 +103,27 @@ describe('SignatureService authority and atomic audit', () => {
 
   describe('recordSignature', () => {
     const input = { signerId: 'sg1', actorUserId: 'signer', signatureImageUrl: 'https://x.test/s.png', signatureType: 'electronic' as const };
+
+    // DEF-0B11-SOC-SIGNING-IGNORES-THE-STORED-EXPIRY-SIGNING-ORDER-AND-AUTHENTICATION-REQUIREMENT
+    it('does not sign an expired request', async () => {
+      m.queue = [[{ id: 'd1' }], [{ expiresAt: new Date(Date.now() - 1000), sequentialSigning: false }]];
+      await expect(SignatureService.recordSignature(input)).rejects.toMatchObject({ code: 'CONFLICT', message: expect.stringContaining('expired') });
+      expect(m.tx.update).not.toHaveBeenCalled();
+      expect(m.audit).not.toHaveBeenCalled();
+    });
+
+    it('makes a later signer wait for the earlier ones when signing is sequential', async () => {
+      m.signerFind.mockResolvedValue({ ...SIGNER, signingOrder: 2 });
+      m.queue = [[{ id: 'd1' }], [{ expiresAt: null, sequentialSigning: true }], [{ id: 'sg0', status: 'sent' }]];
+      await expect(SignatureService.recordSignature(input)).rejects.toMatchObject({ code: 'CONFLICT', message: expect.stringContaining('earlier signer') });
+      expect(m.tx.update).not.toHaveBeenCalled();
+    });
+
+    it('signs when sequential signing is on and every earlier signer has signed', async () => {
+      m.signerFind.mockResolvedValue({ ...SIGNER, signingOrder: 2 });
+      m.queue = [[{ id: 'd1' }], [{ expiresAt: null, sequentialSigning: true }], [{ id: 'sg0', status: 'signed' }]];
+      await expect(SignatureService.recordSignature(input)).resolves.toMatchObject({ status: 'signed' });
+    });
 
     it('refuses a caller who is not the signer', async () => {
       await expect(SignatureService.recordSignature({ ...input, actorUserId: 'someone-else' })).rejects.toThrow('not authorized');

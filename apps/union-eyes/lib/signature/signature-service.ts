@@ -12,7 +12,7 @@ import {
 } from "@/db/schema";
 import SignatureProviderFactory from "./providers";
 import { decideProviderSync, mayAdvanceSigner } from "./provider-sync";
-import { eq, and, or, desc, inArray, notInArray, isNull } from "drizzle-orm";
+import { eq, and, or, desc, inArray, notInArray, isNull, lt } from "drizzle-orm";
 import { organizationMembers } from "@/db/schema-organizations";
 import { signerListSchema, verifySignerList, SignerVerificationError } from "./signer-verification";
 import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
@@ -484,6 +484,25 @@ export class SignatureService {
         .where(and(eq(signatureDocuments.id, document.id), notInArray(signatureDocuments.status, [...FINAL_DOCUMENT_STATES])));
       if (!open) throw new SignatureAuthorityError("CONFLICT", "This document is no longer open for signing");
 
+      // The stored terms of the request bind the signature: an expired request is not signed, and with sequential signing a signer waits for
+      // every signer before them.
+      const [terms] = await tx
+        .select({ expiresAt: signatureDocuments.expiresAt, sequentialSigning: signatureDocuments.sequentialSigning })
+        .from(signatureDocuments)
+        .where(eq(signatureDocuments.id, document.id));
+      if (terms?.expiresAt && terms.expiresAt.getTime() < Date.now()) {
+        throw new SignatureAuthorityError("CONFLICT", "This signature request has expired");
+      }
+      if (terms?.sequentialSigning && existingSigner.signingOrder != null) {
+        const earlier = await tx
+          .select({ id: documentSigners.id, status: documentSigners.status })
+          .from(documentSigners)
+          .where(and(eq(documentSigners.documentId, document.id), lt(documentSigners.signingOrder, existingSigner.signingOrder)));
+        if (earlier.some((signer) => signer.status !== "signed")) {
+          throw new SignatureAuthorityError("CONFLICT", "An earlier signer has not signed yet");
+        }
+      }
+
       const [updated] = await tx
         .update(documentSigners)
         .set({
@@ -593,6 +612,9 @@ export class SignatureService {
         );
         await provider.voidEnvelope(document.providerEnvelopeId, reason);
       } catch (_error) {
+        // The envelope is still live at the provider and can still be signed there. Recording the document as voided here would say otherwise,
+        // so nothing is changed and the sender is told the void did not happen.
+        throw new SignatureAuthorityError("CONFLICT", "The signature provider could not void the envelope, so the document was not voided");
       }
     }
 

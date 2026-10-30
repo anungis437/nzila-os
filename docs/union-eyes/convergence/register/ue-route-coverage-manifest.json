@@ -2,7 +2,7 @@
  "register": "UE-CONV-K-008",
  "summary": {
   "routes": 997,
-  "mutating": 726,
+  "mutating": 727,
   "kernel": 60,
   "byGuard": {
    "ADMIN_AUTH": 7,
@@ -33,11 +33,11 @@
    "ROLE_AUTH": 71,
    "SESSION_AUTH": 35,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 185
+   "WITH_API": 186
   },
   "mutatingByAudit": {
    "ATOMIC": 147,
-   "ATOMIC_SERVICE": 151,
+   "ATOMIC_SERVICE": 152,
    "COMPUTE_ONLY": 35,
    "CRUD_ATOMIC": 162,
    "EXEMPT_BALLOT_SECRECY": 2,
@@ -48,7 +48,7 @@
   "mutatingByData": {
    "AMBIENT_DB": 14,
    "CRUD_TENANT_TX": 162,
-   "NONE": 329,
+   "NONE": 330,
    "SYSTEM_CONTEXT": 63,
    "TENANT_TX": 158
   }
@@ -3066,14 +3066,15 @@
   {
    "route": "cba-intelligence/benchmark/[id]/route.ts",
    "methods": [
-    "GET"
+    "GET",
+    "POST"
    ],
-   "mutating": false,
+   "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "READ_ONLY"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "cba-intelligence/documents/route.ts",
