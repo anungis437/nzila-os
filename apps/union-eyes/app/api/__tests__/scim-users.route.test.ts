@@ -62,6 +62,7 @@ describe('scim users route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.selectRows = [];
+    m.inserted = null;
     m.createdRows = [
       {
         id: 'm-new',
@@ -178,5 +179,25 @@ describe('scim users route', () => {
     const { POST } = await loadRoute();
     await POST(provision({ userName: 'jane@example.com' }), ctx);
     expect(m.inserted).toMatchObject({ status: 'pending', role: 'member', organizationId: 'org_1' });
+  });
+
+  // DEF-0B11-IDS-SCIM-PROVISION-BODY-IS-UNVALIDATED-AND-MALFORMED-INPUT-IS-A-500
+  it.each([
+    ['a non-string userName', { userName: 7 }],
+    ['an empty userName', { userName: '   ' }],
+    ['an oversized userName', { userName: 'x'.repeat(400) }],
+    ['a malformed e-mail', { userName: 'a', emails: [{ value: 'not-an-email' }] }],
+    ['too many e-mails', { userName: 'a', emails: Array.from({ length: 11 }, () => ({ value: 'a@example.com' })) }],
+  ])('POST answers 400, writing and auditing nothing, for %s', async (_label, body) => {
+    const { POST } = await loadRoute();
+    await expect(POST(provision(body), ctx)).rejects.toMatchObject({ status: 400 });
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.inserted).toBeNull();
+  });
+
+  it('POST answers 400 for a body that is not JSON', async () => {
+    const { POST } = await loadRoute();
+    const request = new NextRequest('http://localhost/api/scim/v2/org_1/Users', { method: 'POST', body: 'not json' });
+    await expect(POST(request, ctx)).rejects.toMatchObject({ status: 400 });
   });
 });

@@ -27,7 +27,7 @@ import {
   type ReconciliationRun,
   type ReconciliationException,
 } from '@/db/schema';
-import { eq, and, gte, lte, inArray, isNull, sql } from 'drizzle-orm';
+import { eq, and, gte, lte, inArray, isNull, sql, desc } from 'drizzle-orm';
 import { ApiError } from '@/lib/api/errors';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { addMoney, subtractMoney, absMoney, toCents } from '@/lib/decimal-safe';
@@ -453,19 +453,32 @@ export async function getReconciliationRun(
 /**
  * List open exceptions for an org (paginated).
  */
+export const EXCEPTION_STATUSES = ['open', 'under_review', 'resolved', 'written_off'] as const;
+export const MAX_EXCEPTIONS_PER_READ = 200;
+
 export async function listExceptions(
   organizationId: string,
-  statusFilter: ('open' | 'under_review' | 'resolved' | 'written_off')[] = ['open', 'under_review'],
+  statusFilter: readonly string[] = ['open', 'under_review'],
+  limit: number = MAX_EXCEPTIONS_PER_READ,
 ): Promise<ReconciliationException[]> {
+  // A status outside the vocabulary is the caller's error, not a cast that reaches the database as an invalid enum value, and the list is
+  // bounded and ordered, so a large backlog is read in pages rather than whole.
+  const valid = statusFilter.filter((s): s is (typeof EXCEPTION_STATUSES)[number] => (EXCEPTION_STATUSES as readonly string[]).includes(s));
+  if (valid.length === 0 || valid.length !== statusFilter.length) {
+    throw ApiError.badRequest(`status must be one or more of: ${EXCEPTION_STATUSES.join(', ')}`);
+  }
+  const bounded = Math.min(MAX_EXCEPTIONS_PER_READ, Math.max(1, Math.trunc(limit) || MAX_EXCEPTIONS_PER_READ));
   return await db
     .select()
     .from(reconciliationExceptions)
     .where(
       and(
         eq(reconciliationExceptions.organizationId, organizationId),
-        inArray(reconciliationExceptions.status, statusFilter),
+        inArray(reconciliationExceptions.status, valid),
       ),
-    );
+    )
+    .orderBy(desc(reconciliationExceptions.createdAt))
+    .limit(bounded);
 }
 
 /**

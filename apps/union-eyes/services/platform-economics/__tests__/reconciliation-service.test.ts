@@ -61,6 +61,7 @@ vi.mock('drizzle-orm', async (orig) => ({
   gte: vi.fn(() => ({})),
   lte: vi.fn(() => ({})),
   inArray: vi.fn(() => ({})),
+  desc: vi.fn(() => ({})),
 }));
 vi.mock('@/lib/audit-logger', () => ({
   auditLog: h.auditLog,
@@ -216,6 +217,19 @@ describe('platform-economics/reconciliation-service', () => {
       pushSel([{ id: 'ex1' }]);
       const result = await listExceptions('o1');
       expect(result).toHaveLength(1);
+    });
+  });
+
+  // DEF-0B11-PRP-RECONCILIATION-LISTS-ARE-UNBOUNDED-AND-THE-EXCEPTION-STATUS-FILTER-IS-AN-UNVALIDATED-CAST
+  describe('listExceptions input', () => {
+    it.each([[['bogus']], [['open', 'bogus']], [[]]])('refuses the status filter %j before querying', async (filter) => {
+      await expect(listExceptions('o1', filter as string[])).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+      expect(h.queue).toEqual([]);
+    });
+
+    it('accepts every status in the vocabulary', async () => {
+      pushSel([{ id: 'ex1' }]);
+      await expect(listExceptions('o1', ['open', 'under_review', 'resolved', 'written_off'], 5)).resolves.toHaveLength(1);
     });
   });
 

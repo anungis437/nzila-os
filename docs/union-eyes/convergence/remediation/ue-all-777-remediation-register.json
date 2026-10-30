@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 42,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 202,
-    "engineeringRemaining": 575,
+    "engineeringCorrected": 210,
+    "engineeringRemaining": 567,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 25
+    "engineeringPartial": 28
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -6710,9 +6710,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+        "path": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
+        "explanation": "The governance-coherence engine, which embedded literal scores, answers 501 (batch B10).",
+        "remaining": "The governance-momentum engine still derives scores from ratios of cognition-memory entry counts with arbitrary scaling.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-COGA-ROADMAP-DOCUMENTATION-STRATEGY-PRECEDENCE-BUG",
@@ -6961,9 +6969,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+        "path": "apps/union-eyes/lib/knowledge-transfer/resilience-index/resilience-calculator.ts; apps/union-eyes/lib/knowledge-transfer/resilience-index/__tests__/resilience-calculator.test.ts; apps/union-eyes/scripts/codemods/f05-cognition-honesty.cjs",
+        "explanation": "An organization with no dependency data is refused (409) instead of being scored by divisions by zero or by the absence of risks never looked for, with or without interviews. Tests: the refusal for both cases and finite scores once a dependency map exists.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-COGB-RESILIENCE-INDEX-TREND-AND-DOCUMENTATION-QUALITY-ARE-HEURISTIC-LABELS",
@@ -7012,9 +7027,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+        "path": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts; apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
+        "explanation": "Both engine wrappers (foundational and dynamics) no longer state a constant confidence of 60: it is the evidence the payload reports reading, capped at 100, or 0.",
+        "remaining": "The explainability envelope's evidence and reasoning lists are still not populated by these engines.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-COGB-MEMORY-ENGINES-RESTATE-OFFICER-TYPED-ENTRIES-AS-MEASURED-CONDITION",
@@ -7071,9 +7094,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+        "path": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
+        "explanation": "The coordination, rhythm and trust engines answer 501 (batch B10).",
+        "remaining": "The response-elasticity engine still derives its indicators from entry counts and labels them elasticity.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-COGB-OPERATIONAL-TRUST-OUT-OF-RANGE-AND-MODERATE-WITH-NO-DATA",
@@ -7088,9 +7119,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+        "path": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts; apps/union-eyes/scripts/codemods/f02-dynamics-engines-501.cjs",
+        "explanation": "The operational-trust engine, which scored out of range and stated \"moderate\" with no data, answers 501 (batch B10).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-COGB-PRECEDENT-AND-PROCEDURAL-ENGINES-RETURN-CONSTANT-CONTENT-AS-ORGANIZATION-ANALYSIS",
@@ -9605,9 +9643,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+        "path": "apps/union-eyes/app/api/ml/predictions/churn-risk/route.ts",
+        "explanation": "The churn route answers 501 and contains no SQL (batch B10).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ML-CHURN-PROFILES-NAMED-MEMBERS-FROM-THEIR-CASE-HISTORY-WITH-NO-CONSENT-OR-PURPOSE-DECISION",
@@ -9639,9 +9684,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+        "path": "apps/union-eyes/app/api/ml/predictions/churn-risk/route.ts",
+        "explanation": "The churn route performs no invocation audit write at all now that it answers 501 (batch B10).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ML-CHURN-RESOLVES-A-SECOND-IDENTITY-READS-CLAIMS-WITHOUT-AN-ORGANIZATION-PREDICATE-AND-HAS-NO-FEATURE-GATE",
@@ -9977,9 +10029,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+        "path": "apps/union-eyes/app/api/ml/monitoring/alerts/route.ts",
+        "explanation": "The alerts route answers 501 and contains no SQL (batch B10).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ML-ALERTS-DRIFT-FINDING-IS-A-LITERAL-PSI-AND-ALERT-IDS-CHANGE-EVERY-SECOND",
@@ -13381,9 +13440,16 @@
         "remaining": []
       },
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+        "path": "apps/union-eyes/app/api/reconciliation/process/route.ts; apps/union-eyes/services/platform-economics/reconciliation-service.ts; apps/union-eyes/app/api/__tests__/reconciliation-process.route.test.ts",
+        "explanation": "The run lookup is bound to the caller's organization (another organization's run reads as not found); upstream's change, covered by an existing test.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-PRP-RECONCILIATION-SERVICE-QUERIES-THROUGH-THE-SHARED-DB-HANDLE-WITH-EXPLICIT-PREDICATES-ONLY",
@@ -13515,9 +13581,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+        "path": "apps/union-eyes/services/platform-economics/reconciliation-service.ts; apps/union-eyes/services/platform-economics/__tests__/reconciliation-service.test.ts; apps/union-eyes/scripts/codemods/f05-exceptions-bound.cjs",
+        "explanation": "The exception list validates every status against the vocabulary (400 otherwise, before any query), is ordered and bounded at 200. The run list route (reconciliation/bank) answers 501.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-PRP-REWARDS-EXPORT-RETURNS-EVERY-MEMBER-LEDGER-AWARD-AND-BUDGET-ROW-TO-ANY-MEMBER",
@@ -15002,9 +15075,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+        "path": "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts; apps/union-eyes/app/api/__tests__/scim-users.route.test.ts; apps/union-eyes/scripts/codemods/f05-scim-body.cjs",
+        "explanation": "The body is parsed with a bounded schema (userName 1-320, names at most 100, at most 10 well-formed e-mails); malformed, oversized or non-JSON input is a 400 naming the field, with nothing written or audited.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-IDS-SETTINGS-PUT-MERGES-ANY-KEY-INTO-THE-JSON-THAT-HOLDS-THE-CREDIT-LEDGER-AND-THE-PER-CAPITA-RATE",

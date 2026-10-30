@@ -249,7 +249,7 @@ export class RAGService {
       documentTypes?: string[];
       limit?: number;
       similarityThreshold?: number;
-    } = {}
+    }
   ): Promise<
     Array<{
       documentId: string;

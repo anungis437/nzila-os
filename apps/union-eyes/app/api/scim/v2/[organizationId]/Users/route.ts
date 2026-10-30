@@ -8,9 +8,17 @@ import { db } from '@/db/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { organizationMembers } from '@/db/schema/organization-members-schema';
+import { z } from 'zod';
 import { and, asc, count as countRows, eq, isNull } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
+
+// A provisioning request is bounded, typed input. Malformed or oversized input is a 400 naming the field, not a 500 from a failed insert.
+const provisionSchema = z.object({
+  userName: z.string().trim().min(1).max(320),
+  name: z.object({ givenName: z.string().trim().max(100).optional(), familyName: z.string().trim().max(100).optional() }).optional(),
+  emails: z.array(z.object({ value: z.string().trim().email().max(320), primary: z.boolean().optional() })).max(10).optional(),
+});
 
 function toScimUser(member: typeof organizationMembers.$inferSelect) {
   const parts = (member.name ?? '').split(' ');
@@ -91,16 +99,11 @@ export const POST = withApi(
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     // An administrator provisions users only into the organization they are acting in.
     if (params.organizationId !== organizationId) throw ApiError.notFound('Organization');
-    const body = await request.json();
-    const { userName, name, emails } = body as {
-      userName: string;
-      name?: { givenName?: string; familyName?: string };
-      emails?: Array<{ value: string; primary?: boolean }>;
-    };
-
-    if (!userName) {
-      throw ApiError.badRequest('userName is required');
+    const parsed = provisionSchema.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) {
+      throw ApiError.badRequest(`Invalid SCIM user: ${parsed.error.issues.map((i) => i.path.join('.') || 'body').join(', ')}`);
     }
+    const { userName, name, emails } = parsed.data;
 
     const primaryEmail = emails?.find((e) => e.primary)?.value ?? emails?.[0]?.value;
 

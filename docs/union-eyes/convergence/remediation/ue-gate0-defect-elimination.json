@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 149,
-    "partial": 25,
+    "implementedPendingQualification": 157,
+    "partial": 28,
     "qualificationVerified": 0,
-    "unresolved": 628,
+    "unresolved": 620,
     "externalBlockers": 0
   },
   "batches": [
@@ -159,6 +159,15 @@
       "newlyImplemented": 5,
       "outstandingAfter": 628,
       "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+      "family": "F05: inputs are typed and bounded, empty data is refused rather than scored, and constants are not confidence",
+      "outstandingBefore": 628,
+      "newlyImplemented": 8,
+      "outstandingAfter": 620,
+      "partial": 3,
       "evidenceCommit": null
     }
   ],
@@ -1844,6 +1853,107 @@
       ],
       "explanation": "In production a missing NEXT_PUBLIC_APP_URL is a 503 with no Stripe session instead of a redirect to localhost.",
       "remaining": "The charged amount comes from a Stripe price id or a built-in default and is not compared with the price the page displays."
+    },
+    "DEF-0B7-COGB-EMPTY-ORGANIZATION-RESILIENCE-INDEX-DIVIDES-BY-ZERO-AND-REPORTS-STRONG": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+      "files": [
+        "apps/union-eyes/lib/knowledge-transfer/resilience-index/resilience-calculator.ts",
+        "apps/union-eyes/lib/knowledge-transfer/resilience-index/__tests__/resilience-calculator.test.ts",
+        "apps/union-eyes/scripts/codemods/f05-cognition-honesty.cjs"
+      ],
+      "explanation": "An organization with no dependency data is refused (409) instead of being scored by divisions by zero or by the absence of risks never looked for, with or without interviews. Tests: the refusal for both cases and finite scores once a dependency map exists."
+    },
+    "DEF-0B7-COGB-ENVELOPE-CONFIDENCE-FIXED-AT-60-AND-EXPLAINABILITY-EMPTY": {
+      "status": "PARTIAL",
+      "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+      "files": [
+        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts",
+        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts"
+      ],
+      "explanation": "Both engine wrappers (foundational and dynamics) no longer state a constant confidence of 60: it is the evidence the payload reports reading, capped at 100, or 0.",
+      "remaining": "The explainability envelope's evidence and reasoning lists are still not populated by these engines."
+    },
+    "DEF-0B7-COGB-OPERATIONAL-TRUST-OUT-OF-RANGE-AND-MODERATE-WITH-NO-DATA": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+      "files": [
+        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
+        "apps/union-eyes/scripts/codemods/f02-dynamics-engines-501.cjs"
+      ],
+      "explanation": "The operational-trust engine, which scored out of range and stated \"moderate\" with no data, answers 501 (batch B10)."
+    },
+    "DEF-0B7-COGA-COHERENCE-AND-MOMENTUM-ARE-LITERALS-AND-ENTRY-COUNT-RATIOS": {
+      "status": "PARTIAL",
+      "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+      "files": [
+        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts"
+      ],
+      "explanation": "The governance-coherence engine, which embedded literal scores, answers 501 (batch B10).",
+      "remaining": "The governance-momentum engine still derives scores from ratios of cognition-memory entry counts with arbitrary scaling."
+    },
+    "DEF-0B7-COGB-ENTRY-COUNT-PROXIES-LABELLED-AS-COORDINATION-RHYTHM-ELASTICITY-AND-TRUST": {
+      "status": "PARTIAL",
+      "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+      "files": [
+        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts"
+      ],
+      "explanation": "The coordination, rhythm and trust engines answer 501 (batch B10).",
+      "remaining": "The response-elasticity engine still derives its indicators from entry counts and labels them elasticity."
+    },
+    "DEF-0B9-ML-CHURN-SQL-NAMES-COLUMNS-AND-STATUS-VALUES-THE-REPOSITORY-DOES-NOT-DEFINE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+      "files": [
+        "apps/union-eyes/app/api/ml/predictions/churn-risk/route.ts"
+      ],
+      "explanation": "The churn route answers 501 and contains no SQL (batch B10)."
+    },
+    "DEF-0B9-ML-CHURN-INVOCATION-AUDIT-IS-A-SEPARATE-WRITE-BEFORE-VALIDATION-AND-ON-GET": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+      "files": [
+        "apps/union-eyes/app/api/ml/predictions/churn-risk/route.ts"
+      ],
+      "explanation": "The churn route performs no invocation audit write at all now that it answers 501 (batch B10)."
+    },
+    "DEF-0B9-ML-ALERTS-SQL-NAMES-ABSENT-COLUMNS-AND-AN-ABSENT-TABLE-AND-IS-NOT-VALID-SQL": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+      "files": [
+        "apps/union-eyes/app/api/ml/monitoring/alerts/route.ts"
+      ],
+      "explanation": "The alerts route answers 501 and contains no SQL (batch B10)."
+    },
+    "DEF-0B11-IDS-SCIM-PROVISION-BODY-IS-UNVALIDATED-AND-MALFORMED-INPUT-IS-A-500": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+      "files": [
+        "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts",
+        "apps/union-eyes/app/api/__tests__/scim-users.route.test.ts",
+        "apps/union-eyes/scripts/codemods/f05-scim-body.cjs"
+      ],
+      "explanation": "The body is parsed with a bounded schema (userName 1-320, names at most 100, at most 10 well-formed e-mails); malformed, oversized or non-JSON input is a 400 naming the field, with nothing written or audited."
+    },
+    "DEF-0B11-PRP-RECONCILIATION-LISTS-ARE-UNBOUNDED-AND-THE-EXCEPTION-STATUS-FILTER-IS-AN-UNVALIDATED-CAST": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+      "files": [
+        "apps/union-eyes/services/platform-economics/reconciliation-service.ts",
+        "apps/union-eyes/services/platform-economics/__tests__/reconciliation-service.test.ts",
+        "apps/union-eyes/scripts/codemods/f05-exceptions-bound.cjs"
+      ],
+      "explanation": "The exception list validates every status against the vocabulary (400 otherwise, before any query), is ordered and bounded at 200. The run list route (reconciliation/bank) answers 501."
+    },
+    "DEF-0B11-PRP-RECONCILIATION-PROCESS-GET-RETURNS-ANY-ORGANIZATION-RUN-BY-ID": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+      "files": [
+        "apps/union-eyes/app/api/reconciliation/process/route.ts",
+        "apps/union-eyes/services/platform-economics/reconciliation-service.ts",
+        "apps/union-eyes/app/api/__tests__/reconciliation-process.route.test.ts"
+      ],
+      "explanation": "The run lookup is bound to the caller's organization (another organization's run reads as not found); upstream's change, covered by an existing test."
     }
   }
 }
