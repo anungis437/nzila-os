@@ -73,7 +73,7 @@ describe('pilot/overview route', () => {
   it('permits a direct administrator of a pilot organization, regardless of platform title', async () => {
     const { GET } = await loadRoute();
     const response = await GET();
-    expect(response.status).toBe(200);
+    expect(response.status, JSON.stringify(m.logger.error.mock.calls)).toBe(200);
     expect(m.resolveOrganizationAccess).toHaveBeenCalledWith('u1');
     expect(m.withSystemContext).toHaveBeenCalledOnce();
   });
@@ -106,7 +106,7 @@ describe('pilot/overview route', () => {
       orgName: 'Other Org', orgSlug: 'other',
     }]);
     const response = await GET();
-    expect(response.status).toBe(200);
+    expect(response.status, JSON.stringify(m.logger.error.mock.calls)).toBe(200);
     expect((await response.json()).organizations).toHaveLength(0);
     expect(mockDb.execute).not.toHaveBeenCalled();
   });
@@ -139,7 +139,7 @@ describe('pilot/overview route', () => {
     );
 
     const response = await GET();
-    expect(response.status).toBe(200);
+    expect(response.status, JSON.stringify(m.logger.error.mock.calls)).toBe(200);
     const json = await response.json();
     expect(json.organizations).toHaveLength(1);
     expect(json.organizations[0]).toMatchObject({
