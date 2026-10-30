@@ -255,3 +255,18 @@ rerun initiator identities, a positive integer GitHub approval-review ID, and
 parseable review chronology. A missing ID is not an immutable approval receipt.
 GitHub Environment rules and live human authorization remain separate external
 proofs (#1038). These changes do not activate Tool Fabric or authorize GO.
+
+## Retained production approval evidence (candidate)
+
+After querying GitHub's live environment, run and review APIs, the production
+job now writes a minimal `production-approval-<run>.json` receipt using
+exclusive file creation and retains it with the deployment evidence artifact.
+No receipt is written for a rejected or unverifiable approval; existing
+receipts cannot be silently overwritten by the verifier. Raw reviewer API
+payloads are not uploaded. Negative CLI tests cover self-approval, absent
+identity, malformed review history and overwrite attempts.
+
+This artifact is a **GitHub-sourced audit snapshot**, not a cryptographically
+signed independent authority ledger. Its existence cannot override environment
+protection, repository rulesets, or the runtime release-attestation prerequisites
+in #1036–#1038. Production promotion remains HOLD.
