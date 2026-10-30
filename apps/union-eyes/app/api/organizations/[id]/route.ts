@@ -72,13 +72,19 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
   // Counts are computed under explicit authority. A bare pooled connection has no
   // tenant identity and can silently return zero or leak cross-tenant aggregates.
-  const [claimRows, childRows] = await Promise.all([
-    withRLSContext({ organizationId: id }, async (tx) => Array.from(
-      await tx.execute(sql`SELECT
+  const claimCounts = (tx: typeof db) => tx.execute(sql`SELECT
         count(*)::int AS total,
         count(*) FILTER (WHERE status::text IN ('draft','filed','acknowledged','investigating','response_due','response_received','escalated','mediation','arbitration'))::int AS active
-        FROM grievances WHERE organization_id = ${id}`),
-    ) as Array<{ total: number; active: number }>),
+        FROM grievances WHERE organization_id = ${id}`)
+  // Direct members are bound through tenant RLS. A platform or parent administrator
+  // may be authorized for a descendant without direct membership; canonical binding
+  // correctly rejects impersonating that descendant, so use the system role only
+  // after the explicit canReadOrganization check and the exact organization predicate.
+  const readClaims = access.platform || !access.direct.has(id)
+    ? withSystemContext(async () => Array.from(await claimCounts(db)) as Array<{ total: number; active: number }>)
+    : withRLSContext({ organizationId: id }, async (tx) => Array.from(await claimCounts(tx)) as Array<{ total: number; active: number }>)
+  const [claimRows, childRows] = await Promise.all([
+    readClaims,
     withSystemContext(async () => Array.from(
       await db.execute(sql`SELECT count(*)::int AS cnt FROM organizations WHERE parent_id = ${id}`),
     ) as Array<{ cnt: number }>),
