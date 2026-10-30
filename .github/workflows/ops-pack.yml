@@ -9,6 +9,8 @@ on:
       - 'ARCHITECTURE.md'
       - 'SECURITY.md'
       - 'tooling/ops/**'
+      - 'tooling/scripts/generate-ops-evidence.mjs'
+      - '.github/workflows/ops-pack.yml'
   pull_request:
     branches: [main]
     paths:
@@ -31,10 +33,27 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      actions: read
 
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
+      - name: Generate truthful time-stamped operational evidence
+        run: pnpm ops:evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+
       - name: Validate ops pack completeness
-        run: |
-          pnpm tsx tooling/ops/validate-ops-pack.ts ${{ github.workspace }}
+        run: pnpm tsx tooling/ops/validate-ops-pack.ts ${{ github.workspace }}
+
+      - name: Retain source-backed ops evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ops-pack-evidence-${{ github.run_id }}
+          path: |
+            reports/ops/snapshot.json
+            reports/ops/snapshot.md
+          if-no-files-found: error
+          retention-days: 30

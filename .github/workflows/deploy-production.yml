@@ -383,6 +383,11 @@ jobs:
           name: production-deploy-evidence
           path: |
             ops/deploy-evidence/*.json
+            # Include the EXACT verified upstream attestation and image
+            # manifest, never substitute a locally asserted green report.
+            staging-artifacts/release-attestation.json
+            staging-artifacts/artifact-manifest.json
+            staging-artifacts/sbom.json
             ops/evidence/*.json
             ops/governance-snapshots/governance-snapshot-prod-*.json
             ops/releases/release-*.json

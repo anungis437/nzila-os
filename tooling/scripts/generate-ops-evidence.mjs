@@ -15,6 +15,25 @@ function readJsonIfExists(path) {
   return JSON.parse(readFileSync(path, 'utf8'))
 }
 
+/**
+ * A newly generated wrapper must NOT present two-month-old source exports as
+ * observations from the current 30-day window. Stale sources become explicit
+ * null with documented remediation, not fabricated current measurements.
+ */
+const SOURCE_MAX_AGE_DAYS = 7
+function requireFreshSource(data, label) {
+  if (!data) return { data: null, reason: `Missing ${label} source export` }
+  const collected = Date.parse(data.collected_at ?? '')
+  if (!Number.isFinite(collected)) {
+    return { data: null, reason: `${label} source has no verifiable collected_at timestamp` }
+  }
+  const age = Date.now() - collected
+  if (age < -5 * 60 * 1000 || age > SOURCE_MAX_AGE_DAYS * 86400000) {
+    return { data: null, reason: `${label} source export is outside the verified seven-day freshness window; recollect the upstream source` }
+  }
+  return { data, reason: null }
+}
+
 function toNumber(value) {
   if (value === null || value === undefined) return null
   const n = Number(value)
@@ -171,13 +190,24 @@ function renderMarkdown(snapshot) {
 }
 
 async function main() {
-  const dora = readJsonIfExists(resolve(OPS_OUTPUTS, 'dora-metrics.json'))
-  const cost = readJsonIfExists(resolve(OPS_OUTPUTS, 'cost-allocation.json'))
+  const doraSource = requireFreshSource(
+    readJsonIfExists(resolve(OPS_OUTPUTS, 'dora-metrics.json')),
+    'DORA metrics',
+  )
+  const costSource = requireFreshSource(
+    readJsonIfExists(resolve(OPS_OUTPUTS, 'cost-allocation.json')),
+    'Cost allocation',
+  )
+  const dora = doraSource.data
+  const cost = costSource.data
   const build = await fetchBuildMetricsFromGitHub()
 
   const deploysPerWeek = toNumber(dora?.metrics?.deployment_frequency?.value)
   const changeFailureRate = toNumber(dora?.metrics?.change_failure_rate?.value)
-  const mttrHours = toNumber(dora?.metrics?.mttr?.value)
+  // The existing export may substitute vulnerability-remediation MTTR for
+  // incident recovery. Never present that proxy as actual service MTTR.
+  const mttrHours = dora?.metrics?.mttr?.source?.includes('mttr-dashboard')
+    ? null : toNumber(dora?.metrics?.mttr?.value)
   const mttrMinutes = mttrHours === null ? null : round(mttrHours * 60, 2)
 
   const costMonthly = toNumber(cost?.total_monthly_cost_usd)
@@ -194,7 +224,7 @@ async function main() {
       deploy_frequency_30d: source(
         deploysPerWeek,
         dora ? 'ops/outputs/dora-metrics.json: metrics.deployment_frequency.value (deploys/week)' : 'ops/outputs/dora-metrics.json',
-        dora ? null : 'Run pnpm collect:dora to generate ops/outputs/dora-metrics.json.',
+        dora ? null : `${doraSource.reason}. Run pnpm collect:dora with authoritative access.`,
       ),
       build_success_rate_30d: source(
         build.buildSuccessRate,
@@ -209,12 +239,12 @@ async function main() {
       change_failure_rate_30d: source(
         changeFailureRate,
         dora ? 'ops/outputs/dora-metrics.json: metrics.change_failure_rate.value' : 'ops/outputs/dora-metrics.json',
-        dora ? null : 'Run pnpm collect:dora to generate ops/outputs/dora-metrics.json.',
+        dora ? null : `${doraSource.reason}. Run pnpm collect:dora with authoritative access.`,
       ),
       mttr_minutes: source(
         mttrMinutes,
         dora ? 'ops/outputs/dora-metrics.json: metrics.mttr.value (hours -> minutes)' : 'ops/outputs/dora-metrics.json',
-        mttrMinutes === null ? 'Incident tracker integration required; dora-metrics currently reports null mttr.' : null,
+        mttrMinutes === null ? 'Incident tracker integration required. Historical vulnerability MTTR is not incident recovery time.' : null,
       ),
       uptime_30d: source(
         null,
@@ -244,7 +274,7 @@ async function main() {
       monthly_infra_cost_estimate: source(
         costMonthly,
         cost ? 'ops/outputs/cost-allocation.json: total_monthly_cost_usd' : 'ops/outputs/cost-allocation.json',
-        costMonthly === null ? 'Run pnpm collect:cost with Azure API enabled to populate real monthly cost.' : null,
+        costMonthly === null ? `${costSource.reason}. Run pnpm collect:cost using Azure Cost Management.` : null,
       ),
       incidents_last_30d: source(
         null,

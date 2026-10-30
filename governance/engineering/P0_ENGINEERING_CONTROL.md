@@ -145,3 +145,19 @@ GitHub Environment reviewer enforcement must be verified by an administrator.
 Issue #1038 remains open and production promotion remains **HOLD** until these
 external proofs and the end-to-end release exercise are completed. A CI PASS
 must never be interpreted as production authorization.
+
+## P0 recurring operational-documentation failures
+
+The Ops Documentation Pack now recomputes a scoped, read-only GitHub-backed
+operational snapshot **within CI**, verifies the timestamp, schema and each
+metric's source or explicit `source_needed`, and preserves the resulting
+snapshot as a GitHub Actions artifact. The separate scheduled ops-pack workflow
+uses the same generator and verifier. Old committed snapshots remain historical
+records, not artificially re-dated proof. Stale DORA and Azure Cost exports are
+emitted as `null` with source-needed instructions; unavailable measurements
+cannot be conjured by CI. No governance gate is skipped or downgraded.
+
+Production release contracts distinguish **generating an attestation at build**
+from **verifying and retaining exactly that signed attestation at promotion**.
+The latter additionally records the signed upstream manifest and SBOM as
+production evidence, so a newly generated local PASS is not substituted.
