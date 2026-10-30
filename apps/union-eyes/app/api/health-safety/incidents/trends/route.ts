@@ -2,10 +2,10 @@
  * GET /api/health-safety/incidents/trends
  * Returns incident trend data grouped by date with severity breakdown.
  */
-import { withApi } from '@/lib/api/framework';
-import { db } from '@/db/db';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,82 +22,61 @@ function getStartDateISO(period: string): string {
 
 export const GET = withApi(
   {
-    auth: { required: true, minRole: 'member' },
+    auth: { required: true, minRole: 'health_safety_rep' },
+    rlsOrgContext: true,
     openapi: {
       tags: ['Health-safety'],
-      summary: 'Incident trend data over time',
+      summary: 'Incident trends for the authenticated organization',
     },
   },
-  async ({ request }) => {
+  async ({ request, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.forbidden('Organization context required');
     const url = new URL(request.url);
-    const organizationId = url.searchParams.get('organizationId');
+    const target = url.searchParams.get('organizationId');
+    if (target && target !== organizationId) throw ApiError.forbidden('Cross-organization incident analytics denied');
     const period = url.searchParams.get('period') || '30d';
     const startISO = getStartDateISO(period);
     const isMonthly = period === '12m';
 
-    let rows: Record<string, unknown>[];
-    if (organizationId) {
-      if (isMonthly) {
-        rows = Array.from(await withRLSContext(async () => db.execute(sql`
-          SELECT to_char(date_trunc('month', incident_date), 'YYYY-MM-DD') AS date,
-            COUNT(*) FILTER (WHERE severity IN ('near_miss','minor')) AS minor,
-            COUNT(*) FILTER (WHERE severity IN ('moderate','serious')) AS major,
-            COUNT(*) FILTER (WHERE severity IN ('critical','fatal')) AS critical,
-            COUNT(*) AS total
-          FROM workplace_incidents
-          WHERE organization_id = ${organizationId}
-            AND incident_date >= ${startISO}::timestamptz
-          GROUP BY date_trunc('month', incident_date)
-          ORDER BY date_trunc('month', incident_date) ASC
-        `)));
-      } else {
-        rows = Array.from(await withRLSContext(async () => db.execute(sql`
-          SELECT to_char(date_trunc('day', incident_date), 'YYYY-MM-DD') AS date,
-            COUNT(*) FILTER (WHERE severity IN ('near_miss','minor')) AS minor,
-            COUNT(*) FILTER (WHERE severity IN ('moderate','serious')) AS major,
-            COUNT(*) FILTER (WHERE severity IN ('critical','fatal')) AS critical,
-            COUNT(*) AS total
-          FROM workplace_incidents
-          WHERE organization_id = ${organizationId}
-            AND incident_date >= ${startISO}::timestamptz
-          GROUP BY date_trunc('day', incident_date)
-          ORDER BY date_trunc('day', incident_date) ASC
-        `)));
-      }
-    } else {
-      if (isMonthly) {
-        rows = Array.from(await withRLSContext(async () => db.execute(sql`
-          SELECT to_char(date_trunc('month', incident_date), 'YYYY-MM-DD') AS date,
-            COUNT(*) FILTER (WHERE severity IN ('near_miss','minor')) AS minor,
-            COUNT(*) FILTER (WHERE severity IN ('moderate','serious')) AS major,
-            COUNT(*) FILTER (WHERE severity IN ('critical','fatal')) AS critical,
-            COUNT(*) AS total
-          FROM workplace_incidents
-          WHERE incident_date >= ${startISO}::timestamptz
-          GROUP BY date_trunc('month', incident_date)
-          ORDER BY date_trunc('month', incident_date) ASC
-        `)));
-      } else {
-        rows = Array.from(await withRLSContext(async () => db.execute(sql`
-          SELECT to_char(date_trunc('day', incident_date), 'YYYY-MM-DD') AS date,
-            COUNT(*) FILTER (WHERE severity IN ('near_miss','minor')) AS minor,
-            COUNT(*) FILTER (WHERE severity IN ('moderate','serious')) AS major,
-            COUNT(*) FILTER (WHERE severity IN ('critical','fatal')) AS critical,
-            COUNT(*) AS total
-          FROM workplace_incidents
-          WHERE incident_date >= ${startISO}::timestamptz
-          GROUP BY date_trunc('day', incident_date)
-          ORDER BY date_trunc('day', incident_date) ASC
-        `)));
-      }
-    }
+    return withRLSContext({ organizationId }, async tx => {
+      // The tenant predicate is mandatory in BOTH the SQL and the runtime RLS context,
+      // even for monthly rollups. A query-string target never chooses the tenant.
+      const rows = Array.from(await tx.execute(isMonthly ? sql`
+        SELECT to_char(date_trunc('month', incident_date), 'YYYY-MM-DD') AS date,
+          COUNT(*) FILTER (WHERE severity IN ('near_miss','minor')) AS minor,
+          COUNT(*) FILTER (WHERE severity IN ('moderate','serious')) AS major,
+          COUNT(*) FILTER (WHERE severity IN ('critical','fatal')) AS critical,
+          COUNT(*) AS total
+        FROM workplace_incidents
+        WHERE organization_id = ${organizationId}
+          AND incident_date >= ${startISO}::timestamptz
+        GROUP BY date_trunc('month', incident_date)
+        ORDER BY date_trunc('month', incident_date) ASC
+      ` : sql`
+        SELECT to_char(date_trunc('day', incident_date), 'YYYY-MM-DD') AS date,
+          COUNT(*) FILTER (WHERE severity IN ('near_miss','minor')) AS minor,
+          COUNT(*) FILTER (WHERE severity IN ('moderate','serious')) AS major,
+          COUNT(*) FILTER (WHERE severity IN ('critical','fatal')) AS critical,
+          COUNT(*) AS total
+        FROM workplace_incidents
+        WHERE organization_id = ${organizationId}
+          AND incident_date >= ${startISO}::timestamptz
+        GROUP BY date_trunc('day', incident_date)
+        ORDER BY date_trunc('day', incident_date) ASC
+      `));
 
-    return rows.map((row) => ({
-      date: String(row.date),
-      minor: Number(row.minor ?? 0),
-      major: Number(row.major ?? 0),
-      critical: Number(row.critical ?? 0),
-      total: Number(row.total ?? 0),
-    }));
-  }
+      await persistAtomicAudit(tx, {
+        organizationId, userId, action: 'health_safety.incident_trends.read',
+        resourceType: 'workplace_incidents', resourceId: organizationId,
+        details: { period, rows: rows.length },
+      });
+      return rows.map((row) => ({
+        date: String(row.date),
+        minor: Number(row.minor ?? 0),
+        major: Number(row.major ?? 0),
+        critical: Number(row.critical ?? 0),
+        total: Number(row.total ?? 0),
+      }));
+    });
+  },
 );

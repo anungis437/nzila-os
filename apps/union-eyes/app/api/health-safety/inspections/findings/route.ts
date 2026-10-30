@@ -3,10 +3,10 @@
  * Recent completed inspection findings for the InspectionFindingsCard UI.
  * Returns { findings: InspectionFinding[] }.
  */
-import { withApi } from '@/lib/api/framework';
-import { db } from '@/db/db';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,18 +20,18 @@ export function mapStatus(status: string): FindingStatus {
 
 export const GET = withApi(
   {
-    auth: { required: true, minRole: 'member' },
+    auth: { required: true, minRole: 'health_safety_rep' },
+    rlsOrgContext: true,
     openapi: {
       tags: ['Health-safety'],
       summary: 'Recent inspection findings',
     },
   },
-  async ({ organizationId }) => {
-    const orgFilter = organizationId ? sql`organization_id = ${organizationId}` : sql`1=1`;
+  async ({ organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.forbidden('Organization context required');
 
-    const rows = Array.from(
-      await withRLSContext(async () =>
-        db.execute(sql`
+    return withRLSContext({ organizationId }, async tx => {
+      const rows = Array.from(await tx.execute(sql`
           SELECT
             id,
             inspection_number,
@@ -47,13 +47,11 @@ export const GET = withApi(
             critical_hazards,
             status
           FROM safety_inspections
-          WHERE ${orgFilter}
+          WHERE organization_id = ${organizationId}
             AND status IN ('completed', 'requires_followup', 'followup_complete')
           ORDER BY coalesce(completed_date, scheduled_date) DESC
           LIMIT 20
-        `)
-      )
-    );
+        `));
 
     const findings = rows.map((r) => {
       const row = r as Record<string, unknown>;
@@ -77,6 +75,12 @@ export const GET = withApi(
       };
     });
 
+    await persistAtomicAudit(tx, {
+      organizationId, userId, action: 'health_safety.inspection_findings.read',
+      resourceType: 'safety_inspections', resourceId: organizationId,
+      details: { rowCount: findings.length },
+    });
     return { findings };
+    });
   },
 );
