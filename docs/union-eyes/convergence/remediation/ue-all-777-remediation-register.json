@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 42,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 144,
-    "engineeringRemaining": 633,
+    "engineeringCorrected": 145,
+    "engineeringRemaining": 632,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 19
   },
@@ -316,6 +316,10 @@
     {
       "sha": "a78ad4ea2c878b8ae2878b717438b0db6a70bd28",
       "description": "Source-level reconciliation of four frozen financial, CLC and audit disclosure defects after inspecting actual handlers and adding regression contracts. Separate current-run changes make organization authority and ancestor reads use the explicit system transaction, protect the retired tenant alias, and correct stale contracts. No exact-HEAD Vitest, PG15/16, browser or institutional GO claimed."
+    },
+    {
+      "sha": "3da958e3983a54ae749104aab9f07bbc0c9700ce",
+      "description": "Organization directory and search now redact member counts from non-administrative views and bind system reads to explicit transactions. Added cross-org privacy regression contract; exact HEAD CI, native PG15/16 and HTTP/browser acceptance pending."
     }
   ],
   "records": [
@@ -730,7 +734,16 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "GATE0-ORG-DIRECTORY-PRIVACY",
+        "path": "apps/union-eyes/app/api/organizations/route.ts; apps/union-eyes/app/api/organizations/search/route.ts; apps/union-eyes/lib/organizations/read-authority.ts",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/organization-directory-privacy.contract.test.ts; apps/union-eyes/lib/organizations/__tests__/read-authority-transaction.test.ts",
+        "explanation": "Organization directory and search now restrict records to active authorized memberships, administered descendants or platform authority; contact fields and member counts are only projected for administrators of each organization. System-scoped reads use the explicit transaction handle. No cross-organization member-count/contact exposure remains at the member role floor in these routes.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "sourceCommit": "3da958e3983a54ae749104aab9f07bbc0c9700ce"
+      }
     },
     {
       "defectId": "DEF-0B1-PKI-WORKFLOW-IN-MEMORY",
@@ -16180,6 +16193,19 @@
       "httpBrowser": "PENDING",
       "appFloor": "PENDING",
       "governance": "PENDING",
+      "go": "NO_GO"
+    },
+    {
+      "inspectedSha": "22ce9e838ed99068a574a612bb7255dd4fe0fb64",
+      "evidence": "Inspected exact-SHA GitHub Actions: App Floor, security regression, native PostgreSQL acceptance, runtime governance and disposable HTTP/browser PASS. Whole contract FAIL six tests (stale tenant/current 410 alias, organizing notes explicit 501, canonical calendar alias) and whole application FAIL one no-arg withSystemContext ratchet (113 > 111). Subsequent source and contract fixes committed but not verified at this SHA.",
+      "source": "PREVIOUS_SHA_ONLY",
+      "unit": "FAIL_1_RATCHET",
+      "contract": "FAIL_6_STALE_CONTRACTS",
+      "native": "PASS_PG15_PG16",
+      "security": "PASS",
+      "httpBrowser": "PASS",
+      "appFloor": "PASS",
+      "governance": "PASS",
       "go": "NO_GO"
     }
   ]
