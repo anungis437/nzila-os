@@ -1,0 +1,28 @@
+name: Union Eyes Decision Baseline Contract
+
+on:
+  pull_request:
+    paths:
+      - 'docs/union-eyes/decisions/reviewed/**'
+      - '.github/workflows/ue-decision-baselines.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ue-decision-baselines-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  decision-integrity:
+    name: 138-row decision inventory / no-GO contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify approved implementation baselines without signing release
+        run: node docs/union-eyes/decisions/reviewed/validate.mjs
