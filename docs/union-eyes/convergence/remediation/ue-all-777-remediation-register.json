@@ -86,11 +86,11 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 39,
+    "withCurrentRunSourceOrRegressionWork": 40,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 90,
-    "engineeringRemaining": 687,
+    "engineeringCorrected": 91,
+    "engineeringRemaining": 686,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 9
   },
@@ -10669,10 +10669,31 @@
       "title": "When the canonical bootstrap flag is not 1, GET /api/organizations/[id]/path checks only that a session user exists and then selects the organization named by the path uuid or slug, and every ancestor named by its hierarchy_path, through the shared db client with no withRLSContext, no withSystemContext, no membership check and no comparison with the caller organization: the result depends entirely on the row-level-security role of the connection (an unscoped tenant connection returns no rows, so the route answers empty for everyone; a connection the policy does not bind returns the name, slug, parent id, sector, jurisdiction and description of any organization and its ancestry), and only the canonical branch limits the path to the memberships of the caller and reports omitted ancestors.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/organizations/[id]/path/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/organizations-path.route.test.ts",
+          "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts"
+        ],
+        "commits": [
+          "854902c5f652e63229f4273cf393e5c7738ed5a4",
+          "b72648889ee1d8f4df240ae95100c976d67652bf",
+          "41bd1423dfb691925a47aa20091e3c7b9b1fa3a1"
+        ],
+        "limits": "Exact-HEAD unit, native PG15/16 and browser acceptance pending; source correction is not CLOSED."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/organizations/[id]/path/route.ts",
+        "explanation": "Legacy breadcrumb lookup now uses explicit system transaction with verified organization read authority before returning any record; ancestor projection is filtered to readable organizations, not bare-db behavior.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ORG-ANALYTICS-ANY-SIGNED-IN-USER-READS-ANY-ORGANIZATION-NAME-TYPE-CHILD-COUNT-AND-AGGREGATES-BY-PATH-ID",
