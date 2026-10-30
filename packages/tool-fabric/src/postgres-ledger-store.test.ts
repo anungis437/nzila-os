@@ -117,6 +117,25 @@ describe('P0 Postgres Trust Ledger CAS adapter',()=>{
       ...valid, rows:[{...row, audit_id:null}],
     })).readSnapshot(ORG)).rejects.toThrow('audit receipt columns disagree')
   })
+  it('refuses to extend a poisoned historical stream even when indexed head matches', async () => {
+    const first = auditRecord(LEDGER_GENESIS_HASH, 1)
+    const next = auditRecord(first.hash, 2)
+    const poisoned = { ...first, payload: { ...first.payload, seq: 999 } }
+    const db = fake({ revision: 1, hash: first.hash, entries: [poisoned] })
+    const store = new PostgresAtomicTrustLedgerStore(db)
+    await expect(store.compareAndAppend(ORG, { revision: 1, headHash: first.hash }, next))
+      .rejects.toThrow('audit chain failed integrity')
+    expect(db.commits).toBe(0)
+  })
+  it('refuses to extend a stream with missing durable audit records', async () => {
+    const first = auditRecord(LEDGER_GENESIS_HASH, 1)
+    const next = auditRecord(first.hash, 2)
+    const db = fake({ revision: 1, hash: first.hash, entries: [] })
+    await expect(new PostgresAtomicTrustLedgerStore(db).compareAndAppend(
+      ORG, { revision: 1, headHash: first.hash }, next,
+    )).rejects.toThrow('missing or excess events')
+    expect(db.commits).toBe(0)
+  })
   it('rejects foreign-stream, legacy-v1 and duplicated audit records on snapshot reads', async () => {
     const foreign = auditRecord(LEDGER_GENESIS_HASH, 1, 'foreign-org')
     await expect(new PostgresAtomicTrustLedgerStore(fake({

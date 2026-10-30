@@ -71,9 +71,19 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
 
   async readSnapshot(orgId: string): Promise<LedgerSnapshot> {
     assertStream(orgId)
-    return this.transaction(async tx => {
+    return this.transaction(tx => this.readSnapshotLocked(tx, orgId, 'SHARE'))
+  }
+
+  /**
+   * Revalidate the complete durable stream while holding the stream lock.
+   * The append path MUST use the same integrity proof as a read: an intact
+   * indexed head alone is not evidence that historical records were untampered.
+   */
+  private async readSnapshotLocked(
+    tx: PostgresTrustQuery, orgId: string, lock: 'SHARE' | 'UPDATE',
+  ): Promise<LedgerSnapshot> {
       const heads = await tx.unsafe(
-        'SELECT revision::text AS revision, head_hash FROM tool_fabric_trust_stream WHERE stream_id = $1 FOR SHARE',
+        `SELECT revision::text AS revision, head_hash FROM tool_fabric_trust_stream WHERE stream_id = $1 FOR ${lock}`,
         [orgId],
       )
       if (heads.length !== 1) {
@@ -114,7 +124,6 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
         throw new LedgerStoreUnavailableError('Persistent trust audit chain failed integrity verification')
       }
       return structuredClone({ revision: head.revision, headHash: head.headHash, entries })
-    })
   }
 
   async compareAndAppend(orgId: string, expected: LedgerHead, entry: AuditEntry): Promise<LedgerHead> {
@@ -141,14 +150,11 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
       throw new LedgerConflictError('Append requires an authentic full-coverage audit v2 hash')
     }
     return this.transaction(async tx => {
-      const heads = await tx.unsafe(
-        'SELECT revision::text AS revision, head_hash FROM tool_fabric_trust_stream WHERE stream_id = $1 FOR UPDATE',
-        [orgId],
-      )
-      if (heads.length !== 1) {
-        throw new LedgerStoreUnavailableError('Canonical trust stream not initialized by approved migration')
-      }
-      const current = assertHead(heads[0]!)
+      // Read and verify every committed audit event under the SAME exclusive
+      // stream lock as the subsequent insert/head CAS. A poisoned history must
+      // not be extended, even when its indexed head happens to match expected.
+      const snapshot = await this.readSnapshotLocked(tx, orgId, 'UPDATE')
+      const current: LedgerHead = { revision: snapshot.revision, headHash: snapshot.headHash }
       if (current.revision !== expected.revision || current.headHash !== expected.headHash) {
         throw new LedgerConflictError('Persistent trust ledger changed during CAS append')
       }
