@@ -1,18 +1,18 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 70,
- "partial": 8,
- "outstanding": 707,
- "accountedFor": 707,
+ "corrected": 74,
+ "partial": 10,
+ "outstanding": 703,
+ "accountedFor": 703,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
    "purpose": "Scheduled and provider-driven jobs: method, secret, scheduling, replay and failure reporting",
-   "defects": 22,
+   "defects": 19,
    "severity": {
-    "HIGH": 2,
-    "MEDIUM": 15,
+    "HIGH": 1,
+    "MEDIUM": 13,
     "LOW": 5
    },
    "namedRoutes": 7,
@@ -25,7 +25,7 @@
     "0B.8": 6,
     "0B.9": 3,
     "0B.10": 1,
-    "0B.11": 7
+    "0B.11": 4
    }
   },
   {
@@ -272,11 +272,11 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 116,
+   "defects": 115,
    "severity": {
     "HIGH": 13,
     "MEDIUM": 75,
-    "LOW": 28
+    "LOW": 27
    },
    "namedRoutes": 17,
    "namedFiles": 0,
@@ -291,7 +291,7 @@
     "0B.8": 16,
     "0B.9": 4,
     "0B.10": 8,
-    "0B.11": 9,
+    "0B.11": 8,
     "0B.12": 11
    }
   }
@@ -362,24 +362,14 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B11-PRP-REWARDS-CRON-ANNIVERSARY-AWARDS-REPEAT-ON-EVERY-CALL-ON-AN-ANNIVERSARY-DAY",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B11-PRP-REWARDS-CRON-SCHEDULED-TASK-IS-A-PLACEHOLDER-THAT-COUNTS-RULES-AS-PROCESSED",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B11-PRP-REWARDS-CRON-EXPIRATION-TASK-READS-AN-EXPIRY-NO-WRITER-SETS-AND-WOULD-REPEAT-ACROSS-THE-7-14-AND-30-DAY-WINDOWS",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B11-PRP-REWARDS-CRON-AND-WALLET-AND-REDEMPTION-QUERIES-USE-THE-SHARED-DB-HANDLE-WITH-EXPLICIT-PREDICATES-ONLY",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-PRP-REWARDS-CRON-RUNS-ARE-AUDITED-PER-AWARD-ONLY-AND-THE-EXPIRATION-E-MAILS-ARE-NOT-AUDITED",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B11-RPT-SCHEDULED-PATHS-ARE-REPORT-DEFINITION-CRUD-NO-SCHEDULE-RECIPIENT-OR-DELIVERY-EXISTS-AND-PAUSE-RESUME-REPORT-SUCCESS",
@@ -3087,10 +3077,6 @@
    {
     "id": "DEF-0B11-PRP-PROFILE-ME-GET-SWALLOWS-DATABASE-ERRORS-INTO-A-SUCCESS-WITH-NULL-DATA",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-PRP-REWARDS-CRON-ANNIVERSARY-CREDIT-SCALE-IS-COMPUTED-AND-DISCARDED-AND-THE-AWARD-REASON-NAMES-THE-ORGANIZATION-UUID",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B11-RPT-BUILDER-AND-DATA-SOURCE-SAMPLE-PATHS-ARE-REPORT-DEFINITION-CRUD-AND-SAMPLE-NO-SOURCE",

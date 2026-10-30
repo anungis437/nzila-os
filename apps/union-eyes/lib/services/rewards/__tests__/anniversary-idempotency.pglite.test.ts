@@ -6,7 +6,7 @@ import { sql } from 'drizzle-orm';
 // DEF-0B11-PRP-REWARDS-CRON-ANNIVERSARY-AWARDS-REPEAT-ON-EVERY-CALL-ON-AN-ANNIVERSARY-DAY
 // Real SQL: a second run on the same day must not award the same member again.
 
-const state = vi.hoisted(() => ({ db: null as unknown, created: [] as string[], issued: [] as string[] }));
+const state = vi.hoisted(() => ({ db: null as unknown, created: [] as string[], issued: [] as string[], reasons: [] as string[], failIssueFor: null as string | null }));
 
 vi.mock('@/db', () => ({
   db: new Proxy({}, {
@@ -22,7 +22,7 @@ vi.mock('@/db', () => ({
 }));
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }));
 vi.mock('../award-service', () => ({
-  createAwardRequest: async (input: { orgId: string; recipientUserId: string; awardTypeId: string; executor?: { execute(q: unknown): Promise<unknown> } }) => {
+  createAwardRequest: async (input: { orgId: string; recipientUserId: string; awardTypeId: string; reason?: string; executor?: { execute(q: unknown): Promise<unknown> } }) => {
     const id = crypto.randomUUID();
     // The job holds a transaction on the only connection, so the award must be written through the executor it passes.
     if (!input.executor) throw new Error('the job must write awards through its locking transaction');
@@ -30,9 +30,12 @@ vi.mock('../award-service', () => ({
       sql`INSERT INTO recognition_awards (id, org_id, recipient_user_id, award_type_id, status) VALUES (${id}::uuid, ${input.orgId}::uuid, ${input.recipientUserId}, ${input.awardTypeId}::uuid, 'approved')`,
     );
     state.created.push(`${input.orgId}:${input.recipientUserId}`);
+    state.reasons.push(input.reason ?? '');
+    (globalThis as unknown as { __lastRecipient?: string }).__lastRecipient = input.recipientUserId;
     return { id };
   },
   issueAward: async ({ awardId }: { awardId: string }) => {
+    if (state.failIssueFor && (globalThis as unknown as { __lastRecipient?: string }).__lastRecipient === state.failIssueFor) throw new Error('issue refused');
     state.issued.push(awardId);
     return { award: { id: awardId }, newBalance: 1 };
   },
@@ -53,6 +56,7 @@ beforeAll(async () => {
   await pg.exec(`
     CREATE TABLE organization_members (id uuid primary key default gen_random_uuid(), organization_id uuid not null,
       user_id text not null, name text, status text not null default 'active', deleted_at timestamptz, joined_at timestamptz);
+    CREATE TABLE organizations (id uuid primary key, name text);
     CREATE TABLE recognition_awards (id uuid primary key, org_id uuid not null, recipient_user_id text not null,
       award_type_id uuid not null, status text not null, created_at timestamptz not null default now());
   `);
@@ -72,7 +76,10 @@ afterAll(async () => {
 beforeEach(async () => {
   state.created.length = 0;
   state.issued.length = 0;
-  await pg.exec('TRUNCATE organization_members, recognition_awards');
+  state.reasons.length = 0;
+  state.failIssueFor = null;
+  await pg.exec('TRUNCATE organization_members, recognition_awards, organizations');
+  await pg.query(`INSERT INTO organizations (id, name) VALUES ($1::uuid, 'CAPE Local 7')`, [ORG_A]);
   await pg.query(`INSERT INTO organization_members (organization_id, user_id, name, joined_at) VALUES ($1::uuid, 'member-1', 'One', CURRENT_DATE - interval '2 years')`, [ORG_A]);
   await pg.query(`INSERT INTO organization_members (organization_id, user_id, name, joined_at) VALUES ($1::uuid, 'member-2', 'Two', CURRENT_DATE - interval '5 years')`, [ORG_A]);
 });
@@ -117,5 +124,31 @@ describe('processAnniversaryAwards — one award per member per anniversary day'
     const result = await processAnniversaryAwards(ORG_A);
     expect(result).toMatchObject({ success: true, processed: 0 });
     expect(state.created).toEqual([]);
+  });
+
+  it('names the organization in the award reason, not its identifier', async () => {
+    await processAnniversaryAwards(ORG_A);
+    expect(state.reasons).toHaveLength(2);
+    for (const reason of state.reasons) {
+      expect(reason).toContain('with CAPE Local 7!');
+      expect(reason).not.toContain(ORG_A);
+    }
+  });
+
+  it('rolls back a member\'s award when issuing it fails, keeps the others, and reports the run as failed', async () => {
+    state.failIssueFor = 'member-1';
+    const result = await processAnniversaryAwards(ORG_A);
+
+    expect(result).toMatchObject({ success: false, processed: 1, failed: 1 });
+    // no approved-but-never-issued award is left behind for the failed member
+    const { rows } = await pg.query<{ recipient_user_id: string }>('SELECT recipient_user_id FROM recognition_awards');
+    expect(rows).toEqual([{ recipient_user_id: 'member-2' }]);
+
+    // the next run completes the member that failed, and only that member
+    state.failIssueFor = null;
+    state.created.length = 0;
+    const retry = await processAnniversaryAwards(ORG_A);
+    expect(retry).toMatchObject({ success: true, processed: 1 });
+    expect(state.created).toEqual([`${ORG_A}:member-1`]);
   });
 });

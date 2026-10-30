@@ -556,6 +556,71 @@
           "explanation": "The Google import follows every page (250 per call, 50-page bound that fails instead of truncating), the cron passes the stored sync token (without the window and ordering Google rejects with one), a 410 falls back to a full sync, and the new token is stored only when every page was read and every event applied; otherwise the import throws and the connection is recorded as failed with a retry time. Per-event and token-store errors are no longer swallowed. The due connections are locked FOR UPDATE SKIP LOCKED and leased for 15 minutes in the same transaction, each lease bound to the row's organization. Google only: the Microsoft import has the same shape and is not yet changed."
         }
       ]
+    },
+    {
+      "id": "B07-REWARDS-CRON",
+      "family": "F01 Rewards cron: atomic per-member awards, honest scheduled and expiration tasks, organization context and run audit",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B11-PRP-REWARDS-CRON-ANNIVERSARY-AWARDS-REPEAT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/rewards/automation-service.ts",
+            "apps/union-eyes/app/api/rewards/cron/route.ts",
+            "apps/union-eyes/lib/services/rewards/__tests__/anniversary-idempotency.pglite.test.ts"
+          ],
+          "explanation": "Repeat protection (an advisory lock per organization and award type, and a same-day NOT EXISTS over the member's awards in any state) was already in the source and is proven on PostgreSQL by anniversary-idempotency.pglite.test.ts (existing, not mine). What was still open is closed here: each member's create and issue is one savepoint, so a failure in either rolls both back and no approved award is left un-issued, one member's failure no longer aborts the others' work in the shared transaction, and the run reports failed members (success false) instead of a smaller count. Proved on PostgreSQL: a failed issue leaves no award for that member and the next run completes only that member."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-REWARDS-CRON-ANNIVERSARY-CREDIT-SCALE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/rewards/automation-service.ts",
+            "apps/union-eyes/app/api/rewards/cron/route.ts",
+            "apps/union-eyes/lib/services/rewards/__tests__/anniversary-idempotency.pglite.test.ts"
+          ],
+          "explanation": "The unused years-of-service scale and its helper are removed (credits are the award type's configured amount, which issueAward applies); the years are recorded in the award metadata. The reason text names the organization (read inside the transaction) instead of its UUID, tested on PostgreSQL. No years-of-service credit scale is applied: that would be a product decision on money, not a fix."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-REWARDS-CRON-SCHEDULED-TASK-IS-A-PLACEHOLDER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/rewards/automation-service.ts",
+            "apps/union-eyes/lib/services/rewards/__tests__/automation-service.test.ts"
+          ],
+          "explanation": "A scheduled rule names an award type and a cron expression but nothing that says who earns the award, so no award can be derived; the task now reports those rules as skipped (and logs a warning) and never as processed. Evaluating scheduled rules remains unbuilt; it is not claimed."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-REWARDS-CRON-EXPIRATION-TASK-READS-AN-EXPIRY",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/services/rewards/notification-service.ts",
+            "apps/union-eyes/lib/services/rewards/__tests__/expiration-warnings.pglite.test.ts"
+          ],
+          "explanation": "The three overlapping windows are replaced by exact-day tiers (30, 14 and 7 days out), so a daily run warns each earning once per tier; the warned amount is capped at what the member still holds and spent credits are not warned; a failed send makes the batch fail and is counted per organization. Proved on PostgreSQL and mutation-proved.",
+          "remaining": "There is no sent record, so two runs on the same day (a retry, an overlap) mail the same member twice, and a missed day misses that tier; a durable per-earning-and-tier sent marker needs a table. Nothing in the product sets an expiry or writes an expire entry yet, so the task still has nothing to warn about."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-REWARDS-CRON-AND-WALLET-AND-REDEMPTION-QUERIES",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/rewards/cron/route.ts"
+          ],
+          "explanation": "The cron lists organizations under system authority and runs each organization's anniversary and scheduled task inside that organization's own RLS context, so the services' shared db handle is subject to row-level security on that path.",
+          "remaining": "The wallet and redemption routes wrapped by withRoleAuth, and the expiration scan (a cross-organization read), still reach the shared handle without a tenant context; each needs its own routing."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-REWARDS-CRON-RUNS-ARE-AUDITED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/rewards/automation-service.ts",
+            "apps/union-eyes/app/api/rewards/cron/route.ts",
+            "apps/union-eyes/lib/services/rewards/__tests__/anniversary-idempotency.pglite.test.ts"
+          ],
+          "explanation": "Each organization's anniversary and scheduled run writes an audit entry (processed, failed or skipped, success) inside its own context, the organizations whose members were e-mailed get an audit entry with the sent and failed counts, an audit that cannot be written fails the run naming the organization, and a member's create and issue are one atomic unit."
+        }
+      ]
     }
   ]
 }

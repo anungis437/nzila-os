@@ -84,6 +84,7 @@ vi.mock('@/db', () => {
 vi.mock('@/db/schema', () => ({
   recognitionAwardTypes: { id: 'id', orgId: 'orgId', name: 'name', kind: 'kind' },
   recognitionAwards: { id: 'id', orgId: 'orgId', recipientUserId: 'recipientUserId', awardTypeId: 'awardTypeId' },
+  organizations: { id: 'id', name: 'name' },
 }));
 
 vi.mock('@/db/schema/recognition-rewards-schema', () => ({
@@ -111,9 +112,13 @@ describe('automation-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // The anniversary job runs inside one transaction that first takes an advisory lock.
-    mocks.mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
-      fn({ execute: async (q: unknown) => (String(q).includes('pg_advisory_xact_lock') ? [] : mocks.mockExecute(q)) }),
-    );
+    // Inside it the organization name is read, and each member's award is one savepoint (a nested transaction on the same handle).
+    const lockTx: Record<string, unknown> = {
+      execute: async (q: unknown) => (String(q).includes('pg_advisory_xact_lock') ? [] : mocks.mockExecute(q)),
+      select: () => ({ from: () => ({ where: () => ({ limit: async () => [{ name: 'Local 7' }] }) }) }),
+    };
+    lockTx.transaction = async (fn: (tx: unknown) => unknown) => fn(lockTx);
+    mocks.mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) => fn(lockTx));
   });
 
   /* ============================= processAnniversaryAwards ============================= */
@@ -277,7 +282,8 @@ describe('automation-service', () => {
 
   /* ============================= processScheduledAwards ============================= */
   describe('processScheduledAwards', () => {
-    it('processes scheduled rules', async () => {
+    // A scheduled rule defines no recipient selection, so no award can be derived: it is reported skipped, never processed.
+    it('reports scheduled rules as skipped, not processed', async () => {
       const rules = [
         { id: 'r-1', orgId: 'org-1', name: 'Monthly toppers', triggerType: 'scheduled', isActive: true },
       ];
@@ -289,7 +295,9 @@ describe('automation-service', () => {
       const result = await processScheduledAwards('org-1');
 
       expect(result.success).toBe(true);
-      expect(result.processed).toBe(1);
+      expect(result.processed).toBe(0);
+      expect(result.skipped).toBe(1);
+      expect(mocks.mockCreateAwardRequest).not.toHaveBeenCalled();
     });
   });
 

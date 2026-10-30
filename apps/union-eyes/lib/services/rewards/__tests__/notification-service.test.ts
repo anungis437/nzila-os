@@ -493,72 +493,8 @@ describe('notification-service (extended paths)', () => {
     });
   });
 
-  describe('getExpiringCreditsUsers with data', () => {
-    it('returns mapped entries filtering null emails', async () => {
-      // Override the db.select chain to return rows
-      const { db } = await import('@/db');
-      const limitFn = vi.fn().mockResolvedValue([
-        { userId: 'u1', userEmail: 'a@b.com', userName: 'Alice', organizationName: 'CUPE', expiringAmount: 50, expirationDate: new Date(Date.now() + 86400000) },
-        { userId: 'u2', userEmail: null, userName: 'Bob', organizationName: 'CUPE', expiringAmount: 20, expirationDate: null },
-      ]);
-      const groupByFn = vi.fn().mockReturnValue({ limit: limitFn });
-      const whereFn = vi.fn().mockReturnValue({ groupBy: groupByFn });
-      const lj4 = vi.fn().mockReturnValue({ where: whereFn });
-      const lj3 = vi.fn().mockReturnValue({ leftJoin: lj4 });
-      const lj2 = vi.fn().mockReturnValue({ leftJoin: lj3 });
-      const fromFn = vi.fn().mockReturnValue({ leftJoin: lj2 });
-      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce({ from: fromFn });
-
-      const { getExpiringCreditsUsers } = await import('../notification-service');
-      const result = await getExpiringCreditsUsers(7);
-      expect(result).toHaveLength(1);
-      expect(result[0].userId).toBe('u1');
-    });
-  });
-
-  describe('notifyExpiringCredits with batch processing', () => {
-    it('processes users in batches and sends emails', async () => {
-      const { db } = await import('@/db');
-      const expirationDate = new Date(Date.now() + 86400000);
-      const limitFn = vi.fn().mockResolvedValue([
-        { userId: 'u3', userEmail: 'c@d.com', userName: 'Carol', organizationName: 'CUPE', expiringAmount: 100, expirationDate },
-      ]);
-      const groupByFn = vi.fn().mockReturnValue({ limit: limitFn });
-      const whereFn = vi.fn().mockReturnValue({ groupBy: groupByFn });
-      const lj4 = vi.fn().mockReturnValue({ where: whereFn });
-      const lj3 = vi.fn().mockReturnValue({ leftJoin: lj4 });
-      const lj2 = vi.fn().mockReturnValue({ leftJoin: lj3 });
-      const fromFn = vi.fn().mockReturnValue({ leftJoin: lj2 });
-      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce({ from: fromFn });
-      mocks.mockSendCreditExpirationEmail.mockResolvedValue(undefined);
-
-      const { notifyExpiringCredits } = await import('../notification-service');
-      const result = await notifyExpiringCredits(7);
-      expect(result.success).toBe(true);
-      expect(result.sent).toBe(1);
-    }, 10000);
-
-    it('handles email send failure gracefully', async () => {
-      const { db } = await import('@/db');
-      const expirationDate = new Date(Date.now() + 86400000);
-      const limitFn = vi.fn().mockResolvedValue([
-        { userId: 'u4', userEmail: 'd@d.com', userName: 'Dave', organizationName: 'CUPE', expiringAmount: 75, expirationDate },
-      ]);
-      const groupByFn = vi.fn().mockReturnValue({ limit: limitFn });
-      const whereFn = vi.fn().mockReturnValue({ groupBy: groupByFn });
-      const lj4 = vi.fn().mockReturnValue({ where: whereFn });
-      const lj3 = vi.fn().mockReturnValue({ leftJoin: lj4 });
-      const lj2 = vi.fn().mockReturnValue({ leftJoin: lj3 });
-      const fromFn = vi.fn().mockReturnValue({ leftJoin: lj2 });
-      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce({ from: fromFn });
-      mocks.mockSendCreditExpirationEmail.mockRejectedValue(new Error('smtp fail'));
-
-      const { notifyExpiringCredits } = await import('../notification-service');
-      const result = await notifyExpiringCredits(7);
-      expect(result.success).toBe(true);
-      expect(result.failed).toBe(1);
-    }, 10000);
-  });
+  // The expiring-credit queries (tiers, balance cap, per-organization reporting, failed sends) are exercised against a real SQL engine in
+  // expiration-warnings.pglite.test.ts; chain mocks of the old query shape pinned the overlapping windows.
 
   describe('sendBatchExpirationWarnings', () => {
     it('runs all 3 intervals', async () => {

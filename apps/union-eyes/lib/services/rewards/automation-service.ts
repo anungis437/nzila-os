@@ -5,6 +5,7 @@
 
 import { db } from '@/db';
 import { automationRules } from '@/db/schema/recognition-rewards-schema';
+import { organizations } from '@/db/schema';
 import { createAwardRequest, issueAward } from './award-service';
 import { eq, and } from 'drizzle-orm';
 import { sql } from 'drizzle-orm';
@@ -128,38 +129,47 @@ export async function processAnniversaryAwards(orgId: string) {
 
     const result = await lockTx.execute(query);
     const anniversaries = (Array.isArray(result) ? result : (result as { rows?: unknown[] }).rows ?? []) as unknown as AnniversaryRow[];
-    const executor = lockTx as unknown as typeof db;
+    const [organization] = await lockTx
+      .select({ name: organizations.name })
+      .from(organizations)
+      .where(eq(organizations.id, orgId))
+      .limit(1);
+    const organizationName = organization?.name?.trim() || 'the union';
 
     let processed = 0;
+    let failed = 0;
 
     for (const anniversary of anniversaries) {
       try {
         const yearsOfService = Number(anniversary.years_of_service);
-        const _creditsToAward = calculateAnniversaryCredits(yearsOfService);
-        const reason = `Congratulations on ${yearsOfService} ${yearsOfService === 1 ? 'year' : 'years'} with ${orgId}! Thank you for your dedication and commitment.`;
+        // The credits are the award type's own configured amount (issueAward reads it); the union sets them per award type. A
+        // years-of-service scale computed here was never applied, so none is implied.
+        const reason = `Congratulations on ${yearsOfService} ${yearsOfService === 1 ? 'year' : 'years'} with ${organizationName}! Thank you for your dedication and commitment.`;
 
-        // Create and auto-issue the award
-        const award = await createAwardRequest({
-          orgId,
-          programId: anniversaryAwardType.programId,
-          awardTypeId: anniversaryAwardType.id,
-          recipientUserId: anniversary.user_id,
-          issuerUserId: 'system', // System-generated
-          reason,
-          executor,
-        });
-
-        // Automatically approve and issue anniversary awards
-        if (award && !anniversaryAwardType.requiresApproval) {
-          await issueAward({
-            awardId: award.id,
+        // Creating and issuing one member's award is one savepoint: a failure in either step rolls back both, so no approved award is
+        // left un-issued and never retried, and one member's failure does not abort the others' work in this transaction.
+        await lockTx.transaction(async (memberTx) => {
+          const member = memberTx as unknown as typeof db;
+          const award = await createAwardRequest({
             orgId,
-            executor,
+            programId: anniversaryAwardType.programId,
+            awardTypeId: anniversaryAwardType.id,
+            recipientUserId: anniversary.user_id,
+            issuerUserId: 'system', // System-generated
+            reason,
+            metadataJson: { anniversaryYears: yearsOfService },
+            executor: member,
           });
-        }
+
+          // Automatically approve and issue anniversary awards
+          if (award && !anniversaryAwardType.requiresApproval) {
+            await issueAward({ awardId: award.id, orgId, executor: member });
+          }
+        });
 
         processed++;
       } catch (error) {
+        failed++;
         logger.error('[Automation] Failed to process anniversary', {
           error,
           orgId,
@@ -168,13 +178,15 @@ export async function processAnniversaryAwards(orgId: string) {
       }
     }
 
-    return { success: true, processed };
+    // A member whose award could not be made is a failed run for the scheduler, not a processed count of fewer.
+    return { success: failed === 0, processed, failed };
     });
   } catch (error) {
     logger.error('[Automation] Error processing anniversary awards', { error, orgId });
     return { success: false, error };
   }
 }
+
 
 /**
  * Check and trigger milestone-based awards
@@ -317,9 +329,11 @@ export async function processMetricAwards(
  */
 export async function processScheduledAwards(orgId: string) {
   try {
-    // Get scheduled automation rules from database
+    // A scheduled rule names an award type and a cron expression but nothing that says who earns the award (a top performer by
+    // which measure, over what period), so no award can be derived from it. The rules are reported as skipped, never as processed,
+    // so a response cannot claim work that was not done.
     const rules = await db
-      .select()
+      .select({ id: automationRules.id })
       .from(automationRules)
       .where(
         and(
@@ -329,44 +343,18 @@ export async function processScheduledAwards(orgId: string) {
         )
       );
 
-    let processed = 0;
-
-    for (const rule of rules) {
-      try {
-        // Implement scheduled logic based on rule.conditions.schedule
-        // This is a placeholder for cron-based scheduling
-        logger.info('[Automation] Processing scheduled rule', {
-          orgId,
-          ruleId: rule.id,
-          ruleName: rule.name,
-        });
-        processed++;
-      } catch (error) {
-        logger.error('[Automation] Failed to process scheduled rule', {
-          error,
-          orgId,
-          ruleId: rule.id,
-        });
-      }
+    if (rules.length > 0) {
+      logger.warn('[Automation] Scheduled award rules are not evaluated: they define no recipient selection', {
+        orgId,
+        rules: rules.length,
+      });
     }
 
-    return { success: true, processed };
+    return { success: true, processed: 0, skipped: rules.length };
   } catch (error) {
     logger.error('[Automation] Error processing scheduled awards', { error, orgId });
     return { success: false, error };
   }
-}
-
-/**
- * Helper: Calculate anniversary credits based on years of service
- */
-function calculateAnniversaryCredits(years: number): number {
-  // Progressive scale: more years = more credits
-  if (years <= 1) return 50;
-  if (years <= 3) return 100;
-  if (years <= 5) return 200;
-  if (years <= 10) return 300;
-  return 500; // 10+ years
 }
 
 /**

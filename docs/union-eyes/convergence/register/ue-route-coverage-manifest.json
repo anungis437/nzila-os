@@ -36,8 +36,8 @@
    "WITH_API": 187
   },
   "mutatingByAudit": {
-   "ATOMIC": 151,
-   "ATOMIC_SERVICE": 152,
+   "ATOMIC": 152,
+   "ATOMIC_SERVICE": 151,
    "COMPUTE_ONLY": 35,
    "CRUD_ATOMIC": 275,
    "EXEMPT_BALLOT_SECRECY": 2,
@@ -46,10 +46,10 @@
    "NONE": 74
   },
   "mutatingByData": {
-   "AMBIENT_DB": 15,
+   "AMBIENT_DB": 14,
    "CRUD_TENANT_TX": 275,
    "NONE": 212,
-   "SYSTEM_CONTEXT": 62,
+   "SYSTEM_CONTEXT": 63,
    "TENANT_TX": 162
   }
  },
@@ -11344,8 +11344,8 @@
    "guard": "CRON_SECRET",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "ATOMIC_SERVICE"
+   "data": "SYSTEM_CONTEXT",
+   "audit": "ATOMIC"
   },
   {
    "route": "rewards/export/route.ts",
