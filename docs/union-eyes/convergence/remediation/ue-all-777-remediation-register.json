@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 32,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 43,
-    "engineeringRemaining": 734,
+    "engineeringCorrected": 46,
+    "engineeringRemaining": 731,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 4
   },
@@ -7238,7 +7238,16 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B04-OHS-INCIDENT-CLASSIFICATION-AND-PRIVACY",
+        "path": "apps/union-eyes/app/api/health-safety/incidents/route.ts",
+        "explanation": "All declared incident types and severities (including fatal/serious/near_miss) are mapped without downgrades; missing or invalid incidentDate is refused instead of replaced with report time; explicit event time persisted as Date.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "regressionTest": "apps/union-eyes/app/api/health-safety/__tests__/hazards-incidents-submission.integration.test.ts; apps/union-eyes/app/api/__tests__/health-safety-incident-anonymity.pglite.test.ts",
+        "sourceCommit": "46dff6b6e7fe85433288fd3039ecf930d4ee2f08"
+      }
     },
     {
       "defectId": "DEF-0B8-HS-INCIDENT-INJURY-WITNESS-AND-REPORTER-DATA-IN-UNTYPED-METADATA",
@@ -7255,7 +7264,16 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B04-OHS-INCIDENT-CLASSIFICATION-AND-PRIVACY",
+        "path": "apps/union-eyes/app/api/health-safety/incidents/route.ts",
+        "explanation": "Incident writes injury, witness, reporter and anonymity data to their typed schema columns, not generic metadata. Unsupported sensitive contact/injuryDetails fields are rejected rather than silently persisted as untyped JSON; anonymous reporter name suppressed.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "regressionTest": "apps/union-eyes/app/api/health-safety/__tests__/hazards-incidents-submission.integration.test.ts; apps/union-eyes/app/api/__tests__/health-safety-incident-anonymity.pglite.test.ts",
+        "sourceCommit": "46dff6b6e7fe85433288fd3039ecf930d4ee2f08"
+      }
     },
     {
       "defectId": "DEF-0B8-HS-HAZARD-CREATE-DEFAULTS-LEVEL-AND-CATEGORY-SILENTLY",
@@ -7272,7 +7290,16 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B04-OHS-INCIDENT-CLASSIFICATION-AND-PRIVACY",
+        "path": "apps/union-eyes/app/api/health-safety/hazards/route.ts",
+        "explanation": "Hazard category and level must be explicitly valid (or valid documented aliases); no fallback to other/moderate for missing or unknown classifications.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "regressionTest": "apps/union-eyes/app/api/health-safety/__tests__/hazards-incidents-submission.integration.test.ts; apps/union-eyes/app/api/__tests__/health-safety-incident-anonymity.pglite.test.ts",
+        "sourceCommit": "46dff6b6e7fe85433288fd3039ecf930d4ee2f08"
+      }
     },
     {
       "defectId": "DEF-0B8-HS-RECORD-NUMBERS-CALLER-SUPPLIED-AND-UNIQUE-ACROSS-ORGANIZATIONS",
