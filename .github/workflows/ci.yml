@@ -1017,16 +1017,10 @@ jobs:
       - uses: ./.github/actions/setup-monorepo
       - name: Regenerate inventory
         run: pnpm inventory:generate
-      - name: Enforce committed inventory lock
-        run: |
-          DIFF=$(git diff -- tooling/repo-inventory/output/inventory.json tooling/repo-inventory/output/inventory.md tooling/repo-inventory/output/repo-inventory.json tooling/repo-inventory/output/repo-inventory.md)
-          SUBSTANTIVE=$(echo "$DIFF" | grep '^[+-]' | grep -v '^[+-][+-][+-]' | grep -Ev '"generatedAt"|Auto-generated on' || true)
-          if [ -n "$SUBSTANTIVE" ]; then
-            echo "Substantive inventory drift detected:"
-            echo "$DIFF"
-            exit 1
-          fi
-          echo "Inventory check passed (date-stamp differences ignored)"
+      - name: Test semantic inventory gate against drift and alias corruption
+        run: node --test tooling/repo-inventory/verify-inventory-lock.test.mjs
+      - name: Verify inventory lock structurally
+        run: node tooling/repo-inventory/verify-inventory-lock.mjs
 
   # Merge-critical source-tree validators extracted from Governance Gates.
   # DORA, cost, onboarding, scorecards, release proof, and runtime evidence stay out.
