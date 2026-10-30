@@ -379,6 +379,8 @@ interface ApiRouteRule {
   expectedMinRole: string
   /** Dashboard page(s) that depend on this route */
   backingPage: string
+  /** A named journey is unavailable; contract asserts explicit 501, never a fake CRUD-backed success. */
+  unavailableUntilImplemented?: boolean
 }
 
 const API_ROUTE_MATRIX: ApiRouteRule[] = [
@@ -386,7 +388,7 @@ const API_ROUTE_MATRIX: ApiRouteRule[] = [
   { apiPath: 'messaging/campaigns',  expectedAuthPattern: 'crudRoutes',           expectedMinRole: 'member',               backingPage: 'communications/campaigns' },
   { apiPath: 'messaging/templates',  expectedAuthPattern: 'crudRoutes',           expectedMinRole: 'member',               backingPage: 'communications/templates' },
   { apiPath: 'messaging/preferences',expectedAuthPattern: 'crudRoutes',           expectedMinRole: 'member',               backingPage: 'settings/communications' },
-  { apiPath: 'organizing/notes',     expectedAuthPattern: 'crudRoutes',           expectedMinRole: 'member',               backingPage: 'organizing/notes' },
+  { apiPath: 'organizing/notes',     expectedAuthPattern: 'withApi',              expectedMinRole: 'officer',              backingPage: 'organizing/notes', unavailableUntilImplemented: true },
   { apiPath: 'activities',           expectedAuthPattern: 'withApi',              expectedMinRole: 'member',               backingPage: 'admin (audit log)' },
   { apiPath: 'dues/calculate',       expectedAuthPattern: 'withApiAuth',          expectedMinRole: 'member',               backingPage: 'admin/dues (own record; any other member needs the named financial role)' },
   { apiPath: 'analytics/cross-org',  expectedAuthPattern: 'withApi',              expectedMinRole: 'platform_lead',        backingPage: 'cross-org analytics (platform)' },
@@ -588,6 +590,14 @@ describe('PERSONA_ACCESS_001 — API routes backing dashboard have auth and DB s
       })
 
       it(`API ${rule.apiPath} — imports from DB schema (DB-connected)`, () => {
+        if (rule.unavailableUntilImplemented) {
+          // An unavailable business journey must not masquerade as a working database-backed API.
+          // Preserve its explicit 501 until a real notes model, authority and storage are implemented.
+          expect(content).toContain('ApiError.notImplemented(')
+          expect(content).toMatch(/required:\\s*true/)
+          expect(content).not.toContain('crudRoutes(')
+          return
+        }
         const hasSchemaImport =
           content.includes('@/db/schema') ||
           content.includes('@/db/db') ||
