@@ -56,7 +56,8 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
     }
 
     // CRITICAL: Check subscription entitlement for AI classify
-    const entitlement = await checkEntitlement(context.organizationId!, 'ai_classify');
+    if (!context.organizationId) return NextResponse.json({ error: 'Organization context required' }, { status: 403 });
+    const entitlement = await checkEntitlement(context.organizationId, 'ai_classify');
     if (!entitlement.allowed) {
       return NextResponse.json(
         { 
@@ -68,10 +69,9 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       );
     }
 
-    if (!context.organizationId) return NextResponse.json({ error: 'Organization context required' }, { status: 403 });
     const blocked = await guardAiFeature(AI_FEATURES.AI_EXTRACT_CLAUSES, { userId: context.userId, organizationId: context.organizationId });
     if (blocked) return blocked;
-    enforceAISafety({ origin: 'classify', action: 'POST', organizationId: context.organizationId, userId: context.userId, userRole: 'member', dataClass: 'internal' });
+    enforceAISafety({ origin: 'extract-clauses', action: 'POST', organizationId: context.organizationId, userId: context.userId, userRole: 'member', dataClass: 'internal' });
 
     try {
       const body = await request.json();
