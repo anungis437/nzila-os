@@ -81,6 +81,17 @@ describe('exit-interview mutations', () => {
     expect(m.audit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'exit_interview.create', organizationId: 'org_1' }));
   });
 
+  // DEF-0B7-EXC-NEW-INTERVIEWS-DEFAULT-PUBLIC-INTERNAL-WITH-NO-CLASSIFICATION-STEP
+  it('create stores an unclassified interview at the restricted level, not the public_internal column default', async () => {
+    const { POST } = await import('../exit-interviews/route');
+    await (POST as any)({
+      organizationId: 'org_1',
+      userId: 'u1',
+      body: { retiringEmployeeName: 'Jane', roleInUnion: 'steward', yearsOfService: 10, title: 'Interview', keyLessons: 'Lessons learned' },
+    });
+    expect(m.inserted.find((row) => row.title === 'Interview')).toMatchObject({ sensitivityLevel: 'restricted' });
+  });
+
   describe('documents', () => {
     const body = { title: 'Transcript', fileUrl: 'https://nzilacanadastore.blob.core.windows.net/x.pdf', mimeType: 'application/pdf' };
 

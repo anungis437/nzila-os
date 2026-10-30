@@ -44,7 +44,7 @@ function clearOAuthCookies(cookieStore: CookieStore) {
   cookieStore.set('twitter_code_verifier', '', expired);
 }
 
-export const GET = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
+export const GET = withRoleAuth('admin', async (request: NextRequest, context: BaseAuthContext) => {
   const cookieStore = await cookies();
   const { userId, organizationId } = context;
 
@@ -121,6 +121,14 @@ export const GET = withRoleAuth('steward', async (request: NextRequest, context:
         const shortLived = await metaClient.getAccessToken(code, redirectUri);
         const longLived = await metaClient.getLongLivedToken(shortLived.access_token);
         const pages = await metaClient.getUserPages();
+        // The authorizing user may manage several Pages. Picking the first would publish as an arbitrary one, and there is no
+        // selection step yet, so a connection is made only when exactly one Page is available.
+        if (pages.length > 1) {
+          return standardErrorResponse(
+            ErrorCode.VALIDATION_ERROR,
+            'This account manages more than one Page. Connect an account that manages exactly the Page to publish as.'
+          );
+        }
         const page = pages[0];
         if (!page) {
           return standardErrorResponse(

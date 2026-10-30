@@ -8,49 +8,49 @@
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 12,
    "CRON_SECRET": 2,
-   "CRUD_FACTORY": 161,
+   "CRUD_FACTORY": 156,
    "DELEGATED": 19,
    "NONE": 48,
    "ORG_AUTH": 53,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 201,
+   "RETIRED": 205,
    "ROLE_AUTH": 120,
    "SESSION_AUTH": 64,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 295,
+   "WITH_API": 296,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 8,
    "CRON_SECRET": 1,
-   "CRUD_FACTORY": 161,
+   "CRUD_FACTORY": 156,
    "DELEGATED": 12,
    "NONE": 8,
    "ORG_AUTH": 32,
    "PLATFORM_AUTH_HANDLER": 7,
-   "RETIRED": 195,
+   "RETIRED": 199,
    "ROLE_AUTH": 71,
    "SESSION_AUTH": 35,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 186
+   "WITH_API": 187
   },
   "mutatingByAudit": {
-   "ATOMIC": 147,
+   "ATOMIC": 148,
    "ATOMIC_SERVICE": 152,
    "COMPUTE_ONLY": 35,
-   "CRUD_ATOMIC": 162,
+   "CRUD_ATOMIC": 157,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 23,
    "NO_WRITES_FOUND": 14,
-   "NONE": 192
+   "NONE": 196
   },
   "mutatingByData": {
    "AMBIENT_DB": 14,
-   "CRUD_TENANT_TX": 162,
-   "NONE": 330,
+   "CRUD_TENANT_TX": 157,
+   "NONE": 334,
    "SYSTEM_CONTEXT": 63,
-   "TENANT_TX": 158
+   "TENANT_TX": 159
   }
  },
  "routes": [
@@ -11226,11 +11226,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "reports/datasources/route.ts",
@@ -11251,11 +11251,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "reports/execute/route.ts",
@@ -11290,11 +11290,11 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "reports/scheduled/route.ts",
@@ -11303,11 +11303,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "reports/templates/route.ts",
@@ -11316,11 +11316,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "reviews/route.ts",

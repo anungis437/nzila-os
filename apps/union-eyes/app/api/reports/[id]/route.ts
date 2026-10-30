@@ -12,7 +12,8 @@ const { GET, PATCH, DELETE } = crudRoutes({
   tags: ["Analytics"],
   orgScoped: true,
   itemRoute: true,
-  readRole: 'member',
+  // A report definition names the data sources and filters it reads, and the registry executes only at an officer floor.
+  readRole: 'steward',
   writeRole: 'steward',
 });
 export { GET, PATCH, DELETE };

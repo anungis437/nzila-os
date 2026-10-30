@@ -91,6 +91,10 @@ const FACADES = {
   'healthwelfare/plans': 'the generic CRUD factory over the per-capita remittance ledger (remittance rows under a plan name, at the member floor)',
   'reconciliation/bank': 'a list of reconciliation runs under a bank-feed name (no bank feed is read)',
   'reconciliation/upload': 'a list of reconciliation exceptions under an upload name (no file is received)',
+  'reports/builder': 'the generic CRUD factory over report definitions (a definition list under a builder name; nothing is built)',
+  'reports/scheduled': 'the generic CRUD factory over report definitions (no schedule row, recipient or next run exists behind it)',
+  'reports/scheduled/[id]': 'the generic CRUD factory over report definitions (a definition item under a schedule name; its DELETE removed the report)',
+  'reports/datasources/sample': 'the generic CRUD factory over report definitions (no sample rows are read from any data source)',
   'events/[id]/occurrences': 'a byte-for-byte copy of the event item route, so its path value was the event, not an occurrence',
 }
 

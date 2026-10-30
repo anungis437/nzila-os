@@ -16,6 +16,7 @@ const { GET, POST } = crudRoutes({
   tags: ['Scheduling'],
   orgScoped: true,
   ownerColumn: 'memberId',
+  staffReadsAll: true,
   readRole: 'member',
   writeRole: 'steward',
   beforeCreate: async (values, { organizationId }) => {

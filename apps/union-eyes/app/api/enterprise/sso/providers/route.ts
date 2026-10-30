@@ -16,7 +16,8 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: true, minRole: 'member' },
+    // The identity-provider configuration (issuer, endpoints, client id, attribute mapping) is an administrator's, not every member's.
+    auth: { required: true, minRole: 'admin' },
     openapi: {
       tags: ['Auth'],
       summary: 'List SSO providers',

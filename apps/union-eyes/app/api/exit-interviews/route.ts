@@ -14,6 +14,7 @@ import {
   interviewListCondition,
   projectInterview,
   resolveInterviewReader,
+  UNRECORDED_LEVEL,
 } from '@/lib/knowledge-transfer/governance/interview-access';
 import { createExitInterviewSchema, listQuerySchema } from './schemas';
 
@@ -91,6 +92,9 @@ export const POST = withApi(
         .insert(exitInterviews)
         .values({
           ...body,
+          // A new interview is unclassified until an administrator sets its level through the governance step, so it starts at
+          // the most protective readable level instead of the column default (public_internal).
+          sensitivityLevel: UNRECORDED_LEVEL,
           organizationId: organizationId!,
           createdBy: userId!,
           updatedBy: userId!,

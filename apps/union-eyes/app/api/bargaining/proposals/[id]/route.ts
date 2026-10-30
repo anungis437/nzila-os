@@ -14,7 +14,8 @@ const { GET, PATCH, DELETE } = crudRoutes({
   // bargaining_proposals has no organization column: it belongs to a negotiation, and the negotiation belongs to the organization.
   parentScope: { column: 'negotiationId', parent: negotiations },
   itemRoute: true,
-  readRole: 'member',
+  // Draft bargaining positions are confidential to those who bargain.
+  readRole: 'steward',
   writeRole: 'steward',
 });
 export { GET, PATCH, DELETE };

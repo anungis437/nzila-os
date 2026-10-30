@@ -11,7 +11,8 @@ const { GET, POST } = crudRoutes({
   pk: 'id',
   tags: ["Communications"],
   orgScoped: true,
-  readRole: 'member',
-  writeRole: 'steward',
+  // Message content, recipients and member phone numbers: officer authority, never a member or steward floor.
+  readRole: 'officer',
+  writeRole: 'officer',
 });
 export { GET, POST };

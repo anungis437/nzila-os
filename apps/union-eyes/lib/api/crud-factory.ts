@@ -37,7 +37,7 @@ import { eq, and, desc, count, sql, inArray, type SQL } from 'drizzle-orm';
 import type { PgTable, PgColumn } from 'drizzle-orm/pg-core';
 import type { NextRequest } from 'next/server';
 import { ROLE_HIERARCHY, type UserRole } from '@/lib/api-auth-guard';
-import { lowRoleModeFor, ownRowsScope, resolveLowRoleScope } from './crud-low-role-guard';
+import { isBelowStaff, lowRoleModeFor, ownRowsScope, resolveLowRoleScope } from './crud-low-role-guard';
 import { assertCrudRead, assertCrudWrite, crudGovernanceFor, supportsGenericArchive } from './crud-governance';
 
 // crud-factory's readRole/writeRole accept the full canonical role hierarchy
@@ -79,6 +79,13 @@ export interface CrudOptions {
   writableFields?: string[];
   /** Columns removed from every row the route returns (credentials, internal security flags). */
   omitFromResponse?: string[];
+  /**
+   * With an ownerColumn: a caller at or above the steward floor reads every row of the organization on GET, while a member
+   * still reads only their own. Writes keep the owner scope, so staff reading a member's record never edits it as the member.
+   */
+  staffReadsAll?: boolean;
+  /** A condition added to GET only for a caller below the steward floor (for example, hiding unpublished rows from members). */
+  belowStaffReadCondition?: SQL;
   /** With an ownerColumn: the owner may delete their own row at the write floor (the row scope already limits it to theirs). */
   ownerMayDelete?: boolean;
   /** Column name to auto-filter by authenticated userId (e.g. 'memberId'). Restricts reads to the current user's own rows. */
@@ -427,6 +434,11 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
     if (ownerCol && !userId) throw ApiError.forbidden();
   }
 
+  async function staffMayReadAll(userId: string, organizationId: string | null | undefined): Promise<boolean> {
+    if (!opts.staffReadsAll) return false;
+    return !(await isBelowStaff(userId, organizationId));
+  }
+
   const omitted = new Set(opts.omitFromResponse ?? []);
   /** Removes the columns this route never returns (credentials, internal flags) from a row. */
   function shape<T extends Record<string, unknown> | undefined>(row: T): T {
@@ -515,9 +527,10 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         }
         const parentScoped = parentCondition(organizationId);
         if (parentScoped) conditions.push(parentScoped);
-        if (ownerCol && userId) {
+        if (ownerCol && userId && !(await staffMayReadAll(userId, organizationId))) {
           conditions.push(eq(ownerCol, userId));
         }
+        if (opts.belowStaffReadCondition && (await isBelowStaff(userId, organizationId))) conditions.push(opts.belowStaffReadCondition);
         const lowRole = await readScope(userId, organizationId);
         if (lowRole.condition) conditions.push(lowRole.condition);
 
@@ -660,9 +673,10 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         }
         const parentScoped = parentCondition(organizationId);
         if (parentScoped) conditions.push(parentScoped);
-        if (ownerCol && userId) {
+        if (ownerCol && userId && !(await staffMayReadAll(userId, organizationId))) {
           conditions.push(eq(ownerCol, userId));
         }
+        if (opts.belowStaffReadCondition && (await isBelowStaff(userId, organizationId))) conditions.push(opts.belowStaffReadCondition);
         const lowRole = await readScope(userId, organizationId);
         if (lowRole.condition) conditions.push(lowRole.condition);
 

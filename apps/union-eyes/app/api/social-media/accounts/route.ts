@@ -99,7 +99,8 @@ const socialMediaAccountsSchema = z.object({
   }),
 });
 
-export const POST = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
+// Connecting or disconnecting the organization's publishing identity is an administrator's act, not a steward's.
+export const POST = withRoleAuth('admin', async (request: NextRequest, context: BaseAuthContext) => {
   try {
       const { userId, organizationId } = context;
 
@@ -164,7 +165,6 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
             'pages_manage_engagement',
             'instagram_basic',
             'instagram_content_publish',
-            'business_management',
           ];
           authUrl = metaClient.getAuthorizationUrl(redirectUri, scopes, state);
           break;
@@ -197,7 +197,6 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
           const scopes = [
             'r_organization_social',
             'w_organization_social',
-            'rw_organization_admin',
             'r_basicprofile',
           ];
           authUrl = linkedInClient.getAuthorizationUrl(redirectUri, scopes, state);
@@ -249,7 +248,7 @@ return NextResponse.json(
     }
 });
 
-export const DELETE = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
+export const DELETE = withRoleAuth('admin', async (request: NextRequest, context: BaseAuthContext) => {
   try {
       const { userId, organizationId } = context;
 

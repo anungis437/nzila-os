@@ -19,9 +19,10 @@
  */
 
 import { withApi } from '@/lib/api/framework';
-import { and, eq, gte } from 'drizzle-orm';
+import { and, eq, gte, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { exitInterviews, exitInterviewEvents } from '@/db/schema';
+import { derivedAnalyticsCondition } from '@/lib/knowledge-transfer/governance/interview-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -71,7 +72,9 @@ export const GET = withApi(
         status: exitInterviews.status,
         createdAt: exitInterviews.createdAt,
         publishedAt: exitInterviews.publishedAt,
-        continuityRiskScore: exitInterviews.continuityRiskScore,
+        // A risk score is derived from the interview's content, so it enters the aggregate only for a published interview with consent
+        // and a level that allows derived analytics. The counts of the pipeline carry no content and stay.
+        continuityRiskScore: sql<number | null>`CASE WHEN ${derivedAnalyticsCondition(orgId)} THEN ${exitInterviews.continuityRiskScore} ELSE NULL END`,
         consentGranted: exitInterviews.consentGranted,
       })
       .from(exitInterviews)
