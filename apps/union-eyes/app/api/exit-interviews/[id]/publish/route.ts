@@ -1,5 +1,5 @@
 // cognition-governance-ci: allow-route-bypass — Publication workflow.
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -137,7 +137,22 @@ export const POST = withApi(
       setImmediate(async () => {
         try {
           await auditStep('exit_interview.ai_extraction.requested', { sensitivityLevel: existing.sensitivityLevel, dataClass: 'internal' });
-          const expertiseProfile = await extractExpertise(existing);
+          // Publication and AI extraction run in different moments. Re-read
+          // the CURRENT consent/classification before disclosure: a revoke
+          // after publication must defeat this stale background task.
+          const [current] = await withRLSContext({ organizationId: organization }, async (tx) =>
+            tx.select().from(exitInterviews).where(and(
+              eq(exitInterviews.id, interviewId),
+              eq(exitInterviews.organizationId, organization),
+              eq(exitInterviews.status, 'published'),
+              eq(exitInterviews.consentGranted, true),
+            )).limit(1),
+          );
+          if (!current || !isIndexingAllowed(current.sensitivityLevel, current.consentGranted)) {
+            await auditStep('exit_interview.ai_extraction.skipped', { reason: 'Current consent, status or sensitivity forbids model use' });
+            return;
+          }
+          const expertiseProfile = await extractExpertise(current);
           const expertiseTags = flattenExpertiseTags(expertiseProfile);
           const riskScore = expertiseProfile.continuitySensitivity === 'critical' ? 90
             : expertiseProfile.continuitySensitivity === 'high' ? 70
@@ -146,10 +161,17 @@ export const POST = withApi(
 
           // Only a published interview is updated, and the update is audited with the extraction outcome.
           await withRLSContext({ organizationId: organization }, async (tx) => {
-            await tx
+            const [updated] = await tx
               .update(exitInterviews)
               .set({ expertiseTags, continuityRiskScore: riskScore, continuityRiskFlags: expertiseProfile.undocumentedWorkflows, updatedAt: new Date() })
-              .where(and(eq(exitInterviews.id, interviewId), eq(exitInterviews.organizationId, organization), eq(exitInterviews.status, 'published')));
+              .where(and(
+                eq(exitInterviews.id, interviewId),
+                eq(exitInterviews.organizationId, organization),
+                eq(exitInterviews.status, 'published'),
+                eq(exitInterviews.consentGranted, true),
+                inArray(exitInterviews.sensitivityLevel, ['public_internal', 'restricted']),
+              )).returning({ id: exitInterviews.id });
+            if (!updated) throw new Error('Model outcome not recorded because consent or classification changed');
             await persistAtomicAudit(tx, {
               organizationId: organization,
               userId: actor,
@@ -160,7 +182,7 @@ export const POST = withApi(
             });
           });
 
-          if (isIndexingAllowed((existing.sensitivityLevel ?? 'public_internal') as never, existing.consentGranted ?? false)) {
+          if (isIndexingAllowed(current.sensitivityLevel, current.consentGranted)) {
             await indexExitInterview(interviewId, organization, actor);
           }
         } catch (error) {

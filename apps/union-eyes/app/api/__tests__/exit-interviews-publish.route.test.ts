@@ -255,7 +255,7 @@ describe('exit-interviews/[id]/publish route', () => {
     });
 
     it('audits the intent and the outcome of the AI extraction for an interview that may be indexed', async () => {
-      m.selectQueue.push([reviewed()]);
+      m.selectQueue.push([reviewed()], [reviewed({ status: 'published' })]);
       m.insertReturningQueue.push([{ id: 'kb_1' }]);
       m.updateReturningQueue.push([{ id: 'iv_1', status: 'published', knowledgeBaseId: 'kb_1' }]);
       await publish();
@@ -265,8 +265,20 @@ describe('exit-interviews/[id]/publish route', () => {
       expect(m.extractExpertise).toHaveBeenCalledTimes(1);
     });
 
+    it('skips stale AI extraction when consent was revoked after publication', async () => {
+      m.selectQueue.push([reviewed()], [{ ...reviewed(), status: 'published', consentGranted: false }]);
+      m.insertReturningQueue.push([{ id: 'kb_1' }]);
+      m.updateReturningQueue.push([{ id: 'iv_1', status: 'published', knowledgeBaseId: 'kb_1' }]);
+      await publish();
+      await flush();
+      expect(m.extractExpertise).not.toHaveBeenCalled();
+      expect(m.audit).toHaveBeenCalledWith(mockDb, expect.objectContaining({
+        action: 'exit_interview.ai_extraction.skipped',
+      }));
+    });
+
     it('records a failed extraction instead of swallowing it', async () => {
-      m.selectQueue.push([reviewed()]);
+      m.selectQueue.push([reviewed()], [reviewed({ status: 'published' })]);
       m.insertReturningQueue.push([{ id: 'kb_1' }]);
       m.updateReturningQueue.push([{ id: 'iv_1', status: 'published', knowledgeBaseId: 'kb_1' }]);
       m.extractExpertise.mockRejectedValue(new Error('model down'));
