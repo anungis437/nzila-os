@@ -11,6 +11,7 @@
  */
 
 import { wageEnrichmentService, type SyncResult } from '@/lib/services/external-data/wage-enrichment-service';
+import { NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 import { withApi } from '@/lib/api/framework';
 
@@ -200,21 +201,21 @@ const handler = withApi(
       duration: results.summary.duration,
     });
 
-    return results;
+    // A run with any failed source is a failed run (500, full body): the job used to answer 200 whatever failed.
+    return NextResponse.json(results, { status: results.summary.success ? 200 : 500 });
   } catch (error) {
     logger.error('[CRON] External data sync failed', error);
-    return {
+    return NextResponse.json({
       timestamp: new Date().toISOString(),
       syncType: 'scheduled',
       dataSources: {},
       summary: { totalProcessed: 0, totalInserted: 0, totalUpdated: 0, totalFailed: 0, success: false, duration: Date.now() - startTime },
       errors: [String(error)],
-    };
+    }, { status: 500 });
   }
   },
 );
 
-export const GET = handler;
-// POST for manual triggering
+// POST only: a scheduler (lib/operations/scheduled-jobs.json) or an operator posts here; a GET can never run the job.
 export const POST = handler;
 

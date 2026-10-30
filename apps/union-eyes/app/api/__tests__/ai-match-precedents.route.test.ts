@@ -27,6 +27,11 @@ vi.mock('@/lib/services/ai/precedent-matching-service', () => ({
   generateLegalMemorandum: m.generateLegalMemorandum,
 }));
 
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: (_op: unknown, run: () => Promise<unknown>) => run(),
+  operationAuditResponse: () => null,
+}));
+
 async function loadRoute() {
   return import('../ai/match-precedents/route');
 }

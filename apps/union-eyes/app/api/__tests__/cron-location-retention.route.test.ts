@@ -32,22 +32,24 @@ describe('cron/location-retention route', () => {
 
   it('is cron-authenticated and sweeps every member in one system-role transaction', async () => {
     m.deleteExpiredLocationData.mockResolvedValue({ trackingRecordsDeleted: 3, eventRecordsDeleted: 2 });
-    const { GET, POST } = await import('../cron/location-retention/route');
+    const { GET, POST } = await import('../cron/location-retention/route') as { GET?: unknown; POST: (request: NextRequest) => Promise<Response> };
     expect((m.withApiConfig as { auth: unknown }).auth).toEqual({ cron: true });
 
-    for (const handler of [GET, POST]) {
+    // A scheduler posts; a GET can never run the sweep (no GET export).
+    expect(GET).toBeUndefined();
+    for (const handler of [POST]) {
       const response = await handler(new NextRequest('http://localhost/api/cron/location-retention'));
       expect(response.status).toBe(200);
       expect(await response.json()).toEqual({ trackingRecordsDeleted: 3, eventRecordsDeleted: 2 });
     }
-    expect(m.withSystemContext).toHaveBeenCalledTimes(2);
+    expect(m.withSystemContext).toHaveBeenCalledTimes(1);
     expect(m.deleteExpiredLocationData).toHaveBeenCalledWith({ tx: true });
   });
 
   it('reports failure instead of success when the deletion evidence cannot be written', async () => {
     m.deleteExpiredLocationData.mockRejectedValue(new Error('deletion log write failed'));
-    const { GET } = await import('../cron/location-retention/route');
-    const response = await GET(new NextRequest('http://localhost/api/cron/location-retention'));
+    const { POST } = await import('../cron/location-retention/route');
+    const response = await POST(new NextRequest('http://localhost/api/cron/location-retention'));
     expect(response.status).toBe(500);
     expect((await response.json()).error).toContain('deletion log write failed');
   });

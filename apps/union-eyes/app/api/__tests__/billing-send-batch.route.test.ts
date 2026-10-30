@@ -40,6 +40,8 @@ async function loadRoute() { return import('../billing/send-batch/route'); }
 describe('billing/send-batch tenant isolation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // clearAllMocks keeps queued once-implementations, so a test that stops early would leak its second select into the next test.
+    m.db.select.mockReset();
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
     m.generateInvoice.mockResolvedValue({ id: 'inv_1' });
   });

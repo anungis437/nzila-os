@@ -20,7 +20,6 @@ param prefix string
 @description('Server runtime profile. Qualification exercised the server under "internal"; the owner decides before go-live.')
 @allowed(['internal', 'executive'])
 param featureProfile string = 'internal'
-param cronSchedule string = '*/5 * * * *'
 @description('Stripe is optional at initial launch (client-commercial billing is post-launch). Enable only after the production Stripe secrets exist in Key Vault.')
 param enableStripe bool = false
 param tags object = {}
@@ -164,9 +163,14 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
   dependsOn: [clamav]
 }
 
-// Scheduled deadline-reminder processing. Nothing else schedules this route in production.
-resource cron 'Microsoft.App/jobs@2024-03-01' = {
-  name: '${prefix}-cron-deadlines'
+// Scheduled jobs: one Container Apps schedule job per entry of the manifest (apps/union-eyes/lib/operations/scheduled-jobs.json).
+// Every job POSTs its route with the shared cron secret; `curl -f` makes a non-2xx answer fail the job run, so a job that failed
+// is visible as a failed execution instead of a silent success. The manifest is the only place a schedule is declared.
+var scheduledJobs = loadJsonContent('../../../../apps/union-eyes/lib/operations/scheduled-jobs.json').jobs
+
+resource cronJobs 'Microsoft.App/jobs@2024-03-01' = [for job in scheduledJobs: {
+  // Job names are limited to 32 characters, so the environment prefix is truncated. The deadline job keeps its original name.
+  name: contains(job, 'legacyJobSuffix') ? '${prefix}-${job.legacyJobSuffix}' : '${take(prefix, 18)}-${job.code}'
   location: location
   tags: tags
   identity: { type: 'UserAssigned', userAssignedIdentities: { '${identityId}': {} } }
@@ -175,9 +179,9 @@ resource cron 'Microsoft.App/jobs@2024-03-01' = {
     workloadProfileName: 'Consumption'
     configuration: {
       triggerType: 'Schedule'
-      replicaTimeout: 120
+      replicaTimeout: job.timeoutSeconds + 20
       replicaRetryLimit: 1
-      scheduleTriggerConfig: { cronExpression: cronSchedule, parallelism: 1, replicaCompletionCount: 1 }
+      scheduleTriggerConfig: { cronExpression: job.schedule, parallelism: 1, replicaCompletionCount: 1 }
       registries: [{ server: acrLoginServer, identity: identityId }]
       secrets: [
         { name: 'cron-secret', keyVaultUrl: '${kvBase}secrets/cron-secret', identity: identityId }
@@ -190,7 +194,7 @@ resource cron 'Microsoft.App/jobs@2024-03-01' = {
           image: cronImage
           resources: { cpu: json('0.25'), memory: '0.5Gi' }
           command: ['sh', '-c']
-          args: ['curl -fsS --max-time 100 -H "x-cron-secret: $CRON_SECRET" "https://$APP_FQDN/api/cron/deadline-reminders"']
+          args: ['curl -fsS -X POST --max-time ${job.timeoutSeconds} -H "x-cron-secret: $CRON_SECRET" "https://$APP_FQDN${job.path}"']
           env: [
             { name: 'APP_FQDN', value: app.properties.configuration.ingress.fqdn }
             { name: 'CRON_SECRET', secretRef: 'cron-secret' }
@@ -199,8 +203,7 @@ resource cron 'Microsoft.App/jobs@2024-03-01' = {
       ]
     }
   }
-}
-
+}]
 output appName string = app.name
 output appId string = app.id
 output appFqdn string = app.properties.configuration.ingress.fqdn

@@ -50,6 +50,7 @@ import {
 } from './standardized-responses';
 import { ApiError } from './errors';
 import { secretsEqual } from './secret-compare';
+import { expectedCronSecret, presentedCronSecret } from './cron-secret';
 import {
   ROLE_HIERARCHY,
   getCurrentUser,
@@ -338,11 +339,8 @@ export function withApi<
       // Accepts both x-cron-secret and Authorization: Bearer headers.
       // Checks CRON_SECRET_KEY first, falls back to CRON_SECRET for compat.
       if (requireCron) {
-        const xCronHeader = request.headers.get('x-cron-secret');
-        const authBearer = request.headers.get('authorization')?.replace('Bearer ', '');
-        const cronSecret = xCronHeader || authBearer || '';
-        const expected = process.env.CRON_SECRET_KEY ?? process.env.CRON_SECRET ?? '';
-        if (!secretsEqual(cronSecret, expected)) {
+        // The presentation and precedence rule is shared with the edge check and the rewards route (lib/api/cron-secret.ts).
+        if (!secretsEqual(presentedCronSecret(request.headers), expectedCronSecret())) {
           return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Invalid cron secret', undefined, traceId);
         }
       }

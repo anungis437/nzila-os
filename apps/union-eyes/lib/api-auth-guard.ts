@@ -44,6 +44,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { secretsEqual } from '@/lib/api/secret-compare';
+import { expectedCronSecret, presentedCronSecret } from '@/lib/api/cron-secret';
 import { auth, currentUser as platformCurrentUser } from '@nzila/platform-auth/entra/server';
 import { cookies } from 'next/headers';
 import { eq, and, isNull } from 'drizzle-orm';
@@ -429,15 +430,17 @@ import { isPublicRoute, isCronRoute } from './public-routes';
  * Verify cron secret header
  */
 function verifyCronAuth(request: NextRequest): boolean {
-  const cronSecret = request.headers.get('x-cron-secret');
-  const expectedSecret = process.env.CRON_SECRET_KEY || process.env.CRON_SECRET;
+  // Same presentation rule and precedence as withApi, the edge check and the rewards route (lib/api/cron-secret.ts): the secret is
+  // accepted as x-cron-secret or as a bearer token.
+  const cronSecret = presentedCronSecret(request.headers);
+  const expectedSecret = expectedCronSecret();
   
   if (!expectedSecret) {
     logger.error('CRON_SECRET_KEY/CRON_SECRET not configured', undefined, { context: 'Auth' });
     return false;
   }
   
-  return secretsEqual(cronSecret ?? '', expectedSecret);
+  return secretsEqual(cronSecret, expectedSecret);
 }
 
 // =============================================================================

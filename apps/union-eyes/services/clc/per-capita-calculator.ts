@@ -7,6 +7,7 @@
 import { db } from '@/db';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { logger } from '@/lib/logger';
 import {
   organizations,
   organizationMembers,
@@ -238,10 +239,10 @@ return null;
  * Calculate per-capita for all organizations with parent org
  * Typically run monthly via cron job
  */
-export async function calculateAllPerCapita(
+export async function calculateAllPerCapitaDetailed(
   remittanceMonth: number,
   remittanceYear: number
-): Promise<PerCapitaCalculation[]> {
+): Promise<{ calculations: PerCapitaCalculation[]; failedOrganizationIds: string[] }> {
 // Get all active organizations with parent (potential remitters)
   const orgsWithParent = await db
     .select()
@@ -262,6 +263,7 @@ export async function calculateAllPerCapita(
     return settings.perCapitaRate !== undefined && parseFloat(String(settings.perCapitaRate)) > 0;
   });
 const calculations: PerCapitaCalculation[] = [];
+  const failedOrganizationIds: string[] = [];
 
   for (const org of orgsWithRate) {
     try {
@@ -269,10 +271,18 @@ const calculations: PerCapitaCalculation[] = [];
       if (calculation) {
         calculations.push(calculation);
       }
-    } catch (_error) {
-}
+    } catch (error) {
+      // One organization's failure must not stop the others, but it is counted, logged and returned, never dropped.
+      failedOrganizationIds.push(org.id);
+      logger.error('[per-capita] calculation failed for an organization', error instanceof Error ? error : new Error(String(error)), { organizationId: org.id });
+    }
   }
-return calculations;
+return { calculations, failedOrganizationIds };
+}
+
+/** The calculations only, for callers that do not report per-organization failures. */
+export async function calculateAllPerCapita(remittanceMonth: number, remittanceYear: number): Promise<PerCapitaCalculation[]> {
+  return (await calculateAllPerCapitaDetailed(remittanceMonth, remittanceYear)).calculations;
 }
 
 /**
@@ -294,9 +304,10 @@ return calculations;
  */
 export async function savePerCapitaRemittances(
   calculations: PerCapitaCalculation[]
-): Promise<{ saved: number; errors: number }> {
+): Promise<{ saved: number; errors: number; failedOrganizationIds: string[] }> {
   let saved = 0;
   let errors = 0;
+  const failedOrganizationIds: string[] = [];
 
   for (const calc of calculations) {
     try {
@@ -377,11 +388,13 @@ export async function savePerCapitaRemittances(
       });
 
       if (wrote) saved++;
-    } catch (_error) {
-errors++;
+    } catch (error) {
+      errors++;
+      failedOrganizationIds.push(calc.fromOrganizationId);
+      logger.error('[per-capita] saving a remittance failed', error instanceof Error ? error : new Error(String(error)), { organizationId: calc.fromOrganizationId });
     }
   }
-return { saved, errors };
+return { saved, errors, failedOrganizationIds };
 }
 
 // =====================================================================================
@@ -549,6 +562,10 @@ export async function processMonthlyPerCapita(): Promise<{
   saved: number;
   errors: number;
   overdueMarked: number;
+  /** Organizations whose calculation or save failed; the run is reported as failed when this is not empty. */
+  failedOrganizationIds: string[];
+  /** How many organizations failed at the calculation step (they were never calculated, so are not in calculated). */
+  calculationFailed: number;
 }> {
 const now = new Date();
   const remittanceMonth = now.getMonth() + 1; // Current month
@@ -556,18 +573,20 @@ const now = new Date();
 
   try {
     // Step 1: Calculate all per-capita remittances
-    const calculations = await calculateAllPerCapita(remittanceMonth, remittanceYear);
+    const { calculations, failedOrganizationIds: calculationFailures } = await calculateAllPerCapitaDetailed(remittanceMonth, remittanceYear);
 
     // Step 2: Save remittances to database
-    const { saved, errors } = await savePerCapitaRemittances(calculations);
+    const { saved, errors, failedOrganizationIds: saveFailures } = await savePerCapitaRemittances(calculations);
 
     // Step 3: Mark overdue remittances
     const overdueMarked = await markOverdueRemittances();
 return {
       calculated: calculations.length,
       saved,
-      errors,
+      errors: errors + calculationFailures.length,
       overdueMarked,
+      failedOrganizationIds: [...new Set([...calculationFailures, ...saveFailures])],
+      calculationFailed: calculationFailures.length,
     };
   } catch (error) {
 throw error;

@@ -48,6 +48,7 @@ import type { NextRequest } from "next/server";
 import createIntlMiddleware from 'next-intl/middleware';
 import { locales, defaultLocale } from './lib/locales';
 import { CRON_API_ROUTES, isPublicRoute as isPublicApiRoute } from './lib/public-routes';
+import { cronSecretMatches } from './lib/api/cron-secret';
 import { decideApiLimit, isGuardExempt, logDegradedOnce, presentedCredential } from './lib/rate-limit/proxy-api-guard';
 import { checkRateLimit, RATE_LIMITS } from './lib/rate-limiter';
 
@@ -353,9 +354,8 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
 
     // PR #4: Check cron routes using centralized CRON_API_ROUTES
     if (CRON_API_ROUTES.has(req.nextUrl.pathname)) {
-      const cronSecret = process.env.CRON_SECRET || "";
-      const providedSecret = req.headers.get("x-cron-secret") || "";
-      if (!cronSecret || cronSecret !== providedSecret) {
+      // Same presentation rule, precedence and constant-time comparison as the route's own check (lib/api/cron-secret.ts).
+      if (!(await cronSecretMatches(req.headers))) {
         return withRequestId(new NextResponse("Unauthorized", { status: 401 }), requestId);
       }
       return withRequestId(NextResponse.next(), requestId);

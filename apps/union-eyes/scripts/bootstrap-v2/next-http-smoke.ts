@@ -399,8 +399,9 @@ export async function runNextHttpSmoke(
     documentPayload.title,
   ])
   assert.equal(documentRows.rowCount, 0, 'denied document request persisted a row')
-  await request('cron-without-credential-denied', '/api/cron/deadline-reminders', [401])
+  await request('cron-without-credential-denied', '/api/cron/deadline-reminders', [401], { method: 'POST' })
   await request('cron-with-credential', '/api/cron/deadline-reminders', [200], {
+    method: 'POST',
     headers: { 'x-cron-secret': cronSecret },
   })
   await request('session-logout', '/api/auth/logout', [200], { method: 'POST', cookie })

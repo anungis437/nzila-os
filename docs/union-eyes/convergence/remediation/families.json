@@ -1,0 +1,3243 @@
+{
+ "generated": "deterministic from the frozen register and the overlay",
+ "population": 777,
+ "corrected": 49,
+ "partial": 5,
+ "outstanding": 728,
+ "accountedFor": 728,
+ "families": [
+  {
+   "family": "F01-CRON-SCHEDULER-WEBHOOK",
+   "purpose": "Scheduled and provider-driven jobs: method, secret, scheduling, replay and failure reporting",
+   "defects": 34,
+   "severity": {
+    "HIGH": 5,
+    "MEDIUM": 23,
+    "LOW": 6
+   },
+   "namedRoutes": 7,
+   "namedFiles": 0,
+   "tranches": {
+    "0B.1": 1,
+    "0B.3": 1,
+    "0B.5": 1,
+    "0B.6": 9,
+    "0B.7": 1,
+    "0B.8": 10,
+    "0B.9": 3,
+    "0B.10": 1,
+    "0B.11": 7
+   }
+  },
+  {
+   "family": "F02-PLACEHOLDER-FABRICATED-OR-NOT-IMPLEMENTED",
+   "purpose": "Stubs, fabricated figures and false-success answers: return 501 or implement for real",
+   "defects": 68,
+   "severity": {
+    "HIGH": 8,
+    "MEDIUM": 54,
+    "LOW": 6
+   },
+   "namedRoutes": 23,
+   "namedFiles": 1,
+   "tranches": {
+    "0B.1": 1,
+    "0B.2": 1,
+    "0B.3": 2,
+    "0B.4": 3,
+    "0B.5": 1,
+    "0B.6": 7,
+    "0B.7": 12,
+    "0B.8": 3,
+    "0B.9": 15,
+    "0B.10": 3,
+    "0B.11": 12,
+    "0B.12": 8
+   }
+  },
+  {
+   "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
+   "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
+   "defects": 79,
+   "severity": {
+    "HIGH": 35,
+    "MEDIUM": 31,
+    "LOW": 13
+   },
+   "namedRoutes": 21,
+   "namedFiles": 2,
+   "tranches": {
+    "0B.2": 1,
+    "0B.3": 3,
+    "0B.4": 12,
+    "0B.5": 4,
+    "0B.6": 12,
+    "0B.7": 4,
+    "0B.8": 4,
+    "0B.9": 14,
+    "0B.10": 9,
+    "0B.11": 11,
+    "0B.12": 4,
+    "0C.1": 1
+   }
+  },
+  {
+   "family": "F04-MASS-ASSIGNMENT-AND-GENERIC-CRUD",
+   "purpose": "Generic-CRUD exposure and mass assignment: allow-lists, governance classification, response projection",
+   "defects": 44,
+   "severity": {
+    "HIGH": 8,
+    "MEDIUM": 35,
+    "LOW": 1
+   },
+   "namedRoutes": 36,
+   "namedFiles": 2,
+   "tranches": {
+    "0B.1": 1,
+    "0B.2": 2,
+    "0B.3": 4,
+    "0B.4": 2,
+    "0B.6": 2,
+    "0B.7": 3,
+    "0B.8": 8,
+    "0B.9": 5,
+    "0B.10": 3,
+    "0B.11": 7,
+    "0B.12": 7
+   }
+  },
+  {
+   "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
+   "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
+   "defects": 122,
+   "severity": {
+    "HIGH": 17,
+    "MEDIUM": 63,
+    "LOW": 42
+   },
+   "namedRoutes": 27,
+   "namedFiles": 0,
+   "tranches": {
+    "0B.1": 1,
+    "0B.2": 4,
+    "0B.3": 2,
+    "0B.4": 4,
+    "0B.5": 4,
+    "0B.6": 17,
+    "0B.7": 27,
+    "0B.8": 9,
+    "0B.9": 11,
+    "0B.10": 15,
+    "0B.11": 24,
+    "0B.12": 4
+   }
+  },
+  {
+   "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
+   "purpose": "Audit atomicity, completeness and access records",
+   "defects": 93,
+   "severity": {
+    "HIGH": 15,
+    "MEDIUM": 65,
+    "LOW": 13
+   },
+   "namedRoutes": 15,
+   "namedFiles": 0,
+   "tranches": {
+    "0B.1": 4,
+    "0B.2": 3,
+    "0B.3": 3,
+    "0B.4": 9,
+    "0B.5": 3,
+    "0B.6": 9,
+    "0B.7": 10,
+    "0B.8": 14,
+    "0B.9": 6,
+    "0B.10": 9,
+    "0B.11": 17,
+    "0B.12": 6
+   }
+  },
+  {
+   "family": "F07-AUTHORIZATION-ROLE-FLOOR-AND-OBJECT-LEVEL",
+   "purpose": "Authorization beyond a role floor: object-level ownership, sensitivity and kernel decisions",
+   "defects": 77,
+   "severity": {
+    "HIGH": 21,
+    "MEDIUM": 47,
+    "LOW": 9
+   },
+   "namedRoutes": 13,
+   "namedFiles": 2,
+   "tranches": {
+    "0B.1": 2,
+    "0B.3": 7,
+    "0B.4": 8,
+    "0B.5": 9,
+    "0B.6": 5,
+    "0B.7": 15,
+    "0B.8": 7,
+    "0B.9": 6,
+    "0B.10": 9,
+    "0B.11": 6,
+    "0B.12": 3
+   }
+  },
+  {
+   "family": "F08-PII-DISCLOSURE-AND-PROJECTION",
+   "purpose": "Personal-data disclosure: project, redact or restrict returned fields",
+   "defects": 50,
+   "severity": {
+    "HIGH": 7,
+    "MEDIUM": 30,
+    "LOW": 13
+   },
+   "namedRoutes": 11,
+   "namedFiles": 1,
+   "tranches": {
+    "0B.1": 1,
+    "0B.3": 1,
+    "0B.4": 8,
+    "0B.6": 3,
+    "0B.7": 6,
+    "0B.8": 7,
+    "0B.9": 5,
+    "0B.10": 4,
+    "0B.11": 6,
+    "0B.12": 9
+   }
+  },
+  {
+   "family": "F09-RATE-LIMIT-IDEMPOTENCY-REPLAY",
+   "purpose": "Abuse controls: rate limits, idempotency keys and replay protection",
+   "defects": 9,
+   "severity": {
+    "HIGH": 1,
+    "MEDIUM": 5,
+    "LOW": 3
+   },
+   "namedRoutes": 2,
+   "namedFiles": 1,
+   "tranches": {
+    "0B.4": 1,
+    "0B.5": 1,
+    "0B.6": 3,
+    "0B.7": 1,
+    "0B.10": 1,
+    "0B.11": 2
+   }
+  },
+  {
+   "family": "F10-FINANCIAL-AND-PAYMENT",
+   "purpose": "Financial and payment integrity",
+   "defects": 14,
+   "severity": {
+    "HIGH": 2,
+    "MEDIUM": 10,
+    "LOW": 2
+   },
+   "namedRoutes": 6,
+   "namedFiles": 0,
+   "tranches": {
+    "0B.1": 2,
+    "0B.3": 1,
+    "0B.6": 1,
+    "0B.8": 1,
+    "0B.9": 1,
+    "0B.10": 3,
+    "0B.11": 5
+   }
+  },
+  {
+   "family": "F11-AI-GOVERNANCE",
+   "purpose": "AI governance: consent, sensitivity, explainability and human accountability",
+   "defects": 19,
+   "severity": {
+    "HIGH": 3,
+    "MEDIUM": 14,
+    "LOW": 2
+   },
+   "namedRoutes": 0,
+   "namedFiles": 0,
+   "tranches": {
+    "0B.2": 2,
+    "0B.3": 2,
+    "0B.4": 3,
+    "0B.6": 2,
+    "0B.7": 2,
+    "0B.8": 1,
+    "0B.9": 5,
+    "0B.10": 2
+   }
+  },
+  {
+   "family": "F12-OTHER-ROUTE-SPECIFIC",
+   "purpose": "Route-specific defects with no shared mechanism yet",
+   "defects": 119,
+   "severity": {
+    "HIGH": 14,
+    "MEDIUM": 75,
+    "LOW": 30
+   },
+   "namedRoutes": 17,
+   "namedFiles": 0,
+   "tranches": {
+    "0B.1": 6,
+    "0B.2": 1,
+    "0B.3": 3,
+    "0B.4": 9,
+    "0B.5": 19,
+    "0B.6": 19,
+    "0B.7": 12,
+    "0B.8": 18,
+    "0B.9": 4,
+    "0B.10": 8,
+    "0B.11": 9,
+    "0B.12": 11
+   }
+  }
+ ],
+ "members": {
+  "F01-CRON-SCHEDULER-WEBHOOK": [
+   {
+    "id": "DEF-0B1-BILLING-SCHEDULER-LATENT",
+    "severity": "MEDIUM",
+    "partial": true
+   },
+   {
+    "id": "DEF-0B3-ALERT-SWEEP-AUDIT-ATOMICITY-UNPROVEN",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-COGNITION-KPI-ROI-FROM-ASSUMED-HOURS",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-SYS-RESEND-UNMATCHED-EVENTS-ACKNOWLEDGED-AND-DROPPED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-SYS-RESEND-STATUS-OVERWRITTEN-BY-OUT-OF-ORDER-EVENTS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-SYS-RESEND-REDELIVERY-DOUBLE-COUNTS-STATS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-SYS-RESEND-MESSAGE-ID-LOOKUP-UNINDEXED-AND-NOT-UNIQUE",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-SYS-DEPRECATION-REGISTRY-NAMES-MISSING-REPLACEMENTS-AND-STALE-SUNSET",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-SYS-CALENDAR-SYNC-FIRST-PAGE-ONLY-AND-NO-CLAIM-OF-DUE-CONNECTIONS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-SYS-OBSERVABILITY-SWEEP-RECORDS-EMAIL-SUCCESS-WITHOUT-SENDING",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B6-SYS-SLA-WATCHDOG-EVENTS-HAVE-NO-SUBSCRIBER",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B6-SYS-SLA-WATCHDOG-UNBOUNDED-SCAN-AND-UNAWAITED-DUPLICATE-METRICS",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B7-PLT-EQUITY-SNAPSHOT-SCHEMA-HAS-NO-SMALL-CELL-RULE",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-ICRA-CLAIM-TOKEN-HAS-NO-ICRA-ISSUER-SO-CLAIM-CANNOT-SUCCEED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-REVIEW-DECISION-BY-SHARED-CRON-SECRET-WITH-BODY-CLAIMED-REVIEWER-ROLE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-CONFIGURE-UPDATE-RESETS-OMITTED-ENABLED-SETTINGS-AND-WEBHOOK-URL",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-ICRA-SHOPIFY-DISCOUNT-CODE-NEVER-MATCHES-THE-WEBHOOK-EXTRACTOR",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B8-ICRA-SHOPIFY-WEBHOOK-ACKNOWLEDGES-FAILURES-WITH-200-AND-RECORDS-IGNORED-AS-PROCESSED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-SHOPIFY-WEBHOOK-STORES-FULL-PAYLOAD-AND-CUSTOMER-DATA-IN-A-GLOBAL-TABLE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-SHOPIFY-WEBHOOK-QUERIES-TENANT-RLS-TABLES-WITH-NO-ORGANIZATION-CONTEXT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-SHOPIFY-SHOP-DOMAIN-NEVER-CHECKED-ONE-GLOBAL-SECRET-AND-HEADER-KEYED-LIMIT",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-JUR-PROFILE-MINIMUM-WAGE-IS-A-PLACEHOLDER-ZERO",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-JUR-LOCATION-ERASURE-IS-REACHABLE-ONLY-THROUGH-AN-ACTIVE-CONSENT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-SLA-SCORE-IS-LITERAL-WEIGHTS-OVER-CALLER-VALUES-PRESENTED-AS-A-MODEL-WITH-CONSTANT-CONFIDENCE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-STEWARD-CAN-STORE-ANY-PREDICTION-ROW-THAT-THE-SLA-LIST-ALERT-SWEEP-AND-INSIGHTS-READ",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ORG-ITEM-DELETE-ORGANIZATION-ADMIN-ARCHIVES-OWN-ORGANIZATION-BYPASSING-STATUS-GOVERNANCE",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B10-PIL-CUPE-BOOTSTRAP-REPORTS-WORKSITES-IT-NEVER-WRITES-AND-LITERAL-ONBOARDING-COUNTS-FOR-CHECKLIST-IDS-THE-ONBOARDING-ROUTE-DOES-NOT-READ",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-REWARDS-CRON-ANNIVERSARY-AWARDS-REPEAT-ON-EVERY-CALL-ON-AN-ANNIVERSARY-DAY",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B11-PRP-REWARDS-CRON-SCHEDULED-TASK-IS-A-PLACEHOLDER-THAT-COUNTS-RULES-AS-PROCESSED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-REWARDS-CRON-EXPIRATION-TASK-READS-AN-EXPIRY-NO-WRITER-SETS-AND-WOULD-REPEAT-ACROSS-THE-7-14-AND-30-DAY-WINDOWS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-REWARDS-CRON-AND-WALLET-AND-REDEMPTION-QUERIES-USE-THE-SHARED-DB-HANDLE-WITH-EXPLICIT-PREDICATES-ONLY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-REWARDS-CRON-RUNS-ARE-AUDITED-PER-AWARD-ONLY-AND-THE-EXPIRATION-E-MAILS-ARE-NOT-AUDITED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-RPT-SCHEDULED-PATHS-ARE-REPORT-DEFINITION-CRUD-NO-SCHEDULE-RECIPIENT-OR-DELIVERY-EXISTS-AND-PAUSE-RESUME-REPORT-SUCCESS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-IDS-SETTINGS-SECURITY-POLICY-VALUES-ARE-SAVED-AS-UPDATED-TRUE-AND-ENFORCED-BY-NO-CODE",
+    "severity": "MEDIUM"
+   }
+  ],
+  "F02-PLACEHOLDER-FABRICATED-OR-NOT-IMPLEMENTED": [
+   {
+    "id": "DEF-0B1-CRUD-FACADE-ORG-MEMBERS",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B2-CRUD-FACADE-SEGMENTS-SETTINGS",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B3-EXTERNAL-INVOICES-WRITE-ADVERTISED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B3-SEND-INVOICE-NOT-SENT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CBA-EXPORT-SILENTLY-TRUNCATED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CLAUSE-LIBRARY-COMPARE-GET-STUB-AND-EMPTY-KEYWORDS",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B4-CARBON-FABRICATED-MEASUREMENTS-RETURNED-200",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B5-COMMITTEE-INTELLIGENCE-PLACEHOLDER-RETURNED-AS-RESULT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-CMP-FIREWALL-POLICY-NO-WRITER-OR-ENFORCER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-CMP-DISPATCH-RULES-ENGINE-NEVER-APPLIED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-CMP-DASHBOARD-STATS-FAILURE-RETURNS-ZEROS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-CMP-EXPORT-CSV-AUTHENTICATION-ONLY-AND-EMPTY-200-OUTSIDE-PRODUCTION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-CMP-INTEGRATIONS-ROUTE-OVER-USER-TOKEN-TABLE",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-SYS-CONTINUITY-ALIASES-ARE-THE-DOCUMENT-REPOSITORY-WITH-PLACEHOLDER-GUARD",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-SYS-INHERITANCE-IS-PENDING-PROFILES-REFUSED-BY-GOVERNANCE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-SUMMARIZE-STORES-UNVALIDATED-OR-PLACEHOLDER-OUTPUT-AS-GENERATED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-SUMMARIZE-SENDS-ANY-CONSENT-STATE-TO-MODEL-AS-INTERNAL",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-SCENARIOS-ALWAYS-RETURN-THE-CANNED-MINIMAL-SIMULATION",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B7-EXC-SIMULATION-UNMATCHED-NODES-RETURN-REASSURING-RESULT-AND-ROLES-ARE-IGNORED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGA-CROSS-DOMAIN-CORRELATIONS-ARE-FIXED-LITERALS",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B7-COGA-CONTINUITY-RISK-SENDS-INTERVIEW-DATA-TO-MODEL-UNGUARDED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGA-ENVELOPE-CONFIDENCE-IS-A-CONSTANT-AND-EXPLAINABILITY-IS-EMPTY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGB-DYNAMICS-ENGINES-EMBED-LITERAL-NUMBERS-AND-CLAIMS-AS-MEASUREMENTS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXP-EVIDENCE-PACK-ORG-ID-ECHOED-FROM-QUERY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-PLT-EVENT-OCCURRENCES-PATH-ADDRESSES-WHOLE-EVENT-ROW",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-PLT-ENT-EMPTY-200-WITHOUT-ORGANIZATION-AND-SECOND-RESOLUTION",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B7-PLT-EQUITY-ROUTES-ARE-MEMBER-SEGMENT-CRUD-FACADE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-PAID-PDF-REPORT-GATE-REQUIRES-STATUS-COMPLETED-NO-WRITER",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B8-ICRA-CHECKOUT-SELLS-A-TIER-WITHOUT-REQUIRING-A-SUBMITTED-ASSESSMENT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-INTEGRATION-CREDENTIALS-NEVER-STORED-OR-RESOLVED-YET-REPORTED-STORED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-OPERATIONAL-METRICS-ARE-PROXIES-NAMED-AS-REQUEST-AND-ERROR-RATES-AND-FAILED-READS-BECOME-ZERO",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-CHURN-SCORES-COME-FROM-A-RANDOMLY-INITIALISED-NETWORK-FITTED-ON-GENERATED-EXAMPLES-PRESENTED-AS-ML",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B9-ML-SLA-CASE-ID-IS-NEVER-VERIFIED-AND-NOT-STORED-WITH-THE-PREDICTION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-SLA-RETRAIN-SIGNAL-AND-TRAINING-QUEUE-DESCRIBE-A-FORMULA-THAT-NEVER-READS-THEM",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-PREDICTION-ROUTES-ARE-ONE-GENERIC-ROW-LIST-UNDER-SIX-MODEL-NAMES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-MOB-MEETING-ROOM-BOOKING-RULES-ARE-STORED-BUT-NO-ROUTE-OR-SERVICE-ENFORCES-A-BOOKING",
+    "severity": "MEDIUM",
+    "partial": true
+   },
+   {
+    "id": "DEF-0B9-ASM-FEDERATION-MATCH-IGNORES-THE-SECTOR-AND-REPORTS-SIMILAR-SIZE-FOR-ANY-RATIO",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ASM-SMART-DEFAULTS-ARE-A-LITERAL-TABLE-OF-FEATURES-AND-INTEGRATIONS-NO-OTHER-CODE-DEFINES-OR-READS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ASM-ONBOARDING-TRANSFERS-PATH-IS-THE-EVENT-RECORDER-BEHIND-A-PLACEHOLDER-ORG-ACCESS-FUNCTION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ASM-ONBOARDING-READINESS-IS-THE-PENDING-PROFILES-ROUTE-BEHIND-A-PLACEHOLDER-ORG-ACCESS-FUNCTION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ORG-CURRENT-CONTEXT-ROUTE-RETURNS-PLACEHOLDER-ORGANIZATION-WITH-NULL-NAME-AND-NO-FEATURES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ORG-HIERARCHY-ROUTES-PASS-UNVALIDATED-PATH-ID-TO-UUID-COLUMN-AND-ANSWER-EMPTY-200-FOR-UNKNOWN-ORGANIZATION",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B9-ORG-ANALYTICS-METRIC-QUERIES-RUN-IN-SESSION-ORGANIZATION-CONTEXT-FILTERED-BY-PATH-ID-RETURNING-ZEROS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ORG-ACCESS-LOGS-ROUTE-IS-ORGANIZATIONS-ROW-CRUD-NOT-A-CROSS-ORGANIZATION-ACCESS-LOG",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ORG-SHARING-SETTINGS-ROUTE-IS-ORGANIZATIONS-ROW-CRUD-NOT-SHARING-SETTINGS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-ORG-ROUTES-NAMED-FOR-CARD-CHECK-SUPPORT-NOTES-SEQUENCES-FILINGS-AND-FORMS-ARE-CAMPAIGN-ROW-CRUD",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-OPL-03",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-OPL-08",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-PRP-RECONCILIATION-RUNS-ARE-NOT-REPEATABLE-AND-THE-BILLING-PERIOD-IS-NOT-BOUND-TO-THE-ORGANIZATION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-RPT-SHARE-ITEM-PATH-SHARES-NOTHING-AND-ITS-DELETE-REMOVES-THE-REPORT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-RPT-EXECUTE-ROUTE-ALLOWLIST-CHECKS-FILTER-FIELD-ID-BUT-THE-EXECUTOR-EVALUATES-FIELD-NAME-AND-JOINS-HAVING-LIMIT-AND-TABLE-QUALIFIER-ARE-NOT-CHECKED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-RPT-EXECUTE-FAILURE-IS-ANSWERED-200-WITH-NO-MESSAGE-AND-AUDITED-AS-SUCCESS-OR-AUTH-FAILED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-RPT-DATA-SOURCE-REGISTRY-ADVERTISES-SOURCES-AND-COLUMNS-THE-EXECUTE-ROUTE-REFUSES-OR-THE-TABLES-DO-NOT-HAVE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-SOC-INTERNAL-SIGNATURE-PROVIDER-IS-A-STUB-THAT-SENDS-NOTHING-AND-THE-REQUEST-IS-RECORDED-AS-SENT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-SOC-ANALYTICS-AND-ENGAGEMENT-FIGURES-HAVE-NO-WRITER-SO-EVERY-METRIC-IS-ZERO-OR-EMPTY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-IDS-STEWARD-ROUTES-SERVE-ASSIGNMENT-ROWS-AND-NO-ROUTE-APPOINTS-OR-ENDS-A-STEWARD",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-IDS-SATISFACTION-REPRESENTATIVE-FIGURES-FOR-AN-UNKNOWN-OR-UNRATED-ID-ARE-200-WITH-ZERO-AVERAGES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-IDS-SATISFACTION-CREATE-DOES-NOT-CHECK-CLAIM-STATE-AND-ACCEPTS-ANY-REPRESENTATIVE-ID-ON-AN-UNASSIGNED-CLAIM",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-IDS-SETTINGS-PUT-IS-UNVALIDATED-AND-MERGES-OUTSIDE-THE-TRANSACTION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-IDS-SUPPORT-METRICS-AND-SLA-ROUTES-SERVE-NOTIFICATION-ROWS-NOT-SUPPORT-FIGURES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-CRUD-SUPPORT-TICKET-PATHS-SERVE-NOTIFICATION-ROWS-AND-ASSIGN-AND-COMMENTS-ARE-THE-SAME-ITEM-ROUTE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-CRUD-UPLOAD-PATH-IS-A-JSON-MEDIA-ROW-INSERT-AND-RECEIVES-NO-FILE-WHILE-THE-JOB-FORM-POSTS-ONE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-CRUD-TESTIMONIAL-APPROVAL-COMPONENT-SENDS-FIELDS-THE-TABLE-DOES-NOT-HAVE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-PLT-V2-CATCH-ALL-ANSWERS-200-FOR-POST-PUT-PATCH-AND-DELETE-SO-A-CALLER-IS-TOLD-A-WRITE-SUCCEEDED",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B12-PLT-V2-CATCH-ALL-ANSWERS-200-WITH-A-DEPRECATION-OBJECT-WHERE-A-CALLER-EXPECTS-DATA",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-PLT-TENANT-CURRENT-ANSWERS-200-WITH-NULL-NAME-SLUG-AND-TIER-AND-NO-FEATURES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-PLT-QUEUE-STATUS-ANSWERS-AUTHENTICATION-FAILURE-AS-503-AND-RETURNS-THE-ERROR-TEXT",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B12-PLT-VOCABULARY-SERVES-UNSOURCED-SERVICE-LEVEL-HOURS-ROLE-FLAGS-AND-TRANSITIONS-AS-INSTITUTIONAL-REFERENCE-DATA",
+    "severity": "MEDIUM"
+   }
+  ],
+  "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE": [
+   {
+    "id": "DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B3-ARBITRATION-DECISIONS-NON-PUBLIC-READABLE-CROSS-TENANT",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B3-ARBITRATION-DECISIONS-ORG-ADMIN-DELETES-SHARED-ROW",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B3-BARGAINING-PROPOSALS-NO-TENANT-PREDICATE",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B4-CBA-INTEL-SHARED-DATASET-NO-TENANT-PREDICATE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CBA-INTEL-TENANT-ADMIN-WRITES-SHARED-DATASET",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B4-CBA-INTEL-TENANT-STEWARD-REVIEWS-SHARED-DATASET",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B4-CLAUSE-LIBRARY-SYSTEM-ROLE-CROSS-TENANT-READS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CLAUSE-LIBRARY-PUBLISHING-ON-STEWARD-ROLE-TITLE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CLAUSE-LIBRARY-ORIGINAL-CLAUSE-ID-UNVERIFIED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B4-CLAUSE-LIBRARY-COMPARE-WRITES-OTHER-ORGANIZATION-ROWS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CBA-CHILD-RECORDS-READ-BY-AGREEMENT-ID-ONLY",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B4-CLAUSES-CREATE-ACCEPTS-ANY-CBA-ID",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B4-CBAS-CBA-NUMBER-GLOBALLY-UNIQUE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CASE-STUDIES-ORG-ADMIN-WRITES-GLOBAL-CONTENT",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B4-CASE-STUDIES-READ-IGNORES-PUBLICATION-STATE",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B5-COGNITION-SNAPSHOTS-IN-LOCAL-FILES",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B5-TRACKING-STATS-READ-MODIFY-WRITE-UNAUDITED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B5-UNSUBSCRIBE-NO-CONSENT-RECORD-WITHOUT-CAMPAIGN",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-SURVEY-RESULTS-NO-ORG-PREDICATE-LOADS-ALL-ANSWERS",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B6-EDU-COMPLETIONS-POST-SKIPS-REGISTRATION-CHECKS",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B6-EDU-SESSION-COURSE-ID-NOT-VERIFIED-TO-ORGANIZATION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EDU-GLOBAL-UNIQUE-CODES-ACROSS-ORGANIZATIONS",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-EDU-CRON-REMINDERS-IGNORE-OPT-OUT-AND-HAVE-NO-SENT-MARKER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EDU-CRON-UNBOUNDED-SEQUENTIAL-SENDS",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-EMP-REGISTRY-PARENT-COMPANY-CROSS-ORG-LINK",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-EMP-COMMUNICATION-REFERENCES-UNVERIFIED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-CMP-DISPATCH-REFERENCED-IDS-NOT-VERIFIED",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B6-CMP-DSR-GENERIC-ROUTE-REFUSES-WITH-MISLEADING-403",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-SYS-INHERITANCE-ORG-SCOPE-NO-OP-ON-PENDING-PROFILES",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B6-SYS-LOCATION-DELETION-LOG-FABRICATES-DATES-AND-HAS-NO-ORGANIZATION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-SYS-PER-CAPITA-CRON-WRITES-A-DOMAIN-DECLARED-NOT-IMPLEMENTED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-DOCUMENT-ATTACH-ACCEPTS-ANY-URL-ON-SHARED-HOST-OR-LOCALHOST",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGA-FORECAST-PROJECTIONS-ARE-FIXED-RATES-AND-ALWAYS-IMPROVE",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B7-COGA-CASCADE-REGULATORY-RISK-IS-A-LABEL-TEMPLATE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGB-PRECEDENT-AND-PROCEDURAL-ENGINES-RETURN-CONSTANT-CONTENT-AS-ORGANIZATION-ANALYSIS",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B8-HS-RECORD-NUMBERS-CALLER-SUPPLIED-AND-UNIQUE-ACROSS-ORGANIZATIONS",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-HS-TRAINING-FIGURES-READ-A-TABLE-NO-ROUTE-WRITES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-HS-TRENDS-ORGANIZATION-FROM-QUERY-AND-NO-PREDICATE-WHEN-ABSENT",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B8-JUR-KNOWLEDGE-BASE-ITEM-GET-INCREMENTS-VIEW-COUNT-IN-SYSTEM-CONTEXT-WITHOUT-ORG-PREDICATE",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B9-ML-OPERATIONAL-METRICS-COUNT-EVERY-ORGANIZATIONS-CLAIMS-FOR-ANY-SIGNED-IN-CALLER-OR-THE-SERVICE-KEY",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B9-ML-OPERATIONAL-METRICS-SERVICE-KEY-COMPARED-WITH-EQUALITY-AND-ERROR-TEXT-RETURNED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-CHURN-RESOLVES-A-SECOND-IDENTITY-READS-CLAIMS-WITHOUT-AN-ORGANIZATION-PREDICATE-AND-HAS-NO-FEATURE-GATE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-ALERTS-ACKNOWLEDGEMENT-JOIN-HAS-NO-ORGANIZATION-PREDICATE-AND-READS-THROUGH-THE-BARE-DB",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ASM-PEER-BENCHMARKS-AND-CLAUSE-SUGGESTIONS-TAKE-THE-TARGET-ORGANIZATION-FROM-THE-REQUEST-AND-NEVER-COMPARE-IT-TO-THE-SESSION",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B9-ASM-FEDERATION-DISCOVERY-LISTS-FEDERATIONS-AND-CONGRESSES-BY-NAME-AND-MEMBER-COUNT-WITH-NO-ORGANIZATION-PREDICATE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ASM-ONBOARDING-ROOT-ORG-SCOPE-NO-OP-ON-PENDING-PROFILES",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B9-ORG-ITEM-GET-ANY-SIGNED-IN-USER-READS-ANY-ORGANIZATION-RECORD-AS-SYSTEM",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B9-ORG-ITEM-GET-STATISTICS-RUN-ON-BARE-DB-AFTER-SYSTEM-READ-WITHOUT-ORGANIZATION-CONTEXT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ORG-ROSTER-GET-INCLUDES-REMOVED-MEMBERS-AND-IS-UNBOUNDED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ORG-HIERARCHY-LIST-ANY-SIGNED-IN-USER-ENUMERATES-EVERY-ORGANIZATION-AS-SYSTEM",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B9-ORG-HIERARCHY-LIST-HARD-CODED-RLS-FLAG-AND-SILENT-FIVE-HUNDRED-ROW-CAP",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B9-ORG-CHILDREN-ANY-SIGNED-IN-USER-LISTS-CHILDREN-OF-ANY-ORGANIZATION-AS-SYSTEM",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B9-ORG-DESCENDANTS-ANY-SIGNED-IN-USER-LISTS-WHOLE-SUBTREE-OF-ANY-ORGANIZATION-UNBOUNDED-AS-SYSTEM",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B10-ORG-CAMPAIGN-CODE-UNIQUE-ACROSS-ALL-ORGANIZATIONS-AND-REQUIRED-COLUMNS-FAIL-AS-500",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B10-ORG-ORGANIZER-TASK-CREATE-STORES-UNVERIFIED-ASSIGNEE-MEMBER-CASE-AND-GRIEVANCE-REFERENCES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PIL-CUPE-BOOTSTRAP-RESET-DELETES-ALL-GRIEVANCES-MEMBERS-AND-CHECKLIST-ROWS-OF-THE-ORGANIZATION-AT-THE-FIXTURE-SLUG-WITH-NO-DEMO-MARKER",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B10-OPL-01",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B10-OPL-02",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-OPL-05",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B10-OPL-07",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B10-OPL-13",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-OPL-14",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B11-PRP-PRECEDENT-ITEM-ROUTE-ORGANIZATION-SCOPE-IS-A-NO-OP-ON-A-TABLE-KEYED-BY-SOURCE-ORGANIZATION",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B11-PRP-PRECEDENT-LIBRARY-READS-RETURN-EVERY-COLUMN-AND-IGNORE-IS-PUBLIC-AND-ACCESS-RESTRICTIONS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-PRECEDENT-POST-PUBLISHES-INTO-THE-SHARED-LIBRARY-WITH-NO-REVIEW-PROVENANCE-OR-OWNING-ORGANIZATION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-PROFILE-ROLES-GET-LISTS-EVERY-USER-BILLING-PROFILE-TO-STEWARD-AND-ABOVE-OF-ANY-ORGANIZATION",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B11-RPT-EXECUTE-JOINED-TABLES-CARRY-NO-ORGANIZATION-PREDICATE-SO-A-CALLER-CONFIGURED-JOIN-SELECTS-ROWS-OF-OTHER-ORGANIZATIONS",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B11-SOC-SIGNATURE-READS-AND-ACCESS-CHECK-USE-THE-BARE-DB-HANDLE-WITH-NO-ORGANIZATION-PREDICATE-AND-ACCEPT-ANY-USER-ID-A-SENDER-TYPED-AS-SIGNER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-SOC-RECORD-IS-LOADED-BY-ID-ALONE-ON-THE-BARE-DB-HANDLE-AND-THE-ORGANIZATION-IS-COMPARED-AFTERWARDS",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-IDS-SATISFACTION-PENDING-LIST-HAS-NO-ORGANIZATION-PREDICATE",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-IDS-SCIM-LIST-INCLUDES-REMOVED-MEMBERS-AS-ACTIVE-AND-READS-THE-WHOLE-ROSTER-BEFORE-PAGING",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-IDS-SCIM-PROVISION-STORES-THE-USERNAME-STRING-AS-THE-USER-ID-AND-ACTIVATES-WITHOUT-ACCEPTANCE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-IDS-SETTINGS-TWILIO-NUMBER-KEY-ATTRIBUTES-INBOUND-SMS-WITH-NO-UNIQUENESS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-CRUD-TESTIMONIAL-ITEM-WRITES-ARE-CONDITIONED-ON-THE-ID-ALONE-FOR-AN-ADMIN-OF-ANY-ORGANIZATION",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B12-CRUD-UNIT-AND-WORKSITE-FOREIGN-KEYS-ARE-TAKEN-FROM-THE-BODY-WITHOUT-AN-ORGANIZATION-CHECK",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B12-PLT-ORGANIZATIONS-GET-REBINDS-EVERY-MEMBERSHIP-ROW-OF-AN-E-MAIL-ADDRESS-TO-THE-CALLER-IN-THE-LEGACY-BRANCH",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B12-PLT-ORGANIZATIONS-LEGACY-BRANCH-LISTS-EVERY-ORGANIZATION-TO-A-PLATFORM-ID-AND-LOADS-THE-WHOLE-TABLE-FOR-EVERY-OTHER-CALLER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0C1-REV-REVIEW-ROWS-ARE-PROTECTED-BY-AN-ORGANIZATION-ONLY-RLS-POLICY-SO-ADVERSE-PARTY-COMPLAINANT-AND-PRIVILEGE-CONFIDENTIALITY-IS-APPLICATION-CODE-ONLY",
+    "severity": "MEDIUM"
+   }
+  ],
+  "F04-MASS-ASSIGNMENT-AND-GENERIC-CRUD": [
+   {
+    "id": "DEF-0B1-FIX-SUPER-ADMIN-INERT",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B2-UPDATE-ROLE-INERT",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B2-ANALYTICS-CRUD-FACADE",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B3-CRUD-SOFT-DELETE-ARCHIVED-NOT-IN-ENUM",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B3-BULK-IMPORT-INERT",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B3-ARBITRATION-DECISION-SUBRESOURCES-FACADE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CLC-ROUTES-FACADE-OVER-SYNC-LOG",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CLAUSES-SEARCH-FACADE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EDU-FACADE-PATHS-ARE-COURSE-CATALOG-CRUD",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-CMP-COPE-ROUTES-ARE-DONATION-CAMPAIGN-FACADE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXP-EXPORT-ROUTES-ARE-REPORT-DEFINITION-CRUD-NO-FILE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXP-REPORT-WRITES-ANY-STEWARD-ANY-FIELD",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXP-EXTERNAL-DATA-ROUTES-REFUSE-EVERY-REQUEST-AND-MISNAMED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-API-KEYS-ROUTES-REFUSE-EVERY-REQUEST-WHILE-THE-AUTHORITY-REGISTER-CALLS-THEM-LIVE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-FED-FEDERATION-SUBRESOURCE-PATHS-ARE-FEDERATION-ITEM-COPIES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-FED-BENCHMARK-ROUTE-IS-GENERIC-GRIEVANCE-CRUD-NOT-A-BENCHMARK",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-FED-LOCALS-PATHS-SERVE-BARGAINING-UNITS-NOT-LOCAL-UNIONS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-FED-LOCALS-WRITES-ANY-STEWARD-ANY-FIELD-REFERENCES-NOT-ORG-CHECKED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-JUR-COMPLIANCE-CHECK-REPORTS-ZERO-FINDINGS-WHEN-NO-CHECK-APPLIES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-JUR-CLC-AND-DEADLINE-PATHS-ARE-BARGAINING-UNIT-CRUD-NO-VALIDATION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-JUR-HEALTH-WELFARE-PLANS-PATH-IS-THE-PER-CAPITA-REMITTANCE-LEDGER-AT-MEMBER-FLOOR",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-METRICS-ROUTE-SERVES-STORED-ANALYTICS-ROWS-WHERE-THE-PROMETHEUS-ENDPOINT-IS-DOCUMENTED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B9-ML-MOVEMENT-TRENDS-ROUTE-IS-NOT-THE-CONSENT-GATED-AGGREGATE-THE-DASHBOARD-SERVES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-MOB-PUSH-DEVICE-REGISTRATION-REQUIRES-A-STEWARD-SO-A-MEMBER-DEVICE-IS-REFUSED",
+    "severity": "MEDIUM",
+    "partial": true
+   },
+   {
+    "id": "DEF-0B9-ASM-ONBOARDING-LOOKUP-LIBRARY-SWALLOWS-EVERY-FAILURE-INTO-AN-EMPTY-SUCCESS-RESPONSE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ASM-ONBOARDING-ROOT-IS-PENDING-PROFILES-REFUSED-BY-GOVERNANCE-WHILE-THE-ONBOARDING-FORM-POSTS-TO-IT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-ORG-ORGANIZER-IMPACT-ROUTE-IS-ORGANIZER-TASK-CRUD-NOT-IMPACT-METRICS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PEN-PORTAL-DOCUMENT-PATHS-ARE-CMS-PAGE-CRUD-WITH-NO-PORTAL-PRINCIPAL",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PEN-PORTAL-UPLOAD-ROUTE-RECEIVES-NO-FILE-AND-STORES-A-CALLER-WRITTEN-FILE-URL",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B11-PRP-PRECEDENT-ITEM-PATCH-WRITES-SHARING-LEVEL-SHARED-WITH-LIST-AND-SOURCE-ORGANIZATION-FROM-THE-BODY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-RPT-RUN-AND-EXECUTE-ITEM-PATHS-ARE-REPORT-DEFINITION-CRUD-AND-THEIR-DELETE-REMOVES-THE-REPORT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-SOC-X-MEDIA-URL-IS-FETCHED-BY-THE-SERVER-WITH-ONLY-A-SCHEME-CHECK-AND-THE-BODY-IS-UPLOADED-TO-THE-PLATFORM",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B11-SOC-FEED-ROUTE-SERVES-THE-COMMUNICATIONS-CAMPAIGNS-TABLE-TO-ANY-MEMBER-AS-A-SOCIAL-FEED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-IDS-STORAGE-USAGE-AND-CLEANUP-ROUTES-SERVE-MEDIA-LIBRARY-ROWS-AND-COMPUTE-OR-DELETE-NOTHING",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-IDS-STORAGE-POST-INSERTS-A-CALLER-WRITTEN-MEDIA-ROW-WITH-ANY-FILE-URL-SIZE-AND-UPLOADER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-IDS-SUPPORT-METRICS-POST-LETS-A-STEWARD-STORE-A-NOTIFICATION-FOR-ANY-USER-ID-WITH-A-LINK-AND-NO-SENDER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-CRUD-TAX-PATHS-SERVE-THE-PER-CAPITA-REMITTANCE-LEDGER-TO-ANY-MEMBER",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B12-CRUD-TAX-SLIP-RL1-T106-AND-COPE-RECEIPT-PATHS-ISSUE-NOTHING-AND-REFUSE-EVERY-WRITE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-CRUD-BARGAINING-UNIT-ROWS-READABLE-BY-ANY-MEMBER-WITH-CERTIFICATION-NOTES-AND-CUSTOM-FIELDS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-CRUD-BARGAINING-UNIT-CERTIFICATION-AND-REPRESENTATION-FIELDS-WRITABLE-BY-ANY-STEWARD",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-CRUD-WORKSITE-ROWS-READABLE-BY-ANY-MEMBER-WITH-SITE-MANAGER-CONTACT-AND-NOTES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-CRUD-WCB-CLAIM-ROUTES-ARE-CONFIGURED-FOR-STEWARDS-AND-DENIED-FOR-EVERY-CALLER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-CRUD-WCB-ASSESSMENT-PREMIUM-AND-PAYROLL-READABLE-BY-ANY-STEWARD",
+    "severity": "MEDIUM"
+   }
+  ],
+  "F05-INPUT-VALIDATION-AND-BOUNDS": [
+   {
+    "id": "DEF-0B1-CLC-PUBLIC-CACHE-CONTROL",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B2-CROSS-ORG-ANALYTICS-SCOPE-UNPROVEN",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B2-AGREEMENTS-BODY-UNVALIDATED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B2-AI-DATA-CLASS-DOWNGRADE",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B2-AI-FINANCE-ROLE-TITLE-GATE",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B3-EXTERNAL-INVOICES-MEMBER-FLOOR",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B3-SUBSCRIPTION-ROLE-TITLE-AND-MEMBER-READ",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B4-CLAUSE-LIBRARY-BODY-FIELDS-UNVALIDATED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B4-CBAS-DETAIL-GET-WRITES-VIEW-COUNT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CBAS-LIST-LIMIT-UNBOUNDED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B4-BATCH-STATUS-FINANCE-ENTITLEMENT-ON-NEWSLETTER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-PAY-EQUITY-NO-STATE-MACHINE-OR-DEADLINES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-COMMITTEE-LIST-PAGINATION-UNBOUNDED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B5-COMMS-ACTION-ROUTE-IS-GENERIC-CAMPAIGN-CRUD",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-POLLS-NO-CREATE-OR-VOTE-PATH",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EDU-CONTENT-LISTS-UNBOUNDED-OR-UNVALIDATED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-EMP-REMITTANCE-DETAIL-MEMBER-READ",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B6-EMP-REPLAY-NO-FINANCIAL-MANDATE",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B6-EMP-TIMESHEET-INGEST-STEWARD-FLOOR-UNBOUNDED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EMP-COMPLIANCE-EVENT-FORGEABLE-BY-STEWARD",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EMP-EXECUTION-READS-AT-MEMBER-FLOOR",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EMP-CONTACT-PII-READ-AT-STEWARD-UNAUDITED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-EMP-COMMUNICATION-GRIEVANCE-CORRESPONDENCE-STEWARD-READ",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-CMP-CONTRACT-READ-AT-MEMBER-FLOOR",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-CMP-CONTRACT-CREATE-REFERENCES-UNVERIFIED",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B6-CMP-COMPLIANCE-LISTS-UNBOUNDED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-CMP-DISPATCH-ASSIGN-NO-STATE-OR-FILL-CHECK",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-SYS-RESEND-LEDGER-CALLBACK-OUTSIDE-TRANSACTION",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-SYS-CONTACT-UNBOUNDED-FIELDS-AND-EMAIL-LOGGED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-SYS-CONTINUITY-LIST-UNBOUNDED-AND-FILTERED-AFTER-FETCH",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-SYS-EXTERNAL-DATA-SYNC-CONTRIBUTIONS-WRITE-OUTSIDE-SYSTEM-CONTEXT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-SYS-OBSERVABILITY-SWEEP-NO-DEDUPE-REPEATS-EVERY-RUN",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-CONSENT-WITHDRAWAL-AND-RECLASSIFICATION-WITHDRAW-NOTHING-DERIVED",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B7-EXC-CONSENT-IS-ADMIN-ASSERTED-AND-RECLASSIFICATION-HAS-NO-REVIEW",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-SEARCH-LIMITS-BEFORE-FILTERING-BY-SENSITIVITY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-INDEX-FAILURE-RETURNS-200-WITH-RAW-ERROR-TEXT",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-ANALYTICS-REPORTS-FULL-CONSENT-FOR-MONTHS-WITH-NO-INTERVIEWS",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B7-COGA-DERIVED-AGGREGATES-IGNORE-INTERVIEW-SENSITIVITY",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B7-COGA-EMPTY-ORGANIZATION-RESILIENCE-IS-NAN-AND-READS-STRONG",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGA-PROFILES-MEASURE-ENTERED-MEMORY-ROWS-NOT-GOVERNANCE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGA-FEDERATED-PERCENTILE-FROM-UNSOURCED-LITERALS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGA-COHERENCE-AND-MOMENTUM-ARE-LITERALS-AND-ENTRY-COUNT-RATIOS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGA-ROADMAP-DOCUMENTATION-STRATEGY-PRECEDENCE-BUG",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGA-TIMELINE-COUNTS-CAPPED-AND-INTERVIEW-WINDOW-UNBOUNDED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B7-COGB-SUCCESSION-MODEL-OUTPUT-UNVALIDATED-AND-PARSE-FAILURE-SWALLOWED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGB-TOPIC-CATEGORY-BY-SUBSTRING-DRIVES-CRITICAL-SENSITIVITY",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B7-COGB-PROPAGATION-UNKNOWN-NODE-ANSWERS-500-AND-ANALYSIS-TYPE-NOT-VALIDATED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B7-COGB-INTERVIEW-READS-UNBOUNDED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B7-COGB-EMPTY-ORGANIZATION-RESILIENCE-INDEX-DIVIDES-BY-ZERO-AND-REPORTS-STRONG",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGB-ROADMAP-DOCUMENTATION-RULE-PRECEDENCE-AND-CONSTANT-PROJECTED-GAINS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGB-ENVELOPE-CONFIDENCE-FIXED-AT-60-AND-EXPLAINABILITY-EMPTY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGB-ENTRY-COUNT-PROXIES-LABELLED-AS-COORDINATION-RHYTHM-ELASTICITY-AND-TRUST",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGB-OPERATIONAL-TRUST-OUT-OF-RANGE-AND-MODERATE-WITH-NO-DATA",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGB-PERSONALITY-LABEL-ASSIGNED-FROM-ABSENCE-OF-DATA",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGB-MITIGATION-EFFECTIVENESS-ATTRIBUTES-NEXT-SCORE-TO-INTERVENTION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGB-AGGREGATE-RUNS-28-ENGINES-PER-REQUEST-UNCACHED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B7-COGB-NARRATIVES-CITE-ZERO-EVIDENCE-AS-DERIVED-FROM-EVIDENCE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXP-REPORT-DEFINITIONS-READABLE-AT-MEMBER-FLOOR",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-READ-ROUTES-HAVE-NO-LIMITER",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-ICRA-ONE-SHOT-SUBMIT-STORES-CLIENT-SUPPLIED-CONSENT-AND-UNBOUNDED-BODY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-STEPWISE-SUBMIT-SCORES-ANY-NON-EMPTY-ANSWER-SET",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-EVENT-SINK-WRITES-A-TABLE-NO-SCHEMA-DEFINES-AND-SWALLOWS-FAILURE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-FED-FEDERATION-WRITES-REFUSED-NO-ROUTE-MAINTAINS-THE-REGISTER",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-AND-AUDIT-BEFORE-GRANT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-FED-FLAGS-TYPE-VOCABULARY-ORGANIZATION-NOT-EVALUATED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-JUR-LOCATION-CONSENT-GET-EXPIRES-THE-CONSENT-AS-A-SIDE-EFFECT",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-JUR-GEOFENCE-CREATE-BODY-IS-UNVALIDATED-AND-STRIKE-ID-UNVERIFIED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-CHURN-SQL-NAMES-COLUMNS-AND-STATUS-VALUES-THE-REPOSITORY-DOES-NOT-DEFINE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-CHURN-INVOCATION-AUDIT-IS-A-SEPARATE-WRITE-BEFORE-VALIDATION-AND-ON-GET",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-SLA-MODEL-VERSION-IS-CALLER-NAMED-AND-CREATES-UNBOUNDED-MODEL-ROWS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-SLA-FEEDBACK-PILOT-EVENT-IS-AN-AWAITED-POST-COMMIT-WRITE-THROUGH-THE-BARE-DB",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-ALERTS-SQL-NAMES-ABSENT-COLUMNS-AND-AN-ABSENT-TABLE-AND-IS-NOT-VALID-SQL",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ASM-CLAUSE-RELEVANCE-SCORES-SHARING-LEVELS-AND-SOURCE-NAMES-THAT-THE-ROW-LEVEL-POLICIES-WITHHOLD",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ASM-ONBOARDING-EVENT-METADATA-IS-UNBOUNDED-AND-OVERWRITES-THE-STORED-TARGET-AND-ROLE",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B9-ORG-ITEM-PATCH-BODY-UNVALIDATED-SETTINGS-AND-SLUG-REPLACED-WHOLESALE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ORG-DIRECTORY-SEARCH-UNESCAPED-WILDCARDS-FIXED-FIFTY-NO-ORDER-OR-PAGE",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B9-ORG-PATH-LEGACY-BRANCH-READS-ORGANIZATIONS-ON-BARE-DB-WITHOUT-CONTEXT-OR-MEMBERSHIP-CHECK",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B9-ORG-ORGANIZATION-ROW-FACADES-CONFIGURE-STEWARD-WRITES-OVER-ORGANIZATIONS-REFUSED-ONLY-BY-GOVERNANCE-LIST",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PEN-RETIREMENT-ELIGIBILITY-IS-A-YEARS-OF-SERVICE-COMPARISON-WITH-A-FIXED-DEFAULT-OF-25",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PEN-T4A-POST-STORES-AN-ADMINISTRATOR-TYPED-INCOME-AS-A-GENERATED-TAX-RECORD",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B10-PEN-TRUSTEE-MEETING-READS-RETURN-AGENDA-MINUTES-AND-ATTENDEES-TO-ANY-MEMBER",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B10-PEN-TRUSTEE-MEETING-MINUTES-CAN-BE-REWRITTEN-OR-DELETED-WITHOUT-HISTORY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PEN-PLAN-FIGURES-ARE-ADMINISTRATOR-TYPED-AND-READABLE-BY-ANY-MEMBER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PEN-PENSION-ADMINISTRATION-WRITES-REST-ON-ONE-ROLE-TITLE-WITH-NO-MANDATE-OR-TRUSTEE-DECISION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PEN-PENSION-LIST-READS-HAVE-NO-LIMIT-OR-PAGINATION",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B10-PEN-PENSION-READS-USE-THE-SHARED-DB-HANDLE-WITHOUT-AN-EXPLICIT-TENANT-CONTEXT",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B10-PIL-PILOT-WRITE-ROUTES-CAST-THE-JSON-BODY-WITHOUT-A-SCHEMA-AND-STORE-CALLER-TEXT-IN-AN-UNBOUNDED-JSONB-COLUMN",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B10-PIL-USAGE-TELEMETRY-ROUTES-READ-ANY-ORGANIZATION-NAMED-IN-THE-QUERY-AT-AN-ADMIN-FLOOR-AND-RETURN-PER-USER-IDS-THROUGH-THE-BARE-DB-IMPORT",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B10-PIL-USAGE-EVENTS-ARE-CALLER-ASSERTED-AND-DRIVE-THE-CHAMPION-AND-CONVERSION-SIGNALS-WITHOUT-ANY-CHECK-THAT-THE-ACTION-HAPPENED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PIL-PILOT-FEEDBACK-COMMENT-IS-UNVALIDATED-AND-UNBOUNDED-AND-IS-RETURNED-RAW-WITH-THE-USER-ID",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B10-OPL-06",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-OPL-11",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B10-OPL-12",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B11-PRP-DUES-PAY-GET-RETURNS-EVERY-LEDGER-ENTRY-TYPE-AS-PAYMENTS-AND-OMITS-PENDING-ATTEMPTS",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-PRP-PRECEDENT-COLLECTION-GET-TAKES-UNBOUNDED-LIMIT-AND-PAGE-FROM-THE-QUERY-STRING",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-PRP-PROFILE-ROLES-PATH-IS-A-BILLING-PROFILE-LIST-AND-ITS-POST-IS-REFUSED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-RECONCILIATION-PROCESS-GET-RETURNS-ANY-ORGANIZATION-RUN-BY-ID",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B11-PRP-RECONCILIATION-SERVICE-QUERIES-THROUGH-THE-SHARED-DB-HANDLE-WITH-EXPLICIT-PREDICATES-ONLY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-RECONCILIATION-RESOLVE-IS-A-STATUS-AND-NOTE-ONLY-WITH-NO-SECOND-APPROVER-OR-LEDGER-EFFECT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-RECONCILIATION-LISTS-ARE-UNBOUNDED-AND-THE-EXCEPTION-STATUS-FILTER-IS-AN-UNVALIDATED-CAST",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-PRP-REWARDS-EXPORT-IS-UNBOUNDED-AND-WRITES-NO-AUDIT-RECORD",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-REDEMPTIONS-GET-IGNORES-THE-STATUS-FILTER-AND-VALIDATES-AGAINST-AN-INCOMPLETE-LIST",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-PRP-WALLET-GET-READS-BALANCE-AND-LEDGER-SEPARATELY-WITH-UNVALIDATED-PAGING",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-RPT-STORED-CONFIG-IS-UNVALIDATED-UNBOUNDED-JSON-THAT-NO-SAVE-APPLIES-THE-EXECUTOR-CONTRACT-TO",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-SOC-SIGNER-IDENTITY-IS-SENDER-TYPED-TEXT-AND-A-SENDER-CAN-SIGN-AS-A-NAMED-PERSON-AND-COMPLETE-THE-DOCUMENT",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B11-SOC-SIGNATURE-PATCH-DECLARES-A-SCHEMA-IT-NEVER-APPLIES-AND-STORES-UNBOUNDED-REASON-TEXT",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-SOC-SIGNATURE-LIST-IS-UNPAGINATED-AND-RETURNS-WHOLE-SIGNER-ROWS",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-SOC-POST-PUBLISHES-AT-ONCE-TO-EVERY-ACTIVE-ACCOUNT-OF-THE-SELECTED-PLATFORMS-AT-STEWARD-FLOOR-WITH-NO-APPROVAL-OR-CLASSIFICATION-CHECK",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B11-SOC-PUBLISH-RECORDS-THE-ROW-AFTER-THE-EXTERNAL-POST-AUDITS-COMPLETED-WHEN-EVERY-PLATFORM-FAILED-AND-RETURNS-PLATFORM-ERROR-TEXT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-SOC-CAMPAIGN-ANALYTICS-PLATFORM-AND-GOAL-FIGURES-READ-FIELDS-THE-QUERY-DOES-NOT-SELECT-AND-A-HARD-CODED-UNDEFINED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-SOC-CAMPAIGN-UPDATE-APPLIES-UNVALIDATED-BODY-FIELDS-INCLUDING-STATUS-AND-PLATFORMS",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-SOC-ANALYTICS-EXPORT-IS-A-DELETE-VERB-READ-AT-MEMBER-FLOOR-WITH-UNBOUNDED-ROWS-UNNEUTRALISED-CSV-AND-MISMATCHED-COLUMNS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-SOC-LIMIT-AND-OFFSET-ARE-PARSED-FROM-THE-QUERY-WITH-NO-NUMBER-CHECK-OR-UPPER-BOUND",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-IDS-STEWARD-ROUTES-ARE-CONFIGURED-AT-THE-STEWARD-WRITE-FLOOR-AND-REFUSED-ONLY-BY-THE-GOVERNANCE-LIST",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-IDS-SCIM-PROVISION-BODY-IS-UNVALIDATED-AND-MALFORMED-INPUT-IS-A-500",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-IDS-SECURITY-EVENTS-ROUTE-IS-CONFIGURED-FOR-SECURITY-MANAGER-AND-DENIED-FOR-EVERY-CALLER",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-IDS-SUPPORT-READ-GIVES-EVERY-STEWARD-THE-NOTIFICATIONS-OF-EVERY-MEMBER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-PLT-KPI-CURRENT-VALUE-IS-THE-LATEST-ROW-OF-THE-METRIC-TYPE-TEXT-NOT-THE-DECLARED-SOURCE-OR-CALCULATION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-PLT-KPI-ITEM-ID-IS-NOT-VALIDATED-AND-A-MALFORMED-ID-IS-A-DATABASE-ERROR",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B12-PLT-VOICE-TRANSCRIBE-RETURNS-THE-FILE-SIZE-IN-BYTES-AS-THE-DURATION",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B12-PLT-WORKSPACE-TELEMETRY-LOGS-UNBOUNDED-CLIENT-STRINGS-AND-HAS-NO-LIMIT",
+    "severity": "LOW"
+   }
+  ],
+  "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS": [
+   {
+    "id": "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B1-MANIFEST-DETECTOR",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B1-AUDIT-READ-MEMBER-FLOOR",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B1-REP-PROTOCOL-NOT-IN-CAPABILITY-MODEL",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B2-REVOCATION-MULTI-STORE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B2-AI-GET-WRITES-ROWS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B2-AI-INVOCATION-NOT-AUDITED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B3-BILLING-AUDIT-NOT-ATOMIC",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B3-AUDITS-FABRICATED-ENGAGEMENT-FIELDS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B3-AUDITS-LEGACY-TABLE-NOT-CANONICAL",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CALENDAR-CALLBACK-GET-WRITES-TOKENS-NO-AUDIT",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B4-CALENDAR-SYNC-AUDIT-NOT-ATOMIC",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CBA-INTEL-AUDIT-NOT-ATOMIC",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CBA-BENCHMARK-GET-WRITES-SNAPSHOT-NO-AUDIT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CHATBOT-MODERATION-BYPASSES-AI-CONTROL-PLANE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CLAUSE-LIBRARY-EDIT-AND-DELETE-NO-VERSION-OR-RETENTION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-OHS-REGULATORY-RECORD-HARD-DELETE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CLAUSES-ITEM-GET-WRITES-VIEW-COUNT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-BATCH-STATUS-RECIPIENT-EMAILS-DISCLOSED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-OHS-REFUSAL-EVENT-HARD-DELETE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-COGNITION-READ-ROUTES-WRITE-FILES-AUDIT-NOT-ATOMIC",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-COMMS-SUBSCRIBER-EMAILS-READ-BY-ANY-MEMBER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EMP-PAYROLL-POSTED-IS-STATUS-ONLY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EMP-COMMUNICATION-NOT-DELIVERED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EMP-CAPE-AUDIT-EVENT-AFTER-COMMIT",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-CMP-AUDIT-LOG-FULL-ROW-READ-BY-OFFICER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-CMP-AUDIT-MANUAL-ENTRY-FREE-REFERENCE",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-CMP-CONTRACT-AUDIT-NOT-ATOMIC",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-CMP-VALIDATE-ATTESTS-FROM-CALLER-DATA",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B6-SYS-RESEND-SUPPRESSION-UPDATES-ONLY-ONE-PREFERENCE-ROW",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-SYS-CALENDAR-SYNC-SWALLOWED-EVENT-ERRORS-COUNTED-AS-IMPORTED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-PUBLISH-SENDS-EVERY-INTERVIEW-TO-AI-WITHOUT-CONSENT-GATE-OR-AUDIT",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B7-COGB-SUCCESSION-CALL-NOT-AUDITED-AND-RUNS-ON-EVERY-GET",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXP-REPORT-HARD-DELETE-AUDIT-NAMES-NO-FIELDS",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B7-EXP-EVIDENCE-PACK-ATTESTATIONS-HARD-CODED",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B7-EXP-EVIDENCE-PACK-EXPORT-NOT-AUDITED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-BEARER-LINK-NOT-BOUND-TO-GRANT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-PLT-EXT-PATCH-STEWARD-FLOOR-REWRITES-ENDPOINT-AND-MAPPING",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-PLT-EXT-DELETE-HARD-DELETE-CASCADES-SYNC-LOG-HISTORY",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B7-PLT-EXT-CONFIGURATION-HAS-NO-CREATE-PATH-AND-NO-CONSUMER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-PLT-SSO-CONFIGURATION-NEVER-CONSUMED-BY-SIGN-IN",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-HS-INCIDENT-ITEM-READ-MEMBER-FLOOR-WHOLE-ROW",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B8-HS-ANONYMOUS-REPORTER-STAMPED-IN-CREATED-BY",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B8-ICRA-CLAIM-BINDS-TO-ANY-SIGNED-IN-USER-ORGANIZATION-AND-KEEPS-CAPABILITY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-REVIEW-AUDIT-ONLY-WHEN-A-CLAIMED-ORGANIZATION-EXISTS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-SYNC-DRY-RUN-IS-ACCEPTED-AND-AUDITED-BUT-NEVER-READ",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-SYNC-OUTCOME-AUDIT-IS-WRITTEN-AFTER-THE-EFFECT-AND-ITS-FAILURE-IS-SWALLOWED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-FED-LOCALS-DELETE-ARCHIVES-STATUS-WITHOUT-ARCHIVED-AT",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-FED-EXTERNAL-DECISION-AUDIT-SEPARATE-AND-BEST-EFFORT-IN-LEGACY-MODE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-JUR-ALIAS-WRAPPERS-CARRY-AN-ALWAYS-TRUE-ORG-GUARD",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-JUR-INVESTIGATIONS-PATH-IS-THE-CASE-COLLECTION-NO-INVESTIGATION-RECORD",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-JUR-INVESTIGATIONS-AUDIT-PATH-RETURNS-THE-WHOLE-ORGANIZATION-AUDIT-LOG",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-JUR-KNOWLEDGE-BASE-READS-IGNORE-ACCESS-COLUMNS-ENTITLEMENT-AND-LEAVE-NO-READ-TRACE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-JUR-GEOFENCE-GET-STORES-MEMBER-COORDINATES-WITHOUT-A-CONSENT-CHECK",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B8-JUR-LOCATION-TRACK-WRITES-ARE-UNAUDITED-AND-REFUSALS-ANSWER-500",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-SLA-FEEDBACK-UPDATES-MODEL-METADATA-WHICH-THE-RUNTIME-ROLE-MAY-ONLY-SELECT-AND-INSERT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-QUERY-AUDIT-IS-A-LOG-LINE-AND-THE-SAFETY-CHECK-DECLARES-A-LOWER-ROLE-AND-DATA-CLASS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ASM-ONBOARDING-AUDIT-EVENTS-ARE-EMITTED-ON-AN-IN-PROCESS-BUS-WITH-NO-SUBSCRIBER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ASM-ONBOARDING-EVENTS-RECORD-CALLER-ASSERTED-MILESTONES-AS-EVENT-AND-AUDIT-ROWS-WITHOUT-PERFORMING-OR-VERIFYING-THEM",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ORG-ITEM-PATCH-PARENT-CHANGE-DOES-NOT-REPOINT-HIERARCHY-PATH-OR-CHECK-CYCLE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ORG-ROSTER-GET-ANY-ORGANIZATION-MEMBER-READS-FULL-ROSTER-WITH-CONTACT-DETAILS",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B10-ORG-CAMPAIGN-ROWS-READABLE-BY-ANY-MEMBER-WITH-STRATEGY-EMPLOYER-VULNERABILITIES-TEAM-AND-SUPPORT-COUNTS",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B10-ORG-ORGANIZER-TASKS-READABLE-BY-EVERY-STEWARD-WITH-MEMBER-CASE-AND-GRIEVANCE-REFERENCES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PEN-PLAN-DELETE-REMOVES-THE-PLAN-ROW-WITH-NO-DEPENDENT-CHECK-OR-SNAPSHOT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PIL-COMMERCIAL-TRANSITION-RECORDS-SIGNED-ACTIVE-CONTRACTS-AND-ISSUED-INVOICES-WITH-NO-COUNTERPART-ACCEPTANCE-AND-ADVANCES-STATE-WHEN-EFFECTS-ARE-ONLY-STAGED",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B10-PIL-ORGANIZATION-VERIFICATION-CHECKS-ONLY-THAT-THE-TARGET-ORGANIZATION-ROW-EXISTS-AND-RECORDS-NO-PROOF-OR-REASON",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PIL-ARTIFACT-INTELLIGENCE-AND-REFERENCE-WRITES-COMMIT-NO-AUDIT-ROW-THOUGH-THE-MANIFEST-DECLARES-ATOMIC-AUDIT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PIL-ONBOARDING-CHECKLIST-ITEMS-ARE-TOGGLED-BY-THE-CALLER-WITH-NO-CHECK-THAT-THE-STEP-HAPPENED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PIL-PILOT-OVERVIEW-LISTS-EVERY-ENROLLED-ORGANIZATION-WITH-ITS-FIGURES-TO-ANY-OFFICER-OF-THE-PLATFORM-ORGANIZATION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-OPL-10",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-DUES-PAY-POST-INITIATION-AUDIT-COMMITS-BEFORE-THE-PROCESSOR-CALL-AND-THE-LATER-STATE-CHANGES-ARE-UNAUDITED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-PRECEDENT-ITEM-DELETE-HARD-DELETES-THE-PRECEDENT-AND-CASCADES-TO-ITS-TAGS-AND-CITATIONS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-RECONCILIATION-AUDIT-IS-A-SEPARATE-EVENT-NOT-COMMITTED-WITH-THE-RECONCILIATION-WRITES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-RPT-EXECUTE-RETURNS-MEMBER-EMAIL-AND-CLAIM-ROWS-AT-AN-OFFICER-ROLE-TITLE-WITH-NO-FIELD-AUTHORITY-AND-NO-DURABLE-RECORD-OF-WHAT-WAS-RETURNED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-SOC-SIGNATURE-AUDIT-TRAIL-HAS-NO-HASH-CHAIN-OR-VERIFICATION-AND-IS-SERVED-AS-A-LEGAL-COMPLIANCE-REPORT-OF-SELF-ASSERTED-EVIDENCE",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B11-SOC-VOID-SWALLOWS-THE-PROVIDER-FAILURE-AND-RECORDS-VOIDED-WHILE-THE-ENVELOPE-CAN-STILL-BE-SIGNED",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B11-SOC-SIGNING-IGNORES-THE-STORED-EXPIRY-SIGNING-ORDER-AND-AUTHENTICATION-REQUIREMENT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-SOC-SIGNATURE-DOCUMENT-GET-CALLS-THE-PROVIDER-AND-WRITES-STATUS-SIGNER-AND-AUDIT-ROWS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-SOC-SIGNATURE-STATUS-AND-AUDIT-DISCLOSE-EVERY-SIGNER-ADDRESS-IP-USER-AGENT-AND-LOCATION-TO-EVERY-OTHER-SIGNER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-SOC-SIGNATURE-ENVELOPE-AND-STORED-FILE-ARE-CREATED-BEFORE-AND-OUTSIDE-THE-TRANSACTION-THAT-RECORDS-THEM",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-SOC-OAUTH-CALLBACK-IS-A-GET-THAT-INSERTS-THE-CREDENTIAL-CLEARS-ITS-COOKIES-BEFORE-VALIDATION-AND-AUDITS-AFTER-COMMIT-TO-A-LOG-LINE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-SOC-CONNECT-AUDIT-IS-A-LOG-LINE-THAT-DROPS-THE-ACTION-ORGANIZATION-AND-PLATFORM-THE-CALLER-PASSES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-SOC-ANY-REFRESH-FAILURE-MARKS-THE-ACCOUNT-EXPIRED-AND-A-SUCCESS-FORCES-IT-ACTIVE",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-SOC-POST-DELETE-REMOVES-THE-PLATFORM-POST-BEFORE-THE-LOCAL-ROW-AND-AUDITS-INTENT-AND-OUTCOME-ONLY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-IDS-STEWARD-ASSIGNMENT-ROWS-READABLE-BY-ANY-MEMBER-WITH-PERSONAL-PHONE-NOTES-AND-GRIEVANCE-LINK",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B11-IDS-SATISFACTION-REPRESENTATIVE-FIGURES-HAVE-NO-MINIMUM-RESPONSES-AND-ARE-READ-BY-EVERY-STEWARD-FOR-ANY-REPRESENTATIVE-ID",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-IDS-SETTINGS-PUT-MERGES-ANY-KEY-INTO-THE-JSON-THAT-HOLDS-THE-CREDIT-LEDGER-AND-THE-PER-CAPITA-RATE",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B12-PLT-V2-CATCH-ALL-ACCESS-AUDIT-HAS-NO-ACTOR-AND-IS-NOT-AWAITED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B12-PLT-TRIAGE-LAPSED-DESIGNATION-IS-CLOSED-AS-SYSTEM-EXPIRY-WITH-NO-AUDIT-ROW",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B12-PLT-VOICE-TRANSCRIBE-HAS-NO-RATE-LIMIT-ENTITLEMENT-OR-AUDIT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-WBK-MEMORY-HOLDER-ROUTES-ACCEPT-READS-AND-WRITES-ON-THE-BEARER-ID-OF-AN-UNCLAIMED-WORKBOOK-WITH-NO-LIMIT-AND-NO-AUDIT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-WBK-ANY-MEMBER-OF-THE-CLAIMING-ORGANIZATION-CAN-READ-CHANGE-AND-DELETE-THE-NAMED-PEOPLE-WITH-NO-ROLE-FLOOR-OR-NOTICE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-WBK-EXPORT-STREAMS-THE-IDENTITY-LINKED-CARRIER-REGISTER-WITH-NO-AUDIT-RECORD",
+    "severity": "LOW"
+   }
+  ],
+  "F07-AUTHORIZATION-ROLE-FLOOR-AND-OBJECT-LEVEL": [
+   {
+    "id": "DEF-0B1-BILLING-TARGET-ORG-UNBOUND",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B3-KPI-ALERT-RECIPIENTS-MEMBER-READ",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B3-ARBITRATION-RECORD-NO-CASE-AUTHORITY",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B3-BARGAINING-NOTES-SUMMARY-MODES-IGNORE-CONFIDENTIALITY",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B3-BARGAINING-NOTE-ITEM-ROUTE-BYPASSES-CONFIDENTIALITY",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B3-BARGAINING-NEGOTIATION-RECORDS-MEMBER-READ",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B3-TRIAL-EXPIRY-PLACEHOLDER-PAYMENT-CHECK",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B3-ALERT-INBOX-MEMBER-FLOOR-NO-REDACTION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CALENDAR-SYNC-ANY-MEMBER-CONNECTION",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B4-CLAUSE-LIBRARY-FEDERATION-PREDICATES-DISAGREE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CLC-SYNC-LOG-MEMBER-READ-AND-FORGEABLE-VERIFICATION",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B4-OHS-FILINGS-NO-CASE-AUTHORITY",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B4-OHS-ANTI-SCAB-RECORD-NO-AUTHOR-OR-CASE-AUTHORITY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-OHS-COMMITTEE-ROSTER-MEMBER-READ",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B4-CBAS-DETAIL-EMBEDS-INTERNAL-NOTES-FOR-MEMBERS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CARBON-VALIDATE-ATTESTS-CALLER-DATA",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-OHS-WITHDRAWAL-REFUSAL-NO-CASE-AUTHORITY",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B5-COGNITION-ANY-STEWARD-SCORES-ANY-CASE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-COGNITION-WORKLOAD-BURNOUT-VISIBLE-TO-PEERS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-COMMITTEE-READ-IGNORES-MEMBERSHIP",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-COMMITTEE-INTERNAL-NOTES-READ-BY-ANY-MEMBER",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B5-SMS-STEWARD-READS-ALL-MEMBER-MESSAGES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-SMS-CAMPAIGN-READ-BY-ANY-MEMBER",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B5-SURVEY-DRAFTS-READABLE-BY-MEMBERS",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B5-SURVEY-RESPONSES-IDENTIFY-RESPONDENTS-TO-STEWARDS",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B6-EDU-OWNER-SCOPED-READS-HIDE-MEMBER-RECORDS-FROM-STAFF",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EDU-SESSION-READ-EXPOSES-ACCESS-CODE-AND-COSTS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EDU-CONTENT-COMPLETIONS-COUNT-ATTENDED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EDU-CONTENT-DRAFTS-AND-ARCHIVED-READABLE-BY-MEMBER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-CMP-COPE-FUNDRAISING-TOTALS-WRITABLE-BY-STEWARD",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-READS-IGNORE-SENSITIVITY-LEVEL",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B7-EXC-PUBLISH-AND-INDEX-COPY-INTERVIEW-TEXT-TO-ORG-WIDE-KNOWLEDGE-BASE",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B7-EXC-PUBLISH-PARSE-FAILURE-STORES-DEFAULT-MEDIUM-RISK-SCORE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-NEW-INTERVIEWS-DEFAULT-PUBLIC-INTERNAL-WITH-NO-CLASSIFICATION-STEP",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-COPILOT-CONVERSATIONS-HAVE-NO-OWNER-AND-ARE-READABLE-BY-ANY-STEWARD",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-DERIVED-VIEWS-IGNORE-SENSITIVITY-AND-CONSENT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-REASONING-SESSIONS-HAVE-NO-OWNER-AND-ARE-READABLE-BY-ANY-STEWARD",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGB-SUCCESSION-SENDS-EVERY-PUBLISHED-INTERVIEW-TO-MODEL-IGNORING-SENSITIVITY",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B7-COGB-DERIVED-GRAPHS-IGNORE-INTERVIEW-SENSITIVITY",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-PLT-EXT-GET-RETURNS-WHOLE-INTEGRATION-ROW-WITH-CREDENTIALS",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B7-PLT-EVENT-ITEM-IGNORES-PRIVATE-VISIBILITY-AND-RETURNS-MEETING-PASSWORD",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-PLT-EVENT-ITEM-PUBLIC-REGISTRATION-CALLER-EXPECTS-PUBLIC-EVENT",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B7-PLT-SSO-LIST-DISCLOSES-PROVIDER-CONFIGURATION-AT-MEMBER-FLOOR",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-PLT-EQUITY-READS-RETURN-PRIVATE-SEGMENTS-TO-ANY-MEMBER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-HS-HAZARD-ITEM-READ-MEMBER-FLOOR-WHOLE-ROW",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-HS-STATUS-AND-OUTCOME-FIELDS-WRITABLE-WITHOUT-WORKFLOW",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-HS-PPE-ISSUEE-NAMES-READABLE-AT-MEMBER-FLOOR",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-FED-LOCALS-READABLE-AT-MEMBER-FLOOR-WITH-NOTES-AND-OFFICER-IDS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-FED-EXTERNAL-UPLOAD-ATTACHES-ANY-ORGANIZATION-BLOB-TO-GRIEVANCE",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B8-FED-FLAGS-ANY-SIGNED-IN-USER-CAN-PROBE-ANY-FLAG-NAME",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-JUR-STATUTORY-RULE-TABLES-ARE-UNVERSIONED-LITERALS-SERVED-WITH-STATUTE-CITATIONS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-SLA-LIST-GET-SKIPS-THE-FEATURE-GATE-AND-SAFETY-CHECK-THE-POST-APPLIES",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B9-MOB-TWO-DEVICE-TABLES-NO-ROUTE-REMOVES-A-DEVICE-AND-NO-SENDER-READS-EITHER",
+    "severity": "MEDIUM",
+    "partial": true
+   },
+   {
+    "id": "DEF-0B9-ORG-ROSTER-POST-STEWARD-GRANTS-ANY-ORGANIZATION-ROLE-TO-ANY-USER-ID-WITHOUT-ACCEPTANCE",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B9-ORG-CURRENT-ROW-READ-AT-ANY-MEMBER-FLOOR-RETURNS-SETTINGS-AND-BILLING-CONTACT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ORG-ANALYTICS-ZERO-AND-HUNDRED-PERCENT-DEFAULTS-MEMBER-FLOOR-AND-NO-GROUP-SIZE-SUPPRESSION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ORG-ORGANIZATION-ROW-FACADES-RETURN-WHOLE-ORGANIZATION-ROW-AT-STEWARD-OR-ADMIN-FLOOR",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-ORG-CARD-COUNTS-ELECTION-RESULT-AND-CAMPAIGN-STATUS-ARE-CALLER-ASSERTED-WITH-NO-CARD-RECORDS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-ORG-ITEM-ROUTES-NAMED-FOR-NOTE-ENROLMENT-SEQUENCE-AND-ASSIGNMENT-REWRITE-OR-ARCHIVE-WHOLE-CAMPAIGN",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-ORG-ASSIGNMENT-IS-LEAD-ORGANIZER-AND-TEAM-COLUMNS-WRITABLE-WITH-UNVERIFIED-USER-IDS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PEN-RETIREMENT-ELIGIBILITY-LISTS-EVERY-PENSION-ENROLMENT-OF-THE-ORGANIZATION-TO-ANY-MEMBER",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B10-PEN-BENEFIT-CLAIMS-CAN-BE-FILED-BUT-NO-ROUTE-CAN-DECIDE-OR-PAY-THEM",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PEN-PORTAL-DOCUMENT-LIST-RETURNS-EVERY-PAGE-ROW-AND-IGNORES-ROLE-AND-AUTH-COLUMNS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PEN-PORTAL-POST-LETS-A-STEWARD-SET-STATUS-PUBLISHED-AND-ACCESS-COLUMNS-AROUND-THE-EDITORIAL-WORKFLOW",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PIL-PLATFORM-TIER-OF-THE-PILOT-ROUTES-IS-ANY-ROLE-TITLE-AT-OR-ABOVE-SYSTEM-ADMIN-LEVEL-AND-NOT-A-PLATFORM-MANDATE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-OPL-09",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-REWARDS-EXPORT-RETURNS-EVERY-MEMBER-LEDGER-AWARD-AND-BUDGET-ROW-TO-ANY-MEMBER",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B11-RPT-DEFINITION-READS-RETURN-EVERY-REPORT-OF-THE-ORGANIZATION-TO-ANY-MEMBER-AND-NO-ROUTE-READS-IS-PUBLIC",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-RPT-TEMPLATES-ROUTE-LISTS-EVERY-REPORT-DEFINITION-AND-STORES-A-NON-TEMPLATE-BY-DEFAULT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-RPT-DATA-SOURCE-REGISTRY-IS-SERVED-TO-ANY-SIGNED-IN-USER-WHILE-EXECUTION-NEEDS-AN-OFFICER",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-SOC-ANY-AUTHENTICATED-USER-SENDS-AN-UPLOADED-FILE-TO-TYPED-ADDRESSES-THROUGH-THE-ORGANIZATION-SIGNATURE-PROVIDER-ACCOUNT",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B11-SOC-STEWARD-CONNECTS-THE-ORGANIZATION-PUBLISHING-IDENTITY-WITH-ADMIN-LEVEL-SCOPES-AND-PICKS-THE-FIRST-PAGE-AUTOMATICALLY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-CRUD-SUPPORT-TICKET-ITEM-ROUTES-LET-A-STEWARD-REWRITE-AND-AN-ADMIN-DELETE-ANY-USER-NOTIFICATION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-PLT-TEST-AUTH-FORWARDS-THE-SESSION-TOKEN-AND-RETURNS-THE-BACKEND-BODY-TO-EVERY-SIGNED-IN-USER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-PLT-TRIAGE-GRANT-APPLIES-THE-CASE-ELIGIBILITY-TEST-TO-A-MESSAGES-DESIGNATION",
+    "severity": "MEDIUM"
+   }
+  ],
+  "F08-PII-DISCLOSURE-AND-PROJECTION": [
+   {
+    "id": "DEF-0B1-ORGANIZATIONS-CROSS-ORG-CONTACTS",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B3-CALENDAR-DISCONNECT-ADMIN-FLOOR-NO-REVOKE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CALENDAR-TOKEN-PLAINTEXT-FALLBACK",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CALENDAR-CONNECTION-ROW-RETURNS-TOKENS",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B4-CALENDAR-CONNECTION-CRUD-WRITES-AROUND-OAUTH",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B4-CALENDAR-SYNC-NO-PERSONAL-CALENDAR-CHECK",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B4-CALENDAR-EVENTS-PERSONAL-CALENDAR-LEAK",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B4-CBA-INGESTION-FETCHES-UNRESTRICTED-URLS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CLAUSE-LIBRARY-ANONYMIZATION-NOT-ENFORCED-ON-READ",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B4-CLAUSE-LIBRARY-CREATOR-USER-IDS-DISCLOSED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EDU-COMPLETIONS-ROUTE-NOT-FILTERED-TO-COMPLETED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-CMP-DEBUG-ROUTE-REACHABLE-IN-PRODUCTION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-SYS-OBSERVABILITY-SWEEP-ALERT-HAS-NO-HUMAN-RECIPIENT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-MITIGATION-PROJECTIONS-ARE-FIXED-MULTIPLIERS-WITH-CONSTANT-CONFIDENCE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGB-MEMORY-ENGINES-RESTATE-OFFICER-TYPED-ENTRIES-AS-MEASURED-CONDITION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-RELEASES-LATEST-VERSION-NOT-GRANTED-VERSION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-PLT-ENT-LISTS-EXPIRED-AND-UNBACKED-ENTITLEMENTS-AS-ACTIVE",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B7-PLT-SSO-CREATE-STORES-UNVALIDATED-CONFIGURATION-ENABLED-BY-DEFAULT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-PLT-EQUITY-SELF-IDENTIFY-WRITE-FLOOR-EXCLUDES-DATA-SUBJECT",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-HS-INCIDENT-INJURY-WITNESS-AND-REPORTER-DATA-IN-UNTYPED-METADATA",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-RATE-LIMITS-PER-PROCESS-AND-KEYED-ON-REQUEST-HEADER-ADDRESS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-PUBLIC-WRITES-HAVE-NO-BOT-CHALLENGE-AND-TURNSTILE-IS-OPTIONAL",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-EMAIL-RESULTS-SENDS-THE-BEARER-CAPABILITY-TO-ANY-TYPED-ADDRESS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-MALFORMED-IDS-AND-ANSWER-VALUES-SURFACE-AS-SERVER-ERRORS",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-ICRA-SHOPIFY-ANY-REFUND-EVENT-RETURNS-ALL-CREDITS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-FED-EXTERNAL-GRIEVANCE-PROJECTION-READS-COLUMNS-THE-TABLE-LACKS",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B9-ML-QUERY-SENDS-FREE-TEXT-AND-ARBITRARY-CONTEXT-TO-AN-EXTERNAL-SERVICE-WITH-NO-DISCLOSURE-DECISION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-MOB-SYNC-PATH-REGISTERS-A-DEVICE-AND-SYNCS-NOTHING-AND-ITS-ONLY-CALLER-ALWAYS-FAILS",
+    "severity": "MEDIUM",
+    "partial": true
+   },
+   {
+    "id": "DEF-0B9-ASM-OCRA-EMAIL-RESULTS-PATH-MAILS-THE-BEARER-CAPABILITY-TO-ANY-TYPED-ADDRESS-WITH-NO-DISCLOSURE-DECISION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ORG-ROSTER-POST-DUPLICATE-USER-ID-AND-INVALID-JSON-HANDLING-LEAVES-UNHANDLED-ERRORS",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B9-ORG-DIRECTORY-PROJECTION-FILLS-MISSING-FIELDS-WITH-CANNED-DEPARTMENT-POSITION-AND-ZERO-SENIORITY",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B10-PIL-PUBLIC-APPLICATION-RATE-LIMIT-IS-KEYED-ON-THE-FIRST-FORWARDED-FOR-VALUE-THE-CLIENT-CAN-SUPPLY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PIL-PUBLIC-APPLICATION-SENDS-THE-TYPED-CONTACT-TO-HUBSPOT-WITH-NO-PROOF-OF-THE-ADDRESS-AND-NO-CONSENT-DECISION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PIL-DEMO-DATA-INSERTS-FICTIONAL-GRIEVANCES-AND-NAMED-FEDERAL-EMPLOYERS-INTO-THE-LIVE-TABLES-WITH-NO-ROW-MARKER-AND-DELETES-BY-NUMBER-AND-EMAIL-PATTERN",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-OPL-04",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-PRP-DUES-PAY-POST-SENDS-THE-ORGANIZATION-AND-MEMBER-USER-ID-TO-THE-PROCESSOR-FOR-A-MERCHANT-ACCOUNT-NO-SOURCE-NAMES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-REDEMPTIONS-GET-RETURNS-WHOLE-ROWS-INCLUDING-THE-PROVIDER-PAYLOAD",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-RPT-EXECUTE-OPERATORS-THE-ROUTE-ACCEPTS-ARE-SKIPPED-BY-THE-EXECUTOR-SO-THE-FILTER-IS-DROPPED-AND-ALL-ROWS-RETURN",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-SOC-OAUTH-ACCESS-AND-REFRESH-TOKENS-ARE-STORED-AS-PLAINTEXT-TEXT-COLUMNS-WITH-PAGE-AND-ORGANIZATION-ADMIN-SCOPES",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B11-SOC-DISCONNECT-DELETES-THE-CREDENTIAL-EVEN-WHEN-REVOCATION-FAILS-AND-NEVER-REVOKES-META-OR-LINKEDIN-TOKENS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-IDS-SCIM-ROUTE-HAS-NO-BEARER-AUTHENTICATION-AND-READS-NO-SCIM-CONFIGURATION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-CRUD-TESTIMONIAL-ITEM-READ-IGNORES-VISIBILITY-AND-APPROVAL",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-PLT-ORGANIZATIONS-LEGACY-BRANCH-LOGS-THE-FULL-E-MAIL-ADDRESS",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B12-PLT-QUEUE-STATUS-SERVICE-KEY-IS-THE-SHARED-AI-KEY-COMPARED-WITH-A-PLAIN-EQUALITY",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B12-PLT-VOICE-ROUTES-SEND-THE-RECORDING-TO-AN-EXTERNAL-SERVICE-WITH-NO-CONSENT-OR-RECORD",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-WBK-PUBLIC-START-AND-CHECKOUT-ARE-LIMITED-BY-A-REQUEST-HEADER-ADDRESS-WITH-NO-BOT-CHALLENGE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-WBK-CHECKOUT-SENDS-THE-BEARER-WORKBOOK-ID-TO-STRIPE-IN-THE-REDIRECT-ADDRESSES-AND-METADATA",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-WBK-CHECKOUT-REDIRECT-BASE-FALLS-BACK-TO-LOCALHOST-AND-EVERY-CALL-OPENS-A-NEW-SESSION",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B12-WBK-CLAIM-HAS-NO-RATE-LIMIT-AND-READS-AN-UNCAPPED-BODY",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B12-WBK-ROUTES-LOG-THE-BEARER-WORKBOOK-ID",
+    "severity": "LOW"
+   }
+  ],
+  "F09-RATE-LIMIT-IDEMPOTENCY-REPLAY": [
+   {
+    "id": "DEF-0B4-CHATBOT-SESSION-READ-IGNORES-STATE-AND-FEATURE-GATE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-COMMS-TEMPLATE-DUPLICATE-IS-GENERIC-CRUD",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-EMP-REPLAY-NOT-IDEMPOTENT-GATES-APPROVAL",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EMP-REPLAY-MODE-MISRECORDED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-EMP-EVIDENCE-SEAL-UNKEYED-HASH",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-AI-ROUTES-APPLY-NO-FEATURE-GATE-SAFETY-CHECK-OR-USER-RATE-LIMIT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PEN-PENSION-ROUTES-APPLY-NO-RATE-LIMIT",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-PRP-DUES-PAY-POST-CREATES-A-NEW-FULL-BALANCE-PAYMENT-AND-INTENT-ON-EVERY-CALL-AND-SETTLEMENT-DOES-NOT-RECHECK-THE-BALANCE",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B11-PRP-RECONCILIATION-ENGINE-FABRICATES-FEE-SETTLEMENT-MATCHES-AND-SUMS-REFUNDED-PAYMENTS-AS-RECEIVED",
+    "severity": "MEDIUM"
+   }
+  ],
+  "F10-FINANCIAL-AND-PAYMENT": [
+   {
+    "id": "DEF-0B1-BILLING-HISTORY-FAKE-EMPTY",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B1-CLC-CROSS-TENANT-READ",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B3-BILLING-VALIDATE-LOG-ONLY-MISLABELLED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EMP-REMITTANCE-PACKAGE-SHAPE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-CHECKOUT-REDIRECT-DEFAULTS-TO-LOCALHOST-AND-PRICE-MAY-DIFFER-FROM-DISPLAYED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B9-ASM-NATIONAL-AVERAGE-BENCHMARK-FALLS-BACK-TO-HARD-CODED-LITERALS-WITH-NO-INDICATION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PEN-PENSION-WRITES-STORE-TYPED-MEMBER-REFERENCES-NAMES-AND-AMOUNTS-UNVERIFIED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PIL-COMMERCIAL-TERMS-ARE-SET-BY-ONE-ADMINISTRATOR-FROM-A-TYPED-MEMBER-COUNT-AND-AMOUNT-WITH-NO-APPLICANT-ACCEPTANCE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-OPL-15",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-DUES-BALANCE-TAKES-THE-ORGANIZATION-FROM-THE-CLIENT-WITH-NO-MEMBERSHIP-CHECK-AND-NO-TENANT-CONTEXT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-DUES-BALANCE-CREDIT-STATUS-IS-UNREACHABLE",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-PRP-RECONCILIATION-BANK-AND-UPLOAD-PATHS-ARE-NAMED-FOR-BANK-FEEDS-BUT-LIST-RUNS-AND-EXCEPTIONS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-REWARDS-EXPORT-CSV-DOES-NOT-NEUTRALISE-SPREADSHEET-FORMULAS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-REDEMPTIONS-POST-IS-NAMED-FOR-INITIATION-BUT-CANCELS-AND-DISCARDS-THE-VALIDATED-BODY",
+    "severity": "MEDIUM"
+   }
+  ],
+  "F11-AI-GOVERNANCE": [
+   {
+    "id": "DEF-0B2-AI-RAG-INDEX-PROCESS-LOCAL",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B2-AI-CACHE-PLATFORM-WIDE-ORG-ADMIN",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B3-ANALYTICS-ROWS-FORGE-AI-PROVENANCE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B3-WEEKLY-SUMMARY-FABRICATED-MODEL-CLAIM",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B4-CHATBOT-SAFETY-SKIPPED-OR-FAILS-OPEN",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B4-CHATBOT-FALLBACK-PRESENTED-AS-AI-REPLY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CHATBOT-RAG-LIMITS-BEFORE-SCORING",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EDU-ITEM-FACADES-REWRITE-OR-DELETE-COURSE-BY-PATH-ID",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B6-EDU-UI-CALLS-OPERATIONS-THE-ROUTES-DO-NOT-EXPORT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-COPILOT-EXPLAINABILITY-IS-FIXED-TEXT-AND-NOT-STORED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-COPILOT-CONTEXT-IS-CLIENT-SUPPLIED-HISTORY",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-JUR-LOCATION-CONSENT-TEXT-AND-PURPOSE-ARE-CLIENT-SUPPLIED-AND-UNVALIDATED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-CHURN-PROFILES-NAMED-MEMBERS-FROM-THEIR-CASE-HISTORY-WITH-NO-CONSENT-OR-PURPOSE-DECISION",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-SLA-FEEDBACK-IS-REPEATABLE-CALLER-STATED-VERSION-UNBOUND-AND-A-LOST-UPDATE-READ-MODIFY-WRITE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-DECLARED-PREDICTION-SHAPE-CONFLICTS-WITH-THE-SQL-THAT-CREATES-THE-TABLE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-ALERTS-DRIFT-FINDING-IS-A-LITERAL-PSI-AND-ALERT-IDS-CHANGE-EVERY-SECOND",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ML-ALERT-ACKNOWLEDGE-GUID-NEVER-MATCHES-A-GENERATED-ID-AND-THE-ACKNOWLEDGEMENT-IS-KEYED-ON-THE-ID-ALONE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PIL-PILOT-ADOPTION-ENGAGEMENT-AND-RESOLUTION-FIGURES-ARE-ROW-UPDATE-PROXIES-AND-OPEN-CASE-AGE-WITH-STORED-FIGURES-AS-FALLBACK",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PIL-PILOT-CURRENT-READS-THE-SESSION-ORGANIZATION-UNDER-THE-SYSTEM-CONTEXT-SO-THE-EXPLICIT-PREDICATE-IS-THE-ONLY-SCOPE",
+    "severity": "LOW"
+   }
+  ],
+  "F12-OTHER-ROUTE-SPECIFIC": [
+   {
+    "id": "DEF-0B1-PKI-WORKFLOW-IN-MEMORY",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B1-ALLOWLIST-DRIFT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B1-DOCS-UNAUTH-API-SURFACE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B1-VERSION-UNAUTH-TOPOLOGY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B1-COMMS-TRACKING-GET-MUTATES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B1-ICRA-TELEMETRY-PROCESS-LOCAL-LIMIT",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B2-PKI-ATTESTATION-NOT-CRYPTOGRAPHIC",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B3-TENTATIVE-AGREEMENT-REFERENCES-UNVERIFIED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B3-METRICS-ORG-RESOLVED-TWICE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B3-DERIVED-CASE-METRICS-FROM-TELEMETRY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CALENDAR-OAUTH-STATE-IS-USER-ID",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B4-CALENDAR-EVENT-CALENDAR-ID-UNVERIFIED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CBA-INTEL-UNREVIEWED-ROWS-SERVED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CBA-BENCHMARK-HISTORY-NOT-SCOPED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CHATBOT-REVIEW-NOT-REQUIRED-AND-FIXED-ROLE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-OHS-FILINGS-OWNER-FILTER-INCONSISTENT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CLAUSES-COMPARE-PLACEHOLDER-RECOMMENDATIONS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-BATCH-STATUS-FABRICATED-PROCESSING",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B4-CARBON-ORG-ID-FROM-QUERY-STRING",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-OHS-OWNER-COLUMN-WORKERID-ABSENT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-COGNITION-ENGAGEMENT-NEVER-COMPUTED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-COGNITION-HEALTH-PLATFORM-POSTURE-TO-ORG-OFFICER",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B5-COMMITTEE-REFERENCED-IDS-NOT-VERIFIED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-COMMITTEE-DECISIONS-EDITABLE-AFTER-APPROVAL",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-COMMITTEE-MINUTES-NO-SEPARATION-OF-DUTIES",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B5-COMMITTEE-INTELLIGENCE-GATHERS-ALL-COMMITTEES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-COMMS-CAMPAIGN-STATUS-AND-STATS-WRITABLE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-COMMS-CAMPAIGN-DETACHED-FROM-CONSENT-AND-DELIVERY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-COMMS-TEMPLATE-HARD-DELETE",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B5-COMMS-LIST-DELETE-ERASES-SUBSCRIBER-CONSENT-TRAIL",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-SMS-ROWS-WRITTEN-WITHOUT-SENDING",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-SMS-READ-ROUTE-IS-GENERIC-MESSAGE-CRUD",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-UNSUBSCRIBE-WRITES-NOT-ATOMIC",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-UNSUBSCRIBE-LEAVES-LIST-SUBSCRIPTIONS-ACTIVE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-POLLS-ITEM-ROUTE-IS-COLLECTION",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B5-SURVEY-LIFECYCLE-WRITABLE-DIRECTLY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-SURVEY-RESPONSES-ROUTE-IGNORES-SURVEY-ID",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B5-SURVEY-ANSWERS-HAVE-NO-ROUTE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EDU-REGISTRATION-MEMBER-SETS-COMPLETION-FEE-AND-APPROVAL-FIELDS",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B6-EDU-REGISTRATION-NO-CAPACITY-DUPLICATE-OR-SESSION-COURSE-CHECK",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EDU-CERTIFICATION-ISSUED-WITHOUT-COMPLETION-OR-VERIFICATION",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B6-EDU-CRON-QUERIES-REFERENCE-COLUMNS-ABSENT-FROM-SCHEMA",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B6-EDU-CONTENT-PUBLISH-NO-SEPARATION-OF-DUTIES",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-EMP-OFFICIAL-APPROVAL-UNREACHABLE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EMP-PAYROLL-PREPARE-NOT-BOUND-AND-RACY",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-EMP-REGISTRY-ARCHIVE-IGNORES-DEPENDENTS",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-EMP-CONTACT-PRIMARY-NOT-EXCLUSIVE",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-CMP-READ-FAILURE-RETURNS-EMPTY-SUCCESS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-CMP-ALERT-AND-REPORT-TABLES-HAVE-NO-WRITER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-CMP-VALIDATE-LITERAL-THRESHOLDS-AND-SWALLOWED-LOOKUP",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-CMP-VALIDATE-INPUT-NOT-VALIDATED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-CMP-LEADERSHIP-COMPLIANCE-DEFAULTS-TO-100-AND-TRUNCATES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-SYS-CONTACT-ACKNOWLEDGES-SUBMISSION-WITH-NOTHING-STORED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-SYS-CONTACT-RATE-LIMIT-KEYED-ON-FORGEABLE-ADDRESS-NO-BOT-CHALLENGE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B6-SYS-REAPER-OBJECTS-PAST-RETRY-LIMIT-ARE-ABANDONED-UNREPORTED",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-SYS-LOCATION-RETENTION-BATCH-UNBOUNDED-IN-ONE-TRANSACTION",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B6-SYS-SLA-CLOCK-RESTARTS-ON-ANY-CLAIM-UPDATE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-SEPARATION-OF-DUTIES-ONLY-AGAINST-THE-CREATOR",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-DOCUMENTS-ATTACHABLE-AFTER-REVIEW",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-EXC-GRAPH-QUERY-ACCEPTS-FILTERS-AND-EXPLANATION-LEVEL-IT-NEVER-READS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGB-SUCCESSION-READINESS-SCORE-COUNTS-EXIT-INTERVIEWS-AS-SUCCESSOR-READINESS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGB-INTERVIEW-DERIVED-ROLE-OUTPUT-IDENTIFIES-SINGLE-DEPARTING-PERSON",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGB-RESILIENCE-INDEX-TREND-AND-DOCUMENTATION-QUALITY-ARE-HEURISTIC-LABELS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGB-LEARNING-TRAJECTORY-FORECAST-EXTRAPOLATES-TWO-TYPED-SCORES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B7-COGB-AGGREGATE-ERRORS-RETURNED-VERBATIM-IN-HTTP-200",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B7-EXP-EVIDENCE-PACK-ROLE-DENYLIST",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B7-PLT-SSO-NO-UPDATE-DISABLE-OR-DELETE-ROUTE",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B7-PLT-EQUITY-CONSENT-AND-PRIVACY-PROMISES-NOT-BACKED-BY-SERVER",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-HS-INCIDENT-CREATE-SILENTLY-NORMALISES-SEVERITY-TYPE-AND-DATE",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B8-HS-HAZARD-CREATE-DEFAULTS-LEVEL-AND-CATEGORY-SILENTLY",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-HS-ARCHIVED-ROWS-STILL-READABLE-AND-COUNTED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-HS-LIST-ROUTES-IGNORE-FILTERS-THE-FORMS-SEND",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-HS-DASHBOARD-ERROR-RETURNS-SUCCESS-WITH-CLEAN-METRICS",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B8-HS-DASHBOARD-TRAINING-COMPLIANCE-IS-A-CONSTANT",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B8-HS-DASHBOARD-METRICS-DERIVED-FROM-RECORD-CREATION-AND-DEFAULTS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-HS-UNMEASURED-VALUES-COERCED-TO-ZERO",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-HS-RESOLUTION-TIME-NEEDS-DATES-NO-ROUTE-SETS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-HS-STATS-ORGANIZATION-FILTER-FALLS-BACK-TO-ALWAYS-TRUE",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-ICRA-STEPWISE-FLOW-NEVER-REQUIRES-CONSENT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-SYNC-CONCURRENCY-GUARD-AND-INSTANCE-CACHE-ARE-PROCESS-LOCAL",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B8-FED-EXTERNAL-UPLOAD-CLIENT-CLAIMED-TYPE-SIZE-NO-SCAN-WHOLE-BLOB-READ",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-JUR-WCB-REPORTING-DEADLINE-SERVED-AS-ARBITRATION-DEADLINE",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B8-JUR-BC-TERMINATION-SCHEDULE-HAS-NO-TIER-ABOVE-EIGHT-YEARS",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B8-JUR-RULES-ROUTE-ACCEPTS-ANY-CODE-AND-ANSWERS-SUCCESS-WITH-NO-OR-WRONG-RULES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-JUR-LOCATION-CONSENT-IS-NOT-BOUND-TO-PURPOSE-ORGANIZATION-OR-STRIKE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-JUR-MEETING-ROOM-BOOKINGS-PATH-IS-THE-ROOM-ITEM-DELETE-ARCHIVES-THE-ROOM",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ASM-OCI-PATHS-WRAP-THE-OCRA-HANDLERS-BEHIND-AN-ORG-ACCESS-FUNCTION-THAT-RETURNS-TRUE-FOR-EVERY-REQUEST",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ORG-MEMBERSHIP-GUARD-IGNORES-MEMBER-STATUS-AND-REMOVAL-FLAG",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B9-ORG-ANCESTORS-ANY-SIGNED-IN-USER-READS-ANCESTRY-OF-ANY-ORGANIZATION-AS-SYSTEM",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B9-ORG-ANALYTICS-ANY-SIGNED-IN-USER-READS-ANY-ORGANIZATION-NAME-TYPE-CHILD-COUNT-AND-AGGREGATES-BY-PATH-ID",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B10-ORG-NLRB-AND-LABOUR-BOARD-FILING-ROUTES-RECORD-NO-FILING-AND-TRANSMIT-NOTHING",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-ORG-FORM-GENERATION-ROUTE-RETURNS-JSON-AND-THE-CLIENT-SAVES-IT-AS-THE-PDF",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-ORG-CLIENTS-CALL-CAMPAIGN-ITEM-AND-V2-ROUTES-THAT-ANSWER-NO-CAMPAIGN-DATA",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B10-PEN-MEMBERS-GET-IS-HELD-TO-THE-CALLER-OWN-ENROLMENT-AT-EVERY-ROLE",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B10-PIL-APPLICATION-OWNERSHIP-BEFORE-VERIFICATION-RESTS-ON-THE-ORGANIZATION-ID-THE-ANONYMOUS-APPLICANT-TYPED-INTO-THE-FORM",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PIL-PUBLIC-APPLICATION-RESPONSES-OBJECT-AND-ASSESSMENT-PASSTHROUGH-HAVE-NO-SIZE-OR-DEPTH-BOUND",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B10-PIL-PROPOSAL-SCORES-AND-CUSTOMER-SUCCESS-SIGNALS-ARE-COMPUTED-FROM-THE-APPLICANT-SELF-ASSESSED-READINESS-SCORE-AND-THE-STAGE-REACHED",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B10-PIL-REFERENCE-PROFILE-PRESENTS-A-DEFAULT-TESTIMONIAL-A-SIX-HOUR-FLOOR-AND-SCORE-DERIVED-FIGURES-AS-PILOT-OUTCOMES-AND-STORES-THEM-AS-A-VERSIONED-CASE-STUDY",
+    "severity": "HIGH"
+   },
+   {
+    "id": "DEF-0B11-PRP-PRECEDENT-SEARCH-USES-UNESCAPED-WILDCARD-LIKE-OVER-THE-FULL-TEXT-AND-CASTS-UNVALIDATED-FILTERS",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-PRP-JURISDICTION-PREFERENCES-HAVE-NO-UNIQUE-ROW-UNVALIDATED-FLAGS-AND-NO-SERVER-CONSUMER",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-PRP-PROFILE-ME-GET-SWALLOWS-DATABASE-ERRORS-INTO-A-SUCCESS-WITH-NULL-DATA",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-PRP-REWARDS-CRON-ANNIVERSARY-CREDIT-SCALE-IS-COMPUTED-AND-DISCARDED-AND-THE-AWARD-REASON-NAMES-THE-ORGANIZATION-UUID",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B11-RPT-BUILDER-AND-DATA-SOURCE-SAMPLE-PATHS-ARE-REPORT-DEFINITION-CRUD-AND-SAMPLE-NO-SOURCE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-SOC-SCHEDULED-POST-IS-PUBLISHED-AT-ONCE-ON-INSTAGRAM-X-AND-LINKEDIN-WHILE-THE-ROW-SAYS-SCHEDULED-AND-HASHTAGS-AND-MENTIONS-ARE-NOT-SENT",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-SOC-POSTS-ARE-NEVER-LINKED-TO-A-CAMPAIGN-SO-CAMPAIGN-METRICS-AND-THE-DELETE-GUARD-NEVER-SEE-A-POST",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-SOC-CAMPAIGN-CREATE-VALIDATES-GOALS-AND-STATUS-THEN-DISCARDS-THEM-AND-REPORTS-SUCCESS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B11-IDS-SATISFACTION-ANONYMITY-FLAG-IS-STORED-AND-NEVER-READ-WHILE-THE-FORM-PROMISES-THE-NAME-IS-HIDDEN",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-PLT-KPI-HEALTH-TREATS-A-LOWER-FIGURE-AS-WORSE-FOR-EVERY-TARGET",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-PLT-KPI-CALCULATION-AND-ALERT-FLAG-ARE-STORED-AND-APPLIED-BY-NO-CODE",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-PLT-ORGANIZATIONS-RESPONSE-FABRICATES-A-CREATION-TIME-FOR-A-ROW-WITHOUT-ONE",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B12-PLT-V2-CATCH-ALL-SUNSET-DATE-IS-A-CONSTANT-THAT-CHANGES-NO-ANSWER",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B12-PLT-QUEUE-STATUS-GIVES-ANY-SIGNED-IN-SESSION-THE-QUEUE-COUNTS-AND-RECENT-FAILED-TASK-NAMES",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-PLT-TRIAGE-REVOKE-CARRIES-THE-DESIGNATION-ID-IN-A-DELETE-BODY",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B12-PLT-VOCABULARY-ROUTES-SET-A-PUBLIC-ONE-HOUR-CACHE-ON-A-SIGNED-IN-RESPONSE",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B12-PLT-VOCABULARY-LAST-UPDATED-IS-THE-TIME-OF-THE-CALL-AND-THE-VERSION-IS-A-CONSTANT",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B12-PLT-VOICE-UPLOAD-CHECKS-THE-AI-SEARCH-ENTITLEMENT-AND-CONSUMES-NO-CREDIT",
+    "severity": "LOW"
+   },
+   {
+    "id": "DEF-0B12-WBK-START-STORES-AN-OPTIONAL-CONSENT-OBJECT-THAT-NO-ROUTE-READS",
+    "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B12-WBK-CHECKOUT-READS-THE-USER-OWNED-WORKBOOKS-TABLE-OUTSIDE-ANY-DATABASE-CONTEXT",
+    "severity": "MEDIUM"
+   }
+  ]
+ }
+}

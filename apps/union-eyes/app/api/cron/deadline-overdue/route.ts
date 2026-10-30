@@ -27,7 +27,7 @@ interface OverdueRow {
   due_date: string
 }
 
-export const GET = withApi(
+export const POST = withApi(
   {
     auth: { cron: true },
     openapi: {

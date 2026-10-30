@@ -94,12 +94,40 @@ describe('rewards/cron route', () => {
     expect(m.processScheduledAwards).toHaveBeenCalledTimes(2);
   });
 
-  it('returns healthy status on GET', async () => {
-    const { GET } = await loadRoute();
-    const response = await GET(new NextRequest('http://localhost/api/rewards/cron'));
-    const payload = await response.json();
+  // Gate 0 F01a: the GET reachability probe is removed; a scheduler posts, and a GET cannot reach the route's behaviour.
+  it('exports no GET handler', async () => {
+    const route = await loadRoute() as { GET?: unknown };
+    expect(route.GET).toBeUndefined();
+  });
 
-    expect(response.status).toBe(200);
-    expect(payload.service).toBe('rewards-cron');
+  it('accepts the secret in x-cron-secret (the header the scheduler sends) as well as a bearer token, and rejects a wrong or missing one', async () => {
+    const { POST } = await loadRoute();
+    const url = 'http://localhost/api/rewards/cron?task=scheduled';
+    expect((await POST(new NextRequest(url, { method: 'POST' }))).status).toBe(401);
+    expect((await POST(new NextRequest(url, { method: 'POST', headers: { 'x-cron-secret': 'wrong' } }))).status).toBe(401);
+    const viaHeader = await POST(new NextRequest(url, { method: 'POST', headers: { 'x-cron-secret': process.env.CRON_SECRET! } }));
+    const viaBearer = await POST(new NextRequest(url, { method: 'POST', headers: { authorization: `Bearer ${process.env.CRON_SECRET}` } }));
+    expect(viaHeader.status).not.toBe(401);
+    expect(viaBearer.status).not.toBe(401);
+  });
+
+  // Gate 0 F01 (DEF-0B11-PRP-REWARDS-CRON-REPORTS-SUCCESS-FOR-UNKNOWN-TASKS-AND-FAILED-ORGANIZATIONS)
+  it('refuses an unknown task with 400 and runs nothing', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/rewards/cron?task=bogus', { method: 'POST', headers: { authorization: `Bearer ${process.env.CRON_SECRET}` } }));
+    expect(response.status).toBe(400);
+    expect((await response.json()).error).toBe('UNKNOWN_TASK');
+    expect(m.processAnniversaryAwards).not.toHaveBeenCalled();
+    expect(m.db.query.organizations.findMany).not.toHaveBeenCalled();
+  });
+
+  it('answers 500, naming the failing organizations and keeping the counts, when any organization task is rejected', async () => {
+    const orgs = await m.db.query.organizations.findMany();
+    m.processAnniversaryAwards.mockImplementation(async (id: string) => { if (id === orgs[0].id) throw new Error('boom'); return { processed: 1 }; });
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/rewards/cron?task=anniversaries', { method: 'POST', headers: { authorization: `Bearer ${process.env.CRON_SECRET}` } }));
+    expect(response.status).toBe(500);
+    const body = await response.json();
+    expect(body).toMatchObject({ success: false, failed: 1, succeeded: orgs.length - 1, failures: [{ scope: `anniversaries:${orgs[0].id}` }] });
   });
 });

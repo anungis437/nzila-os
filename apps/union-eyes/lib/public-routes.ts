@@ -10,6 +10,8 @@
  * @module lib/public-routes
  */
 
+import scheduledJobs from './operations/scheduled-jobs.json';
+
 /**
  * Public API routes that don&apos;t require authentication
  * 
@@ -102,16 +104,9 @@ export const PUBLIC_API_ROUTES = new Set([
  * SECURITY: These routes check X-CRON-SECRET header matches CRON_SECRET env var
  * Justification: Background jobs must run without user authentication
  */
-export const CRON_API_ROUTES = new Set([
-  '/api/cron/analytics/daily-metrics',  // Daily analytics aggregation
-  '/api/cron/education-reminders',      // Send education course reminders
-  '/api/cron/monthly-dues',             // Process monthly dues payments
-  '/api/cron/monthly-per-capita',       // CLC per-capita reporting
-  '/api/cron/overdue-notifications',    // Send overdue claim notifications
-  '/api/cron/scheduled-reports',        // Generate scheduled reports
-  '/api/rewards/cron',                  // Process rewards point expiration
-  '/api/cron/external-data-sync',       // Sync data from external systems
-]);
+// Derived from the scheduled-jobs manifest, the one place a scheduled route is declared, so the edge check cannot drift from the
+// jobs that are actually scheduled. (The path is matched without its query string.)
+export const CRON_API_ROUTES = new Set<string>(scheduledJobs.jobs.map((job) => job.path.split('?')[0]));
 
 // =============================================================================
 // PUBLIC & CRON ROUTE HELPERS

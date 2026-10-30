@@ -3,13 +3,12 @@
  * Runs scheduled tasks for automated awards, expiration warnings, etc.
  * 
  * This should be triggered by:
- * - Vercel Cron Jobs (vercel.json)
- * - External cron service (cron-job.org, etc.)
- * - Self-hosted cron daemon
+ * - the scheduled job declared in lib/operations/scheduled-jobs.json (POST, x-cron-secret)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { timingSafeEqual } from 'crypto';
+import { cronSecretMatches } from '@/lib/api/cron-secret';
+import { jobResponse, type JobFailure } from '@/lib/operations/job-result';
 import { db } from '@/db';
 import { processAnniversaryAwards, processScheduledAwards } from '@/lib/services/rewards/automation-service';
 import { sendBatchExpirationWarnings } from '@/lib/services/rewards/notification-service';
@@ -25,32 +24,35 @@ import {
  * 
  * Query Parameters:
  * - task: 'anniversaries' | 'expirations' | 'scheduled' | 'all'
- * - secret: Verification token to prevent unauthorized execution
  * 
- * Security: Requires CRON_SECRET environment variable
+ * Security: the cron secret (CRON_SECRET_KEY or CRON_SECRET), presented as x-cron-secret or a bearer token
  */
+const TASKS = ['anniversaries', 'expirations', 'scheduled', 'all'] as const;
+
+/** An organization task fails when it rejects, and also when it resolves with its own success flag false (it reports rather than throws). */
+function organizationFailure(task: string, organizationId: string, result: PromiseSettledResult<unknown>): JobFailure | null {
+  if (result.status === 'rejected') return { scope: `${task}:${organizationId}`, reason: 'organization task rejected' };
+  if ((result.value as { success?: boolean } | undefined)?.success === false) return { scope: `${task}:${organizationId}`, reason: 'organization task reported failure' };
+  return null;
+}
+
 export async function POST(request: NextRequest) {
   try {
-    // 1. Verify cron secret (timing-safe comparison)
-    const authHeader = request.headers.get('authorization');
-    const secret = authHeader?.replace('Bearer ', '') ?? '';
-    const expected = process.env.CRON_SECRET ?? '';
-    if (!expected) {
-      return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'CRON_SECRET not configured');
-    }
-    const secretBuf = Buffer.from(secret);
-    const expectedBuf = Buffer.from(expected);
-
-    if (secretBuf.length !== expectedBuf.length || !timingSafeEqual(secretBuf, expectedBuf)) {
-      return standardErrorResponse(
-      ErrorCode.AUTH_REQUIRED,
-      'Unauthorized'
-    );
+    // 1. Verify the cron secret with the rule shared with the edge check and withApi (lib/api/cron-secret.ts):
+    // x-cron-secret or a bearer token, CRON_SECRET_KEY then CRON_SECRET, constant time, unset never matches.
+    if (!(await cronSecretMatches(request.headers))) {
+      return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
     }
 
     // 2. Get task parameter
     const searchParams = request.nextUrl.searchParams;
     const task = searchParams.get('task') || 'all';
+    // An unknown task executes nothing, so it is refused instead of answering success for work that never ran.
+    if (!TASKS.includes(task as (typeof TASKS)[number])) {
+      return NextResponse.json({ success: false, error: 'UNKNOWN_TASK', allowed: TASKS }, { status: 400 });
+    }
+    const failures: JobFailure[] = [];
+    let succeeded = 0;
 
     const results: { timestamp: string; task: string; executed: Array<Record<string, unknown>> } = {
       timestamp: new Date().toISOString(),
@@ -69,6 +71,11 @@ const anniversaryResults = await Promise.allSettled(
         organizations.map((org) => processAnniversaryAwards(org.id))
       );
       
+      anniversaryResults.forEach((r, i) => {
+        const failure = organizationFailure('anniversaries', organizations[i].id, r);
+        if (failure) failures.push(failure);
+        else succeeded += 1;
+      });
       results.executed.push({
         task: 'anniversaries',
         organizations: organizations.length,
@@ -76,14 +83,16 @@ const anniversaryResults = await Promise.allSettled(
           orgId: organizations[i].id,
           status: r.status,
           data: r.status === 'fulfilled' ? r.value : undefined,
-          error: r.status === 'rejected' ? r.reason : undefined,
+          error: r.status === 'rejected' ? String(r.reason instanceof Error ? r.reason.message : r.reason) : undefined,
         })),
       });
     }
 
     if (task === 'expirations' || task === 'all') {
 const expirationResult = await sendBatchExpirationWarnings();
-      
+      // The batch carries its own success flag; wrapping it in a successful run would hide a failed one.
+      if ((expirationResult as { success?: boolean } | undefined)?.success === false) failures.push({ scope: 'expirations', reason: 'expiration warnings reported failure' });
+      else succeeded += 1;
       results.executed.push({
         task: 'expirations',
         result: expirationResult,
@@ -95,6 +104,11 @@ const scheduledResults = await Promise.allSettled(
         organizations.map((org) => processScheduledAwards(org.id))
       );
       
+      scheduledResults.forEach((r, i) => {
+        const failure = organizationFailure('scheduled', organizations[i].id, r);
+        if (failure) failures.push(failure);
+        else succeeded += 1;
+      });
       results.executed.push({
         task: 'scheduled',
         organizations: organizations.length,
@@ -102,13 +116,17 @@ const scheduledResults = await Promise.allSettled(
           orgId: organizations[i].id,
           status: r.status,
           data: r.status === 'fulfilled' ? r.value : undefined,
-          error: r.status === 'rejected' ? r.reason : undefined,
+          error: r.status === 'rejected' ? String(r.reason instanceof Error ? r.reason.message : r.reason) : undefined,
         })),
       });
     }
-return NextResponse.json({
-      success: true,
-      data: results,
+// 200 only when nothing failed; any rejected organization task makes the run 500 with the failing scopes in the body.
+    return jobResponse({
+      job: 'rewards-cron',
+      attempted: succeeded + failures.length,
+      succeeded,
+      failures,
+      details: { data: results },
     });
   } catch (_error: any) {
     return NextResponse.json(
@@ -117,21 +135,3 @@ return NextResponse.json({
     );
   }
 }
-
-/**
- * GET handler — reachability probe only.
- *
- * Returns `reachable: true` when the process is up. Does NOT assert that
- * scheduled tasks are running or that the reward pipeline is healthy —
- * that would require checking queue depth, worker heartbeat, and last
- * successful run, none of which are wired here. Do not mistake this
- * probe for an operational status.
- */
-export async function GET(_request: NextRequest) {
-  return NextResponse.json({
-    reachable: true,
-    service: 'rewards-cron',
-    timestamp: new Date().toISOString(),
-  });
-}
-

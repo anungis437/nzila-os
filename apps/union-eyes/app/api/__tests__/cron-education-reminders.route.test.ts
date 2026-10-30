@@ -43,7 +43,7 @@ describe('cron/education-reminders route', () => {
       (_config: unknown, handler: () => Promise<unknown>) =>
         async (_request: NextRequest) => {
           const result = await handler();
-          return new Response(JSON.stringify(result), { status: 200 });
+          return result instanceof Response ? result : new Response(JSON.stringify(result), { status: 200 });
         },
     );
     m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
@@ -51,11 +51,11 @@ describe('cron/education-reminders route', () => {
     m.batchSendExpiryWarnings.mockResolvedValue({ sent: 0, failed: 0, errors: [] });
   });
 
-  it('GET returns success with empty reminder batches', async () => {
-    const { GET } = await loadRoute();
+  it('POST returns success with empty reminder batches', async () => {
+    const { POST } = await loadRoute();
     m.executeQueue.push([], []);
 
-    const response = await GET(new NextRequest('http://localhost/api/cron/education-reminders'));
+    const response = await POST(new NextRequest('http://localhost/api/cron/education-reminders'));
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.success).toBe(true);
@@ -63,8 +63,8 @@ describe('cron/education-reminders route', () => {
     expect(json.results.expiryWarnings.sent).toBe(0);
   });
 
-  it('GET processes session reminders when query returns rows', async () => {
-    const { GET } = await loadRoute();
+  it('POST processes session reminders when query returns rows', async () => {
+    const { POST } = await loadRoute();
     m.executeQueue.push(
       [
         {
@@ -85,15 +85,30 @@ describe('cron/education-reminders route', () => {
     );
     m.batchSendSessionReminders.mockResolvedValueOnce({ sent: 1, failed: 0, errors: [] });
 
-    const response = await GET(new NextRequest('http://localhost/api/cron/education-reminders'));
+    const response = await POST(new NextRequest('http://localhost/api/cron/education-reminders'));
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.results.sessionReminders.sent).toBe(1);
     expect(m.batchSendSessionReminders).toHaveBeenCalledTimes(1);
   });
 
-  it('GET processes expiry warnings when query returns rows', async () => {
-    const { GET } = await loadRoute();
+  it('POST answers 500 naming the failed batch when sends fail, keeping the counts', async () => {
+    const { POST } = await loadRoute();
+    m.executeQueue.push(
+      [{ email: 'member@example.com', first_name: 'Sam', last_name: 'Member', course_name: 'Steward Training', session_date: '2026-07-01', days_until: 3 }],
+      [],
+    );
+    m.batchSendSessionReminders.mockResolvedValueOnce({ sent: 0, failed: 1, errors: ['smtp refused'] });
+
+    const response = await POST(new NextRequest('http://localhost/api/cron/education-reminders'));
+    expect(response.status).toBe(500);
+    const json = await response.json();
+    expect(json).toMatchObject({ success: false, failed: 1, failures: [{ scope: 'session-reminders' }] });
+    expect(json.results.sessionReminders.failed).toBe(1);
+  });
+
+  it('POST processes expiry warnings when query returns rows', async () => {
+    const { POST } = await loadRoute();
     m.executeQueue.push(
       [],
       [
@@ -110,27 +125,27 @@ describe('cron/education-reminders route', () => {
     );
     m.batchSendExpiryWarnings.mockResolvedValueOnce({ sent: 1, failed: 0, errors: [] });
 
-    const response = await GET(new NextRequest('http://localhost/api/cron/education-reminders'));
+    const response = await POST(new NextRequest('http://localhost/api/cron/education-reminders'));
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.results.expiryWarnings.sent).toBe(1);
     expect(m.batchSendExpiryWarnings).toHaveBeenCalledTimes(1);
   });
 
-  it('GET calls withSystemContext for both queries', async () => {
-    const { GET } = await loadRoute();
+  it('POST calls withSystemContext for both queries', async () => {
+    const { POST } = await loadRoute();
     m.executeQueue.push([], []);
 
-    const response = await GET(new NextRequest('http://localhost/api/cron/education-reminders'));
+    const response = await POST(new NextRequest('http://localhost/api/cron/education-reminders'));
     expect(response.status).toBe(200);
     expect(m.withSystemContext).toHaveBeenCalledTimes(2);
   });
 
-  it('GET includes timestamp and message in response', async () => {
-    const { GET } = await loadRoute();
+  it('POST includes timestamp and message in response', async () => {
+    const { POST } = await loadRoute();
     m.executeQueue.push([], []);
 
-    const response = await GET(new NextRequest('http://localhost/api/cron/education-reminders'));
+    const response = await POST(new NextRequest('http://localhost/api/cron/education-reminders'));
     const json = await response.json();
     expect(typeof json.results.timestamp).toBe('string');
     expect(json.message).toContain('Education reminders processed successfully');

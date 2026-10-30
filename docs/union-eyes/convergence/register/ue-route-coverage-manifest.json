@@ -2,7 +2,7 @@
  "register": "UE-CONV-K-008",
  "summary": {
   "routes": 997,
-  "mutating": 717,
+  "mutating": 726,
   "kernel": 62,
   "byGuard": {
    "ADMIN_AUTH": 7,
@@ -29,27 +29,27 @@
    "NONE": 8,
    "ORG_AUTH": 32,
    "PLATFORM_AUTH_HANDLER": 7,
-   "RETIRED": 69,
+   "RETIRED": 75,
    "ROLE_AUTH": 73,
    "SESSION_AUTH": 34,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 184
+   "WITH_API": 187
   },
   "mutatingByAudit": {
    "ATOMIC": 151,
-   "ATOMIC_SERVICE": 150,
-   "COMPUTE_ONLY": 34,
+   "ATOMIC_SERVICE": 152,
+   "COMPUTE_ONLY": 35,
    "CRUD_ATOMIC": 275,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 23,
    "NO_WRITES_FOUND": 14,
-   "NONE": 68
+   "NONE": 74
   },
   "mutatingByData": {
    "AMBIENT_DB": 15,
    "CRUD_TENANT_TX": 275,
-   "NONE": 207,
-   "SYSTEM_CONTEXT": 59,
+   "NONE": 213,
+   "SYSTEM_CONTEXT": 62,
    "TENANT_TX": 161
   }
  },
@@ -4673,14 +4673,14 @@
   {
    "route": "cron/analytics/daily-metrics/route.ts",
    "methods": [
-    "GET"
+    "POST"
    ],
-   "mutating": false,
+   "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "READ_ONLY"
+   "audit": "NONE"
   },
   {
    "route": "cron/billing-lifecycle/route.ts",
@@ -4709,31 +4709,30 @@
   {
    "route": "cron/deadline-overdue/route.ts",
    "methods": [
-    "GET"
+    "POST"
    ],
-   "mutating": false,
+   "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "READ_ONLY"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "cron/deadline-reminders/route.ts",
    "methods": [
-    "GET"
+    "POST"
    ],
-   "mutating": false,
+   "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "READ_ONLY"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "cron/document-intake-reaper/route.ts",
    "methods": [
-    "GET",
     "POST"
    ],
    "mutating": true,
@@ -4746,19 +4745,18 @@
   {
    "route": "cron/education-reminders/route.ts",
    "methods": [
-    "GET"
+    "POST"
    ],
-   "mutating": false,
+   "mutating": true,
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "READ_ONLY"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "cron/external-data-sync/route.ts",
    "methods": [
-    "GET",
     "POST"
    ],
    "mutating": true,
@@ -4771,7 +4769,6 @@
   {
    "route": "cron/location-retention/route.ts",
    "methods": [
-    "GET",
     "POST"
    ],
    "mutating": true,
@@ -4784,19 +4781,18 @@
   {
    "route": "cron/monthly-dues/route.ts",
    "methods": [
-    "GET"
+    "POST"
    ],
-   "mutating": false,
+   "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "READ_ONLY"
+   "audit": "NONE"
   },
   {
    "route": "cron/monthly-per-capita/route.ts",
    "methods": [
-    "GET",
     "POST"
    ],
    "mutating": true,
@@ -4821,50 +4817,50 @@
   {
    "route": "cron/overdue-notifications/route.ts",
    "methods": [
-    "GET"
+    "POST"
    ],
-   "mutating": false,
+   "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "READ_ONLY"
+   "audit": "NONE"
   },
   {
    "route": "cron/process-messages/route.ts",
    "methods": [
-    "GET"
+    "POST"
    ],
-   "mutating": false,
+   "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "READ_ONLY"
+   "audit": "NONE"
   },
   {
    "route": "cron/process-notifications/route.ts",
    "methods": [
-    "GET"
+    "POST"
    ],
-   "mutating": false,
+   "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "READ_ONLY"
+   "audit": "NONE"
   },
   {
    "route": "cron/scheduled-reports/route.ts",
    "methods": [
-    "GET"
+    "POST"
    ],
-   "mutating": false,
+   "mutating": true,
    "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "READ_ONLY"
+   "audit": "NONE"
   },
   {
    "route": "cron/sla-watchdog/route.ts",
@@ -11343,7 +11339,6 @@
   {
    "route": "rewards/cron/route.ts",
    "methods": [
-    "GET",
     "POST"
    ],
    "mutating": true,

@@ -117,26 +117,31 @@ describe('DEF-0B10-PEN-TRUSTEE-MEETING-READS confidential read containment', () 
     m.audit.mockRejectedValueOnce(new Error('audit unavailable'))
     await expect((GET as any)({ organizationId: 'org-a', userId: 'user-a', request: { url: 'http://localhost/api/pension/trustee-meetings' } })).rejects.toThrow('audit unavailable')
   })
-  it('binds trustee meeting creation to the authenticated actor and tenant, ignoring spoofed body identities', async () => {
+  it('binds trustee meeting creation to the authenticated actor and tenant, refusing spoofed body identities', async () => {
     const { POST } = await import('../pension/trustee-meetings/route')
     let inserted: Record<string, unknown> | undefined
+    const insertingTx = (operation: (tx: unknown) => Promise<unknown>) => operation({
+      insert: () => ({
+        values: (value: Record<string, unknown>) => {
+          inserted = value
+          return { returning: async () => [{ id: 'meeting-new', ...value }] }
+        },
+      }),
+    })
+    // The scheduling schema is strict: a body that names another tenant or user is refused, and nothing is written.
+    await expect((POST as any)({
+      organizationId: 'org-a', userId: 'user-a',
+      body: { title: 'Trustee review', scheduledDate: '2026-11-01', organizationId: 'org-b', userId: 'user-b' },
+    })).rejects.toThrow('Invalid trustee meeting scheduling fields')
+    expect(inserted).toBeUndefined()
+
     m.rls.mockImplementationOnce(async (context: unknown, operation: (tx: unknown) => Promise<unknown>) => {
       expect(context).toEqual({ organizationId: 'org-a', userId: 'user-a' })
-      return operation({
-        insert: () => ({
-          values: (value: Record<string, unknown>) => {
-            inserted = value
-            return { returning: async () => [{ id: 'meeting-new', ...value }] }
-          },
-        }),
-      })
+      return insertingTx(operation)
     })
     const result = await (POST as any)({
       organizationId: 'org-a', userId: 'user-a',
-      body: {
-        title: 'Trustee review', scheduledDate: '2026-11-01',
-        organizationId: 'org-b', userId: 'user-b',
-      },
+      body: { title: 'Trustee review', scheduledDate: '2026-11-01' },
     })
     expect(inserted).toMatchObject({ organizationId: 'org-a', title: 'Trustee review' })
     expect(inserted).not.toHaveProperty('userId')

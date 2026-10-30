@@ -11,6 +11,7 @@ import { withSystemContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db';
 import { logger } from "@/lib/logger";
 import { withApi } from '@/lib/api/framework';
+import { jobResponse, type JobFailure } from '@/lib/operations/job-result';
 import {
   batchSendSessionReminders,
   batchSendExpiryWarnings,
@@ -20,14 +21,14 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 /**
- * GET /api/cron/education-reminders
+ * POST /api/cron/education-reminders
  * Automated job to send:
  * - Session reminders (7, 3, 1 day before)
  * - Certification expiry warnings (90, 30 days before)
  * 
  * Runs daily at 6 AM via Vercel Cron
  */
-export const GET = withApi(
+export const POST = withApi(
   {
     auth: { cron: true },
     openapi: { tags: ['Cron'], summary: 'Send education reminders and certification expiry warnings' },
@@ -170,12 +171,26 @@ export const GET = withApi(
       logger.info("No expiry warnings to send today");
     }
 
-    // Return summary
-    return {
-      success: true,
-      results,
-      message: "Education reminders processed successfully",
-    };
+    const failures: JobFailure[] = [];
+    if (results.sessionReminders.failed > 0) {
+      failures.push({ scope: 'session-reminders', reason: `${results.sessionReminders.failed} send(s) failed` });
+    }
+    if (results.expiryWarnings.failed > 0) {
+      failures.push({ scope: 'expiry-warnings', reason: `${results.expiryWarnings.failed} send(s) failed` });
+    }
+
+    return jobResponse({
+      job: 'education-reminders',
+      attempted: 2,
+      succeeded: 2 - failures.length,
+      failures,
+      details: {
+        results,
+        message: failures.length === 0
+          ? "Education reminders processed successfully"
+          : "Education reminders processed with failed sends",
+      },
+    });
   },
 );
 

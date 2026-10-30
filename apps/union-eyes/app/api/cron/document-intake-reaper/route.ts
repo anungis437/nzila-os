@@ -18,5 +18,4 @@ const handler = withApi(
   async () => ({ ...(await runIntakeReaper(blobIntakeStorage)) }),
 );
 
-export const GET = handler;
 export const POST = handler;
