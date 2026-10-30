@@ -1,3 +1,6 @@
+vi.mock('@/lib/ai/require-grievance-ai-case', () => ({
+  requireGrievanceAiCaseAccess: vi.fn(async () => undefined),
+}));
 /**
  * Unit Tests — Grievance Triage AI Service
  *

@@ -1,6 +1,8 @@
+vi.mock('@/lib/ai/require-grievance-ai-case', () => ({ requireGrievanceAiCaseAccess: mockRequireCase }));
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockFindFirst, mockInsertValues, mockGenerate } = vi.hoisted(() => ({
+const { mockFindFirst, mockInsertValues, mockGenerate, mockRequireCase } = vi.hoisted(() => ({
+  mockRequireCase: vi.fn(),
   mockFindFirst: vi.fn(),
   mockInsertValues: vi.fn(),
   mockGenerate: vi.fn(),
@@ -64,6 +66,7 @@ import { analyzeGrievance } from '../grievance-triage';
 describe('analyzeGrievance', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockRequireCase.mockResolvedValue(undefined);
     audit.mockResolvedValue(undefined);
     operation.mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn());
     mockFindFirst.mockResolvedValue({
@@ -94,6 +97,18 @@ describe('analyzeGrievance', () => {
     });
     expect(result.available).toBe(true);
     expect(result.data).toBeDefined();
+  });
+
+  it('never reads grievance content or calls an AI provider without live case authority', async () => {
+    mockRequireCase.mockRejectedValueOnce(new Error('Case access required'));
+    await expect(analyzeGrievance({
+      grievanceId: 'foreign-case', organizationId: 'org-1', userId: 'user-1',
+    })).rejects.toThrow('Case access required');
+    expect(mockFindFirst).not.toHaveBeenCalled();
+    expect(mockGenerate).not.toHaveBeenCalled();
+    expect(operation).not.toHaveBeenCalled();
+    expect(mockInsertValues).not.toHaveBeenCalled();
+    expect(audit).not.toHaveBeenCalled();
   });
 
   it('throws when grievance not found', async () => {

@@ -15,6 +15,7 @@
 
 import { randomUUID } from 'crypto';
 import { db } from '@/db/db';
+import { requireGrievanceAiCaseAccess } from '@/lib/ai/require-grievance-ai-case';
 import { eq, and, desc } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -65,6 +66,7 @@ export async function suggestClausesForGrievance(
   input: ClauseReasoningInput,
 ): Promise<AiResponseEnvelope<ClauseReasoningResult>> {
   const { grievanceId, organizationId, userId } = input;
+  await requireGrievanceAiCaseAccess({ grievanceId, organizationId, userId });
 
   // 1. Fetch grievance
   const grievance = await db.query.grievances.findFirst({
@@ -170,6 +172,7 @@ export async function explainClauseRelevance(
   organizationId: string,
   userId: string,
 ): Promise<AiResponseEnvelope<{ reasoning: string; strength: string }>> {
+  await requireGrievanceAiCaseAccess({ grievanceId, organizationId, userId });
   const grievance = await db.query.grievances.findFirst({
     where: and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId)),
   });

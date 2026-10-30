@@ -20,6 +20,7 @@
 
 import { randomUUID } from 'crypto';
 import { db } from '@/db/db';
+import { requireGrievanceAiCaseAccess } from '@/lib/ai/require-grievance-ai-case';
 import { eq, and, desc } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -91,6 +92,7 @@ export async function analyzeGrievance(
   input: TriageInput,
 ): Promise<AiResponseEnvelope<TriageResult>> {
   const { grievanceId, organizationId, userId } = input;
+  await requireGrievanceAiCaseAccess({ grievanceId, organizationId, userId });
 
   // 1. Fetch grievance
   const grievance = await db.query.grievances.findFirst({

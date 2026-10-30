@@ -13,6 +13,7 @@ import { requireEntitlement } from '@/services/platform-economics/entitlement-gu
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { enforceAISafety } from '@nzila/policies';
 import { operationAuditResponse } from '@/lib/audit/operation-audit';
+import { GrievanceAiCaseAccessDenied } from '@/lib/ai/require-grievance-ai-case';
 
 export const POST = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
   const { userId, organizationId } = context;
@@ -53,6 +54,8 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
 
     return NextResponse.json(result);
   } catch (error) {
+    if (error instanceof GrievanceAiCaseAccessDenied)
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Case access required');
     const refused = operationAuditResponse(error);
     if (refused) return standardErrorResponse(ErrorCode.CONFLICT, refused.body.error.message);
     throw error;
