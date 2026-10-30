@@ -46,6 +46,23 @@ describe('UE-INST-AUDIT-HISTORY-READERS — full audit exposure floor', () => {
     m.resolveAccess.mockResolvedValue({ platform: false, direct: new Map([[own, 'admin']]), descendants: new Set() });
     await expect(requireOrganizationAuditReader('u', own)).resolves.toBe(own);
   });
+  it('all three full-history endpoints require direct-tenant mandate before a projected SELECT', async () => {
+    const { readFileSync } = await import('node:fs');
+    const { resolve } = await import('node:path');
+    const appRoot = resolve(__dirname, '../../../');
+    for (const relativePath of [
+      'app/api/audits/route.ts',
+      'app/api/audits/[id]/route.ts',
+      'app/api/compliance/audit-logs/route.ts',
+    ]) {
+      const src = readFileSync(resolve(appRoot, relativePath), 'utf8');
+      expect(src).toContain('requireOrganizationAuditReader(userId, organizationId)');
+      expect(src).toContain('.select(ORGANIZATION_AUDIT_PROJECTION)');
+      expect(src).not.toMatch(/\\.select\\(\\)/);
+      expect(src).toMatch(/rlsOrgContext:\\s*true/);
+    }
+  });
+
   it('never selects request-network identifiers, full payloads, or arbitrary metadata', () => {
     expect(Object.keys(ORGANIZATION_AUDIT_PROJECTION)).toEqual([
       'auditId', 'organizationId', 'userId', 'action', 'resourceType',

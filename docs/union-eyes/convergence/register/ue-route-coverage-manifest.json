@@ -2020,7 +2020,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -2032,7 +2032,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {

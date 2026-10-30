@@ -2,7 +2,7 @@
  * GET POST /api/compliance/audit-logs
  * Compliance audit logs backed by PostgreSQL.
  */
-import { withApi, ApiError, z } from '@/lib/api/framework';
+import { withApi, z } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { requireOrganizationAuditReader, ORGANIZATION_AUDIT_PROJECTION } from '@/lib/audit/org-audit-reader';
 import { withRLSContext } from '@/lib/db/with-rls-context';
