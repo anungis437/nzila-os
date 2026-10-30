@@ -76,7 +76,7 @@
     "note": "Milestones and evidence are transcribed as prior claims; this run has not independently re-executed those proofs."
   },
   "lastInspectedBranch": "agents/ue-cursor-final-closure",
-  "lastInspectedCommit": "fc4d4769c556fda1b3ecf5053c3e731aa30c2637",
+  "lastInspectedCommit": "3bf040002bd32de32843e15bd0662c1c933ee7fc",
   "summary": {
     "allRecordedDefects": 777,
     "bySeverity": {
@@ -86,7 +86,7 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 19,
+    "withCurrentRunSourceOrRegressionWork": 21,
     "closed": 0,
     "overallGO": false
   },
@@ -255,6 +255,12 @@
     {
       "sha": "3924e6b7914a7c716d713265370a38c36a199089",
       "description": "Fix 0B.8 health-safety incident trend cross-tenant aggregation: authenticated tenant only, explicit SQL predicate in daily/monthly queries, transaction RLS binding, no query-selected org or unscoped fallback; new adversarial unit tests pending exact-SHA CI."
+    }
+  ,
+    {
+      "sha": "56d01efc994254cfbc4fe00aa2c492dd110fab7c",
+      "sourceSha": "ac79a84d423427b3edc89f3beefc6c940604d776",
+      "description": "Contain two 0B.10 HIGH findings: platform MRR/churn/unit-economics now return honest 501 rather than fabricated zeros; confidential pension trustee meeting GETs require pension financial administrator, tenant-bound transaction and mandatory read audit with bounded pagination. Add adversarial unit tests and reconcile dashboard export guard in mutable 995-route manifest. No native/runtime or institutional acceptance claimed."
     }
   ],
   "records": [
@@ -10351,8 +10357,21 @@
       "title": "GET /api/pension/trustee-meetings and GET /api/pension/trustee-meetings/[id] require only the member floor and return every column of the meeting rows of the organization, including the agenda, the minutes text and the untyped attendees array, to every member: no role, trustee identity or decision names who may read the minutes of the pension trustees, the list is unbounded, and the trustee administration that would define a reader is not implemented.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/pension/trustee-meetings/route.ts",
+          "apps/union-eyes/app/api/pension/trustee-meetings/[id]/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/pension-trustee-meeting-confidentiality.route.test.ts"
+        ],
+        "sourceCommit": "ac79a84d423427b3edc89f3beefc6c940604d776",
+        "testCommit": "56d01efc994254cfbc4fe00aa2c492dd110fab7c",
+        "repair": "Restricts confidential meeting list and item GET to existing pension financial administrator role, binds tenant and actor in RLS transaction, audits read before response, paginates list, refuses missing context and unknown item.",
+        "limits": "Engineering role floor is not an issued trustee mandate. Native PG15/16, actual member/treasurer HTTP/browser isolation, audit persistence and full trustee administration journeys are not yet verified."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
     },
@@ -11234,8 +11253,22 @@
       "title": "GET /api/platform/metrics/mrr, GET /api/platform/metrics/churn and GET /api/platform/metrics/unit-economics are three copies of one handler that ignores the request, reads no table and returns the fixed object activeUsers 0, requestsToday 0, errorRate 0 under the OpenAPI summary System metrics: a caller that asks for monthly recurring revenue, churn or unit economics receives zeros for three system-usage keys that are none of those figures (no mrr, churn or unit-economics key exists), presented with HTTP 200 as aggregated system metrics, although the subscription event, MRR snapshot and customer acquisition tables exist in the financial service schema and no route under app/api reads them.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/platform/metrics/mrr/route.ts",
+          "apps/union-eyes/app/api/platform/metrics/churn/route.ts",
+          "apps/union-eyes/app/api/platform/metrics/unit-economics/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/platform-financial-metrics-unavailable.route.test.ts"
+        ],
+        "sourceCommit": "ac79a84d423427b3edc89f3beefc6c940604d776",
+        "testCommit": "56d01efc994254cfbc4fe00aa2c492dd110fab7c",
+        "repair": "Removed fixed HTTP 200 usage counters from three platform financial metric routes; system-admin authentication and explicit private no-store HTTP 501 until actual MRR/churn/unit-economics sources and platform authority are qualified.",
+        "limits": "Containment only. Financial metrics calculation, reconciliation, authority mandate, PostgreSQL and real HTTP acceptance remain unimplemented/unverified. No zero or outcome is claimed."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
     },
@@ -14542,6 +14575,20 @@
       "evidence": "Exact-SHA GitHub Actions 2026-10-30: whole Vitest FAIL 2 tests (21208 pass, 28 skipped): obsolete organizations CRUD-policy expectation and stale sharing-settings generic CRUD mock; whole contract and financial PASS, security PASS, native PostgreSQL 15/16 PASS, disposable HTTP/browser PASS, App Floor PASS, governance PASS. Follow-up f94d7dd source/tests not verified by this evidence.",
       "source": "PATCHED_AFTER_SHA",
       "unit": "FAIL_2_STALE_TESTS",
+      "contract": "PASS",
+      "financial": "PASS",
+      "native": "PASS_PG15_AND_PG16",
+      "security": "PASS",
+      "httpBrowser": "PASS",
+      "appFloor": "PASS",
+      "governance": "PASS",
+      "go": "NO_GO"
+    },
+    {
+      "inspectedSha": "3bf040002bd32de32843e15bd0662c1c933ee7fc",
+      "evidence": "Exact-SHA GitHub Actions on 2026-10-30: whole Vitest FAIL 2 route-coverage-manifest tests (21216 passed, 28 skipped), due to dashboard export guard stale in mutable manifest; contract, financial, security, native PostgreSQL acceptance, disposable HTTP/browser, App Floor and governance attestation PASS. Manifest corrected at ac79a84d; no results transferred to newer SHAs.",
+      "source": "PATCHED_AFTER_SHA",
+      "unit": "FAIL_2_ROUTE_MANIFEST_TESTS",
       "contract": "PASS",
       "financial": "PASS",
       "native": "PASS_PG15_AND_PG16",
