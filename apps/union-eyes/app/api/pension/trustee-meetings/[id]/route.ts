@@ -2,7 +2,6 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { PENSION_ADMIN_ROLES } from '@/lib/pension/pension-authority';
-import { db } from '@/db/db';
 import { pensionTrusteeMeetings } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { z } from 'zod';
@@ -21,16 +20,27 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: true, minRole: 'member' },
-    openapi: { tags: ['Pension'], summary: 'Get trustee meeting', description: 'Get a single trustee meeting by ID' },
+    auth: { required: true, roles: PENSION_ADMIN_ROLES },
+    openapi: { tags: ['Pension'], summary: 'Get trustee meeting (pension financial administrator only)', description: 'Tenant-scoped, audited confidential trustee meeting' },
   },
-  async ({ params, organizationId }) => {
+  async ({ params, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.forbidden('Pension organization context required');
     const id = params.id;
-    const [meeting] = await db
-      .select()
-      .from(pensionTrusteeMeetings)
-      .where(and(eq(pensionTrusteeMeetings.id, id), eq(pensionTrusteeMeetings.organizationId, organizationId!)));
-    return meeting ?? null;
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+      const [meeting] = await tx
+        .select()
+        .from(pensionTrusteeMeetings)
+        .where(and(eq(pensionTrusteeMeetings.id, id), eq(pensionTrusteeMeetings.organizationId, organizationId)));
+      if (!meeting) throw ApiError.notFound('Trustee meeting');
+      await persistAtomicAudit(tx, {
+        organizationId, userId,
+        action: 'pension.trustee_meeting.read',
+        resourceType: 'pension_trustee_meetings',
+        resourceId: id,
+        details: { meetingId: id },
+      });
+      return meeting;
+    });
   },
 );
 

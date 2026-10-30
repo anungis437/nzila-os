@@ -14,10 +14,10 @@
    "ORG_AUTH": 53,
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 75,
-   "ROLE_AUTH": 125,
+   "ROLE_AUTH": 124,
    "SESSION_AUTH": 64,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 293,
+   "WITH_API": 294,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -4898,7 +4898,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
