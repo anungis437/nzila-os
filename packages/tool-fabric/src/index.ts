@@ -63,6 +63,8 @@ export {
   LedgerDuplicateError,
 } from './ledger-store'
 export type { AtomicTrustLedgerStore, LedgerHead, LedgerSnapshot, TrustLedgerHeadWitness } from './ledger-store'
+export { PostgresAtomicTrustLedgerStore, TOOL_FABRIC_PG_STREAM } from './postgres-ledger-store'
+export type { PostgresTrustQuery, PostgresTrustConnection } from './postgres-ledger-store'
 export { AuditEngineToolAuditSink, TOOL_AUDIT_ORG, scrubReason } from './audit'
 export type { ToolAuditEvent, ToolAuditSink } from './audit'
 export { GovernedToolGate } from './gate'

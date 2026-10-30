@@ -218,3 +218,15 @@ missing/mismatched witnesses before replay. Append success is conditional on
 sealing the new revision and head digest to independent host-controlled storage.
 No persistent adapter or independently administered witness is provisioned by
 this change. Production broker and installer remain **HOLD**.
+
+## Durable PostgreSQL adapter — Issue #1037
+
+The PostgreSQL CAS adapter and schema are now implemented in
+`packages/tool-fabric/src/postgres-ledger-store.ts` and
+`packages/tool-fabric/sql/001_trust_ledger_pg.sql`.
+Writes use a locked stream row plus an append-only event insertion and head
+update in a single transaction. Missing canonical stream and corrupt snapshots
+fail closed. This implementation still requires DBA-controlled migration,
+least-privileged host credentials, independent high-watermark witness, real
+PostgreSQL concurrency/restart testing and independent attestation. It neither
+opens the broker nor constitutes persistent-store runtime certification.

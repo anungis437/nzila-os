@@ -53,3 +53,15 @@ The adapter interface does not create an independent persistence/authority
 service. In-memory tests remain explicitly NON_DURABLE_CONTRACT_ONLY. Tool
 execution and installation remain disabled pending separately controlled
 production identity, store, sandbox, revocation and containment proof.
+
+### PostgreSQL CAS storage adapter (P0 #1037)
+
+The canonical PostgreSQL migration lives at `sql/001_trust_ledger_pg.sql`.
+`PostgresAtomicTrustLedgerStore` implements a transactional stream CAS using
+`SELECT FOR UPDATE` and an entry plus head update in one SQL transaction.
+It never initializes a missing stream at runtime. The host supplies its own
+least-privileged authenticated transaction client. The schema must be applied
+through governed migrations and independently verified against PostgreSQL.
+This adapter **does not** by itself satisfy independently controlled witness,
+secrets, network, identity or runtime broker containment; `BROKER_READINESS`
+remains HOLD until those controls are proven in the target environment.
