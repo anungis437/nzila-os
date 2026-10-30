@@ -17,6 +17,7 @@ import { randomUUID } from 'crypto';
 import { db } from '@/db/db';
 import { eq, and, desc } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { performAuditedOperation } from '@/lib/audit/operation-audit';
 import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
@@ -65,6 +66,9 @@ export async function suggestClausesForGrievance(
   input: ClauseReasoningInput,
 ): Promise<AiResponseEnvelope<ClauseReasoningResult>> {
   const { grievanceId, organizationId, userId } = input;
+
+  const access = await getEffectiveCaseAccess({ organizationId, grievanceId, userId });
+  if (!access.canViewCase) throw new Error('Case access denied');
 
   // 1. Fetch grievance
   const grievance = await db.query.grievances.findFirst({
@@ -170,6 +174,8 @@ export async function explainClauseRelevance(
   organizationId: string,
   userId: string,
 ): Promise<AiResponseEnvelope<{ reasoning: string; strength: string }>> {
+  const access = await getEffectiveCaseAccess({ organizationId, grievanceId, userId });
+  if (!access.canViewCase) throw new Error('Case access denied');
   const grievance = await db.query.grievances.findFirst({
     where: and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId)),
   });
