@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { SQL } from 'drizzle-orm';
 import type { PgTable } from 'drizzle-orm/pg-core';
-import { enforceCreateSecurityInvariants, assertGenericWritePayload, stripBlockedPatchFields, buildMergeSetValues, validateMergeJsonColumnValues } from '../crud-factory';
+import { enforceCreateSecurityInvariants, assertGenericWritePayload, parseCrudPagination, stripBlockedPatchFields, buildMergeSetValues, validateMergeJsonColumnValues } from '../crud-factory';
 
 describe('crud-factory enforceCreateSecurityInvariants', () => {
   it('applies organizationId/createdBy when a hook returns a clean object without them', () => {
@@ -249,5 +249,16 @@ describe('generic CRUD mass-assignment gate', () => {
   it('rejects non-object payloads', () => {
     expect(() => assertGenericWritePayload([], table, options)).toThrow();
     expect(() => assertGenericWritePayload(null, table, options)).toThrow();
+  });
+});
+
+
+describe('generic CRUD pagination boundaries', () => {
+  it('uses default pagination with safe offsets', () => {
+    expect(parseCrudPagination(new URLSearchParams())).toEqual({ page: 1, limit: 50, offset: 0 });
+    expect(parseCrudPagination(new URLSearchParams('page=3&limit=20'))).toEqual({ page: 3, limit: 20, offset: 40 });
+  });
+  it.each(['page=0', 'page=-1', 'page=1.5', 'page=NaN', 'page=10001', 'page=9007199254740993', 'limit=0', 'limit=101', 'limit=Infinity', 'limit=2junk'])('rejects malformed or excessive pagination %s', (query) => {
+    expect(() => parseCrudPagination(new URLSearchParams(query))).toThrow();
   });
 });
