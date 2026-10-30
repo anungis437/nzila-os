@@ -133,6 +133,7 @@ test.describe('promotion: DEF-0B10-PIL telemetry routes read only the caller\'s 
 test.describe('promotions: role floors on organization settings, campaigns, health and safety, signatures, testimonials', () => {
   test('DEF-0B11-IDS organization settings: the administrator reads and writes allowed keys; protected keys are refused and unchanged; others are refused', async ({}, testInfo) => {
     test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
+    test.setTimeout(120_000) // a legitimate 60-second rate-limit window may need to expire before role proof
     const admin = await as(U.adminPrimary)
     const before = await admin.get('/api/settings/organization')
     expect(before.status(), await before.text()).toBe(200)
@@ -151,7 +152,21 @@ test.describe('promotions: role floors on organization settings, campaigns, heal
       expect(await status(await as(who), 'get', '/api/settings/organization'), who.userId).toBe(403)
       expect((await (await as(who)).put('/api/settings/organization', { data: { settings: { timezone: 'UTC' } } })).status(), `${who.userId} write`).toBe(403)
     }
-    expect((await (await as(U.wrongOrgSteward)).put('/api/settings/organization', { data: { settings: { timezone: 'UTC' } } })).status()).toBe(403)
+    // 429 is valid flood protection but is NOT evidence that the role/tenant guard returned 403.
+    // A previous test may have consumed this principal's mutation bucket; wait for the
+    // advertised reset and retry once, preserving the strict authorization assertion.
+    const wrongOrg = await as(U.wrongOrgSteward)
+    const wrongOrgWrite = () => wrongOrg.put('/api/settings/organization', { data: { settings: { timezone: 'UTC' } } })
+    let denied = await wrongOrgWrite()
+    if (denied.status() === 429) {
+      const retryAfter = Number(denied.headers()['retry-after'])
+      expect(retryAfter, '429 must advertise a bounded retry window').toBeGreaterThan(0)
+      expect(retryAfter, 'rate-limit window should not exceed 60 seconds').toBeLessThanOrEqual(60)
+      await new Promise((resolve) => setTimeout(resolve, (retryAfter + 1) * 1000))
+      denied = await wrongOrgWrite()
+    }
+    expect(denied.status(), 'wrong-org steward must be denied by authorization, not merely throttling').toBe(403)
+    await wrongOrg.dispose()
     expect((await settingsOf()).timezone, 'no refused caller changed it').toBe('America/Toronto')
   })
 
