@@ -1145,7 +1145,8 @@ export const detectAnomalies = detectComplianceAnomalies;
 
 // Simple forecast using historical per-capita remittance data
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function forecastRemittances(months: number): Promise<any[]> {
+export async function forecastRemittances(months: number, organizationId: string): Promise<any[]> {
+  if (!organizationId) throw new Error('Organization context is mandatory for forecasts');
   // Fetch last 12 months of historical remittance data for a moving-average forecast
   const historicalData = await db
     .select({
@@ -1156,7 +1157,7 @@ export async function forecastRemittances(months: number): Promise<any[]> {
     })
     .from(perCapitaRemittances)
     .where(
-      sql`MAKE_DATE(${perCapitaRemittances.remittanceYear}, ${perCapitaRemittances.remittanceMonth}, 1) >= NOW() - INTERVAL '12 months'`
+      and(eq(perCapitaRemittances.fromOrganizationId, organizationId), sql`MAKE_DATE(${perCapitaRemittances.remittanceYear}, ${perCapitaRemittances.remittanceMonth}, 1) >= NOW() - INTERVAL '12 months'`)
     )
     .groupBy(
       perCapitaRemittances.remittanceYear,
