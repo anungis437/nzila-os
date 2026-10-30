@@ -4,7 +4,8 @@ import { NextRequest } from 'next/server';
 // The organization read authority is proven in organizations-read-authority.route.test.ts; these tests exercise the
 // route's own behaviour as a caller who may read and administer the organization.
 vi.mock('@/lib/organizations/read-authority', () => ({
-  resolveOrganizationAccess: async () => ({ platform: true, direct: new Map(), descendants: new Set() }),
+  resolveOrganizationAccess: m.resolveOrganizationAccess,
+  isAdministrativeRole: (role: string | undefined) => role === 'admin',
   canReadOrganization: () => true,
   canAdministerOrganization: () => true,
   readableOrganizationIds: () => null,
@@ -16,6 +17,7 @@ const m = vi.hoisted(() => ({
   requireUserForOrganization: vi.fn(),
   requireSystemAdmin: vi.fn(),
   audit: vi.fn(),
+  resolveOrganizationAccess: vi.fn(),
   selectQueue: [] as unknown[][],
   executeQueue: [] as unknown[][],
   updateQueue: [] as unknown[][],
@@ -81,6 +83,7 @@ describe('organizations/[id] route', () => {
     m.executeQueue = [];
     m.updateQueue = [];
     m.auth.mockResolvedValue({ userId: 'u1' });
+    m.resolveOrganizationAccess.mockResolvedValue({ platform: false, direct: new Map([[orgRow.id, 'admin']]), descendants: new Set() });
     m.requireUserForOrganization.mockResolvedValue({ roles: ['admin'], userId: 'u1' });
     m.requireSystemAdmin.mockResolvedValue(undefined);
     m.audit.mockResolvedValue(undefined);
@@ -180,7 +183,7 @@ describe('organizations/[id] route', () => {
     expect(response.status).toBe(200);
   });
 
-  it('PATCH lets platform governance change the parent affiliation', async () => {
+  it('PATCH refuses unilateral parent affiliation changes even for platform authority', async () => {
     const { PATCH } = await loadRoute();
     m.selectQueue.push([orgRow]);
     m.updateQueue.push([{ ...orgRow, parentId: '22222222-2222-4222-8222-222222222222' }]);
@@ -189,7 +192,8 @@ describe('organizations/[id] route', () => {
       method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ parent_id: '22222222-2222-4222-8222-222222222222' }),
     }), { params: Promise.resolve({ id: orgRow.id }) });
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(403);
+    expect(mockDb.update).not.toHaveBeenCalled();
   });
 
   it('PATCH does not audit when the organization does not exist', async () => {
@@ -212,8 +216,33 @@ describe('organizations/[id] route', () => {
       params: Promise.resolve({ id: '11111111-1111-4111-8111-111111111111' }),
     });
 
-    expect(response.status).toBe(200);
-    const json = await response.json();
-    expect(json.data.status).toBe('archived');
+    expect(response.status).toBe(409);
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.audit).not.toHaveBeenCalled();
   });
+  it('GET does not expose private organization records to platform-only or parent authority', async () => {
+    const { GET } = await loadRoute();
+    for (const access of [
+      { platform: true, direct: new Map(), descendants: new Set() },
+      { platform: false, direct: new Map(), descendants: new Set([orgRow.id]) },
+    ]) {
+      m.resolveOrganizationAccess.mockResolvedValueOnce(access);
+      const response = await GET(new NextRequest('http://localhost/api/organizations/' + orgRow.id), {
+        params: Promise.resolve({ id: orgRow.id }),
+      });
+      expect(response.status).toBe(404);
+    }
+    expect(mockDb.select).not.toHaveBeenCalled();
+  });
+
+  it('PATCH refuses a platform title lacking a direct organization mandate', async () => {
+    const { PATCH } = await loadRoute();
+    m.resolveOrganizationAccess.mockResolvedValueOnce({ platform: true, direct: new Map(), descendants: new Set() });
+    const response = await PATCH(new NextRequest('http://localhost/api/organizations/' + orgRow.id, {
+      method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: 'Wrong' }),
+    }), { params: Promise.resolve({ id: orgRow.id }) });
+    expect(response.status).toBe(403);
+    expect(mockDb.update).not.toHaveBeenCalled();
+  });
+
 });

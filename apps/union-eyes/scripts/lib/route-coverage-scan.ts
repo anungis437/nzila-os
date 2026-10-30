@@ -109,6 +109,9 @@ export const COMPUTE_ONLY_ROUTES: Record<string, string[]> = {
  * imports no function whose name says it changes state.
  */
 export const READ_ONLY_POST_ROUTES = [
+  // OAuth POST only returns a redirect URL; the real connection is created by
+  // the provider-verified callback. No database mutation or credential intake.
+  'calendar-sync/connections/route.ts',
   'ai/classify/route.ts', 'ai/mamba/route.ts', 'ai/match-precedents/route.ts', 'ai/pension/plans/[id]/trustee-summary/route.ts',
   'ai/search/route.ts', 'ai/semantic-search/route.ts', 'ai/summarize/route.ts', 'carbon/validate/route.ts',
   'clause-library/search/route.ts', 'cognition/precedents/route.ts', 'compliance/validate/route.ts', 'emergency/pipeda/route.ts',

@@ -2,7 +2,7 @@ import { and, eq, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
 import { withSystemContext } from '@/lib/db/with-rls-context';
-import { isPlatformAdminUser, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
+import { ROLE_HIERARCHY } from '@/lib/api-auth-guard';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 
 /**
@@ -43,7 +43,10 @@ async function directMemberships(userId: string): Promise<Array<{ organizationId
 }
 
 export async function resolveOrganizationAccess(userId: string): Promise<OrganizationAccess> {
-  if (await isPlatformAdminUser(userId)) return { platform: true, direct: new Map(), descendants: new Set() };
+  // Platform staff titles grant no standing visibility into real tenants.
+  // Access to an organization requires ACTIVE membership; emergency
+  // platform mandates must be verified through the dedicated, audited
+  // authority service (not implemented by this ordinary read selector).
 
   const memberships = await directMemberships(userId);
   const direct = new Map(memberships.map((m) => [m.organizationId, m.role] as const));
@@ -64,12 +67,12 @@ export async function resolveOrganizationAccess(userId: string): Promise<Organiz
 }
 
 export function canReadOrganization(access: OrganizationAccess, organizationId: string): boolean {
-  return access.platform || access.direct.has(organizationId) || access.descendants.has(organizationId);
+  return access.direct.has(organizationId) || access.descendants.has(organizationId);
 }
 
 /** Administrative authority over an organization: its own administrator, an administrator above it, or the platform. */
 export function canAdministerOrganization(access: OrganizationAccess, organizationId: string): boolean {
-  return access.platform || access.descendants.has(organizationId) || isAdministrativeRole(access.direct.get(organizationId));
+  return access.descendants.has(organizationId) || isAdministrativeRole(access.direct.get(organizationId));
 }
 
 /** The caller's role in the organization (undefined when they are not a direct member). */
@@ -77,7 +80,6 @@ export const directRoleIn = (access: OrganizationAccess, organizationId: string)
 
 /** Every organization id the caller may read, or null for a platform administrator (no restriction). */
 export function readableOrganizationIds(access: OrganizationAccess): string[] | null {
-  if (access.platform) return null;
   return [...new Set([...access.direct.keys(), ...access.descendants])];
 }
 

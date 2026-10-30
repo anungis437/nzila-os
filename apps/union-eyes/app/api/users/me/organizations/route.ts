@@ -5,15 +5,14 @@
  * Queries Drizzle/PostgreSQL directly (replaces Django proxy).
  *
  * V2 uses active private memberships, including for platform administrators.
- * Legacy PLATFORM_ADMIN_USER_IDS can still enumerate all organizations when V2 is off.
+ * Legacy mode also requires current active membership; no platform-wide roster enumeration.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { db } from '@/db/db';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, and, isNull } from 'drizzle-orm';
 import { createLogger } from '@nzila/os-core'
-import { isPlatformAdminUser } from '@/lib/api-auth-guard';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 
 const logger = createLogger('users:me:organizations')
@@ -38,13 +37,17 @@ export async function GET(_req: NextRequest) {
 
     logger.info('[/api/users/me/organizations] Request started', { userId });
 
-    const isAdmin = await isPlatformAdminUser(userId);
-
     // Memberships are those bound to the authenticated user id.
-    const memberships = await db
+    const rawMemberships = await db
       .select()
       .from(organizationMembers)
-      .where(eq(organizationMembers.userId, userId));
+      .where(and(
+        eq(organizationMembers.userId, userId),
+        eq(organizationMembers.status, 'active'),
+        isNull(organizationMembers.deletedAt),
+      ));
+    // Defense in depth if a legacy data adapter unexpectedly ignores a predicate.
+    const memberships = rawMemberships.filter(m => m.status === 'active' && !m.deletedAt);
 
     // A membership is never linked to the caller here. An e-mail address is not proof of identity (the provider can
     // return an unverified one, and a roster row may carry any address), so matching on it used to rebind every
@@ -56,33 +59,16 @@ export async function GET(_req: NextRequest) {
       membershipCount: memberships.length,
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let orgs: any[] = [];
-
-    if (isAdmin) {
-      // Platform admins can see ALL organizations
-      orgs = await db.select().from(organizations).limit(500);
-      logger.info('[/api/users/me/organizations] Platform admin — returning all orgs', {
-        userId,
-        count: orgs.length,
-      });
-    } else {
-      // Regular users only see orgs they are members of
-      const orgIds = [...new Set(memberships.map(m => m.organizationId))];
-
-      if (orgIds.length > 0) {
-        orgs = await db
-          .select()
-          .from(organizations)
-          .where(inArray(organizations.id, orgIds));
-      }
-
-      logger.info('[/api/users/me/organizations] Non-admin org resolution complete', {
-        userId,
-        membershipCount: memberships.length,
-        orgCount: orgs.length,
-      });
-    }
+    // Platform administrators have NO standing cross-tenant visibility;
+    // this is a personal organization selector, never a customer directory.
+    const orgIds = [...new Set(memberships.map(m => m.organizationId))];
+    const orgs = orgIds.length === 0 ? [] : (await db
+      .select()
+      .from(organizations)
+      .where(and(
+        inArray(organizations.id, orgIds),
+        eq(organizations.status, 'active'),
+      ))).filter(org => org.status === 'active' && orgIds.includes(org.id));
 
     return NextResponse.json({
       organizations: orgs.map(o => ({

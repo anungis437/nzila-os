@@ -1,0 +1,863 @@
+{
+  "schemaVersion": 1,
+  "approvalDate": "2026-10-29",
+  "sourceAnswerSheetSha256": "511f00c6b22988a7e3d5e2809eaa6b2f253c66d7eb8a5b3b0c9edd38b484c360",
+  "sourceAuthorityReviewSha256": "b3cba41b8ffc6f334eaf77585a9be6a8b5cf6bb227a74b8842152af651c60d52",
+  "sourceCommit": "a327f69fe34524ce669bb65228fed32cfb48bf0d",
+  "sourcePR": 1014,
+  "decisionOwner": "Aubert Nungisa",
+  "recordedRole": "Founder & Product Owner, Nzila OS (Nzila Ventures) — platform/product only; contracting legal name unverified",
+  "approvalEvidence": "Explicit human sign-off and authorization to proceed in this conversation, subject to blind-spot qualification. Not a signed Git attestation; release and union adoption are separate.",
+  "recordCount": 138,
+  "counts": {
+    "platform": 46,
+    "union default": 65,
+    "product": 27
+  },
+  "dispositions": {
+    "acceptedUnchanged": 79,
+    "revised": 59
+  },
+  "status": "HUMAN_SIGNED_OFF_FOR_IMPLEMENTATION__NOT_RELEASE",
+  "realUnionAdoptions": 0,
+  "defectsClosed": 0,
+  "unresolvedRequiredEvidence": [
+    "real union policy ratification",
+    "verification of legal corporate contracting capacity",
+    "Azure staging app/resource inventory and Entra real-login",
+    "historical exposed credential revocation",
+    "independent cross-tenant PostgreSQL RLS and runtime tests",
+    "all 777 Gate 0 defects remediation and evidence",
+    "signed code review and human release batch approval"
+  ],
+  "decisions": [
+    {
+      "id": "UE-INST-PLATFORM-STAFF-MANDATE",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-PLATFORM-STAFF-MANDATE.json"
+    },
+    {
+      "id": "UE-INST-PLATFORM-CONTRACT-AUTHORITY",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-PLATFORM-CONTRACT-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-REPRESENTATION-AUTHORITY-SOURCE",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-REPRESENTATION-AUTHORITY-SOURCE.json"
+    },
+    {
+      "id": "UE-INST-COMPLIANCE-DETERMINATION-AUTHORITY",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-COMPLIANCE-DETERMINATION-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-ESIGNATURE-REQUEST-AUTHORITY-SIGNER-IDENTITY-AND-LEGAL-VALIDITY",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-ESIGNATURE-REQUEST-AUTHORITY-SIGNER-IDENTITY-AND-LEGAL-VALIDITY.json"
+    },
+    {
+      "id": "UE-INST-ONBOARDING-CROSS-ORGANIZATION-DISCLOSURE",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-ONBOARDING-CROSS-ORGANIZATION-DISCLOSURE.json"
+    },
+    {
+      "id": "UE-INST-PILOT-REFERENCE-AND-CASE-STUDY-PUBLICATION",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-PILOT-REFERENCE-AND-CASE-STUDY-PUBLICATION.json"
+    },
+    {
+      "id": "UE-INST-REWARDS-REDEMPTION-PROVIDER-AUTHORITY",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-REWARDS-REDEMPTION-PROVIDER-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-ORGANIZING-REGULATORY-FILING-AUTHORITY",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-ORGANIZING-REGULATORY-FILING-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-ORGANIZING-SUPPORT-RECORD-AND-OUTREACH-CONSENT",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-ORGANIZING-SUPPORT-RECORD-AND-OUTREACH-CONSENT.json"
+    },
+    {
+      "id": "UE-INST-PLATFORM-MARKETING-CONTENT-OWNER-AND-APPROVAL",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-PLATFORM-MARKETING-CONTENT-OWNER-AND-APPROVAL.json"
+    },
+    {
+      "id": "UE-INST-CARBON-ACCOUNTING-SCOPE",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-CARBON-ACCOUNTING-SCOPE.json"
+    },
+    {
+      "id": "UE-INST-ICRA-PAID-ASSESSMENT-CLAIM-AUTHORITY",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-ICRA-PAID-ASSESSMENT-CLAIM-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTE-DISPOSITION",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTE-DISPOSITION.json"
+    },
+    {
+      "id": "UE-INST-MEMBERSHIP-LINKING-BY-EMAIL-AND-LEGACY-IDENTITY",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-MEMBERSHIP-LINKING-BY-EMAIL-AND-LEGACY-IDENTITY.json"
+    },
+    {
+      "id": "UE-INST-ORGANIZATION-BILLING-AND-REMITTANCE-SETTINGS-AUTHORITY",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-ORGANIZATION-BILLING-AND-REMITTANCE-SETTINGS-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-PILOT-USAGE-SIGNAL-READERS-AND-BASIS",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-PILOT-USAGE-SIGNAL-READERS-AND-BASIS.json"
+    },
+    {
+      "id": "UE-INST-PLATFORM-RECONCILIATION-AUTHORITY",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-PLATFORM-RECONCILIATION-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-POLITICAL-DATA-HANDLING",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-POLITICAL-DATA-HANDLING.json"
+    },
+    {
+      "id": "UE-INST-SCHEDULED-REPORT-RECIPIENTS-AND-DELIVERY",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-SCHEDULED-REPORT-RECIPIENTS-AND-DELIVERY.json"
+    },
+    {
+      "id": "UE-INST-SUPPORT-AND-STORAGE-FIGURES-OWNER",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-SUPPORT-AND-STORAGE-FIGURES-OWNER.json"
+    },
+    {
+      "id": "UE-INST-TAX-SLIP-AND-RECEIPT-ISSUER-AND-SOURCE-RECORDS",
+      "family": "platform",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-TAX-SLIP-AND-RECEIPT-ISSUER-AND-SOURCE-RECORDS.json"
+    },
+    {
+      "id": "UE-INST-MEMBER-LOCATION-PROCESSING",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-MEMBER-LOCATION-PROCESSING.json"
+    },
+    {
+      "id": "UE-INST-BUSINESS-CONTINUITY-RECORDS-OWNER",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-BUSINESS-CONTINUITY-RECORDS-OWNER.json"
+    },
+    {
+      "id": "UE-INST-MEMBER-DUES-SELF-SERVICE-COLLECTION",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-MEMBER-DUES-SELF-SERVICE-COLLECTION.json"
+    },
+    {
+      "id": "UE-INST-ML-MEMBER-RISK-SCORING",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-ML-MEMBER-RISK-SCORING.json"
+    },
+    {
+      "id": "UE-INST-OBSERVABILITY-ALERT-OWNER",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-OBSERVABILITY-ALERT-OWNER.json"
+    },
+    {
+      "id": "UE-INST-ONBOARDING-RECOMMENDATION-BASIS",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-ONBOARDING-RECOMMENDATION-BASIS.json"
+    },
+    {
+      "id": "UE-INST-PILOT-APPLICANT-ORGANIZATION-VERIFICATION",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-PILOT-APPLICANT-ORGANIZATION-VERIFICATION.json"
+    },
+    {
+      "id": "UE-INST-PILOT-COMMERCIAL-AGREEMENT-AUTHORITY",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-PILOT-COMMERCIAL-AGREEMENT-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-PILOT-DEMO-RUNTIME-AUTHORITY",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-PILOT-DEMO-RUNTIME-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-PLATFORM-REVENUE-METRICS-AUTHORITY",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-PLATFORM-REVENUE-METRICS-AUTHORITY.json"
+    },
+    {
+      "id": "DEC-IA-20",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-20.json"
+    },
+    {
+      "id": "DEC-IA-30",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-30.json"
+    },
+    {
+      "id": "DEC-IA-31",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-31.json"
+    },
+    {
+      "id": "UE-INST-CUPE-VOCABULARY-AUTHORITY-AND-SERVICE-LEVELS",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-CUPE-VOCABULARY-AUTHORITY-AND-SERVICE-LEVELS.json"
+    },
+    {
+      "id": "UE-INST-ICRA-PSEUDONYMOUS-DATA-LIFECYCLE",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-ICRA-PSEUDONYMOUS-DATA-LIFECYCLE.json"
+    },
+    {
+      "id": "UE-INST-ICRA-REPORT-REVIEW-AUTHORITY",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-ICRA-REPORT-REVIEW-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-ML-EXTERNAL-QUERY-DISCLOSURE",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-ML-EXTERNAL-QUERY-DISCLOSURE.json"
+    },
+    {
+      "id": "UE-INST-ONBOARDING-EVENT-AUTHORITY",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-ONBOARDING-EVENT-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-ORGANIZATION-CONTEXT-SELECTION-AUTHORITY",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-ORGANIZATION-CONTEXT-SELECTION-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-QUEUE-STATUS-READERS-AND-SERVICE-CREDENTIAL",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-QUEUE-STATUS-READERS-AND-SERVICE-CREDENTIAL.json"
+    },
+    {
+      "id": "UE-INST-SECURITY-EVENT-READERS-AND-AUTHORSHIP",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-SECURITY-EVENT-READERS-AND-AUTHORSHIP.json"
+    },
+    {
+      "id": "UE-INST-VOICE-RECORDING-CONSENT-RETENTION-AND-PROCESSOR",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-VOICE-RECORDING-CONSENT-RETENTION-AND-PROCESSOR.json"
+    },
+    {
+      "id": "UE-INST-WORKBOOK-CLAIM-AND-SAME-ORGANIZATION-PEER-AUTHORITY",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-WORKBOOK-CLAIM-AND-SAME-ORGANIZATION-PEER-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-WORKBOOK-PSEUDONYMOUS-DATA-LIFECYCLE-CONSENT-AND-PROCESSOR",
+      "family": "platform",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-WORKBOOK-PSEUDONYMOUS-DATA-LIFECYCLE-CONSENT-AND-PROCESSOR.json"
+    },
+    {
+      "id": "UE-INST-ORGANIZATION-ROSTER-AND-ROLE-GRANT-AUTHORITY",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-ORGANIZATION-ROSTER-AND-ROLE-GRANT-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-FEDERATION-AFFILIATE-DATA-SHARING",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-FEDERATION-AFFILIATE-DATA-SHARING.json"
+    },
+    {
+      "id": "UE-INST-OHS-INCIDENT-RECORD-READERS",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-OHS-INCIDENT-RECORD-READERS.json"
+    },
+    {
+      "id": "UE-INST-ORGANIZATION-RECORD-AUTHORITY",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-ORGANIZATION-RECORD-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-EXIT-INTERVIEW-RECORD-READERS",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-EXIT-INTERVIEW-RECORD-READERS.json"
+    },
+    {
+      "id": "UE-INST-KNOWLEDGE-PUBLICATION",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-KNOWLEDGE-PUBLICATION.json"
+    },
+    {
+      "id": "DEC-IA-16",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-16.json"
+    },
+    {
+      "id": "UE-INST-ARBITRATION-PRECEDENT-LIBRARY-AUDIENCE-AND-PUBLICATION",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-ARBITRATION-PRECEDENT-LIBRARY-AUDIENCE-AND-PUBLICATION.json"
+    },
+    {
+      "id": "UE-INST-EDUCATION-CERTIFICATION-ISSUING-AUTHORITY",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-EDUCATION-CERTIFICATION-ISSUING-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-EDUCATION-TRAINING-RECORD-READERS",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-EDUCATION-TRAINING-RECORD-READERS.json"
+    },
+    {
+      "id": "UE-INST-OHS-ANONYMOUS-REPORT-IDENTITY",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-OHS-ANONYMOUS-REPORT-IDENTITY.json"
+    },
+    {
+      "id": "UE-INST-SOCIAL-MEDIA-PUBLISHING-AUTHORITY-AND-CREDENTIAL-CUSTODY",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-SOCIAL-MEDIA-PUBLISHING-AUTHORITY-AND-CREDENTIAL-CUSTODY.json"
+    },
+    {
+      "id": "UE-INST-AUDIT-HISTORY-READERS",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-AUDIT-HISTORY-READERS.json"
+    },
+    {
+      "id": "UE-INST-EXIT-INTERVIEW-DERIVED-ANALYTICS-AUDIENCE",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-EXIT-INTERVIEW-DERIVED-ANALYTICS-AUDIENCE.json"
+    },
+    {
+      "id": "UE-INST-PENSION-ADMINISTRATION-AND-TRUSTEE-AUTHORITY",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-PENSION-ADMINISTRATION-AND-TRUSTEE-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-MEMBER-PORTAL-DOCUMENT-INTAKE-AND-PUBLICATION",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-MEMBER-PORTAL-DOCUMENT-INTAKE-AND-PUBLICATION.json"
+    },
+    {
+      "id": "UE-INST-ORGANIZATION-SHARING-SETTINGS-AUTHORITY",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-ORGANIZATION-SHARING-SETTINGS-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-ORGANIZING-CAMPAIGN-DATA-READERS",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-ORGANIZING-CAMPAIGN-DATA-READERS.json"
+    },
+    {
+      "id": "UE-INST-REWARDS-PROGRAM-AUTOMATION-EXPIRY-AND-EXPORT",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-REWARDS-PROGRAM-AUTOMATION-EXPIRY-AND-EXPORT.json"
+    },
+    {
+      "id": "UE-INST-BARGAINING-UNIT-AND-WORKSITE-RECORD-AUTHORITY",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-BARGAINING-UNIT-AND-WORKSITE-RECORD-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-COMMUNICATIONS-CAMPAIGN-OWNER",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-COMMUNICATIONS-CAMPAIGN-OWNER.json"
+    },
+    {
+      "id": "UE-INST-EQUITY-DATA-STEWARD",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-EQUITY-DATA-STEWARD.json"
+    },
+    {
+      "id": "UE-INST-MEMBER-NOTIFICATION-SENDERS-AND-DEVICES",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-MEMBER-NOTIFICATION-SENDERS-AND-DEVICES.json"
+    },
+    {
+      "id": "UE-INST-REPORT-DEFINITION-READERS-AND-SHARING",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-REPORT-DEFINITION-READERS-AND-SHARING.json"
+    },
+    {
+      "id": "UE-INST-REPORT-SOURCE-DATA-READERS",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-REPORT-SOURCE-DATA-READERS.json"
+    },
+    {
+      "id": "UE-INST-SATISFACTION-RATING-READERS-AND-RESPONDENT-ANONYMITY",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-SATISFACTION-RATING-READERS-AND-RESPONDENT-ANONYMITY.json"
+    },
+    {
+      "id": "UE-INST-STEWARD-DIRECTORY-AND-APPOINTMENT-AUTHORITY",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-STEWARD-DIRECTORY-AND-APPOINTMENT-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-WCB-CLAIM-AND-ASSESSMENT-READERS-AND-WRITERS",
+      "family": "union default",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-WCB-CLAIM-AND-ASSESSMENT-READERS-AND-WRITERS.json"
+    },
+    {
+      "id": "DEC-IA-18",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-18.json"
+    },
+    {
+      "id": "DEC-IA-26",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-26.json"
+    },
+    {
+      "id": "UE-INST-DISPATCH-AUTHORITY",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-DISPATCH-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-EXIT-INTERVIEW-MODEL-PROCESSING-CONSENT",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-EXIT-INTERVIEW-MODEL-PROCESSING-CONSENT.json"
+    },
+    {
+      "id": "UE-INST-EXTERNAL-REPRESENTATIVE-DOCUMENT-DEPOSIT",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-EXTERNAL-REPRESENTATIVE-DOCUMENT-DEPOSIT.json"
+    },
+    {
+      "id": "DEC-IA-01",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-01.json"
+    },
+    {
+      "id": "DEC-IA-02",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-02.json"
+    },
+    {
+      "id": "DEC-IA-03",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-03.json"
+    },
+    {
+      "id": "DEC-IA-04",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-04.json"
+    },
+    {
+      "id": "DEC-IA-05",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-05.json"
+    },
+    {
+      "id": "DEC-IA-06",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-06.json"
+    },
+    {
+      "id": "DEC-IA-07",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-07.json"
+    },
+    {
+      "id": "DEC-IA-08",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-08.json"
+    },
+    {
+      "id": "DEC-IA-09",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-09.json"
+    },
+    {
+      "id": "DEC-IA-10",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-10.json"
+    },
+    {
+      "id": "DEC-IA-11",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-11.json"
+    },
+    {
+      "id": "DEC-IA-12",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-12.json"
+    },
+    {
+      "id": "DEC-IA-13",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-13.json"
+    },
+    {
+      "id": "DEC-IA-14",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-14.json"
+    },
+    {
+      "id": "DEC-IA-15",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-15.json"
+    },
+    {
+      "id": "DEC-IA-17",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-17.json"
+    },
+    {
+      "id": "DEC-IA-19",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-19.json"
+    },
+    {
+      "id": "DEC-IA-21",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-21.json"
+    },
+    {
+      "id": "DEC-IA-22",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-22.json"
+    },
+    {
+      "id": "DEC-IA-23",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-23.json"
+    },
+    {
+      "id": "DEC-IA-24",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-24.json"
+    },
+    {
+      "id": "DEC-IA-25",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-25.json"
+    },
+    {
+      "id": "DEC-IA-27",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-27.json"
+    },
+    {
+      "id": "DEC-IA-28",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-28.json"
+    },
+    {
+      "id": "DEC-IA-29",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-29.json"
+    },
+    {
+      "id": "DEC-IA-32",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-IA-32.json"
+    },
+    {
+      "id": "UE-INST-EXIT-INTERVIEW-DERIVED-ANALYTICS-READERS",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-EXIT-INTERVIEW-DERIVED-ANALYTICS-READERS.json"
+    },
+    {
+      "id": "UE-INST-IDENTITY-FEDERATION-ADMINISTRATOR",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-IDENTITY-FEDERATION-ADMINISTRATOR.json"
+    },
+    {
+      "id": "UE-INST-INTEGRATION-CONTROL-PLANE-AUTHORITY",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-INTEGRATION-CONTROL-PLANE-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-KPI-TARGET-OWNER-AND-CALCULATION-RULE",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-KPI-TARGET-OWNER-AND-CALCULATION-RULE.json"
+    },
+    {
+      "id": "UE-INST-SCIM-PROVISIONING-CREDENTIAL-AND-DEPROVISIONING-AUTHORITY",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-SCIM-PROVISIONING-CREDENTIAL-AND-DEPROVISIONING-AUTHORITY.json"
+    },
+    {
+      "id": "UE-INST-TRIAGE-DESIGNATION-ELIGIBILITY-AND-EXPIRY-RECORD",
+      "family": "union default",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/UE-INST-TRIAGE-DESIGNATION-ELIGIBILITY-AND-EXPIRY-RECORD.json"
+    },
+    {
+      "id": "PDR-0C2-FINANCIAL-OFFICER-V1",
+      "family": "product",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/PDR-0C2-FINANCIAL-OFFICER-V1.json"
+    },
+    {
+      "id": "PDR-0C2-REPRESENTATIVE-V1",
+      "family": "product",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/PDR-0C2-REPRESENTATIVE-V1.json"
+    },
+    {
+      "id": "PDR-0C2-STEWARD-V1",
+      "family": "product",
+      "releaseBlocking": true,
+      "path": "docs/union-eyes/decisions/reviewed/PDR-0C2-STEWARD-V1.json"
+    },
+    {
+      "id": "DEC-PD-01",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-01.json"
+    },
+    {
+      "id": "DEC-PD-02",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-02.json"
+    },
+    {
+      "id": "DEC-PD-03",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-03.json"
+    },
+    {
+      "id": "DEC-PD-04",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-04.json"
+    },
+    {
+      "id": "DEC-PD-05",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-05.json"
+    },
+    {
+      "id": "DEC-PD-06",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-06.json"
+    },
+    {
+      "id": "DEC-PD-07",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-07.json"
+    },
+    {
+      "id": "DEC-PD-08",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-08.json"
+    },
+    {
+      "id": "DEC-PD-09",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-09.json"
+    },
+    {
+      "id": "DEC-PD-0C2-01",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-0C2-01.json"
+    },
+    {
+      "id": "DEC-PD-0C2-02",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-0C2-02.json"
+    },
+    {
+      "id": "DEC-PD-0C2-03",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-0C2-03.json"
+    },
+    {
+      "id": "DEC-PD-0C2-04",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-0C2-04.json"
+    },
+    {
+      "id": "DEC-PD-0C2-05",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-0C2-05.json"
+    },
+    {
+      "id": "DEC-PD-0C2-06",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-0C2-06.json"
+    },
+    {
+      "id": "DEC-PD-0C2-07",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-0C2-07.json"
+    },
+    {
+      "id": "DEC-PD-0C2-08",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-0C2-08.json"
+    },
+    {
+      "id": "DEC-PD-0C2-09",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-0C2-09.json"
+    },
+    {
+      "id": "DEC-PD-0C2-10",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-0C2-10.json"
+    },
+    {
+      "id": "DEC-PD-10",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-10.json"
+    },
+    {
+      "id": "DEC-PD-11",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-11.json"
+    },
+    {
+      "id": "DEC-PD-12",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-12.json"
+    },
+    {
+      "id": "DEC-PD-13",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-13.json"
+    },
+    {
+      "id": "DEC-PD-14",
+      "family": "product",
+      "releaseBlocking": false,
+      "path": "docs/union-eyes/decisions/reviewed/DEC-PD-14.json"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+name: UE Gate 0 Focused Remediation Regression
+
+on:
+  pull_request:
+    paths:
+      - 'apps/union-eyes/**'
+      - '.github/workflows/ue-gate0-focused-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ue-gate0-focus-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  focused:
+    name: Security + workflow mutation regressions
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup-monorepo
+      - name: Run changed contracts with exact source SHA
+        run: |
+          pnpm exec vitest run --project union-eyes --maxWorkers=2 \
+            apps/union-eyes/app/api/__tests__/organizations-id-members.route.test.ts \
+            apps/union-eyes/app/api/__tests__/organizations-id.route.test.ts \
+            apps/union-eyes/app/api/__tests__/organizations-sharing-access-containment.test.ts \
+            apps/union-eyes/app/api/__tests__/organizations-switch.route.test.ts \
+            apps/union-eyes/app/api/__tests__/users-me-organizations.route.test.ts \
+            apps/union-eyes/app/api/__tests__/members-directory-authorization.route.test.ts \
+            apps/union-eyes/app/api/__tests__/organization-members.route.test.ts \
+            apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts \
+            apps/union-eyes/app/api/__tests__/bargaining-proposal-delete-parent-boundary.test.ts \
+            apps/union-eyes/app/api/__tests__/calendar-sync-connections-owner-scoping.route.test.ts \
+            apps/union-eyes/app/api/education/registrations/__tests__/route.test.ts \
+            apps/union-eyes/app/api/health-safety/hazards/__tests__/route.test.ts \
+            apps/union-eyes/app/api/health-safety/__tests__/hazards-incidents-submission.integration.test.ts \
+            apps/union-eyes/lib/api/__tests__/crud-governance.test.ts \
+            apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts \
+            apps/union-eyes/lib/__tests__/route-coverage-manifest.test.ts \
+            apps/union-eyes/db/__tests__/schema-mutation-batches.test.ts \
+            apps/union-eyes/services/clc/__tests__/compliance-reports.test.ts \
+            apps/union-eyes/app/api/__tests__/admin-clc-analytics-annual-report.route.test.ts \
+            apps/union-eyes/app/api/__tests__/admin-clc-analytics-trends.route.test.ts

@@ -8,7 +8,7 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import type { RLSTx } from '@/lib/db/with-rls-context';
 import { MAX_HIERARCHY_DEPTH } from '@/lib/utils/hierarchy-validation';
 import {
-  canAdministerOrganization,
+  isAdministrativeRole,
   readableOrganizationIds,
   resolveOrganizationAccess,
   UUID_PATTERN,
@@ -38,8 +38,8 @@ const STATUS_FILTER_PATTERN = /^[a-z_]{1,32}$/;
  * GET /api/organizations — the organizations the caller may read.
  *
  * Being signed in is not enough. The list is the caller's own active memberships, the organizations below one they
- * administer, or (for a platform administrator) every organization, read as the system role after that is decided here
- * rather than left to the connection's database role. Contact details, billing contact, subscription tier, settings and
+ * administer, read as the system role after the organization scope is decided here. A platform staff
+ * title alone grants no access to another union or affiliate. Contact details, billing contact, subscription tier, settings and
  * provenance are returned only for organizations the caller administers; elsewhere the entry is the public profile.
  * Grievance counts (include_stats) are likewise administrative.
  */
@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
     const childrenByOrg: Record<string, number> = {};
     if (includeStats && rows.length > 0) {
       const orgIds = rows.map(r => r.id);
-      const administered = orgIds.filter((id) => canAdministerOrganization(access, id));
+      const administered = orgIds.filter((id) => isAdministrativeRole(access.direct.get(id)));
       if (administered.length > 0) {
         const claimCounts = await db.execute(
           sql`SELECT organization_id::text as org_id, count(*)::int as cnt
@@ -106,7 +106,9 @@ export async function GET(req: NextRequest) {
 
     // Map camelCase DB fields to snake_case expected by frontend
     return rows.map(row => {
-      const administrative = canAdministerOrganization(access, row.id);
+      // Parent-body hierarchy does not itself authorize reading a child's
+      // billing, contact, subscription, settings, provenance or grievance data.
+      const administrative = isAdministrativeRole(access.direct.get(row.id));
       return {
       id: row.id,
       name: row.name,

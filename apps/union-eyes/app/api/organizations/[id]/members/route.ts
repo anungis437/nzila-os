@@ -7,7 +7,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { z } from 'zod';
 import { requireUserForOrganization, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { canAdministerOrganization, resolveOrganizationAccess, UUID_PATTERN } from '@/lib/organizations/read-authority';
+import { isAdministrativeRole, resolveOrganizationAccess, UUID_PATTERN } from '@/lib/organizations/read-authority';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,9 +15,8 @@ type Params = { params: Promise<{ id: string }> };
 
 /** Roles each caller level may grant. A role at or above the caller's own is never grantable here. */
 const GRANTABLE_ROLES: Record<string, string[]> = {
-  steward: ['member', 'observer'],
-  officer: ['member', 'observer', 'steward'],
-  admin: ['member', 'observer', 'steward', 'executive'],
+  // Privileged office grants need a separate dual-approval workflow, not this endpoint.
+  admin: ['member', 'observer', 'steward'],
 };
 
 const createMemberSchema = z.object({
@@ -36,18 +35,12 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
   const { id } = await params;
   if (!UUID_PATTERN.test(id)) return NextResponse.json({ error: 'Invalid organization id' }, { status: 400 });
-  // The roster carries every member's contact details, so it is for the organization's stewards and above, the
-  // administrators above it and the platform: not for any member, and not for a member who is no longer active.
+  // Full roster contacts and membership numbers require ACTIVE, DIRECT
+  // membership-office authority. Platform status, ancestry or a steward role
+  // alone must not disclose the organization's full roster.
   const access = await resolveOrganizationAccess(userId);
-  if (!canAdministerOrganization(access, id)) {
-    try {
-      const caller = await requireUserForOrganization(id);
-      if ((ROLE_HIERARCHY[(caller.roles[0] ?? 'member') as keyof typeof ROLE_HIERARCHY] ?? 0) < ROLE_HIERARCHY.steward) {
-        return NextResponse.json({ error: 'Forbidden: requires steward role' }, { status: 403 });
-      }
-    } catch {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+  if (!isAdministrativeRole(access.direct.get(id))) {
+    return NextResponse.json({ error: 'Forbidden: requires direct organization administrator' }, { status: 403 });
   }
   const rows = await withRLSContext({ organizationId: id }, async () =>
     db.select().from(organizationMembers).where(eq(organizationMembers.organizationId, id)),
@@ -76,7 +69,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 export async function POST(req: NextRequest, { params }: Params) {
   const { id } = await params;
 
-  // Require caller to be a member of THIS org with steward+ role
+  // Require caller to hold a verified direct membership in THIS org.
   let userCtx;
   try {
     userCtx = await requireUserForOrganization(id);
@@ -105,8 +98,12 @@ export async function POST(req: NextRequest, { params }: Params) {
   // A caller may grant only roles below their own, never the administrator role through this route, and what they create
   // is a pending membership: naming a user id does not give that person access, they take it up through the invitation.
   const access = await resolveOrganizationAccess(userCtx.userId);
-  const grantorLevel = canAdministerOrganization(access, id) ? 'admin' : (userRole as string);
-  const grantable = access.platform ? GRANTABLE_ROLES.admin : (GRANTABLE_ROLES[grantorLevel] ?? []);
+  // A steward can neither create a membership nor grant roles on the roster.
+  // Parent-body and platform role titles do not imply a tenant mandate.
+  if (!isAdministrativeRole(access.direct.get(id))) {
+    return NextResponse.json({ error: 'Forbidden: requires direct organization administrator' }, { status: 403 });
+  }
+  const grantable = GRANTABLE_ROLES.admin;
   if (!grantable.includes(role)) {
     return NextResponse.json({ error: `Forbidden: your role may not grant the ${role} role` }, { status: 403 });
   }

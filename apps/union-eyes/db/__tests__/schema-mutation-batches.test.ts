@@ -108,6 +108,12 @@ describe('schema and mutation batch program', () => {
     expect(program.censusCount).toBe(231)
     const evolve = program.batches.find((batch) => batch.id === 'schema-evolve-reachable')
     expect(evolve?.entryCount).toBe(4)
+    const sharing = program.batches.find((batch) => batch.id === 'schema-evolve-org-sharing')
+    expect(sharing?.entryCount).toBe(1)
+    expect(sharing?.applyNow).toBe(false)
+    expect(sharing?.action).toContain('0038_org_sharing_settings_shape')
+    expect(sharing?.action).toContain('UNQUALIFIED')
+    expect(program.schema.find((entry) => entry.table === 'organization_sharing_settings')?.batchId).toBe('schema-evolve-org-sharing')
     expect(evolve?.applyNow).toBe(false)
     expect(evolve?.action).toContain('0031_reachable_stub_shape')
     expect(evolve?.action).toContain('READY_FOR_VS_EXECUTION')
@@ -140,7 +146,6 @@ describe('schema and mutation batch program', () => {
       'member_documents',
       'notification_log',
       'organization_contacts',
-      'organization_sharing_settings',
       'role_tenure_history',
       'room_bookings',
       'segment_executions',

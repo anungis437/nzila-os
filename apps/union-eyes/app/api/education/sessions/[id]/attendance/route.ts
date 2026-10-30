@@ -65,7 +65,11 @@ export const PATCH = withApi({
       attended: body.attended,
       attendanceHours: body.attendanceHours?.toFixed(2),
       updatedAt: new Date().toISOString(),
-    }).where(condition).returning({ id: courseRegistrations.id, attended: courseRegistrations.attended });
+    }).where(and(
+      eq(courseRegistrations.organizationId, organizationId),
+      eq(courseRegistrations.sessionId, parsed.data),
+      eq(courseRegistrations.id, body.registrationId),
+    )).returning({ id: courseRegistrations.id, attended: courseRegistrations.attended });
     if (!updated) throw ApiError.conflict('Registration changed');
     await persistAtomicAudit(tx, {
       organizationId, userId, action: 'education.attendance.record',

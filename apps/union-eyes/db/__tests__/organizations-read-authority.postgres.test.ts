@@ -165,14 +165,14 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
     as('admin-fed')
     const rows = (await (await GET(get('/api/organizations'))).json()).data as Array<Record<string, unknown>>
     expect(rows.filter((r) => [FED, LOCAL_A, LOCAL_B].includes(r.id as string)).map((r) => r.id).sort()).toEqual([FED, LOCAL_A, LOCAL_B].sort())
-    expect(rows.find((r) => r.id === LOCAL_A)).toMatchObject({ subscription_tier: 'pro' })
+    expect(rows.find((r) => r.id === LOCAL_A)).not.toHaveProperty('subscription_tier')
   })
 
-  it('a platform administrator lists every organization', async () => {
+  it('a platform-only title does not enumerate any member organizations', async () => {
     const { GET } = await import('../../app/api/organizations/route')
     state.platformAdmins.add('platform-1')
     as('platform-1')
-    expect(await ids(await GET(get('/api/organizations')))).toEqual([FED, LOCAL_A, LOCAL_B].sort())
+    expect(await ids(await GET(get('/api/organizations')))).toEqual([])
   })
 
   it('the tree, hierarchy and search confine a member to their own organization and show the federation administrator the subtree', async () => {
@@ -200,7 +200,7 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
     as('admin-a')
     expect((await (await GET(get(`/api/organizations/${LOCAL_A}`), params(LOCAL_A))).json()).data).toMatchObject({ subscription_tier: 'pro' })
     as('admin-fed')
-    expect((await GET(get(`/api/organizations/${LOCAL_A}`), params(LOCAL_A))).status).toBe(200)
+    expect((await GET(get(`/api/organizations/${LOCAL_A}`), params(LOCAL_A))).status).toBe(404)
   })
 
   it('children and descendants list nothing to a stranger or a sibling, and the subtree to the federation administrator', async () => {
@@ -235,12 +235,13 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
     }
     const candidate = { user_id: `new-${tag}`, name: 'New Person', email: 'new@example.test' }
 
-    it('a plain member, a suspended member and a stranger cannot read the roster; a steward and the administrator above can', async () => {
+    it('the full roster is limited to the organization direct administrator', async () => {
       for (const user of ['member-a', 'suspended-a', 'member-b']) expect((await rosterGet(user)).status, user).toBe(403)
-      const steward = await rosterGet('steward-a')
-      expect(steward.status).toBe(200)
-      expect(((await steward.json()).data as Array<{ organization_id: string }>).every((r) => r.organization_id === LOCAL_A)).toBe(true)
-      expect((await rosterGet('admin-fed')).status).toBe(200)
+      expect((await rosterGet('steward-a')).status).toBe(403)
+      expect((await rosterGet('admin-fed')).status).toBe(403)
+      const admin = await rosterGet('admin-a')
+      expect(admin.status).toBe(200)
+      expect(((await admin.json()).data as Array<{ organization_id: string }>).every((r) => r.organization_id === LOCAL_A)).toBe(true)
     })
 
     it('no caller grants a role at or above their own, nobody grants admin, and a plain member or stranger adds no one', async () => {
@@ -251,8 +252,8 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
       expect((await admin.query('SELECT 1 FROM organization_members WHERE user_id = $1', [candidate.user_id])).rows).toHaveLength(0)
     })
 
-    it('a steward adds a member only as a pending membership, written as the runtime role under the real row-level policy', async () => {
-      const response = await rosterPost('steward-a', { ...candidate, role: 'member', status: 'active' })
+    it('a direct administrator adds a member only as pending, under native runtime row-level policy', async () => {
+      const response = await rosterPost('admin-a', { ...candidate, role: 'member', status: 'active' })
       expect(response.status).toBe(201)
       const { rows } = await admin.query('SELECT role, status, organization_id FROM organization_members WHERE user_id = $1', [candidate.user_id])
       expect(rows).toEqual([{ role: 'member', status: 'pending', organization_id: LOCAL_A }])

@@ -124,17 +124,17 @@ describe('GET /api/organizations/[id]', () => {
   it('the administrator of the federation reads a local below it; a member of the federation does not read a sibling local', async () => {
     const { GET } = await import('../organizations/[id]/route');
     state.userId = 'u-admin-fed';
-    expect((await GET(get(`/api/organizations/${LOCAL_B}`), params(LOCAL_B))).status).toBe(200);
+    expect((await GET(get(`/api/organizations/${LOCAL_B}`), params(LOCAL_B))).status).toBe(404);
     await member('u-member-fed', FED, 'member');
     state.userId = 'u-member-fed';
     expect((await GET(get(`/api/organizations/${LOCAL_B}`), params(LOCAL_B))).status).toBe(404);
   });
 
-  it('a platform administrator reads any organization', async () => {
+  it('a platform administrator without active membership cannot read a union organization', async () => {
     const { GET } = await import('../organizations/[id]/route');
     state.userId = 'platform-1';
     state.platformAdmins.add('platform-1');
-    expect((await GET(get(`/api/organizations/${LOCAL_B}`), params(LOCAL_B))).status).toBe(200);
+    expect((await GET(get(`/api/organizations/${LOCAL_B}`), params(LOCAL_B))).status).toBe(404);
   });
 });
 
@@ -172,7 +172,7 @@ describe('children, descendants, hierarchy, search, tree', () => {
     expect(await (await search.GET(get('/api/organizations/search?q=Local'))).json()).toMatchObject({ data: [] });
     state.userId = 'platform-1';
     state.platformAdmins.add('platform-1');
-    expect(await names(await search.GET(get('/api/organizations/search?q=Local')))).toEqual([LOCAL_A, LOCAL_B].sort());
+    expect(await names(await search.GET(get('/api/organizations/search?q=Local')))).toEqual([]);
   });
 
   it('a suspended member lists nothing', async () => {
@@ -217,13 +217,16 @@ describe('GET /api/organizations (list) and /api/organizations/tree', () => {
     const rows = (await (await listed('/api/organizations?include_stats=true')).json()).data as Array<Record<string, unknown>>;
     expect(rows.map((r) => r.id).sort()).toEqual([FED, LOCAL_A, LOCAL_B].sort());
     const local = rows.find((r) => r.id === LOCAL_A);
-    expect(local).toMatchObject({ billing_contact_id: '44444444-4444-4444-8444-444444444444', subscription_tier: 'pro', activeClaims: 1 });
+    expect(local).toMatchObject({ id: LOCAL_A, name: 'LocalA' });
+    for (const sensitive of ['billing_contact_id', 'subscription_tier', 'settings', 'activeClaims', 'email', 'phone', 'address']) {
+      expect(local, sensitive).not.toHaveProperty(sensitive);
+    }
   });
 
-  it('shows the federation administrator the locals below, and a platform administrator everything', async () => {
+  it('a platform-only identity cannot list federation or local records', async () => {
     state.userId = 'platform-1';
     state.platformAdmins.add('platform-1');
-    expect(await names(await listed())).toEqual([FED, LOCAL_A, LOCAL_B].sort());
+    expect(await names(await listed())).toEqual([]);
   });
 
   it('rejects a malformed parent or status filter before any read', async () => {
@@ -269,20 +272,21 @@ describe('roster', () => {
     return POST(new NextRequest(`http://localhost/api/organizations/${org}/members`, { method: 'POST', body: JSON.stringify(body), headers: { 'content-type': 'application/json' } }), params(org));
   };
 
-  it('a plain member, a suspended member and a stranger cannot read the roster; a steward can', async () => {
+  it('only the direct administrator reads the full private roster', async () => {
     expect((await rosterGet('u-member-a')).status).toBe(403);
     expect((await rosterGet('u-suspended-a')).status).toBe(403);
     expect((await rosterGet('u-member-b')).status).toBe(403);
-    const steward = await rosterGet('u-steward-a');
-    expect(steward.status).toBe(200);
-    expect((await steward.json()).data.every((r: { organization_id: string }) => r.organization_id === LOCAL_A)).toBe(true);
-    expect((await rosterGet('u-admin-fed')).status).toBe(200);
+    expect((await rosterGet('u-steward-a')).status).toBe(403);
+    expect((await rosterGet('u-admin-fed')).status).toBe(403);
+    const administrator = await rosterGet('u-admin-a');
+    expect(administrator.status).toBe(200);
+    expect((await administrator.json()).data.every((r: { organization_id: string }) => r.organization_id === LOCAL_A)).toBe(true);
   });
 
   const candidate = { user_id: 'new-user', name: 'New Person', email: 'new@x.example' };
 
-  it('a steward may add a member, but only as a pending membership; naming a user id grants no access', async () => {
-    const response = await rosterPost('u-steward-a', { ...candidate, role: 'member', status: 'active' });
+  it('a direct administrator may add a member only as pending; naming a user id grants no access', async () => {
+    const response = await rosterPost('u-admin-a', { ...candidate, role: 'member', status: 'active' });
     expect(response.status).toBe(201);
     const { rows } = await pg.query('SELECT role, status FROM organization_members WHERE user_id = $1', ['new-user']);
     expect(rows).toEqual([{ role: 'member', status: 'pending' }]);

@@ -65,9 +65,9 @@ describe('users/me/organizations route', () => {
   it('returns memberships and orgs for regular users', async () => {
     const { GET } = await loadRoute();
     m.selectQueue.push(
-      [{ id: 'm1', organizationId: 'org_1', userId: 'user_1', role: 'member', isPrimary: true, joinedAt: new Date(), createdAt: new Date() }],
+      [{ id: 'm1', organizationId: 'org_1', userId: 'user_1', role: 'member', status: 'active', isPrimary: true, joinedAt: new Date(), createdAt: new Date() }],
       [
-        { id: 'org_1', name: 'Org One', slug: 'org-one', organizationType: 'union', sectors: ['public'], provinceTerritory: 'ON', createdAt: new Date(), updatedAt: new Date() },
+        { id: 'org_1', name: 'Org One', slug: 'org-one', organizationType: 'union', status: 'active', sectors: ['public'], provinceTerritory: 'ON', createdAt: new Date(), updatedAt: new Date() },
       ],
     );
 
@@ -109,14 +109,14 @@ describe('users/me/organizations route', () => {
     expect(mockDb.update).not.toHaveBeenCalled();
   });
 
-  it('returns all organizations for platform admins', async () => {
+  it('does not enumerate non-member organizations for platform admins', async () => {
     const { GET } = await loadRoute();
     process.env.PLATFORM_ADMIN_USER_IDS = 'user_1';
     m.selectQueue.push(
-      [{ id: 'm1', organizationId: 'org_1', userId: 'user_1', role: 'admin', isPrimary: true, joinedAt: new Date(), createdAt: new Date() }],
+      [{ id: 'm1', organizationId: 'org_1', userId: 'user_1', role: 'admin', status: 'active', isPrimary: true, joinedAt: new Date(), createdAt: new Date() }],
       [
-        { id: 'org_1', name: 'Org One', slug: 'org-one', organizationType: 'union', sectors: [], provinceTerritory: 'ON', createdAt: new Date(), updatedAt: new Date() },
-        { id: 'org_2', name: 'Org Two', slug: 'org-two', organizationType: 'union', sectors: [], provinceTerritory: 'AB', createdAt: new Date(), updatedAt: new Date() },
+        { id: 'org_1', name: 'Org One', slug: 'org-one', organizationType: 'union', status: 'active', sectors: [], provinceTerritory: 'ON', createdAt: new Date(), updatedAt: new Date() },
+        { id: 'org_2', name: 'Org Two', slug: 'org-two', organizationType: 'union', status: 'active', sectors: [], provinceTerritory: 'AB', createdAt: new Date(), updatedAt: new Date() },
       ],
     );
 
@@ -124,6 +124,7 @@ describe('users/me/organizations route', () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.organizations).toHaveLength(2);
+    expect(payload.organizations).toHaveLength(1);
+    expect(mockDb.select).toHaveBeenCalledTimes(2);
   });
 });

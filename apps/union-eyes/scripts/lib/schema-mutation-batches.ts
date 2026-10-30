@@ -232,7 +232,7 @@ const BATCHES: BatchSpec[] = [
     ratchet: 'census',
     execution: 'hold',
     shrink: 'none',
-    action: 'A kept Drizzle relation, a public schema export, a compatibility re-export, or a service that still reads or writes this declaration keeps it. accessibility_audits, accessibility_issues, financial_audit_log, gss_applications, indigenous_member_data, and member_addresses stay because those services name them. The sixteen dependency holds stay because a kept relation or the public user_sessions export names them. Duplicate pgTable bodies for accessibility, indigenous data, and LMBP immigration now re-export the domain declaration. None of these six services is reached from an App Router entry, so retention is not a finished persona. Census column gaps are not evolved here. Do not retire any of these to shrink the census. Do not DROP the relation.',
+    action: 'A kept Drizzle relation, a public schema export, a compatibility re-export, or a service that still reads or writes this declaration keeps it. accessibility_audits, accessibility_issues, financial_audit_log, gss_applications, indigenous_member_data, and member_addresses stay because those services name them. The fifteen remaining dependency holds stay because a kept relation or the public user_sessions export names them. organization_sharing_settings is now a distinct, unqualified evolution batch because an actual API caller reaches it. Duplicate pgTable bodies for accessibility, indigenous data, and LMBP immigration now re-export the domain declaration. None of these six services is reached from an App Router entry, so retention is not a finished persona. Census column gaps are not evolved here. Do not retire any of these to shrink the census. Do not DROP the relation.',
     proof: 'apps/union-eyes/db/__tests__/schema-mutation-batches.test.ts',
   },
   {
@@ -261,6 +261,15 @@ const BATCHES: BatchSpec[] = [
     shrink: 'census',
     action: 'Platform migration 0031_reachable_stub_shape evolves data_anonymization_log, employment_history, job_classifications, and member_leaves. Additive columns and defaults only. NOT NULL only when the relation is empty. No keys, no RLS, no DROP. Revised in place before any apply: existing columns must match the expected type, and the migration refuses a change to constraint, index, policy, or grant definitions, or to row security. It is registered UNQUALIFIED. Do not apply it here. Census regeneration after apply is READY_FOR_VS_EXECUTION.',
     proof: 'apps/union-eyes/scripts/generate-stub-evolution.ts and apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts',
+  },
+  {
+    id: 'schema-evolve-org-sharing',
+    order: 13.5,
+    ratchet: 'census',
+    execution: 'prepared-evolve',
+    shrink: 'census',
+    action: 'Platform migration 0038_org_sharing_settings_shape independently prepares the thirteen missing organization_sharing_settings columns now needed by the tenant sharing-policy API. Additive columns and safe defaults only; zero RLS, grant, index, constraint or ownership changes. Legacy organization_id nulls, duplicate organization owners, existing column type mismatch or policy drift stop the migration. This migration remains UNQUALIFIED and must not be applied before native role, grant and runtime proof. The separately governed unique-owner key and tenant RLS policy are not created here. Census regeneration is READY_FOR_VS_EXECUTION only after approved apply.',
+    proof: 'apps/union-eyes/db/migrations-platform/0038_org_sharing_settings_shape.sql and db/__tests__/org-sharing-schema-evolution-sql.test.ts',
   },
   {
     id: 'schema-verify-reachable-blocked',
@@ -445,6 +454,7 @@ function schemaBatch(entry: CensusEntry, disposition: string, index: ReachIndex,
       if (!reachable && !index.graphComplete) return 'schema-verify-unproven'
       if (!reachable) return (REQUIRED_DEAD_MODULE[entry.table] || SERVICE_RETAINED[entry.table]) ? 'schema-verify-dead-required' : 'schema-verify-dead-module'
       if (blockers.length > 0) return 'schema-verify-reachable-blocked'
+      if (entry.table === 'organization_sharing_settings') return 'schema-evolve-org-sharing'
       return 'schema-evolve-reachable'
     default:
       throw new Error(`no schema batch for ${entry.table} (${disposition})`)

@@ -90,6 +90,22 @@ describe('organization/members route', () => {
     expect(m.eq).not.toHaveBeenCalledWith(m.organizationMembers.organizationId, 'attacker-org');
   });
 
+
+  it('never includes membership numbers in a steward case-context directory projection', async () => {
+    const rows = [{
+      id: 'om_1', userId: 'u1', name: 'Alex', email: 'work@example.invalid',
+      phone: '555-0101', role: 'member', status: 'active', department: 'Site',
+      location: null, position: null, hireDate: null, seniority: null,
+      membershipNumber: 'SENSITIVE-12345', unionJoinDate: null,
+      createdAt: null, metadata: null,
+    }];
+    const where = vi.fn().mockResolvedValue(rows);
+    m.db.select.mockReturnValue({ from: vi.fn().mockReturnValue({ where }) });
+    const { GET } = await loadRoute();
+    const result = await GET(new NextRequest('http://localhost/api/organization/members?__test_org_id=org_1&__test_role=steward'));
+    expect(result.members[0].membershipNumber).toBe('');
+  });
+
   it('returns mapped members and stats for valid organization', async () => {
     const rows = [
       {
