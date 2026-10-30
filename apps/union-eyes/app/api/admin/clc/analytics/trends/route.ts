@@ -18,6 +18,7 @@ import {
 } from '@/lib/api/standardized-responses';
 export const GET = withRoleAuth('admin', async (request, context) => {
     const { userId, organizationId } = context;
+    if (!userId) return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
   try {
         // Rate limiting: 50 CLC operations per hour per user
