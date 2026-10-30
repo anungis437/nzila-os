@@ -42,8 +42,14 @@ beforeEach(() => {
 })
 
 describe('DEF-0B10-PEN-TRUSTEE-MEETING-READS confidential read containment', () => {
-  it.each(['../pension/trustee-meetings/route', '../pension/trustee-meetings/[id]/route'])('restricts GET to pension financial administrators: %s', async (path) => {
-    await import(path)
+  it('restricts list GET to the pension financial administrator role', async () => {
+    await import('../pension/trustee-meetings/route')
+    expect(m.options[0]).toMatchObject({ auth: { required: true, roles: ['secretary_treasurer'] } })
+    expect(m.options[0]).not.toMatchObject({ auth: { minRole: 'member' } })
+  })
+
+  it('restricts item GET to the pension financial administrator role', async () => {
+    await import('../pension/trustee-meetings/[id]/route')
     expect(m.options[0]).toMatchObject({ auth: { required: true, roles: ['secretary_treasurer'] } })
     expect(m.options[0]).not.toMatchObject({ auth: { minRole: 'member' } })
   })

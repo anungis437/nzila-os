@@ -8,11 +8,17 @@ vi.mock('@/lib/api/framework', () => ({
   },
 }))
 
+const metricModules = {
+  mrr: () => import('../platform/metrics/mrr/route'),
+  churn: () => import('../platform/metrics/churn/route'),
+  'unit-economics': () => import('../platform/metrics/unit-economics/route'),
+}
+
 beforeEach(() => { captured.options.length = 0; vi.resetModules() })
 
 describe('DEF-0B10-OPL-12 platform financial metrics are never fabricated', () => {
   it.each(['mrr', 'churn', 'unit-economics'])('%s returns 501 with no fake financial or usage figures', async (metric) => {
-    const module = await import(`../platform/metrics/${metric}/route`)
+    const module = await metricModules[metric as keyof typeof metricModules]()
     expect(captured.options[0]).toMatchObject({ auth: { required: true, minRole: 'system_admin' } })
     const response = await (module.GET as any)({})
     expect(response.status).toBe(501)
