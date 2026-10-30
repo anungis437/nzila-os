@@ -2,13 +2,13 @@
  "register": "UE-CONV-K-008",
  "summary": {
   "routes": 995,
-  "mutating": 717,
+  "mutating": 715,
   "kernel": 62,
   "byGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 12,
    "CRON_SECRET": 3,
-   "CRUD_FACTORY": 279,
+   "CRUD_FACTORY": 277,
    "DELEGATED": 23,
    "NONE": 48,
    "ORG_AUTH": 53,
@@ -17,14 +17,14 @@
    "ROLE_AUTH": 125,
    "SESSION_AUTH": 64,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 291,
+   "WITH_API": 293,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 8,
    "CRON_SECRET": 2,
-   "CRUD_FACTORY": 279,
+   "CRUD_FACTORY": 277,
    "DELEGATED": 16,
    "NONE": 8,
    "ORG_AUTH": 32,
@@ -39,7 +39,7 @@
    "ATOMIC": 150,
    "ATOMIC_SERVICE": 145,
    "COMPUTE_ONLY": 37,
-   "CRUD_ATOMIC": 281,
+   "CRUD_ATOMIC": 279,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 23,
    "NO_WRITES_FOUND": 14,
@@ -47,7 +47,7 @@
   },
   "mutatingByData": {
    "AMBIENT_DB": 15,
-   "CRUD_TENANT_TX": 281,
+   "CRUD_TENANT_TX": 279,
    "NONE": 202,
    "SYSTEM_CONTEXT": 59,
    "TENANT_TX": 160
@@ -9959,16 +9959,14 @@
   {
    "route": "organizations/[id]/access-logs/route.ts",
    "methods": [
-    "DELETE",
-    "GET",
-    "PATCH"
+    "GET"
    ],
-   "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "mutating": false,
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "READ_ONLY"
   },
   {
    "route": "organizations/[id]/analytics/route.ts",
@@ -10060,16 +10058,14 @@
   {
    "route": "organizations/[id]/sharing-settings/route.ts",
    "methods": [
-    "DELETE",
-    "GET",
-    "PATCH"
+    "GET"
    ],
-   "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "mutating": false,
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "NONE",
+   "audit": "READ_ONLY"
   },
   {
    "route": "organizations/current/route.ts",
