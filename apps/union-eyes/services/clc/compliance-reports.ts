@@ -209,12 +209,13 @@ export interface StatCanMembershipData {
 /**
  * Generate comprehensive annual compliance report
  */
-export async function generateAnnualComplianceReport(year: number): Promise<AnnualComplianceReport> {
+export async function generateAnnualComplianceReport(year: number, organizationId: string): Promise<AnnualComplianceReport> {
+  if (!organizationId) throw new Error('Organization context is mandatory for remittance reports');
   // Fetch all remittances for the year
   const remittances = await db
     .select()
     .from(perCapitaRemittances)
-    .where(eq(perCapitaRemittances.remittanceYear, year));
+    .where(and(eq(perCapitaRemittances.remittanceYear, year), eq(perCapitaRemittances.fromOrganizationId, organizationId)));
 
   // Generate summary
   const summary = await generateComplianceSummary(remittances, year);
