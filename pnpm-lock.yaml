@@ -3093,8 +3093,8 @@ importers:
         specifier: ^7.1.0
         version: 7.2.0
       multer:
-        specifier: '>=2.4.0'
-        version: 2.4.0
+        specifier: '>=2.5.0'
+        version: 2.5.0
       node-cron:
         specifier: ^3.0.3
         version: 3.0.3
