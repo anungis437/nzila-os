@@ -8,7 +8,7 @@ const m = vi.hoisted(() => ({
   rls: vi.fn(),
   audit: vi.fn(),
   select: vi.fn(),
-  insert: vi.fn(),
+  update: vi.fn(),
   rows: [] as Record<string, unknown>[],
 }));
 
@@ -54,15 +54,15 @@ beforeEach(() => {
     orderBy: (_value: unknown) => orderChain,
   };
   m.select.mockReturnValue({ from: () => ({ where: () => whereChain }) });
-  m.insert.mockReturnValue({
-    values: (_values: unknown) => ({
-      onConflictDoUpdate: (_conflict: unknown) => ({
+  m.update.mockReturnValue({
+    set: (_value: unknown) => ({
+      where: () => ({
         returning: async () => [{ id: 'sharing-record-1', organizationId: ORG_ID }],
       }),
     }),
   });
   m.rls.mockImplementation(async (_ctx: unknown, callback: (tx: unknown) => Promise<unknown>) =>
-    callback({ select: m.select, insert: m.insert }),
+    callback({ select: m.select, update: m.update }),
   );
 });
 
@@ -113,17 +113,32 @@ describe('organization sharing settings — policy containment', () => {
       }), params);
       expect(res.status).toBe(400);
     }
-    expect(m.insert).not.toHaveBeenCalled();
+    expect(m.update).not.toHaveBeenCalled();
+  });
+
+  it('fails closed on missing or duplicate historical sharing settings rows', async () => {
+    const { PATCH } = await import('../organizations/[id]/sharing-settings/route');
+    for (const rows of [[], [{ id: 'a' }, { id: 'b' }]]) {
+      m.rows = rows;
+      const res = await PATCH(new NextRequest(url + '/sharing-settings', {
+        method: 'PATCH', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ allowFederationSharing: false }),
+      }), params);
+      expect(res.status).toBe(409);
+    }
+    expect(m.update).not.toHaveBeenCalled();
+    expect(m.audit).not.toHaveBeenCalled();
   });
 
   it('restrictive settings persist under own tenant with mandatory atomic audit', async () => {
     const { PATCH } = await import('../organizations/[id]/sharing-settings/route');
+    m.rows = [{ id: 'sharing-record-1' }];
     const res = await PATCH(new NextRequest(url + '/sharing-settings', {
       method: 'PATCH', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ allowFederationSharing: false, requireAnonymization: true }),
     }), params);
     expect(res.status).toBe(200);
-    expect(m.insert).toHaveBeenCalled();
+    expect(m.update).toHaveBeenCalled();
     expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
       userId: 'caller', organizationId: ORG_ID, action: 'organization.sharing_settings_restrict',
     }));

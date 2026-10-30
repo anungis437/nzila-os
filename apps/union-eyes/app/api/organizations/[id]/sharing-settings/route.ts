@@ -87,12 +87,23 @@ export async function PATCH(req: NextRequest, params: Params) {
   }
   const patch = parsed.data;
   const result = await withRLSContext({ organizationId: access.id }, async tx => {
-    const [updated] = await tx.insert(organizationSharingSettings)
-      .values({ organizationId: access.id, ...patch })
-      .onConflictDoUpdate({
-        target: organizationSharingSettings.organizationId,
-        set: { ...patch, updatedAt: new Date() },
-      }).returning();
+    // Django's legacy stub did not declare the Drizzle unique constraint.
+    // Never use ON CONFLICT without a proven unique key; and never update
+    // multiple rows if the historic table contains duplicates.
+    const existing = await tx.select({ id: organizationSharingSettings.id })
+      .from(organizationSharingSettings)
+      .where(eq(organizationSharingSettings.organizationId, access.id))
+      .limit(2);
+    if (existing.length !== 1) {
+      return { error: 'The organization sharing record requires single-owner storage reconciliation', status: 409 } as const;
+    }
+    const [updated] = await tx.update(organizationSharingSettings)
+      .set({ ...patch, updatedAt: new Date() })
+      .where(eq(organizationSharingSettings.id, existing[0].id))
+      .returning();
+    if (!updated) {
+      return { error: 'The organization sharing record changed concurrently', status: 409 } as const;
+    }
     await persistAtomicAudit(tx, {
       organizationId: access.id,
       userId: access.userId,
@@ -101,7 +112,10 @@ export async function PATCH(req: NextRequest, params: Params) {
       resourceId: updated.id,
       details: { changedKeys: Object.keys(patch) },
     });
-    return updated;
+    return { data: updated } as const;
   });
-  return NextResponse.json({ data: result });
+  if ('error' in result) {
+    return NextResponse.json({ error: result.error }, { status: result.status });
+  }
+  return NextResponse.json(result);
 }
