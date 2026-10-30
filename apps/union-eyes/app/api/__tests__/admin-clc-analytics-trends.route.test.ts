@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
+  context: { userId: 'u1', organizationId: 'org-a' } as { userId: string; organizationId: string | null },
   withRoleAuth: vi.fn(),
   checkRateLimit: vi.fn(),
   createRateLimitHeaders: vi.fn(),
@@ -30,8 +31,9 @@ async function loadRoute() {
 describe('admin/clc/analytics/trends route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.context = { userId: 'u1', organizationId: 'org-a' };
     m.withRoleAuth.mockImplementation((_role: string, handler: any) =>
-      (request: NextRequest, context: any = { userId: 'u1', organizationId: 'org-a' }) => handler(request, context));
+      (request: NextRequest, context: any = m.context) => handler(request, context));
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0 });
     m.createRateLimitHeaders.mockReturnValue({ 'x-ratelimit-remaining': '49' });
     m.analyzeMultiYearTrends.mockResolvedValue({ years: 3, trend: [] });
@@ -77,8 +79,7 @@ describe('admin/clc/analytics/trends route', () => {
   });
   it('denies cross-organization trends when organization context is absent', async () => {
     const { GET } = await loadRoute();
-    m.withRoleAuth.mockImplementationOnce((_role: string, handler: any) =>
-      (request: NextRequest) => handler(request, { userId: 'u1', organizationId: null }));
+    m.context = { userId: 'u1', organizationId: null };
     const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/trends?years=5'));
     expect(response.status).toBe(403);
     expect(m.analyzeMultiYearTrends).not.toHaveBeenCalled();

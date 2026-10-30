@@ -1,0 +1,34 @@
+name: UE Schema Mutation Evidence (read only)
+
+on:
+  pull_request:
+    paths:
+      - 'apps/union-eyes/**'
+      - '.github/workflows/ue-schema-mutation-evidence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-census:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup-monorepo
+      - name: Recompute read-only schema assignment and mutator program
+        run: |
+          cd apps/union-eyes
+          pnpm exec tsx scripts/emit-schema-mutation-evidence.ts
+      - name: Retain source-derived evidence without modifying ratchets
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-schema-program-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/ue-schema-mutation-program.json
+          if-no-files-found: warn
+          retention-days: 7

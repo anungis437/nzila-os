@@ -115,8 +115,8 @@ describe('users/me/organizations route', () => {
     m.selectQueue.push(
       [{ id: 'm1', organizationId: 'org_1', userId: 'user_1', role: 'admin', status: 'active', isPrimary: true, joinedAt: new Date(), createdAt: new Date() }],
       [
-        { id: 'org_1', name: 'Org One', slug: 'org-one', organizationType: 'union', sectors: [], provinceTerritory: 'ON', createdAt: new Date(), updatedAt: new Date() },
-        { id: 'org_2', name: 'Org Two', slug: 'org-two', organizationType: 'union', sectors: [], provinceTerritory: 'AB', createdAt: new Date(), updatedAt: new Date() },
+        { id: 'org_1', name: 'Org One', slug: 'org-one', organizationType: 'union', status: 'active', sectors: [], provinceTerritory: 'ON', createdAt: new Date(), updatedAt: new Date() },
+        { id: 'org_2', name: 'Org Two', slug: 'org-two', organizationType: 'union', status: 'active', sectors: [], provinceTerritory: 'AB', createdAt: new Date(), updatedAt: new Date() },
       ],
     );
 
