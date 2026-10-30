@@ -58,7 +58,7 @@ describe('health and safety incident routes', () => {
     captured.calls.length = 0;
     const mod = await import('../health-safety/incidents/route');
     const opts = captured.calls.at(-1) as { anonymousCreate: (v: Record<string, unknown>) => boolean; beforeCreate: (v: Record<string, unknown>) => Record<string, unknown> };
-    const base = { description: 'd', locationDescription: 'l', organizationId: 'o', createdBy: 'user-1' };
+    const base = { description: 'd', locationDescription: 'l', organizationId: 'o', createdBy: 'user-1', incidentType: 'near_miss', severity: 'minor', incidentDate: '2026-03-01T10:00:00Z' };
     expect(opts.anonymousCreate(opts.beforeCreate({ ...base, isAnonymous: true }))).toBe(true);
     expect(opts.anonymousCreate(opts.beforeCreate({ ...base, isAnonymous: false }))).toBe(false);
     expect(opts.anonymousCreate(opts.beforeCreate({ ...base, isAnonymous: 'true' }))).toBe(false);
@@ -70,9 +70,11 @@ describe('health and safety incident routes', () => {
     captured.calls.length = 0;
     vi.resetModules();
     await import('../health-safety/incidents/route');
-    const opts = captured.calls.at(-1) as { beforeCreate: (v: Record<string, unknown>) => { metadata: Record<string, unknown> } };
-    const { metadata } = opts.beforeCreate({ description: 'd', locationDescription: 'l', isAnonymous: true, reportedBy: 'Jo', reporterContact: 'jo@x.ca' });
-    expect(metadata.reportedBy).toBeUndefined();
-    expect(metadata.reporterContact).toBeUndefined();
+    const opts = captured.calls.at(-1) as { beforeCreate: (v: Record<string, unknown>) => Record<string, unknown> };
+    const valid = { description: 'd', locationDescription: 'l', incidentType: 'near_miss', severity: 'minor', incidentDate: '2026-03-01T10:00:00Z', reportedByName: 'Jo' };
+    const anonymous = opts.beforeCreate({ ...valid, isAnonymous: true });
+    expect(anonymous.isAnonymous).toBe(true);
+    expect(anonymous.reportedByName).toBeUndefined();
+    expect(opts.beforeCreate({ ...valid, isAnonymous: false }).reportedByName).toBe('Jo');
   });
 });

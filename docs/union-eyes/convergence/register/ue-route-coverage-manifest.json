@@ -15,9 +15,9 @@
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 78,
    "ROLE_AUTH": 124,
-   "SESSION_AUTH": 64,
+   "SESSION_AUTH": 63,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 297,
+   "WITH_API": 298,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -6175,10 +6175,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "SESSION_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
