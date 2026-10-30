@@ -27,7 +27,7 @@ export const PUBLIC_API_ROUTES = new Set([
   '/api/auth_core/health/',   // Trailing-slash variant used by E2E helpers
   '/api/health/liveness',      // Kubernetes liveness probe
   '/api/status',               // System status endpoint for ops dashboards
-  '/api/docs/openapi.json',    // Public API documentation (describes public endpoints only)
+  // OpenAPI inventory is restricted to administrators at the handler and proxy.
   
   // ========================================================================
   // WEBHOOKS
