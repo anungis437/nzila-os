@@ -44,6 +44,30 @@ export function resolveIncidentDate(raw: Record<string, unknown>): string {
   return new Date().toISOString();
 }
 
+/**
+ * Convert the documented incident form aliases before strict CRUD validation.
+ * Unknown/privileged fields remain in the payload and are refused by the
+ * generic factory instead of silently disappearing or being mass-assigned.
+ */
+export function preprocessIncidentCreateBody(body: unknown): unknown {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return body;
+  const raw = { ...(body as Record<string, unknown>) };
+  const aliases: Record<string, string> = {
+    location: 'locationDescription',
+    department: 'departmentName',
+    rootCause: 'rootCauseAnalysis',
+    correctiveActions: 'correctiveActionsSummary',
+    reportedBy: 'reportedByName',
+  };
+  for (const [alias, canonical] of Object.entries(aliases)) {
+    if (!(alias in raw)) continue;
+    if (canonical in raw) throw ApiError.badRequest(`Conflicting fields: ${alias} and ${canonical}`);
+    raw[canonical] = raw[alias];
+    delete raw[alias];
+  }
+  return raw;
+}
+
 export function buildIncidentCreateValues(values: Record<string, unknown>): Record<string, unknown> {
   const raw = values;
   const incidentType = typeof raw.incidentType === 'string' ? raw.incidentType : undefined;
@@ -62,14 +86,16 @@ export function buildIncidentCreateValues(values: Record<string, unknown>): Reco
   }
 
   return {
-    incidentNumber: raw.incidentNumber ?? generateIncidentNumber(),
+    incidentNumber: generateIncidentNumber(),
     incidentType: incidentType && INCIDENT_TYPE_MAP[incidentType]
       ? INCIDENT_TYPE_MAP[incidentType]
       : 'other',
     severity: severity && SEVERITY_MAP[severity] ? SEVERITY_MAP[severity] : 'minor',
-    incidentDate: resolveIncidentDate(raw),
-    reportedDate: raw.reportedDate ?? nowIso,
+    incidentDate: new Date(resolveIncidentDate(raw)),
+    reportedDate: new Date(nowIso),
     locationDescription,
+    isAnonymous: raw.isAnonymous === true,
+    reportedByName: raw.isAnonymous === true ? undefined : raw.reportedByName,
     departmentName: raw.departmentName ?? raw.department,
     description,
     rootCauseAnalysis: raw.rootCauseAnalysis ?? raw.rootCause,
@@ -102,6 +128,13 @@ const { GET, POST } = crudRoutes({
   // broader 'member' (20) or the stricter 'admin' (140).
   readRole: 'health_safety_rep',
   writeRole: 'health_safety_rep',
+  preprocessCreateBody: preprocessIncidentCreateBody,
+  writableFields: [
+    'incidentType', 'severity', 'locationDescription', 'description',
+    'departmentName', 'rootCauseAnalysis', 'correctiveActionsSummary',
+    'isAnonymous', 'reportedByName', 'workplaceName', 'whatHappened',
+    'witnessesPresent', 'witnessNames', 'immediateActionsToken',
+  ],
   beforeCreate: (values) => buildIncidentCreateValues(values),
   // A report filed as anonymous is not attributed to the session user in the row or the audit entry.
   anonymousCreate: (values) => (values.metadata as { isAnonymous?: unknown } | undefined)?.isAnonymous === true,
