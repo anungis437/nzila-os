@@ -219,7 +219,7 @@ describe('GET /api/organizations (list) and /api/organizations/tree', () => {
   it('gives a member the public profile only, and the administrator everything for what they administer', async () => {
     state.userId = 'u-member-a';
     const [asMember] = (await (await listed('/api/organizations?include_stats=true')).json()).data;
-    for (const key of ['settings', 'billing_contact_id', 'subscription_tier', 'created_by', 'legacy_org_id', 'email', 'phone', 'address', 'charter_number', 'activeClaims']) {
+    for (const key of ['settings', 'billing_contact_id', 'subscription_tier', 'created_by', 'legacy_org_id', 'email', 'phone', 'address', 'charter_number', 'activeClaims', 'member_count', 'active_member_count', 'memberCount']) {
       expect(asMember, key).not.toHaveProperty(key);
     }
     expect(asMember).toMatchObject({ id: LOCAL_A, childCount: 0 });
@@ -229,6 +229,7 @@ describe('GET /api/organizations (list) and /api/organizations/tree', () => {
     expect(rows.map((r) => r.id).sort()).toEqual([FED, LOCAL_A, LOCAL_B].sort());
     const local = rows.find((r) => r.id === LOCAL_A);
     expect(local).toMatchObject({ id: LOCAL_A, name: 'LocalA' });
+    for (const key of ['member_count', 'active_member_count', 'memberCount']) expect(local, key).not.toHaveProperty(key);
     for (const sensitive of ['billing_contact_id', 'subscription_tier', 'settings', 'activeClaims', 'email', 'phone', 'address']) {
       expect(local, sensitive).not.toHaveProperty(sensitive);
     }

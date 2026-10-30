@@ -125,10 +125,14 @@ export async function GET(req: NextRequest) {
       website: row.website,
       clc_affiliated: row.clcAffiliated,
       affiliation_date: row.affiliationDate,
-      member_count: row.memberCount,
-      memberCount: row.memberCount ?? 0,
-      active_member_count: row.activeMemberCount,
-      last_member_count_update: row.lastMemberCountUpdate,
+      // Member counts are not public directory fields; federation ancestry
+      // is not an independently ratified data-sharing instrument.
+      ...(administrative ? {
+        member_count: row.memberCount,
+        memberCount: row.memberCount ?? 0,
+        active_member_count: row.activeMemberCount,
+        last_member_count_update: row.lastMemberCountUpdate,
+      } : {}),
       features_enabled: row.featuresEnabled ?? [],
       status: row.status,
       created_at: row.createdAt,
