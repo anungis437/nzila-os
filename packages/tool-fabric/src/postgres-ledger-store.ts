@@ -81,7 +81,7 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
       }
       const head = assertHead(heads[0]!)
       const rows = await tx.unsafe(
-        'SELECT seq, entry FROM tool_fabric_trust_entry WHERE stream_id = $1 ORDER BY seq ASC',
+        'SELECT seq, audit_id::text AS audit_id, entry_hash, entry FROM tool_fabric_trust_entry WHERE stream_id = $1 ORDER BY seq ASC',
         [orgId],
       )
       if (rows.length !== head.revision) {
@@ -91,7 +91,16 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
         if (Number(r.seq) !== i + 1) {
           throw new LedgerStoreUnavailableError('Persistent trust stream has sequence gaps')
         }
-        return parseAuditEntry(r)
+        const entry = parseAuditEntry(r)
+        // The relational identity/hash columns are immutable receipt indexes.
+        // Verify them against the canonical full-coverage JSON event on every
+        // read; a separately poisoned index must never be silently trusted.
+        if (typeof r.audit_id !== 'string' ||
+            r.audit_id.toLowerCase() !== entry.id.toLowerCase() ||
+            typeof r.entry_hash !== 'string' || r.entry_hash !== entry.hash) {
+          throw new LedgerStoreUnavailableError('Persistent trust audit receipt columns disagree with entry')
+        }
+        return entry
       })
       if ((entries.at(-1)?.hash ?? LEDGER_GENESIS_HASH) !== head.headHash) {
         throw new LedgerStoreUnavailableError('Persistent trust head does not match stored events')

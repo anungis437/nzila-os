@@ -5,7 +5,7 @@ import { PostgresAtomicTrustLedgerStore } from './postgres-ledger-store'
 import { LedgerStoreUnavailableError, LedgerConflictError, LEDGER_GENESIS_HASH } from './ledger-store'
 
 const ORG='platform:tool-fabric:trust'
-function fake(opts: { revision?: number; hash?: string; entries?: unknown[]; initialized?: boolean } = {}) {
+function fake(opts: { revision?: number; hash?: string; entries?: unknown[]; rows?: Record<string,unknown>[]; initialized?: boolean } = {}) {
   let commits=0
   const query = {
     unsafe: async (sql: string, params?: unknown[]) => {
@@ -15,7 +15,9 @@ function fake(opts: { revision?: number; hash?: string; entries?: unknown[]; ini
           head_hash: opts.hash ?? LEDGER_GENESIS_HASH,
         }]
       }
-      if (sql.includes('ORDER BY seq ASC')) return (opts.entries ?? []).map((entry,i)=>({seq:i+1,entry}))
+      if (sql.includes('ORDER BY seq ASC')) return opts.rows ?? (opts.entries ?? []).map((entry,i)=>({
+        seq:i+1, audit_id:(entry as AuditEntry).id, entry_hash:(entry as AuditEntry).hash, entry,
+      }))
       throw new Error('Unexpected write attempt: '+sql)
     },
   }
@@ -100,6 +102,20 @@ describe('P0 Postgres Trust Ledger CAS adapter',()=>{
       revision: 1, hash: entry.hash, entries: [altered],
     }))
     await expect(poisoned.readSnapshot(ORG)).rejects.toThrow('audit chain failed integrity')
+  })
+  it('rejects tampered relational audit receipt indexes even when JSON chain is valid', async () => {
+    const entry = auditRecord(LEDGER_GENESIS_HASH, 1)
+    const row = { seq:1, audit_id:entry.id, entry_hash:entry.hash, entry }
+    const valid = { revision:1, hash:entry.hash }
+    await expect(new PostgresAtomicTrustLedgerStore(fake({
+      ...valid, rows:[{...row, audit_id:randomUUID()}],
+    })).readSnapshot(ORG)).rejects.toThrow('audit receipt columns disagree')
+    await expect(new PostgresAtomicTrustLedgerStore(fake({
+      ...valid, rows:[{...row, entry_hash:'f'.repeat(64)}],
+    })).readSnapshot(ORG)).rejects.toThrow('audit receipt columns disagree')
+    await expect(new PostgresAtomicTrustLedgerStore(fake({
+      ...valid, rows:[{...row, audit_id:null}],
+    })).readSnapshot(ORG)).rejects.toThrow('audit receipt columns disagree')
   })
   it('rejects foreign-stream, legacy-v1 and duplicated audit records on snapshot reads', async () => {
     const foreign = auditRecord(LEDGER_GENESIS_HASH, 1, 'foreign-org')
