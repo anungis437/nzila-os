@@ -211,7 +211,7 @@ describe('platform-economics/billing-service', () => {
 
     it('throws when the period is closed', async () => {
       pushSel([account]);
-      pushSel([{ id: 'bp-1', isClosed: true, label: 'P1' }]);
+      pushSel([{ id: 'bp-1', organizationId: 'o1', isClosed: true, label: 'P1' }]);
       await expect(generateInvoice({ organizationId: 'o1', billingPeriodId: 'bp-1' })).rejects.toThrow('is closed');
     });
 
@@ -361,7 +361,7 @@ describe('platform-economics/billing-service', () => {
       pushSel([{ id: 'bp-1' }]); // getOrCreateBillingPeriod existing
       // generateInvoice → throws 'already exists' (skipped)
       pushSel([{ id: 'acct-1', netTermsDays: 30 }]); // getBillingAccount
-      pushSel([{ id: 'bp-1', isClosed: false, label: 'P', periodStart: runAt, periodEnd: runAt }]); // period
+      pushSel([{ id: 'bp-1', organizationId: 'o1', isClosed: false, label: 'P', periodStart: runAt, periodEnd: runAt }]); // period
       pushSel([{ id: 'inv-x', invoiceNumber: 'INV-X' }]); // existing invoice → throws already exists
       // draft invoices query
       pushSel([{ id: 'draft-1', metadata: null }]);
