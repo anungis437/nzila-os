@@ -243,6 +243,10 @@
     {
       "sha": "7f40ed0ba7d8fde3ea4ae07b269e5a7e851b2404",
       "description": "Remove two generic organization-row facades under access logs and sharing settings, explicitly fail closed with scoped 501, add regressions, reconcile mutable 995-route inventory. Canonical journeys still open."
+    },
+    {
+      "sha": "8ab92583650e1f63417b19b5eaad7b69e36b9afe",
+      "description": "Add disposable native-runtime HTTP tests for unauthenticated/admin OpenAPI, cross-org/low-role access-log and sharing-settings denial, honest 501 and absent generic writes; pending exact-SHA execution."
     }
   ],
   "records": [
@@ -641,11 +645,12 @@
           "apps/union-eyes/config/public-api-routes.ts"
         ],
         "regressionPaths": [
-          "apps/union-eyes/lib/__tests__/docs-openapi-exposure.test.ts"
+          "apps/union-eyes/lib/__tests__/docs-openapi-exposure.test.ts",
+          "apps/union-eyes/e2e/runtime/12-governed-ops-surface.spec.ts"
         ],
         "engineeringHead": "a485a436af186bb9e2fe10a33552ba83287ce1a4",
         "repair": "Removed the unguarded hand-authored OpenAPI alias and both public allowlist entries; now delegates to the same administrator-guarded generated specification as /api/docs, with private no-store caching.",
-        "limits": "Static source regression only until exact-SHA Vitest and unauthenticated/admin HTTP browser acceptance; independent review pending."
+        "limits": "Static source regression only until exact-SHA Vitest and unauthenticated/admin HTTP browser acceptance; independent review pending. Real HTTP regression added but not yet executed at exact SHA."
       },
       "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
@@ -9919,11 +9924,12 @@
           "apps/union-eyes/app/api/organizations/[id]/sharing-settings/route.ts"
         ],
         "regressionPaths": [
-          "apps/union-eyes/lib/__tests__/organization-facade-fail-closed.test.ts"
+          "apps/union-eyes/lib/__tests__/organization-facade-fail-closed.test.ts",
+          "apps/union-eyes/e2e/runtime/12-governed-ops-surface.spec.ts"
         ],
         "engineeringHead": "7f40ed0ba7d8fde3ea4ae07b269e5a7e851b2404",
         "repair": "Both aliases now enforce administrator authentication and exact active-organization identity before explicitly returning HTTP 501; unrelated organizations rows and generic PATCH/DELETE operations are no longer served. Route inventory reconciled.",
-        "limits": "This is containment, not completion: actual cross_org_access_log filters/pagination and governed sharing-settings GET/PUT remain to be implemented, tested on PG15/16, and proven over real HTTP with tenant personas. No user journey accepted."
+        "limits": "This is containment, not completion: actual cross_org_access_log filters/pagination and governed sharing-settings GET/PUT remain to be implemented, tested on PG15/16, and proven over real HTTP with tenant personas. No user journey accepted. Real HTTP regression added but not yet executed at exact SHA."
       },
       "currentHeadVerification": "SOURCE_CONTAINMENT_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
@@ -9948,11 +9954,12 @@
           "apps/union-eyes/app/api/organizations/[id]/sharing-settings/route.ts"
         ],
         "regressionPaths": [
-          "apps/union-eyes/lib/__tests__/organization-facade-fail-closed.test.ts"
+          "apps/union-eyes/lib/__tests__/organization-facade-fail-closed.test.ts",
+          "apps/union-eyes/e2e/runtime/12-governed-ops-surface.spec.ts"
         ],
         "engineeringHead": "7f40ed0ba7d8fde3ea4ae07b269e5a7e851b2404",
         "repair": "Both aliases now enforce administrator authentication and exact active-organization identity before explicitly returning HTTP 501; unrelated organizations rows and generic PATCH/DELETE operations are no longer served. Route inventory reconciled.",
-        "limits": "This is containment, not completion: actual cross_org_access_log filters/pagination and governed sharing-settings GET/PUT remain to be implemented, tested on PG15/16, and proven over real HTTP with tenant personas. No user journey accepted."
+        "limits": "This is containment, not completion: actual cross_org_access_log filters/pagination and governed sharing-settings GET/PUT remain to be implemented, tested on PG15/16, and proven over real HTTP with tenant personas. No user journey accepted. Real HTTP regression added but not yet executed at exact SHA."
       },
       "currentHeadVerification": "SOURCE_CONTAINMENT_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
@@ -9977,11 +9984,12 @@
           "apps/union-eyes/app/api/organizations/[id]/sharing-settings/route.ts"
         ],
         "regressionPaths": [
-          "apps/union-eyes/lib/__tests__/organization-facade-fail-closed.test.ts"
+          "apps/union-eyes/lib/__tests__/organization-facade-fail-closed.test.ts",
+          "apps/union-eyes/e2e/runtime/12-governed-ops-surface.spec.ts"
         ],
         "engineeringHead": "7f40ed0ba7d8fde3ea4ae07b269e5a7e851b2404",
         "repair": "Both aliases now enforce administrator authentication and exact active-organization identity before explicitly returning HTTP 501; unrelated organizations rows and generic PATCH/DELETE operations are no longer served. Route inventory reconciled.",
-        "limits": "This is containment, not completion: actual cross_org_access_log filters/pagination and governed sharing-settings GET/PUT remain to be implemented, tested on PG15/16, and proven over real HTTP with tenant personas. No user journey accepted."
+        "limits": "This is containment, not completion: actual cross_org_access_log filters/pagination and governed sharing-settings GET/PUT remain to be implemented, tested on PG15/16, and proven over real HTTP with tenant personas. No user journey accepted. Real HTTP regression added but not yet executed at exact SHA."
       },
       "currentHeadVerification": "SOURCE_CONTAINMENT_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
@@ -10006,11 +10014,12 @@
           "apps/union-eyes/app/api/organizations/[id]/sharing-settings/route.ts"
         ],
         "regressionPaths": [
-          "apps/union-eyes/lib/__tests__/organization-facade-fail-closed.test.ts"
+          "apps/union-eyes/lib/__tests__/organization-facade-fail-closed.test.ts",
+          "apps/union-eyes/e2e/runtime/12-governed-ops-surface.spec.ts"
         ],
         "engineeringHead": "7f40ed0ba7d8fde3ea4ae07b269e5a7e851b2404",
         "repair": "Both aliases now enforce administrator authentication and exact active-organization identity before explicitly returning HTTP 501; unrelated organizations rows and generic PATCH/DELETE operations are no longer served. Route inventory reconciled.",
-        "limits": "This is containment, not completion: actual cross_org_access_log filters/pagination and governed sharing-settings GET/PUT remain to be implemented, tested on PG15/16, and proven over real HTTP with tenant personas. No user journey accepted."
+        "limits": "This is containment, not completion: actual cross_org_access_log filters/pagination and governed sharing-settings GET/PUT remain to be implemented, tested on PG15/16, and proven over real HTTP with tenant personas. No user journey accepted. Real HTTP regression added but not yet executed at exact SHA."
       },
       "currentHeadVerification": "SOURCE_CONTAINMENT_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
