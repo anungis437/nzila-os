@@ -36,6 +36,11 @@ const summarizeSchema = z.object({
 );
 
 export const POST = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
+  // Never evaluate entitlements or retrieve confidential knowledge without an
+  // authenticated tenant. A public flag does not grant cross-tenant access.
+  if (!context.organizationId) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, 'Active organization required');
+  }
   // Rate limit
   const rateLimitResult = await checkRateLimit(
     `ai-completion:${context.userId}`,
@@ -84,6 +89,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       const doc = await db.query.knowledgeBase.findFirst({
         where: and(
           eq(knowledgeBase.id, document_id),
+          eq(knowledgeBase.organizationId, orgId),
           eq(knowledgeBase.isActive, true),
         ),
         columns: { content: true, title: true, organizationId: true, isPublic: true, sourceType: true, sourceId: true },
@@ -91,9 +97,6 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
 
       if (!doc) {
         return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
-      }
-      if (doc.organizationId !== orgId) {
-        return standardErrorResponse(ErrorCode.FORBIDDEN, 'Access denied to this document');
       }
 
       // A knowledge asset made from an exit interview keeps that interview's sensitivity: it is readable only at the
