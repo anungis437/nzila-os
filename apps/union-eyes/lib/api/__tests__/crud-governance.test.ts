@@ -75,7 +75,7 @@ describe('generic CRUD governance (UE-CONV-K-007)', () => {
     expect(supportsGenericArchive(undefined)).toBe(false) // separate hard-delete branch
     const factory = readFileSync(join(ROOT, 'lib', 'api', 'crud-factory.ts'), 'utf8')
     expect(factory).toMatch(/statusCol && !supportsGenericArchive\\(statusCol\\)/)
-    expect(factory).toMatch(/throw ApiError\\.forbidden\\(`Generic deletion is unavailable/)
+    expect(factory).toMatch(/throw ApiError\.forbidden\(`Generic deletion is unavailable/)
   })
 
   it('leaves dedicated confidential notes and OAuth connections denied by default generic CRUD', () => {
