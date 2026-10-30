@@ -788,6 +788,8 @@ jobs:
       # subscription to new data. Recompute from real sources every CI run.
       - name: Prove operational evidence generator fails truthfully
         run: node --test tooling/scripts/generate-ops-evidence.test.mjs
+      - name: Prove ops metrics cannot launder stale observations
+        run: node --import tsx --test tooling/ops/validate-ops-pack.test.mjs
 
       - name: Collect current operational evidence (no synthetic values)
         run: pnpm ops:evidence

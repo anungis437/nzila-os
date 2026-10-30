@@ -40,6 +40,8 @@ jobs:
       - uses: ./.github/actions/setup-monorepo
       - name: Prove source freshness and outage handling
         run: node --test tooling/scripts/generate-ops-evidence.test.mjs
+      - name: Prove ops metrics cannot launder stale observations
+        run: node --import tsx --test tooling/ops/validate-ops-pack.test.mjs
 
       - name: Generate truthful time-stamped operational evidence
         run: pnpm ops:evidence
