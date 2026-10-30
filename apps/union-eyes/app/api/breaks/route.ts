@@ -5,7 +5,7 @@
  */
 import { withApi, ApiError, z } from '@/lib/api/framework';
 import { memberBreaks, organizationMembers } from '@/db/schema';
-import { withRLSContext } from '@/lib/db/with-rls-context';
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { and, desc, eq } from 'drizzle-orm';
 
@@ -22,7 +22,7 @@ const createSchema = z.object({
   notes: z.string().max(2000).optional(),
 }).strict();
 
-async function ownMember(tx: Parameters<Parameters<typeof withRLSContext>[1]>[0], organizationId: string, userId: string) {
+async function ownMember(tx: RLSTx, organizationId: string, userId: string) {
   const [member] = await tx.select({ id: organizationMembers.id })
     .from(organizationMembers).where(and(
       eq(organizationMembers.organizationId, organizationId),
