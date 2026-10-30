@@ -13,13 +13,10 @@ import { eq, desc } from 'drizzle-orm';
 import { z } from 'zod';
 
 const createMeetingSchema = z.object({
-  title: z.string().max(255),
+  title: z.string().trim().min(1).max(255),
   scheduledDate: z.coerce.date(),
   location: z.string().max(255).optional(),
   agenda: z.string().optional(),
-  minutes: z.string().optional(),
-  status: z.enum(['scheduled', 'completed', 'cancelled']).optional(),
-  attendees: z.array(z.unknown()).optional(),
 });
 
 export const dynamic = 'force-dynamic';
@@ -68,7 +65,7 @@ export const GET = withApi(
 export const POST = withApi(
   {
     auth: { required: true, roles: PENSION_ADMIN_ROLES },
-    openapi: { tags: ['Pension'], summary: 'Create trustee meeting', description: 'Schedule a new trustee meeting' },
+    openapi: { tags: ['Pension'], summary: 'Create trustee meeting', description: 'Schedule a trustee meeting without accepting unverified minutes, attendance, or completion status' },
   },
   async ({ body, organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
