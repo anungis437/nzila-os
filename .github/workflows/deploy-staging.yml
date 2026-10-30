@@ -49,6 +49,11 @@ jobs:
   pre-deploy-gates:
     runs-on: ubuntu-latest
     name: Staging Pre-Deploy Gates
+    # These outputs are derived from actual executed steps, not from a flag
+    # supplied by an agent or release requester.
+    outputs:
+      contract_verified: ${{ steps.contract_tests.outcome == 'success' }}
+      slo_verified: ${{ steps.slo_gate.outcome == 'success' }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -156,8 +161,18 @@ jobs:
           # are never production evidence.
           ATTESTATION_SIGNING_KEY: ${{ secrets.ATTESTATION_SIGNING_KEY }}
         run: |
+          set -euo pipefail
+          # Source of PASS is the successful pre-deploy gate job, not an
+          # unconditional argument to the attestation generator.
+          test "${{ needs.pre-deploy-gates.outputs.contract_verified }}" = "true" || {
+            echo "::error::Contract-test success proof absent"; exit 1;
+          }
+          test "${{ needs.pre-deploy-gates.outputs.slo_verified }}" = "true" || {
+            echo "::error::Staging SLO success proof absent"; exit 1;
+          }
           node --import tsx scripts/release-attestation.ts \
             --sha ${{ github.sha }} \
+            --contract-pass --slo-pass \
             --env staging
 
       - name: Upload artifacts

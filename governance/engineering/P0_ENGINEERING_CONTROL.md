@@ -161,3 +161,13 @@ Production release contracts distinguish **generating an attestation at build**
 from **verifying and retaining exactly that signed attestation at promotion**.
 The latter additionally records the signed upstream manifest and SBOM as
 production evidence, so a newly generated local PASS is not substituted.
+
+## Staging quality truth binding
+
+The staging artifact now signs contract-test and staging SLO PASS only when
+both named steps in the preceding `pre-deploy-gates` job have actually
+succeeded and the job output has been transmitted to the build job. It cannot
+set these PASS values solely because the generator accepts CLI flags. This
+is **necessary, not sufficient** for release certification: Trivy, secrets,
+image digest provenance, environment approval and other runtime assertions
+remain separately required and cannot be synthesized from these two outcomes.
