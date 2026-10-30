@@ -89,6 +89,13 @@ test('missing or inconsistent current run-attempt start time is denied',()=> {
   }
 })
 
+test('approval before the actual workflow attempt start cannot authorize deployment',()=> {
+  const f=fixture()
+  // The run exists, but the approval predates this attempt's authenticated start.
+  f.approvals[0].created_at='2026-10-30T14:00:30Z'
+  assert.throws(()=>verifyProductionApproval(f),/approval timestamp invalid or stale/)
+})
+
 test('CLI writes a minimal, non-overwritable receipt only after authenticated review',()=>{
   const dir=mkdtempSync(join(tmpdir(),'nzila-approval-'))
   try {

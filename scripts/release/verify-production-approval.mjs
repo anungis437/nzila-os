@@ -59,7 +59,7 @@ export function verifyProductionApproval({environment,run,approvals,expectedRunI
   if (!last || String(last.state).toLowerCase()!=='approved') deny('no current approved environment review')
   const reviewer=userName(last.user), at=Date.parse(last.created_at ?? '')
   if (!human(reviewer) || !entitled.has(reviewer) || initiators.has(reviewer)) deny('approval is not by independent entitled human')
-  if (!Number.isFinite(at) || at<started || at>end+300000 || end-at>7*86400000) deny('approval timestamp invalid or stale')
+  if (!Number.isFinite(at) || at<attemptStarted || at>end+300000 || end-at>7*86400000) deny('approval timestamp invalid or stale')
   return Object.freeze({
     verdict:'APPROVED',source:'github_environment_run_review_api',
     runId:String(expectedRunId),sourceSha:expectedSha,environment:'production',
