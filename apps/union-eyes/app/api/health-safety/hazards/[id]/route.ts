@@ -11,7 +11,10 @@ const { GET, PATCH, DELETE } = crudRoutes({
   tags: ["Health-safety"],
   orgScoped: true,
   itemRoute: true,
-  readRole: 'member',
+  // Sensitive hazard detail cannot be readable below the collection's H&S floor.
+  // This is a containment measure; case-specific grants and read auditing
+  // remain separate Gate 0 obligations and are NOT certified by this change.
+  readRole: 'health_safety_rep',
   writeRole: 'admin',
 });
 export { GET, PATCH, DELETE };

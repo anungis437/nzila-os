@@ -338,4 +338,18 @@ describe('health-safety hazards/incidents submission — role gating', () => {
     expect(eq).toHaveBeenCalledWith(workplaceIncidents.organizationId, ORG_A);
     expect(eq).not.toHaveBeenCalledWith(workplaceIncidents.organizationId, ORG_B);
   });
+  it('9. member cannot bypass H&S collection authorization by requesting a hazard by id', async () => {
+    const { GET } = await import('../hazards/[id]/route');
+    m.getCurrentUser.mockResolvedValue(authUser('member', ORG_A));
+    const id = '55555555-5555-4555-8555-555555555555';
+
+    const res = await GET(
+      new NextRequest(`http://localhost/api/health-safety/hazards/${id}`),
+      { params: Promise.resolve({ id }) },
+    );
+
+    expect(res.status).toBe(403);
+    expect(m.dbSelect).not.toHaveBeenCalled();
+  });
+
 });
