@@ -86,11 +86,11 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 25,
+    "withCurrentRunSourceOrRegressionWork": 31,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 15,
-    "engineeringRemaining": 762,
+    "engineeringCorrected": 17,
+    "engineeringRemaining": 760,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately."
   },
   "verificationPolicy": {
@@ -1506,10 +1506,32 @@
       "title": "The batch invoicing route selects every active subscription across all organizations and generates an invoice for each at an organization administrator role title, returning every organization id.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "source": [
+          "apps/union-eyes/app/api/billing/send-batch/route.ts",
+          "apps/union-eyes/services/platform-economics/billing-service.ts"
+        ],
+        "tests": [
+          "apps/union-eyes/app/api/__tests__/billing-send-batch.route.test.ts",
+          "apps/union-eyes/services/platform-economics/billing-service.test.ts"
+        ],
+        "repair": "Bind batch billing period and active subscriptions to authenticated organization, validate returned tenant identity and reject foreign billing periods in shared invoice generator.",
+        "sourceState": "PATCHED_NOT_ACCEPTED",
+        "unitState": "PENDING_AT_EXACT_HEAD",
+        "nativeState": "PENDING_AT_EXACT_HEAD",
+        "runtimeState": "PENDING_AT_EXACT_HEAD",
+        "limits": "No independent acceptance or deployed authorization proof at new HEAD."
+      },
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/billing/send-batch/route.ts",
+        "explanation": "Bind batch billing period and active subscriptions to authenticated organization, validate returned tenant identity and reject foreign billing periods in shared invoice generator.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B3-BILLING-REPLAY-INVOICE-CROSS-TENANT-READ",
@@ -1523,10 +1545,35 @@
       "title": "The invoice replay route selects the invoice and its line items by id with no organization predicate at a steward role floor, so one organization can read another organization invoice.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "source": [
+          "apps/union-eyes/app/api/billing/replay-invoice/route.ts",
+          "apps/union-eyes/services/platform-economics/billing-service.ts",
+          "apps/union-eyes/app/api/finance/invoices/[id]/route.ts"
+        ],
+        "tests": [
+          "apps/union-eyes/app/api/__tests__/billing-replay-invoice.route.test.ts",
+          "apps/union-eyes/services/platform-economics/billing-service.test.ts",
+          "apps/union-eyes/services/platform-economics/__tests__/billing-service.test.ts",
+          "apps/union-eyes/app/api/__tests__/finance-invoices-id.route.test.ts"
+        ],
+        "repair": "Require organization-scoped invoice and line-item lookup for replay and finance detail; reject mismatched rows; require secretary_treasurer for replay.",
+        "sourceState": "PATCHED_NOT_ACCEPTED",
+        "unitState": "PENDING_AT_EXACT_HEAD",
+        "nativeState": "PENDING_AT_EXACT_HEAD",
+        "runtimeState": "PENDING_AT_EXACT_HEAD",
+        "limits": "No independent acceptance or deployed authorization proof at new HEAD."
+      },
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/billing/replay-invoice/route.ts",
+        "explanation": "Require organization-scoped invoice and line-item lookup for replay and finance detail; reject mismatched rows; require secretary_treasurer for replay.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B3-BILLING-AUDIT-NOT-ATOMIC",

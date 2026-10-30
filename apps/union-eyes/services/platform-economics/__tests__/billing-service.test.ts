@@ -156,14 +156,14 @@ describe('platform-economics/billing-service', () => {
     });
 
     it('throws when the period is already closed', async () => {
-      pushSel([{ id: 'bp-1', isClosed: true, label: 'P1' }]);
+      pushSel([{ id: 'bp-1', organizationId: 'o1', isClosed: true, label: 'P1' }]);
       await expect(closeBillingPeriod('bp-1', 'user-1')).rejects.toThrow('already closed');
     });
   });
 
   describe('generateInvoice', () => {
     const account = { id: 'acct-1', netTermsDays: 30 };
-    const period = { id: 'bp-1', isClosed: false, label: 'P1', periodStart: new Date('2025-01-01'), periodEnd: new Date('2025-01-31') };
+    const period = { id: 'bp-1', organizationId: 'o1', isClosed: false, label: 'P1', periodStart: new Date('2025-01-01'), periodEnd: new Date('2025-01-31') };
     const subscription = {
       organizationId: 'o1',
       status: 'active',
@@ -386,32 +386,37 @@ describe('platform-economics/billing-service', () => {
 
   describe('getInvoiceWithLineItems', () => {
     it('returns an invoice with line items', async () => {
-      pushSel([{ id: 'inv-1' }]); // invoice
+      pushSel([{ id: 'inv-1', organizationId: 'o1' }]); // invoice
       pushSel([{ id: 'li-1' }]); // line items
-      const result = await getInvoiceWithLineItems('inv-1');
+      const result = await getInvoiceWithLineItems('inv-1', 'o1');
       expect(result?.lineItems).toHaveLength(1);
     });
 
     it('returns null when not found', async () => {
       pushSel([]);
-      expect(await getInvoiceWithLineItems('inv-1')).toBeNull();
+      expect(await getInvoiceWithLineItems('inv-1', 'o1')).toBeNull();
     });
   });
 
   describe('replayInvoiceDeterministically', () => {
+    it('refuses a foreign invoice before reading its line items', async () => {
+      pushSel([{ id: 'inv-1', organizationId: 'foreign-org' }]);
+      expect(await replayInvoiceDeterministically('inv-1', 'o1')).toBeNull();
+    });
+
     it('recomputes the subtotal and lineage', async () => {
-      pushSel([{ id: 'inv-1', subtotal: '100.00', totalAmount: '100.00', metadata: { pricingRuleVersion: 'v1' } }]); // invoice
+      pushSel([{ id: 'inv-1', organizationId: 'o1', subtotal: '100.00', totalAmount: '100.00', metadata: { pricingRuleVersion: 'v1' } }]); // invoice
       pushSel([
         { id: 'li-1', costType: 'base_subscription', amount: '100.00', metadata: { usageAggregateId: 'agg-1', usageEventIds: ['ue-1', 'ue-2'] } },
       ]); // line items
-      const result = await replayInvoiceDeterministically('inv-1');
+      const result = await replayInvoiceDeterministically('inv-1', 'o1');
       expect(result?.recomputed.isMatch).toBe(true);
       expect(result?.lineage[0]!.usageEventIds).toEqual(['ue-1', 'ue-2']);
     });
 
     it('returns null when the invoice is missing', async () => {
       pushSel([]); // getInvoiceWithLineItems invoice missing
-      expect(await replayInvoiceDeterministically('inv-1')).toBeNull();
+      expect(await replayInvoiceDeterministically('inv-1', 'o1')).toBeNull();
     });
   });
 

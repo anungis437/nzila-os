@@ -216,8 +216,11 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
   const [period] = await db
     .select()
     .from(billingPeriods)
-    .where(eq(billingPeriods.id, input.billingPeriodId))
+    .where(and(eq(billingPeriods.id, input.billingPeriodId), eq(billingPeriods.organizationId, input.organizationId)))
     .limit(1);
+  if (!period || period.organizationId !== input.organizationId) {
+    throw new Error('Billing period not found for organization');
+  }
 
   if (period?.isClosed) {
     throw new Error(`Cannot generate invoice: billing period ${period.label} is closed`);
@@ -832,14 +835,14 @@ export async function getInvoices(organizationId: string, limit = 50) {
     .limit(limit);
 }
 
-export async function getInvoiceWithLineItems(invoiceId: string) {
+export async function getInvoiceWithLineItems(invoiceId: string, organizationId: string) {
   const [invoice] = await db
     .select()
     .from(platformInvoices)
-    .where(eq(platformInvoices.id, invoiceId))
+    .where(and(eq(platformInvoices.id, invoiceId), eq(platformInvoices.organizationId, organizationId)))
     .limit(1);
 
-  if (!invoice) return null;
+  if (!invoice || invoice.organizationId !== organizationId) return null;
 
   const lineItems = await db
     .select()
@@ -849,8 +852,8 @@ export async function getInvoiceWithLineItems(invoiceId: string) {
   return { ...invoice, lineItems };
 }
 
-export async function replayInvoiceDeterministically(invoiceId: string) {
-  const invoiceData = await getInvoiceWithLineItems(invoiceId);
+export async function replayInvoiceDeterministically(invoiceId: string, organizationId: string) {
+  const invoiceData = await getInvoiceWithLineItems(invoiceId, organizationId);
   if (!invoiceData) return null;
 
   let recomputedSubtotalCents = 0;

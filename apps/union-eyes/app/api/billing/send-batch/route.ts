@@ -1,12 +1,12 @@
 /**
- * POST /api/billing/send-batch — Generate invoices for all active subscriptions in a billing period
+ * POST /api/billing/send-batch — Generate invoices for active subscriptions in the caller organization
  */
 
 import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
 import { generateInvoice } from '@/services/platform-economics';
 import { db } from '@/db';
 import { orgSubscriptions, billingPeriods } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,28 +22,30 @@ export const POST = withApi(
     rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
     openapi: {
       tags: ['Billing'],
-      summary: 'Batch-generate invoices for all active subscriptions in a billing period',
+      summary: 'Batch-generate invoices for active subscriptions of the current organization',
     },
   },
-  async ({ body, userId }) => {
-    // Verify billing period exists
+  async ({ body, userId, organizationId }) => {
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    // Verify billing period ownership
     const [period] = await db
       .select()
       .from(billingPeriods)
-      .where(eq(billingPeriods.id, body.billingPeriodId))
+      .where(and(eq(billingPeriods.id, body.billingPeriodId), eq(billingPeriods.organizationId, organizationId)))
       .limit(1);
 
-    if (!period) throw ApiError.notFound('Billing period not found');
+    if (!period || period.organizationId !== organizationId) throw ApiError.notFound('Billing period not found');
 
     // Get all active subscriptions
     const subs = await db
       .select()
       .from(orgSubscriptions)
-      .where(eq(orgSubscriptions.status, 'active'));
+      .where(and(eq(orgSubscriptions.status, 'active'), eq(orgSubscriptions.organizationId, organizationId)));
 
     const results: Array<{ organizationId: string; invoiceId?: string; error?: string }> = [];
 
     for (const sub of subs) {
+      if (sub.organizationId !== organizationId) throw ApiError.badRequest('Subscription organization mismatch');
       try {
         const invoice = await generateInvoice({
           organizationId: sub.organizationId,

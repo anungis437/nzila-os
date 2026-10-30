@@ -278,7 +278,7 @@ describe('generateInvoice', () => {
 
   it('throws when the billing period is closed', async () => {
     state.selects.billingAccounts = [{ id: 'acct-1', netTermsDays: 30 }];
-    state.selects.billingPeriods = [{ id: 'bp-1', isClosed: true, label: '2025-01' }];
+    state.selects.billingPeriods = [{ id: 'bp-1', isClosed: true, label: '2025-01', organizationId: 'org-1' }];
     await expect(generateInvoice({ organizationId: 'org-1', billingPeriodId: 'bp-1' })).rejects.toThrow(
       /is closed/,
     );
@@ -286,11 +286,18 @@ describe('generateInvoice', () => {
 
   it('throws when an invoice already exists for the org+period', async () => {
     state.selects.billingAccounts = [{ id: 'acct-1', netTermsDays: 30 }];
-    state.selects.billingPeriods = [{ id: 'bp-1', isClosed: false, label: '2025-01' }];
+    state.selects.billingPeriods = [{ id: 'bp-1', isClosed: false, label: '2025-01', organizationId: 'org-1' }];
     state.selects.platformInvoices = [{ id: 'inv-1', invoiceNumber: 'INV-EXISTING' }];
     await expect(generateInvoice({ organizationId: 'org-1', billingPeriodId: 'bp-1' })).rejects.toThrow(
       /already exists/,
     );
+  });
+
+  it('rejects an invoice against a foreign billing period', async () => {
+    happyState();
+    state.selects.billingPeriods = [{ id: 'bp-1', organizationId: 'other-org', isClosed: false }];
+    await expect(generateInvoice({ organizationId: 'org-1', billingPeriodId: 'bp-1' })).rejects.toThrow('Billing period not found for organization');
+    expect(auditLog).not.toHaveBeenCalled();
   });
 
   it('throws when there is no active contract', async () => {
@@ -476,25 +483,32 @@ describe('queries', () => {
   });
 
   it('getInvoiceWithLineItems returns the invoice with line items', async () => {
-    state.selects.platformInvoices = [{ id: 'inv-1', subtotal: '10.00' }];
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', subtotal: '10.00' }];
     state.selects.platformInvoiceLineItems = [{ id: 'li-1', amount: '10.00' }];
-    const r = await getInvoiceWithLineItems('inv-1');
+    const r = await getInvoiceWithLineItems('inv-1', 'org-1');
     expect(r?.id).toBe('inv-1');
     expect(r?.lineItems).toHaveLength(1);
   });
 
+  it('does not reveal foreign invoice line items', async () => {
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'other-org', subtotal: '10.00' }];
+    state.selects.platformInvoiceLineItems = [{ id: 'secret-line' }];
+    expect(await getInvoiceWithLineItems('inv-1', 'org-1')).toBeNull();
+    expect(await replayInvoiceDeterministically('inv-1', 'org-1')).toBeNull();
+  });
+
   it('replayInvoiceDeterministically returns null when invoice missing', async () => {
     state.selects.platformInvoices = [];
-    expect(await replayInvoiceDeterministically('inv-x')).toBeNull();
+    expect(await replayInvoiceDeterministically('inv-x', 'org-1')).toBeNull();
   });
 
   it('replayInvoiceDeterministically recomputes subtotal and reports a match', async () => {
-    state.selects.platformInvoices = [{ id: 'inv-1', subtotal: '10.00', totalAmount: '10.00', metadata: { pricingRuleVersion: 'v1' } }];
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', subtotal: '10.00', totalAmount: '10.00', metadata: { pricingRuleVersion: 'v1' } }];
     state.selects.platformInvoiceLineItems = [{
       id: 'li-1', amount: '10.00', costType: 'usage_fee',
       metadata: { usageAggregateId: 'agg-1', usageEventIds: ['ue-1', 'ue-2'] },
     }];
-    const r = await replayInvoiceDeterministically('inv-1');
+    const r = await replayInvoiceDeterministically('inv-1', 'org-1');
     expect(r?.recomputed.isMatch).toBe(true);
     expect(r?.recomputed.subtotal).toBe('10.00');
     expect(r?.lineage[0].usageEventIds).toEqual(['ue-1', 'ue-2']);

@@ -3,7 +3,7 @@
  * Deterministically recompute invoice totals from stored line items and lineage metadata.
  */
 
-import { withApi, z, RATE_LIMITS } from '@/lib/api/framework';
+import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
 import { replayInvoiceDeterministically } from '@/services/platform-economics';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 
@@ -13,7 +13,7 @@ const bodySchema = z.object({
 
 export const POST = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { minRole: 'secretary_treasurer' },
     entitlement: 'financial_intelligence_suite',
     body: bodySchema,
     rateLimit: RATE_LIMITS.FINANCIAL_READ,
@@ -23,7 +23,8 @@ export const POST = withApi(
     },
   },
   async ({ body, organizationId, userId }) => {
-    const replay = await replayInvoiceDeterministically(body.invoiceId);
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    const replay = await replayInvoiceDeterministically(body.invoiceId, organizationId);
     if (!replay) {
       return {
         found: false,
