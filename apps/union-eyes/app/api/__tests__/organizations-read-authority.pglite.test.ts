@@ -124,11 +124,12 @@ describe('GET /api/organizations/[id]', () => {
     const { GET } = await import('../organizations/[id]/route');
     state.userId = 'u-member-a';
     const asMember = (await (await GET(get(`/api/organizations/${LOCAL_A}`), params(LOCAL_A))).json()).data;
-    expect(asMember).toMatchObject({ id: LOCAL_A, name: 'LocalA', totalClaims: 2 });
+    expect(asMember).toMatchObject({ id: LOCAL_A, name: 'LocalA' });
+    for (const field of ['totalClaims', 'activeClaims', 'memberCount', 'member_count', 'active_member_count', 'email', 'phone', 'address']) expect(asMember).not.toHaveProperty(field);
     for (const key of ['settings', 'billing_contact_id', 'subscription_tier', 'created_by', 'legacy_org_id']) expect(asMember).not.toHaveProperty(key);
     state.userId = 'u-admin-a';
     const asAdmin = (await (await GET(get(`/api/organizations/${LOCAL_A}`), params(LOCAL_A))).json()).data;
-    expect(asAdmin).toMatchObject({ billing_contact_id: '44444444-4444-4444-8444-444444444444', subscription_tier: 'pro' });
+    expect(asAdmin).toMatchObject({ billing_contact_id: '44444444-4444-4444-8444-444444444444', subscription_tier: 'pro', totalClaims: 2 });
   });
 
   it('the administrator of the federation reads a local below it; a member of the federation does not read a sibling local', async () => {

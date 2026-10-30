@@ -6,7 +6,7 @@ import { eq, sql } from 'drizzle-orm'
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context'
 import { requireUserForOrganization, ROLE_HIERARCHY } from '@/lib/api-auth-guard'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
-import { canAdministerOrganization, canReadOrganization, isAdministrativeRole, resolveOrganizationAccess } from '@/lib/organizations/read-authority'
+import { canReadOrganization, isAdministrativeRole, resolveOrganizationAccess } from '@/lib/organizations/read-authority'
 
 export const dynamic = 'force-dynamic'
 
@@ -71,31 +71,45 @@ export async function GET(_req: NextRequest, { params }: Params) {
   )
   if (!row) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  // Compute stats
-  const claimRows = Array.from(
-    await db.execute(
-      sql`SELECT
-            count(*)::int AS total,
-            count(*) FILTER (WHERE status::text IN ('draft','filed','acknowledged','investigating','response_due','response_received','escalated','mediation','arbitration'))::int AS active
-          FROM grievances WHERE organization_id = ${id}`,
-    ),
-  ) as Array<{ total: number; active: number }>
-  const claims = claimRows[0] ?? { total: 0, active: 0 }
+  // Grievance workload and private contacts require a DIRECT administrative
+  // office in this tenant. Neither ordinary membership nor parent ancestry
+  // confers permission to infer a local's case volume.
+  const administrative = isAdministrativeRole(access.direct.get(id))
+  let claims: { total: number; active: number } | null = null
+  if (administrative) {
+    const rows = Array.from(
+      await db.execute(
+        sql`SELECT
+              count(*)::int AS total,
+              count(*) FILTER (WHERE status::text IN ('draft','filed','acknowledged','investigating','response_due','response_received','escalated','mediation','arbitration'))::int AS active
+            FROM grievances WHERE organization_id = ${id}`,
+      ),
+    ) as Array<{ total: number; active: number }>
+    claims = rows[0] ?? { total: 0, active: 0 }
+  }
 
   const childRows = Array.from(
     await db.execute(sql`SELECT count(*)::int AS cnt FROM organizations WHERE parent_id = ${id}`),
   ) as Array<{ cnt: number }>
 
-  // Settings, the billing contact and provenance belong to the organization's administrators.
-  const { settings: _settings, billing_contact_id: _billing, created_by: _createdBy, legacy_org_id: _legacy, subscription_tier: _tier, ...profile } = mapOrg(row)
-  const administrative = canAdministerOrganization(access, id)
+  // Do not replace redacted counts with zero: that would fabricate data.
+  const {
+    settings: _settings, billing_contact_id: _billing, created_by: _createdBy,
+    legacy_org_id: _legacy, subscription_tier: _tier,
+    email: _email, phone: _phone, address: _address,
+    member_count: _memberCount, active_member_count: _activeCount,
+    last_member_count_update: _countUpdate,
+    ...profile
+  } = mapOrg(row)
   const mapped = administrative ? mapOrg(row) : profile
   return NextResponse.json({
     data: {
       ...mapped,
-      memberCount: row.memberCount ?? 0,
-      activeClaims: claims.active,
-      totalClaims: claims.total,
+      ...(administrative ? {
+        memberCount: row.memberCount ?? 0,
+        activeClaims: claims!.active,
+        totalClaims: claims!.total,
+      } : {}),
       childCount: childRows[0]?.cnt ?? 0,
     },
   })
