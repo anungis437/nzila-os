@@ -25,7 +25,7 @@ const governanceSchema = z.object({
     .optional(),
   consentGranted: z.boolean().optional(),
   consentNotes: z.string().max(1000).optional(),
-});
+}).strict();
 
 export const PATCH = withApi(
   {
@@ -50,6 +50,15 @@ export const PATCH = withApi(
       .limit(1);
 
     if (!existing) throw ApiError.notFound('Exit interview');
+
+    // An administrator cannot create retiree consent by ticking a box or
+    // entering free-text notes. The approved policy requires a verifiable
+    // signed instruction from the retiring member. The authoritative
+    // instruction verification store is not yet integrated here; fail closed
+    // rather than issue an invalid grant. Revocation remains available.
+    if (body?.consentGranted === true) {
+      throw ApiError.conflict('Retiree consent grant requires verified signed instruction; no consent was recorded');
+    }
 
     const now = new Date();
     const updates: Record<string, unknown> = { updatedAt: now, updatedBy: userId };

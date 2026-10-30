@@ -38,12 +38,12 @@ export interface InterviewAccessFacts {
 export function canReadInterview(row: InterviewAccessFacts, reader: InterviewReader): boolean {
   const isOwner = row.createdBy !== null && row.createdBy === reader.userId;
   const level = row.sensitivityLevel ?? UNRECORDED_LEVEL;
-  // The author may read their own draft whatever its level; nobody else reads above their office.
-  if (!isOwner && !reader.levels.has(level)) return false;
   const finished = row.status === 'published' || row.status === 'archived';
-  if (!finished) return isOwner || reader.stewardPlus;
-  // A finished interview is shared with the organization only with the retiring employee's consent.
-  return isOwner || reader.stewardPlus || row.consentGranted === true;
+  // A revoked/absent consent defeats ALL ordinary readers of a published copy,
+  // including its author and stewards. A legal hold needs a separate mandate.
+  // Neither a title nor ownership can bypass the recorded sensitivity level.
+  if (finished) return row.consentGranted === true && reader.levels.has(level);
+  return isOwner || (reader.stewardPlus && reader.levels.has(level));
 }
 
 /** The same decision as a list predicate, so a list never returns a row the item route would refuse. */
@@ -54,8 +54,11 @@ export function interviewListCondition(reader: InterviewReader): SQL {
     : sql`false`;
   const owner = reader.userId ? sql`${exitInterviews.createdBy} = ${reader.userId}` : sql`false`;
   const finished = sql`${exitInterviews.status}::text IN ('published', 'archived')`;
-  const visibleState = reader.stewardPlus ? sql`true` : sql`(${finished} AND ${exitInterviews.consentGranted} = true)`;
-  return sql`((${owner}) OR (${levelOk} AND ${visibleState}))`;
+  const unfinishedReader = reader.stewardPlus ? sql`true` : sql`false`;
+  // Match canReadInterview exactly: no published or archived row is shown
+  // without both explicit consent and the record's sensitivity floor.
+  return sql`((${finished} AND ${exitInterviews.consentGranted} = true AND ${levelOk})
+    OR (NOT ${finished} AND (${owner} OR (${levelOk} AND ${unfinishedReader}))))`;
 }
 
 /**

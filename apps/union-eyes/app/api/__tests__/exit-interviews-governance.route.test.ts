@@ -100,23 +100,37 @@ describe('exit-interviews/[id]/governance route', () => {
     expect(response.status).toBe(404);
   });
 
-  it('PATCH updates sensitivity and consent flags', async () => {
+  it('PATCH refuses an unverified administrator-issued retiree consent grant', async () => {
     const { PATCH } = await loadRoute();
     m.selectQueue.push([{ id: 'iv_1', sensitivityLevel: 'restricted', consentGranted: false }]);
-    m.updateReturningQueue.push([{ id: 'iv_1', sensitivityLevel: 'public_internal', consentGranted: true }]);
-
     const response = await PATCH(new NextRequest('http://localhost/api/exit-interviews/iv_1/governance', { method: 'PATCH' }), {
       params: { id: 'iv_1' },
       organizationId: 'org_1',
       userId: 'u1',
       body: { sensitivityLevel: 'public_internal', consentGranted: true, consentNotes: 'consent on file' },
     });
+    expect(response.status).toBe(409);
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.audit).not.toHaveBeenCalled();
+  });
+
+  it('PATCH still supports changing sensitivity without inventing a consent grant', async () => {
+    const { PATCH } = await loadRoute();
+    m.selectQueue.push([{ id: 'iv_1', sensitivityLevel: 'restricted', consentGranted: false }]);
+    m.updateReturningQueue.push([{ id: 'iv_1', sensitivityLevel: 'public_internal', consentGranted: false }]);
+
+    const response = await PATCH(new NextRequest('http://localhost/api/exit-interviews/iv_1/governance', { method: 'PATCH' }), {
+      params: { id: 'iv_1' },
+      organizationId: 'org_1',
+      userId: 'u1',
+      body: { sensitivityLevel: 'public_internal' },
+    });
 
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.data.sensitivityLevel).toBe('public_internal');
-    expect(json.data.consentGranted).toBe(true);
-    expect(json.indexingEligible).toBe(true);
+    expect(json.data.consentGranted).toBe(false);
+    expect(json.indexingEligible).toBe(false);
   });
 
   it('PATCH supports consent revocation path', async () => {
