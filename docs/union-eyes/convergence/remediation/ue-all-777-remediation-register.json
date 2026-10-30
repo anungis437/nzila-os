@@ -43,9 +43,9 @@
       {
         "id": "EVIDENCE-PACK-ARTIFACTS-IGNORED",
         "title": "Union Eyes evidence bridge accepts artifacts but never forwards them to the os-core evidence builder; metadata-only pack can be sealed",
-        "state": "NOT_ACCEPTED",
+        "state": "SOURCE_PATCHED_UNVERIFIED",
         "source": "apps/union-eyes/lib/evidence.ts",
-        "risk": "No claim that a caller-supplied artifact was preserved may be accepted without end-to-end proof"
+        "risk": "Bridge now forwards artifacts in source but real Blob/DB persistence, classification, and consumer fire-and-forget behavior are unverified; do not claim accepted evidence preservation."
       }
     ]
   },
@@ -62,7 +62,7 @@
     "note": "Milestones and evidence are transcribed as prior claims; this run has not independently re-executed those proofs."
   },
   "lastInspectedBranch": "agents/ue-cursor-final-closure",
-  "lastInspectedCommit": "37917374a90ab8703bff3c253fd1e496e9f30909",
+  "lastInspectedCommit": "24de152858f2d01f76353fd6ae3c781b92ee71d7",
   "summary": {
     "allRecordedDefects": 777,
     "bySeverity": {
@@ -137,6 +137,34 @@
     {
       "sha": "37917374a90ab8703bff3c253fd1e496e9f30909",
       "description": "Updated mutable 995-route coverage manifest for replaced dedicated routes; removed obsolete generic CRUD classification for confidential notes and OAuth connections. CI pending."
+    },
+    {
+      "sha": "35e5488f684f7b0952fdfb9205ea6212cf38487d",
+      "description": "Repair scanner regex syntax that failed exact-SHA security typecheck."
+    },
+    {
+      "sha": "fb1c3ea694d8dcff53a428197306c349f4d0524a",
+      "description": "Repair canonical event alias regression regex syntax."
+    },
+    {
+      "sha": "a18fed1a6ec3ae7478f31f56c304613f83aeb21e",
+      "description": "Repair generic archive regression regex syntax."
+    },
+    {
+      "sha": "4a7bd0249737241c27557b3d01c16cabf4081b73",
+      "description": "Add supportsGenericArchive to locked CRUD mock; source contract remains governed."
+    },
+    {
+      "sha": "cd077a21f38ddf3709af8e5d40d752dc4e10c1e4",
+      "description": "Constrain Playwright discovery to runtime source specs, excluding .next standalone duplicate copies."
+    },
+    {
+      "sha": "ec3994498c4dac602468ce39cc9dd6798ad4db8e",
+      "description": "Forward JSON artifact buffers into os-core evidence builder; reject empty, malformed, oversized, tenantless, actorless packs; source only."
+    },
+    {
+      "sha": "24de152858f2d01f76353fd6ae3c781b92ee71d7",
+      "description": "Add evidence forwarding, confidentiality and fail-closed unit regressions; not yet CI verified."
     }
   ],
   "records": [
@@ -14127,6 +14155,30 @@
     {
       "inspectedSha": "37917374a90ab8703bff3c253fd1e496e9f30909",
       "evidence": "Source and regression patches committed; exact-SHA Actions queued/pending at inspection; no runtime acceptance inferred",
+      "unit": "PENDING",
+      "contract": "PENDING",
+      "native": "PENDING",
+      "security": "PENDING",
+      "httpBrowser": "PENDING",
+      "go": "NO_GO"
+    },
+    {
+      "inspectedSha": "49172e807e1fd6e4637f034a6e08818999b1c36c",
+      "evidence": "Exact-SHA GitHub Actions: full 40992963101, security 40992963093, native 40992963107, HTTP/browser 40992963091, App Floor 40992963251, governance 40992963096",
+      "source": "REGRESSIONS_IDENTIFIED",
+      "unit": "FAILED_2_TESTS_2_SUITES_21148_PASSED_28_SKIPPED",
+      "contract": "PASS",
+      "native": "PASS",
+      "security": "FAIL_TYPESCRIPT_INVALID_REGEX_SCANNER_LINE_206",
+      "httpBrowser": "FAIL_RESTART_STATE_MISSING_DUPLICATE_STANDALONE_SPEC",
+      "appFloor": "PASS",
+      "governance": "PASS",
+      "go": "NO_GO"
+    },
+    {
+      "inspectedSha": "24de152858f2d01f76353fd6ae3c781b92ee71d7",
+      "evidence": "Seven source/test/config commits pushed; no exact-SHA GitHub Actions runs observed at checkpoint. Evidence bridge end-to-end persistence unproven.",
+      "source": "PATCHED_UNVERIFIED",
       "unit": "PENDING",
       "contract": "PENDING",
       "native": "PENDING",
