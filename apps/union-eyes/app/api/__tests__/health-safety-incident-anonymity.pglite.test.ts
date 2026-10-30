@@ -62,7 +62,7 @@ beforeEach(async () => {
   await pg.exec('TRUNCATE workplace_incidents');
 });
 
-const base = { description: 'Guard missing on press', locationDescription: 'Line 3', incidentType: 'near_miss', severity: 'minor' };
+const base = { description: 'Guard missing on press', locationDescription: 'Line 3', incidentType: 'near_miss', severity: 'minor', incidentDate: '2026-10-29T13:00:00.000Z' };
 const stored = async () => (await pg.query<{ created_by: string; metadata: Record<string, unknown> }>('SELECT created_by, metadata FROM workplace_incidents')).rows;
 
 describe('POST /api/health-safety/incidents', () => {
