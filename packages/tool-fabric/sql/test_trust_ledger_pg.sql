@@ -28,7 +28,7 @@ WHERE stream_id = 'platform:tool-fabric:trust' AND revision = 0;
 SET CONSTRAINTS tool_fabric_receipt_requires_head IMMEDIATE;
 SET CONSTRAINTS tool_fabric_receipt_requires_head DEFERRED;
 
-DO $
+DO $$
 BEGIN
   BEGIN
     UPDATE tool_fabric_trust_entry SET entry = '{"tampered":true}'::jsonb WHERE seq = 1;
