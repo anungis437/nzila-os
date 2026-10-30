@@ -25,7 +25,7 @@ function fake(opts: { revision?: number; hash?: string; entries?: unknown[]; ini
     get commits() { return commits },
   }
 }
-function auditRecord(prevHash: string, seq: number, orgId = ORG, id = randomUUID()): AuditEntry {
+function auditRecord(prevHash: string, seq: number, orgId = ORG, id: string = randomUUID()): AuditEntry {
   const body = {
     id, timestamp: '2026-10-30T15:00:00.000Z', actorId: 'host-actor', orgId,
     action: 'tool_fabric.ledger.tool_registered', resource: 'tool-fabric-tool',
