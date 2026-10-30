@@ -61,13 +61,13 @@ function getOAuth2Client() {
 /**
  * Generate authorization URL
  */
-export function getAuthorizationUrl(userId: string): string {
+export function getAuthorizationUrl(state: string): string {
   const oauth2Client = getOAuth2Client();
   
   return oauth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: SCOPES,
-    state: userId, // Pass userId to identify user in callback
+    state,
     prompt: 'consent', // Force consent to get refresh token
   });
 }
