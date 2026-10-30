@@ -118,7 +118,7 @@ export class BillingCycleService {
 
     try {
        
-      return await withRLSContext(async (tx: RLSTx) => {
+      return await withRLSContext({ organizationId, userId: executedBy }, async (tx: RLSTx) => {
         // Step 1: Get all active members
         const activeMembers = await this.getActiveMembersForBilling(tx, organizationId, periodStart);
 
