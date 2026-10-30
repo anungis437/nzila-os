@@ -6,7 +6,6 @@ import {
   OVERTIME_RULES,
   TERMINATION_NOTICE,
   WCB_BOARDS,
-  getClaimDeadlineDays,
 } from '@/lib/canadian-labour-standards';
 
 /** Map jurisdiction code from ISO-style "CA-XX" to our module's format */
@@ -23,14 +22,21 @@ function parseJurisdictionCode(code: string): CanadianJurisdiction {
 function buildRulesForJurisdiction(jur: CanadianJurisdiction) {
   const rules: Array<{ ruleName: string; ruleCategory: string; legalReference: string; parameters: Record<string, unknown> }> = [];
 
-  // Arbitration / WCB deadline
+  // Board reference only. WCB employer reporting and worker claim filing
+  // periods are not interchangeable with grievance/arbitration deadlines.
+  // The legacy generic day values are not legally qualified for scheduling.
   const wcb = WCB_BOARDS[jur];
   if (wcb) {
     rules.push({
-      ruleName: 'WCB Claim Filing Deadline',
-      ruleCategory: 'arbitration_deadline',
+      ruleName: 'Workers Compensation Board Reference — Verify Applicable Deadlines',
+      ruleCategory: 'workers_compensation_board_reference',
       legalReference: wcb.statute,
-      parameters: { deadline_days: getClaimDeadlineDays(jur) ?? 30 },
+      parameters: {
+        boardName: wcb.name,
+        boardAcronym: wcb.acronym,
+        portalUrl: wcb.portalUrl,
+        verificationRequired: true,
+      },
     });
   }
 

@@ -47,47 +47,17 @@ async function handler(request: NextRequest) {
     const grievanceDate = typeof data.grievanceDate === 'string' ? data.grievanceDate : null;
 
     if (shouldRun('arbitration_deadline') && arbitrationDate && grievanceDate) {
-      const daysDiff = Math.ceil(
-        (new Date(arbitrationDate).getTime() - new Date(grievanceDate).getTime()) /
-          (1000 * 60 * 60 * 24)
-      );
-
-      let maxDays = 30;
-      try {
-        const rulesUrl = new URL('/api/jurisdiction-rules', request.nextUrl.origin);
-        rulesUrl.searchParams.set('jurisdiction', jurisdiction);
-        rulesUrl.searchParams.set('category', 'arbitration_deadline');
-
-        const deadlineRule = await fetch(rulesUrl.toString()).then((r) => r.json());
-        const rule = deadlineRule?.data?.[0];
-        if (rule?.parameters?.deadline_days) {
-          maxDays = rule.parameters.deadline_days;
-        }
-
-        if (daysDiff <= maxDays) {
-          checks.push({
-            id: 'arbitration-deadline',
-            ruleName: rule?.ruleName || 'Arbitration Deadline',
-            ruleCategory: 'arbitration_deadline',
-            status: 'compliant',
-            message: `Arbitration scheduled within ${maxDays}-day deadline (${daysDiff} days)`,
-            legalReference: rule?.legalReference,
-            severity: 'low',
-          });
-        } else {
-          checks.push({
-            id: 'arbitration-deadline',
-            ruleName: rule?.ruleName || 'Arbitration Deadline',
-            ruleCategory: 'arbitration_deadline',
-            status: 'violation',
-            message: `Arbitration deadline exceeded: ${daysDiff} days (max: ${maxDays})`,
-            legalReference: rule?.legalReference,
-            recommendation: 'File extension request or expedited arbitration',
-            severity: 'critical',
-          });
-        }
-      } catch (_error) {
-}
+      // No jurisdiction-validated arbitration deadline rule exists here.
+      // Never substitute workers-compensation reporting periods or 30 days.
+      checks.push({
+        id: 'arbitration-deadline',
+        ruleName: 'Arbitration Deadline — Verification Required',
+        ruleCategory: 'arbitration_deadline',
+        status: 'info',
+        message: 'No validated arbitration deadline is configured. Review the collective agreement, grievance procedure and applicable tribunal rules before relying on a deadline.',
+        recommendation: 'Confirm the applicable deadline with authorized union counsel or an officer.',
+        severity: 'medium',
+      });
     }
 
     const totalMembersValue = data.totalMembers;

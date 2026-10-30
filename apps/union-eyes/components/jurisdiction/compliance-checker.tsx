@@ -85,42 +85,17 @@ export function ComplianceChecker({
     const fallbackChecks: ComplianceCheck[] = [];
 
     if (data.arbitrationDate && data.grievanceDate) {
-      const daysDiff = Math.ceil(
-        (new Date(data.arbitrationDate).getTime() - new Date(data.grievanceDate).getTime()) /
-          (1000 * 60 * 60 * 24)
-      );
-
-      const deadlineRule = await fetch(
-        `/api/jurisdiction-rules?jurisdiction=${jurisdiction}&category=arbitration_deadline`
-      ).then(r => r.json());
-
-      if (deadlineRule.success && deadlineRule.data.length > 0) {
-        const rule = deadlineRule.data[0];
-        const maxDays = rule.parameters.deadline_days || 30;
-
-        if (daysDiff <= maxDays) {
-          fallbackChecks.push({
-            id: 'arbitration-deadline',
-            ruleName: rule.ruleName,
-            ruleCategory: 'arbitration_deadline',
-            status: 'compliant',
-            message: `Arbitration scheduled within ${maxDays}-day deadline (${daysDiff} days)`,
-            legalReference: rule.legalReference,
-            severity: 'low'
-          });
-        } else {
-          fallbackChecks.push({
-            id: 'arbitration-deadline',
-            ruleName: rule.ruleName,
-            ruleCategory: 'arbitration_deadline',
-            status: 'violation',
-            message: `Arbitration deadline exceeded: ${daysDiff} days (max: ${maxDays})`,
-            legalReference: rule.legalReference,
-            recommendation: 'File extension request or expedited arbitration',
-            severity: 'critical'
-          });
-        }
-      }
+      // A WCB reporting period is not an arbitration filing deadline.
+      // Offline fallback must never manufacture a compliance determination.
+      fallbackChecks.push({
+        id: 'arbitration-deadline',
+        ruleName: 'Arbitration Deadline — Verification Required',
+        ruleCategory: 'arbitration_deadline',
+        status: 'info',
+        message: 'No validated arbitration deadline is configured. Review the collective agreement, grievance procedure and applicable tribunal rules.',
+        recommendation: 'Confirm the applicable deadline with authorized union counsel or an officer.',
+        severity: 'medium',
+      });
     }
 
     if (data.totalMembers && data.votesCase) {

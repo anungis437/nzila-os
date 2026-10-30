@@ -59,7 +59,13 @@ describe('compliance/validate route', () => {
       }),
     }));
 
-    expect([200, 400, 401, 403, 500]).toContain(response.status);
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    const arbitration = body.checks?.find((check: { ruleCategory: string }) => check.ruleCategory === 'arbitration_deadline');
+    expect(arbitration).toMatchObject({ status: 'info', severity: 'medium' });
+    expect(arbitration.message).toContain('No validated arbitration deadline');
+    expect(arbitration.message).not.toMatch(/within 30.day|deadline exceeded|compliant/i);
+    expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 
   it('returns 400 for invalid JSON body', async () => {
