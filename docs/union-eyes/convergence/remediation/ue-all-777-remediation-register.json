@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 32,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 39,
-    "engineeringRemaining": 738,
+    "engineeringCorrected": 43,
+    "engineeringRemaining": 734,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 4
   },
@@ -6698,7 +6698,16 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B04-EVIDENCE-EXPORT-FAIL-CLOSED",
+        "path": "apps/union-eyes/app/api/evidence/export/route.ts",
+        "explanation": "Removed fabricated policy, isolation, SBOM and build assertions; without a verified sealed artifact the endpoint explicitly refuses issuance (HTTP 503) with not_attested status and null evidence.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/evidence-export.route.test.ts",
+        "sourceCommit": "5d0d0540ebe5acdd7a5ebdb52989fde37a211371"
+      }
     },
     {
       "defectId": "DEF-0B7-EXP-EVIDENCE-PACK-ORG-ID-ECHOED-FROM-QUERY",
@@ -6715,7 +6724,16 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B04-EVIDENCE-EXPORT-FAIL-CLOSED",
+        "path": "apps/union-eyes/app/api/evidence/export/route.ts",
+        "explanation": "Only the canonical authenticated organizationId is used; a mismatching orgId query is forbidden before any response or audit attempt.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/evidence-export.route.test.ts",
+        "sourceCommit": "5d0d0540ebe5acdd7a5ebdb52989fde37a211371"
+      }
     },
     {
       "defectId": "DEF-0B7-EXP-EVIDENCE-PACK-ROLE-DENYLIST",
@@ -6732,7 +6750,16 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B04-EVIDENCE-EXPORT-FAIL-CLOSED",
+        "path": "apps/union-eyes/app/api/evidence/export/route.ts",
+        "explanation": "Replaced denylist of member spellings with canonical withApi minimum officer role and required organization context.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/evidence-export.route.test.ts",
+        "sourceCommit": "5d0d0540ebe5acdd7a5ebdb52989fde37a211371"
+      }
     },
     {
       "defectId": "DEF-0B7-EXP-EVIDENCE-PACK-EXPORT-NOT-AUDITED",
@@ -6749,7 +6776,16 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B04-EVIDENCE-EXPORT-FAIL-CLOSED",
+        "path": "apps/union-eyes/app/api/evidence/export/route.ts",
+        "explanation": "Every permitted export attempt writes evidence.export.unavailable through persistAtomicAudit inside a tenant-bound transaction; failure aborts the response.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/evidence-export.route.test.ts",
+        "sourceCommit": "5d0d0540ebe5acdd7a5ebdb52989fde37a211371"
+      }
     },
     {
       "defectId": "DEF-0B7-EXP-EXTERNAL-DATA-ROUTES-REFUSE-EVERY-REQUEST-AND-MISNAMED",
