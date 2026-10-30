@@ -96,7 +96,7 @@ describe('admin organizations — direct tenant scope for every data source', ()
       [{ organizationId: org, total: 8, active: 6 }],
       [{ organizationId: org, name: 'President', email: 'private@example.invalid', role: 'president' }],
     ];
-    const result = await invoke();
+    const result = (await invoke()) as unknown as Array<Record<string, unknown>>;
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({ id: org, memberCount: 8, activeCount: 6, contact: 'private@example.invalid' });
     expect(m.conditions).toHaveLength(3);
