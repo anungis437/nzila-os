@@ -48,6 +48,18 @@ export function validateFirstPartySkill(raw) {
   return true
 }
 
+export function validateProtectedReleaseWorkflow(raw) {
+  const housekeeping = raw.split(/\n  post-deploy:\s*\n/)[1]
+  if (!housekeeping) fail('production post-deploy evidence job missing')
+  if (/\bcontents:\s*write\b/.test(housekeeping) || /\bgit\s+push\b/.test(housekeeping)) {
+    fail('production housekeeping must not push directly to protected branches')
+  }
+  if (!housekeeping.includes('actions/upload-artifact@v4')) {
+    fail('production housekeeping must retain outputs as run-scoped evidence')
+  }
+  return true
+}
+
 export function checkRepository() {
   const policy = JSON.parse(read('governance/engineering/authority-precedence.json'))
   const expected = [
@@ -100,6 +112,7 @@ export function checkRepository() {
 
   // Existing CI classifier is the mandatory entrypoint for this fast guard.
   requireText('.github/workflows/ci.yml', 'node scripts/engineering/p0-static-guard.mjs')
+  validateProtectedReleaseWorkflow(read('.github/workflows/deploy-production.yml'))
   console.log('P0 structural governance: PASS (not release authorization)')
   return true
 }
