@@ -204,6 +204,20 @@ describe('organizations/[id] route', () => {
     expect(m.audit).not.toHaveBeenCalled();
   });
 
+  it('DELETE refuses a local administrator without platform archival authority before any write', async () => {
+    const { DELETE } = await loadRoute();
+    m.requireSystemAdmin.mockRejectedValueOnce(new Error('platform authority required'));
+
+    const response = await DELETE(new NextRequest('http://localhost/api/organizations/' + orgRow.id, { method: 'DELETE' }), {
+      params: Promise.resolve({ id: orgRow.id }),
+    });
+
+    expect(response.status).toBe(403);
+    expect(m.requireSystemAdmin).toHaveBeenCalledTimes(1);
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.audit).not.toHaveBeenCalled();
+  });
+
   it('DELETE archives organization', async () => {
     const { DELETE } = await loadRoute();
     m.updateQueue.push([{ ...orgRow, status: 'archived' }]);
@@ -213,6 +227,7 @@ describe('organizations/[id] route', () => {
     });
 
     expect(response.status).toBe(200);
+    expect(m.requireSystemAdmin).toHaveBeenCalledTimes(1);
     const json = await response.json();
     expect(json.data.status).toBe('archived');
   });
