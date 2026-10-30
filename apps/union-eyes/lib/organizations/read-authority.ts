@@ -1,4 +1,4 @@
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
 import { withSystemContext } from '@/lib/db/with-rls-context';
@@ -38,7 +38,11 @@ async function directMemberships(userId: string): Promise<Array<{ organizationId
     db
       .select({ organizationId: organizationMembers.organizationId, role: organizationMembers.role })
       .from(organizationMembers)
-      .where(and(eq(organizationMembers.userId, userId), eq(organizationMembers.status, 'active'))),
+      .where(and(
+        eq(organizationMembers.userId, userId),
+        eq(organizationMembers.status, 'active'),
+        isNull(organizationMembers.deletedAt),
+      )),
   );
 }
 
