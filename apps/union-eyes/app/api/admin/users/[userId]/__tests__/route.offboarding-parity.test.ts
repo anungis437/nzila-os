@@ -34,6 +34,7 @@ const m = vi.hoisted(() => ({
   updateWhere: vi.fn(),
   revokeMemberAccess: vi.fn(),
   reactivateMemberAccess: vi.fn(),
+  resolveOrganizationAccess: vi.fn(),
 }));
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
@@ -46,6 +47,7 @@ vi.mock('@/db/schema', () => ({
     status: 'status',
     organizationId: 'organizationId',
     userId: 'userId',
+    role: 'role',
     deletedAt: 'deletedAt',
     updatedAt: 'updatedAt',
   },
@@ -59,6 +61,10 @@ vi.mock('@/lib/db/with-rls-context', () => ({
     return operation(tx);
   },
 }));
+vi.mock('@/lib/organizations/read-authority', () => ({
+  resolveOrganizationAccess: m.resolveOrganizationAccess,
+  isAdministrativeRole: (role?: string) => role === 'admin',
+}));
 vi.mock('@/lib/services/member-access-revocation-service', () => ({
   revokeMemberAccess: m.revokeMemberAccess,
   reactivateMemberAccess: m.reactivateMemberAccess,
@@ -71,8 +77,8 @@ async function loadRoute() {
 describe('admin users route — synchronous fail-closed offboarding', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.PLATFORM_ADMIN_USER_IDS = 'platform-admin-1';
     m.auth.mockResolvedValue({ userId: 'platform-admin-1' });
+    m.resolveOrganizationAccess.mockResolvedValue({ platform: true, direct: new Map([['org-a', 'admin']]), descendants: new Set() });
     m.updateWhere.mockResolvedValue(undefined);
     m.revokeMemberAccess.mockResolvedValue({
       success: true,
@@ -90,8 +96,9 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
     });
   });
 
-  it('rejects a non-platform-admin caller on both PUT and DELETE before any system execution', async () => {
-    m.auth.mockResolvedValue({ userId: 'ordinary-org-admin' });
+  it('rejects a platform-only caller without direct tenant office before any system execution', async () => {
+    m.auth.mockResolvedValue({ userId: 'platform-only' });
+    m.resolveOrganizationAccess.mockResolvedValue({ platform: true, direct: new Map(), descendants: new Set() });
     const { PUT, DELETE } = await loadRoute();
     const params = Promise.resolve({ userId: 'membership-row-1' });
 
@@ -110,7 +117,7 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
     // UUIDs here — proves the fix for the round-11/12 identity bug where
     // the membership row id was passed to session/case-access revocation.
     m.selectWhere.mockResolvedValue([
-      { status: 'active', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
+      { status: 'active', organizationId: 'org-a', authUserId: 'real-auth-user-999', role: 'member' },
     ]);
     const { PUT } = await loadRoute();
 
@@ -130,7 +137,7 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
 
   it('DELETE (soft-delete) also resolves the real authUserId and calls revokeMemberAccess with newLocalStatus "deleted"', async () => {
     m.selectWhere.mockResolvedValue([
-      { status: 'active', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
+      { status: 'active', organizationId: 'org-a', authUserId: 'real-auth-user-999', role: 'member' },
     ]);
     const { DELETE } = await loadRoute();
 
@@ -150,7 +157,7 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
 
   it('PUT (inactive -> active reactivation) calls reactivateMemberAccess with the real authUserId, not revokeMemberAccess', async () => {
     m.selectWhere.mockResolvedValue([
-      { status: 'inactive', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
+      { status: 'inactive', organizationId: 'org-a', authUserId: 'real-auth-user-999', role: 'member' },
     ]);
     const { PUT } = await loadRoute();
 
@@ -170,7 +177,7 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
 
   it('PUT reactivation returns 502 (not 200) when reactivateMemberAccess reports failure', async () => {
     m.selectWhere.mockResolvedValue([
-      { status: 'inactive', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
+      { status: 'inactive', organizationId: 'org-a', authUserId: 'real-auth-user-999', role: 'member' },
     ]);
     m.reactivateMemberAccess.mockResolvedValue({
       success: false,
@@ -189,7 +196,7 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
 
   it('PUT returns 502 (not 200) when revokeMemberAccess reports failure — offboarding is never certified from a partial revocation', async () => {
     m.selectWhere.mockResolvedValue([
-      { status: 'active', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
+      { status: 'active', organizationId: 'org-a', authUserId: 'real-auth-user-999', role: 'member' },
     ]);
     m.revokeMemberAccess.mockResolvedValue({
       success: false,
@@ -211,7 +218,7 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
 
   it('DELETE returns 502 (not 200) when revokeMemberAccess reports failure', async () => {
     m.selectWhere.mockResolvedValue([
-      { status: 'active', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
+      { status: 'active', organizationId: 'org-a', authUserId: 'real-auth-user-999', role: 'member' },
     ]);
     m.revokeMemberAccess.mockResolvedValue({
       success: false,
@@ -249,4 +256,28 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
     expect(res.status).toBe(404);
     expect(m.revokeMemberAccess).not.toHaveBeenCalled();
   });
+  it('denies a direct admin from deactivating a different tenant member', async () => {
+    m.selectWhere.mockResolvedValue([{ status: 'active', organizationId: 'org-b', authUserId: 'other', role: 'member' }]);
+    const { PUT } = await loadRoute();
+    const response = await PUT({} as never, { params: Promise.resolve({ userId: 'member-org-b' }) });
+    expect(response.status).toBe(404);
+    expect(m.revokeMemberAccess).not.toHaveBeenCalled();
+  });
+
+  it('denies single-administrator privileged reactivation without approval evidence', async () => {
+    m.selectWhere.mockResolvedValue([{ status: 'inactive', organizationId: 'org-a', authUserId: 'officer-1', role: 'admin' }]);
+    const { PUT } = await loadRoute();
+    const response = await PUT({} as never, { params: Promise.resolve({ userId: 'admin-membership-id' }) });
+    expect(response.status).toBe(409);
+    expect(m.reactivateMemberAccess).not.toHaveBeenCalled();
+  });
+
+  it('denies self-offboarding without independent authorization', async () => {
+    m.selectWhere.mockResolvedValue([{ status: 'active', organizationId: 'org-a', authUserId: 'platform-admin-1', role: 'admin' }]);
+    const { DELETE } = await loadRoute();
+    const response = await DELETE({} as never, { params: Promise.resolve({ userId: 'self-membership-id' }) });
+    expect(response.status).toBe(409);
+    expect(m.revokeMemberAccess).not.toHaveBeenCalled();
+  });
+
 });

@@ -35,7 +35,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { createLogger } from '@nzila/os-core/telemetry';
 import { revokeMemberAccess, reactivateMemberAccess } from '@/lib/services/member-access-revocation-service';
-import { isPlatformAdminUser } from '@/lib/api-auth-guard';
+import { resolveOrganizationAccess, isAdministrativeRole } from '@/lib/organizations/read-authority';
 
 const logger = createLogger('union-eyes.admin.users');
 
@@ -45,8 +45,11 @@ type Params = { params: Promise<{ userId: string }> };
 
 export async function PUT(req: NextRequest, { params }: Params) {
   const { userId: callerId } = await auth();
-  if (!callerId || !(await isPlatformAdminUser(callerId))) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!callerId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  // Platform titles never create standing authority over an unrelated union.
+  const access = await resolveOrganizationAccess(callerId);
+  if (![...access.direct.values()].some(isAdministrativeRole)) {
+    return NextResponse.json({ error: 'Forbidden: direct organization admin mandate required' }, { status: 403 });
   }
 
   // [userId] route param = organizationMembers.id (membership row), not
@@ -60,6 +63,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
           status: organizationMembers.status,
           organizationId: organizationMembers.organizationId,
           authUserId: organizationMembers.userId,
+          role: organizationMembers.role,
         })
         .from(organizationMembers)
         .where(eq(organizationMembers.id, membershipId))
@@ -70,6 +74,13 @@ export async function PUT(req: NextRequest, { params }: Params) {
     if (!memberRecord) {
       return NextResponse.json({ error: 'Member not found' }, { status: 404 });
     }
+    if (!isAdministrativeRole(access.direct.get(memberRecord.organizationId))) {
+      // Do not reveal whether a membership exists in another union.
+      return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+    }
+    if (memberRecord.authUserId === callerId) {
+      return NextResponse.json({ error: 'Self-offboarding requires independent review' }, { status: 409 });
+    }
 
     const newStatus = memberRecord.status === 'active' ? 'inactive' : 'active';
 
@@ -78,6 +89,11 @@ export async function PUT(req: NextRequest, { params }: Params) {
     // "reactivated" member with a disabled authOrganizationUsers row,
     // failing the canonical role resolver despite a 200 response.
     if (newStatus === 'active') {
+      // A pre-existing privileged membership must not be resurrected by
+      // a single administrator; mandate and dual approval are separate.
+      if (['admin', 'executive', 'officer', 'president', 'vice_president', 'treasurer', 'platform_lead'].includes(memberRecord.role)) {
+        return NextResponse.json({ error: 'Privileged reactivation requires independent office approval' }, { status: 409 });
+      }
       const result = await reactivateMemberAccess({
         membershipId,
         authUserId: memberRecord.authUserId,
@@ -121,8 +137,11 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
 export async function DELETE(_req: NextRequest, { params }: Params) {
   const { userId: callerId } = await auth();
-  if (!callerId || !(await isPlatformAdminUser(callerId))) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!callerId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  // Platform titles never create standing authority over an unrelated union.
+  const access = await resolveOrganizationAccess(callerId);
+  if (![...access.direct.values()].some(isAdministrativeRole)) {
+    return NextResponse.json({ error: 'Forbidden: direct organization admin mandate required' }, { status: 403 });
   }
 
   // [userId] route param = organizationMembers.id (membership row), not
@@ -136,6 +155,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
           status: organizationMembers.status,
           organizationId: organizationMembers.organizationId,
           authUserId: organizationMembers.userId,
+          role: organizationMembers.role,
         })
         .from(organizationMembers)
         .where(eq(organizationMembers.id, membershipId))
@@ -145,6 +165,13 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
 
     if (!memberRecord) {
       return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+    }
+    if (!isAdministrativeRole(access.direct.get(memberRecord.organizationId))) {
+      // Do not reveal whether a membership exists in another union.
+      return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+    }
+    if (memberRecord.authUserId === callerId) {
+      return NextResponse.json({ error: 'Self-offboarding requires independent review' }, { status: 409 });
     }
 
     const result = await revokeMemberAccess({
