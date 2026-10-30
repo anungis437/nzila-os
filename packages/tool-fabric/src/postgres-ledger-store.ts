@@ -11,7 +11,7 @@
  * mandatory (ToolTrustLedger); this DB is not its own trust anchor.
  */
 import type { AuditEntry } from '@nzila/audit'
-import { auditEntrySchema } from '@nzila/audit'
+import { auditEntrySchema, computeAuditHash } from '@nzila/audit'
 import {
   LEDGER_GENESIS_HASH, LedgerConflictError, LedgerDuplicateError,
   LedgerStoreUnavailableError, type AtomicTrustLedgerStore,
@@ -107,6 +107,21 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
         entry.payload.seq !== expected.revision + 1 ||
         !/^[0-9a-f]{64}$/.test(entry.hash ?? '')) {
       throw new LedgerConflictError('Append does not extend the expected trust head')
+    }
+    // A syntactically valid SHA-256 string is not proof that the audit record
+    // authenticates its full payload. Reject invalid and legacy partial-coverage
+    // records BEFORE the transaction, rather than persisting a poisoned head.
+    if (entry.hashVersion !== 2 || computeAuditHash(expected.headHash, {
+      id: entry.id,
+      timestamp: entry.timestamp,
+      actorId: entry.actorId,
+      orgId: entry.orgId,
+      action: entry.action,
+      resource: entry.resource,
+      resourceId: entry.resourceId,
+      payload: entry.payload,
+    }) !== entry.hash) {
+      throw new LedgerConflictError('Append requires an authentic full-coverage audit v2 hash')
     }
     return this.transaction(async tx => {
       const heads = await tx.unsafe(

@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest'
+import { randomUUID } from 'node:crypto'
+import { computeAuditHash } from '@nzila/audit'
 import { PostgresAtomicTrustLedgerStore } from './postgres-ledger-store'
 import { LedgerStoreUnavailableError, LedgerConflictError, LEDGER_GENESIS_HASH } from './ledger-store'
 
@@ -55,4 +57,24 @@ describe('P0 Postgres Trust Ledger CAS adapter',()=>{
     )).rejects.toBeInstanceOf(LedgerConflictError)
     expect(db.commits).toBe(0)
   })
+  it('rejects a forged audit digest before touching PostgreSQL', async()=> {
+    const db=fake()
+    const store=new PostgresAtomicTrustLedgerStore(db)
+    const hashable={
+      id:randomUUID(), timestamp:'2026-10-30T15:00:00.000Z',
+      actorId:'host-actor',orgId:ORG,action:'tool_fabric.ledger.tool_registered',
+      resource:'tool-fabric-tool',resourceId:'sample-tool',
+      payload:{seq:1,prevEventHash:LEDGER_GENESIS_HASH,eventHash:'a'.repeat(64)},
+    }
+    const validHash=computeAuditHash(LEDGER_GENESIS_HASH,hashable)
+    const expected={revision:0,headHash:LEDGER_GENESIS_HASH}
+    await expect(store.compareAndAppend(ORG,expected,{
+      ...hashable,prevHash:LEDGER_GENESIS_HASH,hash:validHash.replace(/^./,'b'),hashVersion:2,
+    })).rejects.toBeInstanceOf(LedgerConflictError)
+    await expect(store.compareAndAppend(ORG,expected,{
+      ...hashable,prevHash:LEDGER_GENESIS_HASH,hash:validHash,hashVersion:1,
+    })).rejects.toBeInstanceOf(LedgerConflictError)
+    expect(db.commits).toBe(0)
+  })
+
 })
