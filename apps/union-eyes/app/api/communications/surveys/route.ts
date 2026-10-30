@@ -16,5 +16,7 @@ const { GET, POST } = crudRoutes({
   // A draft survey is unpublished work; a member reads only surveys that have left draft.
   belowStaffReadCondition: ne(surveys.status, 'draft'),
   writeRole: 'steward',
+  // A new survey is a draft: publication, counters and completion figures are the server's.
+  writableFields: ['title', 'description', 'surveyType', 'closesAt', 'allowAnonymous', 'allowMultipleResponses', 'requireAuthentication', 'shuffleQuestions', 'showResults', 'welcomeMessage', 'thankYouMessage'],
 });
 export { GET, POST };
