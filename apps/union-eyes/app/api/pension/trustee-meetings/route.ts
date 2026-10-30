@@ -39,7 +39,7 @@ export const GET = withApi(
     const url = new URL(request.url);
     const rawPage = url.searchParams.get('page') ?? '1';
     const rawPageSize = url.searchParams.get('pageSize') ?? '50';
-    if (!/^[1-9]\\d*$/.test(rawPage) || !/^[1-9]\\d*$/.test(rawPageSize)) {
+    if (!/^[1-9]\d*$/.test(rawPage) || !/^[1-9]\d*$/.test(rawPageSize)) {
       throw ApiError.badRequest('Invalid trustee meeting pagination');
     }
     const parsed = pageSchema.safeParse({ page: rawPage, pageSize: rawPageSize });
@@ -73,7 +73,7 @@ export const POST = withApi(
   async ({ body, organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const parsed = createMeetingSchema.parse(body);
-    return withRLSContext({ organizationId }, async (tx) => {
+    return withRLSContext({ organizationId, userId }, async (tx) => {
       const [meeting] = await tx
         .insert(pensionTrusteeMeetings)
         .values({ ...parsed, organizationId })
