@@ -111,7 +111,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         1 - (embedding <=> ${embeddingStr}::vector) AS similarity
       FROM knowledge_base
       WHERE is_active = true
-        AND (organization_id = ${orgId} OR is_public = true)
+        AND organization_id = ${orgId}
         AND (expiry_date IS NULL OR expiry_date > now())
         AND embedding IS NOT NULL
         AND (
