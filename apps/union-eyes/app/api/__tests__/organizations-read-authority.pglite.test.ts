@@ -217,7 +217,10 @@ describe('GET /api/organizations (list) and /api/organizations/tree', () => {
     const rows = (await (await listed('/api/organizations?include_stats=true')).json()).data as Array<Record<string, unknown>>;
     expect(rows.map((r) => r.id).sort()).toEqual([FED, LOCAL_A, LOCAL_B].sort());
     const local = rows.find((r) => r.id === LOCAL_A);
-    expect(local).toMatchObject({ billing_contact_id: '44444444-4444-4444-8444-444444444444', subscription_tier: 'pro', activeClaims: 1 });
+    expect(local).toMatchObject({ id: LOCAL_A, name: 'LocalA' });
+    for (const sensitive of ['billing_contact_id', 'subscription_tier', 'settings', 'activeClaims', 'email', 'phone', 'address']) {
+      expect(local, sensitive).not.toHaveProperty(sensitive);
+    }
   });
 
   it('a platform-only identity cannot list federation or local records', async () => {
