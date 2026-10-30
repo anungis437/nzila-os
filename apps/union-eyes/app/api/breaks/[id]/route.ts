@@ -43,12 +43,12 @@ export const GET = withApi({
 
 const amendmentSchema = z.object({
   breakType: z.enum(['meal', 'rest', 'union', 'nursing', 'prayer', 'health', 'other']).optional(),
-  workDate: z.string().regex(/^\\d{4}-\\d{2}-\\d{2}$/).optional(),
+  workDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   status: z.enum(['scheduled', 'taken', 'shortened', 'missed', 'denied', 'deferred']).optional(),
-  scheduledStart: z.string().regex(/^([01]\\d|2[0-3]):[0-5]\\d$/).nullable().optional(),
-  scheduledEnd: z.string().regex(/^([01]\\d|2[0-3]):[0-5]\\d$/).nullable().optional(),
-  actualStart: z.string().regex(/^([01]\\d|2[0-3]):[0-5]\\d$/).nullable().optional(),
-  actualEnd: z.string().regex(/^([01]\\d|2[0-3]):[0-5]\\d$/).nullable().optional(),
+  scheduledStart: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).nullable().optional(),
+  scheduledEnd: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).nullable().optional(),
+  actualStart: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).nullable().optional(),
+  actualEnd: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).nullable().optional(),
   notes: z.string().max(2000).nullable().optional(),
 }).strict().refine((value) => Object.keys(value).length > 0, 'At least one change is required');
 
