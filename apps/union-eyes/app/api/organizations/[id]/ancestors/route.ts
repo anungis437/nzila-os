@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@nzila/platform-auth/entra/server'
-import { db } from '@/db/db'
 import { organizations } from '@/db/schema-organizations'
 import { eq, inArray } from 'drizzle-orm'
 import { withSystemContext } from '@/lib/db/with-rls-context'
@@ -19,8 +18,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const access = await resolveOrganizationAccess(userId)
   if (!canReadOrganization(access, id)) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   // Get the org to read its hierarchy_path
-  const [org] = await withSystemContext(() =>
-    db
+  const [org] = await withSystemContext((tx) =>
+    tx
       .select({ hierarchyPath: organizations.hierarchyPath })
       .from(organizations)
       .where(eq(organizations.id, id)),
@@ -32,8 +31,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const ancestorIds = (org.hierarchyPath ?? []).filter((aid) => aid !== id && UUID_PATTERN.test(aid) && canReadOrganization(access, aid))
   if (ancestorIds.length === 0) return NextResponse.json({ data: [] })
 
-  const rows = await withSystemContext(() =>
-    db.select().from(organizations).where(inArray(organizations.id, ancestorIds)),
+  const rows = await withSystemContext((tx) =>
+    tx.select().from(organizations).where(inArray(organizations.id, ancestorIds)),
   )
 
   const mapped = rows.map((row) => ({
