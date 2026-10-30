@@ -206,22 +206,39 @@ describe('health-safety hazards/incidents submission — role gating', () => {
     expect(capture()).toBeUndefined();
   });
 
-  it('4. organizationId comes from the authenticated context and cannot be overridden by the request payload', async () => {
+  it('4. refuses client-supplied organizationId rather than accepting a spoofed tenant', async () => {
     const { POST } = await import('../hazards/route');
     m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep', ORG_A));
     m.getOrganizationIdForUser.mockResolvedValue(ORG_A);
     const capture = mockInsertCapture();
 
-    await POST(postRequest('http://localhost/api/health-safety/hazards', {
+    const response = await POST(postRequest('http://localhost/api/health-safety/hazards', {
       hazardType: 'fire',
       priority: 'high',
       location: 'Warehouse B',
       description: 'Sparks near flammable storage',
-      organizationId: ORG_B, // attacker-supplied — must be ignored
+      organizationId: ORG_B,
     }));
 
-    expect(capture()?.organizationId).toBe(ORG_A);
-    expect(capture()?.organizationId).not.toBe(ORG_B);
+    expect(response.status).toBe(400);
+    expect(capture()).toBeUndefined();
+  });
+
+  it('4a. rejects an attacker-supplied incident organizationId before insert', async () => {
+    const { POST } = await import('../incidents/route');
+    m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep', ORG_A));
+    const capture = mockInsertCapture();
+
+    const response = await POST(postRequest('http://localhost/api/health-safety/incidents', {
+      incidentType: 'injury',
+      severity: 'minor',
+      location: 'Loading dock',
+      description: 'Worker slipped on wet floor',
+      organizationId: ORG_B,
+    }));
+
+    expect(response.status).toBe(400);
+    expect(capture()).toBeUndefined();
   });
 
   it('4b. organizationId cannot be overridden even if beforeCreate tried to change it', async () => {
@@ -276,6 +293,37 @@ describe('health-safety hazards/incidents submission — role gating', () => {
     const incidentNumber = capture()?.incidentNumber as string;
     expect(typeof incidentNumber).toBe('string');
     expect(incidentNumber).toMatch(/^INC-\d{4}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+  });
+
+  it('6a. refuses caller-supplied report identifiers, statuses and unsupported form fields', async () => {
+    const { POST } = await import('../hazards/route');
+    m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep'));
+    const capture = mockInsertCapture();
+    for (const injected of [
+      { reportNumber: 'HAZ-FORGED' },
+      { status: 'closed' },
+      { metadata: { approval: true } },
+      { unrecognizedField: 'unexpected' },
+    ]) {
+      const response = await POST(postRequest('http://localhost/api/health-safety/hazards', {
+        hazardType: 'fire', priority: 'high', location: 'Warehouse B',
+        description: 'Sparks near flammable storage', ...injected,
+      }));
+      expect(response.status).toBe(400);
+      expect(capture()).toBeUndefined();
+    }
+  });
+
+  it('6b. refuses conflicting aliases and canonical fields', async () => {
+    const { POST } = await import('../incidents/route');
+    m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep'));
+    const capture = mockInsertCapture();
+    const response = await POST(postRequest('http://localhost/api/health-safety/incidents', {
+      incidentType: 'injury', severity: 'minor', location: 'Dock A',
+      locationDescription: 'Dock B', description: 'Worker slipped',
+    }));
+    expect(response.status).toBe(400);
+    expect(capture()).toBeUndefined();
   });
 
   it('7. malformed required input (no location, no description) is rejected — never silently normalized into a valid record', async () => {
