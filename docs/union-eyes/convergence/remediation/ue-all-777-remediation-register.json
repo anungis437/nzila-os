@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 41,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 126,
-    "engineeringRemaining": 651,
+    "engineeringCorrected": 128,
+    "engineeringRemaining": 649,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 17
   },
@@ -300,6 +300,10 @@
     {
       "sha": "f38291484559977f8bb9810ee912a1483839a473",
       "description": "Calendar OAuth provider state now uses signed, expiring browser-bound nonce (partial until durable single-use consumption); Google/Microsoft callbacks perform tenant-bound credential mutations with mandatory atomic audit. Unit and PGlite regressions authored; exact-HEAD CI and provider runtime pending."
+    },
+    {
+      "sha": "7ede4dc71c7c95d80936db02e8ad21170fc751fb",
+      "description": "Reconciled existing calendar connection owner-scoped projections and strict non-secret mutation boundaries against two frozen defects; existing behavioral regressions inspected, exact-SHA CI and provider runtime pending. No new production changes for these two defects."
     }
   ],
   "records": [
@@ -2095,9 +2099,16 @@
         "nativeState": "PENDING_AT_EXACT_HEAD",
         "runtimeState": "PENDING_AT_EXACT_HEAD"
       },
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B10-CALENDAR-CONNECTION-BOUNDARY-RECONCILIATION",
+        "path": "apps/union-eyes/app/api/calendar-sync/connections/route.ts; apps/union-eyes/app/api/calendar-sync/connections/[id]/route.ts; apps/union-eyes/app/api/__tests__/calendar-sync-connections-owner-scoping.route.test.ts",
+        "explanation": "Both connection GET routes select explicit safe projections excluding accessToken, refreshToken and tokenExpiresAt, and bind both organizationId and userId; regression checks projections and owner predicates.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CALENDAR-CONNECTION-CRUD-WRITES-AROUND-OAUTH",
@@ -2126,9 +2137,16 @@
         "nativeState": "PENDING_AT_EXACT_HEAD",
         "runtimeState": "PENDING_AT_EXACT_HEAD"
       },
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B10-CALENDAR-CONNECTION-BOUNDARY-RECONCILIATION",
+        "path": "apps/union-eyes/app/api/calendar-sync/connections/route.ts; apps/union-eyes/app/api/calendar-sync/connections/[id]/route.ts; apps/union-eyes/app/api/__tests__/calendar-sync-connections-owner-scoping.route.test.ts",
+        "explanation": "Direct POST accepts only provider and returns OAuth initiation URL without writing; item PATCH strictly accepts non-secret sync settings, enforces caller ownership, and audits changes transactionally. Regression rejects token and identity mass assignment.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CALENDAR-SYNC-ANY-MEMBER-CONNECTION",
