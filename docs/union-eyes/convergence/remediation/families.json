@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 94,
- "partial": 12,
- "outstanding": 683,
- "accountedFor": 683,
+ "corrected": 116,
+ "partial": 14,
+ "outstanding": 661,
+ "accountedFor": 661,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -31,27 +31,25 @@
   {
    "family": "F02-PLACEHOLDER-FABRICATED-OR-NOT-IMPLEMENTED",
    "purpose": "Stubs, fabricated figures and false-success answers: return 501 or implement for real",
-   "defects": 67,
+   "defects": 45,
    "severity": {
-    "HIGH": 8,
-    "MEDIUM": 53,
-    "LOW": 6
+    "HIGH": 4,
+    "MEDIUM": 38,
+    "LOW": 3
    },
-   "namedRoutes": 23,
+   "namedRoutes": 11,
    "namedFiles": 1,
    "tranches": {
-    "0B.1": 1,
-    "0B.2": 1,
     "0B.3": 2,
-    "0B.4": 3,
+    "0B.4": 2,
     "0B.5": 1,
-    "0B.6": 7,
-    "0B.7": 11,
+    "0B.6": 5,
+    "0B.7": 8,
     "0B.8": 3,
-    "0B.9": 15,
-    "0B.10": 3,
-    "0B.11": 12,
-    "0B.12": 8
+    "0B.9": 10,
+    "0B.10": 2,
+    "0B.11": 10,
+    "0B.12": 2
    }
   },
   {
@@ -360,14 +358,6 @@
   ],
   "F02-PLACEHOLDER-FABRICATED-OR-NOT-IMPLEMENTED": [
    {
-    "id": "DEF-0B1-CRUD-FACADE-ORG-MEMBERS",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B2-CRUD-FACADE-SEGMENTS-SETTINGS",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B3-EXTERNAL-INVOICES-WRITE-ADVERTISED",
     "severity": "MEDIUM"
    },
@@ -382,10 +372,6 @@
    {
     "id": "DEF-0B4-CLAUSE-LIBRARY-COMPARE-GET-STUB-AND-EMPTY-KEYWORDS",
     "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B4-CARBON-FABRICATED-MEASUREMENTS-RETURNED-200",
-    "severity": "HIGH"
    },
    {
     "id": "DEF-0B5-COMMITTEE-INTELLIGENCE-PLACEHOLDER-RETURNED-AS-RESULT",
@@ -408,16 +394,9 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B6-CMP-INTEGRATIONS-ROUTE-OVER-USER-TOKEN-TABLE",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B6-SYS-CONTINUITY-ALIASES-ARE-THE-DOCUMENT-REPOSITORY-WITH-PLACEHOLDER-GUARD",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-SYS-INHERITANCE-IS-PENDING-PROFILES-REFUSED-BY-GOVERNANCE",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B7-EXC-SUMMARIZE-STORES-UNVALIDATED-OR-PLACEHOLDER-OUTPUT-AS-GENERATED",
@@ -452,18 +431,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B7-PLT-EVENT-OCCURRENCES-PATH-ADDRESSES-WHOLE-EVENT-ROW",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-PLT-ENT-EMPTY-200-WITHOUT-ORGANIZATION-AND-SECOND-RESOLUTION",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B7-PLT-EQUITY-ROUTES-ARE-MEMBER-SEGMENT-CRUD-FACADE",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B8-ICRA-PAID-PDF-REPORT-GATE-REQUIRES-STATUS-COMPLETED-NO-WRITER",
     "severity": "HIGH"
    },
@@ -485,7 +452,8 @@
    },
    {
     "id": "DEF-0B9-ML-SLA-CASE-ID-IS-NEVER-VERIFIED-AND-NOT-STORED-WITH-THE-PREDICTION",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B9-ML-SLA-RETRAIN-SIGNAL-AND-TRAINING-QUEUE-DESCRIBE-A-FORMULA-THAT-NEVER-READS-THEM",
@@ -509,35 +477,11 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B9-ASM-ONBOARDING-TRANSFERS-PATH-IS-THE-EVENT-RECORDER-BEHIND-A-PLACEHOLDER-ORG-ACCESS-FUNCTION",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B9-ASM-ONBOARDING-READINESS-IS-THE-PENDING-PROFILES-ROUTE-BEHIND-A-PLACEHOLDER-ORG-ACCESS-FUNCTION",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B9-ORG-CURRENT-CONTEXT-ROUTE-RETURNS-PLACEHOLDER-ORGANIZATION-WITH-NULL-NAME-AND-NO-FEATURES",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B9-ORG-HIERARCHY-ROUTES-PASS-UNVALIDATED-PATH-ID-TO-UUID-COLUMN-AND-ANSWER-EMPTY-200-FOR-UNKNOWN-ORGANIZATION",
     "severity": "LOW"
    },
    {
     "id": "DEF-0B9-ORG-ANALYTICS-METRIC-QUERIES-RUN-IN-SESSION-ORGANIZATION-CONTEXT-FILTERED-BY-PATH-ID-RETURNING-ZEROS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B9-ORG-ACCESS-LOGS-ROUTE-IS-ORGANIZATIONS-ROW-CRUD-NOT-A-CROSS-ORGANIZATION-ACCESS-LOG",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B9-ORG-SHARING-SETTINGS-ROUTE-IS-ORGANIZATIONS-ROW-CRUD-NOT-SHARING-SETTINGS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-ORG-ROUTES-NAMED-FOR-CARD-CHECK-SUPPORT-NOTES-SEQUENCES-FILINGS-AND-FORMS-ARE-CAMPAIGN-ROW-CRUD",
     "severity": "MEDIUM"
    },
    {
@@ -550,10 +494,6 @@
    },
    {
     "id": "DEF-0B11-PRP-RECONCILIATION-RUNS-ARE-NOT-REPEATABLE-AND-THE-BILLING-PERIOD-IS-NOT-BOUND-TO-THE-ORGANIZATION",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-RPT-SHARE-ITEM-PATH-SHARES-NOTHING-AND-ITS-DELETE-REMOVES-THE-REPORT",
     "severity": "MEDIUM"
    },
    {
@@ -593,36 +533,8 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B11-IDS-SUPPORT-METRICS-AND-SLA-ROUTES-SERVE-NOTIFICATION-ROWS-NOT-SUPPORT-FIGURES",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-CRUD-SUPPORT-TICKET-PATHS-SERVE-NOTIFICATION-ROWS-AND-ASSIGN-AND-COMMENTS-ARE-THE-SAME-ITEM-ROUTE",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-CRUD-UPLOAD-PATH-IS-A-JSON-MEDIA-ROW-INSERT-AND-RECEIVES-NO-FILE-WHILE-THE-JOB-FORM-POSTS-ONE",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B12-CRUD-TESTIMONIAL-APPROVAL-COMPONENT-SENDS-FIELDS-THE-TABLE-DOES-NOT-HAVE",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-PLT-V2-CATCH-ALL-ANSWERS-200-FOR-POST-PUT-PATCH-AND-DELETE-SO-A-CALLER-IS-TOLD-A-WRITE-SUCCEEDED",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B12-PLT-V2-CATCH-ALL-ANSWERS-200-WITH-A-DEPRECATION-OBJECT-WHERE-A-CALLER-EXPECTS-DATA",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-PLT-TENANT-CURRENT-ANSWERS-200-WITH-NULL-NAME-SLUG-AND-TIER-AND-NO-FEATURES",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-PLT-QUEUE-STATUS-ANSWERS-AUTHENTICATION-FAILURE-AS-503-AND-RETURNS-THE-ERROR-TEXT",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B12-PLT-VOCABULARY-SERVES-UNSOURCED-SERVICE-LEVEL-HOURS-ROLE-FLAGS-AND-TRANSITIONS-AS-INSTITUTIONAL-REFERENCE-DATA",

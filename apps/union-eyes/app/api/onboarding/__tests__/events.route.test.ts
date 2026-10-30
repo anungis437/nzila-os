@@ -85,10 +85,13 @@ describe('onboarding/events route — event and audit commit together', () => {
     expect(m.withRLSContext).not.toHaveBeenCalled()
   })
 
-  it('the transfers route delegates to the same audited handler', async () => {
-    const res = await post({ eventType: 'user_invited', targetUserId: 'u3' }, 'transfers')
+  it('the transfers route no longer reuses the audited handler: it answers 501 and records nothing', async () => {
+    const { readFileSync } = await import('node:fs')
+    const { resolve } = await import('node:path')
+    const source = readFileSync(resolve(__dirname, '../transfers/route.ts'), 'utf8')
 
-    expect(res.status).toBe(200)
-    expect(m.persistAtomicAudit).toHaveBeenCalledTimes(1)
+    expect(source).toContain('ApiError.notImplemented')
+    expect(source).not.toContain('persistAtomicAudit')
+    expect(source).not.toContain('events/route')
   })
 })

@@ -1,36 +1,26 @@
 /**
- * Continuity / inheritance alias route.
+ * GET POST /api/continuity/inheritance
  *
- * Semantically identical to `apps/union-eyes/app/api/onboarding/route.ts` —
- * both surface the same `pendingProfilesTable` CRUD collection, but under a
- * URL that reflects the continuity/inheritance vocabulary used by union-eyes
- * evidence flows.
- *
- * The handlers are inlined (rather than re-exported via a barrel) so that
- * every contract guard that scans this specific file — `api-completeness`,
- * `org-isolation`, `org-scope-enforcement`, and `vertical-governance` — can
- * observe the `crudRoutes()` marker and `orgScoped: true` in-file, per the
- * guard patterns declared in `tooling/contract-tests/*.test.ts`.
+ * Not implemented. This path advertises an operation of its own but was the generic CRUD factory over pending_profiles, the pre-signup profile table (no succession record exists). It answered with that other behaviour as though
+ * it were the operation, so it now answers HTTP 501 and changes and returns nothing.
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { pendingProfilesTable } from '@/db/schema';
+import { withApi, ApiError } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-// round 52: see app/api/onboarding/route.ts for the full rationale — this
-// table has no organizationId column (orgScoped is a no-op) and readRole
-// was 'member', letting any authenticated user of ANY org list every
-// pre-signup user's email/payment data. Fixed: readRole raised to
-// 'support_agent' (a genuine PLATFORM_ELEVATED_ROLES member).
-const { GET, POST } = crudRoutes({
-  table: pendingProfilesTable,
-  pk: 'id',
-  tags: ['Auth'],
-  orgScoped: true,
-  unscopedByDesign: 'pending_profiles is refused by CRUD governance (DENIED); it has no organization discriminator',
-  readRole: 'support_agent',
-  writeRole: 'steward',
-});
+const handler = withApi(
+  {
+    auth: { required: true, minRole: 'support_agent' },
+    openapi: {
+      tags: ['Auth'],
+      summary: '/api/continuity/inheritance (not implemented)',
+      description: 'Not implemented: answers 501.',
+    },
+  },
+  async () => {
+    throw ApiError.notImplemented('/api/continuity/inheritance is not implemented: it performed no operation of its own.');
+  },
+);
 
-export { GET, POST };
-
+export const GET = handler;
+export const POST = handler;

@@ -28,7 +28,7 @@ describe('organizing campaign routes', () => {
   const files = routeFiles(join(API, 'organizing')).filter((f) => readFileSync(f, 'utf8').includes('organizingCampaigns'));
 
   it('finds the campaign routes', () => {
-    expect(files.length).toBeGreaterThanOrEqual(14);
+    expect(files.map((p) => p.slice(API.length))).toHaveLength(1);
   });
 
   it.each(files.map((f) => [f.slice(API.length)]))('%s reads and writes at the officer floor', (rel) => {
@@ -36,6 +36,17 @@ describe('organizing campaign routes', () => {
     expect(source).toMatch(/readRole:\s*'officer'/);
     expect(source).toMatch(/writeRole:\s*'officer'/);
     expect(source).not.toMatch(/(read|write)Role:\s*'member'/);
+  });
+});
+
+describe('organizing routes that are not campaign operations', () => {
+  const others = routeFiles(join(API, 'organizing')).filter((f) => !readFileSync(f, 'utf8').includes('organizingCampaigns'));
+
+  it.each(others.map((f) => [f.slice(API.length)]))('%s answers 501 and keeps the officer floor', (rel) => {
+    const source = readFileSync(join(API, rel), 'utf8');
+    expect(source).toContain('ApiError.notImplemented');
+    expect(source).toMatch(/minRole:\s*'officer'/);
+    expect(source).not.toContain('crudRoutes');
   });
 });
 

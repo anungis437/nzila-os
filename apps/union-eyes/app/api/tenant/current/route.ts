@@ -1,56 +1,16 @@
 /**
- * GET /api/tenant/current — DEPRECATED
+ * GET /api/tenant/current — REMOVED
  *
- * Legacy compat wrapper. All new code should use /api/org/current instead.
- * Response still uses org-only language.
+ * The legacy compatibility wrapper answered 200 with an organization whose name, slug and tier were always null and whose
+ * features were always empty; nothing in the application calls it. A client that still does is told the route is gone and where
+ * the canonical one is, instead of receiving a success with no data.
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { withApiAuth, BaseAuthContext } from "@/lib/api-auth-guard";
-import { resolveOrgIdFromContext } from "@/lib/org-id-from-context";
-import {
-  ErrorCode,
-  standardErrorResponse,
-} from "@/lib/api/standardized-responses";
+import { NextResponse } from "next/server";
+import { goneResponse } from "@/lib/api/deprecation";
 
 export const dynamic = "force-dynamic";
 
-export const GET = withApiAuth(
-  async (_request: NextRequest, context: BaseAuthContext) => {
-    try {
-      const userId = context.userId;
-      if (!userId) {
-        return standardErrorResponse(
-          ErrorCode.AUTH_REQUIRED,
-          "Authentication required",
-        );
-      }
-      // R9: helper enforces app-org UUID shape; rejects Entra group GUIDs.
-      const orgId = await resolveOrgIdFromContext(context, userId);
-
-      if (!orgId) {
-        return standardErrorResponse(
-          ErrorCode.NOT_FOUND,
-          "No organization found for current user",
-        );
-      }
-
-      const org = {
-        organizationId: orgId,
-        name: null as string | null,
-        slug: null as string | null,
-        subscriptionTier: null as string | null,
-        features: [] as string[],
-      };
-
-      const response = NextResponse.json({ org, availableOrgs: [org] });
-      response.headers.set("X-Deprecated", "true; use /api/org/current");
-      return response;
-    } catch (_error) {
-      return standardErrorResponse(
-        ErrorCode.INTERNAL_ERROR,
-        "Failed to fetch organization info",
-      );
-    }
-  },
-);
+export function GET(): NextResponse {
+  return goneResponse("/api/tenant/current", "Use /api/org/current, which returns the organization's name, slug, tier and features.");
+}

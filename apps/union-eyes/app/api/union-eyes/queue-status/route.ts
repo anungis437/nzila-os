@@ -8,17 +8,28 @@
  */
 import { NextResponse } from 'next/server'
 import { getAllQueueStats, getFailedJobs } from '@/lib/job-queue'
-import { requireApiAuth } from '@/lib/api-auth-guard'
+import { requireApiAuth, requireSystemAdmin } from '@/lib/api-auth-guard'
+import { logger } from '@/lib/logger'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: Request) {
   try {
-    // Accept either platform JWT (browser) or service key (control-plane s2s)
+    // Queue counts and failed task names are platform-wide operational data, not an organization's: the control plane (service key)
+    // or a platform administrator may read them, and a signed-in member may not.
     const svcKey = process.env.AI_SERVICE_KEY
     const isServiceRequest = !!svcKey && req.headers.get('x-service-key') === svcKey
     if (!isServiceRequest) {
-      await requireApiAuth()
+      try {
+        await requireApiAuth()
+      } catch {
+        return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+      }
+      try {
+        await requireSystemAdmin()
+      } catch {
+        return NextResponse.json({ error: 'Platform administrator authority required' }, { status: 403 })
+      }
     }
 
     const djangoUrl = process.env.DJANGO_API_URL || process.env.NEXT_PUBLIC_DJANGO_API_URL
@@ -71,13 +82,14 @@ export async function GET(req: Request) {
       timestamp: new Date().toISOString(),
     })
   } catch (err) {
+    // The cause is logged, not returned: it can name hosts and credentials of the queue backend.
+    logger.error('queue-status unavailable', { error: String(err) })
     return NextResponse.json(
       {
         service: 'union-eyes',
         availability: 'error',
         queue: null,
         error: 'Queue status unavailable',
-        detail: String(err),
         timestamp: new Date().toISOString(),
       },
       { status: 503 },
