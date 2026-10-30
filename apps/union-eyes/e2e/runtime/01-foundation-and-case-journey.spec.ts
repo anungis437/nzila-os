@@ -94,10 +94,12 @@ test.describe('journey A: member files, authority decides who can see it', () =>
     const body = await response.json()
     caseId = body.claimId
     claimNumber = body.claimNumber
-    if (process.env.UE_RUNTIME_ARTIFACTS) {
-      await mkdir(STATE_DIR, { recursive: true })
-      await writeFile(join(STATE_DIR, 'journey-a-state.json'), JSON.stringify({ caseId, claimNumber, title }))
-    }
+    // The restart check must never depend on an optional artifact flag to receive a real filing.
+    // This ignored local QA state contains identifiers only; it is not a release qualification artifact.
+    expect(caseId).toMatch(/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i)
+    expect(claimNumber).toMatch(/\S/)
+    await mkdir(STATE_DIR, { recursive: true })
+    await writeFile(join(STATE_DIR, 'journey-a-state.json'), JSON.stringify({ caseId, claimNumber, title }), { mode: 0o600 })
     expect(body.status).toBe('submitted')
     expect(body.decision.proof, 'the intake decision carries a sealed proof').toBeTruthy()
   })
