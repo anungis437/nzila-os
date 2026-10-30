@@ -193,7 +193,7 @@ and rejects deeply nested and oversized JSON collections before invoking Zod 3.
 A dedicated 413 response and negative tests enforce this containment. Non-JSON
 multipart ingestion retains separate streaming limits. This is a mitigating
 control only: it does **not** remove the vulnerable Zod 3 runtime dependency or
-clear advisory GHSA-mrhx-c7xc-m3w5. P0 issue #1040 requires a genuine
+clear advisory GHSA-mrhx-c7xc-m3w5. P0 issue #1039 (canonical; #1040 closed as duplicate) requires a genuine
 Zod 4 migration, refreshed lockfile and independent dependency audit PASS.
 
 ## Completed-step receipt and freshness hardening
@@ -240,3 +240,18 @@ cover filesystem order, concatenation collisions, relocation, modifications
 and symlink injection. This binds built directory content more precisely, but
 **does not prove OCI image provenance**, registry content or production runtime.
 Those remain independently gated under #1038.
+
+## Executor-bound policy decisions and approval receipt integrity
+
+The host-issued policy decision must now explicitly bind
+`boundExecutingAgentId` to the authenticated executor in the request. Matching
+workflow, organization, app, step and policy alone is insufficient: an ALLOW
+for another agent is rejected, and the process-local permit rechecks the actor
+binding before completion. This is an interface invariant, **not** proof that
+the external host identity service is independently deployed (#1037).
+
+The production-environment approval verifier now requires both original and
+rerun initiator identities, a positive integer GitHub approval-review ID, and
+parseable review chronology. A missing ID is not an immutable approval receipt.
+GitHub Environment rules and live human authorization remain separate external
+proofs (#1038). These changes do not activate Tool Fabric or authorize GO.
