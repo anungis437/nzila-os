@@ -18,6 +18,7 @@ const m = vi.hoisted(() => ({
   audit: vi.fn(),
   selectQueue: [] as unknown[][],
   executeQueue: [] as unknown[][],
+  rlsContexts: [] as unknown[],
   updateQueue: [] as unknown[][],
 }));
 
@@ -47,7 +48,10 @@ const mockDb: any = {
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: async (fn: (tx: unknown) => Promise<unknown>) => fn(mockDb),
+  withRLSContext: async (...args: unknown[]) => {
+    if (args.length > 1) m.rlsContexts.push(args[0]);
+    return (args[args.length - 1] as (tx: unknown) => Promise<unknown>)(mockDb);
+  },
   withSystemContext: async (fn: () => Promise<unknown>) => fn(),
 }));
 vi.mock('@/lib/api-auth-guard', () => ({
@@ -79,6 +83,7 @@ describe('organizations/[id] route', () => {
     vi.clearAllMocks();
     m.selectQueue = [];
     m.executeQueue = [];
+    m.rlsContexts = [];
     m.updateQueue = [];
     m.auth.mockResolvedValue({ userId: 'u1' });
     m.requireUserForOrganization.mockResolvedValue({ roles: ['admin'], userId: 'u1' });
@@ -112,6 +117,7 @@ describe('organizations/[id] route', () => {
     const json = await response.json();
     expect(json.data.id).toBe('11111111-1111-4111-8111-111111111111');
     expect(json.data.totalClaims).toBe(5);
+    expect(m.rlsContexts).toContainEqual({ organizationId: orgRow.id });
   });
 
   it('PATCH returns 403 when org auth check fails', async () => {
