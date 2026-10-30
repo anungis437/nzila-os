@@ -3,7 +3,7 @@
  * List AI invocation audit log entries.
  * Admin-only view of all AI route calls, their model, dataClass, and audit ref IDs.
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { withOrgOwnedContext } from '@/lib/db/org-owned-context';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
@@ -15,12 +15,15 @@ export const dynamic = 'force-dynamic';
 export const GET = withApi(
   {
     auth: { required: true, minRole: 'admin' },
+    requireOrg: true,
+    rlsOrgContext: true,
     openapi: {
       tags: ['Admin'],
       summary: 'List AI invocation audit log entries',
     },
   },
-  async ({ request }) => {
+  async ({ request, organizationId }) => {
+    if (!organizationId) throw ApiError.forbidden('Organization context required for AI audit visibility');
     const url = new URL(request.url);
     const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
     const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '50')));
@@ -28,8 +31,8 @@ export const GET = withApi(
 
     const v2 = currentStateContextEnabled();
     return withOrgOwnedContext(async () => {
-      // V2: canonical tenant-scoped public.audit_logs (RLS limits rows to the caller's
-      // organization; event payload lives in details); legacy: audit_security, all organizations.
+      // Both canonical and legacy paths require an explicit authenticated-tenant
+      // predicate. Legacy audit_security is NOT implicitly tenant-scoped.
       const rows = v2
         ? await db.execute(sql`
         SELECT
@@ -43,6 +46,7 @@ export const GET = withApi(
           details->'metadata'->>'auditRefId'  AS "auditRefId"
         FROM public.audit_logs
         WHERE details->>'eventType' = 'ai.invocation'
+          AND organization_id = ${organizationId}::uuid
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `)
@@ -58,6 +62,7 @@ export const GET = withApi(
           metadata->>'auditRefId'  AS "auditRefId"
         FROM audit_security.audit_logs
         WHERE metadata->>'eventType' = 'ai.invocation'
+          AND organization_id = ${organizationId}
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `);
@@ -67,11 +72,13 @@ export const GET = withApi(
         SELECT COUNT(*)::int AS total
         FROM public.audit_logs
         WHERE details->>'eventType' = 'ai.invocation'
+          AND organization_id = ${organizationId}::uuid
       `)
         : await db.execute(sql`
         SELECT COUNT(*)::int AS total
         FROM audit_security.audit_logs
         WHERE metadata->>'eventType' = 'ai.invocation'
+          AND organization_id = ${organizationId}
       `);
 
       const total = (countResult as Record<string, unknown>[])[0]?.total ?? 0;

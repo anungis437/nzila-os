@@ -6,7 +6,10 @@ const m = vi.hoisted(() => ({
   db: { execute: vi.fn() },
 }));
 
-vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi }));
+vi.mock('@/lib/api/framework', () => ({
+  withApi: m.withApi,
+  ApiError: { forbidden: (message: string) => new Error(message) },
+}));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/lib/api/standardized-responses', () => ({
@@ -14,7 +17,7 @@ vi.mock('@/lib/api/standardized-responses', () => ({
 }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
-  return { ...actual, sql: Object.assign(vi.fn(() => 'sql'), { mapWith: vi.fn() }) };
+  return { ...actual, sql: Object.assign(vi.fn((strings: TemplateStringsArray, ...values: unknown[]) => ({ text: strings.join('?'), values })), { mapWith: vi.fn() }) };
 });
 
 async function loadRoute() {
@@ -34,7 +37,7 @@ describe('admin/ai-usage route', () => {
 
   it('returns paginated AI audit rows', async () => {
     const { GET } = await loadRoute();
-    const response = await GET({ request: new Request('http://localhost/api/admin/ai-usage?page=2&limit=25') });
+    const response = await GET({ request: new Request('http://localhost/api/admin/ai-usage?page=2&limit=25'), organizationId: 'org-a' });
     const json = await response.json();
 
     expect(response.status).toBe(200);
@@ -43,4 +46,18 @@ describe('admin/ai-usage route', () => {
     expect(json.total).toBe(1);
     expect(Array.isArray(json.entries)).toBe(true);
   });
+  it('requires authenticated tenant context and scopes both audit queries', async () => {
+    const { GET } = await loadRoute();
+    await expect(GET({ request: { url: 'http://localhost/api/admin/ai-usage' }, organizationId: null })).rejects.toThrow('Organization context required');
+    expect(m.db.execute).not.toHaveBeenCalled();
+    const response = await GET({ request: { url: 'http://localhost/api/admin/ai-usage' }, organizationId: 'org-a' });
+    expect(response.status).toBe(200);
+    expect(m.db.execute).toHaveBeenCalledTimes(2);
+    for (const call of m.db.execute.mock.calls) {
+      const sqlQuery = call[0] as { text: string; values: unknown[] };
+      expect(sqlQuery.text).toContain('organization_id =');
+      expect(sqlQuery.values).toContain('org-a');
+    }
+  });
+
 });
