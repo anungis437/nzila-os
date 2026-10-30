@@ -18,6 +18,9 @@ import { z } from "zod";
 import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { checkEntitlement } from '@/lib/services/entitlements';
+import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
+import { AI_FEATURES } from '@/lib/services/feature-flags';
+import { enforceAISafety } from '@nzila/policies';
 
 import {
   ErrorCode,
@@ -63,6 +66,11 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         { status: 403 }
       );
     }
+
+    if (!context.organizationId) return NextResponse.json({ error: 'Organization context required' }, { status: 403 });
+    const blocked = await guardAiFeature(AI_FEATURES.AI_EXTRACT_CLAUSES, { userId: context.userId, organizationId: context.organizationId });
+    if (blocked) return blocked;
+    enforceAISafety({ origin: 'classify', action: 'POST', organizationId: context.organizationId, userId: context.userId, userRole: 'member', dataClass: 'internal' });
 
     try {
       const body = await request.json();
