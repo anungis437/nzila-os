@@ -202,23 +202,11 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Forbidden: organization archival requires platform governance' }, { status: 403 })
   }
 
-  const archived = await withRLSContext(async (tx) => {
-    const [row] = await tx
-      .update(organizations)
-      .set({ status: 'archived', updatedAt: new Date() })
-      .where(eq(organizations.id, id))
-      .returning()
-    if (!row) return null
-    await persistAtomicAudit(tx, {
-      organizationId: id,
-      userId: userCtx.userId,
-      action: 'organization.archive',
-      resourceType: 'organizations',
-      resourceId: id,
-      details: { status: 'archived' },
-    })
-    return row
-  })
-  if (!archived) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  return NextResponse.json({ data: mapOrg(archived) })
+  // An archive request changes membership eligibility, descendant availability and billing.
+  // No durable independent-approval workflow or second-approver evidence is available here.
+  // Even a platform administrator must not bypass that institutional decision by direct UPDATE.
+  return NextResponse.json(
+    { error: 'Organization archival requires an approved institutional lifecycle workflow; this endpoint cannot archive directly' },
+    { status: 501 },
+  )
 }
