@@ -21,7 +21,7 @@ export const PATCH = withApi({
   requireOrg: true,
 }, async () => ({}));
 `;
-const validAlias = "export const dynamic = 'force-dynamic';\\nexport { GET, PATCH } from '../canonical/route';\\n";
+const validAlias = "export const dynamic = 'force-dynamic';\nexport { GET, PATCH } from '../canonical/route';\n";
 
 afterAll(() => { if (existsSync(root)) rmSync(root, { recursive: true, force: true }); });
 

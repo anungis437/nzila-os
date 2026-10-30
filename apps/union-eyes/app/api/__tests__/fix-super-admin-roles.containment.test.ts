@@ -12,7 +12,7 @@ describe('legacy super-admin role repair — no implicit grant path', () => {
     for (const config of state.configs) {
       expect(config).toMatchObject({ auth: { required: true, minRole: 'system_admin' } });
     }
-    expect(() => GET()).toThrow('NOT_IMPLEMENTED');
-    expect(() => POST()).toThrow('NOT_IMPLEMENTED');
+    expect(() => GET({} as never)).toThrow('NOT_IMPLEMENTED');
+    expect(() => POST({} as never)).toThrow('NOT_IMPLEMENTED');
   });
 });
