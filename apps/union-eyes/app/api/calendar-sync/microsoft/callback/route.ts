@@ -34,10 +34,14 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
     const state = request.nextUrl.searchParams.get('state')
 
     if (!code) {
-      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing OAuth authorization code')
+      const response = standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing OAuth authorization code')
+      clearCalendarOAuthStateCookie(response, 'microsoft')
+      return response
     }
     if (!verifyCalendarOAuthState(request, 'microsoft', state, userId, organizationId)) {
-      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Missing, expired or invalid OAuth state')
+      const response = standardErrorResponse(ErrorCode.FORBIDDEN, 'Missing, expired or invalid OAuth state')
+      clearCalendarOAuthStateCookie(response, 'microsoft')
+      return response
     }
 
     const tokens = await exchangeCodeForTokens(code)
@@ -118,16 +122,20 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
     return response
   } catch (error) {
     if (error instanceof Error && error.message.includes('did not return refresh token')) {
-      return standardErrorResponse(
+      const response = standardErrorResponse(
         ErrorCode.SERVICE_UNAVAILABLE,
         'Microsoft OAuth did not return a refresh token. Reconnect and grant offline access to enable continuous sync.',
       )
+      clearCalendarOAuthStateCookie(response, 'microsoft')
+      return response
     }
 
-    return standardErrorResponse(
+    const response = standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Failed to complete Microsoft Calendar authorization',
       error,
     )
+    clearCalendarOAuthStateCookie(response, 'microsoft')
+    return response
   }
 })
