@@ -171,6 +171,10 @@ describe('clc compliance-reports', () => {
   });
 
   it('enforces a tenant predicate on every CLC report and forecasting read', async () => {
+    // The Drizzle mock returns every seeded row regardless of SQL predicates. Keep this
+    // fixture tenant-local so downstream per-organization trend queries cannot be
+    // driven by synthetic foreign-tenant rows that real SQL would have excluded.
+    state.remittances = state.remittances.filter((row) => row.fromOrganizationId === 'org-a');
     await generateAnnualComplianceReport(YEAR, 'org-a');
     await analyzeMultiYearTrends({ years: 3, endYear: YEAR, organizationId: 'org-a' });
     await forecastRemittances(2, 'org-a');
