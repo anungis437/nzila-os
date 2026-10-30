@@ -166,6 +166,16 @@ describe('calendar-sync/microsoft/callback route', () => {
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.db, expect.objectContaining({ organizationId: 'org_1', action: 'calendar.connection.oauth.connect' }));
   });
 
+  it('encrypts rotated refresh tokens before updating an existing connection', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push([{ id: 'existing-microsoft-conn' }]);
+    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/microsoft/callback?code=oauth_code&state=signed-state'));
+    expect(response.status).toBe(307);
+    const set = m.db.update.mock.results[0].value.set;
+    expect(set).toHaveBeenCalledWith(expect.objectContaining({ refreshToken: 'encrypted_token' }));
+    expect(m.persistAtomicAudit).toHaveBeenCalled();
+  });
+
   it('updates existing microsoft connection when record exists', async () => {
     const { GET } = await loadRoute();
     m.selectQueue.push([{ id: 'existing_msft_conn' }]);
