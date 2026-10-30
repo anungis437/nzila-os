@@ -6,6 +6,9 @@ const result = buildSchemaMutationBatches();
 const out = resolve(__dirname, '../../../artifacts/ue-schema-mutation-program.json');
 mkdirSync(resolve(out, '..'), { recursive: true });
 writeFileSync(out, JSON.stringify(result, null, 2) + '\n');
+console.log('SCHEMA_PROGRAM_BEGIN');
+console.log(JSON.stringify(result, null, 2));
+console.log('SCHEMA_PROGRAM_END');
 console.log('SCHEMA_EVIDENCE', JSON.stringify({
   censusCount: result.censusCount,
   schemaEntries: result.schema.length,
