@@ -59,7 +59,7 @@ vi.mock('@/lib/logger', () => ({
 
 // ── Imports ──────────────────────────────────────────────────────────────────
 
-import type { BillingCycleParams } from '../billing-cycle-service';
+import { BillingCycleService, type BillingCycleParams } from '../billing-cycle-service';
 
 // ── Tests ────────────────────────────────────────────────────────────────────
 
@@ -84,6 +84,25 @@ describe('BillingCycleService', () => {
         }),
       }),
     });
+  });
+
+  it('binds the target organization and actor to the database transaction before reading members', async () => {
+    mockWithRLS.mockImplementationOnce(async (scope, callback) => {
+      expect(scope).toEqual({ organizationId: '11111111-1111-4111-8111-111111111111', userId: 'user-1' });
+      return callback({
+        select: () => ({ from: () => ({ leftJoin: () => ({ where: async () => [] }) }) }),
+      });
+    });
+    const result = await BillingCycleService.generateBillingCycle({
+      organizationId: '11111111-1111-4111-8111-111111111111',
+      periodStart: new Date('2026-03-01'),
+      periodEnd: new Date('2026-03-31'),
+      frequency: 'monthly',
+      executedBy: 'user-1',
+      dryRun: true,
+    });
+    expect(result.transactionsCreated).toBe(0);
+    expect(mockWithRLS).toHaveBeenCalledOnce();
   });
 
   it('BillingCycleParams has expected structure', () => {
