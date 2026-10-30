@@ -375,15 +375,12 @@ export class ChatbotService {
           userId: data.userId,
         });
         if (safetyCheck.flagged) {
-          // If the safety system itself is unavailable, skip blocking (fail-open for availability)
-          // Only block when the moderation API explicitly flags the content
+          // Never send unmoderated member text to retrieval or a model when the
+          // safety dependency is absent, malformed or unavailable.
           if (safetyCheck.reason === 'Safety system unavailable') {
-            logger?.warn('[ChatbotService] Content safety system unavailable — proceeding with message', {
-              sessionId: data.sessionId,
-            });
-          } else {
-            throw new Error("Message flagged by content safety filter");
+            throw new Error('Content safety system unavailable');
           }
+          throw new Error('Message flagged by content safety filter');
         }
 
         // Conversation history: what was said before, then this message (stored with the reply below)
@@ -559,7 +556,7 @@ export class ChatbotService {
     // Implement content moderation using OpenAI Moderation API
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      return { flagged: false }; // Skip if not configured
+      return { flagged: true, reason: 'Safety system unavailable' };
     }
     
     try {
@@ -572,9 +569,22 @@ export class ChatbotService {
         body: JSON.stringify({ input: content }),
       });
       
-      const data = await response.json();
-      const result = data.results[0];
-      
+      if (!response.ok) throw new Error('Moderation provider unavailable');
+      const data: unknown = await response.json();
+      if (!data || typeof data !== 'object' || !('results' in data) ||
+          !Array.isArray(data.results) || !data.results[0] ||
+          typeof data.results[0] !== 'object' ||
+          typeof data.results[0].flagged !== 'boolean' ||
+          !data.results[0].categories || typeof data.results[0].categories !== 'object' ||
+          !data.results[0].category_scores || typeof data.results[0].category_scores !== 'object') {
+        throw new Error('Invalid moderation provider response');
+      }
+      const result = data.results[0] as {
+        flagged: boolean;
+        categories: Record<string, boolean>;
+        category_scores: Record<string, number>;
+      };
+
       if (result.flagged) {
         const flaggedCategories = Object.entries(result.categories)
           .filter(([_, flagged]) => flagged)
