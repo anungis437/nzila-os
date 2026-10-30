@@ -135,5 +135,7 @@ const { GET, POST } = crudRoutes({
     'department', 'whoIsAtRisk', 'existingControls', 'photoUrls',
   ],
   beforeCreate: (values) => buildHazardCreateValues(values),
+  // Preserve reporter anonymity in both the row and its mandatory audit entry.
+  anonymousCreate: (values) => values.isAnonymous === true,
 });
 export { GET, POST };
