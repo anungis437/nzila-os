@@ -9,6 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { BillingCycleService } from '@/lib/services/billing-cycle-service';
+import { requireBillingCycleAuthority } from '@/lib/finance/billing-cycle-authority';
 import { withApiAuth, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
 import {
   ErrorCode,
@@ -68,6 +69,14 @@ export const POST = withApiAuth(async (request: NextRequest) => {
     }
 
     const { organizationId, frequency, periodStart, periodEnd, dryRun } = validation.data;
+
+    // A platform role is not a financial mandate for the caller-selected union.
+    // Authorize the target ledger before a preview, audit intent or charge.
+    try {
+      await requireBillingCycleAuthority(organizationId, user.id);
+    } catch {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Live financial execution mandate required for target organization');
+    }
 
     // Calculate period dates if not provided
     let start: Date;
