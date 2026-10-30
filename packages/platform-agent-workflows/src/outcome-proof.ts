@@ -8,6 +8,7 @@
  */
 import type { AgentWorkflow, OutcomeEvidence } from './types'
 import { outcomeEvidenceSchema } from './types'
+import { isVerifiedPolicyPermitFor, type VerifiedPolicyPermit } from './policy-permit'
 
 export interface OutcomeVerificationRequest {
   workflowId: string
@@ -46,16 +47,27 @@ const minted = new WeakSet<object>()
  * Fail-closed process-local completion history. A restored or forged JSON
  * workflow must be re-verified by the trusted host before subsequent steps.
  */
-const verifiedHistory = new WeakMap<AgentWorkflow, Map<string, VerifiedOutcomeProof>>()
+interface CompletedStepReceipt {
+  readonly outcome: VerifiedOutcomeProof
+  readonly policy: VerifiedPolicyPermit
+  readonly policySnapshot: string
+  readonly outputSnapshot: string
+}
+const verifiedHistory = new WeakMap<AgentWorkflow, Map<string, CompletedStepReceipt>>()
 
 export function hasAuthenticatedCompletedHistory(workflow: AgentWorkflow): boolean {
   const history = verifiedHistory.get(workflow)
   return workflow.steps.every(step => {
     if (step.status !== 'completed') return true
     if (step.policyCheck?.result !== 'allow' || !step.outcomeEvidence) return false
-    const proof = history?.get(step.id)
-    if (!isVerifiedOutcomeFor(proof, workflow, step.id)) return false
-    return JSON.stringify(proof.evidence) === JSON.stringify(step.outcomeEvidence)
+    const receipt = history?.get(step.id)
+    if (!receipt ||
+        !isVerifiedOutcomeFor(receipt.outcome, workflow, step.id) ||
+        !isVerifiedPolicyPermitFor(receipt.policy, workflow, step.id, step.policyCheck.policyId) ||
+        receipt.outcome.request.executingAgentId !== receipt.policy.request.executingAgentId) return false
+    return JSON.stringify(receipt.outcome.evidence) === JSON.stringify(step.outcomeEvidence) &&
+      receipt.policySnapshot === JSON.stringify(step.policyCheck) &&
+      receipt.outputSnapshot === JSON.stringify(step.output ?? null)
   })
 }
 
@@ -64,12 +76,23 @@ export function carryAuthenticatedHistory(
   updated: AgentWorkflow,
   stepId: string,
   proof: VerifiedOutcomeProof | undefined,
+  policy: VerifiedPolicyPermit | undefined,
 ): void {
   if (!hasAuthenticatedCompletedHistory(previous)) throw new Error('Untrusted completed-step history')
+  if (Boolean(proof) !== Boolean(policy)) throw new Error('Completion requires both independent receipts')
   const next = new Map(verifiedHistory.get(previous) ?? [])
-  if (proof) {
-    if (!isVerifiedOutcomeFor(proof, updated, stepId)) throw new Error('Outcome proof scope mismatch')
-    next.set(stepId, proof)
+  if (proof && policy) {
+    const step = updated.steps.find(s => s.id === stepId)
+    if (!isVerifiedOutcomeFor(proof, updated, stepId) ||
+        !isVerifiedPolicyPermitFor(policy, updated, stepId, step?.policyCheck?.policyId ?? '') ||
+        proof.request.executingAgentId !== policy.request.executingAgentId ||
+        step?.status !== 'completed') throw new Error('Completion receipt scope mismatch')
+    next.set(stepId, {
+      outcome: proof,
+      policy,
+      policySnapshot: JSON.stringify(step.policyCheck),
+      outputSnapshot: JSON.stringify(step.output ?? null),
+    })
   }
   verifiedHistory.set(updated, next)
 }

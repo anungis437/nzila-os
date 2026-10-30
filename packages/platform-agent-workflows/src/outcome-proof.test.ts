@@ -26,10 +26,10 @@ async function validProof(wf: ReturnType<typeof createWorkflow>, stepId: string)
     }),
   })
 }
-async function validPolicy(wf: ReturnType<typeof createWorkflow>, stepId: string, policyId = 'p1') {
+async function validPolicy(wf: ReturnType<typeof createWorkflow>, stepId: string, policyId = 'p1', agentId = 'implementer-agent') {
   const request = {
     workflowId: wf.id, stepId, app: wf.app, orgId: wf.orgId,
-    policyId, executingAgentId: 'implementer-agent',
+    policyId, executingAgentId: agentId,
   }
   return verifyOutcomePolicy(request, {
     resolve: async r => ({
@@ -113,6 +113,44 @@ describe('platform-agent-workflows P0 outcome controls', () => {
       verifiedOutcome: proof, verifiedPolicy: permit,
     }).status).toBe('blocked')
     expect(() => executeStep(result, result.steps[0].id, { verifiedOutcome: proof })).toThrow('immutable')
+  })
+
+  it('rejects mixing outcome proof and policy permit minted for different agents', async () => {
+    const wf = make()
+    const proof = await validProof(wf, wf.steps[0].id)
+    const otherAgentPermit = await validPolicy(wf, wf.steps[0].id, 'p1', 'other-agent')
+    const result = executeStep(wf, wf.steps[0].id, {
+      policyCheck: { policyId: 'p1', result: 'allow' },
+      verifiedOutcome: proof, verifiedPolicy: otherAgentPermit,
+    })
+    expect(result.status).toBe('blocked')
+  })
+
+  it('fails closed on mutated completed policy, output, or expired policy history', async () => {
+    const wf = make('cfo', ['first', 'second'])
+    const proof = await validProof(wf, wf.steps[0].id)
+    const permit = await validPolicy(wf, wf.steps[0].id)
+    const completed = executeStep(wf, wf.steps[0].id, {
+      policyCheck: { policyId: 'p1', result: 'allow' },
+      verifiedOutcome: proof, verifiedPolicy: permit, output: { count: 1 },
+    })
+    const alteredPolicy = {
+      ...completed,
+      steps: completed.steps.map((step, i) => i === 0
+        ? { ...step, policyCheck: { policyId: 'another-policy', result: 'allow' as const } }
+        : step),
+    }
+    expect(() => executeStep(alteredPolicy, alteredPolicy.steps[1].id, {}))
+      .toThrow('trusted re-verification')
+    const alteredOutput = {
+      ...completed,
+      steps: completed.steps.map((step, i) => i === 0
+        ? { ...step, output: { count: 2 } }
+        : step),
+    }
+    expect(() => executeStep(alteredOutput, alteredOutput.steps[1].id, {}))
+      .toThrow('trusted re-verification')
+    expect(executeStep(completed, completed.steps[1].id, {}).status).toBe('blocked')
   })
 
   it('prevents proof replay across workflow/step/org and rejects mismatched evidence', async () => {

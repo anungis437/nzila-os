@@ -61,7 +61,8 @@ export function executeStep(
   const policyAllows = params.policyCheck?.result === 'allow' &&
     Boolean(params.policyCheck.policyId) &&
     isVerifiedPolicyPermitFor(params.verifiedPolicy, workflow, stepId, params.policyCheck.policyId)
-  const evidenceValid = isVerifiedOutcomeFor(params.verifiedOutcome, workflow, stepId)
+  const evidenceValid = isVerifiedOutcomeFor(params.verifiedOutcome, workflow, stepId) &&
+    params.verifiedOutcome?.request.executingAgentId === params.verifiedPolicy?.request.executingAgentId
   const completes = policyAllows && evidenceValid
   const reason = !policyAllows
     ? 'Independently authorized policy ALLOW is required'
@@ -105,7 +106,9 @@ export function executeStep(
     status,
     completedAt: allCompleted ? new Date().toISOString() : undefined,
   }
-  carryAuthenticatedHistory(workflow, updated, stepId, completes ? params.verifiedOutcome : undefined)
+  carryAuthenticatedHistory(workflow, updated, stepId,
+    completes ? params.verifiedOutcome : undefined,
+    completes ? params.verifiedPolicy : undefined)
   return updated
 }
 
