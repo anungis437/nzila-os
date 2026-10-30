@@ -74,7 +74,7 @@ export const POST = withApi(
     return withRLSContext({ organizationId, userId }, async (tx) => {
       const [meeting] = await tx
         .insert(pensionTrusteeMeetings)
-        .values({ ...parsed, organizationId })
+        .values({ ...parsed.data, organizationId })
         .returning();
       await persistAtomicAudit(tx, {
         organizationId,
@@ -82,7 +82,7 @@ export const POST = withApi(
         action: 'pension.trustee_meeting.schedule',
         resourceType: 'pension_trustee_meetings',
         resourceId: meeting.id,
-        details: { title: parsed.title },
+        details: { title: parsed.data.title },
       });
       return meeting;
     });
