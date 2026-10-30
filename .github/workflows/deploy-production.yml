@@ -237,7 +237,8 @@ jobs:
           gh api "repos/${GITHUB_REPOSITORY}/environments/production" > "$RUNNER_TEMP/nzila-production-review/environment.json"
           gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" > "$RUNNER_TEMP/nzila-production-review/run.json"
           gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/approvals" > "$RUNNER_TEMP/nzila-production-review/approvals.json"
-          node scripts/release/verify-production-approval.mjs "$RUNNER_TEMP/nzila-production-review" "$GITHUB_RUN_ID" "$GITHUB_SHA"
+          mkdir -p ops/deploy-evidence
+          node scripts/release/verify-production-approval.mjs "$RUNNER_TEMP/nzila-production-review" "$GITHUB_RUN_ID" "$GITHUB_SHA" "ops/deploy-evidence/production-approval-${GITHUB_RUN_ID}.json"
 
       # Jobs have isolated filesystems: download again after the independent
       # GitHub Environment approval, then re-verify the exact signed artifact.
@@ -395,6 +396,7 @@ jobs:
         with:
           name: production-deploy-evidence
           path: |
+            # Includes the minimal GitHub API-verified human approval receipt.
             ops/deploy-evidence/*.json
             # Include the EXACT verified upstream attestation and image
             # manifest, never substitute a locally asserted green report.
