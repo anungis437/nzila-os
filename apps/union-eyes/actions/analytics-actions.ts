@@ -464,7 +464,26 @@ export async function getAnalyticsMetrics(params: {
       });
     });
     
-    return { success: true, metrics };
+    // A member may read aggregate metric values, never underlying claim IDs
+    // or arbitrary metadata left by historical versions of the calculator.
+    // Explicit allowlisting also protects records created before the redaction migration.
+    const publicMetrics = metrics.map((metric) => {
+      const raw = metric.metadata && typeof metric.metadata === 'object' && !Array.isArray(metric.metadata)
+        ? metric.metadata as Record<string, unknown>
+        : {};
+      let metadata: Record<string, number | null> = {};
+      if (metric.metricType === 'claims_volume') {
+        const claimsCount = Number(metric.metricValue);
+        metadata = { claimsCount: Number.isFinite(claimsCount) ? claimsCount : null };
+      } else if (metric.metricType === 'resolution_time' && raw.claimsResolved != null) {
+        const claimsResolved = Number(raw.claimsResolved);
+        if (Number.isFinite(claimsResolved) && claimsResolved >= 0) {
+          metadata = { claimsResolved };
+        }
+      }
+      return { ...metric, metadata };
+    });
+    return { success: true, metrics: publicMetrics };
   } catch (error) {
     logger.error('Error fetching analytics metrics', error as Error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };

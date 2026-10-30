@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 32,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 18,
-    "engineeringRemaining": 759,
+    "engineeringCorrected": 19,
+    "engineeringRemaining": 758,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately."
   },
   "verificationPolicy": {
@@ -1826,12 +1826,30 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": {
-        "state": "SOURCE_PATCHED_HISTORICAL_DATA_REMEDIATION_PENDING",
-        "repair": "New calculated claims-volume metrics store only aggregate count, not claim IDs. Existing historical metadata still requires migration/redaction before full closure."
+        "state": "SOURCE_PATCHED_MIGRATION_PENDING_NATIVE_ACCEPTANCE",
+        "source": [
+          "apps/union-eyes/actions/analytics-actions.ts",
+          "apps/union-eyes/db/migrations/20261030_redact_analytics_claim_ids.sql"
+        ],
+        "tests": [
+          "apps/union-eyes/actions/__tests__/analytics-actions.test.ts"
+        ],
+        "repair": "New calculations persist only aggregate counts; member metrics reads now allowlist aggregate-only metadata for all historical and new records; idempotent PostgreSQL migration removes stored claimIds from historical claims-volume rows.",
+        "sourceState": "PATCHED_NOT_ACCEPTED",
+        "unitState": "PENDING_AT_EXACT_HEAD",
+        "nativeState": "MIGRATION_NOT_APPLIED_OR_PROVEN_AT_EXACT_HEAD",
+        "runtimeState": "PENDING_AT_EXACT_HEAD",
+        "limits": "Historical rows remain until migration executes; no runtime/independent acceptance."
       },
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/actions/analytics-actions.ts",
+        "explanation": "New calculations persist only aggregate counts; member metrics reads now allowlist aggregate-only metadata for all historical and new records; idempotent PostgreSQL migration removes stored claimIds from historical claims-volume rows.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B3-METRICS-ORG-RESOLVED-TWICE",
