@@ -40,7 +40,7 @@ describe('organization read authority uses the explicit system transaction', () 
 
   it('uses transaction-bound membership and hierarchy queries, never a bare database handle', async () => {
     const tx = systemTransaction([{ organizationId: orgA, role: 'admin' }], [{ id: orgChild }]);
-    m.withSystemContext.mockImplementation(async (callback: (tx: typeof tx) => unknown) => callback(tx));
+    m.withSystemContext.mockImplementation(async (callback: (systemTx: typeof tx) => unknown) => callback(tx));
     const { resolveOrganizationAccess, canReadOrganization, canAdministerOrganization } = await import('../read-authority');
     const access = await resolveOrganizationAccess('user-a');
     expect(m.withSystemContext).toHaveBeenCalledTimes(2);
@@ -54,7 +54,7 @@ describe('organization read authority uses the explicit system transaction', () 
 
   it('does not query descendant organizations for a non-administrator', async () => {
     const tx = systemTransaction([{ organizationId: orgA, role: 'member' }], [{ id: orgChild }]);
-    m.withSystemContext.mockImplementation(async (callback: (tx: typeof tx) => unknown) => callback(tx));
+    m.withSystemContext.mockImplementation(async (callback: (systemTx: typeof tx) => unknown) => callback(tx));
     const { resolveOrganizationAccess, canReadOrganization } = await import('../read-authority');
     const access = await resolveOrganizationAccess('user-a');
     expect(m.withSystemContext).toHaveBeenCalledTimes(1);
