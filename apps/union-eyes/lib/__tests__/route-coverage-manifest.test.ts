@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { AUTH_MANDATORY_AUDIT_SERVICES, BALLOT_SECRECY_EXEMPT_ROUTES, COMPUTE_ONLY_ROUTES, READ_ONLY_POST_ROUTES, UNATTRIBUTABLE_WRITE_ROUTES, KERNEL_AUDITED_CALLS, auditGap, kernelPending, scanRoutes } from '../../scripts/lib/route-coverage-scan'
+import { AUTH_MANDATORY_AUDIT_SERVICES, BALLOT_SECRECY_EXEMPT_ROUTES, COMPUTE_ONLY_ROUTES, READ_ONLY_POST_ROUTES, UNATTRIBUTABLE_WRITE_ROUTES, KERNEL_AUDITED_CALLS, auditGap, kernelPending, scanRoutes, summarize } from '../../scripts/lib/route-coverage-scan'
 
 /**
  * Route-coverage manifest and ratchets (UE-CONV-K-008). Every app/api route is recorded with how it authenticates,
@@ -10,7 +10,7 @@ import { AUTH_MANDATORY_AUDIT_SERVICES, BALLOT_SECRECY_EXEMPT_ROUTES, COMPUTE_ON
  */
 const ROOT = join(__dirname, '..', '..')
 const REGISTER = join(ROOT, '..', '..', 'docs', 'union-eyes', 'convergence', 'register')
-const manifest = JSON.parse(readFileSync(join(REGISTER, 'ue-route-coverage-manifest.json'), 'utf8')) as { routes: ReturnType<typeof scanRoutes> }
+const manifest = JSON.parse(readFileSync(join(REGISTER, 'ue-route-coverage-manifest.json'), 'utf8')) as { routes: ReturnType<typeof scanRoutes>; summary: ReturnType<typeof summarize> }
 const baselines = JSON.parse(readFileSync(join(REGISTER, 'ue-route-coverage-baselines.json'), 'utf8')) as { auditGap: string[]; kernelPending: string[] }
 const fresh = scanRoutes(ROOT)
 
@@ -29,6 +29,10 @@ const PUBLIC_BY_DESIGN: Record<string, string> = {
 describe('route coverage manifest (UE-CONV-K-008)', () => {
   it('is current: every route file is recorded exactly as the scanner sees it', () => {
     expect(manifest.routes).toEqual(fresh)
+  })
+
+  it('keeps the full 995-route summary in sync with the current scanner, not only route entries', () => {
+    expect(manifest.summary).toEqual(summarize(fresh))
   })
 
   it('lists no mutating route without an authentication or authorization mechanism, except the documented public flows', () => {
