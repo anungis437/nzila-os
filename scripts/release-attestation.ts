@@ -158,9 +158,22 @@ function parseSecretScanResults(): SecretScanSummary {
   return { ran: false, findings: 0, clean: true }
 }
 
+function deepCanonical(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(deepCanonical)
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.keys(value as Record<string, unknown>)
+        .sort()
+        .map(key => [key, deepCanonical((value as Record<string, unknown>)[key])]),
+    )
+  }
+  return value
+}
+
 function computeAttestationDigest(attestation: Omit<ReleaseAttestation, 'attestationDigest' | 'signature'>): string {
-  const canonical = JSON.stringify(attestation, Object.keys(attestation).sort(), 0)
-  return createHash('sha256').update(canonical).digest('hex')
+  // A top-level JSON.stringify replacer drops nested security fields. Recursive
+  // canonicalisation is mandatory before signing any release evidence.
+  return createHash('sha256').update(JSON.stringify(deepCanonical(attestation))).digest('hex')
 }
 
 /**

@@ -104,3 +104,18 @@ policy authority. Results are bound to organization, app, workflow, step,
 policy ID, and expire within five minutes. An injected test fake is not
 production authorization; deployments still require an authoritative identity
 and policy resolver. Absence of that resolver denies completion.
+
+## Production promotion integrity (additional P0 finding)
+
+The existing `deploy-production.yml` performed existence checks for SBOM and
+attestation JSON. The new verifier performs deep-canonical signature verification,
+SBOM hash and content matching, exact source SHA, immutable deployment image
+checks, mandatory scan results and seven-day freshness. The staging SBOM
+generator no longer silently substitutes `{}` after failure.
+
+**HOLD remains mandatory:** the staging generator currently obtains contract/SLO
+PASS from command-line switches, not independently read evidence, and does not
+automatically attach successful security scan reports. The production verifier
+therefore refuses release until a trusted signing key and complete real
+evidence are supplied. No fabricated scan outputs or self-claimed PASS allowed.
+Human GitHub Environment approval is a separate requirement.

@@ -93,3 +93,6 @@
 /.cursor/mcp.json              @nzila/platform @nzila/security
 
 /packages/platform-agent-workflows/src/policy-permit.ts @nzila/platform @nzila/security
+
+/scripts/release/verify-promotion-evidence.mjs @nzila/security @nzila/platform
+/scripts/release-attestation.ts @nzila/security @nzila/platform

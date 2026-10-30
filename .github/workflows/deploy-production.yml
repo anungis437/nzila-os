@@ -174,6 +174,15 @@ jobs:
           test -f staging-artifacts/release-attestation.json
           echo "Attestation verified"
 
+      - name: Verify signed staging provenance and exact artifact continuity
+        env:
+          ATTESTATION_VERIFY_PUBLIC_KEY: ${{ secrets.ATTESTATION_VERIFY_PUBLIC_KEY }}
+        run: |
+          set -euo pipefail
+          # Fail closed for missing keys, invalid/unsigned or stale evidence,
+          # source SHA drift, missing independent scans or mutable images.
+          node scripts/release/verify-promotion-evidence.mjs staging-artifacts "${GITHUB_SHA}"
+
       - name: Verify release signature
         run: |
           set -euo pipefail

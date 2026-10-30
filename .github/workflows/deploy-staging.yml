@@ -115,9 +115,16 @@ jobs:
 
       - name: Generate SBOM
         run: |
-          npx @cyclonedx/cyclonedx-npm --output-file sbom.json || echo '{}' > sbom.json
+          set -euo pipefail
+          # Never disguise an SBOM generator failure as a successful empty BOM.
+          npx @cyclonedx/cyclonedx-npm --output-file sbom.json
+          node -e "const s=require('./sbom.json'); if(s.bomFormat!=='CycloneDX'||!Array.isArray(s.components)||!s.components.length) process.exit(1)"
 
       - name: Generate build attestation
+        env:
+          # Enforced by production promotion verifier: unsigned attestations
+          # are never production evidence.
+          ATTESTATION_SIGNING_KEY: ${{ secrets.ATTESTATION_SIGNING_KEY }}
         run: |
           node --import tsx scripts/release-attestation.ts \
             --sha ${{ github.sha }} \
