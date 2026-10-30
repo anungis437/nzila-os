@@ -130,11 +130,11 @@ describe('GET /api/organizations/[id]', () => {
     expect((await GET(get(`/api/organizations/${LOCAL_B}`), params(LOCAL_B))).status).toBe(404);
   });
 
-  it('a platform administrator reads any organization', async () => {
+  it('a platform administrator without active membership cannot read a union organization', async () => {
     const { GET } = await import('../organizations/[id]/route');
     state.userId = 'platform-1';
     state.platformAdmins.add('platform-1');
-    expect((await GET(get(`/api/organizations/${LOCAL_B}`), params(LOCAL_B))).status).toBe(200);
+    expect((await GET(get(`/api/organizations/${LOCAL_B}`), params(LOCAL_B))).status).toBe(404);
   });
 });
 
@@ -172,7 +172,7 @@ describe('children, descendants, hierarchy, search, tree', () => {
     expect(await (await search.GET(get('/api/organizations/search?q=Local'))).json()).toMatchObject({ data: [] });
     state.userId = 'platform-1';
     state.platformAdmins.add('platform-1');
-    expect(await names(await search.GET(get('/api/organizations/search?q=Local')))).toEqual([LOCAL_A, LOCAL_B].sort());
+    expect(await names(await search.GET(get('/api/organizations/search?q=Local')))).toEqual([]);
   });
 
   it('a suspended member lists nothing', async () => {
@@ -220,10 +220,10 @@ describe('GET /api/organizations (list) and /api/organizations/tree', () => {
     expect(local).toMatchObject({ billing_contact_id: '44444444-4444-4444-8444-444444444444', subscription_tier: 'pro', activeClaims: 1 });
   });
 
-  it('shows the federation administrator the locals below, and a platform administrator everything', async () => {
+  it('a platform-only identity cannot list federation or local records', async () => {
     state.userId = 'platform-1';
     state.platformAdmins.add('platform-1');
-    expect(await names(await listed())).toEqual([FED, LOCAL_A, LOCAL_B].sort());
+    expect(await names(await listed())).toEqual([]);
   });
 
   it('rejects a malformed parent or status filter before any read', async () => {

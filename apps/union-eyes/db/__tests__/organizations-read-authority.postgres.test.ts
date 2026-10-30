@@ -168,11 +168,11 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
     expect(rows.find((r) => r.id === LOCAL_A)).toMatchObject({ subscription_tier: 'pro' })
   })
 
-  it('a platform administrator lists every organization', async () => {
+  it('a platform-only title does not enumerate any member organizations', async () => {
     const { GET } = await import('../../app/api/organizations/route')
     state.platformAdmins.add('platform-1')
     as('platform-1')
-    expect(await ids(await GET(get('/api/organizations')))).toEqual([FED, LOCAL_A, LOCAL_B].sort())
+    expect(await ids(await GET(get('/api/organizations')))).toEqual([])
   })
 
   it('the tree, hierarchy and search confine a member to their own organization and show the federation administrator the subtree', async () => {
