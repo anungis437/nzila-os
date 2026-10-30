@@ -19,7 +19,7 @@
  */
 import { spawn, spawnSync } from 'node:child_process'
 import { randomBytes } from 'node:crypto'
-import { existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, openSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { hasOwnedContainerLabels, UE_DISPOSABLE_MISSION } from './lib/ue-disposable-container-ownership.mjs'
 import { fileURLToPath } from 'node:url'
@@ -258,10 +258,26 @@ function seed() {
 /** Files a case, stops the application, starts it again, and proves the case, its audit proof and its boundaries survived. */
 async function restartCheck() {
   // File, route, escalate and prepare everything the restart check then looks for, so it does not depend on an earlier run.
+  const caseStateFile = join(STATE, 'journey-a-state.json')
+  // Never accept a stale hand-off from an earlier QA run as evidence of this run's filing.
+  if (existsSync(caseStateFile)) unlinkSync(caseStateFile)
   const desktop = ['playwright', 'test', '--config', 'playwright.runtime.config.ts', '--project=desktop']
   run('npx', [...desktop, 'e2e/runtime/01', '-g', 'journey A'], {
-    cwd: APP, env: { ...runtimeEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-restart-pre-case.json') },
+    cwd: APP,
+    env: {
+      ...runtimeEnv(),
+      // The filing test writes the restart hand-off only when artifacts are enabled.
+      // This is also an isolated Playwright output directory, never a production setting.
+      UE_RUNTIME_ARTIFACTS: join(STATE, 'playwright-restart-artifacts'),
+      UE_RUNTIME_REPORT: join(STATE, 'playwright-restart-pre-case.json'),
+    },
   })
+  if (!existsSync(caseStateFile)) throw new Error('Restart acceptance: fresh journey A hand-off was not written')
+  const caseState = JSON.parse(readFileSync(caseStateFile, 'utf8'))
+  if (typeof caseState.caseId !== 'string' || !/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(caseState.caseId) ||
+      typeof caseState.claimNumber !== 'string' || !caseState.claimNumber.trim()) {
+    throw new Error('Restart acceptance: fresh journey A hand-off lacks a valid case identifier or claim number')
+  }
   run('npx', [...desktop, 'e2e/runtime/03', 'e2e/runtime/05'], {
     cwd: APP, env: { ...runtimeEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-restart-pre-mandates.json') },
   })
