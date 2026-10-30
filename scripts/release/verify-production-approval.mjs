@@ -4,7 +4,7 @@
  * alone cannot prove that review protection is configured or actually used.
  * Always run with authenticated GH API responses, never agent-supplied JSON.
  */
-import { readFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -53,13 +53,18 @@ export function verifyProductionApproval({environment,run,approvals,expectedRunI
 
 if (process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url)) {
   try {
-    const [dir,runId,sha]=process.argv.slice(2)
+    const [dir,runId,sha,receiptPath]=process.argv.slice(2)
     if (!dir || !runId || !sha) deny('missing input evidence')
     const load=n=>JSON.parse(readFileSync(join(dir,n),'utf8'))
     const proof=verifyProductionApproval({
       environment:load('environment.json'),run:load('run.json'),
       approvals:load('approvals.json'),expectedRunId:runId,expectedSha:sha,
     })
+    if (!receiptPath) deny('durable approval receipt destination required')
+    // Only a verified, minimally scoped result is retained. The raw GitHub
+    // environment/review API payloads are not copied into deployment artifacts.
+    writeFileSync(receiptPath, JSON.stringify({schemaVersion:1,...proof},null,2)+'\n',
+      {flag:'wx',mode:0o600})
     console.log('Verified independent production approval: '+JSON.stringify(proof))
   } catch(error) {
     console.error(error.message)
