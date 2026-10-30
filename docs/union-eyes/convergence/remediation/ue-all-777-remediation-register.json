@@ -88,7 +88,10 @@
     "notInPriorityLedger": 731,
     "withCurrentRunSourceOrRegressionWork": 23,
     "closed": 0,
-    "overallGO": false
+    "overallGO": false,
+    "engineeringCorrected": 2,
+    "engineeringRemaining": 775,
+    "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately."
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -362,7 +365,13 @@
       },
       "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/lib/api/crud-governance.ts",
+        "explanation": "analytics_metrics is READ_ONLY; generic steward POST/PATCH/DELETE cannot write arbitrary computed metrics.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
@@ -4601,7 +4610,13 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/lib/api/crud-factory.ts",
+        "explanation": "Org-scoped generic routes without organizationId or a declared parentScope now fail during route construction instead of silently omitting tenant filtering.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-CMP-DEBUG-ROUTE-REACHABLE-IN-PRODUCTION",
