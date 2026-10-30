@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 136,
+ "corrected": 139,
  "partial": 18,
- "outstanding": 641,
- "accountedFor": 641,
+ "outstanding": 638,
+ "accountedFor": 638,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -131,9 +131,9 @@
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 90,
+   "defects": 89,
    "severity": {
-    "HIGH": 13,
+    "HIGH": 12,
     "MEDIUM": 65,
     "LOW": 12
    },
@@ -143,7 +143,7 @@
     "0B.1": 4,
     "0B.2": 3,
     "0B.3": 3,
-    "0B.4": 9,
+    "0B.4": 8,
     "0B.5": 3,
     "0B.6": 9,
     "0B.7": 8,
@@ -182,9 +182,9 @@
   {
    "family": "F08-PII-DISCLOSURE-AND-PROJECTION",
    "purpose": "Personal-data disclosure: project, redact or restrict returned fields",
-   "defects": 47,
+   "defects": 45,
    "severity": {
-    "HIGH": 6,
+    "HIGH": 4,
     "MEDIUM": 28,
     "LOW": 13
    },
@@ -193,7 +193,7 @@
    "tranches": {
     "0B.1": 1,
     "0B.3": 1,
-    "0B.4": 7,
+    "0B.4": 5,
     "0B.6": 3,
     "0B.7": 6,
     "0B.8": 5,
@@ -1465,10 +1465,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B4-CALENDAR-CALLBACK-GET-WRITES-TOKENS-NO-AUDIT",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B4-CALENDAR-SYNC-AUDIT-NOT-ATOMIC",
     "severity": "MEDIUM"
    },
@@ -2101,14 +2097,6 @@
    {
     "id": "DEF-0B4-CALENDAR-TOKEN-PLAINTEXT-FALLBACK",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B4-CALENDAR-CONNECTION-ROW-RETURNS-TOKENS",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B4-CALENDAR-CONNECTION-CRUD-WRITES-AROUND-OAUTH",
-    "severity": "HIGH"
    },
    {
     "id": "DEF-0B4-CALENDAR-EVENTS-PERSONAL-CALENDAR-LEAK",

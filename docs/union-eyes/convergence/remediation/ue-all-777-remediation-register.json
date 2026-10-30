@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 41,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 128,
-    "engineeringRemaining": 649,
+    "engineeringCorrected": 139,
+    "engineeringRemaining": 638,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 17
+    "engineeringPartial": 18
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -9194,8 +9194,8 @@
       "engineeringCorrection": {
         "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B10-F02-ML-AND-COGNITION-HONESTY",
-        "path": "apps/union-eyes/app/api/ml/predictions/churn-risk/route.ts; apps/union-eyes/app/api/__tests__/ml-churn-risk.route.test.ts",
-        "explanation": "The churn route scored members with a randomly initialised network pre-trained on generated examples and stored the score. GET and POST now answer 501 behind the officer floor. The extensive route test, which exercised that scoring with mocks, was replaced by a test of the 501 and of the absence of the generated-example model.",
+        "path": "apps/union-eyes/app/api/ml/predictions/churn-risk/route.ts; apps/union-eyes/app/api/__tests__/ml-churn-risk.route.test.ts; apps/union-eyes/db/__tests__/rls-storage-authority-round48-derived-analytics-ai-telemetry.test.ts",
+        "explanation": "The churn route scored members with a randomly initialised network pre-trained on generated examples and stored the score. GET and POST now answer 501 behind the officer floor. The extensive route test, which exercised that scoring with mocks, was replaced by a test of the 501 and of the absence of the generated-example model. Two round-48 ratchet tests that pinned the former handler's organization-input properties (body schema without organizationId, organization-context check) were rewritten to assert that the route now accepts no organization input at all and touches no stored prediction.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -10962,9 +10962,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B11-F02-ORG-REPORTS-SOCIAL-SATISFACTION",
+        "path": "apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "explanation": "The children, descendants, ancestors, members and path routes already validate the id (400) and answer 404 for an organization the caller cannot read; the source change was upstream's and is covered by an existing real-SQL test.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ORG-PATH-LEGACY-BRANCH-READS-ORGANIZATIONS-ON-BARE-DB-WITHOUT-CONTEXT-OR-MEMBERSHIP-CHECK",
@@ -11048,9 +11055,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B11-F02-ORG-REPORTS-SOCIAL-SATISFACTION",
+        "path": "apps/union-eyes/app/api/organizations/[id]/analytics/route.ts; apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts; apps/union-eyes/app/api/__tests__/organizations-id-analytics.route.test.ts",
+        "explanation": "The member, grievance and growth figures now run under the organization named in the path (its own identity for a direct member, the system role with the exact organization predicate for a platform or parent administrator already authorized), not the caller's own organization, so a federation administrator no longer reads zeros for a local. Average resolution days and the growth rate are null, not 0, when they are undefined. A real-SQL test proves the figures for the officer and for the administrator above. The unit test mocks were adapted to the new call shape (child count first, one members query).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ORG-ANALYTICS-ZERO-AND-HUNDRED-PERCENT-DEFAULTS-MEMBER-FLOOR-AND-NO-GROUP-SIZE-SUPPRESSION",
@@ -12255,9 +12269,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B11-F02-ORG-REPORTS-SOCIAL-SATISFACTION",
+        "path": "apps/union-eyes/app/api/organizations/route.ts; apps/union-eyes/app/api/organizations/__tests__/route.post-record-fields.test.ts",
+        "explanation": "POST /api/organizations stores description, province_territory, charter_number and affiliation_date; a value of the wrong shape or an impossible date is refused with 400 rather than dropped under a 201.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-OPL-04",
@@ -12366,9 +12387,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B11-F02-ORG-REPORTS-SOCIAL-SATISFACTION",
+        "path": "apps/union-eyes/app/api/organizations/tree/route.ts",
+        "explanation": "The tree read is bounded to the organizations the caller may read, ordered and limited (upstream), and now runs as the system role like the hierarchy route instead of the ambient connection role.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-OPL-09",
@@ -13498,9 +13526,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B11-F02-ORG-REPORTS-SOCIAL-SATISFACTION",
+        "path": "apps/union-eyes/app/api/reports/execute/route.ts; apps/union-eyes/app/api/__tests__/reports-execute.route.test.ts",
+        "explanation": "The route kept its own table allowlist, different from the registry the builder and executor use. It now validates against the executor's registry only, so one list governs data sources, fields, filters, joins, having and limits (the executor already resolved and bounded those). The route test mock now uses the real registry.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-RPT-EXECUTE-OPERATORS-THE-ROUTE-ACCEPTS-ARE-SKIPPED-BY-THE-EXECUTOR-SO-THE-FILTER-IS-DROPPED-AND-ALL-ROWS-RETURN",
@@ -13532,9 +13567,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B11-F02-ORG-REPORTS-SOCIAL-SATISFACTION",
+        "path": "apps/union-eyes/lib/report-executor.ts; apps/union-eyes/app/api/reports/execute/route.ts; apps/union-eyes/lib/middleware/api-security.ts; apps/union-eyes/lib/__tests__/report-executor.test.ts; apps/union-eyes/app/api/__tests__/reports-execute.route.test.ts",
+        "explanation": "The executor reports a refused configuration (kind invalid) separately from a failed query (kind failed). The route answers 400 with the reason or 500, audits a validation failure or a failure, and never records an unsuccessful run as success or as an authentication failure. A database error message is no longer returned. Two executor tests that asserted the database message was returned were changed to assert it is not.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-RPT-EXECUTE-RETURNS-MEMBER-EMAIL-AND-CLAIM-ROWS-AT-AN-OFFICER-ROLE-TITLE-WITH-NO-FIELD-AUTHORITY-AND-NO-DURABLE-RECORD-OF-WHAT-WAS-RETURNED",
@@ -13566,9 +13608,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B11-F02-ORG-REPORTS-SOCIAL-SATISFACTION",
+        "path": "apps/union-eyes/lib/report-executor.ts; apps/union-eyes/lib/__tests__/report-data-sources-schema.test.ts",
+        "explanation": "The registry named columns the tables do not have (claims.outcome, members first_name/last_name, deadlines current_deadline) and a joinable table that is not a source (claim_notes). They now map to the physical columns (resolution_outcome, due_date), the member name is the single field name, and a new ratchet fails if a registry column is not a physical column of its table. A saved report that named first_name or last_name is refused rather than run against a missing column.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-RPT-DATA-SOURCE-REGISTRY-IS-SERVED-TO-ANY-SIGNED-IN-USER-WHILE-EXECUTION-NEEDS-AN-OFFICER",
@@ -13695,9 +13744,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B11-F02-ORG-REPORTS-SOCIAL-SATISFACTION",
+        "path": "apps/union-eyes/lib/signature/providers.ts; apps/union-eyes/lib/signature/signature-service.ts; apps/union-eyes/app/api/signatures/documents/route.ts; apps/union-eyes/lib/signature/__tests__/providers.test.ts",
+        "explanation": "The built-in provider generated envelope ids and sign URLs, stored and sent nothing, and reported every envelope as sent. It is removed: the default provider is a configured DocuSign or HelloSign account or a 501, and the document route refuses any other provider name. The tests of the stub were removed and replaced by tests that there is no built-in provider and no stub fallback.",
+        "remaining": "Documents already stored with provider \"internal\" keep that value; their status sync reports provider_unavailable and their void is attempted against no provider.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-SOC-SIGNING-IGNORES-THE-STORED-EXPIRY-SIGNING-ORDER-AND-AUTHENTICATION-REQUIREMENT",
@@ -14018,9 +14075,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B11-F02-ORG-REPORTS-SOCIAL-SATISFACTION",
+        "path": "apps/union-eyes/lib/social-media/social-media-service.ts; apps/union-eyes/app/api/social-media/analytics/route.ts; apps/union-eyes/lib/social-media/__tests__/social-media-service.test.ts; apps/union-eyes/app/api/__tests__/social-media-analytics.route.test.ts",
+        "explanation": "fetchAnalytics fetched platform responses it never transformed and returned an empty list as a success. It now answers 501 when nothing was collected, and the analytics read says (data_collected, message) whether analytics were ever collected instead of letting an empty range read as no activity.",
+        "remaining": "No collector transforms the Meta, Instagram, Twitter or LinkedIn responses into the analytics table, and nothing calls fetchAnalytics, so no figure exists yet.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-SOC-CAMPAIGN-ANALYTICS-PLATFORM-AND-GOAL-FIGURES-READ-FIELDS-THE-QUERY-DOES-NOT-SELECT-AND-A-HARD-CODED-UNDEFINED",
@@ -14203,9 +14268,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B11-F02-ORG-REPORTS-SOCIAL-SATISFACTION",
+        "path": "apps/union-eyes/app/api/__tests__/stewards-directory.route.test.ts",
+        "explanation": "The directory route is a member-safe projection for members, full rows (audited) for officers, and answers 405 to writes; upstream's change, covered by an existing test.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-IDS-STEWARD-ROUTES-ARE-CONFIGURED-AT-THE-STEWARD-WRITE-FLOOR-AND-REFUSED-ONLY-BY-THE-GOVERNANCE-LIST",
@@ -14271,9 +14343,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B11-F02-ORG-REPORTS-SOCIAL-SATISFACTION",
+        "path": "apps/union-eyes/app/api/satisfaction/lro/[lroId]/route.ts; apps/union-eyes/app/api/__tests__/satisfaction-lro.route.test.ts",
+        "explanation": "A representative with no completed surveys, or an unknown id, is a 404 rather than 200 with zero averages; a caller with no organization is refused rather than reading across organizations.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-IDS-SATISFACTION-CREATE-DOES-NOT-CHECK-CLAIM-STATE-AND-ACCEPTS-ANY-REPRESENTATIVE-ID-ON-AN-UNASSIGNED-CLAIM",
@@ -14288,9 +14367,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B11-F02-ORG-REPORTS-SOCIAL-SATISFACTION",
+        "path": "apps/union-eyes/app/api/satisfaction/route.ts; apps/union-eyes/app/api/__tests__/write-routes-atomic-audit.route.test.ts",
+        "explanation": "A survey can only be created for a resolved or closed claim (409 otherwise), and a claim with no assigned representative is refused (400) instead of accepting any representative id. The existing test fixtures were given a claim status and extended with the new refusals.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-IDS-SATISFACTION-PENDING-LIST-HAS-NO-ORGANIZATION-PREDICATE",
@@ -14438,9 +14524,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B11-F02-ORG-REPORTS-SOCIAL-SATISFACTION",
+        "path": "apps/union-eyes/app/api/settings/organization/route.ts; apps/union-eyes/app/api/__tests__/settings-organization.route.test.ts",
+        "explanation": "name (1-200), shortName (at most 50) and provinceTerritory (at most 100) are validated before anything is read; a missing body or organization is a 400, not a server error. The settings merge reads the row under FOR UPDATE and writes in the same transaction, and a missing row is a 404 with no audit.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-IDS-SETTINGS-TWILIO-NUMBER-KEY-ATTRIBUTES-INBOUND-SMS-WITH-NO-UNIQUENESS",

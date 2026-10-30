@@ -52,7 +52,7 @@ describe('GET /api/calendar-sync/google/auth', () => {
     })
 
     const req = new NextRequest('https://example.com/api/calendar-sync/google/auth')
-    const res = await GET(req, { userId: 'user-1' })
+    const res = await GET(req, { userId: 'user-1', organizationId: 'org-1' })
     const body = await res.json()
 
     expect(res.status).toBe(500)
