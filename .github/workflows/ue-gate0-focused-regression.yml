@@ -58,4 +58,6 @@ jobs:
             apps/union-eyes/app/api/__tests__/exit-interviews-governance.route.test.ts \
             apps/union-eyes/app/api/__tests__/exit-interviews-read-gates.pglite.test.ts \
             apps/union-eyes/lib/knowledge-transfer/search/__tests__/hybrid-search.test.ts \
-            apps/union-eyes/app/api/__tests__/exit-interviews-summary-consent-gate.test.ts
+            apps/union-eyes/app/api/__tests__/exit-interviews-summary-consent-gate.test.ts \
+            apps/union-eyes/lib/knowledge-transfer/indexing/__tests__/semantic-indexer.test.ts \
+            apps/union-eyes/app/api/__tests__/exit-interviews-publish.route.test.ts
