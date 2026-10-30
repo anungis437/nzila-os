@@ -218,17 +218,16 @@ describe('organizations/[id] route', () => {
     expect(m.audit).not.toHaveBeenCalled();
   });
 
-  it('DELETE archives organization', async () => {
+  it('DELETE refuses direct archival even for a platform administrator until dual approval is implemented', async () => {
     const { DELETE } = await loadRoute();
-    m.updateQueue.push([{ ...orgRow, status: 'archived' }]);
-
-    const response = await DELETE(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111', { method: 'DELETE' }), {
-      params: Promise.resolve({ id: '11111111-1111-4111-8111-111111111111' }),
+    const response = await DELETE(new NextRequest('http://localhost/api/organizations/' + orgRow.id, { method: 'DELETE' }), {
+      params: Promise.resolve({ id: orgRow.id }),
     });
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(501);
     expect(m.requireSystemAdmin).toHaveBeenCalledTimes(1);
-    const json = await response.json();
-    expect(json.data.status).toBe('archived');
+    expect((await response.json()).error).toMatch(/institutional lifecycle workflow/i);
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.audit).not.toHaveBeenCalled();
   });
 });
