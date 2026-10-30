@@ -1,3 +1,5 @@
+import { verifyCalendarOAuthState, clearCalendarOAuthStateCookie } from '@/lib/external-calendar-sync/oauth-state'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 /**
  * Google Calendar OAuth Callback
  *
@@ -10,7 +12,6 @@ import { and, eq } from 'drizzle-orm'
 import { BaseAuthContext, withRoleAuth } from '@/lib/api-auth-guard'
 import { exchangeCodeForTokens } from '@/lib/external-calendar-sync/google-calendar-service'
 import { encryptCalendarToken } from '@/lib/external-calendar-sync/token-crypto'
-import { db } from '@/db/db'
 import { externalCalendarConnections } from '@/db/schema/calendar-schema'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses'
@@ -35,14 +36,14 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
     if (!code) {
       return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing OAuth authorization code')
     }
-    if (state && state !== userId) {
-      return standardErrorResponse(ErrorCode.FORBIDDEN, 'OAuth state mismatch')
+    if (!verifyCalendarOAuthState(request, 'google', state, userId, organizationId)) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Missing, expired or invalid OAuth state')
     }
 
     const tokens = await exchangeCodeForTokens(code)
 
-    await withRLSContext(async () => {
-      const [existing] = await db
+    await withRLSContext({ organizationId, userId }, async (tx) => {
+      const [existing] = await tx
         .select({ id: externalCalendarConnections.id })
         .from(externalCalendarConnections)
         .where(
@@ -76,12 +77,13 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
         updatedAt: now,
       }
 
+      let connectionId = existing?.id
       if (existing) {
-        await db
+        await tx
           .update(externalCalendarConnections)
           .set({
             ...connectionPayload,
-            refreshToken: tokens.refreshToken || undefined,
+            refreshToken: tokens.refreshToken ? encryptCalendarToken(tokens.refreshToken) : undefined,
           })
           .where(
             and(
@@ -91,15 +93,28 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
             ),
           )
       } else {
-        await db.insert(externalCalendarConnections).values({
+        const [created] = await tx.insert(externalCalendarConnections).values({
           ...connectionPayload,
           createdAt: now,
-        })
+        }).returning({ id: externalCalendarConnections.id })
+        if (!created) throw new Error('Calendar connection creation failed')
+        connectionId = created.id
       }
+      if (!connectionId) throw new Error('Calendar connection id unavailable')
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'calendar.connection.oauth.connect',
+        resourceType: 'external_calendar_connections',
+        resourceId: connectionId,
+        details: { provider: 'google', updatedExisting: Boolean(existing) },
+      })
     })
 
     const redirectUrl = new URL('/calendar?sync=connected&provider=google', request.nextUrl.origin)
-    return NextResponse.redirect(redirectUrl)
+    const response = NextResponse.redirect(redirectUrl)
+    clearCalendarOAuthStateCookie(response, 'google')
+    return response
   } catch (error) {
     if (error instanceof Error && error.message.includes('did not return refresh token')) {
       return standardErrorResponse(
