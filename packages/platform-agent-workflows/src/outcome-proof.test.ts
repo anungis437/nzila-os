@@ -151,6 +151,10 @@ describe('platform-agent-workflows P0 outcome controls', () => {
     expect(() => executeStep(alteredOutput, alteredOutput.steps[1].id, {}))
       .toThrow('trusted re-verification')
     expect(executeStep(completed, completed.steps[1].id, {}).status).toBe('blocked')
+    // Even a same-object downgrade cannot silently erase authenticated history.
+    completed.steps[0].status = 'pending'
+    expect(() => executeStep(completed, completed.steps[1].id, {}))
+      .toThrow('trusted re-verification')
   })
 
   it('rejects stale and future independent verifier timestamps and expired proofs', async () => {

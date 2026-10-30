@@ -56,9 +56,18 @@ interface CompletedStepReceipt {
   readonly outputSnapshot: string
 }
 const verifiedHistory = new WeakMap<AgentWorkflow, Map<string, CompletedStepReceipt>>()
+const verifiedShape = new WeakMap<AgentWorkflow, string>()
+const shapeOf = (workflow: AgentWorkflow): string => JSON.stringify({
+  id: workflow.id, app: workflow.app, orgId: workflow.orgId,
+  steps: workflow.steps.map(step => ({ id: step.id, name: step.name })),
+})
 
 export function hasAuthenticatedCompletedHistory(workflow: AgentWorkflow): boolean {
   const history = verifiedHistory.get(workflow)
+  const shape = verifiedShape.get(workflow)
+  if (shape !== undefined && shape !== shapeOf(workflow)) return false
+  if (history && [...history.keys()].some(id =>
+    workflow.steps.find(step => step.id === id)?.status !== 'completed')) return false
   return workflow.steps.every(step => {
     if (step.status !== 'completed') return true
     if (step.policyCheck?.result !== 'allow' || !step.outcomeEvidence) return false
@@ -97,6 +106,7 @@ export function carryAuthenticatedHistory(
     })
   }
   verifiedHistory.set(updated, next)
+  verifiedShape.set(updated, shapeOf(updated))
 }
 
 function requireScope(value: string, field: string): void {
