@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 42,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 140,
-    "engineeringRemaining": 637,
+    "engineeringCorrected": 144,
+    "engineeringRemaining": 633,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 19
   },
@@ -312,6 +312,10 @@
     {
       "sha": "20979bdf7d242049382b12b82bf6588078564e0a",
       "description": "BillingCycleService now binds its transaction to the target organization and actor, with regression asserting RLS context. Exact-HEAD CI pending; separate billing atomicity/idempotency concerns remain open."
+    },
+    {
+      "sha": "a78ad4ea2c878b8ae2878b717438b0db6a70bd28",
+      "description": "Source-level reconciliation of four frozen financial, CLC and audit disclosure defects after inspecting actual handlers and adding regression contracts. Separate current-run changes make organization authority and ancestor reads use the explicit system transaction, protect the retired tenant alias, and correct stale contracts. No exact-HEAD Vitest, PG15/16, browser or institutional GO claimed."
     }
   ],
   "records": [
@@ -470,7 +474,16 @@
       },
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "GATE0-RECONCILE-FINANCE-AUDIT-CLC",
+        "path": "apps/union-eyes/app/api/admin/billing-cycles/route.ts",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/admin-billing-cycles.route.test.ts",
+        "explanation": "The billing-cycle history GET refuses the nonexistent history store with HTTP 501 and NOT_IMPLEMENTED instead of returning an invented empty successful history.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "sourceCommit": "a78ad4ea2c878b8ae2878b717438b0db6a70bd28"
+      }
     },
     {
       "defectId": "DEF-0B1-BILLING-TARGET-ORG-UNBOUND",
@@ -594,7 +607,16 @@
       },
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "GATE0-RECONCILE-FINANCE-AUDIT-CLC",
+        "path": "apps/union-eyes/services/clc/compliance-reports.ts; apps/union-eyes/app/api/admin/clc/analytics/annual-report/route.ts; apps/union-eyes/app/api/admin/clc/analytics/trends/route.ts",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/admin-clc-analytics-annual-report.route.test.ts; apps/union-eyes/app/api/__tests__/admin-clc-analytics-trends.route.test.ts",
+        "explanation": "Both annual and multi-year CLC remittance report paths require the authenticated organization context and predicate remittances on fromOrganizationId; the original unrestricted cross-tenant reads in these paths are removed. StatCan and other report concerns remain separately open.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "sourceCommit": "a78ad4ea2c878b8ae2878b717438b0db6a70bd28"
+      }
     },
     {
       "defectId": "DEF-0B1-CLC-PUBLIC-CACHE-CONTROL",
@@ -643,7 +665,16 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "GATE0-RECONCILE-FINANCE-AUDIT-CLC",
+        "path": "apps/union-eyes/app/api/compliance/audit-logs/route.ts",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/financial-invoices-audit-read-boundary.contract.test.ts",
+        "explanation": "Compliance audit-log GET is administrator-only, tenant-scoped and records the read through persistAtomicAudit. A member-role floor no longer grants access to user and resource audit records.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "sourceCommit": "a78ad4ea2c878b8ae2878b717438b0db6a70bd28"
+      }
     },
     {
       "defectId": "DEF-0B1-AI-USAGE-LEGACY-CROSS-TENANT",
@@ -1507,7 +1538,16 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "GATE0-RECONCILE-FINANCE-AUDIT-CLC",
+        "path": "apps/union-eyes/app/api/billing/invoices/route.ts",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/financial-invoices-audit-read-boundary.contract.test.ts",
+        "explanation": "External invoice GET requires finance-authorized roles, an active finance:view mandate, RLS organization context and rowsVisibleToGrant. Generic POST is refused by READ_ONLY external_invoices governance. Customer names and balances are no longer member-floor reads.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "sourceCommit": "a78ad4ea2c878b8ae2878b717438b0db6a70bd28"
+      }
     },
     {
       "defectId": "DEF-0B3-EXTERNAL-INVOICES-WRITE-ADVERTISED",
