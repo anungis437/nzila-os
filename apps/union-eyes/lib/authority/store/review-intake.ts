@@ -28,6 +28,9 @@ export { REVIEW_INTAKE_TYPES, type ReviewIntakeType }
 
 const NOTIFICATION = { notificationDelivered: false, notificationPolicy: 'not_adopted' } as const
 
+/** Reviews one member may open in a day. The table is append-only, so intake is bounded where the rows are written. */
+export const REVIEW_INTAKE_DAILY_LIMIT = 10
+
 export interface OwnReview {
   id: string
   reviewType: string
@@ -86,11 +89,20 @@ function normaliseAdverse(actorUserId: string, adverseUserIds: readonly string[]
   return ids
 }
 
+/** An adverse party names a current member of this organization; a complainant cannot exclude an invented or foreign identity. */
+async function requireAdverseMembers(exec: SqlExecutor, deps: EnforcementDeps, organizationId: string, adverseUserIds: readonly string[]): Promise<void> {
+  if (adverseUserIds.length === 0) return
+  const rows = (await deps.memberships(exec, organizationId, [...adverseUserIds])).filter((row) => row.organizationId === organizationId && row.status === 'active')
+  const members = new Set(rows.map((row) => row.userId))
+  // One answer for every failure, so intake does not confirm which identities are members.
+  if (!adverseUserIds.every((id) => members.has(id))) throw new AuthorityStoreError('INVALID_CONTEXT', 'ADVERSE_NOT_A_MEMBER: each person named must be a current member of this organization')
+}
+
 export async function openMemberReview(
   exec: SqlExecutor,
   deps: EnforcementDeps,
   input: { organizationId: string; actorUserId: string; reviewType: string; adverseUserIds?: readonly string[] },
-): Promise<{ id: string; reviewType: ReviewIntakeType; status: 'open'; notificationDelivered: false; notificationPolicy: 'not_adopted' }> {
+): Promise<{ id: string; reviewType: ReviewIntakeType; status: 'open'; created: boolean; notificationDelivered: false; notificationPolicy: 'not_adopted' }> {
   requireUuids(input.organizationId)
   requirePrincipals(input.actorUserId)
   if (!REVIEW_INTAKE_TYPES.includes(input.reviewType as ReviewIntakeType)) {
@@ -100,6 +112,23 @@ export async function openMemberReview(
   const adverseUserIds = normaliseAdverse(input.actorUserId, input.adverseUserIds)
   await bindSessionActor(exec, input.actorUserId, 'review opener')
   await requireActiveMember(exec, deps, input.organizationId, input.actorUserId)
+  await requireAdverseMembers(exec, deps, input.organizationId, adverseUserIds)
+  // Serialise one member's intake so a retry or a burst cannot slip past the duplicate and daily checks below.
+  await exec.query('SELECT pg_advisory_xact_lock(hashtext($1))', [`review-open:${input.organizationId}:${input.actorUserId}`])
+  const sortedAdverse = [...adverseUserIds].sort()
+  const existing = (
+    await exec.query<Row>(
+      `SELECT id::text AS id FROM ue_authority_reviews
+        WHERE organization_id = $1::uuid AND opened_by = $2 AND review_type = $3 AND status = 'open'
+          AND COALESCE((SELECT array_agg(a::text ORDER BY a::text) FROM unnest(adverse_user_ids) a), ARRAY[]::text[]) = $4::text[]
+        ORDER BY created_at LIMIT 1`,
+      [input.organizationId, input.actorUserId, reviewType, sortedAdverse],
+    )
+  ).rows[0]
+  // The same member asking again for the same open review gets that review back rather than another permanent row.
+  if (existing && isUuid(existing.id)) return { id: String(existing.id), reviewType, status: 'open', created: false, ...NOTIFICATION }
+  const recent = Number((await exec.query<Row>(`SELECT count(*)::int AS n FROM ue_authority_reviews WHERE organization_id = $1::uuid AND opened_by = $2 AND created_at > now() - interval '24 hours'`, [input.organizationId, input.actorUserId])).rows[0]?.n ?? 0)
+  if (recent >= REVIEW_INTAKE_DAILY_LIMIT) throw new AuthorityStoreError('PRECONDITION', 'REVIEW_INTAKE_LIMIT: too many reviews opened today')
   const id = await registerReview(exec, deps, {
     organizationId: input.organizationId,
     openedBy: input.actorUserId,
@@ -108,7 +137,7 @@ export async function openMemberReview(
     adverseUserIds,
     classification: 'standard',
   })
-  return { id, reviewType, status: 'open', ...NOTIFICATION }
+  return { id, reviewType, status: 'open', created: true, ...NOTIFICATION }
 }
 
 export async function listMemberReviewIntake(

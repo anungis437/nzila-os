@@ -45,8 +45,8 @@ const OPERATIONAL = [
   'course_registrations', 'course_sessions', 'donation_campaigns', 'employers', 'hazard_reports',
   'in_app_notifications', 'insight_recommendations', 'joint_hs_committees', 'kpi_configurations', 'meeting_rooms', 'member_breaks',
   'member_certifications', 'member_segments', 'message_templates', 'ml_predictions', 'negotiations', 'newsletter_distribution_lists',
-  'notifications', 'organizer_tasks', 'organizing_campaigns', 'pay_equity_exercises', 'pilot_applications', 'ppe_equipment',
-  'preventive_withdrawals', 'push_devices', 'push_notifications', 'reports', 'right_of_refusal_events', 'safety_inspections',
+  'organizer_tasks', 'organizing_campaigns', 'pay_equity_exercises', 'pilot_applications', 'ppe_equipment',
+  'preventive_withdrawals', 'push_devices', 'reports', 'right_of_refusal_events', 'safety_inspections',
   'sms_campaigns', 'sms_conversations', 'sms_messages', 'survey_responses', 'surveys', 'testimonials', 'training_courses',
   'training_programs', 'trend_analyses', 'user_notification_preferences', 'wcb_employer_assessments', 'workplace_incidents', 'worksites',
 ] as const

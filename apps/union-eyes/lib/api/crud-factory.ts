@@ -71,6 +71,16 @@ export interface CrudOptions {
    * to build the route rather than serve every tenant's rows.
    */
   unscopedByDesign?: string;
+  /**
+   * The body fields a client may set on create and update. Any other field is refused with 400 rather than copied into the
+   * row, so status, counters, approval flags and similar server-owned columns cannot be written by mass assignment.
+   * The primary key, organization and creator are always server-owned and ignored if sent.
+   */
+  writableFields?: string[];
+  /** Columns removed from every row the route returns (credentials, internal security flags). */
+  omitFromResponse?: string[];
+  /** With an ownerColumn: the owner may delete their own row at the write floor (the row scope already limits it to theirs). */
+  ownerMayDelete?: boolean;
   /** Column name to auto-filter by authenticated userId (e.g. 'memberId'). Restricts reads to the current user's own rows. */
   ownerColumn?: string;
   /** Whether this is an item route ([id]/route.ts) vs collection */
@@ -410,6 +420,20 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
     if (ownerCol && !userId) throw ApiError.forbidden();
   }
 
+  const omitted = new Set(opts.omitFromResponse ?? []);
+  /** Removes the columns this route never returns (credentials, internal flags) from a row. */
+  function shape<T extends Record<string, unknown> | undefined>(row: T): T {
+    if (!row || omitted.size === 0) return row;
+    return Object.fromEntries(Object.entries(row).filter(([key]) => !omitted.has(key))) as T;
+  }
+
+  /** Refuses any body field outside the route's allow-list. Factory-managed fields are already refused by assertGenericWritePayload. */
+  function assertWritable(fields: Record<string, unknown>): void {
+    if (!opts.writableFields) return;
+    const unexpected = Object.keys(fields).filter((key) => !opts.writableFields!.includes(key));
+    if (unexpected.length > 0) throw ApiError.badRequest(`Fields not allowed on this resource: ${unexpected.join(', ')}`);
+  }
+
   /** Limits a query to rows whose parent belongs to the caller's organization. */
   function parentCondition(organizationId: string | null | undefined): SQL | undefined {
     if (!parentColumn || !parentKeyColumn || !parentOrgColumn) return undefined;
@@ -516,7 +540,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         const total = totalResult[0]?.total ?? 0;
 
         return {
-          data: rows,
+          data: rows.map((row) => shape(row as Record<string, unknown>)),
           pagination: {
             page,
             limit,
@@ -545,6 +569,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           ownerColumn: opts.ownerColumn,
           blockedFields: blockedPatchFields,
         });
+        assertWritable(values);
 
         if (orgScoped && orgCol && organizationId) {
           values.organizationId = organizationId;
@@ -595,7 +620,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           }
           return (await tx.insert(table).values(finalValues).returning())[0] as Record<string, unknown> | undefined;
         });
-        return { data: row };
+        return { data: shape(row) };
       },
     );
 
@@ -635,7 +660,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
 
         const [row] = await db.select().from(table).where(and(...conditions));
         if (!row) throw ApiError.notFound(`${resourceName} not found`);
-        return { data: row };
+        return { data: shape(row) };
       },
     );
 
@@ -669,6 +694,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           blockedFields: protectedFields,
         });
         let updates = stripBlockedPatchFields(checkedUpdates, { pk: resolvedPk, orgScoped, blockedPatchFields: protectedFields });
+        assertWritable(updates);
 
         // Fail closed BEFORE opening a transaction or running any hook: a
         // merge column can only ever be safely converted into a JSONB
@@ -746,7 +772,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           }));
 
           if (!row) throw ApiError.notFound(`${resourceName} not found`);
-          return { data: row };
+          return { data: shape(row) };
         }
 
         // Auto-set updatedAt if column exists
@@ -761,14 +787,17 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           .returning())[0] as Record<string, unknown> | undefined);
 
         if (!row) throw ApiError.notFound(`${resourceName} not found`);
-        return { data: row };
+        return { data: shape(row) };
       },
     );
 
     // Deleting needs at least an administrator, and never LESS than the role that may write: a table whose writes are
     // reserved for an elevated role (shared reference or marketing content) must not be deletable by an organization
     // administrator, who could otherwise remove any organization's row by id.
-    const deleteRole: MinRole = (ROLE_HIERARCHY[writeRole] ?? 0) > ROLE_HIERARCHY.admin ? writeRole : 'admin';
+    // An owner-scoped route can let the owner remove their own row at the write floor: the row scope already limits it to theirs.
+    const deleteRole: MinRole = opts.ownerMayDelete && opts.ownerColumn
+      ? writeRole
+      : (ROLE_HIERARCHY[writeRole] ?? 0) > ROLE_HIERARCHY.admin ? writeRole : 'admin';
 
     const DELETE = withApi(
       {
@@ -821,7 +850,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
               : (await tx.delete(table).where(and(...conditions)).returning())[0] as Record<string, unknown> | undefined;
           }));
           if (!row) throw ApiError.notFound(`${resourceName} not found`);
-          return { data: row };
+          return { data: shape(row) };
         }
 
         // Try soft delete first (status → archived), fall back to hard delete
@@ -831,7 +860,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
             .where(and(...conditions))
             .returning())[0] as Record<string, unknown> | undefined);
           if (!row) throw ApiError.notFound(`${resourceName} not found`);
-          return { data: row };
+          return { data: shape(row) };
         }
 
         // Hard delete for tables without a status column
@@ -839,7 +868,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           .where(and(...conditions))
           .returning())[0] as Record<string, unknown> | undefined);
         if (!deleted) throw ApiError.notFound(`${resourceName} not found`);
-        return { data: deleted };
+        return { data: shape(deleted) };
       },
     );
 

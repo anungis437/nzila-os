@@ -6,7 +6,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { ORG, ORG_B, U, seedMembership } from './authority-kernel-harness'
 import { freshDb, kit } from './authority-kernel-testkit'
 import { declareOwnRecusal } from '../../lib/authority/store/lifecycle'
-import { listMemberReviewIntake, openMemberReview } from '../../lib/authority/store/review-intake'
+import { REVIEW_INTAKE_DAILY_LIMIT, listMemberReviewIntake, openMemberReview } from '../../lib/authority/store/review-intake'
 import type { PGlite } from '@electric-sql/pglite'
 
 let db: PGlite
@@ -86,4 +86,44 @@ describe('member review intake', () => {
     const recused = await k.as(U.auditor)((t) => listMemberReviewIntake(t, k.deps, { organizationId: ORG, actorUserId: U.auditor }))
     expect(recused.oversight.map((row) => row.id)).not.toContain(opened.id)
   })
-})
+
+  it('refuses an adverse party who is not a current member of the organization, without saying which identity failed', async () => {
+    const before = await k.asAdmin(() => db.query<{ n: number }>(`SELECT count(*)::int AS n FROM ue_authority_reviews`))
+    for (const adverse of [[U.stranger], [U.reviewer, U.stranger]]) {
+      await expect(k.as(U.member)((t) => openMemberReview(t, k.deps, {
+        organizationId: ORG, actorUserId: U.member, reviewType: 'complaint', adverseUserIds: adverse,
+      }))).rejects.toMatchObject({ code: 'INVALID_CONTEXT', message: expect.stringContaining('ADVERSE_NOT_A_MEMBER') })
+    }
+    const after = await k.asAdmin(() => db.query<{ n: number }>(`SELECT count(*)::int AS n FROM ue_authority_reviews`))
+    expect(Number(after.rows[0].n)).toBe(Number(before.rows[0].n))
+  })
+
+  it('returns the same open review for a repeat request, whatever order the adverse parties are named in, and writes one row', async () => {
+    const input = { organizationId: ORG, actorUserId: U.member2, reviewType: 'reconsideration' }
+    const first = await k.as(U.member2)((t) => openMemberReview(t, k.deps, { ...input, adverseUserIds: [U.reviewer, U.auditor] }))
+    const again = await k.as(U.member2)((t) => openMemberReview(t, k.deps, { ...input, adverseUserIds: [U.auditor, U.reviewer] }))
+    expect(first.created).toBe(true)
+    expect(again).toMatchObject({ id: first.id, created: false })
+    const rows = await k.asAdmin(() => db.query<{ n: number }>(`SELECT count(*)::int AS n FROM ue_authority_reviews WHERE opened_by = $1 AND review_type = 'reconsideration'`, [U.member2]))
+    expect(Number(rows.rows[0].n)).toBe(1)
+    const different = await k.as(U.member2)((t) => openMemberReview(t, k.deps, { ...input, adverseUserIds: [U.reviewer] }))
+    expect(different.id).not.toBe(first.id)
+  })
+
+  it('stops one member at the daily intake limit and leaves other members unaffected', async () => {
+    let refused: unknown
+    for (let i = 0; i < REVIEW_INTAKE_DAILY_LIMIT + 2; i += 1) {
+      // distinct adverse sets, otherwise the duplicate rule would return the first review each time
+      const adverse = [`user_filler_${i}`]
+      await k.asAdmin(() => seedMembership(db, adverse[0], ORG, 'member'))
+      try {
+        await k.as(U.clerk)((t) => openMemberReview(t, k.deps, { organizationId: ORG, actorUserId: U.clerk, reviewType: 'complaint', adverseUserIds: adverse }))
+      } catch (error) {
+        refused = error
+        break
+      }
+    }
+    expect(refused).toMatchObject({ code: 'PRECONDITION', message: expect.stringContaining('REVIEW_INTAKE_LIMIT') })
+    const other = await k.as(U.auditor)((t) => openMemberReview(t, k.deps, { organizationId: ORG, actorUserId: U.auditor, reviewType: 'complaint' }))
+    expect(other.created).toBe(true)
+  })})
