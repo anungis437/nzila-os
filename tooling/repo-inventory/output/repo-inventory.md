@@ -9,7 +9,7 @@
 | Apps | 28 |
 | Packages (packages/*) | 225 |
 | Workspace Packages (apps|packages|services|tooling) | 260 |
-| GitHub Workflows | 60 |
+| GitHub Workflows | 61 |
 | Contract Test Files | 300 |
 | TS/JS Test Files | 2860 |
 | Python Test Files | 43 |
@@ -105,6 +105,7 @@
 - secret-scan.yml
 - security-design-review.yml
 - trivy.yml
+- tool-fabric-pg-contract.yml
 - ue-build-push-proof.yml
 - ue-staging-discovery.yml
 - union-eyes-authority-rollout.yml
