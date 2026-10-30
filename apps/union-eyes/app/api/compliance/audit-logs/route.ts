@@ -3,7 +3,6 @@
  * Compliance audit logs backed by PostgreSQL.
  */
 import { withApi, ApiError, z } from '@/lib/api/framework';
-import { db } from '@/db/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { auditLogs } from '@/db/schema/audit-security-schema';
@@ -12,15 +11,19 @@ import { eq, desc } from 'drizzle-orm';
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
-  { auth: { required: true, minRole: 'officer' } },
-  async ({ organizationId }) => {
-    const rows = await db
+  { auth: { required: true, minRole: 'admin' } },
+  async ({ organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.forbidden('Organization audit context required');
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+    const rows = await tx
       .select()
       .from(auditLogs)
       .where(eq(auditLogs.organizationId, organizationId!))
       .orderBy(desc(auditLogs.createdAt))
       .limit(100);
+    await persistAtomicAudit(tx, { organizationId, userId, action: 'compliance.audit_log.read', resourceType: 'audit_logs', resourceId: organizationId, details: { count: rows.length } });
     return rows;
+    });
   },
 );
 
@@ -40,7 +43,7 @@ export const POST = withApi(
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     // A manual entry is recorded as exactly that: attributed to the administrator who wrote it, with the declared
     // fields kept as details, so it cannot pass for a system-generated record of another action.
-    return withRLSContext({ organizationId }, async (tx) => {
+    return withRLSContext({ organizationId, userId }, async (tx) => {
       await persistAtomicAudit(tx, {
         organizationId,
         userId,
