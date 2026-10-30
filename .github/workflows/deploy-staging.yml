@@ -120,16 +120,6 @@ jobs:
           npx @cyclonedx/cyclonedx-npm --output-file sbom.json
           node -e "const s=require('./sbom.json'); if(s.bomFormat!=='CycloneDX'||!Array.isArray(s.components)||!s.components.length) process.exit(1)"
 
-      - name: Generate build attestation
-        env:
-          # Enforced by production promotion verifier: unsigned attestations
-          # are never production evidence.
-          ATTESTATION_SIGNING_KEY: ${{ secrets.ATTESTATION_SIGNING_KEY }}
-        run: |
-          node --import tsx scripts/release-attestation.ts \
-            --sha ${{ github.sha }} \
-            --env staging
-
       - name: Compute artifact digest
         id: digest
         run: |
@@ -153,11 +143,22 @@ jobs:
             "sbom_hash": "${{ steps.digest.outputs.digest }}",
             "attestation_ref": "release-attestation.json",
             "commit_sha": "${{ github.sha }}",
+            "run_id": "${{ github.run_id }}",
             "built_at": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)",
             "source_workflow": "deploy-staging",
             "deployTargets": ${DEPLOY_TARGETS_JSON}
           }
           EOF
+
+      - name: Generate build attestation
+        env:
+          # Enforced by production promotion verifier: unsigned attestations
+          # are never production evidence.
+          ATTESTATION_SIGNING_KEY: ${{ secrets.ATTESTATION_SIGNING_KEY }}
+        run: |
+          node --import tsx scripts/release-attestation.ts \
+            --sha ${{ github.sha }} \
+            --env staging
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
