@@ -84,9 +84,21 @@ export function verifyPromotionEvidence({ directory, expectedCommit, expectedRun
   if (!Number.isFinite(stagedAt) || !Number.isFinite(attestedAt) ||
       stagedAt > current + 5 * 60_000 || attestedAt > current + 5 * 60_000 ||
       stagedAt < current - ttl || attestedAt < current - ttl) deny('staging evidence stale or from future')
+  // A target may carry multiple historical aliases. Checking only the
+  // first truthy alias lets an immutable image mask a conflicting mutable
+  // imageRef/digest that a downstream deployer might actually consume.
+  // Require every supplied alias to be the same complete immutable reference.
+  const pinned = ref => typeof ref === 'string' &&
+    /^[a-zA-Z0-9][a-zA-Z0-9._:/-]*@sha256:[0-9a-f]{64}$/i.test(ref)
   if (!Array.isArray(manifest.deployTargets) || !manifest.deployTargets.length ||
-      manifest.deployTargets.some(x => !/@sha256:[0-9a-f]{64}$/i.test(
-        x.image ?? x.imageRef ?? x.digest ?? ''))) deny('deployment target is absent or mutable')
+      manifest.deployTargets.some(target => {
+        if (!target || typeof target !== 'object' || Array.isArray(target)) return true
+        const refs = ['image', 'imageRef', 'digest']
+          .filter(key => target[key] !== undefined && target[key] !== null)
+          .map(key => target[key])
+        return refs.length === 0 || refs.some(ref => !pinned(ref)) ||
+          new Set(refs).size !== 1
+      })) deny('deployment target is absent, mutable or conflicting')
   return {
     commitSha: expectedCommit,
     attestationDigest: digest,

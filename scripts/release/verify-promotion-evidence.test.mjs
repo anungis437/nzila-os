@@ -80,6 +80,28 @@ test('blank or mutable deployment target is denied', () => {
     assert.throws(() => x.verify(), /mutable/)
   } finally { x.cleanup() }
 })
+test('conflicting image aliases cannot hide a mutable deployment reference', () => {
+  const x = makeFixture()
+  try {
+    x.manifest.deployTargets = [{ name: 'demo', image: IMAGE, imageRef: 'example.invalid/app:latest' }]
+    x.write()
+    assert.throws(() => x.verify(), /mutable or conflicting/)
+    x.manifest.deployTargets = [{ name: 'demo', image: IMAGE, digest: 'example.invalid/other@sha256:' + 'f'.repeat(64) }]
+    x.write()
+    assert.throws(() => x.verify(), /mutable or conflicting/)
+  } finally { x.cleanup() }
+})
+test('identical immutable aliases remain valid and malformed prefixed references are denied', () => {
+  const x = makeFixture()
+  try {
+    x.manifest.deployTargets = [{ name: 'demo', image: IMAGE, imageRef: IMAGE }]
+    x.write()
+    assert.equal(x.verify().targetCount, 1)
+    x.manifest.deployTargets = [{ name: 'demo', image: 'prefix?' + IMAGE }]
+    x.write()
+    assert.throws(() => x.verify(), /mutable or conflicting/)
+  } finally { x.cleanup() }
+})
 test('non-CycloneDX SBOM rejected', () => {
   const x = makeFixture()
   try {
