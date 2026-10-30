@@ -189,15 +189,17 @@ describe('R-52: lockedAuthCheck is mandatory for all generic writes', () => {
       table: alternate, pk: 'id', tags: ['Scheduling'], orgScoped: true,
       itemRoute: true, writeRole: 'steward', ownerColumn: 'ownerId',
     })
-    await handler('Update')(context({
+    await expect(handler('Update')(context({
       recordId: 'malicious-pk', createdBy: 'malicious-creator',
       ownerId: 'malicious-new-owner', title: 'Allowed title',
-    }))
+    }))).rejects.toMatchObject({ code: 'BAD_REQUEST' })
+    expect(m.update).not.toHaveBeenCalled()
+    expect(m.audit).not.toHaveBeenCalled()
+    // A valid title-only amendment remains available; denying mass assignment
+    // must not disable the legitimate calendar editing journey.
+    await handler('Update')(context({ title: 'Allowed title' }))
     expect(m.update).toHaveBeenCalledOnce()
     expect(m.update.mock.calls[0][0]).toMatchObject({ title: 'Allowed title' })
-    expect(m.update.mock.calls[0][0]).not.toHaveProperty('recordId')
-    expect(m.update.mock.calls[0][0]).not.toHaveProperty('ownerId')
-    expect(m.update.mock.calls[0][0]).not.toHaveProperty('createdBy')
   })
 
   it('sanitizes server-managed PK, tenant and owner fields reintroduced by a beforeUpdate hook', async () => {
