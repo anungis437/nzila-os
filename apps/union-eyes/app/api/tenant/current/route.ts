@@ -1,16 +1,16 @@
 /**
- * GET /api/tenant/current — REMOVED
+ * GET /api/tenant/current — retired compatibility alias.
  *
- * The legacy compatibility wrapper answered 200 with an organization whose name, slug and tier were always null and whose
- * features were always empty; nothing in the application calls it. A client that still does is told the route is gone and where
- * the canonical one is, instead of receiving a success with no data.
+ * The old endpoint fabricated null organization metadata and an empty feature set. The canonical
+ * /api/org/current endpoint is the only supported organization view. Authenticate and establish
+ * the active organization before returning 410; do not disclose session/tenant state anonymously.
  */
+import { withApi } from '@/lib/api/framework';
+import { goneResponse } from '@/lib/api/deprecation';
 
-import { NextResponse } from "next/server";
-import { goneResponse } from "@/lib/api/deprecation";
+export const dynamic = 'force-dynamic';
 
-export const dynamic = "force-dynamic";
-
-export function GET(): NextResponse {
-  return goneResponse("/api/tenant/current", "Use /api/org/current, which returns the organization's name, slug, tier and features.");
-}
+export const GET = withApi(
+  { auth: { required: true, minRole: 'member' }, requireOrg: true },
+  async () => goneResponse('/api/tenant/current', 'Use /api/org/current for current organization metadata and features.'),
+);
