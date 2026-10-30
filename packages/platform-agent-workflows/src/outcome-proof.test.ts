@@ -38,6 +38,7 @@ async function validPolicy(wf: ReturnType<typeof createWorkflow>, stepId: string
       expiresAt: new Date(Date.now() + 60_000).toISOString(),
       boundWorkflowId: r.workflowId, boundStepId: r.stepId,
       boundApp: r.app, boundOrgId: r.orgId, boundPolicyId: r.policyId,
+      boundExecutingAgentId: r.executingAgentId,
     }),
   })
 }
@@ -113,6 +114,29 @@ describe('platform-agent-workflows P0 outcome controls', () => {
       verifiedOutcome: proof, verifiedPolicy: permit,
     }).status).toBe('blocked')
     expect(() => executeStep(result, result.steps[0].id, { verifiedOutcome: proof })).toThrow('immutable')
+  })
+
+  it('refuses an ALLOW decision for a different executor even with identical workflow scope', async () => {
+    const wf = make()
+    const request = {
+      workflowId: wf.id, stepId: wf.steps[0].id, app: wf.app, orgId: wf.orgId,
+      policyId: 'p1', executingAgentId: 'implementer-agent',
+    }
+    const now = Date.now()
+    const resolve = async (r: typeof request) => ({
+      verdict: 'ALLOW' as const,
+      decisionRef: 'policy://host/identity-bound',
+      authoritySource: 'trusted-host-policy',
+      issuedAt: new Date(now).toISOString(),
+      expiresAt: new Date(now + 60_000).toISOString(),
+      boundWorkflowId: r.workflowId, boundStepId: r.stepId,
+      boundApp: r.app, boundOrgId: r.orgId, boundPolicyId: r.policyId,
+      boundExecutingAgentId: 'different-agent',
+    })
+    await expect(verifyOutcomePolicy(request, { resolve }))
+      .rejects.toThrow('Trusted policy ALLOW was not established')
+    await expect(verifyOutcomePolicy({ ...request, executingAgentId: '' }, { resolve }))
+      .rejects.toThrow('Policy request identity and scope are required')
   })
 
   it('rejects mixing outcome proof and policy permit minted for different agents', async () => {
