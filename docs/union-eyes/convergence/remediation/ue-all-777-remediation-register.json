@@ -50,7 +50,7 @@
       {
         "id": "RUNTIME-RESTART-STATE-HANDOFF-MISSING",
         "title": "Restart persistence acceptance fails when a real filed case hand-off is not written; stale proof must not substitute for the current filing.",
-        "state": "SOURCE_PATCHED_PENDING_EXACT_SHA_CI",
+        "state": "EXACT_SHA_CI_PASS_NOT_INSTITUTIONALLY_ACCEPTED",
         "source": "tooling/scripts/ue-runtime-up.mjs",
         "related": [
           "apps/union-eyes/e2e/runtime/01-foundation-and-case-journey.spec.ts",
@@ -58,7 +58,7 @@
           "tooling/scripts/lib/ue-runtime-restart-handoff.test.mjs",
           ".github/workflows/ue-http-runtime.yml"
         ],
-        "evidence": "1de343a HTTP/browser run 40996929145 failed ENOENT after 111 main and 9 pre-case tests passed; source now removes stale hand-off, always writes real filed case identifiers and rejects missing/malformed hand-off. Four isolated helper tests passed locally; exact-SHA CI pending.",
+        "evidence": "1efd394816ae279503834c9aa2166b0603898e58: HTTP/browser run 41002233842 PASS; PG15/16 41002233765 PASS; full Vitest/contract/finance 41002233718 PASS; security 41002233784 PASS; app floor 41002233714 and governance 41002233899 PASS. This is a pipeline-level result, not complete journey or independent acceptance.",
         "releaseEffect": "BLOCKS_HTTP_BROWSER_ACCEPTANCE"
       }
     ]
@@ -76,7 +76,7 @@
     "note": "Milestones and evidence are transcribed as prior claims; this run has not independently re-executed those proofs."
   },
   "lastInspectedBranch": "agents/ue-cursor-final-closure",
-  "lastInspectedCommit": "0db2106b70687d10d79c4a4bc140100b6238e81a",
+  "lastInspectedCommit": "bce9b61c62a1c363d03af70110809843ae30ffad",
   "summary": {
     "allRecordedDefects": 777,
     "bySeverity": {
@@ -86,7 +86,7 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 7,
+    "withCurrentRunSourceOrRegressionWork": 8,
     "closed": 0,
     "overallGO": false
   },
@@ -211,6 +211,10 @@
     {
       "sha": "0db2106b70687d10d79c4a4bc140100b6238e81a",
       "description": "Always write actual filed-case hand-off in runtime journey, independent of optional artifact flag."
+    },
+    {
+      "sha": "bce9b61c62a1c363d03af70110809843ae30ffad",
+      "description": "Replace fabricated weekly-summary AI invocation/confidence/impact with explicit deterministic aggregation and regression tests; leave human triage pending."
     }
   ],
   "records": [
@@ -1180,8 +1184,21 @@
       "title": "The weekly summary records an AI invocation naming model analytics-engine and stores confidenceScore 0.83 and fixed recommendation text for a computation that counts events and runs no model.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/analytics/insights/weekly-summary/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/analytics-weekly-summary.route.test.ts"
+        ],
+        "commits": [
+          "bce9b61c62a1c363d03af70110809843ae30ffad"
+        ],
+        "repair": "Removed fabricated AI invocation, fixed 0.83 confidence and estimated impact, ungrounded onboarding/SLA recommendations, and false zero feedback ratings; records deterministic provenance and requires human triage.",
+        "limits": "Source-level only. No exact-SHA unit/native/HTTP evidence for this repair; user journeys and institutional disposition remain open."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
     },
@@ -14259,6 +14276,32 @@
     {
       "inspectedSha": "0db2106b70687d10d79c4a4bc140100b6238e81a",
       "evidence": "Six follow-up commits correct restart hand-off and add regression/CI gate; isolated local reproduction of helper 4/4 tests passed, not repository qualification. Exact-SHA GitHub Actions and HTTP/browser acceptance pending. No 777-defect CLOSED claims.",
+      "source": "PATCHED",
+      "unit": "PENDING_EXACT_SHA",
+      "contract": "PENDING_EXACT_SHA",
+      "native": "PENDING_EXACT_SHA",
+      "security": "PENDING_EXACT_SHA",
+      "httpBrowser": "PENDING_EXACT_SHA",
+      "appFloor": "PENDING_EXACT_SHA",
+      "governance": "PENDING_EXACT_SHA",
+      "go": "NO_GO"
+    },
+    {
+      "inspectedSha": "1efd394816ae279503834c9aa2166b0603898e58",
+      "evidence": "Exact-SHA GitHub Actions on 2026-10-30: app floor 41002233714 PASS; governance 41002233899 PASS; PG15/16 41002233765 PASS; security 41002233784 PASS; whole-app Vitest/contract/finance 41002233718 PASS; disposable HTTP/browser including restart 41002233842 PASS. These checks do not establish complete 777-defect or 111-capability acceptance.",
+      "source": "PRIOR_PATCHES",
+      "unit": "PASS",
+      "contract": "PASS",
+      "native": "PASS_PG15_AND_PG16",
+      "security": "PASS",
+      "httpBrowser": "PASS_PIPELINE",
+      "appFloor": "PASS",
+      "governance": "PASS",
+      "go": "NO_GO"
+    },
+    {
+      "inspectedSha": "bce9b61c62a1c363d03af70110809843ae30ffad",
+      "evidence": "Weekly summary fabricated AI claim patched with regression coverage; new exact-SHA CI and runtime not yet evaluated; no independent qualification.",
       "source": "PATCHED",
       "unit": "PENDING_EXACT_SHA",
       "contract": "PENDING_EXACT_SHA",
