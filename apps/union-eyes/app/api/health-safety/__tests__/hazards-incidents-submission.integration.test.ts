@@ -369,6 +369,24 @@ describe('health-safety hazards/incidents submission — role gating', () => {
     expect(JSON.stringify(capture()?.metadata ?? {})).not.toContain('Witness One');
   });
 
+  it('6e. rejects missing or unrecognized hazard classification instead of assuming moderate/other', async () => {
+    const { POST } = await import('../hazards/route');
+    m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep'));
+    const capture = mockInsertCapture();
+    for (const extra of [
+      { hazardType: 'fire' },
+      { priority: 'high' },
+      { hazardType: 'unknown', priority: 'high' },
+      { hazardType: 'fire', priority: 'unknown' },
+    ]) {
+      const response = await POST(postRequest('http://localhost/api/health-safety/hazards', {
+        location: 'Warehouse B', description: 'Sparks near flammable storage', ...extra,
+      }));
+      expect(response.status).toBe(400);
+      expect(capture()).toBeUndefined();
+    }
+  });
+
   it('7. malformed required input (no location, no description) is rejected — never silently normalized into a valid record', async () => {
     const { POST } = await import('../hazards/route');
     m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep'));
