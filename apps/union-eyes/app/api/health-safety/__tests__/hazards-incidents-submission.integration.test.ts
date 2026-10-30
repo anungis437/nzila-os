@@ -338,4 +338,51 @@ describe('health-safety hazards/incidents submission — role gating', () => {
     expect(eq).toHaveBeenCalledWith(workplaceIncidents.organizationId, ORG_A);
     expect(eq).not.toHaveBeenCalledWith(workplaceIncidents.organizationId, ORG_B);
   });
+  it('9. member cannot bypass H&S collection authorization by requesting a hazard by id', async () => {
+    const { GET } = await import('../hazards/[id]/route');
+    m.getCurrentUser.mockResolvedValue(authUser('member', ORG_A));
+    const id = '55555555-5555-4555-8555-555555555555';
+
+    const res = await GET(
+      new NextRequest(`http://localhost/api/health-safety/hazards/${id}`),
+      { params: Promise.resolve({ id }) },
+    );
+
+    expect(res.status).toBe(403);
+    expect(m.dbSelect).not.toHaveBeenCalled();
+  });
+
+  it('10. anonymous hazard submission removes the reporter identity from storage and audit', async () => {
+    const { POST } = await import('../hazards/route');
+    const { persistAtomicAudit } = await import('@/lib/audit/atomic-audit');
+    m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep', ORG_A));
+    const capture = mockInsertCapture();
+
+    const response = await POST(postRequest('http://localhost/api/health-safety/hazards', {
+      hazardType: 'fire', priority: 'medium', location: 'Site A', description: 'Unsafe wiring',
+      isAnonymous: true, reportedByName: 'Reporter Secret', reporterName: 'Reporter Secret',
+      reporterContactInfo: 'secret@example.invalid', reporterContact: 'secret@example.invalid',
+    }));
+
+    expect(response.status).toBe(200);
+    expect(capture()?.isAnonymous).toBe(true);
+    expect(capture()?.createdBy).toBe('anonymous');
+    expect(capture()?.reportedByName).toBeUndefined();
+    expect(capture()?.reporterContactInfo).toBeUndefined();
+    expect(persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      organizationId: ORG_A, userId: 'anonymous',
+    }));
+  });
+
+  it('11. malformed anonymity indicator fails closed without writing hazard data', async () => {
+    const { POST } = await import('../hazards/route');
+    m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep', ORG_A));
+    const capture = mockInsertCapture();
+    const response = await POST(postRequest('http://localhost/api/health-safety/hazards', {
+      location: 'Site A', description: 'Unsafe wiring', isAnonymous: 'true',
+    }));
+    expect(response.status).toBe(400);
+    expect(capture()).toBeUndefined();
+  });
+
 });

@@ -82,6 +82,11 @@ describe('health-safety/hazards route helpers', () => {
       expect(result.reporterContactInfo).toBeUndefined();
     });
 
+
+    it('rejects ambiguous anonymity values instead of risking identity disclosure', () => {
+      expect(() => buildHazardCreateValues({ location: 'Site A', description: 'desc', isAnonymous: 'true' })).toThrow();
+      expect(() => buildHazardCreateValues({ location: 'Site A', description: 'desc', isAnonymous: 1 })).toThrow();
+    });
     it('carries reporter identity fields when not anonymous', () => {
       const result = buildHazardCreateValues({
         hazardType: 'other',
