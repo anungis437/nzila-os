@@ -14,7 +14,7 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { exitInterviews, exitInterviewEvents } from '@/db/schema';
+import { exitInterviews, exitInterviewEvents, knowledgeBase } from '@/db/schema';
 import { SENSITIVITY_LEVELS } from '@/lib/knowledge-transfer/governance/consent-controls';
 
 export const dynamic = 'force-dynamic';
@@ -84,11 +84,30 @@ export const PATCH = withApi(
         .returning();
       if (!row) throw ApiError.notFound('Exit interview');
 
+      // Immediately hide its knowledge-base derivative in the SAME tenant
+      // transaction as consent withdrawal; do not let a revoked copy remain
+      // in a privileged shared search surface. Retention/purge and legal hold
+      // are separately governed and this operation does not delete evidence.
+      let hiddenKnowledgeAssetId: string | null = null;
+      if (body?.consentGranted === false && row.knowledgeBaseId) {
+        const [hidden] = await tx.update(knowledgeBase)
+          .set({ isActive: false, updatedAt: now })
+          .where(and(
+            eq(knowledgeBase.id, row.knowledgeBaseId),
+            eq(knowledgeBase.organizationId, organizationId!),
+            eq(knowledgeBase.sourceType, 'exit_interview'),
+            eq(knowledgeBase.sourceId, row.id),
+          )).returning({ id: knowledgeBase.id });
+        hiddenKnowledgeAssetId = hidden?.id ?? null;
+      }
+
       const change = {
         previousSensitivity: existing.sensitivityLevel,
         newSensitivity: row.sensitivityLevel,
         previousConsent: existing.consentGranted,
         newConsent: row.consentGranted,
+        derivedKnowledgeAssetDisabled: hiddenKnowledgeAssetId,
+        derivedRemovalReviewRequired: body?.consentGranted === false,
       };
       await tx.insert(exitInterviewEvents).values({
         interviewId: params.id,

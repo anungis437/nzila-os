@@ -133,6 +133,25 @@ describe('exit-interviews/[id]/governance route', () => {
     expect(json.indexingEligible).toBe(false);
   });
 
+  it('PATCH withdrawal disables an existing knowledge-base derivative in the same tenant transaction', async () => {
+    const { PATCH } = await loadRoute();
+    m.selectQueue.push([{ id: 'iv_1', sensitivityLevel: 'public_internal', consentGranted: true, knowledgeBaseId: 'kb_1' }]);
+    m.updateReturningQueue.push(
+      [{ id: 'iv_1', knowledgeBaseId: 'kb_1', sensitivityLevel: 'public_internal', consentGranted: false }],
+      [{ id: 'kb_1' }],
+    );
+    const response = await PATCH(new NextRequest('http://localhost/api/exit-interviews/iv_1/governance', { method: 'PATCH' }), {
+      params: { id: 'iv_1' },
+      organizationId: 'org_1', userId: 'admin-1',
+      body: { consentGranted: false },
+    });
+    expect(response.status).toBe(200);
+    expect(mockDb.update).toHaveBeenCalledTimes(2);
+    expect(m.audit).toHaveBeenCalledWith(mockDb, expect.objectContaining({
+      details: expect.objectContaining({ newConsent: false, derivedKnowledgeAssetDisabled: 'kb_1', derivedRemovalReviewRequired: true }),
+    }));
+  });
+
   it('PATCH supports consent revocation path', async () => {
     const { PATCH } = await loadRoute();
     m.selectQueue.push([{ id: 'iv_1', sensitivityLevel: 'public_internal', consentGranted: true }]);
