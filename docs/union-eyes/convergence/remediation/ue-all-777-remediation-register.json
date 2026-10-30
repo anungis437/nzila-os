@@ -86,13 +86,13 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 41,
+    "withCurrentRunSourceOrRegressionWork": 42,
     "closed": 0,
     "overallGO": false,
     "engineeringCorrected": 140,
     "engineeringRemaining": 637,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 2
+    "engineeringPartial": 19
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
