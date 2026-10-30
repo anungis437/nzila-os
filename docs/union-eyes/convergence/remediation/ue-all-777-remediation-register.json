@@ -89,9 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 32,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 19,
-    "engineeringRemaining": 758,
-    "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately."
+    "engineeringCorrected": 39,
+    "engineeringRemaining": 738,
+    "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
+    "engineeringPartial": 4
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -9113,9 +9114,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
+        "path": "apps/union-eyes/app/api/notifications/route.ts; apps/union-eyes/app/api/notifications/count/route.ts",
+        "explanation": "The swallowing try/catch is removed from the list and count reads, so a failed read is a failure; page and limit are parsed strictly (400).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-MOB-STEWARD-NOTIFICATION-IS-STORED-WITHOUT-A-SENDER-AND-WITH-UNBOUNDED-UNVALIDATED-CONTENT",
@@ -9130,9 +9138,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
+        "path": "apps/union-eyes/app/api/notifications/route.ts",
+        "explanation": "Strict schema bounds title, message, type, label, link (same-site path only) and data size and requires a future expiry; the author is stored in data.origin (client origin overwritten); 100 per hour per steward; the audit carries a content digest.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-MOB-NOTIFICATION-PATCH-READ-FLAG-IS-UNVALIDATED-AND-READ-AT-IS-NOT-CLEARED",
@@ -9147,9 +9162,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
+        "path": "apps/union-eyes/app/api/notifications/[id]/route.ts",
+        "explanation": "Only a real boolean is accepted; readAt is set when read and cleared when unread; the audit stores a boolean.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-MOB-NOTIFICATION-TEST-ROUTE-EXERCISES-NO-DELIVERY-CHANNEL-AND-LEAVES-A-PERMANENT-ROW",
@@ -9164,9 +9186,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
+        "path": "apps/union-eyes/app/api/notifications/test/route.ts",
+        "explanation": "The route states it tests the inbox only, reports each channel's real state, reuses a recent unread test row, and expires new rows after an hour.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-MOB-PUSH-DEVICE-REGISTRATION-REQUIRES-A-STEWARD-SO-A-MEMBER-DEVICE-IS-REFUSED",
@@ -9181,9 +9210,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
+        "path": "apps/union-eyes/app/api/mobile/devices/route.ts; apps/union-eyes/lib/api/crud-factory.ts",
+        "explanation": "Registration is at the member floor with an allow-list of fields, a platform check and a token check, so unknown platforms no longer reach the database enum as a 500.",
+        "remaining": "A user with no profiles row still fails the foreign key as a 500.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-MOB-TWO-DEVICE-TABLES-NO-ROUTE-REMOVES-A-DEVICE-AND-NO-SENDER-READS-EITHER",
@@ -9198,9 +9235,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
+        "path": "apps/union-eyes/app/api/mobile/devices/[id]/route.ts; apps/union-eyes/app/api/mobile/sync/[deviceId]/route.ts",
+        "explanation": "Both device tables now have an owner removal route (PATCH preferences and DELETE for push devices, DELETE for mobile devices), audited.",
+        "remaining": "The two tables are not consolidated, and no sender reads either table (services/fcm-service.ts and lib/mobile/mobile-engine.ts remain unimported by any route or worker).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-MOB-DEVICE-ROWS-ARE-RETURNED-WHOLE-WITH-THE-PUSH-TOKEN-AND-SECURITY-FLAGS",
@@ -9215,9 +9260,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
+        "path": "apps/union-eyes/app/api/mobile/devices/route.ts; apps/union-eyes/app/api/mobile/sync/route.ts; apps/union-eyes/lib/api/crud-factory.ts",
+        "explanation": "omitFromResponse removes the push token from every push-device response; the sync route projects an explicit safe column list that excludes the token, the jailbreak flag and the compliance columns.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-MOB-SYNC-PATH-REGISTERS-A-DEVICE-AND-SYNCS-NOTHING-AND-ITS-ONLY-CALLER-ALWAYS-FAILS",
@@ -9232,9 +9284,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
+        "path": "apps/union-eyes/app/api/mobile/sync/route.ts; apps/union-eyes/components/mobile/SyncStatus.tsx",
+        "explanation": "The route accepts the body its only caller sends (a browser needs no token), says in every response that no synchronization was performed, and the Sync now button shows success only when the response says it synced.",
+        "remaining": "No synchronization is implemented: mobile_sync_queue is still never read or written.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-MOB-DEVICE-REREGISTRATION-KEEPS-THE-OLD-ORGANIZATION-AND-CONSTRAINT-CLASHES-ANSWER-500",
@@ -9249,9 +9309,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
+        "path": "apps/union-eyes/app/api/mobile/sync/route.ts",
+        "explanation": "Re-registration updates organizationId, a token held by another device is a 409, and every field is length-validated against its column before any write.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-MOB-PUSH-SUBSCRIBE-AND-UNSUBSCRIBE-ARE-PUSH-CAMPAIGN-CRUD-AND-STORE-NO-SUBSCRIPTION",
@@ -9266,9 +9333,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
+        "path": "apps/union-eyes/app/api/mobile/push/subscribe/route.ts; apps/union-eyes/app/api/mobile/push/unsubscribe/route.ts",
+        "explanation": "Web push subscription has no store and no sender, so both routes answer 501 and read or write nothing, instead of CRUD over the campaign table that failed and left the client believing it had subscribed.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-MOB-PUSH-CAMPAIGN-ROWS-ARE-READABLE-BY-EVERY-MEMBER-WITH-TARGETING-AND-DEVICE-IDS",
@@ -9283,9 +9357,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
+        "path": "apps/union-eyes/app/api/mobile/push/subscribe/route.ts; apps/union-eyes/app/api/mobile/push/unsubscribe/route.ts; apps/union-eyes/lib/api/crud-governance.ts",
+        "explanation": "The only paths that served push_notifications to a member are removed; the table is no longer classified for generic CRUD, so it is DENIED by default.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-MOB-PUSH-CAMPAIGN-CREATE-ACCEPTS-SENT-STATUS-AND-DELIVERY-COUNTERS-AND-NOTHING-SENDS",
@@ -9300,9 +9381,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
+        "path": "apps/union-eyes/app/api/mobile/push/subscribe/route.ts; apps/union-eyes/lib/api/crud-governance.ts",
+        "explanation": "No route can create a push_notifications row any more, so a row cannot be written as sent with delivery counters.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-MOB-MOBILE-NOTIFICATIONS-PATH-SERVES-THE-SCHEDULED-QUEUE-TABLE-NOT-THE-INBOX",
@@ -9317,9 +9405,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
+        "path": "apps/union-eyes/app/api/mobile/notifications/route.ts; apps/union-eyes/lib/notifications/inbox-handlers.ts",
+        "explanation": "The mobile path runs the same handlers as /api/notifications (shared in lib/notifications/inbox-handlers.ts, each path behind its own visible guard), so it serves the in-app inbox (own rows) instead of the scheduled queue table.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-MOB-MOBILE-NOTIFICATIONS-CREATE-ADDRESSES-ANY-USER-ID-AND-STORES-A-CALLER-CHOSEN-SENT-STATE",
@@ -9334,9 +9429,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
+        "path": "apps/union-eyes/app/api/mobile/notifications/route.ts; apps/union-eyes/lib/api/crud-governance.ts",
+        "explanation": "Create now goes through the inbox POST, which checks the recipient is a member of the organization, validates input and cannot set a sent state; the scheduled-queue table has no generic route.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-MOB-NEGOTIATIONS-PATH-REPEATS-THE-BARGAINING-NEGOTIATIONS-COLLECTION",
@@ -9351,9 +9453,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
+        "path": "apps/union-eyes/app/api/negotiations/route.ts; apps/union-eyes/app/api/bargaining/negotiations/route.ts; apps/union-eyes/lib/bargaining/negotiation-route-rules.ts",
+        "explanation": "Both paths take their read floor and writable fields from one shared rules module, so a restriction cannot be added to one path and missed on the other.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-MOB-NEGOTIATION-CREATE-LETS-A-STEWARD-RECORD-STRIKE-VOTE-MANDATE-AND-COST-CEILING-WITH-NO-SOURCE-RECORD",
@@ -9368,9 +9477,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
+        "path": "apps/union-eyes/app/api/bargaining/negotiations/route.ts; apps/union-eyes/app/api/bargaining/negotiations/[id]/route.ts; apps/union-eyes/lib/api/crud-factory.ts",
+        "explanation": "writableFields excludes strike-vote, mandate, cost, status, confidentiality and agreement-link fields on create and update (400), and negotiations are read at steward level instead of member.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-MOB-MEETING-ROOM-BOOKING-RULES-ARE-STORED-BUT-NO-ROUTE-OR-SERVICE-ENFORCES-A-BOOKING",
@@ -9385,9 +9501,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
+        "path": "apps/union-eyes/lib/services/room-booking-rules.ts; apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts",
+        "explanation": "Every stored rule (active state, hours, blocked dates, durations, advance window, allowed roles, capacity, approval) is implemented as one tested pure function (19 tests). A first route that wired it to room_bookings was withdrawn before commit because the physical room_bookings table lacks 26 declared columns and the runtime role has no grant on it, so it could never have worked; the bookings path answers 501 until that exists.",
+        "remaining": "Needs a reviewed migration that brings room_bookings to the declared shape (organization_id, booked_by, start_time, end_time, status and 21 more columns), RLS, and a storage-authority classification granting the runtime role access; then wire evaluateBooking into a bookings route under a room lock. lib/services/calendar-service.ts also still has an unused checkRoomAvailability stub that returns true.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-MOB-MEETING-ROOM-BOOKINGS-PATH-PATCH-EDITS-THE-ROOM-ROW-NOT-A-BOOKING",
@@ -9402,9 +9526,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
+        "path": "apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts",
+        "explanation": "The bookings path no longer edits the room row or exports PATCH or any room CRUD; it answers 501 for every method and reads or writes nothing.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ASM-OCI-PATHS-WRAP-THE-OCRA-HANDLERS-BEHIND-AN-ORG-ACCESS-FUNCTION-THAT-RETURNS-TRUE-FOR-EVERY-REQUEST",
@@ -14589,9 +14720,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B01-REVIEW-INTAKE",
+        "path": "apps/union-eyes/lib/authority/store/review-intake.ts",
+        "explanation": "requireAdverseMembers checks every named adverse party is an active member of the organization (one generic refusal, no per-identity oracle) before anything is written. Real-SQL pglite test.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0C1-REV-POST-HAS-NO-RATE-LIMIT-OR-IDEMPOTENCY-AND-EVERY-CALL-WRITES-A-PERMANENT-APPEND-ONLY-REVIEW-AND-AUDIT-ROW",
@@ -14606,9 +14744,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B01-REVIEW-INTAKE",
+        "path": "apps/union-eyes/lib/authority/store/review-intake.ts; apps/union-eyes/app/api/reviews/route.ts",
+        "explanation": "Per-member intake is serialised with an advisory lock; a repeat of an identical open review returns that review (200, alreadyOpen) instead of another append-only row; a daily cap of 10 raises REVIEW_INTAKE_LIMIT answered 429 with Retry-After. pglite and route tests.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0C1-REV-POST-READS-AN-UNCAPPED-REQUEST-BODY-BEFORE-ITS-SCHEMA-BOUNDS-APPLY",
@@ -14623,9 +14768,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B01-REVIEW-INTAKE",
+        "path": "apps/union-eyes/app/api/reviews/route.ts",
+        "explanation": "readBoundedBody enforces a 2 KiB cap by declared length and by streamed length, cancelling the stream, before JSON parsing; 413 otherwise.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0C1-REV-THE-ROUTE-RESOLVES-ITS-ORGANIZATION-ONCE-AND-THE-DATABASE-CONTEXT-RESOLVES-IT-AGAIN-WITH-NO-COMPARISON",
@@ -14640,9 +14792,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B01-REVIEW-INTAKE",
+        "path": "apps/union-eyes/app/api/reviews/route.ts",
+        "explanation": "Both handlers call withRLSContext({ organizationId }) with the organization the route resolved, so the database context cannot be a second resolution.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0C1-REV-FAILURES-OUTSIDE-THE-STORE-AND-CASE-AUTHORIZATION-ERRORS-ARE-RETHROWN-UNLOGGED-AS-AN-UNSTRUCTURED-SERVER-ERROR",
@@ -14657,9 +14816,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B01-REVIEW-INTAKE",
+        "path": "apps/union-eyes/app/api/reviews/route.ts",
+        "explanation": "reviewErrorResponse maps ApiError to 401/403 and logs any other failure with logger.error, answering a structured INTERNAL_ERROR 500 that does not echo the cause.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0C1-REV-THE-OVERSIGHT-LIST-RETURNS-COMPLAINANT-IDENTITY-AND-PRIVILEGED-CLASSIFICATION-WITH-NO-ACCESS-RECORD",
@@ -14674,9 +14840,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B01-REVIEW-INTAKE",
+        "path": "apps/union-eyes/app/api/reviews/route.ts",
+        "explanation": "An oversight read persists review.oversight.read with the disclosed review ids and the privileged count through persistAtomicAudit in the same transaction; an own-only list records nothing.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     }
   ],
   "engineeringCheckpoints": [

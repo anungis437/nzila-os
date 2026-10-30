@@ -111,8 +111,9 @@ export const COMPUTE_ONLY_ROUTES: Record<string, string[]> = {
 export const READ_ONLY_POST_ROUTES = [
   // POST is a guarded, explicit HTTP 501; no role repair or data mutation occurs.
   'admin/fix-super-admin-roles/route.ts',
-  'ai/classify/route.ts', 'ai/mamba/route.ts', 'ai/match-precedents/route.ts', 'ai/pension/plans/[id]/trustee-summary/route.ts',
-  'ai/search/route.ts', 'ai/semantic-search/route.ts', 'ai/summarize/route.ts', 'carbon/validate/route.ts',
+  // ai/classify, ai/match-precedents, ai/search and ai/summarize now write an atomic audit record, so they are audited routes, not read-only.
+  'ai/mamba/route.ts', 'ai/pension/plans/[id]/trustee-summary/route.ts',
+  'ai/semantic-search/route.ts', 'carbon/validate/route.ts',
   'calendar-sync/connections/route.ts',
   'clause-library/search/route.ts', 'cognition/precedents/route.ts', 'compliance/validate/route.ts', 'emergency/pipeda/route.ts',
   'exit-interviews/graph-query/route.ts', 'exit-interviews/mitigation-comparison/route.ts', 'exit-interviews/scenarios/route.ts',

@@ -9,9 +9,9 @@
 | Apps | 28 |
 | Packages (packages/*) | 225 |
 | Workspace Packages (apps|packages|services|tooling) | 260 |
-| GitHub Workflows | 60 |
+| GitHub Workflows | 64 |
 | Contract Test Files | 302 |
-| TS/JS Test Files | 3123 |
+| TS/JS Test Files | 3150 |
 | Python Test Files | 43 |
 
 ## Apps
@@ -38,7 +38,7 @@
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 56 | Cross-border trade infrastructure: deals, financing states, listings, |
 | trustcore | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 98 |  |
 | trustcore-trustops | Next.js | 3018 | ✅ | ✅ | ✅ | ✅ | 20 |  |
-| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 5959 | Full-stack union case management platform — grievance lifecycle, collective barg |
+| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 5993 | Full-stack union case management platform — grievance lifecycle, collective barg |
 | union-eyes-demo | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 80 |  |
 | veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 23 |  |
 | veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 26 |  |
@@ -106,6 +106,10 @@
 - security-design-review.yml
 - trivy.yml
 - ue-build-push-proof.yml
+- ue-full-regression.yml
+- ue-http-runtime.yml
+- ue-native-postgres.yml
+- ue-security-regression.yml
 - ue-staging-discovery.yml
 - union-eyes-authority-rollout.yml
 - zonga-check.yml

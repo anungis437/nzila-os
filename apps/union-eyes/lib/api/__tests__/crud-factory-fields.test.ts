@@ -72,20 +72,24 @@ describe('crud-factory writableFields, omitFromResponse and ownerMayDelete', () 
   });
   const base = { table: devices, tags: ['t'], orgScoped: true, ownerColumn: 'profileId', writableFields: ['deviceToken', 'platform', 'enabled'], omitFromResponse: ['deviceToken'] } as const;
 
-  it('refuses a body field outside the allow-list instead of copying it into the row', async () => {
+  it('refuses a column the table has but the route does not allow, and a field the table does not have, writing nothing', async () => {
     const crudRoutes = await factory();
-    crudRoutes({ ...base, writeRole: 'member' });
-    await expect(captured.handlers.get('Create')!(ctx({ body: { deviceToken: 'tok-12345678', platform: 'ios', id: 'forced', status: 'sent', totalSent: 9000 } }))).rejects.toMatchObject({ message: expect.stringContaining('status, totalSent') });
+    crudRoutes({ ...base, writeRole: 'member', writableFields: ['platform'] });
+    // a real column outside this route's allow-list: refused by the route's own allow-list
+    await expect(captured.handlers.get('Create')!(ctx({ body: { platform: 'ios', deviceToken: 'tok-12345678' } }))).rejects.toMatchObject({ message: expect.stringContaining('Fields not allowed on this resource: deviceToken') });
+    // a field that is no column at all (status, a delivery counter): refused by the generic payload guard
+    await expect(captured.handlers.get('Create')!(ctx({ body: { platform: 'ios', status: 'sent', totalSent: 9000 } }))).rejects.toMatchObject({ message: expect.stringContaining('status') });
     expect(captured.inserts).toEqual([]);
   });
 
-  it('ignores the server-owned fields (id, organization, creator) rather than failing or trusting them', async () => {
+  it('refuses the factory-managed fields (id, organization, creator, owner) instead of trusting them', async () => {
+    // assertGenericWritePayload (upstream) refuses these before the allow-list is consulted.
     const crudRoutes = await factory();
     crudRoutes({ ...base, writeRole: 'member' });
-    await captured.handlers.get('Create')!(ctx({ body: { deviceToken: 'tok-12345678', platform: 'ios', id: 'forced', organizationId: '22222222-2222-4222-8222-222222222222' } }));
-    expect(captured.inserts).toHaveLength(1);
-    expect(captured.inserts[0]).not.toHaveProperty('id');
-    expect(captured.inserts[0].organizationId).toBe('11111111-1111-4111-8111-111111111111');
+    for (const managed of ['id', 'organizationId', 'createdBy', 'profileId']) {
+      await expect(captured.handlers.get('Create')!(ctx({ body: { deviceToken: 'tok-12345678', platform: 'ios', [managed]: 'forced' } }))).rejects.toMatchObject({ message: expect.stringContaining(managed) });
+    }
+    expect(captured.inserts).toEqual([]);
   });
 
   it('applies the same allow-list to an update', async () => {
