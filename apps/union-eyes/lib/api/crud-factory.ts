@@ -38,7 +38,7 @@ import type { PgTable, PgColumn } from 'drizzle-orm/pg-core';
 import type { NextRequest } from 'next/server';
 import { ROLE_HIERARCHY, type UserRole } from '@/lib/api-auth-guard';
 import { lowRoleModeFor, ownRowsScope, resolveLowRoleScope } from './crud-low-role-guard';
-import { assertCrudRead, assertCrudWrite, crudGovernanceFor } from './crud-governance';
+import { assertCrudRead, assertCrudWrite, crudGovernanceFor, supportsGenericArchive } from './crud-governance';
 
 // crud-factory's readRole/writeRole accept the full canonical role hierarchy
 // (same set withApi's auth.minRole already enforces via ROLE_HIERARCHY), not
@@ -743,6 +743,14 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           conditions.push(eq(ownerCol, userId));
         }
 
+        // Never write an invented 'archived' value to a domain-specific enum. In particular,
+        // bargaining proposals use a governed lifecycle (withdrawn/superseded) and must not
+        // be silently hard-deleted or answered with an accidental database HTTP 500.
+        const statusCol = getColumn(table, 'status');
+        if (statusCol && !supportsGenericArchive(statusCol)) {
+          throw ApiError.forbidden(`Generic deletion is unavailable for ${resourceName}; use the governed lifecycle action.`);
+        }
+
         // A route may declare lockedAuthCheck without beforeUpdate/mergeJsonColumns (e.g. personal calendars).
         // The callback must run against THIS row under SELECT ... FOR UPDATE inside the write/audit transaction.
         // Checking an earlier unlocked row, or ignoring the callback on DELETE, permits same-org IDOR.
@@ -756,7 +764,6 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
             if (!authResult.ok) {
               throw authResult.status === 401 ? ApiError.unauthorized() : ApiError.forbidden();
             }
-            const statusCol = getColumn(table, 'status');
             return statusCol
               ? (await tx.update(table).set({ status: 'archived', updatedAt: new Date() } as Record<string, unknown>).where(and(...conditions)).returning())[0] as Record<string, unknown> | undefined
               : (await tx.delete(table).where(and(...conditions)).returning())[0] as Record<string, unknown> | undefined;
@@ -766,7 +773,6 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         }
 
         // Try soft delete first (status → archived), fall back to hard delete
-        const statusCol = getColumn(table, 'status');
         if (statusCol) {
           const row = await audited(organizationId, userId, 'delete', ['status'], async (tx) => (await tx.update(table)
             .set({ status: 'archived', updatedAt: new Date() } as Record<string, unknown>)
