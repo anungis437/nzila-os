@@ -125,14 +125,12 @@ jobs:
 
           # GitHub is the independent source for the workflow run identity. A
           # caller-supplied run ID must not substitute another SHA or workflow.
-          RUN_JSON=$(gh run view "$SOURCE_RUN_ID" --json headSha,headBranch,workflowName,conclusion)
-          echo "$RUN_JSON" | jq -e --arg sha "$GITHUB_SHA" '
-            .headSha == $sha and .headBranch == "main" and
-            .workflowName == "Deploy Staging" and .conclusion == "success"
-          ' >/dev/null || {
-            echo "::error::Selected staging run does not match the exact release commit and trusted workflow"
-            exit 1
-          }
+          # A successful build-only staging run is NOT a deployed/verified
+          # staging revision. GitHub must independently report a completed,
+          # successful real staging-deploy job for this exact dispatch run.
+          RUN_JSON=$(gh run view "$SOURCE_RUN_ID" --json databaseId,headSha,headBranch,workflowName,event,conclusion,jobs)
+          printf '%s\n' "$RUN_JSON" > "$RUNNER_TEMP/nzila-staging-run.json"
+          node scripts/release/verify-staging-run.mjs "$RUNNER_TEMP/nzila-staging-run.json" "$GITHUB_SHA" "$SOURCE_RUN_ID"
 
           echo "source_run_id=$SOURCE_RUN_ID" >> "$GITHUB_OUTPUT"
 

@@ -113,6 +113,7 @@ export function checkRepository() {
   // Existing CI classifier is the mandatory entrypoint for this fast guard.
   requireText('.github/workflows/ci.yml', 'node scripts/engineering/p0-static-guard.mjs')
   validateProtectedReleaseWorkflow(read('.github/workflows/deploy-production.yml'))
+  requireText('.github/workflows/deploy-production.yml', 'verify-staging-run.mjs')
   console.log('P0 structural governance: PASS (not release authorization)')
   return true
 }
