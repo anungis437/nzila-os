@@ -73,7 +73,13 @@ export const PATCH = withApi({
     );
     const [original] = await tx.select().from(memberBreaks).where(predicate).limit(1);
     if (!original) throw ApiError.notFound('Break self-report');
-    const [updated] = await tx.update(memberBreaks).set(body).where(predicate).returning();
+    // Repeat all ownership predicates on the UPDATE itself; the preliminary
+    // read is not an authorization substitute for the mutation statement.
+    const [updated] = await tx.update(memberBreaks).set(body).where(and(
+      eq(memberBreaks.id, params.id),
+      eq(memberBreaks.organizationId, organizationId),
+      eq(memberBreaks.memberId, member.id),
+    )).returning();
     if (!updated) throw ApiError.notFound('Break self-report');
     await persistAtomicAudit(tx, {
       organizationId, userId, action: 'member.break.self_report.amend',
