@@ -25,7 +25,7 @@ describe('platform-agent-workflows', () => {
       expect(wf.steps.every((s) => s.status === 'pending')).toBe(true)
     })
 
-    it('completes step with policy allow', () => {
+    it('does not self-certify completion from policy allow and arbitrary output', () => {
       const wf = createWorkflow({
         name: 'test',
         triggerEvent: 'test',
@@ -39,8 +39,9 @@ describe('platform-agent-workflows', () => {
         output: { done: true },
       })
 
-      expect(result.status).toBe('completed')
-      expect(result.steps[0].status).toBe('completed')
+      // A policy allow and arbitrary output are not independent proof.
+      expect(result.status).toBe('blocked')
+      expect(result.steps[0].status).toBe('blocked')
     })
 
     it('blocks step when policy denies', () => {
@@ -202,7 +203,7 @@ describe('platform-agent-workflows', () => {
 
       const events = getAuditTimeline({ eventType: 'workflow_step_executed' })
       expect(events).toHaveLength(1)
-      expect(events[0].policyResult).toBe('pass')
+      expect(events[0].policyResult).toBe('fail')
     })
 
     it('emits recommendation_generated audit event', () => {

@@ -54,6 +54,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      # P0 governance is a prerequisite of the existing mandatory classifier.
+      # This does not create a new optional/advisory status context.
+      - name: Verify engineering authority and outcome boundaries
+        run: |
+          node scripts/engineering/p0-static-guard.mjs
+          node --test scripts/engineering/p0-static-guard.test.mjs
+
       - name: Classify changed paths once
         id: plan
         run: |

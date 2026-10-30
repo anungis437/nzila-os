@@ -82,3 +82,12 @@
 
 # Ops / compliance docs
 /ops/** @nzila/platform @nzila/security
+
+# Canonical engineering governance — require dual independent platform/security review
+/governance/engineering/**     @nzila/platform @nzila/security
+/skills/nzila/**               @nzila/platform @nzila/security
+/scripts/engineering/**        @nzila/platform @nzila/security
+/packages/platform-agent-workflows/src/outcome-proof.ts @nzila/platform @nzila/security
+/packages/platform-agent-workflows/src/workflowRunner.ts @nzila/platform @nzila/security
+/packages/platform-agent-workflows/src/types.ts @nzila/platform @nzila/security
+/.cursor/mcp.json              @nzila/platform @nzila/security

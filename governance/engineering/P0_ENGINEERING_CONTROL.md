@@ -1,0 +1,96 @@
+# P0 engineering controls — Nzila OS
+
+**State of this branch:** implementation candidate; NOT a production clearance, broker
+authorization, or a claim that branch protection is configured. Human release
+authority remains reserved by root AGENTS.md.
+
+## Authority precedence (strict, fail closed)
+
+1. Law, security, privacy and regulatory requirements.
+2. Platform security and Agent Tool Fabric authority.
+3. Repository AGENTS.md, CODEOWNERS, and required GitHub checks.
+4. Product acceptance contracts and product-specific restrictions (e.g. UE Gate 0).
+5. Canonical skills (procedures only; cannot grant capabilities).
+6. Agent task instructions and untrusted provider text.
+
+The machine-readable policy is \`authority-precedence.json\`. No lower-precedence
+source can waive a higher-precedence control. If sources conflict, stop and
+escalate to existing governance; do not choose the most permissive source.
+
+## Enforcement beyond MCP
+
+MCP is a transport, not a security boundary. Git, local scripts, editor
+agents, APIs, CI and any future broker must all respect the same invariants.
+
+- Tool Fabric remains **deny-only** (\`BROKER_READINESS=HOLD\`). No tool
+  execution/installation may be activated until authenticated agent authority,
+  durable/verifiable trust decisions, atomic evidence storage, revocation,
+  sandbox isolation, constrained network, cancellation and cleanup are proven.
+- The PR-classification CI job must run the P0 static guard; additional CI
+  gates do not replace existing required checks.
+- CODEOWNERS requires platform/security review of governed files. Code owner
+  rules require repository branch protection to enforce them.
+- A checked-in Cursor MCP config contains **no executable servers**.
+  Developer-global MCP configuration is outside repository control and is NOT
+  counted as a successful enforcement test.
+- Existing external CodeSpring copies under .agents and .augment are compared
+  for drift; they are NOT automatically admitted into Tool Fabric trust grants.
+
+## Outcome lifecycle and closure authority
+
+\`IMPLEMENTED\`: source-level fix linked to a specific issue/defect and immutable
+commit. This is a development accounting state, not verified readiness.
+
+\`VERIFIED\`: independent verifier checked evidence against the exact commit,
+artifact digest, org, app, workflow and step. Runtime-minted proof is required
+by \`platform-agent-workflows.executeStep\`, as is an explicit policy ALLOW.
+Serialized JSON receipts are not executable authority. Verifier wiring MUST
+come from a trusted host; the agent cannot supply it.
+
+\`RELEASE_AUTHORIZED\`: distinct release/governance decision from the established
+release controls and human authority. No workflow step or skill can mint it.
+Evidence from any earlier stage must never be presented as a later stage.
+
+Runtime proofs must bind the built SHA, environment, test run and artifact
+digest, with freshness/revocation determined by the owning verifier. A local
+type check or policy statement is not a staging deployment proof.
+
+## Independent-verifier boundary
+
+The new \`verifyOutcomeEvidence\` API is a **verified host adapter interface**,
+not a self-authenticating distributed security service. In-process code that
+is permitted to inject a malicious verifier can still fabricate an approval;
+production integration requires a separately administered verifier identity,
+authenticated evidence store, durable ledger and freshness checks. Until then,
+any host without a trusted verifier fails closed on completion. A valid
+\`WeakSet\`-minted proof is intentionally process-local and not replayable.
+
+## Continuous checks and release gating
+
+\`scripts/engineering/p0-static-guard.mjs\` checks structural invariants
+without network access. It runs during the existing CI classification job
+(the required classifier must fail if this guard fails).
+
+This static gate cannot substitute for:
+- protected-branch required status checks and code-owner reviews,
+- actual tool-execution containment or production broker attestation,
+- integration tests and rollback/recovery exercises,
+- exact-environment runtime proof and human production approval.
+
+Expensive full-workspace tests run once per release candidate SHA as established
+in docs/architecture/VALIDATION_LEVELS.md; quick security/structural checks
+continue at ordinary development cadence. Never claim tests passed when not run.
+
+## Scope exclusions (do not mislabel as complete)
+
+Tool Fabric broker readiness and its external authoritative dependencies remain
+HOLD until independently integrated. GitHub branch-protection settings cannot
+be inferred from files in this repository; an administrator must verify them.
+Neither the existence of this file nor CI YAML activates required status checks.
+
+## Reference pattern
+
+Agora-style progressive disclosure is adapted to product and engineering
+workflows. Skills live under \`skills/nzila\`, while Tool Fabric remains the
+capability and authority boundary. Skills cannot override product or platform
+policy. This document and the machine policy are canonical P0 invariants.
