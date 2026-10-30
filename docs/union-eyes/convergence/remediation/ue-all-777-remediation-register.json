@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 42,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 149,
-    "engineeringRemaining": 628,
+    "engineeringCorrected": 150,
+    "engineeringRemaining": 627,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 19
   },
@@ -328,6 +328,10 @@
     {
       "sha": "aacd2548af1c794e3b2d573cc83a6b5018992f1f",
       "description": "Chatbot moderation now refuses missing key, provider errors and malformed responses; no fail-open continuation. Source contract regression added. Other AI control-plane and provenance defects remain open; exact HEAD verification pending."
+    },
+    {
+      "sha": "b46d981ef6ce6ce706eeddd693dbd43b9459b0b8",
+      "description": "Shared anonymized clause item and list projections now hide original employer and owner identifiers from non-owners. Free-text de-identification and stakeholder acceptance remain unproven; no defect marked CLOSED."
     }
   ],
   "records": [
@@ -2696,7 +2700,16 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "GATE0-CLAUSE-SHARING-ANONYMIZATION",
+        "path": "apps/union-eyes/app/api/clause-library/[id]/route.ts; apps/union-eyes/app/api/clause-library/route.ts",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/clause-library-anonymization.contract.test.ts",
+        "explanation": "For non-owner readers of anonymized shared clauses, item GET no longer exposes originalEmployerName, creator user ID or source organization identity; list GET also hides the source union identity for anonymized shared clauses. Source-level structural regressions added. Free-text de-identification and human review of clause content are NOT proven by this correction and remain an explicit privacy acceptance concern.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "sourceCommit": "b46d981ef6ce6ce706eeddd693dbd43b9459b0b8"
+      }
     },
     {
       "defectId": "DEF-0B4-CLAUSE-LIBRARY-CREATOR-USER-IDS-DISCLOSED",
