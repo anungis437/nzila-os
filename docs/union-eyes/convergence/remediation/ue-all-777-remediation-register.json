@@ -86,11 +86,11 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 31,
+    "withCurrentRunSourceOrRegressionWork": 32,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 17,
-    "engineeringRemaining": 760,
+    "engineeringCorrected": 18,
+    "engineeringRemaining": 759,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately."
   },
   "verificationPolicy": {
@@ -1879,10 +1879,30 @@
       "title": "The break compliance report returns per-member denied, missed and flagged counts to any steward while the generic break route holds a member to their own rows, so the report is authorized more broadly than the records it is computed from.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "source": [
+          "apps/union-eyes/app/api/breaks/compliance/route.ts"
+        ],
+        "tests": [
+          "apps/union-eyes/app/api/__tests__/breaks-compliance-privacy.route.test.ts"
+        ],
+        "repair": "Replaced per-member steward report with organization-only self-report totals under tenant RLS; suppresses cohorts of 1–4, does not imply employer verification, and requires durable read audit. Member-owned self-report routes remain unchanged.",
+        "sourceState": "PATCHED_NOT_ACCEPTED",
+        "unitState": "PENDING_AT_EXACT_HEAD",
+        "nativeState": "PENDING_AT_EXACT_HEAD",
+        "runtimeState": "PENDING_AT_EXACT_HEAD",
+        "limits": "No source-backed case-representation authority for steward-level individual break reporting; such detail remains unavailable. No independent approval."
+      },
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/app/api/breaks/compliance/route.ts",
+        "explanation": "Replaced per-member steward report with organization-only self-report totals under tenant RLS; suppresses cohorts of 1–4, does not imply employer verification, and requires durable read audit. Member-owned self-report routes remain unchanged.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B3-ALERT-INBOX-MEMBER-FLOOR-NO-REDACTION",
