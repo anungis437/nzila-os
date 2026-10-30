@@ -171,3 +171,17 @@ set these PASS values solely because the generator accepts CLI flags. This
 is **necessary, not sufficient** for release certification: Trivy, secrets,
 image digest provenance, environment approval and other runtime assertions
 remain separately required and cannot be synthesized from these two outcomes.
+
+## Operational evidence generation reliability
+
+CI and the standalone ops-pack workflow generate a fresh operational **assessment**
+from source-backed observations before validating it. Existing committed exports
+are not treated as current measurements: missing or stale inputs become `null`
+with `source_needed` explaining the missing provider or integration.
+
+A temporary GitHub Actions API outage, expired token, or malformed provider result
+must not manufacture zero, a healthy percentage, or a build PASS. The collector
+records the missing evidence as unknown and retains it as an output artifact;
+the independent production/readiness gates still require real supporting data.
+The Node negative tests run with both ops-pack paths so this distinction
+remains verifiable even when source APIs are unavailable.

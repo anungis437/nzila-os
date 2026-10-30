@@ -38,6 +38,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
+      - name: Prove source freshness and outage handling
+        run: node --test tooling/scripts/generate-ops-evidence.test.mjs
+
       - name: Generate truthful time-stamped operational evidence
         run: pnpm ops:evidence
         env:
