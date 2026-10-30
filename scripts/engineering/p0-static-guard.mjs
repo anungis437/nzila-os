@@ -41,7 +41,7 @@ export function validateFirstPartySkill(raw) {
   for (const key of ['name:', 'description:', 'license:', 'version:']) {
     if (!front.includes(key)) fail('skill missing ' + key)
   }
-  if (/^\\s*(allowed[-_]?tools|permissions|approved|trust|grants?|auto[-_]?approve|capabilities|mcpServers|command|shell|execution)\\s*:/mi.test(front)) {
+  if (/^\s*(allowed[-_]?tools|permissions|approved|trust|grants?|auto[-_]?approve|capabilities|mcpServers|command|shell|execution)\s*:/mi.test(front)) {
     fail('skill attempts to encode authority')
   }
   if (raw.length > 256 * 1024) fail('skill exceeds size limit')
