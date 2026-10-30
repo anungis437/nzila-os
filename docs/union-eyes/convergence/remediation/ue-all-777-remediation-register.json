@@ -86,7 +86,7 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 18,
+    "withCurrentRunSourceOrRegressionWork": 19,
     "closed": 0,
     "overallGO": false
   },
@@ -251,6 +251,10 @@
     {
       "sha": "f94d7ddfe6eeb32496ec71526a1f3fc0c2c64f3e",
       "description": "Remove orphan generic CRUD organizations policy after governed access-log and sharing-settings containment, correct stale authorization and governance regressions, and fail closed for all dashboard CSV exports (0B.6 defect) rather than returning fabricated empty 200 outside production; new focused route regression added. Latest source unverified."
+    },
+    {
+      "sha": "3924e6b7914a7c716d713265370a38c36a199089",
+      "description": "Fix 0B.8 health-safety incident trend cross-tenant aggregation: authenticated tenant only, explicit SQL predicate in daily/monthly queries, transaction RLS binding, no query-selected org or unscoped fallback; new adversarial unit tests pending exact-SHA CI."
     }
   ],
   "records": [
@@ -7230,8 +7234,19 @@
       "title": "The incident trend route ignores the organization of the session: it takes organizationId from the query string, uses it as the only organization predicate, and when the parameter is absent runs the aggregate over workplace_incidents with no organization predicate at all, so which rows are counted depends only on row-level security applied to the connection; the route never compares the supplied id with the caller organization and no handler code limits the query to it.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_UNVERIFIED",
+        "paths": [
+          "apps/union-eyes/app/api/health-safety/incidents/trends/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/health-safety-incidents-trends-tenant.route.test.ts"
+        ],
+        "engineeringHead": "3924e6b7914a7c716d713265370a38c36a199089",
+        "repair": "Both daily and monthly aggregates now derive organizationId solely from authenticated context, require it, bind the exact organization in withRLSContext and include an unconditional organization_id SQL predicate. The caller's organizationId query string is ignored and unsupported periods are refused.",
+        "limits": "New source and adversarial mocked regression are committed but not yet unit-, PG15/16-, or real HTTP/browser-verified. Full health-safety persona authorization and aggregate correctness remain subject to acceptance."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
     },
