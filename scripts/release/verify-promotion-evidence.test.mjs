@@ -7,6 +7,7 @@ import { createHash, generateKeyPairSync, sign } from 'node:crypto'
 import { canonical, computeSignedPayloadDigest, verifyPromotionEvidence } from './verify-promotion-evidence.mjs'
 
 const COMMIT = 'a'.repeat(40)
+const RUN = '123456'
 const IMAGE = 'example.invalid/app@sha256:' + 'b'.repeat(64)
 const hash = text => createHash('sha256').update(text).digest('hex')
 
@@ -19,15 +20,17 @@ function makeFixture() {
   const sbomDigest = hash(sbom)
   const now = new Date().toISOString()
   const manifest = { source_workflow: 'deploy-staging', commit_sha: COMMIT,
-    attestation_ref: 'release-attestation.json', built_at: now, artifact_digest: sbomDigest,
+    attestation_ref: 'release-attestation.json', built_at: now, run_id: RUN, artifact_digest: sbomDigest,
     sbom_hash: sbomDigest, deployTargets: [{ name: 'demo', image: IMAGE }] }
   const attestation = { version: '2.0', commitSha: COMMIT,
+    stagingRunId: RUN, manifestDigest: hash(JSON.stringify(manifest)),
     contractTestResult: 'pass', sloGateResult: 'pass', sbomDigest,
     secretScanSummary: { ran: true, clean: true, findings: 0 },
     trivySummary: { ran: true, critical: 0, high: 0, medium: 0, low: 0 },
     artifactDigests: [{ name: 'demo', digest: 'c'.repeat(64), fileCount: 1 }],
     lockfileHash: 'd'.repeat(64), timestamp: now, environment: 'staging' }
   function write() {
+    attestation.manifestDigest = hash(JSON.stringify(manifest))
     const digest = computeSignedPayloadDigest(attestation)
     const signature = sign(null, Buffer.from(digest, 'hex'), privateKey).toString('hex')
     writeFileSync(join(directory, 'sbom.json'), sbom)
@@ -38,7 +41,7 @@ function makeFixture() {
   }
   write()
   return { directory, publicKeyPem, manifest, attestation, write,
-    verify: () => verifyPromotionEvidence({ directory, expectedCommit: COMMIT, publicKeyPem }),
+    verify: () => verifyPromotionEvidence({ directory, expectedCommit: COMMIT, expectedRunId: RUN, publicKeyPem }),
     cleanup: () => rmSync(directory, { recursive: true, force: true }) }
 }
 test('nested canonical hashing preserves modifications', () => {
@@ -64,7 +67,7 @@ test('wrong source commit is denied', () => {
   const x = makeFixture()
   try {
     assert.throws(() => verifyPromotionEvidence({
-      directory: x.directory, expectedCommit: 'f'.repeat(40),
+      directory: x.directory, expectedCommit: 'f'.repeat(40), expectedRunId: RUN,
       publicKeyPem: x.publicKeyPem,
     }), /source commit/)
   } finally { x.cleanup() }
@@ -82,5 +85,39 @@ test('non-CycloneDX SBOM rejected', () => {
   try {
     writeFileSync(join(x.directory, 'sbom.json'), '{}')
     assert.throws(() => x.verify(), /SBOM is empty/)
+  } finally { x.cleanup() }
+})
+
+test('substituted staging run ID is denied', () => {
+  const x = makeFixture()
+  try {
+    assert.throws(() => verifyPromotionEvidence({
+      directory: x.directory, expectedCommit: COMMIT,
+      expectedRunId: '999999', publicKeyPem: x.publicKeyPem,
+    }), /source commit or provenance/)
+  } finally { x.cleanup() }
+})
+test('manifest target tampering is denied by signed manifest hash', () => {
+  const x = makeFixture()
+  try {
+    const altered = { ...x.manifest, deployTargets: [{ name: 'demo', image: 'attacker.invalid/app@sha256:' + 'f'.repeat(64) }] }
+    writeFileSync(join(x.directory, 'artifact-manifest.json'), JSON.stringify(altered))
+    assert.throws(() => x.verify(), /source commit or provenance/)
+  } finally { x.cleanup() }
+})
+test('signed but unsafe high-severity scan is denied', () => {
+  const x = makeFixture()
+  try {
+    x.attestation.trivySummary.high = 1
+    x.write()
+    assert.throws(() => x.verify(), /mandatory recorded quality\/security proof absent/)
+  } finally { x.cleanup() }
+})
+test('missing trusted staging run coordinate is denied', () => {
+  const x = makeFixture()
+  try {
+    assert.throws(() => verifyPromotionEvidence({
+      directory: x.directory, expectedCommit: COMMIT, publicKeyPem: x.publicKeyPem,
+    }), /missing\/invalid trusted staging run ID/)
   } finally { x.cleanup() }
 })
