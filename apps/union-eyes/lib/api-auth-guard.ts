@@ -763,14 +763,14 @@ export async function getUserContext(): Promise<UnifiedUserContext | null> {
 
     if (resolvedOrgId) {
       membership = await db.query.organizationMembers.findFirst({
-        where: (om, { eq, and }) => and(eq(om.userId, userId), eq(om.organizationId, resolvedOrgId)),
+        where: (om, { eq, and, isNull }) => and(eq(om.userId, userId), eq(om.organizationId, resolvedOrgId), eq(om.status, 'active'), isNull(om.deletedAt)),
         columns: { id: true, organizationId: true, role: true },
       });
     }
 
     if (!membership) {
       membership = await db.query.organizationMembers.findFirst({
-        where: (om, { eq }) => eq(om.userId, userId),
+        where: (om, { eq, and, isNull }) => and(eq(om.userId, userId), eq(om.status, 'active'), isNull(om.deletedAt)),
         columns: { id: true, organizationId: true, role: true },
       });
     }
@@ -898,7 +898,7 @@ export async function getUserContextForOrganization(
   return withSystemContext(async () => {
   // Only an ACTIVE membership counts: a pending, suspended or inactive row is not access.
   const membership = await db.query.organizationMembers.findFirst({
-    where: (om, { eq, and }) => and(eq(om.userId, userId), eq(om.organizationId, organizationId), eq(om.status, 'active')),
+    where: (om, { eq, and, isNull }) => and(eq(om.userId, userId), eq(om.organizationId, organizationId), eq(om.status, 'active'), isNull(om.deletedAt)),
     columns: { id: true, organizationId: true, role: true },
   });
 
@@ -1069,7 +1069,7 @@ async function getUserRoleFromDatabase(userId: string, organizationId?: string |
     }
 
     const membershipByOrg = await db.query.organizationMembers.findFirst({
-      where: (om, { eq, and }) => and(eq(om.userId, userId), eq(om.organizationId, organizationId)),
+      where: (om, { eq, and, isNull }) => and(eq(om.userId, userId), eq(om.organizationId, organizationId), eq(om.status, 'active'), isNull(om.deletedAt)),
       columns: { role: true },
     });
 
@@ -1309,7 +1309,8 @@ export async function hasRoleInOrganization(
       where: (om, { eq, and }) => and(
         eq(om.userId, actorUserId),
         eq(om.organizationId, organizationId),
-        eq(om.status, 'active')
+        eq(om.status, 'active'),
+        isNull(om.deletedAt)
       ),
       columns: { role: true },
     });
@@ -1354,7 +1355,8 @@ export async function getUserRole(
       where: (om, { eq, and }) => and(
         eq(om.userId, userId),
         eq(om.organizationId, organizationId),
-        eq(om.status, 'active')
+        eq(om.status, 'active'),
+        isNull(om.deletedAt)
       ),
       columns: { role: true },
     });
