@@ -344,6 +344,76 @@
           "explanation": "A run with failed session-reminder or expiry-warning sends answers 500 through jobResponse naming the failed batch, with the sent/failed counts and collected errors in the body; the message no longer claims success. The route writes nothing, so it is classified as a read-only POST for the audit ratchet."
         }
       ]
+    },
+    {
+      "id": "B04-RESEND-WEBHOOK",
+      "family": "F01 Provider webhooks: Resend delivery events applied by rules, once, in one transaction",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B6-SYS-RESEND-UNMATCHED-EVENTS-ACKNOWLEDGED-AND-DROPPED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/communications/webhooks/resend/route.ts",
+            "apps/union-eyes/lib/communications/resend-event-rules.ts",
+            "apps/union-eyes/app/api/__tests__/communications-webhooks-resend.pglite.test.ts"
+          ],
+          "explanation": "An event matching neither a message_log row nor a delivery-ledger row answers 404 retryable so the provider redelivers (covering an event that beats the sender storing the provider message id); a redelivery after the row exists applies it. Both are tested against PostgreSQL (pglite)."
+        },
+        {
+          "prefix": "DEF-0B6-SYS-RESEND-STATUS-OVERWRITTEN-BY-OUT-OF-ORDER-EVENTS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/communications/webhooks/resend/route.ts",
+            "apps/union-eyes/lib/communications/resend-event-rules.ts",
+            "apps/union-eyes/app/api/__tests__/communications-webhooks-resend.pglite.test.ts",
+            "apps/union-eyes/db/schema/domains/communications/campaigns.ts"
+          ],
+          "explanation": "Status only advances to a higher rank (a late sent, delivered or opened never overwrites bounced, failed or complained); fact timestamps are filled when missing; existing metadata is preserved. The table comment no longer claims the log is immutable and states the real rule. Mutation-proved."
+        },
+        {
+          "prefix": "DEF-0B6-SYS-RESEND-REDELIVERY-DOUBLE-COUNTS-STATS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/communications/webhooks/resend/route.ts",
+            "apps/union-eyes/lib/communications/resend-event-rules.ts",
+            "apps/union-eyes/app/api/__tests__/communications-webhooks-resend.pglite.test.ts"
+          ],
+          "explanation": "Each statistic counts a message at most once (a counted set persisted in message_log.metadata, seeded from timestamps and terminal status for older rows), and the campaign counters advance inside the UPDATE (jsonb || jsonb_build_object over the stored value) rather than from a value read earlier. Tested with redelivery and with a counter another writer already advanced. Mutation-proved."
+        },
+        {
+          "prefix": "DEF-0B6-SYS-RESEND-SUPPRESSION-UPDATES-ONLY-ONE-PREFERENCE-ROW",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/communications/webhooks/resend/route.ts",
+            "apps/union-eyes/lib/communications/resend-event-rules.ts",
+            "apps/union-eyes/app/api/__tests__/communications-webhooks-resend.pglite.test.ts"
+          ],
+          "explanation": "A complaint or suppression now creates the preference row when none exists, writes a revoked consent record and the audit entry, and applies once per message in the same transaction.",
+          "remaining": "Suppression is still scoped to the one organization on the message row; suppressing the same address in other organizations and in distribution-list subscriptions needs a cross-organization address-suppression design."
+        },
+        {
+          "prefix": "DEF-0B6-SYS-RESEND-LEDGER-CALLBACK-OUTSIDE-TRANSACTION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/communications/webhooks/resend/route.ts",
+            "apps/union-eyes/lib/communications/resend-event-rules.ts",
+            "apps/union-eyes/app/api/__tests__/communications-webhooks-resend.pglite.test.ts",
+            "apps/union-eyes/lib/services/delivery-reconciliation.ts"
+          ],
+          "explanation": "recordProviderCallback takes the caller's transaction (inserting inside a savepoint so a duplicate does not abort it); the webhook runs it in the same transaction as the message row, so a ledger failure rolls everything back and the retry repeats nothing. An unmatched or ambiguous ledger result is logged, and an event matching nothing is retried. Rollback proved with a failing audit write."
+        },
+        {
+          "prefix": "DEF-0B6-SYS-RESEND-MESSAGE-ID-LOOKUP-UNINDEXED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/db/migrations/20261031_message_log_provider_message_id_index.sql",
+            "apps/union-eyes/db/migrations/20261031_message_log_provider_message_id_index_rollback.sql",
+            "apps/union-eyes/db/schema/domains/communications/campaigns.ts"
+          ],
+          "explanation": "Migration 20261031 creates a unique (provider, provider_message_id) index when no pair repeats, otherwise a plain index with the duplicate count reported; both branches and idempotence executed on PostgreSQL (pglite). The webhook locks the row (FOR UPDATE) and refuses with 409 when two rows carry the id. Native PostgreSQL qualification of the migration is still to run."
+        }
+      ]
     }
   ]
 }

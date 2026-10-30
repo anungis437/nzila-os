@@ -3,11 +3,15 @@ import { and, eq } from 'drizzle-orm';
 import { Resend, type WebhookEventPayload } from 'resend';
 import { z } from 'zod';
 
-import { campaigns, communicationPreferences, messageLog } from '@/db/schema';
+import { campaigns, communicationPreferences, consentRecords, messageLog } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
 import { recordProviderCallback, type DeliveryLedgerEvent } from '@/lib/services/delivery-reconciliation';
+import {
+  advanceStatus, alreadyCounted, incrementedStats, keysToCount, nextMetadata,
+  type MessageStatus, type StatKey,
+} from '@/lib/communications/resend-event-rules';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,29 +21,6 @@ const WebhookEnvelopeSchema = z.object({
   signature: z.string().min(1),
   payload: z.string().min(1),
 });
-
-type MessageStatus =
-  | 'sent'
-  | 'delivered'
-  | 'opened'
-  | 'clicked'
-  | 'bounced'
-  | 'failed'
-  | 'unsubscribed'
-  | 'complained';
-
-function incrementStat(stats: any, key: string): Record<string, unknown> {
-  const current =
-    typeof stats === 'object' && stats !== null && !Array.isArray(stats)
-      ? (stats as Record<string, unknown>)
-      : {};
-
-  const currentValue = typeof current[key] === 'number' ? current[key] : 0;
-  return {
-    ...current,
-    [key]: currentValue + 1,
-  };
-}
 
 function getEventTimestamp(event: WebhookEventPayload): Date {
   const raw = event.created_at;
@@ -67,7 +48,7 @@ function callbackLedgerEvent(eventType: WebhookEventPayload['type']): Extract<De
 
 function mapEventToStatus(eventType: WebhookEventPayload['type']): {
   status: MessageStatus;
-  statKey: string;
+  statKey: StatKey;
   timeField?: 'sentAt' | 'deliveredAt' | 'openedAt' | 'clickedAt' | 'bouncedAt';
 } | null {
   switch (eventType) {
@@ -178,9 +159,12 @@ export async function POST(request: NextRequest) {
 
   const providerMessageId = event.data.email_id;
   const eventTimestamp = getEventTimestamp(event);
+  const ledgerEvent = callbackLedgerEvent(event.type);
 
-  await withSystemContext(async (tx) => {
-    const [logRow] = await tx
+  // One transaction carries the message row, the statistics, any suppression and the delivery-ledger row, so a failure anywhere
+  // rolls all of them back and the provider's retry repeats nothing that was already applied.
+  const outcome = await withSystemContext(async (tx) => {
+    const rows = await tx
       .select({
         id: messageLog.id,
         campaignId: messageLog.campaignId,
@@ -193,104 +177,95 @@ export async function POST(request: NextRequest) {
         bouncedAt: messageLog.bouncedAt,
         status: messageLog.status,
         errorMessage: messageLog.errorMessage,
+        metadata: messageLog.metadata,
       })
       .from(messageLog)
       .where(eq(messageLog.providerMessageId, providerMessageId))
-      .limit(1);
+      .limit(2)
+      .for('update');
 
+    // The same provider id on two rows would make the receiving organization arbitrary; refuse to guess.
+    if (rows.length > 1) return { kind: 'ambiguous' as const };
+
+    const [logRow] = rows;
     if (!logRow) {
-      logger.warn('[resend-webhook] No message_log row for provider message', {
-        providerMessageId,
-        eventType: event.type,
-      });
-      return;
+      const ledger = ledgerEvent
+        ? await recordProviderCallback({ providerMessageId, event: ledgerEvent, providerId: 'resend', webhookId: svixId }, tx)
+        : null;
+      return ledger === 'recorded' || ledger === 'duplicate' || ledger === 'ignored'
+        ? { kind: 'ledger-only' as const, ledger }
+        : { kind: 'unmatched' as const, ledger };
     }
 
-    const updates: {
-      status: MessageStatus;
-      sentAt?: Date;
-      deliveredAt?: Date;
-      openedAt?: Date;
-      clickedAt?: Date;
-      bouncedAt?: Date;
-      errorMessage?: string;
-      metadata?: Record<string, unknown>;
-    } = {
-      status: mapping.status,
-      metadata: {
-        ...(typeof logRow.errorMessage === 'string' ? { lastErrorMessage: logRow.errorMessage } : {}),
-        resendEventType: event.type,
-        resendEventCreatedAt: event.created_at,
-      },
+    const counted = alreadyCounted(logRow);
+    const added = keysToCount(mapping.statKey, counted);
+    const status = advanceStatus(logRow.status, mapping.status);
+
+    const updates: Record<string, unknown> = {
+      metadata: nextMetadata(logRow.metadata, counted, added, {
+        type: event.type,
+        createdAt: event.created_at,
+        lastErrorMessage: typeof logRow.errorMessage === 'string' ? logRow.errorMessage : null,
+      }),
     };
+    if (status !== logRow.status) updates.status = status;
 
-    let shouldIncrementStat = false;
-
-    if (mapping.timeField === 'sentAt' && !logRow.sentAt) {
-      updates.sentAt = eventTimestamp;
-      shouldIncrementStat = true;
-    }
-    if (mapping.timeField === 'deliveredAt' && !logRow.deliveredAt) {
-      updates.deliveredAt = eventTimestamp;
-      shouldIncrementStat = true;
-    }
-    if (mapping.timeField === 'openedAt' && !logRow.openedAt) {
-      updates.openedAt = eventTimestamp;
-      shouldIncrementStat = true;
-    }
+    // Fact timestamps are about the message, not a verdict, so a late event still fills one that is missing.
+    if (mapping.timeField === 'sentAt' && !logRow.sentAt) updates.sentAt = eventTimestamp;
+    if (mapping.timeField === 'deliveredAt' && !logRow.deliveredAt) updates.deliveredAt = eventTimestamp;
+    if (mapping.timeField === 'openedAt' && !logRow.openedAt) updates.openedAt = eventTimestamp;
     if (mapping.timeField === 'clickedAt' && !logRow.clickedAt) {
       updates.clickedAt = eventTimestamp;
-      if (!logRow.openedAt) {
-        updates.openedAt = eventTimestamp;
-      }
-      shouldIncrementStat = true;
+      if (!logRow.openedAt) updates.openedAt = eventTimestamp;
     }
-    if (mapping.timeField === 'bouncedAt' && !logRow.bouncedAt) {
-      updates.bouncedAt = eventTimestamp;
-      shouldIncrementStat = true;
-    }
-
-    if (mapping.status === 'failed' && event.type === 'email.failed') {
+    if (mapping.timeField === 'bouncedAt' && !logRow.bouncedAt) updates.bouncedAt = eventTimestamp;
+    if (event.type === 'email.failed' && status === 'failed') {
       updates.errorMessage = event.data.failed?.reason || 'delivery_failed';
-      shouldIncrementStat = true;
     }
 
-    if (mapping.status === 'unsubscribed' || mapping.status === 'complained') {
-      shouldIncrementStat = true;
-
-      await tx
+    // Suppression changes the recipient's consent state, so it is applied once per message, with a consent record and an audit entry,
+    // and it creates the preference row when the recipient never had one.
+    if ((mapping.status === 'unsubscribed' || mapping.status === 'complained') && added.includes(mapping.statKey)) {
+      const reason = mapping.status === 'complained' ? 'complaint' : 'suppressed';
+      const preference = {
+        emailEnabled: false,
+        globallyUnsubscribed: true,
+        unsubscribedAt: eventTimestamp,
+        unsubscribeReason: reason,
+        updatedAt: new Date(),
+      };
+      const touched = await tx
         .update(communicationPreferences)
-        .set({
-          emailEnabled: false,
-          globallyUnsubscribed: true,
-          unsubscribedAt: eventTimestamp,
-          unsubscribeReason: mapping.status === 'complained' ? 'complaint' : 'suppressed',
-          updatedAt: new Date(),
-        })
-        .where(
-          and(
-            eq(communicationPreferences.organizationId, logRow.organizationId),
-            eq(communicationPreferences.userId, logRow.recipientId),
-          ),
-        );
-      // Delivery statistics are provider telemetry; suppressing a recipient's email is a change to their consent state.
+        .set(preference)
+        .where(and(
+          eq(communicationPreferences.organizationId, logRow.organizationId),
+          eq(communicationPreferences.userId, logRow.recipientId),
+        ))
+        .returning({ id: communicationPreferences.id });
+      if (touched.length === 0) {
+        await tx.insert(communicationPreferences).values({
+          organizationId: logRow.organizationId,
+          userId: logRow.recipientId,
+          ...preference,
+        });
+      }
+      await tx.insert(consentRecords).values({
+        organizationId: logRow.organizationId,
+        userId: logRow.recipientId,
+        consentType: 'email_delivery',
+        channel: 'email',
+        status: 'revoked',
+        method: 'provider_webhook',
+        metadata: { reason, providerMessageId, messageLogId: logRow.id, eventId: svixId },
+      });
       await persistAtomicAudit(tx, {
         organizationId: logRow.organizationId,
         userId: 'system:resend-webhook',
         action: 'communications.email_suppression.apply',
         resourceType: 'communication_preferences',
         resourceId: logRow.recipientId,
-        details: { reason: mapping.status === 'complained' ? 'complaint' : 'suppressed', messageLogId: logRow.id, providerMessageId },
+        details: { reason, messageLogId: logRow.id, providerMessageId },
       });
-    }
-
-    if (
-      mapping.timeField === undefined
-      && logRow.status === mapping.status
-      && mapping.status !== 'clicked'
-      && mapping.status !== 'opened'
-    ) {
-      shouldIncrementStat = false;
     }
 
     await tx
@@ -298,37 +273,33 @@ export async function POST(request: NextRequest) {
       .set(updates)
       .where(and(eq(messageLog.id, logRow.id), eq(messageLog.organizationId, logRow.organizationId)));
 
-    if (logRow.campaignId && shouldIncrementStat) {
-      const [campaign] = await tx
-        .select({ stats: campaigns.stats })
-        .from(campaigns)
-        .where(and(eq(campaigns.id, logRow.campaignId), eq(campaigns.organizationId, logRow.organizationId)))
-        .limit(1);
-
-      if (campaign) {
-        let nextStats = incrementStat(campaign.stats, mapping.statKey);
-        if (mapping.status === 'clicked' && !logRow.openedAt) {
-          nextStats = incrementStat(nextStats, 'opened');
-        }
-
-        await tx
-          .update(campaigns)
-          .set({
-            stats: nextStats,
-            updatedAt: new Date(),
-          })
-          .where(and(eq(campaigns.id, logRow.campaignId), eq(campaigns.organizationId, logRow.organizationId)));
-      }
+    if (logRow.campaignId && added.length > 0) {
+      await tx
+        .update(campaigns)
+        .set({ stats: incrementedStats(campaigns.stats, added), updatedAt: new Date() })
+        .where(and(eq(campaigns.id, logRow.campaignId), eq(campaigns.organizationId, logRow.organizationId)));
     }
+
+    const ledger = ledgerEvent
+      ? await recordProviderCallback({ providerMessageId, event: ledgerEvent, providerId: 'resend', webhookId: svixId }, tx)
+      : null;
+    return { kind: 'applied' as const, ledger, organizationId: logRow.organizationId };
   });
 
-  const ledgerEvent = callbackLedgerEvent(event.type);
-  if (ledgerEvent) {
-    await recordProviderCallback({
-      providerMessageId,
-      event: ledgerEvent,
-      providerId: 'resend',
-      webhookId: svixId,
+  if (outcome.kind === 'ambiguous') {
+    logger.error('[resend-webhook] More than one message_log row carries the provider message id', { providerMessageId, eventType: event.type });
+    return NextResponse.json({ error: 'Ambiguous provider message id' }, { status: 409 });
+  }
+  if (outcome.kind === 'unmatched') {
+    // A non-2xx makes the provider redeliver, which covers an event that beats the sender storing the provider message id.
+    logger.warn('[resend-webhook] No message_log or delivery-ledger row for provider message; asking the provider to retry', {
+      providerMessageId, eventType: event.type, ledger: outcome.ledger,
+    });
+    return NextResponse.json({ error: 'Message not recorded', retryable: true }, { status: 404 });
+  }
+  if (outcome.kind === 'applied' && (outcome.ledger === 'unmatched' || outcome.ledger === 'ambiguous')) {
+    logger.warn('[resend-webhook] Delivery-ledger callback did not match a ledger row', {
+      providerMessageId, eventType: event.type, ledger: outcome.ledger, organizationId: outcome.organizationId,
     });
   }
 

@@ -1,19 +1,19 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 56,
- "partial": 5,
- "outstanding": 721,
- "accountedFor": 721,
+ "corrected": 61,
+ "partial": 6,
+ "outstanding": 716,
+ "accountedFor": 716,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
    "purpose": "Scheduled and provider-driven jobs: method, secret, scheduling, replay and failure reporting",
-   "defects": 34,
+   "defects": 30,
    "severity": {
     "HIGH": 5,
-    "MEDIUM": 23,
-    "LOW": 6
+    "MEDIUM": 20,
+    "LOW": 5
    },
    "namedRoutes": 7,
    "namedFiles": 0,
@@ -21,7 +21,7 @@
     "0B.1": 1,
     "0B.3": 1,
     "0B.5": 1,
-    "0B.6": 9,
+    "0B.6": 5,
     "0B.7": 1,
     "0B.8": 10,
     "0B.9": 3,
@@ -109,11 +109,11 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 122,
+   "defects": 121,
    "severity": {
     "HIGH": 17,
     "MEDIUM": 63,
-    "LOW": 42
+    "LOW": 41
    },
    "namedRoutes": 27,
    "namedFiles": 0,
@@ -123,7 +123,7 @@
     "0B.3": 2,
     "0B.4": 4,
     "0B.5": 4,
-    "0B.6": 17,
+    "0B.6": 16,
     "0B.7": 27,
     "0B.8": 9,
     "0B.9": 11,
@@ -310,22 +310,6 @@
    },
    {
     "id": "DEF-0B5-COGNITION-KPI-ROI-FROM-ASSUMED-HOURS",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B6-SYS-RESEND-UNMATCHED-EVENTS-ACKNOWLEDGED-AND-DROPPED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-SYS-RESEND-STATUS-OVERWRITTEN-BY-OUT-OF-ORDER-EVENTS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-SYS-RESEND-REDELIVERY-DOUBLE-COUNTS-STATS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-SYS-RESEND-MESSAGE-ID-LOOKUP-UNINDEXED-AND-NOT-UNIQUE",
     "severity": "LOW"
    },
    {
@@ -1315,10 +1299,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B6-SYS-RESEND-LEDGER-CALLBACK-OUTSIDE-TRANSACTION",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B6-SYS-CONTACT-UNBOUNDED-FIELDS-AND-EMAIL-LOGGED",
     "severity": "LOW"
    },
@@ -1814,7 +1794,8 @@
    },
    {
     "id": "DEF-0B6-SYS-RESEND-SUPPRESSION-UPDATES-ONLY-ONE-PREFERENCE-ROW",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B6-SYS-CALENDAR-SYNC-SWALLOWED-EVENT-ERRORS-COUNTED-AS-IMPORTED",

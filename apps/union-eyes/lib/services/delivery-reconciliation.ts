@@ -9,6 +9,7 @@ import { and, eq } from 'drizzle-orm';
 import { v4 as uuid } from 'uuid';
 
 import { db } from '@/db';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { notificationDeliveryLog } from '@/db/schema/domains/communications';
 
 export const DELIVERY_LEDGER_EVENTS = [
@@ -180,13 +181,18 @@ export async function loadDeliveryFacts(organizationId: string, idempotencyKey: 
   return ledgerEventsFromRows(rows);
 }
 
+/**
+ * Records a provider callback in the delivery ledger. Pass the caller's transaction as `executor` to commit the ledger row with the
+ * caller's other writes: a failure then rolls all of them back together and the provider's retry repeats none of them twice.
+ */
 export async function recordProviderCallback(input: {
   providerMessageId: string;
   event: Extract<DeliveryLedgerEvent, 'accepted' | 'delivered' | 'failed' | 'bounced' | 'suppressed'>;
   providerId: string;
   webhookId: string;
-}): Promise<'recorded' | 'duplicate' | 'ignored' | 'unmatched' | 'ambiguous'> {
-  const rows = await db
+}, executor?: RLSTx): Promise<'recorded' | 'duplicate' | 'ignored' | 'unmatched' | 'ambiguous'> {
+  const reader = executor ?? db;
+  const rows = await reader
     .select({
       event: notificationDeliveryLog.event,
       externalEventId: notificationDeliveryLog.externalEventId,
@@ -209,8 +215,7 @@ export async function recordProviderCallback(input: {
   const organizationId = [...organizations][0];
   const notificationId = facts.find((fact) => fact.notificationId)?.notificationId;
   if (!organizationId || !notificationId) return 'ambiguous';
-  try {
-    await db.insert(notificationDeliveryLog).values({
+  const write = (handle: RLSTx) => handle.insert(notificationDeliveryLog).values({
       id: uuid(),
       organizationId,
       notificationId,
@@ -220,6 +225,11 @@ export async function recordProviderCallback(input: {
       externalEventId: input.providerMessageId,
       details: { webhookId: input.webhookId, providerMessageId: input.providerMessageId },
     });
+  try {
+    // A unique violation aborts the surrounding transaction unless it happens inside a savepoint, so a caller's transaction
+    // gets one and can carry on to answer 'duplicate' or 'ambiguous'.
+    if (executor) await executor.transaction((savepoint) => write(savepoint as unknown as RLSTx));
+    else await write(db);
   } catch (error) {
     const conflict = callbackWriteConflict(error);
     if (conflict) return conflict;
