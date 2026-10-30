@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 165,
+ "corrected": 170,
  "partial": 22,
- "outstanding": 612,
- "accountedFor": 612,
+ "outstanding": 607,
+ "accountedFor": 607,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -51,9 +51,9 @@
   {
    "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
    "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
-   "defects": 68,
+   "defects": 67,
    "severity": {
-    "HIGH": 25,
+    "HIGH": 24,
     "MEDIUM": 30,
     "LOW": 13
    },
@@ -66,7 +66,7 @@
     "0B.5": 4,
     "0B.6": 12,
     "0B.7": 4,
-    "0B.8": 4,
+    "0B.8": 3,
     "0B.9": 9,
     "0B.10": 9,
     "0B.11": 11,
@@ -128,9 +128,9 @@
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 88,
+   "defects": 87,
    "severity": {
-    "HIGH": 11,
+    "HIGH": 10,
     "MEDIUM": 65,
     "LOW": 12
    },
@@ -144,7 +144,7 @@
     "0B.5": 3,
     "0B.6": 9,
     "0B.7": 8,
-    "0B.8": 13,
+    "0B.8": 12,
     "0B.9": 6,
     "0B.10": 9,
     "0B.11": 17,
@@ -179,9 +179,9 @@
   {
    "family": "F08-PII-DISCLOSURE-AND-PROJECTION",
    "purpose": "Personal-data disclosure: project, redact or restrict returned fields",
-   "defects": 44,
+   "defects": 42,
    "severity": {
-    "HIGH": 3,
+    "HIGH": 1,
     "MEDIUM": 28,
     "LOW": 13
    },
@@ -189,7 +189,7 @@
    "namedFiles": 1,
    "tranches": {
     "0B.3": 1,
-    "0B.4": 5,
+    "0B.4": 3,
     "0B.6": 3,
     "0B.7": 6,
     "0B.8": 5,
@@ -242,9 +242,9 @@
   {
    "family": "F11-AI-GOVERNANCE",
    "purpose": "AI governance: consent, sensitivity, explainability and human accountability",
-   "defects": 19,
+   "defects": 18,
    "severity": {
-    "HIGH": 3,
+    "HIGH": 2,
     "MEDIUM": 14,
     "LOW": 2
    },
@@ -253,7 +253,7 @@
    "tranches": {
     "0B.2": 2,
     "0B.3": 2,
-    "0B.4": 3,
+    "0B.4": 2,
     "0B.6": 2,
     "0B.7": 2,
     "0B.8": 1,
@@ -535,10 +535,6 @@
    {
     "id": "DEF-0B8-HS-TRAINING-FIGURES-READ-A-TABLE-NO-ROUTE-WRITES",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B8-HS-TRENDS-ORGANIZATION-FROM-QUERY-AND-NO-PREDICATE-WHEN-ABSENT",
-    "severity": "HIGH"
    },
    {
     "id": "DEF-0B8-JUR-KNOWLEDGE-BASE-ITEM-GET-INCREMENTS-VIEW-COUNT-IN-SYSTEM-CONTEXT-WITHOUT-ORG-PREDICATE",
@@ -1489,10 +1485,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B8-HS-INCIDENT-ITEM-READ-MEMBER-FLOOR-WHOLE-ROW",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B8-ICRA-CLAIM-BINDS-TO-ANY-SIGNED-IN-USER-ORGANIZATION-AND-KEEPS-CAPABILITY",
     "severity": "MEDIUM"
    },
@@ -2002,16 +1994,8 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B4-CALENDAR-EVENTS-PERSONAL-CALENDAR-LEAK",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B4-CBA-INGESTION-FETCHES-UNRESTRICTED-URLS",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B4-CLAUSE-LIBRARY-ANONYMIZATION-NOT-ENFORCED-ON-READ",
-    "severity": "HIGH"
    },
    {
     "id": "DEF-0B4-CLAUSE-LIBRARY-CREATOR-USER-IDS-DISCLOSED",
@@ -2274,10 +2258,6 @@
    },
    {
     "id": "DEF-0B3-WEEKLY-SUMMARY-FABRICATED-MODEL-CLAIM",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B4-CHATBOT-SAFETY-SKIPPED-OR-FAILS-OPEN",
     "severity": "HIGH"
    },
    {
