@@ -70,21 +70,18 @@ export const POST = withApi(
             eq(modelMetadata.version, body.modelVersion),
           ),
         )
+        // The statistics are read, changed and written back, so the row is held for the duration: two feedbacks no longer overwrite each other.
+        .for('update')
         .limit(1);
 
-      const activeModel = model
-        ? model
-        : (
-            await tx
-              .insert(modelMetadata)
-              .values({
-                organizationId,
-                modelType: 'sla_breach_risk',
-                version: body.modelVersion,
-                parameters: {},
-              })
-              .returning()
-          )[0];
+      // Feedback scores a model that exists. It no longer creates one under a version the caller names, and a prediction that records its
+      // own model version can only be scored against that version.
+      if (!model) throw ApiError.notFound('Model version');
+      const recordedVersion = (prediction as { modelVersion?: string | null }).modelVersion;
+      if (recordedVersion && recordedVersion !== model.version) {
+        throw ApiError.conflict('The prediction was made by a different model version');
+      }
+      const activeModel = model;
 
       const predicted = Number(prediction.predictedValue ?? 0);
       const actual = body.actualBreach ? 1 : 0;
@@ -92,6 +89,13 @@ export const POST = withApi(
 
       const currentParams = (activeModel.parameters ?? {}) as Record<string, unknown>;
       const currentStats = (currentParams.feedbackStats ?? {}) as Record<string, unknown>;
+
+      // One outcome per prediction: a repeated submission would count the same case again and drag the error statistics.
+      const scoredIds = Array.isArray(currentParams.scoredPredictionIds) ? (currentParams.scoredPredictionIds as string[]) : [];
+      const queued = Array.isArray(currentParams.trainingDataQueue) ? (currentParams.trainingDataQueue as Array<{ predictionId?: string }>) : [];
+      if (scoredIds.includes(prediction.id) || queued.some((entry) => entry.predictionId === prediction.id)) {
+        throw ApiError.conflict('An outcome has already been recorded for this prediction');
+      }
 
       const previousObs = Number(currentStats.observations ?? 0);
       const previousMae = Number(currentStats.meanAbsoluteError ?? 0);
@@ -129,6 +133,7 @@ export const POST = withApi(
           lastUpdatedAt: new Date().toISOString(),
         },
         trainingDataQueue,
+        scoredPredictionIds: [...scoredIds, prediction.id].slice(-5000),
         retrainSignal: {
           recommended: retrainRecommended,
           reason: retrainRecommended

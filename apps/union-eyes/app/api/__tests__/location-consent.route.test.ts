@@ -61,6 +61,19 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
     m.standardSuccessResponse.mockImplementation((data: unknown) => new Response(JSON.stringify(data), { status: 200 }));
   });
 
+  // DEF-0B8-JUR-LOCATION-CONSENT-TEXT-AND-PURPOSE-ARE-CLIENT-SUPPLIED-AND-UNVALIDATED
+  it('POST refuses a body whose allowance flag is not a boolean or whose text is empty, recording no consent', async () => {
+    const { POST } = await loadRoute();
+    const base = { purpose: 'strike', purposeDescription: 'desc', consentText: 'I agree' };
+    for (const extra of [{ allowedDuringStrike: 'false' }, { allowedDuringEvents: 1 }, { consentText: '' }]) {
+      const response = await POST(new NextRequest('http://localhost/api/location/consent', { method: 'POST', body: JSON.stringify({ ...base, ...extra }) }));
+      expect(response.status).toBe(400);
+    }
+    const response = await POST(new NextRequest('http://localhost/api/location/consent', { method: 'POST', body: 'not json' }));
+    expect(response.status).toBe(400);
+    expect(m.requestLocationConsent).not.toHaveBeenCalled();
+  });
+
   it('POST grants consent for the authenticated caller, ignoring a client-supplied userId in the body', async () => {
     const { POST } = await loadRoute();
 

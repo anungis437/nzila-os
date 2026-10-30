@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 283,
- "partial": 42,
- "outstanding": 494,
- "accountedFor": 494,
+ "corrected": 292,
+ "partial": 44,
+ "outstanding": 485,
+ "accountedFor": 485,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -235,22 +235,20 @@
   {
    "family": "F11-AI-GOVERNANCE",
    "purpose": "AI governance: consent, sensitivity, explainability and human accountability",
-   "defects": 18,
+   "defects": 9,
    "severity": {
-    "HIGH": 2,
-    "MEDIUM": 14,
+    "HIGH": 0,
+    "MEDIUM": 7,
     "LOW": 2
    },
    "namedRoutes": 0,
    "namedFiles": 0,
    "tranches": {
-    "0B.2": 2,
-    "0B.3": 2,
-    "0B.4": 2,
-    "0B.6": 2,
+    "0B.2": 1,
+    "0B.6": 1,
     "0B.7": 2,
     "0B.8": 1,
-    "0B.9": 5,
+    "0B.9": 2,
     "0B.10": 2
    }
   },
@@ -1814,30 +1812,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B2-AI-CACHE-PLATFORM-WIDE-ORG-ADMIN",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B3-ANALYTICS-ROWS-FORGE-AI-PROVENANCE",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B3-WEEKLY-SUMMARY-FABRICATED-MODEL-CLAIM",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B4-CHATBOT-FALLBACK-PRESENTED-AS-AI-REPLY",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B4-CHATBOT-RAG-LIMITS-BEFORE-SCORING",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-EDU-ITEM-FACADES-REWRITE-OR-DELETE-COURSE-BY-PATH-ID",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B6-EDU-UI-CALLS-OPERATIONS-THE-ROUTES-DO-NOT-EXPORT",
     "severity": "MEDIUM"
    },
@@ -1851,26 +1825,16 @@
    },
    {
     "id": "DEF-0B8-JUR-LOCATION-CONSENT-TEXT-AND-PURPOSE-ARE-CLIENT-SUPPLIED-AND-UNVALIDATED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B9-ML-CHURN-PROFILES-NAMED-MEMBERS-FROM-THEIR-CASE-HISTORY-WITH-NO-CONSENT-OR-PURPOSE-DECISION",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B9-ML-SLA-FEEDBACK-IS-REPEATABLE-CALLER-STATED-VERSION-UNBOUND-AND-A-LOST-UPDATE-READ-MODIFY-WRITE",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B9-ML-DECLARED-PREDICTION-SHAPE-CONFLICTS-WITH-THE-SQL-THAT-CREATES-THE-TABLE",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B9-ML-ALERTS-DRIFT-FINDING-IS-A-LITERAL-PSI-AND-ALERT-IDS-CHANGE-EVERY-SECOND",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B9-ML-ALERT-ACKNOWLEDGE-GUID-NEVER-MATCHES-A-GENERATED-ID-AND-THE-ACKNOWLEDGEMENT-IS-KEYED-ON-THE-ID-ALONE",
     "severity": "MEDIUM"
    },
    {

@@ -22,12 +22,14 @@ import {
  */
 
 
-const _locationConsentSchema = z.object({
-  purpose: z.unknown().optional(),
-  purposeDescription: z.string().optional(),
-  consentText: z.unknown().optional(),
-  allowedDuringStrike: z.unknown().optional(),
-  allowedDuringEvents: z.unknown().optional(),
+// The consent record is what the member agreed to, so every field is typed and bounded and an unknown field (such as a user id) is ignored: a boolean that
+// arrives as the string "false" used to be stored as consent to track.
+const locationConsentSchema = z.object({
+  purpose: z.string().trim().min(1).max(100),
+  purposeDescription: z.string().trim().min(1).max(1000),
+  consentText: z.string().trim().min(1).max(4000),
+  allowedDuringStrike: z.boolean().optional(),
+  allowedDuringEvents: z.boolean().optional(),
 });
 
 
@@ -40,15 +42,14 @@ export const POST = withApiAuth(async (req: NextRequest) => {
     const userId = user.id;
     const organizationId = await getOrganizationIdForUser(userId);
 
-    const body = await req.json();
-    const { purpose, purposeDescription, consentText, allowedDuringStrike, allowedDuringEvents } = body;
-
-    if (!purpose || !purposeDescription || !consentText) {
+    const parsed = locationConsentSchema.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) {
       return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      'Missing required fields: purpose, purposeDescription, consentText'
-    );
+        ErrorCode.VALIDATION_ERROR,
+        'purpose, purposeDescription and consentText are required text, the two allowance flags must be true or false, and any other field is ignored',
+      );
     }
+    const { purpose, purposeDescription, consentText, allowedDuringStrike, allowedDuringEvents } = parsed.data;
 
     // Get IP and User-Agent for audit
     const ipAddress = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";

@@ -87,6 +87,16 @@ async function aiEmbed(text: string, organizationId?: string): Promise<number[]>
 /**
  * Chat Session Manager
  */
+/** Upper bound on the knowledge rows scored for one question. */
+const RAG_CANDIDATE_CAP = 500;
+
+export class ChatbotUnavailableError extends Error {
+  constructor() {
+    super('The assistant is temporarily unavailable');
+    this.name = 'ChatbotUnavailableError';
+  }
+}
+
 export class ChatSessionManager {
   /**
    * Create a new chat session
@@ -279,26 +289,33 @@ export class RAGService {
           eq(knowledgeBase.isActive, true),
           eq(knowledgeBase.organizationId, options.organizationId),
         ))
-        .limit(options.limit || 5),
+        // The limit applies to the best matches, not to the rows read: a bounded candidate set is scored first, so a relevant
+        // document is not lost because it was not among the first few rows the database returned.
+        .limit(RAG_CANDIDATE_CAP),
     );
-    
-    // Calculate cosine similarity (simplified)
-    const scored = results.map((doc) => {
-      const docEmbedding = JSON.parse(doc.embedding as unknown as string);
-      const similarity = cosineSimilarity(queryEmbedding, docEmbedding);
-      
-      return {
+
+    // Calculate cosine similarity; a row whose embedding is missing or unreadable cannot be scored and is skipped.
+    const scored = results.flatMap((doc) => {
+      let docEmbedding: number[];
+      try {
+        docEmbedding = typeof doc.embedding === 'string' ? JSON.parse(doc.embedding) : (doc.embedding as unknown as number[]);
+      } catch {
+        return [];
+      }
+      if (!Array.isArray(docEmbedding) || docEmbedding.length !== queryEmbedding.length) return [];
+      return [{
         documentId: doc.id,
         title: doc.title,
-        relevanceScore: similarity,
+        relevanceScore: cosineSimilarity(queryEmbedding, docEmbedding),
         excerpt: doc.content.substring(0, 200) + "...",
-      };
+      }];
     });
-    
-    // Filter by threshold and sort
+
+    // Filter by threshold, order by relevance, then keep the requested number.
     return scored
-      .filter((r) => r.relevanceScore >= (options.similarityThreshold || 0.7))
-      .sort((a, b) => b.relevanceScore - a.relevanceScore);
+      .filter((r) => r.relevanceScore >= (options.similarityThreshold ?? 0.7))
+      .sort((a, b) => b.relevanceScore - a.relevanceScore)
+      .slice(0, options.limit || 5);
   }
   
   /**
@@ -436,18 +453,13 @@ export class ChatbotService {
             model: session.model,
           });
         } catch (aiError) {
-          logger?.error('[ChatbotService] AI generation failed — returning fallback response', {
+          // No canned text is stored as the assistant's reply: it would sit in the conversation, billed and counted as a model
+          // answer. The failure is raised, nothing is recorded, and the caller sees the service is unavailable.
+          logger?.error('[ChatbotService] AI generation failed', {
             error: aiError instanceof Error ? aiError.message : String(aiError),
             sessionId: data.sessionId,
           });
-          generated = {
-            content:
-              "I'm sorry, the AI assistant is temporarily unavailable. " +
-              "Please try again in a few moments. If the issue persists, " +
-              "contact your union representative for assistance.",
-            tokensUsed: 0,
-            model: 'fallback',
-          };
+          throw new ChatbotUnavailableError();
         }
 
         // NZ-RISK-026: Cap response length to prevent full CBA clause extraction

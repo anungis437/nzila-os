@@ -1585,6 +1585,7 @@
    "route": "analytics/insights/route.ts",
    "methods": [
     "GET",
+    "PATCH",
     "POST"
    ],
    "mutating": true,

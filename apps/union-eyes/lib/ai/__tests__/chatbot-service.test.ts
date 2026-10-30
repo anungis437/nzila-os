@@ -102,6 +102,7 @@ vi.mock("@/lib/services/ai/embedding-cache", () => ({
 }));
 
 vi.mock("@/lib/ai/ai-client", () => ({
+  buildOrgAiTrace: () => ({}),
   getAiClient: vi.fn(() => ({
     generate: mocks.mockAiGenerate,
     embed: mocks.mockAiEmbed,
@@ -127,7 +128,7 @@ vi.mock("@/lib/rate-limiter", () => ({
 
 /* ── imports ────────────────────────────────────────────────────────── */
 
-import { ChatSessionManager, RAGService, ChatbotService } from "../chatbot-service";
+import { ChatSessionManager, RAGService, ChatbotService, ChatbotUnavailableError } from "../chatbot-service";
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
 
@@ -259,6 +260,21 @@ describe("RAGService", () => {
     ]);
     const results = await rag.searchDocuments("grievance", { organizationId: "org-1", limit: 5 });
     expect(Array.isArray(results)).toBe(true);
+  });
+
+  // DEF-0B4-CHATBOT-RAG-LIMITS-BEFORE-SCORING
+  it("searchDocuments scores the candidate set before applying the limit, and skips unreadable embeddings", async () => {
+    const aligned = (n: number) => JSON.stringify(Array(384).fill(n));
+    mocks.mockSelectLimit.mockResolvedValueOnce([
+      { id: "weak", title: "Weak", content: "x", embedding: JSON.stringify(Array.from({ length: 384 }, (_, i) => (i === 0 ? 1 : 0))) },
+      { id: "broken", title: "Broken", content: "x", embedding: "not json" },
+      { id: "missing", title: "Missing", content: "x", embedding: null },
+      { id: "best", title: "Best", content: "x", embedding: aligned(0.1) },
+    ]);
+    const results = await rag.searchDocuments("grievance", { organizationId: "org-1", limit: 1, similarityThreshold: 0 });
+    expect(results.map((r) => r.documentId)).toEqual(["best"]);
+    // The query reads a bounded candidate set, not the requested limit.
+    expect(mocks.mockSelectLimit).toHaveBeenCalledWith(500);
   });
 
   it("searchDocuments filters by threshold", async () => {
@@ -408,28 +424,21 @@ describe("ChatbotService", () => {
     ).rejects.toThrow("audit down");
   });
 
-  it("sendMessage handles AI error with fallback", async () => {
+  // Replaced: this test asserted that a failed generation was stored as an assistant reply from the model "fallback". The ai-client mock also
+  // lacked buildOrgAiTrace, so the other sendMessage tests were passing on that canned reply; the mock now provides it.
+  // DEF-0B4-CHATBOT-FALLBACK-PRESENTED-AS-AI-REPLY
+  it("sendMessage raises when generation fails and stores no reply", async () => {
     mocks.mockSelectLimit
       .mockResolvedValueOnce([session])
       .mockResolvedValueOnce([]);
     mocks.mockAiGenerate.mockRejectedValueOnce(new Error("AI down"));
-    mocks.mockInsertReturning.mockResolvedValueOnce([
-      {
-        id: "msg-2",
-        sessionId: "sess-1",
-        role: "assistant",
-        content: "I'm sorry, the AI assistant is temporarily unavailable.",
-        modelUsed: "fallback",
-      },
-    ]);
-    const msg = await bot.sendMessage({
+    await expect(bot.sendMessage({
       sessionId: "sess-1",
       userId: "user-1",
       organizationId: "org-1",
       content: "Hello",
-      useRAG: false,
-    });
-    expect(msg.content).toContain("temporarily unavailable");
+    })).rejects.toBeInstanceOf(ChatbotUnavailableError);
+    expect(mocks.mockInsertValues).not.toHaveBeenCalled();
   });
 
   it("sendMessage with content safety flagged throws", async () => {

@@ -6,7 +6,7 @@
  */
 import { z } from 'zod';
 import { withApi } from '@/lib/api/with-api';
-import { ChatbotService } from '@/lib/ai/chatbot-service';
+import { ChatbotService, ChatbotUnavailableError } from '@/lib/ai/chatbot-service';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { RATE_LIMITS } from '@/lib/rate-limiter';
@@ -62,6 +62,7 @@ export const POST = withApi(
         useRAG: body.useRAG,
       });
     } catch (error) {
+      if (error instanceof ChatbotUnavailableError) throw ApiError.externalService('ai-assistant', 'The assistant is temporarily unavailable. Please try again shortly.');
       const refused = operationAuditResponse(error);
       if (refused) throw ApiError.conflict(refused.body.error.message);
       throw error;

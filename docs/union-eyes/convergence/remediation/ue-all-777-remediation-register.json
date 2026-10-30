@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 283,
-    "engineeringRemaining": 494,
+    "engineeringCorrected": 292,
+    "engineeringRemaining": 485,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 42
+    "engineeringPartial": 44
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -1275,9 +1275,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B23-F11-AI-AND-MODEL-OUTPUT-GOVERNANCE",
+        "path": "apps/union-eyes/app/api/ai/cache-stats/route.ts; apps/union-eyes/app/api/__tests__/ai-cache-stats.route.test.ts; apps/union-eyes/lib/api/__tests__/f11-ai-governance.contract.test.ts",
+        "explanation": "Embedding cache statistics need platform system-administrator authority and are audited (batch B18).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B2-PKI-ATTESTATION-NOT-CRYPTOGRAPHIC",
@@ -1539,9 +1546,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B23-F11-AI-AND-MODEL-OUTPUT-GOVERNANCE",
+        "path": "apps/union-eyes/app/api/analytics/insights/route.ts; apps/union-eyes/app/api/__tests__/analytics-insights.route.test.ts",
+        "explanation": "A create answers 501, so no AI reference id, confidence score or data source can be typed into a stored insight. The only change a person makes is a triage (acknowledge, start, complete, dismiss with a reason) on an existing insight, stamped with their identity and the server clock, guarded by a transition table and a status predicate, and audited in the same transaction. The panel's PATCH, which had no route behind it, now has one.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B3-WEEKLY-SUMMARY-FABRICATED-MODEL-CLAIM",
@@ -1571,7 +1585,14 @@
       },
       "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B23-F11-AI-AND-MODEL-OUTPUT-GOVERNANCE",
+        "path": "apps/union-eyes/app/api/analytics/insights/weekly-summary/route.ts; apps/union-eyes/app/api/__tests__/analytics-weekly-summary.route.test.ts; apps/union-eyes/lib/api/__tests__/f11-ai-governance.contract.test.ts",
+        "explanation": "The weekly summary is a deterministic seven-day aggregate that says so (aiUsed false, no AI reference, no confidence) (upstream's change, existing test and contract).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B3-EXTERNAL-INVOICES-MEMBER-FLOOR",
@@ -2731,9 +2752,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B23-F11-AI-AND-MODEL-OUTPUT-GOVERNANCE",
+        "path": "apps/union-eyes/lib/ai/chatbot-service.ts; apps/union-eyes/app/api/chatbot/messages/route.ts; apps/union-eyes/lib/ai/__tests__/chatbot-service.test.ts",
+        "explanation": "A failed generation raises ChatbotUnavailableError (a 502 from the route) and stores nothing; it no longer saves a canned apology as an assistant message from the model \"fallback\". Test disclosure: the test that asserted the stored fallback was replaced. The ai-client mock lacked buildOrgAiTrace, so the other sendMessage tests had been passing on that canned reply; the mock now provides it and those tests exercise a real generation.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CHATBOT-RAG-LIMITS-BEFORE-SCORING",
@@ -2748,9 +2776,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B23-F11-AI-AND-MODEL-OUTPUT-GOVERNANCE",
+        "path": "apps/union-eyes/lib/ai/chatbot-service.ts; apps/union-eyes/lib/ai/__tests__/chatbot-service.test.ts",
+        "explanation": "The search scores a bounded candidate set (500 rows) and applies the requested limit to the best matches; a row with a missing or unreadable embedding is skipped instead of throwing; a threshold of 0 is honoured.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CHATBOT-SESSION-READ-IGNORES-STATE-AND-FEATURE-GATE",
@@ -4255,9 +4290,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B23-F11-AI-AND-MODEL-OUTPUT-GOVERNANCE",
+        "path": "apps/union-eyes/app/api/education/programs/[id]/enrollments/route.ts; apps/union-eyes/lib/api/__tests__/f11-ai-governance.contract.test.ts",
+        "explanation": "The program enrolment item answers 501 for every method, so a program id can no longer rewrite or delete a training course.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-EDU-COMPLETIONS-ROUTE-NOT-FILTERED-TO-COMPLETED",
@@ -9751,9 +9793,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B23-F11-AI-AND-MODEL-OUTPUT-GOVERNANCE",
+        "path": "apps/union-eyes/app/api/location/consent/route.ts; apps/union-eyes/app/api/__tests__/location-consent.route.test.ts",
+        "explanation": "The body is parsed with a typed, bounded schema: purpose, description and text are non-empty bounded strings and the two allowance flags must be booleans (a string \"false\" was stored as consent); an invalid or non-JSON body is a 400 that records no consent.",
+        "remaining": "The consent text and purpose are still supplied by the client; a server-owned notice with a version the member acknowledges needs a client change.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-JUR-LOCATION-CONSENT-GET-EXPIRES-THE-CONSENT-AS-A-SIDE-EFFECT",
@@ -9978,9 +10028,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B23-F11-AI-AND-MODEL-OUTPUT-GOVERNANCE",
+        "path": "apps/union-eyes/app/api/ml/predictions/churn-risk/route.ts; apps/union-eyes/lib/api/__tests__/f11-ai-governance.contract.test.ts",
+        "explanation": "The churn-risk route answers 501 (batch B10); no member is profiled from case history.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ML-CHURN-INVOCATION-AUDIT-IS-A-SEPARATE-WRITE-BEFORE-VALIDATION-AND-ON-GET",
@@ -10110,9 +10167,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B23-F11-AI-AND-MODEL-OUTPUT-GOVERNANCE",
+        "path": "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/feedback/route.ts; apps/union-eyes/app/api/__tests__/sla-breach-risk-feedback.route.test.ts",
+        "explanation": "The model row is locked for the read-modify-write; a prediction is scored once (409 on a repeat); feedback no longer creates a model under a version the caller names (404), and a prediction that records its own version is scored only against it.",
+        "remaining": "The SLA prediction rows written by the prediction route carry no model version column, so the version binding applies only where the stored prediction has one.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ML-SLA-RETRAIN-SIGNAL-AND-TRAINING-QUEUE-DESCRIBE-A-FORMULA-THAT-NEVER-READS-THEM",
@@ -10371,9 +10436,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B23-F11-AI-AND-MODEL-OUTPUT-GOVERNANCE",
+        "path": "apps/union-eyes/app/api/ml/monitoring/alerts/route.ts; apps/union-eyes/lib/api/__tests__/f11-ai-governance.contract.test.ts",
+        "explanation": "The monitoring alerts route answers 501 (batch B15); no literal drift value or per-second alert id is returned.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ML-ALERT-ACKNOWLEDGE-GUID-NEVER-MATCHES-A-GENERATED-ID-AND-THE-ACKNOWLEDGEMENT-IS-KEYED-ON-THE-ID-ALONE",
@@ -10388,9 +10460,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B23-F11-AI-AND-MODEL-OUTPUT-GOVERNANCE",
+        "path": "apps/union-eyes/app/api/ml/monitoring/alerts/route.ts; apps/union-eyes/lib/api/__tests__/f11-ai-governance.contract.test.ts",
+        "explanation": "The same route answers 501, so there is no acknowledgement to key on an id alone.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ML-ALERTS-ACKNOWLEDGEMENT-JOIN-HAS-NO-ORGANIZATION-PREDICATE-AND-READS-THROUGH-THE-BARE-DB",
