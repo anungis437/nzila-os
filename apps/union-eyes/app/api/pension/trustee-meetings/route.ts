@@ -16,7 +16,7 @@ const createMeetingSchema = z.object({
   title: z.string().trim().min(1).max(255),
   scheduledDate: z.coerce.date(),
   location: z.string().max(255).optional(),
-  agenda: z.string().optional(),
+  agenda: z.string().max(100000).optional(),
 });
 
 export const dynamic = 'force-dynamic';
@@ -69,7 +69,8 @@ export const POST = withApi(
   },
   async ({ body, organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
-    const parsed = createMeetingSchema.parse(body);
+    const parsed = createMeetingSchema.strict().safeParse(body);
+    if (!parsed.success) throw ApiError.badRequest('Invalid trustee meeting scheduling fields');
     return withRLSContext({ organizationId, userId }, async (tx) => {
       const [meeting] = await tx
         .insert(pensionTrusteeMeetings)
