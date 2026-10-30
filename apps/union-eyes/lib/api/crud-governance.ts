@@ -32,15 +32,15 @@ const DENIED = [
 const OWN_ROWS_READ = ['grievances', 'claims', 'claim_deadlines'] as const
 
 const READ_ONLY = [
-  'organization_members', 'organizations', 'dues_transactions',
+  'organization_members', 'dues_transactions',
   'external_invoices', 'polls', 'federations', 'data_classification_policy',
 ] as const
 
 const OPERATIONAL = [
-  'analytics_metrics', 'anti_scab_violations', 'arbitration_decisions', 'arbitrations', 'bargaining_notes',
+  'analytics_metrics', 'anti_scab_violations', 'arbitration_decisions', 'arbitrations',
   'bargaining_proposals', 'bargaining_units', 'break_policies', 'calendar_events', 'calendars', 'campaigns', 'case_studies',
   'cba_clauses', 'clc_sync_log', 'cms_media_library', 'cms_pages', 'cnesst_filings', 'committees', 'communication_preferences',
-  'course_registrations', 'course_sessions', 'donation_campaigns', 'employers', 'external_calendar_connections', 'hazard_reports',
+  'course_registrations', 'course_sessions', 'donation_campaigns', 'employers', 'hazard_reports',
   'in_app_notifications', 'insight_recommendations', 'joint_hs_committees', 'kpi_configurations', 'meeting_rooms', 'member_breaks',
   'member_certifications', 'member_segments', 'message_templates', 'ml_predictions', 'negotiations', 'newsletter_distribution_lists',
   'notifications', 'organizer_tasks', 'organizing_campaigns', 'pay_equity_exercises', 'pilot_applications', 'ppe_equipment',
