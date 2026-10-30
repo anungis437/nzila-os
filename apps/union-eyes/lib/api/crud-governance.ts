@@ -35,6 +35,9 @@ const READ_ONLY = [
   // Analytics metrics are computed evidence, not steward-authored records. A generic role floor must never
   // permit inserting or altering reported measures; ingestion requires a dedicated, audited computation path.
   'analytics_metrics', 'organization_members', 'dues_transactions',
+  // A prediction is a computed output that the SLA list, the realtime alert sweep and the insights generator consume as one. A
+  // steward-chosen row would be stored with no provenance and read as a model result, so only the dedicated scoring routes write it.
+  'ml_predictions',
   'external_invoices', 'polls', 'federations', 'data_classification_policy',
 ] as const
 
@@ -44,7 +47,7 @@ const OPERATIONAL = [
   'cba_clauses', 'clc_sync_log', 'cms_media_library', 'cms_pages', 'cnesst_filings', 'committees', 'communication_preferences',
   'course_registrations', 'course_sessions', 'donation_campaigns', 'employers', 'hazard_reports',
   'in_app_notifications', 'insight_recommendations', 'joint_hs_committees', 'kpi_configurations', 'meeting_rooms',
-  'member_certifications', 'member_segments', 'message_templates', 'ml_predictions', 'negotiations', 'newsletter_distribution_lists',
+  'member_certifications', 'member_segments', 'message_templates', 'negotiations', 'newsletter_distribution_lists',
   'organizer_tasks', 'organizing_campaigns', 'pay_equity_exercises', 'pilot_applications', 'ppe_equipment',
   'preventive_withdrawals', 'push_devices', 'reports', 'right_of_refusal_events', 'safety_inspections',
   'sms_campaigns', 'sms_conversations', 'sms_messages', 'survey_responses', 'surveys', 'testimonials', 'training_courses',

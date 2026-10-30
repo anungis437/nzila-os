@@ -112,6 +112,13 @@ describe('geofence-privacy-service', () => {
     expect(r.consentId).toBe('c1');
   });
 
+  it('eraseLocationData removes tracking and event rows without needing any consent, and reports the total', async () => {
+    pushSel([{ id: 't1' }, { id: 't2' }], [{ id: 'e1' }], []); // tracking delete, events delete, deletion log insert
+    const r = await S.eraseLocationData('u1');
+    expect(r).toEqual({ trackingRecordsDeleted: 2, eventRecordsDeleted: 1, total: 3 });
+    expect(h.db.update).not.toHaveBeenCalled();
+  });
+
   it('revokeLocationConsent throws and deletes nothing when there is no consent to revoke', async () => {
     h.db.delete.mockClear();
     pushSel([]); // update matched nothing

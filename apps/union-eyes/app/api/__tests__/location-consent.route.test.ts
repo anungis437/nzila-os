@@ -8,6 +8,7 @@ const m = vi.hoisted(() => ({
   requestLocationConsent: vi.fn(),
   hasValidConsent: vi.fn(),
   revokeLocationConsent: vi.fn(),
+  eraseLocationData: vi.fn(),
   persistAtomicAudit: vi.fn(),
   standardErrorResponse: vi.fn(),
   standardSuccessResponse: vi.fn(),
@@ -30,6 +31,7 @@ vi.mock('@/services/geofence-privacy-service', () => {
       requestLocationConsent: m.requestLocationConsent,
       hasValidConsent: m.hasValidConsent,
       revokeLocationConsent: m.revokeLocationConsent,
+      eraseLocationData: m.eraseLocationData,
     },
   };
 });
@@ -53,6 +55,7 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
     m.requestLocationConsent.mockResolvedValue({ id: 'consent_1' });
     m.hasValidConsent.mockResolvedValue(true);
     m.revokeLocationConsent.mockResolvedValue({ consentId: 'consent_1' });
+    m.eraseLocationData.mockResolvedValue({ total: 0, trackingRecordsDeleted: 0, eventRecordsDeleted: 0 });
     m.standardErrorResponse.mockImplementation((code: string, message: string) =>
       new Response(JSON.stringify({ code, message }), { status: code === 'AUTH_REQUIRED' ? 401 : 400 }));
     m.standardSuccessResponse.mockImplementation((data: unknown) => new Response(JSON.stringify(data), { status: 200 }));
@@ -134,6 +137,23 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
       m.tx,
       expect.objectContaining({ userId: 'caller-own-id', action: 'location.consent.revoke', resourceId: 'consent_1' }),
     );
+  });
+
+  it('DELETE still erases the member\'s location data when there is no active consent to revoke, and audits the erasure', async () => {
+    const { DELETE } = await loadRoute();
+    const { LocationConsentNotFoundError } = await import('@/services/geofence-privacy-service');
+    m.revokeLocationConsent.mockRejectedValueOnce(new LocationConsentNotFoundError());
+    m.eraseLocationData.mockResolvedValueOnce({ total: 3, trackingRecordsDeleted: 2, eventRecordsDeleted: 1 });
+
+    const response = await DELETE(new NextRequest('http://localhost/api/location/consent?reason=gdpr'));
+
+    expect(response.status).toBe(200);
+    expect(m.eraseLocationData).toHaveBeenCalledWith('caller-own-id', m.tx);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.tx, expect.objectContaining({
+      userId: 'caller-own-id', action: 'location.data.erase',
+      details: expect.objectContaining({ trackingRecordsDeleted: 2, eventRecordsDeleted: 1 }),
+    }));
+    expect((await response.json()).message).toContain('No active location consent');
   });
 
   it('DELETE answers 404 and writes no audit when there is no consent to revoke', async () => {

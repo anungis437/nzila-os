@@ -47,6 +47,10 @@ function mapOrg(row: typeof organizations.$inferSelect) {
 
 type Params = { params: Promise<{ id: string }> }
 
+/** A raw query answers an array on the production driver and { rows } on others; both are rows. */
+const rowsOf = <T,>(result: unknown): T[] =>
+  Array.isArray(result) ? (result as T[]) : ((result as { rows?: T[] } | null)?.rows ?? Array.from((result ?? []) as Iterable<T>))
+
 function assertOrgIdParam(id: string): NextResponse | null {
   if (id === 'current' || !/^[0-9a-fA-F-]{36}$/.test(id)) {
     return NextResponse.json({ error: 'Invalid organization id' }, { status: 400 })
@@ -81,13 +85,13 @@ export async function GET(_req: NextRequest, { params }: Params) {
   // correctly rejects impersonating that descendant, so use the system role only
   // after the explicit canReadOrganization check and the exact organization predicate.
   const readClaims = access.platform || !access.direct.has(id)
-    ? withSystemContext(async () => Array.from(await claimCounts(db)) as Array<{ total: number; active: number }>)
-    : withRLSContext({ organizationId: id }, async (tx) => Array.from(await claimCounts(tx)) as Array<{ total: number; active: number }>)
+    ? withSystemContext(async () => rowsOf<{ total: number; active: number }>(await claimCounts(db)))
+    : withRLSContext({ organizationId: id }, async (tx) => rowsOf<{ total: number; active: number }>(await claimCounts(tx)))
   const [claimRows, childRows] = await Promise.all([
     readClaims,
-    withSystemContext(async () => Array.from(
+    withSystemContext(async () => rowsOf<{ cnt: number }>(
       await db.execute(sql`SELECT count(*)::int AS cnt FROM organizations WHERE parent_id = ${id}`),
-    ) as Array<{ cnt: number }>),
+    )),
   ])
   const claims = claimRows[0] ?? { total: 0, active: 0 }
 

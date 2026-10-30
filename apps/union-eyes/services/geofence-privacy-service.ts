@@ -171,6 +171,16 @@ export class GeofencePrivacyService {
   }
 
   /**
+   * Erase every location record of a member without requiring an active consent. Consent can already be opted out, expired or
+   * never recorded while rows remain (a retention sweep that failed, rows written before consent was tracked), and the right to
+   * have them removed does not depend on a consent row. Returns how many records were removed.
+   */
+  static async eraseLocationData(userId: string, tx: RLSTx = db) {
+    const deleted = await this.deleteAllUserLocationData(userId, "erasure_requested", tx);
+    return { ...deleted, total: deleted.trackingRecordsDeleted + deleted.eventRecordsDeleted };
+  }
+
+  /**
    * Check if user has valid location tracking consent
    */
   static async hasValidConsent(userId: string, context?: "strike" | "event"): Promise<boolean> {

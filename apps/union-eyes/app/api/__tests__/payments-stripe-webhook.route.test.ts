@@ -655,6 +655,46 @@ describe('payments/webhooks/stripe route', () => {
     expect(m.syncWorkbookPurchase).toHaveBeenCalledTimes(1);
   });
 
+  it('issues the claim credential with the paid ICRA tier, bound to the buyer\'s e-mail, in the same fulfilment', async () => {
+    const { POST } = await loadRoute('whsec_test');
+    m.syncIcraPurchase.mockResolvedValue(undefined);
+    m.queueSelect([{ reportTierId: 'continuity_reflection' }], []);
+    const payload = JSON.stringify({
+      id: 'evt_icra_ok_1',
+      type: 'checkout.session.completed',
+      data: { object: {
+        id: 'cs_icra_ok_1',
+        customer_details: { email: 'buyer@example.org' },
+        metadata: { product: 'icra_report', icra_assessment_id: '00000000-0000-0000-0000-000000000099', icra_tier_id: 'executive_continuity_brief' },
+      } },
+    });
+
+    const response = await POST(makeStripeRequest(payload, 'whsec_test'));
+    expect(response.status).toBe(200);
+
+    const sets = (mockDb.update as ReturnType<typeof vi.fn>).mock.results
+      .flatMap((r) => (r.value as { set: ReturnType<typeof vi.fn> }).set.mock.calls.map((call) => call[0] as Record<string, unknown>));
+    expect(sets[0]).toEqual({ reportTierId: 'executive_continuity_brief' });
+    expect(sets[1]).toEqual({
+      claimToken: 'claim-token-123',
+      claimTokenExpiresAt: new Date('2026-06-30T00:00:00.000Z'),
+      claimEmail: 'buyer@example.org',
+    });
+  });
+
+  it('does not issue a credential when the paid tier was already fulfilled (a replayed delivery)', async () => {
+    const { POST } = await loadRoute('whsec_test');
+    m.queueSelect([{ reportTierId: 'executive_continuity_brief' }]);
+    const payload = JSON.stringify({
+      id: 'evt_icra_replay_1',
+      type: 'checkout.session.completed',
+      data: { object: { id: 'cs_icra_replay_1', metadata: { product: 'icra_report', icra_assessment_id: '00000000-0000-0000-0000-000000000099', icra_tier_id: 'executive_continuity_brief' } } },
+    });
+    const response = await POST(makeStripeRequest(payload, 'whsec_test'));
+    expect(response.status).toBe(200);
+    expect(m.generateClaimToken).not.toHaveBeenCalled();
+  });
+
   it('returns a retryable error when ICRA paid-report fulfillment fails', async () => {
     const { POST } = await loadRoute('whsec_test');
     m.withSystemContext.mockRejectedValueOnce(new Error('transient database failure'));

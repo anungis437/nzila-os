@@ -132,21 +132,40 @@ export const DELETE = withApiAuth(async (req: NextRequest) => {
     const { searchParams } = new URL(req.url);
     const reason = searchParams.get("reason");
 
-    await withRLSContext({ organizationId }, async (tx) => {
-      const revoked = await GeofencePrivacyService.revokeLocationConsent(userId, reason || undefined, tx);
-      await persistAtomicAudit(tx, {
-        organizationId,
-        userId,
-        action: 'location.consent.revoke',
-        resourceType: 'member_location_consent',
-        resourceId: revoked.consentId,
-        details: { reason: reason || 'User request' },
-      });
+    const erasedOnly = await withRLSContext({ organizationId }, async (tx) => {
+      try {
+        const revoked = await GeofencePrivacyService.revokeLocationConsent(userId, reason || undefined, tx);
+        await persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: 'location.consent.revoke',
+          resourceType: 'member_location_consent',
+          resourceId: revoked.consentId,
+          details: { reason: reason || 'User request' },
+        });
+        return false;
+      } catch (error) {
+        if (!(error instanceof LocationConsentNotFoundError)) throw error;
+        // No active consent to revoke does not mean no data: the member can still have location records (consent expired or already
+        // withdrawn, a retention sweep that did not finish). Erasure does not depend on consent, so whatever remains is removed.
+        const erased = await GeofencePrivacyService.eraseLocationData(userId, tx);
+        if (erased.total === 0) throw error; // nothing recorded and nothing held: the request has nothing to act on, and no log row is kept
+        await persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: 'location.data.erase',
+          resourceType: 'member_location_data',
+          details: { reason: reason || 'User request', trackingRecordsDeleted: erased.trackingRecordsDeleted, eventRecordsDeleted: erased.eventRecordsDeleted },
+        });
+        return true;
+      }
     });
 
     return NextResponse.json({
       success: true,
-      message: "Location tracking consent revoked. All location data has been deleted.",
+      message: erasedOnly
+        ? "No active location consent was found. The location data that remained has been deleted."
+        : "Location tracking consent revoked. All location data has been deleted.",
     });
   } catch (error) {
     if (error instanceof LocationConsentNotFoundError) {

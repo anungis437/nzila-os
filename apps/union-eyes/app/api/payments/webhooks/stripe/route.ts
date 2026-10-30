@@ -488,6 +488,11 @@ export async function POST(request: NextRequest) {
               break
             }
 
+            const icraBuyerEmail =
+              (session?.customer_details?.email as string | undefined) ??
+              (session?.customer_email as string | undefined) ??
+              (session?.metadata?.email as string | undefined)
+
             // Upgrade the assessment tier and patch the stored profile payload
             // (SYSTEM_ONLY table — bounded system execution, not ordinary db) so
             // the results page reflects the new tier.
@@ -496,6 +501,25 @@ export async function POST(request: NextRequest) {
                 .update(icraAssessments)
                 .set({ reportTierId: icraTierId })
                 .where(eq(icraAssessments.id, icraAssessmentId))
+
+              // A paid assessment is issued the single-use credential the claim route redeems, in the same transaction as the tier
+              // upgrade so a paid tier is never left without it. The guard keeps an already-issued or already-claimed assessment
+              // untouched, so a later upgrade or a replayed delivery cannot replace a token the buyer already holds.
+              await tx
+                .update(icraAssessments)
+                .set({
+                  claimToken: generateClaimToken(),
+                  claimTokenExpiresAt: computeClaimExpiry(),
+                  claimEmail: icraBuyerEmail ?? null,
+                })
+                .where(
+                  and(
+                    eq(icraAssessments.id, icraAssessmentId),
+                    isNull(icraAssessments.claimToken),
+                    isNull(icraAssessments.claimedAt),
+                    isNull(icraAssessments.claimedByUserId),
+                  ),
+                )
 
               const [profileRow] = await tx
                 .select({ profilePayload: icraMaturityProfiles.profilePayload })
@@ -526,10 +550,7 @@ export async function POST(request: NextRequest) {
             // fulfilment, the PDF flow, or the assessment lifecycle.
             // Only runs when the institution voluntarily provided an email
             // (no enrichment, no scraping, no behavioural scoring).
-            const customerEmail =
-              (session?.customer_details?.email as string | undefined) ??
-              (session?.customer_email as string | undefined) ??
-              (session?.metadata?.email as string | undefined)
+            const customerEmail = icraBuyerEmail
             if (customerEmail) {
               void syncIcraPurchase({
                 assessmentId: icraAssessmentId,

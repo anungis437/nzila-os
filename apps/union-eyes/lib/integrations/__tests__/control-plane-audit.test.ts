@@ -4,6 +4,7 @@ const m = vi.hoisted(() => {
   const state = {
     existing: [] as Array<Record<string, unknown>>,
     written: [] as Array<Record<string, unknown>>,
+    sets: [] as Array<Record<string, unknown>>,
     updateRows: null as Array<Record<string, unknown>> | null,
     persistAtomicAudit: vi.fn(),
     executeSync: vi.fn(),
@@ -11,7 +12,11 @@ const m = vi.hoisted(() => {
   };
   const chain = (rows: () => unknown[], op: string) => {
     const c: Record<string, unknown> = {};
-    for (const name of ['set', 'from', 'where', 'limit']) c[name] = () => c;
+    for (const name of ['from', 'where', 'limit', 'for']) c[name] = () => c;
+    c.set = (changes: Record<string, unknown>) => {
+      state.sets.push(changes);
+      return c;
+    };
     c.values = (row: Record<string, unknown>) => {
       state.written.push(row);
       return c;
@@ -74,6 +79,7 @@ describe('integration control plane — audit', () => {
     vi.clearAllMocks();
     m.existing = [];
     m.written = [];
+    m.sets = [];
     m.updateRows = null;
     m.order = [];
     m.persistAtomicAudit.mockResolvedValue(undefined);
@@ -97,6 +103,32 @@ describe('integration control plane — audit', () => {
       }),
     );
     expect(JSON.stringify(m.persistAtomicAudit.mock.calls)).not.toContain('vault/secret-1');
+  });
+
+  const existing = { ...config, enabled: true, settings: { region: 'ca' }, webhookUrl: 'https://hooks.example/x', credentials: { credentialRef: 'vault/old' } };
+
+  it('changing only the credential reference leaves enabled, settings and webhook URL as they were', async () => {
+    m.existing = [existing];
+    await configureIntegrationForOrg('org_1', { provider: IntegrationProvider.BAMBOOHR, type: IntegrationType.HRIS, credentialRef: 'vault/new' }, 'steward_1');
+    expect(Object.keys(m.sets[0]).sort()).toEqual(['credentials', 'updatedAt']);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(tx, expect.objectContaining({
+      details: expect.objectContaining({ settingsChanged: false, webhookUrlChanged: false, credentialRefChanged: true, previouslyEnabled: true }),
+    }));
+  });
+
+  it('applies the fields that are supplied, including an explicit disable and an explicit empty settings object', async () => {
+    m.existing = [existing];
+    await configureIntegrationForOrg('org_1', { provider: IntegrationProvider.BAMBOOHR, type: IntegrationType.HRIS, enabled: false, settings: {}, webhookUrl: null as unknown as undefined }, 'steward_1');
+    expect(m.sets[0]).toMatchObject({ enabled: false, settings: {}, webhookUrl: null });
+  });
+
+  it('refuses with 409, and no audit, when the integration was switched by someone else while configuring', async () => {
+    m.existing = [existing];
+    m.updateRows = [];
+    await expect(
+      configureIntegrationForOrg('org_1', { provider: IntegrationProvider.BAMBOOHR, type: IntegrationType.HRIS, enabled: true }, 'steward_1'),
+    ).rejects.toMatchObject({ code: 'CONFLICT' });
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('configure fails, leaving no integration, when the audit cannot be written', async () => {

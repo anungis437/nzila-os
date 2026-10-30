@@ -7,6 +7,8 @@ const m = vi.hoisted(() => ({
   enforceAISafety: vi.fn(),
   db: { select: vi.fn(), insert: vi.fn() },
   audit: vi.fn(),
+  claim: [] as unknown[],
+  inserted: [] as Array<Record<string, unknown>>,
 }));
 
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError: { badRequest: (msg: string) => Object.assign(new Error(msg), { status: 400 }) }, RATE_LIMITS: { ML_PREDICTIONS: 'ML_PREDICTIONS' }, z: require('zod') }));
@@ -14,7 +16,7 @@ vi.mock('@/lib/ai/ai-feature-guard', () => ({ guardAiFeature: m.guardAiFeature }
 vi.mock('@/lib/services/feature-flags', () => ({ AI_FEATURES: { GRIEVANCE_TRIAGE: 'GRIEVANCE_TRIAGE' } }));
 vi.mock('@nzila/policies', () => ({ enforceAISafety: m.enforceAISafety }));
 vi.mock('@/db', () => ({ db: m.db }));
-vi.mock('@/db/schema', () => ({ mlPredictions: { organizationId: 'organizationId', predictionType: 'predictionType', createdAt: 'createdAt' }, modelMetadata: { organizationId: 'organizationId', modelType: 'modelType', version: 'version', trainedAt: 'trainedAt' } }));
+vi.mock('@/db/schema', () => ({ claims: { claimId: 'claimId', organizationId: 'organizationId', status: 'status', priority: 'priority', updatedAt: 'updatedAt', createdAt: 'createdAt' }, mlPredictions: { organizationId: 'organizationId', predictionType: 'predictionType', createdAt: 'createdAt' }, modelMetadata: { organizationId: 'organizationId', modelType: 'modelType', version: 'version', trainedAt: 'trainedAt' } }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(m.db),
@@ -38,8 +40,13 @@ describe('ml/predictions/sla-breach-risk route', () => {
       });
     m.guardAiFeature.mockResolvedValue(null);
     m.enforceAISafety.mockReturnValue(undefined);
-    m.db.select.mockReturnValue({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => [{ version: 'sla-risk-v1', modelType: 'sla_breach_risk', trainedAt: '2026-01-01' }]) })) })) } as any);
-    m.db.insert.mockReturnValue({ values: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 'pred_1' }]) })) });
+    m.claim = [{ status: 'open', priority: 'high', updatedAt: new Date(Date.now() - 3_600_000), createdAt: new Date(Date.now() - 3_600_000) }];
+    m.inserted = [];
+    // the first select is the case, the second the model record
+    m.db.select
+      .mockReturnValueOnce({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => m.claim) })) })) } as any)
+      .mockReturnValue({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => [{ version: 'sla-risk-v1', modelType: 'sla_breach_risk', trainedAt: '2026-01-01' }]) })) })) } as any);
+    m.db.insert.mockReturnValue({ values: vi.fn((row: Record<string, unknown>) => { m.inserted.push(row); return { returning: vi.fn(async () => [{ id: 'pred_1' }]) }; }) });
     m.audit.mockResolvedValue(undefined);
   });
 
@@ -60,6 +67,45 @@ describe('ml/predictions/sla-breach-risk route', () => {
       m.db,
       expect.objectContaining({ organizationId: 'org_1', userId: 'u1', action: 'ml.sla_breach.predict', resourceId: 'pred_1' }),
     );
+  });
+
+  const call = (features: Record<string, unknown>) => async () => {
+    const { POST } = await loadRoute();
+    return POST(new NextRequest('http://localhost/api/ml/predictions/sla-breach-risk', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ caseId: '550e8400-e29b-41d4-a716-446655440000', features: { transitionCount: 0, hasPreviousBreaches: false, featureRefs: ['f1'], ...features } }),
+    }), { organizationId: 'org_1', userId: 'u1' });
+  };
+
+  it('scores from the case\'s own priority and deadline, ignoring a caller-supplied priority and time remaining', async () => {
+    // the case is high priority with most of its window left; the caller claims urgent and already overdue
+    const honest = await call({ priority: 'low', hoursRemaining: 500 })();
+    m.db.select.mockReset();
+    m.claim = [{ status: 'open', priority: 'high', updatedAt: new Date(Date.now() - 3_600_000), createdAt: new Date(Date.now() - 3_600_000) }];
+    m.db.select
+      .mockReturnValueOnce({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => m.claim) })) })) } as any)
+      .mockReturnValue({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => [{ version: 'sla-risk-v1', modelType: 'sla_breach_risk' }]) })) })) } as any);
+    const inflated = await call({ priority: 'urgent', hoursRemaining: -5 })();
+    expect(inflated.score).toBe(honest.score);
+    expect(inflated.inputs.fromCase.priority).toBe('high');
+  });
+
+  it('answers not found, and stores nothing, for a case that is not in the caller\'s organization', async () => {
+    m.db.select.mockReset();
+    m.db.select.mockReturnValueOnce({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => []) })) })) } as any);
+    await expect(call({})()).rejects.toThrow();
+    expect(m.inserted).toEqual([]);
+    expect(m.audit).not.toHaveBeenCalled();
+  });
+
+  it('presents a rule-based score as one: no confidence, no interval and no training date', async () => {
+    const result = await call({})();
+    expect(result.method).toBe('rule_based_heuristic_v1');
+    expect(result.confidence).toBeNull();
+    expect(result.model).toEqual({ type: 'sla_breach_risk', version: 'sla-risk-v1' });
+    const stored = m.inserted.find((row) => row.predictionType === 'sla_breach_risk');
+    expect(stored).toMatchObject({ confidence: null, lowerBound: null, upperBound: null });
   });
 
   it('does not return a prediction whose audit record cannot be written', async () => {

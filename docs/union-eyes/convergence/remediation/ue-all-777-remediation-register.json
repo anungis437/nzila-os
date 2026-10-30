@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 41,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 88,
-    "engineeringRemaining": 689,
+    "engineeringCorrected": 94,
+    "engineeringRemaining": 683,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 10
+    "engineeringPartial": 12
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -7939,9 +7939,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B08-ICRA-JUR-ML-ORG",
+        "path": "apps/union-eyes/app/api/payments/webhooks/stripe/route.ts; apps/union-eyes/app/api/__tests__/payments-stripe-webhook.route.test.ts",
+        "explanation": "The paid-tier fulfilment now issues the single-use claim credential (32 random bytes, 30-day expiry, bound to the buyer e-mail) in the same transaction as the tier upgrade, guarded so an existing or consumed credential is never replaced, and a replayed delivery issues nothing.",
+        "remaining": "Nothing delivers the credential to the buyer (the same gap exists for workbooks) and there is no ICRA claim page, so a buyer still cannot present it; delivery needs the e-mail sender and a claim route in the UI.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-ICRA-CLAIM-BINDS-TO-ANY-SIGNED-IN-USER-ORGANIZATION-AND-KEEPS-CAPABILITY",
@@ -7973,9 +7981,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B08-ICRA-JUR-ML-ORG",
+        "path": "apps/union-eyes/app/api/icra/report/[assessmentId]/review/route.ts; apps/union-eyes/app/api/__tests__/icra-report-review.route.test.ts",
+        "explanation": "The shared cron secret no longer authorizes a review: the caller must be a signed-in platform administrator (401 / 403 otherwise, nothing written). The reviewer role is the verified governance_reviewer authority; a role asserted in the body is refused unless it matches, and the audit actor is the reviewer's own user id instead of a constant. For an unclaimed prospect assessment the reviewer's identity is still not persisted (no tenant to audit against, and the decision record has no reviewer field).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-ICRA-REVIEW-AUDIT-ONLY-WHEN-A-CLAIMED-ORGANIZATION-EXISTS",
@@ -8109,9 +8124,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B08-ICRA-JUR-ML-ORG",
+        "path": "apps/union-eyes/lib/integrations/control-plane.ts; apps/union-eyes/lib/integrations/__tests__/control-plane-audit.test.ts",
+        "explanation": "An update changes only the fields supplied: sending only a credential reference no longer disables the integration or clears its settings and webhook URL. Switching enabled through configure now carries the same IS NOT DISTINCT FROM concurrency predicate as the activate route (409 and no audit when the state changed), the row is read FOR UPDATE, and the audit records the resulting state, the previous state and which fields changed.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-ICRA-API-KEYS-ROUTES-REFUSE-EVERY-REQUEST-WHILE-THE-AUTHORITY-REGISTER-CALLS-THEM-LIVE",
@@ -8610,9 +8632,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B08-ICRA-JUR-ML-ORG",
+        "path": "apps/union-eyes/app/api/labour-standards/[jurisdiction]/route.ts; apps/union-eyes/lib/canadian-labour-standards/types.ts; apps/union-eyes/app/api/__tests__/labour-standards-profile.route.test.ts",
+        "explanation": "No source of minimum wage rates exists, so none is published: minimumWage is null with minimumWageStatus not_published instead of a zero rate that reads as a real one. Live rates are not provided by this change.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-JUR-RULES-ROUTE-ACCEPTS-ANY-CODE-AND-ANSWERS-SUCCESS-WITH-NO-OR-WRONG-RULES",
@@ -8763,9 +8792,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B08-ICRA-JUR-ML-ORG",
+        "path": "apps/union-eyes/services/geofence-privacy-service.ts; apps/union-eyes/app/api/location/consent/route.ts; apps/union-eyes/app/api/__tests__/location-consent.route.test.ts",
+        "explanation": "When there is no active consent to revoke, DELETE now erases whatever location tracking and geofence rows remain (consent expired or already withdrawn, an unfinished retention sweep) and audits the erasure; it answers 404 only when there is neither a consent to revoke nor data to erase, and then keeps no log row. revokeLocationConsent itself is unchanged.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-JUR-LOCATION-TRACK-WRITES-ARE-UNAUDITED-AND-REFUSALS-ANSWER-500",
@@ -9050,9 +9086,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B08-ICRA-JUR-ML-ORG",
+        "path": "apps/union-eyes/lib/ml/sla-breach-score.ts; apps/union-eyes/app/api/ml/predictions/sla-breach-risk/route.ts; apps/union-eyes/app/api/__tests__/ml-sla-breach-risk.route.test.ts; apps/union-eyes/lib/ml/__tests__/sla-breach-score.test.ts",
+        "explanation": "The score is presented as a rule-based heuristic: no confidence, no interval and no training date are returned or stored. Its priority and time remaining are read from the case in the caller's organization (404 for a case that is not), so a caller can no longer choose the inputs that decide an imminent-breach alert; values sent for them are ignored.",
+        "remaining": "The transition count and previous-breach flag are still caller-supplied (they add at most 0.34, so with a case that has time left they cannot reach the 0.80 alert threshold); deriving them needs the claim history.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ML-SLA-CASE-ID-IS-NEVER-VERIFIED-AND-NOT-STORED-WITH-THE-PREDICTION",
@@ -9283,9 +9327,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B08-ICRA-JUR-ML-ORG",
+        "path": "apps/union-eyes/lib/api/crud-governance.ts",
+        "explanation": "ml_predictions moves from OPERATIONAL to READ_ONLY in the generic CRUD governance, so the six generic prediction routes can no longer insert or alter a prediction row; only the dedicated scoring routes write it. Covered by the existing governance and route-coverage ratchets.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ML-DECLARED-PREDICTION-SHAPE-CONFLICTS-WITH-THE-SQL-THAT-CREATES-THE-TABLE",
@@ -10260,9 +10311,16 @@
         "repair": "Direct DELETE archival now refuses local administrators and returns explicit HTTP 501 even for platform administrators; no archive write occurs without an independent institutional approval workflow.",
         "limits": "The durable two-person approval, reason, confirmation, descendant and billing lifecycle handling remain unimplemented; cannot count this as engineering-corrected or CLOSED."
       },
-      "currentHeadVerification": "SOURCE_CONTAINED_NOT_VERIFIED_AT_CURRENT_HEAD",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B08-ICRA-JUR-ML-ORG",
+        "path": "apps/union-eyes/app/api/organizations/[id]/route.ts; apps/union-eyes/app/api/__tests__/organizations-id-delete-governance.route.test.ts",
+        "explanation": "The route already refuses an organization's own administrator (403, platform governance required) and gives even a platform administrator no direct archive (501, institutional lifecycle workflow required), so DELETE no longer archives. The source change was upstream's; the regression test proving it (admin refused, non-admin refused, platform admin 501, nothing written, no audit, malformed id 400) is new. The organization aggregate reads now accept both driver result shapes, which also repairs an upstream pglite test that read zero claims.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ORG-MEMBERSHIP-GUARD-IGNORES-MEMBER-STATUS-AND-REMOVAL-FLAG",

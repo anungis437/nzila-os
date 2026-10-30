@@ -7,7 +7,7 @@
   "byGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 12,
-   "CRON_SECRET": 3,
+   "CRON_SECRET": 2,
    "CRUD_FACTORY": 273,
    "DELEGATED": 23,
    "NONE": 48,
@@ -15,7 +15,7 @@
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 78,
    "ROLE_AUTH": 124,
-   "SESSION_AUTH": 63,
+   "SESSION_AUTH": 64,
    "WEBHOOK_SIGNATURE": 4,
    "WITH_API": 298,
    "WITH_API_PUBLIC": 2
@@ -23,7 +23,7 @@
   "mutatingByGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 8,
-   "CRON_SECRET": 2,
+   "CRON_SECRET": 1,
    "CRUD_FACTORY": 273,
    "DELEGATED": 16,
    "NONE": 8,
@@ -31,7 +31,7 @@
    "PLATFORM_AUTH_HANDLER": 7,
    "RETIRED": 75,
    "ROLE_AUTH": 73,
-   "SESSION_AUTH": 34,
+   "SESSION_AUTH": 35,
    "WEBHOOK_SIGNATURE": 4,
    "WITH_API": 187
   },
@@ -8440,7 +8440,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRON_SECRET",
+   "guard": "SESSION_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",

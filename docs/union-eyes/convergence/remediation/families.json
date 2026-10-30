@@ -1,29 +1,29 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 88,
- "partial": 10,
- "outstanding": 689,
- "accountedFor": 689,
+ "corrected": 94,
+ "partial": 12,
+ "outstanding": 683,
+ "accountedFor": 683,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
    "purpose": "Scheduled and provider-driven jobs: method, secret, scheduling, replay and failure reporting",
-   "defects": 19,
+   "defects": 13,
    "severity": {
-    "HIGH": 1,
-    "MEDIUM": 13,
-    "LOW": 5
+    "HIGH": 0,
+    "MEDIUM": 9,
+    "LOW": 4
    },
-   "namedRoutes": 7,
+   "namedRoutes": 6,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 1,
     "0B.5": 1,
     "0B.6": 2,
     "0B.7": 1,
-    "0B.8": 6,
-    "0B.9": 3,
+    "0B.8": 2,
+    "0B.9": 1,
     "0B.10": 1,
     "0B.11": 4
    }
@@ -322,15 +322,8 @@
    },
    {
     "id": "DEF-0B8-ICRA-CLAIM-TOKEN-HAS-NO-ICRA-ISSUER-SO-CLAIM-CANNOT-SUCCEED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B8-ICRA-REVIEW-DECISION-BY-SHARED-CRON-SECRET-WITH-BODY-CLAIMED-REVIEWER-ROLE",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B8-ICRA-CONFIGURE-UPDATE-RESETS-OMITTED-ENABLED-SETTINGS-AND-WEBHOOK-URL",
-    "severity": "LOW"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B8-ICRA-SHOPIFY-SHOP-DOMAIN-NEVER-CHECKED-ONE-GLOBAL-SECRET-AND-HEADER-KEYED-LIMIT",
@@ -338,24 +331,9 @@
     "partial": true
    },
    {
-    "id": "DEF-0B8-JUR-PROFILE-MINIMUM-WAGE-IS-A-PLACEHOLDER-ZERO",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B8-JUR-LOCATION-ERASURE-IS-REACHABLE-ONLY-THROUGH-AN-ACTIVE-CONSENT",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B9-ML-SLA-SCORE-IS-LITERAL-WEIGHTS-OVER-CALLER-VALUES-PRESENTED-AS-A-MODEL-WITH-CONSTANT-CONFIDENCE",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B9-ML-STEWARD-CAN-STORE-ANY-PREDICTION-ROW-THAT-THE-SLA-LIST-ALERT-SWEEP-AND-INSIGHTS-READ",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B9-ORG-ITEM-DELETE-ORGANIZATION-ADMIN-ARCHIVES-OWN-ORGANIZATION-BYPASSING-STATUS-GOVERNANCE",
-    "severity": "HIGH"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B10-PIL-CUPE-BOOTSTRAP-REPORTS-WORKSITES-IT-NEVER-WRITES-AND-LITERAL-ONBOARDING-COUNTS-FOR-CHECKLIST-IDS-THE-ONBOARDING-ROUTE-DOES-NOT-READ",
