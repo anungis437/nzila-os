@@ -306,7 +306,9 @@ export async function generateStatCanAnnualReport(fiscalYear: number): Promise<S
 export async function analyzeMultiYearTrends(options: {
   years: number;
   endYear?: number;
+  organizationId: string;
 }): Promise<MultiYearTrendAnalysis> {
+  if (!options.organizationId) throw new Error('Organization context is mandatory for trend reports');
   const endYear = options.endYear || new Date().getFullYear();
   const startYear = endYear - options.years + 1;
   const years = Array.from({ length: options.years }, (_, i) => startYear + i);
@@ -317,7 +319,7 @@ export async function analyzeMultiYearTrends(options: {
       const remittances = await db
         .select()
         .from(perCapitaRemittances)
-        .where(eq(perCapitaRemittances.remittanceYear, year));
+        .where(and(eq(perCapitaRemittances.remittanceYear, year), eq(perCapitaRemittances.fromOrganizationId, options.organizationId)));
 
       const uniqueOrgs = new Set(remittances.map(r => r.fromOrganizationId));
 
