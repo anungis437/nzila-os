@@ -51,3 +51,18 @@ test('rejection, stale review and staging review do not authorize production',()
     const f=fixture();fn(f);assert.throws(()=>verifyProductionApproval(f),/PRODUCTION_APPROVAL_DENIED/)
   }
 })
+
+test('approval receipts require a real immutable GitHub review ID and timestamp',()=>{
+  for (const invalid of [undefined, null, 0, -1, '890', 1.5]) {
+    const f=fixture();f.approvals[0].id=invalid
+    assert.throws(()=>verifyProductionApproval(f),/malformed environment review history/)
+  }
+  const f=fixture();f.approvals[0].created_at='not-a-date'
+  assert.throws(()=>verifyProductionApproval(f),/malformed environment review history/)
+})
+test('both run actor and rerun triggering actor must be authenticated',()=>{
+  for (const key of ['actor','triggering_actor']) {
+    const f=fixture();f.run[key]=null
+    assert.throws(()=>verifyProductionApproval(f),/run initiator not authenticated/)
+  }
+})
