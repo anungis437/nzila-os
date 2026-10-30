@@ -474,6 +474,23 @@ describe('ApiAuthGuard', () => {
       expect(ctx!.organizationId).toBe('org-1');
     });
 
+    it('requires active and non-deleted membership before granting organization authority', async () => {
+      await getUserContextForOrganization('org-1');
+      const query = mocks.mockOrgMembersFindFirst.mock.calls[0][0];
+      const checked: string[] = [];
+      query.where(
+        { userId: 'userId', organizationId: 'organizationId', status: 'status', deletedAt: 'deletedAt' },
+        {
+          eq: (column: string, value: string) => { checked.push(`eq:${column}:${value}`); return true; },
+          isNull: (column: string) => { checked.push(`isNull:${column}`); return true; },
+          and: (...predicates: boolean[]) => predicates.every(Boolean),
+        },
+      );
+      expect(checked).toEqual([
+        'eq:userId:user_123', 'eq:organizationId:org-1', 'eq:status:active', 'isNull:deletedAt',
+      ]);
+    });
+
     it('returns null when no membership', async () => {
       mocks.mockOrgMembersFindFirst.mockResolvedValue(undefined);
       expect(await getUserContextForOrganization('org-1')).toBeNull();
