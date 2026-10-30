@@ -230,8 +230,8 @@ Routes discovered under `apps/union-eyes/app/api/`. Only pilot-relevant and cros
 | `/api/dashboard/leadership` | GET | Yes | `executive`/`officer` | cape-features.spec.ts | ✅ VALIDATED |
 | `/api/dashboard/stats` | GET | Yes | `steward` | — | 🔄 DATA ONLY |
 | `/api/analytics/claims` | GET | Yes | `steward` | — | 🔄 DATA ONLY |
-| `/api/audits` | GET | Yes | `officer` | — | 🔄 DATA ONLY |
-| `/api/audits/[id]` | GET | Yes | `officer` | — | 🔄 DATA ONLY |
+| `/api/audits` | GET | Yes | `admin` + direct organization mandate | — | 🔄 REDACTED; runtime pending |
+| `/api/audits/[id]` | GET | Yes | `admin` + direct organization mandate | — | 🔄 REDACTED; runtime pending |
 | `/api/ai/grievances/[id]/triage` | POST | Yes | `steward` | — | ✅ VALIDATED (source) |
 | `/api/ai/search` | GET | Yes | `steward` | — | 🔄 DATA ONLY |
 | `/api/clause-library/search` | GET | Yes | `steward` | — | 🔄 DATA ONLY |

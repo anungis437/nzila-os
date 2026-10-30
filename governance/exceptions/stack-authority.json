@@ -125,25 +125,25 @@
     {
       "path": "apps/union-eyes/app/api/audits/**/route.ts",
       "owner": "@nzila/union-eyes",
-      "justification": "Audit logs v1 — audit_security.audit_logs table (TS-only, no Django model). withApi auth enforced (minRole: officer). Read-only.",
+      "justification": "Audit history v1 — direct active organization administrator required in addition to withApi(minRole: admin). SQL-level field-minimized projection excludes IP, session/user-agent, old/new payloads and arbitrary metadata. Designated privacy-officer mandate remains unimplemented and fail-closed; native validation pending.",
       "expiresOn": "2026-12-31"
     },
     {
       "path": "apps/union-eyes/app/api/v2/audits/**/route.ts",
       "owner": "@nzila/union-eyes",
-      "justification": "Audit logs v2 — audit_security.audit_logs table (TS-only, no Django model). withApi auth enforced (minRole: officer). Read-only.",
+      "justification": "Historical exception entry only: no dedicated V2 route file exists under this pattern. The V2 catch-all must independently enforce its own auth, scoped source, redaction and audit contract; this exception proves no authorization.",
       "expiresOn": "2026-12-31"
     },
     {
       "path": "apps/union-eyes/app/api/compliance/audit-logs/**/route.ts",
       "owner": "@nzila/union-eyes",
-      "justification": "Compliance audit logs v1 — audit_security.audit_logs table (TS-only, no Django model). withApi auth enforced (minRole: officer for reads, admin for writes).",
+      "justification": "Compliance audit history v1 — direct active organization administrator required for read and manual-entry write. History GET uses a redacted SQL projection, and manual entries use mandatory atomic audit. A designated privacy-officer path requires verified mandate and remains unavailable.",
       "expiresOn": "2026-12-31"
     },
     {
       "path": "apps/union-eyes/app/api/v2/compliance/audit-logs/**/route.ts",
       "owner": "@nzila/union-eyes",
-      "justification": "Compliance audit logs v2 — audit_security.audit_logs table (TS-only, no Django model). withApi auth enforced (minRole: officer for reads, admin for writes).",
+      "justification": "Historical exception entry only: no dedicated V2 route file exists under this pattern. The V2 catch-all must independently enforce its own auth, scoped source, redaction and audit contract; this exception proves no authorization.",
       "expiresOn": "2026-12-31"
     },
     {
