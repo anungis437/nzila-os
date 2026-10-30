@@ -150,7 +150,9 @@ export async function PATCH(
         updateType: 'status_change',
         // Member-visible history must not contain the staff's transition reason:
         // it may include confidential evidence, third-party identity or legal strategy.
-        // The reason remains in the restricted atomic audit and evidence pack.
+        // The reason remains in the restricted atomic audit. The separate evidence-pack
+        // bridge currently does not ingest its supplied artifacts and is not
+        // relied upon as proof of this confidential reason.
         message: `Status changed: ${fromStatus} → ${toDbStatus}`,
         createdBy: userId,
         isInternal: false,
