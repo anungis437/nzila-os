@@ -8,6 +8,7 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createSocialMediaService } from '@/lib/social-media/social-media-service';
+import { parseSocialPostPagination } from '@/lib/social-media/social-post-pagination';
 import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 import { db } from '@/db';
 import { socialPosts, socialAccounts } from '@/db/schema/social-media-schema';
@@ -49,8 +50,9 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
       const status = searchParams.get('status');
       const campaignId = searchParams.get('campaign_id');
       const search = searchParams.get('search');
-      const limit = parseInt(searchParams.get('limit') || '20');
-      const offset = parseInt(searchParams.get('offset') || '0');
+      const pagination = parseSocialPostPagination(searchParams);
+      if (!pagination) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'limit must be 1-100 and offset must be 0-10000');
+      const { limit, offset } = pagination;
 
       // Build query with dynamic filters
       const conditions: SQL[] = [eq(socialPosts.organizationId, organizationId)];
