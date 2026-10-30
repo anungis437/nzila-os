@@ -22,9 +22,10 @@
  *
  * @module scripts/release-attestation
  */
-import { createHash, sign, verify, generateKeyPairSync } from 'node:crypto'
-import { writeFileSync, readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
+import { createHash, sign, verify } from 'node:crypto'
+import { writeFileSync, readFileSync, existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
+import { hashDirectory } from './release/artifact-tree.mjs'
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -212,29 +213,7 @@ function computeArtifactDigests(): ArtifactDigest[] {
   return digests
 }
 
-function hashDirectory(dir: string): { digest: string; fileCount: number } {
-  const hash = createHash('sha256')
-  let fileCount = 0
-
-  function walk(d: string) {
-    const entries = readdirSync(d, { withFileTypes: true })
-    for (const entry of entries) {
-      const full = join(d, entry.name)
-      if (entry.isDirectory()) {
-        if (!['node_modules', '.git', 'cache'].includes(entry.name)) {
-          walk(full)
-        }
-      } else if (entry.isFile()) {
-        const content = readFileSync(full)
-        hash.update(content)
-        fileCount++
-      }
-    }
-  }
-
-  walk(dir)
-  return { digest: hash.digest('hex'), fileCount }
-}
+// Deterministic, path-bound, domain-separated hashing is in release/artifact-tree.mjs.
 
 /**
  * Compute SHA-256 hash of the pnpm lockfile for supply-chain provenance.

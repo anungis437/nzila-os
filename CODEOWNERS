@@ -104,3 +104,5 @@
 
 /packages/tool-fabric/src/postgres-ledger-store.ts @nzila/platform @nzila/security
 /packages/tool-fabric/sql/** @nzila/platform @nzila/security
+
+/scripts/release/artifact-tree.mjs @nzila/platform @nzila/security

@@ -230,3 +230,13 @@ fail closed. This implementation still requires DBA-controlled migration,
 least-privileged host credentials, independent high-watermark witness, real
 PostgreSQL concurrency/restart testing and independent attestation. It neither
 opens the broker nor constitutes persistent-store runtime certification.
+
+## Source bundle digest strengthening — Issue #1038
+
+The release generator now uses deterministic sorted paths and domain-separated
+SHA-256 records of relative paths, file sizes and content hashes. Symlinks
+and special files are rejected rather than omitted. Node negative tests
+cover filesystem order, concatenation collisions, relocation, modifications
+and symlink injection. This binds built directory content more precisely, but
+**does not prove OCI image provenance**, registry content or production runtime.
+Those remain independently gated under #1038.

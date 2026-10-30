@@ -62,6 +62,7 @@ jobs:
           node --test scripts/engineering/p0-static-guard.test.mjs
           node --test scripts/release/verify-promotion-evidence.test.mjs
           node --test scripts/release/verify-production-approval.test.mjs
+          node --test scripts/release/artifact-tree.test.mjs
 
       - name: Classify changed paths once
         id: plan
