@@ -1,3 +1,4 @@
+import { issueCalendarOAuthState, setCalendarOAuthStateCookie } from '@/lib/external-calendar-sync/oauth-state';
 /**
  * Microsoft Outlook Calendar OAuth Authorization
  * 
@@ -22,11 +23,13 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
       return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
     }
 
-    // Generate authorization URL with userId as state
-    const authUrl = await getAuthorizationUrl(userId);
-
-    // Redirect to Microsoft authorization page
-    return NextResponse.redirect(authUrl);
+    const organizationId = typeof context.organizationId === 'string' ? context.organizationId : null;
+    if (!organizationId) return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
+    const state = issueCalendarOAuthState('microsoft', userId, organizationId);
+    const authUrl = await getAuthorizationUrl(state);
+    const response = NextResponse.redirect(authUrl);
+    setCalendarOAuthStateCookie(response, 'microsoft', state);
+    return response;
   } catch (error) {
     // Missing OAuth client configuration is an unavailable integration, not an internal fault.
     if (error instanceof Error && /^Missing required Microsoft calendar OAuth environment variables/.test(error.message)) {
