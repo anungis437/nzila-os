@@ -68,6 +68,15 @@ describe('billing/send-batch tenant isolation', () => {
     expect(m.generateInvoice).not.toHaveBeenCalled();
   });
 
+  it('preflights every subscription before creating any invoice', async () => {
+    selectRows({ id: PERIOD, organizationId: ORG_A }, [
+      { organizationId: ORG_A }, { organizationId: ORG_B },
+    ]);
+    const { POST } = await loadRoute();
+    await expect(POST({ body: { billingPeriodId: PERIOD }, userId: 'u1', organizationId: ORG_A })).rejects.toThrow('Subscription organization mismatch');
+    expect(m.generateInvoice).not.toHaveBeenCalled();
+  });
+
   it('refuses a foreign subscription even if an adapter returns it', async () => {
     selectRows({ id: PERIOD, organizationId: ORG_A }, [{ organizationId: ORG_B }]);
     const { POST } = await loadRoute();

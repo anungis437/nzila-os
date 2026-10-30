@@ -42,10 +42,15 @@ export const POST = withApi(
       .from(orgSubscriptions)
       .where(and(eq(orgSubscriptions.status, 'active'), eq(orgSubscriptions.organizationId, organizationId)));
 
+    // Validate the entire batch before the first mutation; a foreign row later
+    // in the result set must not leave earlier invoices partially generated.
+    if (subs.some((sub) => sub.organizationId !== organizationId)) {
+      throw ApiError.badRequest('Subscription organization mismatch');
+    }
+
     const results: Array<{ organizationId: string; invoiceId?: string; error?: string }> = [];
 
     for (const sub of subs) {
-      if (sub.organizationId !== organizationId) throw ApiError.badRequest('Subscription organization mismatch');
       try {
         const invoice = await generateInvoice({
           organizationId: sub.organizationId,
