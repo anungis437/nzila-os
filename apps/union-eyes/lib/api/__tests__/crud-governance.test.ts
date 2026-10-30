@@ -65,6 +65,24 @@ describe('generic CRUD governance (UE-CONV-K-007)', () => {
     expect(() => assertCrudWrite(gate)).toThrow()
   })
 
+  // DEF-0B1-CLC-ANALYTICS-WRITABLE: a steward must not be able to invent
+  // dashboard metrics through a generic CRUD POST, even within their own tenant.
+  // The tenant-scoped read remains available; a governed computation/ingestion
+  // journey must be implemented and independently verified separately.
+  it('treats analytics metrics as read-only evidence across every generic metric alias', () => {
+    const gate = crudGovernanceFor(schema.analyticsMetrics)
+    expect(gate.class).toBe('READ_ONLY')
+    expect(() => assertCrudRead(gate)).not.toThrow()
+    expect(() => assertCrudWrite(gate)).toThrow()
+    for (const route of ['metrics/route.ts', 'analytics/refresh/route.ts']) {
+      const source = readFileSync(join(API, route), 'utf8')
+      expect(source).toMatch(/table:\\s*analyticsMetrics/)
+      expect(source).toMatch(/crudRoutes\\(/)
+    }
+    const factory = readFileSync(join(ROOT, 'lib', 'api', 'crud-factory.ts'), 'utf8')
+    expect(factory).toMatch(/assertCrudWrite\\(governance\\)/)
+  })
+
   it('denies invented archived enum values rather than raising 500 or deleting institutional bargaining history', () => {
     expect(schema.proposalStatusEnum.enumValues).not.toContain('archived')
     expect(supportsGenericArchive(schema.bargainingProposals.status)).toBe(false)
