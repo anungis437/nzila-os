@@ -105,7 +105,18 @@ test('R-51: bargaining proposal CRUD enforces its parent negotiation organizatio
     const attemptedMove = await primary.patch(`/api/bargaining/proposals/${pPrimary}`, {
       data: { negotiationId: nSecondary, title: 'Legitimate text amendment' },
     })
-    expect(attemptedMove.status(), await attemptedMove.text()).toBe(200)
+    // Parent foreign keys are immutable through generic CRUD. Reject the whole
+    // mass-assignment request rather than silently dropping negotiationId.
+    expect(attemptedMove.status(), await attemptedMove.text()).toBe(400)
+    const afterRejectedMove = unwrap(await (await primary.get(`/api/bargaining/proposals/${pPrimary}`)).json()) as RecordShape
+    expect(afterRejectedMove.negotiationId).toBe(nPrimary)
+    expect(afterRejectedMove.title).toBe(`Synthetic proposal primary-${marker}`)
+
+    // A legitimate title-only amendment must still work for the owning tenant.
+    const validAmendment = await primary.patch(`/api/bargaining/proposals/${pPrimary}`, {
+      data: { title: 'Legitimate text amendment' },
+    })
+    expect(validAmendment.status(), await validAmendment.text()).toBe(200)
     const fresh = unwrap(await (await primary.get(`/api/bargaining/proposals/${pPrimary}`)).json()) as RecordShape
     expect(fresh.negotiationId).toBe(nPrimary)
     expect(fresh.title).toBe('Legitimate text amendment')
