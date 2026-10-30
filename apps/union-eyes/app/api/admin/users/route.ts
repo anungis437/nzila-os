@@ -1,21 +1,41 @@
 /**
  * GET /api/admin/users
- * Lists all platform users with optional search by name/email.
+ * Lists membership records only for the active union under a direct
+ * administrator mandate. A platform role has no standing access to union
+ * membership contacts or records.
  */
 import { db } from '@/db/db';
 import { organizationMembers, organizations } from '@/db/schema';
-import { desc, sql, or, ilike } from 'drizzle-orm';
-import { withApi } from '@/lib/api/framework';
+import { and, desc, eq, isNull, sql, or, ilike } from 'drizzle-orm';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { resolveOrganizationAccess, isAdministrativeRole } from '@/lib/organizations/read-authority';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
-  { auth: { required: true, minRole: 'platform_lead' } },
-  async (ctx) => {
-    const url = new URL(ctx.request.url);
+  {
+    auth: { required: true, minRole: 'admin' },
+    requireOrg: true,
+    rlsOrgContext: true,
+  },
+  async ({ request, userId, organizationId }) => {
+    if (!userId || !organizationId) throw ApiError.forbidden('Active organization required');
+    const authority = await resolveOrganizationAccess(userId);
+    if (!isAdministrativeRole(authority.direct.get(organizationId))) {
+      throw ApiError.forbidden('Direct organization administrator mandate required');
+    }
+    const url = new URL(request.url);
     const search = url.searchParams.get('search')?.trim() ?? '';
 
-    let query = db
+    const predicate = and(
+      eq(organizationMembers.organizationId, organizationId),
+      isNull(organizationMembers.deletedAt),
+      ...(search ? [or(
+        ilike(organizationMembers.name, `%${search.slice(0, 100)}%`),
+        ilike(organizationMembers.email, `%${search.slice(0, 100)}%`),
+      )] : []),
+    );
+    const rows = await db
       .select({
         id: organizationMembers.id,
         name: organizationMembers.name,
@@ -28,21 +48,13 @@ export const GET = withApi(
         createdAt: organizationMembers.createdAt,
       })
       .from(organizationMembers)
-      .leftJoin(organizations, sql`${organizations.id}::text = ${organizationMembers.organizationId}::text`)
+      .leftJoin(organizations, eq(organizations.id, organizationMembers.organizationId))
+      .where(predicate)
       .orderBy(desc(organizationMembers.createdAt))
-      .$dynamic();
+      .limit(100);
+    // Defense in depth for DB adapters ignoring an unexpected predicate.
+    const users = rows.filter(u => u.organizationId === organizationId);
 
-    if (search) {
-      const pattern = `%${search}%`;
-      query = query.where(
-        or(
-          ilike(organizationMembers.name, pattern),
-          ilike(organizationMembers.email, pattern),
-        ),
-      );
-    }
-
-    const users = await query.limit(100);
 
     return users.map((u) => ({
       id: u.id,
