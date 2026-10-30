@@ -559,6 +559,18 @@ jobs:
       - name: GA gate check
         run: pnpm exec tsx tooling/ga-check/ga-check.ts
 
+      # P0 #1036. Required checks alone do not enforce real human code review.
+      # Fail closed until administrator fixes active ruleset and team ownership.
+      - name: Verify actual CODEOWNER review enforcement
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "repos/${GITHUB_REPOSITORY}" > "$RUNNER_TEMP/repository.json"
+          gh api "repos/${GITHUB_REPOSITORY}/rulesets/12952284" > "$RUNNER_TEMP/branch-ruleset.json"
+          node --test scripts/engineering/verify-review-ruleset.test.mjs
+          node scripts/engineering/verify-review-ruleset.mjs "$RUNNER_TEMP/repository.json" "$RUNNER_TEMP/branch-ruleset.json" CODEOWNERS
+
       - name: Governance fail-closed gate
         run: pnpm exec tsx tooling/governance/validate-governance-gate.ts
 
