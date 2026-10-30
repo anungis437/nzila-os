@@ -203,7 +203,7 @@ function auditOf(route: string, source: string, guard: RouteGuard, mutating: boo
   // transaction commits its mutation and mandatory audit together. This is a narrow, pinned alias:
   // the manifest ratchet checks both the delegate and the canonical audited implementation.
   if (route === 'events/[id]/route.ts' &&
-      /from ['"]@\\/app\\/api\\/calendar\\/events\\/\\[id\\]\\/route['"]/.test(source) &&
+      /from ['"]@\/app\/api\/calendar\/events\/\[id\]\/route['"]/.test(source) &&
       /canonicalPATCH\(request/.test(source) && /canonicalDELETE\(request/.test(source)) {
     return 'ATOMIC_SERVICE'
   }
