@@ -16,6 +16,8 @@ import {
 
 export const GET = withRoleAuth('admin', async (request, context) => {
   const { userId, organizationId } = context;
+  if (!userId) return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
+  if (!organizationId) return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
 
   try {
     const rateLimitResult = await checkRateLimit(userId, RATE_LIMITS.CLC_OPERATIONS);
@@ -33,7 +35,8 @@ export const GET = withRoleAuth('admin', async (request, context) => {
     }
 
     const searchParams = request.nextUrl.searchParams;
-    const years = parseInt(searchParams.get('years') || '5');
+    const rawYears = searchParams.get('years');
+    const years = rawYears === null ? 5 : Number(rawYears);
 
     if (![3, 5, 10].includes(years)) {
       logApiAuditEvent({
@@ -51,7 +54,6 @@ export const GET = withRoleAuth('admin', async (request, context) => {
       );
     }
 
-    if (!organizationId) return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
     const trends = await analyzeMultiYearTrends({ years: years as 3 | 5 | 10, organizationId });
 
     logApiAuditEvent({
