@@ -38,6 +38,8 @@ describe('worksites item route', () => {
       // The site manager's contact and the working notes are omitted from every response (batch B24).
       omitFromResponse: ['siteManagerName', 'siteManagerEmail', 'siteManagerPhone', 'notes', 'customFields'],
       writeRole: 'steward',
+      // The employer must be the caller organization's (batch B25).
+      beforeUpdate: expect.any(Function),
     });
   });
 

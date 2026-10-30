@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 307,
- "partial": 45,
- "outstanding": 470,
- "accountedFor": 470,
+ "corrected": 317,
+ "partial": 46,
+ "outstanding": 460,
+ "accountedFor": 460,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -50,26 +50,26 @@
   {
    "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
    "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
-   "defects": 58,
+   "defects": 48,
    "severity": {
-    "HIGH": 21,
+    "HIGH": 12,
     "MEDIUM": 25,
-    "LOW": 12
+    "LOW": 11
    },
-   "namedRoutes": 15,
+   "namedRoutes": 10,
    "namedFiles": 1,
    "tranches": {
     "0B.2": 1,
     "0B.3": 1,
-    "0B.4": 8,
-    "0B.5": 3,
-    "0B.6": 12,
+    "0B.4": 7,
+    "0B.5": 2,
+    "0B.6": 11,
     "0B.7": 4,
     "0B.8": 3,
     "0B.9": 3,
-    "0B.10": 9,
-    "0B.11": 9,
-    "0B.12": 4,
+    "0B.10": 6,
+    "0B.11": 7,
+    "0B.12": 2,
     "0C.1": 1
    }
   },
@@ -426,10 +426,6 @@
     "severity": "HIGH"
    },
    {
-    "id": "DEF-0B4-CLAUSES-CREATE-ACCEPTS-ANY-CBA-ID",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B4-CBAS-CBA-NUMBER-GLOBALLY-UNIQUE",
     "severity": "MEDIUM"
    },
@@ -440,10 +436,6 @@
    {
     "id": "DEF-0B5-UNSUBSCRIBE-NO-CONSENT-RECORD-WITHOUT-CAMPAIGN",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B5-SURVEY-RESULTS-NO-ORG-PREDICATE-LOADS-ALL-ANSWERS",
-    "severity": "HIGH"
    },
    {
     "id": "DEF-0B6-EDU-COMPLETIONS-POST-SKIPS-REGISTRATION-CHECKS",
@@ -472,10 +464,6 @@
    {
     "id": "DEF-0B6-EMP-COMMUNICATION-REFERENCES-UNVERIFIED",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-CMP-DISPATCH-REFERENCED-IDS-NOT-VERIFIED",
-    "severity": "HIGH"
    },
    {
     "id": "DEF-0B6-CMP-DSR-GENERIC-ROUTE-REFUSES-WITH-MISLEADING-403",
@@ -548,20 +536,9 @@
     "partial": true
    },
    {
-    "id": "DEF-0B10-OPL-01",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B10-OPL-02",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-OPL-05",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B10-OPL-07",
-    "severity": "HIGH"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B10-OPL-13",
@@ -584,14 +561,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B11-PRP-PROFILE-ROLES-GET-LISTS-EVERY-USER-BILLING-PROFILE-TO-STEWARD-AND-ABOVE-OF-ANY-ORGANIZATION",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B11-RPT-EXECUTE-JOINED-TABLES-CARRY-NO-ORGANIZATION-PREDICATE-SO-A-CALLER-CONFIGURED-JOIN-SELECTS-ROWS-OF-OTHER-ORGANIZATIONS",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B11-SOC-SIGNATURE-READS-AND-ACCESS-CHECK-USE-THE-BARE-DB-HANDLE-WITH-NO-ORGANIZATION-PREDICATE-AND-ACCEPT-ANY-USER-ID-A-SENDER-TYPED-AS-SIGNER",
     "severity": "MEDIUM"
    },
@@ -607,14 +576,6 @@
    {
     "id": "DEF-0B11-IDS-SETTINGS-TWILIO-NUMBER-KEY-ATTRIBUTES-INBOUND-SMS-WITH-NO-UNIQUENESS",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-CRUD-TESTIMONIAL-ITEM-WRITES-ARE-CONDITIONED-ON-THE-ID-ALONE-FOR-AN-ADMIN-OF-ANY-ORGANIZATION",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B12-CRUD-UNIT-AND-WORKSITE-FOREIGN-KEYS-ARE-TAKEN-FROM-THE-BODY-WITHOUT-AN-ORGANIZATION-CHECK",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B12-PLT-ORGANIZATIONS-GET-REBINDS-EVERY-MEMBERSHIP-ROW-OF-AN-E-MAIL-ADDRESS-TO-THE-CALLER-IN-THE-LEGACY-BRANCH",
