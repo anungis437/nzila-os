@@ -76,7 +76,7 @@
     "note": "Milestones and evidence are transcribed as prior claims; this run has not independently re-executed those proofs."
   },
   "lastInspectedBranch": "agents/ue-cursor-final-closure",
-  "lastInspectedCommit": "e9d614509e54d32380de9f1e82a565c2b9de5304",
+  "lastInspectedCommit": "2dc17f3b686f1c9444ddb2e7bf3a293a613d0082",
   "summary": {
     "allRecordedDefects": 777,
     "bySeverity": {
@@ -86,7 +86,7 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 11,
+    "withCurrentRunSourceOrRegressionWork": 13,
     "closed": 0,
     "overallGO": false
   },
@@ -231,6 +231,14 @@
     {
       "sha": "e9d614509e54d32380de9f1e82a565c2b9de5304",
       "description": "Add source regression for admin repair role requirement, 501 and no membership CRUD; tests not yet CI verified."
+    },
+    {
+      "sha": "a485a436af186bb9e2fe10a33552ba83287ce1a4",
+      "description": "Protect OpenAPI JSON alias by administrator authorization, remove public proxy/config allowlists, and add source regression. No HTTP acceptance yet."
+    },
+    {
+      "sha": "8d1770a6bd5819c53480e4ed4d4bdb444b1a3f9b",
+      "description": "Add actual version-handler confidentiality regression for anonymous, invalid/valid probe credential and unset token; no version source change."
     }
   ],
   "records": [
@@ -621,8 +629,21 @@
           "HTTP-level proof through the proxy (E2E)"
         ]
       },
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/docs/openapi.json/route.ts",
+          "apps/union-eyes/lib/public-routes.ts",
+          "apps/union-eyes/config/public-api-routes.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/__tests__/docs-openapi-exposure.test.ts"
+        ],
+        "engineeringHead": "a485a436af186bb9e2fe10a33552ba83287ce1a4",
+        "repair": "Removed the unguarded hand-authored OpenAPI alias and both public allowlist entries; now delegates to the same administrator-guarded generated specification as /api/docs, with private no-store caching.",
+        "limits": "Static source regression only until exact-SHA Vitest and unauthenticated/admin HTTP browser acceptance; independent review pending."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
     },
@@ -654,8 +675,20 @@
           "HTTP-level proof (E2E)"
         ]
       },
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "EXISTING_SOURCE_INSPECTED_REGRESSION_ADDED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/version/route.ts",
+          "apps/union-eyes/lib/runtime/deployment-probe.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/version-topology-privacy.route.test.ts"
+        ],
+        "engineeringHead": "8d1770a6bd5819c53480e4ed4d4bdb444b1a3f9b",
+        "repair": "Existing version handler already restricts topology to constant-time deployment-probe bearer credential. Added handler-level tests for anonymous, invalid-token, valid-token and unconfigured-secret cases; no new version handler patch.",
+        "limits": "No exact-SHA test or real HTTP proof yet; no release acceptance."
+      },
+      "currentHeadVerification": "REGRESSION_ADDED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
     },
@@ -14398,6 +14431,19 @@
       "httpBrowser": "PENDING_EXACT_SHA",
       "appFloor": "PENDING_EXACT_SHA",
       "governance": "PENDING_EXACT_SHA",
+      "go": "NO_GO"
+    },
+    {
+      "inspectedSha": "2dc17f3b686f1c9444ddb2e7bf3a293a613d0082",
+      "evidence": "Exact SHA GitHub Actions: App Floor PASS, governance PASS, security PASS, native PostgreSQL acceptance PASS, disposable HTTP/browser PASS, contract and financial PASS; full Vitest FAIL (3 route-coverage-manifest ratchet tests, 21198 passed, 28 skipped). Scanner/manifest mismatch and denied admin-repair audit classification patched after this SHA; no transfer of acceptance to new HEAD.",
+      "source": "PATCHED_AFTER_SHA",
+      "unit": "FAIL_3_ROUTE_COVERAGE_TESTS",
+      "contract": "PASS",
+      "native": "PASS",
+      "security": "PASS",
+      "httpBrowser": "PASS",
+      "appFloor": "PASS",
+      "governance": "PASS",
       "go": "NO_GO"
     }
   ]
