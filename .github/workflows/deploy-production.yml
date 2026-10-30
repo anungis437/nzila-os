@@ -208,11 +208,13 @@ jobs:
           mkdir -p staging-artifacts
           gh run download "${{ needs.verify-artifact.outputs.source_run_id }}" --name staging-build-artifacts --dir ./staging-artifacts
 
-      - name: Generate SLSA provenance
+      # A Git commit SHA is NOT a SHA-256 digest of the deployable image.
+      # Attest only the actual downloaded SBOM subject; image provenance
+      # remains a separate release prerequisite and must not be inferred.
+      - name: Attest downloaded staging SBOM
         uses: actions/attest-build-provenance@v2
         with:
-          subject-name: nzila-os
-          subject-digest: sha256:${{ github.sha }}
+          subject-path: staging-artifacts/sbom.json
 
   # ── W2-9: Human Approval Gate ──────────────────────────────────────────────
   deploy-production:
