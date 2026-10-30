@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 42,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 148,
-    "engineeringRemaining": 629,
+    "engineeringCorrected": 149,
+    "engineeringRemaining": 628,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 19
   },
@@ -324,6 +324,10 @@
     {
       "sha": "5fa80b00ac12611834db0915c7ba19bf48b4e001",
       "description": "Reconciled three previously implemented sensitive incident item, incident trends and personal calendar access fixes with new source-level regression contracts. No exact-HEAD test, native database or HTTP/browser verdict; no human acceptance."
+    },
+    {
+      "sha": "aacd2548af1c794e3b2d573cc83a6b5018992f1f",
+      "description": "Chatbot moderation now refuses missing key, provider errors and malformed responses; no fail-open continuation. Source contract regression added. Other AI control-plane and provenance defects remain open; exact HEAD verification pending."
     }
   ],
   "records": [
@@ -2547,7 +2551,16 @@
       "currentRun": null,
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "GATE0-AI-MODERATION-FAIL-CLOSED",
+        "path": "apps/union-eyes/lib/ai/chatbot-service.ts",
+        "regressionTest": "apps/union-eyes/lib/ai/__tests__/chatbot-moderation-fail-closed.contract.test.ts",
+        "explanation": "Missing moderation credentials, provider HTTP failures, malformed moderation responses and moderation audit errors no longer permit model/retrieval execution. The safety guard throws for every flagged result, including safety-system unavailability. Separate AI control-plane bypass and fallback provenance defects remain open.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "sourceCommit": "aacd2548af1c794e3b2d573cc83a6b5018992f1f"
+      }
     },
     {
       "defectId": "DEF-0B4-CHATBOT-MODERATION-BYPASSES-AI-CONTROL-PLANE",
