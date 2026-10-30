@@ -55,7 +55,7 @@
     "note": "Milestones and evidence are transcribed as prior claims; this run has not independently re-executed those proofs."
   },
   "lastInspectedBranch": "agents/ue-cursor-final-closure",
-  "lastInspectedCommit": "dae373e42b77b4258ca9f20fc08a52904e06b892",
+  "lastInspectedCommit": "e18fe8d979e2e6995bab783f331d0c011e7153b6",
   "summary": {
     "allRecordedDefects": 777,
     "bySeverity": {
@@ -65,7 +65,7 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 2,
+    "withCurrentRunSourceOrRegressionWork": 6,
     "closed": 0,
     "overallGO": false
   },
@@ -94,6 +94,18 @@
     {
       "sha": "dae373e42b77b4258ca9f20fc08a52904e06b892",
       "description": "Billing history regression asserts honest 501 and no fabricated empty success"
+    },
+    {
+      "sha": "47d740cc43b21d6b36427567e1675cfcf9609766",
+      "description": "Explicit organization predicates on education completion/attendance writes; strict CLC periods and repaired tenant-context unit tests; education enrollment adversarial regressions"
+    },
+    {
+      "sha": "9fad09e1410d060342118ec2570224d6f4aae7c5",
+      "description": "Calendar OAuth connection owner-boundary, token projection and no-fake-revocation regression coverage"
+    },
+    {
+      "sha": "e18fe8d979e2e6995bab783f331d0c011e7153b6",
+      "description": "Correct CLC SQL mock tenant fixture so predicate regression checks do not evaluate foreign rows excluded by real SQL"
     }
   ],
   "records": [
@@ -275,21 +287,20 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": {
-        "state": "SOURCE_REPAIR_PRESENT_NOT_VERIFIED_AT_CURRENT_HEAD",
-        "paths": [
-          "apps/union-eyes/services/clc/compliance-reports.ts",
-          "apps/union-eyes/app/api/admin/clc/analytics/forecast/route.ts",
-          "apps/union-eyes/app/api/admin/clc/analytics/multi-year-trends/route.ts"
+        "source": [
+          "apps/union-eyes/app/api/admin/clc/analytics/annual-report/route.ts",
+          "apps/union-eyes/app/api/admin/clc/analytics/trends/route.ts"
         ],
-        "regressionPaths": [
-          "apps/union-eyes/app/api/__tests__/admin-clc-analytics-forecast.route.test.ts",
-          "apps/union-eyes/app/api/__tests__/admin-clc-analytics-multi-year-trends.route.test.ts"
+        "tests": [
+          "apps/union-eyes/app/api/__tests__/admin-clc-analytics-annual-report.route.test.ts",
+          "apps/union-eyes/app/api/__tests__/admin-clc-analytics-trends.route.test.ts"
         ],
-        "commits": [
-          "f1fa4c2a2c97cd58f63c7334ec6ac35008cbccab",
-          "4f68b04b4b5eee461f39c97f9b8d09f877d88aa0"
-        ],
-        "limits": "No current-HEAD Vitest, native PostgreSQL, or HTTP/browser verdict; earlier service tenant predicates observed in source."
+        "note": "CLC analytics tenant guards and strict period parsing; adversarial tests added; current HEAD acceptance pending.",
+        "engineeringHead": "e18fe8d979e2e6995bab783f331d0c011e7153b6",
+        "sourceState": "INSPECTED_OR_PATCHED_NOT_ACCEPTED",
+        "unitState": "PENDING_AT_EXACT_HEAD",
+        "nativeState": "PENDING_AT_EXACT_HEAD",
+        "runtimeState": "PENDING_AT_EXACT_HEAD"
       },
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
@@ -307,7 +318,22 @@
       "title": "Administrator-only financial analytics is served with Cache-Control public, so shared caches may store it.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
+      "currentRun": {
+        "source": [
+          "apps/union-eyes/app/api/admin/clc/analytics/annual-report/route.ts",
+          "apps/union-eyes/app/api/admin/clc/analytics/trends/route.ts"
+        ],
+        "tests": [
+          "apps/union-eyes/app/api/__tests__/admin-clc-analytics-annual-report.route.test.ts",
+          "apps/union-eyes/app/api/__tests__/admin-clc-analytics-trends.route.test.ts"
+        ],
+        "note": "Source explicitly emits private no-store; this run did not independently validate intermediary caching.",
+        "engineeringHead": "e18fe8d979e2e6995bab783f331d0c011e7153b6",
+        "sourceState": "INSPECTED_OR_PATCHED_NOT_ACCEPTED",
+        "unitState": "PENDING_AT_EXACT_HEAD",
+        "nativeState": "PENDING_AT_EXACT_HEAD",
+        "runtimeState": "PENDING_AT_EXACT_HEAD"
+      },
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
@@ -1102,7 +1128,21 @@
       "title": "bargaining_proposals has no organization column, so the generic factory adds no tenant predicate to reads, updates or deletes and the create accepts any negotiationId; isolation rests only on a row-level-security policy this tranche cannot show is applied.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
+      "currentRun": {
+        "source": [
+          "apps/union-eyes/lib/api/crud-factory.ts",
+          "apps/union-eyes/app/api/bargaining/proposals/[id]/route.ts"
+        ],
+        "tests": [
+          "apps/union-eyes/e2e/runtime/11-bargaining-proposals-tenant-scope.spec.ts"
+        ],
+        "note": "At a327f69, real HTTP test refused foreign GET/PATCH but foreign DELETE returned 500 rather than expected 403/404. No source fix proven; remains blocked.",
+        "engineeringHead": "e18fe8d979e2e6995bab783f331d0c011e7153b6",
+        "sourceState": "INSPECTED_OR_PATCHED_NOT_ACCEPTED",
+        "unitState": "PENDING_AT_EXACT_HEAD",
+        "nativeState": "PENDING_AT_EXACT_HEAD",
+        "runtimeState": "PENDING_AT_EXACT_HEAD"
+      },
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
@@ -1510,7 +1550,21 @@
       "title": "The connection collection and item reads select the whole external_calendar_connections row, so the stored accessToken and refreshToken values are returned to the browser of the connection owner.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
+      "currentRun": {
+        "source": [
+          "apps/union-eyes/app/api/calendar-sync/connections/route.ts",
+          "apps/union-eyes/app/api/calendar-sync/connections/[id]/route.ts"
+        ],
+        "tests": [
+          "apps/union-eyes/app/api/__tests__/calendar-sync-connections-owner-scoping.route.test.ts"
+        ],
+        "note": "Existing source uses safe projection and user+organization predicates; behavioral unit regression added; real HTTP/credential validation pending.",
+        "engineeringHead": "e18fe8d979e2e6995bab783f331d0c011e7153b6",
+        "sourceState": "INSPECTED_OR_PATCHED_NOT_ACCEPTED",
+        "unitState": "PENDING_AT_EXACT_HEAD",
+        "nativeState": "PENDING_AT_EXACT_HEAD",
+        "runtimeState": "PENDING_AT_EXACT_HEAD"
+      },
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
@@ -1527,7 +1581,21 @@
       "title": "A steward can create or update a connection through the generic factory with any provider, providerAccountId, accessToken and refreshToken, stored as supplied and unencrypted, and an update can reassign userId, so the OAuth flow and the token encryption can be bypassed and a connection can be handed to another user.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
+      "currentRun": {
+        "source": [
+          "apps/union-eyes/app/api/calendar-sync/connections/route.ts",
+          "apps/union-eyes/app/api/calendar-sync/connections/[id]/route.ts"
+        ],
+        "tests": [
+          "apps/union-eyes/app/api/__tests__/calendar-sync-connections-owner-scoping.route.test.ts"
+        ],
+        "note": "Existing source permits direct POST only as OAuth initiation, rejects credential fields on PATCH; regression added, runtime pending.",
+        "engineeringHead": "e18fe8d979e2e6995bab783f331d0c011e7153b6",
+        "sourceState": "INSPECTED_OR_PATCHED_NOT_ACCEPTED",
+        "unitState": "PENDING_AT_EXACT_HEAD",
+        "nativeState": "PENDING_AT_EXACT_HEAD",
+        "runtimeState": "PENDING_AT_EXACT_HEAD"
+      },
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
@@ -13967,6 +14035,28 @@
       "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false
+    }
+  ],
+  "engineeringCheckpoints": [
+    {
+      "inspectedSha": "a327f69fe34524ce669bb65228fed32cfb48bf0d",
+      "evidence": "GitHub Actions completed at exact SHA",
+      "unit": "WHOLE_APP_FAILED_12_TESTS_9_FILES_21162_PASSED",
+      "contract": "PASS",
+      "native": "PASS",
+      "security": "PASS",
+      "httpBrowser": "FAIL_FOREIGN_BARGAINING_DELETE_HTTP_500",
+      "go": "NO_GO"
+    },
+    {
+      "inspectedSha": "e18fe8d979e2e6995bab783f331d0c011e7153b6",
+      "evidence": "GitHub Actions queued or running at time of ledger update",
+      "unit": "PENDING",
+      "contract": "PENDING",
+      "native": "PENDING",
+      "security": "PENDING",
+      "httpBrowser": "PENDING",
+      "go": "NO_GO"
     }
   ]
 }
