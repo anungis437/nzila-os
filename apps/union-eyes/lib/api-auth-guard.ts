@@ -1094,7 +1094,7 @@ async function getUserRoleFromDatabase(userId: string, organizationId?: string |
   }
 
   const membership = await db.query.organizationMembers.findFirst({
-    where: (om, { eq }) => eq(om.userId, userId),
+    where: (om, { eq, and, isNull }) => and(eq(om.userId, userId), eq(om.status, 'active'), isNull(om.deletedAt)),
     columns: { role: true },
   });
 
