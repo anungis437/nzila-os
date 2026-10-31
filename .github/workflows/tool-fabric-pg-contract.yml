@@ -114,6 +114,13 @@ jobs:
             exit 1
           fi
 
+      - name: Verify least-privileged trust writer on live PostgreSQL (ephemeral CI only)
+        run: |
+          set -euo pipefail
+          # Uses a temporary restricted role and rolls back both role and data.
+          # Production grants and independently administered identity remain HOLD.
+          psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/test_trust_ledger_pg_least_privilege.sql
+
       - name: Verify serialized concurrent CAS under PostgreSQL row locks (ephemeral CI only)
         run: |
           set -euo pipefail
