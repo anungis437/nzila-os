@@ -63,7 +63,11 @@ vi.mock('@/lib/clause-library/sharing-authority', () => ({
 }));
 
 const req = (path: string, body: unknown) => ({ url: `http://x${path}`, json: async () => body });
-const ctx = (path: string, body: unknown) => ({ request: req(path, body), organizationId: 'org-1', userId: 'u1' });
+// The route reads the caller's role from the session user (public sharing needs an officer); ids in bodies are guids.
+const TAG_A = '11111111-1111-4111-8111-111111111111';
+const TAG_B = '22222222-2222-4222-8222-222222222222';
+const CBA_X = '33333333-3333-4333-8333-333333333333';
+const ctx = (path: string, body: unknown, role = 'officer') => ({ request: req(path, body), organizationId: 'org-1', userId: 'u1', user: { role } });
 
 beforeEach(() => {
   h.queue.length = 0;
@@ -93,11 +97,11 @@ describe('clause-library/[id]/tags', () => {
   it('DELETE removing nothing is 404 with no audit; removing a tag is audited', async () => {
     const { DELETE } = await import('../clause-library/[id]/tags/route');
     h.queue.push([{ id: 'k1', sourceOrganizationId: 'org-1' }], []);
-    await expect(DELETE(ctx('/api/clause-library/k1/tags', { tagId: 't9' }))).rejects.toMatchObject({ status: 404 });
+    await expect(DELETE(ctx('/api/clause-library/k1/tags', { tagId: TAG_B }))).rejects.toMatchObject({ status: 404 });
     expect(h.audit).not.toHaveBeenCalled();
 
     h.queue.push([{ id: 'k1', sourceOrganizationId: 'org-1' }], [{ id: 't1', tagName: 'wages' }]);
-    await DELETE(ctx('/api/clause-library/k1/tags', { tagId: 't1' }));
+    await DELETE(ctx('/api/clause-library/k1/tags', { tagId: TAG_A }));
     expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'clause_library.tag.remove', resourceId: 't1' }));
   });
 });
@@ -148,7 +152,8 @@ describe('clause-library/[id] PATCH and DELETE', () => {
   it('PATCH validates a sharing change before the update', async () => {
     const { PATCH } = await import('../clause-library/[id]/route');
     h.denial.mockResolvedValue({ status: 400, message: 'sharingLevel must be one of private, federation, congress, public' });
-    await expect(PATCH(ctx('/api/clause-library/k1', { sharingLevel: 'galaxy' }))).rejects.toMatchObject({ status: 400 });
+    // The body schema (B45) now refuses an unknown level before the sharing authority is consulted.
+    await expect(PATCH(ctx('/api/clause-library/k1', { sharingLevel: 'galaxy' }))).rejects.toThrow(/Invalid clause \(sharingLevel\)/);
     expect(h.audit).not.toHaveBeenCalled();
   });
 });
@@ -166,7 +171,7 @@ describe('clause-library POST', () => {
   it('refuses an agreement of another organization as the source', async () => {
     const { POST } = await import('../clause-library/route');
     h.queue.push([]);
-    await expect(POST(ctx('/api/clause-library', { ...body, sourceCbaId: 'cba-x' }))).rejects.toMatchObject({ status: 404 });
+    await expect(POST(ctx('/api/clause-library', { ...body, sourceCbaId: CBA_X }))).rejects.toMatchObject({ status: 404 });
     expect(h.audit).not.toHaveBeenCalled();
   });
 
