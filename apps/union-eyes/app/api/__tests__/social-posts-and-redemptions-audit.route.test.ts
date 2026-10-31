@@ -6,7 +6,9 @@ const m = vi.hoisted(() => ({
   deletePost: vi.fn(),
   persistAtomicAudit: vi.fn(),
   cancelRedemption: vi.fn(),
-  withRLSContext: vi.fn(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn({})),
+  accounts: [] as Array<{ id: string; platform: string }>,
+  drafts: [] as Array<Record<string, unknown>>,
+  withRLSContext: vi.fn(),
   selected: [] as unknown[],
   order: [] as string[],
 }));
@@ -17,20 +19,22 @@ vi.mock('@/lib/rate-limiter', () => ({
 }));
 vi.mock('@/lib/social-media/social-media-service', () => ({
   createSocialMediaService: () => ({ publishPost: m.publishPost, deletePost: m.deletePost }),
+  postTypeFor: () => 'text',
   AllPlatformsFailedError: class extends Error {
     results: unknown[] = [];
   },
 }));
 vi.mock('@/db', () => ({
   db: {
-    select: () => ({ from: () => ({ innerJoin: () => ({ where: () => ({ limit: async () => m.selected }) }) }) }),
+    select: () => ({ from: () => ({ innerJoin: () => ({ where: () => ({ limit: async () => m.selected }) }), where: async () => m.accounts }) }),
   },
 }));
 vi.mock('@/db/schema/social-media-schema', () => ({
   socialPosts: { id: 'id', accountId: 'accountId' },
+  socialCampaigns: { id: 'id', organizationId: 'organizationId' },
   socialAccounts: { id: 'id', organizationId: 'organizationId' },
 }));
-vi.mock('drizzle-orm', () => ({ eq: vi.fn(() => 'eq'), and: vi.fn(), ilike: vi.fn(), desc: vi.fn(), count: vi.fn() }));
+vi.mock('drizzle-orm', () => ({ eq: vi.fn(() => 'eq'), and: vi.fn(), ilike: vi.fn(), desc: vi.fn(), count: vi.fn(), inArray: vi.fn() }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/services/rewards/redemption-service', () => ({
@@ -49,6 +53,10 @@ describe('social-media/posts — external effects are audited around the operati
     vi.clearAllMocks();
     m.order.length = 0;
     m.selected = [{ id: 'post_1', orgId: 'org_1' }];
+    m.accounts = [{ id: '11111111-1111-4111-8111-111111111111', platform: 'twitter' }];
+    m.drafts.length = 0;
+    m.withRLSContext.mockImplementation(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) =>
+      fn({ insert: () => ({ values: (row: Record<string, unknown>) => { m.drafts.push(row); return { returning: async () => [{ id: `draft_${m.drafts.length}`, accountId: row.accountId }] }; } }) }));
     m.persistAtomicAudit.mockImplementation(async (_tx: unknown, entry: { action: string }) => {
       m.order.push(entry.action);
     });
@@ -61,29 +69,46 @@ describe('social-media/posts — external effects are audited around the operati
     });
   });
 
-  const publish = () =>
+  const ACCOUNT = '11111111-1111-4111-8111-111111111111';
+  const publish = (extra: Record<string, unknown> = {}) =>
     new NextRequest('http://localhost/api/social-media/posts', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ platforms: ['twitter'], content: 'Vote Yes on the ratification' }),
+      body: JSON.stringify({ platforms: ['twitter'], content: 'Vote Yes on the ratification', account_ids: [ACCOUNT], ...extra }),
     });
 
-  it('records the intent before publishing and the outcome after, without the post text', async () => {
+  // DEF-0B11-SOC-POST-PUBLISHES-AT-ONCE-TO-EVERY-ACTIVE-ACCOUNT-OF-THE-SELECTED-PLATFORMS-AT-STEWARD-FLOOR-WITH-NO-APPROVAL-OR-CLASSIFICATION-CHECK
+  it('saves a draft for each named account and publishes nothing, auditing the draft without the post text', async () => {
     const { POST } = await import('../social-media/posts/route');
     const response = await POST(publish(), ctx as never);
 
-    expect(response.status).toBe(200);
-    expect(m.order).toEqual(['social.post.publish.requested', 'publish', 'social.post.publish.completed']);
+    expect(response.status).toBe(202);
+    expect((await response.json()).status).toBe('pending_approval');
+    expect(m.publishPost).not.toHaveBeenCalled();
+    expect(m.drafts).toHaveLength(1);
+    expect(m.drafts[0]).toMatchObject({ status: 'draft', accountId: ACCOUNT, createdBy: 'steward_1' });
+    expect(m.order).toEqual(['social.post.draft']);
     expect(JSON.stringify(m.persistAtomicAudit.mock.calls)).not.toContain('Vote Yes');
   });
 
-  it('does not publish when the intent cannot be recorded', async () => {
+  it('refuses an account that is not an active account of the organization on a selected platform', async () => {
+    const { POST } = await import('../social-media/posts/route');
+    m.accounts = [];
+    expect((await POST(publish(), ctx as never)).status).toBe(400);
+    m.accounts = [{ id: ACCOUNT, platform: 'facebook' }];
+    expect((await POST(publish(), ctx as never)).status).toBe(400);
+    expect(m.drafts).toHaveLength(0);
+  });
+
+  it('requires the post to name its accounts', async () => {
+    const { POST } = await import('../social-media/posts/route');
+    expect((await POST(publish({ account_ids: undefined }), ctx as never)).status).toBe(400);
+  });
+
+  it('writes no draft when the draft audit cannot be written', async () => {
     const { POST } = await import('../social-media/posts/route');
     m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
-
-    const response = await POST(publish(), ctx as never);
-
-    expect(response.status).toBe(409);
+    expect((await POST(publish(), ctx as never)).status).toBe(500);
     expect(m.publishPost).not.toHaveBeenCalled();
   });
 

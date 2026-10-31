@@ -30,7 +30,7 @@ const contactSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const intake = await guardPublicIntake(request, { bucket: 'write' });
+    const intake = await guardPublicIntake(request, { bucket: 'write', challenge: true });
     if (!intake.ok) return intake.response;
     const raw = intake.json;
     const body = contactSchema.parse(raw);

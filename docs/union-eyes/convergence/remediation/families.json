@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 573,
- "partial": 77,
- "outstanding": 204,
- "accountedFor": 204,
+ "corrected": 578,
+ "partial": 76,
+ "outstanding": 199,
+ "accountedFor": 199,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -90,9 +90,9 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 31,
+   "defects": 30,
    "severity": {
-    "HIGH": 6,
+    "HIGH": 5,
     "MEDIUM": 22,
     "LOW": 3
    },
@@ -107,7 +107,7 @@
     "0B.8": 2,
     "0B.9": 1,
     "0B.10": 1,
-    "0B.11": 8,
+    "0B.11": 7,
     "0B.12": 1
    }
   },
@@ -161,21 +161,20 @@
   {
    "family": "F08-PII-DISCLOSURE-AND-PROJECTION",
    "purpose": "Personal-data disclosure: project, redact or restrict returned fields",
-   "defects": 19,
+   "defects": 16,
    "severity": {
     "HIGH": 1,
-    "MEDIUM": 16,
-    "LOW": 2
+    "MEDIUM": 14,
+    "LOW": 1
    },
-   "namedRoutes": 5,
+   "namedRoutes": 4,
    "namedFiles": 1,
    "tranches": {
-    "0B.3": 1,
     "0B.4": 1,
     "0B.7": 3,
-    "0B.8": 2,
+    "0B.8": 1,
     "0B.9": 2,
-    "0B.10": 3,
+    "0B.10": 2,
     "0B.11": 3,
     "0B.12": 4
    }
@@ -237,10 +236,10 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 37,
+   "defects": 36,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 28,
+    "MEDIUM": 27,
     "LOW": 7
    },
    "namedRoutes": 6,
@@ -249,7 +248,7 @@
     "0B.1": 4,
     "0B.2": 1,
     "0B.5": 4,
-    "0B.6": 7,
+    "0B.6": 6,
     "0B.7": 7,
     "0B.8": 5,
     "0B.10": 4,
@@ -592,11 +591,6 @@
     "severity": "HIGH"
    },
    {
-    "id": "DEF-0B11-SOC-POST-PUBLISHES-AT-ONCE-TO-EVERY-ACTIVE-ACCOUNT-OF-THE-SELECTED-PLATFORMS-AT-STEWARD-FLOOR-WITH-NO-APPROVAL-OR-CLASSIFICATION-CHECK",
-    "severity": "HIGH",
-    "partial": true
-   },
-   {
     "id": "DEF-0B11-SOC-PUBLISH-RECORDS-THE-ROW-AFTER-THE-EXTERNAL-POST-AUDITS-COMPLETED-WHEN-EVERY-PLATFORM-FAILED-AND-RETURNS-PLATFORM-ERROR-TEXT",
     "severity": "MEDIUM",
     "partial": true
@@ -865,10 +859,6 @@
   ],
   "F08-PII-DISCLOSURE-AND-PROJECTION": [
    {
-    "id": "DEF-0B3-CALENDAR-DISCONNECT-ADMIN-FLOOR-NO-REVOKE",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B4-CBA-INGESTION-FETCHES-UNRESTRICTED-URLS",
     "severity": "MEDIUM",
     "partial": true
@@ -893,10 +883,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B8-ICRA-PUBLIC-WRITES-HAVE-NO-BOT-CHALLENGE-AND-TURNSTILE-IS-OPTIONAL",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B9-ML-QUERY-SENDS-FREE-TEXT-AND-ARBITRARY-CONTEXT-TO-AN-EXTERNAL-SERVICE-WITH-NO-DISCLOSURE-DECISION",
     "severity": "MEDIUM",
     "partial": true
@@ -913,10 +899,6 @@
    {
     "id": "DEF-0B10-PIL-DEMO-DATA-INSERTS-FICTIONAL-GRIEVANCES-AND-NAMED-FEDERAL-EMPLOYERS-INTO-THE-LIVE-TABLES-WITH-NO-ROW-MARKER-AND-DELETES-BY-NUMBER-AND-EMAIL-PATTERN",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-OPL-04",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B11-PRP-DUES-PAY-POST-SENDS-THE-ORGANIZATION-AND-MEMBER-USER-ID-TO-THE-PROCESSOR-FOR-A-MERCHANT-ACCOUNT-NO-SOURCE-NAMES",
@@ -1080,10 +1062,6 @@
     "id": "DEF-0B6-CMP-LEADERSHIP-COMPLIANCE-DEFAULTS-TO-100-AND-TRUNCATES",
     "severity": "MEDIUM",
     "partial": true
-   },
-   {
-    "id": "DEF-0B6-SYS-CONTACT-RATE-LIMIT-KEYED-ON-FORGEABLE-ADDRESS-NO-BOT-CHALLENGE",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B6-SYS-SLA-CLOCK-RESTARTS-ON-ANY-CLAIM-UPDATE",

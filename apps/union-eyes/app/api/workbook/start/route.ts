@@ -39,7 +39,7 @@ const bodySchema = z.object({
 export async function POST(request: NextRequest) {
   // Public pseudonymous intake: bounded by a per-client limit and a body cap. The workbook it creates holds no
   // tenant data and grants no access to any; it is a bearer-id record until claimed by an authenticated user.
-  const intake = await guardPublicIntake(request, { bucket: 'write' });
+  const intake = await guardPublicIntake(request, { bucket: 'write', challenge: true });
   if (!intake.ok) return intake.response;
 
   const parse = bodySchema.safeParse(intake.json ?? {});

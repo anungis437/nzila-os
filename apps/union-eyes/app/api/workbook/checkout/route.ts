@@ -37,7 +37,7 @@ const SELF_GUIDED_TIER_ID = 'workbook_self_guided' as const;
 const CHECKOUT_REUSE_WINDOW_MS = 30 * 60 * 1000;
 
 export async function POST(request: NextRequest) {
-  const intake = await guardPublicIntake(request, { bucket: 'checkout' });
+  const intake = await guardPublicIntake(request, { bucket: 'checkout', challenge: true });
   if (!intake.ok) return intake.response;
 
   const parse = bodySchema.safeParse(intake.json);

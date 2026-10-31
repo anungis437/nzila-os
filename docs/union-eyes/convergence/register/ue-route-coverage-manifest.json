@@ -1,8 +1,8 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 998,
-  "mutating": 726,
+  "routes": 999,
+  "mutating": 727,
   "kernel": 60,
   "byGuard": {
    "ADMIN_AUTH": 7,
@@ -14,7 +14,7 @@
    "ORG_AUTH": 53,
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 222,
-   "ROLE_AUTH": 120,
+   "ROLE_AUTH": 121,
    "SESSION_AUTH": 64,
    "WEBHOOK_SIGNATURE": 4,
    "WITH_API": 296,
@@ -30,14 +30,14 @@
    "ORG_AUTH": 32,
    "PLATFORM_AUTH_HANDLER": 7,
    "RETIRED": 215,
-   "ROLE_AUTH": 71,
+   "ROLE_AUTH": 72,
    "SESSION_AUTH": 35,
    "WEBHOOK_SIGNATURE": 4,
    "WITH_API": 187
   },
   "mutatingByAudit": {
-   "ATOMIC": 149,
-   "ATOMIC_SERVICE": 152,
+   "ATOMIC": 151,
+   "ATOMIC_SERVICE": 151,
    "COMPUTE_ONLY": 33,
    "CRUD_ATOMIC": 141,
    "EXEMPT_BALLOT_SECRECY": 2,
@@ -48,9 +48,9 @@
   "mutatingByData": {
    "AMBIENT_DB": 14,
    "CRUD_TENANT_TX": 141,
-   "NONE": 340,
+   "NONE": 339,
    "SYSTEM_CONTEXT": 65,
-   "TENANT_TX": 166
+   "TENANT_TX": 168
   }
  },
  "routes": [
@@ -11618,6 +11618,18 @@
    "audit": "NONE"
   },
   {
+   "route": "social-media/posts/review/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "ROLE_AUTH",
+   "kernel": false,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
+  },
+  {
    "route": "social-media/posts/route.ts",
    "methods": [
     "DELETE",
@@ -11628,8 +11640,8 @@
    "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "staging-proof/deadline-engine/scenario/route.ts",

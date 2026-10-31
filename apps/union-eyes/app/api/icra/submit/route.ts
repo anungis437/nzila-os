@@ -155,9 +155,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Unsupported locale.' }, { status: 400 })
   }
 
-  // Turnstile verification — env-gated. Returns success=true when no secret
-  // is configured so dev/private envs work without keys.
+  // Turnstile verification. Outside production an unconfigured secret is open so dev/private envs work without keys; in production an
+  // unconfigured challenge refuses (503) instead of quietly running unchallenged.
   const turnstile = await verifyTurnstileToken(turnstileToken ?? null, ip)
+  if (turnstile.notConfigured && process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'This form is temporarily unavailable.' }, { status: 503 })
+  }
   if (!turnstile.success) {
     fireAndForgetEvent({
       kind: 'turnstile_failed',

@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Mail, CheckCircle2, AlertCircle } from 'lucide-react';
 import { logger } from '@/lib/logger';
+import { TurnstileWidget, isTurnstileConfigured } from '@/components/icra/TurnstileWidget';
 
 interface FormData {
   firstName: string;
@@ -39,6 +40,8 @@ export function ContactForm() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  // When a Turnstile site key is configured the server requires a token; an unconfigured environment reports an empty one.
+  const [challengeToken, setChallengeToken] = useState<string | null>(isTurnstileConfigured() ? null : '');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +52,7 @@ export function ContactForm() {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, turnstileToken: challengeToken ?? '' }),
       });
 
       if (!res.ok) throw new Error('Request failed');
@@ -210,11 +213,13 @@ export function ContactForm() {
         />
       </div>
 
+      {isTurnstileConfigured() && <TurnstileWidget onVerified={setChallengeToken} />}
+
       <Button 
         type="submit" 
         className="w-full" 
         size="lg"
-        disabled={isSubmitting}
+        disabled={isSubmitting || challengeToken === null}
       >
         {isSubmitting ? (
           <>Sending...</>

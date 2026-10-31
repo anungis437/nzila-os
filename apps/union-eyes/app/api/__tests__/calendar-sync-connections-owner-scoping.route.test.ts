@@ -6,6 +6,7 @@ const m = vi.hoisted(() => ({
   select: vi.fn(), from: vi.fn(), where: vi.fn(), orderBy: vi.fn(), limit: vi.fn(),
   delete: vi.fn(), returning: vi.fn(), persistAtomicAudit: vi.fn(),
   withRLSContext: vi.fn(),
+  revoke: vi.fn(),
   eq: vi.fn((column: unknown, value: unknown) => ({ op: 'eq', column, value })),
   and: vi.fn((...predicates: unknown[]) => ({ op: 'and', predicates })),
   desc: vi.fn((column: unknown) => ({ op: 'desc', column })),
@@ -43,6 +44,7 @@ vi.mock('@/lib/api/framework', () => ({
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: (...args: unknown[]) => m.withRLSContext(...args),
 }));
+vi.mock('@/lib/external-calendar-sync/provider-revocation', () => ({ revokeProviderGrant: (...args: unknown[]) => m.revoke(...args) }));
 vi.mock('@/lib/audit/atomic-audit', () => ({
   persistAtomicAudit: (...args: unknown[]) => m.persistAtomicAudit(...args),
 }));
@@ -76,7 +78,8 @@ describe('calendar connection owner and credential boundary', () => {
     m.returning.mockResolvedValue([{ id: ID }]);
     m.delete.mockReturnValue({ where: m.where });
     m.withRLSContext.mockImplementation(async (_context: unknown, fn: (tx: unknown) => Promise<unknown>) =>
-      fn({ delete: m.delete }));
+      fn({ delete: m.delete, select: (...args: unknown[]) => { m.select(...args); return { from: m.from }; } }));
+    m.revoke.mockResolvedValue('not_supported');
     m.persistAtomicAudit.mockResolvedValue(undefined);
   });
 
@@ -116,15 +119,33 @@ describe('calendar connection owner and credential boundary', () => {
     expect(config.body.safeParse({ syncEnabled: true }).success).toBe(true);
   });
 
-  it('DELETE is scoped to the caller, audited in the transaction, and does not claim provider revocation', async () => {
+  // DEF-0B3-CALENDAR-DISCONNECT-ADMIN-FLOOR-NO-REVOKE
+  it('DELETE is scoped to the caller, asks the provider to revoke, audits what it did and deletes the local credentials', async () => {
+    m.limit.mockResolvedValue([{ provider: 'google', accessToken: 'enc-a', refreshToken: 'enc-r' }]);
+    m.revoke.mockResolvedValue('revoked');
     const { DELETE } = await import('@/app/api/calendar-sync/connections/[id]/route');
-    const result = await invoke<{ deleted: boolean; id: string; providerRevocationVerified: boolean }>(DELETE, { ...actor, params: { id: ID } });
-    expect(result).toEqual({ deleted: true, id: ID, providerRevocationVerified: false });
-    scoped(m.where.mock.calls[0][0]);
+    const result = await invoke<Record<string, unknown>>(DELETE, { ...actor, params: { id: ID } });
+    expect(result).toEqual({ deleted: true, id: ID, providerRevocation: 'revoked', providerRevocationVerified: true });
+    expect(m.revoke).toHaveBeenCalledWith('google', expect.objectContaining({ refreshToken: 'enc-r' }));
     expect(m.withRLSContext).toHaveBeenCalledWith(actor, expect.any(Function));
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
       organizationId: 'org-1', userId: 'user-1', action: 'calendar.connection.delete',
-      resourceId: ID,
+      resourceId: ID, details: expect.objectContaining({ providerRevocation: 'revoked', localCredentialsDeleted: true }),
     }));
+  });
+
+  it('DELETE still removes the local credentials, and says so, when the provider cannot revoke', async () => {
+    m.limit.mockResolvedValue([{ provider: 'microsoft', accessToken: 'enc-a', refreshToken: null }]);
+    m.revoke.mockResolvedValue('not_supported');
+    const { DELETE } = await import('@/app/api/calendar-sync/connections/[id]/route');
+    const result = await invoke<Record<string, unknown>>(DELETE, { ...actor, params: { id: ID } });
+    expect(result).toMatchObject({ deleted: true, providerRevocation: 'not_supported', providerRevocationVerified: false });
+  });
+
+  it('DELETE of a connection the caller does not own is not found and revokes nothing', async () => {
+    m.limit.mockResolvedValue([]);
+    const { DELETE } = await import('@/app/api/calendar-sync/connections/[id]/route');
+    await expect(invoke(DELETE, { ...actor, params: { id: ID } })).rejects.toMatchObject({ status: 404 });
+    expect(m.revoke).not.toHaveBeenCalled();
   });
 });

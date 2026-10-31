@@ -86,7 +86,7 @@ function buildLineItems(
 // ── Handler ─────────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  const intake = await guardPublicIntake(request, { bucket: 'checkout' });
+  const intake = await guardPublicIntake(request, { bucket: 'checkout', challenge: true });
   if (!intake.ok) return intake.response;
 
   const parse = bodySchema.safeParse(intake.json);

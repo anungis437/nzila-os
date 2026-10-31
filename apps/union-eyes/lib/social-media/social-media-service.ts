@@ -51,6 +51,22 @@ export function composePostText(content: Pick<UnifiedPostContent, 'text' | 'hash
 /**
  * Platform-specific post result
  */
+/** Narrows a publish: to named accounts, and to a draft that already exists and is completed rather than inserted. */
+export interface PublishOptions {
+  accountIds?: string[];
+  existingPostId?: string;
+}
+
+/** The kind of post, from its content; used for a draft as well as for a published post. */
+export function postTypeFor(content: Pick<UnifiedPostContent, 'media_urls' | 'link_url'>): SocialPostType {
+  if (content.media_urls && content.media_urls.length > 0) {
+    if (content.media_urls.length > 1) return 'carousel';
+    const url = content.media_urls[0].toLowerCase();
+    return url.includes('.mp4') || url.includes('.mov') || url.includes('video') ? 'video' : 'image';
+  }
+  return content.link_url ? 'link' : 'text';
+}
+
 export interface PlatformPostResult {
   platform: SocialPlatform;
   success: boolean;
@@ -249,7 +265,8 @@ export class SocialMediaService {
   async publishPost(
     organizationId: string,
     content: UnifiedPostContent,
-    createdById: string
+    createdById: string,
+    options: PublishOptions = {},
   ): Promise<PlatformPostResult[]> {
     const results: PlatformPostResult[] = [];
 
@@ -262,6 +279,8 @@ export class SocialMediaService {
           eq(socialAccounts.organizationId, organizationId),
           inArray(socialAccounts.platform, content.platforms),
           eq(socialAccounts.status, 'active'),
+          // Publishing reaches only the accounts the post names: never every connected page of a platform.
+          ...(options.accountIds ? [inArray(socialAccounts.id, options.accountIds)] : []),
         )
       );
 
@@ -389,7 +408,21 @@ export class SocialMediaService {
         // the post is live, so it is reported as published and unrecorded, and the failure is logged.
         let recorded = true;
         try {
-          await db.insert(socialPosts).values({
+          if (options.existingPostId) {
+            // An approved draft is completed in place: it is the record of what was approved.
+            const completed = await db
+              .update(socialPosts)
+              .set({
+                platformPostId: postId,
+                status: content.scheduled_for ? 'scheduled' : 'published',
+                publishedAt: content.scheduled_for ? null : new Date(),
+                platformUrl: permalink ?? null,
+                updatedAt: new Date(),
+              })
+              .where(and(eq(socialPosts.id, options.existingPostId), eq(socialPosts.organizationId, organizationId), eq(socialPosts.accountId, account.id)))
+              .returning({ id: socialPosts.id });
+            if (completed.length === 0) throw new Error('The approved draft no longer exists');
+          } else await db.insert(socialPosts).values({
             organizationId,
             accountId: account.id,
             platformPostId: postId,
@@ -710,23 +743,7 @@ throw error;
    * Detect post type from content
    */
   private detectPostType(content: UnifiedPostContent): SocialPostType {
-    if (content.media_urls && content.media_urls.length > 0) {
-      if (content.media_urls.length > 1) {
-        return 'carousel';
-      }
-      // Check if it&apos;s a video (simple check, could be more sophisticated)
-      const url = content.media_urls[0].toLowerCase();
-      if (url.includes('.mp4') || url.includes('.mov') || url.includes('video')) {
-        return 'video';
-      }
-      return 'image';
-    }
-
-    if (content.link_url) {
-      return 'link';
-    }
-
-    return 'text';
+    return postTypeFor(content);
   }
 }
 
@@ -738,4 +755,3 @@ export function createSocialMediaService(): SocialMediaService {
 }
 
 export default SocialMediaService;
-

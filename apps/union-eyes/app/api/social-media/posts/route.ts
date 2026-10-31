@@ -7,12 +7,14 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createSocialMediaService, AllPlatformsFailedError } from '@/lib/social-media/social-media-service';
+import { createSocialMediaService, postTypeFor } from '@/lib/social-media/social-media-service';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { parseSocialPostPagination } from '@/lib/social-media/social-post-pagination';
 import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 import { db } from '@/db';
 import { socialPosts, socialAccounts, socialCampaigns } from '@/db/schema/social-media-schema';
-import { eq, and, ilike, desc, count, SQL } from 'drizzle-orm';
+import { eq, and, ilike, desc, count, inArray, SQL } from 'drizzle-orm';
 import { z } from "zod";
 import { BaseAuthContext, withRoleAuth } from '@/lib/api-auth-guard';
 
@@ -109,9 +111,12 @@ const socialMediaPostsSchema = z.object({
   mentions: z.array(z.string().max(100)).max(20, "Maximum 20 mentions").optional(),
   scheduled_for: z.string().datetime().optional(),
   campaign_id: z.guid("Invalid campaign_id").optional(),
+  // The post goes to the accounts it names, never to every connected page of a platform.
+  account_ids: z.array(z.guid("Invalid account id")).min(1, "Name at least one account").max(10, "Maximum 10 accounts"),
 });
 
-// A post goes at once to every connected account of each selected platform in the organization's name, so publishing is an officer's act.
+// Speaking in the organization's name takes two officers: this route records a draft for the accounts the author names, and a different
+// officer approves it (POST /api/social-media/posts/review) before anything reaches a platform.
 export const POST = withRoleAuth('officer', async (request: NextRequest, context: BaseAuthContext) => {
   try {
       const { userId, organizationId } = context;
@@ -165,6 +170,7 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
         mentions,
         scheduled_for,
         campaign_id,
+        account_ids,
       } = validation.data;
 
       // The platform APIs here take no mention markup, so a mention would be stored as sent while nothing sends it.
@@ -200,73 +206,64 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
         }
       }
 
-      // Create social media service
-      const socialMediaService = createSocialMediaService();
+      // The accounts named must be this organization's own, active, and on a selected platform.
+      const accounts = await db
+        .select({ id: socialAccounts.id, platform: socialAccounts.platform })
+        .from(socialAccounts)
+        .where(and(
+          eq(socialAccounts.organizationId, organizationId),
+          inArray(socialAccounts.id, account_ids),
+          eq(socialAccounts.status, 'active'),
+        ));
+      if (accounts.length !== new Set(account_ids).size || accounts.some((a) => !platforms.includes(a.platform))) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Every account must be an active account of this organization on a selected platform');
+      }
 
-      // Publish post. It reaches external platforms, so intent is audited before and outcome after.
-      const results = await performAuditedOperation(
-        {
-          organizationId,
-          userId,
-          action: 'social.post.publish',
-          resourceType: 'social_posts',
-          details: { platforms, scheduled: !!scheduled_for, mediaCount: (media_urls || []).length },
-        },
-        async () => {
-          const published = await socialMediaService.publishPost(
-            organizationId,
-            {
-              text: content,
-              media_urls: media_urls || [],
-              link_url,
-              link_title,
-              link_description,
+      // One draft per account, written with its audit record; nothing is sent.
+      const drafts = await withRLSContext({ organizationId }, async (tx) => {
+        const rows = [];
+        for (const account of accounts) {
+          const [row] = await tx
+            .insert(socialPosts)
+            .values({
+              organizationId,
+              accountId: account.id,
+              campaignId: campaign_id ?? null,
+              postType: postTypeFor({ media_urls, link_url }),
+              content,
+              mediaUrls: media_urls || [],
+              linkUrl: link_url ?? null,
               hashtags: hashtags || [],
-              mentions: mentions || [],
-              scheduled_for: scheduled_for ? new Date(scheduled_for) : undefined,
-              campaign_id,
-              platforms,
-            },
-            userId
-          );
-          // When no platform accepted the post the operation is a failure, so its outcome record says so.
-          if (published.every((r) => !r.success)) throw new AllPlatformsFailedError(published);
-          return published;
-        },
-      );
-
-      // Check if any posts succeeded
-      const successCount = results.filter(r => r.success).length;
-      const failureCount = results.filter(r => !r.success).length;
-
-      if (successCount === 0) {
-        return NextResponse.json(
-          {
-            error: 'Failed to publish to any platform',
-            results,
-          },
-          { status: 500 }
-        );
-      }
-
-      return NextResponse.json({
-        message: `Published to ${successCount} platform(s)${failureCount > 0 ? `, failed on ${failureCount}` : ''}`,
-        results,
-        success: successCount,
-        failed: failureCount,
+              mentions: [],
+              status: 'draft',
+              scheduledFor: scheduled_for ? new Date(scheduled_for) : null,
+              postMetadata: { approval: { state: 'pending', requestedBy: userId, requestedAt: new Date().toISOString() }, linkTitle: link_title, linkDescription: link_description },
+              createdBy: userId,
+            })
+            .returning({ id: socialPosts.id, accountId: socialPosts.accountId });
+          await persistAtomicAudit(tx, {
+            organizationId,
+            userId,
+            action: 'social.post.draft',
+            resourceType: 'social_posts',
+            resourceId: row.id,
+            details: { platform: account.platform, scheduled: !!scheduled_for, mediaCount: (media_urls || []).length },
+          });
+          rows.push(row);
+        }
+        return rows;
       });
-    } catch (error) {
-      if (error instanceof AllPlatformsFailedError) {
-        return NextResponse.json({ error: 'Failed to publish to any platform', results: error.results }, { status: 500 });
-      }
-      const refused = operationAuditResponse(error);
-      if (refused) return NextResponse.json(refused.body, { status: refused.status });
+
       return NextResponse.json(
         {
-          error: 'Internal server error',
+          message: 'Saved as a draft for approval. Nothing was published; a different officer must approve it.',
+          status: 'pending_approval',
+          drafts: drafts.map((d) => ({ id: d.id, account_id: d.accountId })),
         },
-        { status: 500 }
+        { status: 202 },
       );
+    } catch (error) {
+      return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Internal server error', error);
     }
 });
 

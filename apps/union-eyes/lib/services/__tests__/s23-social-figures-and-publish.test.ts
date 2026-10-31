@@ -65,7 +65,7 @@ describe('Gate 0 batch B79: social campaign figures and publish handling', () =>
   })
 
   it('records an all-platform failure as a failed operation and never returns platform text', () => {
-    const route = src('app/api/social-media/posts/route.ts')
+    const route = src('app/api/social-media/posts/review/route.ts')
     expect(route).toContain('throw new AllPlatformsFailedError(published)')
     const service = src('lib/social-media/social-media-service.ts')
     expect(service).toContain("'The platform did not accept the post.'")

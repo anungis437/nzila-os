@@ -475,3 +475,27 @@ describe('publishPost reports what happened without echoing the platform or hidi
     expect(results[0]).toMatchObject({ success: true, recorded: true });
   });
 });
+
+// An approved draft is published to its own account only and completed in place.
+describe('publishPost options', () => {
+  it('publishes only to the named accounts', async () => {
+    state.selects.socialAccounts = [account({ platform: 'twitter' })];
+    const results = await new SocialMediaService().publishPost('org-1', { text: 'hello', platforms: ['twitter'] }, 'user-1', { accountIds: ['acct-1'] });
+    expect(results[0]).toMatchObject({ success: true });
+  });
+
+  it('completes an existing draft instead of inserting a second row', async () => {
+    state.selects.socialAccounts = [account({ platform: 'twitter' })];
+    state.updates.socialPosts = [{ id: 'draft-1' }];
+    let inserted = false;
+    const original = dbMock.insert;
+    (dbMock as any).insert = (...args: unknown[]) => { inserted = true; return (original as any)(...args); };
+    try {
+      const results = await new SocialMediaService().publishPost('org-1', { text: 'hello', platforms: ['twitter'] }, 'user-1', { accountIds: ['acct-1'], existingPostId: 'draft-1' });
+      expect(results[0]).toMatchObject({ success: true, recorded: true });
+      expect(inserted).toBe(false);
+    } finally {
+      (dbMock as any).insert = original;
+    }
+  });
+});

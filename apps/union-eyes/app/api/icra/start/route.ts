@@ -42,7 +42,7 @@ const startSchema = z.object({
 export async function POST(request: Request) {
   let payload: z.infer<typeof startSchema>
   try {
-    const intake = await guardPublicIntake(request, { bucket: 'write' })
+    const intake = await guardPublicIntake(request, { bucket: 'write', challenge: true })
     if (!intake.ok) return intake.response
     payload = startSchema.parse(intake.json ?? {})
   } catch (err) {

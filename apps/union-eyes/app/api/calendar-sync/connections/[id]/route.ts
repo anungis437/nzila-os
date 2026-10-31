@@ -8,6 +8,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { externalCalendarConnections as connections } from '@/db/schema';
 import { and, eq } from 'drizzle-orm';
+import { revokeProviderGrant } from '@/lib/external-calendar-sync/provider-revocation';
 
 export const dynamic = 'force-dynamic';
 
@@ -92,11 +93,20 @@ export const PATCH = withApi({
 export const DELETE = withApi({
   auth: { required: true, minRole: 'member' },
   requireOrg: true,
-  openapi: { tags: ['Scheduling'], summary: 'Delete own local calendar connection' },
+  openapi: { tags: ['Scheduling'], summary: 'Disconnect own calendar: revoke the provider grant where possible, then delete the local credentials' },
 }, async ({ organizationId, userId, params }) => {
   if (!organizationId || !userId) throw ApiError.forbidden('Organization context required');
   const parsed = zUUID.safeParse(params.id);
   if (!parsed.success) throw ApiError.badRequest('Invalid connection id');
+
+  // The provider is asked first, outside the transaction (an external call must not hold a database transaction open); the local
+  // credentials are removed whatever it answers, and the audit row records what it did.
+  const [connection] = await withRLSContext({ organizationId, userId }, (tx) => tx
+    .select({ provider: connections.provider, accessToken: connections.accessToken, refreshToken: connections.refreshToken })
+    .from(connections).where(ownConnection(organizationId, userId, parsed.data)).limit(1));
+  if (!connection) throw ApiError.notFound('Calendar connection not found');
+  const providerRevocation = await revokeProviderGrant(connection.provider, connection);
+
   return withRLSContext({ organizationId, userId }, async (tx) => {
     const [deleted] = await tx.delete(connections)
       .where(ownConnection(organizationId, userId, parsed.data))
@@ -107,8 +117,8 @@ export const DELETE = withApi({
       action: 'calendar.connection.delete',
       resourceType: 'external_calendar_connections',
       resourceId: parsed.data,
-      details: { providerRevocation: 'NOT_VERIFIED', localCredentialsDeleted: true },
+      details: { provider: connection.provider, providerRevocation, localCredentialsDeleted: true },
     });
-    return { deleted: true, id: deleted.id, providerRevocationVerified: false };
+    return { deleted: true, id: deleted.id, providerRevocation, providerRevocationVerified: providerRevocation === 'revoked' };
   });
 });
