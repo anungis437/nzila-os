@@ -72,3 +72,44 @@ jobs:
             FROM tool_fabric_trust_stream s
             WHERE s.stream_id = 'platform:tool-fabric:trust'")"
           test "$observed" = "t"
+
+      - name: Verify committed trust receipts survive an actual PostgreSQL restart (ephemeral CI only)
+        run: |
+          set -euo pipefail
+          # Restart only this job's uniquely identified PostgreSQL service.
+          # A new psql connection alone does not prove restart persistence.
+          mapfile -t postgres_ids < <(docker ps --filter 'ancestor=postgres:16' --format '{{.ID}}')
+          if [ "${#postgres_ids[@]}" -ne 1 ]; then
+            echo "::error::Expected exactly one ephemeral PostgreSQL 16 service container"
+            exit 1
+          fi
+          docker restart "${postgres_ids[0]}"
+          ready=false
+          for attempt in $(seq 1 30); do
+            if pg_isready -q -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE"; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" != true ]; then
+            echo "::error::PostgreSQL did not recover after service restart"
+            exit 1
+          fi
+          # A fresh connection must observe both committed receipts, the
+          # matching head, and no orphan from the rejected transaction.
+          observed="$(psql -X -At -v ON_ERROR_STOP=1 -c "SELECT
+            s.revision = 2
+            AND s.head_hash = repeat('2',64)
+            AND (SELECT count(*) FROM tool_fabric_trust_entry e
+                 WHERE e.stream_id = s.stream_id) = 2
+            AND (SELECT count(*) FROM tool_fabric_trust_entry e
+                 WHERE e.stream_id = s.stream_id AND e.seq > s.revision) = 0
+            AND (SELECT entry_hash FROM tool_fabric_trust_entry e
+                 WHERE e.stream_id = s.stream_id AND e.seq = 2) = repeat('2',64)
+            FROM tool_fabric_trust_stream s
+            WHERE s.stream_id = 'platform:tool-fabric:trust'")"
+          if [ "$observed" != "t" ]; then
+            echo "::error::PostgreSQL restart changed durable trust receipts or head"
+            exit 1
+          fi
