@@ -9,8 +9,11 @@ import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-function requireOrgAccess(_request: NextRequest): boolean {
-  return true;
+// The unsubscribe link is a narrowly scoped capability, not a user session.
+// Its signed action, campaign and recipient must all match; a recipient-only
+// token must never revoke preferences across unrelated organizations.
+function requireOrgAccess(token: string | null, campaignId: string, recipientId: string) {
+  return verifyTrackingToken(token, [`${campaignId}:${recipientId}:unsubscribe`]);
 }
 
 function incrementStat(stats: any, key: string): Record<string, unknown> {
@@ -108,27 +111,21 @@ export async function GET(
   request: NextRequest,
   context: { params: Promise<{ recipientId: string }> },
 ) {
-  if (!requireOrgAccess(request)) {
-    return new NextResponse('Unauthorized', { status: 401 });
-  }
-
   const { recipientId } = await context.params;
   const campaignId = request.nextUrl.searchParams.get('campaignId');
   const token = request.nextUrl.searchParams.get('token');
   const reason = (request.nextUrl.searchParams.get('reason') || 'unsubscribe_link').slice(0, 200);
   const locale = request.nextUrl.searchParams.get('locale') || 'en-CA';
 
-  // Action-bound candidates only: an unsubscribe token MUST carry the
-  // `:unsubscribe` action suffix, so an open/click tracking token (which signs
-  // `${campaignId}:${recipientId}` / `${campaignId}:${recipientId}:${url}`) can
-  // never authorize an unsubscribe mutation (UNSUBSCRIBE_TOKEN_SCOPE).
-  const tokenCandidates = campaignId
-    ? [`${campaignId}:${recipientId}:unsubscribe`]
-    : [`${recipientId}:unsubscribe`];
+  // A recipient-only token carries no organization authority. Do not infer
+  // an organization from the recipient and silently revoke other tenants.
+  if (!campaignId) {
+    return new NextResponse('A campaign-bound unsubscribe link is required', { status: 400 });
+  }
 
-  // Fail closed: a missing/placeholder secret (configuration_missing) or a
-  // forged/absent token (invalid) rejects with 401 and performs NO mutation.
-  const verification = verifyTrackingToken(token, tokenCandidates);
+  // Only an action-bound token for this exact campaign and recipient may
+  // authorize a write; open/click tokens cannot be repurposed.
+  const verification = requireOrgAccess(token, campaignId, recipientId);
   if (verification !== 'valid') {
     logger.warn('[communications/unsubscribe] Unsubscribe token not authorized', {
       recipientId,
@@ -138,67 +135,43 @@ export async function GET(
     return new NextResponse('Invalid unsubscribe token', { status: 401 });
   }
 
-  await withSystemContext(async (tx) => {
-    let organizationId: string | null = null;
+  const campaignFound = await withSystemContext(async (tx) => {
+    const [campaign] = await tx
+      .select({ id: campaigns.id, organizationId: campaigns.organizationId, stats: campaigns.stats })
+      .from(campaigns)
+      .where(eq(campaigns.id, campaignId))
+      .limit(1);
 
-    if (campaignId) {
-      const [campaign] = await tx
-        .select({ id: campaigns.id, organizationId: campaigns.organizationId, stats: campaigns.stats })
-        .from(campaigns)
-        .where(eq(campaigns.id, campaignId))
-        .limit(1);
+    // Never acknowledge a successful unsubscribe for a campaign that cannot
+    // be resolved to an organization; the signed token alone is not a row.
+    if (!campaign) return false;
 
-      if (campaign) {
-        organizationId = campaign.organizationId;
+    const updatedMessageRows = await tx
+      .update(messageLog)
+      .set({ status: 'unsubscribed' })
+      .where(and(
+        eq(messageLog.campaignId, campaignId),
+        eq(messageLog.organizationId, campaign.organizationId),
+        eq(messageLog.recipientId, recipientId),
+        eq(messageLog.channelType, 'email'),
+        ne(messageLog.status, 'unsubscribed'),
+      ))
+      .returning({ id: messageLog.id });
 
-        const updatedMessageRows = await tx
-          .update(messageLog)
-          .set({
-            status: 'unsubscribed',
-          })
-          .where(
-            and(
-              eq(messageLog.campaignId, campaignId),
-              eq(messageLog.organizationId, campaign.organizationId),
-              eq(messageLog.recipientId, recipientId),
-              eq(messageLog.channelType, 'email'),
-              ne(messageLog.status, 'unsubscribed'),
-            ),
-          )
-          .returning({ id: messageLog.id });
-
-        if (updatedMessageRows.length > 0) {
-          await tx
-            .update(campaigns)
-            .set({
-              stats: incrementStat(campaign.stats, 'unsubscribed'),
-              updatedAt: new Date(),
-            })
-            .where(and(eq(campaigns.id, campaignId), eq(campaigns.organizationId, campaign.organizationId)));
-        }
-      }
+    if (updatedMessageRows.length > 0) {
+      await tx.update(campaigns)
+        .set({ stats: incrementStat(campaign.stats, 'unsubscribed'), updatedAt: new Date() })
+        .where(and(eq(campaigns.id, campaignId), eq(campaigns.organizationId, campaign.organizationId)));
     }
 
-    // A campaign link names one organization. A link without a campaign binds only the recipient, so the revocation is applied to
-    // every organization that holds a preference row or a list subscription for this recipient, each under its own predicate and each with its own consent record.
-    let organizationIds: string[] = organizationId ? [organizationId] : [];
-    if (!organizationId) {
-      const fromPreferences = await tx
-        .select({ organizationId: communicationPreferences.organizationId })
-        .from(communicationPreferences)
-        .where(eq(communicationPreferences.userId, recipientId));
-      const fromLists = await tx
-        .select({ organizationId: newsletterDistributionLists.organizationId })
-        .from(newsletterListSubscribers)
-        .innerJoin(newsletterDistributionLists, eq(newsletterListSubscribers.listId, newsletterDistributionLists.id))
-        .where(eq(newsletterListSubscribers.profileId, recipientId));
-      organizationIds = [...new Set([...fromPreferences, ...fromLists].map((row) => row.organizationId))];
-    }
-
-    for (const orgId of organizationIds) {
-      await revokeEmailForOrganization(tx, orgId, recipientId, reason, campaignId);
-    }
+    // Only the campaign's organization may be affected by this link.
+    await revokeEmailForOrganization(tx, campaign.organizationId, recipientId, reason, campaignId);
+    return true;
   });
+
+  if (!campaignFound) {
+    return new NextResponse('Unsubscribe campaign not found', { status: 404 });
+  }
 
   return new NextResponse(confirmationHtml(locale), {
     status: 200,
