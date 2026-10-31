@@ -9,6 +9,7 @@ import {
   type RepresentationAuthority,
 } from '@/db/schema/representation-authority-schema';
 import { auditLog, AuditSeverity } from '@/lib/audit-logger';
+import { logger } from '@/lib/logger';
 import { evaluateRepresentationAuthority } from './representation-authority-service';
 
 export type ExternalMatterPermission =
@@ -347,6 +348,12 @@ export async function auditExternalAuthorizationDecision(params: {
   resource: string;
   resourceId: string;
 }) {
+  // A refusal for someone who holds no authority at all is not an event of the organization they named: any signed-in user can name any
+  // organization id, and the named organization's audit trail must not take rows from strangers. It is kept in the application log.
+  if (!params.decision.allowed && !params.decision.authorityId) {
+    logger.warn('External authorization refused: no authority held', { resource: params.resource, reason: params.decision.reason });
+    return;
+  }
   return auditLog({
     eventType: params.decision.allowed
       ? 'external_authorization.allowed'

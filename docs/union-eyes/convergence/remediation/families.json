@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 603,
- "partial": 78,
- "outstanding": 174,
- "accountedFor": 174,
+ "corrected": 605,
+ "partial": 79,
+ "outstanding": 172,
+ "accountedFor": 172,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -87,10 +87,10 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 25,
+   "defects": 24,
    "severity": {
     "HIGH": 4,
-    "MEDIUM": 21,
+    "MEDIUM": 20,
     "LOW": 0
    },
    "namedRoutes": 1,
@@ -104,7 +104,7 @@
     "0B.8": 1,
     "0B.9": 1,
     "0B.10": 1,
-    "0B.11": 5,
+    "0B.11": 4,
     "0B.12": 1
    }
   },
@@ -232,13 +232,13 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 33,
+   "defects": 32,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 25,
+    "MEDIUM": 24,
     "LOW": 6
    },
-   "namedRoutes": 6,
+   "namedRoutes": 5,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 4,
@@ -249,7 +249,7 @@
     "0B.8": 3,
     "0B.10": 4,
     "0B.11": 2,
-    "0B.12": 3
+    "0B.12": 2
    }
   }
  ],
@@ -518,7 +518,8 @@
    },
    {
     "id": "DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-AND-AUDIT-BEFORE-GRANT",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B9-ASM-CLAUSE-RELEVANCE-SCORES-SHARING-LEVELS-AND-SOURCE-NAMES-THAT-THE-ROW-LEVEL-POLICIES-WITHHOLD",
@@ -526,10 +527,6 @@
    },
    {
     "id": "DEF-0B10-PEN-PENSION-ADMINISTRATION-WRITES-REST-ON-ONE-ROLE-TITLE-WITH-NO-MANDATE-OR-TRUSTEE-DECISION",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-PRP-PROFILE-ROLES-PATH-IS-A-BILLING-PROFILE-LIST-AND-ITS-POST-IS-REFUSED",
     "severity": "MEDIUM"
    },
    {
@@ -1038,10 +1035,6 @@
     "id": "DEF-0B11-IDS-SATISFACTION-ANONYMITY-FLAG-IS-STORED-AND-NEVER-READ-WHILE-THE-FORM-PROMISES-THE-NAME-IS-HIDDEN",
     "severity": "MEDIUM",
     "partial": true
-   },
-   {
-    "id": "DEF-0B12-PLT-KPI-CALCULATION-AND-ALERT-FLAG-ARE-STORED-AND-APPLIED-BY-NO-CODE",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B12-PLT-VOICE-UPLOAD-CHECKS-THE-AI-SEARCH-ENTITLEMENT-AND-CONSUMES-NO-CREDIT",

@@ -13,12 +13,14 @@ export const POST = withApi(
       description: z.string().max(1000).optional(),
       metricType: z.string().min(1).max(100),
       dataSource: z.enum(['claims', 'members', 'financial', 'custom_query']),
-      calculation: z.record(z.string(), z.unknown()).default({ aggregation: 'sum' }),
+      // The calculation is a bounded, named aggregation, not free-form JSON: no key or value outside it is stored.
+      calculation: z.object({ aggregation: z.enum(['sum', 'avg', 'count', 'min', 'max']) }).strict().default({ aggregation: 'sum' }),
       visualizationType: z.enum(['line', 'bar', 'pie', 'gauge', 'number']).default('gauge'),
       targetValue: z.number().optional(),
       warningThreshold: z.number().optional(),
       criticalThreshold: z.number().optional(),
-      alertEnabled: z.boolean().default(false),
+      // No code sends an alert and no recipient list is stored, so a target cannot be created promising one.
+      alertEnabled: z.literal(false).default(false),
       direction: z.enum(['higher_is_better', 'lower_is_better']).optional(),
     }),
   },

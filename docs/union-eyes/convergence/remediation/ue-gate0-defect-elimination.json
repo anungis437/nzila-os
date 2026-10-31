@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 550,
-    "partial": 78,
+    "implementedPendingQualification": 552,
+    "partial": 79,
     "qualificationVerified": 0,
-    "unresolved": 227,
+    "unresolved": 225,
     "externalBlockers": 0
   },
   "batches": [
@@ -914,6 +914,15 @@
       "outstandingBefore": 228,
       "newlyImplemented": 1,
       "outstandingAfter": 227,
+      "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B94-TARGETS-EXTERNAL-AUDIT-PROFILE",
+      "family": "KPI target bounds, external refusal audit scope, profile roles",
+      "outstandingBefore": 227,
+      "newlyImplemented": 2,
+      "outstandingAfter": 225,
       "partial": 1,
       "evidenceCommit": null
     }
@@ -7401,6 +7410,36 @@
       ],
       "explanation": "Timesheet ingest now refuses an archived employer (409) instead of continuing to take payroll input for it.",
       "remaining": "The generic employer delete still sets only status archived (no archived-at stamp) and does not check for open timesheet batches, contacts or communications; a governed archive action is needed."
+    },
+    "DEF-0B12-PLT-KPI-CALCULATION-AND-ALERT-FLAG-ARE-STORED-AND-APPLIED-BY-NO-CODE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B94-TARGETS-EXTERNAL-AUDIT-PROFILE",
+      "files": [
+        "apps/union-eyes/app/api/targets/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s38-targets-external-audit-profile.test.ts"
+      ],
+      "explanation": "POST /api/targets now stores a calculation only as one named aggregation (sum, avg, count, min or max; strict, nothing else is kept) and refuses a target created with alertEnabled true, because no sender or recipient list exists to deliver an alert; it no longer stores a promise nothing keeps.",
+      "remaining": "The summary route still does not apply the stored aggregation or data source; wiring it is a product change to the KPI engine."
+    },
+    "DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-AND-AUDIT-BEFORE-GRANT": {
+      "status": "PARTIAL",
+      "batch": "B94-TARGETS-EXTERNAL-AUDIT-PROFILE",
+      "files": [
+        "apps/union-eyes/lib/services/external-resource-authorization-service.ts",
+        "apps/union-eyes/lib/external-resource-middleware.ts",
+        "apps/union-eyes/lib/services/__tests__/s38-targets-external-audit-profile.test.ts"
+      ],
+      "explanation": "A refusal for an actor who holds no representation authority is no longer written into the named organization's audit trail (it goes to the application log), so a signed-in stranger who names any organization id can no longer add rows to that organization's audit log; a refusal for an actor who does hold an authority is still audited there.",
+      "remaining": "The route still opens the tenant transaction for the organization named by the caller before the grant is checked; the binder that requires an active membership applies only in canonical V2."
+    },
+    "DEF-0B11-PRP-PROFILE-ROLES-PATH-IS-A-BILLING-PROFILE-LIST-AND-ITS-POST-IS-REFUSED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B94-TARGETS-EXTERNAL-AUDIT-PROFILE",
+      "files": [
+        "apps/union-eyes/app/api/profile/roles/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s38-targets-external-audit-profile.test.ts"
+      ],
+      "explanation": "Verified on source in B94: the route no longer lists billing profiles; it answers the signed-in user's own roles from their live membership on GET and on POST (whose body is ignored), so there is no refused POST and no billing data."
     }
   }
 }
