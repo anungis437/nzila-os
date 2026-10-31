@@ -3,6 +3,9 @@ import type { Locale } from './locales';
 
 const OG_LOCALE: Record<Locale, string> = { 'en-CA': 'en_CA', 'fr-CA': 'fr_CA' };
 
+// The shared card is a generic brand graphic, so its alt text describes the graphic, not the page.
+const SHARED_IMAGE_ALT = 'Nzila Ventures — Human-centered institutional software';
+
 type PageMetadataInput = {
   title: string;
   description: string;
@@ -30,7 +33,7 @@ export function pageMetadata({ title, description, path, locale }: PageMetadataI
       title: socialTitle,
       description,
       url: path,
-      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: socialTitle }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: SHARED_IMAGE_ALT }],
     },
     twitter: {
       card: 'summary_large_image',
