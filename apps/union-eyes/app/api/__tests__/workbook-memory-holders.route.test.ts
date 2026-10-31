@@ -26,7 +26,7 @@ const mockDb = {
         const rows = (m.selectQueue.shift() ?? []) as unknown[];
         const first = rows[0] as Record<string, unknown> | undefined;
         if (first && Object.hasOwn(first, 'claimedByUserId')) {
-          m.lockedWorkbook = first as typeof m.lockedWorkbook;
+          m.lockedWorkbook = { id: String(first.id), claimedByUserId: first.claimedByUserId as string | null, claimedOrgId: first.claimedOrgId as string | null };
         }
         return rows;
       }),
