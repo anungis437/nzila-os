@@ -14,13 +14,16 @@
  * Access: officer+
  */
 
-import { withApi } from '@/lib/api/framework';
-import { and, eq, gte, desc, inArray } from 'drizzle-orm';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { and, eq, gte, desc, inArray, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { exitInterviews, exitInterviewEvents } from '@/db/schema';
 import { officerGovernanceCondition } from '@/lib/knowledge-transfer/governance/interview-access';
 
 export const dynamic = 'force-dynamic';
+
+// The interview window is read in full or refused: a silent cut would skew every count derived from it.
+const MAX_INTERVIEWS_IN_WINDOW = 5000;
 
 export const GET = withApi(
   {
@@ -40,7 +43,20 @@ export const GET = withApi(
     const since = new Date();
     since.setMonth(since.getMonth() - 6);
 
-    const [events, recentInterviews] = await Promise.all([
+    // The event scope is shared by the feed (newest 500) and the counts, which are computed over every event in the window
+    // rather than over the feed.
+    const eventScope = and(
+      eq(exitInterviewEvents.organizationId, orgId),
+      gte(exitInterviewEvents.createdAt, since),
+      // Events of an interview above the officer floor (administrator-only levels) are not part of this view.
+      inArray(
+        exitInterviewEvents.interviewId,
+        db.select({ id: exitInterviews.id }).from(exitInterviews).where(officerGovernanceCondition(orgId)),
+      ),
+    );
+    const last30Days = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    const [events, recentInterviews, typeCountRows, [governanceLast30Row]] = await Promise.all([
       db
         .select({
           id: exitInterviewEvents.id,
@@ -52,17 +68,7 @@ export const GET = withApi(
           createdAt: exitInterviewEvents.createdAt,
         })
         .from(exitInterviewEvents)
-        .where(
-          and(
-            eq(exitInterviewEvents.organizationId, orgId),
-            gte(exitInterviewEvents.createdAt, since),
-            // Events of an interview above the officer floor (administrator-only levels) are not part of this view.
-            inArray(
-              exitInterviewEvents.interviewId,
-              db.select({ id: exitInterviews.id }).from(exitInterviews).where(officerGovernanceCondition(orgId)),
-            ),
-          ),
-        )
+        .where(eventScope)
         .orderBy(desc(exitInterviewEvents.createdAt))
         .limit(500),
 
@@ -86,14 +92,28 @@ export const GET = withApi(
             gte(exitInterviews.createdAt, since),
           ),
         )
-        .orderBy(desc(exitInterviews.createdAt)),
+        .orderBy(desc(exitInterviews.createdAt))
+        .limit(MAX_INTERVIEWS_IN_WINDOW + 1),
+
+      db
+        .select({ eventType: exitInterviewEvents.eventType, total: sql<number>`count(*)::int` })
+        .from(exitInterviewEvents)
+        .where(eventScope)
+        .groupBy(exitInterviewEvents.eventType),
+
+      db
+        .select({ total: sql<number>`count(*)::int` })
+        .from(exitInterviewEvents)
+        .where(and(eventScope, eq(exitInterviewEvents.eventType, 'governance_updated'), gte(exitInterviewEvents.createdAt, last30Days))),
     ]);
+
+    if (recentInterviews.length > MAX_INTERVIEWS_IN_WINDOW) {
+      throw ApiError.externalService('Governance timeline', 'Interview window exceeds safe limits; narrow the period');
+    }
 
     // Compute drift indicators from event patterns
     const eventTypeCounts: Record<string, number> = {};
-    for (const event of events) {
-      eventTypeCounts[event.eventType] = (eventTypeCounts[event.eventType] ?? 0) + 1;
-    }
+    for (const row of typeCountRows) eventTypeCounts[row.eventType] = row.total;
 
     // Stale reviews: submitted but not reviewed in >14 days
     const now = new Date();
@@ -104,10 +124,7 @@ export const GET = withApi(
     });
 
     // Governance update rate (per 30 days)
-    const govUpdatesLast30 = events.filter((e) => {
-      const age = now.getTime() - e.createdAt.getTime();
-      return age < 30 * 24 * 60 * 60 * 1000 && e.eventType === 'governance_updated';
-    }).length;
+    const govUpdatesLast30 = governanceLast30Row?.total ?? 0;
 
     // Sensitivity distribution
     const sensitivityDist: Record<string, number> = {};

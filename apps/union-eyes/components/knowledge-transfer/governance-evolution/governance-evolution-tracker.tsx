@@ -395,7 +395,7 @@ export function GovernanceEvolutionTracker() {
                     <div className="flex-1">
                       <p className="text-sm font-medium text-slate-800">{outcome.interventionTitle}</p>
                       <p className="text-xs text-slate-500">
-                        {new Date(outcome.recordedAt).toLocaleDateString()} — {outcome.daysToObservableEffect}d to effect
+                        {new Date(outcome.recordedAt).toLocaleDateString()} — {outcome.daysToObservableEffect}d to next baseline
                       </p>
                     </div>
                     <div className="text-right">

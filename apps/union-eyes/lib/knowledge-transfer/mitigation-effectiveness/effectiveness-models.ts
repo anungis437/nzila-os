@@ -23,7 +23,12 @@ export interface MitigationIntervention {
   memoryEntryId: string;
   resilienceScoreAtRecording: number | null;
   tags: string[];
+  /** Why no outcome could be read for it (set only on the unverified list). */
+  unverifiedReason?: 'no_recorded_score' | 'no_baseline_in_window' | 'other_intervention_in_window';
 }
+
+/** The days after an intervention within which a later baseline can be read as its follow-up. */
+export const OBSERVATION_WINDOW_DAYS = 90;
 
 export interface MitigationOutcome {
   interventionId: string;
@@ -60,6 +65,12 @@ export interface MitigationEffectivenessReport {
   ineffectiveInterventions: MitigationOutcome[];
   /** Interventions without enough follow-up to verify */
   unverifiedInterventions: MitigationIntervention[];
+  /**
+   * A score change that follows an intervention is an association in officer-recorded scores, not a measured effect: other
+   * work in the window is not controlled for, so only a window with a single intervention is read at all.
+   */
+  attribution: 'association_not_causation';
+  observationWindowDays: number;
   /** Overall effectiveness health */
   overallEffectivenessRating: EffectivenessRating;
   /** Governance recommendation based on effectiveness history */

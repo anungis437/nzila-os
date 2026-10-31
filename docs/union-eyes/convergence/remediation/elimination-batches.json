@@ -6737,6 +6737,65 @@
           "explanation": "Verified in source: assignment refuses a request that is not open or partially filled, a worker already offered or placed, a worker who is not an active member, and more workers than the request still needs; filled is derived from the live assignments plus the new ones."
         }
       ]
+    },
+    {
+      "id": "B77-COGNITION-HONESTY",
+      "family": "Cognition and exit-interview analytics: officer-asserted inputs, whole-word topics, windowed attribution, uncapped counts",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B7-COGB-TOPIC-CATEGORY-BY-SUBSTRING-DRIVES-CRITICAL-SENSITIVITY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/topic-graph/topic-graph-builder.ts",
+            "apps/union-eyes/lib/services/__tests__/s21-cognition-honesty.test.ts"
+          ],
+          "explanation": "A topic keyword now matches a tag only as a whole word or phrase (with an optional plural), so esa no longer matches inside message and tool no longer matches inside stool. The propagation engine reads the category from this graph, so unrelated tags can no longer raise critical bottleneck findings."
+        },
+        {
+          "prefix": "DEF-0B7-COGB-MITIGATION-EFFECTIVENESS-ATTRIBUTES-NEXT-SCORE-TO-INTERVENTION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/mitigation-effectiveness/effectiveness-tracker.ts",
+            "apps/union-eyes/lib/knowledge-transfer/mitigation-effectiveness/effectiveness-models.ts",
+            "apps/union-eyes/components/knowledge-transfer/governance-evolution/governance-evolution-tracker.tsx",
+            "apps/union-eyes/lib/services/__tests__/s21-cognition-honesty.test.ts"
+          ],
+          "explanation": "The follow-up is the next resilience baseline only (not any later entry), within a 90-day window, and only when no other intervention was recorded between the two; otherwise the intervention is listed as unverified with the reason. The report states attribution association_not_causation and the window, and the screen says days to next baseline instead of days to effect."
+        },
+        {
+          "prefix": "DEF-0B7-COGA-TIMELINE-COUNTS-CAPPED-AND-INTERVIEW-WINDOW-UNBOUNDED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/exit-interviews/governance-timeline/route.ts",
+            "apps/union-eyes/app/api/__tests__/exit-interviews-governance-timeline.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s21-cognition-honesty.test.ts"
+          ],
+          "explanation": "The per-type event counts and the governance_updated count of the last 30 days are computed in SQL over every event in the window (the feed keeps its 500 newest); the interview window is bounded at 5000 and refused beyond it instead of cut silently. The route test was rewritten for the new query order and extended with the count and limit cases (disclosed)."
+        },
+        {
+          "prefix": "DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-store.ts",
+            "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-models.ts",
+            "apps/union-eyes/app/api/exit-interviews/cognition-memory/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s21-cognition-honesty.test.ts"
+          ],
+          "explanation": "Each saved entry carries its author (kept under a payload key the server reserves and a caller cannot supply) and is labelled officer_asserted on the entry and on every resilience timeline point; the payload (16 KB), tags (20 of 64 characters), insights (20 of 500) and session id are bounded.",
+          "remaining": "Nothing checks a snapshot or score against a real simulation or index (the entry is still the officer's statement, now labelled as such), and entries saved before this change have no recorded author."
+        },
+        {
+          "prefix": "DEF-0B7-EXC-ANALYTICS-REPORTS-FULL-CONSENT-FOR-MONTHS-WITH-NO-INTERVIEWS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/exit-interviews/analytics/route.ts",
+            "apps/union-eyes/app/api/__tests__/exit-interviews-analytics.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s21-cognition-honesty.test.ts"
+          ],
+          "explanation": "Verified in source: an empty month reports no coverage rate (null), the exposure score is null when nothing was assessed, and the read is bounded and refused beyond 10000 rows."
+        }
+      ]
     }
   ]
 }
