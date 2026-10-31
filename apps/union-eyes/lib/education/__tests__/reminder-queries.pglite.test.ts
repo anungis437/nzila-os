@@ -50,17 +50,18 @@ async function certification(userId: string, org: string, expiryOffset: number, 
 
 beforeAll(async () => {
   const { trainingCourses, courseSessions, courseRegistrations, memberCertifications, organizationMembers } = await import('@/db/schema');
+  const { inAppNotifications } = await import('@/db/schema/domains/communications/notifications');
   // The declaration that matches the physical table (it carries the topic columns, training_reminders included).
   const { communicationPreferences } = await import('@/db/schema/communication-analytics-schema');
   const { createTableDatabase } = await import('../../../app/api/__tests__/support/pglite-tables');
-  const created = await createTableDatabase([trainingCourses, courseSessions, courseRegistrations, memberCertifications, organizationMembers, communicationPreferences]);
+  const created = await createTableDatabase([trainingCourses, courseSessions, courseRegistrations, memberCertifications, organizationMembers, communicationPreferences, inAppNotifications]);
   pg = created.pg;
   db = created.db as unknown as typeof db;
 });
 afterAll(async () => { await pg.close(); });
 
 beforeEach(async () => {
-  await pg.exec('TRUNCATE training_courses, course_sessions, course_registrations, member_certifications, organization_members, communication_preferences');
+  await pg.exec('TRUNCATE training_courses, course_sessions, course_registrations, member_certifications, organization_members, communication_preferences, in_app_notifications');
   for (const [id, org, name] of [[COURSE, ORG, 'Steward Training'], [OTHER_COURSE, OTHER, 'Other Course']]) {
     await pg.query(
       `INSERT INTO training_courses (id, organization_id, course_code, course_name, course_category, delivery_method, duration_hours)
@@ -144,6 +145,33 @@ describe('education reminder statements against the declared schema', () => {
     await registration('u1', ORG, OTHER_COURSE, 'c0000000-0000-4000-8000-000000000001');
 
     expect(rowsOf(await db.execute(sessionReminderQuery))).toEqual([]);
+  });
+
+  it('excludes claimed session and certification reminders so a capped follow-up run progresses', async () => {
+    await member('u1', ORG);
+    await member('u2', ORG);
+    await session('e0000000-0000-4000-8000-000000000001', ORG, COURSE, 3);
+    await registration('u1', ORG, COURSE, 'e0000000-0000-4000-8000-000000000001');
+    await registration('u2', ORG, COURSE, 'e0000000-0000-4000-8000-000000000001');
+    await certification('u1', ORG, 30);
+    const sessionRows = rowsOf(await db.execute(sessionReminderQuery));
+    const certRows = rowsOf(await db.execute(expiryWarningQuery));
+    expect(sessionRows).toHaveLength(2);
+    expect(certRows).toHaveLength(1);
+
+    const claimedSession = sessionRows.find((row) => row.user_id === 'u1')!;
+    const claimedCert = certRows[0]!;
+    const writeMarker = async (user: string, key: string) =>
+      pg.query(`INSERT INTO in_app_notifications (organization_id, user_id, title, message, type, data)
+                VALUES ($1::uuid, $2, 'Reminder', 'Claimed', 'info', $3::jsonb)`,
+        [ORG, user, JSON.stringify({ dedupeKey: key })]);
+    await writeMarker('u1', `education:session:${claimedSession.reminder_source_id}:3`);
+    await writeMarker('u1', `education:certification:${claimedCert.reminder_source_id}:30`);
+
+    const remainingSessions = rowsOf(await db.execute(sessionReminderQuery));
+    expect(remainingSessions.map((row) => row.user_id)).toEqual(['u2']);
+    expect(Number(remainingSessions[0].total_due)).toBe(1);
+    expect(rowsOf(await db.execute(expiryWarningQuery))).toEqual([]);
   });
 
   it('shows an online session as Online when it has no venue', async () => {

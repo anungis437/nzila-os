@@ -34,7 +34,15 @@ export const sessionReminderQuery = sql`
     AND cs.start_date IN (CURRENT_DATE + 7, CURRENT_DATE + 3, CURRENT_DATE + 1)
     AND om.email IS NOT NULL
     AND om.email <> ''
-  ORDER BY cs.start_date, om.email
+    -- The durable marker excludes completed or reconciliation-held deliveries. This lets
+    -- a later capped run reach the remaining recipients instead of repeating page one.
+    AND NOT EXISTS (
+      SELECT 1 FROM in_app_notifications notice
+      WHERE notice.organization_id = cr.organization_id
+        AND notice.user_id = om.user_id
+        AND notice.data->>'dedupeKey' = 'education:session:' || cr.id::text || ':' || (cs.start_date - CURRENT_DATE)::text
+    )
+  ORDER BY cs.start_date, om.email, cr.id
   LIMIT 301
 `
 
@@ -61,7 +69,13 @@ export const expiryWarningQuery = sql`
     AND mc.expiry_date IN (CURRENT_DATE + 90, CURRENT_DATE + 30)
     AND om.email IS NOT NULL
     AND om.email <> ''
-  ORDER BY mc.expiry_date, om.email
+    AND NOT EXISTS (
+      SELECT 1 FROM in_app_notifications notice
+      WHERE notice.organization_id = mc.organization_id
+        AND notice.user_id = om.user_id
+        AND notice.data->>'dedupeKey' = 'education:certification:' || mc.id::text || ':' || (mc.expiry_date - CURRENT_DATE)::text
+    )
+  ORDER BY mc.expiry_date, om.email, mc.id
   LIMIT 301
 `
 
