@@ -183,7 +183,9 @@ export class SignatureService {
 
     // The document, its signers, its trail and the platform audit commit together. The envelope and the stored file
     // above are external effects and happen first.
-    const document = await withRLSContext({ organizationId: data.organizationId }, async (tx) => {
+    let document: typeof signatureDocuments.$inferSelect;
+    try {
+      document = await withRLSContext({ organizationId: data.organizationId }, async (tx) => {
       const [created] = await tx
         .insert(signatureDocuments)
         .values(documentInsert)
@@ -228,6 +230,14 @@ export class SignatureService {
       });
       return created;
     });
+    } catch (error) {
+      // The envelope can e-mail signers who could still complete it, and the file has no record: undo both, best effort, and report the original failure.
+      await Promise.allSettled([
+        provider.voidEnvelope(envelope.envelopeId, "The request could not be recorded"),
+        storageService.deleteDocument(uploadResult.key),
+      ]);
+      throw error;
+    }
 
     return document;
   }
@@ -282,11 +292,7 @@ export class SignatureService {
       throw new Error("Document not found");
     }
 
-    // Optionally sync with provider for latest status
-    if (document.providerEnvelopeId && document.status !== "completed") {
-      await this.syncDocumentStatus(documentId);
-    }
-
+    // A read never calls the provider or writes a row; the sender refreshes explicitly through syncDocumentStatus.
     return document;
   }
 

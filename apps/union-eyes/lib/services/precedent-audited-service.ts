@@ -23,6 +23,8 @@ export async function createPrecedentAudited(
       ...data,
       isPublic: false,
       accessRestrictions: 'pending_review',
+      // The table has no organization column: the typed source is recorded on the row itself so a reviewer can see who supplied it.
+      importedFrom: `typed:${scope.organizationId}:${scope.userId}`.slice(0, 200),
     }).returning();
     await persistAtomicAudit(tx, {
       organizationId: scope.organizationId,

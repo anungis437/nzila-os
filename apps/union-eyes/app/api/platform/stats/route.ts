@@ -9,7 +9,7 @@
  */
 
 import { getPlatformStatsFromDb } from '@/lib/queries/platform-stats';
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,8 +21,9 @@ export const GET = withApi(
       summary: 'Platform-wide statistics from real database',
     },
   },
-  async () => {
-    const stats = await getPlatformStatsFromDb();
+  async ({ userId, organizationId }) => {
+    if (!userId || !organizationId) throw ApiError.forbidden('An active organization is required to read platform statistics');
+    const stats = await getPlatformStatsFromDb({ userId, organizationId });
     return stats as any as Record<string, unknown>;
   },
 );

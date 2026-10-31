@@ -11525,7 +11525,8 @@
    "route": "signatures/documents/[id]/route.ts",
    "methods": [
     "GET",
-    "PATCH"
+    "PATCH",
+    "POST"
    ],
    "mutating": true,
    "guard": "ROLE_AUTH",

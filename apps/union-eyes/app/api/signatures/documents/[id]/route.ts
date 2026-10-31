@@ -2,6 +2,7 @@
  * Document Status API
  * GET /api/signatures/documents/[id] - Get document details
  * PATCH /api/signatures/documents/[id] - Update document (void, etc.)
+ * POST /api/signatures/documents/[id] - Refresh the status from the provider (sender only)
  */
 
 import { z } from 'zod';
@@ -107,5 +108,28 @@ return standardErrorResponse(
       'Failed to update document',
       error
     );
+  }
+});
+
+/**
+ * Refresh the status from the provider. Only the sender may do it: the read above never calls the provider or writes.
+ */
+export const POST = withApiAuth(async (
+  _req: NextRequest,
+  { params }: { params: { id: string } }
+) => {
+  try {
+    const user = await getCurrentUser();
+    if (!user || !user.id) {
+      return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
+    }
+    const sender = await SignatureService.getDocumentSender(params.id);
+    if (!sender || sender !== user.id) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Access denied');
+    }
+    const result = await SignatureService.syncDocumentStatus(params.id);
+    return NextResponse.json({ success: true, ...result });
+  } catch (error) {
+    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to refresh document status', error);
   }
 });

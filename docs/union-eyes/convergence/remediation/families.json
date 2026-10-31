@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 579,
- "partial": 75,
- "outstanding": 198,
- "accountedFor": 198,
+ "corrected": 586,
+ "partial": 77,
+ "outstanding": 191,
+ "accountedFor": 191,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -47,25 +47,23 @@
   {
    "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
    "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
-   "defects": 22,
+   "defects": 17,
    "severity": {
     "HIGH": 4,
-    "MEDIUM": 14,
-    "LOW": 4
+    "MEDIUM": 10,
+    "LOW": 3
    },
-   "namedRoutes": 5,
+   "namedRoutes": 4,
    "namedFiles": 1,
    "tranches": {
     "0B.2": 1,
     "0B.3": 1,
     "0B.4": 2,
-    "0B.5": 2,
     "0B.6": 3,
     "0B.8": 1,
     "0B.9": 1,
-    "0B.10": 5,
-    "0B.11": 4,
-    "0B.12": 1,
+    "0B.10": 4,
+    "0B.11": 3,
     "0C.1": 1
    }
   },
@@ -114,10 +112,10 @@
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 43,
+   "defects": 41,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 39,
+    "MEDIUM": 37,
     "LOW": 2
    },
    "namedRoutes": 5,
@@ -132,7 +130,7 @@
     "0B.8": 6,
     "0B.9": 2,
     "0B.10": 6,
-    "0B.11": 11,
+    "0B.11": 9,
     "0B.12": 3
    }
   },
@@ -360,14 +358,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B5-TRACKING-STATS-READ-MODIFY-WRITE-UNAUDITED",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B5-UNSUBSCRIBE-NO-CONSENT-RECORD-WITHOUT-CAMPAIGN",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B6-EDU-CRON-REMINDERS-IGNORE-OPT-OUT-AND-HAVE-NO-SENT-MARKER",
     "severity": "MEDIUM",
     "partial": true
@@ -407,34 +397,24 @@
     "partial": true
    },
    {
-    "id": "DEF-0B10-OPL-13",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B10-OPL-14",
     "severity": "HIGH",
     "partial": true
    },
    {
     "id": "DEF-0B11-PRP-PRECEDENT-POST-PUBLISHES-INTO-THE-SHARED-LIBRARY-WITH-NO-REVIEW-PROVENANCE-OR-OWNING-ORGANIZATION",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B11-SOC-SIGNATURE-READS-AND-ACCESS-CHECK-USE-THE-BARE-DB-HANDLE-WITH-NO-ORGANIZATION-PREDICATE-AND-ACCEPT-ANY-USER-ID-A-SENDER-TYPED-AS-SIGNER",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B11-IDS-SCIM-PROVISION-STORES-THE-USERNAME-STRING-AS-THE-USER-ID-AND-ACTIVATES-WITHOUT-ACCEPTANCE",
     "severity": "MEDIUM",
     "partial": true
-   },
-   {
-    "id": "DEF-0B11-IDS-SETTINGS-TWILIO-NUMBER-KEY-ATTRIBUTES-INBOUND-SMS-WITH-NO-UNIQUENESS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-PLT-ORGANIZATIONS-LEGACY-BRANCH-LISTS-EVERY-ORGANIZATION-TO-A-PLATFORM-ID-AND-LOADS-THE-WHOLE-TABLE-FOR-EVERY-OTHER-CALLER",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0C1-REV-REVIEW-ROWS-ARE-PROTECTED-BY-AN-ORGANIZATION-ONLY-RLS-POLICY-SO-ADVERSE-PARTY-COMPLAINANT-AND-PRIVILEGE-CONFIDENTIALITY-IS-APPLICATION-CODE-ONLY",
@@ -745,17 +725,9 @@
     "partial": true
    },
    {
-    "id": "DEF-0B11-SOC-SIGNATURE-DOCUMENT-GET-CALLS-THE-PROVIDER-AND-WRITES-STATUS-SIGNER-AND-AUDIT-ROWS",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B11-SOC-SIGNATURE-STATUS-AND-AUDIT-DISCLOSE-EVERY-SIGNER-ADDRESS-IP-USER-AGENT-AND-LOCATION-TO-EVERY-OTHER-SIGNER",
     "severity": "MEDIUM",
     "partial": true
-   },
-   {
-    "id": "DEF-0B11-SOC-SIGNATURE-ENVELOPE-AND-STORED-FILE-ARE-CREATED-BEFORE-AND-OUTSIDE-THE-TRANSACTION-THAT-RECORDS-THEM",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B11-SOC-OAUTH-CALLBACK-IS-A-GET-THAT-INSERTS-THE-CREDENTIAL-CLEARS-ITS-COOKIES-BEFORE-VALIDATION-AND-AUDITS-AFTER-COMMIT-TO-A-LOG-LINE",

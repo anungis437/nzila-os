@@ -3,7 +3,7 @@ import { and, eq, inArray, ne } from 'drizzle-orm';
 
 import { db } from '@/db';
 import { campaigns, communicationPreferences, consentRecords, messageLog, newsletterDistributionLists, newsletterListSubscribers } from '@/db/schema';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { verifyTrackingToken } from '@/lib/communications/tracking-token';
 import { logger } from '@/lib/logger';
 
@@ -48,6 +48,62 @@ function confirmationHtml(locale: string): string {
 </main></body></html>`;
 }
 
+async function revokeEmailForOrganization(
+  tx: RLSTx,
+  organizationId: string,
+  recipientId: string,
+  reason: string,
+  campaignId: string | null,
+): Promise<void> {
+  const now = new Date();
+  const [existingPreference] = await tx
+    .select({ id: communicationPreferences.id })
+    .from(communicationPreferences)
+    .where(and(eq(communicationPreferences.organizationId, organizationId), eq(communicationPreferences.userId, recipientId)))
+    .limit(1);
+
+  if (existingPreference) {
+    await tx
+      .update(communicationPreferences)
+      .set({ emailEnabled: false, globallyUnsubscribed: true, unsubscribedAt: now, unsubscribeReason: reason, updatedAt: now })
+      .where(and(eq(communicationPreferences.id, existingPreference.id), eq(communicationPreferences.organizationId, organizationId)));
+  } else {
+    await tx.insert(communicationPreferences).values({
+      organizationId,
+      userId: recipientId,
+      emailEnabled: false,
+      globallyUnsubscribed: true,
+      unsubscribedAt: now,
+      unsubscribeReason: reason,
+    });
+  }
+
+  // An unsubscribe also ends the recipient's subscriptions to this organization's distribution lists.
+  await tx
+    .update(newsletterListSubscribers)
+    .set({ status: 'unsubscribed', unsubscribedAt: now })
+    .where(
+      and(
+        eq(newsletterListSubscribers.profileId, recipientId),
+        ne(newsletterListSubscribers.status, 'unsubscribed'),
+        inArray(
+          newsletterListSubscribers.listId,
+          tx.select({ id: newsletterDistributionLists.id }).from(newsletterDistributionLists).where(eq(newsletterDistributionLists.organizationId, organizationId)),
+        ),
+      ),
+    );
+
+  await tx.insert(consentRecords).values({
+    organizationId,
+    userId: recipientId,
+    consentType: 'email_marketing',
+    channel: 'email',
+    status: 'revoked',
+    method: 'unsubscribe_link',
+    metadata: { reason, campaignId },
+  });
+}
+
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ recipientId: string }> },
@@ -59,7 +115,7 @@ export async function GET(
   const { recipientId } = await context.params;
   const campaignId = request.nextUrl.searchParams.get('campaignId');
   const token = request.nextUrl.searchParams.get('token');
-  const reason = request.nextUrl.searchParams.get('reason') || 'unsubscribe_link';
+  const reason = (request.nextUrl.searchParams.get('reason') || 'unsubscribe_link').slice(0, 200);
   const locale = request.nextUrl.searchParams.get('locale') || 'en-CA';
 
   // Action-bound candidates only: an unsubscribe token MUST carry the
@@ -123,98 +179,24 @@ export async function GET(
       }
     }
 
-    if (organizationId) {
-      const [existingPreference] = await tx
-        .select({ id: communicationPreferences.id })
-        .from(communicationPreferences)
-        .where(
-          and(
-            eq(communicationPreferences.organizationId, organizationId),
-            eq(communicationPreferences.userId, recipientId),
-          ),
-        )
-        .limit(1);
-
-      if (existingPreference) {
-        await tx
-          .update(communicationPreferences)
-          .set({
-            emailEnabled: false,
-            globallyUnsubscribed: true,
-            unsubscribedAt: new Date(),
-            unsubscribeReason: reason,
-            updatedAt: new Date(),
-          })
-          .where(
-            and(
-              eq(communicationPreferences.id, existingPreference.id),
-              eq(communicationPreferences.organizationId, organizationId),
-            ),
-          );
-      } else {
-        await tx.insert(communicationPreferences).values({
-          organizationId,
-          userId: recipientId,
-          emailEnabled: false,
-          globallyUnsubscribed: true,
-          unsubscribedAt: new Date(),
-          unsubscribeReason: reason,
-        });
-      }
-
-      // An unsubscribe from a campaign link also ends the recipient's subscriptions to this organization's distribution lists.
-      await tx
-        .update(newsletterListSubscribers)
-        .set({ status: 'unsubscribed', unsubscribedAt: new Date() })
-        .where(
-          and(
-            eq(newsletterListSubscribers.profileId, recipientId),
-            ne(newsletterListSubscribers.status, 'unsubscribed'),
-            inArray(
-              newsletterListSubscribers.listId,
-              tx.select({ id: newsletterDistributionLists.id }).from(newsletterDistributionLists).where(eq(newsletterDistributionLists.organizationId, organizationId)),
-            ),
-          ),
-        );
-
-      await tx.insert(consentRecords).values({
-        organizationId,
-        userId: recipientId,
-        consentType: 'email_marketing',
-        channel: 'email',
-        status: 'revoked',
-        method: 'unsubscribe_link',
-        metadata: {
-          reason,
-          campaignId,
-        },
-      });
-    } else {
-      // The token binds only the recipient, so there is no parent row to derive one organization from. The token
-      // authorises this recipient's own preference rows; each is updated under its own organization predicate.
-      const ownPreferences = await tx
-        .select({ id: communicationPreferences.id, organizationId: communicationPreferences.organizationId })
+    // A campaign link names one organization. A link without a campaign binds only the recipient, so the revocation is applied to
+    // every organization that holds a preference row or a list subscription for this recipient, each under its own predicate and each with its own consent record.
+    let organizationIds: string[] = organizationId ? [organizationId] : [];
+    if (!organizationId) {
+      const fromPreferences = await tx
+        .select({ organizationId: communicationPreferences.organizationId })
         .from(communicationPreferences)
         .where(eq(communicationPreferences.userId, recipientId));
+      const fromLists = await tx
+        .select({ organizationId: newsletterDistributionLists.organizationId })
+        .from(newsletterListSubscribers)
+        .innerJoin(newsletterDistributionLists, eq(newsletterListSubscribers.listId, newsletterDistributionLists.id))
+        .where(eq(newsletterListSubscribers.profileId, recipientId));
+      organizationIds = [...new Set([...fromPreferences, ...fromLists].map((row) => row.organizationId))];
+    }
 
-      for (const preference of ownPreferences) {
-        await tx
-          .update(communicationPreferences)
-          .set({
-            emailEnabled: false,
-            globallyUnsubscribed: true,
-            unsubscribedAt: new Date(),
-            unsubscribeReason: reason,
-            updatedAt: new Date(),
-          })
-          .where(
-            and(
-              eq(communicationPreferences.id, preference.id),
-              eq(communicationPreferences.organizationId, preference.organizationId),
-              eq(communicationPreferences.userId, recipientId),
-            ),
-          );
-      }
+    for (const orgId of organizationIds) {
+      await revokeEmailForOrganization(tx, orgId, recipientId, reason, campaignId);
     }
   });
 

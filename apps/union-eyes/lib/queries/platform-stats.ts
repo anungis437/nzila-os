@@ -7,6 +7,7 @@
 
 import { organizations, organizationMembers } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { sql, ne, count, sum, isNull } from 'drizzle-orm';
 
 export interface PlatformStats {
@@ -64,8 +65,19 @@ export interface PlatformStats {
  * `resolved` grievances are settled or closed ones; `totalMonetaryValue` sums only settlements that were agreed or implemented, and the
  * settlements table records no currency, so it is an unlabelled amount.
  */
-export function getPlatformStatsFromDb(): Promise<PlatformStats> {
-  return withSystemContext((tx) => computePlatformStats(tx as unknown as typeof import('@/db/db').db));
+export function getPlatformStatsFromDb(reader: { userId: string; organizationId: string }): Promise<PlatformStats> {
+  return withSystemContext(async (tx) => {
+    const stats = await computePlatformStats(tx as unknown as typeof import('@/db/db').db);
+    // The read of every tenant's counts is recorded in the same transaction as the read: no audit record, no data.
+    await persistAtomicAudit(tx, {
+      userId: reader.userId,
+      organizationId: reader.organizationId,
+      resourceType: 'platform_stats',
+      action: 'platform_stats.read',
+      details: { organizationsCounted: stats.totalOrganizations },
+    });
+    return stats;
+  });
 }
 
 async function computePlatformStats(db: typeof import('@/db/db').db): Promise<PlatformStats> {

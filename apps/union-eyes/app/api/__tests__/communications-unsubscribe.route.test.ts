@@ -12,6 +12,7 @@ const m = vi.hoisted(() => ({
 function makeSelectChain(rows: unknown[]) {
   const chain: any = {
     from: vi.fn(() => chain),
+    innerJoin: vi.fn(() => chain),
     where: vi.fn(() => chain),
     limit: vi.fn(async () => rows),
     then: (resolve: (value: unknown[]) => unknown) => Promise.resolve(rows).then(resolve),
@@ -120,6 +121,22 @@ describe('communications/unsubscribe/[recipientId] route', () => {
 
     expect(response.status).toBe(200);
     expect(mockDb.insert).toHaveBeenCalledTimes(2);
+  });
+
+  it('without a campaign id revokes in every organization that holds a preference or a list subscription, with a consent record for each', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
+    const { GET } = await loadRoute();
+    const t = token('secret', 'r1:unsubscribe');
+    // preference organizations, list organizations, then each organization's own preference lookup
+    m.selectQueue.push([{ organizationId: 'org_1' }], [{ organizationId: 'org_2' }, { organizationId: 'org_1' }], [{ id: 'p1' }], []);
+
+    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?reason=manual&token=${t}`), {
+      params: Promise.resolve({ recipientId: 'r1' }),
+    });
+
+    expect(response.status).toBe(200);
+    // org_1: consent record; org_2: new preference and consent record
+    expect(mockDb.insert).toHaveBeenCalledTimes(3);
   });
 
   it('handles fallback unsubscribe when no campaign id is provided', async () => {
