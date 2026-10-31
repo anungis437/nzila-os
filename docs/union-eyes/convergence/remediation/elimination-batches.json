@@ -7620,6 +7620,33 @@
           "remaining": "The routes still apply no union_knowledge_suite entitlement, because the same table serves organizations without that suite and which of them may read it is a product decision."
         }
       ]
+    },
+    {
+      "id": "B96-HONEST-AVAILABILITY-AND-ENDPOINT-RULES",
+      "family": "Honest availability for an uncomputed store; public-address rule for a stored integration endpoint",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B5-COGNITION-ENGAGEMENT-NEVER-COMPUTED",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/cognition/engagement/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s40-honest-availability-and-endpoint-rules.test.ts"
+          ],
+          "explanation": "The engagement route answers availability: not_computed when no snapshot exists, so an empty list is the absence of a measurement and not a finding that no member is disengaged.",
+          "remaining": "Nothing computes engagement snapshots (computeMemberEngagement has no caller), and the executive summary and key-indicator disengaged-member counts still read the same empty store; a scheduled scorer is a product change."
+        },
+        {
+          "prefix": "DEF-0B7-PLT-EXT-CONFIGURATION-HAS-NO-CREATE-PATH-AND-NO-CONSUMER",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/extensions/[id]/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s40-honest-availability-and-endpoint-rules.test.ts"
+          ],
+          "explanation": "An integration endpoint written through PATCH must now be a public http(s) address (the same rule as every other address the platform is told to call).",
+          "remaining": "No route creates an integration row and no synchronization consumes the table, so enabling an integration or changing its frequency still affects nothing; a create path and a consumer are a product decision."
+        }
+      ]
     }
   ]
 }

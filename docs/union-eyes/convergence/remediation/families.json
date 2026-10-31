@@ -2,7 +2,7 @@
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
  "corrected": 605,
- "partial": 81,
+ "partial": 83,
  "outstanding": 172,
  "accountedFor": 172,
  "families": [
@@ -612,7 +612,8 @@
    },
    {
     "id": "DEF-0B7-PLT-EXT-CONFIGURATION-HAS-NO-CREATE-PATH-AND-NO-CONSUMER",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B7-PLT-SSO-CONFIGURATION-NEVER-CONSUMED-BY-SIGN-IN",
@@ -933,7 +934,8 @@
    },
    {
     "id": "DEF-0B5-COGNITION-ENGAGEMENT-NEVER-COMPUTED",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B5-COMMS-CAMPAIGN-DETACHED-FROM-CONSENT-AND-DELIVERY",

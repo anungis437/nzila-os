@@ -92,7 +92,7 @@
     "engineeringCorrected": 605,
     "engineeringRemaining": 172,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 81
+    "engineeringPartial": 83
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -4031,9 +4031,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B96-HONEST-AVAILABILITY-AND-ENDPOINT-RULES",
+        "path": "apps/union-eyes/app/api/cognition/engagement/route.ts; apps/union-eyes/lib/services/__tests__/s40-honest-availability-and-endpoint-rules.test.ts",
+        "explanation": "The engagement route answers availability: not_computed when no snapshot exists, so an empty list is the absence of a measurement and not a finding that no member is disengaged.",
+        "remaining": "Nothing computes engagement snapshots (computeMemberEngagement has no caller), and the executive summary and key-indicator disengaged-member counts still read the same empty store; a scheduled scorer is a product change.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B5-COGNITION-WORKLOAD-BURNOUT-VISIBLE-TO-PEERS",
@@ -9106,9 +9114,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B96-HONEST-AVAILABILITY-AND-ENDPOINT-RULES",
+        "path": "apps/union-eyes/app/api/extensions/[id]/route.ts; apps/union-eyes/lib/services/__tests__/s40-honest-availability-and-endpoint-rules.test.ts",
+        "explanation": "An integration endpoint written through PATCH must now be a public http(s) address (the same rule as every other address the platform is told to call).",
+        "remaining": "No route creates an integration row and no synchronization consumes the table, so enabling an integration or changing its frequency still affects nothing; a create path and a consumer are a product decision.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-PLT-EVENT-ITEM-IGNORES-PRIVATE-VISIBILITY-AND-RETURNS-MEETING-PASSWORD",

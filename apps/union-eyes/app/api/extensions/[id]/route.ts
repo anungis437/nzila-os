@@ -11,13 +11,22 @@ import { eq, and } from 'drizzle-orm';
 import { z } from 'zod';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { assertPublicHttpUrl } from '@/lib/security/outbound-url';
 
 const updateIntegrationSchema = z.object({
   name: z.string().min(1).max(255).optional(),
   enabled: z.boolean().optional(),
   syncFrequency: z.string().max(50).optional(),
   fieldMapping: z.record(z.string(), z.unknown()).optional(),
-  apiEndpoint: z.string().url().max(2000).optional(),
+  // An endpoint the platform is told to send organization data to must be a public http(s) address, as for any other fetched address.
+  apiEndpoint: z.string().url().max(2000).refine((value) => {
+    try {
+      assertPublicHttpUrl(value);
+      return true;
+    } catch {
+      return false;
+    }
+  }, 'Must be a public http(s) address').optional(),
 });
 
 export const dynamic = 'force-dynamic';
