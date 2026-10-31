@@ -111,10 +111,11 @@ export async function trackLocation(
     });
 
     return { success: true };
-  } catch (error) {
+  } catch {
+    // Do not expose database error details to a member-facing caller.
     return {
       success: false,
-      error: `Failed to track location: ${error}`
+      error: 'Failed to track location. Please retry or contact support.'
     };
   }
 }
@@ -135,7 +136,7 @@ export async function revokeLocationConsent(
       success: true,
       message: 'Location tracking disabled. You can re-enable anytime.'
     };
-  } catch (error) {
+  } catch {
     return {
       success: false,
       message: 'Unable to revoke location consent. Please retry or contact support.'
