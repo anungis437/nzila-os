@@ -77,8 +77,8 @@ export async function requirePushDeviceProfile(
   userId: string | null | undefined,
 ): Promise<void> {
   if (!organizationId || !userId) throw ApiError.forbidden();
-  const rows = await withRLSContext({ organizationId, userId }, (tx) =>
-    tx.select({ id: profiles.id }).from(profiles).where(eq(profiles.userId, userId)).limit(1),
+  const rows = await withRLSContext({ organizationId, userId }, async (tx) =>
+    await tx.select({ id: profiles.id }).from(profiles).where(eq(profiles.userId, userId)).limit(1),
   );
   assertPushDeviceProfilePresent(rows);
 }
