@@ -187,6 +187,10 @@ jobs:
           SYSTEM_DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
           NODE_ENV: production
           PORT: ${{ matrix.port }}
+          # Every request from the runner shares one IP, and Next.js link prefetches
+          # count against the per-IP limiter, so the suite itself can trip the
+          # production default (200/min) and return 429 pages. CI server only.
+          RATE_LIMIT_MAX: '100000'
           QA_TEST_ENV: 'true'
           PLAYWRIGHT_TEST_AUTH: 'true'
           UE_E2E_RISK_BYPASS: 'true'
