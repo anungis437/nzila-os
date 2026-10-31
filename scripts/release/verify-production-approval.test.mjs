@@ -17,7 +17,7 @@ function fixture() {
       actor:{login:'developer'},triggering_actor:{login:'developer'},head_branch:'main',
       run_attempt:1,created_at:'2026-10-30T14:00:00Z',
       run_started_at:'2026-10-30T14:01:00Z'},
-    approvals:[{id:890,state:'approved',user:{login:'security-reviewer'},
+    approvals:[{id:890,state:'approved',user:{login:'security-reviewer',type:'User'},
       created_at:'2026-10-30T14:15:00Z',environments:[{name:'production'}]}],
     expectedRunId:'12345',expectedSha:SHA,now:NOW,
   }
@@ -41,6 +41,14 @@ test('self approval and automation cannot substitute for human review',()=>{
     assert.throws(()=>verifyProductionApproval(f),/independent entitled human/)
   }
 })
+test('GitHub actor type must independently identify a human User, not a bot with a human-looking login',()=> {
+  for (const type of ['Bot', 'Organization', undefined, null]) {
+    const f=fixture()
+    f.approvals[0].user.type=type
+    assert.throws(()=>verifyProductionApproval(f),/independent entitled human/)
+  }
+})
+
 test('run substitution, wrong SHA and workflow substitution rejected',()=>{
   for (const key of ['head_sha','name','event']) {
     const f=fixture();f.run[key]='substituted'
