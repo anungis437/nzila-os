@@ -7075,6 +7075,33 @@
           "explanation": "Verified in source: every library read (by id, case number, list, search, issue type, related, statistics, most cited) filters isPublic and empty access restrictions in SQL, and the list, issue-type, most-cited and search routes answer an explicit public projection without the full text, grievor, remedy or provenance columns."
         }
       ]
+    },
+    {
+      "id": "B83-COGNITION-CASE-AUTHORITY",
+      "family": "Cognition reads follow the case authority",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B5-COGNITION-ANY-STEWARD-SCORES-ANY-CASE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/cognition/case-visibility.ts",
+            "apps/union-eyes/app/api/cognition/cases/[id]/risk/route.ts",
+            "apps/union-eyes/app/api/cognition/precedents/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s27-cognition-case-authority.test.ts"
+          ],
+          "explanation": "The risk score is computed only for a case the authority kernel lets the caller read (case:read_internal, the decision the case routes use); any other case answers 404. The precedent search requires the searched case to be readable, validates the case ids (at most 50 candidates) and compares only candidates the caller may read, so it never returns the title of a case the steward does not hold."
+        },
+        {
+          "prefix": "DEF-0B5-COGNITION-WORKLOAD-BURNOUT-VISIBLE-TO-PEERS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/cognition/workload/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s27-cognition-case-authority.test.ts"
+          ],
+          "explanation": "The workload route, which returns each steward's burnout signal, utilization and recommended reassignments, is at the officer floor instead of the steward floor, so a steward no longer reads a colleague's burnout signal."
+        }
+      ]
     }
   ]
 }

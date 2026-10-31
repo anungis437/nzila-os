@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 516,
+    "implementedPendingQualification": 518,
     "partial": 78,
     "qualificationVerified": 0,
-    "unresolved": 261,
+    "unresolved": 259,
     "externalBlockers": 0
   },
   "batches": [
@@ -824,6 +824,15 @@
       "outstandingBefore": 266,
       "newlyImplemented": 5,
       "outstandingAfter": 261,
+      "partial": 0,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B83-COGNITION-CASE-AUTHORITY",
+      "family": "Cognition reads follow the case authority",
+      "outstandingBefore": 261,
+      "newlyImplemented": 2,
+      "outstandingAfter": 259,
       "partial": 0,
       "evidenceCommit": null
     }
@@ -6914,6 +6923,26 @@
         "apps/union-eyes/lib/services/__tests__/s26-attach-cascade-cron.test.ts"
       ],
       "explanation": "Verified in source: every library read (by id, case number, list, search, issue type, related, statistics, most cited) filters isPublic and empty access restrictions in SQL, and the list, issue-type, most-cited and search routes answer an explicit public projection without the full text, grievor, remedy or provenance columns."
+    },
+    "DEF-0B5-COGNITION-ANY-STEWARD-SCORES-ANY-CASE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B83-COGNITION-CASE-AUTHORITY",
+      "files": [
+        "apps/union-eyes/lib/cognition/case-visibility.ts",
+        "apps/union-eyes/app/api/cognition/cases/[id]/risk/route.ts",
+        "apps/union-eyes/app/api/cognition/precedents/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s27-cognition-case-authority.test.ts"
+      ],
+      "explanation": "The risk score is computed only for a case the authority kernel lets the caller read (case:read_internal, the decision the case routes use); any other case answers 404. The precedent search requires the searched case to be readable, validates the case ids (at most 50 candidates) and compares only candidates the caller may read, so it never returns the title of a case the steward does not hold."
+    },
+    "DEF-0B5-COGNITION-WORKLOAD-BURNOUT-VISIBLE-TO-PEERS": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B83-COGNITION-CASE-AUTHORITY",
+      "files": [
+        "apps/union-eyes/app/api/cognition/workload/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s27-cognition-case-authority.test.ts"
+      ],
+      "explanation": "The workload route, which returns each steward's burnout signal, utilization and recommended reassignments, is at the officer floor instead of the steward floor, so a steward no longer reads a colleague's burnout signal."
     }
   }
 }
