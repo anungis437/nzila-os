@@ -7,6 +7,8 @@ import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context'
 import { requireUserForOrganization, requireSystemAdmin, ROLE_HIERARCHY } from '@/lib/api-auth-guard'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { canAdministerOrganization, canReadOrganization, resolveOrganizationAccess } from '@/lib/organizations/read-authority'
+import { mergeSettings, organizationPatchSchema } from '@/lib/organizations/profile-input'
+import { isUniqueViolation } from '@/lib/db/unique-violation'
 
 export const dynamic = 'force-dynamic'
 
@@ -129,7 +131,17 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Forbidden: requires admin role' }, { status: 403 })
   }
 
-  const body = await req.json()
+  let raw: unknown
+  try {
+    raw = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Request body must be valid JSON' }, { status: 400 })
+  }
+  const parsedBody = organizationPatchSchema.safeParse(raw)
+  if (!parsedBody.success) {
+    return NextResponse.json({ error: 'Invalid organization update', details: parsedBody.error.issues.slice(0, 5).map((issue) => `${issue.path.join('.') || 'body'}: ${issue.message}`) }, { status: 400 })
+  }
+  const body = parsedBody.data
 
   const updates: Record<string, unknown> = {}
   if (body.name !== undefined) updates.name = body.name
@@ -141,10 +153,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (body.website !== undefined) updates.website = body.website
   if (body.sectors !== undefined) updates.sectors = body.sectors
   if (body.parent_id !== undefined) updates.parentId = body.parent_id
-  if (body.settings !== undefined) updates.settings = body.settings
+  const settingsPatch = body.settings
   updates.updatedAt = new Date()
 
-  const updated = await withRLSContext(async (tx) => {
+  const apply = () => withRLSContext(async (tx) => {
     const [current] = await tx.select().from(organizations).where(eq(organizations.id, id))
     if (!current) return null
 
@@ -163,6 +175,13 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       delete updates.status
     }
 
+    // A new slug must be free: paths resolve organizations by slug. Settings are merged into the stored ones, not substituted.
+    if (typeof updates.slug === 'string' && updates.slug !== current.slug) {
+      const [taken] = await tx.select({ id: organizations.id }).from(organizations).where(eq(organizations.slug, updates.slug)).limit(1)
+      if (taken) return 'slug-taken' as const
+    }
+    if (settingsPatch !== undefined) updates.settings = mergeSettings(current.settings, settingsPatch)
+
     const [row] = await tx.update(organizations).set(updates).where(eq(organizations.id, id)).returning()
     if (!row) return null
     await persistAtomicAudit(tx, {
@@ -175,6 +194,15 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     })
     return row
   })
+  let updated: Awaited<ReturnType<typeof apply>>
+  try {
+    updated = await apply()
+  } catch (error) {
+    // Two requests for the same new slug: the unique index settles it.
+    if (isUniqueViolation(error)) return NextResponse.json({ error: 'That slug is already in use' }, { status: 409 })
+    throw error
+  }
+  if (updated === 'slug-taken') return NextResponse.json({ error: 'That slug is already in use' }, { status: 409 })
   if (updated === 'forbidden') {
     return NextResponse.json(
       { error: 'Forbidden: changing parent affiliation or status requires platform governance' },

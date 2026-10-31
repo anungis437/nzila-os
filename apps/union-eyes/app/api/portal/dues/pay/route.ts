@@ -15,6 +15,7 @@ import { requireUserForOrganization } from '@/lib/api-auth-guard'
 import { memberDuesLedger } from '@/db/schema/dues-finance-schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { withApi, ApiError, RATE_LIMITS } from '@/lib/api/framework'
+import { listPage } from '@/lib/api/list-page'
 import { stripe } from '@/lib/stripe'
 import { DuesInitiationError, initiateDuesPayment } from '@/lib/dues/dues-payment-service'
 import { assertMemberDuesPaymentEnabled } from '@/lib/dues/member-dues-flag'
@@ -38,7 +39,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Missing organizationId' }, { status: 400 })
     }
 
-    const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') ?? '20', 10), 100)
+    // A non-numeric limit is the default: NaN never reaches the query.
+    const page = listPage(req, 100, 20)
 
     // The organization comes from the client; only a live canonical member may read its ledger.
     try {
@@ -57,14 +59,16 @@ export async function GET(req: NextRequest) {
           date: memberDuesLedger.transactionDate,
           description: memberDuesLedger.description,
           paymentMethod: memberDuesLedger.paymentMethod,
-          paymentReference: memberDuesLedger.paymentReference,
           receiptNumber: memberDuesLedger.receiptNumber,
           status: memberDuesLedger.status,
         })
         .from(memberDuesLedger)
-        .where(and(eq(memberDuesLedger.userId, userId), eq(memberDuesLedger.organizationId, orgId)))
-        .orderBy(desc(memberDuesLedger.transactionDate))
-        .limit(limit),
+        // Payment history is payments: charges, credits, adjustments and write-offs are the ledger, and the processor's own
+        // payment reference is not a member-facing field.
+        .where(and(eq(memberDuesLedger.userId, userId), eq(memberDuesLedger.organizationId, orgId), eq(memberDuesLedger.transactionType, 'payment')))
+        .orderBy(desc(memberDuesLedger.transactionDate), desc(memberDuesLedger.id))
+        .limit(page.limit)
+        .offset(page.offset),
     )
 
     return NextResponse.json({ success: true, data: { payments } })

@@ -3,6 +3,7 @@
  * Returns training courses from PostgreSQL.
  */
 import { withApi } from '@/lib/api/framework';
+import { listPage } from '@/lib/api/list-page';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -15,6 +16,7 @@ export const GET = withApi(
     const orgId = ctx.organizationId;
     const url = new URL(ctx.request.url);
     const activeOnly = url.searchParams.get('active') !== 'false';
+    const page = listPage(ctx.request, 200);
 
     // duration_label, completion_count and materials_url are not stored columns: they are derived
     // from the canonical duration, registration and materials fields.
@@ -35,7 +37,8 @@ export const GET = withApi(
       query = sql`${query} AND tc.is_active = true`;
     }
 
-    query = sql`${query} ORDER BY tc.is_mandatory DESC, completion_count DESC`;
+    // The id breaks ties so a page is stable while the list is paged through.
+    query = sql`${query} ORDER BY tc.is_mandatory DESC, completion_count DESC, tc.id LIMIT ${page.limit} OFFSET ${page.offset}`;
 
     const result = await withRLSContext(async () => db.execute(query));
     const rows = Array.from(result);

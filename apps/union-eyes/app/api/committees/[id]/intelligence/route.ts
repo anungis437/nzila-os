@@ -3,6 +3,7 @@
  * POST /api/committees/[id]/intelligence — Not implemented (501): no synthesis exists
  */
 
+import { listPage } from "@/lib/api/list-page";
 import { z } from "zod";
 import { withApi } from "@/lib/api/with-api";
 import { ApiError } from "@/lib/api/errors";
@@ -28,8 +29,7 @@ export const GET = withApi(
     if (!organizationId) throw ApiError.badRequest("Organization context required");
     const { id: committeeId } = params as { id: string };
     if (committeeId !== "all") await requireCommitteeScope(organizationId, committeeId);
-    const searchParams = request.nextUrl.searchParams;
-    const limit = searchParams.get("limit") ? parseInt(searchParams.get("limit")!, 10) : undefined;
+    const { limit } = listPage(request, 100, 20);
 
     return listIntelligenceSnapshots(organizationId, {
       committeeId: committeeId === "all" ? undefined : committeeId,

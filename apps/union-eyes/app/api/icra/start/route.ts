@@ -114,6 +114,9 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
+  // A capability read is bounded like the writes: a caller cannot probe assessment ids or render reports without limit.
+  const intake = await guardPublicIntake(request, { bucket: 'capability', readBody: false })
+  if (!intake.ok) return intake.response
   const url = new URL(request.url)
   const id = url.searchParams.get('assessmentId')
   if (!id) {

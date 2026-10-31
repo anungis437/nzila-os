@@ -10,6 +10,8 @@ import { getSLADeadlineHours, type CasePriority } from '@/lib/workflow/case-life
 import { toLifecycleState } from '@/lib/workflow/state-bridge'
 
 export const SLA_SCORING_METHOD = 'rule_based_heuristic_v1'
+/** The one model version this scorer can honestly claim: a caller does not get to name another. */
+export const SLA_MODEL_VERSION = 'sla-risk-v1'
 
 export type ScoringPriority = 'low' | 'medium' | 'high' | 'urgent'
 

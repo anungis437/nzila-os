@@ -4,7 +4,7 @@ import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { enforceAISafety } from '@nzila/policies';
 import { db } from '@/db';
 import { claims, mlPredictions, modelMetadata } from '@/db/schema';
-import { SLA_SCORING_METHOD, caseFacts, computeSlaBreachProbability } from '@/lib/ml/sla-breach-score';
+import { SLA_MODEL_VERSION, SLA_SCORING_METHOD, caseFacts, computeSlaBreachProbability } from '@/lib/ml/sla-breach-score';
 import { and, desc, eq } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -20,7 +20,8 @@ const bodySchema = z.object({
     hasPreviousBreaches: z.boolean(),
     featureRefs: z.array(z.string().min(2)).min(1),
   }),
-  modelVersion: z.string().min(1).optional(),
+  // Only the version this scorer implements: naming another used to create a model row for any string a steward typed.
+  modelVersion: z.literal(SLA_MODEL_VERSION).optional(),
 });
 
 export const POST = withApi(
@@ -45,7 +46,7 @@ export const POST = withApi(
 
     enforceAISafety({ origin: 'sla-breach-risk', action: 'POST', organizationId: organizationId!, userId: userId ?? '', userRole: 'steward', dataClass: 'confidential' });
 
-    const selectedVersion = body.modelVersion ?? 'sla-risk-v1';
+    const selectedVersion = SLA_MODEL_VERSION;
     const now = new Date();
 
     // The model record (when first used), the prediction and their audit record commit together

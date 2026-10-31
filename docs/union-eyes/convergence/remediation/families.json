@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 438,
- "partial": 82,
- "outstanding": 339,
- "accountedFor": 339,
+ "corrected": 448,
+ "partial": 72,
+ "outstanding": 329,
+ "accountedFor": 329,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -29,19 +29,19 @@
   {
    "family": "F02-PLACEHOLDER-FABRICATED-OR-NOT-IMPLEMENTED",
    "purpose": "Stubs, fabricated figures and false-success answers: return 501 or implement for real",
-   "defects": 10,
+   "defects": 8,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 10,
+    "MEDIUM": 8,
     "LOW": 0
    },
    "namedRoutes": 1,
-   "namedFiles": 1,
+   "namedFiles": 0,
    "tranches": {
     "0B.6": 1,
     "0B.7": 2,
     "0B.8": 1,
-    "0B.9": 3,
+    "0B.9": 1,
     "0B.11": 3
    }
   },
@@ -92,13 +92,13 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 77,
+   "defects": 75,
    "severity": {
     "HIGH": 8,
     "MEDIUM": 45,
-    "LOW": 24
+    "LOW": 22
    },
-   "namedRoutes": 11,
+   "namedRoutes": 10,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 1,
@@ -110,8 +110,8 @@
     "0B.7": 19,
     "0B.8": 7,
     "0B.9": 5,
-    "0B.10": 9,
-    "0B.11": 14,
+    "0B.10": 8,
+    "0B.11": 13,
     "0B.12": 2
    }
   },
@@ -189,16 +189,16 @@
   {
    "family": "F09-RATE-LIMIT-IDEMPOTENCY-REPLAY",
    "purpose": "Abuse controls: rate limits, idempotency keys and replay protection",
-   "defects": 4,
+   "defects": 3,
    "severity": {
     "HIGH": 0,
     "MEDIUM": 3,
-    "LOW": 1
+    "LOW": 0
    },
    "namedRoutes": 0,
    "namedFiles": 0,
    "tranches": {
-    "0B.6": 3,
+    "0B.6": 2,
     "0B.11": 1
    }
   },
@@ -223,10 +223,10 @@
   {
    "family": "F11-AI-GOVERNANCE",
    "purpose": "AI governance: consent, sensitivity, explainability and human accountability",
-   "defects": 9,
+   "defects": 8,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 7,
+    "MEDIUM": 6,
     "LOW": 2
    },
    "namedRoutes": 0,
@@ -236,30 +236,30 @@
     "0B.6": 1,
     "0B.7": 2,
     "0B.8": 1,
-    "0B.9": 2,
+    "0B.9": 1,
     "0B.10": 2
    }
   },
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 69,
+   "defects": 65,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 48,
+    "MEDIUM": 44,
     "LOW": 19
    },
-   "namedRoutes": 11,
+   "namedRoutes": 10,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 4,
     "0B.2": 1,
     "0B.3": 2,
-    "0B.4": 5,
-    "0B.5": 8,
-    "0B.6": 12,
+    "0B.4": 4,
+    "0B.5": 7,
+    "0B.6": 11,
     "0B.7": 9,
-    "0B.8": 10,
+    "0B.8": 9,
     "0B.9": 1,
     "0B.10": 6,
     "0B.11": 5,
@@ -338,18 +338,8 @@
     "partial": true
    },
    {
-    "id": "DEF-0B9-ML-SLA-CASE-ID-IS-NEVER-VERIFIED-AND-NOT-STORED-WITH-THE-PREDICTION",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
     "id": "DEF-0B9-ML-SLA-RETRAIN-SIGNAL-AND-TRAINING-QUEUE-DESCRIBE-A-FORMULA-THAT-NEVER-READS-THEM",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B9-MOB-MEETING-ROOM-BOOKING-RULES-ARE-STORED-BUT-NO-ROUTE-OR-SERVICE-ENFORCES-A-BOOKING",
-    "severity": "MEDIUM",
-    "partial": true
    },
    {
     "id": "DEF-0B11-PRP-RECONCILIATION-RUNS-ARE-NOT-REPEATABLE-AND-THE-BILLING-PERIOD-IS-NOT-BOUND-TO-THE-ORGANIZATION",
@@ -775,11 +765,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B10-PEN-PENSION-LIST-READS-HAVE-NO-LIMIT-OR-PAGINATION",
-    "severity": "LOW",
-    "partial": true
-   },
-   {
     "id": "DEF-0B10-PEN-PENSION-READS-USE-THE-SHARED-DB-HANDLE-WITHOUT-AN-EXPLICIT-TENANT-CONTEXT",
     "severity": "LOW"
    },
@@ -816,11 +801,6 @@
    {
     "id": "DEF-0B11-PRP-RECONCILIATION-RESOLVE-IS-A-STATUS-AND-NOTE-ONLY-WITH-NO-SECOND-APPROVER-OR-LEDGER-EFFECT",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-PRP-WALLET-GET-READS-BALANCE-AND-LEDGER-SEPARATELY-WITH-UNVALIDATED-PAGING",
-    "severity": "LOW",
-    "partial": true
    },
    {
     "id": "DEF-0B11-RPT-STORED-CONFIG-IS-UNVALIDATED-UNBOUNDED-JSON-THAT-NO-SAVE-APPLIES-THE-EXECUTOR-CONTRACT-TO",
@@ -1359,11 +1339,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B6-EMP-REPLAY-MODE-MISRECORDED",
-    "severity": "LOW",
-    "partial": true
-   },
-   {
     "id": "DEF-0B6-EMP-EVIDENCE-SEAL-UNKEYED-HASH",
     "severity": "MEDIUM"
    },
@@ -1423,11 +1398,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B9-ML-SLA-FEEDBACK-IS-REPEATABLE-CALLER-STATED-VERSION-UNBOUND-AND-A-LOST-UPDATE-READ-MODIFY-WRITE",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
     "id": "DEF-0B9-ML-DECLARED-PREDICTION-SHAPE-CONFLICTS-WITH-THE-SQL-THAT-CREATES-THE-TABLE",
     "severity": "MEDIUM"
    },
@@ -1470,11 +1440,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B4-CALENDAR-EVENT-CALENDAR-ID-UNVERIFIED",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
     "id": "DEF-0B4-CBA-INTEL-UNREVIEWED-ROWS-SERVED",
     "severity": "MEDIUM"
    },
@@ -1499,11 +1464,6 @@
     "severity": "LOW"
    },
    {
-    "id": "DEF-0B5-COMMITTEE-REFERENCED-IDS-NOT-VERIFIED",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
     "id": "DEF-0B5-COMMITTEE-INTELLIGENCE-GATHERS-ALL-COMMITTEES",
     "severity": "MEDIUM"
    },
@@ -1525,11 +1485,6 @@
    {
     "id": "DEF-0B5-SURVEY-ANSWERS-HAVE-NO-ROUTE",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-EDU-REGISTRATION-NO-CAPACITY-DUPLICATE-OR-SESSION-COURSE-CHECK",
-    "severity": "MEDIUM",
-    "partial": true
    },
    {
     "id": "DEF-0B6-EMP-OFFICIAL-APPROVAL-UNREACHABLE",
@@ -1649,11 +1604,6 @@
    {
     "id": "DEF-0B8-JUR-LOCATION-CONSENT-IS-NOT-BOUND-TO-PURPOSE-ORGANIZATION-OR-STRIKE",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B8-JUR-MEETING-ROOM-BOOKINGS-PATH-IS-THE-ROOM-ITEM-DELETE-ARCHIVES-THE-ROOM",
-    "severity": "MEDIUM",
-    "partial": true
    },
    {
     "id": "DEF-0B9-ASM-OCI-PATHS-WRAP-THE-OCRA-HANDLERS-BEHIND-AN-ORG-ACCESS-FUNCTION-THAT-RETURNS-TRUE-FOR-EVERY-REQUEST",
