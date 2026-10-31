@@ -405,6 +405,25 @@ describe('smart-onboarding', () => {
       expect(benchmarks[0].percentile).toBeGreaterThanOrEqual(0);
     });
 
+    it('rejects invalid cached measurements rather than returning fabricated figures', async () => {
+      mocks.mockOrgFindFirst.mockResolvedValueOnce(ORG).mockResolvedValueOnce(ORG);
+      mocks.mockOrgFindMany
+        .mockResolvedValueOnce([{ id: 'peer-1', sectors: ['public'] }])
+        .mockResolvedValueOnce([{ memberCount: 900 }]);
+      mocks.mockCacheGet.mockResolvedValue('not-a-number');
+      const benchmarks = await getPeerBenchmarks('org-1');
+      expect(benchmarks[0].nationalAverage).toBeNull();
+    });
+
+    it('does not invent a peer percentile when every peer member count is missing', async () => {
+      mocks.mockOrgFindFirst.mockResolvedValueOnce(ORG).mockResolvedValueOnce(ORG);
+      mocks.mockOrgFindMany
+        .mockResolvedValueOnce([{ id: 'peer-1', sectors: ['public'] }])
+        .mockResolvedValueOnce([{ memberCount: null }]);
+      const benchmarks = await getPeerBenchmarks('org-1');
+      expect(benchmarks).toEqual([]);
+    });
+
     it('uses cached national average', async () => {
       mocks.mockOrgFindFirst
         .mockResolvedValueOnce(ORG)
@@ -590,6 +609,7 @@ describe('smart-onboarding', () => {
     it('fetches from CLC API when key is set and caches result', async () => {
       setupPeerBenchmarkMocks();
       process.env.CLC_API_KEY = 'test-key';
+      process.env.CLC_API_URL = 'https://benchmarks.example.test';
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -608,6 +628,7 @@ describe('smart-onboarding', () => {
     it('falls back on CLC API 404 response', async () => {
       setupPeerBenchmarkMocks();
       process.env.CLC_API_KEY = 'test-key';
+      process.env.CLC_API_URL = 'https://benchmarks.example.test';
 
       mockFetch.mockResolvedValueOnce({
         ok: false,
@@ -622,6 +643,7 @@ describe('smart-onboarding', () => {
     it('falls back on CLC API non-404 error', async () => {
       setupPeerBenchmarkMocks();
       process.env.CLC_API_KEY = 'test-key';
+      process.env.CLC_API_URL = 'https://benchmarks.example.test';
 
       mockFetch.mockResolvedValueOnce({
         ok: false,
@@ -636,6 +658,7 @@ describe('smart-onboarding', () => {
     it('falls back on invalid response format (non-number average)', async () => {
       setupPeerBenchmarkMocks();
       process.env.CLC_API_KEY = 'test-key';
+      process.env.CLC_API_URL = 'https://benchmarks.example.test';
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -649,6 +672,7 @@ describe('smart-onboarding', () => {
     it('falls back on fetch throwing network error', async () => {
       setupPeerBenchmarkMocks();
       process.env.CLC_API_KEY = 'test-key';
+      process.env.CLC_API_URL = 'https://benchmarks.example.test';
 
       mockFetch.mockRejectedValueOnce(new Error('Network timeout'));
 
@@ -835,6 +859,7 @@ describe('smart-onboarding', () => {
         .mockResolvedValueOnce([{ memberCount: 1200 }]);
       mocks.mockCacheGet.mockResolvedValue(null);
       process.env.CLC_API_KEY = 'test-key';
+      process.env.CLC_API_URL = 'https://benchmarks.example.test';
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -911,6 +936,7 @@ describe('smart-onboarding', () => {
         .mockResolvedValueOnce([{ memberCount: 1200 }]);
       mocks.mockCacheGet.mockResolvedValueOnce(4000); // cached value
       process.env.CLC_API_KEY = 'test-key';
+      process.env.CLC_API_URL = 'https://benchmarks.example.test';
 
       const benchmarks = await getPeerBenchmarks('org-1');
       expect(benchmarks[0].nationalAverage).toBe(4000);
@@ -931,6 +957,7 @@ describe('smart-onboarding', () => {
         .mockResolvedValueOnce([{ memberCount: 1200 }]);
       mocks.mockCacheGet.mockResolvedValue(null);
       process.env.CLC_API_KEY = 'test-key';
+      process.env.CLC_API_URL = 'https://benchmarks.example.test';
     }
 
     it('uses data.average when data.data.average is missing', async () => {

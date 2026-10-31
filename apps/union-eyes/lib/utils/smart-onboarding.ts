@@ -372,16 +372,24 @@ async function fetchNationalAverage(
   try {
     // Check cache first (24 hour TTL)
     const cached = await cacheGet<number>(cacheKey, { namespace: 'clc-api' });
-    if (cached !== null) {
+    if (typeof cached === 'number' && Number.isFinite(cached) && cached >= 0) {
       logger.info('[CLC API] Using cached national average', { metric, sector, value: cached });
       return cached;
     }
+    if (cached != null) logger.warn('[CLC API] Ignoring invalid cached national average', { metric, sector });
 
-    const CLC_API_URL = process.env.CLC_API_URL || 'https://api.clc-ctc.ca';
+    const CLC_API_URL = process.env.CLC_API_URL;
     const CLC_API_KEY = process.env.CLC_API_KEY;
 
-    if (!CLC_API_KEY) {
-      logger.warn('[CLC API] API key not configured; national average unavailable');
+    // Never assume an external benchmark endpoint exists. An explicit, HTTPS-only
+    // institutional configuration is required before transmitting a request.
+    if (!CLC_API_KEY || !CLC_API_URL) {
+      logger.warn('[CLC API] Explicit endpoint and API key required; national average unavailable');
+      return null;
+    }
+    const endpoint = new URL(CLC_API_URL);
+    if (endpoint.protocol !== 'https:' || endpoint.username || endpoint.password || endpoint.search || endpoint.hash) {
+      logger.warn('[CLC API] Invalid benchmark endpoint configuration');
       return null;
     }
 
@@ -393,7 +401,7 @@ async function fetchNationalAverage(
     });
 
     const response = await fetch(
-      `${CLC_API_URL}/v1/benchmarks/national?${params}`,
+      `${endpoint.origin}${endpoint.pathname.replace(/\/$/, '')}/v1/benchmarks/national?${params}`,
       {
         method: 'GET',
         headers: {
