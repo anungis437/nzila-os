@@ -18,19 +18,13 @@ import { createLinkedInClient } from '@/lib/social-media/linkedin-api-client';
 import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { sealToken, sealOptionalToken } from '@/lib/social-media/token-vault';
+import { validateOAuthCallbackContext } from '@/lib/social-media/oauth-callback-state';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
-
-const SUPPORTED_PLATFORMS = ['facebook', 'instagram', 'twitter', 'linkedin'] as const;
-type SupportedPlatform = (typeof SUPPORTED_PLATFORMS)[number];
-
-function isSupportedPlatform(value: string | undefined): value is SupportedPlatform {
-  return !!value && (SUPPORTED_PLATFORMS as readonly string[]).includes(value);
-}
 
 type CookieStore = Awaited<ReturnType<typeof cookies>>;
 
-// Expires all temporary OAuth cookies immediately so a replayed callback
-// request (same code/state, second delivery) always finds them gone.
+// Consume temporary OAuth cookies only after state, session, organization and provider validation.
+// Forged or malformed requests must not cancel the legitimate pending connection.
 function clearOAuthCookies(cookieStore: CookieStore) {
   const expired = {
     httpOnly: true,
@@ -51,7 +45,6 @@ export const GET = withRoleAuth('admin', async (request: NextRequest, context: B
 
   try {
     if (!organizationId) {
-      clearOAuthCookies(cookieStore);
       return standardErrorResponse(ErrorCode.FORBIDDEN, 'No organization found');
     }
 
@@ -60,51 +53,41 @@ export const GET = withRoleAuth('admin', async (request: NextRequest, context: B
     const state = searchParams.get('state');
     const providerError = searchParams.get('error');
 
-    const storedState = cookieStore.get('oauth_state')?.value;
-    const storedPlatform = cookieStore.get('oauth_platform')?.value;
-    const storedOrganizationId = cookieStore.get('oauth_organization_id')?.value;
-    const storedUserId = cookieStore.get('oauth_user_id')?.value;
-    const codeVerifier = cookieStore.get('twitter_code_verifier')?.value;
+    const storedState = cookieStore.get('oauth_state')?.value ?? null;
+    const storedPlatform = cookieStore.get('oauth_platform')?.value ?? null;
+    const storedOrganizationId = cookieStore.get('oauth_organization_id')?.value ?? null;
+    const storedUserId = cookieStore.get('oauth_user_id')?.value ?? null;
+    const codeVerifier = cookieStore.get('twitter_code_verifier')?.value ?? null;
 
-    // Single-use: clear cookies before any further processing so a replay of
-    // this exact request (same query string) can never validate twice.
+    // A malformed or forged callback does not consume the genuine pending connection.
+    const checked = validateOAuthCallbackContext({
+      state, code, providerError, userId, organizationId,
+      storedState, storedPlatform, storedOrganizationId, storedUserId, codeVerifier,
+    });
+    if (!checked.ok) {
+      switch (checked.reason) {
+        case 'state_mismatch':
+          return standardErrorResponse(ErrorCode.FORBIDDEN, 'OAuth state mismatch');
+        case 'session_mismatch':
+          return standardErrorResponse(ErrorCode.FORBIDDEN, 'OAuth state does not match the authenticated session');
+        case 'organization_mismatch':
+          return standardErrorResponse(ErrorCode.FORBIDDEN, 'OAuth state does not match the authenticated organization');
+        case 'unsupported_platform':
+          return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Unknown or expired OAuth platform context');
+        case 'missing_pkce_verifier':
+          return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing PKCE verifier for Twitter OAuth');
+        case 'missing_authorization_code':
+          return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing OAuth authorization code');
+      }
+    }
+
+    // Consume only an authenticated, fully validated callback, before contacting the provider.
     clearOAuthCookies(cookieStore);
-
     if (providerError) {
       return standardErrorResponse(ErrorCode.VALIDATION_ERROR, `Provider denied authorization: ${providerError}`);
     }
-
-    if (!code || !state) {
-      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing OAuth authorization code or state');
-    }
-
-    // CSRF/replay defense: state must match the httpOnly cookie set at
-    // connect-initiation time byte-for-byte. Neither the provider nor a
-    // third party can forge this without also controlling the victim's
-    // cookie jar (the cookie is never exposed to client-side script). State
-    // itself is an opaque random nonce — it carries no identity claims.
-    if (!storedState || storedState !== state) {
-      return standardErrorResponse(ErrorCode.FORBIDDEN, 'OAuth state mismatch');
-    }
-
-    // Bind the flow to the session AND the organization that initiated it —
-    // both compared against separate httpOnly cookies, never trusted from
-    // query params or the state value. This stops a user who belongs to
-    // multiple organizations from starting the flow under one org and
-    // completing it into another by switching active context mid-flow.
-    // The actual account write below still derives org/user only from the
-    // authenticated server context, never from these cookies directly.
-    if (!storedUserId || storedUserId !== userId) {
-      return standardErrorResponse(ErrorCode.FORBIDDEN, 'OAuth state does not match the authenticated session');
-    }
-    if (!storedOrganizationId || storedOrganizationId !== organizationId) {
-      return standardErrorResponse(ErrorCode.FORBIDDEN, 'OAuth state does not match the authenticated organization');
-    }
-
-    if (!isSupportedPlatform(storedPlatform)) {
-      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Unknown or expired OAuth platform context');
-    }
-    const platform = storedPlatform;
+    const platform = checked.platform;
+    const authorizedCode = code!; // The successful validation guarantees a code absent provider error.
 
     const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/social-media/accounts/callback`;
 
@@ -119,7 +102,7 @@ export const GET = withRoleAuth('admin', async (request: NextRequest, context: B
       case 'facebook':
       case 'instagram': {
         const metaClient = createMetaClient();
-        const shortLived = await metaClient.getAccessToken(code, redirectUri);
+        const shortLived = await metaClient.getAccessToken(authorizedCode, redirectUri);
         const longLived = await metaClient.getLongLivedToken(shortLived.access_token);
         const pages = await metaClient.getUserPages();
         // The authorizing user may manage several Pages. Picking the first would publish as an arbitrary one, and there is no
@@ -166,7 +149,7 @@ export const GET = withRoleAuth('admin', async (request: NextRequest, context: B
           return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing PKCE verifier for Twitter OAuth');
         }
         const twitterClient = createTwitterClient();
-        const tokenData = await twitterClient.getAccessToken(code, redirectUri, codeVerifier);
+        const tokenData = await twitterClient.getAccessToken(authorizedCode, redirectUri, codeVerifier);
         const me = await createTwitterClient(tokenData.access_token).getMe();
 
         platformUserId = me.id;
@@ -180,7 +163,7 @@ export const GET = withRoleAuth('admin', async (request: NextRequest, context: B
 
       case 'linkedin': {
         const linkedInClient = createLinkedInClient();
-        const tokenData = await linkedInClient.getAccessToken(code, redirectUri);
+        const tokenData = await linkedInClient.getAccessToken(authorizedCode, redirectUri);
         const orgs = await createLinkedInClient(tokenData.access_token).getOrganizations();
         const org = orgs[0];
         if (!org) {
