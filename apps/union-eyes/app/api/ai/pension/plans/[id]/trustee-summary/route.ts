@@ -25,12 +25,17 @@ import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { enforceAISafety } from '@nzila/policies';
+import { financeViewMandateDenial } from '@/lib/finance/finance-view-mandate';
 
 const trusteeSummarySchema = z.object({
   valuationDocumentText: z.string().max(10_000).optional(),
 });
 
 export const POST = withRoleAuth('officer', async (request: NextRequest, context: BaseAuthContext) => {
+  // 0. Pension figures need a live financial view mandate, not only an officer role title.
+  const noMandate = await financeViewMandateDenial(context.organizationId!, context.userId!);
+  if (noMandate) return noMandate;
+
   // 1. Rate limit
   const rl = await checkRateLimit(`ai-pension-trustee:${context.userId}`, RATE_LIMITS.AI_COMPLETION);
   if (!rl.allowed) {

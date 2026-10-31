@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 383,
- "partial": 67,
- "outstanding": 394,
- "accountedFor": 394,
+ "corrected": 385,
+ "partial": 68,
+ "outstanding": 392,
+ "accountedFor": 392,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -94,10 +94,10 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 93,
+   "defects": 91,
    "severity": {
     "HIGH": 8,
-    "MEDIUM": 54,
+    "MEDIUM": 52,
     "LOW": 31
    },
    "namedRoutes": 15,
@@ -108,7 +108,7 @@
     "0B.3": 1,
     "0B.4": 2,
     "0B.5": 4,
-    "0B.6": 11,
+    "0B.6": 9,
     "0B.7": 23,
     "0B.8": 9,
     "0B.9": 7,
@@ -601,7 +601,8 @@
    },
    {
     "id": "DEF-0B2-AI-FINANCE-ROLE-TITLE-GATE",
-    "severity": "HIGH"
+    "severity": "HIGH",
+    "partial": true
    },
    {
     "id": "DEF-0B3-SUBSCRIPTION-ROLE-TITLE-AND-MEMBER-READ",
@@ -640,14 +641,6 @@
     "id": "DEF-0B6-EMP-TIMESHEET-INGEST-STEWARD-FLOOR-UNBOUNDED",
     "severity": "MEDIUM",
     "partial": true
-   },
-   {
-    "id": "DEF-0B6-EMP-COMPLIANCE-EVENT-FORGEABLE-BY-STEWARD",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-EMP-EXECUTION-READS-AT-MEMBER-FLOOR",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B6-EMP-CONTACT-PII-READ-AT-STEWARD-UNAUDITED",

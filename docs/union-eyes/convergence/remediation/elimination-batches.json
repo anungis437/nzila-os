@@ -4290,6 +4290,49 @@
           "remaining": "A configured Stripe price id can still differ from the amount the application displays; nothing compares them."
         }
       ]
+    },
+    {
+      "id": "B39-F05-FINANCIAL-INTELLIGENCE-NEEDS-A-MANDATE-AND-FLAGS-CANNOT-BE-FORGED",
+      "family": "F05: financial intelligence needs a live financial mandate, and a record a person raises cannot pass for an engine record",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B2-AI-FINANCE-ROLE-TITLE-GATE",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/finance/finance-view-mandate.ts",
+            "apps/union-eyes/lib/finance/__tests__/finance-view-mandate.test.ts",
+            "apps/union-eyes/app/api/ai/finance/analysis/route.ts",
+            "apps/union-eyes/app/api/ai/pension/plans/[id]/funding/route.ts",
+            "apps/union-eyes/app/api/ai/pension/members/[id]/projection/route.ts",
+            "apps/union-eyes/app/api/ai/pension/plans/[id]/trustee-summary/route.ts",
+            "apps/union-eyes/app/api/__tests__/ai-finance-analysis.route.test.ts",
+            "apps/union-eyes/lib/api/__tests__/f05-b39-mandate.contract.test.ts"
+          ],
+          "explanation": "The finance analysis and the three pension intelligence routes first require a live finance:view mandate (in the caller own tenant context) and answer 403 without it, before the rate limit, feature gate, entitlement or any read. The finance analysis test mock gained the new collaborator and a refusal test.",
+          "remaining": "The view mandate is not resource-scoped to a plan or member, and the pension projection still reads any member of the plan by id for an officer."
+        },
+        {
+          "prefix": "DEF-0B6-EMP-COMPLIANCE-EVENT-FORGEABLE-BY-STEWARD",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/employer-execution/compliance/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f05-b39-mandate.contract.test.ts"
+          ],
+          "explanation": "Raising a compliance event is a financial-role act; a manual flag may be info or warning only, can never block an approval, cannot take an engine event code (it is prefixed manual_), and its summary and code are bounded; unknown body fields are refused."
+        },
+        {
+          "prefix": "DEF-0B6-EMP-EXECUTION-READS-AT-MEMBER-FLOOR",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/employer-execution/compliance/route.ts",
+            "apps/union-eyes/app/api/employer-execution/payroll-runs/route.ts",
+            "apps/union-eyes/app/api/employer-execution/remittance-runs/route.ts",
+            "apps/union-eyes/lib/api/__tests__/f05-b39-mandate.contract.test.ts"
+          ],
+          "explanation": "The compliance event list moves from the member floor to the financial roles and is bounded to 500 rows; the payroll and remittance run lists already require the financial roles and a live view mandate."
+        }
+      ]
     }
   ]
 }
