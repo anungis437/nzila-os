@@ -36,7 +36,7 @@ vi.mock('@/lib/services/external-resource-authorization-service', () => ({
   authorizeExternalMatterAccess: mocks.authorizeExternalMatterAccess,
   authorizeExternalDocumentAccess: mocks.authorizeExternalDocumentAccess,
 }));
-vi.mock('@/lib/blob-client', () => ({ generateSasUrl: mocks.generateSasUrl }));
+vi.mock('@/lib/blob-client', () => ({ generateSasUrl: mocks.generateSasUrl, readBlobBounded: vi.fn(), BlobTooLargeError: class extends Error {} }));
 vi.mock('@/lib/services/document-blob-integrity-service', () => ({ resolveStoredBlob: mocks.resolveStoredBlob }));
 
 describe('external resource routes', () => {

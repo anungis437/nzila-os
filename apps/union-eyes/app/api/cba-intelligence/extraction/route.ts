@@ -41,6 +41,16 @@ export const POST = withApi(
           action: body?.documentId ? "cba_intel.extraction.run_document" : "cba_intel.extraction.run_bulk",
           resourceType: "cba_intel_documents",
           resourceId: body?.documentId,
+          // The outcome record names the durable extraction runs, so the audit trail leads to them.
+          resultDetails: ({ data }) =>
+            "extractionRunId" in data
+              ? { extractionRunId: data.extractionRunId, documentId: data.documentId, findings: data.findings.length, errors: data.errors.length }
+              : {
+                  extractionRunIds: data.results.slice(0, 100).map((r) => r.extractionRunId),
+                  processed: data.processed,
+                  succeeded: data.succeeded,
+                  failed: data.failed,
+                },
         },
         async () => ({
           data: body?.documentId ? await extractDocument(body.documentId) : await runBulkExtraction(),

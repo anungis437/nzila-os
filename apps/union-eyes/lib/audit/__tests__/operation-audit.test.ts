@@ -102,6 +102,14 @@ describe('performAtomicAuditedOperation', () => {
     expect(order).toEqual(['work:true', 'audit:platform.thing:true']);
   });
 
+  it('records what the work produced in the same audit row, merged over the static details', async () => {
+    await performAtomicAuditedOperation(
+      { ...op, details: { fixed: 1 }, resultDetails: (value: { created: number }) => ({ created: value.created }) },
+      async () => ({ created: 4 }),
+    );
+    expect(m.audit).toHaveBeenCalledWith(m.tx, expect.objectContaining({ details: { fixed: 1, created: 4 } }));
+  });
+
   it('turns a failed audit write into OperationAuditError so the transaction (and the work in it) is abandoned, and does not run afterCommit', async () => {
     m.audit.mockRejectedValue(new Error('audit down'));
     const after = vi.fn();

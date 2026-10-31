@@ -4,6 +4,8 @@ import { NextRequest } from 'next/server';
 const m = vi.hoisted(() => ({
   publishPost: vi.fn(),
   deletePost: vi.fn(),
+  removeFromPlatform: vi.fn(),
+  updates: [] as Array<Record<string, unknown>>,
   persistAtomicAudit: vi.fn(),
   cancelRedemption: vi.fn(),
   accounts: [] as Array<{ id: string; platform: string }>,
@@ -18,7 +20,7 @@ vi.mock('@/lib/rate-limiter', () => ({
   RATE_LIMITS: { SOCIAL_MEDIA_POST: {}, SOCIAL_MEDIA_API: {} },
 }));
 vi.mock('@/lib/social-media/social-media-service', () => ({
-  createSocialMediaService: () => ({ publishPost: m.publishPost, deletePost: m.deletePost }),
+  createSocialMediaService: () => ({ publishPost: m.publishPost, deletePost: m.deletePost, removeFromPlatform: m.removeFromPlatform }),
   postTypeFor: () => 'text',
   AllPlatformsFailedError: class extends Error {
     results: unknown[] = [];
@@ -30,7 +32,7 @@ vi.mock('@/db', () => ({
   },
 }));
 vi.mock('@/db/schema/social-media-schema', () => ({
-  socialPosts: { id: 'id', accountId: 'accountId' },
+  socialPosts: { id: 'id', accountId: 'accountId', organizationId: 'organizationId' },
   socialCampaigns: { id: 'id', organizationId: 'organizationId' },
   socialAccounts: { id: 'id', organizationId: 'organizationId' },
 }));
@@ -56,7 +58,7 @@ describe('social-media/posts — external effects are audited around the operati
     m.accounts = [{ id: '11111111-1111-4111-8111-111111111111', platform: 'twitter' }];
     m.drafts.length = 0;
     m.withRLSContext.mockImplementation(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) =>
-      fn({ insert: () => ({ values: (row: Record<string, unknown>) => { m.drafts.push(row); return { returning: async () => [{ id: `draft_${m.drafts.length}`, accountId: row.accountId }] }; } }) }));
+      fn({ update: () => ({ set: (v: Record<string, unknown>) => ({ where: async () => { m.updates.push(v); m.order.push('local-update'); } }) }), insert: () => ({ values: (row: Record<string, unknown>) => { m.drafts.push(row); return { returning: async () => [{ id: `draft_${m.drafts.length}`, accountId: row.accountId }] }; } }) }));
     m.persistAtomicAudit.mockImplementation(async (_tx: unknown, entry: { action: string }) => {
       m.order.push(entry.action);
     });
@@ -64,8 +66,10 @@ describe('social-media/posts — external effects are audited around the operati
       m.order.push('publish');
       return [{ success: true, platform: 'twitter' }];
     });
-    m.deletePost.mockImplementation(async () => {
+    m.updates.length = 0;
+    m.removeFromPlatform.mockImplementation(async () => {
       m.order.push('delete');
+      return { alreadyRemoved: false };
     });
   });
 
@@ -112,20 +116,53 @@ describe('social-media/posts — external effects are audited around the operati
     expect(m.publishPost).not.toHaveBeenCalled();
   });
 
-  it('audits a post deletion around the platform call, and does not delete another organization\u2019s post', async () => {
+  it('audits a post deletion around the platform call and the local state change in its own transaction, and does not delete another organization\u2019s post', async () => {
     const { DELETE } = await import('../social-media/posts/route');
     const response = await DELETE(new NextRequest('http://localhost/api/social-media/posts?id=post_1', { method: 'DELETE' }), ctx as never);
 
     expect(response.status).toBe(200);
-    expect(m.order).toEqual(['social.post.delete.requested', 'delete', 'social.post.delete.completed']);
+    expect(m.order).toEqual(['social.post.delete.requested', 'delete', 'social.post.delete.completed', 'local-update', 'social.post.deleted']);
+    expect(m.updates[0]).toMatchObject({ status: 'deleted' });
 
     m.order.length = 0;
-    m.deletePost.mockClear();
+    m.removeFromPlatform.mockClear();
     // The lookup names the caller organization, so another organization's post is simply not found.
     m.selected = [];
     const refused = await DELETE(new NextRequest('http://localhost/api/social-media/posts?id=post_2', { method: 'DELETE' }), ctx as never);
     expect(refused.status).toBe(404);
-    expect(m.deletePost).not.toHaveBeenCalled();
+    expect(m.removeFromPlatform).not.toHaveBeenCalled();
+  });
+
+  it('F06 A3: a platform failure leaves the row published, says so, and writes no deleted record', async () => {
+    const { DELETE } = await import('../social-media/posts/route');
+    m.removeFromPlatform.mockRejectedValueOnce(new Error('platform down'));
+
+    const response = await DELETE(new NextRequest('http://localhost/api/social-media/posts?id=post_1', { method: 'DELETE' }), ctx as never);
+    const body = await response.json();
+
+    expect(response.status).toBe(502);
+    expect(body).toMatchObject({ code: 'PLATFORM_REMOVAL_FAILED', retryable: true });
+    expect(m.updates).toHaveLength(0);
+    expect(m.order).toEqual(['social.post.delete.requested', 'social.post.delete.failed']);
+  });
+
+  it('F06 A3: a local failure after the platform removal is reported as pending, never as deleted, and a repeat completes it', async () => {
+    const { DELETE } = await import('../social-media/posts/route');
+    m.persistAtomicAudit.mockImplementationOnce(async (_tx: unknown, entry: { action: string }) => { m.order.push(entry.action); });
+    m.persistAtomicAudit.mockImplementationOnce(async (_tx: unknown, entry: { action: string }) => { m.order.push(entry.action); });
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
+
+    const first = await DELETE(new NextRequest('http://localhost/api/social-media/posts?id=post_1', { method: 'DELETE' }), ctx as never);
+    expect(first.status).toBe(502);
+    expect((await first.json()).code).toBe('LOCAL_STATE_PENDING');
+
+    m.removeFromPlatform.mockResolvedValueOnce({ alreadyRemoved: true });
+    const repeat = await DELETE(new NextRequest('http://localhost/api/social-media/posts?id=post_1', { method: 'DELETE' }), ctx as never);
+    expect(repeat.status).toBe(200);
+    expect(m.persistAtomicAudit).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'social.post.deleted', details: { alreadyRemovedOnPlatform: true } }),
+    );
   });
 });
 

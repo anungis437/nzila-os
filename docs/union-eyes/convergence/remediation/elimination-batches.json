@@ -6319,13 +6319,18 @@
         },
         {
           "prefix": "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-BEARER-LINK-NOT-BOUND-TO-GRANT",
-          "status": "PARTIAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
           "files": [
             "apps/union-eyes/app/api/external/documents/[id]/download/route.ts",
-            "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts"
+            "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts",
+            "apps/union-eyes/lib/blob-client.ts",
+            "apps/union-eyes/app/api/external/documents/[id]/download/route.pglite.test.ts",
+            "apps/union-eyes/app/api/external/documents/[id]/download/projection.test.ts",
+            "apps/union-eyes/app/api/external/__tests__/external-routes.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
           ],
-          "explanation": "The link lives five minutes instead of sixty, its lifetime is returned and recorded in the audit.",
-          "remaining": "A storage link is still a read-only bearer URL for those minutes and cannot be bound to the caller or recalled when the grant is revoked."
+          "explanation": "The link lives five minutes instead of sixty, its lifetime is returned and recorded in the audit. No storage link leaves the server. The route reads the pinned version's bytes (bounded at 50 MB; larger files get 413) and serves them with attachment, no-store and nosniff headers, so the grant, its expiry and its revocation are checked on every read and cannot be bypassed by a passed-on URL. The access record is written before any byte is sent and names the bytes delivered (size, version, grant), and the bytes are withheld if it cannot be written. The two tests that pinned the five-minute link (s11, projection) were replaced with assertions that no link is issued (disclosed); the real-SQL test was rewritten for byte delivery, the 413 and the refused grant.",
+          "remaining": "A grant issued before migration 0046 and not pinned to a version still releases the current version (a separate, already-recorded item)."
         },
         {
           "prefix": "DEF-0B4-CLAUSE-LIBRARY-EDIT-AND-DELETE-NO-VERSION-OR-RETENTION",
@@ -7917,16 +7922,18 @@
       "items": [
         {
           "prefix": "DEF-0B10-OPL-10",
-          "status": "PARTIAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
           "files": [
             "apps/union-eyes/lib/auth/organization-selection-audit.ts",
             "apps/union-eyes/lib/auth/canonical-organization-selection.ts",
             "apps/union-eyes/app/api/organizations/switch/route.ts",
             "apps/union-eyes/app/api/__tests__/organizations-switch.route.test.ts",
-            "apps/union-eyes/lib/services/__tests__/s46-gate0-org-selection-audit.test.ts"
+            "apps/union-eyes/lib/services/__tests__/s46-gate0-org-selection-audit.test.ts",
+            "apps/union-eyes/lib/auth/__tests__/organization-selection-audit.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
           ],
-          "explanation": "Selecting an organization to work in now leaves an organization.select audit record (actor, organization, and whether the authority was membership or platform administrator) written through the atomic audit before the session is rebound, the preference cookie is set or the organization is returned; if the record cannot be written the selection is refused (503 in legacy mode, an error in canonical mode). A platform administrator selecting an organization they hold no membership of is named as such.",
-          "remaining": "The session store and the audit store are separate databases, so the record is written first rather than in one transaction with the rebind; a record can exist for a rebind that then fails. The canonical path is covered by source pins and mocks only, not by a native or HTTP run."
+          "explanation": "Selecting an organization to work in now leaves an organization.select audit record (actor, organization, and whether the authority was membership or platform administrator) written through the atomic audit before the session is rebound, the preference cookie is set or the organization is returned; if the record cannot be written the selection is refused (503 in legacy mode, an error in canonical mode). A platform administrator selecting an organization they hold no membership of is named as such. The selection record (B103) now names the organization the actor was working in before (from the session or provider), and the canonical selection records its outcome after the session store has been changed or has refused (organization.selected, organization.select_failed). An intent with no outcome is a selection that did not complete.",
+          "remaining": "The session store cannot commit with an audit row, so the pair is two-phase; the legacy path keeps no server-side previous organization and records null."
         }
       ]
     },
@@ -7996,10 +8003,13 @@
             "apps/union-eyes/app/api/admin/feature-flags/route.ts",
             "apps/union-eyes/app/api/__tests__/admin-feature-flags.route.test.ts",
             "apps/union-eyes/scripts/lib/route-coverage-scan.ts",
-            "apps/union-eyes/lib/services/__tests__/s47-f06-a1-audit-foundation.test.ts"
+            "apps/union-eyes/lib/services/__tests__/s47-f06-a1-audit-foundation.test.ts",
+            "apps/union-eyes/app/api/cba-intelligence/ingestion/seed/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/benchmark/[id]/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
           ],
-          "explanation": "The audit-write contract is now stated in one place: performAtomicAuditedOperation writes the change and a single hash-chained audit record in one tenant transaction (a failed audit write abandons the change; a failed change records nothing; afterCommit runs only after commit), and performAuditedOperation is documented and labelled INTENT_OUTCOME as the durable two-phase record for effects our transaction cannot reach. The manifest no longer declares the two-phase routes atomic. The platform feature-flag toggle, a pure database change, moved onto the atomic contract (an undefined flag is a 404 rather than an insert the runtime role may not make).",
-          "remaining": "Other operations audited as intent and outcome whose effect is only database rows (CBA source seeding and benchmark snapshot) still use the two-phase helper; they are converted in the external/multi-store batch."
+          "explanation": "The audit-write contract is now stated in one place: performAtomicAuditedOperation writes the change and a single hash-chained audit record in one tenant transaction (a failed audit write abandons the change; a failed change records nothing; afterCommit runs only after commit), and performAuditedOperation is documented and labelled INTENT_OUTCOME as the durable two-phase record for effects our transaction cannot reach. The manifest no longer declares the two-phase routes atomic. The platform feature-flag toggle, a pure database change, moved onto the atomic contract (an undefined flag is a 404 rather than an insert the runtime role may not make). The two database-only operations that were still two-phase, the CBA registry seed and the benchmark snapshot, now write the change and a single hash-chained audit record in one system-scope transaction (a failed audit write rolls the whole seed or snapshot back; the seed fails fast so a swallowed statement error cannot leave an aborted transaction reporting a partial result). performAtomicAuditedOperation and performAuditedOperation gain resultDetails, so the record carries what the work did.",
+          "remaining": "Operations that act outside the database transaction stay durable two-phase records, labelled INTENT_OUTCOME in the route manifest rather than ATOMIC. Billing-cycle generation is finance-frozen and was not changed."
         }
       ]
     },
@@ -8033,7 +8043,7 @@
     {
       "id": "B107-F06-A4-TRUTHFUL-INSTITUTIONAL-OUTCOMES",
       "family": "F06 A4: a state, status or audit record names an outcome only when the system performed or can show it",
-      "evidenceCommit": null,
+      "evidenceCommit": "0ab678010",
       "items": [
         {
           "prefix": "DEF-0B10-PIL-COMMERCIAL-TRANSITION-RECORDS-SIGNED-ACTIVE-CONTRACTS-AND-ISSUED-INVOICES-WITH-NO-COUNTERPART-ACCEPTANCE-AND-ADVANCES-STATE-WHEN-EFFECTS-ARE-ONLY-STAGED",
@@ -8108,6 +8118,72 @@
           ],
           "explanation": "Every provider list, create, update and delete response, and the create and update audit records, now states inEffect: false with the reason, and the capability is recorded as NOT_IMPLEMENTED (UE-SSO-SIGN-IN), so a configured provider is no longer reported as though it governed sign-in.",
           "remaining": "No sign-in, token-exchange, provisioning or SCIM code reads the stored provider; the consumer needs the identity-provider protocol work and a real provider to qualify against."
+        }
+      ]
+    },
+    {
+      "id": "B108-F06-A3-DURABLE-OPERATION-LIFECYCLES",
+      "family": "F06 A3: each state change of a multi-step operation is recorded for what it is, with the durable record that leads to it",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B4-CBA-INTEL-AUDIT-NOT-ATOMIC",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/cba-intelligence/ingestion/run/route.ts",
+            "apps/union-eyes/app/api/cba-intelligence/extraction/route.ts",
+            "apps/union-eyes/lib/services/cba-intelligence/seed-sources.ts",
+            "apps/union-eyes/lib/services/cba-intelligence/__tests__/seed-sources.test.ts",
+            "apps/union-eyes/app/api/__tests__/cba-benchmark-snapshot.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+          ],
+          "explanation": "Source seeding is atomic (see above). Ingestion runs and extraction call external sources and an AI provider across many statements, so they cannot share one transaction and are no longer described as atomic: the manifest labels them INTENT_OUTCOME, and the outcome record now names the durable rows the run wrote (job ids and counts; extraction run ids and counts), so the audit trail leads to them.",
+          "remaining": "Ingestion and extraction remain two-phase by nature; no provider was exercised in this batch."
+        },
+        {
+          "prefix": "DEF-0B4-CALENDAR-SYNC-AUDIT-NOT-ATOMIC",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/calendar-sync/connections/[id]/sync/route.ts",
+            "apps/union-eyes/app/api/calendar-sync/connections/[id]/sync/route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+          ],
+          "explanation": "The provider call stays inside the durable intent and outcome record, but the connection's own state change is now a tenant transaction that also writes its audit record: calendar_sync.connection.state_synced on success and calendar_sync.connection.sync_failed, with the connection marked failed, when the provider fails (previously a failure left the connection unchanged and unrecorded). A state change whose audit record cannot be written fails the sync instead of reporting it synced.",
+          "remaining": "Events imported or exported before a later provider failure remain; the failure is recorded, not rolled back at the provider."
+        },
+        {
+          "prefix": "DEF-0B2-REVOCATION-MULTI-STORE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/member-access-revocation-service.ts",
+            "apps/union-eyes/lib/services/__tests__/member-access-revocation-service.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+          ],
+          "explanation": "Revocation spans sessions, the platform-auth membership and the local row, which cannot share a transaction, so the attempt is made durable before any store is touched (member.access.deactivate_attempt or delete_attempt) and the outcome is recorded atomically with the local status change as before. A process that stops part-way leaves a visible attempt with no outcome, and a repeat is idempotent. Unlike reactivation, a revocation whose attempt cannot be recorded is still carried out, because denying access is the safe direction; the outcome record then says attemptRecorded: false and the result reports intentRecorded.",
+          "remaining": "Three stores are still updated separately; a failed step still returns 502 and is completed by a retry."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-DUES-PAY-POST-INITIATION-AUDIT-COMMITS-BEFORE-THE-PROCESSOR-CALL-AND-THE-LATER-STATE-CHANGES-ARE-UNAUDITED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/dues/dues-payment-service.ts",
+            "apps/union-eyes/lib/dues/__tests__/dues-initiation-single-open.pglite.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+          ],
+          "explanation": "The initiation record now says a payment was opened, and what the provider then did is recorded as its own state change in its own transaction: dues.payment_provider_intent_linked with the processor id, dues.payment_cancelled with the reason (provider_intent_not_created, superseded_by_new_balance). A cancellation that cannot be written is logged, never discarded, and leaves the row pending, which is safe because a repeat reuses an open payment of the same amount and the provider call is idempotent on the payment id. A payment whose intent the provider created is no longer cancelled when only the local link failed (that left a chargeable intent whose settlement would be refused): it stays pending and a repeat reuses it. Four real-SQL tests added. No finance mandate, amount, principal or settlement logic was changed.",
+          "remaining": "The provider call is still outside the transaction by nature."
+        },
+        {
+          "prefix": "DEF-0B11-SOC-POST-DELETE-REMOVES-THE-PLATFORM-POST-BEFORE-THE-LOCAL-ROW-AND-AUDITS-INTENT-AND-OUTCOME-ONLY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/social-media/posts/route.ts",
+            "apps/union-eyes/lib/social-media/social-media-service.ts",
+            "apps/union-eyes/app/api/__tests__/social-posts-and-redemptions-audit.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+          ],
+          "explanation": "The two effects are separated and each is recorded for what it is. Removal from the platform is a durable intent and outcome (with whether it was already gone); the row then reads deleted in one transaction with social.post.deleted. A platform failure now returns 502 PLATFORM_REMOVAL_FAILED with the row still published (true: the post is still live); a failure of the local step returns 502 LOCAL_STATE_PENDING, never \"deleted\", and repeating the deletion completes it because a platform answer that the post is already gone counts as removed. deletePost keeps its contract for other callers.",
+          "remaining": "The already-removed detection reads the platform error text, since the platform clients expose no typed not-found."
         }
       ]
     }

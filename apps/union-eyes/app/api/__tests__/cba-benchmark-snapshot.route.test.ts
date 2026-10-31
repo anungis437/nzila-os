@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // DEF-0B4-CBA-BENCHMARK-GET-WRITES-SNAPSHOT-NO-AUDIT: a GET with ?save=true inserted a snapshot with no audit. A read no longer writes; saving is POST,
-// under platform authority, with the intent recorded before the write.
+// under platform authority, with the audit record written in the snapshot's own transaction.
 const m = vi.hoisted(() => ({
   findComparable: vi.fn(),
   save: vi.fn(),
@@ -22,7 +22,7 @@ vi.mock('@/lib/api/framework', () => ({
 }));
 vi.mock('@/lib/api-auth-guard', () => ({ requireSystemAdmin: () => m.requireSystemAdmin() }));
 vi.mock('@/lib/audit/operation-audit', () => ({
-  performAuditedOperation: m.operation,
+  performAtomicAuditedOperation: m.operation,
   operationAuditResponse: (e: unknown) => ((e as { code?: string })?.code === 'OPERATION_AUDIT_UNAVAILABLE' ? { status: 409, body: { error: { message: 'not performed' } } } : null),
 }));
 vi.mock('@/lib/services/cba-intelligence/benchmark-service', () => ({
@@ -66,14 +66,15 @@ describe('cba-intelligence/benchmark/[id]', () => {
     expect(m.save).not.toHaveBeenCalled();
   });
 
-  it('POST records the intent before saving, and returns the snapshot id', async () => {
+  it('POST saves and audits in one system-scope transaction, and returns the snapshot id', async () => {
     const { POST } = await import('../cba-intelligence/benchmark/[id]/route');
     const result = await (POST as never as (c: unknown) => Promise<{ data: { snapshotId: string } }>)({ ...ctx, body: { sector: 'public' } });
-    expect(m.operation).toHaveBeenCalledWith(expect.objectContaining({ action: 'cba_benchmark.snapshot', userId: 'u1', resourceId: 'a1' }), expect.any(Function));
+    expect(m.operation).toHaveBeenCalledWith(expect.objectContaining({ action: 'cba_benchmark.snapshot', userId: 'u1', resourceId: 'a1', scope: 'system' }), expect.any(Function));
+    expect(m.operation.mock.calls[0][0].resultDetails({ data: { snapshotId: 's1', comparableCount: 2 } })).toEqual({ snapshotId: 's1', comparableCount: 2 });
     expect(result.data.snapshotId).toBe('s1');
   });
 
-  it('POST saves nothing when the intent cannot be recorded', async () => {
+  it('POST saves nothing when the audit record cannot be written', async () => {
     m.operation.mockRejectedValue(Object.assign(new Error('audit down'), { code: 'OPERATION_AUDIT_UNAVAILABLE' }));
     const { POST } = await import('../cba-intelligence/benchmark/[id]/route');
     await expect((POST as never as (c: unknown) => Promise<unknown>)({ ...ctx, body: {} })).rejects.toMatchObject({ status: 409 });

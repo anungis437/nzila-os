@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 626,
- "partial": 89,
- "outstanding": 151,
- "accountedFor": 151,
+ "corrected": 633,
+ "partial": 87,
+ "outstanding": 144,
+ "accountedFor": 144,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -110,22 +110,21 @@
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 22,
+   "defects": 15,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 20,
+    "MEDIUM": 13,
     "LOW": 0
    },
-   "namedRoutes": 5,
+   "namedRoutes": 3,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 1,
-    "0B.2": 1,
-    "0B.4": 3,
-    "0B.7": 3,
+    "0B.4": 1,
+    "0B.7": 2,
     "0B.8": 3,
-    "0B.10": 2,
-    "0B.11": 6,
+    "0B.10": 1,
+    "0B.11": 4,
     "0B.12": 3
    }
   },
@@ -550,25 +549,8 @@
     "partial": true
    },
    {
-    "id": "DEF-0B2-REVOCATION-MULTI-STORE",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B4-CALENDAR-SYNC-AUDIT-NOT-ATOMIC",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B4-CBA-INTEL-AUDIT-NOT-ATOMIC",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B4-CHATBOT-MODERATION-BYPASSES-AI-CONTROL-PLANE",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-BEARER-LINK-NOT-BOUND-TO-GRANT",
-    "severity": "MEDIUM",
-    "partial": true
    },
    {
     "id": "DEF-0B7-PLT-EXT-CONFIGURATION-HAS-NO-CREATE-PATH-AND-NO-CONSUMER",
@@ -601,15 +583,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B10-OPL-10",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B11-PRP-DUES-PAY-POST-INITIATION-AUDIT-COMMITS-BEFORE-THE-PROCESSOR-CALL-AND-THE-LATER-STATE-CHANGES-ARE-UNAUDITED",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B11-RPT-EXECUTE-RETURNS-MEMBER-EMAIL-AND-CLAIM-ROWS-AT-AN-OFFICER-ROLE-TITLE-WITH-NO-FIELD-AUTHORITY-AND-NO-DURABLE-RECORD-OF-WHAT-WAS-RETURNED",
     "severity": "MEDIUM",
     "partial": true
@@ -628,10 +601,6 @@
     "id": "DEF-0B11-SOC-SIGNATURE-STATUS-AND-AUDIT-DISCLOSE-EVERY-SIGNER-ADDRESS-IP-USER-AGENT-AND-LOCATION-TO-EVERY-OTHER-SIGNER",
     "severity": "MEDIUM",
     "partial": true
-   },
-   {
-    "id": "DEF-0B11-SOC-POST-DELETE-REMOVES-THE-PLATFORM-POST-BEFORE-THE-LOCAL-ROW-AND-AUDITS-INTENT-AND-OUTCOME-ONLY",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B12-PLT-VOICE-TRANSCRIBE-HAS-NO-RATE-LIMIT-ENTITLEMENT-OR-AUDIT",

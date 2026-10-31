@@ -479,7 +479,12 @@ export class SocialMediaService {
    * organizationId is required and enforced in the join below — this removes
    * the dependency on any caller having already checked ownership first.
    */
-  async deletePost(postId: string, organizationId: string): Promise<void> {
+  /**
+   * Removes the post from its platform and nothing else. The caller records the local state change in its own transaction, so a
+   * failure after the platform removal leaves a row that still says published and a retry completes the deletion: a platform answer
+   * that the post is already gone counts as removed.
+   */
+  async removeFromPlatform(postId: string, organizationId: string): Promise<{ alreadyRemoved: boolean }> {
     const [result] = await db
       .select({
         id: socialPosts.id,
@@ -524,16 +529,21 @@ export class SocialMediaService {
         default:
           throw new Error(`Unsupported platform: ${typedPost.platform ?? 'unknown'}`);
       }
-
-      // Update post status in database
-      await db.update(socialPosts).set({
-        status: 'deleted',
-        deletedAt: new Date(),
-        updatedAt: new Date(),
-      }).where(and(eq(socialPosts.id, postId), eq(socialPosts.organizationId, organizationId)));
+      return { alreadyRemoved: false };
     } catch (error) {
-      throw new Error(`Failed to delete post: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (/not found|does not exist|already (been )?deleted|\b404\b|\b410\b/i.test(message)) return { alreadyRemoved: true };
+      throw new Error(`Failed to delete post: ${message}`);
     }
+  }
+
+  async deletePost(postId: string, organizationId: string): Promise<void> {
+    await this.removeFromPlatform(postId, organizationId);
+    await db.update(socialPosts).set({
+      status: 'deleted',
+      deletedAt: new Date(),
+      updatedAt: new Date(),
+    }).where(and(eq(socialPosts.id, postId), eq(socialPosts.organizationId, organizationId)));
   }
 
   /**

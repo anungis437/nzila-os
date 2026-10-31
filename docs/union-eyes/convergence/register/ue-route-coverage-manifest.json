@@ -36,22 +36,22 @@
    "WITH_API": 182
   },
   "mutatingByAudit": {
-   "ATOMIC": 160,
+   "ATOMIC": 163,
    "ATOMIC_SERVICE": 109,
    "COMPUTE_ONLY": 32,
    "CRUD_ATOMIC": 86,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 28,
-   "INTENT_OUTCOME": 40,
+   "INTENT_OUTCOME": 37,
    "NO_WRITES_FOUND": 10,
    "NONE": 213
   },
   "mutatingByData": {
-   "AMBIENT_DB": 14,
+   "AMBIENT_DB": 13,
    "CRUD_TENANT_TX": 86,
    "NONE": 339,
    "SYSTEM_CONTEXT": 66,
-   "TENANT_TX": 175
+   "TENANT_TX": 176
   }
  },
  "routes": [
@@ -2609,8 +2609,8 @@
    "guard": "ORG_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
-   "audit": "INTENT_OUTCOME"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "calendar-sync/connections/route.ts",
@@ -3088,7 +3088,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "INTENT_OUTCOME"
+   "audit": "ATOMIC"
   },
   {
    "route": "cba-intelligence/documents/route.ts",
@@ -3173,7 +3173,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "INTENT_OUTCOME"
+   "audit": "ATOMIC"
   },
   {
    "route": "cba-intelligence/review/route.ts",

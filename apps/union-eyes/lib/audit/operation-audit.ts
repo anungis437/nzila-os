@@ -33,7 +33,7 @@ export class OperationAuditError extends Error {
   }
 }
 
-export interface AtomicAuditedOperation {
+export interface AtomicAuditedOperation<T = unknown> {
   organizationId: string | null | undefined
   userId: string | null | undefined
   /** The single audit action recorded with the change (there is no .requested/.completed pair: there is one transaction). */
@@ -41,10 +41,12 @@ export interface AtomicAuditedOperation {
   resourceType: string
   resourceId?: string
   details?: Record<string, unknown>
+  /** Facts about what the work did (counts, identifiers), recorded in the same audit row once the work has produced them. */
+  resultDetails?: (value: T) => Record<string, unknown>
   scope?: 'organization' | 'system'
 }
 
-export interface AuditedOperation {
+export interface AuditedOperation<T = unknown> {
   /** The organization the administrator is acting in. Required: there is no unattributed platform audit. */
   organizationId: string | null | undefined
   userId: string | null | undefined
@@ -60,9 +62,11 @@ export interface AuditedOperation {
   scope?: 'organization' | 'system'
   /** Set to { recorded: false } by the operation when its outcome record could not be written, so the caller can say so. */
   outcomeReport?: { recorded: boolean }
+  /** What the operation did (counts, identifiers of the durable rows it wrote), added to the outcome record when it completes. */
+  resultDetails?: (value: T) => Record<string, unknown>
 }
 
-export async function performAuditedOperation<T>(op: AuditedOperation, operation: () => Promise<T>): Promise<T> {
+export async function performAuditedOperation<T>(op: AuditedOperation<T>, operation: () => Promise<T>): Promise<T> {
   const { organizationId, userId } = op
   if (!organizationId || !userId) {
     throw new OperationAuditError('A platform operation needs an authenticated administrator acting in an organization.')
@@ -85,7 +89,7 @@ export async function performAuditedOperation<T>(op: AuditedOperation, operation
 
   try {
     const result = await operation()
-    const recorded = await recordOutcome(op.scope, organizationId, entry('completed'), 'success')
+    const recorded = await recordOutcome(op.scope, organizationId, entry('completed', op.resultDetails ? op.resultDetails(result) : {}), 'success')
     if (op.outcomeReport) op.outcomeReport.recorded = recorded
     return result
   } catch (error) {
@@ -101,7 +105,7 @@ export async function performAuditedOperation<T>(op: AuditedOperation, operation
  * `afterCommit` runs only once the transaction has committed (cache invalidation, for example) and cannot undo it.
  */
 export async function performAtomicAuditedOperation<T>(
-  op: AtomicAuditedOperation,
+  op: AtomicAuditedOperation<T>,
   work: (tx: RLSTx) => Promise<T>,
   afterCommit?: () => Promise<void> | void,
 ): Promise<T> {
@@ -118,7 +122,7 @@ export async function performAtomicAuditedOperation<T>(
         action: op.action,
         resourceType: op.resourceType,
         resourceId: op.resourceId,
-        details: op.details ?? {},
+        details: { ...(op.details ?? {}), ...(op.resultDetails ? op.resultDetails(value) : {}) },
       })
     } catch (error) {
       logger.error('platform_operation_atomic_audit_not_recorded', { action: op.action, error })

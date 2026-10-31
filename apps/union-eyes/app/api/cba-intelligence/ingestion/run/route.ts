@@ -40,6 +40,16 @@ export const POST = withApi(
           action: body?.sourceId ? "cba_intel.ingestion.run_source" : "cba_intel.ingestion.run_full",
           resourceType: "cba_intel_sources",
           resourceId: body?.sourceId,
+          // The outcome record names the durable job rows the run wrote, so the audit trail leads to them.
+          resultDetails: ({ data }) =>
+            "jobId" in data
+              ? { jobId: data.jobId, status: data.status, documentsNew: data.documentsNew, documentsFailed: data.documentsFailed }
+              : {
+                  jobIds: data.results.slice(0, 100).map((r) => r.jobId),
+                  sourcesSucceeded: data.sourcesSucceeded,
+                  sourcesFailed: data.sourcesFailed,
+                  totalDocumentsIngested: data.totalDocumentsIngested,
+                },
         },
         async () => ({
           data: body?.sourceId ? await runSourceIngestion(body.sourceId) : await runFullIngestion(),

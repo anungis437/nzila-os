@@ -311,18 +311,59 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
     );
       }
 
-      // Delete post using social media service; it removes the post from the external platform, so it is audited
+      // Two effects in two places, each recorded for what it is. Removing the post from the platform is external, so it is a durable
+      // intent and outcome. The row then reads deleted in one transaction with its own audit record. A platform failure leaves the row
+      // published (true: the post is still live); a failure of the local step leaves the row published for a post that is gone, which
+      // the response says, and repeating the deletion completes it (a platform answer that the post is already gone counts as removed).
       const socialMediaService = createSocialMediaService();
-      await performAuditedOperation(
-        {
-          organizationId,
-          userId,
-          action: 'social.post.delete',
-          resourceType: 'social_posts',
-          resourceId: postId,
-        },
-        () => socialMediaService.deletePost(postId, organizationId),
-      );
+      let alreadyRemoved = false;
+      try {
+        const removal = await performAuditedOperation(
+          {
+            organizationId,
+            userId,
+            action: 'social.post.delete',
+            resourceType: 'social_posts',
+            resourceId: postId,
+            resultDetails: (result) => ({ alreadyRemoved: result.alreadyRemoved }),
+          },
+          () => socialMediaService.removeFromPlatform(postId, organizationId),
+        );
+        alreadyRemoved = removal.alreadyRemoved;
+      } catch (error) {
+        const refused = operationAuditResponse(error);
+        if (refused) return NextResponse.json(refused.body, { status: refused.status });
+        return NextResponse.json(
+          { error: 'The platform did not remove the post, so it is still published. Try again.', code: 'PLATFORM_REMOVAL_FAILED', retryable: true },
+          { status: 502 },
+        );
+      }
+
+      try {
+        await withRLSContext({ organizationId }, async (tx) => {
+          await tx
+            .update(socialPosts)
+            .set({ status: 'deleted', deletedAt: new Date(), updatedAt: new Date() })
+            .where(and(eq(socialPosts.id, postId), eq(socialPosts.organizationId, organizationId)));
+          await persistAtomicAudit(tx, {
+            organizationId,
+            userId,
+            action: 'social.post.deleted',
+            resourceType: 'social_posts',
+            resourceId: postId,
+            details: { alreadyRemovedOnPlatform: alreadyRemoved },
+          });
+        });
+      } catch {
+        return NextResponse.json(
+          {
+            error: 'The post was removed from the platform, but its record could not be updated and still reads published. Repeat the deletion to complete it.',
+            code: 'LOCAL_STATE_PENDING',
+            retryable: true,
+          },
+          { status: 502 },
+        );
+      }
 
       return NextResponse.json({
         message: 'Post deleted successfully',

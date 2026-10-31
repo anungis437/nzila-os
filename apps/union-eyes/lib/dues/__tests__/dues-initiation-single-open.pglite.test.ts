@@ -129,6 +129,77 @@ describe('initiateDuesPayment — one open payment per member', () => {
     await expect(initiate('member-without-dues', g)).rejects.toMatchObject({ code: 'NOTHING_DUE' })
     expect(await rows()).toHaveLength(0)
   })
+
+  // F06 A3: the initiation record says a payment was opened; what the provider then did is recorded as its own state change.
+  it('records the provider intent link in the same transaction as the update that stores it', async () => {
+    const g = gateway()
+    const result = await initiate('member-a', g)
+
+    const linked = state.audit.filter((e) => e.action === 'dues.payment_provider_intent_linked')
+    expect(linked).toHaveLength(1)
+    expect(linked[0]).toMatchObject({ resourceId: result.paymentId, details: { paymentIntentId: result.paymentIntentId, currency: 'cad' } })
+    expect((await rows(`WHERE member_id = 'member-a'`))[0].processor_payment_id).toBe(result.paymentIntentId)
+  })
+
+  it('records the cancellation when the provider creates nothing, and the member can try again', async () => {
+    const failing = { create: vi.fn(async () => { throw new Error('stripe_down') }), cancel: vi.fn() }
+    await expect(
+      initiateDuesPayment({ organizationId: ORG, userId: 'member-a', gateway: { paymentIntents: failing }, providerConfigured: true }),
+    ).rejects.toThrow('stripe_down')
+
+    const [row] = await rows(`WHERE member_id = 'member-a'`)
+    expect(row.status).toBe('cancelled')
+    const cancelled = state.audit.filter((e) => e.action === 'dues.payment_cancelled')
+    expect(cancelled).toHaveLength(1)
+    expect(cancelled[0]).toMatchObject({ resourceId: row.id, details: { reason: 'provider_intent_not_created' } })
+
+    const retry = await initiate('member-a', gateway())
+    expect(retry.paymentId).not.toBe(row.id)
+  })
+
+  it('keeps the payment pending when the provider holds a payable intent that could not be linked, and a repeat reuses it', async () => {
+    const g = gateway()
+    const originalExecute = (state.db as { transaction: unknown }).transaction
+    let failLink = true
+    ;(state.db as { transaction: unknown }).transaction = (fn: (tx: { execute(q: unknown): Promise<{ rows: unknown[] }> }) => Promise<unknown>) =>
+      (originalExecute as (f: typeof fn) => Promise<unknown>).call(state.db, async (tx) =>
+        fn({
+          execute: async (q: unknown) => {
+            const text = JSON.stringify((q as { queryChunks?: unknown }).queryChunks ?? '')
+            if (failLink && text.includes('processor_payment_id =')) {
+              failLink = false
+              throw new Error('link failed')
+            }
+            return tx.execute(q)
+          },
+        }),
+      )
+    try {
+      await expect(initiate('member-a', g)).rejects.toThrow('link failed')
+    } finally {
+      ;(state.db as { transaction: unknown }).transaction = originalExecute
+    }
+
+    const [pendingRow] = await rows(`WHERE member_id = 'member-a'`)
+    expect(pendingRow.status).toBe('pending')
+    expect(state.audit.some((e) => e.action === 'dues.payment_cancelled')).toBe(false)
+
+    const repeat = await initiate('member-a', g)
+    expect(repeat.paymentId).toBe(pendingRow.id)
+    const keys = new Set(g.create.mock.calls.map((call) => (call[1] as { idempotencyKey: string }).idempotencyKey))
+    expect(keys).toEqual(new Set([`ue-dues-${pendingRow.id}`]))
+  })
+
+  it('records the cancellation of a superseded payment', async () => {
+    const g = gateway()
+    const first = await initiate('member-a', g)
+    await charge('member-a', 10)
+    await initiate('member-a', g)
+
+    const superseded = state.audit.filter((e) => e.action === 'dues.payment_cancelled')
+    expect(superseded).toHaveLength(1)
+    expect(superseded[0]).toMatchObject({ resourceId: first.paymentId, details: { reason: 'superseded_by_new_balance' } })
+  })
 })
 
 describe('settleDuesPaymentIntent — a payment beyond the balance is recorded, not hidden', () => {

@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm'
 import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { fromCents, toCents } from '@/lib/decimal-safe'
+import { logger } from '@/lib/logger'
 
 /**
  * Member dues payment initiation. The server owns everything that matters: the amount is the
@@ -92,6 +93,14 @@ export async function initiateDuesPayment(input: {
         sql`UPDATE dues_transactions SET status = 'cancelled', updated_at = now()
             WHERE id = ${row.id}::uuid AND status = 'pending'`,
       )
+      await persistAtomicAudit(tx, {
+        organizationId,
+        action: 'dues.payment_cancelled',
+        resourceType: 'dues_transactions',
+        resourceId: row.id,
+        userId,
+        details: { reason: 'superseded_by_new_balance', amount: row.amount },
+      })
     }
     const supersededIntents = superseded.map((row) => row.processor_payment_id)
     if (reusable) return { paymentId: reusable.id, amount: balance, supersededIntents }
@@ -127,8 +136,11 @@ export async function initiateDuesPayment(input: {
     if (intentId) await input.gateway.paymentIntents.cancel?.(intentId).catch(() => undefined)
   }
 
+  // The initiation record above says a payment was opened, not that the provider accepted it. What happens next is recorded
+  // as its own state change with its own audit record: the provider intent linked, or the payment cancelled.
+  let intent: { id: string; client_secret: string | null }
   try {
-    const intent = await input.gateway.paymentIntents.create(
+    intent = await input.gateway.paymentIntents.create(
       {
         amount: toCents(pending.amount),
         currency: DUES_CURRENCY,
@@ -143,26 +155,52 @@ export async function initiateDuesPayment(input: {
       },
       { idempotencyKey: `ue-dues-${pending.paymentId}` },
     )
-    await withRLSContext({ organizationId }, async (tx) => {
-      await tx.execute(
-        sql`UPDATE dues_transactions SET processor_payment_id = ${intent.id}, updated_at = now()
-            WHERE id = ${pending.paymentId}::uuid AND status = 'pending'`,
-      )
-    })
-    return {
-      paymentId: pending.paymentId,
-      paymentIntentId: intent.id,
-      clientSecret: intent.client_secret,
-      amount: fromCents(toCents(pending.amount)),
-      currency: DUES_CURRENCY,
-    }
   } catch (error) {
-    await withRLSContext({ organizationId }, async (tx) => {
-      await tx.execute(
-        sql`UPDATE dues_transactions SET status = 'cancelled', updated_at = now()
-            WHERE id = ${pending.paymentId}::uuid AND status = 'pending'`,
-      )
-    }).catch(() => undefined)
+    // The provider created nothing, so the payment is cancelled and the cancellation is recorded with it. If even that cannot be
+    // written the row stays pending, which is safe: the next initiation reuses an open payment of the same amount, and the
+    // provider call is idempotent on the payment id. It is logged, never swallowed.
+    try {
+      await withRLSContext({ organizationId }, async (tx) => {
+        await tx.execute(
+          sql`UPDATE dues_transactions SET status = 'cancelled', updated_at = now()
+              WHERE id = ${pending.paymentId}::uuid AND status = 'pending'`,
+        )
+        await persistAtomicAudit(tx, {
+          organizationId,
+          action: 'dues.payment_cancelled',
+          resourceType: 'dues_transactions',
+          resourceId: pending.paymentId,
+          userId,
+          details: { reason: 'provider_intent_not_created', amount: pending.amount },
+        })
+      })
+    } catch (cancelError) {
+      logger.error('dues_payment_cancellation_not_recorded', { paymentId: pending.paymentId, error: cancelError })
+    }
     throw error
+  }
+
+  // The provider holds a payable intent from here on, so a failure to link it is not a reason to cancel the payment: that would
+  // leave a chargeable intent whose settlement is refused. The row stays pending and a repeat reuses it and the same intent.
+  await withRLSContext({ organizationId }, async (tx) => {
+    await tx.execute(
+      sql`UPDATE dues_transactions SET processor_payment_id = ${intent.id}, updated_at = now()
+          WHERE id = ${pending.paymentId}::uuid AND status = 'pending'`,
+    )
+    await persistAtomicAudit(tx, {
+      organizationId,
+      action: 'dues.payment_provider_intent_linked',
+      resourceType: 'dues_transactions',
+      resourceId: pending.paymentId,
+      userId,
+      details: { paymentIntentId: intent.id, amount: pending.amount, currency: DUES_CURRENCY },
+    })
+  })
+  return {
+    paymentId: pending.paymentId,
+    paymentIntentId: intent.id,
+    clientSecret: intent.client_secret,
+    amount: fromCents(toCents(pending.amount)),
+    currency: DUES_CURRENCY,
   }
 }

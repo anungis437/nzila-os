@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 573,
-    "partial": 89,
+    "implementedPendingQualification": 580,
+    "partial": 87,
     "qualificationVerified": 0,
-    "unresolved": 204,
+    "unresolved": 197,
     "externalBlockers": 0
   },
   "batches": [
@@ -687,360 +687,369 @@
       "id": "B67-COGNITION-HONESTY-AGGREGATE-GUARDS-AUDIT-AND-SYNC-INTEGRITY",
       "family": "Cognition honesty, aggregator guards, audit-list honesty, employer correspondence and calendar-sync integrity",
       "outstandingBefore": 317,
-      "newlyImplemented": 11,
-      "outstandingAfter": 306,
-      "partial": 2,
+      "newlyImplemented": 12,
+      "outstandingAfter": 305,
+      "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B68-REGISTERS-SINKS-AND-HONEST-ANSWERS",
       "family": "Read-only registers, observability sinks and answers that stated more than the source computes",
-      "outstandingBefore": 306,
+      "outstandingBefore": 305,
       "newlyImplemented": 9,
-      "outstandingAfter": 297,
+      "outstandingAfter": 296,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B69-SATISFACTION-FIGURES-PLATFORM-STATS-AND-ORGANIZATION-REPARENT",
       "family": "Representative satisfaction figures, platform statistics definitions, the in-memory index answer and organization parent changes",
-      "outstandingBefore": 297,
+      "outstandingBefore": 296,
       "newlyImplemented": 3,
-      "outstandingAfter": 294,
+      "outstandingAfter": 293,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B70-CLAUSE-TAGS-REMINDER-OPT-OUT-AND-CHATBOT-ROLE",
       "family": "Clause tag projection, education reminder opt-out and chatbot role and review markers",
-      "outstandingBefore": 294,
+      "outstandingBefore": 293,
       "newlyImplemented": 2,
-      "outstandingAfter": 292,
+      "outstandingAfter": 291,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B71-VALIDATED-INPUT-AND-BOUNDED-SYSTEM-JOBS",
       "family": "Parsed request bodies and system jobs that were unbounded or unreported",
-      "outstandingBefore": 292,
+      "outstandingBefore": 291,
       "newlyImplemented": 4,
-      "outstandingAfter": 288,
+      "outstandingAfter": 287,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B72-S10-ML-FEEDBACK-TABLE-QUERY-DISCLOSURE-AND-ALIAS-ROUTES",
       "family": "Schema: append-only prediction feedback (0047, cache 0037); ML query disclosure; alias routes; hierarchy list",
-      "outstandingBefore": 288,
+      "outstandingBefore": 287,
       "newlyImplemented": 5,
-      "outstandingAfter": 283,
+      "outstandingAfter": 282,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B73-PENSION-PLAN-FIGURES-AND-READS",
       "family": "Pension plan figures, member list authority and tenant-context reads",
-      "outstandingBefore": 283,
+      "outstandingBefore": 282,
       "newlyImplemented": 3,
-      "outstandingAfter": 280,
+      "outstandingAfter": 279,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B74-PILOT-WRITE-PAYLOADS",
       "family": "Pilot write routes: parsed, bounded request bodies",
-      "outstandingBefore": 280,
+      "outstandingBefore": 279,
       "newlyImplemented": 0,
-      "outstandingAfter": 280,
+      "outstandingAfter": 279,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B75-REPORT-OPERATORS-AND-QUEUE-STATUS",
       "family": "Report filter operators that were silently dropped; queue status verified",
-      "outstandingBefore": 280,
+      "outstandingBefore": 279,
       "newlyImplemented": 1,
-      "outstandingAfter": 279,
+      "outstandingAfter": 278,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B76-PILOT-EMPLOYER-CONTRACT",
       "family": "Pilot telemetry authority, employer read exposure, contract input",
-      "outstandingBefore": 279,
+      "outstandingBefore": 278,
       "newlyImplemented": 4,
-      "outstandingAfter": 275,
+      "outstandingAfter": 274,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B77-COGNITION-HONESTY",
       "family": "Cognition and exit-interview analytics: officer-asserted inputs, whole-word topics, windowed attribution, uncapped counts",
-      "outstandingBefore": 275,
+      "outstandingBefore": 274,
       "newlyImplemented": 4,
-      "outstandingAfter": 271,
+      "outstandingAfter": 270,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B78-AUDIT-ATOMICITY",
       "family": "Audit atomicity: invoice generation, trial expiry, lapsed designations, workbook export, deprecated-route access",
-      "outstandingBefore": 271,
+      "outstandingBefore": 270,
       "newlyImplemented": 5,
-      "outstandingAfter": 266,
+      "outstandingAfter": 265,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B79-SOCIAL-FIGURES-AND-PUBLISH",
       "family": "Social campaign figures, publish handling and token refresh",
-      "outstandingBefore": 266,
+      "outstandingBefore": 265,
       "newlyImplemented": 2,
-      "outstandingAfter": 264,
+      "outstandingAfter": 263,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B80-CBA-VISIBILITY-AND-ANALYTICS",
       "family": "CBA review visibility, benchmark and comparison honesty, cognition health scope, derived case metrics, metrics organization binding",
-      "outstandingBefore": 264,
+      "outstandingBefore": 263,
       "newlyImplemented": 7,
-      "outstandingAfter": 257,
+      "outstandingAfter": 256,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B81-SOCIAL-SCHEDULE-GRAPH-HS",
       "family": "Social scheduling and campaign link, graph query inputs, health-safety statistics",
-      "outstandingBefore": 257,
+      "outstandingBefore": 256,
       "newlyImplemented": 3,
-      "outstandingAfter": 254,
+      "outstandingAfter": 253,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B82-ATTACH-CASCADE-CRON",
       "family": "Interview document location, cascade wording, per-capita job, education reminder cap, precedent reads",
-      "outstandingBefore": 254,
+      "outstandingBefore": 253,
       "newlyImplemented": 5,
-      "outstandingAfter": 249,
+      "outstandingAfter": 248,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B83-COGNITION-CASE-AUTHORITY",
       "family": "Cognition reads follow the case authority",
-      "outstandingBefore": 249,
+      "outstandingBefore": 248,
       "newlyImplemented": 2,
-      "outstandingAfter": 247,
+      "outstandingAfter": 246,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B84-SMALL-VALIDATION",
       "family": "Small validation and verification items",
-      "outstandingBefore": 247,
+      "outstandingBefore": 246,
       "newlyImplemented": 0,
-      "outstandingAfter": 247,
+      "outstandingAfter": 246,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B85-DECISIONS-APPLIED",
       "family": "Owner decisions applied: organization types, calendar revocation, bot challenge",
-      "outstandingBefore": 247,
+      "outstandingBefore": 246,
       "newlyImplemented": 4,
-      "outstandingAfter": 243,
+      "outstandingAfter": 242,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B87-PLATFORM-READS-COMMUNICATIONS-SIGNATURES",
       "family": "Platform reads, communications tracking and unsubscribe, signature service",
-      "outstandingBefore": 243,
+      "outstandingBefore": 242,
       "newlyImplemented": 7,
-      "outstandingAfter": 236,
+      "outstandingAfter": 235,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B88-AUDIT-RECORDS-ONBOARDING-SOCIAL-SYNC",
       "family": "Audit records: onboarding reads, social connection, integration sync",
-      "outstandingBefore": 236,
+      "outstandingBefore": 235,
       "newlyImplemented": 3,
-      "outstandingAfter": 233,
+      "outstandingAfter": 232,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B89-REPORT-CONFIG-CROSS-ORG-READ-AI-CLASS",
       "family": "Stored report contract, cross-organization read authority, AI data class, verified signer and list fixes",
-      "outstandingBefore": 233,
+      "outstandingBefore": 232,
       "newlyImplemented": 4,
-      "outstandingAfter": 229,
+      "outstandingAfter": 228,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B90-LIFECYCLE-ROUTES-AND-MINIMUM-COHORT",
       "family": "Lifecycle routes (health-safety close, SSO provider) and minimum cohort for satisfaction figures",
-      "outstandingBefore": 229,
+      "outstandingBefore": 228,
       "newlyImplemented": 3,
-      "outstandingAfter": 226,
+      "outstandingAfter": 225,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B91-TOKEN-SEALING-OUTBOUND-RESOLUTION",
       "family": "Provider token sealing, resolved outbound fetch guard, verified analytics suppression",
-      "outstandingBefore": 226,
+      "outstandingBefore": 225,
       "newlyImplemented": 1,
-      "outstandingAfter": 225,
+      "outstandingAfter": 224,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B92-FACTORY-ATTRIBUTION-AND-VERIFIED-CREDITS",
       "family": "Generic CRUD attribution fields and verified credits",
-      "outstandingBefore": 225,
+      "outstandingBefore": 224,
       "newlyImplemented": 2,
-      "outstandingAfter": 223,
+      "outstandingAfter": 222,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B93-DASHBOARD-MEASURES-KEYS-ARCHIVE",
       "family": "Health-safety dashboard measures, dedicated queue key, archived employer input, verified credits",
-      "outstandingBefore": 223,
+      "outstandingBefore": 222,
       "newlyImplemented": 1,
-      "outstandingAfter": 222,
+      "outstandingAfter": 221,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B94-TARGETS-EXTERNAL-AUDIT-PROFILE",
       "family": "KPI target bounds, external refusal audit scope, profile roles",
-      "outstandingBefore": 222,
+      "outstandingBefore": 221,
       "newlyImplemented": 2,
-      "outstandingAfter": 220,
+      "outstandingAfter": 219,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B95-REPORT-AND-KNOWLEDGE-READ-RECORDS",
       "family": "Durable records and access rules for report execution and knowledge-base reads",
-      "outstandingBefore": 220,
+      "outstandingBefore": 219,
       "newlyImplemented": 0,
-      "outstandingAfter": 220,
+      "outstandingAfter": 219,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B96-HONEST-AVAILABILITY-AND-ENDPOINT-RULES",
       "family": "Honest availability for an uncomputed store; public-address rule for a stored integration endpoint",
-      "outstandingBefore": 220,
+      "outstandingBefore": 219,
       "newlyImplemented": 0,
-      "outstandingAfter": 220,
+      "outstandingAfter": 219,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B97-PILOT-AUDIT-VERIFICATION-BASIS-KPI-FRESHNESS",
       "family": "Pilot write audit, organization verification basis, KPI value freshness",
-      "outstandingBefore": 220,
+      "outstandingBefore": 219,
       "newlyImplemented": 2,
-      "outstandingAfter": 218,
+      "outstandingAfter": 217,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B98-ARBITRATION-CASE-AUTHORITY",
       "family": "Case authority for arbitration writes",
-      "outstandingBefore": 218,
+      "outstandingBefore": 217,
       "newlyImplemented": 0,
-      "outstandingAfter": 218,
+      "outstandingAfter": 217,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B99-CLAUSE-LIBRARY-SOURCE-ATTRIBUTION",
       "family": "Clause-library anonymized source projection across system-role list/search/compare",
-      "outstandingBefore": 218,
+      "outstandingBefore": 217,
       "newlyImplemented": 0,
-      "outstandingAfter": 218,
+      "outstandingAfter": 217,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B100-ONBOARDING-LOOKUP-TRUTHFULNESS",
       "family": "Smart onboarding lookup failures and fabricated national benchmarks",
-      "outstandingBefore": 218,
+      "outstandingBefore": 217,
       "newlyImplemented": 1,
-      "outstandingAfter": 217,
+      "outstandingAfter": 216,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B101-PG-MIGRATIONS-SCIM-SLA-SURVEY-DECISIONS",
       "family": "PostgreSQL migrations: SCIM bearer token, SLA status clock, survey anonymity, decision owner",
-      "outstandingBefore": 217,
+      "outstandingBefore": 216,
       "newlyImplemented": 1,
-      "outstandingAfter": 216,
+      "outstandingAfter": 215,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B102-AUDIT-SETTINGS-NOT-IMPLEMENTED-HONESTY",
       "family": "Mandatory external-access audit, unrecorded sync outcome, unenforced settings, 501 for the absent DSR route, workbook peer floor",
-      "outstandingBefore": 216,
+      "outstandingBefore": 215,
       "newlyImplemented": 2,
-      "outstandingAfter": 214,
+      "outstandingAfter": 213,
       "partial": 4,
       "evidenceCommit": null
     },
     {
       "id": "B103-ORGANIZATION-SELECTION-AUDIT",
       "family": "Organization selection is audited before it takes effect",
-      "outstandingBefore": 214,
-      "newlyImplemented": 0,
-      "outstandingAfter": 214,
-      "partial": 1,
+      "outstandingBefore": 213,
+      "newlyImplemented": 1,
+      "outstandingAfter": 212,
+      "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B104-OAUTH-CALLBACK-STATE-COOKIE-SAFETY",
       "family": "Social OAuth callback authenticity and cookie lifecycle",
-      "outstandingBefore": 214,
+      "outstandingBefore": 212,
       "newlyImplemented": 1,
-      "outstandingAfter": 213,
+      "outstandingAfter": 211,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B105-F06-A1-AUDIT-FOUNDATION",
       "family": "F06 A1: audit-write contract, truthful route manifest, canonical audit visibility, representation protocol capability",
-      "outstandingBefore": 213,
+      "outstandingBefore": 211,
       "newlyImplemented": 3,
-      "outstandingAfter": 210,
+      "outstandingAfter": 208,
       "partial": 1,
       "evidenceCommit": "b258d0938"
     },
     {
       "id": "B106-F06-A2-LOCAL-TRANSACTION-ATOMICITY",
       "family": "F06 A2: mutation and mandatory audit record in one database transaction",
-      "outstandingBefore": 210,
+      "outstandingBefore": 208,
       "newlyImplemented": 2,
-      "outstandingAfter": 208,
+      "outstandingAfter": 206,
       "partial": 0,
       "evidenceCommit": "5dae044ef"
     },
     {
       "id": "B107-F06-A4-TRUTHFUL-INSTITUTIONAL-OUTCOMES",
       "family": "F06 A4: a state, status or audit record names an outcome only when the system performed or can show it",
-      "outstandingBefore": 208,
+      "outstandingBefore": 206,
       "newlyImplemented": 4,
-      "outstandingAfter": 204,
+      "outstandingAfter": 202,
       "partial": 2,
+      "evidenceCommit": "0ab678010"
+    },
+    {
+      "id": "B108-F06-A3-DURABLE-OPERATION-LIFECYCLES",
+      "family": "F06 A3: each state change of a multi-step operation is recorded for what it is, with the durable record that leads to it",
+      "outstandingBefore": 202,
+      "newlyImplemented": 5,
+      "outstandingAfter": 197,
+      "partial": 0,
       "evidenceCommit": null
     }
   ],
@@ -6479,14 +6488,19 @@
       "explanation": "The second audit event emitted after the commit (which also carried the contact name) is removed from both routes; the in-transaction audit record is the only one."
     },
     "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-BEARER-LINK-NOT-BOUND-TO-GRANT": {
-      "status": "PARTIAL",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
       "batch": "B67-COGNITION-HONESTY-AGGREGATE-GUARDS-AUDIT-AND-SYNC-INTEGRITY",
       "files": [
         "apps/union-eyes/app/api/external/documents/[id]/download/route.ts",
-        "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts"
+        "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts",
+        "apps/union-eyes/lib/blob-client.ts",
+        "apps/union-eyes/app/api/external/documents/[id]/download/route.pglite.test.ts",
+        "apps/union-eyes/app/api/external/documents/[id]/download/projection.test.ts",
+        "apps/union-eyes/app/api/external/__tests__/external-routes.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
       ],
-      "explanation": "The link lives five minutes instead of sixty, its lifetime is returned and recorded in the audit.",
-      "remaining": "A storage link is still a read-only bearer URL for those minutes and cannot be bound to the caller or recalled when the grant is revoked."
+      "explanation": "The link lives five minutes instead of sixty, its lifetime is returned and recorded in the audit. No storage link leaves the server. The route reads the pinned version's bytes (bounded at 50 MB; larger files get 413) and serves them with attachment, no-store and nosniff headers, so the grant, its expiry and its revocation are checked on every read and cannot be bypassed by a passed-on URL. The access record is written before any byte is sent and names the bytes delivered (size, version, grant), and the bytes are withheld if it cannot be written. The two tests that pinned the five-minute link (s11, projection) were replaced with assertions that no link is issued (disclosed); the real-SQL test was rewritten for byte delivery, the 413 and the refused grant.",
+      "remaining": "A grant issued before migration 0046 and not pinned to a version still releases the current version (a separate, already-recorded item)."
     },
     "DEF-0B4-CLAUSE-LIBRARY-EDIT-AND-DELETE-NO-VERSION-OR-RETENTION": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -7833,17 +7847,19 @@
       "explanation": "Credited from the B100 code change (commits 43cbe020f and f895de200): the invented national table is gone, an unavailable or invalid CLC measurement is null and is never replaced by a peer average, the endpoint must be an explicitly configured HTTPS URL, and a peer set with no positive member counts yields no average or percentile instead of 0 divided by 0. The existing tests assert nationalAverage null for an unset key, a 404, an invalid body, an invalid cache and a thrown error."
     },
     "DEF-0B10-OPL-10": {
-      "status": "PARTIAL",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
       "batch": "B103-ORGANIZATION-SELECTION-AUDIT",
       "files": [
         "apps/union-eyes/lib/auth/organization-selection-audit.ts",
         "apps/union-eyes/lib/auth/canonical-organization-selection.ts",
         "apps/union-eyes/app/api/organizations/switch/route.ts",
         "apps/union-eyes/app/api/__tests__/organizations-switch.route.test.ts",
-        "apps/union-eyes/lib/services/__tests__/s46-gate0-org-selection-audit.test.ts"
+        "apps/union-eyes/lib/services/__tests__/s46-gate0-org-selection-audit.test.ts",
+        "apps/union-eyes/lib/auth/__tests__/organization-selection-audit.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
       ],
-      "explanation": "Selecting an organization to work in now leaves an organization.select audit record (actor, organization, and whether the authority was membership or platform administrator) written through the atomic audit before the session is rebound, the preference cookie is set or the organization is returned; if the record cannot be written the selection is refused (503 in legacy mode, an error in canonical mode). A platform administrator selecting an organization they hold no membership of is named as such.",
-      "remaining": "The session store and the audit store are separate databases, so the record is written first rather than in one transaction with the rebind; a record can exist for a rebind that then fails. The canonical path is covered by source pins and mocks only, not by a native or HTTP run."
+      "explanation": "Selecting an organization to work in now leaves an organization.select audit record (actor, organization, and whether the authority was membership or platform administrator) written through the atomic audit before the session is rebound, the preference cookie is set or the organization is returned; if the record cannot be written the selection is refused (503 in legacy mode, an error in canonical mode). A platform administrator selecting an organization they hold no membership of is named as such. The selection record (B103) now names the organization the actor was working in before (from the session or provider), and the canonical selection records its outcome after the session store has been changed or has refused (organization.selected, organization.select_failed). An intent with no outcome is a selection that did not complete.",
+      "remaining": "The session store cannot commit with an audit row, so the pair is two-phase; the legacy path keeps no server-side previous organization and records null."
     },
     "DEF-0B1-MANIFEST-DETECTOR": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -7889,10 +7905,13 @@
         "apps/union-eyes/app/api/admin/feature-flags/route.ts",
         "apps/union-eyes/app/api/__tests__/admin-feature-flags.route.test.ts",
         "apps/union-eyes/scripts/lib/route-coverage-scan.ts",
-        "apps/union-eyes/lib/services/__tests__/s47-f06-a1-audit-foundation.test.ts"
+        "apps/union-eyes/lib/services/__tests__/s47-f06-a1-audit-foundation.test.ts",
+        "apps/union-eyes/app/api/cba-intelligence/ingestion/seed/route.ts",
+        "apps/union-eyes/app/api/cba-intelligence/benchmark/[id]/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
       ],
-      "explanation": "The audit-write contract is now stated in one place: performAtomicAuditedOperation writes the change and a single hash-chained audit record in one tenant transaction (a failed audit write abandons the change; a failed change records nothing; afterCommit runs only after commit), and performAuditedOperation is documented and labelled INTENT_OUTCOME as the durable two-phase record for effects our transaction cannot reach. The manifest no longer declares the two-phase routes atomic. The platform feature-flag toggle, a pure database change, moved onto the atomic contract (an undefined flag is a 404 rather than an insert the runtime role may not make).",
-      "remaining": "Other operations audited as intent and outcome whose effect is only database rows (CBA source seeding and benchmark snapshot) still use the two-phase helper; they are converted in the external/multi-store batch."
+      "explanation": "The audit-write contract is now stated in one place: performAtomicAuditedOperation writes the change and a single hash-chained audit record in one tenant transaction (a failed audit write abandons the change; a failed change records nothing; afterCommit runs only after commit), and performAuditedOperation is documented and labelled INTENT_OUTCOME as the durable two-phase record for effects our transaction cannot reach. The manifest no longer declares the two-phase routes atomic. The platform feature-flag toggle, a pure database change, moved onto the atomic contract (an undefined flag is a 404 rather than an insert the runtime role may not make). The two database-only operations that were still two-phase, the CBA registry seed and the benchmark snapshot, now write the change and a single hash-chained audit record in one system-scope transaction (a failed audit write rolls the whole seed or snapshot back; the seed fails fast so a swallowed statement error cannot leave an aborted transaction reporting a partial result). performAtomicAuditedOperation and performAuditedOperation gain resultDetails, so the record carries what the work did.",
+      "remaining": "Operations that act outside the database transaction stay durable two-phase records, labelled INTENT_OUTCOME in the route manifest rather than ATOMIC. Billing-cycle generation is finance-frozen and was not changed."
     },
     "DEF-0B8-ICRA-REVIEW-AUDIT-ONLY-WHEN-A-CLAIMED-ORGANIZATION-EXISTS": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -7987,6 +8006,65 @@
       ],
       "explanation": "Every provider list, create, update and delete response, and the create and update audit records, now states inEffect: false with the reason, and the capability is recorded as NOT_IMPLEMENTED (UE-SSO-SIGN-IN), so a configured provider is no longer reported as though it governed sign-in.",
       "remaining": "No sign-in, token-exchange, provisioning or SCIM code reads the stored provider; the consumer needs the identity-provider protocol work and a real provider to qualify against."
+    },
+    "DEF-0B4-CBA-INTEL-AUDIT-NOT-ATOMIC": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B108-F06-A3-DURABLE-OPERATION-LIFECYCLES",
+      "files": [
+        "apps/union-eyes/app/api/cba-intelligence/ingestion/run/route.ts",
+        "apps/union-eyes/app/api/cba-intelligence/extraction/route.ts",
+        "apps/union-eyes/lib/services/cba-intelligence/seed-sources.ts",
+        "apps/union-eyes/lib/services/cba-intelligence/__tests__/seed-sources.test.ts",
+        "apps/union-eyes/app/api/__tests__/cba-benchmark-snapshot.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+      ],
+      "explanation": "Source seeding is atomic (see above). Ingestion runs and extraction call external sources and an AI provider across many statements, so they cannot share one transaction and are no longer described as atomic: the manifest labels them INTENT_OUTCOME, and the outcome record now names the durable rows the run wrote (job ids and counts; extraction run ids and counts), so the audit trail leads to them.",
+      "remaining": "Ingestion and extraction remain two-phase by nature; no provider was exercised in this batch."
+    },
+    "DEF-0B4-CALENDAR-SYNC-AUDIT-NOT-ATOMIC": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B108-F06-A3-DURABLE-OPERATION-LIFECYCLES",
+      "files": [
+        "apps/union-eyes/app/api/calendar-sync/connections/[id]/sync/route.ts",
+        "apps/union-eyes/app/api/calendar-sync/connections/[id]/sync/route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+      ],
+      "explanation": "The provider call stays inside the durable intent and outcome record, but the connection's own state change is now a tenant transaction that also writes its audit record: calendar_sync.connection.state_synced on success and calendar_sync.connection.sync_failed, with the connection marked failed, when the provider fails (previously a failure left the connection unchanged and unrecorded). A state change whose audit record cannot be written fails the sync instead of reporting it synced.",
+      "remaining": "Events imported or exported before a later provider failure remain; the failure is recorded, not rolled back at the provider."
+    },
+    "DEF-0B2-REVOCATION-MULTI-STORE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B108-F06-A3-DURABLE-OPERATION-LIFECYCLES",
+      "files": [
+        "apps/union-eyes/lib/services/member-access-revocation-service.ts",
+        "apps/union-eyes/lib/services/__tests__/member-access-revocation-service.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+      ],
+      "explanation": "Revocation spans sessions, the platform-auth membership and the local row, which cannot share a transaction, so the attempt is made durable before any store is touched (member.access.deactivate_attempt or delete_attempt) and the outcome is recorded atomically with the local status change as before. A process that stops part-way leaves a visible attempt with no outcome, and a repeat is idempotent. Unlike reactivation, a revocation whose attempt cannot be recorded is still carried out, because denying access is the safe direction; the outcome record then says attemptRecorded: false and the result reports intentRecorded.",
+      "remaining": "Three stores are still updated separately; a failed step still returns 502 and is completed by a retry."
+    },
+    "DEF-0B11-PRP-DUES-PAY-POST-INITIATION-AUDIT-COMMITS-BEFORE-THE-PROCESSOR-CALL-AND-THE-LATER-STATE-CHANGES-ARE-UNAUDITED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B108-F06-A3-DURABLE-OPERATION-LIFECYCLES",
+      "files": [
+        "apps/union-eyes/lib/dues/dues-payment-service.ts",
+        "apps/union-eyes/lib/dues/__tests__/dues-initiation-single-open.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+      ],
+      "explanation": "The initiation record now says a payment was opened, and what the provider then did is recorded as its own state change in its own transaction: dues.payment_provider_intent_linked with the processor id, dues.payment_cancelled with the reason (provider_intent_not_created, superseded_by_new_balance). A cancellation that cannot be written is logged, never discarded, and leaves the row pending, which is safe because a repeat reuses an open payment of the same amount and the provider call is idempotent on the payment id. A payment whose intent the provider created is no longer cancelled when only the local link failed (that left a chargeable intent whose settlement would be refused): it stays pending and a repeat reuses it. Four real-SQL tests added. No finance mandate, amount, principal or settlement logic was changed.",
+      "remaining": "The provider call is still outside the transaction by nature."
+    },
+    "DEF-0B11-SOC-POST-DELETE-REMOVES-THE-PLATFORM-POST-BEFORE-THE-LOCAL-ROW-AND-AUDITS-INTENT-AND-OUTCOME-ONLY": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B108-F06-A3-DURABLE-OPERATION-LIFECYCLES",
+      "files": [
+        "apps/union-eyes/app/api/social-media/posts/route.ts",
+        "apps/union-eyes/lib/social-media/social-media-service.ts",
+        "apps/union-eyes/app/api/__tests__/social-posts-and-redemptions-audit.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s50-f06-a3-durable-operation-lifecycles.test.ts"
+      ],
+      "explanation": "The two effects are separated and each is recorded for what it is. Removal from the platform is a durable intent and outcome (with whether it was already gone); the row then reads deleted in one transaction with social.post.deleted. A platform failure now returns 502 PLATFORM_REMOVAL_FAILED with the row still published (true: the post is still live); a failure of the local step returns 502 LOCAL_STATE_PENDING, never \"deleted\", and repeating the deletion completes it because a platform answer that the post is already gone counts as removed. deletePost keeps its contract for other callers.",
+      "remaining": "The already-removed detection reads the platform error text, since the platform clients expose no typed not-found."
     }
   },
   "uncreditedSourceEvidence": {

@@ -11,6 +11,8 @@ import { db } from '@/db/db'
 import { calendars, calendarEvents, externalCalendarConnections } from '@/db/schema/calendar-schema'
 import { withOrganizationAuth } from '@/lib/organization-middleware'
 import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
+import { withRLSContext } from '@/lib/db/with-rls-context'
 import {
   importGoogleEvents,
   exportEventToGoogle,
@@ -42,6 +44,34 @@ const syncRequestSchema = z.object({
 })
 
 type SyncRouteParams = { id: string }
+
+/** The connection's sync state and the audit record of that change commit together or not at all. */
+async function recordConnectionState(
+  actor: { organizationId: string; userId: string; connectionId: string },
+  state: Partial<typeof externalCalendarConnections.$inferInsert>,
+  audit: { action: string; details: Record<string, unknown> },
+) {
+  await withRLSContext({ organizationId: actor.organizationId }, async (tx) => {
+    await tx
+      .update(externalCalendarConnections)
+      .set({ ...state, updatedAt: new Date() })
+      .where(
+        and(
+          eq(externalCalendarConnections.id, actor.connectionId),
+          eq(externalCalendarConnections.organizationId, actor.organizationId),
+          eq(externalCalendarConnections.userId, actor.userId),
+        ),
+      )
+    await persistAtomicAudit(tx, {
+      organizationId: actor.organizationId,
+      userId: actor.userId,
+      action: audit.action,
+      resourceType: 'external_calendar_connections',
+      resourceId: actor.connectionId,
+      details: audit.details,
+    })
+  })
+}
 
 export const POST = withOrganizationAuth(async (request, context, params?: SyncRouteParams) => {
   try {
@@ -135,7 +165,8 @@ export const POST = withOrganizationAuth(async (request, context, params?: SyncR
     }
 
     // The sync imports and exports through an external provider, so its effect cannot commit with a database
-    // transaction: the intent is recorded first (no record, no sync) and the outcome afterwards.
+    // transaction: the intent is recorded first (no record, no sync) and the outcome afterwards. The connection's own state
+    // change (synced or failed) is a database row, so it is written in one transaction with its audit record.
     let results: Record<string, unknown>
     try {
       results = await performAuditedOperation(
@@ -157,33 +188,31 @@ export const POST = withOrganizationAuth(async (request, context, params?: SyncR
           const synced: Record<string, unknown> = {}
           const google = connection.provider === 'google'
 
-          if (effectiveMode === 'import' || effectiveMode === 'both') {
-            synced.import = google
-              ? await importGoogleEvents(connection.id, localCalendarId, externalCalendarId, { timeMin: sinceDate })
-              : await importMicrosoftEvents(connection.id, localCalendarId, externalCalendarId, { timeMin: sinceDate })
-          }
-          if ((effectiveMode === 'export' || effectiveMode === 'both') && localEventId) {
-            synced.export = google
-              ? await exportEventToGoogle(connection.id, localEventId, externalCalendarId)
-              : await exportEventToMicrosoft(connection.id, localEventId, externalCalendarId)
+          try {
+            if (effectiveMode === 'import' || effectiveMode === 'both') {
+              synced.import = google
+                ? await importGoogleEvents(connection.id, localCalendarId, externalCalendarId, { timeMin: sinceDate })
+                : await importMicrosoftEvents(connection.id, localCalendarId, externalCalendarId, { timeMin: sinceDate })
+            }
+            if ((effectiveMode === 'export' || effectiveMode === 'both') && localEventId) {
+              synced.export = google
+                ? await exportEventToGoogle(connection.id, localEventId, externalCalendarId)
+                : await exportEventToMicrosoft(connection.id, localEventId, externalCalendarId)
+            }
+          } catch (providerError) {
+            await recordConnectionState(
+              { organizationId, userId, connectionId: connection.id },
+              { syncStatus: 'failed', syncError: providerError instanceof Error ? providerError.message.slice(0, 500) : 'Provider sync failed' },
+              { action: 'calendar_sync.connection.sync_failed', details: { provider: connection.provider, mode: effectiveMode } },
+            )
+            throw providerError
           }
 
-          await db
-            .update(externalCalendarConnections)
-            .set({
-              lastSyncAt: new Date(),
-              nextSyncAt: getNextSyncAt(),
-              syncStatus: 'synced',
-              syncError: null,
-              updatedAt: new Date(),
-            })
-            .where(
-              and(
-                eq(externalCalendarConnections.id, connection.id),
-                eq(externalCalendarConnections.organizationId, organizationId),
-                eq(externalCalendarConnections.userId, userId),
-              ),
-            )
+          await recordConnectionState(
+            { organizationId, userId, connectionId: connection.id },
+            { lastSyncAt: new Date(), nextSyncAt: getNextSyncAt(), syncStatus: 'synced', syncError: null },
+            { action: 'calendar_sync.connection.state_synced', details: { provider: connection.provider, mode: effectiveMode, imported: synced.import !== undefined, exported: synced.export !== undefined } },
+          )
 
           return synced
         },

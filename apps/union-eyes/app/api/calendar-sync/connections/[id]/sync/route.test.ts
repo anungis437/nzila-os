@@ -27,6 +27,8 @@ const mocks = vi.hoisted(() => {
     exportEventToMicrosoft: vi.fn(),
     performAuditedOperation: vi.fn(),
     operationAuditResponse: vi.fn(),
+    persistAtomicAudit: vi.fn(),
+    withRLSContext: vi.fn(),
   }
 })
 
@@ -40,6 +42,8 @@ vi.mock('@/lib/audit/operation-audit', () => ({
 }))
 
 vi.mock('@/db/db', () => ({ db: mocks.db }))
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mocks.persistAtomicAudit }))
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: mocks.withRLSContext }))
 
 vi.mock('@/lib/external-calendar-sync/google-calendar-service', () => ({
   importGoogleEvents: mocks.importGoogleEvents,
@@ -67,6 +71,8 @@ describe('POST /api/calendar-sync/connections/[id]/sync', () => {
     mocks.db._selectQueue.length = 0
     mocks.performAuditedOperation.mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn())
     mocks.operationAuditResponse.mockReturnValue(null)
+    mocks.persistAtomicAudit.mockResolvedValue(undefined)
+    mocks.withRLSContext.mockImplementation(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(mocks.db))
   })
 
   const conn = { id: 'conn-1', provider: 'google', syncDirection: 'import', isActive: true, organizationId: 'org-1' }
@@ -251,5 +257,49 @@ describe('POST /api/calendar-sync/connections/[id]/sync', () => {
 
     expect(res.status).toBe(400)
     expect(body.code).toBe('VALIDATION_ERROR')
+  })
+
+  it('F06 A3: the connection state change and its audit record commit in one tenant transaction', async () => {
+    mocks.importGoogleEvents.mockResolvedValue({ imported: 1 })
+    mocks.db._selectQueue.push([conn], [{ id: 'cal-1' }])
+
+    const res = await POST(makePostRequest(ids), actor, { id: 'conn-1' })
+
+    expect(res.status).toBe(200)
+    expect(mocks.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-1' }, expect.any(Function))
+    expect(mocks.persistAtomicAudit).toHaveBeenCalledWith(
+      mocks.db,
+      expect.objectContaining({
+        organizationId: 'org-1',
+        userId: 'user-1',
+        action: 'calendar_sync.connection.state_synced',
+        resourceType: 'external_calendar_connections',
+        resourceId: 'conn-1',
+        details: expect.objectContaining({ provider: 'google', mode: 'import', imported: true, exported: false }),
+      }),
+    )
+  })
+
+  it('F06 A3: a provider failure is recorded on the connection with its own audit record and the failure still surfaces', async () => {
+    mocks.importGoogleEvents.mockRejectedValue(new Error('provider down'))
+    mocks.db._selectQueue.push([conn], [{ id: 'cal-1' }])
+
+    const res = await POST(makePostRequest(ids), actor, { id: 'conn-1' })
+
+    expect(res.status).toBe(500)
+    expect(mocks.persistAtomicAudit).toHaveBeenCalledWith(mocks.db, expect.objectContaining({ action: 'calendar_sync.connection.sync_failed' }))
+    expect(mocks.persistAtomicAudit).not.toHaveBeenCalledWith(mocks.db, expect.objectContaining({ action: 'calendar_sync.connection.state_synced' }))
+    const set = mocks.db.update.mock.results[0]!.value.set
+    expect(set).toHaveBeenCalledWith(expect.objectContaining({ syncStatus: 'failed', syncError: 'provider down' }))
+  })
+
+  it('F06 A3: a state change whose audit record cannot be written fails the sync instead of reporting it synced', async () => {
+    mocks.importGoogleEvents.mockResolvedValue({ imported: 1 })
+    mocks.db._selectQueue.push([conn], [{ id: 'cal-1' }])
+    mocks.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'))
+
+    const res = await POST(makePostRequest(ids), actor, { id: 'conn-1' })
+
+    expect(res.status).toBe(500)
   })
 })

@@ -55,10 +55,13 @@ describe('Gate 0 batch B67: cognition honesty, aggregate guards, audit and sync 
     expect(comms).not.toMatch(/sentAt: data\.status === 'sent' \? new Date\(\)/)
   })
 
-  it('gives the external download link a short life and records it', () => {
+  // Replaced in F06 batch 4 (A3): the five-minute bearer link this pinned is gone. The route serves the file itself, so the grant is checked on every read.
+  it('serves the external download from the route instead of issuing a storage link', () => {
     const download = src('app/api/external/documents/[id]/download/route.ts')
-    expect(download).toContain('EXTERNAL_DOWNLOAD_LINK_MINUTES = 5')
-    expect(download).toContain('generateSasUrl(DOCUMENT_BLOB_CONTAINER, latestVersion.storageKey, EXTERNAL_DOWNLOAD_LINK_MINUTES)')
+    expect(download).not.toContain('generateSasUrl')
+    expect(download).not.toContain('downloadUrl')
+    expect(download).toContain('readBlobBounded(latestVersion.storageKey, EXTERNAL_DOWNLOAD_MAX_BYTES)')
+    expect(download).toContain("delivery: 'served_by_route'")
   })
 
   it('raises a clause version on a content change and keeps a shared clause from being deleted', () => {
