@@ -4,9 +4,11 @@ import { verifyStagingRun } from './verify-staging-run.mjs'
 
 const SHA = 'a'.repeat(40)
 const RUN_ID = '123456'
+const WORKFLOW_ID = '789'
 function validRun() {
   return {
     databaseId: 123456,
+    workflowDatabaseId: 789,
     headSha: SHA,
     headBranch: 'main',
     workflowName: 'Deploy Staging',
@@ -19,14 +21,21 @@ function validRun() {
 }
 
 test('requires independently completed staging deployment for exact run', () => {
-  assert.deepEqual(verifyStagingRun(validRun(), SHA, RUN_ID),
+  assert.deepEqual(verifyStagingRun(validRun(), SHA, RUN_ID, WORKFLOW_ID),
     { runId: RUN_ID, commitSha: SHA })
+})
+test('a same-name but different workflow ID cannot substitute canonical staging', () => {
+  const run = validRun()
+  run.workflowDatabaseId = 790
+  assert.throws(() => verifyStagingRun(run, SHA, RUN_ID, WORKFLOW_ID), /mismatch/)
+  assert.throws(() => verifyStagingRun(validRun(), SHA, RUN_ID, undefined),
+    /missing trusted commit or run coordinate/)
 })
 test('rerun cannot reuse an earlier staging deployment or artifact success', () => {
   for (const attempt of [2, 3, 0, null, undefined, '1']) {
     const run = validRun()
     run.attempt = attempt
-    assert.throws(() => verifyStagingRun(run, SHA, RUN_ID),
+    assert.throws(() => verifyStagingRun(run, SHA, RUN_ID, WORKFLOW_ID),
       /rerun lacks independently attributable deployment evidence/)
   }
 })
@@ -34,7 +43,7 @@ test('in-progress or cancelled staging run cannot be promoted', () => {
   for (const status of ['in_progress', 'queued', 'waiting', null, undefined]) {
     const run = validRun()
     run.status = status
-    assert.throws(() => verifyStagingRun(run, SHA, RUN_ID),
+    assert.throws(() => verifyStagingRun(run, SHA, RUN_ID, WORKFLOW_ID),
       /identity, dispatch or source commit mismatch/)
   }
 })
@@ -42,30 +51,30 @@ test('build-only push run cannot be used for production promotion', () => {
   const run = validRun()
   run.event = 'push'
   run.jobs[0].conclusion = 'skipped'
-  assert.throws(() => verifyStagingRun(run, SHA, RUN_ID), /identity, dispatch/)
+  assert.throws(() => verifyStagingRun(run, SHA, RUN_ID, WORKFLOW_ID), /identity, dispatch/)
 })
 test('skipped or failed staging deployment cannot be promoted', () => {
   for (const conclusion of ['skipped', 'failure', 'cancelled', null]) {
     const run = validRun()
     run.jobs[0].conclusion = conclusion
-    assert.throws(() => verifyStagingRun(run, SHA, RUN_ID), /successful real staging/)
+    assert.throws(() => verifyStagingRun(run, SHA, RUN_ID, WORKFLOW_ID), /successful real staging/)
   }
 })
 test('rejects wrong SHA, wrong run ID and wrong workflow identity', () => {
   const run = validRun()
-  assert.throws(() => verifyStagingRun(run, 'b'.repeat(40), RUN_ID), /mismatch/)
-  assert.throws(() => verifyStagingRun(run, SHA, '123457'), /mismatch/)
+  assert.throws(() => verifyStagingRun(run, 'b'.repeat(40), RUN_ID, WORKFLOW_ID), /mismatch/)
+  assert.throws(() => verifyStagingRun(run, SHA, '123457', WORKFLOW_ID), /mismatch/)
   run.workflowName = 'Other Workflow'
-  assert.throws(() => verifyStagingRun(run, SHA, RUN_ID), /mismatch/)
+  assert.throws(() => verifyStagingRun(run, SHA, RUN_ID, WORKFLOW_ID), /mismatch/)
 })
 test('rejects missing, duplicate and spoofed deployment job evidence', () => {
   const run = validRun()
   run.jobs = []
-  assert.throws(() => verifyStagingRun(run, SHA, RUN_ID), /successful real staging/)
+  assert.throws(() => verifyStagingRun(run, SHA, RUN_ID, WORKFLOW_ID), /successful real staging/)
   run.jobs = [validRun().jobs[0], validRun().jobs[0]]
-  assert.throws(() => verifyStagingRun(run, SHA, RUN_ID), /successful real staging/)
+  assert.throws(() => verifyStagingRun(run, SHA, RUN_ID, WORKFLOW_ID), /successful real staging/)
   run.jobs = [{ name: 'Build & Attest', status: 'completed', conclusion: 'success' }]
-  assert.throws(() => verifyStagingRun(run, SHA, RUN_ID), /successful real staging/)
+  assert.throws(() => verifyStagingRun(run, SHA, RUN_ID, WORKFLOW_ID), /successful real staging/)
   run.jobs = null
-  assert.throws(() => verifyStagingRun(run, SHA, RUN_ID), /evidence unavailable/)
+  assert.throws(() => verifyStagingRun(run, SHA, RUN_ID, WORKFLOW_ID), /evidence unavailable/)
 })

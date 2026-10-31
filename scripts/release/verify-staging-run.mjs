@@ -10,13 +10,17 @@ import { pathToFileURL } from 'node:url'
 
 function deny(message) { throw new Error('STAGING_RUN_DENIED: ' + message) }
 
-export function verifyStagingRun(run, expectedCommit, expectedRunId) {
+export function verifyStagingRun(run, expectedCommit, expectedRunId, expectedWorkflowId) {
   if (!/^[0-9a-f]{40}$/i.test(expectedCommit ?? '') ||
-      !/^[1-9][0-9]*$/.test(String(expectedRunId ?? ''))) {
+      !/^[1-9][0-9]*$/.test(String(expectedRunId ?? '')) ||
+      !/^[1-9][0-9]*$/.test(String(expectedWorkflowId ?? ''))) {
     deny('missing trusted commit or run coordinate')
   }
   if (!run || typeof run !== 'object' || Array.isArray(run) ||
       String(run.databaseId) !== String(expectedRunId) ||
+      // A workflow display name is not a unique identity. Require the
+      // workflow ID independently resolved from the canonical workflow file.
+      String(run.workflowDatabaseId) !== String(expectedWorkflowId) ||
       run.headSha !== expectedCommit ||
       run.headBranch !== 'main' ||
       run.workflowName !== 'Deploy Staging' ||
@@ -40,7 +44,7 @@ export function verifyStagingRun(run, expectedCommit, expectedRunId) {
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
   try {
     const run = JSON.parse(readFileSync(process.argv[2], 'utf8'))
-    const result = verifyStagingRun(run, process.argv[3], process.argv[4])
+    const result = verifyStagingRun(run, process.argv[3], process.argv[4], process.argv[5])
     console.log('GitHub staging deployment job verified for ' + result.commitSha)
   } catch (error) {
     console.error(error.message)
