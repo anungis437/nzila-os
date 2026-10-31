@@ -143,8 +143,20 @@ function canonicalJson(value: unknown): string {
   return `{${keys.map((k) => `${JSON.stringify(k)}:${canonicalJson(obj[k])}`).join(',')}}`
 }
 
-function computeEventHash(seq: number, prevEventHash: string, body: unknown, mutation: unknown): string {
+export function computeEventHash(seq: number, prevEventHash: string, body: unknown, mutation: unknown): string {
   return createHash('sha256').update(canonicalJson({ seq, prevEventHash, body, mutation })).digest('hex')
+}
+
+/**
+ * Independent adapter-side admission proof: a valid audit-v2 envelope alone
+ * does not prove the inner event body hash. Prevent an adapter caller from
+ * durably committing a poisoned event that would make all future replay fail.
+ */
+export function isAuthenticTrustEventPayload(value: unknown): boolean {
+  const parsed = payloadSchema.safeParse(value)
+  if (!parsed.success) return false
+  const { seq, prevEventHash, eventHash, body, mutation } = parsed.data
+  return eventHash === computeEventHash(seq, prevEventHash, body, mutation)
 }
 
 function snapshotOf(g: GovernanceDecisionSnapshot): z.infer<typeof governanceSnapshotSchema> {

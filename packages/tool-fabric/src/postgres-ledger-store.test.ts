@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { computeAuditHash, type AuditEntry } from '@nzila/audit'
 import { PostgresAtomicTrustLedgerStore } from './postgres-ledger-store'
+import { computeEventHash, isAuthenticTrustEventPayload } from './ledger'
+import { pinned } from './fixtures'
 import { LedgerStoreUnavailableError, LedgerConflictError, LEDGER_GENESIS_HASH } from './ledger-store'
 
 const ORG='platform:tool-fabric:trust'
@@ -221,5 +223,36 @@ describe('P0 Postgres Trust Ledger CAS adapter',()=>{
     await expect(new PostgresAtomicTrustLedgerStore(fake({
       revision: 2, hash: duplicate.hash, entries: [first, duplicate],
     })).readSnapshot(ORG)).rejects.toThrow('audit chain failed integrity')
+  })
+  it('rejects a fully audit-hashed but forged inner event digest before SQL writes', async () => {
+    const body = { type: 'TOOL_REGISTERED' as const, descriptor: pinned() }
+    const mutation = {
+      actorId: 'host-actor', role: 'platform-governance-board',
+      authorityRef: 'host:test-identity', operation: 'register' as const,
+    }
+    const valid = {
+      seq: 1, prevEventHash: LEDGER_GENESIS_HASH,
+      eventHash: computeEventHash(1, LEDGER_GENESIS_HASH, body, mutation),
+      body, mutation,
+    }
+    expect(isAuthenticTrustEventPayload(valid)).toBe(true)
+    const forged = { ...valid, eventHash: valid.eventHash === 'a'.repeat(64)
+      ? 'b'.repeat(64) : 'a'.repeat(64) }
+    const hashable = {
+      id: randomUUID(), timestamp: '2026-10-30T15:00:00.000Z',
+      actorId: 'host-actor', orgId: ORG,
+      action: 'tool_fabric.ledger.tool_registered',
+      resource: 'tool-fabric-tool', resourceId: 'sample-tool',
+      payload: forged,
+    }
+    const entry: AuditEntry = {
+      ...hashable, prevHash: LEDGER_GENESIS_HASH,
+      hashVersion: 2, hash: computeAuditHash(LEDGER_GENESIS_HASH, hashable),
+    }
+    const db = fake()
+    await expect(new PostgresAtomicTrustLedgerStore(db).compareAndAppend(
+      ORG, { revision: 0, headHash: LEDGER_GENESIS_HASH }, entry,
+    )).rejects.toThrow('Append event body hash or schema is invalid')
+    expect(db.commits).toBe(0)
   })
 })

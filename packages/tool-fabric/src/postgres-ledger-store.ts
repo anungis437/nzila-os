@@ -11,6 +11,7 @@
  * mandatory (ToolTrustLedger); this DB is not its own trust anchor.
  */
 import type { AuditEntry } from '@nzila/audit'
+import { isAuthenticTrustEventPayload } from './ledger'
 import { computeAuditHash, verifyChain } from '@nzila/audit'
 import {
   LEDGER_GENESIS_HASH, LedgerConflictError, LedgerDuplicateError,
@@ -191,6 +192,11 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
           typeof entry.payload.eventHash !== 'string' ||
           !/^[0-9a-f]{64}$/.test(entry.payload.eventHash)) {
         throw new LedgerConflictError('Append does not extend verified trust event chain')
+      }
+      // The caller can recompute a valid audit-v2 envelope over an invented
+      // eventHash. Verify the canonical event body before any SQL write.
+      if (!isAuthenticTrustEventPayload(entry.payload)) {
+        throw new LedgerConflictError('Append event body hash or schema is invalid')
       }
       try {
         const inserted = await tx.unsafe(
