@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { SQL } from 'drizzle-orm';
 import type { PgTable } from 'drizzle-orm/pg-core';
-import { enforceCreateSecurityInvariants, assertGenericWritePayload, parseCrudPagination, stripBlockedPatchFields, buildMergeSetValues, validateMergeJsonColumnValues } from '../crud-factory';
+import { enforceCreateSecurityInvariants, assertGenericWritePayload, parseCrudPagination, stripBlockedPatchFields, buildMergeSetValues, validateMergeJsonColumnValues, shapeCrudResponseRow } from '../crud-factory';
 
 describe('crud-factory enforceCreateSecurityInvariants', () => {
   it('applies organizationId/createdBy when a hook returns a clean object without them', () => {
@@ -260,5 +260,37 @@ describe('generic CRUD pagination boundaries', () => {
   });
   it.each(['page=0', 'page=-1', 'page=1.5', 'page=NaN', 'page=10001', 'page=9007199254740993', 'limit=0', 'limit=101', 'limit=Infinity', 'limit=2junk'])('rejects malformed or excessive pagination %s', (query) => {
     expect(() => parseCrudPagination(new URLSearchParams(query))).toThrow();
+  });
+});
+
+
+describe('generic analytics metric read confidentiality', () => {
+  it('redacts historical case identifiers and other metadata on every analytics_metrics read', () => {
+    const stored = {
+      id: 'metric-1',
+      organizationId: 'org-1',
+      metricType: 'claims_volume',
+      metricValue: '2',
+      metadata: { claimIds: ['case-private-1', 'case-private-2'], internalNotes: 'restricted' },
+    };
+    const projected = shapeCrudResponseRow(stored, 'analytics_metrics');
+    expect(projected).toEqual({
+      id: 'metric-1', organizationId: 'org-1', metricType: 'claims_volume', metricValue: '2',
+    });
+    expect(JSON.stringify(projected)).not.toContain('case-private');
+    expect(stored.metadata.claimIds).toHaveLength(2); // Projection never modifies stored evidence.
+  });
+
+  it('enforces the analytics redaction even if an alias provides an empty omit list', () => {
+    expect(shapeCrudResponseRow({ metadata: { claimIds: ['secret'] }, metricValue: '1' }, 'analytics_metrics', []))
+      .toEqual({ metricValue: '1' });
+  });
+
+  it('preserves explicit credential redactions for other tables and leaves ordinary fields intact', () => {
+    expect(shapeCrudResponseRow({ id: 'x', accessToken: 'secret', name: 'calendar' }, 'external_calendar_connections', ['accessToken']))
+      .toEqual({ id: 'x', name: 'calendar' });
+    expect(shapeCrudResponseRow({ id: 'x', metadata: { public: true } }, 'other_table'))
+      .toEqual({ id: 'x', metadata: { public: true } });
+    expect(shapeCrudResponseRow(undefined, 'analytics_metrics')).toBeUndefined();
   });
 });
