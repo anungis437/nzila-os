@@ -11,6 +11,8 @@ const m = vi.hoisted(() => ({
   insertQueue: [] as unknown[][],
   updateQueue: [] as unknown[][],
   deleteQueue: [] as unknown[][],
+  lockedWorkbook: null as null | { id: string; claimedByUserId: string | null; claimedOrgId: string | null },
+  lockOverride: null as null | { id: string; claimedByUserId: string | null; claimedOrgId: string | null },
 }));
 
 const mockDb = {
@@ -18,8 +20,16 @@ const mockDb = {
     const chain: any = {
       from: vi.fn(() => chain),
       where: vi.fn(() => chain),
-      orderBy: vi.fn(async () => (m.selectQueue.shift() ?? []) as unknown[]),
-      limit: vi.fn(async () => (m.selectQueue.shift() ?? []) as unknown[]),
+      orderBy: vi.fn(() => chain),
+      for: vi.fn(async () => m.lockOverride ? [m.lockOverride] : m.lockedWorkbook ? [m.lockedWorkbook] : []),
+      limit: vi.fn(async () => {
+        const rows = (m.selectQueue.shift() ?? []) as unknown[];
+        const first = rows[0] as Record<string, unknown> | undefined;
+        if (first && Object.hasOwn(first, 'claimedByUserId')) {
+          m.lockedWorkbook = first as typeof m.lockedWorkbook;
+        }
+        return rows;
+      }),
     };
     return chain;
   }),
@@ -79,11 +89,21 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
     m.insertQueue = [];
     m.updateQueue = [];
     m.deleteQueue = [];
+    m.lockedWorkbook = null;
+    m.lockOverride = null;
     m.runStewardshipCartography.mockReturnValue({ density: { index: 0 } });
     m.persistAtomicAudit.mockResolvedValue(undefined);
   });
 
   describe('GET', () => {
+    it('refuses to return a misleading partial cartography for an oversized legacy workbook', async () => {
+      const { GET } = await loadListRoute();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
+      m.selectQueue.push(Array.from({ length: 201 }, (_, i) => ({ id: `holder_${i}` })));
+      const response = await GET(req(), { params: Promise.resolve({ id: 'w1' }) });
+      expect(response.status).toBe(409);
+      expect(m.runStewardshipCartography).not.toHaveBeenCalled();
+    });
     it('serves an unclaimed workbook via the bearer id (preclaim)', async () => {
       const { GET } = await loadListRoute();
       m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
@@ -131,6 +151,42 @@ describe('workbook memory-holders routes — claimed-workbook authority', () => 
   });
 
   describe('POST', () => {
+    it('refuses a 201st holder under the workbook lock before any insert', async () => {
+      const { POST } = await loadListRoute();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+      m.selectQueue.push(Array.from({ length: 200 }, (_, i) => ({ id: `holder_${i}` })));
+      m.auth.mockResolvedValueOnce({ userId: 'user_1' });
+      const response = await POST(req({ role: 'Treasurer', responsibility: 'Signs cheques' }), {
+        params: Promise.resolve({ id: 'w1' }),
+      });
+      expect(response.status).toBe(409);
+      expect(mockDb.insert).not.toHaveBeenCalled();
+      expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    });
+
+    it('rejects a workbook whose ownership changed while waiting for the row lock', async () => {
+      const { POST } = await loadListRoute();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+      m.lockOverride = { id: 'w1', claimedByUserId: 'another_user', claimedOrgId: 'org_1' };
+      m.auth.mockResolvedValueOnce({ userId: 'user_1' });
+      const response = await POST(req({ role: 'Treasurer', responsibility: 'Signs cheques' }), {
+        params: Promise.resolve({ id: 'w1' }),
+      });
+      expect(response.status).toBe(503);
+      expect(mockDb.insert).not.toHaveBeenCalled();
+    });
+
+    it('permits a holder when the workbook has fewer than 200 records', async () => {
+      const { POST } = await loadListRoute();
+      m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+      m.selectQueue.push(Array.from({ length: 199 }, (_, i) => ({ id: `holder_${i}` })));
+      m.auth.mockResolvedValueOnce({ userId: 'user_1' });
+      const response = await POST(req({ role: 'Treasurer', responsibility: 'Signs cheques' }), {
+        params: Promise.resolve({ id: 'w1' }),
+      });
+      expect(response.status).toBe(201);
+      expect(mockDb.insert).toHaveBeenCalledTimes(1);
+    });
     it('creates a memory holder for the claimant', async () => {
       const { POST } = await loadListRoute();
       m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
