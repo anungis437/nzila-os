@@ -71,4 +71,14 @@ test.describe('Web E2E', () => {
     await expect(page.getByRole('heading', { name: /Technology should strengthen human judgment|La technologie doit renforcer le jugement humain/ })).toBeVisible();
   });
 
+  test('contact intent is preselected and remains editable without submitting personal data', async ({ page }) => {
+    await page.goto(`${BASE}/contact?interest=civic`);
+    const interest = page.locator('select#source');
+    await expect(interest).toHaveValue('civic_briefing');
+    await interest.selectOption('union_eyes_pilot');
+    await expect(interest).toHaveValue('union_eyes_pilot');
+    await page.goto(`${BASE}/contact?interest=union-eyes`);
+    await expect(page.locator('select#source')).toHaveValue('union_eyes_pilot');
+  });
+
 })
