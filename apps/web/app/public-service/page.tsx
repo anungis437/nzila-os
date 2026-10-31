@@ -154,7 +154,7 @@ export default async function PublicServicePage() {
             <h1 className="mt-7 text-4xl font-semibold leading-[1.1] tracking-[-0.04em] sm:text-5xl lg:text-6xl">{c.title}</h1>
             <p className="mt-7 max-w-2xl text-lg leading-relaxed text-slate-300">{c.intro}</p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <TrackedLink href="/contact" eventName="civic_briefing_request" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#dfbe70] px-6 py-3 text-sm font-bold text-navy hover:bg-[#f2d694] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">{c.primary} <span aria-hidden="true" className="ml-2">↗</span></TrackedLink>
+              <TrackedLink href="/contact?interest=civic" eventName="civic_briefing_request" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#dfbe70] px-6 py-3 text-sm font-bold text-navy hover:bg-[#f2d694] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">{c.primary} <span aria-hidden="true" className="ml-2">↗</span></TrackedLink>
               <a href="#civic-framework" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/30 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">{c.secondary}</a>
             </div>
             <p className="mt-9 max-w-xl border-l-2 border-white/20 pl-4 text-xs leading-relaxed text-slate-400">{c.notice}</p>
@@ -263,7 +263,7 @@ export default async function PublicServicePage() {
           <h2 className="text-3xl font-semibold tracking-tight md:text-5xl">{c.finalTitle}</h2>
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-slate-300">{c.finalBody}</p>
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-            <TrackedLink href="/contact" eventName="civic_briefing_request" eventProps={{ source: 'civic_bottom' }} className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#dfbe70] px-7 py-3 text-sm font-bold text-navy hover:bg-[#f2d694] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">{c.finalCta}</TrackedLink>
+            <TrackedLink href="/contact?interest=civic" eventName="civic_briefing_request" eventProps={{ source: 'civic_bottom' }} className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#dfbe70] px-7 py-3 text-sm font-bold text-navy hover:bg-[#f2d694] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">{c.finalCta}</TrackedLink>
             <TrackedLink href="/union-eyes" eventName="civic_related_union_eyes" className="inline-flex min-h-12 items-center justify-center text-sm font-semibold text-blue-200 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">{c.related} <span aria-hidden="true" className="ml-2">→</span></TrackedLink>
           </div>
           <TrackedLink href="/doctrine" eventName="civic_doctrine" className="mt-6 inline-flex min-h-10 items-center text-sm text-slate-300 hover:text-white hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">{c.doctrine} <span aria-hidden="true" className="ml-2">→</span></TrackedLink>
