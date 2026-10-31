@@ -24,7 +24,7 @@
     "@nzila/platform-governance": "workspace:*",
     "@nzila/platform-observability": "workspace:*",
     "yaml": "^2.7.0",
-    "zod": "^3.25.0"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "vitest": "^5.0.5"
