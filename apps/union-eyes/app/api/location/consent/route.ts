@@ -5,6 +5,7 @@ import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { getLocationConsentNotice } from '@/lib/location/consent-notice';
 
 import {
   ErrorCode,
@@ -22,15 +23,14 @@ import {
  */
 
 
-// The consent record is what the member agreed to, so every field is typed and bounded and an unknown field (such as a user id) is ignored: a boolean that
-// arrives as the string "false" used to be stored as consent to track.
+// Consent text, purpose and version are NEVER client-controlled. The member must
+// affirm the exact currently configured notice before a consent record is written.
 const locationConsentSchema = z.object({
-  purpose: z.string().trim().min(1).max(100),
-  purposeDescription: z.string().trim().min(1).max(1000),
-  consentText: z.string().trim().min(1).max(4000),
-  allowedDuringStrike: z.boolean().optional(),
-  allowedDuringEvents: z.boolean().optional(),
-});
+  noticeVersion: z.string().min(1).max(10),
+  acknowledged: z.literal(true),
+  allowedDuringStrike: z.boolean().default(false),
+  allowedDuringEvents: z.boolean().default(false),
+}).strict();
 
 
 export const POST = withApiAuth(async (req: NextRequest) => {
@@ -42,14 +42,32 @@ export const POST = withApiAuth(async (req: NextRequest) => {
     const userId = user.id;
     const organizationId = await getOrganizationIdForUser(userId);
 
+    const notice = getLocationConsentNotice();
+    if (!notice) {
+      return NextResponse.json(
+        { error: 'Location consent is unavailable until the institutional notice is configured' },
+        { status: 503, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+
     const parsed = locationConsentSchema.safeParse(await req.json().catch(() => null));
     if (!parsed.success) {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
-        'purpose, purposeDescription and consentText are required text, the two allowance flags must be true or false, and any other field is ignored',
+        'The current noticeVersion, acknowledged: true and boolean context permissions are required; client-authored notice text is not accepted',
       );
     }
-    const { purpose, purposeDescription, consentText, allowedDuringStrike, allowedDuringEvents } = parsed.data;
+    if (parsed.data.noticeVersion !== notice.version) {
+      return NextResponse.json(
+        { error: 'Consent notice has changed; review and acknowledge the current version' },
+        { status: 409, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+    const { allowedDuringStrike, allowedDuringEvents } = parsed.data;
+    if (!allowedDuringStrike && !allowedDuringEvents) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Select at least one permitted tracking context');
+    }
+    const { purpose, purposeDescription, consentText } = notice;
 
     // Get IP and User-Agent for audit
     const ipAddress = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
@@ -75,14 +93,23 @@ export const POST = withApiAuth(async (req: NextRequest) => {
         action: 'location.consent.grant',
         resourceType: 'member_location_consent',
         resourceId: granted.id,
-        details: { purpose, allowedDuringStrike: !!allowedDuringStrike, allowedDuringEvents: !!allowedDuringEvents },
+        details: { purpose, noticeVersion: notice.version, allowedDuringStrike, allowedDuringEvents },
       });
       return granted;
     });
 
     return standardSuccessResponse(
-      { consent,
-        message: "Location tracking consent granted. Data will be retained for 24 hours maximum." }
+      {
+        consent: {
+          id: consent.id,
+          consentStatus: consent.consentStatus,
+          consentVersion: consent.consentVersion,
+          allowedDuringStrike: consent.allowedDuringStrike,
+          allowedDuringEvents: consent.allowedDuringEvents,
+          expiresAt: consent.expiresAt,
+        },
+        message: "Location tracking consent granted. Data will be retained for 24 hours maximum.",
+      }
     );
   } catch (error) {
     if (error instanceof LocationConsentConflictError) {
@@ -116,11 +143,19 @@ export const GET = withApiAuth(async (req: NextRequest) => {
       GeofencePrivacyService.hasValidConsent(userId, context, tx),
     );
 
+    const notice = getLocationConsentNotice();
     return NextResponse.json({
       userId,
       hasConsent,
       context,
-    });
+      notice: notice ? {
+        version: notice.version,
+        purpose: notice.purpose,
+        purposeDescription: notice.purposeDescription,
+        consentText: notice.consentText,
+      } : null,
+      consentGrantAvailable: notice !== null,
+    }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (_error) {
     return NextResponse.json(
       { error: "Failed to check consent status" },
