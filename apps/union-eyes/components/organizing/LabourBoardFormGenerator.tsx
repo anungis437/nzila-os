@@ -7,6 +7,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { readVerifiedPdfResponse } from '@/lib/organizing/verified-pdf-response';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -133,6 +134,7 @@ export function LabourBoardFormGenerator({ campaignId, organizationId: _organiza
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -156,12 +158,12 @@ export function LabourBoardFormGenerator({ campaignId, organizationId: _organiza
     }
   };
 
-  const autoPopulateForm = (campaignData: OrganizingCampaign) => {
-    if (!selectedTemplate) return;
+  const autoPopulateForm = (campaignData: OrganizingCampaign, template: FormTemplate | null = selectedTemplate) => {
+    if (!template) return;
 
     const populated: Record<string, string> = {};
 
-    selectedTemplate.fields.forEach(field => {
+    template.fields.forEach(field => {
       if (field.mappedTo) {
         const path = field.mappedTo.split('.');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -188,7 +190,7 @@ export function LabourBoardFormGenerator({ campaignId, organizationId: _organiza
     if (template) {
       setSelectedTemplate(template);
       if (campaign) {
-        autoPopulateForm(campaign);
+        autoPopulateForm(campaign, template);
       }
     }
   };
@@ -213,7 +215,8 @@ export function LabourBoardFormGenerator({ campaignId, organizationId: _organiza
 
     try {
       setIsGenerating(true);
-      
+      setGenerationError(null);
+
       const response = await fetch('/api/organizing/forms/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -224,7 +227,8 @@ export function LabourBoardFormGenerator({ campaignId, organizationId: _organiza
         }),
       });
 
-      const blob = await response.blob();
+      // Never label an error JSON body as a completed legal PDF. The endpoint currently returns 501.
+      const blob = await readVerifiedPdfResponse(response);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -233,8 +237,9 @@ export function LabourBoardFormGenerator({ campaignId, organizationId: _organiza
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (_error) {
-} finally {
+    } catch (error) {
+      setGenerationError(error instanceof Error ? error.message : 'The PDF could not be generated. No file was downloaded.');
+    } finally {
       setIsGenerating(false);
     }
   };
@@ -432,8 +437,14 @@ export function LabourBoardFormGenerator({ campaignId, organizationId: _organiza
           
           <Button variant="outline" onClick={() => window.open('https://www.canada.ca/en/employment-social-development/services/labour-relations.html', '_blank', 'noopener')}>
             <Send className="h-4 w-4 mr-2" />
-            E-File to Labour Board
+            Federal labour relations information
           </Button>
+        </div>
+      )}
+      {generationError && (
+        <div role="alert" aria-live="polite" className="flex items-start gap-2 rounded-md border border-destructive p-3 text-sm text-destructive">
+          <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+          <span>{generationError}</span>
         </div>
       )}
     </div>

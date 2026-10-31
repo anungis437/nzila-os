@@ -5145,10 +5145,13 @@
       "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
       "files": [
         "apps/union-eyes/app/api/organizing/forms/generate/route.ts",
-        "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts"
+        "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts",
+        "apps/union-eyes/components/organizing/LabourBoardFormGenerator.tsx",
+        "apps/union-eyes/lib/organizing/verified-pdf-response.ts",
+        "apps/union-eyes/lib/organizing/__tests__/verified-pdf-response.test.ts"
       ],
-      "explanation": "Existing implementation, verified: the form generation path answers 501 and no longer inserts or lists campaign rows.",
-      "remaining": "The client still saves a JSON response as a PDF; the form generator itself is not built."
+      "explanation": "The generation endpoint already refuses unsupported work with 501. The client now checks HTTP success, application/pdf content type, PDF magic bytes, and a 20 MB safety ceiling before creating a downloadable file. A 501 or JSON success-looking response produces an accessible visible error instead of a mislabeled PDF. Template selection now fills the selected template, and the federal information link no longer falsely advertises electronic filing. Focused regression tests are committed but not executed on this HEAD.",
+      "remaining": "A real jurisdiction-specific PDF generator, template authority/legal review, PDF content validation, and exact-HEAD unit, native PostgreSQL, HTTP/browser and staging acceptance remain outstanding; the client explicitly preserves entered values on refusal."
     },
     "DEF-0B8-JUR-MEETING-ROOM-BOOKINGS-PATH-IS-THE-ROOM-ITEM-DELETE-ARCHIVES-THE-ROOM": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
