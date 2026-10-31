@@ -14,6 +14,7 @@ function fixture() {
       protection_rules:[{type:'required_reviewers',reviewers:[{type:'User',reviewer:{id:202,login:'security-reviewer',type:'User'}}]}],
     },
     run:{id:12345,workflow_id:67890,head_sha:SHA,name:'Deploy Production',event:'workflow_dispatch',
+      status:'in_progress',conclusion:null,
       actor:{id:101,login:'developer',type:'User'},triggering_actor:{id:101,login:'developer',type:'User'},head_branch:'main',
       run_attempt:1,created_at:'2026-10-30T14:00:00Z',
       run_started_at:'2026-10-30T14:01:00Z'},
@@ -24,6 +25,16 @@ function fixture() {
 }
 test('only a distinct individually entitled human on same run is accepted',()=>{
   assert.equal(verifyProductionApproval(fixture()).verdict,'APPROVED')
+})
+test('completed, cancelled, queued or otherwise inactive runs cannot mint approval receipts',()=>{
+  for (const status of ['completed','cancelled','queued','waiting',undefined]) {
+    const f=fixture();f.run.status=status
+    assert.throws(()=>verifyProductionApproval(f),/not actively executing/)
+  }
+  for (const conclusion of ['success','failure','cancelled','skipped',undefined]) {
+    const f=fixture();f.run.conclusion=conclusion
+    assert.throws(()=>verifyProductionApproval(f),/not actively executing/)
+  }
 })
 test('environment lacking reviewers is denied',()=>{
   const f=fixture();f.environment.protection_rules=[]

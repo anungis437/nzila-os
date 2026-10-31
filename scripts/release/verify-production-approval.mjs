@@ -33,6 +33,13 @@ export function verifyProductionApproval({environment,run,approvals,expectedRunI
       !['push','workflow_dispatch'].includes(run?.event)) {
     deny('untrusted workflow run or source SHA')
   }
+  // A completed, cancelled or merely queued historical workflow must not
+  // mint a fresh production approval receipt. This verifier executes inside
+  // the production deployment job after its Environment approval: GitHub
+  // must still report that exact workflow run as actively in progress.
+  if (run.status !== 'in_progress' || run.conclusion !== null) {
+    deny('production workflow is not actively executing under approved environment')
+  }
   // GitHub's run approvals API does not bind each approval to a run attempt.
   // A rerun must not reuse an approval granted to an earlier attempt.
   if (!Number.isSafeInteger(run.run_attempt) || run.run_attempt !== 1) {
