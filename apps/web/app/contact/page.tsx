@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useLocale } from 'next-intl';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import { trackEvent } from '@/lib/telemetry';
@@ -184,24 +184,6 @@ export default function Contact() {
     website: '',
   });
 
-  // Read attribution after hydration so server and client render the same
-  // initial form. The only accepted product intents are enumerated here.
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const intent = params.get('interest');
-    const source = intent === 'union-eyes' ? 'union_eyes_pilot'
-      : intent === 'civic' ? 'civic_briefing'
-      : intent === 'portfolio' ? 'portfolio_inquiry'
-      : 'contact_page';
-    setFormData((previous) => ({
-      ...previous,
-      source,
-      utmSource: params.get('utm_source') ?? '',
-      utmMedium: params.get('utm_medium') ?? '',
-      utmCampaign: params.get('utm_campaign') ?? '',
-    }));
-  }, []);
-
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -215,11 +197,27 @@ export default function Contact() {
       has_company: Boolean(formData.company),
     });
 
+    // Resolve attribution at submit time, without a hydration state update.
+    // Never trust arbitrary interest labels as CRM source values.
+    const params = new URLSearchParams(window.location.search);
+    const interest = params.get('interest');
+    const source = interest === 'union-eyes' ? 'union_eyes_pilot'
+      : interest === 'civic' ? 'civic_briefing'
+      : interest === 'portfolio' ? 'portfolio_inquiry'
+      : 'contact_page';
+    const payload = {
+      ...formData,
+      source,
+      utmSource: (params.get('utm_source') ?? '').slice(0, 160),
+      utmMedium: (params.get('utm_medium') ?? '').slice(0, 160),
+      utmCampaign: (params.get('utm_campaign') ?? '').slice(0, 160),
+    };
+
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
