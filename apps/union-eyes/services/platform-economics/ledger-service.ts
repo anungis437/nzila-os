@@ -93,18 +93,22 @@ async function recordLedgerAppend(tx: RLSTx, input: LedgerEntryInput, entryId: s
 
 /**
  * Append a single immutable entry to the platform cost ledger.
- * The row and its audit commit together. A failed audit leaves no entry.
+ * The row and its audit commit together. A failed audit leaves no entry. A caller that is already inside a transaction
+ * passes it, so the entry commits or rolls back with that caller's own writes.
  */
 export async function appendLedgerEntry(
   input: LedgerEntryInput,
+  callerTx?: unknown,
 ): Promise<string> {
   const entryId = uuidv4();
   const auditReference = `DAPL-${Date.now()}-${entryId.slice(0, 8)}`;
 
-  await db.transaction(async (tx) => {
+  const write = async (tx: any) => {
     await tx.insert(platformCostLedgerEntries).values(ledgerValues(input, entryId, auditReference));
     await recordLedgerAppend(tx as unknown as RLSTx, input, entryId, auditReference);
-  });
+  };
+  if (callerTx) await write(callerTx);
+  else await db.transaction(write);
 
   return entryId;
 }

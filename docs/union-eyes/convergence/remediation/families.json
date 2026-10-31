@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 547,
- "partial": 77,
- "outstanding": 230,
- "accountedFor": 230,
+ "corrected": 551,
+ "partial": 78,
+ "outstanding": 226,
+ "accountedFor": 226,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -115,17 +115,17 @@
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 48,
+   "defects": 44,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 40,
-    "LOW": 6
+    "MEDIUM": 39,
+    "LOW": 3
    },
    "namedRoutes": 5,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 3,
-    "0B.2": 2,
+    "0B.2": 1,
     "0B.3": 2,
     "0B.4": 4,
     "0B.6": 2,
@@ -134,7 +134,7 @@
     "0B.9": 2,
     "0B.10": 6,
     "0B.11": 12,
-    "0B.12": 6
+    "0B.12": 3
    }
   },
   {
@@ -664,12 +664,9 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B2-AI-GET-WRITES-ROWS",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B3-BILLING-AUDIT-NOT-ATOMIC",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B3-AUDITS-LEGACY-TABLE-NOT-CANONICAL",
@@ -823,14 +820,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B12-PLT-V2-CATCH-ALL-ACCESS-AUDIT-HAS-NO-ACTOR-AND-IS-NOT-AWAITED",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B12-PLT-TRIAGE-LAPSED-DESIGNATION-IS-CLOSED-AS-SYSTEM-EXPIRY-WITH-NO-AUDIT-ROW",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B12-PLT-VOICE-TRANSCRIBE-HAS-NO-RATE-LIMIT-ENTITLEMENT-OR-AUDIT",
     "severity": "MEDIUM",
     "partial": true
@@ -843,10 +832,6 @@
    {
     "id": "DEF-0B12-WBK-ANY-MEMBER-OF-THE-CLAIMING-ORGANIZATION-CAN-READ-CHANGE-AND-DELETE-THE-NAMED-PEOPLE-WITH-NO-ROLE-FLOOR-OR-NOTICE",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-WBK-EXPORT-STREAMS-THE-IDENTITY-LINKED-CARRIER-REGISTER-WITH-NO-AUDIT-RECORD",
-    "severity": "LOW"
    }
   ],
   "F07-AUTHORIZATION-ROLE-FLOOR-AND-OBJECT-LEVEL": [

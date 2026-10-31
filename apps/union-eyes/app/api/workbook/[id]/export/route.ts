@@ -12,6 +12,7 @@ import { db } from '@/db';
 import { workbooks } from '@/db/schema/workbook-schema';
 import { generateWorkbookPdf } from '@/lib/workbook-pdf/generateWorkbookPdf';
 import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
+import { auditClaimedWorkbookWrite } from '@/lib/workbook/claimed-write-audit';
 import { logger } from '@/lib/logger';
 import { opaqueRef } from '@/lib/icra/opaque-ref';
 
@@ -60,6 +61,14 @@ export async function GET(
         if (!buffer) {
           return { kind: 'not_found' as const };
         }
+        // The register names the people who hold the organization's knowledge: the export is recorded before it is
+        // returned, and fails closed if the record cannot be written.
+        await auditClaimedWorkbookWrite(authority, {
+          action: 'workbook.export',
+          resourceType: 'workbooks',
+          resourceId: workbookId,
+          details: { format: 'pdf', authority: authority.kind, bytes: buffer.byteLength },
+        });
         return { kind: 'ok' as const, buffer };
       },
     );

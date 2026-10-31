@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 const m = vi.hoisted(() => ({
   auth: vi.fn(),
   generateWorkbookPdf: vi.fn(),
+  auditClaimedWorkbookWrite: vi.fn(),
   getOrganizationIdForUser: vi.fn(),
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   selectQueue: [] as unknown[][],
@@ -35,6 +36,7 @@ vi.mock('@/lib/workbook-pdf/generateWorkbookPdf', () => ({
 vi.mock('@/lib/organization-utils', () => ({
   getOrganizationIdForUser: m.getOrganizationIdForUser,
 }));
+vi.mock('@/lib/workbook/claimed-write-audit', () => ({ auditClaimedWorkbookWrite: m.auditClaimedWorkbookWrite }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('drizzle-orm', () => ({ eq: vi.fn() }));
 // Pass-through RLS context helpers so the real authority boundary runs against
@@ -55,6 +57,7 @@ describe('workbook/[id]/export route', () => {
     m.auth.mockResolvedValue({ userId: 'user_1' });
     m.generateWorkbookPdf.mockResolvedValue(new Uint8Array([1, 2, 3]).buffer);
     m.getOrganizationIdForUser.mockResolvedValue('org_1');
+    m.auditClaimedWorkbookWrite.mockResolvedValue(undefined);
   });
 
   it('returns 401 when unauthenticated (claimed workbook)', async () => {
@@ -157,6 +160,35 @@ describe('workbook/[id]/export route', () => {
     expect(response.status).toBe(200);
     expect(response.headers.get('content-type')).toBe('application/pdf');
     expect(response.headers.get('content-disposition')).toContain('governance-entropy-workbook-w1.pdf');
+    // DEF-0B12-WBK-EXPORT-STREAMS-THE-IDENTITY-LINKED-CARRIER-REGISTER-WITH-NO-AUDIT-RECORD
+    expect(m.auditClaimedWorkbookWrite).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'claimant', actorUserId: 'user_1' }),
+      expect.objectContaining({ action: 'workbook.export', resourceType: 'workbooks', resourceId: 'w1' }),
+    );
+  });
+
+  it('does not return the PDF when the export cannot be audited', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+    m.selectQueue.push([{ reportTierId: 'workbook_self_guided' }]);
+    m.auditClaimedWorkbookWrite.mockRejectedValueOnce(new Error('audit down'));
+
+    const response = await GET(new NextRequest('http://localhost/api/workbook/w1/export'), {
+      params: Promise.resolve({ id: 'w1' }),
+    });
+
+    expect(response.status).not.toBe(200);
+    expect(response.headers.get('content-type')).not.toBe('application/pdf');
+  });
+
+  it('records no export when the tier is not eligible', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+    m.selectQueue.push([{ reportTierId: 'free' }]);
+
+    await GET(new NextRequest('http://localhost/api/workbook/w1/export'), { params: Promise.resolve({ id: 'w1' }) });
+
+    expect(m.auditClaimedWorkbookWrite).not.toHaveBeenCalled();
   });
 
   it('allows a same-organization peer to export', async () => {

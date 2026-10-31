@@ -142,8 +142,8 @@ export async function grantDesignation(
   if (input.userId === actor.userId) return { kind: 'self_grant' }
   if (!(await deps.assigneeEligible(input.userId))) return { kind: 'ineligible' }
 
-  // A designation that has already lapsed must not block a fresh grant: record its end first.
-  await tx
+  // A designation that has already lapsed must not block a fresh grant: record its end first, and audit the closure.
+  const lapsed = await tx
     .update(triageDesignations)
     .set({ revokedAt: now, revokedBy: 'system:expiry' })
     .where(
@@ -155,6 +155,17 @@ export async function grantDesignation(
         lte(triageDesignations.expiresAt, now),
       ),
     )
+    .returning({ id: triageDesignations.id, expiresAt: triageDesignations.expiresAt })
+  for (const closed of lapsed) {
+    await persistAtomicAudit(tx, {
+      organizationId: actor.organizationId,
+      userId: 'system:expiry',
+      action: 'triage.designation.expire',
+      resourceType: 'triage_designations',
+      resourceId: closed.id,
+      details: { scope: input.scope, designatedUserId: input.userId, expiredAt: closed.expiresAt.toISOString(), closedDuringGrantBy: actor.userId },
+    })
+  }
   const [existing] = await tx.select({ id: triageDesignations.id }).from(triageDesignations).where(live(actor, input.scope, input.userId, now)).limit(1)
   if (existing) return { kind: 'conflict' }
 

@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 494,
-    "partial": 77,
+    "implementedPendingQualification": 498,
+    "partial": 78,
     "qualificationVerified": 0,
-    "unresolved": 283,
+    "unresolved": 279,
     "externalBlockers": 0
   },
   "batches": [
@@ -779,6 +779,15 @@
       "outstandingBefore": 287,
       "newlyImplemented": 4,
       "outstandingAfter": 283,
+      "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B78-AUDIT-ATOMICITY",
+      "family": "Audit atomicity: invoice generation, trial expiry, lapsed designations, workbook export, deprecated-route access",
+      "outstandingBefore": 283,
+      "newlyImplemented": 4,
+      "outstandingAfter": 279,
       "partial": 1,
       "evidenceCommit": null
     }
@@ -3261,13 +3270,10 @@
       "status": "PARTIAL",
       "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
       "files": [
-        "apps/union-eyes/app/api/organizations/[id]/analytics/route.ts",
-        "apps/union-eyes/lib/organizations/analytics-privacy.ts",
-        "apps/union-eyes/lib/organizations/__tests__/analytics-privacy.test.ts",
-        "apps/union-eyes/app/api/__tests__/organizations-id-analytics.route.test.ts"
+        "apps/union-eyes/app/api/organizations/[id]/analytics/route.ts"
       ],
-      "explanation": "Analytics are officer-level and an undefined rate is null rather than 0 or 100 (batch B11). Additional source change: organization analytics now suppresses entire member or grievance metric families when any displayed cell or its complement is below five, including rates, averages and status breakdowns, with explicit suppression metadata and regression cases. No small-cell counts can be reconstructed from a published family.",
-      "remaining": "Exact-HEAD focused and full regression, real PostgreSQL 15/16, HTTP/browser/staging privacy qualification and institutional approval of the minimum-group policy remain outstanding. The policy is deliberately conservative pending that decision."
+      "explanation": "Analytics are officer-level and an undefined rate is null rather than 0 or 100 (batch B11).",
+      "remaining": "No small-group suppression threshold is applied to counts and rates."
     },
     "DEF-0B10-PEN-BENEFIT-CLAIMS-CAN-BE-FILED-BUT-NO-ROUTE-CAN-DECIDE-OR-PAY-THEM": {
       "status": "PARTIAL",
@@ -5602,11 +5608,10 @@
       "files": [
         "apps/union-eyes/app/api/portal/dues/pay/route.ts",
         "apps/union-eyes/lib/api/list-page.ts",
-        "apps/union-eyes/lib/services/__tests__/s5-input-bounds.test.ts",
-        "apps/union-eyes/app/api/__tests__/portal-dues-pay-history.route.test.ts"
+        "apps/union-eyes/lib/services/__tests__/s5-input-bounds.test.ts"
       ],
-      "explanation": "The payment history lists payments only (not charges, credits, adjustments or write-offs), omits the processor payment reference, and pages through a bounded limit and offset with a stable order; a non-numeric limit is the default. Source correction: the member portal GET now returns bounded, tenant-and-member-scoped pending/failed/cancelled dues payment attempts separately from posted ledger payments, without provider references; regression tests cover the split, authorization and query scoping.",
-      "remaining": "Exact-HEAD focused/full unit and contract tests, real PostgreSQL 15/16 RLS, HTTP/browser/staging acceptance and member journey validation are outstanding. No attempt is represented as a settled payment."
+      "explanation": "The payment history lists payments only (not charges, credits, adjustments or write-offs), omits the processor payment reference, and pages through a bounded limit and offset with a stable order; a non-numeric limit is the default.",
+      "remaining": "Pending payment attempts created by POST are still not listed: they live in dues_transactions and need a joined, status-filtered read."
     },
     "DEF-0B6-EDU-CONTENT-COMPLETIONS-COUNT-ATTENDED": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -6629,6 +6634,62 @@
         "apps/union-eyes/lib/services/__tests__/s21-cognition-honesty.test.ts"
       ],
       "explanation": "Verified in source: an empty month reports no coverage rate (null), the exposure score is null when nothing was assessed, and the read is bounded and refused beyond 10000 rows."
+    },
+    "DEF-0B3-BILLING-AUDIT-NOT-ATOMIC": {
+      "status": "PARTIAL",
+      "batch": "B78-AUDIT-ATOMICITY",
+      "files": [
+        "apps/union-eyes/services/platform-economics/billing-service.ts",
+        "apps/union-eyes/services/platform-economics/ledger-service.ts",
+        "apps/union-eyes/services/platform-economics/subscription-lifecycle-service.ts",
+        "apps/union-eyes/services/platform-economics/billing-service.test.ts",
+        "apps/union-eyes/services/platform-economics/__tests__/billing-service.test.ts",
+        "apps/union-eyes/services/platform-economics/__tests__/subscription-lifecycle-service.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s22-audit-atomicity-batch.test.ts"
+      ],
+      "explanation": "Invoice generation now writes the invoice, its lines, a ledger entry for every non-zero line (appendLedgerEntry joins the caller transaction) and a persistAtomicAudit record in one transaction, so a failed audit leaves no invoice and no ledger entry (the ledger appends used to commit separately, after the invoice, and the audit event after those). Trial expiry updates the subscription, writes its event row and its audit record in one transaction per subscription, where it used to write no audit record. Three test files were adapted (disclosed): the mocks of the atomic audit and of the transaction, the invoice-generated assertion moved from auditLog to persistAtomicAudit, and failure cases added.",
+      "remaining": "The invoice replay route still records its access as a separate auditLog event; the replay recomputes totals and writes nothing, so there is no row for the record to be atomic with, but the manifest still declares the audit class atomic."
+    },
+    "DEF-0B12-PLT-TRIAGE-LAPSED-DESIGNATION-IS-CLOSED-AS-SYSTEM-EXPIRY-WITH-NO-AUDIT-ROW": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B78-AUDIT-ATOMICITY",
+      "files": [
+        "apps/union-eyes/lib/triage/designations.ts",
+        "apps/union-eyes/lib/services/__tests__/s22-audit-atomicity-batch.test.ts"
+      ],
+      "explanation": "The closure of a lapsed designation during a fresh grant returns the closed rows and writes a triage.designation.expire audit record for each, in the same transaction, attributed to system:expiry (kept in the metadata, as persistAtomicAudit does for system actors) with the administrator who triggered the closure."
+    },
+    "DEF-0B12-WBK-EXPORT-STREAMS-THE-IDENTITY-LINKED-CARRIER-REGISTER-WITH-NO-AUDIT-RECORD": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B78-AUDIT-ATOMICITY",
+      "files": [
+        "apps/union-eyes/app/api/workbook/[id]/export/route.ts",
+        "apps/union-eyes/app/api/__tests__/workbook-export.route.test.ts",
+        "apps/union-eyes/lib/workbook-pdf/loadWorkbookModules.ts",
+        "apps/union-eyes/lib/workbook-pdf/GovernanceEntropyWorkbookTemplate.tsx",
+        "apps/union-eyes/lib/services/__tests__/s22-audit-atomicity-batch.test.ts"
+      ],
+      "explanation": "The export writes a workbook.export audit record (authority kind, size) through the claimed-workbook audit helper before the PDF is returned, and fails closed when the record cannot be written. The loader no longer selects the display name of every holder, which the template never printed. The export route test was extended (disclosed): it mocks the audit helper and adds the audit, audit-failure and ineligible-tier cases."
+    },
+    "DEF-0B12-PLT-V2-CATCH-ALL-ACCESS-AUDIT-HAS-NO-ACTOR-AND-IS-NOT-AWAITED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B78-AUDIT-ATOMICITY",
+      "files": [
+        "apps/union-eyes/app/api/v2/[...path]/route.ts",
+        "apps/union-eyes/app/api/__tests__/v2-catch-all-gone.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s22-audit-atomicity-batch.test.ts"
+      ],
+      "explanation": "The access record carries the caller and organization from the handler context and is awaited; a failure to record is logged and the answer stays 410. The catch-all test was extended (disclosed): it supplies the identity, asserts it, mocks the logger and adds the failed-record case."
+    },
+    "DEF-0B2-AI-GET-WRITES-ROWS": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B78-AUDIT-ATOMICITY",
+      "files": [
+        "apps/union-eyes/lib/ai/employer-risk.ts",
+        "apps/union-eyes/app/api/ai/employers/[id]/risk/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s22-audit-atomicity-batch.test.ts"
+      ],
+      "explanation": "Verified in source: the employer risk calculation and the insight report no longer insert employer_risk_scores or ai_insight_reports on a GET (the comment records that persistence needs a separately authorized, audited command); the invocation is audited."
     }
   }
 }

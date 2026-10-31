@@ -108,6 +108,9 @@ vi.mock('@/lib/audit-logger', () => ({
   AuditSeverity: { HIGH: 'high', CRITICAL: 'critical' },
 }));
 
+const persistAtomicAudit = vi.fn().mockResolvedValue(undefined);
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: (...a: unknown[]) => persistAtomicAudit(...a) }));
+
 const appendLedgerEntry = vi.fn().mockResolvedValue(undefined);
 vi.mock('./ledger-service', () => ({
   appendLedgerEntry: (...a: unknown[]) => appendLedgerEntry(...a),
@@ -329,9 +332,12 @@ describe('generateInvoice', () => {
     const r = await generateInvoice({ organizationId: 'org-1', billingPeriodId: 'bp-1', createdBy: 'admin-1' });
     expect(r.id).toBe('inv-new');
     expect(appendLedgerEntry).toHaveBeenCalled();
-    expect(auditLog).toHaveBeenCalledWith(
+    // The audit record is written inside the invoice transaction (DEF-0B3-BILLING-AUDIT-NOT-ATOMIC).
+    expect(persistAtomicAudit).toHaveBeenCalledWith(
+      expect.anything(),
       expect.objectContaining({ action: 'invoice_generated', resourceId: 'inv-new' }),
     );
+    expect(auditLog).not.toHaveBeenCalledWith(expect.objectContaining({ action: 'invoice_generated' }));
   });
 });
 

@@ -26,6 +26,8 @@ import {
 } from '@/db/schema';
 import { eq, and, desc, inArray, sql, or, lt } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { appendLedgerEntry } from './ledger-service';
 import { requireReconciliation } from './reconciliation-service';
 import { getActiveContract } from './contract-service';
@@ -420,7 +422,7 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
   const issueDate = new Date();
   const dueDate = new Date(issueDate.getTime() + account.netTermsDays * 86400000);
 
-  // Insert invoice + line items + ledger entries in transaction
+  // The invoice, its lines, its ledger entries and its audit record commit together: a failure of any leaves no invoice.
   const result = await db.transaction(async (tx) => {
     const [invoice] = await tx
       .insert(platformInvoices)
@@ -457,38 +459,36 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
       });
     }
 
-    return invoice;
-  });
+    // Ledger entries for each non-zero line item
+    for (const li of lineItems) {
+      const amt = centsSafe(li.amount);
+      if (amt === 0) continue;
 
-  // Create ledger entries for each positive line item
-  for (const li of lineItems) {
-    const amt = centsSafe(li.amount);
-    if (amt === 0) continue;
+      await appendLedgerEntry({
+        organizationId: input.organizationId,
+        billingPeriodId: input.billingPeriodId,
+        costType: li.costType as NewPlatformCostLedgerEntry['costType'],
+        eventType: 'invoice_generated',
+        sourceType: 'invoice',
+        sourceId: invoice.id,
+        quantity: li.quantity,
+        unitPriceCad: li.unitPrice,
+        amountCad: li.amount,
+        description: li.description,
+        createdBy: input.createdBy,
+      }, tx);
+    }
 
-    await appendLedgerEntry({
+    await persistAtomicAudit(tx as unknown as RLSTx, {
       organizationId: input.organizationId,
-      billingPeriodId: input.billingPeriodId,
-      costType: li.costType as NewPlatformCostLedgerEntry['costType'],
-      eventType: 'invoice_generated',
-      sourceType: 'invoice',
-      sourceId: result.id,
-      quantity: li.quantity,
-      unitPriceCad: li.unitPrice,
-      amountCad: li.amount,
-      description: li.description,
-      createdBy: input.createdBy,
+      userId: input.createdBy,
+      action: 'invoice_generated',
+      resourceType: 'platform_invoice',
+      resourceId: invoice.id,
+      details: { invoiceNumber, totalAmount: centsToDecimal(totalCents), lineItemCount: lineItems.length },
     });
-  }
 
-  await auditLog({
-    eventType: AuditEventType.DATA_CREATE,
-    severity: AuditSeverity.HIGH,
-    organizationId: input.organizationId,
-    resource: 'platform_invoice',
-    resourceId: result.id,
-    action: 'invoice_generated',
-    userId: input.createdBy,
-    details: { invoiceNumber, totalAmount: centsToDecimal(totalCents), lineItemCount: lineItems.length },
+    return invoice;
   });
 
   return result;

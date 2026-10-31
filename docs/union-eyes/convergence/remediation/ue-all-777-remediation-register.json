@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 547,
-    "engineeringRemaining": 230,
+    "engineeringCorrected": 551,
+    "engineeringRemaining": 226,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 77
+    "engineeringPartial": 78
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -1197,9 +1197,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B78-AUDIT-ATOMICITY",
+        "path": "apps/union-eyes/lib/ai/employer-risk.ts; apps/union-eyes/app/api/ai/employers/[id]/risk/route.ts; apps/union-eyes/lib/services/__tests__/s22-audit-atomicity-batch.test.ts",
+        "explanation": "Verified in source: the employer risk calculation and the insight report no longer insert employer_risk_scores or ai_insight_reports on a GET (the comment records that persistence needs a separately authorized, audited command); the invocation is audited.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B2-AI-INVOCATION-NOT-AUDITED",
@@ -1888,9 +1895,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B78-AUDIT-ATOMICITY",
+        "path": "apps/union-eyes/services/platform-economics/billing-service.ts; apps/union-eyes/services/platform-economics/ledger-service.ts; apps/union-eyes/services/platform-economics/subscription-lifecycle-service.ts; apps/union-eyes/services/platform-economics/billing-service.test.ts; apps/union-eyes/services/platform-economics/__tests__/billing-service.test.ts; apps/union-eyes/services/platform-economics/__tests__/subscription-lifecycle-service.test.ts; apps/union-eyes/lib/services/__tests__/s22-audit-atomicity-batch.test.ts",
+        "explanation": "Invoice generation now writes the invoice, its lines, a ledger entry for every non-zero line (appendLedgerEntry joins the caller transaction) and a persistAtomicAudit record in one transaction, so a failed audit leaves no invoice and no ledger entry (the ledger appends used to commit separately, after the invoice, and the audit event after those). Trial expiry updates the subscription, writes its event row and its audit record in one transaction per subscription, where it used to write no audit record. Three test files were adapted (disclosed): the mocks of the atomic audit and of the transaction, the invoice-generated assertion moved from auditLog to persistAtomicAudit, and failure cases added.",
+        "remaining": "The invoice replay route still records its access as a separate auditLog event; the replay recomputes totals and writes nothing, so there is no row for the record to be atomic with, but the manifest still declares the audit class atomic.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B3-BILLING-VALIDATE-LOG-ONLY-MISLABELLED",
@@ -18495,9 +18510,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B78-AUDIT-ATOMICITY",
+        "path": "apps/union-eyes/app/api/v2/[...path]/route.ts; apps/union-eyes/app/api/__tests__/v2-catch-all-gone.route.test.ts; apps/union-eyes/lib/services/__tests__/s22-audit-atomicity-batch.test.ts",
+        "explanation": "The access record carries the caller and organization from the handler context and is awaited; a failure to record is logged and the answer stays 410. The catch-all test was extended (disclosed): it supplies the identity, asserts it, mocks the logger and adds the failed-record case.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-PLT-V2-CATCH-ALL-SUNSET-DATE-IS-A-CONSTANT-THAT-CHANGES-NO-ANSWER",
@@ -18681,9 +18703,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B78-AUDIT-ATOMICITY",
+        "path": "apps/union-eyes/lib/triage/designations.ts; apps/union-eyes/lib/services/__tests__/s22-audit-atomicity-batch.test.ts",
+        "explanation": "The closure of a lapsed designation during a fresh grant returns the closed rows and writes a triage.designation.expire audit record for each, in the same transaction, attributed to system:expiry (kept in the metadata, as persistAtomicAudit does for system actors) with the administrator who triggered the closure.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-PLT-TRIAGE-REVOKE-CARRIES-THE-DESIGNATION-ID-IN-A-DELETE-BODY",
@@ -19075,9 +19104,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B78-AUDIT-ATOMICITY",
+        "path": "apps/union-eyes/app/api/workbook/[id]/export/route.ts; apps/union-eyes/app/api/__tests__/workbook-export.route.test.ts; apps/union-eyes/lib/workbook-pdf/loadWorkbookModules.ts; apps/union-eyes/lib/workbook-pdf/GovernanceEntropyWorkbookTemplate.tsx; apps/union-eyes/lib/services/__tests__/s22-audit-atomicity-batch.test.ts",
+        "explanation": "The export writes a workbook.export audit record (authority kind, size) through the claimed-workbook audit helper before the PDF is returned, and fails closed when the record cannot be written. The loader no longer selects the display name of every holder, which the template never printed. The export route test was extended (disclosed): it mocks the audit helper and adds the audit, audit-failure and ineligible-tier cases.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-WBK-ROUTES-LOG-THE-BEARER-WORKBOOK-ID",

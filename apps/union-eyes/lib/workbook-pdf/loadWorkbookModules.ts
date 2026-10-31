@@ -47,7 +47,8 @@ export interface LoadedWorkbookContext {
   cartography: CartographyResult;
   holders: ReadonlyArray<{
     role: string;
-    displayName: string | null;
+    /** Never selected: the register prints roles, not names. */
+    displayName?: string | null;
     responsibility: string;
     tenureBand: string | null;
     criticality: string | null;
@@ -157,7 +158,6 @@ async function loadHolderRows(workbookId: string) {
   return db
     .select({
       role: workbookMemoryHolders.role,
-      displayName: workbookMemoryHolders.displayName,
       responsibility: workbookMemoryHolders.responsibility,
       tenureBand: workbookMemoryHolders.tenureBand,
       criticality: workbookMemoryHolders.criticality,
