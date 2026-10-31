@@ -5,7 +5,9 @@
  * This module never creates connections, reads secrets or permits tool execution.
  * Applying the database migration is a separately governed operation.
  *
- * All SQL references pin the public schema: pg_temp must never shadow the\n * canonical ledger, even if the authenticated connection changes search_path.\n * Every read uses a database row lock to obtain an atomic snapshot. Every
+ * All SQL references pin the public schema: pg_temp must never shadow the
+ * canonical ledger, even if the authenticated connection changes search_path.
+ * Every read uses a database row lock to obtain an atomic snapshot. Every
  * append locks the same row and commits the entry plus the new stream head
  * in one transaction. An externally managed rollback witness is STILL
  * mandatory (ToolTrustLedger); this DB is not its own trust anchor.

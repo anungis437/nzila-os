@@ -84,7 +84,7 @@ describe('P0 Postgres Trust Ledger CAS adapter',()=>{
     expect(statements.filter(sql => sql.includes('INSERT INTO public.tool_fabric_trust_entry'))).toHaveLength(1)
     expect(statements.filter(sql => sql.includes('UPDATE public.tool_fabric_trust_stream'))).toHaveLength(1)
     expect(statements.some(sql =>
-      /\\b(?:FROM|INTO|UPDATE)\\s+(?:tool_fabric_trust_stream|tool_fabric_trust_entry)\\b/i.test(sql),
+      /\b(?:FROM|INTO|UPDATE)\s+(?:tool_fabric_trust_stream|tool_fabric_trust_entry)\b/i.test(sql),
     )).toBe(false)
   })
   it('reads independently initialized empty canonical stream',async()=>{
