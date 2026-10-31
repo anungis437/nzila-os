@@ -95,7 +95,9 @@ export class GeofencePrivacyService {
       .where(eq(memberLocationConsent.userId, request.userId))
       .limit(1);
 
-    if (existing.length > 0 && existing[0].consentStatus === "opted_in") {
+    if (existing.length > 0 &&
+        existing[0].consentStatus === "opted_in" &&
+        existing[0].consentVersion === notice.version) {
       if (!existing[0].expiresAt || new Date() <= existing[0].expiresAt) {
         throw new LocationConsentConflictError();
       }
@@ -131,7 +133,11 @@ export class GeofencePrivacyService {
       .onConflictDoUpdate({
         target: memberLocationConsent.userId,
         set: { ...grant, updatedAt: new Date() },
-        setWhere: or(ne(memberLocationConsent.consentStatus, "opted_in"), lte(memberLocationConsent.expiresAt, new Date())),
+        setWhere: or(
+          ne(memberLocationConsent.consentStatus, "opted_in"),
+          ne(memberLocationConsent.consentVersion, notice.version),
+          lte(memberLocationConsent.expiresAt, new Date()),
+        ),
       })
       .returning();
     if (!consent) throw new LocationConsentConflictError();
@@ -209,6 +215,10 @@ export class GeofencePrivacyService {
     if (consent.length === 0) return false;
 
     const userConsent = consent[0];
+    // An old client-authored or superseded notice cannot authorize tracking.
+    // A member must explicitly acknowledge the currently configured version.
+    const notice = getLocationConsentNotice();
+    if (!notice || userConsent.consentVersion !== notice.version) return false;
 
     // An expired consent is simply not valid, whatever its stored status. Checking consent is a read and writes nothing.
     if (userConsent.expiresAt && new Date() > userConsent.expiresAt) {
