@@ -149,7 +149,12 @@ describe('cron/education-reminders route', () => {
       member_name: 'Member', course_name: 'Training', session_date: '2026-11-07',
       days_until: 7, total_due: 421,
     };
-    m.executeQueue.push(Array.from({ length: 301 }, () => row), []);
+    m.executeQueue.push(Array.from({ length: 301 }, (_, index) => ({
+      ...row,
+      email: `member-${index}@example.test`,
+      user_id: `u-${index}`,
+      reminder_source_id: `33333333-3333-4333-8333-${String(index).padStart(12, '0')}`,
+    })), []);
     m.batchSendSessionReminders.mockResolvedValueOnce({ sent: 300, failed: 0, errors: [] });
 
     const response = await POST(new NextRequest('http://localhost/api/cron/education-reminders'));
