@@ -67,10 +67,10 @@ describe('communications/unsubscribe/[recipientId] route', () => {
   });
 
   it('returns 401 for invalid tracking token', async () => {
-    const { GET } = await loadRoute();
+    const { POST } = await loadRoute();
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
 
-    const response = await GET(new NextRequest('http://localhost/api/communications/unsubscribe/r1?campaignId=c1&token=bad'), {
+    const response = await POST(new NextRequest('http://localhost/api/communications/unsubscribe/r1?campaignId=c1&token=bad'), {
       params: Promise.resolve({ recipientId: 'r1' }),
     });
 
@@ -78,14 +78,14 @@ describe('communications/unsubscribe/[recipientId] route', () => {
   });
 
   it('handles campaign-linked unsubscribe and returns html confirmation', async () => {
-    const { GET } = await loadRoute();
+    const { POST } = await loadRoute();
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
     const t = token('secret', 'c1:r1:unsubscribe');
 
     m.selectQueue.push([{ id: 'c1', organizationId: 'org_1', stats: {} }], [{ id: 'p1' }]);
     m.updateReturnQueue.push([{ id: 'm1' }]);
 
-    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?campaignId=c1&token=${t}&locale=en-CA`), {
+    const response = await POST(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?campaignId=c1&token=${t}&locale=en-CA`), {
       params: Promise.resolve({ recipientId: 'r1' }),
     });
 
@@ -95,11 +95,11 @@ describe('communications/unsubscribe/[recipientId] route', () => {
 
   it('renders the French confirmation copy when locale is fr-CA', async () => {
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
-    const { GET } = await loadRoute();
+    const { POST } = await loadRoute();
     const t = token('secret', 'c1:r1:unsubscribe');
     m.selectQueue.push([{ id: 'c1', organizationId: 'org_1', stats: {} }], []);
 
-    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?campaignId=c1&reason=manual&locale=fr-CA&token=${t}`), {
+    const response = await POST(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?campaignId=c1&reason=manual&locale=fr-CA&token=${t}`), {
       params: Promise.resolve({ recipientId: 'r1' }),
     });
     const html = await response.text();
@@ -109,14 +109,14 @@ describe('communications/unsubscribe/[recipientId] route', () => {
   });
 
   it('creates subscription records when no existing preference is found', async () => {
-    const { GET } = await loadRoute();
+    const { POST } = await loadRoute();
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
     const t = token('secret', 'c2:r2:unsubscribe');
 
     m.selectQueue.push([{ id: 'c2', organizationId: 'org_2', stats: {} }], []);
     m.updateReturnQueue.push([{ id: 'm2' }]);
 
-    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r2?campaignId=c2&token=${t}&reason=manual`), {
+    const response = await POST(new NextRequest(`http://localhost/api/communications/unsubscribe/r2?campaignId=c2&token=${t}&reason=manual`), {
       params: Promise.resolve({ recipientId: 'r2' }),
     });
 
@@ -126,10 +126,10 @@ describe('communications/unsubscribe/[recipientId] route', () => {
 
   it('refuses a legacy recipient-only token without an organization-bound campaign', async () => {
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
-    const { GET } = await loadRoute();
+    const { POST } = await loadRoute();
     const t = token('secret', 'r1:unsubscribe');
 
-    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?reason=manual&token=${t}`), {
+    const response = await POST(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?reason=manual&token=${t}`), {
       params: Promise.resolve({ recipientId: 'r1' }),
     });
 
@@ -142,7 +142,7 @@ describe('communications/unsubscribe/[recipientId] route', () => {
 
   it('honours a separately signed global opt-out and records consent for each actual organization', async () => {
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
-    const { GET } = await loadRoute();
+    const { POST } = await loadRoute();
     const t = token('secret', 'r1:unsubscribe-all');
     m.selectQueue.push(
       [{ organizationId: 'org_1' }],
@@ -151,7 +151,7 @@ describe('communications/unsubscribe/[recipientId] route', () => {
       [],
     );
 
-    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?scope=all&token=${t}`), {
+    const response = await POST(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?scope=all&token=${t}`), {
       params: Promise.resolve({ recipientId: 'r1' }),
     });
 
@@ -164,9 +164,9 @@ describe('communications/unsubscribe/[recipientId] route', () => {
 
   it('does not treat a legacy recipient token as an all-organizations capability', async () => {
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
-    const { GET } = await loadRoute();
+    const { POST } = await loadRoute();
     const t = token('secret', 'r1:unsubscribe');
-    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?scope=all&token=${t}`), {
+    const response = await POST(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?scope=all&token=${t}`), {
       params: Promise.resolve({ recipientId: 'r1' }),
     });
     expect(response.status).toBe(401);
@@ -175,10 +175,10 @@ describe('communications/unsubscribe/[recipientId] route', () => {
 
   it('does not claim a successful global opt-out when no matching organization exists', async () => {
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
-    const { GET } = await loadRoute();
+    const { POST } = await loadRoute();
     const t = token('secret', 'r1:unsubscribe-all');
     m.selectQueue.push([], []);
-    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?scope=all&token=${t}`), {
+    const response = await POST(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?scope=all&token=${t}`), {
       params: Promise.resolve({ recipientId: 'r1' }),
     });
     expect(response.status).toBe(404);
@@ -188,10 +188,10 @@ describe('communications/unsubscribe/[recipientId] route', () => {
 
   it('fails closed on global opt-out exceeding the bounded organization scan', async () => {
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
-    const { GET } = await loadRoute();
+    const { POST } = await loadRoute();
     const t = token('secret', 'r1:unsubscribe-all');
     m.selectQueue.push(Array.from({ length: 101 }, (_, i) => ({ organizationId: `org_${i}` })), []);
-    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?scope=all&token=${t}`), {
+    const response = await POST(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?scope=all&token=${t}`), {
       params: Promise.resolve({ recipientId: 'r1' }),
     });
     expect(response.status).toBe(404);
@@ -201,11 +201,11 @@ describe('communications/unsubscribe/[recipientId] route', () => {
 
   it('refuses a signed campaign token for a missing campaign without recording consent or claiming success', async () => {
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
-    const { GET } = await loadRoute();
+    const { POST } = await loadRoute();
     const t = token('secret', 'missing:r1:unsubscribe');
     m.selectQueue.push([]);
 
-    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?campaignId=missing&token=${t}`), {
+    const response = await POST(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?campaignId=missing&token=${t}`), {
       params: Promise.resolve({ recipientId: 'r1' }),
     });
 
@@ -217,12 +217,12 @@ describe('communications/unsubscribe/[recipientId] route', () => {
 
   it('changes preferences only within the signed campaign organization, without cross-tenant recipient discovery', async () => {
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
-    const { GET } = await loadRoute();
+    const { POST } = await loadRoute();
     const t = token('secret', 'c1:r1:unsubscribe');
     m.selectQueue.push([{ id: 'c1', organizationId: 'org_1', stats: {} }], []);
     m.updateReturnQueue.push([]);
 
-    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?campaignId=c1&token=${t}`), {
+    const response = await POST(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?campaignId=c1&token=${t}`), {
       params: Promise.resolve({ recipientId: 'r1' }),
     });
 
@@ -234,9 +234,9 @@ describe('communications/unsubscribe/[recipientId] route', () => {
 
   it('rejects ambiguous scope parameters before any database access', async () => {
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
-    const { GET } = await loadRoute();
+    const { POST } = await loadRoute();
     const t = token('secret', 'c1:r1:unsubscribe');
-    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?campaignId=c1&scope=unknown&token=${t}`), {
+    const response = await POST(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?campaignId=c1&scope=unknown&token=${t}`), {
       params: Promise.resolve({ recipientId: 'r1' }),
     });
     expect(response.status).toBe(400);
@@ -245,11 +245,11 @@ describe('communications/unsubscribe/[recipientId] route', () => {
 
   it('does not persist arbitrary query-string text as a consent reason', async () => {
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
-    const { GET } = await loadRoute();
+    const { POST } = await loadRoute();
     const t = token('secret', 'c2:r2:unsubscribe');
     m.selectQueue.push([{ id: 'c2', organizationId: 'org_2', stats: {} }], []);
     m.updateReturnQueue.push([]);
-    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r2?campaignId=c2&token=${t}&reason=${encodeURIComponent('email=private@example.org')}`), {
+    const response = await POST(new NextRequest(`http://localhost/api/communications/unsubscribe/r2?campaignId=c2&token=${t}&reason=${encodeURIComponent('email=private@example.org')}`), {
       params: Promise.resolve({ recipientId: 'r2' }),
     });
     expect(response.status).toBe(200);
@@ -260,9 +260,9 @@ describe('communications/unsubscribe/[recipientId] route', () => {
   });
 
   it('fails closed without a configured secret: 401 and no mutation', async () => {
-    const { GET } = await loadRoute();
+    const { POST } = await loadRoute();
 
-    const response = await GET(new NextRequest('http://localhost/api/communications/unsubscribe/r1?campaignId=c1&token=whatever'), {
+    const response = await POST(new NextRequest('http://localhost/api/communications/unsubscribe/r1?campaignId=c1&token=whatever'), {
       params: Promise.resolve({ recipientId: 'r1' }),
     });
 
@@ -274,11 +274,11 @@ describe('communications/unsubscribe/[recipientId] route', () => {
 
   it('rejects a non-unsubscribe (open/click) token — action binding', async () => {
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
-    const { GET } = await loadRoute();
+    const { POST } = await loadRoute();
     // A valid OPEN-tracking token (payload has no `:unsubscribe` action suffix).
     const openToken = token('secret', 'c1:r1');
 
-    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?campaignId=c1&token=${openToken}`), {
+    const response = await POST(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?campaignId=c1&token=${openToken}`), {
       params: Promise.resolve({ recipientId: 'r1' }),
     });
 
@@ -289,11 +289,11 @@ describe('communications/unsubscribe/[recipientId] route', () => {
 
   it('rejects a token bound to a different recipient', async () => {
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
-    const { GET } = await loadRoute();
+    const { POST } = await loadRoute();
     // Token was issued for recipient r1, but the request targets r2.
     const tokenForR1 = token('secret', 'c1:r1:unsubscribe');
 
-    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r2?campaignId=c1&token=${tokenForR1}`), {
+    const response = await POST(new NextRequest(`http://localhost/api/communications/unsubscribe/r2?campaignId=c1&token=${tokenForR1}`), {
       params: Promise.resolve({ recipientId: 'r2' }),
     });
 
@@ -301,4 +301,38 @@ describe('communications/unsubscribe/[recipientId] route', () => {
     expect(mockDb.update).not.toHaveBeenCalled();
     expect(m.withSystemContext).not.toHaveBeenCalled();
   });
+  it('GET is a scanner-safe confirmation only; POST is required to revoke consent', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
+    const { GET, POST } = await loadRoute();
+    const t = token('secret', 'c1:r1:unsubscribe');
+    const url = `http://localhost/api/communications/unsubscribe/r1?campaignId=c1&token=${t}`;
+    const context = { params: Promise.resolve({ recipientId: 'r1' }) };
+    const preview = await GET(new NextRequest(url), context);
+    expect(preview.status).toBe(200);
+    expect(await preview.text()).toContain('<form method="post">');
+    expect(preview.headers.get('referrer-policy')).toBe('no-referrer');
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+    expect(mockDb.select).not.toHaveBeenCalled();
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(mockDb.insert).not.toHaveBeenCalled();
+
+    m.selectQueue.push([{ id: 'c1', organizationId: 'org_1', stats: {} }], []);
+    m.updateReturnQueue.push([]);
+    const submitted = await POST(new NextRequest(url, { method: 'POST' }), context);
+    expect(submitted.status).toBe(200);
+    expect(m.withSystemContext).toHaveBeenCalledTimes(1);
+    expect(mockDb.insert).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not render a confirmation form for a forged GET token', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
+    const { GET } = await loadRoute();
+    const response = await GET(
+      new NextRequest('http://localhost/api/communications/unsubscribe/r1?campaignId=c1&token=forged'),
+      { params: Promise.resolve({ recipientId: 'r1' }) },
+    );
+    expect(response.status).toBe(401);
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+  });
+
 });

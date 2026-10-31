@@ -112,7 +112,55 @@ async function revokeEmailForOrganization(
   });
 }
 
+
+/**
+ * Link scanners and mail clients routinely prefetch GET URLs. A GET must not
+ * change consent, campaign metrics or subscriptions. The signed capability is
+ * checked before showing the confirmation form, but is consumed only by POST.
+ * RFC 8058 one-click clients can POST directly to the same signed URL.
+ */
 export async function GET(
+  request: NextRequest,
+  context: { params: Promise<{ recipientId: string }> },
+) {
+  const { recipientId } = await context.params;
+  const campaignId = request.nextUrl.searchParams.get('campaignId');
+  const scope = request.nextUrl.searchParams.get('scope');
+  if ((!campaignId && scope !== 'all') || (campaignId && scope !== null)) {
+    return new NextResponse('An explicit campaign or all-organizations unsubscribe scope is required', {
+      status: 400, headers: { 'Cache-Control': 'no-store' },
+    });
+  }
+  const verification = requireOrgAccess(request.nextUrl.searchParams.get('token'), campaignId, recipientId, scope);
+  if (verification !== 'valid') {
+    return new NextResponse('Invalid unsubscribe token', {
+      status: 401, headers: { 'Cache-Control': 'no-store' },
+    });
+  }
+  const fr = request.nextUrl.searchParams.get('locale')?.toLowerCase() === 'fr-ca';
+  const global = scope === 'all';
+  const title = fr ? 'Confirmer le désabonnement' : 'Confirm unsubscribe';
+  const explanation = global
+    ? (fr ? 'Confirmez le désabonnement des communications de toutes vos organisations associées.'
+          : 'Confirm that you want to stop campaign emails from all your associated organizations.')
+    : (fr ? 'Confirmez le désabonnement des communications de cette organisation.'
+          : 'Confirm that you want to stop campaign emails from this organization.');
+  const button = fr ? 'Confirmer' : 'Unsubscribe';
+  // No token is reflected into the HTML. Without an action attribute the form
+  // POSTs to the current document URL, retaining its signed query parameters.
+  const html = `<!doctype html><html lang="${fr ? 'fr-CA' : 'en-CA'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title></head><body style="font-family:system-ui,sans-serif;max-width:640px;margin:48px auto;padding:24px"><main><h1>${title}</h1><p>${explanation}</p><form method="post"><button type="submit">${button}</button></form></main></body></html>`;
+  return new NextResponse(html, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'Referrer-Policy': 'no-referrer',
+      'X-Content-Type-Options': 'nosniff',
+    },
+  });
+}
+
+export async function POST(
   request: NextRequest,
   context: { params: Promise<{ recipientId: string }> },
 ) {
@@ -210,6 +258,8 @@ export async function GET(
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       'Cache-Control': 'no-store',
+      'Referrer-Policy': 'no-referrer',
+      'X-Content-Type-Options': 'nosniff',
     },
   });
 }
