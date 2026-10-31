@@ -131,6 +131,7 @@ describe('platform-economics/reconciliation-service', () => {
 
     it('handles a period with no payments and raises a critical variance alert', async () => {
       const inv1 = { id: 'inv1', organizationId: 'o1', totalAmount: '500.00', invoiceNumber: 'INV-1', status: 'issued' };
+      pushSel([]); // no prior run for this organization and period
       pushSel([{ id: 'run-2' }]); // insert run
       pushSel([inv1]); // invoices
       pushSel([]); // payments (empty → allocations skipped)
@@ -139,6 +140,7 @@ describe('platform-economics/reconciliation-service', () => {
       pushSel([]); // update run
 
       const result = await runReconciliation({
+        organizationId: 'o1',
         periodStart: new Date('2025-01-01'),
         periodEnd: new Date('2025-01-31'),
       });
@@ -153,6 +155,14 @@ describe('platform-economics/reconciliation-service', () => {
   // DEF-0B11-PRP-RECONCILIATION-RUNS-ARE-NOT-REPEATABLE-AND-THE-BILLING-PERIOD-IS-NOT-BOUND-TO-THE-ORGANIZATION
   describe('runReconciliation guards', () => {
     const period = { periodStart: new Date('2025-01-01'), periodEnd: new Date('2025-01-31') };
+
+    it('refuses a missing or blank organization before touching the financial ledger', async () => {
+      for (const organizationId of [undefined, '', '   ']) {
+        await expect(runReconciliation({ organizationId, ...period })).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+      }
+      expect(h.queue).toEqual([]);
+      expect(h.auditLog).not.toHaveBeenCalled();
+    });
 
     it('refuses a billing period that is not the organization\u2019s own, before creating a run', async () => {
       pushSel([]); // the billing period is not found for this organization
