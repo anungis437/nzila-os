@@ -4,6 +4,7 @@ import { withRoleAuth } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { checkVoiceDisclosure } from '@/lib/voice/disclosure-consent';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -50,14 +51,27 @@ export const POST = withRoleAuth('steward', async (request, context) => {
         return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Audio file too large (max 25MB)');
       }
 
+      const disclosure = checkVoiceDisclosure(formData);
+      if (!disclosure.allowed) {
+        return NextResponse.json({ error: disclosure.error }, { status: disclosure.status });
+      }
+
       // The disclosure to the external service is recorded before the audio leaves; no transcript or audio is kept in the record.
       await withRLSContext({ organizationId, userId }, (tx) => persistAtomicAudit(tx, {
         organizationId,
         userId,
-        action: 'voice.transcribe.requested',
+        action: 'voice.transcribe.disclosure_acknowledged',
         resourceType: 'voice_recording',
         resourceId: userId,
-        details: { language, bytes: audioFile.size, contentType: audioFile.type },
+        details: {
+          language,
+          bytes: audioFile.size,
+          contentType: audioFile.type,
+          noticeVersion: disclosure.notice.version,
+          approvalReference: disclosure.notice.approvalReference,
+          provider: disclosure.notice.provider,
+          participantPermissionAsserted: true,
+        },
       }));
 
       // Convert file to buffer
