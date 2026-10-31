@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { NextRequest } from 'next/server';
 
 vi.mock('@/lib/api-auth-guard', () => ({
   withRoleAuth: (_role: string, handler: () => Promise<Response>) => handler,
@@ -14,7 +15,7 @@ describe('GET /api/voice/disclosure', () => {
 
   it('returns the current bilingual notice without exposing approval evidence', async () => {
     const { GET } = await import('../disclosure/route');
-    const response = await GET();
+    const response = await GET(new NextRequest('http://localhost/api/voice/disclosure'), {} as never);
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe('no-store');
     const body = await response.json();
@@ -25,7 +26,7 @@ describe('GET /api/voice/disclosure', () => {
   it('fails closed if institutional configuration is incomplete', async () => {
     delete process.env.UE_VOICE_DISCLOSURE_APPROVAL_REFERENCE;
     const { GET } = await import('../disclosure/route');
-    const response = await GET();
+    const response = await GET(new NextRequest('http://localhost/api/voice/disclosure'), {} as never);
     expect(response.status).toBe(503);
     expect(response.headers.get('cache-control')).toBe('no-store');
   });
