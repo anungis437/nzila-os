@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 331,
-    "partial": 63,
+    "implementedPendingQualification": 336,
+    "partial": 59,
     "qualificationVerified": 0,
-    "unresolved": 446,
+    "unresolved": 441,
     "externalBlockers": 0
   },
   "batches": [
@@ -338,6 +338,15 @@
       "outstandingBefore": 453,
       "newlyImplemented": 7,
       "outstandingAfter": 446,
+      "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B37-F07-COMMITTEE-WORKING-RECORD-AND-VERIFIED-OBJECT-READS",
+      "family": "F07: a committee's working record is read by staff and its own members, and a read names only what the caller may see",
+      "outstandingBefore": 446,
+      "newlyImplemented": 5,
+      "outstandingAfter": 441,
       "partial": 1,
       "evidenceCommit": null
     }
@@ -2330,13 +2339,19 @@
     },
     "DEF-0B5-COMMITTEE-READ-IGNORES-MEMBERSHIP": {
       "status": "PARTIAL",
-      "batch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "batch": "B37-F07-COMMITTEE-WORKING-RECORD-AND-VERIFIED-OBJECT-READS",
       "files": [
-        "apps/union-eyes/app/api/committees/route.ts",
-        "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
+        "apps/union-eyes/lib/services/committee-read-access.ts",
+        "apps/union-eyes/lib/services/__tests__/committee-read-access.test.ts",
+        "apps/union-eyes/app/api/committees/[id]/action-items/route.ts",
+        "apps/union-eyes/app/api/committees/[id]/documents/route.ts",
+        "apps/union-eyes/app/api/committees/[id]/meetings/route.ts",
+        "apps/union-eyes/app/api/committees/[id]/meetings/[meetingId]/route.ts",
+        "apps/union-eyes/app/api/committees/[id]/meetings/[meetingId]/attendance/route.ts",
+        "apps/union-eyes/lib/api/__tests__/f07-b37-object-access.contract.test.ts"
       ],
-      "explanation": "Internal working fields are no longer returned to every member.",
-      "remaining": "A committee is still listed to every member of the organization: there is no committee-membership scope on the generic read."
+      "explanation": "The five committee read routes (meetings, meeting detail, attendance, action items, documents) require the committee to be the organization's and the reader to be staff or an active member of that committee; any other member gets the not-found answer. Tests cover staff, an active member, an outsider, no identity and another organization's committee.",
+      "remaining": "The committee directory entry itself stays readable by every member (without notes), and the minutes read is steward-level but not checked against membership."
     },
     "DEF-0B3-KPI-ALERT-RECIPIENTS-MEMBER-READ": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -2430,14 +2445,13 @@
       "explanation": "The factory gained staffReadsAll: with an owner column, a steward or above reads every member's registration or certification on GET while a member keeps their own; writes keep the owner scope."
     },
     "DEF-0B6-EDU-SESSION-READ-EXPOSES-ACCESS-CODE-AND-COSTS": {
-      "status": "PARTIAL",
-      "batch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B37-F07-COMMITTEE-WORKING-RECORD-AND-VERIFIED-OBJECT-READS",
       "files": [
         "apps/union-eyes/app/api/education/sessions/route.ts",
         "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
       ],
-      "explanation": "The virtual-meeting access code, session budget and actual cost are omitted from every session response.",
-      "remaining": "The factory has no per-role column view, so staff also cannot read the cost columns through this route."
+      "explanation": "A session read omits the virtual-meeting access code and the session budget and actual cost (existing implementation, pinned by the F07 contract test)."
     },
     "DEF-0B6-EDU-CONTENT-DRAFTS-AND-ARCHIVED-READABLE-BY-MEMBER": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -2459,16 +2473,15 @@
       "explanation": "A campaign body is limited to an allow-list; the amount raised, the status and the payment-provider identifiers can no longer be set by a steward."
     },
     "DEF-0B8-HS-STATUS-AND-OUTCOME-FIELDS-WRITABLE-WITHOUT-WORKFLOW": {
-      "status": "PARTIAL",
-      "batch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B37-F07-COMMITTEE-WORKING-RECORD-AND-VERIFIED-OBJECT-READS",
       "files": [
         "apps/union-eyes/app/api/health-safety/incidents/[id]/route.ts",
         "apps/union-eyes/app/api/health-safety/hazards/[id]/route.ts",
         "apps/union-eyes/app/api/health-safety/inspections/[id]/route.ts",
         "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
       ],
-      "explanation": "A PATCH can no longer set status, closure, verification, investigation outcome or scoring fields on incidents, hazards and inspections.",
-      "remaining": "No dedicated workflow route yet performs the investigation, verification and closure transitions that the blocked fields now require."
+      "explanation": "The incident, hazard and inspection item routes block a status or outcome PATCH (existing implementation, pinned by the F07 contract test)."
     },
     "DEF-0B8-HS-PPE-ISSUEE-NAMES-READABLE-AT-MEMBER-FLOOR": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -2574,15 +2587,13 @@
       "explanation": "The route needs an active membership (404 otherwise) and returns settings, billing contact, subscription tier and provenance only to the organization's administrators; every other member gets the public profile. The sibling /api/org/current already returns a four-field projection."
     },
     "DEF-0B10-OPL-09": {
-      "status": "PARTIAL",
-      "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B37-F07-COMMITTEE-WORKING-RECORD-AND-VERIFIED-OBJECT-READS",
       "files": [
         "apps/union-eyes/app/api/organizations/switch/route.ts",
-        "apps/union-eyes/app/api/__tests__/organizations-switch.route.test.ts",
         "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts"
       ],
-      "explanation": "The legacy switch requires an active, non-removed membership of an active organization, matching the resolver that later reads the selection; an archived organization is a 404. A platform administrator still switches without membership, as the platform mandate allows.",
-      "remaining": "The legacy route still stores nothing server side: it validates and returns metadata, and the client writes the selection cookie."
+      "explanation": "A legacy organization switch needs an active, non-removed membership of an active organization (B21 implementation, pinned by the F07 contract test)."
     },
     "DEF-0B3-TRIAL-EXPIRY-PLACEHOLDER-PAYMENT-CHECK": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -2714,15 +2725,16 @@
       "explanation": "Sending needs a steward, bounds the upload and the signer list, and every platform signer must be an active member of the organization (upstream's change, existing tests)."
     },
     "DEF-0B7-PLT-EVENT-ITEM-IGNORES-PRIVATE-VISIBILITY-AND-RETURNS-MEETING-PASSWORD": {
-      "status": "PARTIAL",
-      "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B37-F07-COMMITTEE-WORKING-RECORD-AND-VERIFIED-OBJECT-READS",
       "files": [
         "apps/union-eyes/app/api/events/[id]/route.ts",
         "apps/union-eyes/app/api/calendar/events/[id]/route.ts",
-        "apps/union-eyes/app/api/__tests__/hs-calendar-tenant-privacy.contract.test.ts"
+        "apps/union-eyes/lib/calendar/event-visibility.ts",
+        "apps/union-eyes/lib/calendar/event-visibility.test.ts",
+        "apps/union-eyes/lib/api/__tests__/f07-b37-object-access.contract.test.ts"
       ],
-      "explanation": "The event item routes delegate to the canonical calendar item, which applies owner, visibility and tenant predicates and selects no meeting password (upstream's change, existing contract test).",
-      "remaining": "The privacy test is a source contract; there is no real-SQL test of a private event read by a non-owner."
+      "explanation": "The legacy event item delegates to the canonical calendar route, which applies private and confidential visibility and selects no meeting password or access code."
     },
     "DEF-0B8-FED-LOCALS-READABLE-AT-MEMBER-FLOOR-WITH-NOTES-AND-OFFICER-IDS": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -4199,6 +4211,15 @@
         "apps/union-eyes/app/api/__tests__/voice-transcribe.route.test.ts"
       ],
       "explanation": "The transcription response carries no duration: neither bytes nor a guess is reported as a measured audio duration (existing implementation and test)."
+    },
+    "DEF-0B6-EDU-COMPLETIONS-ROUTE-NOT-FILTERED-TO-COMPLETED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B37-F07-COMMITTEE-WORKING-RECORD-AND-VERIFIED-OBJECT-READS",
+      "files": [
+        "apps/union-eyes/app/api/education/completions/route.ts",
+        "apps/union-eyes/lib/api/__tests__/f07-b37-object-access.contract.test.ts"
+      ],
+      "explanation": "The completions list reads only completed registrations of the caller's organization."
     }
   }
 }

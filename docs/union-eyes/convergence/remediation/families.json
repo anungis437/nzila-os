@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 380,
+ "corrected": 381,
  "partial": 67,
- "outstanding": 397,
- "accountedFor": 397,
+ "outstanding": 396,
+ "accountedFor": 396,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -169,10 +169,10 @@
   {
    "family": "F08-PII-DISCLOSURE-AND-PROJECTION",
    "purpose": "Personal-data disclosure: project, redact or restrict returned fields",
-   "defects": 31,
+   "defects": 30,
    "severity": {
     "HIGH": 1,
-    "MEDIUM": 23,
+    "MEDIUM": 22,
     "LOW": 7
    },
    "namedRoutes": 7,
@@ -180,7 +180,7 @@
    "tranches": {
     "0B.3": 1,
     "0B.4": 3,
-    "0B.6": 2,
+    "0B.6": 1,
     "0B.7": 6,
     "0B.8": 3,
     "0B.9": 3,
@@ -1383,10 +1383,6 @@
    },
    {
     "id": "DEF-0B4-CLAUSE-LIBRARY-CREATOR-USER-IDS-DISCLOSED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-EDU-COMPLETIONS-ROUTE-NOT-FILTERED-TO-COMPLETED",
     "severity": "MEDIUM"
    },
    {

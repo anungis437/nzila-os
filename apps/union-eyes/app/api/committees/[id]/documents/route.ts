@@ -4,6 +4,7 @@
  */
 
 import { z } from "zod";
+import { requireCommitteeReader } from "@/lib/services/committee-read-access";
 import { withApi } from "@/lib/api/with-api";
 import { ApiError } from "@/lib/api/errors";
 import {
@@ -28,10 +29,10 @@ export const GET = withApi(
     auth: { required: true, minRole: "member" },
     openapi: { tags: ["Committees"], summary: "List committee documents" },
   },
-  async ({ organizationId, params, request }) => {
+  async ({ organizationId, userId, params, request }) => {
     if (!organizationId) throw ApiError.badRequest("Organization context required");
     const { id: committeeId } = params as { id: string };
-    await requireCommitteeScope(organizationId, committeeId);
+    await requireCommitteeReader(organizationId, committeeId, userId);
     const searchParams = request.nextUrl.searchParams;
     const category = searchParams.get("category") ?? undefined;
     const meetingId = searchParams.get("meetingId") ?? undefined;
