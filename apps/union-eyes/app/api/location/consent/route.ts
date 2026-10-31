@@ -111,7 +111,10 @@ export const GET = withApiAuth(async (req: NextRequest) => {
     }
     const context = (rawContext ?? undefined) as "strike" | "event" | undefined;
 
-    const hasConsent = await GeofencePrivacyService.hasValidConsent(userId, context);
+    const organizationId = await getOrganizationIdForUser(userId);
+    const hasConsent = await withRLSContext({ organizationId }, (tx) =>
+      GeofencePrivacyService.hasValidConsent(userId, context, tx),
+    );
 
     return NextResponse.json({
       userId,
