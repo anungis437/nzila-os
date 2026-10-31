@@ -23,6 +23,7 @@ import { eq, and, sql } from 'drizzle-orm';
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { canReadSharedClause, isSharedClauseOwner } from '@/lib/clause-library/sharing-authority';
+import { parseClauseTagBody } from '@/lib/clause-library/tag-body';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,8 +83,7 @@ export const POST = withApi(
   async ({ request, userId, organizationId }) => {
     const url = new URL(request.url);
     const id = url.pathname.split('/clause-library/')[1]?.split('/tags')[0];
-    const body = await request.json();
-    const tagName = body.tagName || body.tag;
+    const { tagName } = parseClauseTagBody(await request.json().catch(() => null), 'add');
     if (!organizationId) throw ApiError.badRequest('Organization context required');
     if (!userId) throw ApiError.badRequest('Authenticated user is required to add a tag.');
 
@@ -134,9 +134,7 @@ export const DELETE = withApi(
   async ({ request, userId, organizationId }) => {
     const url = new URL(request.url);
     const id = url.pathname.split('/clause-library/')[1]?.split('/tags')[0];
-    const body = await request.json();
-    const tagName = body.tagName || body.tag;
-    const tagId = body.tagId;
+    const { tagName, tagId } = parseClauseTagBody(await request.json().catch(() => null), 'remove');
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     if (!tagId && !tagName) throw ApiError.badRequest('tagId or tagName required');
 
@@ -154,13 +152,13 @@ export const DELETE = withApi(
           and(
             eq(clauseLibraryTags.clauseId, id),
             tagOfOwnedClause(id, organizationId),
-            tagId ? eq(clauseLibraryTags.id, tagId) : eq(clauseLibraryTags.tagName, tagName.trim()),
+            tagId ? eq(clauseLibraryTags.id, tagId) : eq(clauseLibraryTags.tagName, tagName!),
           ),
         )
         .returning({ id: clauseLibraryTags.id, tagName: clauseLibraryTags.tagName });
 
       if (removed.length === 0) {
-        throw ApiError.notFound('tag', tagId ?? tagName);
+        throw ApiError.notFound('tag', tagId ?? tagName ?? 'unknown');
       }
 
       await persistAtomicAudit(tx, {
