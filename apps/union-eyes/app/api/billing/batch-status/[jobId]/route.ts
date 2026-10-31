@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withRoleAuth } from '@/lib/api-auth-guard';
-import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 import {
   ErrorCode,
@@ -13,8 +12,8 @@ export const GET = async (req: NextRequest, { params: pendingParams }: { params:
   return withRoleAuth('steward', async (request, context) => {
     const _user = { id: context.userId, organizationId: context.organizationId };
 
-    await requireEntitlement(context.organizationId as string, 'financial_intelligence_suite', context.userId);
-
+    // A newsletter campaign's progress is not a finance-suite capability, so the finance entitlement no longer gates it (and no
+    // longer admits a union that bought finance but not communications): the campaign is read for the caller's own organization.
     try {
       const jobId = params.jobId;
 

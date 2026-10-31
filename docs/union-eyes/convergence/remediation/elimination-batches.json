@@ -5951,6 +5951,31 @@
           "remaining": "The trustee and plan write routes still store typed names and figures (plan figures are administrator-typed and readable by any member, a separate open defect), and the T4A route is not implemented."
         }
       ]
+    },
+    {
+      "id": "B64-F05-F06-BATCH-STATUS-ENTITLEMENT-AND-DISCLOSURE",
+      "family": "Newsletter batch status: the right gate and no recipient addresses",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B4-BATCH-STATUS-FINANCE-ENTITLEMENT-ON-NEWSLETTER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/billing/batch-status/[jobId]/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
+          ],
+          "explanation": "The finance-suite entitlement no longer gates a newsletter campaign's progress (it admitted a union that bought finance but not communications and refused the reverse); the steward floor and the caller's-organization campaign scope remain. No communications entitlement exists in the catalogue, so none is substituted; adding one is a product decision."
+        },
+        {
+          "prefix": "DEF-0B4-BATCH-STATUS-RECIPIENT-EMAILS-DISCLOSED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/billing/batch-status/[jobId]/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
+          ],
+          "explanation": "Existing implementation, verified: the status response lists no recipient address (earlier B53 work); pinned by a test, so there is no disclosure to audit."
+        }
+      ]
     }
   ]
 }

@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 424,
+    "implementedPendingQualification": 426,
     "partial": 78,
     "qualificationVerified": 0,
-    "unresolved": 353,
+    "unresolved": 351,
     "externalBlockers": 0
   },
   "batches": [
@@ -654,6 +654,15 @@
       "newlyImplemented": 1,
       "outstandingAfter": 353,
       "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B64-F05-F06-BATCH-STATUS-ENTITLEMENT-AND-DISCLOSURE",
+      "family": "Newsletter batch status: the right gate and no recipient addresses",
+      "outstandingBefore": 353,
+      "newlyImplemented": 2,
+      "outstandingAfter": 351,
+      "partial": 0,
       "evidenceCommit": null
     }
   ],
@@ -5751,6 +5760,24 @@
       ],
       "explanation": "A contribution and a benefit claim are recorded only against a pension member of the caller's organization (404 otherwise), under the stored member name (the typed name is ignored), with a positive amount of at most ten digits and two decimals; a member is enrolled only in a plan of the organization, under that plan's own name, with a bounded years-of-service figure. The own-records route test mock was extended for the member lookup and gained refusal cases (disclosed).",
       "remaining": "The trustee and plan write routes still store typed names and figures (plan figures are administrator-typed and readable by any member, a separate open defect), and the T4A route is not implemented."
+    },
+    "DEF-0B4-BATCH-STATUS-FINANCE-ENTITLEMENT-ON-NEWSLETTER": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B64-F05-F06-BATCH-STATUS-ENTITLEMENT-AND-DISCLOSURE",
+      "files": [
+        "apps/union-eyes/app/api/billing/batch-status/[jobId]/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
+      ],
+      "explanation": "The finance-suite entitlement no longer gates a newsletter campaign's progress (it admitted a union that bought finance but not communications and refused the reverse); the steward floor and the caller's-organization campaign scope remain. No communications entitlement exists in the catalogue, so none is substituted; adding one is a product decision."
+    },
+    "DEF-0B4-BATCH-STATUS-RECIPIENT-EMAILS-DISCLOSED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B64-F05-F06-BATCH-STATUS-ENTITLEMENT-AND-DISCLOSURE",
+      "files": [
+        "apps/union-eyes/app/api/billing/batch-status/[jobId]/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
+      ],
+      "explanation": "Existing implementation, verified: the status response lists no recipient address (earlier B53 work); pinned by a test, so there is no disclosure to audit."
     }
   }
 }

@@ -105,4 +105,11 @@ describe('S6 verified and small fixes', () => {
     expect(route).toContain('planName: plan.planName')
     expect(route).toContain('yearsOfService: z.string().regex(')
   })
+
+  it('does not gate a newsletter campaign\'s progress on the finance entitlement, and does not list recipient addresses (DEF-0B4-BATCH-STATUS-FINANCE-ENTITLEMENT-ON-NEWSLETTER, DEF-0B4-BATCH-STATUS-RECIPIENT-EMAILS-DISCLOSED)', () => {
+    const source = read('app/api/billing/batch-status/[jobId]/route.ts')
+    expect(source).not.toContain('financial_intelligence_suite')
+    expect(source).not.toContain('requireEntitlement')
+    expect(source).not.toMatch(/recipientEmail|\.email\b/)
+  })
 })
