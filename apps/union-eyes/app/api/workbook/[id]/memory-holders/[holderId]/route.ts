@@ -14,6 +14,7 @@ import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
 import { auditClaimedWorkbookWrite } from '@/lib/workbook/claimed-write-audit';
 import { logger } from '@/lib/logger';
 import { opaqueRef } from '@/lib/icra/opaque-ref';
+import { guardPublicIntake } from '@/lib/public-intake/guard';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -46,14 +47,12 @@ export async function PATCH(
 ) {
   const { id: workbookId, holderId } = await params;
 
-  let body: any;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
-  }
+  // The workbook identifier is a bearer credential until claimed. Bound
+  // attempts and payload bytes before resolving authority or writing to SQL.
+  const intake = await guardPublicIntake(request, { bucket: 'capability' });
+  if (!intake.ok) return intake.response;
 
-  const parse = patchSchema.safeParse(body);
+  const parse = patchSchema.safeParse(intake.json);
   if (!parse.success) {
     return NextResponse.json(
       { error: 'Validation failed', details: parse.error.flatten().fieldErrors },
@@ -112,10 +111,13 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string; holderId: string }> },
 ) {
   const { id: workbookId, holderId } = await params;
+
+  const intake = await guardPublicIntake(request, { bucket: 'capability', readBody: false });
+  if (!intake.ok) return intake.response;
 
   try {
     // Authorization is resolved first; the protected delete then runs inside
