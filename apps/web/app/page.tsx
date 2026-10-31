@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Nzila Ventures | Organizational Continuity Infrastructure',
     description: 'Governed operational infrastructure for continuity, operational memory, audit evidence, and organizational trust.',
-    images: [{ url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Earth at night showing organizational continuity infrastructure' }],
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Nzila Ventures — Build continuity. Preserve accountability.' }],
   },
   alternates: { canonical: '/' },
 };
