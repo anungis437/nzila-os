@@ -11,7 +11,7 @@
   "totals": {
     "original": 777,
     "implementedPendingQualification": 471,
-    "partial": 82,
+    "partial": 83,
     "qualificationVerified": 0,
     "unresolved": 306,
     "externalBlockers": 0
@@ -731,6 +731,15 @@
     {
       "id": "B72-PUBLIC-PRECEDENT-PROJECTION-AND-VISIBILITY",
       "family": "Public arbitration decision library SQL visibility and explicit API response projection",
+      "outstandingBefore": 306,
+      "newlyImplemented": 0,
+      "outstandingAfter": 306,
+      "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B73-PRECEDENT-DRAFT-NONPUBLIC-BY-DEFAULT",
+      "family": "Precedent creation fail-closed publication and audit provenance",
       "outstandingBefore": 306,
       "newlyImplemented": 0,
       "outstandingAfter": 306,
@@ -6379,6 +6388,17 @@
       ],
       "explanation": "Shared arbitration_decisions library issue-type, most-cited, related and statistics queries now filter is_public and access_restrictions in SQL, matching list and search. The list/search/ranking/issue-type API responses use an explicit allowlist that excludes grievor, fullText, remedies, private CBA references, embedding, import provenance and access-control metadata. Unit and projection regressions added; executable qualification not yet established.",
       "remaining": "Other direct callers of getPrecedentById/getPrecedentByCaseNumber and non-API services still need full inventory; shared-table native PostgreSQL RLS, authenticated HTTP/browser and cross-tenant runtime proof are outstanding."
+    },
+    "DEF-0B11-PRP-PRECEDENT-POST-PUBLISHES-INTO-THE-SHARED-LIBRARY-WITH-NO-REVIEW-PROVENANCE-OR-OWNING-ORGANIZATION": {
+      "status": "PARTIAL",
+      "batch": "B73-PRECEDENT-DRAFT-NONPUBLIC-BY-DEFAULT",
+      "files": [
+        "apps/union-eyes/lib/services/precedent-audited-service.ts",
+        "apps/union-eyes/app/api/precedents/route.ts",
+        "apps/union-eyes/lib/services/__tests__/precedent-audited-service.test.ts"
+      ],
+      "explanation": "The shared arbitration_decisions POST now creates a non-public pending-review draft, overriding the schema's public default, and records the acting organization's source provenance and actor in the same-transaction audit. The response identifies pending_review and publiclyDiscoverable=false rather than implying publication. Forged public flags are overwritten server-side; regression tests added.",
+      "remaining": "No reviewed publication workflow, organization-owner column and RLS, institutional reviewer ratification, or authenticated HTTP/native PostgreSQL qualification. The new draft cannot be publicly discovered until those controls exist."
     }
   }
 }

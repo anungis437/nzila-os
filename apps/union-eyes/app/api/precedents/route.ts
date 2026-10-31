@@ -208,11 +208,11 @@ export const POST = withRoleAuth('content_manager', async (request, context) => 
       );
     }
 
-      // Create precedent
+      // Create a non-public draft. Publication requires an independent reviewed workflow. 
       const precedent = await createPrecedentAudited({ organizationId, userId }, validation.data);
 
       return standardSuccessResponse(
-      {  precedent  }
+      { precedent, publicationStatus: 'pending_review', publiclyDiscoverable: false }
     );
     } catch (error) {
 // Handle unique constraint violations
