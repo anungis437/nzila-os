@@ -207,7 +207,7 @@ export default function Contact() {
       : 'contact_page';
     const payload = {
       ...formData,
-      source,
+      source: formData.source === 'contact_page' ? source : formData.source,
       utmSource: (params.get('utm_source') ?? '').slice(0, 160),
       utmMedium: (params.get('utm_medium') ?? '').slice(0, 160),
       utmCampaign: (params.get('utm_campaign') ?? '').slice(0, 160),
@@ -261,44 +261,51 @@ export default function Contact() {
   const verticals = copy.verticals;
 
   const inputClasses =
-    'w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-electric/40 focus:border-electric transition text-gray-900 placeholder-gray-400';
+    'w-full min-w-0 min-h-12 px-4 py-3 bg-[#f8fafc] border border-slate-300 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric transition-colors text-gray-900 placeholder-gray-500';
 
   return (
     <main className="min-h-screen">
-      {/* ═══════════════════════ HERO ═══════════════════════ */}
-      <section className="relative min-h-[50vh] flex items-center overflow-hidden">
-        <Image
-          src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920"
-          alt="Modern open-plan office with floor-to-ceiling windows and warm natural light"
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-linear-to-b from-navy/80 via-navy/70 to-navy/90" />
-        <div className="absolute inset-0 bg-mesh opacity-40" />
-
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
-          <ScrollReveal>
-            <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/20 text-gold mb-6">
-              {copy.connect}
-            </span>
-          </ScrollReveal>
-          <ScrollReveal delay={0.1}>
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">{copy.heroTitle}</h1>
-          </ScrollReveal>
-          <ScrollReveal delay={0.2}>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              {copy.heroSubtitle}
+      {/* A human-centered invitation, rather than an unrelated stock photo. */}
+      <section className="relative isolate overflow-hidden bg-[#080e1c] text-white">
+        <div aria-hidden="true" className="pointer-events-none absolute -right-20 -top-48 h-[34rem] w-[34rem] rounded-full bg-blue-600/20 blur-[105px]" />
+        <div aria-hidden="true" className="pointer-events-none absolute bottom-[-16rem] left-[-12rem] h-[30rem] w-[30rem] rounded-full bg-[#dfbe70]/10 blur-[95px]" />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 pb-16 pt-36 sm:px-6 sm:pb-20 lg:grid-cols-[1.15fr_0.85fr] lg:px-8 lg:pb-24 lg:pt-44">
+          <div className="max-w-2xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#dfbe70]">{copy.connect}</p>
+            <h1 className="mt-6 text-4xl font-semibold leading-[1.09] tracking-[-0.04em] sm:text-5xl lg:text-6xl">{copy.heroTitle}</h1>
+            <p className="mt-7 max-w-xl text-base leading-8 text-slate-300 sm:text-lg">{copy.heroSubtitle}</p>
+            <a href="#contact-form" className="mt-8 inline-flex min-h-12 items-center justify-center rounded-xl bg-[#dfbe70] px-6 py-3 text-sm font-bold text-[#101a2c] transition-colors hover:bg-[#f2d694] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+              {copy.sendMessage} <span aria-hidden="true" className="ml-2">↘</span>
+            </a>
+          </div>
+          <div className="relative overflow-hidden rounded-3xl border border-white/15 bg-white/[0.045] p-6 sm:p-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-blue-200">
+              {locale === 'fr-CA' ? 'Le début d’une conversation' : 'Start a conversation'}
             </p>
-          </ScrollReveal>
+            <p className="mt-5 text-xl font-semibold leading-relaxed text-white sm:text-2xl">
+              {locale === 'fr-CA'
+                ? 'Parlez-nous de votre défi. Nous parlerons de votre réalité avant de parler de technologie.'
+                : 'Tell us what you are facing. We will start with your reality, not a product pitch.'}
+            </p>
+            <div className="mt-7 flex items-center gap-3 border-t border-white/10 pt-6">
+              <span aria-hidden="true" className="flex h-11 w-11 items-center justify-center rounded-full border border-[#dfbe70]/40 bg-[#dfbe70]/10 text-[#dfbe70]">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="7" r="3" stroke="currentColor" strokeWidth="1.7" />
+                  <path d="M4.5 21v-3a7.5 7.5 0 0 1 15 0v3" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                </svg>
+              </span>
+              <p className="text-sm leading-6 text-slate-300">
+                {locale === 'fr-CA' ? 'Une démarche humaine et adaptée à votre organisation.' : 'A human conversation, grounded in your organization.'}
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* ═══════════════════════ CONTACT CONTENT ═══════════════════════ */}
-      <section className="py-20 bg-white">
+      <section id="contact-form" className="scroll-mt-20 bg-white py-16 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16">
+          <div className="grid min-w-0 gap-12 lg:grid-cols-2 lg:gap-16">
             {/* ── FORM ── */}
             <ScrollReveal direction="left">
               <div>
@@ -324,21 +331,21 @@ export default function Contact() {
                     <label htmlFor="name" className="block text-sm font-semibold text-navy mb-1.5">
                       {copy.fullName}
                     </label>
-                    <input type="text" id="name" name="name" required value={formData.name} onChange={handleChange} className={inputClasses} placeholder={copy.fullNamePlaceholder} />
+                    <input type="text" id="name" name="name" autoComplete="name" required value={formData.name} onChange={handleChange} className={inputClasses} placeholder={copy.fullNamePlaceholder} />
                   </div>
 
                   <div>
                     <label htmlFor="email" className="block text-sm font-semibold text-navy mb-1.5">
                       {copy.emailAddress}
                     </label>
-                    <input type="email" id="email" name="email" required value={formData.email} onChange={handleChange} className={inputClasses} placeholder={copy.emailPlaceholder} />
+                    <input type="email" id="email" name="email" autoComplete="email" inputMode="email" required value={formData.email} onChange={handleChange} className={inputClasses} placeholder={copy.emailPlaceholder} />
                   </div>
 
                   <div>
                     <label htmlFor="company" className="block text-sm font-semibold text-navy mb-1.5">
                       {copy.company}
                     </label>
-                    <input type="text" id="company" name="company" value={formData.company} onChange={handleChange} className={inputClasses} placeholder={copy.companyPlaceholder} />
+                    <input type="text" id="company" name="company" autoComplete="organization" value={formData.company} onChange={handleChange} className={inputClasses} placeholder={copy.companyPlaceholder} />
                   </div>
 
                   <div>
@@ -387,7 +394,7 @@ export default function Contact() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full bg-electric text-white font-bold py-4 px-6 rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/25 btn-press disabled:opacity-60"
+                    className="w-full min-h-12 bg-[#193d7a] text-white font-bold py-4 px-6 rounded-xl hover:bg-[#234f93] transition-colors text-base shadow-lg shadow-blue-900/15 disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-electric"
                   >
                     {submitting ? copy.sending : copy.send}
                   </button>
