@@ -50,11 +50,25 @@ export function verifyProductionApproval({environment,run,approvals,expectedRunI
   if (!userName(run.actor) || !userName(run.triggering_actor)) deny('run initiator not authenticated')
   const started=Date.parse(run.created_at ?? ''), end=now.getTime()
   if (!Number.isFinite(started) || started > end+300000) deny('invalid run time')
-  const reviews=approvals.filter(matches).filter(a=>['approved','rejected'].includes(String(a?.state??'').toLowerCase()))
-    .sort((a,b)=>Date.parse(a.created_at??'')-Date.parse(b.created_at??''))
+  // An unknown, withdrawn or pending production review must not disappear
+  // from the chronology and resurrect an earlier approval. Treat every
+  // production review record as security-relevant, not just approved entries.
+  const reviews=approvals.filter(matches)
+  if (reviews.some(a => !['approved','rejected'].includes(String(a?.state??'').toLowerCase()))) {
+    deny('unrecognized production environment review state')
+  }
   // Missing or malformed review IDs/timestamps cannot become durable approval receipts.
   if (reviews.some(a => !Number.isSafeInteger(a.id) || a.id <= 0 ||
       !Number.isFinite(Date.parse(a.created_at ?? '')))) deny('malformed environment review history')
+  // GitHub review IDs are unique. Duplicate IDs or identical timestamp
+  // ordering with conflicting records are not independently ordered evidence.
+  if (new Set(reviews.map(a=>a.id)).size !== reviews.length) {
+    deny('duplicate production environment review ID')
+  }
+  reviews.sort((a,b)=>Date.parse(a.created_at)-Date.parse(b.created_at))
+  if (reviews.some((a,i)=>i>0 && Date.parse(a.created_at)===Date.parse(reviews[i-1].created_at))) {
+    deny('ambiguous production environment review chronology')
+  }
   const last=reviews.at(-1)
   if (!last || String(last.state).toLowerCase()!=='approved') deny('no current approved environment review')
   const reviewer=userName(last.user), at=Date.parse(last.created_at ?? '')

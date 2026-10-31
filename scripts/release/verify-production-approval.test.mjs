@@ -67,6 +67,32 @@ test('approval receipts require a real immutable GitHub review ID and timestamp'
   const f=fixture();f.approvals[0].created_at='not-a-date'
   assert.throws(()=>verifyProductionApproval(f),/malformed environment review history/)
 })
+test('unknown or withdrawn production review state cannot revive an earlier approval',()=> {
+  for (const state of ['dismissed','pending','unknown',null]) {
+    const f=fixture()
+    f.approvals.push({
+      id:891,state,user:{login:'security-reviewer'},
+      created_at:'2026-10-30T14:16:00Z',environments:[{name:'production'}],
+    })
+    assert.throws(()=>verifyProductionApproval(f),/unrecognized production environment review state/)
+  }
+})
+
+test('duplicate review IDs and simultaneous conflicting reviews are not trustworthy ordering',()=> {
+  const duplicate=fixture()
+  duplicate.approvals.push({
+    ...duplicate.approvals[0],state:'rejected',
+    created_at:'2026-10-30T14:16:00Z',
+  })
+  assert.throws(()=>verifyProductionApproval(duplicate),/duplicate production environment review ID/)
+
+  const ambiguous=fixture()
+  ambiguous.approvals.push({
+    ...ambiguous.approvals[0],id:891,state:'rejected',
+  })
+  assert.throws(()=>verifyProductionApproval(ambiguous),/ambiguous production environment review chronology/)
+})
+
 test('both run actor and rerun triggering actor must be authenticated',()=>{
   for (const key of ['actor','triggering_actor']) {
     const f=fixture();f.run[key]=null
