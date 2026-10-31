@@ -52,11 +52,11 @@ describe('TF-A authenticated host binding', () => {
 
   it('A03 denies revoked authority on re-resolution and expired host assertions', async () => {
     const e = await setup()
-    const authority = await resolveAgentAuthority(new StaticAgentAuthorityResolver([{
+    await expect(resolveAgentAuthority(new StaticAgentAuthorityResolver([{
       ...authorityRecord, status: 'REVOKED', agentId: 'agent-a',
       capabilities: ['image.convert'], source: 'host', authorityRef: 'AUTH-agent-a',
-    }]), 'agent-a', NOW_DATE)
-    expect(e.policy.evaluateExecution(intent(), { authority, invocation: e.invocation, approval: null }).allowed).toBe(false)
+    }]), 'agent-a', NOW_DATE)).rejects.toThrow(/revoked, expired/)
+    expect(e.policy.evaluateExecution(intent(), { authority: null, invocation: e.invocation, approval: null }).allowed).toBe(false)
     const authenticator: InvocationAuthenticator = {
       async authenticate() { return { ...e.invocation, expiresAt: NOW } },
     }

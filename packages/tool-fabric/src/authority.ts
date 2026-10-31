@@ -156,6 +156,16 @@ export async function resolveAgentAuthority(
   if (record.capabilities.some((c) => c === '*' || !c.trim())) {
     throw new AuthorityResolutionError('wildcard or empty capabilities are not valid authority')
   }
+  // A revoked, expired or scope-less host record must never be branded as
+  // resolved authority. Policy rechecks this at use time, but rejecting it
+  // at the minting boundary also protects future consumers of this port.
+  if (record.status !== 'ACTIVE' || !record.expiresAt ||
+      Date.parse(record.expiresAt) <= now.getTime()) {
+    throw new AuthorityResolutionError('host authority is revoked, expired or lacks an active lease')
+  }
+  if (!record.organizationId || !record.missionId) {
+    throw new AuthorityResolutionError('host authority lacks organization or mission scope')
+  }
   const resolved: ResolvedAgentAuthority = Object.freeze({
     agentId: record.agentId,
     capabilities: Object.freeze([...record.capabilities]),

@@ -212,6 +212,30 @@ describe('request / authority separation', () => {
     await expect(resolveAgentAuthority(bare, 'agent-a')).rejects.toThrow(/source and authority reference/)
   })
 
+  it('refuses to mint host authority from revoked, expired, missing-lease or unscoped records', async () => {
+    const overrides = [
+      { status: 'REVOKED' as const },
+      { expiresAt: NOW },
+      { expiresAt: undefined },
+      { status: undefined },
+      { organizationId: undefined },
+      { missionId: undefined },
+    ]
+    for (const override of overrides) {
+      const resolver = new StaticAgentAuthorityResolver([{
+        ...authorityRecord, agentId: 'agent-a', capabilities: ['image.convert'],
+        source: 'trusted-host', authorityRef: 'AUTH-agent-a', ...override,
+      }])
+      await expect(resolveAgentAuthority(resolver, 'agent-a', NOW_DATE))
+        .rejects.toThrow(AuthorityResolutionError)
+    }
+    const valid = new StaticAgentAuthorityResolver([{
+      ...authorityRecord, agentId: 'agent-a', capabilities: ['image.convert'],
+      source: 'trusted-host', authorityRef: 'AUTH-agent-a',
+    }])
+    expect(isResolvedAgentAuthority(await resolveAgentAuthority(valid, 'agent-a', NOW_DATE))).toBe(true)
+  })
+
   it('marks a compliant request policy-eligible but keeps execution closed and audits denial', async () => {
     const e = env()
     await onboard(e)
