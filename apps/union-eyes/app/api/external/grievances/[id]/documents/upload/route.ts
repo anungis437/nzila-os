@@ -76,6 +76,22 @@ export const POST = withExternalMatterResourceAuth(
       });
       if (!derived.ok) return { forbidden: true as const };
 
+      // The representative names a stored object; nothing shows it is theirs. An object another record already holds (a document
+      // or a version of one) is some other matter's file, so it is never attached here through an upload.
+      const [heldByDocument] = await db
+        .select({ id: documents.id })
+        .from(documents)
+        .where(and(eq(documents.organizationId, context.organizationId), eq(documents.blobPath, resolvedBlob.blobPath)))
+        .limit(1);
+      const [heldByVersion] = heldByDocument
+        ? []
+        : await db
+            .select({ id: documentVersions.id })
+            .from(documentVersions)
+            .where(and(eq(documentVersions.organizationId, context.organizationId), eq(documentVersions.storageKey, resolvedBlob.blobPath)))
+            .limit(1);
+      if (heldByDocument || heldByVersion) return { conflict: true as const };
+
       const [insertedDocument] = await db
         .insert(documents)
         .values({
@@ -148,9 +164,12 @@ export const POST = withExternalMatterResourceAuth(
         details: { matterType, matterId: context.matterId, authorityId: context.authorityId, privacyLabel: parsed.data.privacyLabel },
       });
 
-      return { forbidden: false as const, document: insertedDocument };
+      return { forbidden: false as const, conflict: false as const, document: insertedDocument };
     }, context.organizationId);
 
+    if ('conflict' in created && created.conflict) {
+      return NextResponse.json({ error: 'The file is already attached to another record' }, { status: 409 });
+    }
     if (created.forbidden) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }

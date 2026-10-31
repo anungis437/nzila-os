@@ -3942,6 +3942,76 @@
           "remaining": "The counts are pinned by source only; no test runs the statistics against rows holding an archived status."
         }
       ]
+    },
+    {
+      "id": "B34-F04-F12-COMPUTED-ROWS-ARE-NOT-TYPED-IN-AND-REFERENCE-FIGURES-ARE-NOT-INVENTED",
+      "family": "F04/F12: a row served as analytics comes from a job, a stored object is attached only if nothing else holds it, and a reference profile states only what was measured",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B2-ANALYTICS-CRUD-FACADE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/api/computed-resource.ts",
+            "apps/union-eyes/lib/api/__tests__/computed-resource.test.ts",
+            "apps/union-eyes/app/api/analytics/financial/route.ts",
+            "apps/union-eyes/app/api/analytics/claims/route.ts",
+            "apps/union-eyes/app/api/analytics/members/route.ts",
+            "apps/union-eyes/app/api/analytics/operational/route.ts",
+            "apps/union-eyes/app/api/analytics/executive/route.ts",
+            "apps/union-eyes/app/api/analytics/claims/trends/route.ts"
+          ],
+          "explanation": "Twenty-nine analytics routes over the metric and trend tables keep their read and answer every create with 501, so a steward can no longer insert a row that is then served as computed analytics. A test scans every such route for the factory POST and for the 501 helper."
+        },
+        {
+          "prefix": "DEF-0B8-FED-EXTERNAL-UPLOAD-ATTACHES-ANY-ORGANIZATION-BLOB-TO-GRIEVANCE",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/external/grievances/[id]/documents/upload/route.ts",
+            "apps/union-eyes/app/api/external/__tests__/external-routes.test.ts"
+          ],
+          "explanation": "An upload names a stored object only if no document, and no version of one, in the organization already holds it; an object another record holds answers 409 and inserts nothing. Tests added for both holders.",
+          "remaining": "An unattached object under the organization prefix is still accepted: nothing yet proves it was uploaded by this representative for this matter (an upload-intake record bound to the representative is needed)."
+        },
+        {
+          "prefix": "DEF-0B11-SOC-X-MEDIA-URL-IS-FETCHED-BY-THE-SERVER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/social-media/social-media-service.ts",
+            "apps/union-eyes/lib/social-media/linkedin-api-client.ts",
+            "apps/union-eyes/lib/social-media/__tests__/social-media-service.test.ts",
+            "apps/union-eyes/lib/social-media/__tests__/social-media-clients-full.test.ts"
+          ],
+          "explanation": "X publishing refuses every remote media URL (existing refusal and test); the LinkedIn path, which does fetch a caller-supplied image, now follows no redirect, accepts only an image content type and refuses an image over 8 MB, with tests."
+        },
+        {
+          "prefix": "DEF-0B10-PIL-REFERENCE-PROFILE-PRESENTS-A-DEFAULT-TESTIMONIAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/pilot/apply/[id]/reference-profile/route.ts",
+            "apps/union-eyes/app/api/__tests__/pilot-reference-profile.route.test.ts"
+          ],
+          "explanation": "The profile states no default testimonial, no six-hour floor and no 90-day outcomes: a quote appears only when supplied and always as unattested, time saved is null, the case study lists outcomes only when a stored metrics row exists, and the data source is labelled."
+        },
+        {
+          "prefix": "DEF-0B7-COGB-PRECEDENT-AND-PROCEDURAL-ENGINES",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
+            "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/constant-engines-not-implemented.test.ts",
+            "apps/union-eyes/app/api/exit-interviews/procedural-continuity/route.ts"
+          ],
+          "explanation": "The precedent and procedural engines refuse with NOT_IMPLEMENTED for every organization and return no constant profile (existing implementation and test)."
+        },
+        {
+          "prefix": "DEF-0B7-COGA-FORECAST-PROJECTIONS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/__tests__/interview-derived-analytics.pglite.test.ts"
+          ],
+          "explanation": "The continuity forecast reports no trend and no projection instead of an improving curve from fixed rates, and bases its metrics on eligible interviews, proven against a real SQL engine (existing implementation and test)."
+        }
+      ]
     }
   ]
 }

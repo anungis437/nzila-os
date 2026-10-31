@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 365,
- "partial": 64,
- "outstanding": 412,
- "accountedFor": 412,
+ "corrected": 369,
+ "partial": 65,
+ "outstanding": 408,
+ "accountedFor": 408,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -50,9 +50,9 @@
   {
    "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
    "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
-   "defects": 41,
+   "defects": 39,
    "severity": {
-    "HIGH": 6,
+    "HIGH": 4,
     "MEDIUM": 25,
     "LOW": 10
    },
@@ -64,7 +64,7 @@
     "0B.4": 6,
     "0B.5": 2,
     "0B.6": 9,
-    "0B.7": 4,
+    "0B.7": 2,
     "0B.8": 2,
     "0B.9": 2,
     "0B.10": 6,
@@ -76,16 +76,15 @@
   {
    "family": "F04-MASS-ASSIGNMENT-AND-GENERIC-CRUD",
    "purpose": "Generic-CRUD exposure and mass assignment: allow-lists, governance classification, response projection",
-   "defects": 9,
+   "defects": 8,
    "severity": {
-    "HIGH": 3,
+    "HIGH": 2,
     "MEDIUM": 5,
     "LOW": 1
    },
    "namedRoutes": 6,
    "namedFiles": 2,
    "tranches": {
-    "0B.2": 1,
     "0B.3": 2,
     "0B.9": 3,
     "0B.11": 2,
@@ -248,9 +247,9 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 90,
+   "defects": 89,
    "severity": {
-    "HIGH": 3,
+    "HIGH": 2,
     "MEDIUM": 64,
     "LOW": 23
    },
@@ -266,7 +265,7 @@
     "0B.7": 11,
     "0B.8": 12,
     "0B.9": 1,
-    "0B.10": 8,
+    "0B.10": 7,
     "0B.11": 5,
     "0B.12": 7
    }
@@ -471,16 +470,8 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B7-COGA-FORECAST-PROJECTIONS-ARE-FIXED-RATES-AND-ALWAYS-IMPROVE",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B7-COGA-CASCADE-REGULATORY-RISK-IS-A-LABEL-TEMPLATE",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-COGB-PRECEDENT-AND-PROCEDURAL-ENGINES-RETURN-CONSTANT-CONTENT-AS-ORGANIZATION-ANALYSIS",
-    "severity": "HIGH"
    },
    {
     "id": "DEF-0B8-HS-RECORD-NUMBERS-CALLER-SUPPLIED-AND-UNIQUE-ACROSS-ORGANIZATIONS",
@@ -560,10 +551,6 @@
    }
   ],
   "F04-MASS-ASSIGNMENT-AND-GENERIC-CRUD": [
-   {
-    "id": "DEF-0B2-ANALYTICS-CRUD-FACADE",
-    "severity": "HIGH"
-   },
    {
     "id": "DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT",
     "severity": "HIGH"
@@ -1391,7 +1378,8 @@
    },
    {
     "id": "DEF-0B8-FED-EXTERNAL-UPLOAD-ATTACHES-ANY-ORGANIZATION-BLOB-TO-GRIEVANCE",
-    "severity": "HIGH"
+    "severity": "HIGH",
+    "partial": true
    },
    {
     "id": "DEF-0B8-JUR-STATUTORY-RULE-TABLES-ARE-UNVERSIONED-LITERALS-SERVED-WITH-STATUTE-CITATIONS",
@@ -1955,10 +1943,6 @@
    {
     "id": "DEF-0B10-PIL-PROPOSAL-SCORES-AND-CUSTOMER-SUCCESS-SIGNALS-ARE-COMPUTED-FROM-THE-APPLICANT-SELF-ASSESSED-READINESS-SCORE-AND-THE-STAGE-REACHED",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-PIL-REFERENCE-PROFILE-PRESENTS-A-DEFAULT-TESTIMONIAL-A-SIX-HOUR-FLOOR-AND-SCORE-DERIVED-FIGURES-AS-PILOT-OUTCOMES-AND-STORES-THEM-AS-A-VERSIONED-CASE-STUDY",
-    "severity": "HIGH"
    },
    {
     "id": "DEF-0B11-PRP-JURISDICTION-PREFERENCES-HAVE-NO-UNIQUE-ROW-UNVALIDATED-FLAGS-AND-NO-SERVER-CONSUMER",

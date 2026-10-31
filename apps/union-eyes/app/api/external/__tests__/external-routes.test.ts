@@ -349,6 +349,27 @@ describe('external resource routes', () => {
     });
   });
 
+  // DEF-0B8-FED-EXTERNAL-UPLOAD-ATTACHES-ANY-ORGANIZATION-BLOB-TO-GRIEVANCE
+  it('refuses a stored object another document already holds, and inserts nothing', async () => {
+    seedMatterGrant();
+    mocks.selectQueue.push([{ id: 'existing-document' }]);
+
+    const response = await postUpload(uploadBody);
+
+    expect(response.status).toBe(409);
+    expect(mocks.db.insert).not.toHaveBeenCalled();
+  });
+
+  it('refuses a stored object that is already a version of another document', async () => {
+    seedMatterGrant();
+    mocks.selectQueue.push([], [{ id: 'existing-version' }]);
+
+    const response = await postUpload(uploadBody);
+
+    expect(response.status).toBe(409);
+    expect(mocks.db.insert).not.toHaveBeenCalled();
+  });
+
   it('rejects a privilege label before any external upload insert', async () => {
     const response = await postUpload({ ...uploadBody, privacyLabel: 'privileged' });
     expect(response.status).toBe(400);

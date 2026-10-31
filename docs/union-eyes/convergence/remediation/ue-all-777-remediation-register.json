@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 365,
-    "engineeringRemaining": 412,
+    "engineeringCorrected": 369,
+    "engineeringRemaining": 408,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 64
+    "engineeringPartial": 65
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -1018,9 +1018,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B34-F04-F12-COMPUTED-ROWS-ARE-NOT-TYPED-IN-AND-REFERENCE-FIGURES-ARE-NOT-INVENTED",
+        "path": "apps/union-eyes/lib/api/computed-resource.ts; apps/union-eyes/lib/api/__tests__/computed-resource.test.ts; apps/union-eyes/app/api/analytics/financial/route.ts; apps/union-eyes/app/api/analytics/claims/route.ts; apps/union-eyes/app/api/analytics/members/route.ts; apps/union-eyes/app/api/analytics/operational/route.ts; apps/union-eyes/app/api/analytics/executive/route.ts; apps/union-eyes/app/api/analytics/claims/trends/route.ts",
+        "explanation": "Twenty-nine analytics routes over the metric and trend tables keep their read and answer every create with 501, so a steward can no longer insert a row that is then served as computed analytics. A test scans every such route for the factory POST and for the 501 helper.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ",
@@ -7138,9 +7145,16 @@
         ]
       },
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B34-F04-F12-COMPUTED-ROWS-ARE-NOT-TYPED-IN-AND-REFERENCE-FIGURES-ARE-NOT-INVENTED",
+        "path": "apps/union-eyes/app/api/__tests__/interview-derived-analytics.pglite.test.ts",
+        "explanation": "The continuity forecast reports no trend and no projection instead of an improving curve from fixed rates, and bases its metrics on eligible interviews, proven against a real SQL engine (existing implementation and test).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-COGA-EMPTY-ORGANIZATION-RESILIENCE-IS-NAN-AND-READS-STRONG",
@@ -7748,9 +7762,16 @@
         ]
       },
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B34-F04-F12-COMPUTED-ROWS-ARE-NOT-TYPED-IN-AND-REFERENCE-FIGURES-ARE-NOT-INVENTED",
+        "path": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts; apps/union-eyes/lib/organizational-operating-intelligence/__tests__/constant-engines-not-implemented.test.ts; apps/union-eyes/app/api/exit-interviews/procedural-continuity/route.ts",
+        "explanation": "The precedent and procedural engines refuse with NOT_IMPLEMENTED for every organization and return no constant profile (existing implementation and test).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-COGB-PERSONALITY-LABEL-ASSIGNED-FROM-ABSENCE-OF-DATA",
@@ -9714,9 +9735,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B34-F04-F12-COMPUTED-ROWS-ARE-NOT-TYPED-IN-AND-REFERENCE-FIGURES-ARE-NOT-INVENTED",
+        "path": "apps/union-eyes/app/api/external/grievances/[id]/documents/upload/route.ts; apps/union-eyes/app/api/external/__tests__/external-routes.test.ts",
+        "explanation": "An upload names a stored object only if no document, and no version of one, in the organization already holds it; an object another record holds answers 409 and inserts nothing. Tests added for both holders.",
+        "remaining": "An unattached object under the organization prefix is still accepted: nothing yet proves it was uploaded by this representative for this matter (an upload-intake record bound to the representative is needed).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-FED-EXTERNAL-UPLOAD-CLIENT-CLAIMED-TYPE-SIZE-NO-SCAN-WHOLE-BLOB-READ",
@@ -13496,9 +13525,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B34-F04-F12-COMPUTED-ROWS-ARE-NOT-TYPED-IN-AND-REFERENCE-FIGURES-ARE-NOT-INVENTED",
+        "path": "apps/union-eyes/app/api/pilot/apply/[id]/reference-profile/route.ts; apps/union-eyes/app/api/__tests__/pilot-reference-profile.route.test.ts",
+        "explanation": "The profile states no default testimonial, no six-hour floor and no 90-day outcomes: a quote appears only when supplied and always as unattested, time saved is null, the case study lists outcomes only when a stored metrics row exists, and the data source is labelled.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-PIL-USAGE-TELEMETRY-ROUTES-READ-ANY-ORGANIZATION-NAMED-IN-THE-QUERY-AT-AN-ADMIN-FLOOR-AND-RETURN-PER-USER-IDS-THROUGH-THE-BARE-DB-IMPORT",
