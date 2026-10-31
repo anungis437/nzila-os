@@ -1,27 +1,29 @@
 /**
- * CRUD collection route for securityEvents
+ * GET POST /api/security/events
  *
- * PR #752 round 49: readRole/writeRole tightened from the crud-factory
- * defaults (member/steward) to security_manager, matching the privileged
- * gate app/[locale]/dashboard/security/page.tsx already enforces via
- * hasMinRole('security_manager'). Previously any org 'member' could read
- * every security event for their organization directly via this API
- * (bypassing the dashboard's intended privileged-reader restriction), and
- * any 'steward' could fabricate arbitrary security event records
- * (attacker-controlled severity/type/description) — a self-authored
- * security-evidence integrity defect.
+ * Not implemented. This path was configured as a privileged security-manager reader and writer over security_events, but that
+ * table is in the denied list of the CRUD governance file, so every caller (a security manager included) was refused by a
+ * different rule than the one this file described, and a write path for security evidence was configured that must not exist:
+ * a security event is authored by the system, never typed in. The privileged reader of the table is the security dashboard page
+ * (security_manager, system context). The path therefore answers 501 and reads and writes nothing.
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { securityEvents } from '@/db/schema';
+import { withApi, ApiError } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
-  table: securityEvents,
-  pk: 'eventId',
-  tags: ["System"],
-  orgScoped: true,
-  readRole: 'security_manager',
-  writeRole: 'security_manager',
-});
-export { GET, POST };
+const handler = withApi(
+  {
+    auth: { required: true, minRole: 'security_manager' },
+    openapi: {
+      tags: ['System'],
+      summary: '/api/security/events (not implemented)',
+      description: 'Not implemented: answers 501.',
+    },
+  },
+  async () => {
+    throw ApiError.notImplemented('/api/security/events is not implemented: security events are read on the security dashboard and written only by the system.');
+  },
+);
+
+export const GET = handler;
+export const POST = handler;

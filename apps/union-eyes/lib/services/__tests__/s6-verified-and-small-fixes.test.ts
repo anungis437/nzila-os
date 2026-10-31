@@ -20,4 +20,30 @@ describe('S6 verified and small fixes', () => {
       expect(source, route).toContain('operationAuditResponse(error)')
     }
   })
+
+  it('does not write from a consent check: expiry is a read, and the retention sweep marks consents expired (DEF-0B8-JUR-LOCATION-CONSENT-GET-EXPIRES-THE-CONSENT-AS-A-SIDE-EFFECT)', () => {
+    const service = read('services/geofence-privacy-service.ts')
+    expect(service).not.toContain('this.expireConsent')
+    const sweep = service.slice(service.indexOf('static async deleteExpiredLocationData'))
+    expect(sweep).toContain('consentStatus: "expired"')
+    expect(sweep).toContain('consentsExpired')
+  })
+
+  it('shows a private report definition to its author only (DEF-0B7-EXP-REPORT-DEFINITIONS-READABLE-AT-MEMBER-FLOOR)', () => {
+    for (const route of ['app/api/reports/route.ts', 'app/api/reports/[id]/route.ts']) {
+      const source = read(route)
+      expect(source, route).toContain("readRole: 'steward'")
+      expect(source, route).toContain('or(eq(reports.isPublic, true), eq(reports.createdBy, userId))')
+    }
+    const factory = read('lib/api/crud-factory.ts')
+    expect(factory.match(/opts\.readConditionFor\?\.\(/g)).toHaveLength(2)
+  })
+
+  it('answers 501 for the support figures and the security-event writer that never existed as described (verified existing implementation and new)', () => {
+    for (const route of ['app/api/support/metrics/route.ts', 'app/api/support/sla/route.ts', 'app/api/security/events/route.ts']) {
+      const source = read(route)
+      expect(source, route).toContain('ApiError.notImplemented')
+      expect(source, route).not.toContain('crudRoutes')
+    }
+  })
 })

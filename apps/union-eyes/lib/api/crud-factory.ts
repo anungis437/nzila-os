@@ -96,6 +96,8 @@ export interface CrudOptions {
   archiveColumn?: string;
   /** A condition added to every GET, whatever the caller's role (for example, a restricted row of shared reference data is never listed). */
   readCondition?: SQL;
+  /** Like readCondition, but decided per caller (for example: public, or written by the caller). Applies to every GET. */
+  readConditionFor?: (caller: { userId: string | null | undefined; organizationId: string | null | undefined }) => SQL | undefined;
   /** A condition added to GET only for a caller below the steward floor (for example, hiding unpublished rows from members). */
   belowStaffReadCondition?: SQL;
   /** With an ownerColumn: the owner may delete their own row at the write floor (the row scope already limits it to theirs). */
@@ -584,6 +586,8 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           conditions.push(eq(ownerCol, userId));
         }
         if (opts.readCondition) conditions.push(opts.readCondition);
+        const callerCondition = opts.readConditionFor?.({ userId, organizationId });
+        if (callerCondition) conditions.push(callerCondition);
         if (opts.belowStaffReadCondition && (await isBelowStaff(userId, organizationId))) conditions.push(opts.belowStaffReadCondition);
         const lowRole = await readScope(userId, organizationId);
         if (lowRole.condition) conditions.push(lowRole.condition);
@@ -743,6 +747,8 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           conditions.push(eq(ownerCol, userId));
         }
         if (opts.readCondition) conditions.push(opts.readCondition);
+        const callerCondition = opts.readConditionFor?.({ userId, organizationId });
+        if (callerCondition) conditions.push(callerCondition);
         if (opts.belowStaffReadCondition && (await isBelowStaff(userId, organizationId))) conditions.push(opts.belowStaffReadCondition);
         const lowRole = await readScope(userId, organizationId);
         if (lowRole.condition) conditions.push(lowRole.condition);

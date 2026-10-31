@@ -199,9 +199,9 @@ export class GeofencePrivacyService {
 
     const userConsent = consent[0];
 
-    // Check expiry
+    // An expired consent is simply not valid. Checking consent is a read: the status is moved to expired by the retention
+    // sweep (deleteExpiredLocationData), under system authority and in its own transaction, not as a side effect of a GET.
     if (userConsent.expiresAt && new Date() > userConsent.expiresAt) {
-      await this.expireConsent(userConsent.id, userId);
       return false;
     }
 
@@ -436,7 +436,14 @@ export class GeofencePrivacyService {
       });
     }
 
-    return { trackingRecordsDeleted, eventRecordsDeleted };
+    // Consents past their expiry are marked expired here, in the same transaction as the deletions.
+    const expiredConsents = await tx
+      .update(memberLocationConsent)
+      .set({ consentStatus: "expired", updatedAt: now })
+      .where(and(eq(memberLocationConsent.consentStatus, "opted_in"), lte(memberLocationConsent.expiresAt, now)))
+      .returning({ id: memberLocationConsent.id });
+
+    return { trackingRecordsDeleted, eventRecordsDeleted, consentsExpired: expiredConsents.length };
   }
 
   /**
@@ -466,19 +473,6 @@ export class GeofencePrivacyService {
       trackingRecordsDeleted: deletedTracking.length,
       eventRecordsDeleted: deletedEvents.length,
     };
-  }
-
-  /**
-   * Expire consent (after 6 months)
-   */
-  private static async expireConsent(consentId: string, userId: string) {
-    await db
-      .update(memberLocationConsent)
-      .set({
-        consentStatus: "expired",
-        updatedAt: new Date(),
-      })
-      .where(and(eq(memberLocationConsent.id, consentId), eq(memberLocationConsent.userId, userId)));
   }
 
   /**
