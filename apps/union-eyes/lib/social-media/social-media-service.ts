@@ -8,6 +8,7 @@
  * and rate limit management across all platforms.
  */
 
+import { openToken, openOptionalToken, sealToken, sealOptionalToken } from '@/lib/social-media/token-vault';
 import { MetaAPIClient, createMetaClient } from './meta-api-client';
 import { TwitterAPIClient, createTwitterClient } from './twitter-api-client';
 import { LinkedInAPIClient, createLinkedInClient } from './linkedin-api-client';
@@ -163,13 +164,13 @@ export class SocialMediaService {
     switch (typedAccount.platform) {
       case 'facebook':
       case 'instagram':
-        return createMetaClient(typedAccount.accessToken);
+        return createMetaClient((await openToken(typedAccount.accessToken)));
 
       case 'twitter':
-        return createTwitterClient(typedAccount.accessToken, typedAccount.refreshToken || undefined);
+        return createTwitterClient((await openToken(typedAccount.accessToken)), (await openOptionalToken(typedAccount.refreshToken)));
 
       case 'linkedin':
-        return createLinkedInClient(typedAccount.accessToken);
+        return createLinkedInClient((await openToken(typedAccount.accessToken)));
 
       default:
         throw new Error(`Unsupported platform: ${typedAccount.platform}`);
@@ -202,8 +203,8 @@ export class SocialMediaService {
       switch (typedAccount.platform) {
         case 'facebook':
         case 'instagram': {
-          const metaClient = createMetaClient(typedAccount.accessToken);
-          const tokenData = await metaClient.getLongLivedToken(typedAccount.accessToken);
+          const metaClient = createMetaClient((await openToken(typedAccount.accessToken)));
+          const tokenData = await metaClient.getLongLivedToken((await openToken(typedAccount.accessToken)));
           newAccessToken = tokenData.access_token;
           expiresIn = tokenData.expires_in;
           break;
@@ -214,8 +215,8 @@ export class SocialMediaService {
             throw new Error('No refresh token available for Twitter account');
           }
           const twitterClient = createTwitterClient(
-            typedAccount.accessToken,
-            typedAccount.refreshToken
+            (await openToken(typedAccount.accessToken)),
+            (await openToken(typedAccount.refreshToken))
           );
           const tokenData = await twitterClient.refreshAccessToken();
           newAccessToken = tokenData.access_token;
@@ -228,7 +229,7 @@ export class SocialMediaService {
           if (!typedAccount.refreshToken) {
             throw new Error('No refresh token available for LinkedIn account');
           }
-          const linkedInClient = createLinkedInClient(typedAccount.accessToken);
+          const linkedInClient = createLinkedInClient((await openToken(typedAccount.accessToken)));
           const tokenData = await linkedInClient.refreshAccessToken(typedAccount.refreshToken);
           newAccessToken = tokenData.access_token;
           newRefreshToken = tokenData.refresh_token || null;
@@ -243,10 +244,10 @@ export class SocialMediaService {
       // Update account with new tokens
       const expiresAt = new Date(Date.now() + expiresIn * 1000);
       await db.update(socialAccounts).set({
-        accessToken: newAccessToken,
+        accessToken: await sealToken(newAccessToken),
         tokenExpiresAt: expiresAt,
         updatedAt: new Date(),
-        ...(newRefreshToken ? { refreshToken: newRefreshToken } : {}),
+        ...(newRefreshToken ? { refreshToken: await sealToken(newRefreshToken) } : {}),
       }).where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId)));
     } catch (error) {
       // Update account status to error
@@ -309,7 +310,7 @@ export class SocialMediaService {
             const metaClient = client as MetaAPIClient;
             const response = await metaClient.publishFacebookPost(
               account.platformUserId,
-              account.accessToken,
+              (await openToken(account.accessToken)),
               {
                 message: text,
                 media_urls: content.media_urls,
@@ -504,7 +505,7 @@ export class SocialMediaService {
         case 'facebook':
         case 'instagram': {
           const metaClient = client as MetaAPIClient;
-          await metaClient.deletePost(typedPost.platformPostId!, typedPost.accessToken!);
+          await metaClient.deletePost(typedPost.platformPostId!, (await openToken(typedPost.accessToken!)));
           break;
         }
 
@@ -567,7 +568,7 @@ export class SocialMediaService {
           const metaClient = client as MetaAPIClient;
           const _insights = await metaClient.getPageInsights(
             typedAccount.platformUserId,
-            typedAccount.accessToken,
+            (await openToken(typedAccount.accessToken)),
             [
               'page_impressions',
               'page_engaged_users',

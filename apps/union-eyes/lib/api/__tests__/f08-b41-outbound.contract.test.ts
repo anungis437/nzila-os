@@ -8,7 +8,7 @@ describe('F08 outbound fetches of supplied addresses', () => {
   // DEF-0B4-CBA-INGESTION-FETCHES-UNRESTRICTED-URLS
   it('every CBA ingestion adapter fetches through the guarded base fetch', () => {
     const base = read('lib/services/cba-intelligence/adapters/base-adapter.ts')
-    expect(base).toContain('assertPublicHttpUrl(url)')
+    expect(base).toContain('assertPublicHttpUrlResolved(url)')
     expect(base).toContain('redirect: "manual"')
     const adapters = ['canlii', 'esdc', 'fpslreb', 'html-bulletin', 'provincial-board', 'statscan-csv', 'union-bargaining']
     for (const name of adapters) {

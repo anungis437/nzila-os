@@ -1,6 +1,6 @@
 import type { IngestionAdapter, DiscoveredDocument, FetchedContent } from "./types";
 import { logger } from "@/lib/logger";
-import { assertPublicHttpUrl } from "@/lib/security/outbound-url";
+import { assertPublicHttpUrlResolved } from "@/lib/security/outbound-url";
 
 /** A source page larger than this is refused rather than read whole into memory. */
 const MAX_SOURCE_CHARACTERS = 10_000_000;
@@ -78,7 +78,7 @@ export abstract class BaseAdapter implements IngestionAdapter {
   ): Promise<Response> {
     // The address comes from a configured source or a discovered link: only a public http(s) address is fetched, and a
     // redirect is followed by hand so each hop is checked again.
-    assertPublicHttpUrl(url);
+    await assertPublicHttpUrlResolved(url);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.defaultTimeoutMs);
 

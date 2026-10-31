@@ -17,6 +17,7 @@ import { createTwitterClient } from '@/lib/social-media/twitter-api-client';
 import { createLinkedInClient } from '@/lib/social-media/linkedin-api-client';
 import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { sealToken, sealOptionalToken } from '@/lib/social-media/token-vault';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
 
 const SUPPORTED_PLATFORMS = ['facebook', 'instagram', 'twitter', 'linkedin'] as const;
@@ -204,6 +205,9 @@ export const GET = withRoleAuth('admin', async (request: NextRequest, context: B
 
     // organizationId/userId come only from the trusted, authenticated server
     // context (withRoleAuth) — never from query params, provider payload, or state.
+        // Provider tokens are stored sealed, never as plaintext.
+    const sealedAccessToken = await sealToken(accessToken);
+    const sealedRefreshToken = await sealOptionalToken(refreshToken);
     const [account] = await withRLSContext({ organizationId }, async (tx) => {
       const rows = await tx
         .insert(socialAccounts)
@@ -213,8 +217,8 @@ export const GET = withRoleAuth('admin', async (request: NextRequest, context: B
           platformUserId,
           username,
           displayName,
-          accessToken,
-          refreshToken,
+          accessToken: sealedAccessToken,
+          refreshToken: sealedRefreshToken,
           tokenExpiresAt,
           status: 'active',
           connectedBy: userId,
@@ -224,8 +228,8 @@ export const GET = withRoleAuth('admin', async (request: NextRequest, context: B
           set: {
             username,
             displayName,
-            accessToken,
-            refreshToken,
+            accessToken: sealedAccessToken,
+            refreshToken: sealedRefreshToken,
             tokenExpiresAt,
             status: 'active',
             updatedAt: new Date(),

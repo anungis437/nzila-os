@@ -6,6 +6,7 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
  * Supports OAuth flows, token refresh, and account management.
  */
 
+import { openToken, openOptionalToken, sealToken, sealOptionalToken } from '@/lib/social-media/token-vault';
 import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes } from 'crypto';
 import { createMetaClient } from '@/lib/social-media/meta-api-client';
@@ -299,8 +300,8 @@ export const DELETE = withRoleAuth('admin', async (request: NextRequest, context
         switch (account.platform) {
           case 'twitter': {
             const twitterClient = createTwitterClient(
-              account.accessToken,
-              account.refreshToken || undefined
+              (await openToken(account.accessToken)),
+              (await openOptionalToken(account.refreshToken))
             );
             await twitterClient.revokeToken();
             platformTokenRevoked = 'revoked';
@@ -401,8 +402,8 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
         switch (account.platform) {
           case 'facebook':
           case 'instagram': {
-            const metaClient = createMetaClient(account.accessToken);
-            const tokenData = await metaClient.getLongLivedToken(account.accessToken);
+            const metaClient = createMetaClient((await openToken(account.accessToken)));
+            const tokenData = await metaClient.getLongLivedToken((await openToken(account.accessToken)));
             newAccessToken = tokenData.access_token;
             expiresIn = tokenData.expires_in;
             break;
@@ -413,8 +414,8 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
               throw new Error('No refresh token available');
             }
             const twitterClient = createTwitterClient(
-              account.accessToken,
-              account.refreshToken
+              (await openToken(account.accessToken)),
+              (await openToken(account.refreshToken))
             );
             const tokenData = await twitterClient.refreshAccessToken();
             newAccessToken = tokenData.access_token;
@@ -427,7 +428,7 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
             if (!account.refreshToken) {
               throw new Error('No refresh token available');
             }
-            const linkedInClient = createLinkedInClient(account.accessToken);
+            const linkedInClient = createLinkedInClient((await openToken(account.accessToken)));
             const tokenData = await linkedInClient.refreshAccessToken(account.refreshToken);
             newAccessToken = tokenData.access_token;
             newRefreshToken = tokenData.refresh_token || null;
@@ -470,12 +471,12 @@ export const PUT = withRoleAuth('steward', async (request: NextRequest, context:
           const rows = await tx
             .update(socialAccounts)
             .set({
-              accessToken: newAccessToken,
+              accessToken: await sealToken(newAccessToken),
               tokenExpiresAt: expiresAt,
               // An expired account is reconnected by a successful refresh; any other state is kept as it was.
               status: account.status === 'expired' ? 'active' : account.status,
               updatedAt: new Date(),
-              ...(newRefreshToken ? { refreshToken: newRefreshToken } : {}),
+              ...(newRefreshToken ? { refreshToken: await sealToken(newRefreshToken) } : {}),
             })
             .where(and(eq(socialAccounts.id, account_id), eq(socialAccounts.organizationId, organizationId)))
             .returning({ id: socialAccounts.id });

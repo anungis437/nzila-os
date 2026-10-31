@@ -13,6 +13,12 @@
  * fix (asserting the exact context object withRLSContext was called with).
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+// Provider tokens are stored sealed (B91); a deterministic stand-in for the secret service keeps these tests free of key material.
+vi.mock('@/lib/encryption', () => ({
+  encryptSecret: async (value: string) => `sealed(${value})`,
+  decryptSecret: async (value: string) => value.replace(/^sealed\((.*)\)$/, '$1'),
+}));
 import { NextRequest } from 'next/server';
 
 interface FakeAccount {
@@ -282,7 +288,7 @@ describe('round 37: social-media accounts route org boundary (negative tests 3, 
 
     expect(response.status).toBe(200);
     expect(m.withRLSContextCalls).toContainEqual({ organizationId: ORG_B });
-    expect(accounts.find((a) => a.id === 'legit-account')!.accessToken).toBe('new-token');
+    expect(accounts.find((a) => a.id === 'legit-account')!.accessToken).toBe('enc:v1:sealed(new-token)');
     // The other org's account must never be reachable through this call.
     expect(accounts.find((a) => a.id === 'rogue-account')!.accessToken).toBe('rogue-secret-access-token');
   });

@@ -62,3 +62,26 @@ export function assertPublicHttpUrl(raw: string): URL {
   }
   return url
 }
+
+/**
+ * assertPublicHttpUrl plus the addresses the host name resolves to: a public-looking name that resolves to a loopback, private or
+ * link-local address is refused. A name that cannot be resolved is refused. The resolution and the later connection are two lookups,
+ * so the network egress policy remains the control against a name that changes between them.
+ */
+export async function assertPublicHttpUrlResolved(raw: string): Promise<URL> {
+  const url = assertPublicHttpUrl(raw)
+  const host = url.hostname.replace(/^\[|\]$/g, '')
+  if (/^[\d.]+$/.test(host) || host.includes(':')) return url
+  const { lookup } = await import('node:dns/promises')
+  let addresses: Array<{ address: string; family: number }>
+  try {
+    addresses = await lookup(host, { all: true })
+  } catch {
+    throw new OutboundUrlError('The host name could not be resolved')
+  }
+  if (addresses.length === 0) throw new OutboundUrlError('The host name could not be resolved')
+  for (const { address, family } of addresses) {
+    assertPublicHttpUrl(family === 6 ? `http://[${address}]/` : `http://${address}/`)
+  }
+  return url
+}

@@ -2618,12 +2618,13 @@
         },
         {
           "prefix": "DEF-0B9-ORG-ANALYTICS-ZERO-AND-HUNDRED-PERCENT-DEFAULTS-MEMBER-FLOOR-AND-NO-GROUP-SIZE-SUPPRESSION",
-          "status": "PARTIAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
           "files": [
-            "apps/union-eyes/app/api/organizations/[id]/analytics/route.ts"
+            "apps/union-eyes/app/api/organizations/[id]/analytics/route.ts",
+            "apps/union-eyes/lib/organizations/analytics-privacy.ts",
+            "apps/union-eyes/lib/services/__tests__/s35-token-sealing-outbound-resolution.test.ts"
           ],
-          "explanation": "Analytics are officer-level and an undefined rate is null rather than 0 or 100 (batch B11).",
-          "remaining": "No small-group suppression threshold is applied to counts and rates."
+          "explanation": "Analytics are officer-level and an undefined rate is null rather than 0 or 100 (batch B11). Verified on source in B91: the route applies a minimum group size to the member and claim families together (null, not zero, with the suppression flags), the resolution average is null when nothing has resolved, and the route is at the officer floor."
         },
         {
           "prefix": "DEF-0B10-PEN-BENEFIT-CLAIMS-CAN-BE-FILED-BUT-NO-ROUTE-CAN-DECIDE-OR-PAY-THEM",
@@ -4377,17 +4378,19 @@
       "items": [
         {
           "prefix": "DEF-0B4-CBA-INGESTION-FETCHES-UNRESTRICTED-URLS",
-          "status": "PARTIAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
           "files": [
             "apps/union-eyes/lib/security/outbound-url.ts",
             "apps/union-eyes/lib/security/__tests__/outbound-url.test.ts",
             "apps/union-eyes/lib/services/cba-intelligence/adapters/base-adapter.ts",
             "apps/union-eyes/lib/services/cba-intelligence/adapters/__tests__/base-adapter.test.ts",
             "apps/union-eyes/app/api/cba-intelligence/sources/route.ts",
-            "apps/union-eyes/lib/api/__tests__/f08-b41-outbound.contract.test.ts"
+            "apps/union-eyes/lib/api/__tests__/f08-b41-outbound.contract.test.ts",
+            "apps/union-eyes/lib/security/__tests__/outbound-url-resolved.test.ts",
+            "apps/union-eyes/app/api/cba-intelligence/sources/[id]/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s35-token-sealing-outbound-resolution.test.ts"
           ],
-          "explanation": "A shared guard refuses non-http(s) schemes, credentials in the address, localhost and internal names, private, loopback, link-local, metadata and reserved IPv4 and IPv6 literals (including IPv4-mapped forms). The base adapter checks every address before fetching, follows redirects by hand (three at most) re-checking each hop, and refuses a source larger than 10 million characters; every ingestion adapter fetches through it, and a source address is checked when it is saved.",
-          "remaining": "The guard reads the address as written and does not resolve DNS, so a public name that resolves to a private address is not caught; that needs an egress policy or a resolving fetch. The body is still read whole before the size check."
+          "explanation": "A shared guard refuses non-http(s) schemes, credentials in the address, localhost and internal names, private, loopback, link-local, metadata and reserved IPv4 and IPv6 literals (including IPv4-mapped forms). The base adapter checks every address before fetching, follows redirects by hand (three at most) re-checking each hop, and refuses a source larger than 10 million characters; every ingestion adapter fetches through it, and a source address is checked when it is saved. B91: the fetch guard now also resolves the host name and refuses a name that resolves to a private, loopback, link-local or reserved address, or does not resolve (assertPublicHttpUrlResolved, used by the base adapter before every fetch and redirect hop); the source update route applies the same public-address rule as registration; the oversized-body refusals are in the adapter tests. Seven adapter test files mock DNS because their fixtures use names that do not exist, and the f08 outbound contract pin reads the resolving guard (disclosed). A name that changes between the lookup and the connection is still the egress policy's to stop."
         }
       ]
     },
@@ -7446,6 +7449,32 @@
             "apps/union-eyes/lib/services/__tests__/s34-lifecycle-routes-and-minimum-cohort.test.ts"
           ],
           "explanation": "PATCH /api/enterprise/sso/providers/[id] (administrator) changes, enables, disables or rotates the client secret of one provider of the organization, and DELETE removes it. Unknown fields are refused, a role mapping may only assign roles a tenant administrator can already assign, the merged configuration must be complete for its type to be enabled, a rotated secret is encrypted with the same service as at creation, and every change is audited in the same transaction with the names of the fields and never a credential value. The manifest grants the tenant runtime UPDATE and DELETE on sso_providers (the manifest-driven generator issues the grants, so there is no hand-written migration) and the catalog contract was regenerated; the grants are unqualified until run on native PostgreSQL."
+        }
+      ]
+    },
+    {
+      "id": "B91-TOKEN-SEALING-OUTBOUND-RESOLUTION",
+      "family": "Provider token sealing, resolved outbound fetch guard, verified analytics suppression",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B11-SOC-OAUTH-ACCESS-AND-REFRESH-TOKENS-ARE-STORED-AS-PLAINTEXT-TEXT-COLUMNS-WITH-PAGE-AND-ORGANIZATION-ADMIN-SCOPES",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/social-media/token-vault.ts",
+            "apps/union-eyes/lib/social-media/__tests__/token-vault.test.ts",
+            "apps/union-eyes/lib/social-media/social-media-service.ts",
+            "apps/union-eyes/app/api/social-media/accounts/route.ts",
+            "apps/union-eyes/app/api/social-media/accounts/callback/route.ts",
+            "apps/union-eyes/app/api/__tests__/round37-oauth-callback.test.ts",
+            "apps/union-eyes/app/api/__tests__/round37-social-media-accounts-boundary.test.ts",
+            "apps/union-eyes/app/api/__tests__/social-media-accounts.route.test.ts",
+            "apps/union-eyes/lib/social-media/__tests__/round37-cross-org-account-boundary.test.ts",
+            "apps/union-eyes/lib/social-media/__tests__/social-media-service.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s35-token-sealing-outbound-resolution.test.ts"
+          ],
+          "explanation": "Provider access and refresh tokens are sealed with the Key-Vault-backed secret service (enc:v1: marker) when the OAuth callback stores them and whenever a refresh rewrites them, and opened only at the point a provider client is built. A token written before sealing existed has no marker, is used as it is, and becomes sealed the next time it is rewritten, so connected accounts keep working. Sealing fails closed: if the secret service is unavailable the token is not stored. Five existing test files now mock the secret service and two storage assertions expect the sealed form (disclosed).",
+          "remaining": "Existing plaintext tokens stay plaintext until each account is refreshed or reconnected; a one-off backfill needs the production secret service and was not run."
         }
       ]
     }
