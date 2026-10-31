@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 339,
-    "partial": 60,
+    "implementedPendingQualification": 341,
+    "partial": 59,
     "qualificationVerified": 0,
-    "unresolved": 438,
+    "unresolved": 436,
     "externalBlockers": 0
   },
   "batches": [
@@ -356,6 +356,15 @@
       "outstandingBefore": 441,
       "newlyImplemented": 3,
       "outstandingAfter": 438,
+      "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B39-F05-FINANCIAL-INTELLIGENCE-NEEDS-A-MANDATE-AND-FLAGS-CANNOT-BE-FORGED",
+      "family": "F05: financial intelligence needs a live financial mandate, and a record a person raises cannot pass for an engine record",
+      "outstandingBefore": 438,
+      "newlyImplemented": 2,
+      "outstandingAfter": 436,
       "partial": 1,
       "evidenceCommit": null
     }
@@ -4250,26 +4259,41 @@
       ],
       "explanation": "The session list reads active sessions only, and the message read needs the entitlement, the AI feature flag, the safety check and the rate limit, and refuses an archived or deleted session (existing implementation and test)."
     },
-    "DEF-0B3-METRICS-CLAIM-IDS-IN-MEMBER-READ": {
+    "DEF-0B2-AI-FINANCE-ROLE-TITLE-GATE": {
       "status": "PARTIAL",
-      "batch": "GATE0-ANALYTICS-PRIVACY-20261030",
+      "batch": "B39-F05-FINANCIAL-INTELLIGENCE-NEEDS-A-MANDATE-AND-FLAGS-CANNOT-BE-FORGED",
       "files": [
-        "apps/union-eyes/lib/api/crud-factory.ts",
-        "apps/union-eyes/lib/api/__tests__/crud-factory.test.ts",
-        "apps/union-eyes/actions/analytics-actions.ts"
+        "apps/union-eyes/lib/finance/finance-view-mandate.ts",
+        "apps/union-eyes/lib/finance/__tests__/finance-view-mandate.test.ts",
+        "apps/union-eyes/app/api/ai/finance/analysis/route.ts",
+        "apps/union-eyes/app/api/ai/pension/plans/[id]/funding/route.ts",
+        "apps/union-eyes/app/api/ai/pension/members/[id]/projection/route.ts",
+        "apps/union-eyes/app/api/ai/pension/plans/[id]/trustee-summary/route.ts",
+        "apps/union-eyes/app/api/__tests__/ai-finance-analysis.route.test.ts",
+        "apps/union-eyes/lib/api/__tests__/f05-b39-mandate.contract.test.ts"
       ],
-      "explanation": "Generic CRUD responses over analytics_metrics now centrally omit the metadata JSON on every collection/item alias, protecting historical case IDs and confidential provenance. The dedicated analytics action already allowlists aggregate metadata; new regression tests exercise redaction and real Drizzle table-name binding. Source commits 3b7223e89438c08d0451fe2e5f3ac10f6645fa0f, 7697305fe3010756931373e100c3af324f8a8d14 and 3658d9d19419702089cc93e88d6e42963a9d5761.",
-      "remaining": "Exact-HEAD focused tests, complete Vitest/contract, native PostgreSQL 15/16, HTTP/browser/staging acceptance and independent Gate 0C.4 approvals are not yet established. Do not promote to IMPLEMENTED_PENDING_QUALIFICATION or CLOSED solely on source edits."
+      "explanation": "The finance analysis and the three pension intelligence routes first require a live finance:view mandate (in the caller own tenant context) and answer 403 without it, before the rate limit, feature gate, entitlement or any read. The finance analysis test mock gained the new collaborator and a refusal test.",
+      "remaining": "The view mandate is not resource-scoped to a plan or member, and the pension projection still reads any member of the plan by id for an officer."
     },
-    "DEF-0B7-EXC-ANALYTICS-REPORTS-FULL-CONSENT-FOR-MONTHS-WITH-NO-INTERVIEWS": {
-      "status": "PARTIAL",
-      "batch": "GATE0-GOVERNANCE-ANALYTICS-INTEGRITY-20261030",
+    "DEF-0B6-EMP-COMPLIANCE-EVENT-FORGEABLE-BY-STEWARD": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B39-F05-FINANCIAL-INTELLIGENCE-NEEDS-A-MANDATE-AND-FLAGS-CANNOT-BE-FORGED",
       "files": [
-        "apps/union-eyes/app/api/exit-interviews/analytics/route.ts",
-        "apps/union-eyes/app/api/__tests__/exit-interviews-analytics.route.test.ts"
+        "apps/union-eyes/app/api/employer-execution/compliance/route.ts",
+        "apps/union-eyes/lib/api/__tests__/f05-b39-mandate.contract.test.ts"
       ],
-      "explanation": "Empty months now report consentCoverageRate null, and organizations with no measured continuity risk report currentExposureScore null, rather than false 100% coverage and zero exposure. Both reads are capped at 10,001 rows and the route refuses oversized snapshots instead of returning a truncated or misleading report. Regression tests cover empty months, actual coverage and oversized datasets. Source commits 4d4bcf81047777fb3511f0790af87188942fb54d and a502bf3996907b2a63f4bbb829a9fb767c9bc753.",
-      "remaining": "Replace bounded in-memory aggregation with native PostgreSQL month-bucket aggregates and ensure explicit tenant transaction/RLS; verify frontend null handling. Exact-HEAD focused/full regression, PG15/16, HTTP/browser/staging and independent Gate 0C.4 approval remain unproven."
+      "explanation": "Raising a compliance event is a financial-role act; a manual flag may be info or warning only, can never block an approval, cannot take an engine event code (it is prefixed manual_), and its summary and code are bounded; unknown body fields are refused."
+    },
+    "DEF-0B6-EMP-EXECUTION-READS-AT-MEMBER-FLOOR": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B39-F05-FINANCIAL-INTELLIGENCE-NEEDS-A-MANDATE-AND-FLAGS-CANNOT-BE-FORGED",
+      "files": [
+        "apps/union-eyes/app/api/employer-execution/compliance/route.ts",
+        "apps/union-eyes/app/api/employer-execution/payroll-runs/route.ts",
+        "apps/union-eyes/app/api/employer-execution/remittance-runs/route.ts",
+        "apps/union-eyes/lib/api/__tests__/f05-b39-mandate.contract.test.ts"
+      ],
+      "explanation": "The compliance event list moves from the member floor to the financial roles and is bounded to 500 rows; the payroll and remittance run lists already require the financial roles and a live view mandate."
     }
   }
 }
