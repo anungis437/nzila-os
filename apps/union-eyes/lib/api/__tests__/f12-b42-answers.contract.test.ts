@@ -10,8 +10,9 @@ describe('F12 answers that state a failure as a failure', () => {
     const source = read('app/api/exit-interviews/propagation/route.ts')
     expect(source).toContain("analysisType: z.enum(['downstream', 'upstream', 'coupling', 'full'])")
     expect(source).toContain('.strict()')
-    expect(source).toContain("ApiError.notFound('Node not found')")
+    expect(source).toContain("ApiError.notFound('node', nodeId)")
     expect(source).not.toContain("throw new Error('Node not found')")
+    expect(source).toContain("if (!organizationId) throw ApiError.badRequest('Organization context required')")
   })
 
   // DEF-0B7-EXC-INDEX-FAILURE-RETURNS-200-WITH-RAW-ERROR-TEXT

@@ -4435,10 +4435,15 @@
       "batch": "B42-F12-FAILURES-ARE-STATED-AS-FAILURES",
       "files": [
         "apps/union-eyes/app/api/exit-interviews/propagation/route.ts",
-        "apps/union-eyes/lib/api/__tests__/f12-b42-answers.contract.test.ts"
+        "apps/union-eyes/lib/api/__tests__/f12-b42-answers.contract.test.ts",
+        "apps/union-eyes/app/api/exit-interviews/propagation/__tests__/route.test.ts"
       ],
-      "explanation": "The query is validated (nodeId bounded text, analysisType one of four values, unknown parameters refused), an unknown node answers 404 instead of a thrown 500.",
-      "remaining": "The contract test pins the source only; no behavioural test drives the route with an unknown node."
+      "explanation": "The query is validated (nodeId bounded text, analysisType one of four values, unknown parameters refused), an unknown node answers 404 instead of a thrown 500. Follow-up source patch: reject missing organization context before map access; unknown node now returns 404 even when the map is empty, with an explicit behavioral route regression suite.",
+      "remaining": "Exact-HEAD behavioral Vitest execution, native PostgreSQL 15/16 and HTTP/browser acceptance are pending; no independent closure decision.",
+      "sourcePatchPendingQualification": {
+        "classification": "SOURCE_ONLY_UNVERIFIED",
+        "evidence": "docs/union-eyes/convergence/remediation/ue-propagation-node-behavior-20261030.md"
+      }
     },
     "DEF-0B12-PLT-WORKSPACE-TELEMETRY-LOGS-UNBOUNDED-CLIENT-STRINGS-AND-HAS-NO-LIMIT": {
       "status": "PARTIAL",

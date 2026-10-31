@@ -29,14 +29,16 @@ export const GET = withApi(
     entitlement: 'union_knowledge_suite',
   },
   async ({ organizationId, request }) => {
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
     const { searchParams } = new URL(request.url);
     const parsed = querySchema.safeParse(Object.fromEntries(searchParams.entries()));
     if (!parsed.success) throw ApiError.badRequest('nodeId must be text and analysisType one of downstream, upstream, coupling or full');
     const { nodeId, analysisType } = parsed.data;
 
-    const propagationMap = await buildDependencyPropagationMap(organizationId!);
+    const propagationMap = await buildDependencyPropagationMap(organizationId);
 
     if (!propagationMap.nodes.length) {
+      if (nodeId) throw ApiError.notFound('node', nodeId);
       return {
         data: propagationMap,
         meta: { message: 'No published interviews found to analyze' },
@@ -47,7 +49,7 @@ export const GET = withApi(
     if (nodeId) {
       const node = propagationMap.nodes.find((n) => n.id === nodeId);
       if (!node) {
-        throw ApiError.notFound('Node not found');
+        throw ApiError.notFound('node', nodeId);
       }
 
       const downstreamImpact = propagationMap.downstreamImpacts.find((d) => d.nodeId === nodeId);
