@@ -12,8 +12,13 @@ export const dynamic = 'force-dynamic';
 // The unsubscribe link is a narrowly scoped capability, not a user session.
 // Its signed action, campaign and recipient must all match; a recipient-only
 // token must never revoke preferences across unrelated organizations.
-function requireOrgAccess(token: string | null, campaignId: string, recipientId: string) {
-  return verifyTrackingToken(token, [`${campaignId}:${recipientId}:unsubscribe`]);
+function requireOrgAccess(token: string | null, campaignId: string | null, recipientId: string, scope: string | null) {
+  // A deliberate global opt-out uses a separate, explicitly signed action.
+  // The legacy recipient-only :unsubscribe token cannot authorize all-org writes.
+  const payload = scope === 'all'
+    ? `${recipientId}:unsubscribe-all`
+    : `${campaignId}:${recipientId}:unsubscribe`;
+  return verifyTrackingToken(token, [payload]);
 }
 
 function incrementStat(stats: any, key: string): Record<string, unknown> {
@@ -114,18 +119,19 @@ export async function GET(
   const { recipientId } = await context.params;
   const campaignId = request.nextUrl.searchParams.get('campaignId');
   const token = request.nextUrl.searchParams.get('token');
+  const scope = request.nextUrl.searchParams.get('scope');
   const reason = (request.nextUrl.searchParams.get('reason') || 'unsubscribe_link').slice(0, 200);
   const locale = request.nextUrl.searchParams.get('locale') || 'en-CA';
 
   // A recipient-only token carries no organization authority. Do not infer
   // an organization from the recipient and silently revoke other tenants.
-  if (!campaignId) {
-    return new NextResponse('A campaign-bound unsubscribe link is required', { status: 400 });
+  if ((!campaignId && scope !== 'all') || (campaignId && scope === 'all')) {
+    return new NextResponse('An explicit campaign or all-organizations unsubscribe scope is required', { status: 400 });
   }
 
   // Only an action-bound token for this exact campaign and recipient may
   // authorize a write; open/click tokens cannot be repurposed.
-  const verification = requireOrgAccess(token, campaignId, recipientId);
+  const verification = requireOrgAccess(token, campaignId, recipientId, scope);
   if (verification !== 'valid') {
     logger.warn('[communications/unsubscribe] Unsubscribe token not authorized', {
       recipientId,
@@ -135,15 +141,40 @@ export async function GET(
     return new NextResponse('Invalid unsubscribe token', { status: 401 });
   }
 
-  const campaignFound = await withSystemContext(async (tx) => {
+  const targetFound = await withSystemContext(async (tx) => {
+    if (!campaignId) {
+      // Global opt-out is an explicit, separately signed recipient capability.
+      // Collect organization IDs only from that recipient's preferences/lists;
+      // never infer a tenant from caller-supplied organization parameters.
+      const fromPreferences = await tx
+        .select({ organizationId: communicationPreferences.organizationId })
+        .from(communicationPreferences)
+        .where(eq(communicationPreferences.userId, recipientId))
+        .limit(101);
+      const fromLists = await tx
+        .select({ organizationId: newsletterDistributionLists.organizationId })
+        .from(newsletterListSubscribers)
+        .innerJoin(newsletterDistributionLists, eq(newsletterListSubscribers.listId, newsletterDistributionLists.id))
+        .where(eq(newsletterListSubscribers.profileId, recipientId))
+        .limit(101);
+      const organizationIds = [...new Set([...fromPreferences, ...fromLists].map(row => row.organizationId))];
+      // Do not silently truncate a large result or falsely acknowledge an
+      // unsubscribe when there are no organization records to revoke.
+      if (organizationIds.length === 0 || organizationIds.length > 100 || fromPreferences.length > 100 || fromLists.length > 100) {
+        return false;
+      }
+      for (const orgId of organizationIds) {
+        await revokeEmailForOrganization(tx, orgId, recipientId, reason, null);
+      }
+      return true;
+    }
+
     const [campaign] = await tx
       .select({ id: campaigns.id, organizationId: campaigns.organizationId, stats: campaigns.stats })
       .from(campaigns)
       .where(eq(campaigns.id, campaignId))
       .limit(1);
 
-    // Never acknowledge a successful unsubscribe for a campaign that cannot
-    // be resolved to an organization; the signed token alone is not a row.
     if (!campaign) return false;
 
     const updatedMessageRows = await tx
@@ -164,13 +195,12 @@ export async function GET(
         .where(and(eq(campaigns.id, campaignId), eq(campaigns.organizationId, campaign.organizationId)));
     }
 
-    // Only the campaign's organization may be affected by this link.
     await revokeEmailForOrganization(tx, campaign.organizationId, recipientId, reason, campaignId);
     return true;
   });
 
-  if (!campaignFound) {
-    return new NextResponse('Unsubscribe campaign not found', { status: 404 });
+  if (!targetFound) {
+    return new NextResponse('Unsubscribe target not found or too large', { status: 404 });
   }
 
   return new NextResponse(confirmationHtml(locale), {
