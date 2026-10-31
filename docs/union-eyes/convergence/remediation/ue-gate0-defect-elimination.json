@@ -11,7 +11,7 @@
   "totals": {
     "original": 777,
     "implementedPendingQualification": 342,
-    "partial": 60,
+    "partial": 61,
     "qualificationVerified": 0,
     "unresolved": 435,
     "externalBlockers": 0
@@ -373,6 +373,15 @@
       "family": "F05: a page request is parsed into bounded integers and an export is bounded, administrative and audited",
       "outstandingBefore": 436,
       "newlyImplemented": 1,
+      "outstandingAfter": 435,
+      "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B41-F08-OUTBOUND-FETCH-OF-SUPPLIED-ADDRESSES",
+      "family": "F08: the server fetches a supplied address only if it is a public http(s) address, follows each redirect by hand and reads a bounded document",
+      "outstandingBefore": 435,
+      "newlyImplemented": 0,
       "outstandingAfter": 435,
       "partial": 1,
       "evidenceCommit": null
@@ -4322,6 +4331,20 @@
         "apps/union-eyes/app/api/__tests__/rewards-export.route.test.ts"
       ],
       "explanation": "The export needs the administrator role before any read, is bounded to 5,000 rows, neutralises spreadsheet formula cells, and is audited in the transaction that reads it so a failed audit withholds the file (existing implementation and test)."
+    },
+    "DEF-0B4-CBA-INGESTION-FETCHES-UNRESTRICTED-URLS": {
+      "status": "PARTIAL",
+      "batch": "B41-F08-OUTBOUND-FETCH-OF-SUPPLIED-ADDRESSES",
+      "files": [
+        "apps/union-eyes/lib/security/outbound-url.ts",
+        "apps/union-eyes/lib/security/__tests__/outbound-url.test.ts",
+        "apps/union-eyes/lib/services/cba-intelligence/adapters/base-adapter.ts",
+        "apps/union-eyes/lib/services/cba-intelligence/adapters/__tests__/base-adapter.test.ts",
+        "apps/union-eyes/app/api/cba-intelligence/sources/route.ts",
+        "apps/union-eyes/lib/api/__tests__/f08-b41-outbound.contract.test.ts"
+      ],
+      "explanation": "A shared guard refuses non-http(s) schemes, credentials in the address, localhost and internal names, private, loopback, link-local, metadata and reserved IPv4 and IPv6 literals (including IPv4-mapped forms). The base adapter checks every address before fetching, follows redirects by hand (three at most) re-checking each hop, and refuses a source larger than 10 million characters; every ingestion adapter fetches through it, and a source address is checked when it is saved.",
+      "remaining": "The guard reads the address as written and does not resolve DNS, so a public name that resolves to a private address is not caught; that needs an egress policy or a resolving fetch. The body is still read whole before the size check."
     }
   }
 }

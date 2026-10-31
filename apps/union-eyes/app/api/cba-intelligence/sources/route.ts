@@ -1,5 +1,6 @@
 import { requireSystemAdmin } from "@/lib/api-auth-guard";
 import { withApi, z } from "@/lib/api/framework";
+import { assertPublicHttpUrl } from '@/lib/security/outbound-url';
 import {
   listSources,
   createSource,
@@ -44,6 +45,15 @@ export const GET = withApi(
 // POST /api/cba-intelligence/sources — Register a new source
 // ---------------------------------------------------------------------------
 
+const publicUrl = z.string().url().max(2000).refine((value) => {
+  try {
+    assertPublicHttpUrl(value);
+    return true;
+  } catch {
+    return false;
+  }
+}, 'Must be a public http(s) address');
+
 const createSourceSchema = z.object({
   slug: z.string().min(2).max(100),
   nameEn: z.string().min(1).max(255),
@@ -55,9 +65,10 @@ const createSourceSchema = z.object({
   trustTier: z.string(),
   jurisdictions: z.array(z.string()).optional(),
   sectors: z.array(z.string()).optional(),
-  baseUrl: z.string().url().optional(),
-  apiEndpoint: z.string().url().optional(),
-  feedUrl: z.string().url().optional(),
+  // A source address is fetched by the server, so it must be a public http(s) address when it is saved, not only when it is fetched.
+  baseUrl: publicUrl.optional(),
+  apiEndpoint: publicUrl.optional(),
+  feedUrl: publicUrl.optional(),
   updateCadence: z.string().max(100).optional(),
   expectedUpdateDays: z.number().int().positive().optional(),
   robotsNotes: z.string().max(2000).optional(),

@@ -2,7 +2,7 @@
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
  "corrected": 386,
- "partial": 69,
+ "partial": 70,
  "outstanding": 391,
  "accountedFor": 391,
  "families": [
@@ -1364,7 +1364,8 @@
    },
    {
     "id": "DEF-0B4-CBA-INGESTION-FETCHES-UNRESTRICTED-URLS",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B4-CLAUSE-LIBRARY-CREATOR-USER-IDS-DISCLOSED",
