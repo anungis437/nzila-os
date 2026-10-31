@@ -43,7 +43,8 @@ const SAFE_SECTIONS = new Set([
   'explainability_trust', 'sovereignty_governance',
 ])
 const NUMERIC_METADATA = new Set(['step', 'answered', 'included', 'deferred', 'required', 'optional'])
-const TOKEN_METADATA = new Set(['doctrineVersion', 'scale', 'continuity', 'governance', 'routeVersion', 'decision', 'ruleId'])
+const TOKEN_METADATA = new Set(['doctrineVersion', 'scale', 'continuity', 'governance', 'exposure', 'lens', 'routeVersion', 'decision', 'ruleId'])
+const BOOLEAN_METADATA = new Set(['safeDefault'])
 const SAFE_TOKEN = /^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,63}$/
 
 async function boundedJson(request: NextRequest): Promise<unknown> {
@@ -126,6 +127,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       if (NUMERIC_METADATA.has(k) && typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 100000) {
         entries.push([k, v])
       } else if (TOKEN_METADATA.has(k) && typeof v === 'string' && v.length <= MAX_METADATA_VALUE_LEN && SAFE_TOKEN.test(v)) {
+        entries.push([k, v])
+      } else if (BOOLEAN_METADATA.has(k) && typeof v === 'boolean') {
         entries.push([k, v])
       }
     }

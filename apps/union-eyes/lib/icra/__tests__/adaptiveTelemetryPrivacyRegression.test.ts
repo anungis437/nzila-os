@@ -174,12 +174,13 @@ describe('Adaptive telemetry privacy regression', () => {
         phone: '5551234567',
         ruleId: 'R-3',
         decision: 'defer_optional',
+        safeDefault: true,
       },
     }));
     expect(mockEmit).toHaveBeenCalledTimes(1);
     const event = mockEmit.mock.calls[0]?.[0];
     expect(event.sectionId).toBeUndefined();
-    expect(event.metadata).toEqual({ ruleId: 'R-3', decision: 'defer_optional' });
+    expect(event.metadata).toEqual({ ruleId: 'R-3', decision: 'defer_optional', safeDefault: true });
   });
 
   it('drops oversized request bodies before the emitter is reached', async () => {
