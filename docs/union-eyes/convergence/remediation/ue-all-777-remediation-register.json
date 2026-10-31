@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 381,
-    "engineeringRemaining": 396,
+    "engineeringCorrected": 383,
+    "engineeringRemaining": 394,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 67
   },
@@ -2880,9 +2880,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B38-F01-F09-F10-DEPRECATION-REGISTRY-AND-VERIFIED-JOBS",
+        "path": "apps/union-eyes/app/api/chatbot/sessions/route.ts; apps/union-eyes/app/api/chatbot/sessions/[sessionId]/messages/route.ts; apps/union-eyes/lib/ai/chatbot-service.ts; apps/union-eyes/app/api/__tests__/chatbot-session-read-guards.route.test.ts",
+        "explanation": "The session list reads active sessions only, and the message read needs the entitlement, the AI feature flag, the safety check and the rate limit, and refuses an archived or deleted session (existing implementation and test).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CLAUSE-LIBRARY-SYSTEM-ROLE-CROSS-TENANT-READS",
@@ -6089,9 +6096,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B38-F01-F09-F10-DEPRECATION-REGISTRY-AND-VERIFIED-JOBS",
+        "path": "apps/union-eyes/lib/api/deprecation.ts; apps/union-eyes/lib/api/__tests__/deprecation-registry.test.ts",
+        "explanation": "Seven registry rows named replacement routes that do not exist; they now name the real route (current-user, message thread, strike funds) or REMOVED with the reason. A test checks every named replacement against the route tree. A sunset date already past is no longer advertised in a Sunset header, and the body states that it has passed.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-SYS-CRON-GET-ALIASES-RUN-STATE-CHANGES",

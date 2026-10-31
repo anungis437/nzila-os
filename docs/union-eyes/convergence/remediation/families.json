@@ -1,26 +1,26 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 381,
+ "corrected": 383,
  "partial": 67,
- "outstanding": 396,
- "accountedFor": 396,
+ "outstanding": 394,
+ "accountedFor": 394,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
    "purpose": "Scheduled and provider-driven jobs: method, secret, scheduling, replay and failure reporting",
-   "defects": 12,
+   "defects": 11,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 8,
+    "MEDIUM": 7,
     "LOW": 4
    },
-   "namedRoutes": 6,
+   "namedRoutes": 3,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 1,
     "0B.5": 1,
-    "0B.6": 2,
+    "0B.6": 1,
     "0B.7": 1,
     "0B.8": 2,
     "0B.9": 1,
@@ -192,16 +192,15 @@
   {
    "family": "F09-RATE-LIMIT-IDEMPOTENCY-REPLAY",
    "purpose": "Abuse controls: rate limits, idempotency keys and replay protection",
-   "defects": 5,
+   "defects": 4,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 4,
+    "MEDIUM": 3,
     "LOW": 1
    },
    "namedRoutes": 0,
    "namedFiles": 0,
    "tranches": {
-    "0B.4": 1,
     "0B.6": 3,
     "0B.11": 1
    }
@@ -281,10 +280,6 @@
    {
     "id": "DEF-0B5-COGNITION-KPI-ROI-FROM-ASSUMED-HOURS",
     "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B6-SYS-DEPRECATION-REGISTRY-NAMES-MISSING-REPLACEMENTS-AND-STALE-SUNSET",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B6-SYS-SLA-WATCHDOG-UNBOUNDED-SCAN-AND-UNAWAITED-DUPLICATE-METRICS",
@@ -1495,10 +1490,6 @@
    }
   ],
   "F09-RATE-LIMIT-IDEMPOTENCY-REPLAY": [
-   {
-    "id": "DEF-0B4-CHATBOT-SESSION-READ-IGNORES-STATE-AND-FEATURE-GATE",
-    "severity": "MEDIUM"
-   },
    {
     "id": "DEF-0B6-EMP-REPLAY-NOT-IDEMPOTENT-GATES-APPROVAL",
     "severity": "MEDIUM",

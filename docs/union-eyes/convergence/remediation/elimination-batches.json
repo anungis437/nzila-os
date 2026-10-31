@@ -4243,6 +4243,53 @@
           "explanation": "The legacy event item delegates to the canonical calendar route, which applies private and confidential visibility and selects no meeting password or access code."
         }
       ]
+    },
+    {
+      "id": "B38-F01-F09-F10-DEPRECATION-REGISTRY-AND-VERIFIED-JOBS",
+      "family": "F01/F09/F10: a registry names replacements that exist, a job pages its scan and awaits its writes, and a read honours the record's state and the feature gate",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B6-SYS-DEPRECATION-REGISTRY-NAMES-MISSING-REPLACEMENTS-AND-STALE-SUNSET",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/api/deprecation.ts",
+            "apps/union-eyes/lib/api/__tests__/deprecation-registry.test.ts"
+          ],
+          "explanation": "Seven registry rows named replacement routes that do not exist; they now name the real route (current-user, message thread, strike funds) or REMOVED with the reason. A test checks every named replacement against the route tree. A sunset date already past is no longer advertised in a Sunset header, and the body states that it has passed."
+        },
+        {
+          "prefix": "DEF-0B6-SYS-SLA-WATCHDOG-UNBOUNDED-SCAN-AND-UNAWAITED-DUPLICATE-METRICS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/cron/sla-watchdog/route.ts",
+            "apps/union-eyes/app/api/__tests__/cron-sla-watchdog.route.test.ts",
+            "apps/union-eyes/lib/workflow/__tests__/sla-alerts.pglite.test.ts"
+          ],
+          "explanation": "The watchdog keyset-pages the claims scan under a page cap, assesses each claim once, awaits the metric writes keyed by organization and hour, and reports a failed metric or alert write as a failed job (existing implementation, existing route and pglite tests)."
+        },
+        {
+          "prefix": "DEF-0B4-CHATBOT-SESSION-READ-IGNORES-STATE-AND-FEATURE-GATE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/chatbot/sessions/route.ts",
+            "apps/union-eyes/app/api/chatbot/sessions/[sessionId]/messages/route.ts",
+            "apps/union-eyes/lib/ai/chatbot-service.ts",
+            "apps/union-eyes/app/api/__tests__/chatbot-session-read-guards.route.test.ts"
+          ],
+          "explanation": "The session list reads active sessions only, and the message read needs the entitlement, the AI feature flag, the safety check and the rate limit, and refuses an archived or deleted session (existing implementation and test)."
+        },
+        {
+          "prefix": "DEF-0B8-ICRA-CHECKOUT-REDIRECT-DEFAULTS-TO-LOCALHOST-AND-PRICE-MAY-DIFFER-FROM-DISPLAYED",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/icra/checkout/route.ts",
+            "apps/union-eyes/app/api/__tests__/icra-checkout.route.test.ts"
+          ],
+          "explanation": "Production with no application URL refuses to open a session instead of redirecting a buyer to localhost (existing implementation and test).",
+          "remaining": "A configured Stripe price id can still differ from the amount the application displays; nothing compares them."
+        }
+      ]
     }
   ]
 }

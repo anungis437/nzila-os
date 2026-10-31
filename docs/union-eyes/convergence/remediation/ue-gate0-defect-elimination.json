@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 336,
-    "partial": 59,
+    "implementedPendingQualification": 339,
+    "partial": 58,
     "qualificationVerified": 0,
-    "unresolved": 441,
+    "unresolved": 438,
     "externalBlockers": 0
   },
   "batches": [
@@ -347,6 +347,15 @@
       "outstandingBefore": 446,
       "newlyImplemented": 5,
       "outstandingAfter": 441,
+      "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B38-F01-F09-F10-DEPRECATION-REGISTRY-AND-VERIFIED-JOBS",
+      "family": "F01/F09/F10: a registry names replacements that exist, a job pages its scan and awaits its writes, and a read honours the record's state and the feature gate",
+      "outstandingBefore": 441,
+      "newlyImplemented": 3,
+      "outstandingAfter": 438,
       "partial": 1,
       "evidenceCommit": null
     }
@@ -827,14 +836,14 @@
       "explanation": "The in-process bus events are replaced by a durable inbox alert for the steward each late or at-risk claim is assigned to, written inside that organization's own context and deduplicated by a unique index over (organization, user, claim+kind+deadline) from migration 20261103: a rerun, retry or overlapping run adds nothing; a new deadline or escalation alerts again. Unassigned claims are counted in the result. Real-SQL tested; mutation-proved (dedupe, recipient). Native PostgreSQL qualification of the migration is still to run."
     },
     "DEF-0B6-SYS-SLA-WATCHDOG-UNBOUNDED-SCAN-AND-UNAWAITED-DUPLICATE-METRICS": {
-      "status": "PARTIAL",
-      "batch": "B06-SLA-OBSERVABILITY-CALENDAR",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B38-F01-F09-F10-DEPRECATION-REGISTRY-AND-VERIFIED-JOBS",
       "files": [
         "apps/union-eyes/app/api/cron/sla-watchdog/route.ts",
-        "apps/union-eyes/lib/workflow/sla-alerts.ts"
+        "apps/union-eyes/app/api/__tests__/cron-sla-watchdog.route.test.ts",
+        "apps/union-eyes/lib/workflow/__tests__/sla-alerts.pglite.test.ts"
       ],
-      "explanation": "The scan is keyset-paged (500 per page, bounded page count that fails the run rather than truncating silently), each claim is assessed once, and the metrics are awaited with their failures reported through the job result (500 naming the organization). Metrics are keyed by organization and clock hour.",
-      "remaining": "recordPilotMetricEvent does not deduplicate by trace id, so two runs in one hour still record two metric rows; an idempotency key needs support in @nzila/platform-pilot-metrics."
+      "explanation": "The watchdog keyset-pages the claims scan under a page cap, assesses each claim once, awaits the metric writes keyed by organization and hour, and reports a failed metric or alert write as a failed job (existing implementation, existing route and pglite tests)."
     },
     "DEF-0B3-ALERT-SWEEP-AUDIT-ATOMICITY-UNPROVEN": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -2021,13 +2030,13 @@
     },
     "DEF-0B8-ICRA-CHECKOUT-REDIRECT-DEFAULTS-TO-LOCALHOST-AND-PRICE-MAY-DIFFER-FROM-DISPLAYED": {
       "status": "PARTIAL",
-      "batch": "B16-F09-F10-DUES-RECONCILIATION-ICRA",
+      "batch": "B38-F01-F09-F10-DEPRECATION-REGISTRY-AND-VERIFIED-JOBS",
       "files": [
         "apps/union-eyes/app/api/icra/checkout/route.ts",
         "apps/union-eyes/app/api/__tests__/icra-checkout.route.test.ts"
       ],
-      "explanation": "In production a missing NEXT_PUBLIC_APP_URL is a 503 with no Stripe session instead of a redirect to localhost.",
-      "remaining": "The charged amount comes from a Stripe price id or a built-in default and is not compared with the price the page displays."
+      "explanation": "Production with no application URL refuses to open a session instead of redirecting a buyer to localhost (existing implementation and test).",
+      "remaining": "A configured Stripe price id can still differ from the amount the application displays; nothing compares them."
     },
     "DEF-0B7-COGB-EMPTY-ORGANIZATION-RESILIENCE-INDEX-DIVIDES-BY-ZERO-AND-REPORTS-STRONG": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -4220,6 +4229,26 @@
         "apps/union-eyes/lib/api/__tests__/f07-b37-object-access.contract.test.ts"
       ],
       "explanation": "The completions list reads only completed registrations of the caller's organization."
+    },
+    "DEF-0B6-SYS-DEPRECATION-REGISTRY-NAMES-MISSING-REPLACEMENTS-AND-STALE-SUNSET": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B38-F01-F09-F10-DEPRECATION-REGISTRY-AND-VERIFIED-JOBS",
+      "files": [
+        "apps/union-eyes/lib/api/deprecation.ts",
+        "apps/union-eyes/lib/api/__tests__/deprecation-registry.test.ts"
+      ],
+      "explanation": "Seven registry rows named replacement routes that do not exist; they now name the real route (current-user, message thread, strike funds) or REMOVED with the reason. A test checks every named replacement against the route tree. A sunset date already past is no longer advertised in a Sunset header, and the body states that it has passed."
+    },
+    "DEF-0B4-CHATBOT-SESSION-READ-IGNORES-STATE-AND-FEATURE-GATE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B38-F01-F09-F10-DEPRECATION-REGISTRY-AND-VERIFIED-JOBS",
+      "files": [
+        "apps/union-eyes/app/api/chatbot/sessions/route.ts",
+        "apps/union-eyes/app/api/chatbot/sessions/[sessionId]/messages/route.ts",
+        "apps/union-eyes/lib/ai/chatbot-service.ts",
+        "apps/union-eyes/app/api/__tests__/chatbot-session-read-guards.route.test.ts"
+      ],
+      "explanation": "The session list reads active sessions only, and the message read needs the entitlement, the AI feature flag, the safety check and the rate limit, and refuses an archived or deleted session (existing implementation and test)."
     }
   }
 }
