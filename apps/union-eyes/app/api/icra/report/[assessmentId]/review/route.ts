@@ -22,6 +22,7 @@ import { NextResponse } from 'next/server';
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { logger } from '@/lib/logger';
 import { ALL_QUESTIONS } from '@/lib/icra/questions';
 import type { OrganizationalContinuityProfile } from '@/lib/icra/types';
@@ -130,6 +131,17 @@ export async function POST(request: Request, { params }: RouteContext) {
       return NextResponse.json({ error: 'Report AI slot could not be resolved.' }, { status: 422 });
     }
 
+    // Every review decision is audited. The audit chain is organization-keyed: a claimed assessment is audited against the organization
+    // that claimed it, and an unclaimed prospect assessment against the organization the reviewing platform administrator is acting in
+    // (as for any platform operation). A reviewer acting in no organization cannot record a decision, so none is made unrecorded.
+    const auditOrganizationId = assessment.claimedOrgId ?? (await getOrganizationIdForUser(userId).catch(() => null));
+    if (!auditOrganizationId) {
+      return NextResponse.json(
+        { error: 'A review decision needs an acting organization to be recorded against. Select an organization and retry.' },
+        { status: 409 },
+      );
+    }
+
     const updated = applyAdaptiveReportReviewDecision(slot, {
       reviewerRole: VERIFIED_REVIEWER_ROLE,
       status: action === 'approve' ? 'approved' : 'rejected',
@@ -147,19 +159,21 @@ export async function POST(request: Request, { params }: RouteContext) {
       .set({ organizationContext: updatedOrganizationContext })
       .where(eq(icraAssessments.id, assessmentId));
 
-    // The decision itself (reviewer role, status, summary, time) is stored in the assessment row above. An assessment
-    // that a tenant has claimed also gets a canonical audit record in the same transaction, so the decision cannot
-    // commit without it. An unclaimed prospect assessment has no tenant to audit against.
-    if (assessment.claimedOrgId) {
-      await persistAtomicAudit(tx, {
-        organizationId: assessment.claimedOrgId,
-        userId,
-        action: 'icra.report.review',
-        resourceType: 'icra_assessments',
-        resourceId: assessmentId,
-        details: { decision: action, reviewerRole: VERIFIED_REVIEWER_ROLE, reviewStatus: updated.reviewWorkflow.status },
-      });
-    }
+    // The decision is stored in the assessment row above and its audit record is written in the same transaction, so the decision
+    // cannot commit without it. The summary text is the reviewer's own words and is not copied into the audit record.
+    await persistAtomicAudit(tx, {
+      organizationId: auditOrganizationId,
+      userId,
+      action: 'icra.report.review',
+      resourceType: 'icra_assessments',
+      resourceId: assessmentId,
+      details: {
+        decision: action,
+        reviewerRole: VERIFIED_REVIEWER_ROLE,
+        reviewStatus: updated.reviewWorkflow.status,
+        assessmentClaimed: Boolean(assessment.claimedOrgId),
+      },
+    });
 
     logger.info('icra.report.review_recorded', {
       assessmentId,

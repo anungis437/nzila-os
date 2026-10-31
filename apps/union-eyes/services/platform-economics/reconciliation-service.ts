@@ -29,7 +29,8 @@ import {
 } from '@/db/schema';
 import { eq, and, gte, lte, inArray, sql, desc } from 'drizzle-orm';
 import { ApiError } from '@/lib/api/errors';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { addMoney, subtractMoney, absMoney, toCents } from '@/lib/decimal-safe';
 
 // ============================================================================
@@ -324,15 +325,17 @@ export async function runReconciliation(
         ),
       );
 
-    await auditLog({
-      eventType: AuditEventType.DATA_CREATE,
-      severity: AuditSeverity.HIGH,
+    // The run, its matches and exceptions, and these audit records commit or roll back together: a failed audit write leaves no run, and
+    // a run that rolls back leaves no audit event behind.
+    const auditTx = tx as unknown as RLSTx;
+    await persistAtomicAudit(auditTx, {
       organizationId: input.organizationId,
-      resource: 'reconciliation_run',
+      userId: input.runBy ?? null,
+      action: 'reconciliation.run.completed',
+      resourceType: 'reconciliation_run',
       resourceId: run.id,
-      action: 'reconciliation_completed',
-      userId: input.runBy,
-      metadata: {
+      details: {
+        severity: 'high',
         totalInvoices: invoices.length,
         totalPayments: payments.length,
         totalMatches,
@@ -344,15 +347,14 @@ export async function runReconciliation(
     // CRITICAL variance alert: flag net variance above $100 as critical audit event
     const varianceCents = Math.abs(toCents(varianceCad));
     if (varianceCents > 10000) {
-      await auditLog({
-        eventType: AuditEventType.DATA_CREATE,
-        severity: AuditSeverity.CRITICAL,
+      await persistAtomicAudit(auditTx, {
         organizationId: input.organizationId,
-        resource: 'reconciliation_run',
+        userId: input.runBy ?? null,
+        action: 'reconciliation.run.critical_variance',
+        resourceType: 'reconciliation_run',
         resourceId: run.id,
-        action: 'reconciliation_critical_variance',
-        userId: input.runBy,
-        metadata: {
+        details: {
+          severity: 'critical',
           varianceCad,
           threshold: '100.00',
           totalExceptions,
@@ -390,40 +392,43 @@ export async function resolveException(
     notes: string;
   },
 ): Promise<ReconciliationException> {
-  const [updated] = await db
-    .update(reconciliationExceptions)
-    .set({
-      status: resolution.status,
-      resolvedBy: resolution.resolvedBy,
-      resolvedAt: new Date(),
-      resolutionNotes: resolution.notes,
-      updatedAt: new Date(),
-    })
-    .where(
-      and(
-        eq(reconciliationExceptions.id, exceptionId),
-        eq(reconciliationExceptions.organizationId, organizationId),
-        inArray(reconciliationExceptions.status, ['open', 'under_review']),
-      ),
-    )
-    .returning();
+  // The status change and its audit record are one transaction: a failed audit write leaves the exception open, so a write-off can never
+  // stand without its record. The update is conditional on the exception still being open, so two resolvers cannot both succeed.
+  return db.transaction(async (tx) => {
+    const [updated] = await tx
+      .update(reconciliationExceptions)
+      .set({
+        status: resolution.status,
+        resolvedBy: resolution.resolvedBy,
+        resolvedAt: new Date(),
+        resolutionNotes: resolution.notes,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(reconciliationExceptions.id, exceptionId),
+          eq(reconciliationExceptions.organizationId, organizationId),
+          inArray(reconciliationExceptions.status, ['open', 'under_review']),
+        ),
+      )
+      .returning();
 
-  if (!updated) {
-    throw new Error(`Exception ${exceptionId} not found or already resolved`);
-  }
+    if (!updated) {
+      throw new Error(`Exception ${exceptionId} not found or already resolved`);
+    }
 
-  await auditLog({
-    eventType: AuditEventType.DATA_UPDATE,
-    severity: AuditSeverity.MEDIUM,
-    organizationId: updated.organizationId ?? undefined,
-    resource: 'reconciliation_exception',
-    resourceId: exceptionId,
-    action: 'exception_resolved',
-    userId: resolution.resolvedBy,
-    metadata: { status: resolution.status, notes: resolution.notes },
+    await persistAtomicAudit(tx as unknown as RLSTx, {
+      organizationId,
+      userId: resolution.resolvedBy,
+      action: 'reconciliation.exception.resolved',
+      resourceType: 'reconciliation_exception',
+      resourceId: exceptionId,
+      // The resolver's notes are free text and are kept on the exception row, not copied into the audit record.
+      details: { status: resolution.status, notesLength: resolution.notes.length },
+    });
+
+    return updated;
   });
-
-  return updated;
 }
 
 // ============================================================================

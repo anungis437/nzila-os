@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 616,
- "partial": 91,
- "outstanding": 161,
- "accountedFor": 161,
+ "corrected": 621,
+ "partial": 88,
+ "outstanding": 156,
+ "accountedFor": 156,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -110,10 +110,10 @@
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 32,
+   "defects": 27,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 30,
+    "MEDIUM": 25,
     "LOW": 0
    },
    "namedRoutes": 5,
@@ -121,14 +121,13 @@
    "tranches": {
     "0B.1": 1,
     "0B.2": 1,
-    "0B.3": 1,
-    "0B.4": 4,
-    "0B.6": 2,
+    "0B.4": 3,
+    "0B.6": 1,
     "0B.7": 3,
-    "0B.8": 4,
+    "0B.8": 3,
     "0B.9": 1,
     "0B.10": 5,
-    "0B.11": 7,
+    "0B.11": 6,
     "0B.12": 3
    }
   },
@@ -557,11 +556,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B3-BILLING-AUDIT-NOT-ATOMIC",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
     "id": "DEF-0B4-CALENDAR-SYNC-AUDIT-NOT-ATOMIC",
     "severity": "MEDIUM"
    },
@@ -574,18 +568,8 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B4-CLAUSE-LIBRARY-EDIT-AND-DELETE-NO-VERSION-OR-RETENTION",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
     "id": "DEF-0B6-EMP-PAYROLL-POSTED-IS-STATUS-ONLY",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-SYS-RESEND-SUPPRESSION-UPDATES-ONLY-ONE-PREFERENCE-ROW",
-    "severity": "MEDIUM",
-    "partial": true
    },
    {
     "id": "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-BEARER-LINK-NOT-BOUND-TO-GRANT",
@@ -605,10 +589,6 @@
     "id": "DEF-0B8-ICRA-CLAIM-BINDS-TO-ANY-SIGNED-IN-USER-ORGANIZATION-AND-KEEPS-CAPABILITY",
     "severity": "MEDIUM",
     "partial": true
-   },
-   {
-    "id": "DEF-0B8-ICRA-REVIEW-AUDIT-ONLY-WHEN-A-CLAIMED-ORGANIZATION-EXISTS",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B8-FED-EXTERNAL-DECISION-AUDIT-SEPARATE-AND-BEST-EFFORT-IN-LEGACY-MODE",
@@ -648,10 +628,6 @@
    },
    {
     "id": "DEF-0B11-PRP-DUES-PAY-POST-INITIATION-AUDIT-COMMITS-BEFORE-THE-PROCESSOR-CALL-AND-THE-LATER-STATE-CHANGES-ARE-UNAUDITED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-PRP-RECONCILIATION-AUDIT-IS-A-SEPARATE-EVENT-NOT-COMMITTED-WITH-THE-RECONCILIATION-WRITES",
     "severity": "MEDIUM"
    },
    {

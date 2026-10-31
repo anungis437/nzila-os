@@ -835,8 +835,9 @@ export async function getInvoices(organizationId: string, limit = 50) {
     .limit(limit);
 }
 
-export async function getInvoiceWithLineItems(invoiceId: string, organizationId: string) {
-  const [invoice] = await db
+/** eader is the caller's tenant transaction when the read and its audit record must commit together; it defaults to the shared handle. */
+export async function getInvoiceWithLineItems(invoiceId: string, organizationId: string, reader: Pick<typeof db, 'select'> = db) {
+  const [invoice] = await reader
     .select()
     .from(platformInvoices)
     .where(and(eq(platformInvoices.id, invoiceId), eq(platformInvoices.organizationId, organizationId)))
@@ -844,7 +845,7 @@ export async function getInvoiceWithLineItems(invoiceId: string, organizationId:
 
   if (!invoice || invoice.organizationId !== organizationId) return null;
 
-  const lineItems = await db
+  const lineItems = await reader
     .select()
     .from(platformInvoiceLineItems)
     .where(eq(platformInvoiceLineItems.invoiceId, invoiceId));
@@ -852,8 +853,8 @@ export async function getInvoiceWithLineItems(invoiceId: string, organizationId:
   return { ...invoice, lineItems };
 }
 
-export async function replayInvoiceDeterministically(invoiceId: string, organizationId: string) {
-  const invoiceData = await getInvoiceWithLineItems(invoiceId, organizationId);
+export async function replayInvoiceDeterministically(invoiceId: string, organizationId: string, reader: Pick<typeof db, 'select'> = db) {
+  const invoiceData = await getInvoiceWithLineItems(invoiceId, organizationId, reader);
   if (!invoiceData) return null;
 
   let recomputedSubtotalCents = 0;

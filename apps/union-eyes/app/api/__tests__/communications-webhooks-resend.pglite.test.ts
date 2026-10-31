@@ -3,7 +3,9 @@ import crypto from 'crypto';
 import { NextRequest } from 'next/server';
 import type { PGlite } from '@electric-sql/pglite';
 import { campaigns, communicationPreferences, consentRecords, messageLog } from '@/db/schema';
-import { notificationDeliveryLog } from '@/db/schema/domains/communications';
+import { notificationDeliveryLog, emailAddressSuppressions } from '@/db/schema/domains/communications';
+import { newsletterDistributionLists, newsletterListSubscribers } from '@/db/schema';
+import { addressSha256 } from '@/lib/communications/address-suppression';
 import { createTableDatabase } from './support/pglite-tables';
 
 // The Resend webhook against a real SQL engine. Provider events are redelivered and arrive out of order, so these tests pin
@@ -72,7 +74,10 @@ async function send(type: string, providerId: string, extra: Record<string, unkn
 }
 
 beforeAll(async () => {
-  const created = await createTableDatabase([campaigns, messageLog, communicationPreferences, consentRecords, notificationDeliveryLog]);
+  const created = await createTableDatabase([campaigns, messageLog, communicationPreferences, consentRecords, notificationDeliveryLog, newsletterDistributionLists, newsletterListSubscribers, emailAddressSuppressions], [
+    // the table generator does not emit the unique constraint that platform 0053 declares and the upsert arbitrates on
+    'CREATE UNIQUE INDEX email_address_suppressions_hash_uq ON email_address_suppressions (address_sha256)',
+  ]);
   pg = created.pg;
   state.db = created.db;
   process.env.RESEND_API_KEY = 're_test';
@@ -86,7 +91,7 @@ afterAll(async () => {
 beforeEach(async () => {
   audit.mockReset();
   audit.mockResolvedValue(undefined);
-  await pg.exec('TRUNCATE consent_records, communication_preferences, message_log, campaigns, notification_delivery_log');
+  await pg.exec('TRUNCATE consent_records, communication_preferences, message_log, campaigns, notification_delivery_log, newsletter_list_subscribers, newsletter_distribution_lists, email_address_suppressions');
   await insertCampaign(CAMPAIGN, ORG_A);
 });
 
@@ -179,7 +184,7 @@ describe('resend webhook — suppression', () => {
     expect(await stats()).toEqual({ unsubscribed: 1 });
   });
 
-  it('suppresses only the organization that owns the message', async () => {
+  it('keeps the recipient\u2019s consent and preference organization-scoped: only the organization that owns the message is changed', async () => {
     await insertLog(ORG_A, 'shared-recipient', 'prov-10');
     await pg.query(
       `INSERT INTO communication_preferences (id, organization_id, user_id, email_enabled) VALUES ($1, $2, 'shared-recipient', true)`,
@@ -203,6 +208,73 @@ describe('resend webhook — suppression', () => {
     expect((await send('email.complained', 'prov-11')).status).toBe(200);
     expect(await count('consent_records')).toBe(1);
     expect(await stats()).toEqual({ complained: 1 });
+  });
+});
+
+// DEF-0B6-SYS-RESEND-SUPPRESSION-UPDATES-ONLY-ONE-PREFERENCE-ROW
+describe('resend webhook — list subscriptions and platform-wide delivery suppression', () => {
+  const LIST_A = '44444444-4444-4444-8444-444444444444';
+  const LIST_B = '55555555-5555-4555-8555-555555555555';
+  const subscribe = async (listId: string, profileId: string) =>
+    pg.query(`INSERT INTO newsletter_list_subscribers (id, list_id, profile_id, email, status) VALUES ($1, $2, $3, 'u@example.com', 'subscribed')`, [crypto.randomUUID(), listId, profileId]);
+  const subscriptionStatus = async (listId: string) =>
+    (await pg.query<{ status: string }>('SELECT status FROM newsletter_list_subscribers WHERE list_id = $1', [listId])).rows[0].status;
+
+  beforeEach(async () => {
+    await pg.query(`INSERT INTO newsletter_distribution_lists (id, organization_id, name, created_by) VALUES ($1, $2, 'A list', 'u'), ($3, $4, 'B list', 'u')`, [LIST_A, ORG_A, LIST_B, ORG_B]);
+  });
+
+  it('ends the recipient\u2019s subscriptions to the organization\u2019s own lists, and to no other organization\u2019s', async () => {
+    await subscribe(LIST_A, 'r-list');
+    await subscribe(LIST_B, 'r-list');
+    await insertLog(ORG_A, 'r-list', 'prov-20');
+    await send('email.complained', 'prov-20');
+    expect(await subscriptionStatus(LIST_A)).toBe('unsubscribed');
+    expect(await subscriptionStatus(LIST_B)).toBe('subscribed');
+    expect(audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ details: expect.objectContaining({ listSubscriptionsEnded: 1 }) }));
+  });
+
+  it('records the address platform-wide, as a hash only, in the same transaction', async () => {
+    await insertLog(ORG_A, 'r-plat', 'prov-21');
+    await send('email.complained', 'prov-21', {}, 'evt-plat');
+    const rows = await pg.query<{ address_sha256: string; reason: string; source_organization_id: string | null; last_provider_event_id: string }>(
+      'SELECT address_sha256, reason, source_organization_id, last_provider_event_id FROM email_address_suppressions');
+    expect(rows.rows).toEqual([{ address_sha256: addressSha256('u@example.com'), reason: 'complaint', source_organization_id: null, last_provider_event_id: 'evt-plat' }].map((r) => ({ ...r, source_organization_id: expect.anything() })));
+    expect(JSON.stringify(rows.rows)).not.toContain('u@example.com');
+  });
+
+  it('records an event suppressed by the provider with its own reason, and a redelivery leaves one row', async () => {
+    await insertLog(ORG_A, 'r-prov', 'prov-22');
+    await send('email.suppressed', 'prov-22', {}, 'evt-1');
+    await send('email.suppressed', 'prov-22', {}, 'evt-1');
+    const rows = await pg.query<{ reason: string }>('SELECT reason FROM email_address_suppressions');
+    expect(rows.rows).toEqual([{ reason: 'provider_suppressed' }]);
+  });
+
+  it('does not guess which of several recipients complained', async () => {
+    await insertLog(ORG_A, 'r-many', 'prov-23');
+    await send('email.complained', 'prov-23', { to: ['a@example.com', 'b@example.com'] });
+    expect(await count('email_address_suppressions')).toBe(0);
+    expect(await count('consent_records')).toBe(1);
+  });
+
+  it('clears an earlier lift when the address complains again', async () => {
+    await insertLog(ORG_A, 'r-again', 'prov-24');
+    await send('email.complained', 'prov-24', {}, 'evt-1');
+    await pg.query(`UPDATE email_address_suppressions SET lifted_at = now(), lifted_by = 'admin', lift_reason = 'confirmed with the member'`);
+    await insertLog(ORG_A, 'r-again', 'prov-25');
+    await send('email.complained', 'prov-25', {}, 'evt-2');
+    const rows = await pg.query<{ lifted_at: string | null; lifted_by: string | null; last_provider_event_id: string }>('SELECT lifted_at, lifted_by, last_provider_event_id FROM email_address_suppressions');
+    expect(rows.rows).toEqual([{ lifted_at: null, lifted_by: null, last_provider_event_id: 'evt-2' }]);
+  });
+
+  it('leaves no platform suppression and no ended subscription when the audit entry cannot be written', async () => {
+    await subscribe(LIST_A, 'r-rb2');
+    await insertLog(ORG_A, 'r-rb2', 'prov-26');
+    audit.mockRejectedValueOnce(new Error('audit unavailable'));
+    await expect(send('email.complained', 'prov-26')).rejects.toThrow('audit unavailable');
+    expect(await count('email_address_suppressions')).toBe(0);
+    expect(await subscriptionStatus(LIST_A)).toBe('subscribed');
   });
 });
 

@@ -25,6 +25,7 @@
 export * from './messages';
 export * from './notifications';
 export * from './contact-submissions';
+export * from './email-address-suppressions';
 export * from './newsletters';
 export * from './sms';
 export * from './surveys';

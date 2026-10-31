@@ -629,6 +629,17 @@ export const communicationsNotificationsEntries: StorageAuthorityEntry[] = [
     reviewPriority: "NONE",
   },
   {
+    table: "email_address_suppressions",
+    classification: "SYSTEM_ONLY",
+    reason: "Created by platform 0053 with cache 0043: the platform-wide delivery suppression of an e-mail address that complained or that the provider suppressed (SHA-256 of the lower-cased address, no plaintext). Not tenant data and not consent: the provider webhook writes it and the single sending function reads it, both under the system role, so no tenant session can read or change it. A suppression is lifted only by a platform administrator through an audited route.",
+    supportingCapability: ["app/api/communications/webhooks/resend/route.ts","lib/communications/address-suppression.ts","lib/email-service.ts","app/api/admin/email-suppressions/route.ts"],
+    requiredRuntimePrivileges: [],
+    requiredSystemPrivileges: ["SELECT","INSERT","UPDATE"],
+    invocationAuthority: "SYSTEM_SCHEDULE",
+    dbExecutionPrincipal: "SYSTEM_RUNTIME",
+    reviewPriority: "NONE",
+  },
+  {
     table: "contact_submissions",
     classification: "SYSTEM_ONLY",
     reason: "Local record of the public marketing contact form (platform migration 0045_contact_submissions, cache migration 0036_contact_submissions_rls_closure). Anonymous visitors' contact details, not tenant data: there is no organization column and no tenant session may read or write it. app/api/contact/route.ts stores the submission under withSystemContext before the CRM sync and acknowledges the visitor only once the local record exists; the public intake guard bounds the request. Every column is length-limited and retain_until states when the row is due for deletion. Both migrations are registered UNQUALIFIED and not applied to a live database; until then the route fails closed (503) because the record cannot be stored.",

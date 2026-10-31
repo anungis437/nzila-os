@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 563,
-    "partial": 91,
+    "implementedPendingQualification": 568,
+    "partial": 88,
     "qualificationVerified": 0,
-    "unresolved": 214,
+    "unresolved": 209,
     "externalBlockers": 0
   },
   "batches": [
@@ -48,878 +48,860 @@
       "id": "B04-RESEND-WEBHOOK",
       "family": "F01 Provider webhooks: Resend delivery events applied by rules, once, in one transaction",
       "outstandingBefore": 747,
-      "newlyImplemented": 5,
-      "outstandingAfter": 742,
-      "partial": 1,
+      "newlyImplemented": 6,
+      "outstandingAfter": 741,
+      "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B05-SHOPIFY-REDEMPTION-WEBHOOK",
       "family": "F01 Provider webhooks: Shopify redemption lifecycle - one code format, shop-bound organization, retryable and idempotent, proportional refunds, no purchaser data",
-      "outstandingBefore": 742,
+      "outstandingBefore": 741,
       "newlyImplemented": 5,
-      "outstandingAfter": 737,
+      "outstandingAfter": 736,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B06-SLA-OBSERVABILITY-CALENDAR",
       "family": "F01 Scheduled jobs that alert or import: durable deduplicated alerts, one transaction per alert, paged and leased imports",
-      "outstandingBefore": 737,
+      "outstandingBefore": 736,
       "newlyImplemented": 4,
-      "outstandingAfter": 733,
+      "outstandingAfter": 732,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B07-REWARDS-CRON",
       "family": "F01 Rewards cron: atomic per-member awards, honest scheduled and expiration tasks, organization context and run audit",
-      "outstandingBefore": 733,
+      "outstandingBefore": 732,
       "newlyImplemented": 4,
-      "outstandingAfter": 729,
+      "outstandingAfter": 728,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B08-ICRA-JUR-ML-ORG",
       "family": "F01 remainder: ICRA authority and credentials, labour-standards and location erasure honesty, ML provenance, organization archival",
-      "outstandingBefore": 729,
+      "outstandingBefore": 728,
       "newlyImplemented": 6,
-      "outstandingAfter": 723,
+      "outstandingAfter": 722,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B09-F02-FACADES-AND-PLACEHOLDERS",
       "family": "F02: paths that advertise an operation but were generic CRUD over an unrelated table, or placeholder context routes",
-      "outstandingBefore": 723,
+      "outstandingBefore": 722,
       "newlyImplemented": 23,
-      "outstandingAfter": 700,
+      "outstandingAfter": 699,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B10-F02-ML-AND-COGNITION-HONESTY",
       "family": "F02: model and cognition output must come from the organization's records or be refused (501 / 400 / 502), never a constant or a reassuring default",
-      "outstandingBefore": 700,
+      "outstandingBefore": 699,
       "newlyImplemented": 9,
-      "outstandingAfter": 691,
+      "outstandingAfter": 690,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B11-F02-ORG-REPORTS-SOCIAL-SATISFACTION",
       "family": "F02: organization figures, report engine, signature, social analytics, satisfaction and settings answer from stored records or refuse",
-      "outstandingBefore": 691,
+      "outstandingBefore": 690,
       "newlyImplemented": 11,
-      "outstandingAfter": 680,
+      "outstandingAfter": 679,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B12-F02-FINANCE-CBA-COMPLIANCE-ICRA-ONBOARDING",
       "family": "F02: invoices, CBA export and comparison, committee intelligence, dispatch, ICRA checkout, onboarding, reconciliation, testimonials and vocabulary state only what they do",
-      "outstandingBefore": 680,
+      "outstandingBefore": 679,
       "newlyImplemented": 13,
-      "outstandingAfter": 667,
+      "outstandingAfter": 666,
       "partial": 5,
       "evidenceCommit": null
     },
     {
       "id": "B13-F03-SHARED-DATASET-AUTHORITY",
       "family": "F03: platform-wide datasets are changed only with platform authority; an organization's role floor is not authority over rows every organization reads",
-      "outstandingBefore": 667,
+      "outstandingBefore": 666,
       "newlyImplemented": 6,
-      "outstandingAfter": 661,
+      "outstandingAfter": 660,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B14-F03-OWN-ORGANIZATION-SCOPE",
       "family": "F03: a route reads and writes the caller's own organization; a target taken from the request is the caller's own or not found",
-      "outstandingBefore": 661,
+      "outstandingBefore": 660,
       "newlyImplemented": 9,
-      "outstandingAfter": 652,
+      "outstandingAfter": 651,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B15-F04-DOMAIN-FACADES",
       "family": "F04: generic-CRUD facades advertising another capability answer 501 behind their original role floor",
-      "outstandingBefore": 652,
+      "outstandingBefore": 651,
       "newlyImplemented": 19,
-      "outstandingAfter": 633,
+      "outstandingAfter": 632,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B16-F09-F10-DUES-RECONCILIATION-ICRA",
       "family": "F09/F10: payment initiation is idempotent, exports are formula-safe, and routes named for an intake or feed that does not exist answer 501",
-      "outstandingBefore": 633,
+      "outstandingBefore": 632,
       "newlyImplemented": 5,
-      "outstandingAfter": 628,
+      "outstandingAfter": 627,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
       "family": "F05: inputs are typed and bounded, empty data is refused rather than scored, and constants are not confidence",
-      "outstandingBefore": 628,
+      "outstandingBefore": 627,
       "newlyImplemented": 8,
-      "outstandingAfter": 620,
+      "outstandingAfter": 619,
       "partial": 3,
       "evidenceCommit": null
     },
     {
       "id": "B18-F06-AUDIT-AND-SIGNATURE-INTEGRITY",
       "family": "F06: a read does not write, an effect is audited with its record, and a state is recorded only when the effect it names happened",
-      "outstandingBefore": 620,
+      "outstandingBefore": 619,
       "newlyImplemented": 9,
-      "outstandingAfter": 611,
+      "outstandingAfter": 610,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B19-PILOT-TRUTHFULNESS-SOCIAL-CONTROLS",
       "family": "F01/F03/F05/F04/F12: truthful pilot bootstrap, bounded social reads, typed campaigns, fail-closed remote media",
-      "outstandingBefore": 611,
+      "outstandingBefore": 610,
       "newlyImplemented": 4,
-      "outstandingAfter": 607,
+      "outstandingAfter": 606,
       "partial": 2,
       "evidenceCommit": "ec396551a80050734d4d50515c5cb313a300a966"
     },
     {
       "id": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
       "family": "F07: a role floor is eligibility, not authority; reads and writes need the mandate, ownership, sensitivity or workflow that the record belongs to",
-      "outstandingBefore": 607,
+      "outstandingBefore": 606,
       "newlyImplemented": 27,
-      "outstandingAfter": 580,
+      "outstandingAfter": 579,
       "partial": 3,
       "evidenceCommit": null
     },
     {
       "id": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
       "family": "F07: authority is checked against the object, the organization and the capacity a record belongs to; defects already repaired in source are credited only where an existing test pins them",
-      "outstandingBefore": 580,
+      "outstandingBefore": 579,
       "newlyImplemented": 24,
-      "outstandingAfter": 556,
+      "outstandingAfter": 555,
       "partial": 3,
       "evidenceCommit": null
     },
     {
       "id": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
       "family": "F08: public routes are bounded by a shared limiter keyed on a trusted address, bearer identifiers stay out of logs, and responses carry a projection rather than the stored row",
-      "outstandingBefore": 556,
+      "outstandingBefore": 555,
       "newlyImplemented": 13,
-      "outstandingAfter": 543,
+      "outstandingAfter": 542,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B23-F11-AI-AND-MODEL-OUTPUT-GOVERNANCE",
       "family": "F11: model output is shown as what it is: no canned reply stored as a model answer, no value typed into a provenance field, scoring before limiting, and feedback that counts a case once",
-      "outstandingBefore": 543,
+      "outstandingBefore": 542,
       "newlyImplemented": 9,
-      "outstandingAfter": 534,
+      "outstandingAfter": 533,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
       "family": "F04: a generic CRUD route names the fields a body may write and the columns a response omits, and a path that the factory cannot serve answers 501 instead of refusing every request under another name",
-      "outstandingBefore": 534,
+      "outstandingBefore": 533,
       "newlyImplemented": 16,
-      "outstandingAfter": 518,
+      "outstandingAfter": 517,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B25-F03-ORGANIZATION-BOUND-REFERENCES-AND-VERIFIED-CREDITS",
       "family": "F03: a reference in a body names a row of the caller's own organization or is refused, and a read over joined or hierarchical data stays inside the caller's organization",
-      "outstandingBefore": 518,
+      "outstandingBefore": 517,
       "newlyImplemented": 10,
-      "outstandingAfter": 508,
+      "outstandingAfter": 507,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B26-F12-VERIFIED-CREDITS-EDUCATION-ANALYTICS-CALENDAR",
       "family": "F12: route-specific defects already repaired in source, credited only where an existing or new test pins the repair",
-      "outstandingBefore": 508,
+      "outstandingBefore": 507,
       "newlyImplemented": 4,
-      "outstandingAfter": 504,
+      "outstandingAfter": 503,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B27-F05-F06-COMMERCIAL-BOUNDS-AUDIT-AND-RETENTION",
       "family": "F05/F06: inputs are typed and bounded, commercial data is read by those who administer it, effects are audited with their record, and retained records are ended rather than deleted",
-      "outstandingBefore": 504,
+      "outstandingBefore": 503,
       "newlyImplemented": 11,
-      "outstandingAfter": 493,
+      "outstandingAfter": 492,
       "partial": 4,
       "evidenceCommit": null
     },
     {
       "id": "B28-F12-F06-COMPLIANCE-VERDICTS-AND-UNSCOPED-AGGREGATES",
       "family": "F12/F06: a check states only what it verified, an aggregate never runs without an organization, and an administrative record is read and written as exactly that",
-      "outstandingBefore": 493,
+      "outstandingBefore": 492,
       "newlyImplemented": 4,
-      "outstandingAfter": 489,
+      "outstandingAfter": 488,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B29-F12-COMMUNICATIONS-LIFECYCLE-AND-VERIFIED-CREDITS",
       "family": "F12: a record moves through its lifecycle by rule, the server owns its status and counters, and a route reads the id from the path segment it is mounted on",
-      "outstandingBefore": 489,
+      "outstandingBefore": 488,
       "newlyImplemented": 5,
-      "outstandingAfter": 484,
+      "outstandingAfter": 483,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B30-F09-F10-LIMITS-REPLAY-REMITTANCE-AND-CANCEL-CONTRACT",
       "family": "F09/F10: a financial write is rate limited and repeatable without piling up records, an endpoint validates the request it actually performs, and an exported package states only what the data supports",
-      "outstandingBefore": 484,
+      "outstandingBefore": 483,
       "newlyImplemented": 5,
-      "outstandingAfter": 479,
+      "outstandingAfter": 478,
       "partial": 3,
       "evidenceCommit": null
     },
     {
       "id": "B31-F03-TENANT-SCOPE-OF-SHARED-AND-CHILD-RECORDS",
       "family": "F03: a record is read under the organization that holds it, a shared record under what its own row permits, and a platform read of other organizations is attributed and recorded first",
-      "outstandingBefore": 479,
+      "outstandingBefore": 478,
       "newlyImplemented": 9,
-      "outstandingAfter": 470,
+      "outstandingAfter": 469,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B32-F06-CONSENT-GATED-RECORDING-AND-VERIFIED-TELEMETRY-SCOPE",
       "family": "F06: a precise position or interview text is recorded or sent onward only after the consent and configuration checks, and a telemetry read stays in the caller's organization",
-      "outstandingBefore": 470,
+      "outstandingBefore": 469,
       "newlyImplemented": 6,
-      "outstandingAfter": 464,
+      "outstandingAfter": 463,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B33-F12-TRUTHFUL-READS-SCHEMA-CHECKED-JOBS-AND-RECORD-LIFECYCLE",
       "family": "F12: a job runs statements the schema declares, a read states a failure as a failure, an acknowledgement means the record exists, and a removed record is no longer read or counted",
-      "outstandingBefore": 464,
+      "outstandingBefore": 463,
       "newlyImplemented": 11,
-      "outstandingAfter": 453,
+      "outstandingAfter": 452,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B34-F04-F12-COMPUTED-ROWS-ARE-NOT-TYPED-IN-AND-REFERENCE-FIGURES-ARE-NOT-INVENTED",
       "family": "F04/F12: a row served as analytics comes from a job, a stored object is attached only if nothing else holds it, and a reference profile states only what was measured",
-      "outstandingBefore": 453,
+      "outstandingBefore": 452,
       "newlyImplemented": 5,
-      "outstandingAfter": 448,
+      "outstandingAfter": 447,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B35-F06-AUDIT-READS-ALIASES-AND-READ-ONLY-GETS",
       "family": "F06: an audit read serves the record and not the captured values, a recorded position and its audit commit together, and a GET changes nothing",
-      "outstandingBefore": 448,
+      "outstandingBefore": 447,
       "newlyImplemented": 6,
-      "outstandingAfter": 442,
+      "outstandingAfter": 441,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B36-F05-BOUNDED-LISTS-AND-ACCURATE-FILTERS",
       "family": "F05: a list is bounded, a field is bounded, and a filter filters by the values the record can hold",
-      "outstandingBefore": 442,
+      "outstandingBefore": 441,
       "newlyImplemented": 7,
-      "outstandingAfter": 435,
+      "outstandingAfter": 434,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B37-F07-COMMITTEE-WORKING-RECORD-AND-VERIFIED-OBJECT-READS",
       "family": "F07: a committee's working record is read by staff and its own members, and a read names only what the caller may see",
-      "outstandingBefore": 435,
+      "outstandingBefore": 434,
       "newlyImplemented": 5,
-      "outstandingAfter": 430,
+      "outstandingAfter": 429,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B38-F01-F09-F10-DEPRECATION-REGISTRY-AND-VERIFIED-JOBS",
       "family": "F01/F09/F10: a registry names replacements that exist, a job pages its scan and awaits its writes, and a read honours the record's state and the feature gate",
-      "outstandingBefore": 430,
+      "outstandingBefore": 429,
       "newlyImplemented": 3,
-      "outstandingAfter": 427,
+      "outstandingAfter": 426,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B39-F05-FINANCIAL-INTELLIGENCE-NEEDS-A-MANDATE-AND-FLAGS-CANNOT-BE-FORGED",
       "family": "F05: financial intelligence needs a live financial mandate, and a record a person raises cannot pass for an engine record",
-      "outstandingBefore": 427,
+      "outstandingBefore": 426,
       "newlyImplemented": 2,
-      "outstandingAfter": 425,
+      "outstandingAfter": 424,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B40-F05-REWARDS-PAGING-AND-EXPORT",
       "family": "F05: a page request is parsed into bounded integers and an export is bounded, administrative and audited",
-      "outstandingBefore": 425,
+      "outstandingBefore": 424,
       "newlyImplemented": 1,
-      "outstandingAfter": 424,
+      "outstandingAfter": 423,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B41-F08-OUTBOUND-FETCH-OF-SUPPLIED-ADDRESSES",
       "family": "F08: the server fetches a supplied address only if it is a public http(s) address, follows each redirect by hand and reads a bounded document",
-      "outstandingBefore": 424,
+      "outstandingBefore": 423,
       "newlyImplemented": 1,
-      "outstandingAfter": 423,
+      "outstandingAfter": 422,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B42-F12-FAILURES-ARE-STATED-AS-FAILURES",
       "family": "F12: a failure is answered as a failure without internal text, and a query is validated",
-      "outstandingBefore": 423,
+      "outstandingBefore": 422,
       "newlyImplemented": 2,
-      "outstandingAfter": 421,
+      "outstandingAfter": 420,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B43-F05-PARSED-WINDOWS-AND-VERIFIED-TELEMETRY",
       "family": "F05: a numeric query parameter is parsed into a bounded integer, and a telemetry body is bounded",
-      "outstandingBefore": 421,
+      "outstandingBefore": 420,
       "newlyImplemented": 3,
-      "outstandingAfter": 418,
+      "outstandingAfter": 417,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B44-F05-SIGNATURE-DISCLOSURE-AND-BOUNDED-DIRECTORY-SEARCH",
       "family": "F05: signature records disclose only what the viewer is entitled to and are bounded; a search term is literal and bounded",
-      "outstandingBefore": 418,
+      "outstandingBefore": 417,
       "newlyImplemented": 4,
-      "outstandingAfter": 414,
+      "outstandingAfter": 413,
       "partial": 3,
       "evidenceCommit": null
     },
     {
       "id": "B45-F03-CLAUSE-LIBRARY-BODY-AUTHORITY-AND-OWNERSHIP",
       "family": "F03/F05: the shared clause library validates what it stores, reserves public publishing to an officer, and writes only rows it owns",
-      "outstandingBefore": 414,
+      "outstandingBefore": 413,
       "newlyImplemented": 4,
-      "outstandingAfter": 410,
+      "outstandingAfter": 409,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B46-F12-ICRA-CONSENT-AND-REQUIRED-COVERAGE",
       "family": "F12: an ICRA assessment exists only with server-stamped consent and is scored only from the required answers",
-      "outstandingBefore": 410,
+      "outstandingBefore": 409,
       "newlyImplemented": 3,
-      "outstandingAfter": 407,
+      "outstandingAfter": 406,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B47-F12-COGNITION-RESULTS-STATE-WHAT-THEY-REST-ON",
       "family": "F12: cognition and knowledge-transfer results do not present absence, defaults or literals as measurement",
-      "outstandingBefore": 407,
+      "outstandingBefore": 406,
       "newlyImplemented": 4,
-      "outstandingAfter": 403,
+      "outstandingAfter": 402,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B48-F05-LITERAL-SEARCH-AND-BOUNDED-ANONYMOUS-JSON",
       "family": "F05/F12: searches match literally and list only active organizations; free-form JSON from callers is bounded and cannot overwrite audited fields",
-      "outstandingBefore": 403,
+      "outstandingBefore": 402,
       "newlyImplemented": 3,
-      "outstandingAfter": 400,
+      "outstandingAfter": 399,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B49-F06-REGULATORY-RECORDS-AND-SYNC-HISTORY-ARE-RETAINED",
       "family": "F06: regulatory records and integration sync history are not erased by the generic delete",
-      "outstandingBefore": 400,
+      "outstandingBefore": 399,
       "newlyImplemented": 3,
-      "outstandingAfter": 397,
+      "outstandingAfter": 396,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B50-F05-SOCIAL-EXPORT-AND-ORG-BOUND-LOOKUPS",
       "family": "F05/F03: the social export is a bounded staff read with safe cells; records are looked up inside the caller organization",
-      "outstandingBefore": 397,
+      "outstandingBefore": 396,
       "newlyImplemented": 1,
-      "outstandingAfter": 396,
+      "outstandingAfter": 395,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B51-F08-SSO-CREATE-CALENDAR-TOKENS-AND-ENTITLEMENT-LIST",
       "family": "F08: stored credentials and access configuration fail closed",
-      "outstandingBefore": 396,
+      "outstandingBefore": 395,
       "newlyImplemented": 2,
-      "outstandingAfter": 394,
+      "outstandingAfter": 393,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B52-F03-ORGANIZATION-OWNED-REFERENCES",
       "family": "F03: an id taken from a body must name a row of the caller organization",
-      "outstandingBefore": 394,
+      "outstandingBefore": 393,
       "newlyImplemented": 2,
-      "outstandingAfter": 392,
+      "outstandingAfter": 391,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
       "family": "F12: routes that record a send or advertise an operation they do not perform answer 501; communications history is retained",
-      "outstandingBefore": 392,
+      "outstandingBefore": 391,
       "newlyImplemented": 6,
-      "outstandingAfter": 386,
+      "outstandingAfter": 385,
       "partial": 4,
       "evidenceCommit": null
     },
     {
       "id": "B54-F12-REFERENCES-AND-FIGURES-STATE-WHAT-THEY-ARE",
       "family": "F12: referenced ids belong to the right parent, and a figure with nothing to measure is unknown rather than 0 or 100",
-      "outstandingBefore": 386,
+      "outstandingBefore": 385,
       "newlyImplemented": 4,
-      "outstandingAfter": 382,
+      "outstandingAfter": 381,
       "partial": 4,
       "evidenceCommit": null
     },
     {
       "id": "B55-F12-WORKFLOW-INTEGRITY-APPROVAL-LOCKS-AND-ATOMIC-UNSUBSCRIBE",
       "family": "F12: approved records are locked, reviewers are independent, referenced members and documents are the organization own, and an unsubscribe is one transaction",
-      "outstandingBefore": 382,
+      "outstandingBefore": 381,
       "newlyImplemented": 3,
-      "outstandingAfter": 379,
+      "outstandingAfter": 378,
       "partial": 4,
       "evidenceCommit": null
     },
     {
       "id": "B56-F12-CONTENT-PUBLISH-AND-REGISTRATION-RULES",
       "family": "F12: publication needs a second person, and registration follows the session window and capacity",
-      "outstandingBefore": 379,
+      "outstandingBefore": 378,
       "newlyImplemented": 0,
-      "outstandingAfter": 379,
+      "outstandingAfter": 378,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
       "family": "Schema closure: the columns and indexes that let earlier partial fixes record the real fact instead of approximating it",
-      "outstandingBefore": 379,
+      "outstandingBefore": 378,
       "newlyImplemented": 7,
-      "outstandingAfter": 372,
+      "outstandingAfter": 371,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "S02-DATABASE-ENFORCEMENT-MIGRATION-0040",
       "family": "Database enforcement: constraints, triggers and columns that settle what application checks could only attempt",
-      "outstandingBefore": 372,
+      "outstandingBefore": 371,
       "newlyImplemented": 4,
-      "outstandingAfter": 368,
+      "outstandingAfter": 367,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "S03-ROOM-BOOKING-MIGRATIONS-0041-AND-0035",
       "family": "Room booking: the booking store, its tenant isolation and the route that enforces the room's own rules",
-      "outstandingBefore": 368,
+      "outstandingBefore": 367,
       "newlyImplemented": 2,
-      "outstandingAfter": 366,
+      "outstandingAfter": 365,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S04-CODE-CLOSURE-OF-REMAINING-PARTIALS",
       "family": "Code closure of partial fixes whose remaining part needed no external decision",
-      "outstandingBefore": 366,
+      "outstandingBefore": 365,
       "newlyImplemented": 4,
-      "outstandingAfter": 362,
+      "outstandingAfter": 361,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B57-F05-INPUT-VALIDATION-AND-BOUNDS-SWEEP",
       "family": "F05 input validation and bounds: typed bodies, bounded pages and limited anonymous reads",
-      "outstandingBefore": 362,
+      "outstandingBefore": 361,
       "newlyImplemented": 9,
-      "outstandingAfter": 353,
+      "outstandingAfter": 352,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B58-F06-VERIFIED-AUDIT-AND-COMPLETION-COUNTS",
       "family": "F06 audit and records: verified existing audit and a completion count that measured attendance",
-      "outstandingBefore": 353,
+      "outstandingBefore": 352,
       "newlyImplemented": 2,
-      "outstandingAfter": 351,
+      "outstandingAfter": 350,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B59-F05-F08-READS-WITHOUT-SIDE-EFFECTS-AND-PRIVATE-DEFINITIONS",
       "family": "Reads that wrote, private definitions readable by others, and paths that advertised what they did not do",
-      "outstandingBefore": 351,
+      "outstandingBefore": 350,
       "newlyImplemented": 4,
-      "outstandingAfter": 347,
+      "outstandingAfter": 346,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S05-TENANT-SCOPED-UNIQUENESS-MIGRATION-0042",
       "family": "Schema: record numbers and codes unique within an organization, not across every organization",
-      "outstandingBefore": 347,
+      "outstandingBefore": 346,
       "newlyImplemented": 2,
-      "outstandingAfter": 345,
+      "outstandingAfter": 344,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B60-F03-F08-RETENTION-LOG-AND-VERIFIED-PROJECTIONS",
       "family": "Retention evidence that told the truth, and projections verified free of canned values and address logging",
-      "outstandingBefore": 345,
+      "outstandingBefore": 344,
       "newlyImplemented": 2,
-      "outstandingAfter": 343,
+      "outstandingAfter": 342,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B61-F01-F02-VERIFIED-NOT-IMPLEMENTED-PATHS",
       "family": "Paths that advertised an operation but were generic CRUD over another table, verified as honest 501",
-      "outstandingBefore": 343,
+      "outstandingBefore": 342,
       "newlyImplemented": 4,
-      "outstandingAfter": 339,
+      "outstandingAfter": 338,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S06-KNOWLEDGE-TRANSFER-OWNER-MIGRATION-0043",
       "family": "Schema: a copilot conversation and a reasoning session belong to the person who opened them",
-      "outstandingBefore": 339,
+      "outstandingBefore": 338,
       "newlyImplemented": 3,
-      "outstandingAfter": 336,
+      "outstandingAfter": 335,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S07-ANTI-SCAB-AUTHOR-MIGRATION-0044",
       "family": "Schema: the author of an anti-scab violation is recorded by the server",
-      "outstandingBefore": 336,
+      "outstandingBefore": 335,
       "newlyImplemented": 0,
-      "outstandingAfter": 336,
+      "outstandingAfter": 335,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B62-F03-F08-F06-VERIFIED-PATHS-AND-HONEST-DISCONNECT",
       "family": "Verified honest 501 paths, and a disconnect that reports whether the platform token was revoked",
-      "outstandingBefore": 336,
+      "outstandingBefore": 335,
       "newlyImplemented": 3,
-      "outstandingAfter": 333,
+      "outstandingAfter": 332,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S08-CONTACT-SUBMISSIONS-STORE-MIGRATIONS-0045-AND-0036",
       "family": "Schema: a local, system-only record of public contact-form submissions",
-      "outstandingBefore": 333,
+      "outstandingBefore": 332,
       "newlyImplemented": 1,
-      "outstandingAfter": 332,
+      "outstandingAfter": 331,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B63-F10-F02-UNMEASURED-FIGURES-AND-PENSION-CONTRIBUTION-REFERENCES",
       "family": "A figure nothing measures is not zero, and a pension contribution names a real pension member",
-      "outstandingBefore": 332,
+      "outstandingBefore": 331,
       "newlyImplemented": 1,
-      "outstandingAfter": 331,
+      "outstandingAfter": 330,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B64-F05-F06-BATCH-STATUS-ENTITLEMENT-AND-DISCLOSURE",
       "family": "Newsletter batch status: the right gate and no recipient addresses",
-      "outstandingBefore": 331,
+      "outstandingBefore": 330,
       "newlyImplemented": 2,
-      "outstandingAfter": 329,
+      "outstandingAfter": 328,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B65-F05-GENERIC-PATHS-THAT-ADVERTISED-OTHER-OPERATIONS",
       "family": "Campaign analytics and poll-vote paths that were generic CRUD over another table",
-      "outstandingBefore": 329,
+      "outstandingBefore": 328,
       "newlyImplemented": 1,
-      "outstandingAfter": 328,
+      "outstandingAfter": 327,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B66-S09-SMALL-PLATFORM-FIXES-AND-ROW-INTEGRITY-MIGRATION-0046",
       "family": "Small platform fixes, list filters and migration 0046 (row integrity)",
-      "outstandingBefore": 328,
+      "outstandingBefore": 327,
       "newlyImplemented": 10,
-      "outstandingAfter": 318,
+      "outstandingAfter": 317,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B67-COGNITION-HONESTY-AGGREGATE-GUARDS-AUDIT-AND-SYNC-INTEGRITY",
       "family": "Cognition honesty, aggregator guards, audit-list honesty, employer correspondence and calendar-sync integrity",
-      "outstandingBefore": 318,
-      "newlyImplemented": 10,
-      "outstandingAfter": 308,
-      "partial": 3,
+      "outstandingBefore": 317,
+      "newlyImplemented": 11,
+      "outstandingAfter": 306,
+      "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B68-REGISTERS-SINKS-AND-HONEST-ANSWERS",
       "family": "Read-only registers, observability sinks and answers that stated more than the source computes",
-      "outstandingBefore": 308,
+      "outstandingBefore": 306,
       "newlyImplemented": 9,
-      "outstandingAfter": 299,
+      "outstandingAfter": 297,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B69-SATISFACTION-FIGURES-PLATFORM-STATS-AND-ORGANIZATION-REPARENT",
       "family": "Representative satisfaction figures, platform statistics definitions, the in-memory index answer and organization parent changes",
-      "outstandingBefore": 299,
+      "outstandingBefore": 297,
       "newlyImplemented": 3,
-      "outstandingAfter": 296,
+      "outstandingAfter": 294,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B70-CLAUSE-TAGS-REMINDER-OPT-OUT-AND-CHATBOT-ROLE",
       "family": "Clause tag projection, education reminder opt-out and chatbot role and review markers",
-      "outstandingBefore": 296,
+      "outstandingBefore": 294,
       "newlyImplemented": 2,
-      "outstandingAfter": 294,
+      "outstandingAfter": 292,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B71-VALIDATED-INPUT-AND-BOUNDED-SYSTEM-JOBS",
       "family": "Parsed request bodies and system jobs that were unbounded or unreported",
-      "outstandingBefore": 294,
+      "outstandingBefore": 292,
       "newlyImplemented": 4,
-      "outstandingAfter": 290,
+      "outstandingAfter": 288,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B72-S10-ML-FEEDBACK-TABLE-QUERY-DISCLOSURE-AND-ALIAS-ROUTES",
       "family": "Schema: append-only prediction feedback (0047, cache 0037); ML query disclosure; alias routes; hierarchy list",
-      "outstandingBefore": 290,
+      "outstandingBefore": 288,
       "newlyImplemented": 5,
-      "outstandingAfter": 285,
+      "outstandingAfter": 283,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B73-PENSION-PLAN-FIGURES-AND-READS",
       "family": "Pension plan figures, member list authority and tenant-context reads",
-      "outstandingBefore": 285,
+      "outstandingBefore": 283,
       "newlyImplemented": 3,
-      "outstandingAfter": 282,
+      "outstandingAfter": 280,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B74-PILOT-WRITE-PAYLOADS",
       "family": "Pilot write routes: parsed, bounded request bodies",
-      "outstandingBefore": 282,
+      "outstandingBefore": 280,
       "newlyImplemented": 0,
-      "outstandingAfter": 282,
+      "outstandingAfter": 280,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B75-REPORT-OPERATORS-AND-QUEUE-STATUS",
       "family": "Report filter operators that were silently dropped; queue status verified",
-      "outstandingBefore": 282,
+      "outstandingBefore": 280,
       "newlyImplemented": 1,
-      "outstandingAfter": 281,
+      "outstandingAfter": 279,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B76-PILOT-EMPLOYER-CONTRACT",
       "family": "Pilot telemetry authority, employer read exposure, contract input",
-      "outstandingBefore": 281,
+      "outstandingBefore": 279,
       "newlyImplemented": 4,
-      "outstandingAfter": 277,
+      "outstandingAfter": 275,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B77-COGNITION-HONESTY",
       "family": "Cognition and exit-interview analytics: officer-asserted inputs, whole-word topics, windowed attribution, uncapped counts",
-      "outstandingBefore": 277,
+      "outstandingBefore": 275,
       "newlyImplemented": 4,
-      "outstandingAfter": 273,
+      "outstandingAfter": 271,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B78-AUDIT-ATOMICITY",
       "family": "Audit atomicity: invoice generation, trial expiry, lapsed designations, workbook export, deprecated-route access",
-      "outstandingBefore": 273,
-      "newlyImplemented": 4,
-      "outstandingAfter": 269,
-      "partial": 1,
+      "outstandingBefore": 271,
+      "newlyImplemented": 5,
+      "outstandingAfter": 266,
+      "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B79-SOCIAL-FIGURES-AND-PUBLISH",
       "family": "Social campaign figures, publish handling and token refresh",
-      "outstandingBefore": 269,
+      "outstandingBefore": 266,
       "newlyImplemented": 2,
-      "outstandingAfter": 267,
+      "outstandingAfter": 264,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B80-CBA-VISIBILITY-AND-ANALYTICS",
       "family": "CBA review visibility, benchmark and comparison honesty, cognition health scope, derived case metrics, metrics organization binding",
-      "outstandingBefore": 267,
+      "outstandingBefore": 264,
       "newlyImplemented": 7,
-      "outstandingAfter": 260,
+      "outstandingAfter": 257,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B81-SOCIAL-SCHEDULE-GRAPH-HS",
       "family": "Social scheduling and campaign link, graph query inputs, health-safety statistics",
-      "outstandingBefore": 260,
+      "outstandingBefore": 257,
       "newlyImplemented": 3,
-      "outstandingAfter": 257,
+      "outstandingAfter": 254,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B82-ATTACH-CASCADE-CRON",
       "family": "Interview document location, cascade wording, per-capita job, education reminder cap, precedent reads",
-      "outstandingBefore": 257,
+      "outstandingBefore": 254,
       "newlyImplemented": 5,
-      "outstandingAfter": 252,
+      "outstandingAfter": 249,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B83-COGNITION-CASE-AUTHORITY",
       "family": "Cognition reads follow the case authority",
-      "outstandingBefore": 252,
+      "outstandingBefore": 249,
       "newlyImplemented": 2,
-      "outstandingAfter": 250,
+      "outstandingAfter": 247,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B84-SMALL-VALIDATION",
       "family": "Small validation and verification items",
-      "outstandingBefore": 250,
+      "outstandingBefore": 247,
       "newlyImplemented": 0,
-      "outstandingAfter": 250,
+      "outstandingAfter": 247,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B85-DECISIONS-APPLIED",
       "family": "Owner decisions applied: organization types, calendar revocation, bot challenge",
-      "outstandingBefore": 250,
+      "outstandingBefore": 247,
       "newlyImplemented": 4,
-      "outstandingAfter": 246,
+      "outstandingAfter": 243,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B87-PLATFORM-READS-COMMUNICATIONS-SIGNATURES",
       "family": "Platform reads, communications tracking and unsubscribe, signature service",
-      "outstandingBefore": 246,
+      "outstandingBefore": 243,
       "newlyImplemented": 7,
-      "outstandingAfter": 239,
+      "outstandingAfter": 236,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B88-AUDIT-RECORDS-ONBOARDING-SOCIAL-SYNC",
       "family": "Audit records: onboarding reads, social connection, integration sync",
-      "outstandingBefore": 239,
+      "outstandingBefore": 236,
       "newlyImplemented": 3,
-      "outstandingAfter": 236,
+      "outstandingAfter": 233,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B89-REPORT-CONFIG-CROSS-ORG-READ-AI-CLASS",
       "family": "Stored report contract, cross-organization read authority, AI data class, verified signer and list fixes",
-      "outstandingBefore": 236,
+      "outstandingBefore": 233,
       "newlyImplemented": 4,
-      "outstandingAfter": 232,
+      "outstandingAfter": 229,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B90-LIFECYCLE-ROUTES-AND-MINIMUM-COHORT",
       "family": "Lifecycle routes (health-safety close, SSO provider) and minimum cohort for satisfaction figures",
-      "outstandingBefore": 232,
+      "outstandingBefore": 229,
       "newlyImplemented": 3,
-      "outstandingAfter": 229,
+      "outstandingAfter": 226,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B91-TOKEN-SEALING-OUTBOUND-RESOLUTION",
       "family": "Provider token sealing, resolved outbound fetch guard, verified analytics suppression",
-      "outstandingBefore": 229,
+      "outstandingBefore": 226,
       "newlyImplemented": 1,
-      "outstandingAfter": 228,
+      "outstandingAfter": 225,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B92-FACTORY-ATTRIBUTION-AND-VERIFIED-CREDITS",
       "family": "Generic CRUD attribution fields and verified credits",
-      "outstandingBefore": 228,
-      "newlyImplemented": 2,
-      "outstandingAfter": 226,
-      "partial": 1,
-      "evidenceCommit": null
-    },
-    {
-      "id": "B93-DASHBOARD-MEASURES-KEYS-ARCHIVE",
-      "family": "Health-safety dashboard measures, dedicated queue key, archived employer input, verified credits",
-      "outstandingBefore": 226,
-      "newlyImplemented": 1,
-      "outstandingAfter": 225,
-      "partial": 1,
-      "evidenceCommit": null
-    },
-    {
-      "id": "B94-TARGETS-EXTERNAL-AUDIT-PROFILE",
-      "family": "KPI target bounds, external refusal audit scope, profile roles",
       "outstandingBefore": 225,
       "newlyImplemented": 2,
       "outstandingAfter": 223,
@@ -927,102 +909,129 @@
       "evidenceCommit": null
     },
     {
+      "id": "B93-DASHBOARD-MEASURES-KEYS-ARCHIVE",
+      "family": "Health-safety dashboard measures, dedicated queue key, archived employer input, verified credits",
+      "outstandingBefore": 223,
+      "newlyImplemented": 1,
+      "outstandingAfter": 222,
+      "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B94-TARGETS-EXTERNAL-AUDIT-PROFILE",
+      "family": "KPI target bounds, external refusal audit scope, profile roles",
+      "outstandingBefore": 222,
+      "newlyImplemented": 2,
+      "outstandingAfter": 220,
+      "partial": 1,
+      "evidenceCommit": null
+    },
+    {
       "id": "B95-REPORT-AND-KNOWLEDGE-READ-RECORDS",
       "family": "Durable records and access rules for report execution and knowledge-base reads",
-      "outstandingBefore": 223,
+      "outstandingBefore": 220,
       "newlyImplemented": 0,
-      "outstandingAfter": 223,
+      "outstandingAfter": 220,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B96-HONEST-AVAILABILITY-AND-ENDPOINT-RULES",
       "family": "Honest availability for an uncomputed store; public-address rule for a stored integration endpoint",
-      "outstandingBefore": 223,
+      "outstandingBefore": 220,
       "newlyImplemented": 0,
-      "outstandingAfter": 223,
+      "outstandingAfter": 220,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B97-PILOT-AUDIT-VERIFICATION-BASIS-KPI-FRESHNESS",
       "family": "Pilot write audit, organization verification basis, KPI value freshness",
-      "outstandingBefore": 223,
+      "outstandingBefore": 220,
       "newlyImplemented": 1,
-      "outstandingAfter": 222,
+      "outstandingAfter": 219,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B98-ARBITRATION-CASE-AUTHORITY",
       "family": "Case authority for arbitration writes",
-      "outstandingBefore": 222,
+      "outstandingBefore": 219,
       "newlyImplemented": 0,
-      "outstandingAfter": 222,
+      "outstandingAfter": 219,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B99-CLAUSE-LIBRARY-SOURCE-ATTRIBUTION",
       "family": "Clause-library anonymized source projection across system-role list/search/compare",
-      "outstandingBefore": 222,
+      "outstandingBefore": 219,
       "newlyImplemented": 0,
-      "outstandingAfter": 222,
+      "outstandingAfter": 219,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B100-ONBOARDING-LOOKUP-TRUTHFULNESS",
       "family": "Smart onboarding lookup failures and fabricated national benchmarks",
-      "outstandingBefore": 222,
+      "outstandingBefore": 219,
       "newlyImplemented": 1,
-      "outstandingAfter": 221,
+      "outstandingAfter": 218,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B101-PG-MIGRATIONS-SCIM-SLA-SURVEY-DECISIONS",
       "family": "PostgreSQL migrations: SCIM bearer token, SLA status clock, survey anonymity, decision owner",
-      "outstandingBefore": 221,
+      "outstandingBefore": 218,
       "newlyImplemented": 1,
-      "outstandingAfter": 220,
+      "outstandingAfter": 217,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B102-AUDIT-SETTINGS-NOT-IMPLEMENTED-HONESTY",
       "family": "Mandatory external-access audit, unrecorded sync outcome, unenforced settings, 501 for the absent DSR route, workbook peer floor",
-      "outstandingBefore": 220,
+      "outstandingBefore": 217,
       "newlyImplemented": 2,
-      "outstandingAfter": 218,
+      "outstandingAfter": 215,
       "partial": 4,
       "evidenceCommit": null
     },
     {
       "id": "B103-ORGANIZATION-SELECTION-AUDIT",
       "family": "Organization selection is audited before it takes effect",
-      "outstandingBefore": 218,
+      "outstandingBefore": 215,
       "newlyImplemented": 0,
-      "outstandingAfter": 218,
+      "outstandingAfter": 215,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B104-OAUTH-CALLBACK-STATE-COOKIE-SAFETY",
       "family": "Social OAuth callback authenticity and cookie lifecycle",
-      "outstandingBefore": 218,
+      "outstandingBefore": 215,
       "newlyImplemented": 1,
-      "outstandingAfter": 217,
+      "outstandingAfter": 214,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B105-F06-A1-AUDIT-FOUNDATION",
       "family": "F06 A1: audit-write contract, truthful route manifest, canonical audit visibility, representation protocol capability",
-      "outstandingBefore": 217,
+      "outstandingBefore": 214,
       "newlyImplemented": 3,
-      "outstandingAfter": 214,
+      "outstandingAfter": 211,
       "partial": 1,
+      "evidenceCommit": "b258d0938"
+    },
+    {
+      "id": "B106-F06-A2-LOCAL-TRANSACTION-ATOMICITY",
+      "family": "F06 A2: mutation and mandatory audit record in one database transaction",
+      "outstandingBefore": 211,
+      "newlyImplemented": 2,
+      "outstandingAfter": 209,
+      "partial": 0,
       "evidenceCommit": null
     }
   ],
@@ -1389,15 +1398,27 @@
       "explanation": "Each statistic counts a message at most once (a counted set persisted in message_log.metadata, seeded from timestamps and terminal status for older rows), and the campaign counters advance inside the UPDATE (jsonb || jsonb_build_object over the stored value) rather than from a value read earlier. Tested with redelivery and with a counter another writer already advanced. Mutation-proved."
     },
     "DEF-0B6-SYS-RESEND-SUPPRESSION-UPDATES-ONLY-ONE-PREFERENCE-ROW": {
-      "status": "PARTIAL",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
       "batch": "B04-RESEND-WEBHOOK",
       "files": [
         "apps/union-eyes/app/api/communications/webhooks/resend/route.ts",
         "apps/union-eyes/lib/communications/resend-event-rules.ts",
-        "apps/union-eyes/app/api/__tests__/communications-webhooks-resend.pglite.test.ts"
+        "apps/union-eyes/app/api/__tests__/communications-webhooks-resend.pglite.test.ts",
+        "apps/union-eyes/db/migrations-platform/0053_email_address_suppressions.sql",
+        "apps/union-eyes/db/migrations-cache/0043_email_address_suppressions_rls_closure.sql",
+        "apps/union-eyes/db/schema/domains/communications/email-address-suppressions.ts",
+        "apps/union-eyes/db/rls-storage-authority/communications-notifications.ts",
+        "apps/union-eyes/lib/communications/address-suppression.ts",
+        "apps/union-eyes/lib/communications/__tests__/address-suppression.test.ts",
+        "apps/union-eyes/lib/email-service.ts",
+        "apps/union-eyes/lib/__tests__/email-service.test.ts",
+        "apps/union-eyes/app/api/admin/email-suppressions/route.ts",
+        "apps/union-eyes/app/api/__tests__/admin-email-suppressions.route.test.ts",
+        "apps/union-eyes/db/__tests__/migration-0053-email-address-suppressions.postgres.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts"
       ],
-      "explanation": "A complaint or suppression now creates the preference row when none exists, writes a revoked consent record and the audit entry, and applies once per message in the same transaction.",
-      "remaining": "Suppression is still scoped to the one organization on the message row; suppressing the same address in other organizations and in distribution-list subscriptions needs a cross-organization address-suppression design."
+      "explanation": "A complaint or suppression now creates the preference row when none exists, writes a revoked consent record and the audit entry, and applies once per message in the same transaction. A complaint or provider suppression now ends the recipient's subscriptions to the organization's own distribution lists as well as its preference, and is recorded platform-wide in a governed mechanism: platform 0053 adds email_address_suppressions (SHA-256 of the address only, no plaintext; cache 0043 makes it SYSTEM_ONLY), the webhook writes it in the same transaction as the consent record and the audit entry (only when the event names exactly one recipient; several are not guessed), and the single sending function refuses a suppressed address from any organization and fails closed if the list cannot be read. It is a delivery suppression, not consent, so other organizations' consent records are untouched. A platform administrator lifts one only through an audited route (reason required, row kept); a later complaint clears the lift. Proven on native PostgreSQL 15 and 16 and against a real SQL engine through the webhook.",
+      "remaining": "Only lib/email-service.ts is gated; any other code that talks to a provider directly would bypass the list (none was found)."
     },
     "DEF-0B6-SYS-RESEND-LEDGER-CALLBACK-OUTSIDE-TRANSACTION": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -6459,14 +6480,23 @@
       "remaining": "A storage link is still a read-only bearer URL for those minutes and cannot be bound to the caller or recalled when the grant is revoked."
     },
     "DEF-0B4-CLAUSE-LIBRARY-EDIT-AND-DELETE-NO-VERSION-OR-RETENTION": {
-      "status": "PARTIAL",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
       "batch": "B67-COGNITION-HONESTY-AGGREGATE-GUARDS-AUDIT-AND-SYNC-INTEGRITY",
       "files": [
         "apps/union-eyes/app/api/clause-library/[id]/route.ts",
-        "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts"
+        "apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts",
+        "apps/union-eyes/db/migrations-platform/0052_shared_clause_versions.sql",
+        "apps/union-eyes/db/migrations-cache/0042_shared_clause_versions_rls_closure.sql",
+        "apps/union-eyes/db/schema/domains/agreements/shared-library.ts",
+        "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+        "apps/union-eyes/lib/clause-library/version-history.ts",
+        "apps/union-eyes/app/api/clause-library/[id]/versions/route.ts",
+        "apps/union-eyes/app/api/clause-library/[id]/__tests__/route.test.ts",
+        "apps/union-eyes/db/__tests__/migration-0052-shared-clause-versions.postgres.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts"
       ],
-      "explanation": "A change to the title, text or type raises the version and the audit records the versions and a SHA-256 of the replaced text; a clause shared beyond private is refused deletion (409) until withdrawn from sharing, and the delete audit keeps its title, type, version and text digest.",
-      "remaining": "The replaced text itself is not retained as a prior row (previous_version_id is unused); only its digest is."
+      "explanation": "A change to the title, text or type raises the version and the audit records the versions and a SHA-256 of the replaced text; a clause shared beyond private is refused deletion (409) until withdrawn from sharing, and the delete audit keeps its title, type, version and text digest. The text a clause had is no longer lost. Platform 0052 adds shared_clause_versions, an append-only history (no foreign key to the clause, so it outlives it; unique per clause, version and kind; SHA-256 of the text) that cache 0042 forces to the owning organization with SELECT and INSERT only. The item route writes the replaced text in the same transaction before it overwrites it, and the final text before it deletes the row (a retried request cannot record a version twice); a failed history write abandons the change. The owner reads the history at /api/clause-library/[id]/versions. Proven on native PostgreSQL 15 and 16 as the runtime and system roles.",
+      "remaining": "Only the owning organization can read the prior text; an organization that compared or cited a clause sees its version number rise but cannot retrieve the earlier text, and a citation is not pinned to a version."
     },
     "DEF-0B6-SYS-CALENDAR-SYNC-SWALLOWED-EVENT-ERRORS-COUNTED-AS-IMPORTED": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -6907,7 +6937,7 @@
       "explanation": "Verified in source: an empty month reports no coverage rate (null), the exposure score is null when nothing was assessed, and the read is bounded and refused beyond 10000 rows."
     },
     "DEF-0B3-BILLING-AUDIT-NOT-ATOMIC": {
-      "status": "PARTIAL",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
       "batch": "B78-AUDIT-ATOMICITY",
       "files": [
         "apps/union-eyes/services/platform-economics/billing-service.ts",
@@ -6916,10 +6946,12 @@
         "apps/union-eyes/services/platform-economics/billing-service.test.ts",
         "apps/union-eyes/services/platform-economics/__tests__/billing-service.test.ts",
         "apps/union-eyes/services/platform-economics/__tests__/subscription-lifecycle-service.test.ts",
-        "apps/union-eyes/lib/services/__tests__/s22-audit-atomicity-batch.test.ts"
+        "apps/union-eyes/lib/services/__tests__/s22-audit-atomicity-batch.test.ts",
+        "apps/union-eyes/app/api/billing/replay-invoice/route.ts",
+        "apps/union-eyes/app/api/__tests__/billing-replay-invoice.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts"
       ],
-      "explanation": "Invoice generation now writes the invoice, its lines, a ledger entry for every non-zero line (appendLedgerEntry joins the caller transaction) and a persistAtomicAudit record in one transaction, so a failed audit leaves no invoice and no ledger entry (the ledger appends used to commit separately, after the invoice, and the audit event after those). Trial expiry updates the subscription, writes its event row and its audit record in one transaction per subscription, where it used to write no audit record. Three test files were adapted (disclosed): the mocks of the atomic audit and of the transaction, the invoice-generated assertion moved from auditLog to persistAtomicAudit, and failure cases added.",
-      "remaining": "The invoice replay route still records its access as a separate auditLog event; the replay recomputes totals and writes nothing, so there is no row for the record to be atomic with, but the manifest still declares the audit class atomic."
+      "explanation": "Invoice generation now writes the invoice, its lines, a ledger entry for every non-zero line (appendLedgerEntry joins the caller transaction) and a persistAtomicAudit record in one transaction, so a failed audit leaves no invoice and no ledger entry (the ledger appends used to commit separately, after the invoice, and the audit event after those). Trial expiry updates the subscription, writes its event row and its audit record in one transaction per subscription, where it used to write no audit record. Three test files were adapted (disclosed): the mocks of the atomic audit and of the transaction, the invoice-generated assertion moved from auditLog to persistAtomicAudit, and failure cases added. The invoice replay, the last non-atomic item, reads the invoice and its lineage and writes its access record with persistAtomicAudit in one tenant transaction, before anything is returned: if the record cannot be written the lineage is not released, and a replay of an invoice that is not found writes no record. With invoice generation and trial expiry already atomic, the three operations the defect names are now all atomic; the route manifest classifies the route ATOMIC from its own source."
     },
     "DEF-0B12-PLT-TRIAGE-LAPSED-DESIGNATION-IS-CLOSED-AS-SYSTEM-EXPIRY-WITH-NO-AUDIT-ROW": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -7847,6 +7879,26 @@
       ],
       "explanation": "The audit-write contract is now stated in one place: performAtomicAuditedOperation writes the change and a single hash-chained audit record in one tenant transaction (a failed audit write abandons the change; a failed change records nothing; afterCommit runs only after commit), and performAuditedOperation is documented and labelled INTENT_OUTCOME as the durable two-phase record for effects our transaction cannot reach. The manifest no longer declares the two-phase routes atomic. The platform feature-flag toggle, a pure database change, moved onto the atomic contract (an undefined flag is a 404 rather than an insert the runtime role may not make).",
       "remaining": "Other operations audited as intent and outcome whose effect is only database rows (CBA source seeding and benchmark snapshot) still use the two-phase helper; they are converted in the external/multi-store batch."
+    },
+    "DEF-0B8-ICRA-REVIEW-AUDIT-ONLY-WHEN-A-CLAIMED-ORGANIZATION-EXISTS": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B106-F06-A2-LOCAL-TRANSACTION-ATOMICITY",
+      "files": [
+        "apps/union-eyes/app/api/icra/report/[assessmentId]/review/route.ts",
+        "apps/union-eyes/app/api/__tests__/icra-report-review.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts"
+      ],
+      "explanation": "Every review decision is now audited in the decision's transaction. A claimed assessment is audited against the claiming organization; an unclaimed prospect assessment against the organization the reviewing platform administrator is acting in (as for any platform operation); a reviewer acting in no organization gets a 409 and no decision is made unrecorded. The reviewer's summary text is not copied into the audit record. The existing test that pinned the absence of an audit was replaced (disclosed)."
+    },
+    "DEF-0B11-PRP-RECONCILIATION-AUDIT-IS-A-SEPARATE-EVENT-NOT-COMMITTED-WITH-THE-RECONCILIATION-WRITES": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B106-F06-A2-LOCAL-TRANSACTION-ATOMICITY",
+      "files": [
+        "apps/union-eyes/services/platform-economics/reconciliation-service.ts",
+        "apps/union-eyes/services/platform-economics/__tests__/reconciliation-service.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts"
+      ],
+      "explanation": "runReconciliation writes its completed and critical-variance audit records with persistAtomicAudit on the run's own transaction, and resolveException updates the exception and writes its record in one transaction (the notes stay on the exception row and only their length reaches the audit record). A failed audit write abandons the run or leaves the exception open, and a rolled-back run leaves no audit event. This changes audit atomicity only; no financial mandate, ledger effect or principal changed (the finance freeze stands)."
     }
   }
 }

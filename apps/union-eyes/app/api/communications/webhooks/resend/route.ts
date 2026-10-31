@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray, ne } from 'drizzle-orm';
 import { Resend, type WebhookEventPayload } from 'resend';
 import { z } from 'zod';
 
-import { campaigns, communicationPreferences, consentRecords, messageLog } from '@/db/schema';
+import { campaigns, communicationPreferences, consentRecords, messageLog, newsletterDistributionLists, newsletterListSubscribers } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
+import { suppressAddress } from '@/lib/communications/address-suppression';
 import { recordProviderCallback, type DeliveryLedgerEvent } from '@/lib/services/delivery-reconciliation';
 import {
   advanceStatus, alreadyCounted, incrementedStats, keysToCount, nextMetadata,
@@ -258,13 +259,42 @@ export async function POST(request: NextRequest) {
         method: 'provider_webhook',
         metadata: { reason, providerMessageId, messageLogId: logRow.id, eventId: svixId },
       });
+      // The recipient's subscriptions to this organization's distribution lists end with the preference, as they do when the recipient
+      // unsubscribes themselves.
+      const endedSubscriptions = await tx
+        .update(newsletterListSubscribers)
+        .set({ status: 'unsubscribed', unsubscribedAt: eventTimestamp })
+        .where(and(
+          eq(newsletterListSubscribers.profileId, logRow.recipientId),
+          ne(newsletterListSubscribers.status, 'unsubscribed'),
+          inArray(
+            newsletterListSubscribers.listId,
+            tx.select({ id: newsletterDistributionLists.id }).from(newsletterDistributionLists).where(eq(newsletterDistributionLists.organizationId, logRow.organizationId)),
+          ),
+        ))
+        .returning({ id: newsletterListSubscribers.id });
+
+      // Platform-wide delivery suppression, so no other organization writes to an address that complained. It is attributed to one
+      // address only: an event for a message with several recipients cannot say which of them complained, so it is not guessed.
+      const eventRecipients = (event.data as { to?: unknown }).to;
+      const addresses = Array.isArray(eventRecipients) ? eventRecipients.filter((a): a is string => typeof a === 'string') : [];
+      const platformSuppressed = addresses.length === 1;
+      if (platformSuppressed) {
+        await suppressAddress(tx, {
+          address: addresses[0],
+          reason: mapping.status === 'complained' ? 'complaint' : 'provider_suppressed',
+          sourceOrganizationId: logRow.organizationId,
+          providerEventId: svixId,
+        });
+      }
+
       await persistAtomicAudit(tx, {
         organizationId: logRow.organizationId,
         userId: 'system:resend-webhook',
         action: 'communications.email_suppression.apply',
         resourceType: 'communication_preferences',
         resourceId: logRow.recipientId,
-        details: { reason, messageLogId: logRow.id, providerMessageId },
+        details: { reason, messageLogId: logRow.id, providerMessageId, listSubscriptionsEnded: endedSubscriptions.length, platformSuppression: platformSuppressed },
       });
     }
 

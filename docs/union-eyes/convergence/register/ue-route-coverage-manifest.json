@@ -1,11 +1,11 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 1004,
-  "mutating": 679,
+  "routes": 1006,
+  "mutating": 680,
   "kernel": 60,
   "byGuard": {
-   "ADMIN_AUTH": 19,
+   "ADMIN_AUTH": 20,
    "CAPABILITY_TOKEN": 13,
    "CRON_SECRET": 2,
    "CRUD_FACTORY": 141,
@@ -17,11 +17,11 @@
    "ROLE_AUTH": 173,
    "SESSION_AUTH": 56,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 285,
+   "WITH_API": 286,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
-   "ADMIN_AUTH": 18,
+   "ADMIN_AUTH": 19,
    "CAPABILITY_TOKEN": 9,
    "CRON_SECRET": 1,
    "CRUD_FACTORY": 85,
@@ -36,14 +36,14 @@
    "WITH_API": 182
   },
   "mutatingByAudit": {
-   "ATOMIC": 157,
-   "ATOMIC_SERVICE": 111,
+   "ATOMIC": 160,
+   "ATOMIC_SERVICE": 109,
    "COMPUTE_ONLY": 32,
    "CRUD_ATOMIC": 86,
    "EXEMPT_BALLOT_SECRECY": 2,
-   "EXEMPT_UNATTRIBUTABLE": 26,
+   "EXEMPT_UNATTRIBUTABLE": 28,
    "INTENT_OUTCOME": 40,
-   "NO_WRITES_FOUND": 12,
+   "NO_WRITES_FOUND": 10,
    "NONE": 213
   },
   "mutatingByData": {
@@ -51,7 +51,7 @@
    "CRUD_TENANT_TX": 86,
    "NONE": 339,
    "SYSTEM_CONTEXT": 66,
-   "TENANT_TX": 174
+   "TENANT_TX": 175
   }
  },
  "routes": [
@@ -477,6 +477,18 @@
    "audit": "ATOMIC"
   },
   {
+   "route": "admin/email-suppressions/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "ADMIN_AUTH",
+   "kernel": false,
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "ATOMIC"
+  },
+  {
    "route": "admin/employment/[id]/route.ts",
    "methods": [
     "DELETE",
@@ -540,7 +552,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "ATOMIC"
   },
   {
    "route": "admin/fix-super-admin-roles/route.ts",
@@ -2069,7 +2081,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "auth/invite/accept/route.ts",
@@ -2129,7 +2141,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NO_WRITES_FOUND"
+   "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
    "route": "auth/magic-link/verify/route.ts",
@@ -2430,8 +2442,8 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "billing/send-batch/route.ts",
@@ -3426,6 +3438,18 @@
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "ATOMIC"
+  },
+  {
+   "route": "clause-library/[id]/versions/route.ts",
+   "methods": [
+    "GET"
+   ],
+   "mutating": false,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "READ_ONLY"
   },
   {
    "route": "clause-library/compare/route.ts",

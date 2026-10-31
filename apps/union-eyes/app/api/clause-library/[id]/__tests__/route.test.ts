@@ -152,6 +152,9 @@ const h = vi.hoisted(() => {
   };
 });
 
+// Disclosed addition (F06 A2): the version history is written by lib/clause-library/version-history.ts in the same transaction.
+const versions = vi.hoisted(() => ({ record: vi.fn() }));
+vi.mock('@/lib/clause-library/version-history', () => ({ recordClauseVersion: versions.record, clauseTextSha256: () => 'sha' }));
 vi.mock('@/db/db', () => ({ db: h.db }));
 vi.mock('@/db/schema/domains/agreements/shared-library', () => ({
   sharedClauseLibrary: { id: 'scl.id', sourceOrganizationId: 'scl.sourceOrganizationId' },
@@ -335,6 +338,26 @@ describe('clause-library/[id] item route (round 55)', () => {
     );
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-a' }, expect.any(Function));
     expect(h.sharingChangeDenial).toHaveBeenCalledWith(expect.any(String), expect.any(Object));
+    // the text being replaced is kept, on the same transaction, before the overwrite
+    expect(versions.record).toHaveBeenCalledWith(h.db, expect.objectContaining({ organizationId: 'org-a', recordedBy: 'user-1', kind: 'replaced', clause: expect.objectContaining({ id: 'clause-1' }) }));
+  });
+
+  it('PATCH keeps no version when only sharing fields change, and applies nothing when the version cannot be recorded', async () => {
+    h.isSharedClauseOwner.mockReturnValue(true);
+    h.allowPrivilegedRead.current = true;
+    const { PATCH } = await loadHandlers();
+    versions.record.mockClear();
+    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', clauseTitle: 'Same', sharingLevel: 'private' }]);
+    pushSel([{ id: 'clause-1' }]);
+    await PATCH({ request: req('clause-1', { clauseTitle: 'Same' }), organizationId: 'org-a', userId: 'user-1' });
+    expect(versions.record).not.toHaveBeenCalled();
+
+    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', clauseTitle: 'Old', sharingLevel: 'private' }]);
+    pushSel([{ id: 'clause-1' }]);
+    versions.record.mockRejectedValueOnce(new Error('history unavailable'));
+    const applied = h.applied.updates;
+    await expect(PATCH({ request: req('clause-1', { clauseTitle: 'New' }), organizationId: 'org-a', userId: 'user-1' })).rejects.toThrow('history unavailable');
+    expect(h.applied.updates).toBe(applied);
   });
 
   it('does not audit when a non-owner mutation is rejected', async () => {
@@ -392,6 +415,7 @@ describe('clause-library/[id] item route (round 55)', () => {
     const result = (await DELETE({ request: req('clause-1'), organizationId: 'org-a', userId: 'user-1', user: { role: 'officer' } })) as { success: boolean };
     expect(result.success).toBe(true);
     expect(h.applied.deletes).toBe(1);
+    expect(versions.record).toHaveBeenCalledWith(h.db, expect.objectContaining({ organizationId: 'org-a', kind: 'deleted', clause: expect.objectContaining({ id: 'clause-1' }) }));
     expect(h.persistAtomicAudit).toHaveBeenCalledWith(
       h.db,
       expect.objectContaining({ organizationId: 'org-a', action: 'clause_library.delete', resourceId: 'clause-1' }),

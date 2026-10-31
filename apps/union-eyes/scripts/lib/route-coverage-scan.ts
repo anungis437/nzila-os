@@ -137,6 +137,11 @@ export const READ_ONLY_POST_ROUTES = [
  * so the exemption is a statement about what the route is bounded by, not a gap in attention.
  */
 export const UNATTRIBUTABLE_WRITE_ROUTES: Record<string, { why: string; control: RegExp }> = {
+  // These two were counted atomically audited only because every route importing the e-mail sender also reached operation-audit.ts, which
+  // contains persistAtomicAudit. They have no organization to audit against (the caller is anonymous); platform-auth records the request in
+  // its own auth audit log, and the routes are limited per client address by the proxy.
+  'auth/forgot-password/route.ts': { why: 'Anonymous password-reset request with a neutral answer; there is no organization or actor. platform-auth records password_reset_request in its own auth audit log.', control: /forgotPassword\(/ },
+  'auth/magic-link/request/route.ts': { why: 'Anonymous sign-in link request with a neutral answer; there is no organization or actor. platform-auth records magic_link_requested in its own auth audit log.', control: /requestMagicLink\(/ },
   'icra/start/route.ts': { why: 'Public pseudonymous assessment intake; no actor, no tenant.', control: /guardPublicIntake|rateLimit\(/ },
   'icra/submit/route.ts': { why: 'Public assessment submission by capability; no actor, no tenant.', control: /guardPublicIntake|rateLimit\(|assessment-capability/ },
   'icra/[assessmentId]/answer/route.ts': { why: 'Answer to a pseudonymous assessment, authorised by its capability token.', control: /assessment-capability|rateLimit\(/ },
@@ -158,7 +163,7 @@ export const UNATTRIBUTABLE_WRITE_ROUTES: Record<string, { why: string; control:
   'cron/sla-watchdog/route.ts': { why: 'Platform-wide scan with no acting organization; it writes one deduplicated inbox alert per claim, kind and deadline inside each organization\'s own context (an audit row per alert would double every alert), plus metrics.', control: /cron:\s*true|CRON_SECRET|verifyCronAuth|cronAuth/i },
 }
 
-const ATOMIC_AUDIT = /persistAtomicAudit|appendMandatoryAudit/
+const ATOMIC_AUDIT = /persistAtomicAudit|appendMandatoryAudit|performAtomicAuditedOperation/
 
 /**
  * Platform-auth services whose audit record is part of the operation (a failed write fails and rolls back the change).

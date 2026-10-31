@@ -19,13 +19,13 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sharedClauseLibrary, clauseLibraryTags } from '@/db/schema/domains/agreements/shared-library';
 import { organizations } from '@/db/schema-organizations';
-import { createHash } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { canReadSharedClause, isSharedClauseOwner, sharingChangeDenial } from '@/lib/clause-library/sharing-authority';
 import { parseClauseBody, assertMayPublish } from '@/lib/clause-library/clause-body';
 import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
+import { clauseTextSha256, recordClauseVersion } from '@/lib/clause-library/version-history';
 
 export const dynamic = 'force-dynamic';
 
@@ -165,6 +165,11 @@ export const PATCH = withApi(
       );
       if (contentChanged) updateData.version = (existing.version ?? 1) + 1;
 
+      // The text being replaced is kept, in this transaction, before it is overwritten.
+      if (contentChanged) {
+        await recordClauseVersion(tx, { organizationId, recordedBy: userId, kind: 'replaced', clause: existing });
+      }
+
       const [updated] = await tx
         .update(sharedClauseLibrary)
         .set(updateData)
@@ -186,7 +191,7 @@ export const PATCH = withApi(
             ? {
                 fromVersion: existing.version ?? 1,
                 toVersion: updateData.version,
-                replacedTextSha256: createHash('sha256').update(existing.clauseText ?? '').digest('hex'),
+                replacedTextSha256: clauseTextSha256(existing.clauseText),
               }
             : {}),
           ...(updateData.sharingLevel !== undefined
@@ -221,6 +226,9 @@ export const DELETE = withApi(
         throw ApiError.conflict('This clause is shared. Withdraw it from sharing (set its sharing level to private) before deleting it.');
       }
 
+      // The final text is kept before the row goes, so a deleted clause can still be shown as it was.
+      await recordClauseVersion(tx, { organizationId, recordedBy: userId, kind: 'deleted', clause: existing });
+
       const [deleted] = await tx
         .delete(sharedClauseLibrary)
         .where(and(eq(sharedClauseLibrary.id, id), eq(sharedClauseLibrary.sourceOrganizationId, organizationId)))
@@ -241,7 +249,7 @@ export const DELETE = withApi(
           clauseType: existing.clauseType,
           version: existing.version ?? 1,
           sharingLevel: existing.sharingLevel,
-          clauseTextSha256: createHash('sha256').update(existing.clauseText ?? '').digest('hex'),
+          clauseTextSha256: clauseTextSha256(existing.clauseText),
         },
       });
       return { success: true };

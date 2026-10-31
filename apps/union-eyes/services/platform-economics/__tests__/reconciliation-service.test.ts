@@ -63,11 +63,9 @@ vi.mock('drizzle-orm', async (orig) => ({
   inArray: vi.fn(() => ({})),
   desc: vi.fn(() => ({})),
 }));
-vi.mock('@/lib/audit-logger', () => ({
-  auditLog: h.auditLog,
-  AuditEventType: { DATA_CREATE: 'data_create', DATA_UPDATE: 'data_update' },
-  AuditSeverity: { HIGH: 'high', MEDIUM: 'medium', CRITICAL: 'critical' },
-}));
+// Disclosed adaptation (F06 A2): the audit is persistAtomicAudit on the run's own transaction (it used to be the separate application
+// audit logger, which does not take the transaction handle). h.auditLog is kept as the name of the spy so the assertions read as before.
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: (...args: unknown[]) => h.auditLog(...args) }));
 
 import { eq } from 'drizzle-orm';
 import {
@@ -127,6 +125,13 @@ describe('platform-economics/reconciliation-service', () => {
       expect(result.totalMatches).toBe(2); // pmt1↔inv1 + fee1↔sb1
       expect(result.totalExceptions).toBe(4); // discrepancy + 2 unmatched payments + unmatched invoice
       expect(h.auditLog).toHaveBeenCalled();
+      expect(h.auditLog.mock.calls[0][1]).toMatchObject({ action: 'reconciliation.run.completed', resourceId: 'run-1' });
+    });
+
+    it('fails the whole run when its audit record cannot be written', async () => {
+      pushSel([]); pushSel([{ id: 'run-9' }]); pushSel([]); pushSel([]); pushSel([]); pushSel([]);
+      h.auditLog.mockRejectedValueOnce(new Error('audit down'));
+      await expect(runReconciliation({ organizationId: 'o1', periodStart: new Date('2025-01-01'), periodEnd: new Date('2025-01-31') })).rejects.toThrow('audit down');
     });
 
     it('handles a period with no payments and raises a critical variance alert', async () => {
@@ -208,6 +213,15 @@ describe('platform-economics/reconciliation-service', () => {
       });
       expect(updated.id).toBe('ex1');
       expect(h.auditLog).toHaveBeenCalledTimes(1);
+      expect(h.auditLog).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ organizationId: 'o1', userId: 'user-1', action: 'reconciliation.exception.resolved', resourceId: 'ex1' }));
+      // the notes are free text; only their length reaches the audit record
+      expect(JSON.stringify(h.auditLog.mock.calls[0])).not.toContain('fixed');
+    });
+
+    it('leaves the exception open when its audit record cannot be written (the audit throws inside the same transaction)', async () => {
+      pushSel([{ id: 'ex1', organizationId: 'o1' }]);
+      h.auditLog.mockRejectedValueOnce(new Error('audit down'));
+      await expect(resolveException('ex1', 'o1', { status: 'written_off', resolvedBy: 'user-1', notes: 'n' })).rejects.toThrow('audit down');
     });
 
     it('throws when the exception is already resolved', async () => {

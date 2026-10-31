@@ -5,7 +5,8 @@
 
 import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
 import { replayInvoiceDeterministically } from '@/services/platform-economics';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 const bodySchema = z.object({
   invoiceId: z.guid(),
@@ -24,31 +25,34 @@ export const POST = withApi(
   },
   async ({ body, organizationId, userId }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
-    const replay = await replayInvoiceDeterministically(body.invoiceId, organizationId);
-    if (!replay) {
+    if (!userId) throw ApiError.badRequest('User context required');
+    // Replay discloses an invoice's billed lineage, so the access record is mandatory and is written in the same tenant transaction as
+    // the read, before anything is returned: if it cannot be written the lineage is not released.
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+      const replay = await replayInvoiceDeterministically(body.invoiceId, organizationId, tx);
+      if (!replay) {
+        return {
+          found: false,
+          invoiceId: body.invoiceId,
+        };
+      }
+
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'billing.invoice.replay',
+        resourceType: 'platform_invoice',
+        resourceId: body.invoiceId,
+        details: {
+          isMatch: replay.recomputed.isMatch,
+          pricingRuleVersion: replay.pricingRuleVersion,
+        },
+      });
+
       return {
-        found: false,
-        invoiceId: body.invoiceId,
+        found: true,
+        replay,
       };
-    }
-
-    await auditLog({
-      eventType: AuditEventType.DATA_ACCESS,
-      severity: AuditSeverity.MEDIUM,
-      userId: userId ?? undefined,
-      organizationId: organizationId ?? undefined,
-      resource: 'platform_invoice',
-      resourceId: body.invoiceId,
-      action: 'invoice_replay',
-      details: {
-        isMatch: replay.recomputed.isMatch,
-        pricingRuleVersion: replay.pricingRuleVersion,
-      },
     });
-
-    return {
-      found: true,
-      replay,
-    };
   },
 );

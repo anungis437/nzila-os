@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 616,
-    "engineeringRemaining": 161,
+    "engineeringCorrected": 621,
+    "engineeringRemaining": 156,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 91
+    "engineeringPartial": 88
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -1967,11 +1967,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B78-AUDIT-ATOMICITY",
-        "path": "apps/union-eyes/services/platform-economics/billing-service.ts; apps/union-eyes/services/platform-economics/ledger-service.ts; apps/union-eyes/services/platform-economics/subscription-lifecycle-service.ts; apps/union-eyes/services/platform-economics/billing-service.test.ts; apps/union-eyes/services/platform-economics/__tests__/billing-service.test.ts; apps/union-eyes/services/platform-economics/__tests__/subscription-lifecycle-service.test.ts; apps/union-eyes/lib/services/__tests__/s22-audit-atomicity-batch.test.ts",
-        "explanation": "Invoice generation now writes the invoice, its lines, a ledger entry for every non-zero line (appendLedgerEntry joins the caller transaction) and a persistAtomicAudit record in one transaction, so a failed audit leaves no invoice and no ledger entry (the ledger appends used to commit separately, after the invoice, and the audit event after those). Trial expiry updates the subscription, writes its event row and its audit record in one transaction per subscription, where it used to write no audit record. Three test files were adapted (disclosed): the mocks of the atomic audit and of the transaction, the invoice-generated assertion moved from auditLog to persistAtomicAudit, and failure cases added.",
-        "remaining": "The invoice replay route still records its access as a separate auditLog event; the replay recomputes totals and writes nothing, so there is no row for the record to be atomic with, but the manifest still declares the audit class atomic.",
+        "path": "apps/union-eyes/services/platform-economics/billing-service.ts; apps/union-eyes/services/platform-economics/ledger-service.ts; apps/union-eyes/services/platform-economics/subscription-lifecycle-service.ts; apps/union-eyes/services/platform-economics/billing-service.test.ts; apps/union-eyes/services/platform-economics/__tests__/billing-service.test.ts; apps/union-eyes/services/platform-economics/__tests__/subscription-lifecycle-service.test.ts; apps/union-eyes/lib/services/__tests__/s22-audit-atomicity-batch.test.ts; apps/union-eyes/app/api/billing/replay-invoice/route.ts; apps/union-eyes/app/api/__tests__/billing-replay-invoice.route.test.ts; apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts",
+        "explanation": "Invoice generation now writes the invoice, its lines, a ledger entry for every non-zero line (appendLedgerEntry joins the caller transaction) and a persistAtomicAudit record in one transaction, so a failed audit leaves no invoice and no ledger entry (the ledger appends used to commit separately, after the invoice, and the audit event after those). Trial expiry updates the subscription, writes its event row and its audit record in one transaction per subscription, where it used to write no audit record. Three test files were adapted (disclosed): the mocks of the atomic audit and of the transaction, the invoice-generated assertion moved from auditLog to persistAtomicAudit, and failure cases added. The invoice replay, the last non-atomic item, reads the invoice and its lineage and writes its access record with persistAtomicAudit in one tenant transaction, before anything is returned: if the record cannot be written the lineage is not released, and a replay of an invoice that is not found writes no record. With invoice generation and trial expiry already atomic, the three operations the defect names are now all atomic; the route manifest classifies the route ATOMIC from its own source.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -3270,11 +3269,11 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B67-COGNITION-HONESTY-AGGREGATE-GUARDS-AUDIT-AND-SYNC-INTEGRITY",
-        "path": "apps/union-eyes/app/api/clause-library/[id]/route.ts; apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts",
-        "explanation": "A change to the title, text or type raises the version and the audit records the versions and a SHA-256 of the replaced text; a clause shared beyond private is refused deletion (409) until withdrawn from sharing, and the delete audit keeps its title, type, version and text digest.",
-        "remaining": "The replaced text itself is not retained as a prior row (previous_version_id is unused); only its digest is.",
+        "path": "apps/union-eyes/app/api/clause-library/[id]/route.ts; apps/union-eyes/lib/services/__tests__/s11-cognition-and-integrity.test.ts; apps/union-eyes/db/migrations-platform/0052_shared_clause_versions.sql; apps/union-eyes/db/migrations-cache/0042_shared_clause_versions_rls_closure.sql; apps/union-eyes/db/schema/domains/agreements/shared-library.ts; apps/union-eyes/db/rls-storage-authority/reference-latent.ts; apps/union-eyes/lib/clause-library/version-history.ts; apps/union-eyes/app/api/clause-library/[id]/versions/route.ts; apps/union-eyes/app/api/clause-library/[id]/__tests__/route.test.ts; apps/union-eyes/db/__tests__/migration-0052-shared-clause-versions.postgres.test.ts; apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts",
+        "explanation": "A change to the title, text or type raises the version and the audit records the versions and a SHA-256 of the replaced text; a clause shared beyond private is refused deletion (409) until withdrawn from sharing, and the delete audit keeps its title, type, version and text digest. The text a clause had is no longer lost. Platform 0052 adds shared_clause_versions, an append-only history (no foreign key to the clause, so it outlives it; unique per clause, version and kind; SHA-256 of the text) that cache 0042 forces to the owning organization with SELECT and INSERT only. The item route writes the replaced text in the same transaction before it overwrites it, and the final text before it deletes the row (a retried request cannot record a version twice); a failed history write abandons the change. The owner reads the history at /api/clause-library/[id]/versions. Proven on native PostgreSQL 15 and 16 as the runtime and system roles.",
+        "remaining": "Only the owning organization can read the prior text; an organization that compared or cited a clause sees its version number rise but cannot retrieve the earlier text, and a citation is not pinned to a version.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -6498,11 +6497,11 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B04-RESEND-WEBHOOK",
-        "path": "apps/union-eyes/app/api/communications/webhooks/resend/route.ts; apps/union-eyes/lib/communications/resend-event-rules.ts; apps/union-eyes/app/api/__tests__/communications-webhooks-resend.pglite.test.ts",
-        "explanation": "A complaint or suppression now creates the preference row when none exists, writes a revoked consent record and the audit entry, and applies once per message in the same transaction.",
-        "remaining": "Suppression is still scoped to the one organization on the message row; suppressing the same address in other organizations and in distribution-list subscriptions needs a cross-organization address-suppression design.",
+        "path": "apps/union-eyes/app/api/communications/webhooks/resend/route.ts; apps/union-eyes/lib/communications/resend-event-rules.ts; apps/union-eyes/app/api/__tests__/communications-webhooks-resend.pglite.test.ts; apps/union-eyes/db/migrations-platform/0053_email_address_suppressions.sql; apps/union-eyes/db/migrations-cache/0043_email_address_suppressions_rls_closure.sql; apps/union-eyes/db/schema/domains/communications/email-address-suppressions.ts; apps/union-eyes/db/rls-storage-authority/communications-notifications.ts; apps/union-eyes/lib/communications/address-suppression.ts; apps/union-eyes/lib/communications/__tests__/address-suppression.test.ts; apps/union-eyes/lib/email-service.ts; apps/union-eyes/lib/__tests__/email-service.test.ts; apps/union-eyes/app/api/admin/email-suppressions/route.ts; apps/union-eyes/app/api/__tests__/admin-email-suppressions.route.test.ts; apps/union-eyes/db/__tests__/migration-0053-email-address-suppressions.postgres.test.ts; apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts",
+        "explanation": "A complaint or suppression now creates the preference row when none exists, writes a revoked consent record and the audit entry, and applies once per message in the same transaction. A complaint or provider suppression now ends the recipient's subscriptions to the organization's own distribution lists as well as its preference, and is recorded platform-wide in a governed mechanism: platform 0053 adds email_address_suppressions (SHA-256 of the address only, no plaintext; cache 0043 makes it SYSTEM_ONLY), the webhook writes it in the same transaction as the consent record and the audit entry (only when the event names exactly one recipient; several are not guessed), and the single sending function refuses a suppressed address from any organization and fails closed if the list cannot be read. It is a delivery suppression, not consent, so other organizations' consent records are untouched. A platform administrator lifts one only through an audited route (reason required, row kept); a later complaint clears the lift. Proven on native PostgreSQL 15 and 16 and against a real SQL engine through the webhook.",
+        "remaining": "Only lib/email-service.ts is gated; any other code that talks to a provider directly would bypass the list (none was found).",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -10360,9 +10359,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B106-F06-A2-LOCAL-TRANSACTION-ATOMICITY",
+        "path": "apps/union-eyes/app/api/icra/report/[assessmentId]/review/route.ts; apps/union-eyes/app/api/__tests__/icra-report-review.route.test.ts; apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts",
+        "explanation": "Every review decision is now audited in the decision's transaction. A claimed assessment is audited against the claiming organization; an unclaimed prospect assessment against the organization the reviewing platform administrator is acting in (as for any platform operation); a reviewer acting in no organization gets a 409 and no decision is made unrecorded. The reviewer's summary text is not copied into the audit record. The existing test that pinned the absence of an audit was replaced (disclosed).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-ICRA-MALFORMED-IDS-AND-ANSWER-VALUES-SURFACE-AS-SERVER-ERRORS",
@@ -16152,9 +16158,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B106-F06-A2-LOCAL-TRANSACTION-ATOMICITY",
+        "path": "apps/union-eyes/services/platform-economics/reconciliation-service.ts; apps/union-eyes/services/platform-economics/__tests__/reconciliation-service.test.ts; apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts",
+        "explanation": "runReconciliation writes its completed and critical-variance audit records with persistAtomicAudit on the run's own transaction, and resolveException updates the exception and writes its record in one transaction (the notes stay on the exception row and only their length reaches the audit record). A failed audit write abandons the run or leaves the exception open, and a rolled-back run leaves no audit event. This changes audit atomicity only; no financial mandate, ledger effect or principal changed (the finance freeze stands).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-PRP-RECONCILIATION-RUNS-ARE-NOT-REPEATABLE-AND-THE-BILLING-PERIOD-IS-NOT-BOUND-TO-THE-ORGANIZATION",

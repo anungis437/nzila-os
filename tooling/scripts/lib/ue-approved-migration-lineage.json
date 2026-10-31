@@ -284,6 +284,20 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Public-or-owner row security for arbitration_decisions"
+      },
+      {
+        "tag": "0042_shared_clause_versions_rls_closure",
+        "sha256": "b0897771e2a578e0b073d4a735df77afa9a7cbdfea81d3c927479b5d2d209ad1",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Append-only RLS for shared_clause_versions"
+      },
+      {
+        "tag": "0043_email_address_suppressions_rls_closure",
+        "sha256": "f3d94790e1a5432eb4ef8875e08a738952a52744f83c0983075d7543d605f777",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "SYSTEM_ONLY RLS for email_address_suppressions"
       }
     ],
     "platform": [
@@ -545,6 +559,20 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Owner column and private-by-default for the shared arbitration_decisions library"
+      },
+      {
+        "tag": "0052_shared_clause_versions",
+        "sha256": "bc659adef04356134ac2dd3baea016753c2279a61332318862199d8a68e68211",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Append-only shared clause version history"
+      },
+      {
+        "tag": "0053_email_address_suppressions",
+        "sha256": "45a20651664091ec5e9da93cf6fcf2918bc230d71725b039c81513fc993fd642",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Platform-wide system-only email address suppression"
       }
     ]
   }
