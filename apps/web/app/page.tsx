@@ -2,14 +2,13 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import { getLocale } from 'next-intl/server';
 import ScrollReveal from '@/components/public/ScrollReveal';
-import AnimatedCounter from '@/components/public/AnimatedCounter';
+import HomeExperience from '@/components/public/HomeExperience';
 import SectionHeading from '@/components/public/SectionHeading';
 import ImageCard from '@/components/public/ImageCard';
 import TechStackBar from '@/components/public/TechStackBar';
 import InvestorCTA from '@/components/public/InvestorCTA';
 import SectionDivider from '@/components/public/SectionDivider';
 import TrackedLink from '@/components/public/TrackedLink';
-import { MARKETING_FACTS } from '@/lib/marketing-facts';
 import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
@@ -99,113 +98,8 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen">
-      {/* ═══════════════════════ HERO ═══════════════════════ */}
-      <section className="relative min-h-screen flex items-center overflow-hidden">
-        <Image
-          src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920"
-          alt="Earth at night showing illuminated cities and global digital connectivity networks"
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-linear-to-b from-navy/80 via-navy/70 to-navy/90" />
-        <div className="absolute inset-0 bg-mesh opacity-60" />
-
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
-          <ScrollReveal>
-            <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/20 text-gold mb-6">
-              {isFr ? 'Infrastructure de continuité organisationnelle' : 'Organizational Continuity Infrastructure'}
-            </span>
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.05}>
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-emerald/10 text-emerald mb-4 border border-emerald/20">
-              {isFr ? 'Anti-surveillance par doctrine' : 'Anti-surveillance by doctrine'}
-            </span>
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.1}>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
-              {isFr ? 'Les organisations ne devraient pas perdre' : 'Organizations should not lose'}<br />
-              <span className="gradient-text">{isFr ? 'leur continuité' : 'continuity when key people leave'}</span>
-            </h1>
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.2}>
-            <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-3xl">
-              {isFr
-                ? 'Nzila Ventures construit Nzila OS: une infrastructure gouvernée qui préserve la mémoire opérationnelle, les décisions, les preuves et la confiance organisationnelle pendant les transitions.'
-                : 'Nzila Ventures builds Nzila OS: governed infrastructure that preserves operational memory, decision rationale, evidence, and organizational trust across leadership change, restructuring, and system transition.'}
-            </p>
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.25}>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <TrackedLink
-                href="/continuity-assessment"
-                eventName="cta_continuity_assessment"
-                eventProps={{ source: 'home_hero' }}
-                className="inline-flex items-center justify-center px-8 py-4 bg-gold text-navy font-bold rounded-xl hover:bg-gold-light transition-all text-lg shadow-lg shadow-gold/30 btn-press"
-              >
-                {isFr ? 'Parcours OCRA: évaluer la continuité' : 'OCRA-first: Assess Continuity'}
-              </TrackedLink>
-              <TrackedLink
-                href="/union-eyes"
-                eventName="cta_union_eyes"
-                eventProps={{ source: 'home_hero' }}
-                className="inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur text-white font-bold rounded-xl border border-white/20 hover:bg-white/20 transition-all text-lg btn-press"
-              >
-                {isFr ? 'Parcours opérations: stabiliser les workflows' : 'Operations-first: Stabilize Workflows'}
-              </TrackedLink>
-              <TrackedLink
-                href="/anti-surveillance"
-                eventName="cta_anti_surveillance"
-                eventProps={{ source: 'home_hero' }}
-                className="inline-flex items-center justify-center px-8 py-4 bg-transparent text-white font-bold rounded-xl border border-white/20 hover:bg-white/10 transition-all text-lg btn-press"
-              >
-                {isFr ? 'Lire l engagement' : 'Read the Commitment'}
-              </TrackedLink>
-            </div>
-          </ScrollReveal>
-
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
-          <div className="w-6 h-10 rounded-full border-2 border-white/30 flex items-start justify-center p-1.5">
-            <div className="w-1.5 h-3 rounded-full bg-white/60 animate-bounce" />
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════ STATS BAR ═══════════════════════ */}
-      <section className="relative bg-navy-light py-16 overflow-hidden">
-        <div className="absolute inset-0 bg-mesh opacity-40" />
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { target: 1, prefix: '', suffix: '', label: isFr ? 'Produit de validation phare' : 'Flagship Validation Wedge' },
-              { target: MARKETING_FACTS.governedApplications, prefix: '', suffix: '', label: isFr ? 'Applications gouvernées' : 'Governed Applications' },
-              { target: 10, prefix: '', suffix: '+', label: isFr ? 'Secteurs sensibles à la confiance' : 'Trust-Sensitive Sectors' },
-              { target: 7, prefix: '', suffix: '', label: isFr ? 'Piliers de doctrine' : 'Doctrine Pillars' },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-white mb-2">
-                  <AnimatedCounter
-                    target={stat.target}
-                    prefix={stat.prefix}
-                    suffix={stat.suffix}
-                  />
-                </div>
-                <div className="text-gray-400 font-medium text-sm tracking-wider uppercase">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Product-led homepage hero and interactive journey introduction */}
+      <HomeExperience isFr={isFr} />
 
       {/* ═══════════════════════ DUAL ENTRY GTM ═══════════════════════ */}
       <section className="py-20 bg-white">
