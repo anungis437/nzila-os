@@ -11,7 +11,7 @@
 --
 -- Additive. New columns are NULLABLE and invent no value for existing rows (a row written before this migration stays null and the
 -- application falls back to its earlier behaviour). The two unique indexes refuse, rather than repair, data that already breaks
--- them. Relations that the Django snapshot owns (exit_interviews, sso_providers) are evolved only when present.
+-- them. Relations that the Django snapshot owns (exit_interviews, sso_providers) are evolved only when present; SSO uniqueness keys are added as nullable columns when the Django snapshot contains only a stub.
 
 DO $$
 BEGIN
@@ -80,6 +80,12 @@ END $$;
 DO $$
 BEGIN
   IF to_regclass('public.sso_providers') IS NOT NULL THEN
+    -- The combined Django + Drizzle bootstrap creates sso_providers as a minimal Django stub
+    -- (id and organization_id only). The index keys must exist before any uniqueness query.
+    -- Keep new fields nullable: a historical row must not acquire a fabricated identity provider.
+    ALTER TABLE public.sso_providers ADD COLUMN IF NOT EXISTS saml_entity_id varchar(500);
+    ALTER TABLE public.sso_providers ADD COLUMN IF NOT EXISTS oidc_issuer varchar(500);
+    ALTER TABLE public.sso_providers ADD COLUMN IF NOT EXISTS oidc_client_id varchar(255);
     IF EXISTS (SELECT 1 FROM public.sso_providers WHERE saml_entity_id IS NOT NULL GROUP BY organization_id, saml_entity_id HAVING count(*) > 1)
        OR EXISTS (SELECT 1 FROM public.sso_providers WHERE oidc_issuer IS NOT NULL GROUP BY organization_id, oidc_issuer, oidc_client_id HAVING count(*) > 1) THEN
       RAISE EXCEPTION 'platform 0038 fail-closed: an organization has duplicate SSO providers; resolve them before applying.';

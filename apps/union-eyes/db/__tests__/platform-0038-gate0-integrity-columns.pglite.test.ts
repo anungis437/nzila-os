@@ -20,7 +20,7 @@ const STUBS = `
   CREATE TABLE committee_meetings (id uuid primary key default gen_random_uuid(), minutes_approved_by text);
   CREATE TABLE cms_pages (id uuid primary key default gen_random_uuid());
   CREATE TABLE exit_interviews (id uuid primary key default gen_random_uuid(), reviewed_by text);
-  CREATE TABLE sso_providers (id uuid primary key default gen_random_uuid(), organization_id uuid not null, saml_entity_id varchar(500), oidc_issuer varchar(500), oidc_client_id varchar(255));
+  CREATE TABLE sso_providers (id uuid primary key default gen_random_uuid(), organization_id uuid not null);
 `
 const ORG = '11111111-1111-4111-8111-111111111111'
 const EMP = '22222222-2222-4222-8222-222222222222'
@@ -78,6 +78,16 @@ describe('platform migration 0038_gate0_integrity_columns on PGlite', () => {
     await expect(pg.exec(`INSERT INTO committee_meetings (minutes_recorded_by, minutes_approved_by) VALUES ('a', 'a')`)).rejects.toThrow(/committee_meetings_minutes_independent_chk/)
     await pg.exec(`INSERT INTO exit_interviews (submitted_by, reviewed_by) VALUES ('a', 'b')`)
     await expect(pg.exec(`INSERT INTO exit_interviews (submitted_by, reviewed_by) VALUES ('a', 'a')`)).rejects.toThrow(/exit_interviews_review_independent_chk/)
+  })
+
+  it('evolves a Django-owned SSO stub without fabricating provider identifiers', async () => {
+    await pg.exec(`INSERT INTO sso_providers (organization_id) VALUES ('${ORG}')`)
+    await run(pg, '0038_gate0_integrity_columns.sql')
+    await run(pg, '0038_gate0_integrity_columns.sql')
+    const rows = await pg.query<{ saml_entity_id: string | null; oidc_issuer: string | null; oidc_client_id: string | null }>(
+      'SELECT saml_entity_id, oidc_issuer, oidc_client_id FROM sso_providers',
+    )
+    expect(rows.rows).toEqual([{ saml_entity_id: null, oidc_issuer: null, oidc_client_id: null }])
   })
 
   it('allows one SSO provider per organization and entity id, and per organization, issuer and client', async () => {

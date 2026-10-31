@@ -401,10 +401,10 @@
       },
       {
         "tag": "0038_gate0_integrity_columns",
-        "sha256": "8e48666ac479f44b0d9291a67640423167a3dc06e644afe718a0afcc5958e4ba",
+        "sha256": "e95bb37ef864c8af05704ec2d3d3e383058db077d0d36d436a982fcb86caf6a5",
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
-        "note": "Adds kpi_configurations.direction, committee_meetings.minutes_recorded_by, exit_interviews.submitted_by, cms_pages.submitted_by, one active primary contact per employer and unique SSO provider indexes, each with a check or index that refuses the earlier approximation. Additive and nullable; refuses data that already breaks a unique index. Proven on PGlite only; has not been applied to a native or live database."
+        "note": "Adds kpi_configurations.direction, committee_meetings.minutes_recorded_by, exit_interviews.submitted_by, cms_pages.submitted_by, one active primary contact per employer, and unique SSO provider indexes. Evolves the three nullable SSO identity keys when the combined Django bootstrap has only the minimal SSO stub. Additive and nullable; refuses existing duplicates. Source and PGlite tests pending on this revision; native and live database acceptance not established."
       },
       {
         "tag": "0039_committee_memberships_shape",
