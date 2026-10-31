@@ -7589,6 +7589,37 @@
           "explanation": "Verified on source in B94: the route no longer lists billing profiles; it answers the signed-in user's own roles from their live membership on GET and on POST (whose body is ignored), so there is no refused POST and no billing data."
         }
       ]
+    },
+    {
+      "id": "B95-REPORT-AND-KNOWLEDGE-READ-RECORDS",
+      "family": "Durable records and access rules for report execution and knowledge-base reads",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B11-RPT-EXECUTE-RETURNS-MEMBER-EMAIL-AND-CLAIM-ROWS-AT-AN-OFFICER-ROLE-TITLE-WITH-NO-FIELD-AUTHORITY-AND-NO-DURABLE-RECORD-OF-WHAT-WAS-RETURNED",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/reports/execute/route.ts",
+            "apps/union-eyes/app/api/__tests__/reports-execute.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s39-report-and-knowledge-read-records.test.ts"
+          ],
+          "explanation": "A successful execution now writes report.execute to the canonical audit log before the rows are returned (data source, field ids, filter count and row count, never the rows), where it was only a log line.",
+          "remaining": "The route is still at the officer role title and no field-level authority limits which registry fields (member e-mail, claim rows) an officer may select."
+        },
+        {
+          "prefix": "DEF-0B8-JUR-KNOWLEDGE-BASE-READS-IGNORE-ACCESS-COLUMNS-ENTITLEMENT-AND-LEAVE-NO-READ-TRACE",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/governance/kb-visibility.ts",
+            "apps/union-eyes/lib/knowledge-transfer/governance/__tests__/kb-visibility.test.ts",
+            "apps/union-eyes/app/api/knowledge-base/route.ts",
+            "apps/union-eyes/app/api/knowledge-base/[id]/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s39-report-and-knowledge-read-records.test.ts"
+          ],
+          "explanation": "A parent organization's knowledge-base row is now served to a child only when it is public or names the child in allowed_organizations (the access columns decide); the list search matches the title and summary the list returns, not the full content of rows whose content it does not show; and opening a document writes knowledge_base.read to the audit log before the content is returned. Exit-interview copies were already governed by the interview reader condition.",
+          "remaining": "The routes still apply no union_knowledge_suite entitlement, because the same table serves organizations without that suite and which of them may read it is a product decision."
+        }
+      ]
     }
   ]
 }

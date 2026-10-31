@@ -14,6 +14,9 @@ vi.mock('@/lib/api-auth-guard', () => ({
   ),
 }));
 
+// The execution is recorded durably (B95); the writer has its own coverage.
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (_ctx: unknown, fn: (tx: unknown) => unknown) => fn({}) }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: m.checkRateLimit,
   RATE_LIMITS: { REPORT_EXECUTION: { requests: 30, window: 60 } },

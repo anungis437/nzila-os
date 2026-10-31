@@ -2,7 +2,7 @@
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
  "corrected": 605,
- "partial": 79,
+ "partial": 81,
  "outstanding": 172,
  "accountedFor": 172,
  "families": [
@@ -637,7 +637,8 @@
    },
    {
     "id": "DEF-0B8-JUR-KNOWLEDGE-BASE-READS-IGNORE-ACCESS-COLUMNS-ENTITLEMENT-AND-LEAVE-NO-READ-TRACE",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B9-ASM-ONBOARDING-EVENTS-RECORD-CALLER-ASSERTED-MILESTONES-AS-EVENT-AND-AUDIT-ROWS-WITHOUT-PERFORMING-OR-VERIFYING-THEM",
@@ -677,7 +678,8 @@
    },
    {
     "id": "DEF-0B11-RPT-EXECUTE-RETURNS-MEMBER-EMAIL-AND-CLAIM-ROWS-AT-AN-OFFICER-ROLE-TITLE-WITH-NO-FIELD-AUTHORITY-AND-NO-DURABLE-RECORD-OF-WHAT-WAS-RETURNED",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B11-SOC-SIGNATURE-AUDIT-TRAIL-HAS-NO-HASH-CHAIN-OR-VERIFICATION-AND-IS-SERVED-AS-A-LEGAL-COMPLIANCE-REPORT-OF-SELF-ASSERTED-EVIDENCE",

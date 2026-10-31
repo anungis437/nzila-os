@@ -16,6 +16,8 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { ReportExecutor, type ReportConfig } from '@/lib/report-executor';
 import { validateReportConfig } from '@/lib/reports/report-config-validation';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 import {
   ErrorCode,
@@ -150,6 +152,23 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
         organizationId,
       },
     });
+
+    // What was returned is recorded durably, by source and fields and the number of rows, never the rows themselves: a report can carry
+    // member contact and case data, and the answer must leave a record the log line did not.
+    await withRLSContext({ organizationId, userId }, (tx) =>
+      persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'report.execute',
+        resourceType: 'report_execution',
+        details: {
+          dataSource: config.dataSourceId,
+          fields: config.fields.map((field) => field.fieldId).slice(0, 100),
+          filterCount: config.filters?.length ?? 0,
+          rowCount: result.rowCount,
+        },
+      }),
+    );
 
     return NextResponse.json({
       success: true,

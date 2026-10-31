@@ -6,9 +6,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withApiAuth, BaseAuthContext, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
 import { knowledgeBaseSourceCondition, resolveInterviewReader } from '@/lib/knowledge-transfer/governance/interview-access';
+import { knowledgeBaseOrganizationCondition } from '@/lib/knowledge-transfer/governance/kb-visibility';
 import { db } from '@/db/db';
 import { knowledgeBase } from '@/db/schema';
-import { eq, and, sql, inArray } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 
@@ -28,7 +31,7 @@ export const GET = withApiAuth(async (
     sql`SELECT parent_id::text FROM organizations WHERE id = ${orgId}::uuid`,
   ));
   const parentId = parentRow[0]?.parent_id as string | undefined;
-  const orgIds = parentId ? [orgId, parentId] : [orgId];
+  const visibleOrgs = knowledgeBaseOrganizationCondition(orgId, parentId);
 
   const reader = await resolveInterviewReader(user?.id ?? null, false, hasMinRole);
   const [row] = await db
@@ -51,7 +54,7 @@ export const GET = withApiAuth(async (
     .where(
       and(
         eq(knowledgeBase.id, id),
-        inArray(knowledgeBase.organizationId, orgIds),
+        visibleOrgs,
         eq(knowledgeBase.isActive, true),
         knowledgeBaseSourceCondition(reader, orgId),
       ),
@@ -60,6 +63,18 @@ export const GET = withApiAuth(async (
   if (!row) {
     return NextResponse.json({ error: 'Document not found' }, { status: 404 });
   }
+
+  // Who opened which document is recorded before the content is returned.
+  await withRLSContext({ organizationId: orgId, userId: user?.id }, (tx) =>
+    persistAtomicAudit(tx, {
+      organizationId: orgId,
+      userId: user?.id ?? null,
+      action: 'knowledge_base.read',
+      resourceType: 'knowledge_base',
+      resourceId: id,
+      details: { ownedByReader: row.organizationId === orgId },
+    }),
+  );
 
   // Bump view count (fire-and-forget). Log failures so a broken index or
   // permissions issue is visible instead of silently never recording views.

@@ -92,7 +92,7 @@
     "engineeringCorrected": 605,
     "engineeringRemaining": 172,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 79
+    "engineeringPartial": 81
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -4601,9 +4601,9 @@
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
         "batch": "B55-F12-WORKFLOW-INTEGRITY-APPROVAL-LOCKS-AND-ATOMIC-UNSUBSCRIBE",
-        "path": "apps/union-eyes/app/api/communications/unsubscribe/[recipientId]/route.ts; apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts; apps/union-eyes/app/api/__tests__/communications-public-mutation-isolation.pglite.test.ts; apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts",
-        "explanation": "The message log, campaign stats, preference, list subscriptions and consent record are written on the one transaction handed to the callback (they used the shared connection, so there was no transaction at all). The unit-test mocks were adapted to pass the mock db as the transaction and to include the newsletter tables, and the real-SQL pglite test now creates those tables and still passes (disclosed).",
-        "remaining": "The public GET still changes state; it is guarded by a signed, action-bound token.",
+        "path": "apps/union-eyes/app/api/communications/unsubscribe/[recipientId]/route.ts; apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts; apps/union-eyes/app/api/__tests__/communications-public-mutation-isolation.pglite.test.ts; apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts; apps/union-eyes/lib/services/messaging/campaign-service.ts; apps/union-eyes/lib/services/messaging/email-service.ts; apps/union-eyes/lib/services/messaging/__tests__/campaign-service.test.ts; apps/union-eyes/lib/services/messaging/__tests__/email-service.test.ts; docs/union-eyes/convergence/remediation/ue-unsubscribe-scanner-safe-20261031.md; docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md",
+        "explanation": "The message log, campaign stats, preference, list subscriptions and consent record are written on the one transaction handed to the callback (they used the shared connection, so there was no transaction at all). The unit-test mocks were adapted to pass the mock db as the transaction and to include the newsletter tables, and the real-SQL pglite test now creates those tables and still passes (disclosed). Subsequent source corrections made GET a signed read-only confirmation and POST the sole mutation; outbound campaign emails now carry a campaign/recipient-bound RFC 8058 one-click POST capability, with SendGrid header forwarding. Added unit and PGlite regression sources. These additions are not yet executable-qualified.",
+        "remaining": "Exact-HEAD focused/full unit and contract, native PostgreSQL 15/16, HTTP/browser and staging proof; live provider one-click interoperability; independent institutional ratification. No CLOSED credit.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -4626,8 +4626,9 @@
       "engineeringCorrection": {
         "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B87-PLATFORM-READS-COMMUNICATIONS-SIGNATURES",
-        "path": "apps/union-eyes/app/api/communications/unsubscribe/[recipientId]/route.ts; apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts; apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts; apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts",
-        "explanation": "A link without a campaign now revokes in every organization that holds a preference row or a list subscription for the recipient, in the same transaction and through the same helper as a campaign link: preference, list subscriptions and one revoked consent record per organization, each attributed to its organization. The reason text is bounded at 200 characters. The route tests were extended and the b55 pin was adapted to the helper (disclosed).",
+        "path": "apps/union-eyes/app/api/communications/unsubscribe/[recipientId]/route.ts; apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts; apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts; apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts; apps/union-eyes/lib/services/messaging/campaign-service.ts; apps/union-eyes/lib/services/messaging/__tests__/campaign-service.test.ts; docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md",
+        "explanation": "A link without a campaign now revokes in every organization that holds a preference row or a list subscription for the recipient, in the same transaction and through the same helper as a campaign link: preference, list subscriptions and one revoked consent record per organization, each attributed to its organization. The reason text is bounded at 200 characters. The route tests were extended and the b55 pin was adapted to the helper (disclosed). An outbound campaign sender now issues a signed campaign-scoped unsubscribe capability, while explicit all-organization tokens remain separately signed. Missing signing keys refuse sends. Real mail-provider issuance and independent policy approval remain unproven.",
+        "remaining": "Exact-HEAD executable, native and HTTP/browser qualification; provider delivery headers and one-click interoperability; global opt-out institutional semantics.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -11196,9 +11197,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B95-REPORT-AND-KNOWLEDGE-READ-RECORDS",
+        "path": "apps/union-eyes/lib/knowledge-transfer/governance/kb-visibility.ts; apps/union-eyes/lib/knowledge-transfer/governance/__tests__/kb-visibility.test.ts; apps/union-eyes/app/api/knowledge-base/route.ts; apps/union-eyes/app/api/knowledge-base/[id]/route.ts; apps/union-eyes/lib/services/__tests__/s39-report-and-knowledge-read-records.test.ts",
+        "explanation": "A parent organization's knowledge-base row is now served to a child only when it is public or names the child in allowed_organizations (the access columns decide); the list search matches the title and summary the list returns, not the full content of rows whose content it does not show; and opening a document writes knowledge_base.read to the audit log before the content is returned. Exit-interview copies were already governed by the interview reader condition.",
+        "remaining": "The routes still apply no union_knowledge_suite entitlement, because the same table serves organizations without that suite and which of them may read it is a product decision.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-JUR-KNOWLEDGE-BASE-ITEM-GET-INCREMENTS-VIEW-COUNT-IN-SYSTEM-CONTEXT-WITHOUT-ORG-PREDICATE",
@@ -16816,9 +16825,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B95-REPORT-AND-KNOWLEDGE-READ-RECORDS",
+        "path": "apps/union-eyes/app/api/reports/execute/route.ts; apps/union-eyes/app/api/__tests__/reports-execute.route.test.ts; apps/union-eyes/lib/services/__tests__/s39-report-and-knowledge-read-records.test.ts",
+        "explanation": "A successful execution now writes report.execute to the canonical audit log before the rows are returned (data source, field ids, filter count and row count, never the rows), where it was only a log line.",
+        "remaining": "The route is still at the officer role title and no field-level authority limits which registry fields (member e-mail, claim rows) an officer may select.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-RPT-DATA-SOURCE-REGISTRY-ADVERTISES-SOURCES-AND-COLUMNS-THE-EXECUTE-ROUTE-REFUSES-OR-THE-TABLES-DO-NOT-HAVE",

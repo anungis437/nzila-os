@@ -9,9 +9,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withApiAuth, BaseAuthContext, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
 import { knowledgeBaseSourceCondition, resolveInterviewReader } from '@/lib/knowledge-transfer/governance/interview-access';
+import { knowledgeBaseOrganizationCondition } from '@/lib/knowledge-transfer/governance/kb-visibility';
 import { db } from '@/db/db';
 import { knowledgeBase } from '@/db/schema';
-import { eq, and, ilike, or, sql, inArray } from 'drizzle-orm';
+import { eq, and, ilike, or, sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const GET = withApiAuth(async (request: NextRequest, _context: BaseAuthContext) => {
@@ -27,7 +28,7 @@ export const GET = withApiAuth(async (request: NextRequest, _context: BaseAuthCo
     sql`SELECT parent_id::text FROM organizations WHERE id = ${orgId}::uuid`,
   ));
   const parentId = parentRow[0]?.parent_id as string | undefined;
-  const orgIds = parentId ? [orgId, parentId] : [orgId];
+  const visibleOrgs = knowledgeBaseOrganizationCondition(orgId, parentId);
 
   const url = new URL(request.url);
   const documentType = url.searchParams.get('documentType');
@@ -38,7 +39,7 @@ export const GET = withApiAuth(async (request: NextRequest, _context: BaseAuthCo
   const reader = await resolveInterviewReader(user?.id ?? null, false, hasMinRole);
   const sourceCondition = knowledgeBaseSourceCondition(reader, orgId);
   const conditions = [
-    inArray(knowledgeBase.organizationId, orgIds),
+    visibleOrgs,
     eq(knowledgeBase.isActive, true),
     sourceCondition,
   ];
@@ -51,10 +52,11 @@ export const GET = withApiAuth(async (request: NextRequest, _context: BaseAuthCo
   }
   if (q) {
     const pattern = `%${q}%`;
+    // The search matches what the list returns (title and summary), not the full content of rows whose content it does not show.
     conditions.push(
       or(
         ilike(knowledgeBase.title, pattern),
-        ilike(knowledgeBase.content, pattern),
+        ilike(knowledgeBase.summary, pattern),
       )!,
     );
   }
@@ -86,7 +88,7 @@ export const GET = withApiAuth(async (request: NextRequest, _context: BaseAuthCo
       count: sql<number>`count(*)::int`,
     })
     .from(knowledgeBase)
-    .where(and(inArray(knowledgeBase.organizationId, orgIds), eq(knowledgeBase.isActive, true), sourceCondition))
+    .where(and(visibleOrgs, eq(knowledgeBase.isActive, true), sourceCondition))
     .groupBy(knowledgeBase.sourceType);
 
   return NextResponse.json({ data: rows, total: rows.length, counts });
