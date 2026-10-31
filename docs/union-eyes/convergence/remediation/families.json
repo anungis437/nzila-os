@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 598,
- "partial": 78,
- "outstanding": 179,
- "accountedFor": 179,
+ "corrected": 600,
+ "partial": 79,
+ "outstanding": 177,
+ "accountedFor": 177,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -70,18 +70,17 @@
   {
    "family": "F04-MASS-ASSIGNMENT-AND-GENERIC-CRUD",
    "purpose": "Generic-CRUD exposure and mass assignment: allow-lists, governance classification, response projection",
-   "defects": 6,
+   "defects": 4,
    "severity": {
     "HIGH": 1,
-    "MEDIUM": 4,
+    "MEDIUM": 2,
     "LOW": 1
    },
-   "namedRoutes": 4,
+   "namedRoutes": 3,
    "namedFiles": 2,
    "tranches": {
-    "0B.3": 2,
+    "0B.3": 1,
     "0B.9": 2,
-    "0B.11": 1,
     "0B.12": 1
    }
   },
@@ -423,11 +422,8 @@
   "F04-MASS-ASSIGNMENT-AND-GENERIC-CRUD": [
    {
     "id": "DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B3-CRUD-SOFT-DELETE-ARCHIVED-NOT-IN-ENUM",
-    "severity": "MEDIUM"
+    "severity": "HIGH",
+    "partial": true
    },
    {
     "id": "DEF-0B9-ML-METRICS-ROUTE-SERVES-STORED-ANALYTICS-ROWS-WHERE-THE-PROMETHEUS-ENDPOINT-IS-DOCUMENTED",
@@ -435,10 +431,6 @@
    },
    {
     "id": "DEF-0B9-ASM-ONBOARDING-LOOKUP-LIBRARY-SWALLOWS-EVERY-FAILURE-INTO-AN-EMPTY-SUCCESS-RESPONSE",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-PRP-PRECEDENT-ITEM-PATCH-WRITES-SHARING-LEVEL-SHARED-WITH-LIST-AND-SOURCE-ORGANIZATION-FROM-THE-BODY",
     "severity": "MEDIUM"
    },
    {

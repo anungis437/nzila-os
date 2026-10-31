@@ -328,7 +328,8 @@ describe('clause-service', () => {
       const result = await compareClauses({ clauseIds: ['cl1', 'cl2'], analysisType: 'all' });
       expect(result.clauses).toHaveLength(2);
       expect(result.similarities.length).toBeGreaterThan(0);
-      expect(result.recommendations.length).toBeGreaterThan(0);
+      // No fixed recommendation is attached to a comparison (B80): the service reports what it found and nothing it cannot support.
+      expect(result.recommendations).toHaveLength(0);
     });
 
     it('throws when no clauses found', async () => {

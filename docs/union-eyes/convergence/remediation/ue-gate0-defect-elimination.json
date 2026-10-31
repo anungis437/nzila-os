@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 545,
-    "partial": 78,
+    "implementedPendingQualification": 547,
+    "partial": 79,
     "qualificationVerified": 0,
-    "unresolved": 232,
+    "unresolved": 230,
     "externalBlockers": 0
   },
   "batches": [
@@ -897,6 +897,15 @@
       "newlyImplemented": 1,
       "outstandingAfter": 232,
       "partial": 0,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B92-FACTORY-ATTRIBUTION-AND-VERIFIED-CREDITS",
+      "family": "Generic CRUD attribution fields and verified credits",
+      "outstandingBefore": 232,
+      "newlyImplemented": 2,
+      "outstandingAfter": 230,
+      "partial": 1,
       "evidenceCommit": null
     }
   ],
@@ -7332,6 +7341,34 @@
       ],
       "explanation": "Provider access and refresh tokens are sealed with the Key-Vault-backed secret service (enc:v1: marker) when the OAuth callback stores them and whenever a refresh rewrites them, and opened only at the point a provider client is built. A token written before sealing existed has no marker, is used as it is, and becomes sealed the next time it is rewritten, so connected accounts keep working. Sealing fails closed: if the secret service is unavailable the token is not stored. Five existing test files now mock the secret service and two storage assertions expect the sealed form (disclosed).",
       "remaining": "Existing plaintext tokens stay plaintext until each account is refreshed or reconnected; a one-off backfill needs the production secret service and was not run."
+    },
+    "DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT": {
+      "status": "PARTIAL",
+      "batch": "B92-FACTORY-ATTRIBUTION-AND-VERIFIED-CREDITS",
+      "files": [
+        "apps/union-eyes/lib/api/crud-factory.ts",
+        "apps/union-eyes/lib/services/__tests__/s36-factory-attribution-and-verified-credits.test.ts"
+      ],
+      "explanation": "The factory already refuses any key that is not a real column and any identity, tenancy, owner and lifecycle-time field. B92 widens the refused set to attribution and approval written under other spellings (createdById, approvedById, reviewedById, publishedById, verifiedById/Name/Date, approvedByName/Date, closedBy/ById, resolvedBy/ById, signedBy/ById, enteredBy), so the person and time of an act are always the server's record on all 98 factory routes; the factory and route suites pass.",
+      "remaining": "A route that lists no writableFields (84 of the 98) still accepts any real, non-reserved column, including status, cost and outcome columns; each needs its own allow-list decided from what its screens send."
+    },
+    "DEF-0B3-CRUD-SOFT-DELETE-ARCHIVED-NOT-IN-ENUM": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B92-FACTORY-ATTRIBUTION-AND-VERIFIED-CREDITS",
+      "files": [
+        "apps/union-eyes/lib/api/crud-factory.ts",
+        "apps/union-eyes/lib/services/__tests__/s36-factory-attribution-and-verified-credits.test.ts"
+      ],
+      "explanation": "Verified on source in B92: DELETE no longer writes an invented archived value into a domain enum; a status column that cannot take it refuses generic deletion with a 403 that names the governed lifecycle action (supportsGenericArchive)."
+    },
+    "DEF-0B11-PRP-PRECEDENT-ITEM-PATCH-WRITES-SHARING-LEVEL-SHARED-WITH-LIST-AND-SOURCE-ORGANIZATION-FROM-THE-BODY": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B92-FACTORY-ATTRIBUTION-AND-VERIFIED-CREDITS",
+      "files": [
+        "apps/union-eyes/app/api/precedents/[id]/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s36-factory-attribution-and-verified-credits.test.ts"
+      ],
+      "explanation": "Verified on source in B92: the item PATCH parses a strict schema (no body copy), is owner-only under the caller's tenant context, and audits a change of sharing level with the previous and new level."
     }
   }
 }

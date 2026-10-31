@@ -349,6 +349,9 @@ const FACTORY_MANAGED_FIELDS = new Set([
   'createdAt', 'updatedAt', 'deletedAt', 'archivedAt',
   'verifiedAt', 'verifiedBy', 'approvedAt', 'approvedBy',
   'submittedAt', 'reviewedAt', 'reviewedBy', 'publishedAt', 'publishedBy',
+  // Attribution and approval written under another spelling: the person and time of an act are the server's record, not a field the caller supplies.
+  'createdById', 'updatedById', 'approvedById', 'reviewedById', 'publishedById', 'verifiedById', 'verifiedByName', 'verifiedDate',
+  'approvedByName', 'approvedDate', 'closedBy', 'closedById', 'resolvedBy', 'resolvedById', 'signedBy', 'signedById', 'enteredBy',
 ]);
 
 /** Strict, bounded pagination for every collection backed by the CRUD factory. */

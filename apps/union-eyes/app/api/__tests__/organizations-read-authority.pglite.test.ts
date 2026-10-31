@@ -265,15 +265,18 @@ describe('analytics', () => {
     for (const user of ['u-officer-a', 'u-admin-fed']) {
       state.userId = user;
       const { data } = await (await GET(get(`/api/organizations/${LOCAL_A}/analytics`), params(LOCAL_A))).json();
+      // The seeded organization is below the minimum group size (5 members of whom 1 is inactive, 2 claims), so the figures are withheld
+      // rather than published (the small-group rule); the identity of the organization and its child count are not figures about people.
       expect(data, user).toMatchObject({
         organizationId: LOCAL_A,
-        totalMembers: 5,
-        activeMembers: 4,
-        totalClaims: 2,
-        activeClaims: 1,
-        resolvedClaims: 1,
+        totalMembers: null,
+        activeMembers: null,
+        totalClaims: null,
+        activeClaims: null,
+        resolvedClaims: null,
         childOrganizations: 0,
-        claimsByStatus: { filed: 1, closed: 1 },
+        claimsByStatus: null,
+        suppression: { members: true, claims: true },
       });
     }
   });

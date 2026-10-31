@@ -16,6 +16,8 @@ const m = vi.hoisted(() => ({
 vi.mock('@/lib/api-auth-guard', () => ({
   withRoleAuth: (_role: string, handler: (req: unknown, ctx: unknown) => Promise<unknown>) => handler,
 }));
+// The reads run inside the caller's organization context (B76); the services are mocked, so the context is a pass-through.
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (_ctx: unknown, fn: (tx: unknown) => unknown) => fn({}) }));
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() } }));
 vi.mock('@/lib/services/pilot-signals', () => ({ detectChampions: m.detectChampions, assessConversionReadiness: m.assessConversionReadiness }));
 vi.mock('@/lib/services/pilot-friction', () => ({ getFrictionReport: m.getFrictionReport, getFrictionSummary: m.getFrictionSummary }));

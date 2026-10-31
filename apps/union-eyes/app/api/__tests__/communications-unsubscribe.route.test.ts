@@ -156,7 +156,8 @@ describe('communications/unsubscribe/[recipientId] route', () => {
     });
 
     expect(response.status).toBe(200);
-    expect(mockDb.select).toHaveBeenCalledTimes(4);
+    // two scans, then per organization its preference lookup and the list-subscription subquery (the shared revocation helper)
+    expect(mockDb.select).toHaveBeenCalledTimes(6);
     expect(mockDb.insert).toHaveBeenCalledTimes(3); // org_1 consent, org_2 preference and consent
     expect(m.withSystemContext).toHaveBeenCalledTimes(1);
   });
@@ -226,7 +227,7 @@ describe('communications/unsubscribe/[recipientId] route', () => {
     });
 
     expect(response.status).toBe(200);
-    expect(mockDb.select).toHaveBeenCalledTimes(2); // campaign and scoped preference only
+    expect(mockDb.select).toHaveBeenCalledTimes(3); // campaign, scoped preference, and the list-subscription subquery of the same organization only
     expect(mockDb.insert).toHaveBeenCalledTimes(2); // preference and scoped consent only
     expect(m.withSystemContext).toHaveBeenCalledTimes(1);
   });
