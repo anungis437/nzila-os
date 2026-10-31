@@ -5561,7 +5561,8 @@
         "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts"
       ],
       "explanation": "The message log, campaign stats, preference, list subscriptions and consent record are written on the one transaction handed to the callback (they used the shared connection, so there was no transaction at all). The unit-test mocks were adapted to pass the mock db as the transaction and to include the newsletter tables, and the real-SQL pglite test now creates those tables and still passes (disclosed).",
-      "remaining": "The public GET still changes state; it is guarded by a signed, action-bound token."
+      "remaining": "The public GET still changes state; it is guarded by a signed, action-bound token.",
+      "additionalEngineeringEvidence": "docs/union-eyes/convergence/remediation/ue-unsubscribe-scope-and-consent-20261031.md (source-only; not executable qualification)"
     },
     "DEF-0B5-UNSUBSCRIBE-LEAVES-LIST-SUBSCRIPTIONS-ACTIVE": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -5570,7 +5571,8 @@
         "apps/union-eyes/app/api/communications/unsubscribe/[recipientId]/route.ts",
         "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts"
       ],
-      "explanation": "A campaign-link unsubscribe also marks the recipient subscriptions to the distribution lists of that organization unsubscribed, in the same transaction. Proven on real SQL (pglite) not to fail; contract test pins the update."
+      "explanation": "A campaign-link unsubscribe also marks the recipient subscriptions to the distribution lists of that organization unsubscribed, in the same transaction. Proven on real SQL (pglite) not to fail; contract test pins the update.",
+      "additionalEngineeringEvidence": "docs/union-eyes/convergence/remediation/ue-unsubscribe-scope-and-consent-20261031.md (source-only; not executable qualification)"
     },
     "DEF-0B6-EDU-CONTENT-PUBLISH-NO-SEPARATION-OF-DUTIES": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -7095,7 +7097,9 @@
         "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts",
         "apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts"
       ],
-      "explanation": "A link without a campaign now revokes in every organization that holds a preference row or a list subscription for the recipient, in the same transaction and through the same helper as a campaign link: preference, list subscriptions and one revoked consent record per organization, each attributed to its organization. The reason text is bounded at 200 characters. The route tests were extended and the b55 pin was adapted to the helper (disclosed)."
+      "explanation": "Campaignless unsubscribe requires an explicitly all-organizations action-bound token (scope=all, signed recipientId:unsubscribe-all). Under that capability, bounded recipient preference/list lookups enumerate organizations and revoke preferences, list subscriptions and one consent record per organization in one transaction. The ambiguous legacy recipient-only :unsubscribe token is refused; campaign-bound links remain scoped to their campaign organization.",
+      "additionalEngineeringEvidence": "docs/union-eyes/convergence/remediation/ue-unsubscribe-scope-and-consent-20261031.md (source-only; not executable qualification)",
+      "remaining": "Verify that actual mail senders issue the new explicit global capability where intended; obtain product authority for all-organizations opt-out semantics and executable native/HTTP qualification. No independent sign-off recorded."
     },
     "DEF-0B5-TRACKING-STATS-READ-MODIFY-WRITE-UNAUDITED": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
