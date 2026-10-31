@@ -29,7 +29,9 @@ describe('Gate 0 batch B87: platform reads, communications tracking and signatur
   it('revokes a campaign-less unsubscribe per organization with a consent record each', () => {
     const route = src('app/api/communications/unsubscribe/[recipientId]/route.ts')
     expect(route).toContain('for (const orgId of organizationIds)')
-    expect(route).toContain('revokeEmailForOrganization(tx, orgId, recipientId, reason, campaignId)')
+    expect(route).toContain('unsubscribe-all')
+    expect(route).toContain("scope !== 'all'")
+    expect(route).toContain('revokeEmailForOrganization(tx, orgId, recipientId, reason, null)')
     expect(route).toContain('.slice(0, 200)')
     const helper = route.slice(route.indexOf('async function revokeEmailForOrganization'), route.indexOf('export async function GET'))
     expect(helper).toContain("status: 'revoked'")
