@@ -3787,10 +3787,11 @@
       "batch": "B27-F05-F06-COMMERCIAL-BOUNDS-AUDIT-AND-RETENTION",
       "files": [
         "apps/union-eyes/app/api/workbook/[id]/memory-holders/route.ts",
-        "apps/union-eyes/lib/api/__tests__/f06-controls.contract.test.ts"
+        "apps/union-eyes/lib/api/__tests__/f06-controls.contract.test.ts",
+        "apps/union-eyes/app/api/__tests__/workbook-memory-holders.route.test.ts"
       ],
-      "explanation": "The collection reads and writes run through the public-intake guard (rate limit; body cap on writes). Claimed-workbook writes were already audited.",
-      "remaining": "The per-holder item route is not yet behind the guard, there is no per-workbook holder cap, and unclaimed-workbook reads are not audited."
+      "explanation": "Collection and item routes use the public-intake guard. Claimed-workbook writes have an audit. A bounded 200-holder cartography refuses misleading partial reads; POST locks the parent workbook row, rechecks claim authority and rejects capacity overflow before insert. Source/test commits baa2ba18 and 8d4f8b82; executable qualification is pending.",
+      "remaining": "Unclaimed-workbook reads remain unaudited. Native PG15/16 transaction-lock and cross-tenant acceptance, full unit/contract, HTTP/browser and staging verification are outstanding; this remains PARTIAL and not CLOSED."
     },
     "DEF-0B5-COMMS-SUBSCRIBER-EMAILS-READ-BY-ANY-MEMBER": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
