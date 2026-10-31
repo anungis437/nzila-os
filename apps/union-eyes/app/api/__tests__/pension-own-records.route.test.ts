@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   audit: vi.fn(),
   own: vi.fn(),
   conditions: [] as unknown[],
+  memberRows: [] as unknown[],
   inserted: [] as Record<string, unknown>[],
   tx: { select: vi.fn(), insert: vi.fn() },
 }));
@@ -14,6 +15,7 @@ vi.mock('@/lib/api/framework', () => ({
   ApiError: {
     badRequest: (msg: string) => Object.assign(new Error(msg), { code: 'BAD_REQUEST' }),
     forbidden: (msg: string) => Object.assign(new Error(msg), { code: 'FORBIDDEN' }),
+    notFound: (msg: string) => Object.assign(new Error(msg), { code: 'NOT_FOUND' }),
   },
 }));
 vi.mock('@/lib/db/with-rls-context', () => ({
@@ -27,7 +29,7 @@ vi.mock('@/lib/pension/pension-authority', () => ({
 }));
 vi.mock('@/db/schema', () => {
   const t = (name: string) => new Proxy({}, { get: (_t, p) => `${name}.${String(p)}` });
-  return { pensionBenefitClaims: t('claims'), pensionT4aRecords: t('t4a'), pensionContributions: t('contrib') };
+  return { pensionBenefitClaims: t('claims'), pensionT4aRecords: t('t4a'), pensionContributions: t('contrib'), pensionMembers: t('pmember') };
 });
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((c: unknown, v: unknown) => ({ eq: [c, v] })),
@@ -95,6 +97,8 @@ describe('pension/benefits POST', () => {
     m.withApi.mockImplementation((_cfg: unknown, handler: (c: any) => Promise<unknown>) => (c: any) => handler(c));
     m.own.mockResolvedValue(['membership-1', MY_PENSION_ID]);
     m.audit.mockResolvedValue(undefined);
+    m.memberRows = [{ name: 'Stored Me' }];
+    m.tx.select.mockReturnValue({ from: () => ({ where: () => ({ limit: async () => m.memberRows }) }) });
     m.tx.insert.mockReturnValue({
       values: (v: Record<string, unknown>) => {
         m.inserted.push(v);
@@ -108,9 +112,21 @@ describe('pension/benefits POST', () => {
   it('files the member\'s own claim as pending, ignoring a decision they try to supply, and audits it', async () => {
     const { POST } = await import('../pension/benefits/route');
     await (POST as any)({ ...base, body: { ...claim, status: 'paid', processedDate: '2026-01-01' } });
-    expect(m.inserted[0]).toMatchObject({ status: 'pending', organizationId: 'org_1', memberId: MY_PENSION_ID });
+    // The member's name is the stored one, not the typed one (DEF-0B10-PEN-PENSION-WRITES-STORE-TYPED-MEMBER-REFERENCES...).
+    expect(m.inserted[0]).toMatchObject({ status: 'pending', organizationId: 'org_1', memberId: MY_PENSION_ID, memberName: 'Stored Me' });
     expect(m.inserted[0]).not.toHaveProperty('processedDate');
     expect(m.audit).toHaveBeenCalledWith(m.tx, expect.objectContaining({ action: 'pension.benefit_claim.submit', userId: 'u1' }));
+  });
+
+  it('refuses a claim for an id that is no pension member of the organization, and a non-positive or malformed amount', async () => {
+    const { POST } = await import('../pension/benefits/route');
+    m.memberRows = [];
+    await expect((POST as any)({ ...base, body: claim })).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    m.memberRows = [{ name: 'Stored Me' }];
+    for (const amount of ['0', '-1', '1.234', 'lots']) {
+      await expect((POST as any)({ ...base, body: { ...claim, amount } })).rejects.toThrow();
+    }
+    expect(m.tx.insert).not.toHaveBeenCalled();
   });
 
   it('refuses a claim filed for someone else and writes nothing', async () => {

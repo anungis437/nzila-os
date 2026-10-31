@@ -13,9 +13,9 @@ if (!ledger.batches.some((x) => x.id === id)) {
     items: [
       { prefix: 'DEF-0B8-HS-TRAINING-FIGURES-READ-A-TABLE-NO-ROUTE-WRITES', status: 'IMPLEMENTED_PENDING_QUALIFICATION', files: [A + 'app/api/health-safety/stats/route.ts', A + 'app/[locale]/dashboard/health-safety/training/page.tsx', test],
         explanation: 'No route or job writes training records, so an organization with none now gets trainingDue null (not measured) with trainingRecordsHeld 0, instead of "0 due"; the training page shows the records held as its total rather than the due count.' },
-      { prefix: 'DEF-0B10-PEN-PENSION-WRITES-STORE-TYPED-MEMBER-REFERENCES-NAMES-AND-AM', status: 'PARTIAL', files: [A + 'app/api/pension/contributions/route.ts', A + 'app/api/__tests__/pension-contribution-member.route.test.ts'],
-        explanation: 'A contribution is recorded only against a pension member of the caller\'s organization (404 otherwise), under the stored member name (the typed name is ignored), and the amount must be a positive amount of at most ten digits and two decimals. Tested with a mocked transaction.',
-        remaining: 'The T4A, benefit-claim, member and plan write routes still store typed references, names and amounts; each needs the same reference and amount checks.' },
+      { prefix: 'DEF-0B10-PEN-PENSION-WRITES-STORE-TYPED-MEMBER-REFERENCES-NAMES-AND-AM', status: 'PARTIAL', files: [A + 'app/api/pension/contributions/route.ts', A + 'app/api/pension/benefits/route.ts', A + 'app/api/pension/members/route.ts', A + 'app/api/__tests__/pension-contribution-member.route.test.ts', A + 'app/api/__tests__/pension-own-records.route.test.ts', test],
+        explanation: 'A contribution and a benefit claim are recorded only against a pension member of the caller\'s organization (404 otherwise), under the stored member name (the typed name is ignored), with a positive amount of at most ten digits and two decimals; a member is enrolled only in a plan of the organization, under that plan\'s own name, with a bounded years-of-service figure. The own-records route test mock was extended for the member lookup and gained refusal cases (disclosed).',
+        remaining: 'The trustee and plan write routes still store typed names and figures (plan figures are administrator-typed and readable by any member, a separate open defect), and the T4A route is not implemented.' },
     ],
   })
 }

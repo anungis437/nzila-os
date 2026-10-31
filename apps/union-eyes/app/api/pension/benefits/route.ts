@@ -2,7 +2,7 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { listPage } from '@/lib/api/list-page';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { pensionBenefitClaims } from '@/db/schema';
+import { pensionBenefitClaims, pensionMembers } from '@/db/schema';
 import { eq, and, desc, inArray } from 'drizzle-orm';
 import { isPensionAdministrator, ownPensionIdentities } from '@/lib/pension/pension-authority';
 import { z } from 'zod';
@@ -11,10 +11,11 @@ import { z } from 'zod';
 // trustees, which is not implemented, so a submission is always filed as pending and cannot carry a decision.
 const createBenefitClaimSchema = z.object({
   memberId: z.guid(),
-  memberName: z.string().max(255),
-  claimType: z.string().max(100),
-  amount: z.string(),
-  notes: z.string().optional(),
+  // The member's name is read from the pension member row; accepted and ignored for compatibility.
+  memberName: z.string().max(255).optional(),
+  claimType: z.string().trim().min(1).max(100),
+  amount: z.string().regex(/^(?!0+(\.0+)?$)\d{1,10}(\.\d{1,2})?$/, 'amount must be a positive amount with at most two decimals'),
+  notes: z.string().max(4000).optional(),
 });
 
 export const dynamic = 'force-dynamic';
@@ -61,9 +62,15 @@ export const POST = withApi(
       if (!own.includes(parsed.memberId)) {
         throw ApiError.forbidden('A benefit claim can only be submitted for yourself');
       }
+      const [member] = await tx
+        .select({ name: pensionMembers.name })
+        .from(pensionMembers)
+        .where(and(eq(pensionMembers.id, parsed.memberId), eq(pensionMembers.organizationId, organizationId)))
+        .limit(1);
+      if (!member) throw ApiError.notFound('Pension member');
       const [claim] = await tx
         .insert(pensionBenefitClaims)
-        .values({ ...parsed, organizationId, status: 'pending', submittedDate: new Date() })
+        .values({ ...parsed, memberName: member.name, organizationId, status: 'pending', submittedDate: new Date() })
         .returning();
       await persistAtomicAudit(tx, {
         organizationId,

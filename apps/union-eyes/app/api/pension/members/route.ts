@@ -4,7 +4,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { PENSION_ADMIN_ROLES } from '@/lib/pension/pension-authority';
 import { db } from '@/db/db';
-import { pensionMembers } from '@/db/schema';
+import { pensionMembers, pensionPlans } from '@/db/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
@@ -12,10 +12,11 @@ const createMemberSchema = z.object({
   planId: z.guid(),
   userId: z.guid().optional(),
   name: z.string().max(255),
-  planName: z.string().max(255),
+  // The plan's name is read from the plan; accepted and ignored for compatibility.
+  planName: z.string().max(255).optional(),
   enrollmentDate: z.coerce.date().optional(),
   membershipStatus: z.enum(['active', 'inactive', 'retired', 'deferred', 'terminated']).optional(),
-  yearsOfService: z.string().optional(),
+  yearsOfService: z.string().regex(/^\d{1,3}(\.\d)?$/, 'yearsOfService must be a number with at most one decimal').optional(),
   vestingStatus: z.enum(['not_vested', 'partially_vested', 'fully_vested']).optional(),
 });
 
@@ -70,9 +71,16 @@ export const POST = withApi(
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const parsed = createMemberSchema.parse(body);
     return withRLSContext({ organizationId }, async (tx) => {
+      // The plan must be this organization's, and the member is enrolled under that plan's own name.
+      const [plan] = await tx
+        .select({ id: pensionPlans.id, planName: pensionPlans.planName })
+        .from(pensionPlans)
+        .where(and(eq(pensionPlans.id, parsed.planId), eq(pensionPlans.organizationId, organizationId)))
+        .limit(1);
+      if (!plan) throw ApiError.notFound('Pension plan');
       const [member] = await tx
         .insert(pensionMembers)
-        .values({ ...parsed, organizationId })
+        .values({ ...parsed, planName: plan.planName, organizationId })
         .returning();
       await persistAtomicAudit(tx, {
         organizationId,

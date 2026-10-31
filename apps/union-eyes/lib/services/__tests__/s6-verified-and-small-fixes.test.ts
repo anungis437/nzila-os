@@ -97,4 +97,12 @@ describe('S6 verified and small fixes', () => {
     expect(route).toContain('trainingRecordsHeld: recordsHeld')
     expect(read('app/[locale]/dashboard/health-safety/training/page.tsx')).toContain('totalRecords: json.trainingRecordsHeld ?? 0')
   })
+
+  it('enrols a pension member only in a plan of the organization, under the plan\'s own name, with a bounded years-of-service figure', () => {
+    const route = read('app/api/pension/members/route.ts')
+    expect(route).toContain('eq(pensionPlans.organizationId, organizationId)')
+    expect(route).toContain("throw ApiError.notFound('Pension plan')")
+    expect(route).toContain('planName: plan.planName')
+    expect(route).toContain('yearsOfService: z.string().regex(')
+  })
 })

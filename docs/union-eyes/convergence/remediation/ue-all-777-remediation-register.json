@@ -13792,9 +13792,9 @@
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
         "batch": "B63-F10-F02-UNMEASURED-FIGURES-AND-PENSION-CONTRIBUTION-REFERENCES",
-        "path": "apps/union-eyes/app/api/pension/contributions/route.ts; apps/union-eyes/app/api/__tests__/pension-contribution-member.route.test.ts",
-        "explanation": "A contribution is recorded only against a pension member of the caller's organization (404 otherwise), under the stored member name (the typed name is ignored), and the amount must be a positive amount of at most ten digits and two decimals. Tested with a mocked transaction.",
-        "remaining": "The T4A, benefit-claim, member and plan write routes still store typed references, names and amounts; each needs the same reference and amount checks.",
+        "path": "apps/union-eyes/app/api/pension/contributions/route.ts; apps/union-eyes/app/api/pension/benefits/route.ts; apps/union-eyes/app/api/pension/members/route.ts; apps/union-eyes/app/api/__tests__/pension-contribution-member.route.test.ts; apps/union-eyes/app/api/__tests__/pension-own-records.route.test.ts; apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts",
+        "explanation": "A contribution and a benefit claim are recorded only against a pension member of the caller's organization (404 otherwise), under the stored member name (the typed name is ignored), with a positive amount of at most ten digits and two decimals; a member is enrolled only in a plan of the organization, under that plan's own name, with a bounded years-of-service figure. The own-records route test mock was extended for the member lookup and gained refusal cases (disclosed).",
+        "remaining": "The trustee and plan write routes still store typed names and figures (plan figures are administrator-typed and readable by any member, a separate open defect), and the T4A route is not implemented.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
