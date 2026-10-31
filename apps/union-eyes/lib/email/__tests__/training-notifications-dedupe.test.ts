@@ -75,7 +75,7 @@ describe('education batch delivery claims', () => {
     expect(result.errors.join(' ')).not.toContain(cert.toEmail);
   });
 
-  it('retains a claim after an unexpected exception instead of risking duplicate delivery', async () => {
+  it('retains a claim after an ambiguous provider exception instead of risking duplicate delivery', async () => {
     m.send.mockRejectedValue(new Error('unknown provider state'));
     expect(await batchSendSessionReminders([session])).toMatchObject({ sent: 0, failed: 1 });
     expect(m.release).not.toHaveBeenCalled();

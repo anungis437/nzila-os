@@ -16,6 +16,8 @@ interface SendEmailResult {
   success: boolean;
   error?: string;
   messageId?: string;
+  /** Unknown provider state after an exception: do not release the durable send claim. */
+  uncertain?: boolean;
 }
 
 async function sendTrainingEmail(
@@ -144,6 +146,7 @@ export async function sendSessionReminder({
   } catch (error) {
 return {
       success: false,
+      uncertain: true,
       error: error instanceof Error ? error.message : "Unknown error",
     };
   }
@@ -252,6 +255,7 @@ export async function sendCertificationExpiryWarning({
   } catch (error) {
 return {
       success: false,
+      uncertain: true,
       error: error instanceof Error ? error.message : "Unknown error",
     };
   }
@@ -343,6 +347,8 @@ async function deliverOnce(
   try {
     const result = await send();
     if (result.success) return 'sent';
+    // An exception may occur after provider acceptance; retain the claim for manual reconciliation.
+    if (result.uncertain) return 'failed';
     // The provider explicitly refused; retry is safe only after the claim is released.
     try {
       await withSystemContext(() => releaseEducationReminder(identity));
