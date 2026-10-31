@@ -64,8 +64,10 @@ function sfw(data: any[] = []) {
 function sfol(data: any[] = []) {
   return {
     from: vi.fn(() => ({
-      orderBy: vi.fn(() => ({
-        limit: vi.fn().mockResolvedValue(data),
+      where: vi.fn(() => ({
+        orderBy: vi.fn(() => ({
+          limit: vi.fn().mockResolvedValue(data),
+        })),
       })),
     })),
   };
@@ -86,7 +88,9 @@ function _sfwool(data: any[] = []) {
 function sfg(data: any[] = []) {
   return {
     from: vi.fn(() => ({
-      groupBy: vi.fn().mockResolvedValue(data),
+      where: vi.fn(() => ({
+        groupBy: vi.fn().mockResolvedValue(data),
+      })),
     })),
   };
 }
@@ -504,7 +508,7 @@ describe("precedent-service", () => {
       (db.select as ReturnType<typeof vi.fn>)
         .mockReturnValueOnce(sfg([{ outcome: "upheld", count: 3 }]))
         .mockReturnValueOnce(sfg([{ tribunal: "OLRB", count: 2 }]))
-        .mockReturnValueOnce(sf([{ total: 5 }]));
+        .mockReturnValueOnce(sfw([{ total: 5 }]));
       const r = await getPrecedentStatistics();
       expect(r.total).toBe(5);
       expect(r.byOutcome).toHaveLength(1);
@@ -518,6 +522,50 @@ describe("precedent-service", () => {
       (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfol([dec]));
       const r = await getMostCitedPrecedents(5);
       expect(r).toHaveLength(1);
+    });
+  });
+
+
+  // DEF-0B11-PRP-PRECEDENT-LIBRARY-READS-RETURN-EVERY-COLUMN-AND-IGNORE-IS-PUBLIC-AND-ACCESS-RESTRICTIONS
+  describe("public-only SQL predicates across every shared-library read mode", () => {
+    it("filters issue-type lookup before returning rows", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfwolNoOffset([]));
+      await getPrecedentsByIssueType("discipline");
+      expect(eq).toHaveBeenCalledWith("isPublic", true);
+      expect(eq).toHaveBeenCalledWith("accessRestrictions", "");
+    });
+
+    it("filters most-cited rankings before returning rows", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfol([]));
+      await getMostCitedPrecedents(10);
+      expect(eq).toHaveBeenCalledWith("isPublic", true);
+      expect(eq).toHaveBeenCalledWith("accessRestrictions", "");
+    });
+
+    it("filters every statistics query, including the total count", async () => {
+      const groupedOutcome = sfg([]);
+      const groupedTribunal = sfg([]);
+      const total = sfw([{ total: 0 }]);
+      (db.select as ReturnType<typeof vi.fn>)
+        .mockReturnValueOnce(groupedOutcome)
+        .mockReturnValueOnce(groupedTribunal)
+        .mockReturnValueOnce(total);
+      await getPrecedentStatistics();
+      expect(groupedOutcome.from().where).toHaveBeenCalled();
+      expect(groupedTribunal.from().where).toHaveBeenCalled();
+      expect(total.from().where).toHaveBeenCalled();
+      expect(eq).toHaveBeenCalledWith("isPublic", true);
+    });
+
+    it("filters related decisions independently of the source decision", async () => {
+      mocks.mockFindFirst.mockResolvedValueOnce(dec);
+      mocks.mockUpdateSet.mockReturnValueOnce({
+        where: vi.fn().mockResolvedValue([dec]),
+      });
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfwolNoOffset([]));
+      await getRelatedPrecedents("d-1");
+      expect(eq).toHaveBeenCalledWith("isPublic", true);
+      expect(eq).toHaveBeenCalledWith("accessRestrictions", "");
     });
   });
 

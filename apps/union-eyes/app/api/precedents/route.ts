@@ -14,6 +14,7 @@ import {
 import { createPrecedentAudited } from "@/lib/services/precedent-audited-service";
 import { tribunalTypeEnum, decisionTypeEnum, outcomeEnum, precedentValueEnum } from "@/db/schema";
 import { z } from "zod";
+import { toPublicPrecedentSummary } from "@/lib/precedents/public-decision-view";
 import { withRoleAuth } from '@/lib/api-auth-guard';
 
  
@@ -66,14 +67,14 @@ export const GET = withRoleAuth('member', async (request, _context) => {
       if (mostCited) {
         // Reuse validated, bounded collection limit.
         const precedents = await getMostCitedPrecedents(limit);
-        return NextResponse.json({ precedents });
+        return NextResponse.json({ precedents: precedents.map(toPublicPrecedentSummary) });
       }
 
       // Return by issue type
       if (issueType) {
         // Reuse validated, bounded collection limit.
         const precedents = await getPrecedentsByIssueType(issueType, limit);
-        return NextResponse.json({ precedents, count: precedents.length });
+        return NextResponse.json({ precedents: precedents.map(toPublicPrecedentSummary), count: precedents.length });
       }
 
       // Build filters
@@ -151,7 +152,7 @@ export const GET = withRoleAuth('member', async (request, _context) => {
 
       const result = await listPrecedents(filters, { page, limit, sortBy, sortOrder: sortOrder as "asc" | "desc" });
 
-      return NextResponse.json(result);
+      return NextResponse.json({ ...result, precedents: result.precedents.map(toPublicPrecedentSummary) });
     } catch (error) {
 return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,

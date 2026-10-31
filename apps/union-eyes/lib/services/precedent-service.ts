@@ -385,7 +385,7 @@ export async function getPrecedentsByIssueType(
     const results = await db
       .select()
       .from(arbitrationDecisions)
-      .where(sql`${arbitrationDecisions.issueTypes}::jsonb ? ${issueType}`)
+      .where(and(sharedDecisions(), sql`${arbitrationDecisions.issueTypes}::jsonb ? ${issueType}`))
       .orderBy(desc(arbitrationDecisions.precedentValue), desc(arbitrationDecisions.decisionDate))
       .limit(limit);
 
@@ -409,7 +409,7 @@ export async function getRelatedPrecedents(
     if (!decision) return [];
 
     // Find related decisions based on similar criteria
-    const conditions: SQL[] = [];
+    const conditions: SQL[] = [sharedDecisions()];
 
     if (decision.issueTypes) {
       // Would use vector similarity or JSONB overlap in production
@@ -569,6 +569,7 @@ export async function getPrecedentStatistics() {
         count: sql<number>`count(*)::int`,
       })
       .from(arbitrationDecisions)
+      .where(sharedDecisions())
       .groupBy(arbitrationDecisions.outcome);
 
     const byTribunal = await db
@@ -577,11 +578,13 @@ export async function getPrecedentStatistics() {
         count: sql<number>`count(*)::int`,
       })
       .from(arbitrationDecisions)
+      .where(sharedDecisions())
       .groupBy(arbitrationDecisions.tribunal);
 
     const [{ total }] = await db
       .select({ total: sql<number>`count(*)::int` })
-      .from(arbitrationDecisions);
+      .from(arbitrationDecisions)
+      .where(sharedDecisions());
 
     return {
       total,
@@ -602,6 +605,7 @@ export async function getMostCitedPrecedents(limit: number = 10): Promise<Arbitr
     const precedents = await db
       .select()
       .from(arbitrationDecisions)
+      .where(sharedDecisions())
       .orderBy(desc(arbitrationDecisions.citationCount))
       .limit(limit);
 

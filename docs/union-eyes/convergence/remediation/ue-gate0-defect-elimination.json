@@ -11,7 +11,7 @@
   "totals": {
     "original": 777,
     "implementedPendingQualification": 471,
-    "partial": 81,
+    "partial": 82,
     "qualificationVerified": 0,
     "unresolved": 306,
     "externalBlockers": 0
@@ -726,6 +726,15 @@
       "newlyImplemented": 4,
       "outstandingAfter": 306,
       "partial": 0,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B72-PUBLIC-PRECEDENT-PROJECTION-AND-VISIBILITY",
+      "family": "Public arbitration decision library SQL visibility and explicit API response projection",
+      "outstandingBefore": 306,
+      "newlyImplemented": 0,
+      "outstandingAfter": 306,
+      "partial": 1,
       "evidenceCommit": null
     }
   ],
@@ -6356,6 +6365,20 @@
         "apps/union-eyes/lib/services/__tests__/s15-validation-and-bounded-jobs.test.ts"
       ],
       "explanation": "Verified in source: the alert is addressed to each active admin or president of the organization, and an organization with none records a failed execution naming that instead of an alert to a pseudo-user."
+    },
+    "DEF-0B11-PRP-PRECEDENT-LIBRARY-READS-RETURN-EVERY-COLUMN-AND-IGNORE-IS-PUBLIC-AND-ACCESS-RESTRICTIONS": {
+      "status": "PARTIAL",
+      "batch": "B72-PUBLIC-PRECEDENT-PROJECTION-AND-VISIBILITY",
+      "files": [
+        "apps/union-eyes/lib/services/precedent-service.ts",
+        "apps/union-eyes/app/api/precedents/route.ts",
+        "apps/union-eyes/app/api/precedents/search/route.ts",
+        "apps/union-eyes/lib/precedents/public-decision-view.ts",
+        "apps/union-eyes/lib/services/__tests__/precedent-service.test.ts",
+        "apps/union-eyes/lib/precedents/public-decision-view.test.ts"
+      ],
+      "explanation": "Shared arbitration_decisions library issue-type, most-cited, related and statistics queries now filter is_public and access_restrictions in SQL, matching list and search. The list/search/ranking/issue-type API responses use an explicit allowlist that excludes grievor, fullText, remedies, private CBA references, embedding, import provenance and access-control metadata. Unit and projection regressions added; executable qualification not yet established.",
+      "remaining": "Other direct callers of getPrecedentById/getPrecedentByCaseNumber and non-API services still need full inventory; shared-table native PostgreSQL RLS, authenticated HTTP/browser and cross-tenant runtime proof are outstanding."
     }
   }
 }

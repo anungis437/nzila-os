@@ -6,6 +6,7 @@
 import { NextResponse } from "next/server";
 import { searchPrecedents } from "@/lib/services/precedent-service";
 import { z } from "zod";
+import { toPublicPrecedentSummary } from "@/lib/precedents/public-decision-view";
 import { withRoleAuth } from '@/lib/api-auth-guard';
 
 import {
@@ -45,7 +46,7 @@ export const POST = withRoleAuth('steward', async (request, _context) => {
       const results = await searchPrecedents(query, filters, limit);
 
       return NextResponse.json({ 
-        precedents: results,
+        precedents: results.map(toPublicPrecedentSummary),
         count: results.length
       });
     } catch (error) {
