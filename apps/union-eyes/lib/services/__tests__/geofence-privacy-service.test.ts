@@ -135,6 +135,7 @@ describe("geofence-privacy-service", () => {
       const result = await trackLocation("u1", { latitude: 45.5, longitude: -73.5 }, "safety");
       expect(result.success).toBe(false);
       expect(result.error).toContain("Failed to track location");
+      expect(result.error).not.toContain("insert fail");
     });
 
     it("handles findFirst DB error via .catch fallback", async () => {
@@ -158,6 +159,7 @@ describe("geofence-privacy-service", () => {
       mocks.mockUpdateSet.mockReturnValueOnce({ where: vi.fn().mockRejectedValue(new Error("fail")) });
       const result = await revokeLocationConsent("u1");
       expect(result.success).toBe(false);
+      expect(result.message).not.toContain("fail");
     });
   });
 
