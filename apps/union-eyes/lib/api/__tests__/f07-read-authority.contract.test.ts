@@ -11,7 +11,6 @@ describe('F07 read authority beyond a role floor', () => {
     'communications/sms',
     'communications/sms/campaigns',
     'communications/sms/conversations',
-    'communications/sms/conversations/[conversationId]/read',
   ])('%s is read and written at the officer floor', (route) => {
     const text = read(route);
     expect(text).toContain("readRole: 'officer'");

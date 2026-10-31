@@ -12,6 +12,8 @@ const { GET, PATCH, DELETE } = crudRoutes({
   tags: ["Communications"],
   orgScoped: true,
   itemRoute: true,
+  // A removed template or list takes its history with it (a list's subscribed and unsubscribed trail cascades); it is retained.
+  retainOnDelete: true,
   // A distribution list names its audience and carries its filter criteria: staff read it.
   readRole: 'steward',
   writeRole: 'steward',

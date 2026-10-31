@@ -18,8 +18,11 @@ export const GET = async (req: NextRequest, { params: pendingParams }: { params:
     try {
       const jobId = params.jobId;
 
-      // Query newsletter campaigns to get batch job status
-      // Job ID format: "campaign-{campaignId}" or "batch-{timestamp}"
+      // Only a newsletter campaign job exists. Any other id, or a campaign of another organization, is not a job: reporting it as
+      // processing would invent a running job.
+      if (!jobId.startsWith('campaign-')) {
+        return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Batch job not found');
+      }
       let status = 'processing';
       let progress = {
         total: 0,
@@ -51,7 +54,10 @@ export const GET = async (req: NextRequest, { params: pendingParams }: { params:
           )
           .limit(1);
 
-        if (campaign) {
+        if (!campaign) {
+          return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Batch job not found');
+        }
+        {
           // Get recipient stats
           const [stats] = await db
             .select({
@@ -87,7 +93,7 @@ export const GET = async (req: NextRequest, { params: pendingParams }: { params:
           if (progress.failed > 0) {
             const failedRecipients = await db
               .select({
-                email: newsletterRecipients.email,
+                id: newsletterRecipients.id,
                 error: newsletterRecipients.errorMessage,
               })
               .from(newsletterRecipients)
@@ -100,7 +106,7 @@ export const GET = async (req: NextRequest, { params: pendingParams }: { params:
               .limit(10);
 
             errors = failedRecipients.map(r => ({
-              recipientEmail: r.email,
+              recipientId: r.id,
               error: r.error || 'Unknown error',
             }));
           }

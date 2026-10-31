@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 366,
-    "partial": 74,
+    "implementedPendingQualification": 371,
+    "partial": 79,
     "qualificationVerified": 0,
-    "unresolved": 411,
+    "unresolved": 406,
     "externalBlockers": 0
   },
   "batches": [
@@ -483,6 +483,15 @@
       "newlyImplemented": 2,
       "outstandingAfter": 411,
       "partial": 0,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+      "family": "F12: routes that record a send or advertise an operation they do not perform answer 501; communications history is retained",
+      "outstandingBefore": 411,
+      "newlyImplemented": 5,
+      "outstandingAfter": 406,
+      "partial": 5,
       "evidenceCommit": null
     }
   ],
@@ -4840,6 +4849,107 @@
         "apps/union-eyes/app/api/__tests__/f03-b52-references.contract.test.ts"
       ],
       "explanation": "Logging an employer communication checks employerId, grievanceId, recipientContactId and templateId against the caller organization before any write (404, nothing written or audited), and the list is limited to 200. The existing route test mock gained the limit step and a new test covers a foreign grievance (disclosed)."
+    },
+    "DEF-0B5-SMS-ROWS-WRITTEN-WITHOUT-SENDING": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+      "files": [
+        "apps/union-eyes/lib/api/records-a-send-only.ts",
+        "apps/union-eyes/app/api/communications/sms/route.ts",
+        "apps/union-eyes/app/api/communications/sms/campaigns/route.ts",
+        "apps/union-eyes/app/api/communications/sms/conversations/route.ts",
+        "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts"
+      ],
+      "explanation": "The SMS message, campaign and conversation collections keep their officer-floor read, and their POST (which inserted rows carrying status, provider id, price and delivery times for messages never sent) now answers 501 and writes nothing. Contract test pins the read and the refusal."
+    },
+    "DEF-0B5-SMS-READ-ROUTE-IS-GENERIC-MESSAGE-CRUD": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+      "files": [
+        "apps/union-eyes/app/api/communications/sms/conversations/[conversationId]/read/route.ts",
+        "apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts",
+        "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts"
+      ],
+      "explanation": "The conversation read path no longer lists every message of the organization or inserts a message row: both methods answer 501 at the officer floor. The F07 read-authority contract test listed this path among the CRUD floors and was adjusted to drop it (disclosed); the new test pins the 501."
+    },
+    "DEF-0B5-COMMS-TEMPLATE-HARD-DELETE": {
+      "status": "PARTIAL",
+      "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+      "files": [
+        "apps/union-eyes/app/api/communications/templates/[id]/route.ts",
+        "apps/union-eyes/app/api/messaging/templates/[id]/route.ts",
+        "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts"
+      ],
+      "explanation": "Both message-template item routes declare retainOnDelete: DELETE answers 409 and the template (and the campaign links it keeps) survives.",
+      "remaining": "No archive or withdrawal action exists yet, so a template can no longer be removed through the API."
+    },
+    "DEF-0B5-COMMS-LIST-DELETE-ERASES-SUBSCRIBER-CONSENT-TRAIL": {
+      "status": "PARTIAL",
+      "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+      "files": [
+        "apps/union-eyes/app/api/communications/distribution-lists/[id]/route.ts",
+        "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts"
+      ],
+      "explanation": "The distribution-list item route declares retainOnDelete, so a delete can no longer cascade away the subscribed, unsubscribed and unsubscribe-reason history of the list.",
+      "remaining": "No archive action exists yet."
+    },
+    "DEF-0B4-BATCH-STATUS-FABRICATED-PROCESSING": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+      "files": [
+        "apps/union-eyes/app/api/billing/batch-status/[jobId]/route.ts",
+        "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts"
+      ],
+      "explanation": "A job id that is not a campaign job, or a campaign of another organization, is answered 404 instead of a fabricated processing status with a start time of now; the failed-recipient list names a recipient id, not an e-mail address."
+    },
+    "DEF-0B10-ORG-NLRB-AND-LABOUR-BOARD-FILING-ROUTES-RECORD-NO-FILING-AND-TRANSMIT-NOTHING": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+      "files": [
+        "apps/union-eyes/app/api/organizing/nlrb-filings/route.ts",
+        "apps/union-eyes/app/api/organizing/labour-board/route.ts",
+        "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts"
+      ],
+      "explanation": "Existing implementation, verified by a new source-contract test: both filing paths answer 501 and neither is the generic campaign CRUD any more."
+    },
+    "DEF-0B10-ORG-FORM-GENERATION-ROUTE-RETURNS-JSON-AND-THE-CLIENT-SAVES-IT-AS-THE-PDF": {
+      "status": "PARTIAL",
+      "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+      "files": [
+        "apps/union-eyes/app/api/organizing/forms/generate/route.ts",
+        "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts"
+      ],
+      "explanation": "Existing implementation, verified: the form generation path answers 501 and no longer inserts or lists campaign rows.",
+      "remaining": "The client still saves a JSON response as a PDF; the form generator itself is not built."
+    },
+    "DEF-0B8-JUR-MEETING-ROOM-BOOKINGS-PATH-IS-THE-ROOM-ITEM-DELETE-ARCHIVES-THE-ROOM": {
+      "status": "PARTIAL",
+      "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+      "files": [
+        "apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts",
+        "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts"
+      ],
+      "explanation": "Existing implementation, verified: the bookings path answers 501 for GET and POST, reads and writes no room or booking row.",
+      "remaining": "The room_bookings table is not migrated; the booking rules in lib/services/room-booking-rules.ts are not wired in."
+    },
+    "DEF-0B4-CARBON-ORG-ID-FROM-QUERY-STRING": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+      "files": [
+        "apps/union-eyes/app/api/carbon/dashboard/route.ts",
+        "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts"
+      ],
+      "explanation": "Existing implementation, verified: the carbon dashboard no longer reads an organization id from the query string and no longer returns figures; it answers 501."
+    },
+    "DEF-0B5-SURVEY-RESPONSES-ROUTE-IGNORES-SURVEY-ID": {
+      "status": "PARTIAL",
+      "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+      "files": [
+        "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/route.ts",
+        "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts"
+      ],
+      "explanation": "Existing implementation, verified: the response create verifies the survey belongs to the caller organization, is active and open, and strips respondent identity for an anonymous survey; the list is a count-only steward read of the path survey.",
+      "remaining": "The POST still takes the survey id from the body rather than the path."
     }
   }
 }

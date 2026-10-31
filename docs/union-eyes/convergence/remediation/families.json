@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 410,
- "partial": 83,
- "outstanding": 367,
- "accountedFor": 367,
+ "corrected": 415,
+ "partial": 88,
+ "outstanding": 362,
+ "accountedFor": 362,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -245,10 +245,10 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 88,
+   "defects": 83,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 63,
+    "MEDIUM": 58,
     "LOW": 23
    },
    "namedRoutes": 11,
@@ -257,13 +257,13 @@
     "0B.1": 4,
     "0B.2": 1,
     "0B.3": 3,
-    "0B.4": 8,
-    "0B.5": 16,
+    "0B.4": 6,
+    "0B.5": 14,
     "0B.6": 14,
     "0B.7": 11,
     "0B.8": 11,
     "0B.9": 1,
-    "0B.10": 7,
+    "0B.10": 6,
     "0B.11": 5,
     "0B.12": 7
    }
@@ -1545,14 +1545,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B4-BATCH-STATUS-FABRICATED-PROCESSING",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B4-CARBON-ORG-ID-FROM-QUERY-STRING",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B5-OHS-OWNER-COLUMN-WORKERID-ABSENT",
     "severity": "MEDIUM"
    },
@@ -1587,19 +1579,13 @@
    },
    {
     "id": "DEF-0B5-COMMS-TEMPLATE-HARD-DELETE",
-    "severity": "LOW"
+    "severity": "LOW",
+    "partial": true
    },
    {
     "id": "DEF-0B5-COMMS-LIST-DELETE-ERASES-SUBSCRIBER-CONSENT-TRAIL",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B5-SMS-ROWS-WRITTEN-WITHOUT-SENDING",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B5-SMS-READ-ROUTE-IS-GENERIC-MESSAGE-CRUD",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B5-UNSUBSCRIBE-WRITES-NOT-ATOMIC",
@@ -1611,7 +1597,8 @@
    },
    {
     "id": "DEF-0B5-SURVEY-RESPONSES-ROUTE-IGNORES-SURVEY-ID",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B5-SURVEY-ANSWERS-HAVE-NO-ROUTE",
@@ -1761,19 +1748,17 @@
    },
    {
     "id": "DEF-0B8-JUR-MEETING-ROOM-BOOKINGS-PATH-IS-THE-ROOM-ITEM-DELETE-ARCHIVES-THE-ROOM",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B9-ASM-OCI-PATHS-WRAP-THE-OCRA-HANDLERS-BEHIND-AN-ORG-ACCESS-FUNCTION-THAT-RETURNS-TRUE-FOR-EVERY-REQUEST",
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B10-ORG-NLRB-AND-LABOUR-BOARD-FILING-ROUTES-RECORD-NO-FILING-AND-TRANSMIT-NOTHING",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B10-ORG-FORM-GENERATION-ROUTE-RETURNS-JSON-AND-THE-CLIENT-SAVES-IT-AS-THE-PDF",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B10-ORG-CLIENTS-CALL-CAMPAIGN-ITEM-AND-V2-ROUTES-THAT-ANSWER-NO-CAMPAIGN-DATA",

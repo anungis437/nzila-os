@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 410,
-    "engineeringRemaining": 367,
+    "engineeringCorrected": 415,
+    "engineeringRemaining": 362,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 83
+    "engineeringPartial": 88
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -3510,9 +3510,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+        "path": "apps/union-eyes/app/api/billing/batch-status/[jobId]/route.ts; apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts",
+        "explanation": "A job id that is not a campaign job, or a campaign of another organization, is answered 404 instead of a fabricated processing status with a start time of now; the failed-recipient list names a recipient id, not an e-mail address.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-BATCH-STATUS-RECIPIENT-EMAILS-DISCLOSED",
@@ -3630,9 +3637,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+        "path": "apps/union-eyes/app/api/carbon/dashboard/route.ts; apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts",
+        "explanation": "Existing implementation, verified: the carbon dashboard no longer reads an organization id from the query string and no longer returns figures; it answers 501.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CARBON-VALIDATE-ATTESTS-CALLER-DATA",
@@ -4104,9 +4118,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+        "path": "apps/union-eyes/app/api/communications/templates/[id]/route.ts; apps/union-eyes/app/api/messaging/templates/[id]/route.ts; apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts",
+        "explanation": "Both message-template item routes declare retainOnDelete: DELETE answers 409 and the template (and the campaign links it keeps) survives.",
+        "remaining": "No archive or withdrawal action exists yet, so a template can no longer be removed through the API.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B5-COMMS-TEMPLATE-DUPLICATE-IS-GENERIC-CRUD",
@@ -4145,9 +4167,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+        "path": "apps/union-eyes/app/api/communications/distribution-lists/[id]/route.ts; apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts",
+        "explanation": "The distribution-list item route declares retainOnDelete, so a delete can no longer cascade away the subscribed, unsubscribed and unsubscribe-reason history of the list.",
+        "remaining": "No archive action exists yet.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B5-COMMS-SUBSCRIBER-EMAILS-READ-BY-ANY-MEMBER",
@@ -4186,9 +4216,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+        "path": "apps/union-eyes/lib/api/records-a-send-only.ts; apps/union-eyes/app/api/communications/sms/route.ts; apps/union-eyes/app/api/communications/sms/campaigns/route.ts; apps/union-eyes/app/api/communications/sms/conversations/route.ts; apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts",
+        "explanation": "The SMS message, campaign and conversation collections keep their officer-floor read, and their POST (which inserted rows carrying status, provider id, price and delivery times for messages never sent) now answers 501 and writes nothing. Contract test pins the read and the refusal.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B5-SMS-STEWARD-READS-ALL-MEMBER-MESSAGES",
@@ -4251,9 +4288,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+        "path": "apps/union-eyes/app/api/communications/sms/conversations/[conversationId]/read/route.ts; apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts; apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts",
+        "explanation": "The conversation read path no longer lists every message of the organization or inserts a message row: both methods answer 501 at the officer floor. The F07 read-authority contract test listed this path among the CRUD floors and was adjusted to drop it (disclosed); the new test pins the 501.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B5-TRACKING-STATS-READ-MODIFY-WRITE-UNAUDITED",
@@ -4449,9 +4493,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+        "path": "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/route.ts; apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts",
+        "explanation": "Existing implementation, verified: the response create verifies the survey belongs to the caller organization, is active and open, and strips respondent identity for an anonymous survey; the list is a count-only steward read of the path survey.",
+        "remaining": "The POST still takes the survey id from the body rather than the path.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B5-SURVEY-ANSWERS-HAVE-NO-ROUTE",
@@ -10582,9 +10634,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+        "path": "apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts; apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts",
+        "explanation": "Existing implementation, verified: the bookings path answers 501 for GET and POST, reads and writes no room or booking row.",
+        "remaining": "The room_bookings table is not migrated; the booking rules in lib/services/room-booking-rules.ts are not wired in.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ML-OPERATIONAL-METRICS-COUNT-EVERY-ORGANIZATIONS-CLAIMS-FOR-ANY-SIGNED-IN-CALLER-OR-THE-SERVICE-KEY",
@@ -13015,9 +13075,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+        "path": "apps/union-eyes/app/api/organizing/nlrb-filings/route.ts; apps/union-eyes/app/api/organizing/labour-board/route.ts; apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts",
+        "explanation": "Existing implementation, verified by a new source-contract test: both filing paths answer 501 and neither is the generic campaign CRUD any more.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-ORG-FORM-GENERATION-ROUTE-RETURNS-JSON-AND-THE-CLIENT-SAVES-IT-AS-THE-PDF",
@@ -13032,9 +13099,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+        "path": "apps/union-eyes/app/api/organizing/forms/generate/route.ts; apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts",
+        "explanation": "Existing implementation, verified: the form generation path answers 501 and no longer inserts or lists campaign rows.",
+        "remaining": "The client still saves a JSON response as a PDF; the form generator itself is not built.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-ORG-ITEM-ROUTES-NAMED-FOR-NOTE-ENROLMENT-SEQUENCE-AND-ASSIGNMENT-REWRITE-OR-ARCHIVE-WHOLE-CAMPAIGN",
