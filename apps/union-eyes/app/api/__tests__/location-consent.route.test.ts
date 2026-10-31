@@ -137,7 +137,28 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
 
     await GET(new NextRequest('http://localhost/api/location/consent?userId=attacker-supplied-victim-id&context=strike'));
 
-    expect(m.hasValidConsent).toHaveBeenCalledWith('caller-own-id', 'strike');
+    expect(m.getOrganizationIdForUser).toHaveBeenCalledWith('caller-own-id');
+    expect(m.hasValidConsent).toHaveBeenCalledWith('caller-own-id', 'strike', m.tx);
+  });
+
+  it('GET refuses to report consent when the caller organization cannot be resolved', async () => {
+    const { GET } = await loadRoute();
+    m.getOrganizationIdForUser.mockRejectedValueOnce(new Error('organization binding unavailable'));
+
+    const response = await GET(new NextRequest('http://localhost/api/location/consent?context=event'));
+
+    expect(response.status).toBe(500);
+    expect(m.hasValidConsent).not.toHaveBeenCalled();
+  });
+
+  it('GET does not claim consent when the tenant-bound read fails', async () => {
+    const { GET } = await loadRoute();
+    m.hasValidConsent.mockRejectedValueOnce(new Error('RLS read refused'));
+
+    const response = await GET(new NextRequest('http://localhost/api/location/consent?context=strike'));
+
+    expect(response.status).toBe(500);
+    expect(m.hasValidConsent).toHaveBeenCalledWith('caller-own-id', 'strike', m.tx);
   });
 
   it('DELETE revokes consent only for the authenticated caller, ignoring a client-supplied ?userId=', async () => {
