@@ -14,6 +14,7 @@ import { eq, and, gte, lte, asc, desc, count, SQL } from 'drizzle-orm';
 import { z } from "zod";
 import { BaseAuthContext, withRoleAuth } from '@/lib/api-auth-guard';
 import { csvCell } from '@/lib/employer-execution/csv-cell';
+import { auditSocialAnalyticsExport } from '@/lib/social-media/export-audit';
 
 import {
   ErrorCode,
@@ -22,8 +23,10 @@ import {
 
 const MAX_ANALYTICS_ROWS = 5000;
 const MAX_EXPORT_ROWS = 5000;
+const MAX_CAMPAIGN_EXPORT_ROWS = 200;
 
 // The campaign export names its columns differently from its header text, so each header maps to its own row key.
+const ACCOUNT_EXPORT_KEYS: Record<string, string> = { Followers: 'follower_count' };
 const CAMPAIGN_EXPORT_KEYS: Record<string, string> = {
   Campaign: 'name',
   'Start Date': 'start_date',
@@ -40,6 +43,10 @@ const CAMPAIGN_EXPORT_KEYS: Record<string, string> = {
 };
 
 export const GET = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
+  // An export is a separate, steward-gated read. The normal analytics view remains member-readable.
+  if (request.nextUrl.searchParams.get('export') === 'true') {
+    return exportSocialMediaAnalyticsWithAuth(request);
+  }
   try {
       const { userId, organizationId } = context;
 
@@ -525,7 +532,7 @@ return NextResponse.json(
 });
 
 // An export of the organization's posts, account figures and campaigns is a staff read.
-export const DELETE = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
+const exportSocialMediaAnalyticsWithAuth = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
   try {
       const { userId, organizationId } = context;
 
@@ -547,6 +554,12 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
       const data_type = searchParams.get('type') || 'posts'; // posts, accounts, campaigns
       const startDate = searchParams.get('start_date') || format(subDays(new Date(), 30), 'yyyy-MM-dd');
       const endDate = searchParams.get('end_date') || format(new Date(), 'yyyy-MM-dd');
+      const validDay = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+        !Number.isNaN(Date.parse(value)) && new Date(value + 'T00:00:00.000Z').toISOString().slice(0, 10) === value;
+      if (!['csv', 'json'].includes(format_type) || !validDay(startDate) || !validDay(endDate) ||
+          startDate > endDate || (Date.parse(endDate) - Date.parse(startDate)) / 86_400_000 > 366) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid export format or date range');
+      }
 
       let data: Array<Record<string, unknown>> = [];
       let headers: string[] = [];
@@ -578,7 +591,7 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
               )
             )
             .orderBy(desc(socialPosts.publishedAt))
-            .limit(MAX_EXPORT_ROWS);
+            .limit(MAX_EXPORT_ROWS + 1);
 
           data = exportPosts;
           headers = [
@@ -622,7 +635,7 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
               )
             )
             .orderBy(asc(socialAnalytics.analyticsDate))
-            .limit(MAX_EXPORT_ROWS);
+            .limit(MAX_EXPORT_ROWS + 1);
 
           data = exportAnalytics;
           headers = [
@@ -648,7 +661,11 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
             .from(socialCampaigns)
             .where(eq(socialCampaigns.organizationId, organizationId))
             .orderBy(desc(socialCampaigns.createdAt))
-            .limit(MAX_EXPORT_ROWS);
+            .limit(MAX_CAMPAIGN_EXPORT_ROWS + 1);
+
+          if (exportCampaigns.length > MAX_CAMPAIGN_EXPORT_ROWS) {
+            return NextResponse.json({ error: 'Campaign export exceeds the supported limit; narrow the selection' }, { status: 409 });
+          }
 
           data = await Promise.all(
             exportCampaigns.map(async (campaign) => {
@@ -660,7 +677,9 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
                   sharesCount: socialPosts.sharesCount,
                 })
                 .from(socialPosts)
-                .where(eq(socialPosts.campaignId, campaign.id));
+                .where(eq(socialPosts.campaignId, campaign.id))
+                .limit(MAX_EXPORT_ROWS + 1);
+              if (campaignPosts.length > MAX_EXPORT_ROWS) throw new Error('Campaign post export exceeds safe bound');
 
               return {
                 name: campaign.name,
@@ -703,6 +722,13 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
     );
       }
 
+      // An export is never silently truncated and is never delivered without a durable, tenant-scoped audit.
+      if (data.length > MAX_EXPORT_ROWS) {
+        return NextResponse.json({ error: 'Export exceeds the supported limit; narrow the date range' }, { status: 409 });
+      }
+      await auditSocialAnalyticsExport({ organizationId, userId, dataType: data_type, format: format_type,
+        startDate, endDate, rowCount: data.length });
+
       // Generate CSV
       if (format_type === 'csv') {
         const csv = [
@@ -710,7 +736,8 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
           ...data.map((row) => {
             return headers
               .map((header) => {
-                const key = data_type === 'campaigns' ? CAMPAIGN_EXPORT_KEYS[header] : header.toLowerCase().replace(/ /g, '_');
+                const key = data_type === 'campaigns' ? CAMPAIGN_EXPORT_KEYS[header] :
+                  (ACCOUNT_EXPORT_KEYS[header] ?? header.toLowerCase().replace(/ /g, '_'));
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 let value: any = row[key] ?? '';
                 
@@ -733,6 +760,8 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
         return new NextResponse(csv, {
           headers: {
             'Content-Type': 'text/csv',
+            'Cache-Control': 'private, no-store',
+            'X-Content-Type-Options': 'nosniff',
             'Content-Disposition': `attachment; filename="social-media-${data_type}-${format(
               new Date(),
               'yyyy-MM-dd'
@@ -750,13 +779,18 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
           end_date: endDate,
         },
         exported_at: new Date().toISOString(),
-      });
+      }, { headers: { 'Cache-Control': 'private, no-store' } });
     } catch (_error) {
 return NextResponse.json(
         {
-          error: 'Failed to export analytics',
+          error: 'Export temporarily unavailable',
         },
-        { status: 500 }
+        { status: 503 }
       );
     }
 });
+
+// DELETE never performed a deletion; it formerly exported data. Refuse that misleading verb.
+export const DELETE = withRoleAuth('steward', async () =>
+  NextResponse.json({ error: 'Use GET /api/social-media/analytics?export=true' },
+    { status: 405, headers: { Allow: 'GET', 'Cache-Control': 'no-store' } }));
