@@ -107,9 +107,11 @@ describe('schema and mutation batch program', () => {
     }
     expect(program.censusCount).toBe(231)
     const evolve = program.batches.find((batch) => batch.id === 'schema-evolve-reachable')
-    expect(evolve?.entryCount).toBe(4)
+    expect(evolve?.entryCount).toBe(5)
     expect(evolve?.applyNow).toBe(false)
     expect(evolve?.action).toContain('0031_reachable_stub_shape')
+    expect(evolve?.action).toContain('0039_committee_memberships_shape')
+    expect(program.schema.find((entry) => entry.table === 'committee_memberships')?.batchId).toBe('schema-evolve-reachable')
     expect(evolve?.action).toContain('READY_FOR_VS_EXECUTION')
     expect(evolve?.action).toContain('no DROP')
     const history = program.schema.find((entry) => entry.table === 'notification_history')
@@ -131,7 +133,6 @@ describe('schema and mutation batch program', () => {
     ]
     const dependencyHeld = [
       'clc_webhook_log',
-      'committee_memberships',
       'event_reminders',
       'grievance_approvals',
       'grievance_assignments',

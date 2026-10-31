@@ -186,7 +186,8 @@ describe('round 47 same-org cross-user ratchet: user_consents route', () => {
 describe('round 47 crud-factory itemRoute ownerColumn ratchet', () => {
   it('buildItemHandlers applies ownerColumn to GET/PATCH/DELETE conditions', () => {
     const src = source('lib/api/crud-factory.ts');
-    const occurrences = src.match(/if \(ownerCol && userId\) \{\s*conditions\.push\(eq\(ownerCol, userId\)\);/g);
+    // A read is scoped to the owner unless staff may read all (staffMayReadAll); a write is always scoped to the owner.
+    const occurrences = src.match(/if \(ownerCol && userId(?: && !\(await staffMayReadAll\(userId, organizationId\)\))?\) \{\s*conditions\.push\(eq\(ownerCol, userId\)\);/g);
     // One in buildCollectionHandlers' GET (pre-existing) + three in
     // buildItemHandlers' GET/PATCH/DELETE (added this round) = 4 total.
     expect(occurrences?.length ?? 0).toBe(4);

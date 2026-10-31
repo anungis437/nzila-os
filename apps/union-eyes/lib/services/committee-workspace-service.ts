@@ -133,12 +133,10 @@ export async function updateMeeting(
   // Once the minutes are approved, the recorded decisions, the agenda and the meeting status are part of the approved record.
   const touchesApprovedRecord = (['decisions', 'agendaItems', 'agenda', 'status'] as const).some((key) => key in changes);
   return withRLSContext(async (tx) => {
-    const conditions = [eq(committeeMeetings.id, meetingId), eq(committeeMeetings.organizationId, organizationId)];
-    if (touchesApprovedRecord) conditions.push(isNull(committeeMeetings.minutesApprovedAt));
     const [updated] = await tx
       .update(committeeMeetings)
       .set({ ...changes, updatedAt: sql`now()` })
-      .where(and(...conditions))
+      .where(and(eq(committeeMeetings.id, meetingId), eq(committeeMeetings.organizationId, organizationId), touchesApprovedRecord ? isNull(committeeMeetings.minutesApprovedAt) : undefined))
       .returning();
     if (!updated) {
       if (!touchesApprovedRecord) return null;

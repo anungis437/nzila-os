@@ -405,6 +405,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Adds kpi_configurations.direction, committee_meetings.minutes_recorded_by, exit_interviews.submitted_by, cms_pages.submitted_by, one active primary contact per employer and unique SSO provider indexes, each with a check or index that refuses the earlier approximation. Additive and nullable; refuses data that already breaks a unique index. Proven on PGlite only; has not been applied to a native or live database."
+      },
+      {
+        "tag": "0039_committee_memberships_shape",
+        "sha256": "493474c5698c34663f1974141003a020b209e35dc37f73121fafaf01d20762c5",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Additive shape evolution of committee_memberships"
       }
     ]
   }

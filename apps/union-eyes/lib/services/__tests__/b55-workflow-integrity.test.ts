@@ -8,7 +8,7 @@ describe('B55 workflow integrity', () => {
   it('locks decisions, agenda and status once the minutes are approved (DEF-0B5-COMMITTEE-DECISIONS-EDITABLE-AFTER-APPROVAL)', () => {
     const service = read('lib/services/committee-workspace-service.ts')
     expect(service).toContain("(['decisions', 'agendaItems', 'agenda', 'status'] as const).some((key) => key in changes)")
-    expect(service).toContain('if (touchesApprovedRecord) conditions.push(isNull(committeeMeetings.minutesApprovedAt))')
+    expect(service).toContain('touchesApprovedRecord ? isNull(committeeMeetings.minutesApprovedAt) : undefined')
     expect(service).toContain('cannot be changed')
   })
 

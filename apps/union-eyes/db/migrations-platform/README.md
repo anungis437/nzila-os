@@ -62,6 +62,7 @@ business tables that already had Drizzle projections / runtime authority but lac
 | `0021_employer_execution_integrity` | Adds `executed_by` / `executed_at` to `employer_payroll_runs` (the executing officer is a recorded fact, not only an audit entry) and makes two code-level rules structural: one remittance run per payroll run and one timesheet batch per organization, employer, period and source-file hash, as unique indexes. Refuses existing duplicates rather than choosing a survivor. Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json` |
 | `0020_declared_shape_tranche_3` | Third generated, additive evolution of 23 live Django stub relations to their declared shape (organizing, settlements, surveys, polls, federations, safety and others). NOT NULL only on empty relations, no keys or RLS. Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json` |
 | `0038_gate0_integrity_columns` | Gate 0 integrity columns: KPI direction, who recorded minutes, who submitted an interview or content item, one primary employer contact and unique SSO providers. Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
+| `0039_committee_memberships_shape` | Evolve committee_memberships to its declared shape Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 
 ## What does not belong here
 
