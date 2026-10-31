@@ -43,17 +43,31 @@ vi.mock('drizzle-orm', async (orig) => ({
 }));
 
 import { GeofencePrivacyService } from '../geofence-privacy-service';
+import { LOCATION_CONSENT_DESCRIPTION, LOCATION_CONSENT_PURPOSE } from '@/lib/location/consent-notice';
 
 const S = GeofencePrivacyService;
 const enabledConfig = (over: Record<string, unknown> = {}) => ({ locationTrackingEnabled: true, backgroundTrackingAllowed: false, ...over });
 
 beforeEach(() => {
   h.queue.length = 0;
+  process.env.UE_LOCATION_CONSENT_NOTICE_VERSION = 'v1';
+  process.env.UE_LOCATION_CONSENT_NOTICE_TEXT = 'Approved exact notice';
 });
 
 describe('geofence-privacy-service', () => {
   describe('requestLocationConsent', () => {
-    const req = { userId: 'u1', purpose: 'strike', purposeDescription: 'd', consentText: 't' };
+    const req = { userId: 'u1', purpose: LOCATION_CONSENT_PURPOSE, purposeDescription: LOCATION_CONSENT_DESCRIPTION, consentText: 'Approved exact notice', noticeVersion: 'v1' };
+
+    it('refuses direct service callers who forge the notice or omit the configured policy', async () => {
+      h.db.select.mockClear();
+      await expect(S.requestLocationConsent({ ...req, consentText: 'I agree to a different purpose' }))
+        .rejects.toThrow('notice unavailable or mismatched');
+      await expect(S.requestLocationConsent({ ...req, noticeVersion: 'v0' }))
+        .rejects.toThrow('notice unavailable or mismatched');
+      delete process.env.UE_LOCATION_CONSENT_NOTICE_TEXT;
+      await expect(S.requestLocationConsent(req)).rejects.toThrow('notice unavailable or mismatched');
+      expect(h.db.select).not.toHaveBeenCalled();
+    });
 
     it('grants consent when none exists', async () => {
       pushSel([], [{ id: 'c1' }], []); // existing empty, insert, audit
