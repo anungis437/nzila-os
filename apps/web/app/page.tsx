@@ -10,16 +10,22 @@ import SectionDivider from '@/components/public/SectionDivider';
 import TrackedLink from '@/components/public/TrackedLink';
 import type { Locale } from '@/lib/locales';
 
-export const metadata: Metadata = {
-  title: 'Home',
-  description: 'Nzila Ventures builds organizational continuity infrastructure for trust-sensitive organizations that need governance, operational memory, evidence, and trust to survive transition.',
-  openGraph: {
-    title: 'Nzila Ventures | Organizational Continuity Infrastructure',
-    description: 'Governed operational infrastructure for continuity, operational memory, audit evidence, and organizational trust.',
-    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Nzila Ventures — Build continuity. Preserve accountability.' }],
-  },
-  alternates: { canonical: '/' },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const isFr = (await getLocale()) === 'fr-CA';
+  const description = isFr
+    ? 'Nzila Ventures conçoit des logiciels centrés sur l’humain pour préserver la mémoire institutionnelle et relier les décisions à des preuves. Découvrez Union Eyes et CIVIC.'
+    : 'Nzila Ventures builds human-centered software to preserve institutional knowledge and keep decisions accountable. Discover Union Eyes for unions and CIVIC for public institutions.';
+  return {
+    title: isFr ? 'Logiciels pensés pour les personnes et les institutions' : 'Human-Centered Software for Institutions',
+    description,
+    openGraph: {
+      title: isFr ? 'Nzila Ventures | Des logiciels au service des personnes' : 'Nzila Ventures | Software That Keeps People in Control',
+      description,
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Nzila Ventures — Human-centered institutional software' }],
+    },
+    alternates: { canonical: '/' },
+  };
+}
 
 const verticals = [
   { name: 'Fintech', description: 'Financial services and planning' },
