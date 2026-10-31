@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 531,
+ "corrected": 534,
  "partial": 80,
- "outstanding": 246,
- "accountedFor": 246,
+ "outstanding": 243,
+ "accountedFor": 243,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -91,13 +91,13 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 47,
+   "defects": 45,
    "severity": {
     "HIGH": 8,
-    "MEDIUM": 28,
-    "LOW": 11
+    "MEDIUM": 27,
+    "LOW": 10
    },
-   "namedRoutes": 5,
+   "namedRoutes": 3,
    "namedFiles": 0,
    "tranches": {
     "0B.2": 3,
@@ -107,7 +107,7 @@
     "0B.7": 13,
     "0B.8": 2,
     "0B.9": 1,
-    "0B.10": 6,
+    "0B.10": 4,
     "0B.11": 10,
     "0B.12": 2
    }
@@ -238,13 +238,13 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 50,
+   "defects": 49,
    "severity": {
     "HIGH": 2,
     "MEDIUM": 38,
-    "LOW": 10
+    "LOW": 9
    },
-   "namedRoutes": 7,
+   "namedRoutes": 6,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 4,
@@ -255,7 +255,7 @@
     "0B.6": 7,
     "0B.7": 8,
     "0B.8": 5,
-    "0B.10": 6,
+    "0B.10": 5,
     "0B.11": 4,
     "0B.12": 3
    }
@@ -622,16 +622,8 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B10-PEN-PLAN-FIGURES-ARE-ADMINISTRATOR-TYPED-AND-READABLE-BY-ANY-MEMBER",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B10-PEN-PENSION-ADMINISTRATION-WRITES-REST-ON-ONE-ROLE-TITLE-WITH-NO-MANDATE-OR-TRUSTEE-DECISION",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-PEN-PENSION-READS-USE-THE-SHARED-DB-HANDLE-WITHOUT-AN-EXPLICIT-TENANT-CONTEXT",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B10-PIL-PILOT-WRITE-ROUTES-CAST-THE-JSON-BODY-WITHOUT-A-SCHEMA-AND-STORE-CALLER-TEXT-IN-AN-UNBOUNDED-JSONB-COLUMN",
@@ -1301,10 +1293,6 @@
    },
    {
     "id": "DEF-0B10-ORG-CLIENTS-CALL-CAMPAIGN-ITEM-AND-V2-ROUTES-THAT-ANSWER-NO-CAMPAIGN-DATA",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B10-PEN-MEMBERS-GET-IS-HELD-TO-THE-CALLER-OWN-ENROLMENT-AT-EVERY-ROLE",
     "severity": "LOW"
    },
    {

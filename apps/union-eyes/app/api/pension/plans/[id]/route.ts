@@ -1,21 +1,19 @@
 import { withApi, ApiError, RATE_LIMITS } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { PENSION_ADMIN_ROLES } from '@/lib/pension/pension-authority';
-import { db } from '@/db/db';
+import { PENSION_ADMIN_ROLES, isPensionAdministrator } from '@/lib/pension/pension-authority';
+import { PLAN_STATUSES, PLAN_TYPES, activeEnrolmentCount, memberSafePlan, planFigureFields } from '@/lib/pension/plan-input';
 import { pensionPlans } from '@/db/schema';
 import { eq, and, ne } from 'drizzle-orm';
 import { z } from 'zod';
 
 const updatePlanSchema = z.object({
   planName: z.string().max(255).optional(),
-  planType: z.enum(['defined_benefit', 'defined_contribution', 'hybrid', 'target_benefit']).optional(),
-  status: z.enum(['active', 'frozen', 'terminated', 'pending_approval']).optional(),
-  activeMembers: z.number().int().min(0).optional(),
-  totalAssets: z.string().optional(),
-  fundingStatus: z.string().optional(),
-  description: z.string().optional(),
-});
+  planType: z.enum(PLAN_TYPES).optional(),
+  status: z.enum(PLAN_STATUSES).optional(),
+  ...planFigureFields,
+  description: z.string().max(4000).optional(),
+}).strict();
 
 export const dynamic = 'force-dynamic';
 
@@ -24,13 +22,18 @@ export const GET = withApi(
     auth: { required: true, minRole: 'member' },
     openapi: { tags: ['Pension'], summary: 'Get pension plan', description: 'Get a single pension plan by ID' },
   },
-  async ({ params, organizationId }) => {
+  async ({ params, organizationId, userId, user }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const id = params.id;
-    const [plan] = await db
-      .select()
-      .from(pensionPlans)
-      .where(and(eq(pensionPlans.id, id), eq(pensionPlans.organizationId, organizationId!)));
-    return plan ?? null;
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+      const [row] = await tx
+        .select({ plan: pensionPlans, activeMembers: activeEnrolmentCount(pensionPlans.id) })
+        .from(pensionPlans)
+        .where(and(eq(pensionPlans.id, id), eq(pensionPlans.organizationId, organizationId)));
+      if (!row) throw ApiError.notFound('Pension plan');
+      // The assets and funding figures are an administrator's record; the member view carries no figure.
+      return isPensionAdministrator(user?.role) ? { ...row.plan, activeMembers: row.activeMembers } : memberSafePlan(row.plan);
+    });
   },
 );
 

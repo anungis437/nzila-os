@@ -2,8 +2,7 @@ import { withApi, ApiError, RATE_LIMITS } from '@/lib/api/framework';
 import { listPage } from '@/lib/api/list-page';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { PENSION_ADMIN_ROLES } from '@/lib/pension/pension-authority';
-import { db } from '@/db/db';
+import { PENSION_ADMIN_ROLES, isPensionAdministrator } from '@/lib/pension/pension-authority';
 import { pensionMembers, pensionPlans } from '@/db/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { z } from 'zod';
@@ -30,34 +29,47 @@ export const GET = withApi(
     auth: { required: true, minRole: 'member' },
     openapi: { tags: ['Pension'], summary: 'List pension members', description: 'List pension members by organization and optionally by plan' },
   },
-  async ({ request, organizationId, userId }) => {
+  async ({ request, organizationId, userId, user }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const page = listPage(request, LIST_LIMIT);
     const url = new URL(request.url);
     const planId = url.searchParams.get('planId');
+    if (planId && !z.guid().safeParse(planId).success) throw ApiError.badRequest('planId must be a valid id');
+    // The route lists the organization's pension members to a pension administrator (the read is recorded, since the rows are personal and
+    // financial); every other caller is limited to their own enrolment.
+    const administrator = isPensionAdministrator(user?.role);
 
-    const conditions = [eq(pensionMembers.organizationId, organizationId!)];
-    if (planId) conditions.push(eq(pensionMembers.planId, planId));
-
-    // Scope to the calling user's own pension enrollment.
-    // pensionMembers.userId stores the organization_members.id (UUID PK),
-    // not the auth provider string ID — resolve via subquery.
-    if (userId) {
-      conditions.push(
-        sql`${pensionMembers.userId} = (
-          SELECT id FROM organization_members
-          WHERE user_id = ${userId}
-            AND organization_id = ${organizationId}::uuid
-          LIMIT 1
-        )`,
-      );
-    }
-
-    const members = await db
-      .select()
-      .from(pensionMembers)
-      .where(and(...conditions))
-      .orderBy(desc(pensionMembers.createdAt)).limit(page.limit).offset(page.offset);
-    return members;
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+      const conditions = [eq(pensionMembers.organizationId, organizationId)];
+      if (planId) conditions.push(eq(pensionMembers.planId, planId));
+      if (!administrator) {
+        // pensionMembers.userId stores the organization_members.id (UUID PK), not the auth provider string id.
+        conditions.push(
+          sql`${pensionMembers.userId} = (
+            SELECT id FROM organization_members
+            WHERE user_id = ${userId}
+              AND organization_id = ${organizationId}::uuid
+            LIMIT 1
+          )`,
+        );
+      }
+      const members = await tx
+        .select()
+        .from(pensionMembers)
+        .where(and(...conditions))
+        .orderBy(desc(pensionMembers.createdAt)).limit(page.limit).offset(page.offset);
+      if (administrator) {
+        await persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: 'pension.members.read',
+          resourceType: 'pension_members',
+          resourceId: organizationId,
+          details: { rows: members.length, ...(planId ? { planId } : {}) },
+        });
+      }
+      return members;
+    });
   },
 );
 

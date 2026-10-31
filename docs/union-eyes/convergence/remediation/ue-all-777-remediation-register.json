@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 531,
-    "engineeringRemaining": 246,
+    "engineeringCorrected": 534,
+    "engineeringRemaining": 243,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 80
   },
@@ -14050,9 +14050,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B73-PENSION-PLAN-FIGURES-AND-READS",
+        "path": "apps/union-eyes/lib/pension/plan-input.ts; apps/union-eyes/app/api/pension/plans/route.ts; apps/union-eyes/app/api/pension/plans/[id]/route.ts; apps/union-eyes/lib/services/__tests__/s17-pension-plan-figures.test.ts",
+        "explanation": "totalAssets and fundingStatus are validated as the amount and percentage the numeric columns hold, the body is strict, activeMembers is no longer typed in but counted from the plan's active enrolments, and a member reads the plan without the assets and funding figures (they are an administrator's recorded values). A missing plan is a 404 instead of null.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-PEN-PLAN-DELETE-REMOVES-THE-PLAN-ROW-WITH-NO-DEPENDENT-CHECK-OR-SNAPSHOT",
@@ -14206,9 +14213,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B73-PENSION-PLAN-FIGURES-AND-READS",
+        "path": "apps/union-eyes/app/api/pension/members/route.ts; apps/union-eyes/lib/services/__tests__/s17-pension-plan-figures.test.ts",
+        "explanation": "A pension administrator lists the organization's pension members (optionally by plan, validated) and the read is recorded in the same transaction; every other caller is still limited to their own enrolment.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-PEN-PENSION-READS-USE-THE-SHARED-DB-HANDLE-WITHOUT-AN-EXPLICIT-TENANT-CONTEXT",
@@ -14223,9 +14237,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B73-PENSION-PLAN-FIGURES-AND-READS",
+        "path": "apps/union-eyes/app/api/pension/members/route.ts; apps/union-eyes/app/api/pension/plans/route.ts; apps/union-eyes/app/api/pension/plans/[id]/route.ts; apps/union-eyes/app/api/pension/retirement-eligibility/route.ts; apps/union-eyes/app/api/pension/trustee-meetings/route.ts; apps/union-eyes/lib/services/__tests__/s17-pension-plan-figures.test.ts",
+        "explanation": "Members, plans, the plan item, retirement eligibility and the trustee meetings read inside withRLSContext (verified for the last two); none imports the shared db handle.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-PEN-PORTAL-DOCUMENT-PATHS-ARE-CMS-PAGE-CRUD-WITH-NO-PORTAL-PRINCIPAL",

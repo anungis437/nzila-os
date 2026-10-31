@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 478,
+    "implementedPendingQualification": 481,
     "partial": 80,
     "qualificationVerified": 0,
-    "unresolved": 299,
+    "unresolved": 296,
     "externalBlockers": 0
   },
   "batches": [
@@ -735,6 +735,15 @@
       "newlyImplemented": 5,
       "outstandingAfter": 299,
       "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B73-PENSION-PLAN-FIGURES-AND-READS",
+      "family": "Pension plan figures, member list authority and tenant-context reads",
+      "outstandingBefore": 299,
+      "newlyImplemented": 3,
+      "outstandingAfter": 296,
+      "partial": 0,
       "evidenceCommit": null
     }
   ],
@@ -6438,6 +6447,39 @@
         "apps/union-eyes/lib/services/__tests__/s16-ml-feedback-and-aliases.test.ts"
       ],
       "explanation": "The constant rls_enabled flag is removed (the badge it drove no longer shows), the root filter runs in the query before the cap, one extra row is read and the answer states truncated and the limit."
+    },
+    "DEF-0B10-PEN-PLAN-FIGURES-ARE-ADMINISTRATOR-TYPED-AND-READABLE-BY-ANY-MEMBER": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B73-PENSION-PLAN-FIGURES-AND-READS",
+      "files": [
+        "apps/union-eyes/lib/pension/plan-input.ts",
+        "apps/union-eyes/app/api/pension/plans/route.ts",
+        "apps/union-eyes/app/api/pension/plans/[id]/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s17-pension-plan-figures.test.ts"
+      ],
+      "explanation": "totalAssets and fundingStatus are validated as the amount and percentage the numeric columns hold, the body is strict, activeMembers is no longer typed in but counted from the plan's active enrolments, and a member reads the plan without the assets and funding figures (they are an administrator's recorded values). A missing plan is a 404 instead of null."
+    },
+    "DEF-0B10-PEN-MEMBERS-GET-IS-HELD-TO-THE-CALLER-OWN-ENROLMENT-AT-EVERY-ROLE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B73-PENSION-PLAN-FIGURES-AND-READS",
+      "files": [
+        "apps/union-eyes/app/api/pension/members/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s17-pension-plan-figures.test.ts"
+      ],
+      "explanation": "A pension administrator lists the organization's pension members (optionally by plan, validated) and the read is recorded in the same transaction; every other caller is still limited to their own enrolment."
+    },
+    "DEF-0B10-PEN-PENSION-READS-USE-THE-SHARED-DB-HANDLE-WITHOUT-AN-EXPLICIT-TENANT-CONTEXT": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B73-PENSION-PLAN-FIGURES-AND-READS",
+      "files": [
+        "apps/union-eyes/app/api/pension/members/route.ts",
+        "apps/union-eyes/app/api/pension/plans/route.ts",
+        "apps/union-eyes/app/api/pension/plans/[id]/route.ts",
+        "apps/union-eyes/app/api/pension/retirement-eligibility/route.ts",
+        "apps/union-eyes/app/api/pension/trustee-meetings/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s17-pension-plan-figures.test.ts"
+      ],
+      "explanation": "Members, plans, the plan item, retirement eligibility and the trustee meetings read inside withRLSContext (verified for the last two); none imports the shared db handle."
     }
   }
 }
