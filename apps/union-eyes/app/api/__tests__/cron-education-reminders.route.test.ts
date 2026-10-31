@@ -140,6 +140,27 @@ describe('cron/education-reminders route', () => {
     })]);
   });
 
+  it('reports a capped batch as incomplete instead of a false scheduler success', async () => {
+    const { POST } = await loadRoute();
+    const row = {
+      email: 'member@example.test', user_id: 'u-1',
+      organization_id: '11111111-1111-4111-8111-111111111111',
+      reminder_source_id: '33333333-3333-4333-8333-333333333333',
+      member_name: 'Member', course_name: 'Training', session_date: '2026-11-07',
+      days_until: 7, total_due: 421,
+    };
+    m.executeQueue.push(Array.from({ length: 301 }, () => row), []);
+    m.batchSendSessionReminders.mockResolvedValueOnce({ sent: 300, failed: 0, errors: [] });
+
+    const response = await POST(new NextRequest('http://localhost/api/cron/education-reminders'));
+    expect(response.status).toBe(500);
+    const json = await response.json();
+    expect(json.success).toBe(false);
+    expect(json.results.truncated.sessionReminders).toBe(121);
+    expect(json).toMatchObject({ failed: 1, failures: [{ scope: 'session-reminders' }] });
+    expect(m.batchSendSessionReminders.mock.calls[0][0]).toHaveLength(300);
+  });
+
   it('POST calls withSystemContext for both queries', async () => {
     const { POST } = await loadRoute();
     m.executeQueue.push([], []);

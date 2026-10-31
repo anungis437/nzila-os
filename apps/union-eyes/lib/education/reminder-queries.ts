@@ -12,6 +12,7 @@ export const sessionReminderQuery = sql`
     om.user_id,
     cr.organization_id,
     cr.id AS reminder_source_id,
+    COUNT(*) OVER() AS total_due,
     om.name AS member_name,
     c.course_name,
     cs.start_date AS session_date,
@@ -34,6 +35,7 @@ export const sessionReminderQuery = sql`
     AND om.email IS NOT NULL
     AND om.email <> ''
   ORDER BY cs.start_date, om.email
+  LIMIT 301
 `
 
 export const expiryWarningQuery = sql`
@@ -42,6 +44,7 @@ export const expiryWarningQuery = sql`
     om.user_id,
     mc.organization_id,
     mc.id AS reminder_source_id,
+    COUNT(*) OVER() AS total_due,
     om.name AS member_name,
     mc.certification_name,
     mc.certification_number,
@@ -59,6 +62,7 @@ export const expiryWarningQuery = sql`
     AND om.email IS NOT NULL
     AND om.email <> ''
   ORDER BY mc.expiry_date, om.email
+  LIMIT 301
 `
 
 /** drizzle returns the rows directly or under .rows, depending on the driver. */

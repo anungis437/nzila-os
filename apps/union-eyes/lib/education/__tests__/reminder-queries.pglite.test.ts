@@ -89,6 +89,7 @@ describe('education reminder statements against the declared schema', () => {
     const rows = rowsOf(await db.execute(sessionReminderQuery));
 
     expect(rows.map((row) => row.days_until).sort()).toEqual([1, 3, 7]);
+    expect(rows.every((row) => Number(row.total_due) === 3)).toBe(true);
     const reminder = toSessionReminder(rows.find((row) => row.days_until === 7)!);
     expect(reminder).toMatchObject({
       toEmail: 'u7@example.test',

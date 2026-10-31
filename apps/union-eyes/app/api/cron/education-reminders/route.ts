@@ -55,7 +55,9 @@ export const POST = withApi(
       return rowsOf(await db.execute(sessionReminderQuery));
     });
     const sessionReminders = allSessionReminders.slice(0, MAX_RECIPIENTS_PER_KIND);
-    results.truncated.sessionReminders = allSessionReminders.length - sessionReminders.length;
+    // Query returns at most 301 rows, with the full cardinality in a window count.
+    // Do not describe an unknown number of unprocessed recipients as zero.
+    results.truncated.sessionReminders = Math.max(0, Number(allSessionReminders[0]?.total_due ?? allSessionReminders.length) - sessionReminders.length);
 
     if (sessionReminders.length > 0) {
       logger.info("Processing session reminders", {
@@ -82,7 +84,7 @@ export const POST = withApi(
       return rowsOf(await db.execute(expiryWarningQuery));
     });
     const expiryWarnings = allExpiryWarnings.slice(0, MAX_RECIPIENTS_PER_KIND);
-    results.truncated.expiryWarnings = allExpiryWarnings.length - expiryWarnings.length;
+    results.truncated.expiryWarnings = Math.max(0, Number(allExpiryWarnings[0]?.total_due ?? allExpiryWarnings.length) - expiryWarnings.length);
 
     if (expiryWarnings.length > 0) {
       logger.info("Processing expiry warnings", {
@@ -106,11 +108,11 @@ export const POST = withApi(
     }
 
     const failures: JobFailure[] = [];
-    if (results.sessionReminders.failed > 0) {
-      failures.push({ scope: 'session-reminders', reason: `${results.sessionReminders.failed} send(s) failed` });
+    if (results.sessionReminders.failed > 0 || results.truncated.sessionReminders > 0) {
+      failures.push({ scope: 'session-reminders', reason: `${results.sessionReminders.failed} send(s) failed; ${results.truncated.sessionReminders} recipient(s) unprocessed` });
     }
-    if (results.expiryWarnings.failed > 0) {
-      failures.push({ scope: 'expiry-warnings', reason: `${results.expiryWarnings.failed} send(s) failed` });
+    if (results.expiryWarnings.failed > 0 || results.truncated.expiryWarnings > 0) {
+      failures.push({ scope: 'expiry-warnings', reason: `${results.expiryWarnings.failed} send(s) failed; ${results.truncated.expiryWarnings} recipient(s) unprocessed` });
     }
 
     return jobResponse({
@@ -122,7 +124,7 @@ export const POST = withApi(
         results,
         message: failures.length === 0
           ? "Education reminders processed successfully"
-          : "Education reminders processed with failed sends",
+          : "Education reminders incomplete: failed sends or unprocessed recipients",
       },
     });
   },
