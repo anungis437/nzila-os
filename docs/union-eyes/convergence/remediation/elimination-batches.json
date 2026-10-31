@@ -4423,13 +4423,13 @@
       "items": [
         {
           "prefix": "DEF-0B12-PLT-WORKSPACE-TELEMETRY-LOGS-UNBOUNDED-CLIENT-STRINGS-AND-HAS-NO-LIMIT",
-          "status": "PARTIAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
           "files": [
             "apps/union-eyes/app/api/workspace/telemetry/route.ts",
-            "apps/union-eyes/app/api/__tests__/workspace-telemetry.route.test.ts"
+            "apps/union-eyes/app/api/__tests__/workspace-telemetry.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s28-small-validation-batch.test.ts"
           ],
-          "explanation": "The telemetry body is bounded to 2 KB while it is streamed (not only by Content-Length), the payload is reduced to an allow-list of canonical event, tab and static route, and the client attests to no timestamp or workspace name (existing implementation and tests).",
-          "remaining": "The route has no rate limit of its own beyond the member floor."
+          "explanation": "The telemetry body is bounded to 2 KB while it is streamed (not only by Content-Length), the payload is reduced to an allow-list of canonical event, tab and static route, and the client attests to no timestamp or workspace name (existing implementation and tests). Verified in source: the route has its own per-user rate limit (120 a minute, refusing when the limiter is unavailable) and logs only the allow-listed event, tab and static route with a server-set timestamp."
         },
         {
           "prefix": "DEF-0B10-PIL-PILOT-FEEDBACK-COMMENT-IS-UNVALIDATED-AND-UNBOUNDED-AND-IS-RETURNED-RAW-WITH-THE-USER-ID",
@@ -5581,14 +5581,14 @@
         },
         {
           "prefix": "DEF-0B11-PRP-DUES-PAY-GET-RETURNS-EVERY-LEDGER-ENTRY",
-          "status": "PARTIAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
           "files": [
             "apps/union-eyes/app/api/portal/dues/pay/route.ts",
             "apps/union-eyes/lib/api/list-page.ts",
-            "apps/union-eyes/lib/services/__tests__/s5-input-bounds.test.ts"
+            "apps/union-eyes/lib/services/__tests__/s5-input-bounds.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s28-small-validation-batch.test.ts"
           ],
-          "explanation": "The payment history lists payments only (not charges, credits, adjustments or write-offs), omits the processor payment reference, and pages through a bounded limit and offset with a stable order; a non-numeric limit is the default.",
-          "remaining": "Pending payment attempts created by POST are still not listed: they live in dues_transactions and need a joined, status-filtered read."
+          "explanation": "The payment history lists payments only (not charges, credits, adjustments or write-offs), omits the processor payment reference, and pages through a bounded limit and offset with a stable order; a non-numeric limit is the default. Verified in source: the GET also returns a separate bounded attempt history read from dues_transactions (pending, failed and cancelled attempts), kept apart from the posted payments."
         }
       ]
     },
@@ -5631,10 +5631,12 @@
           "status": "PARTIAL",
           "files": [
             "apps/union-eyes/services/geofence-privacy-service.ts",
-            "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
+            "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts",
+            "apps/union-eyes/app/api/location/consent/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s28-small-validation-batch.test.ts"
           ],
-          "explanation": "A consent check is a read and no longer writes: past its expiry the consent is simply not valid, whatever its stored status. The existing geofence service and route tests pass.",
-          "remaining": "The stored status of an expired consent never becomes expired: a sweep needs the system role to hold UPDATE on member_location_consent, which the storage-authority manifest and the location-retention ratchets do not grant (an attempt broke them and was reverted)."
+          "explanation": "A consent check is a read and no longer writes: past its expiry the consent is simply not valid, whatever its stored status. The existing geofence service and route tests pass. B84: the context query parameter is one of strike or event, and anything else is refused (400) rather than reflected.",
+          "remaining": "The stored status of an expired consent never becomes expired: a sweep needs the system role to hold UPDATE on member_location_consent, which the storage-authority manifest and the location-retention ratchets do not grant."
         },
         {
           "prefix": "DEF-0B7-EXP-REPORT-DEFINITIONS-READABLE-AT-MEMBER-FLOOR",
@@ -7100,6 +7102,23 @@
             "apps/union-eyes/lib/services/__tests__/s27-cognition-case-authority.test.ts"
           ],
           "explanation": "The workload route, which returns each steward's burnout signal, utilization and recommended reassignments, is at the officer floor instead of the steward floor, so a steward no longer reads a colleague's burnout signal."
+        }
+      ]
+    },
+    {
+      "id": "B84-SMALL-VALIDATION",
+      "family": "Small validation and verification items",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B11-PRP-RECONCILIATION-RESOLVE-IS-A-STATUS-AND-NOTE-ONLY-WITH-NO-SECOND-APPROVER-OR-LEDGER-EFFECT",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/reconciliation/resolve/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s28-small-validation-batch.test.ts"
+          ],
+          "explanation": "Resolving or writing off an exception now requires a stated reason of at least 10 characters after trimming (an empty string was accepted), on top of the live financial mandate and the admin floor the route already required.",
+          "remaining": "A second approver and any ledger effect of a write-off are not implemented: they are finance workflow decisions that sit under the finance freeze."
         }
       ]
     }

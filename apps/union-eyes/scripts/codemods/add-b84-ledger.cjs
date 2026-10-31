@@ -6,7 +6,7 @@ const A = 'apps/union-eyes/'
 const id = 'B84-SMALL-VALIDATION'
 const test = A + 'lib/services/__tests__/s28-small-validation-batch.test.ts'
 const ST = 'IMPLEMENTED_PENDING_QUALIFICATION'
-const find = (prefix) => ledger.batches.flatMap((x) => x.items).find((i) => i.prefix.startsWith(prefix))
+const find = (prefix) => ledger.batches.flatMap((x) => x.items).find((i) => prefix.startsWith(i.prefix) || i.prefix.startsWith(prefix))
 const upgrade = (prefix, files, explanation) => {
   const found = find(prefix)
   if (!found) throw new Error('not found ' + prefix)
