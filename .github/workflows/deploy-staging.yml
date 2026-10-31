@@ -274,7 +274,7 @@ jobs:
             "commit": "${{ github.sha }}",
             "artifact_digest": "${{ needs.build-artifact.outputs.artifact_digest }}",
             "sbom_hash": "${{ needs.build-artifact.outputs.artifact_digest }}",
-            "policy_engine_status": "pass",
+            "policy_engine_status": "not_independently_attested",
             "change_record_ref": "ci-automated",
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
           }

@@ -1,4 +1,5 @@
 import { test } from 'node:test'
+import { readFileSync } from 'node:fs'
 import assert from 'node:assert/strict'
 import { verifyStagingRun } from './verify-staging-run.mjs'
 
@@ -149,4 +150,10 @@ test('smoke and runtime evidence must follow deployment in staging execution ord
     assert.throws(() => verifyStagingRun(run, SHA, RUN_ID, WORKFLOW_ID),
       /staging deployment and live runtime verification steps/)
   }
+})
+
+test('staging release snapshot must not fabricate independent policy verification', () => {
+  const workflow = readFileSync(new URL('../../.github/workflows/deploy-staging.yml', import.meta.url), 'utf8')
+  assert.match(workflow, /"policy_engine_status": "not_independently_attested"/)
+  assert.doesNotMatch(workflow, /"policy_engine_status": "pass"/)
 })
