@@ -5,7 +5,7 @@ export class OutboundUrlError extends Error {
 const BLOCKED_HOSTS = new Set(['localhost', 'metadata.google.internal', 'metadata', 'instance-data'])
 const BLOCKED_SUFFIXES = ['.localhost', '.local', '.internal', '.localdomain', '.home.arpa']
 
-function ipv4Private(a: number, b: number, c: number, d: number): boolean {
+function ipv4Private(a: number, b: number, c: number, _d: number): boolean {
   // Non-globally-routable IPv4 literals must never be used for outbound ingestion.
   // Include documentation, benchmarking, protocol assignment and relay ranges:
   // these are not safe substitutes for a public source URL.
@@ -55,7 +55,7 @@ export function assertPublicHttpUrl(raw: string): URL {
     // Until egress pins a verified public DNS result, reject these literal forms.
     if (host === '::1' || host === '::' || /^f[cd]/.test(host) || /^fe[89ab]/.test(host) ||
         /^ff/.test(host) || /^2001:db8:/.test(host) || /^2002:/.test(host) ||
-        /^64:ff9b:/.test(host) || /^2001:0:/.test(host) ||
+        /^64:ff9b:/.test(host) || /^2001:(?:0:|:)/.test(host) ||
         (mapped && ipv4Private(mapped[0]!, mapped[1]!, mapped[2]!, mapped[3]!))) {
       throw new OutboundUrlError('A private or reserved address is not allowed')
     }
