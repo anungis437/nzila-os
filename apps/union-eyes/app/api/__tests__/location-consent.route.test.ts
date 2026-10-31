@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   withApiAuth: vi.fn(),
   getCurrentUser: vi.fn(),
   getOrganizationIdForUser: vi.fn(),
+  getLocationConsentNotice: vi.fn(),
   requestLocationConsent: vi.fn(),
   hasValidConsent: vi.fn(),
   revokeLocationConsent: vi.fn(),
@@ -21,6 +22,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: vi.fn(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(m.tx)),
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
+vi.mock('@/lib/location/consent-notice', () => ({ getLocationConsentNotice: m.getLocationConsentNotice }));
 vi.mock('@/services/geofence-privacy-service', () => {
   class LocationConsentConflictError extends Error {}
   class LocationConsentNotFoundError extends Error {}
@@ -51,6 +53,7 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
     m.withApiAuth.mockImplementation((handler: any) => handler);
     m.getCurrentUser.mockResolvedValue({ id: 'caller-own-id' });
     m.getOrganizationIdForUser.mockResolvedValue('org-1');
+    m.getLocationConsentNotice.mockReturnValue({ version: 'v1', purpose: 'foreground_location_tracking', purposeDescription: 'Server description', consentText: 'Approved exact notice' });
     m.persistAtomicAudit.mockResolvedValue(undefined);
     m.requestLocationConsent.mockResolvedValue({ id: 'consent_1' });
     m.hasValidConsent.mockResolvedValue(true);
@@ -62,39 +65,70 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
   });
 
   // DEF-0B8-JUR-LOCATION-CONSENT-TEXT-AND-PURPOSE-ARE-CLIENT-SUPPLIED-AND-UNVALIDATED
-  it('POST refuses a body whose allowance flag is not a boolean or whose text is empty, recording no consent', async () => {
+  it('POST refuses client-authored text, absent acknowledgment, forged version and invalid permissions', async () => {
     const { POST } = await loadRoute();
-    const base = { purpose: 'strike', purposeDescription: 'desc', consentText: 'I agree' };
-    for (const extra of [{ allowedDuringStrike: 'false' }, { allowedDuringEvents: 1 }, { consentText: '' }]) {
-      const response = await POST(new NextRequest('http://localhost/api/location/consent', { method: 'POST', body: JSON.stringify({ ...base, ...extra }) }));
-      expect(response.status).toBe(400);
+    const base = { noticeVersion: 'v1', acknowledged: true, allowedDuringStrike: true };
+    for (const extra of [
+      { allowedDuringStrike: 'false' },
+      { allowedDuringEvents: 1 },
+      { acknowledged: false },
+      { noticeVersion: 'forged' },
+      { consentText: 'attacker-provided wording' },
+      { purpose: 'other purpose' },
+      { userId: 'victim' },
+    ]) {
+      const response = await POST(new NextRequest('http://localhost/api/location/consent', {
+        method: 'POST', body: JSON.stringify({ ...base, ...extra }),
+      }));
+      expect([400, 409]).toContain(response.status);
     }
-    const response = await POST(new NextRequest('http://localhost/api/location/consent', { method: 'POST', body: 'not json' }));
-    expect(response.status).toBe(400);
+    const malformed = await POST(new NextRequest('http://localhost/api/location/consent', { method: 'POST', body: 'not json' }));
+    expect(malformed.status).toBe(400);
     expect(m.requestLocationConsent).not.toHaveBeenCalled();
   });
 
-  it('POST grants consent for the authenticated caller, ignoring a client-supplied userId in the body', async () => {
+  it('POST uses only the server-controlled notice and the authenticated identity', async () => {
     const { POST } = await loadRoute();
-
-    await POST(new NextRequest('http://localhost/api/location/consent', {
+    const response = await POST(new NextRequest('http://localhost/api/location/consent', {
       method: 'POST',
-      body: JSON.stringify({
-        userId: 'attacker-supplied-victim-id',
-        purpose: 'strike line tracking',
-        purposeDescription: 'desc',
-        consentText: 'I agree',
-      }),
+      body: JSON.stringify({ noticeVersion: 'v1', acknowledged: true, allowedDuringStrike: true }),
     }));
-
+    expect(response.status).toBe(200);
     expect(m.requestLocationConsent).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: 'caller-own-id' }),
+      expect.objectContaining({
+        userId: 'caller-own-id', purpose: 'foreground_location_tracking',
+        purposeDescription: 'Server description', consentText: 'Approved exact notice',
+        noticeVersion: 'v1', allowedDuringStrike: true,
+      }),
       m.tx,
     );
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(
       m.tx,
-      expect.objectContaining({ organizationId: 'org-1', userId: 'caller-own-id', action: 'location.consent.grant', resourceId: 'consent_1' }),
+      expect.objectContaining({
+        organizationId: 'org-1', userId: 'caller-own-id',
+        action: 'location.consent.grant', resourceId: 'consent_1',
+        details: expect.objectContaining({ noticeVersion: 'v1' }),
+      }),
     );
+  });
+
+  it('POST fails closed without an institution-configured notice', async () => {
+    const { POST } = await loadRoute();
+    m.getLocationConsentNotice.mockReturnValueOnce(null);
+    const response = await POST(new NextRequest('http://localhost/api/location/consent', {
+      method: 'POST', body: JSON.stringify({ noticeVersion: 'v1', acknowledged: true, allowedDuringStrike: true }),
+    }));
+    expect(response.status).toBe(503);
+    expect(m.requestLocationConsent).not.toHaveBeenCalled();
+  });
+
+  it('POST rejects acknowledgment with no selected tracking purpose', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/location/consent', {
+      method: 'POST', body: JSON.stringify({ noticeVersion: 'v1', acknowledged: true }),
+    }));
+    expect(response.status).toBe(400);
+    expect(m.requestLocationConsent).not.toHaveBeenCalled();
   });
 
   it('POST fails the grant when its audit cannot be written, so no consent is left behind', async () => {
@@ -103,7 +137,7 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
 
     const response = await POST(new NextRequest('http://localhost/api/location/consent', {
       method: 'POST',
-      body: JSON.stringify({ purpose: 'p', purposeDescription: 'd', consentText: 'I agree' }),
+      body: JSON.stringify({ noticeVersion: 'v1', acknowledged: true, allowedDuringEvents: true }),
     }));
 
     expect(response.status).toBe(500);
@@ -116,7 +150,7 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
 
     const response = await POST(new NextRequest('http://localhost/api/location/consent', {
       method: 'POST',
-      body: JSON.stringify({ purpose: 'p', purposeDescription: 'd', consentText: 'I agree' }),
+      body: JSON.stringify({ noticeVersion: 'v1', acknowledged: true, allowedDuringEvents: true }),
     }));
 
     expect(response.status).toBe(409);
@@ -139,6 +173,19 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
 
     expect(m.getOrganizationIdForUser).toHaveBeenCalledWith('caller-own-id');
     expect(m.hasValidConsent).toHaveBeenCalledWith('caller-own-id', 'strike', m.tx);
+  });
+
+  it('GET returns the current exact notice for member review without changing consent', async () => {
+    const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost/api/location/consent'));
+    const payload = await response.json();
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
+    expect(payload.consentGrantAvailable).toBe(true);
+    expect(payload.notice).toEqual({
+      version: 'v1', purpose: 'foreground_location_tracking',
+      purposeDescription: 'Server description', consentText: 'Approved exact notice',
+    });
+    expect(m.requestLocationConsent).not.toHaveBeenCalled();
   });
 
   it('GET refuses to report consent when the caller organization cannot be resolved', async () => {
