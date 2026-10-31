@@ -166,7 +166,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: h.withSystemContext,
   withRLSContext: h.withRLSContext,
 }));
-vi.mock('@/lib/api/framework', () => ({ withApi: h.withApi, ApiError: { notFound: h.notFound, forbidden: h.forbidden, badRequest: vi.fn((msg: string) => ({ apiError: true, status: 400, msg })) } }));
+vi.mock('@/lib/api/framework', () => ({ withApi: h.withApi, ApiError: { notFound: h.notFound, forbidden: h.forbidden, badRequest: vi.fn((msg: string) => ({ apiError: true, status: 400, msg })), conflict: vi.fn((msg: string) => ({ apiError: true, status: 409, msg })) } }));
 vi.mock('@/lib/clause-library/sharing-authority', () => ({
   canReadSharedClause: h.canReadSharedClause,
   isSharedClauseOwner: h.isSharedClauseOwner,
@@ -356,8 +356,18 @@ describe('clause-library/[id] item route (round 55)', () => {
     expect(h.withSystemContext).not.toHaveBeenCalled();
   });
 
+  it('DELETE refuses a clause that is shared beyond its owner until it is withdrawn from sharing (disclosed addition)', async () => {
+    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'public' }]);
+    h.isSharedClauseOwner.mockReturnValue(true);
+    const { DELETE } = await loadHandlers();
+
+    await expect(DELETE({ request: req('clause-1'), organizationId: 'org-a', userId: 'user-1', user: { role: 'officer' } })).rejects.toMatchObject({ status: 409 });
+    expect(h.applied.deletes).toBe(0);
+    expect(h.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
   it('DELETE succeeds for the owner', async () => {
-    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a' }]);
+    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'private' }]);
     h.isSharedClauseOwner.mockReturnValue(true);
     pushSel([{ id: 'clause-1' }]);
     const { DELETE } = await loadHandlers();

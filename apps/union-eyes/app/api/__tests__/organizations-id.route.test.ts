@@ -25,7 +25,8 @@ const m = vi.hoisted(() => ({
 function makeSelectChain(rows: unknown[]) {
   const chain: any = {
     from: vi.fn(() => chain),
-    where: vi.fn(async () => rows),
+    // A select may end at where or continue with limit (the reparent helper's lookups).
+    where: vi.fn(() => Object.assign(Promise.resolve(rows), { limit: async () => rows })),
   };
   return chain;
 }
@@ -188,7 +189,8 @@ describe('organizations/[id] route', () => {
 
   it('PATCH lets platform governance change the parent affiliation', async () => {
     const { PATCH } = await loadRoute();
-    m.selectQueue.push([orgRow]);
+    // The route's own read, then the reparent helper's three reads: this organization's current parent, the new parent, the descendants.
+    m.selectQueue.push([orgRow], [{ parentId: null }], [{ id: '22222222-2222-4222-8222-222222222222', hierarchyPath: [], hierarchyLevel: 0 }], []);
     m.updateQueue.push([{ ...orgRow, parentId: '22222222-2222-4222-8222-222222222222' }]);
 
     const response = await PATCH(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111', {

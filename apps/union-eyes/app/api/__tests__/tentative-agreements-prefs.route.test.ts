@@ -4,7 +4,7 @@ const h = vi.hoisted(() => ({ queue: [] as unknown[], audit: vi.fn(), values: vi
 
 function chain(): Record<string, unknown> {
   const c: Record<string, unknown> = {};
-  for (const m of ['select', 'from', 'where', 'limit', 'insert', 'update', 'returning', 'delete']) c[m] = () => c;
+  for (const m of ['select', 'from', 'where', 'limit', 'insert', 'update', 'returning', 'delete', 'onConflictDoUpdate']) c[m] = () => c;
   c.values = (...a: unknown[]) => {
     h.values(...a);
     return c;
