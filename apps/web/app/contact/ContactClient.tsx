@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useState } from 'react';
 import { useLocale } from 'next-intl';
 import ScrollReveal from '@/components/public/ScrollReveal';
@@ -84,7 +83,7 @@ const contactCopy: Record<Locale, {
     partnerPortal: 'Partner Portal',
     buildingWithUs: 'Already Building With Us?',
     buildingSubtitle: 'Access your dedicated dashboard, manage deployments, and collaborate with the Nzila Ventures engineering team — all in one place.',
-    teamPortalLogin: 'Team Portal Login ->',
+    teamPortalLogin: 'Partner workspace →',
     requestPartnerAccess: 'Request Partner Access',
     notPartnerYet: 'Not a partner yet?',
     applyProgram: 'Apply to our partnership program',
@@ -142,7 +141,7 @@ const contactCopy: Record<Locale, {
     partnerPortal: 'Portail partenaires',
     buildingWithUs: 'Vous construisez déjà avec nous ?',
     buildingSubtitle: 'Accédez a votre tableau de bord, gérez vos déploiements et collaborez avec l équipe d ingénierie Nzila Ventures.',
-    teamPortalLogin: 'Connexion au portail équipe ->',
+    teamPortalLogin: 'Espace partenaires →',
     requestPartnerAccess: 'Demander un accès partenaire',
     notPartnerYet: 'Pas encore partenaire ?',
     applyProgram: 'Postulez a notre programme de partenariat',
@@ -423,7 +422,7 @@ export default function ContactClient({ initialSource }: { initialSource: string
                 </div>
 
                 {/* Business Inquiries */}
-                <div className="mt-10 bg-navy rounded-2xl p-6 text-white pulse-glow">
+                <div className="mt-10 rounded-2xl bg-[#101a2c] p-6 text-white">
                   <h3 className="font-bold text-lg mb-3">{copy.inquiries}</h3>
                   <p className="text-gray-300 text-sm mb-4">
                     {copy.inquiriesBlurb}
@@ -444,16 +443,9 @@ export default function ContactClient({ initialSource }: { initialSource: string
       </section>
 
       {/* ═══════════════════════ PARTNER PORTAL ═══════════════════════ */}
-      <section className="relative py-24 overflow-hidden">
-        {/* Background */}
-        <Image
-          src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1920"
-          alt="Diverse team collaborating around a conference table with laptops and digital dashboards"
-          fill
-          className="object-cover"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-linear-to-br from-navy/90 via-navy/85 to-navy/95" />
+      <section className="relative isolate overflow-hidden bg-[#101a2c] py-20 sm:py-24">
+        <div aria-hidden="true" className="pointer-events-none absolute -right-32 -top-40 h-[32rem] w-[32rem] rounded-full bg-blue-600/15 blur-[100px]" />
+        <div aria-hidden="true" className="pointer-events-none absolute bottom-[-16rem] left-[-12rem] h-[30rem] w-[30rem] rounded-full bg-[#dfbe70]/10 blur-[100px]" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Heading */}
@@ -472,13 +464,13 @@ export default function ContactClient({ initialSource }: { initialSource: string
           </ScrollReveal>
 
           {/* Feature Grid */}
-          <div className="grid md:grid-cols-3 gap-6 mb-14">
+          <div className="mb-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {copy.features.map((feature, i) => (
               <ScrollReveal key={feature.title} delay={i * 0.08}>
-                <div className="glass-card p-6 rounded-2xl border border-white/10 hover-lift h-full">
-                  <span className="text-3xl block mb-4">{feature.icon}</span>
+                <div className="h-full rounded-2xl border border-white/10 bg-white/[0.045] p-6 transition-colors hover:bg-white/[0.08]">
+                  <span aria-hidden="true" className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#dfbe70]/30 bg-[#dfbe70]/10 text-sm font-semibold text-[#dfbe70]">{String(i + 1).padStart(2, '0')}</span>
                   <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
-                  <p className="text-sm text-gray-400 leading-relaxed">{feature.description}</p>
+                  <p className="text-sm leading-7 text-slate-300">{feature.description}</p>
                 </div>
               </ScrollReveal>
             ))}
@@ -486,21 +478,21 @@ export default function ContactClient({ initialSource }: { initialSource: string
 
           {/* CTA Row */}
           <ScrollReveal delay={0.3}>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
+            <div className="flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
               <a
                 href="/partners"
-                className="inline-flex items-center justify-center px-10 py-4 bg-gold text-navy font-bold rounded-xl hover:bg-gold/90 transition-all text-lg shadow-lg shadow-gold/25 btn-press"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#dfbe70] px-6 py-3 text-sm font-bold text-[#101a2c] transition-colors hover:bg-[#f2d694] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 {copy.teamPortalLogin}
               </a>
               <a
                 href="mailto:partners@nzilaventures.com"
-                className="inline-flex items-center justify-center px-10 py-4 border-2 border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all text-lg"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/30 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 {copy.requestPartnerAccess}
               </a>
             </div>
-            <p className="text-center text-gray-500 text-sm mt-6">
+            <p className="mx-auto mt-6 max-w-2xl text-center text-sm leading-7 text-slate-300">
               {copy.notPartnerYet}{' '}
               <a href="/contact" className="text-gold hover:underline">
                 {copy.applyProgram}
