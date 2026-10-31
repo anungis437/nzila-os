@@ -32,7 +32,7 @@ describe('Gate 0 batch B87: platform reads, communications tracking and signatur
     expect(route).toContain('unsubscribe-all')
     expect(route).toContain("scope !== 'all'")
     expect(route).toContain('revokeEmailForOrganization(tx, orgId, recipientId, reason, null)')
-    expect(route).toContain('.slice(0, 200)')
+    expect(route).toContain("requestedReason === 'manual'")
     const helper = route.slice(route.indexOf('async function revokeEmailForOrganization'), route.indexOf('export async function GET'))
     expect(helper).toContain("status: 'revoked'")
     expect(helper).toContain('update(newsletterListSubscribers)')
