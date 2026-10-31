@@ -6799,6 +6799,14 @@
       ],
       "explanation": "A platform failure is returned as a fixed message (this application's own refusals keep their text; the platform's text is logged, not returned); a failure to save the row after the platform accepted the post is reported as published and unrecorded (recorded: false) and logged, not as a failed publish; when no platform accepted the post the audited operation throws, so its outcome record says failed. Two tests were adapted and three added (disclosed): the route test mock gained the error class, the service test gained the three cases.",
       "remaining": "The intent and outcome records are still written around the external call and are not committed with a data row: an external effect cannot be made atomic with a database row, and a post scheduled or published before the row is saved can still exist without it if the process dies in between."
+      ,"supplementalEngineeringEvidence": [{
+        "commit": "35a7cee83c82536e2cd20ac3f52535ef742c42ac",
+        "path": "docs/union-eyes/convergence/remediation/ue-social-publish-uncertain-engineering.json",
+        "scope": "Provider accepted but local persistence unconfirmed: no false published response, no automatic replay",
+        "qualification": "SOURCE_IMPLEMENTED_UNQUALIFIED",
+        "countsChanged": false,
+        "remaining": "Durable provider-aware reconciliation and native/runtime qualification"
+      }]
     },
     "DEF-0B11-SOC-ANY-REFRESH-FAILURE-MARKS-THE-ACCOUNT-EXPIRED-AND-A-SUCCESS-FORCES-IT-ACTIVE": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
