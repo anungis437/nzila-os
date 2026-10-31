@@ -9,7 +9,6 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@nzila/platform-auth/entra/server'
-import { db } from '@/db/db'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { requireUserForOrganization } from '@/lib/api-auth-guard'
 import { memberDuesLedger } from '@/db/schema/dues-finance-schema'
@@ -49,8 +48,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const { payments, attempts } = await withRLSContext({ organizationId: orgId }, async () => {
-      const payments = await db
+    const { payments, attempts } = await withRLSContext({ organizationId: orgId }, async (tx) => {
+      const payments = await tx
         .select({
           id: memberDuesLedger.id,
           type: memberDuesLedger.transactionType,
@@ -73,7 +72,7 @@ export async function GET(req: NextRequest) {
       // Initiated payments are not ledger entries until a verified provider event settles them.
       // Expose a separate bounded attempt history so the member can see pending/failed/cancelled
       // outcomes without misrepresenting an attempted charge as a posted payment.
-      const result = (await db.execute(sql`SELECT id::text AS id, amount::text AS amount,
+      const result = (await tx.execute(sql`SELECT id::text AS id, amount::text AS amount,
               status, created_at AS "createdAt"
           FROM dues_transactions
           WHERE organization_id = ${orgId}::uuid AND member_id = ${userId}

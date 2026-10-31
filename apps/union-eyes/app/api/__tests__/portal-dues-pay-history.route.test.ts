@@ -51,7 +51,7 @@ describe('member dues payment history and unsettled attempts', () => {
     vi.clearAllMocks()
     m.auth.mockResolvedValue({ userId: 'member-1' })
     m.requireMember.mockResolvedValue(undefined)
-    m.rls.mockImplementation(async (_scope: unknown, cb: () => Promise<unknown>) => cb())
+    m.rls.mockImplementation(async (_scope: unknown, cb: (tx: unknown) => Promise<unknown>) => cb(m.db))
     m.db.select.mockReturnValue({
       from: () => ({
         where: () => ({
@@ -73,6 +73,8 @@ describe('member dues payment history and unsettled attempts', () => {
     expect(json.data.attempts).toEqual([{ id: 'attempt-1', status: 'pending', amount: '25.00', createdAt: '2026-10-31' }])
     expect(m.rls).toHaveBeenCalledWith({ organizationId: '11111111-1111-4111-8111-111111111111' }, expect.any(Function))
     expect(m.requireMember).toHaveBeenCalledWith('11111111-1111-4111-8111-111111111111')
+    expect(m.db.select).toHaveBeenCalledTimes(1)
+    expect(m.db.execute).toHaveBeenCalledTimes(1)
   })
 
   it('refuses another organization without querying any payment table', async () => {
@@ -86,6 +88,8 @@ describe('member dues payment history and unsettled attempts', () => {
 
   it('keeps the unsettled-attempt query organization/member scoped and excludes processor identifiers', () => {
     const source = readFileSync(join(__dirname, '..', 'portal', 'dues', 'pay', 'route.ts'), 'utf8')
+    expect(source).toContain('withRLSContext({ organizationId: orgId }, async (tx) => {')
+    expect(source).toContain('await tx.execute(sql`SELECT')
     expect(source).toContain('WHERE organization_id = ${orgId}::uuid AND member_id = ${userId}')
     expect(source).toContain("AND metadata->>'kind' = ${DUES_PAYMENT_KIND}")
     expect(source).toContain("AND status IN ('pending', 'failed', 'cancelled')")
