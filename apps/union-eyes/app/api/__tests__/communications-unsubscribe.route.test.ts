@@ -140,6 +140,64 @@ describe('communications/unsubscribe/[recipientId] route', () => {
     expect(mockDb.insert).not.toHaveBeenCalled();
   });
 
+  it('honours a separately signed global opt-out and records consent for each actual organization', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
+    const { GET } = await loadRoute();
+    const t = token('secret', 'r1:unsubscribe-all');
+    m.selectQueue.push(
+      [{ organizationId: 'org_1' }],
+      [{ organizationId: 'org_2' }, { organizationId: 'org_1' }],
+      [{ id: 'p1' }],
+      [],
+    );
+
+    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?scope=all&token=${t}`), {
+      params: Promise.resolve({ recipientId: 'r1' }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(mockDb.select).toHaveBeenCalledTimes(4);
+    expect(mockDb.insert).toHaveBeenCalledTimes(3); // org_1 consent, org_2 preference and consent
+    expect(m.withSystemContext).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not treat a legacy recipient token as an all-organizations capability', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
+    const { GET } = await loadRoute();
+    const t = token('secret', 'r1:unsubscribe');
+    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?scope=all&token=${t}`), {
+      params: Promise.resolve({ recipientId: 'r1' }),
+    });
+    expect(response.status).toBe(401);
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+  });
+
+  it('does not claim a successful global opt-out when no matching organization exists', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
+    const { GET } = await loadRoute();
+    const t = token('secret', 'r1:unsubscribe-all');
+    m.selectQueue.push([], []);
+    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?scope=all&token=${t}`), {
+      params: Promise.resolve({ recipientId: 'r1' }),
+    });
+    expect(response.status).toBe(404);
+    expect(mockDb.insert).not.toHaveBeenCalled();
+    expect(mockDb.update).not.toHaveBeenCalled();
+  });
+
+  it('fails closed on global opt-out exceeding the bounded organization scan', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
+    const { GET } = await loadRoute();
+    const t = token('secret', 'r1:unsubscribe-all');
+    m.selectQueue.push(Array.from({ length: 101 }, (_, i) => ({ organizationId: `org_${i}` })), []);
+    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?scope=all&token=${t}`), {
+      params: Promise.resolve({ recipientId: 'r1' }),
+    });
+    expect(response.status).toBe(404);
+    expect(mockDb.insert).not.toHaveBeenCalled();
+    expect(mockDb.update).not.toHaveBeenCalled();
+  });
+
   it('refuses a signed campaign token for a missing campaign without recording consent or claiming success', async () => {
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
     const { GET } = await loadRoute();
