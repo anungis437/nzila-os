@@ -23,6 +23,11 @@ import { and, eq, gte, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { exitInterviews, exitInterviewEvents } from '@/db/schema';
 import { derivedAnalyticsCondition } from '@/lib/knowledge-transfer/governance/interview-access';
+import { ApiError } from '@/lib/api/errors';
+
+// Until the report is aggregated in SQL, reject oversize snapshots instead of
+// silently truncating data or loading an unbounded confidential dataset.
+const MAX_GOVERNANCE_SNAPSHOT_ROWS = 10000;
 
 export const dynamic = 'force-dynamic';
 
@@ -32,14 +37,14 @@ export interface GovernanceTimelineEntry {
   publishedCount: number;
   governanceUpdateCount: number;
   averageRiskScore: number | null;
-  consentCoverageRate: number; // 0–100
+  consentCoverageRate: number | null; // 0–100, null when no interviews were assessed
 }
 
 export interface GovernanceDriftReport {
   organizationId: string;
   generatedAt: string;
   timeline: GovernanceTimelineEntry[];
-  currentExposureScore: number;
+  currentExposureScore: number | null; // null when no risk assessment exists
   trendDirection: 'improving' | 'stable' | 'degrading';
   totalInterviewsCaptured: number;
   totalPublished: number;
@@ -83,7 +88,8 @@ export const GET = withApi(
           eq(exitInterviews.organizationId, orgId),
           gte(exitInterviews.createdAt, new Date(sinceIso)),
         ),
-      );
+      )
+      .limit(MAX_GOVERNANCE_SNAPSHOT_ROWS + 1);
 
     // Fetch governance events in range
     const govEvents = await db
@@ -97,7 +103,12 @@ export const GET = withApi(
           eq(exitInterviewEvents.organizationId, orgId),
           gte(exitInterviewEvents.createdAt, new Date(sinceIso)),
         ),
-      );
+      )
+      .limit(MAX_GOVERNANCE_SNAPSHOT_ROWS + 1);
+
+    if (interviews.length > MAX_GOVERNANCE_SNAPSHOT_ROWS || govEvents.length > MAX_GOVERNANCE_SNAPSHOT_ROWS) {
+      throw ApiError.externalService('Governance analytics', 'Snapshot exceeds safe limits; use a server-side aggregated report');
+    }
 
     // Build monthly buckets (last 12 months)
     const months: string[] = [];
@@ -137,7 +148,7 @@ export const GET = withApi(
         consentCoverageRate:
           monthInterviews.length > 0
             ? Math.round((consentedCount / monthInterviews.length) * 100)
-            : 100,
+            : null,
       };
     });
 
@@ -169,7 +180,7 @@ export const GET = withApi(
     const currentExposureScore =
       allRiskScores.length > 0
         ? Math.round(allRiskScores.reduce((a, b) => a + b, 0) / allRiskScores.length)
-        : 0;
+        : null;
 
     return {
       data: {
