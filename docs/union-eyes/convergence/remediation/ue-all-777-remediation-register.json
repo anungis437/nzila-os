@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 408,
-    "engineeringRemaining": 369,
+    "engineeringCorrected": 410,
+    "engineeringRemaining": 367,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 83
   },
@@ -4693,9 +4693,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B52-F03-ORGANIZATION-OWNED-REFERENCES",
+        "path": "apps/union-eyes/app/api/education/sessions/route.ts; apps/union-eyes/app/api/__tests__/f03-b52-references.contract.test.ts",
+        "explanation": "The training session create checks that the course is the organization own (shared reference helper, 404 otherwise) and accepts only an allow-list of descriptive fields: registration, waitlist, attendance, completion, rating, evaluation, cost, status and cancellation figures are no longer body-writable. Contract test pins the allow-list and the check.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-EDU-CERTIFICATION-ISSUED-WITHOUT-COMPLETION-OR-VERIFICATION",
@@ -5257,9 +5264,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B52-F03-ORGANIZATION-OWNED-REFERENCES",
+        "path": "apps/union-eyes/app/api/employers/communications/route.ts; apps/union-eyes/app/api/__tests__/employers-communications-atomic-audit.route.test.ts; apps/union-eyes/app/api/__tests__/f03-b52-references.contract.test.ts",
+        "explanation": "Logging an employer communication checks employerId, grievanceId, recipientContactId and templateId against the caller organization before any write (404, nothing written or audited), and the list is limited to 200. The existing route test mock gained the limit step and a new test covers a foreign grievance (disclosed).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-EMP-COMMUNICATION-GRIEVANCE-CORRESPONDENCE-STEWARD-READ",

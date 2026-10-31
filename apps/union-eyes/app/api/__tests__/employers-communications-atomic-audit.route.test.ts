@@ -34,7 +34,7 @@ describe('employer communications and contacts audit atomically', () => {
     m.emitCapeAuditEvent.mockResolvedValue(undefined);
     m.withRLSContext.mockImplementation(async (_c: unknown, fn: (tx: unknown) => unknown) => fn(m.tx));
     m.tx.insert = vi.fn(() => ({ values: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 'row-1', employerId: EMPLOYER, type: 'email', status: 'sent', role: 'hr' }]) })) }));
-    m.db.select = vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(async () => [{ id: EMPLOYER }]) })) }));
+    m.db.select = vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(() => Object.assign(Promise.resolve([{ id: EMPLOYER }]), { limit: async () => [{ id: EMPLOYER }] })) })) }));
   });
 
   const communication = () => post('http://localhost/api/employers/communications', {
@@ -52,6 +52,17 @@ describe('employer communications and contacts audit atomically', () => {
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.tx, expect.objectContaining({
       action: 'employer_communication.create', organizationId: 'org_1', userId: 'u1', resourceId: 'row-1',
     }));
+  });
+
+  it('refuses a communication that names a grievance, contact or template of another organization, and writes nothing', async () => {
+    m.db.select = vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: async () => [] })) })) }));
+    const { POST } = await import('../employers/communications/route');
+    const response = await POST(post('http://localhost/api/employers/communications', {
+      employerId: EMPLOYER, grievanceId: '22222222-2222-4222-8222-222222222222', type: 'email', status: 'draft', subject: 'Notice', body: 'Hello',
+    }));
+    expect(response.status).toBe(404);
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('fails the communication when the audit record cannot be written, and emits no downstream event', async () => {

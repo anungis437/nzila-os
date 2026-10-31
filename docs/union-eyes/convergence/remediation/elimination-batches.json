@@ -4837,6 +4837,32 @@
           "explanation": "The entitlement list now names only the feature keys that the server-side checkModuleEntitlement allows (not expired, backing contract active) and is limited to 200 rows. Contract test pins the check."
         }
       ]
+    },
+    {
+      "id": "B52-F03-ORGANIZATION-OWNED-REFERENCES",
+      "family": "F03: an id taken from a body must name a row of the caller organization",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B6-EDU-SESSION-COURSE-ID-NOT-VERIFIED-TO-ORGANIZATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/education/sessions/route.ts",
+            "apps/union-eyes/app/api/__tests__/f03-b52-references.contract.test.ts"
+          ],
+          "explanation": "The training session create checks that the course is the organization own (shared reference helper, 404 otherwise) and accepts only an allow-list of descriptive fields: registration, waitlist, attendance, completion, rating, evaluation, cost, status and cancellation figures are no longer body-writable. Contract test pins the allow-list and the check."
+        },
+        {
+          "prefix": "DEF-0B6-EMP-COMMUNICATION-REFERENCES-UNVERIFIED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/employers/communications/route.ts",
+            "apps/union-eyes/app/api/__tests__/employers-communications-atomic-audit.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/f03-b52-references.contract.test.ts"
+          ],
+          "explanation": "Logging an employer communication checks employerId, grievanceId, recipientContactId and templateId against the caller organization before any write (404, nothing written or audited), and the list is limited to 200. The existing route test mock gained the limit step and a new test covers a foreign grievance (disclosed)."
+        }
+      ]
     }
   ]
 }

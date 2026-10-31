@@ -21,6 +21,12 @@ import {
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses'
 import { eq, desc, and } from 'drizzle-orm'
+import { assertOrganizationOwns } from '@/lib/api/org-references'
+import { ApiError } from '@/lib/api/errors'
+import { employers } from '@/db/schema/union-structure-schema'
+import { employerContacts } from '@/db/schema/domains/communications/employer-communications'
+import { grievances } from '@/db/schema/domains/claims/grievances'
+import { messageTemplates } from '@/db/schema/domains/communications/campaigns'
 
 // ── Validation ──────────────────────────────────────────────────────────────
 
@@ -58,6 +64,14 @@ export const POST = withOrganizationAuth(async (request, context) => {
     }
 
     const data = parsed.data
+
+    // Every id in the body must name a row of the caller's own organization.
+    await assertOrganizationOwns([
+      { field: 'employerId', value: data.employerId, table: employers },
+      { field: 'grievanceId', value: data.grievanceId, table: grievances },
+      { field: 'recipientContactId', value: data.recipientContactId, table: employerContacts },
+      { field: 'templateId', value: data.templateId, table: messageTemplates },
+    ], organizationId)
 
     // The communication record and its audit record commit together.
     const communication = await withRLSContext({ organizationId }, async (tx) => {
@@ -111,7 +125,10 @@ export const POST = withOrganizationAuth(async (request, context) => {
     })
 
     return standardSuccessResponse(communication)
-  } catch (_error) {
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return standardErrorResponse(error.code, error.message)
+    }
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to log communication')
   }
 })
@@ -140,6 +157,7 @@ export const GET = withOrganizationAuth(async (request, context) => {
       .from(employerCommunications)
       .where(and(...conditions))
       .orderBy(desc(employerCommunications.createdAt))
+      .limit(200)
 
     return standardSuccessResponse(rows)
   } catch (_error) {
