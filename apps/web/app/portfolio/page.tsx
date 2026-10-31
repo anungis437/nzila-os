@@ -89,7 +89,7 @@ export default async function PortfolioPage() {
               ? 'Nous pouvons distinguer ensemble les fonctionnalités disponibles, les capacités pilotes et les orientations encore exploratoires.'
               : 'We can clarify the difference between available capabilities, pilot work and exploratory directions for your organization.'}
           </p>
-          <TrackedLink href="/contact" eventName="portfolio_contact" className="mt-8 inline-flex min-h-12 items-center justify-center rounded-xl bg-[#dfbe70] px-7 py-3 text-sm font-bold text-navy hover:bg-[#f2d694] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+          <TrackedLink href="/contact?interest=portfolio" eventName="portfolio_contact" className="mt-8 inline-flex min-h-12 items-center justify-center rounded-xl bg-[#dfbe70] px-7 py-3 text-sm font-bold text-navy hover:bg-[#f2d694] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
             {isFr ? 'Communiquer avec nous' : 'Get in touch'} <span aria-hidden="true" className="ml-2">↗</span>
           </TrackedLink>
         </div>
