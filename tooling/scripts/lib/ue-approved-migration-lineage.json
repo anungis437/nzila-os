@@ -447,6 +447,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "created_by on ue_copilot_conversations and ue_reasoning_sessions (owner scoping)"
+      },
+      {
+        "tag": "0044_anti_scab_author",
+        "sha256": "1fbf51b59ea2d50972b864c97107df6811401f91544798e9c5bf48fd04dbf05d",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "created_by on anti_scab_violations (server-recorded author)"
       }
     ]
   }

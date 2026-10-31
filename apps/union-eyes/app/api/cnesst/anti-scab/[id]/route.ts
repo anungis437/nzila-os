@@ -19,5 +19,7 @@ const { GET, PATCH, DELETE } = crudRoutes({
   retainOnDelete: true,
   readRole: 'steward',
   writeRole: 'steward',
+  // Authorship and the reporter are fixed when the violation is filed.
+  blockedPatchFields: ['createdBy', 'reportedById', 'reportedByName'],
 });
 export { GET, PATCH, DELETE };

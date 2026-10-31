@@ -67,6 +67,7 @@ business tables that already had Drizzle projections / runtime authority but lac
 | `0041_room_bookings_shape` | Evolve room_bookings and refuse overlapping bookings Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 | `0042_tenant_scoped_uniqueness` | Make nine record numbers and codes unique within an organization Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 | `0043_knowledge_transfer_owner` | Record who opened each copilot conversation and reasoning session Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
+| `0044_anti_scab_author` | Record the author of an anti-scab violation from the session Registered as an UNQUALIFIED addition in `tooling/scripts/lib/ue-approved-migration-lineage.json`. |
 
 ## What does not belong here
 

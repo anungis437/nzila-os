@@ -92,7 +92,7 @@
     "engineeringCorrected": 472,
     "engineeringRemaining": 305,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 77
+    "engineeringPartial": 78
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -3267,9 +3267,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "S07-ANTI-SCAB-AUTHOR-MIGRATION-0044",
+        "path": "apps/union-eyes/db/migrations-platform/0044_anti_scab_author.sql; apps/union-eyes/db/migrations-platform/0044_anti_scab_author.rollback.sql; apps/union-eyes/db/schema/domains/health-safety/cnesst-schema.ts; apps/union-eyes/app/api/cnesst/anti-scab/route.ts; apps/union-eyes/app/api/cnesst/anti-scab/[id]/route.ts; apps/union-eyes/lib/services/__tests__/s8-anti-scab-author.test.ts",
+        "explanation": "Migration 0044 adds created_by (text, nullable; the existing reported_by_id is a uuid and could not hold a session principal) to anti_scab_violations. The factory stamps the session user as the author on create; the collection route no longer accepts the reporter, a resolution, a penalty or a tribunal filing from the body, and the item route refuses to patch the author or the reporter. Proved on PGlite for the migration and by source pins.",
+        "remaining": "Any steward of the organization still reads and rewrites every violation: case authority (the steward represents the member the matter concerns) needs a kernel resource type for these records.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-OHS-REGULATORY-RECORD-HARD-DELETE",

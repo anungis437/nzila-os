@@ -5839,6 +5839,27 @@
           "explanation": "The model input is built from the caller's stored conversation (the last 20 messages); prior messages sent by the client are accepted for compatibility and ignored, so a caller cannot put words in the assistant's mouth or pass instructions as earlier turns. Tested with a forged assistant turn."
         }
       ]
+    },
+    {
+      "id": "S07-ANTI-SCAB-AUTHOR-MIGRATION-0044",
+      "family": "Schema: the author of an anti-scab violation is recorded by the server",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B4-OHS-ANTI-SCAB-RECORD-NO-AUTHOR-OR-CASE-AUTHORITY",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/db/migrations-platform/0044_anti_scab_author.sql",
+            "apps/union-eyes/db/migrations-platform/0044_anti_scab_author.rollback.sql",
+            "apps/union-eyes/db/schema/domains/health-safety/cnesst-schema.ts",
+            "apps/union-eyes/app/api/cnesst/anti-scab/route.ts",
+            "apps/union-eyes/app/api/cnesst/anti-scab/[id]/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s8-anti-scab-author.test.ts"
+          ],
+          "explanation": "Migration 0044 adds created_by (text, nullable; the existing reported_by_id is a uuid and could not hold a session principal) to anti_scab_violations. The factory stamps the session user as the author on create; the collection route no longer accepts the reporter, a resolution, a penalty or a tribunal filing from the body, and the item route refuses to patch the author or the reporter. Proved on PGlite for the migration and by source pins.",
+          "remaining": "Any steward of the organization still reads and rewrites every violation: case authority (the steward represents the member the matter concerns) needs a kernel resource type for these records."
+        }
+      ]
     }
   ]
 }

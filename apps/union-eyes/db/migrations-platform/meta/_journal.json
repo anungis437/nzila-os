@@ -316,6 +316,13 @@
       "when": 1759000000000,
       "tag": "0043_knowledge_transfer_owner",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1759010000000,
+      "tag": "0044_anti_scab_author",
+      "breakpoints": true
     }
   ]
 }
