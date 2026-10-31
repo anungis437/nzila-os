@@ -18,6 +18,9 @@ function makeFixture() {
   const sbom = JSON.stringify({ bomFormat: 'CycloneDX', specVersion: '1.6',
     components: [{ name: 'test', version: '1' }] }) + '\n'
   const sbomDigest = hash(sbom)
+  const sourceLockfilePath = join(directory, 'pnpm-lock.yaml')
+  const lockfile = 'lockfileVersion: 9.0\n'
+  writeFileSync(sourceLockfilePath, lockfile)
   const now = new Date().toISOString()
   const manifest = { source_workflow: 'deploy-staging', commit_sha: COMMIT,
     attestation_ref: 'release-attestation.json', built_at: now, run_id: RUN, artifact_digest: sbomDigest,
@@ -28,7 +31,7 @@ function makeFixture() {
     secretScanSummary: { ran: true, clean: true, findings: 0 },
     trivySummary: { ran: true, critical: 0, high: 0, medium: 0, low: 0 },
     artifactDigests: [{ name: 'demo', digest: 'c'.repeat(64), fileCount: 1 }],
-    lockfileHash: 'd'.repeat(64), timestamp: now, environment: 'staging' }
+    lockfileHash: hash(lockfile), timestamp: now, environment: 'staging' }
   function write() {
     attestation.manifestDigest = hash(JSON.stringify(manifest))
     const digest = computeSignedPayloadDigest(attestation)
@@ -40,8 +43,8 @@ function makeFixture() {
     }))
   }
   write()
-  return { directory, publicKeyPem, manifest, attestation, write,
-    verify: () => verifyPromotionEvidence({ directory, expectedCommit: COMMIT, expectedRunId: RUN, publicKeyPem }),
+  return { directory, publicKeyPem, manifest, attestation, sourceLockfilePath, write,
+    verify: () => verifyPromotionEvidence({ directory, expectedCommit: COMMIT, expectedRunId: RUN, publicKeyPem, sourceLockfilePath }),
     cleanup: () => rmSync(directory, { recursive: true, force: true }) }
 }
 test('nested canonical hashing preserves modifications', () => {
@@ -185,5 +188,34 @@ test('missing trusted staging run coordinate is denied', () => {
     assert.throws(() => verifyPromotionEvidence({
       directory: x.directory, expectedCommit: COMMIT, publicKeyPem: x.publicKeyPem,
     }), /missing\/invalid trusted staging run ID/)
+  } finally { x.cleanup() }
+})
+
+test('signed lockfile digest must match the independently checked-out source', () => {
+  const x = makeFixture()
+  try {
+    writeFileSync(x.sourceLockfilePath, 'lockfileVersion: 9.0\\npackages: {}\\n')
+    assert.throws(() => x.verify(), /signed lockfile hash does not match checked-out source/)
+  } finally { x.cleanup() }
+})
+test('a correctly signed but forged lockfile hash cannot substitute source provenance', () => {
+  const x = makeFixture()
+  try {
+    x.attestation.lockfileHash = 'f'.repeat(64)
+    x.write()
+    assert.throws(() => x.verify(), /signed lockfile hash does not match checked-out source/)
+  } finally { x.cleanup() }
+})
+test('source lockfile path is mandatory and cannot be inferred from staging artifacts', () => {
+  const x = makeFixture()
+  try {
+    assert.throws(() => verifyPromotionEvidence({
+      directory: x.directory, expectedCommit: COMMIT, expectedRunId: RUN,
+      publicKeyPem: x.publicKeyPem,
+    }), /trusted source lockfile path unavailable/)
+    assert.throws(() => verifyPromotionEvidence({
+      directory: x.directory, expectedCommit: COMMIT, expectedRunId: RUN,
+      publicKeyPem: x.publicKeyPem, sourceLockfilePath: join(x.directory, 'absent.yaml'),
+    }), /trusted source lockfile unavailable/)
   } finally { x.cleanup() }
 })

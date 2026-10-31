@@ -22,7 +22,7 @@ export function computeSignedPayloadDigest(attestation) {
   const { signature, attestationDigest, ...payload } = attestation
   return sha256(Buffer.from(JSON.stringify(canonical(payload))))
 }
-export function verifyPromotionEvidence({ directory, expectedCommit, expectedRunId, publicKeyPem, now = new Date() }) {
+export function verifyPromotionEvidence({ directory, expectedCommit, expectedRunId, publicKeyPem, sourceLockfilePath, now = new Date() }) {
   if (!/^[0-9a-f]{40}$/i.test(expectedCommit ?? '')) deny('missing/invalid expected commit SHA')
   if (!/^[1-9][0-9]*$/.test(String(expectedRunId ?? ''))) deny('missing/invalid trusted staging run ID')
   if (!publicKeyPem || !publicKeyPem.includes('BEGIN PUBLIC KEY')) deny('independently provisioned verification key unavailable')
@@ -76,6 +76,23 @@ export function verifyPromotionEvidence({ directory, expectedCommit, expectedRun
       attestation.artifactDigests.some(x => !x.name || !Number.isInteger(x.fileCount) ||
         x.fileCount < 1 || !/^[0-9a-f]{64}$/i.test(x.digest ?? ''))) {
     deny('incomplete source/bundle digest evidence')
+  }
+  // A signed lockfileHash is not source provenance unless it matches the
+  // independently checked-out Git commit being promoted. The production
+  // workflow checks out GITHUB_SHA, which is separately matched to staging.
+  // Refuse missing or unreadable source material; do not trust a supplied
+  // hash or the staging artifact to define the expected source lockfile.
+  if (typeof sourceLockfilePath !== 'string' || !sourceLockfilePath) {
+    deny('trusted source lockfile path unavailable')
+  }
+  let actualLockfileHash
+  try {
+    actualLockfileHash = sha256(readFileSync(sourceLockfilePath))
+  } catch {
+    deny('trusted source lockfile unavailable')
+  }
+  if (actualLockfileHash !== attestation.lockfileHash) {
+    deny('signed lockfile hash does not match checked-out source')
   }
   const stagedAt = Date.parse(manifest.built_at ?? '')
   const attestedAt = Date.parse(attestation.timestamp ?? '')
@@ -132,6 +149,7 @@ if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.m
     const result = verifyPromotionEvidence({
       directory, expectedCommit, expectedRunId: process.argv[4],
       publicKeyPem: process.env.ATTESTATION_VERIFY_PUBLIC_KEY,
+      sourceLockfilePath: resolve('pnpm-lock.yaml'),
     })
     console.log('Signed staging evidence verified for ' + result.commitSha)
   } catch (e) {
