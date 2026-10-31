@@ -22,7 +22,7 @@ const mocks = vi.hoisted(() => ({
 function makeChain() {
   const chain: Record<string, unknown> = {};
   chain.from = () => chain;
-  chain.where = () => Promise.resolve(mocks.interviews);
+  chain.where = () => ({ limit: () => Promise.resolve(mocks.interviews) });
   return chain;
 }
 

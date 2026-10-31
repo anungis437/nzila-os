@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 397,
- "partial": 77,
- "outstanding": 380,
- "accountedFor": 380,
+ "corrected": 400,
+ "partial": 80,
+ "outstanding": 377,
+ "accountedFor": 377,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -94,10 +94,10 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 82,
+   "defects": 79,
    "severity": {
     "HIGH": 8,
-    "MEDIUM": 49,
+    "MEDIUM": 46,
     "LOW": 25
    },
    "namedRoutes": 12,
@@ -109,7 +109,7 @@
     "0B.4": 2,
     "0B.5": 4,
     "0B.6": 9,
-    "0B.7": 22,
+    "0B.7": 19,
     "0B.8": 7,
     "0B.9": 6,
     "0B.10": 10,
@@ -683,10 +683,6 @@
     "severity": "LOW"
    },
    {
-    "id": "DEF-0B7-COGA-EMPTY-ORGANIZATION-RESILIENCE-IS-NAN-AND-READS-STRONG",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B7-COGA-PROFILES-MEASURE-ENTERED-MEMORY-ROWS-NOT-GOVERNANCE",
     "severity": "MEDIUM"
    },
@@ -698,10 +694,6 @@
     "id": "DEF-0B7-COGA-COHERENCE-AND-MOMENTUM-ARE-LITERALS-AND-ENTRY-COUNT-RATIOS",
     "severity": "MEDIUM",
     "partial": true
-   },
-   {
-    "id": "DEF-0B7-COGA-ROADMAP-DOCUMENTATION-STRATEGY-PRECEDENCE-BUG",
-    "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B7-COGA-TIMELINE-COUNTS-CAPPED-AND-INTERVIEW-WINDOW-UNBOUNDED",
@@ -722,11 +714,13 @@
    },
    {
     "id": "DEF-0B7-COGB-INTERVIEW-READS-UNBOUNDED",
-    "severity": "LOW"
+    "severity": "LOW",
+    "partial": true
    },
    {
     "id": "DEF-0B7-COGB-ROADMAP-DOCUMENTATION-RULE-PRECEDENCE-AND-CONSTANT-PROJECTED-GAINS",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B7-COGB-ENVELOPE-CONFIDENCE-FIXED-AT-60-AND-EXPLAINABILITY-EMPTY",
@@ -739,10 +733,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B7-COGB-PERSONALITY-LABEL-ASSIGNED-FROM-ABSENCE-OF-DATA",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B7-COGB-MITIGATION-EFFECTIVENESS-ATTRIBUTES-NEXT-SCORE-TO-INTERVENTION",
     "severity": "MEDIUM"
    },
@@ -752,7 +742,8 @@
    },
    {
     "id": "DEF-0B7-COGB-NARRATIVES-CITE-ZERO-EVIDENCE-AS-DERIVED-FROM-EVIDENCE",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B7-EXP-REPORT-DEFINITIONS-READABLE-AT-MEMBER-FLOOR",

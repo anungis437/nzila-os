@@ -7,7 +7,7 @@ const { whereMock, generateMock } = vi.hoisted(() => ({
   generateMock: vi.fn(),
 }));
 vi.mock('@/db/db', () => ({
-  db: { select: () => ({ from: () => ({ where: whereMock }) }) },
+  db: { select: () => ({ from: () => ({ where: (...args: unknown[]) => ({ limit: () => whereMock(...args) }) }) }) },
 }));
 vi.mock('@/db/schema', () => ({
   exitInterviews: new Proxy({}, { get: (_t, p) => String(p) }),

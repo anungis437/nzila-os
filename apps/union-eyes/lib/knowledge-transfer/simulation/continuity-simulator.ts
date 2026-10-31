@@ -13,6 +13,7 @@
  * ORGANIZATIONALLY FRAMED — not about individuals, about organizational resilience.
  */
 
+import { INTERVIEW_READ_LIMIT } from '@/lib/knowledge-transfer/governance/interview-read-limit';
 import { derivedAnalyticsCondition } from '../governance/interview-access';
 import { db } from '@/db/db';
 import { ApiError } from '@/lib/api/errors';
@@ -39,7 +40,8 @@ async function loadPublishedInterviews(orgId: string) {
   return db
     .select()
     .from(exitInterviews)
-    .where(derivedAnalyticsCondition(orgId));
+    .where(derivedAnalyticsCondition(orgId))
+    .limit(INTERVIEW_READ_LIMIT);
 }
 
 /**

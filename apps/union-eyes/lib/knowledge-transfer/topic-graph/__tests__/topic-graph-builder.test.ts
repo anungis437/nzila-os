@@ -4,7 +4,7 @@ vi.mock('@/lib/knowledge-transfer/governance/interview-access', () => ({ derived
 
 const { whereMock } = vi.hoisted(() => ({ whereMock: vi.fn() }));
 vi.mock('@/db/db', () => ({
-  db: { select: () => ({ from: () => ({ where: whereMock }) }) },
+  db: { select: () => ({ from: () => ({ where: (...args: unknown[]) => ({ limit: () => whereMock(...args) }) }) }) },
 }));
 vi.mock('@/db/schema', () => ({
   exitInterviews: { id: 'id', roleInUnion: 'roleInUnion', topics: 'topics', expertiseTags: 'expertiseTags', organizationId: 'organizationId', status: 'status' },

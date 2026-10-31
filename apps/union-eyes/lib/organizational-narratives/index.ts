@@ -58,7 +58,9 @@ function pickSummary(env: InstitutionalExplainabilityEnvelope<unknown>): string 
   const reviewCount = env.governanceImplications.filter((g) => g.requiresHumanReview).length;
   const parts = [
     env.interpretationGuidance.trim(),
-    `Derived from ${evidenceCount} institutional evidence item${evidenceCount === 1 ? '' : 's'} ${conf}.`,
+    evidenceCount === 0
+      ? 'No institutional evidence is attached to this result, so it is guidance, not a finding.'
+      : `Derived from ${evidenceCount} institutional evidence item${evidenceCount === 1 ? '' : 's'} ${conf}.`,
   ];
   if (reviewCount > 0) {
     parts.push(

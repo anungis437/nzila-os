@@ -12,6 +12,7 @@
  * It does NOT rank employees or evaluate individual performance.
  */
 
+import { INTERVIEW_READ_LIMIT } from '@/lib/knowledge-transfer/governance/interview-read-limit';
 import { derivedAnalyticsCondition } from '../governance/interview-access';
 import { db } from '@/db/db';
 import { exitInterviews } from '@/db/schema';
@@ -70,7 +71,8 @@ export async function buildTopicGraph(orgId: string): Promise<TopicGraph> {
       expertiseTags: exitInterviews.expertiseTags,
     })
     .from(exitInterviews)
-    .where(derivedAnalyticsCondition(orgId));
+    .where(derivedAnalyticsCondition(orgId))
+    .limit(INTERVIEW_READ_LIMIT);
 
   // Build frequency map
   const nodeMap = new Map<

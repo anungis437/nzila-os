@@ -10,6 +10,7 @@
  * INV-01: All AI calls via @nzila/ai-sdk getAiClient()
  */
 
+import { INTERVIEW_READ_LIMIT } from '@/lib/knowledge-transfer/governance/interview-read-limit';
 import { derivedAnalyticsCondition } from '../governance/interview-access';
 import { db } from '@/db/db';
 import { exitInterviews } from '@/db/schema';
@@ -51,7 +52,8 @@ export async function buildDependencyPropagationMap(orgId: string): Promise<Prop
       summary: exitInterviews.summary,
     })
     .from(exitInterviews)
-    .where(derivedAnalyticsCondition(orgId));
+    .where(derivedAnalyticsCondition(orgId))
+    .limit(INTERVIEW_READ_LIMIT);
 
   if (interviews.length === 0) {
     return {

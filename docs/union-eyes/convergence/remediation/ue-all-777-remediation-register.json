@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 397,
-    "engineeringRemaining": 380,
+    "engineeringCorrected": 400,
+    "engineeringRemaining": 377,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 77
+    "engineeringPartial": 80
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -7292,9 +7292,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B47-F12-COGNITION-RESULTS-STATE-WHAT-THEY-REST-ON",
+        "path": "apps/union-eyes/lib/knowledge-transfer/resilience-index/resilience-calculator.ts; apps/union-eyes/lib/knowledge-transfer/resilience-index/__tests__/resilience-calculator.test.ts",
+        "explanation": "Existing implementation, verified: the resilience index refuses an organization with no dependency data with a conflict instead of computing NaN scores, so no strong status or brief is derived from it; an existing test covers both the empty and the interviews-without-nodes cases.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-COGA-CONTINUITY-RISK-SENDS-INTERVIEW-DATA-TO-MODEL-UNGUARDED",
@@ -7451,9 +7458,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B47-F12-COGNITION-RESULTS-STATE-WHAT-THEY-REST-ON",
+        "path": "apps/union-eyes/lib/knowledge-transfer/resilience-strategies/strategy-modeler.ts; apps/union-eyes/lib/knowledge-transfer/__tests__/b47-honest-analytics.test.ts",
+        "explanation": "The documentation strategy is selected when the documentation score is low (under 65) or unmeasured (missing or not finite), and not for any high score. The expression that parsed as score ?? (0 < 65) is gone. Source-contract test added.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-COGA-TIMELINE-COUNTS-CAPPED-AND-INTERVIEW-WINDOW-UNBOUNDED",
@@ -7690,9 +7704,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B47-F12-COGNITION-RESULTS-STATE-WHAT-THEY-REST-ON",
+        "path": "apps/union-eyes/lib/knowledge-transfer/governance/interview-read-limit.ts; apps/union-eyes/lib/knowledge-transfer/topic-graph/topic-graph-builder.ts; apps/union-eyes/lib/knowledge-transfer/propagation/dependency-propagator.ts; apps/union-eyes/lib/knowledge-transfer/resilience-index/resilience-calculator.ts; apps/union-eyes/lib/knowledge-transfer/succession/succession-analyzer.ts; apps/union-eyes/lib/knowledge-transfer/continuity-risk/risk-detector.ts; apps/union-eyes/lib/knowledge-transfer/simulation/continuity-simulator.ts; apps/union-eyes/lib/knowledge-transfer/__tests__/b47-honest-analytics.test.ts",
+        "explanation": "Every derived analysis that read all published exit interviews now reads at most 500, newest as the database returns them, through one shared constant, so the work and the model prompt no longer grow without bound. Six test mocks gained a limit step on the query chain (disclosed; behaviour unchanged).",
+        "remaining": "The 500 are not ordered by recency, and the topic graph still builds a pair edge for every two tags of each interview.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-COGB-EMPTY-ORGANIZATION-RESILIENCE-INDEX-DIVIDES-BY-ZERO-AND-REPORTS-STRONG",
@@ -7748,9 +7770,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B47-F12-COGNITION-RESULTS-STATE-WHAT-THEY-REST-ON",
+        "path": "apps/union-eyes/lib/knowledge-transfer/resilience-strategies/strategy-modeler.ts; apps/union-eyes/lib/knowledge-transfer/__tests__/b47-honest-analytics.test.ts",
+        "explanation": "The precedence defect in the documentation rule is corrected (same fix as the companion defect).",
+        "remaining": "The projected resilience, governance and dependency gains of each strategy are still literal numbers from a per-strategy table.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-COGB-ENVELOPE-CONFIDENCE-FIXED-AT-60-AND-EXPLAINABILITY-EMPTY",
@@ -7917,9 +7947,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B47-F12-COGNITION-RESULTS-STATE-WHAT-THEY-REST-ON",
+        "path": "apps/union-eyes/lib/knowledge-transfer/maturity-personalities/personality-profiler.ts; apps/union-eyes/lib/knowledge-transfer/maturity-personalities/personality-models.ts; apps/union-eyes/lib/knowledge-transfer/maturity-personalities/__tests__/personality-profiler.test.ts; apps/union-eyes/lib/knowledge-transfer/__tests__/b47-honest-analytics.test.ts",
+        "explanation": "With fewer than two entries and sessions the profiler now returns a new insufficient_data type with no characteristics and an identity statement that says so, instead of Resilience-Fragile. The existing no-history test pinned the old label and was changed to assert the new behaviour (disclosed).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-COGB-MITIGATION-EFFECTIVENESS-ATTRIBUTES-NEXT-SCORE-TO-INTERVENTION",
@@ -8002,9 +8039,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B47-F12-COGNITION-RESULTS-STATE-WHAT-THEY-REST-ON",
+        "path": "apps/union-eyes/lib/organizational-narratives/index.ts; apps/union-eyes/lib/knowledge-transfer/__tests__/b47-honest-analytics.test.ts",
+        "explanation": "A narrative whose envelope carries no evidence now says that no institutional evidence is attached and that the result is guidance, not a finding, instead of \"Derived from 0 institutional evidence items\".",
+        "remaining": "The headline is still the first sentence of fixed interpretation guidance and the engines still emit no evidence, reasoning or implications.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-EXP-EXPORT-ROUTES-ARE-REPORT-DEFINITION-CRUD-NO-FILE",

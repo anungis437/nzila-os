@@ -4,6 +4,7 @@
  * Measure organizational continuity resilience across multiple dimensions.
  */
 
+import { INTERVIEW_READ_LIMIT } from '@/lib/knowledge-transfer/governance/interview-read-limit';
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
 import type { PropagationMap } from '../propagation/propagation-models';
 import { derivedAnalyticsCondition } from '../governance/interview-access';
@@ -42,7 +43,8 @@ async function loadPublishedInterviews(orgId: string) {
   return db
     .select()
     .from(exitInterviews)
-    .where(derivedAnalyticsCondition(orgId));
+    .where(derivedAnalyticsCondition(orgId))
+    .limit(INTERVIEW_READ_LIMIT);
 }
 
 export async function calculateResilienceIndex(orgId: string): Promise<OrganizationalResilienceIndex> {

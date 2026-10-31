@@ -13,6 +13,7 @@
  * It NEVER evaluates individual worker performance, value, or productivity.
  */
 
+import { INTERVIEW_READ_LIMIT } from '@/lib/knowledge-transfer/governance/interview-read-limit';
 import { derivedAnalyticsCondition } from '../governance/interview-access';
 import { db } from '@/db/db';
 import { exitInterviews } from '@/db/schema';
@@ -168,7 +169,8 @@ export async function detectContinuityRisks(orgId: string): Promise<OrgContinuit
       topics: exitInterviews.topics,
     })
     .from(exitInterviews)
-    .where(derivedAnalyticsCondition(orgId));
+    .where(derivedAnalyticsCondition(orgId))
+    .limit(INTERVIEW_READ_LIMIT);
 
   const singleSourceTopics = detectSingleSourceTopics(publishedInterviews);
   const isolatedExpertise = detectIsolatedExpertise(publishedInterviews);

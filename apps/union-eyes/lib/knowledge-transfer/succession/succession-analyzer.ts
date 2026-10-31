@@ -14,6 +14,7 @@
  * INV-01: All AI calls via getAiClient()
  */
 
+import { INTERVIEW_READ_LIMIT } from '@/lib/knowledge-transfer/governance/interview-read-limit';
 import { derivedAnalyticsCondition } from '../governance/interview-access';
 import { z } from 'zod';
 import { db } from '@/db/db';
@@ -122,7 +123,8 @@ export async function analyzeSuccessionFragility(orgId: string, actorUserId?: st
       continuityRiskFlags: exitInterviews.continuityRiskFlags,
     })
     .from(exitInterviews)
-    .where(derivedAnalyticsCondition(orgId));
+    .where(derivedAnalyticsCondition(orgId))
+    .limit(INTERVIEW_READ_LIMIT);
 
   // Build per-role statistics
   const roleMap = new Map<

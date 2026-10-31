@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), interviews: [] as unknown[]
 function makeChain() {
   const chain: Record<string, unknown> = {};
   chain.from = () => chain;
-  chain.where = () => Promise.resolve(mocks.interviews);
+  chain.where = () => ({ limit: () => Promise.resolve(mocks.interviews) });
   return chain;
 }
 
