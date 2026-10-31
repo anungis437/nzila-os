@@ -1,5 +1,6 @@
 import { db } from "@/db";
 import type { RLSTx } from "@/lib/db/with-rls-context";
+import { getLocationConsentNotice } from "@/lib/location/consent-notice";
 import {
   memberLocationConsent,
   locationTracking,
@@ -26,6 +27,7 @@ export interface LocationConsentRequest {
   purpose: string;
   purposeDescription: string;
   consentText: string;
+  noticeVersion: string;
   allowedDuringStrike?: boolean;
   allowedDuringEvents?: boolean;
   ipAddress?: string;
@@ -70,13 +72,22 @@ export class LocationConsentNotFoundError extends Error {
 
 export class GeofencePrivacyService {
   private static readonly MAX_RETENTION_HOURS = 24;
-  private static readonly CONSENT_VERSION = "1.0";
 
   /**
    * Request explicit location tracking consent from user.
    * Pass the caller's transaction so the consent, its privacy audit row and the platform audit commit together.
    */
   static async requestLocationConsent(request: LocationConsentRequest, tx: RLSTx = db) {
+    // Guard this service boundary as well as the HTTP route. A direct caller
+    // cannot bypass the institutional notice or substitute its own wording.
+    const notice = getLocationConsentNotice();
+    if (!notice ||
+        request.noticeVersion !== notice.version ||
+        request.purpose !== notice.purpose ||
+        request.purposeDescription !== notice.purposeDescription ||
+        request.consentText !== notice.consentText) {
+      throw new Error("Location consent notice unavailable or mismatched");
+    }
     // Check if user already has active consent
     const existing = await tx
       .select()
@@ -107,7 +118,7 @@ export class GeofencePrivacyService {
       dataRetentionHours: this.MAX_RETENTION_HOURS.toString(),
       expiresAt,
       consentText: request.consentText,
-      consentVersion: this.CONSENT_VERSION,
+      consentVersion: notice.version,
       ipAddress: request.ipAddress,
       userAgent: request.userAgent,
     };
