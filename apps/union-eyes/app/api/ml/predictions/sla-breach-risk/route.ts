@@ -106,6 +106,8 @@ export const POST = withApi(
           confidence: null,
           horizon: 72,
           granularity: 'case',
+          modelVersion: model.version,
+          subjectId: body.caseId,
         })
         .returning();
 

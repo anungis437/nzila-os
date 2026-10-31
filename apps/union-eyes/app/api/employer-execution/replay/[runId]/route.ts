@@ -303,8 +303,8 @@ export const POST = withApi(
           : "Replay matched original run",
     };
 
-    // The stored mode column cannot tell an engine change from a faithful re-run, so the requested mode and rule
-    // version travel with the diff, and the same request against the same run is answered with the replay it made.
+    // The stored mode records an engine change as new_engine (migration 0040); the requested mode and rule version
+    // still travel with the diff, and the same request against the same run is answered with the replay it made.
     const replayContext = { requestedMode: body.mode, replayRuleVersionId: ruleVersion.id };
     const diffHash = sha256(JSON.stringify(diff));
     const priorReplays = await db
@@ -376,7 +376,7 @@ export const POST = withApi(
           organizationId,
           sourcePayrollRunId: sourceRun.id,
           replayPayrollRunId: null,
-          mode: body.mode === "new_rule" ? "simulated" : "exact",
+          mode: body.mode === "new_rule" ? "simulated" : body.mode === "new_engine" ? "new_engine" : "exact",
           sourceEngineVersion: sourceRun.engineVersion,
           replayEngineVersion,
           diffJson: { ...diff, replayContext },

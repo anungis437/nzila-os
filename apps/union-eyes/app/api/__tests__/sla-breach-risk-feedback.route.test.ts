@@ -34,7 +34,7 @@ vi.mock('@/lib/api/framework', () => ({
   z: {
     object: () => ({}),
     guid: () => ({ min: () => ({ default: () => ({}) }), optional: () => ({}) }),
-    string: () => ({ uuid: () => ({ min: () => ({ default: () => ({}) }) }), min: () => ({ default: () => ({}) }), max: () => ({ optional: () => ({}) }), optional: () => ({}) }),
+    string: () => ({ uuid: () => ({ min: () => ({ default: () => ({}) }) }), min: () => ({ default: () => ({}), optional: () => ({}) }), max: () => ({ optional: () => ({}) }), optional: () => ({}) }),
     boolean: () => ({}),
     number: () => ({ nonnegative: () => ({ optional: () => ({}) }) }),
   },

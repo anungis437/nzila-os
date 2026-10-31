@@ -5291,6 +5291,83 @@
           "remaining": "No proof that the organization owns the identity domain: that needs a DNS or e-mail verification process with the identity provider, which a schema cannot supply."
         }
       ]
+    },
+    {
+      "id": "S02-DATABASE-ENFORCEMENT-MIGRATION-0040",
+      "family": "Database enforcement: constraints, triggers and columns that settle what application checks could only attempt",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B6-EMP-REPLAY-MODE-MISRECORDED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/db/schema/domains/employer-execution/employer-artifacts.ts",
+            "apps/union-eyes/app/api/employer-execution/replay/[runId]/route.ts",
+            "apps/union-eyes/db/migrations-platform/0040_gate0_integrity_enforcement.sql",
+            "apps/union-eyes/db/migrations-platform/0040_gate0_integrity_enforcement.rollback.sql",
+            "apps/union-eyes/db/__tests__/platform-0040-gate0-integrity-enforcement.pglite.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s2-database-enforcement.test.ts"
+          ],
+          "explanation": "Migration 0040 adds new_engine to employer_execution_replay_mode, so an engine-change replay is stored as new_engine and not as a faithful exact re-run. Proven on PGlite; the requested mode still travels with the diff for idempotency."
+        },
+        {
+          "prefix": "DEF-0B6-EDU-REGISTRATION-NO-CAPACITY-DUPLICATE-OR-SESSION-COURSE-CHECK",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/education/registrations/route.ts",
+            "apps/union-eyes/lib/api/crud-factory.ts",
+            "apps/union-eyes/lib/db/unique-violation.ts",
+            "apps/union-eyes/db/schema/domains/scheduling/training.ts",
+            "apps/union-eyes/db/schema/education-training-schema.ts",
+            "apps/union-eyes/db/migrations-platform/0040_gate0_integrity_enforcement.sql",
+            "apps/union-eyes/db/migrations-platform/0040_gate0_integrity_enforcement.rollback.sql",
+            "apps/union-eyes/db/__tests__/platform-0040-gate0-integrity-enforcement.pglite.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s2-database-enforcement.test.ts"
+          ],
+          "explanation": "Migration 0040 adds a unique index (organization, member, session) that refuses to apply over existing duplicates, and a BEFORE INSERT/UPDATE trigger that locks the session row and refuses a registration beyond max_enrollment (SQLSTATE 23514); a cancelled place frees a seat and a re-save of a registered row is not recounted. The CRUD factory gains mapCreateError so a lost race answers 409 (full, or already registered). Proven on PGlite."
+        },
+        {
+          "prefix": "DEF-0B9-ML-SLA-CASE-ID-IS-NEVER-VERIFIED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/db/schema/domains/ml/predictions.ts",
+            "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/route.ts",
+            "apps/union-eyes/db/migrations-platform/0040_gate0_integrity_enforcement.sql",
+            "apps/union-eyes/db/migrations-platform/0040_gate0_integrity_enforcement.rollback.sql",
+            "apps/union-eyes/db/__tests__/platform-0040-gate0-integrity-enforcement.pglite.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s2-database-enforcement.test.ts"
+          ],
+          "explanation": "Migration 0040 adds ml_predictions.subject_id. The case is verified against the organization (B08) and is now stored on the prediction row, and the audit entry and feedback carry it."
+        },
+        {
+          "prefix": "DEF-0B9-ML-SLA-FEEDBACK-IS-REPEATABLE-CALLER-STATED-VERSION-UNBOUND-AND-A-LOST-UPDATE-READ-MODIFY-WRITE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/db/schema/domains/ml/predictions.ts",
+            "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/route.ts",
+            "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/feedback/route.ts",
+            "apps/union-eyes/app/api/__tests__/sla-breach-risk-feedback.route.test.ts",
+            "apps/union-eyes/db/migrations-platform/0040_gate0_integrity_enforcement.sql",
+            "apps/union-eyes/db/migrations-platform/0040_gate0_integrity_enforcement.rollback.sql",
+            "apps/union-eyes/db/__tests__/platform-0040-gate0-integrity-enforcement.pglite.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s2-database-enforcement.test.ts"
+          ],
+          "explanation": "Migration 0040 adds ml_predictions.model_version, written by the prediction route. Feedback now defaults to the version the prediction recorded and refuses (409) a different one, so the version binding no longer depends on a column that was missing. The route test zod mock gained optional() on min() (disclosed)."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-REWARDS-CRON-EXPIRATION-TASK-READS-AN-EXPIRY",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/services/rewards/notification-service.ts",
+            "apps/union-eyes/lib/services/rewards/expiry-warning-marker.ts",
+            "apps/union-eyes/lib/services/rewards/__tests__/expiration-warnings.pglite.test.ts",
+            "apps/union-eyes/lib/services/rewards/__tests__/notification-service.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s2-database-enforcement.test.ts"
+          ],
+          "explanation": "The durable sent marker needed no new table: the warning is also the member's in-app notice, recorded in in_app_notifications under data.dedupeKey (unique per organization and member, migration 20261103) before the mail leaves; a second run, retry or overlap mails nothing more, and a failed send releases the record so the next run tries again. Proved on PostgreSQL (PGlite) for repeat, retry-after-failure and per-tier behaviour. The mocked notification-service test now mocks the marker (disclosed).",
+          "remaining": "Nothing in the product sets an expiry or writes an expire entry yet, so the task still has nothing to warn about until an expiry policy is decided and implemented."
+        }
+      ]
     }
   ]
 }

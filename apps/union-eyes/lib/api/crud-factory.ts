@@ -154,6 +154,11 @@ export interface CrudOptions {
    */
   anonymousCreate?: (values: Record<string, unknown>) => boolean;
   /**
+   * Translates a database refusal raised by the insert itself (a trigger or unique index that settles a race the hook
+   * could only check) into the error the caller should see. Return null to let the original error propagate.
+   */
+  mapCreateError?: (error: unknown) => Error | null;
+  /**
    * Optional transform applied to the PATCH payload, after
    * `blockedPatchFields` have been stripped, before `.set(...)`. Receives
    * the row's CURRENT (pre-update) values via one extra SELECT — only
@@ -685,7 +690,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         // A below-staff caller can only create rows about themselves.
         if (lowRole.forcedOwner) finalValues[lowRole.forcedOwner.name] = lowRole.forcedOwner.value;
 
-        const row = await audited(organizationId, anonymous ? ANONYMOUS_ACTOR : userId, 'create', Object.keys(finalValues), async (tx) => {
+        const createAudited = () => audited(organizationId, anonymous ? ANONYMOUS_ACTOR : userId, 'create', Object.keys(finalValues), async (tx) => {
           if (parentColumn && parentKeyColumn && parentOrgColumn && opts.parentScope) {
             // An indirect reference is checked like a direct one: the named parent must belong to the caller's organization.
             const parentId = finalValues[opts.parentScope.column];
@@ -696,6 +701,12 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           }
           return (await tx.insert(table).values(finalValues).returning())[0] as Record<string, unknown> | undefined;
         });
+        let row: Record<string, unknown> | undefined;
+        try {
+          row = await createAudited();
+        } catch (error) {
+          throw opts.mapCreateError?.(error) ?? error;
+        }
         return { data: shape(row) };
       },
     );

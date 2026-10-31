@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PGlite } from '@electric-sql/pglite';
 import { rewardWalletLedger } from '@/db/schema/domains/infrastructure/rewards';
+import { inAppNotifications } from '@/db/schema/domains/communications/notifications';
 import { createTableDatabase } from '@/app/api/__tests__/support/pglite-tables';
 
 // DEF-0B11-PRP-REWARDS-CRON-EXPIRATION-TASK-READS-AN-EXPIRY...: against real SQL, who is warned, when, and for how much.
@@ -52,7 +53,8 @@ async function spend(org: string, user: string, amount: number, balanceAfter: nu
 }
 
 beforeAll(async () => {
-  const created = await createTableDatabase([rewardWalletLedger], [
+  const created = await createTableDatabase([rewardWalletLedger, inAppNotifications], [
+    `CREATE UNIQUE INDEX uq_in_app_notifications_dedupe ON in_app_notifications (organization_id, user_id, ((data->>'dedupeKey'))) WHERE data ? 'dedupeKey'`,
     `CREATE SCHEMA IF NOT EXISTS user_management`,
     `CREATE TABLE user_management.users (user_id text primary key, email text, display_name text)`,
     `CREATE TABLE organizations (id uuid primary key, name text)`,
@@ -65,7 +67,7 @@ afterAll(async () => { await pg.close(); });
 beforeEach(async () => {
   state.sent.length = 0;
   state.failFor = null;
-  await pg.exec('TRUNCATE reward_wallet_ledger, user_management.users, organizations, organization_members');
+  await pg.exec('TRUNCATE in_app_notifications, reward_wallet_ledger, user_management.users, organizations, organization_members');
   await pg.query(`INSERT INTO organizations (id, name) VALUES ($1::uuid, 'Local 7'), ($2::uuid, 'Local 9')`, [ORG_A, ORG_B]);
   for (const user of ['u7', 'u6', 'u14', 'u30', 'u20', 'u-spent', 'u-partial', 'u-b']) {
     await pg.query(`INSERT INTO user_management.users (user_id, email) VALUES ($1, $1 || '@x.ca')`, [user]);
@@ -119,5 +121,27 @@ describe('credit expiration warnings', () => {
     expect(result.success).toBe(false);
     expect(result.errors).toEqual(['Failed for 7 days: 1 e-mail(s) were not sent']);
     expect(result.byOrganization[ORG_A]).toEqual({ sent: 0, failed: 1 });
+  });
+
+  it('mails an earning once per tier: a second run on the same day, or a retry, sends nothing more', async () => {
+    await earn(ORG_A, 'u7', 100, 7);
+    await earn(ORG_A, 'u14', 100, 14);
+    expect(await sendBatchExpirationWarnings()).toMatchObject({ success: true, usersNotified7Days: 1, usersNotified14Days: 1 });
+    const second = await sendBatchExpirationWarnings() as { success: boolean; usersNotified7Days: number; byOrganization: Record<string, unknown> };
+    expect(second).toMatchObject({ success: true, usersNotified7Days: 0 });
+    expect(second.byOrganization).toEqual({});
+    expect(state.sent).toHaveLength(2);
+    const notices = await pg.query<{ n: number }>(`SELECT count(*)::int AS n FROM in_app_notifications`);
+    expect(notices.rows[0].n).toBe(2);
+  });
+
+  it('releases the record of a warning that could not be sent, so the next run tries again', async () => {
+    await earn(ORG_A, 'u7', 100, 7);
+    state.failFor = 'u7@x.ca';
+    await sendBatchExpirationWarnings();
+    expect((await pg.query(`SELECT 1 FROM in_app_notifications`)).rows).toHaveLength(0);
+    state.failFor = null;
+    await sendBatchExpirationWarnings();
+    expect(state.sent.map((s) => s.recipientEmail)).toEqual(['u7@x.ca']);
   });
 });

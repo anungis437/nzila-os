@@ -288,6 +288,13 @@
       "when": 1758960000000,
       "tag": "0039_committee_memberships_shape",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1758970000000,
+      "tag": "0040_gate0_integrity_enforcement",
+      "breakpoints": true
     }
   ]
 }

@@ -18,6 +18,7 @@
  */
 import { and, count, eq } from 'drizzle-orm';
 import { ApiError } from '@/lib/api/errors';
+import { isCheckViolation, isUniqueViolation } from '@/lib/db/unique-violation';
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { db } from '@/db/db';
 import { courseRegistrations, courseSessions, trainingCourses } from '@/db/schema';
@@ -33,6 +34,11 @@ const { GET, POST } = crudRoutes({
   staffReadsAll: true,
   readRole: 'member',
   writeRole: 'member',
+  // The checks below are friendly early answers; the unique index and the capacity trigger (migration 0040) settle a race.
+  mapCreateError: (error) =>
+    isCheckViolation(error) ? ApiError.conflict('This session is full')
+      : isUniqueViolation(error) ? ApiError.conflict('Already registered for this session')
+      : null,
   beforeCreate: async (values, ctx) => {
     if (!ctx.organizationId || !ctx.userId) throw ApiError.forbidden('Organization membership required');
     const courseId = values.courseId;

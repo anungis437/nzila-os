@@ -9,6 +9,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
   varchar,
   foreignKey,
@@ -193,6 +194,8 @@ export const courseRegistrations = pgTable("course_registrations", {
     idxCourseRegistrationsOrg: index("idx_course_registrations_org").using("btree", table.organizationId.asc().nullsLast()),
     idxCourseRegistrationsSession: index("idx_course_registrations_session").using("btree", table.sessionId.asc().nullsLast()),
     idxCourseRegistrationsStatus: index("idx_course_registrations_status").using("btree", table.registrationStatus.asc().nullsLast()),
+    // One registration per member and session; the capacity trigger is in platform migration 0040.
+    uqCourseRegistrationsMemberSession: uniqueIndex("uq_course_registrations_member_session").on(table.organizationId, table.memberId, table.sessionId),
     courseRegistrationsCourseIdFkey: foreignKey({
       columns: [table.courseId],
       foreignColumns: [trainingCourses.id],

@@ -21,6 +21,7 @@ import {
 } from './email-service';
 import { eq, and, lte, lt, gte, sql, gt, desc, inArray } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
+import { claimExpiryWarning, releaseExpiryWarning } from './expiry-warning-marker';
 
 // Batch configuration
 const BATCH_SIZE = 100;
@@ -42,6 +43,8 @@ interface NotificationResult {
   userId: string;
   organizationId?: string;
   emailSent: boolean;
+  /** The warning for this lot and tier was already recorded by an earlier run. */
+  alreadyWarned?: boolean;
   error?: string;
 }
 
@@ -305,9 +308,16 @@ async function currentBalances(members: Array<{ orgId: string; userId: string }>
  * 
  */
 async function sendExpirationNotificationToUser(
-  entry: ExpiringCreditsNotification
+  entry: ExpiringCreditsNotification,
+  tierDays: number,
 ): Promise<NotificationResult> {
+  let claimed = false;
   try {
+    // The record is written before the mail leaves, so a retry or an overlapping run cannot mail the same lot twice.
+    claimed = await claimExpiryWarning(entry, tierDays);
+    if (!claimed) {
+      return { success: true, userId: entry.userId, organizationId: entry.organizationId, emailSent: false, alreadyWarned: true };
+    }
     await sendCreditExpirationEmail({
       recipientName: entry.userName,
       recipientEmail: entry.userEmail,
@@ -319,6 +329,8 @@ async function sendExpirationNotificationToUser(
     return { success: true, userId: entry.userId, organizationId: entry.organizationId, emailSent: true };
   } catch (error) {
     logger.error('[Notifications] Error sending expiration notification', { error, userId: entry.userId });
+    // A warning that was not delivered is not a warning that was given: release it so the next run tries again.
+    if (claimed) await releaseExpiryWarning(entry, tierDays).catch(() => undefined);
     return { 
       success: false, 
       userId: entry.userId, 
@@ -362,7 +374,7 @@ export async function notifyExpiringCredits(daysBeforeExpiration = 7, options: {
           // Rate limit between emails
           await new Promise((resolve) => setTimeout(resolve, EMAIL_RATE_LIMIT_MS));
           
-          return sendExpirationNotificationToUser(userEntry);
+          return sendExpirationNotificationToUser(userEntry, daysBeforeExpiration);
         })
       );
       
@@ -377,7 +389,7 @@ export async function notifyExpiringCredits(daysBeforeExpiration = 7, options: {
     }
 
     const successCount = results.filter((r) => r.emailSent).length;
-    const failedCount = results.filter((r) => !r.emailSent).length;
+    const failedCount = results.filter((r) => !r.emailSent && !r.alreadyWarned).length;
     const duration = Date.now() - now;
 
     logger.info('[Notifications] Completed expiration notifications', {
@@ -389,7 +401,7 @@ export async function notifyExpiringCredits(daysBeforeExpiration = 7, options: {
     // The e-mails left the application, so who was mailed is reported per organization for the caller to audit.
     const byOrganization: Record<string, { sent: number; failed: number }> = {};
     for (const entry of results) {
-      if (!entry.organizationId) continue;
+      if (!entry.organizationId || entry.alreadyWarned) continue;
       const tally = (byOrganization[entry.organizationId] ??= { sent: 0, failed: 0 });
       if (entry.emailSent) tally.sent += 1;
       else tally.failed += 1;

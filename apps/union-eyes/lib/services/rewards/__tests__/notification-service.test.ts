@@ -117,6 +117,12 @@ vi.mock('../email-service', () => ({
 
 vi.mock('@/lib/logger', () => ({ logger: mocks.mockLogger }));
 
+// The sent marker has its own PostgreSQL test (expiration-warnings.pglite.test.ts); here every warning is a first warning.
+vi.mock('../expiry-warning-marker', () => ({
+  claimExpiryWarning: vi.fn(async () => true),
+  releaseExpiryWarning: vi.fn(async () => undefined),
+}));
+
 import {
   notifyAwardIssued,
   notifyAwardPendingApproval,

@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 385,
-    "partial": 82,
+    "implementedPendingQualification": 389,
+    "partial": 78,
     "qualificationVerified": 0,
-    "unresolved": 392,
+    "unresolved": 388,
     "externalBlockers": 0
   },
   "batches": [
@@ -527,6 +527,15 @@
       "outstandingBefore": 399,
       "newlyImplemented": 7,
       "outstandingAfter": 392,
+      "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "S02-DATABASE-ENFORCEMENT-MIGRATION-0040",
+      "family": "Database enforcement: constraints, triggers and columns that settle what application checks could only attempt",
+      "outstandingBefore": 392,
+      "newlyImplemented": 4,
+      "outstandingAfter": 388,
       "partial": 1,
       "evidenceCommit": null
     }
@@ -1076,13 +1085,16 @@
     },
     "DEF-0B11-PRP-REWARDS-CRON-EXPIRATION-TASK-READS-AN-EXPIRY-NO-WRITER-SETS-AND-WOULD-REPEAT-ACROSS-THE-7-14-AND-30-DAY-WINDOWS": {
       "status": "PARTIAL",
-      "batch": "B07-REWARDS-CRON",
+      "batch": "S02-DATABASE-ENFORCEMENT-MIGRATION-0040",
       "files": [
         "apps/union-eyes/lib/services/rewards/notification-service.ts",
-        "apps/union-eyes/lib/services/rewards/__tests__/expiration-warnings.pglite.test.ts"
+        "apps/union-eyes/lib/services/rewards/expiry-warning-marker.ts",
+        "apps/union-eyes/lib/services/rewards/__tests__/expiration-warnings.pglite.test.ts",
+        "apps/union-eyes/lib/services/rewards/__tests__/notification-service.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s2-database-enforcement.test.ts"
       ],
-      "explanation": "The three overlapping windows are replaced by exact-day tiers (30, 14 and 7 days out), so a daily run warns each earning once per tier; the warned amount is capped at what the member still holds and spent credits are not warned; a failed send makes the batch fail and is counted per organization. Proved on PostgreSQL and mutation-proved.",
-      "remaining": "There is no sent record, so two runs on the same day (a retry, an overlap) mail the same member twice, and a missed day misses that tier; a durable per-earning-and-tier sent marker needs a table. Nothing in the product sets an expiry or writes an expire entry yet, so the task still has nothing to warn about."
+      "explanation": "The durable sent marker needed no new table: the warning is also the member's in-app notice, recorded in in_app_notifications under data.dedupeKey (unique per organization and member, migration 20261103) before the mail leaves; a second run, retry or overlap mails nothing more, and a failed send releases the record so the next run tries again. Proved on PostgreSQL (PGlite) for repeat, retry-after-failure and per-tier behaviour. The mocked notification-service test now mocks the marker (disclosed).",
+      "remaining": "Nothing in the product sets an expiry or writes an expire entry yet, so the task still has nothing to warn about until an expiry policy is decided and implemented."
     },
     "DEF-0B11-PRP-REWARDS-CRON-AND-WALLET-AND-REDEMPTION-QUERIES-USE-THE-SHARED-DB-HANDLE-WITH-EXPLICIT-PREDICATES-ONLY": {
       "status": "PARTIAL",
@@ -1383,13 +1395,17 @@
       "explanation": "Same as access-logs."
     },
     "DEF-0B9-ML-SLA-CASE-ID-IS-NEVER-VERIFIED-AND-NOT-STORED-WITH-THE-PREDICTION": {
-      "status": "PARTIAL",
-      "batch": "B09-F02-FACADES-AND-PLACEHOLDERS",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "S02-DATABASE-ENFORCEMENT-MIGRATION-0040",
       "files": [
-        "apps/union-eyes/lib/ml/sla-breach-score.ts"
+        "apps/union-eyes/db/schema/domains/ml/predictions.ts",
+        "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/route.ts",
+        "apps/union-eyes/db/migrations-platform/0040_gate0_integrity_enforcement.sql",
+        "apps/union-eyes/db/migrations-platform/0040_gate0_integrity_enforcement.rollback.sql",
+        "apps/union-eyes/db/__tests__/platform-0040-gate0-integrity-enforcement.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s2-database-enforcement.test.ts"
       ],
-      "explanation": "The case is verified against the organization (B08).",
-      "remaining": "The case id is still not stored on the prediction row."
+      "explanation": "Migration 0040 adds ml_predictions.subject_id. The case is verified against the organization (B08) and is now stored on the prediction row, and the audit entry and feedback carry it."
     },
     "DEF-0B7-COGA-CROSS-DOMAIN-CORRELATIONS-ARE-FIXED-LITERALS": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -3202,14 +3218,19 @@
       "explanation": "The search scores a bounded candidate set (500 rows) and applies the requested limit to the best matches; a row with a missing or unreadable embedding is skipped instead of throwing; a threshold of 0 is honoured."
     },
     "DEF-0B9-ML-SLA-FEEDBACK-IS-REPEATABLE-CALLER-STATED-VERSION-UNBOUND-AND-A-LOST-UPDATE-READ-MODIFY-WRITE": {
-      "status": "PARTIAL",
-      "batch": "B23-F11-AI-AND-MODEL-OUTPUT-GOVERNANCE",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "S02-DATABASE-ENFORCEMENT-MIGRATION-0040",
       "files": [
+        "apps/union-eyes/db/schema/domains/ml/predictions.ts",
+        "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/route.ts",
         "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/feedback/route.ts",
-        "apps/union-eyes/app/api/__tests__/sla-breach-risk-feedback.route.test.ts"
+        "apps/union-eyes/app/api/__tests__/sla-breach-risk-feedback.route.test.ts",
+        "apps/union-eyes/db/migrations-platform/0040_gate0_integrity_enforcement.sql",
+        "apps/union-eyes/db/migrations-platform/0040_gate0_integrity_enforcement.rollback.sql",
+        "apps/union-eyes/db/__tests__/platform-0040-gate0-integrity-enforcement.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s2-database-enforcement.test.ts"
       ],
-      "explanation": "The model row is locked for the read-modify-write; a prediction is scored once (409 on a repeat); feedback no longer creates a model under a version the caller names (404), and a prediction that records its own version is scored only against it.",
-      "remaining": "The SLA prediction rows written by the prediction route carry no model version column, so the version binding applies only where the stored prediction has one."
+      "explanation": "Migration 0040 adds ml_predictions.model_version, written by the prediction route. Feedback now defaults to the version the prediction recorded and refuses (409) a different one, so the version binding no longer depends on a column that was missing. The route test zod mock gained optional() on min() (disclosed)."
     },
     "DEF-0B8-JUR-LOCATION-CONSENT-TEXT-AND-PURPOSE-ARE-CLIENT-SUPPLIED-AND-UNVALIDATED": {
       "status": "PARTIAL",
@@ -3856,14 +3877,17 @@
       "remaining": "A genuinely different replay still opens an error-severity event that must be acknowledged before approval; whether a replay should gate approval is a payroll-governance decision, and replays are still allowed at any run status."
     },
     "DEF-0B6-EMP-REPLAY-MODE-MISRECORDED": {
-      "status": "PARTIAL",
-      "batch": "B30-F09-F10-LIMITS-REPLAY-REMITTANCE-AND-CANCEL-CONTRACT",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "S02-DATABASE-ENFORCEMENT-MIGRATION-0040",
       "files": [
+        "apps/union-eyes/db/schema/domains/employer-execution/employer-artifacts.ts",
         "apps/union-eyes/app/api/employer-execution/replay/[runId]/route.ts",
-        "apps/union-eyes/app/api/__tests__/employer-replay-run-id.route.test.ts"
+        "apps/union-eyes/db/migrations-platform/0040_gate0_integrity_enforcement.sql",
+        "apps/union-eyes/db/migrations-platform/0040_gate0_integrity_enforcement.rollback.sql",
+        "apps/union-eyes/db/__tests__/platform-0040-gate0-integrity-enforcement.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s2-database-enforcement.test.ts"
       ],
-      "explanation": "The requested mode and replay rule version are stored with the diff, so an engine-change replay can be told from a faithful re-run.",
-      "remaining": "The mode enum column still holds only exact and simulated; adding new_engine needs a PostgreSQL enum migration that has not been run on a native database."
+      "explanation": "Migration 0040 adds new_engine to employer_execution_replay_mode, so an engine-change replay is stored as new_engine and not as a faithful exact re-run. Proven on PGlite; the requested mode still travels with the diff for idempotency."
     },
     "DEF-0B6-EMP-REMITTANCE-PACKAGE-SHAPE": {
       "status": "PARTIAL",
@@ -4995,8 +5019,8 @@
         "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/route.ts",
         "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts"
       ],
-      "explanation": "The nested response POST now binds surveyId to the URL before the existing tenant-bound, active/open survey lookup; conflicting body identifiers fail closed and the URL identifier is reasserted after the create hook. The anonymous identity suppression and count-only steward GET remain intact.",
-      "remaining": "Path-parent source correction and focused regression cases are committed, but executable Vitest, exact-HEAD native PostgreSQL 15/16, HTTP/browser and independent release qualification remain unverified. Do not mark CLOSED."
+      "explanation": "Existing implementation, verified: the response create verifies the survey belongs to the caller organization, is active and open, and strips respondent identity for an anonymous survey; the list is a count-only steward read of the path survey.",
+      "remaining": "The POST still takes the survey id from the body rather than the path."
     },
     "DEF-0B12-PLT-KPI-HEALTH-TREATS-A-LOWER-FIGURE-AS-WORSE-FOR-EVERY-TARGET": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -5183,15 +5207,20 @@
       "explanation": "Migration 0038 adds cms_pages.submitted_by. Moving an item to review records who did it, and publication is refused for that person, with the last-editor fallback only for earlier rows. Existing status tests pass."
     },
     "DEF-0B6-EDU-REGISTRATION-NO-CAPACITY-DUPLICATE-OR-SESSION-COURSE-CHECK": {
-      "status": "PARTIAL",
-      "batch": "B56-F12-CONTENT-PUBLISH-AND-REGISTRATION-RULES",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "S02-DATABASE-ENFORCEMENT-MIGRATION-0040",
       "files": [
         "apps/union-eyes/app/api/education/registrations/route.ts",
-        "apps/union-eyes/app/api/education/registrations/__tests__/route.test.ts",
-        "apps/union-eyes/lib/services/__tests__/b56-content-registration.test.ts"
+        "apps/union-eyes/lib/api/crud-factory.ts",
+        "apps/union-eyes/lib/db/unique-violation.ts",
+        "apps/union-eyes/db/schema/domains/scheduling/training.ts",
+        "apps/union-eyes/db/schema/education-training-schema.ts",
+        "apps/union-eyes/db/migrations-platform/0040_gate0_integrity_enforcement.sql",
+        "apps/union-eyes/db/migrations-platform/0040_gate0_integrity_enforcement.rollback.sql",
+        "apps/union-eyes/db/__tests__/platform-0040-gate0-integrity-enforcement.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s2-database-enforcement.test.ts"
       ],
-      "explanation": "Registration is refused (409) for a session that is not scheduled, outside its registration window, or at its maximum enrollment (counted from registered rows). The session-belongs-to-course and duplicate checks already existed. The route test mock gained the count helper and new cases for closed, not-yet-open, cancelled and full sessions (disclosed).",
-      "remaining": "The capacity count is read then written, so two simultaneous registrations for the last place can both pass; a transactional lock or counter is still needed."
+      "explanation": "Migration 0040 adds a unique index (organization, member, session) that refuses to apply over existing duplicates, and a BEFORE INSERT/UPDATE trigger that locks the session row and refuses a registration beyond max_enrollment (SQLSTATE 23514); a cancelled place frees a seat and a re-save of a registered row is not recounted. The CRUD factory gains mapCreateError so a lost race answers 409 (full, or already registered). Proven on PGlite."
     }
   }
 }

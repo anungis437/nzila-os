@@ -412,6 +412,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Additive shape evolution of committee_memberships"
+      },
+      {
+        "tag": "0040_gate0_integrity_enforcement",
+        "sha256": "5ca1dcbaa8ce16d68a1c91be6db4681d1e7b90b150aaba2f8978f421ed30b3a1",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Database enforcement: replay mode new_engine, ml_predictions model_version/subject_id, course registration uniqueness and capacity trigger"
       }
     ]
   }

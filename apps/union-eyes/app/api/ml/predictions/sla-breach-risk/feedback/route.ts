@@ -11,7 +11,8 @@ import { trackPilotEvent } from '@/lib/services/pilot-tracking';
 
 const bodySchema = z.object({
   predictionId: z.guid(),
-  modelVersion: z.string().min(1).default('sla-risk-v1'),
+  // Omitted, it is the version the prediction recorded when it was made.
+  modelVersion: z.string().min(1).optional(),
   actualBreach: z.boolean(),
   comment: z.string().max(1000).optional(),
   resolutionHours: z.number().nonnegative().optional(),
@@ -67,7 +68,7 @@ export const POST = withApi(
           and(
             eq(modelMetadata.organizationId, organizationId),
             eq(modelMetadata.modelType, 'sla_breach_risk'),
-            eq(modelMetadata.version, body.modelVersion),
+            eq(modelMetadata.version, body.modelVersion ?? prediction.modelVersion ?? 'sla-risk-v1'),
           ),
         )
         // The statistics are read, changed and written back, so the row is held for the duration: two feedbacks no longer overwrite each other.
@@ -77,7 +78,7 @@ export const POST = withApi(
       // Feedback scores a model that exists. It no longer creates one under a version the caller names, and a prediction that records its
       // own model version can only be scored against that version.
       if (!model) throw ApiError.notFound('Model version');
-      const recordedVersion = (prediction as { modelVersion?: string | null }).modelVersion;
+      const recordedVersion = prediction.modelVersion;
       if (recordedVersion && recordedVersion !== model.version) {
         throw ApiError.conflict('The prediction was made by a different model version');
       }
@@ -108,6 +109,7 @@ export const POST = withApi(
       const feedbackEntry = {
         predictionId: prediction.id,
         predictionDate: prediction.predictionDate,
+        caseId: prediction.subjectId,
         predictedValue: prediction.predictedValue,
         actualBreach: body.actualBreach,
         absError,
