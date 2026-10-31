@@ -5609,12 +5609,13 @@
       "items": [
         {
           "prefix": "DEF-0B8-JUR-LOCATION-CONSENT-GET-EXPIRES",
-          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "status": "PARTIAL",
           "files": [
             "apps/union-eyes/services/geofence-privacy-service.ts",
             "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
           ],
-          "explanation": "A consent check is a read: past its expiry the consent is simply not valid. The status is moved to expired by the retention sweep (deleteExpiredLocationData), in the same system transaction as the deletions, which now reports consentsExpired. The existing geofence service and route tests pass."
+          "explanation": "A consent check is a read and no longer writes: past its expiry the consent is simply not valid, whatever its stored status. The existing geofence service and route tests pass.",
+          "remaining": "The stored status of an expired consent never becomes expired: a sweep needs the system role to hold UPDATE on member_location_consent, which the storage-authority manifest and the location-retention ratchets do not grant (an attempt broke them and was reverted)."
         },
         {
           "prefix": "DEF-0B7-EXP-REPORT-DEFINITIONS-READABLE-AT-MEMBER-FLOOR",
@@ -5645,6 +5646,66 @@
             "apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts"
           ],
           "explanation": "The path now answers 501 behind the security-manager floor and reads and writes nothing. It was configured as a reader and a writer of security evidence while the governance list denied both, so the comment and the behaviour disagreed and a write path for security events existed only on paper; security events are read on the security dashboard and written by the system."
+        }
+      ]
+    },
+    {
+      "id": "S05-TENANT-SCOPED-UNIQUENESS-MIGRATION-0042",
+      "family": "Schema: record numbers and codes unique within an organization, not across every organization",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B4-CBAS-CBA-NUMBER-GLOBALLY-UNIQUE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/db/schema/domains/agreements/collective-agreements.ts",
+            "apps/union-eyes/db/schema/collective-agreements-schema.ts",
+            "apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.sql",
+            "apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.rollback.sql",
+            "apps/union-eyes/db/__tests__/platform-0042-tenant-scoped-uniqueness.pglite.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s7-tenant-scoped-uniqueness.test.ts"
+          ],
+          "explanation": "Migration 0042 replaces the single-column unique constraint on collective_agreements.cba_number with a unique index on (organization_id, cba_number): two organizations may use one agreement number and a repeat inside one is refused, so a number taken elsewhere is no longer disclosed by a refusal. Proved on PGlite, including a standalone unique index form, idempotency, refusal over existing in-organization duplicates, fail-closed on a missing organization_id, and a rollback that refuses when two organizations share a code."
+        },
+        {
+          "prefix": "DEF-0B6-EDU-GLOBAL-UNIQUE-CODES-ACROSS-ORGANIZATIONS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/db/schema/domains/scheduling/training.ts",
+            "apps/union-eyes/db/schema/education-training-schema.ts",
+            "apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.sql",
+            "apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.rollback.sql",
+            "apps/union-eyes/db/__tests__/platform-0042-tenant-scoped-uniqueness.pglite.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s7-tenant-scoped-uniqueness.test.ts"
+          ],
+          "explanation": "Migration 0042 makes course_code, session_code and certification_number unique within an organization instead of across all of them, so one organization's code no longer blocks another's."
+        },
+        {
+          "prefix": "DEF-0B8-HS-RECORD-NUMBERS-CALLER-SUPPLIED-AND-UNIQUE-ACROSS-ORGANIZATI",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/db/schema/domains/health-safety/health-safety-schema.ts",
+            "apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.sql",
+            "apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.rollback.sql",
+            "apps/union-eyes/db/__tests__/platform-0042-tenant-scoped-uniqueness.pglite.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s7-tenant-scoped-uniqueness.test.ts"
+          ],
+          "explanation": "Migration 0042 makes incident_number, inspection_number, report_number and item_number unique within an organization.",
+          "remaining": "The numbers are still supplied by the caller; a server-issued per-organization sequence is not built."
+        },
+        {
+          "prefix": "DEF-0B10-ORG-CAMPAIGN-CODE-UNIQUE-ACROSS-ALL-ORGANIZATIONS-AND-REQUIRE",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/db/schema/domains/infrastructure/organizing.ts",
+            "apps/union-eyes/db/schema/organizing-tools-schema.ts",
+            "apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.sql",
+            "apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.rollback.sql",
+            "apps/union-eyes/db/__tests__/platform-0042-tenant-scoped-uniqueness.pglite.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s7-tenant-scoped-uniqueness.test.ts"
+          ],
+          "explanation": "Migration 0042 makes organizing_campaigns.campaign_code unique within an organization.",
+          "remaining": "campaign_code and the other columns are still required in the body; a server-issued code and defaults are not built."
         }
       ]
     }

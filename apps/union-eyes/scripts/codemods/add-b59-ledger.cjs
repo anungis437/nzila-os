@@ -12,8 +12,9 @@ if (!ledger.batches.some((x) => x.id === id)) {
     family: 'Reads that wrote, private definitions readable by others, and paths that advertised what they did not do',
     evidenceCommit: null,
     items: [
-      item('DEF-0B8-JUR-LOCATION-CONSENT-GET-EXPIRES', [A + 'services/geofence-privacy-service.ts'],
-        'A consent check is a read: past its expiry the consent is simply not valid. The status is moved to expired by the retention sweep (deleteExpiredLocationData), in the same system transaction as the deletions, which now reports consentsExpired. The existing geofence service and route tests pass.'),
+      { prefix: 'DEF-0B8-JUR-LOCATION-CONSENT-GET-EXPIRES', status: 'PARTIAL', files: [A + 'services/geofence-privacy-service.ts', test],
+        explanation: 'A consent check is a read and no longer writes: past its expiry the consent is simply not valid, whatever its stored status. The existing geofence service and route tests pass.',
+        remaining: 'The stored status of an expired consent never becomes expired: a sweep needs the system role to hold UPDATE on member_location_consent, which the storage-authority manifest and the location-retention ratchets do not grant (an attempt broke them and was reverted).' },
       item('DEF-0B7-EXP-REPORT-DEFINITIONS-READABLE-AT-MEMBER-FLOOR', [A + 'lib/api/crud-factory.ts', A + 'app/api/reports/route.ts', A + 'app/api/reports/[id]/route.ts'],
         'The report reads already sit at the steward floor (upstream); a definition its author kept private (isPublic false) is now read by its author only, through the new factory option readConditionFor (applied to every list and item GET), so another steward no longer receives it with its whole config.'),
       item('DEF-0B11-IDS-SUPPORT-READ-GIVES-EVERY-STEWARD-THE-NOTIFICATIONS-OF-EVERY-MEMBER', [A + 'app/api/support/metrics/route.ts', A + 'app/api/support/sla/route.ts'],

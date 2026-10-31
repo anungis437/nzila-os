@@ -433,6 +433,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Shape evolution of room_bookings plus no-overlap trigger"
+      },
+      {
+        "tag": "0042_tenant_scoped_uniqueness",
+        "sha256": "0c91b85a6044791eeecc2544f8022776c1fdb870bd37474ecf55351ea4e28130",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Record numbers and codes unique per organization, not across every organization (nine tables)"
       }
     ]
   }

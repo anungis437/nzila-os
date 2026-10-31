@@ -8,7 +8,6 @@ import {
   pgTable,
   text,
   timestamp,
-  unique,
   uniqueIndex,
   uuid,
   varchar,
@@ -70,7 +69,7 @@ export const trainingCourses = pgTable("training_courses", {
       foreignColumns: [organizations.id],
       name: "training_courses_organization_id_fkey"
     }),
-    trainingCoursesCourseCodeKey: unique("training_courses_course_code_key").on(table.courseCode),
+    uqTrainingCoursesOrgCode: uniqueIndex("uq_training_courses_org_course_code").on(table.organizationId, table.courseCode),
   }
 });
 
@@ -135,7 +134,7 @@ export const courseSessions = pgTable("course_sessions", {
       foreignColumns: [organizations.id],
       name: "course_sessions_organization_id_fkey"
     }),
-    courseSessionsSessionCodeKey: unique("course_sessions_session_code_key").on(table.sessionCode),
+    uqCourseSessionsOrgCode: uniqueIndex("uq_course_sessions_org_session_code").on(table.organizationId, table.sessionCode),
   }
 });
 
@@ -280,7 +279,7 @@ export const memberCertifications = pgTable("member_certifications", {
       foreignColumns: [courseSessions.id],
       name: "member_certifications_session_id_fkey"
     }),
-    memberCertificationsCertificationNumberKey: unique("member_certifications_certification_number_key").on(table.certificationNumber),
+    uqMemberCertificationsOrgNumber: uniqueIndex("uq_member_certifications_org_certification_number").on(table.organizationId, table.certificationNumber),
   }
 });
 

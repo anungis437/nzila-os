@@ -150,10 +150,11 @@ describe('round 49 cross-tenant IDOR ratchet: signature audit trail', () => {
 });
 
 describe('round 49 privileged-reader ratchet: security events', () => {
-  it('security/events crud route requires security_manager for both read and write', () => {
+  it('security/events path is behind the security_manager floor and answers 501: security events are read on the dashboard and written by the system', () => {
     const src = source('app/api/security/events/route.ts');
-    expect(src).toContain("readRole: 'security_manager'");
-    expect(src).toContain("writeRole: 'security_manager'");
+    expect(src).toContain("minRole: 'security_manager'");
+    expect(src).toContain('ApiError.notImplemented');
+    expect(src).not.toContain('crudRoutes');
   });
 });
 

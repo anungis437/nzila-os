@@ -7,7 +7,7 @@
 //          certification workflow, vote management, field organizer tools, employer tracking
 // =====================================================================================
 
-import {
+import { uniqueIndex,
   pgTable,
   uuid,
   varchar,
@@ -33,7 +33,7 @@ export const organizingCampaigns = pgTable(
 
     // Campaign identification
     campaignName: varchar('campaign_name', { length: 255 }).notNull(),
-    campaignCode: varchar('campaign_code', { length: 50 }).notNull().unique(),
+    campaignCode: varchar('campaign_code', { length: 50 }).notNull(),
     targetEmployer: varchar('target_employer', { length: 255 }).notNull(),
     workplaceLocation: text('workplace_location').notNull(),
 
@@ -88,6 +88,8 @@ export const organizingCampaigns = pgTable(
     archivedAt: timestamp('archived_at', { withTimezone: true }),
   },
   (table) => ({
+    // One number per organization, not one across all organizations (platform migration 0042).
+    uqOrgCampaignCode: uniqueIndex('uq_organizing_campaigns_org_campaign_code').on(table.organizationId, table.campaignCode),
     organizationIdx: index('idx_organizing_campaigns_organization').on(table.organizationId),
     statusIdx: index('idx_organizing_campaigns_status').on(table.status),
     leadIdx: index('idx_organizing_campaigns_lead').on(table.leadOrganizerId),

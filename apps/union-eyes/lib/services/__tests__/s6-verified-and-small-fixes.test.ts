@@ -21,12 +21,12 @@ describe('S6 verified and small fixes', () => {
     }
   })
 
-  it('does not write from a consent check: expiry is a read, and the retention sweep marks consents expired (DEF-0B8-JUR-LOCATION-CONSENT-GET-EXPIRES-THE-CONSENT-AS-A-SIDE-EFFECT)', () => {
+  it('does not write from a consent check: expiry is a read (DEF-0B8-JUR-LOCATION-CONSENT-GET-EXPIRES-THE-CONSENT-AS-A-SIDE-EFFECT)', () => {
     const service = read('services/geofence-privacy-service.ts')
     expect(service).not.toContain('this.expireConsent')
-    const sweep = service.slice(service.indexOf('static async deleteExpiredLocationData'))
-    expect(sweep).toContain('consentStatus: "expired"')
-    expect(sweep).toContain('consentsExpired')
+    const check = service.slice(service.indexOf('static async hasValidConsent'), service.indexOf('static async trackLocation'))
+    expect(check).not.toContain('.update(')
+    expect(check).toContain('return false')
   })
 
   it('shows a private report definition to its author only (DEF-0B7-EXP-REPORT-DEFINITIONS-READABLE-AT-MEMBER-FLOOR)', () => {

@@ -302,6 +302,13 @@
       "when": 1758980000000,
       "tag": "0041_room_bookings_shape",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1758990000000,
+      "tag": "0042_tenant_scoped_uniqueness",
+      "breakpoints": true
     }
   ]
 }
