@@ -54,6 +54,10 @@ export const PATCH = withApi(
       throw ApiError.badRequest("Cannot approve — no minutes recorded yet");
     }
 
+    if (meeting.updatedBy && meeting.updatedBy === userId) {
+      throw ApiError.forbidden("Minutes cannot be approved by the person who last edited the meeting record");
+    }
+
     const updated = await approveMinutes(meetingId, organizationId, userId!);
     if (!updated) throw ApiError.conflict("The minutes have already been approved");
 

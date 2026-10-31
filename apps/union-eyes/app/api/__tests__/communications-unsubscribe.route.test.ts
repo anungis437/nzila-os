@@ -37,12 +37,14 @@ vi.mock('@/db/schema', () => ({
   communicationPreferences: { id: 'id', organizationId: 'organizationId', userId: 'userId' },
   consentRecords: {},
   messageLog: { campaignId: 'campaignId', recipientId: 'recipientId', channelType: 'channelType', status: 'status' },
+  newsletterListSubscribers: { profileId: 'profileId', status: 'status', listId: 'listId' },
+  newsletterDistributionLists: { id: 'id', organizationId: 'organizationId' },
 }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
-  return { ...actual, and: vi.fn(() => 'and'), eq: vi.fn(() => 'eq'), ne: vi.fn(() => 'ne') };
+  return { ...actual, and: vi.fn(() => 'and'), eq: vi.fn(() => 'eq'), ne: vi.fn(() => 'ne'), inArray: vi.fn(() => 'in') };
 });
 
 async function loadRoute() {
@@ -58,7 +60,8 @@ describe('communications/unsubscribe/[recipientId] route', () => {
     vi.clearAllMocks();
     m.selectQueue = [];
     m.updateReturnQueue = [];
-    m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    // The unsubscribe writes run on the transaction handed to the callback; the mock db stands in for it.
+    m.withSystemContext.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => fn(mockDb));
     delete process.env.COMMUNICATIONS_TRACKING_SECRET;
   });
 

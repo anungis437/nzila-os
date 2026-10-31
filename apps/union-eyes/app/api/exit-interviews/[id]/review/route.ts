@@ -54,6 +54,11 @@ export const POST = withApi(
     if (existing.createdBy === userId) {
       throw ApiError.forbidden('The author of an exit interview cannot review it');
     }
+    // Nor does whoever last changed it: the record keeps no separate submitter, so the last editor stands in for the person who prepared the
+    // interview for review.
+    if (existing.updatedBy && existing.updatedBy === userId) {
+      throw ApiError.forbidden('The person who last edited or submitted an exit interview cannot review it');
+    }
 
     const now = new Date();
     const updated = await withRLSContext({ organizationId: organizationId! }, async (tx) => {

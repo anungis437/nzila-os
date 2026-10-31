@@ -73,9 +73,9 @@ export const POST = withApi(
       throw ApiError.forbidden('Only the interview owner or steward-level users can attach documents');
     }
 
-    // A published or archived interview is a finished record; material is attached while it is being prepared.
-    if (interview.status === 'published' || interview.status === 'archived') {
-      throw ApiError.conflict('Cannot attach documents to a published or archived interview');
+    // A reviewed, published or archived interview is no longer being prepared: what the reviewer approved is what is published.
+    if (interview.status === 'reviewed' || interview.status === 'published' || interview.status === 'archived') {
+      throw ApiError.conflict('Cannot attach documents to a reviewed, published or archived interview');
     }
 
     // Validate fileUrl is within allowed domains (no SSRF)

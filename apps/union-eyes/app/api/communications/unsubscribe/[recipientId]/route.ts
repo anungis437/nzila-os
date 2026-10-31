@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { and, eq, ne } from 'drizzle-orm';
+import { and, eq, inArray, ne } from 'drizzle-orm';
 
 import { db } from '@/db';
-import { campaigns, communicationPreferences, consentRecords, messageLog } from '@/db/schema';
+import { campaigns, communicationPreferences, consentRecords, messageLog, newsletterDistributionLists, newsletterListSubscribers } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { verifyTrackingToken } from '@/lib/communications/tracking-token';
 import { logger } from '@/lib/logger';
@@ -82,11 +82,11 @@ export async function GET(
     return new NextResponse('Invalid unsubscribe token', { status: 401 });
   }
 
-  await withSystemContext(async () => {
+  await withSystemContext(async (tx) => {
     let organizationId: string | null = null;
 
     if (campaignId) {
-      const [campaign] = await db
+      const [campaign] = await tx
         .select({ id: campaigns.id, organizationId: campaigns.organizationId, stats: campaigns.stats })
         .from(campaigns)
         .where(eq(campaigns.id, campaignId))
@@ -95,7 +95,7 @@ export async function GET(
       if (campaign) {
         organizationId = campaign.organizationId;
 
-        const updatedMessageRows = await db
+        const updatedMessageRows = await tx
           .update(messageLog)
           .set({
             status: 'unsubscribed',
@@ -112,7 +112,7 @@ export async function GET(
           .returning({ id: messageLog.id });
 
         if (updatedMessageRows.length > 0) {
-          await db
+          await tx
             .update(campaigns)
             .set({
               stats: incrementStat(campaign.stats, 'unsubscribed'),
@@ -124,7 +124,7 @@ export async function GET(
     }
 
     if (organizationId) {
-      const [existingPreference] = await db
+      const [existingPreference] = await tx
         .select({ id: communicationPreferences.id })
         .from(communicationPreferences)
         .where(
@@ -136,7 +136,7 @@ export async function GET(
         .limit(1);
 
       if (existingPreference) {
-        await db
+        await tx
           .update(communicationPreferences)
           .set({
             emailEnabled: false,
@@ -152,7 +152,7 @@ export async function GET(
             ),
           );
       } else {
-        await db.insert(communicationPreferences).values({
+        await tx.insert(communicationPreferences).values({
           organizationId,
           userId: recipientId,
           emailEnabled: false,
@@ -162,7 +162,22 @@ export async function GET(
         });
       }
 
-      await db.insert(consentRecords).values({
+      // An unsubscribe from a campaign link also ends the recipient's subscriptions to this organization's distribution lists.
+      await tx
+        .update(newsletterListSubscribers)
+        .set({ status: 'unsubscribed', unsubscribedAt: new Date() })
+        .where(
+          and(
+            eq(newsletterListSubscribers.profileId, recipientId),
+            ne(newsletterListSubscribers.status, 'unsubscribed'),
+            inArray(
+              newsletterListSubscribers.listId,
+              tx.select({ id: newsletterDistributionLists.id }).from(newsletterDistributionLists).where(eq(newsletterDistributionLists.organizationId, organizationId)),
+            ),
+          ),
+        );
+
+      await tx.insert(consentRecords).values({
         organizationId,
         userId: recipientId,
         consentType: 'email_marketing',
@@ -177,13 +192,13 @@ export async function GET(
     } else {
       // The token binds only the recipient, so there is no parent row to derive one organization from. The token
       // authorises this recipient's own preference rows; each is updated under its own organization predicate.
-      const ownPreferences = await db
+      const ownPreferences = await tx
         .select({ id: communicationPreferences.id, organizationId: communicationPreferences.organizationId })
         .from(communicationPreferences)
         .where(eq(communicationPreferences.userId, recipientId));
 
       for (const preference of ownPreferences) {
-        await db
+        await tx
           .update(communicationPreferences)
           .set({
             emailEnabled: false,

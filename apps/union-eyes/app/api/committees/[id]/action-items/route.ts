@@ -7,6 +7,7 @@ import { z } from "zod";
 import { requireCommitteeReader } from "@/lib/services/committee-read-access";
 import { withApi } from "@/lib/api/with-api";
 import { ApiError } from "@/lib/api/errors";
+import { assertOrganizationMembers } from "@/lib/services/org-member-references";
 import {
   createActionItem,
   listActionItems,
@@ -52,6 +53,7 @@ export const POST = withApi(
     if (!organizationId) throw ApiError.badRequest("Organization context required");
     const { id: committeeId } = params as { id: string };
     await requireCommitteeScope(organizationId, committeeId, { meetingId: body.meetingId });
+    await assertOrganizationMembers([body.assignedTo], organizationId);
 
     return createActionItem({
       ...body,

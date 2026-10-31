@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 419,
- "partial": 92,
- "outstanding": 358,
- "accountedFor": 358,
+ "corrected": 422,
+ "partial": 96,
+ "outstanding": 355,
+ "accountedFor": 355,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -245,10 +245,10 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 79,
+   "defects": 76,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 54,
+    "MEDIUM": 51,
     "LOW": 23
    },
    "namedRoutes": 11,
@@ -258,9 +258,9 @@
     "0B.2": 1,
     "0B.3": 2,
     "0B.4": 5,
-    "0B.5": 13,
+    "0B.5": 11,
     "0B.6": 14,
-    "0B.7": 11,
+    "0B.7": 10,
     "0B.8": 10,
     "0B.9": 1,
     "0B.10": 6,
@@ -1547,15 +1547,13 @@
    },
    {
     "id": "DEF-0B5-COMMITTEE-REFERENCED-IDS-NOT-VERIFIED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B5-COMMITTEE-DECISIONS-EDITABLE-AFTER-APPROVAL",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B5-COMMITTEE-MINUTES-NO-SEPARATION-OF-DUTIES",
-    "severity": "LOW"
+    "severity": "LOW",
+    "partial": true
    },
    {
     "id": "DEF-0B5-COMMITTEE-INTELLIGENCE-GATHERS-ALL-COMMITTEES",
@@ -1578,11 +1576,8 @@
    },
    {
     "id": "DEF-0B5-UNSUBSCRIBE-WRITES-NOT-ATOMIC",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B5-UNSUBSCRIBE-LEAVES-LIST-SUBSCRIPTIONS-ACTIVE",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B5-SURVEY-RESPONSES-ROUTE-IGNORES-SURVEY-ID",
@@ -1654,11 +1649,8 @@
    },
    {
     "id": "DEF-0B7-EXC-SEPARATION-OF-DUTIES-ONLY-AGAINST-THE-CREATOR",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-EXC-DOCUMENTS-ATTACHABLE-AFTER-REVIEW",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B7-EXC-GRAPH-QUERY-ACCEPTS-FILTERS-AND-EXPLANATION-LEVEL-IT-NEVER-READS",

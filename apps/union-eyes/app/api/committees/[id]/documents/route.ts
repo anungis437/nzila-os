@@ -7,6 +7,8 @@ import { z } from "zod";
 import { requireCommitteeReader } from "@/lib/services/committee-read-access";
 import { withApi } from "@/lib/api/with-api";
 import { ApiError } from "@/lib/api/errors";
+import { assertOrganizationOwns } from "@/lib/api/org-references";
+import { documents } from "@/db/schema/documents-schema";
 import {
   linkDocument,
   listCommitteeDocuments,
@@ -52,6 +54,7 @@ export const POST = withApi(
     if (!organizationId) throw ApiError.badRequest("Organization context required");
     const { id: committeeId } = params as { id: string };
     await requireCommitteeScope(organizationId, committeeId, { meetingId: body.meetingId });
+    await assertOrganizationOwns([{ field: 'documentId', value: body.documentId, table: documents }], organizationId);
 
     return linkDocument({
       ...body,

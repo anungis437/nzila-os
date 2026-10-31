@@ -2,7 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import crypto from 'crypto';
 import { NextRequest } from 'next/server';
 import type { PGlite } from '@electric-sql/pglite';
-import { campaigns, communicationPreferences, consentRecords, messageLog } from '@/db/schema';
+import { campaigns, communicationPreferences, consentRecords, messageLog, newsletterDistributionLists, newsletterListSubscribers } from '@/db/schema';
 import { notificationDeliveryLog } from '@/db/schema/domains/communications';
 import { createTableDatabase } from './support/pglite-tables';
 
@@ -88,7 +88,7 @@ async function preference(id: string) {
 }
 
 beforeAll(async () => {
-  const created = await createTableDatabase([campaigns, messageLog, communicationPreferences, consentRecords, notificationDeliveryLog]);
+  const created = await createTableDatabase([campaigns, messageLog, communicationPreferences, consentRecords, notificationDeliveryLog, newsletterDistributionLists, newsletterListSubscribers]);
   pg = created.pg;
   state.db = created.db;
   process.env.COMMUNICATIONS_TRACKING_SECRET = SECRET;
