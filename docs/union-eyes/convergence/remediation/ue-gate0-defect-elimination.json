@@ -5593,10 +5593,11 @@
       "files": [
         "apps/union-eyes/app/api/portal/dues/pay/route.ts",
         "apps/union-eyes/lib/api/list-page.ts",
-        "apps/union-eyes/lib/services/__tests__/s5-input-bounds.test.ts"
+        "apps/union-eyes/lib/services/__tests__/s5-input-bounds.test.ts",
+        "apps/union-eyes/app/api/__tests__/portal-dues-pay-history.route.test.ts"
       ],
-      "explanation": "The payment history lists payments only (not charges, credits, adjustments or write-offs), omits the processor payment reference, and pages through a bounded limit and offset with a stable order; a non-numeric limit is the default.",
-      "remaining": "Pending payment attempts created by POST are still not listed: they live in dues_transactions and need a joined, status-filtered read."
+      "explanation": "The payment history lists payments only (not charges, credits, adjustments or write-offs), omits the processor payment reference, and pages through a bounded limit and offset with a stable order; a non-numeric limit is the default. Source correction: the member portal GET now returns bounded, tenant-and-member-scoped pending/failed/cancelled dues payment attempts separately from posted ledger payments, without provider references; regression tests cover the split, authorization and query scoping.",
+      "remaining": "Exact-HEAD focused/full unit and contract tests, real PostgreSQL 15/16 RLS, HTTP/browser/staging acceptance and member journey validation are outstanding. No attempt is represented as a settled payment."
     },
     "DEF-0B6-EDU-CONTENT-COMPLETIONS-COUNT-ATTENDED": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
