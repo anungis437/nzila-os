@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 342,
-    "partial": 61,
+    "implementedPendingQualification": 343,
+    "partial": 62,
     "qualificationVerified": 0,
-    "unresolved": 435,
+    "unresolved": 434,
     "externalBlockers": 0
   },
   "batches": [
@@ -383,6 +383,15 @@
       "outstandingBefore": 435,
       "newlyImplemented": 0,
       "outstandingAfter": 435,
+      "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B42-F12-FAILURES-ARE-STATED-AS-FAILURES",
+      "family": "F12: a failure is answered as a failure without internal text, and a query is validated",
+      "outstandingBefore": 435,
+      "newlyImplemented": 1,
+      "outstandingAfter": 434,
       "partial": 1,
       "evidenceCommit": null
     }
@@ -4343,8 +4352,30 @@
         "apps/union-eyes/app/api/cba-intelligence/sources/route.ts",
         "apps/union-eyes/lib/api/__tests__/f08-b41-outbound.contract.test.ts"
       ],
-      "explanation": "A shared guard refuses non-http(s) schemes, credentials in the address, localhost and internal names, private, loopback, link-local, metadata and reserved IPv4 and IPv6 literals (including IPv4-mapped and transition forms). The base adapter checks every address before fetching, follows redirects by hand (three at most) re-checking each hop, and now enforces a 10,000,000-byte bound while streaming the body rather than after reading it whole. Every ingestion adapter fetches through it, and a source address is checked when saved. Additional reserved-address and streaming regression cases were committed at 986ea8ce, 623f638e; exact-HEAD executable qualification is pending.",
-      "remaining": "The guard reads the address as written and does not resolve DNS, so a public name resolving to a private address remains an SSRF risk. DNS resolution, connection pinning and verified egress restrictions are required; do not mark this defect CLOSED. Exact-HEAD tests, native and HTTP/browser acceptance remain required."
+      "explanation": "A shared guard refuses non-http(s) schemes, credentials in the address, localhost and internal names, private, loopback, link-local, metadata and reserved IPv4 and IPv6 literals (including IPv4-mapped forms). The base adapter checks every address before fetching, follows redirects by hand (three at most) re-checking each hop, and refuses a source larger than 10 million characters; every ingestion adapter fetches through it, and a source address is checked when it is saved.",
+      "remaining": "The guard reads the address as written and does not resolve DNS, so a public name that resolves to a private address is not caught; that needs an egress policy or a resolving fetch. The body is still read whole before the size check."
+    },
+    "DEF-0B7-EXC-INDEX-FAILURE-RETURNS-200-WITH-RAW-ERROR-TEXT": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B42-F12-FAILURES-ARE-STATED-AS-FAILURES",
+      "files": [
+        "apps/union-eyes/lib/knowledge-transfer/indexing/semantic-indexer.ts",
+        "apps/union-eyes/app/api/exit-interviews/[id]/index/route.ts",
+        "apps/union-eyes/lib/knowledge-transfer/indexing/__tests__/semantic-indexer.test.ts",
+        "apps/union-eyes/app/api/__tests__/exit-interviews-index.route.test.ts",
+        "apps/union-eyes/lib/api/__tests__/f12-b42-answers.contract.test.ts"
+      ],
+      "explanation": "A failed indexing now returns a result flagged failed with the fixed text \"Indexing failed\" (the error stays in the audit record), and the index route answers it 500 instead of 200 carrying the error. Two existing indexer assertions adapted: they required the raw error text (\"audit down\", \"embed boom\") in the reason, which is the defect; they now require the fixed text and the absence of the error text."
+    },
+    "DEF-0B7-COGB-PROPAGATION-UNKNOWN-NODE-ANSWERS-500-AND-ANALYSIS-TYPE-NOT-VALIDATED": {
+      "status": "PARTIAL",
+      "batch": "B42-F12-FAILURES-ARE-STATED-AS-FAILURES",
+      "files": [
+        "apps/union-eyes/app/api/exit-interviews/propagation/route.ts",
+        "apps/union-eyes/lib/api/__tests__/f12-b42-answers.contract.test.ts"
+      ],
+      "explanation": "The query is validated (nodeId bounded text, analysisType one of four values, unknown parameters refused), an unknown node answers 404 instead of a thrown 500.",
+      "remaining": "The contract test pins the source only; no behavioural test drives the route with an unknown node."
     }
   }
 }
