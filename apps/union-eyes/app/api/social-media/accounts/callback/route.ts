@@ -16,7 +16,7 @@ import { createMetaClient } from '@/lib/social-media/meta-api-client';
 import { createTwitterClient } from '@/lib/social-media/twitter-api-client';
 import { createLinkedInClient } from '@/lib/social-media/linkedin-api-client';
 import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
-import { logApiAuditEvent } from '@/lib/middleware/api-security';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
 
 const SUPPORTED_PLATFORMS = ['facebook', 'instagram', 'twitter', 'linkedin'] as const;
@@ -204,8 +204,8 @@ export const GET = withRoleAuth('admin', async (request: NextRequest, context: B
 
     // organizationId/userId come only from the trusted, authenticated server
     // context (withRoleAuth) — never from query params, provider payload, or state.
-    const [account] = await withRLSContext({ organizationId }, async (tx) =>
-      tx
+    const [account] = await withRLSContext({ organizationId }, async (tx) => {
+      const rows = await tx
         .insert(socialAccounts)
         .values({
           organizationId,
@@ -231,19 +231,19 @@ export const GET = withRoleAuth('admin', async (request: NextRequest, context: B
             updatedAt: new Date(),
           },
         })
-        .returning({ id: socialAccounts.id, platform: socialAccounts.platform, username: socialAccounts.username })
-    );
+        .returning({ id: socialAccounts.id, platform: socialAccounts.platform, username: socialAccounts.username });
 
-    await logApiAuditEvent({
-      userId,
-      organizationId,
-      action: 'COMPLETE_SOCIAL_CONNECT',
-      dataType: 'SOCIAL_MEDIA',
-      recordId: account?.id,
-      success: true,
-      metadata: { platform },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+      // The credential and its audit record commit together: a connection with no record is not kept.
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'social_account.connected',
+        resourceType: 'social_accounts',
+        resourceId: rows[0]?.id,
+        details: { platform },
+      });
+      return rows;
+    });
 
     return NextResponse.json({
       message: 'Account connected successfully',

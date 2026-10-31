@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 586,
- "partial": 77,
- "outstanding": 191,
- "accountedFor": 191,
+ "corrected": 589,
+ "partial": 78,
+ "outstanding": 188,
+ "accountedFor": 188,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -112,10 +112,10 @@
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 41,
+   "defects": 38,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 37,
+    "MEDIUM": 34,
     "LOW": 2
    },
    "namedRoutes": 5,
@@ -127,10 +127,10 @@
     "0B.4": 4,
     "0B.6": 2,
     "0B.7": 3,
-    "0B.8": 6,
-    "0B.9": 2,
+    "0B.8": 5,
+    "0B.9": 1,
     "0B.10": 6,
-    "0B.11": 9,
+    "0B.11": 8,
     "0B.12": 3
    }
   },
@@ -655,10 +655,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B8-ICRA-SYNC-DRY-RUN-IS-ACCEPTED-AND-AUDITED-BUT-NEVER-READ",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B8-ICRA-SYNC-OUTCOME-AUDIT-IS-WRITTEN-AFTER-THE-EFFECT-AND-ITS-FAILURE-IS-SWALLOWED",
     "severity": "LOW"
    },
@@ -668,10 +664,6 @@
    },
    {
     "id": "DEF-0B8-JUR-KNOWLEDGE-BASE-READS-IGNORE-ACCESS-COLUMNS-ENTITLEMENT-AND-LEAVE-NO-READ-TRACE",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B9-ASM-ONBOARDING-AUDIT-EVENTS-ARE-EMITTED-ON-AN-IN-PROCESS-BUS-WITH-NO-SUBSCRIBER",
     "severity": "MEDIUM"
    },
    {
@@ -731,11 +723,8 @@
    },
    {
     "id": "DEF-0B11-SOC-OAUTH-CALLBACK-IS-A-GET-THAT-INSERTS-THE-CREDENTIAL-CLEARS-ITS-COOKIES-BEFORE-VALIDATION-AND-AUDITS-AFTER-COMMIT-TO-A-LOG-LINE",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-SOC-CONNECT-AUDIT-IS-A-LOG-LINE-THAT-DROPS-THE-ACTION-ORGANIZATION-AND-PLATFORM-THE-CALLER-PASSES",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B11-SOC-POST-DELETE-REMOVES-THE-PLATFORM-POST-BEFORE-THE-LOCAL-ROW-AND-AUDITS-INTENT-AND-OUTCOME-ONLY",

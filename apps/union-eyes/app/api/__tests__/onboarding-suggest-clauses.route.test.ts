@@ -7,11 +7,14 @@ const m = vi.hoisted(() => ({
   suggestRelevantClauses: vi.fn(),
   logger: { warn: vi.fn(), info: vi.fn(), error: vi.fn() },
   eventBus: { emit: vi.fn() },
+  record: vi.fn(),
 }));
 
 vi.mock('@/lib/role-middleware', () => ({ withRoleAuth: m.withRoleAuth }));
 vi.mock('@/lib/utils/smart-onboarding', () => ({ suggestRelevantClauses: m.suggestRelevantClauses }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+// The read audit moved from an in-process event to the canonical audit log (B87); the writer has its own coverage.
+vi.mock('@/lib/utils/onboarding-read-audit', () => ({ recordOnboardingRead: m.record }));
 vi.mock('@/lib/events', () => ({ eventBus: m.eventBus, AppEvents: { AUDIT_LOG: 'AUDIT_LOG' } }));
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: m.checkRateLimit,
@@ -52,7 +55,7 @@ describe('onboarding/suggest-clauses route', () => {
 
     expect(response.status).toBe(200);
     expect(m.suggestRelevantClauses).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440000');
-    expect(m.eventBus.emit).toHaveBeenCalled();
+    expect(m.record).toHaveBeenCalledWith(expect.anything(), 'onboarding.clause_suggestions', expect.anything());
   });
 
   it('returns 429 when rate limited', async () => {

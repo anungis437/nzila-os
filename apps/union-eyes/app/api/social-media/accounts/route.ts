@@ -1,4 +1,3 @@
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 /**
  * Social Media Accounts API Routes - Phase 10
@@ -72,15 +71,16 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
         .orderBy(desc(socialAccounts.connectedAt));
 
       // Audit log
-      await logApiAuditEvent({
-        userId,
-        organizationId,
-        action: 'LIST_SOCIAL_ACCOUNTS',
-        dataType: 'SOCIAL_MEDIA',
-        success: true,
-        metadata: { count: accounts.length },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      // The canonical audit record: the earlier log line dropped the action, organization and platform the caller passed.
+      await withRLSContext({ organizationId, userId }, (tx) =>
+        persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: 'social_account.list',
+          resourceType: 'social_accounts',
+          details: { count: accounts.length },
+        }),
+      );
 
       return NextResponse.json({ accounts });
     } catch (error) {
@@ -227,15 +227,15 @@ export const POST = withRoleAuth('admin', async (request: NextRequest, context: 
       cookieStore.set('oauth_user_id', userId, cookieOpts);
 
       // Audit log
-      await logApiAuditEvent({
-        userId,
-        organizationId,
-        action: 'INITIATE_SOCIAL_CONNECT',
-        dataType: 'SOCIAL_MEDIA',
-        success: true,
-        metadata: { platform },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      await withRLSContext({ organizationId, userId }, (tx) =>
+        persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: 'social_account.connect_initiated',
+          resourceType: 'social_accounts',
+          details: { platform },
+        }),
+      );
 
       return NextResponse.json({ auth_url: authUrl });
     } catch (_error) {

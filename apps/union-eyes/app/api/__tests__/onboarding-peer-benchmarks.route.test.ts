@@ -6,6 +6,7 @@ const m = vi.hoisted(() => ({
   checkRateLimit: vi.fn(),
   getPeerBenchmarks: vi.fn(),
   eventBus: { emit: vi.fn() },
+  record: vi.fn(),
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
@@ -25,6 +26,8 @@ vi.mock('@/lib/events', () => ({
   AppEvents: { AUDIT_LOG: 'AUDIT_LOG' },
 }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+// The read audit moved from an in-process event to the canonical audit log (B87); the writer has its own coverage.
+vi.mock('@/lib/utils/onboarding-read-audit', () => ({ recordOnboardingRead: m.record }));
 vi.mock('@/lib/api/standardized-responses', () => ({
   ErrorCode: {
     MISSING_REQUIRED_FIELD: 'MISSING_REQUIRED_FIELD',
@@ -121,13 +124,7 @@ describe('onboarding/peer-benchmarks route', () => {
       { userId: 'u1', organizationId: 'org1' },
     );
 
-    expect(m.eventBus.emit).toHaveBeenCalledWith(
-      'AUDIT_LOG',
-      expect.objectContaining({
-        action: 'peer_benchmarks',
-        resource: 'onboarding',
-      })
-    );
+    expect(m.record).toHaveBeenCalledWith(expect.objectContaining({ userId: 'u1' }), 'onboarding.peer_benchmarks', expect.anything());
   });
 
   it('GET returns benchmarks with metadata', async () => {

@@ -14,7 +14,7 @@ import { NextResponse } from 'next/server';
 import { withRoleAuth, type MemberRole } from '@/lib/role-middleware';
 import { getPeerBenchmarks } from '@/lib/utils/smart-onboarding';
 import { logger } from '@/lib/logger';
-import { eventBus, AppEvents } from '@/lib/events';
+import { recordOnboardingRead } from '@/lib/utils/onboarding-read-audit';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 
  
@@ -59,13 +59,7 @@ export const GET = withRoleAuth('member' as MemberRole, async (request, context)
       benchmarkCount: benchmarks.length,
     });
 
-    // Emit audit event
-    eventBus.emit(AppEvents.AUDIT_LOG, {
-      userId,
-      action: 'peer_benchmarks',
-      resource: 'onboarding',
-      details: { organizationId: reqOrgId, benchmarkCount: benchmarks.length },
-    });
+    await recordOnboardingRead({ organizationId: reqOrgId, userId }, 'onboarding.peer_benchmarks', { benchmarkCount: benchmarks.length });
 
     return NextResponse.json({
       success: true,

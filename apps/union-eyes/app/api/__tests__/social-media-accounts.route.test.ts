@@ -205,9 +205,10 @@ describe('social-media/accounts route', () => {
     expect(response.status).toBe(200);
     expect(payload.accounts).toHaveLength(1);
     expect(payload.accounts[0]).toMatchObject({ id: 'acct-1', platform: 'facebook' });
-    expect(m.logApiAuditEvent).toHaveBeenCalledWith(expect.objectContaining({
-      action: 'LIST_SOCIAL_ACCOUNTS',
-      metadata: { count: 1 },
+    // The list is recorded in the canonical audit log (B87), not a log line.
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      action: 'social_account.list',
+      details: { count: 1 },
     }));
   });
 

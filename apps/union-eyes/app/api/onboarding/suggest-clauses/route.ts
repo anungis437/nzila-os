@@ -14,7 +14,7 @@ import { NextResponse } from 'next/server';
 import { withRoleAuth, type MemberRole } from '@/lib/role-middleware';
 import { suggestRelevantClauses } from '@/lib/utils/smart-onboarding';
 import { logger } from '@/lib/logger';
-import { eventBus, AppEvents } from '@/lib/events';
+import { recordOnboardingRead } from '@/lib/utils/onboarding-read-audit';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 
  
@@ -71,13 +71,7 @@ export const POST = withRoleAuth('officer' as MemberRole, async (request, contex
       suggestionCount: suggestions.length,
     });
 
-    // Emit audit event
-    eventBus.emit(AppEvents.AUDIT_LOG, {
-      userId,
-      action: 'clause_suggestions',
-      resource: 'onboarding',
-      details: { organizationId: reqOrgId, suggestionCount: suggestions.length },
-    });
+    await recordOnboardingRead({ organizationId: reqOrgId, userId }, 'onboarding.clause_suggestions', { suggestionCount: suggestions.length });
 
     return NextResponse.json({
       success: true,

@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 533,
-    "partial": 77,
+    "implementedPendingQualification": 536,
+    "partial": 78,
     "qualificationVerified": 0,
-    "unresolved": 244,
+    "unresolved": 241,
     "externalBlockers": 0
   },
   "batches": [
@@ -861,6 +861,15 @@
       "newlyImplemented": 7,
       "outstandingAfter": 244,
       "partial": 2,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B88-AUDIT-RECORDS-ONBOARDING-SOCIAL-SYNC",
+      "family": "Audit records: onboarding reads, social connection, integration sync",
+      "outstandingBefore": 244,
+      "newlyImplemented": 3,
+      "outstandingAfter": 241,
+      "partial": 1,
       "evidenceCommit": null
     }
   ],
@@ -6800,14 +6809,6 @@
       ],
       "explanation": "A platform failure is returned as a fixed message (this application's own refusals keep their text; the platform's text is logged, not returned); a failure to save the row after the platform accepted the post is reported as published and unrecorded (recorded: false) and logged, not as a failed publish; when no platform accepted the post the audited operation throws, so its outcome record says failed. Two tests were adapted and three added (disclosed): the route test mock gained the error class, the service test gained the three cases.",
       "remaining": "The intent and outcome records are still written around the external call and are not committed with a data row: an external effect cannot be made atomic with a database row, and a post scheduled or published before the row is saved can still exist without it if the process dies in between."
-      ,"supplementalEngineeringEvidence": [{
-        "commit": "35a7cee83c82536e2cd20ac3f52535ef742c42ac",
-        "path": "docs/union-eyes/convergence/remediation/ue-social-publish-uncertain-engineering.json",
-        "scope": "Provider accepted but local persistence unconfirmed: no false published response, no automatic replay",
-        "qualification": "SOURCE_IMPLEMENTED_UNQUALIFIED",
-        "countsChanged": false,
-        "remaining": "Durable provider-aware reconciliation and native/runtime qualification"
-      }]
     },
     "DEF-0B11-SOC-ANY-REFRESH-FAILURE-MARKS-THE-ACCOUNT-EXPIRED-AND-A-SUCCESS-FORCES-IT-ACTIVE": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -7145,6 +7146,51 @@
       ],
       "explanation": "A signer user id must now be an active member of the sending organization when the request is created, so a user of another organization cannot be named as a signer, and the status and audit views are projected per viewer.",
       "remaining": "verifyDocumentAccess, getDocumentStatus and the audit reads still look the document up by id through the shared handle with no tenant context; they need an organization-bound read path."
+    },
+    "DEF-0B9-ASM-ONBOARDING-AUDIT-EVENTS-ARE-EMITTED-ON-AN-IN-PROCESS-BUS-WITH-NO-SUBSCRIBER": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B88-AUDIT-RECORDS-ONBOARDING-SOCIAL-SYNC",
+      "files": [
+        "apps/union-eyes/lib/utils/onboarding-read-audit.ts",
+        "apps/union-eyes/app/api/onboarding/discover-federation/route.ts",
+        "apps/union-eyes/app/api/onboarding/peer-benchmarks/route.ts",
+        "apps/union-eyes/app/api/onboarding/suggest-clauses/route.ts",
+        "apps/union-eyes/app/api/__tests__/onboarding-discover-federation.route.test.ts",
+        "apps/union-eyes/app/api/__tests__/onboarding-peer-benchmarks.route.test.ts",
+        "apps/union-eyes/app/api/__tests__/onboarding-suggest-clauses.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s32-audit-records-onboarding-social.test.ts"
+      ],
+      "explanation": "The three onboarding reads no longer emit to an in-process bus with no subscriber. Each awaits recordOnboardingRead, a canonical audit row (onboarding.federation_discovery, onboarding.peer_benchmarks, onboarding.clause_suggestions) in the acting organization, before the result is returned, and a failed record fails the request. Federation discovery now also requires an organization context. The three route tests were adapted from the bus assertion to the audit writer (disclosed)."
+    },
+    "DEF-0B8-ICRA-SYNC-DRY-RUN-IS-ACCEPTED-AND-AUDITED-BUT-NEVER-READ": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B88-AUDIT-RECORDS-ONBOARDING-SOCIAL-SYNC",
+      "files": [
+        "apps/union-eyes/app/api/integrations/framework/[id]/sync/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s32-audit-records-onboarding-social.test.ts"
+      ],
+      "explanation": "No sync engine or adapter performs a dry run, so the route schema accepts dryRun only as false: a request for a dry run is refused with a validation error instead of running a real sync that the audit row calls a dry run."
+    },
+    "DEF-0B11-SOC-CONNECT-AUDIT-IS-A-LOG-LINE-THAT-DROPS-THE-ACTION-ORGANIZATION-AND-PLATFORM-THE-CALLER-PASSES": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B88-AUDIT-RECORDS-ONBOARDING-SOCIAL-SYNC",
+      "files": [
+        "apps/union-eyes/app/api/social-media/accounts/route.ts",
+        "apps/union-eyes/app/api/social-media/accounts/callback/route.ts",
+        "apps/union-eyes/app/api/__tests__/social-media-accounts.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s32-audit-records-onboarding-social.test.ts"
+      ],
+      "explanation": "Listing and initiating a connection now write canonical audit rows (social_account.list, social_account.connect_initiated) and completing one writes social_account.connected in the same transaction as the credential upsert, so a connection with no record is not kept. The log-line helper, which dropped the action, organization and platform, is no longer used by either route. The list test asserts the audit row (disclosed), and the social_accounts importer census gained the review route that earlier batch B85 added."
+    },
+    "DEF-0B11-SOC-OAUTH-CALLBACK-IS-A-GET-THAT-INSERTS-THE-CREDENTIAL-CLEARS-ITS-COOKIES-BEFORE-VALIDATION-AND-AUDITS-AFTER-COMMIT-TO-A-LOG-LINE": {
+      "status": "PARTIAL",
+      "batch": "B88-AUDIT-RECORDS-ONBOARDING-SOCIAL-SYNC",
+      "files": [
+        "apps/union-eyes/app/api/social-media/accounts/callback/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s32-audit-records-onboarding-social.test.ts"
+      ],
+      "explanation": "The completion audit is now an atomic row committed with the credential upsert (social_account.connected).",
+      "remaining": "The callback is still a GET that clears its state cookies before validating the request, so a forged request can clear a pending connection; changing the verb or the cookie order needs a coordinated change with the provider redirect registration."
     }
   }
 }

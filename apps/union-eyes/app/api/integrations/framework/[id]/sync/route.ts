@@ -8,7 +8,8 @@ export const dynamic = 'force-dynamic';
 const syncSchema = z.object({
   syncType: z.nativeEnum(SyncType).default(SyncType.INCREMENTAL),
   entities: z.array(z.string().min(1).max(100)).max(20).optional(),
-  dryRun: z.boolean().optional(),
+  // No sync engine or adapter performs a dry run, so a request for one is refused instead of running a real sync that was audited as a dry run.
+  dryRun: z.literal(false).optional(),
   limit: z.number().int().positive().max(500).optional(),
 });
 
