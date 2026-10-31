@@ -113,9 +113,21 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
       if (rows.length !== head.revision) {
         throw new LedgerStoreUnavailableError('Persistent trust stream has missing or excess events')
       }
+      // SQL sequence indexes and the event-sourced hash chain are distinct
+      // integrity layers. A valid audit v2 digest must not disguise a forged
+      // payload sequence or a disconnected prior event hash.
+      let previousEventHash = LEDGER_GENESIS_HASH
       const entries = rows.map((r, i) => {
         assertSequence(r.seq, i + 1)
         const entry = parseAuditEntry(r)
+        if (typeof entry.payload.seq !== 'number' ||
+            !Number.isSafeInteger(entry.payload.seq) || entry.payload.seq !== i + 1 ||
+            entry.payload.prevEventHash !== previousEventHash ||
+            typeof entry.payload.eventHash !== 'string' ||
+            !/^[0-9a-f]{64}$/.test(entry.payload.eventHash)) {
+          throw new LedgerStoreUnavailableError('Persistent trust event chain disagrees with receipt index')
+        }
+        previousEventHash = entry.payload.eventHash
         // The relational identity/hash columns are immutable receipt indexes.
         // Verify them against the canonical full-coverage JSON event on every
         // read; a separately poisoned index must never be silently trusted.
@@ -171,6 +183,14 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
       const current: LedgerHead = { revision: snapshot.revision, headHash: snapshot.headHash }
       if (current.revision !== expected.revision || current.headHash !== expected.headHash) {
         throw new LedgerConflictError('Persistent trust ledger changed during CAS append')
+      }
+      // A caller of the database adapter cannot skip the higher-level event
+      // replay check and append an audit-hashed but disconnected event.
+      const previousEventHash = snapshot.entries.at(-1)?.payload.eventHash ?? LEDGER_GENESIS_HASH
+      if (entry.payload.prevEventHash !== previousEventHash ||
+          typeof entry.payload.eventHash !== 'string' ||
+          !/^[0-9a-f]{64}$/.test(entry.payload.eventHash)) {
+        throw new LedgerConflictError('Append does not extend verified trust event chain')
       }
       try {
         const inserted = await tx.unsafe(

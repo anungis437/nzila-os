@@ -27,12 +27,12 @@ function fake(opts: { revision?: number; hash?: string; entries?: unknown[]; row
     get commits() { return commits },
   }
 }
-function auditRecord(prevHash: string, seq: number, orgId = ORG, id: string = randomUUID()): AuditEntry {
+function auditRecord(prevHash: string, seq: number, orgId = ORG, id: string = randomUUID(), prevEventHash = LEDGER_GENESIS_HASH): AuditEntry {
   const body = {
     id, timestamp: '2026-10-30T15:00:00.000Z', actorId: 'host-actor', orgId,
     action: 'tool_fabric.ledger.tool_registered', resource: 'tool-fabric-tool',
     resourceId: 'sample-tool',
-    payload: { seq, prevEventHash: LEDGER_GENESIS_HASH, eventHash: 'a'.repeat(64) },
+    payload: { seq, prevEventHash, eventHash: 'a'.repeat(64) },
   }
   return { ...body, prevHash, hashVersion: 2, hash: computeAuditHash(prevHash, body) }
 }
@@ -136,6 +136,33 @@ describe('P0 Postgres Trust Ledger CAS adapter',()=>{
       revision: 1, hash: entry.hash, entries: [altered],
     }))
     await expect(poisoned.readSnapshot(ORG)).rejects.toThrow('audit chain failed integrity')
+  })
+  it('refuses audit-hashed payload sequence substitution despite matching SQL head', async () => {
+    const forged = auditRecord(LEDGER_GENESIS_HASH, 2)
+    const store = new PostgresAtomicTrustLedgerStore(fake({
+      revision: 1, hash: forged.hash, entries: [forged],
+    }))
+    await expect(store.readSnapshot(ORG)).rejects.toThrow('event chain disagrees with receipt index')
+  })
+  it('refuses disconnected event hashes even when the audit v2 chain is valid', async () => {
+    const first = auditRecord(LEDGER_GENESIS_HASH, 1)
+    const disconnected = auditRecord(first.hash, 2)
+    const store = new PostgresAtomicTrustLedgerStore(fake({
+      revision: 2, hash: disconnected.hash, entries: [first, disconnected],
+    }))
+    await expect(store.readSnapshot(ORG)).rejects.toThrow('event chain disagrees with receipt index')
+    const db = fake({ revision: 1, hash: first.hash, entries: [first] })
+    await expect(new PostgresAtomicTrustLedgerStore(db).compareAndAppend(
+      ORG, { revision: 1, headHash: first.hash }, disconnected,
+    )).rejects.toThrow('Append does not extend verified trust event chain')
+    expect(db.commits).toBe(0)
+  })
+  it('accepts a correctly linked two-event PostgreSQL snapshot', async () => {
+    const first = auditRecord(LEDGER_GENESIS_HASH, 1)
+    const next = auditRecord(first.hash, 2, ORG, randomUUID(), first.payload.eventHash as string)
+    const snapshot = { revision: 2, hash: next.hash, entries: [first, next] }
+    await expect(new PostgresAtomicTrustLedgerStore(fake(snapshot)).readSnapshot(ORG))
+      .resolves.toEqual({ revision: 2, headHash: next.hash, entries: [first, next] })
   })
   it('rejects coerced, noncanonical, or unsafe BIGINT receipt indexes', async () => {
     const entry = auditRecord(LEDGER_GENESIS_HASH, 1)
