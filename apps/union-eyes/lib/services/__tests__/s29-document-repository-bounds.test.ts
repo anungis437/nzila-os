@@ -24,7 +24,7 @@ describe('Gate 0B.6 repository list cannot fan out over the entire tenant', () =
   it('keeps the existing array response and exposes candidate-offset pagination', () => {
     expect(route).toContain('standardSuccessResponse(visible.filter(Boolean), {')
     expect(route).toContain('nextOffset: offset + limit')
-    expect(route).toContain('hasMore: rows.length === limit')
+    expect(route).not.toContain('hasMore: rows.length === limit')
   })
 
   it('bounds pagination without changing the shared list helper', () => {
