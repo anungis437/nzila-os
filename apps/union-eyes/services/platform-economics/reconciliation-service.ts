@@ -65,6 +65,12 @@ export interface ReconciliationResult {
 export async function runReconciliation(
   input: RunReconciliationInput,
 ): Promise<ReconciliationResult> {
+  // Never permit an organization-less reconciliation. That legacy mode scanned
+  // and matched invoices, payments and fees from unrelated tenants in one run.
+  // A caller must supply the organization whose financial ledger is in scope.
+  if (!input.organizationId || input.organizationId.trim() === '') {
+    throw ApiError.badRequest('An organization is required for reconciliation');
+  }
   if (input.periodEnd < input.periodStart) {
     throw ApiError.badRequest('The reconciliation period ends before it starts');
   }
