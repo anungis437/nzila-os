@@ -1,10 +1,13 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PGlite } from '@electric-sql/pglite';
 import { inAppNotifications } from '@/db/schema/domains/communications/notifications';
-import { createTableDatabase, lateBoundDb } from '@/app/api/__tests__/support/pglite-tables';
+import { createTableDatabase } from '@/app/api/__tests__/support/pglite-tables';
 
 const state = vi.hoisted(() => ({ db: null as unknown }));
-vi.mock('@/db', () => ({ db: lateBoundDb(state) }));
+vi.mock('@/db', async () => {
+  const { lateBoundDb } = await import('@/app/api/__tests__/support/pglite-tables');
+  return { db: lateBoundDb(state) };
+});
 import { claimEducationReminder, educationReminderKey, releaseEducationReminder } from '../reminder-delivery';
 
 const ORG = '11111111-1111-4111-8111-111111111111';

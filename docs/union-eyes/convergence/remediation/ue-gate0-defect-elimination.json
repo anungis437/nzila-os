@@ -6430,10 +6430,15 @@
       "files": [
         "apps/union-eyes/lib/education/reminder-queries.ts",
         "apps/union-eyes/lib/education/__tests__/reminder-queries.pglite.test.ts",
-        "apps/union-eyes/lib/services/__tests__/s14-clause-reminders-chatbot.test.ts"
+        "apps/union-eyes/lib/services/__tests__/s14-clause-reminders-chatbot.test.ts",
+        "apps/union-eyes/lib/education/reminder-delivery.ts",
+        "apps/union-eyes/lib/education/__tests__/reminder-delivery.pglite.test.ts",
+        "apps/union-eyes/lib/email/training-notifications.ts",
+        "apps/union-eyes/lib/email/__tests__/training-notifications-dedupe.test.ts",
+        "apps/union-eyes/app/api/__tests__/cron-education-reminders.route.test.ts"
       ],
-      "explanation": "Both reminder statements join the member's communication preferences and leave out a member who turned e-mail or training reminders off (an absent row is the default, on; another organization's opt-out does not apply). The PGlite test gained the preferences table and a case (disclosed).",
-      "remaining": "There is still no sent marker: a second run on the same day would send the same reminders again."
+      "explanation": "Both reminder statements join the member's communication preferences and leave out a member who turned e-mail or training reminders off (an absent row is the default, on; another organization's opt-out does not apply). The PGlite test gained the preferences table and a case (disclosed). A durable per-organization/member/source/tier in-app notification claim is now written before email delivery using the existing unique index; retries and overlapping cron runs cannot claim twice. Provider refusals release the marker; ambiguous failures retain it. Focused PGlite and sender regression tests were added in source commit 3ad7b9a611012e06d49921447d4950a0cf0cab80.",
+      "remaining": "Exact-HEAD focused tests, native PostgreSQL 15/16, complete Vitest/contract and real HTTP/browser/staging acceptance remain unproven; source credit is withheld until focused tests pass. Independent ratification is outstanding."
     },
     "DEF-0B4-CHATBOT-REVIEW-NOT-REQUIRED-AND-FIXED-ROLE": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
