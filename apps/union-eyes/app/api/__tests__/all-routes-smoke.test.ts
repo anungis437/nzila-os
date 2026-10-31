@@ -140,6 +140,7 @@ vi.mock('@/lib/rate-limiter', () => ({
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({
   requireEntitlement: m.requireEntitlement,
   checkEntitlement: m.checkEntitlement,
+  checkModuleEntitlement: vi.fn().mockResolvedValue({ allowed: true }),
   PLATFORM_MODULES: {
     CORE: 'core',
     AI: 'ai',

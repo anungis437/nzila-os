@@ -1,0 +1,7 @@
+# Gate 0 public ICRA telemetry privacy and truthful contract regression (2026-10-31)
+
+Baseline: `b8db0e48c33732ab8c96a01555d4659b1bedabd3`, branch `agents/ue-cursor-final-closure`. The existing public telemetry endpoint accepted arbitrary metadata names and strings, including direct contact identifiers and per-question identifiers. Its privacy test mocked an obsolete rate-limit module, so the denial test did not exercise the production limiter. The route also parsed unbounded JSON.
+
+This source change makes the telemetry sink fail closed on limiter failure, rejects bodies over 4,096 bytes while streaming, and allowlists only coarse numeric counters, bounded operational tokens and known section names. Unknown keys (including email, names, phone, questionId and routeFingerprint) are not emitted. No raw answers, organization contact details or arbitrary free-text metadata are admitted. Tests cover valid operational fields, redaction, oversized bodies, limiter refusal and outage. The route-coverage scanner's regression now recognizes the actual `checkRateLimit` invocation. Separately, the onboarding route's stale CRUD test is replaced with a truthful HTTP-501 contract, and the all-route smoke mock gains the entitlement checker actually used by the production route.
+
+These are source changes and regression tests, not runtime proof. Full Vitest/contract, PostgreSQL 15/16, HTTP/browser, staging, human ratifications and production GO remain unverified at the new SHA. No frozen defect record or institutional approval is altered.

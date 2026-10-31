@@ -21,7 +21,7 @@ import { NextRequest } from 'next/server';
 
 const { mockEmit, mockRateLimit } = vi.hoisted(() => ({
   mockEmit: vi.fn(),
-  mockRateLimit: vi.fn(() => ({ success: true, remaining: 10, reset: 0 })),
+  mockRateLimit: vi.fn(async () => ({ allowed: true, remaining: 10, resetIn: 0 })),
 }));
 
 vi.mock('@/lib/icra/observability', () => ({
@@ -29,8 +29,8 @@ vi.mock('@/lib/icra/observability', () => ({
   hashIp: (ip: string | null) => (ip ? `hash-${ip.slice(0, 4)}` : null),
 }));
 
-vi.mock('@/lib/rate-limit', () => ({
-  rateLimit: mockRateLimit,
+vi.mock('@/lib/rate-limiter', () => ({
+  checkRateLimit: mockRateLimit,
 }));
 
 import { POST } from '@/app/api/icra/telemetry/route';
@@ -65,6 +65,7 @@ const ADAPTIVE_KINDS = [
 describe('Adaptive telemetry privacy regression', () => {
   beforeEach(() => {
     mockEmit.mockClear();
+    mockRateLimit.mockReset().mockResolvedValue({ allowed: true, remaining: 10, resetIn: 0 });
   });
 
   for (const kind of ADAPTIVE_KINDS) {
@@ -94,8 +95,7 @@ describe('Adaptive telemetry privacy regression', () => {
   });
 
   it('caps metadata at 8 keys (drops the rest silently)', async () => {
-    const meta: Record<string, string> = {};
-    for (let i = 0; i < 20; i++) meta[`k${i}`] = `v${i}`;
+    const meta: Record<string, string | number> = { step: 1, answered: 2, included: 3, deferred: 4, required: 5, optional: 6, doctrineVersion: '1.0.0', scale: 'small', continuity: 'low', governance: 'low', routeVersion: 'v1', decision: 'defer_optional', ruleId: 'r1' };
     const res = await POST(
       makeReq({ kind: 'assessment_routed', metadata: meta }),
     );
@@ -109,13 +109,12 @@ describe('Adaptive telemetry privacy regression', () => {
     const res = await POST(
       makeReq({
         kind: 'adaptive_profile_created',
-        metadata: { fp: longValue },
+        metadata: { routeVersion: longValue },
       }),
     );
     expect(res.status).toBe(204);
     const forwarded = mockEmit.mock.calls[0]?.[0]?.metadata ?? {};
-    expect(typeof forwarded.fp).toBe('string');
-    expect((forwarded.fp as string).length).toBeLessThanOrEqual(64);
+    expect(forwarded.routeVersion).toBeUndefined(); // Oversized strings are rejected, never silently reinterpreted.
   });
 
   it('does NOT forward objects, arrays, or null metadata values (only string|number|boolean)', async () => {
@@ -123,7 +122,7 @@ describe('Adaptive telemetry privacy regression', () => {
       makeReq({
         kind: 'assessment_routed',
         metadata: {
-          good: 'ok',
+          routeVersion: 'v1',
           bad_obj: { nested: 'leak' } as any as string,
           bad_arr: ['leak'] as any as string,
           bad_null: null as any as string,
@@ -132,7 +131,7 @@ describe('Adaptive telemetry privacy regression', () => {
     );
     expect(res.status).toBe(204);
     const forwarded = mockEmit.mock.calls[0]?.[0]?.metadata ?? {};
-    expect(forwarded.good).toBe('ok');
+    expect(forwarded.routeVersion).toBe('v1');
     expect('bad_obj' in forwarded).toBe(false);
     expect('bad_arr' in forwarded).toBe(false);
     expect('bad_null' in forwarded).toBe(false);
@@ -152,13 +151,49 @@ describe('Adaptive telemetry privacy regression', () => {
 
   it('honors rate-limit denial with a silent 204 (no emitter call)', async () => {
     mockRateLimit.mockReturnValueOnce({
-      success: false,
+      allowed: false,
       remaining: 0,
-      reset: 0,
+      resetIn: 0,
     } as never);
     const res = await POST(
       makeReq({ kind: 'assessment_routed', metadata: { included: 22 } }),
     );
+    expect(res.status).toBe(204);
+    expect(mockEmit).not.toHaveBeenCalled();
+  });
+
+  it('never forwards client-provided contact fields, question identifiers or fingerprints', async () => {
+    await POST(makeReq({
+      kind: 'adaptive_question_deferred',
+      sectionId: 'private-person@example.com',
+      metadata: {
+        questionId: 'sensitive-question',
+        routeFingerprint: 'unique-client',
+        email: 'private-person@example.com',
+        orgName: 'Sensitive Union',
+        phone: '5551234567',
+        ruleId: 'R-3',
+        decision: 'defer_optional',
+      },
+    }));
+    expect(mockEmit).toHaveBeenCalledTimes(1);
+    const event = mockEmit.mock.calls[0]?.[0];
+    expect(event.sectionId).toBeUndefined();
+    expect(event.metadata).toEqual({ ruleId: 'R-3', decision: 'defer_optional' });
+  });
+
+  it('drops oversized request bodies before the emitter is reached', async () => {
+    const res = await POST(makeReq({
+      kind: 'assessment_routed',
+      metadata: { routeVersion: 'x'.repeat(5000) },
+    }));
+    expect(res.status).toBe(204);
+    expect(mockEmit).not.toHaveBeenCalled();
+  });
+
+  it('does not emit when the rate limiter is unavailable', async () => {
+    mockRateLimit.mockRejectedValueOnce(new Error('redis unavailable'));
+    const res = await POST(makeReq({ kind: 'assessment_routed' }));
     expect(res.status).toBe(204);
     expect(mockEmit).not.toHaveBeenCalled();
   });

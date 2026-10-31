@@ -48,7 +48,7 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
       'workbook/start/route.ts': /guardPublicIntake/,
       'workbook/checkout/route.ts': /guardPublicIntake/,
       'whop/unauthenticated-checkout/route.ts': /guardPublicIntake/,
-      'icra/telemetry/route.ts': /rateLimit\(/,
+      'icra/telemetry/route.ts': /checkRateLimit\(/,
       'staging-proof/deadline-engine/scenario/route.ts': /BUILD_APP_ENV:\s*process\.env\.NEXT_PUBLIC_APP_ENV/,
     };
     for (const route of Object.keys(PUBLIC_BY_DESIGN)) {
@@ -62,7 +62,7 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
 
   it('puts the capability-token routes behind the capability limiter or their own limiter', () => {
     for (const e of fresh.filter((r) => r.mutating && r.guard === 'CAPABILITY_TOKEN')) {
-      expect(readFileSync(join(ROOT, 'app', 'api', e.route), 'utf8'), e.route).toMatch(/guardPublicIntake|rateLimit\(|withClaimedWorkbookAccess/);
+      expect(readFileSync(join(ROOT, 'app', 'api', e.route), 'utf8'), e.route).toMatch(/guardPublicIntake|checkRateLimit\(|rateLimit\(|withClaimedWorkbookAccess/);
     }
   });
 
