@@ -1,0 +1,1276 @@
+{
+  "record": "UE_DEFECT_REMEDIATION_LEDGER",
+  "version": 1,
+  "mission": "UE-FULL-PLATFORM-CONVERGENCE-TO-STAGING-2026",
+  "branch": "agents/ue-cursor-final-closure",
+  "pullRequest": 1014,
+  "recordedAtCommit": "bd953b9d7",
+  "baseline": "0b0e363aaf5c8b5cc546e6e136af44d78e4fca1a",
+  "traceability": "Every defectId is an item of docs/union-eyes/convergence/register/ue-release-debt-index-0c3.json (150 items) and, through it, of the frozen 777-defect register. This ledger adds state; it never edits frozen Gate 0 evidence and counts each defect once.",
+  "statusScale": {
+    "IMPLEMENTED_NOT_VERIFIED": "Source changed; no test of the behaviour on file.",
+    "UNIT_VERIFIED": "Positive and adversarial tests pass against mocks or an in-process SQL engine. No deployed row-level security was involved.",
+    "NATIVE_VERIFIED": "The repaired code ran unmodified against real PostgreSQL 15 and 16 with the combined deployed schema, runtime role and row-level security, with an adversarial cross-tenant case.",
+    "E2E_VERIFIED": "Proven through the running application over HTTP or a browser, through the proxy and routing layer.",
+    "CLOSED": "Every proof the acceptance condition requires is on file and an independent release decision has been made."
+  },
+  "summary": {
+    "releaseDebtItems": 150,
+    "addressedThisProgramme": 46,
+    "byStatus": {
+      "NATIVE_VERIFIED": 16,
+      "UNIT_VERIFIED": 16,
+      "E2E_VERIFIED": 14,
+      "CLOSED": 0
+    },
+    "releaseBlockingAddressed": 34,
+    "conditionallyBlockingAddressed": 11,
+    "awaitingDispositionAddressed": 1,
+    "note": "No defect is CLOSED. CLOSED needs the acceptance condition's runtime proofs and an independent release decision.",
+    "trackedEngineeringDebtAddressed": 0
+  },
+  "entries": [
+    {
+      "defectId": "DEF-0B11-PRP-REWARDS-EXPORT-RETURNS-EVERY-MEMBER-LEDGER-AWARD-AND-BUDGET-ROW-TO-ANY-MEMBER",
+      "status": "E2E_VERIFIED",
+      "commits": [
+        "8f8cb18aa"
+      ],
+      "rootCause": "Member-level export with no role floor, unaudited, unbounded, CSV formula injection.",
+      "repair": "Administrator floor, same-transaction audit, row bound, formula neutralisation, no-store.",
+      "evidence": [
+        "app/api/__tests__/rewards-export.route.test.ts"
+      ],
+      "nativeEvidence": "Partial: tenant-isolation-remediation.postgres.test.ts shows recognition_awards hidden from another organization; the route itself has not run natively.",
+      "remaining": [
+        "Run the export route natively",
+        "Institutional decision on the export audience (administrator is an engineering default, not a mandate)"
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "rewards export: administrator receives a no-store text/csv; a member, a steward and an anonymous caller are refused (403, 403, 401). Not proven over HTTP: the same-transaction audit and formula neutralisation (still unit-level), and the institutional decision on the export audience",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
+    },
+    {
+      "defectId": "DEF-0B11-PRP-RECONCILIATION-PROCESS-GET-RETURNS-ANY-ORGANIZATION-RUN-BY-ID",
+      "status": "NATIVE_VERIFIED",
+      "commits": [
+        "8f8cb18aa",
+        "6a4a6e820"
+      ],
+      "rootCause": "Run lookup by id alone.",
+      "repair": "Organization-bound lookup and guid validation.",
+      "evidence": [
+        "services/platform-economics/__tests__/reconciliation-service.test.ts",
+        "app/api/__tests__/reconciliation-process.route.test.ts",
+        "db/__tests__/tenant-isolation-remediation.postgres.test.ts (reconciliation run lookup, run on a connection where RLS does not apply)"
+      ],
+      "remaining": []
+    },
+    {
+      "defectId": "DEF-0B11-IDS-SETTINGS-PUT-MERGES-ANY-KEY-INTO-THE-JSON-THAT-HOLDS-THE-CREDIT-LEDGER-AND-THE-PER-CAPITA-RATE",
+      "status": "E2E_VERIFIED",
+      "commits": [
+        "8f8cb18aa"
+      ],
+      "rootCause": "Arbitrary keys merged into the settings JSON that other code reads as authority.",
+      "repair": "Allow-list policy, protected keys refused, before/after audited.",
+      "evidence": [
+        "app/api/__tests__/settings-organization.route.test.ts (18)"
+      ],
+      "remaining": [
+        "Native run of the PUT under the runtime role"
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "organization settings: the administrator writes an allowed key (persisted); perCapitaRate, creditLedger and an arbitrary key are refused with 400, echo no value and leave the stored settings unchanged; a steward, member, executive and another tenant are refused (403) and change nothing",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
+    },
+    {
+      "defectId": "DEF-0B11-PRP-PROFILE-ROLES-GET-LISTS-EVERY-USER-BILLING-PROFILE-TO-STEWARD-AND-ABOVE-OF-ANY-ORGANIZATION",
+      "status": "E2E_VERIFIED",
+      "commits": [
+        "8f8cb18aa"
+      ],
+      "rootCause": "Generic CRUD collection over profiles.",
+      "repair": "Self-only endpoint with no database access; profiles removed from generic CRUD.",
+      "evidence": [
+        "app/api/__tests__/profile-roles.route.test.ts"
+      ],
+      "remaining": [],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "a steward who names another user receives only their own role; the named user id is absent from the response",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
+    },
+    {
+      "defectId": "DEF-0B11-IDS-STEWARD-ASSIGNMENT-ROWS-READABLE-BY-ANY-MEMBER-WITH-PERSONAL-PHONE-NOTES-AND-GRIEVANCE-LINK",
+      "status": "NATIVE_VERIFIED",
+      "commits": [
+        "43b1cc814",
+        "6a4a6e820"
+      ],
+      "rootCause": "Generic CRUD GET at the member floor returned whole rows.",
+      "repair": "Explicit routes: allow-listed member projection of active rows; officers get full rows with atomic audit; no write route.",
+      "evidence": [
+        "app/api/__tests__/stewards-directory.route.test.ts (10)",
+        "db/__tests__/tenant-isolation-remediation.postgres.test.ts (steward directory)"
+      ],
+      "remaining": [
+        "Appointment route owned by the appointing office does not exist; writes answer 405",
+        "Officer floor is an engineering default, not an issued mandate"
+      ]
+    },
+    {
+      "defectId": "DEF-0B11-PRP-PRECEDENT-ITEM-ROUTE-ORGANIZATION-SCOPE-IS-A-NO-OP-ON-A-TABLE-KEYED-BY-SOURCE-ORGANIZATION",
+      "status": "NATIVE_VERIFIED",
+      "commits": [
+        "f866548e1",
+        "6a4a6e820"
+      ],
+      "rootCause": "orgScoped filter targets organizationId; the table is keyed by source_organization_id.",
+      "repair": "Explicit route: owner-only audited PATCH and DELETE, GET in the tenant context with canReadSharedClause as a second gate, reader projection.",
+      "evidence": [
+        "app/api/__tests__/precedents-item-isolation.pglite.test.ts (12)",
+        "db/__tests__/tenant-isolation-remediation.postgres.test.ts (precedents)"
+      ],
+      "remaining": [
+        "Cross-organization sharing of precedents is unavailable: union_eyes_system has no privilege on arbitration_precedents and the deployed policy is owner-only. A reviewed multi-party policy migration is required to restore it."
+      ]
+    },
+    {
+      "defectId": "DEF-0B11-RPT-EXECUTE-JOINED-TABLES-CARRY-NO-ORGANIZATION-PREDICATE-SO-A-CALLER-CONFIGURED-JOIN-SELECTS-ROWS-OF-OTHER-ORGANIZATIONS",
+      "status": "NATIVE_VERIFIED",
+      "commits": [
+        "f866548e1",
+        "6a4a6e820"
+      ],
+      "rootCause": "Organization predicate only on the base table.",
+      "repair": "Organization predicate in every joined table's ON clause, declared-relationship joins only, field tables restricted to the query, row cap.",
+      "evidence": [
+        "lib/__tests__/report-executor-tenancy.pglite.test.ts (4 of 6 fail on the previous executor)",
+        "db/__tests__/tenant-isolation-remediation.postgres.test.ts (report joins, on a connection where RLS does not apply)"
+      ],
+      "remaining": [
+        "Same-tenant over-disclosure by report source (institutional decision UE-INST-REPORT-SOURCE-DATA-READERS) is not addressed",
+        "Selected fields can only come from the base source's field list"
+      ]
+    },
+    {
+      "defectId": "DEF-0B10-PIL-USAGE-TELEMETRY-ROUTES-READ-ANY-ORGANIZATION-NAMED-IN-THE-QUERY-AT-AN-ADMIN-FLOOR-AND-RETURN-PER-USER-IDS-THROUGH-THE-BARE-DB-IMPORT",
+      "status": "E2E_VERIFIED",
+      "commits": [
+        "f866548e1"
+      ],
+      "rootCause": "Organization read from the query string.",
+      "repair": "Organization resolved from the authenticated session; a different organization refused without naming it.",
+      "evidence": [
+        "app/api/__tests__/pilot-telemetry-scope.route.test.ts (18)"
+      ],
+      "nativeEvidence": "Partial: pilot_events hidden from another organization by RLS.",
+      "remaining": [
+        "The services still read through the bare db import",
+        "Per-user ids within the caller's own organization remain visible to administrators"
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "pilot champions, readiness, friction and metrics: the organization administrator reads their own organization (200); naming another organization is refused; a member and a steward are refused (403); an anonymous caller is refused (401)",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
+    },
+    {
+      "defectId": "DEF-0B1-DOCS-UNAUTH-API-SURFACE",
+      "status": "E2E_VERIFIED",
+      "commits": [
+        "560f003a1"
+      ],
+      "rootCause": "Complete OpenAPI inventory served anonymously; the proxy does not authenticate API calls.",
+      "repair": "/api/docs and /api/docs/openapi require an administrator, no shared caching, no wildcard CORS. /api/docs/openapi.json remains the public documentation.",
+      "evidence": [
+        "app/api/__tests__/public-system-exposure.route.test.ts"
+      ],
+      "remaining": [
+        "HTTP-level proof through the proxy (E2E)"
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "anonymous GET /api/docs and /api/docs/openapi are 401; a member is 403. The administrator success path is not exercised (R-42)",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
+    },
+    {
+      "defectId": "DEF-0B1-VERSION-UNAUTH-TOPOLOGY",
+      "status": "E2E_VERIFIED",
+      "commits": [
+        "560f003a1"
+      ],
+      "rootCause": "Environment, host, deployment type, feature profile and image digests served anonymously.",
+      "repair": "Anonymous callers receive the build identity only; topology and digests need the deployment-probe bearer credential.",
+      "evidence": [
+        "app/api/__tests__/public-system-exposure.route.test.ts",
+        "tooling/scripts/lib/union-eyes-deployment-safety.test.mjs (24)"
+      ],
+      "remaining": [
+        "Deployment requirement: the secret UE_CANDIDATE_PROBE_TOKEN must exist and be injected (the workflow now injects it); without it digest verification fails closed",
+        "HTTP-level proof (E2E)"
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "anonymous GET /api/version returns exactly app, appVersion, gitSha, buildTimestamp, releaseId and artifactId and no host, database, cache, cloud or credential text",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
+    },
+    {
+      "defectId": "DEF-0B12-PLT-V2-CATCH-ALL-ANSWERS-200-FOR-POST-PUT-PATCH-AND-DELETE-SO-A-CALLER-IS-TOLD-A-WRITE-SUCCEEDED",
+      "status": "E2E_VERIFIED",
+      "commits": [
+        "560f003a1"
+      ],
+      "rootCause": "One handler answered 200 for every method and path.",
+      "repair": "410 Gone for every method; nothing is processed.",
+      "evidence": [
+        "app/api/__tests__/v2-catch-all-gone.route.test.ts"
+      ],
+      "remaining": [
+        "Frontend callers of removed /api/v2 endpoints now fail visibly; see functionalGaps"
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "every method on /api/v2/* answers 410 to an authenticated caller and 401 to an anonymous one; none answers 200",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
+    },
+    {
+      "defectId": "DEF-0B10-PIL-CUPE-BOOTSTRAP-RESET-DELETES-ALL-GRIEVANCES-MEMBERS-AND-CHECKLIST-ROWS-OF-THE-ORGANIZATION-AT-THE-FIXTURE-SLUG-WITH-NO-DEMO-MARKER",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "560f003a1"
+      ],
+      "rootCause": "Reset deleted by organization id alone.",
+      "repair": "Reset needs confirmReset naming the slug, is refused when any member or grievance is not a fixture row, and deletes only fixture rows.",
+      "evidence": [
+        "app/api/__tests__/pilot-bootstrap-cupe.route.test.ts"
+      ],
+      "remaining": [
+        "Mocked database only"
+      ]
+    },
+    {
+      "defectId": "DEF-0B4-CARBON-FABRICATED-MEASUREMENTS-RETURNED-200",
+      "status": "E2E_VERIFIED",
+      "commits": [
+        "560f003a1"
+      ],
+      "rootCause": "Literal measurements and a certification verdict returned as 200.",
+      "repair": "501 on all three routes; registered NOT_IMPLEMENTED (UE-ACTION-CARBON-ACCOUNTING).",
+      "evidence": [
+        "app/api/__tests__/carbon-not-implemented.route.test.ts"
+      ],
+      "remaining": [
+        "The superseded carbon-validate test asserted the fabricated 200/400 and was removed"
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "the three carbon routes answer 501 and the body carries none of the formerly fabricated measurement, recommendation or certification values",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
+    },
+    {
+      "defectId": "DEF-0B12-PLT-ORGANIZATIONS-GET-REBINDS-EVERY-MEMBERSHIP-ROW-OF-AN-E-MAIL-ADDRESS-TO-THE-CALLER-IN-THE-LEGACY-BRANCH",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "560f003a1"
+      ],
+      "rootCause": "Legacy branch linked memberships by e-mail address, and moved another user id's memberships through a matching profile.",
+      "repair": "The branch is removed; the route only reads memberships bound to the authenticated user id.",
+      "evidence": [
+        "app/api/__tests__/users-me-organizations.route.test.ts"
+      ],
+      "remaining": [
+        "The test that asserted the self-healing was replaced by tests that assert it never happens"
+      ]
+    },
+    {
+      "defectId": "DEF-0B12-CRUD-TAX-PATHS-SERVE-THE-PER-CAPITA-REMITTANCE-LEDGER-TO-ANY-MEMBER",
+      "status": "E2E_VERIFIED",
+      "commits": [
+        "af75d9e88"
+      ],
+      "rootCause": "Generic CRUD collections over per_capita_remittances at the member read floor.",
+      "repair": "Four paths answer 501 (UE-ACTION-TAX-DOCUMENTS); per_capita_remittances is DENIED in generic CRUD governance, which also closes the arrears and health-and-welfare collections.",
+      "evidence": [
+        "app/api/__tests__/tax-paths-not-implemented.route.test.ts",
+        "lib/api/__tests__/crud-governance.test.ts"
+      ],
+      "remaining": [
+        "Arrears and health-and-welfare collections now answer 403; their capabilities are not implemented"
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "the four tax paths answer 501 to GET and POST for a member and an administrator; the per-capita ledger is not served",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
+    },
+    {
+      "defectId": "DEF-0B11-PRP-DUES-PAY-POST-CREATES-A-NEW-FULL-BALANCE-PAYMENT-AND-INTENT-ON-EVERY-CALL-AND-SETTLEMENT-DOES-NOT-RECHECK-THE-BALANCE",
+      "status": "NATIVE_VERIFIED",
+      "commits": [
+        "af75d9e88",
+        "6a4a6e820",
+        "1df40bbe1"
+      ],
+      "rootCause": "Every call inserted a new full-balance payment and intent.",
+      "repair": "Per-member advisory lock, one open payment, superseded payment and intent cancelled; settlement flags amounts paid beyond the balance.",
+      "evidence": [
+        "lib/dues/__tests__/dues-initiation-single-open.pglite.test.ts (4 of 6 fail on the previous service)",
+        "db/__tests__/tenant-isolation-remediation.postgres.test.ts (ten simultaneous initiations on separate connections create one payment)",
+        "apps/union-eyes/db/__tests__/tenant-isolation-remediation.postgres.test.ts: settlement under real concurrency (PG15 and PG16): ten simultaneous deliveries with distinct event ids credit once; tampered amount, member, organization or provider reference never credit; a late or replayed event changes nothing; a provider failure after settlement is ignored"
+      ],
+      "remaining": [
+        "Webhook route over HTTP with a signed payload (E2E)",
+        "Refund and dispute events are not covered by this suite"
+      ]
+    },
+    {
+      "defectId": "DEF-0B11-PRP-REWARDS-CRON-ANNIVERSARY-AWARDS-REPEAT-ON-EVERY-CALL-ON-AN-ANNIVERSARY-DAY",
+      "status": "NATIVE_VERIFIED",
+      "commits": [
+        "af75d9e88",
+        "1df40bbe1"
+      ],
+      "rootCause": "No check for an award already created today.",
+      "repair": "The selection excludes members who already have today's award of the type, in any state, in the same organization. The job also ran against a column organization_members does not have (user_name), so on the real schema it failed on every run and awarded nothing; the query now reads name, only active and non-deleted members. A transaction-scoped advisory lock keyed on organization and award type serializes overlapping runs, and awards are written through that transaction (the services accept an executor).",
+      "evidence": [
+        "lib/services/rewards/__tests__/anniversary-idempotency.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/rewards-anniversary-concurrency.postgres.test.ts (PG15 and PG16: six overlapping runs award three active members exactly once; with the lock removed the same test records 18 awards)"
+      ],
+      "remaining": [
+        "A unique index would add a second, schema-level guard; it needs a reviewed migration",
+        "E2E through the scheduler"
+      ]
+    },
+    {
+      "defectId": "DEF-0B11-SOC-SIGNER-IDENTITY-IS-SENDER-TYPED-TEXT-AND-A-SENDER-CAN-SIGN-AS-A-NAMED-PERSON-AND-COMPLETE-THE-DOCUMENT",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "af75d9e88"
+      ],
+      "rootCause": "Signer identity typed by the sender; local signing could complete a provider-held document.",
+      "repair": "Identity taken from the member record, active membership required, list validated and unique, checked before the provider or storage is touched; provider-held documents cannot be signed locally.",
+      "evidence": [
+        "lib/signature/__tests__/signer-identity.test.ts",
+        "app/api/__tests__/signatures-documents.route.test.ts"
+      ],
+      "remaining": [
+        "Signature bound to the document hash and provider acknowledgement, sealed audit trail, trusted-edge network evidence, signature image source: open"
+      ]
+    },
+    {
+      "defectId": "DEF-0B11-SOC-ANY-AUTHENTICATED-USER-SENDS-AN-UPLOADED-FILE-TO-TYPED-ADDRESSES-THROUGH-THE-ORGANIZATION-SIGNATURE-PROVIDER-ACCOUNT",
+      "status": "E2E_VERIFIED",
+      "scope": "PARTIAL",
+      "commits": [
+        "af75d9e88"
+      ],
+      "rootCause": "No role floor, size bound or schema.",
+      "repair": "Steward floor, schema, signer cap, size bound.",
+      "evidence": [
+        "app/api/__tests__/signatures-documents.route.test.ts"
+      ],
+      "remaining": [
+        "No approval step and no rate limit; the offices that may send are an institutional decision     (steward floor is an engineering default)"
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "signatures: a member is refused sending a document for signature (403) and an anonymous caller 401. The steward and officer success path and the typed-address handling are not exercised over HTTP",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
+    },
+    {
+      "defectId": "DEF-0B10-OPL-05",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "e0afd3bf9"
+      ],
+      "rootCause": "Organization search ran as the system role after checking only that a session user existed.",
+      "repair": "Search is bound to the organizations the caller may read (lib/organizations/read-authority.ts).",
+      "evidence": [
+        "app/api/__tests__/organizations-read-authority.pglite.test.ts (13, real routes and real SQL)"
+      ],
+      "nativeEvidence": "The hierarchy overlap query and the system role's SELECT privilege were checked against the native schema; the routes have not run natively.",
+      "remaining": [
+        "Run the organization routes natively"
+      ]
+    },
+    {
+      "defectId": "DEF-0B9-ORG-ITEM-GET-ANY-SIGNED-IN-USER-READS-ANY-ORGANIZATION-RECORD-AS-SYSTEM",
+      "status": "NATIVE_VERIFIED",
+      "commits": [
+        "e0afd3bf9",
+        "8636991de"
+      ],
+      "rootCause": "System-role read of any organization by id after a session-user check.",
+      "repair": "Active membership, administrator above, or platform; otherwise 404. Non-administrators get the profile without settings, billing contact, tier or provenance.",
+      "evidence": [
+        "app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts (PG15 and PG16, system role, 5 tests each)"
+      ],
+      "remaining": []
+    },
+    {
+      "defectId": "DEF-0B9-ORG-ANALYTICS-ANY-SIGNED-IN-USER-READS-ANY-ORGANIZATION-NAME-TYPE-CHILD-COUNT-AND-AGGREGATES-BY-PATH-ID",
+      "status": "NATIVE_VERIFIED",
+      "commits": [
+        "e0afd3bf9",
+        "bd953b9d7"
+      ],
+      "rootCause": "Analytics by path id with no membership check and no uuid validation.",
+      "repair": "uuid validated; organization must be readable; officer, administrator above or platform required.",
+      "evidence": [
+        "app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts (PG15 and PG16, system and runtime roles, 10 tests each)"
+      ],
+      "remaining": [
+        "Officer floor is an engineering default, not an issued mandate"
+      ]
+    },
+    {
+      "defectId": "DEF-0B9-ORG-CHILDREN-ANY-SIGNED-IN-USER-LISTS-CHILDREN-OF-ANY-ORGANIZATION-AS-SYSTEM",
+      "status": "NATIVE_VERIFIED",
+      "commits": [
+        "e0afd3bf9",
+        "bd953b9d7"
+      ],
+      "rootCause": "System-role children read of any organization.",
+      "repair": "Parent must be readable and only children the caller may read are returned; bounded.",
+      "evidence": [
+        "app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts (PG15 and PG16, system and runtime roles, 10 tests each)"
+      ],
+      "remaining": []
+    },
+    {
+      "defectId": "DEF-0B9-ORG-DESCENDANTS-ANY-SIGNED-IN-USER-LISTS-WHOLE-SUBTREE-OF-ANY-ORGANIZATION-UNBOUNDED-AS-SYSTEM",
+      "status": "NATIVE_VERIFIED",
+      "commits": [
+        "e0afd3bf9",
+        "bd953b9d7"
+      ],
+      "rootCause": "Unbounded system-role subtree read of any organization.",
+      "repair": "Root must be readable, result limited to readable organizations and bounded at 2000.",
+      "evidence": [
+        "app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts (PG15 and PG16, system and runtime roles, 10 tests each)"
+      ],
+      "remaining": []
+    },
+    {
+      "defectId": "DEF-0B9-ORG-HIERARCHY-LIST-ANY-SIGNED-IN-USER-ENUMERATES-EVERY-ORGANIZATION-AS-SYSTEM",
+      "status": "NATIVE_VERIFIED",
+      "commits": [
+        "e0afd3bf9",
+        "8636991de"
+      ],
+      "rootCause": "Up to 500 organizations of every tenant listed to any signed-in user.",
+      "repair": "Listing is bound to the organizations the caller may read; the legacy tree is bound the same way (DEF-0B10-OPL-07, legacy branch).",
+      "evidence": [
+        "app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts (PG15 and PG16, system role, 5 tests each)"
+      ],
+      "remaining": [
+        "DEF-0B10-OPL-07 is challenged: its legacy branch is repaired, the V2 branch was already scoped"
+      ]
+    },
+    {
+      "defectId": "DEF-0B9-ORG-ROSTER-GET-ANY-ORGANIZATION-MEMBER-READS-FULL-ROSTER-WITH-CONTACT-DETAILS",
+      "status": "NATIVE_VERIFIED",
+      "commits": [
+        "e0afd3bf9",
+        "bd953b9d7"
+      ],
+      "rootCause": "Any member, in any status, read the full roster with contact details.",
+      "repair": "Steward or above, administrator above or platform; getUserContextForOrganization counts only an active membership.",
+      "evidence": [
+        "app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts (PG15 and PG16, system and runtime roles, 10 tests each)"
+      ],
+      "remaining": [
+        "Steward floor is an engineering default, not an issued mandate"
+      ]
+    },
+    {
+      "defectId": "DEF-0B9-ORG-ROSTER-POST-STEWARD-GRANTS-ANY-ORGANIZATION-ROLE-TO-ANY-USER-ID-WITHOUT-ACCEPTANCE",
+      "status": "NATIVE_VERIFIED",
+      "commits": [
+        "e0afd3bf9",
+        "bd953b9d7"
+      ],
+      "rootCause": "A steward inserted an active membership with any role for any user id.",
+      "repair": "Grantable roles are below the caller's own and never administrator; the membership is always pending. The native run also found that the roster insert (and the six other Drizzle inserts into organization_members) failed on the real schema: created_at, updated_at and is_primary are NOT NULL with no database default, and the ORM left them out. The schema now supplies them in the ORM (the same approach already used for exempt_from_per_capita).",
+      "evidence": [
+        "app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts (PG15 and PG16, system and runtime roles, 10 tests each)"
+      ],
+      "remaining": [
+        "The invitation flow that activates a pending membership is not exercised by this suite"
+      ]
+    },
+    {
+      "defectId": "DEF-0B10-ORG-CAMPAIGN-ROWS-READABLE-BY-ANY-MEMBER-WITH-STRATEGY-EMPLOYER-VULNERABILITIES-TEAM-AND-SUPPORT-COUNTS",
+      "status": "E2E_VERIFIED",
+      "commits": [
+        "66acc8b1e"
+      ],
+      "rootCause": "Every organizingCampaigns route admitted a member, returning strategy, employer vulnerabilities, team and support counts.",
+      "repair": "All 14 organizing routes read and write at the officer floor. The floor is an engineering default, not an issued institutional mandate.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/wave1-route-floors.test.ts"
+      ],
+      "remaining": [
+        "Native run",
+        "Institutional confirmation of the officer floor"
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "organizing campaigns: a member and a steward are refused (403) and an anonymous caller 401. The officer and administrator read paths are not exercised over HTTP",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
+    },
+    {
+      "defectId": "DEF-0B10-PEN-RETIREMENT-ELIGIBILITY-LISTS-EVERY-PENSION-ENROLMENT-OF-THE-ORGANIZATION-TO-ANY-MEMBER",
+      "status": "NATIVE_VERIFIED",
+      "commits": [
+        "66acc8b1e"
+      ],
+      "rootCause": "Any member listed every pension enrolment of the organization, whole rows.",
+      "repair": "Officer floor, validated 1-60 threshold, allow-listed projection, 500-row cap, tenant context and an atomic audit entry.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/pension-retirement-eligibility.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/tenant-isolation-remediation.postgres.test.ts (PG15 and PG16, runtime role)"
+      ],
+      "remaining": [
+        "E2E through a browser",
+        "Institutional confirmation of the officer floor"
+      ]
+    },
+    {
+      "defectId": "DEF-0B12-CRUD-TESTIMONIAL-ITEM-WRITES-ARE-CONDITIONED-ON-THE-ID-ALONE-FOR-AN-ADMIN-OF-ANY-ORGANIZATION",
+      "status": "E2E_VERIFIED",
+      "commits": [
+        "66acc8b1e"
+      ],
+      "rootCause": "An administrator of any organization could change any testimonial by id; the table has no organization column.",
+      "repair": "Item writes need the content_manager role.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/wave1-route-floors.test.ts"
+      ],
+      "remaining": [
+        "Native run",
+        "Real behaviour of the content_manager role in a deployed identity provider"
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "testimonials: a shared row cannot be changed or deleted by an organization administrator, steward or member (403) and survives every refused write. DISCOVERED BY THIS TEST: the repair covered PATCH only; the crud-factory DELETE handler still hard-coded an administrator floor, so an organization administrator could delete any shared row by id (R-44). Demonstrated on the pre-fix build, fixed, and re-run green",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
+    },
+    {
+      "defectId": "DEF-0B7-COGA-CROSS-DOMAIN-CORRELATIONS-ARE-FIXED-LITERALS",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "66acc8b1e"
+      ],
+      "rootCause": "The engine returned fixed literals as organization analysis.",
+      "repair": "The engine answers 501 until a real computation exists.",
+      "evidence": [
+        "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/constant-engines-not-implemented.test.ts"
+      ],
+      "remaining": [
+        "A real engine, if the capability is required product functionality"
+      ]
+    },
+    {
+      "defectId": "DEF-0B7-COGB-PRECEDENT-AND-PROCEDURAL-ENGINES-RETURN-CONSTANT-CONTENT-AS-ORGANIZATION-ANALYSIS",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "66acc8b1e"
+      ],
+      "rootCause": "Precedent and procedural engines returned constant content as organization analysis.",
+      "repair": "Both engines answer 501 until a real computation exists.",
+      "evidence": [
+        "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/constant-engines-not-implemented.test.ts"
+      ],
+      "remaining": [
+        "A real engine, if the capability is required product functionality"
+      ]
+    },
+    {
+      "defectId": "DEF-0B7-EXC-PUBLISH-AND-INDEX-COPY-INTERVIEW-TEXT-TO-ORG-WIDE-KNOWLEDGE-BASE",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "66acc8b1e"
+      ],
+      "rootCause": "Publishing copied interview text, including the retiring employee name, to the organization-wide knowledge base regardless of sensitivity.",
+      "repair": "Publication needs a recorded level and consent and a second person; the copy is made only when the level allows indexing and omits the retiring employee name. An unrecorded level is treated as restricted.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/exit-interviews-publish.route.test.ts",
+        "apps/union-eyes/app/api/__tests__/exit-interviews-read-gates.pglite.test.ts"
+      ],
+      "remaining": [
+        "Native run",
+        "Institutional confirmation of which levels permit indexing"
+      ]
+    },
+    {
+      "defectId": "DEF-0B7-EXC-READS-IGNORE-SENSITIVITY-LEVEL",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "66acc8b1e"
+      ],
+      "rootCause": "List, item and documents reads ignored the sensitivity level and consent.",
+      "repair": "A reader policy applies level and consent; a non-readable interview answers 404; members get a projection without the retiring employee, reason or risk score and without workflow events.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/exit-interviews-read-gates.pglite.test.ts",
+        "apps/union-eyes/app/api/__tests__/exit-interviews-mutations.route.test.ts"
+      ],
+      "remaining": [
+        "Native run",
+        "Derived graphs, aggregates, succession and forecast engines still ignore sensitivity (see related defects)"
+      ]
+    },
+    {
+      "defectId": "DEF-0B7-EXC-PUBLISH-SENDS-EVERY-INTERVIEW-TO-AI-WITHOUT-CONSENT-GATE-OR-AUDIT",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "66acc8b1e"
+      ],
+      "rootCause": "Publication sent every interview to the AI service with no consent gate or audit, and swallowed failures.",
+      "repair": "Extraction runs only when the level and consent allow it, is audited (requested, completed, failed) and no longer swallows errors.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/exit-interviews-publish.route.test.ts"
+      ],
+      "remaining": [
+        "Native run"
+      ]
+    },
+    {
+      "defectId": "DEF-0B8-HS-ANONYMOUS-REPORTER-STAMPED-IN-CREATED-BY",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "66acc8b1e"
+      ],
+      "rootCause": "A report filed as anonymous was stamped with the session user in created_by and the audit entry.",
+      "repair": "The route declares anonymousCreate; the factory records the actor as anonymous in the row and the audit entry. A client-supplied createdBy changes nothing. The anonymity policy is an engineering default needing institutional confirmation.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/health-safety-incident-anonymity.pglite.test.ts",
+        "apps/union-eyes/app/api/__tests__/wave1-route-floors.test.ts"
+      ],
+      "remaining": [
+        "Native run",
+        "Institutional confirmation of the anonymity policy"
+      ]
+    },
+    {
+      "defectId": "DEF-0B8-HS-DASHBOARD-TRAINING-COMPLIANCE-IS-A-CONSTANT",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "66acc8b1e"
+      ],
+      "rootCause": "Training compliance was a constant and a failed read returned zeros.",
+      "repair": "Unmeasured metrics are null and shown as not measured; a failed read is an error; the organization is required.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/health-safety-dashboard.route.test.ts"
+      ],
+      "remaining": [
+        "A real training-compliance measure needs status and completion columns the table does not have"
+      ]
+    },
+    {
+      "defectId": "DEF-0B8-HS-INCIDENT-ITEM-READ-MEMBER-FLOOR-WHOLE-ROW",
+      "status": "E2E_VERIFIED",
+      "commits": [
+        "66acc8b1e"
+      ],
+      "rootCause": "Any member read a whole incident row by id.",
+      "repair": "Item read needs a health_safety_rep.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/wave1-route-floors.test.ts"
+      ],
+      "remaining": [
+        "Native run"
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "health and safety incidents: a member is refused the list and the single-record read (403); an anonymous caller 401; the administrator reads the list (200). A real incident row is not read over HTTP, so the whole-row projection is still unit-level",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
+    },
+    {
+      "defectId": "DEF-0B8-ICRA-PAID-PDF-REPORT-GATE-REQUIRES-STATUS-COMPLETED-NO-WRITER",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "66acc8b1e"
+      ],
+      "rootCause": "The paid PDF gate required a status no writer ever sets, so the report was unreachable.",
+      "repair": "Submitted and completed assessments are reportable; tier and capability checks are unchanged.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/icra-report-assessmentId.route.test.ts"
+      ],
+      "remaining": [
+        "Native run"
+      ]
+    },
+    {
+      "defectId": "DEF-0B9-ML-OPERATIONAL-METRICS-COUNT-EVERY-ORGANIZATIONS-CLAIMS-FOR-ANY-SIGNED-IN-CALLER-OR-THE-SERVICE-KEY",
+      "status": "E2E_VERIFIED",
+      "commits": [
+        "66acc8b1e"
+      ],
+      "rootCause": "Any signed-in user or the service key received counts across every organization; request and error figures were proxies; a failed read was zero.",
+      "repair": "Platform administrator or the service key compared in constant time; proxies are not reported (null); a failed read is a 500 with no detail.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/metrics-operational.route.test.ts"
+      ],
+      "remaining": [
+        "Native run",
+        "Real request and error figures from the observability system"
+      ],
+      "e2eEvidence": [
+        "apps/union-eyes/e2e/runtime/10-unit-verified-promotions.spec.ts"
+      ],
+      "e2eProven": "an anonymous caller is refused (401); a member, steward, organization administrator and executive are refused (403). The platform-administrator and service-key success paths are not exercised over HTTP",
+      "e2eNote": "Production build (next build + next start) against native PostgreSQL 16 and a real Redis, through the QA acceptance session. Not CLOSED: the acceptance condition also needs an independent release decision."
+    },
+    {
+      "defectId": "DEF-0B10-OPL-01",
+      "status": "NATIVE_VERIFIED",
+      "commits": [
+        "66acc8b1e",
+        "8636991de"
+      ],
+      "rootCause": "GET /api/organizations returned every organization with contact, billing and settings to any signed-in user.",
+      "repair": "The list is the caller's memberships, the organizations below one they administer, or everything for a platform administrator; non-administrators get the public profile; filters are validated; result bounded to 1000; grievance counts are administrative.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts (PG15 and PG16, system role, 5 tests each)"
+      ],
+      "remaining": [
+        "Institutional decision on which fields another organization may see"
+      ]
+    },
+    {
+      "defectId": "DEF-0B10-OPL-07",
+      "status": "NATIVE_VERIFIED",
+      "commits": [
+        "66acc8b1e",
+        "8636991de"
+      ],
+      "rootCause": "The legacy tree branch read every organization for any signed-in user.",
+      "repair": "Repaired in batch 7 (read authority); covered by a tree test in this batch. The canonical branch was already membership-scoped.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts (PG15 and PG16, system role, 5 tests each)"
+      ],
+      "remaining": [
+        "Audit of each selection (switch) is not part of this route"
+      ]
+    },
+    {
+      "defectId": "DEF-0B7-COGA-DERIVED-AGGREGATES-IGNORE-INTERVIEW-SENSITIVITY",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "8636991de"
+      ],
+      "rootCause": "The expertise map, cascade analysis, decision brief, continuity risk report and governance timeline aggregated interviews without testing sensitivity or consent.",
+      "repair": "Every derived engine reads only published, consented interviews at public_internal or restricted (an unrecorded level reads as restricted); the officer-floor governance timeline also shows privileged and never the administrator-only levels. These sets are engineering defaults awaiting the institutional decision on which offices read derived analytics.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/interview-derived-analytics.pglite.test.ts",
+        "apps/union-eyes/lib/knowledge-transfer/**/__tests__ (engine logic with the eligibility condition stubbed)"
+      ],
+      "remaining": [
+        "Native run",
+        "Institutional decision on derived-analytics levels per office",
+        "No minimum cohort before a role is attached to a tag"
+      ]
+    },
+    {
+      "defectId": "DEF-0B7-COGA-FORECAST-PROJECTIONS-ARE-FIXED-RATES-AND-ALWAYS-IMPROVE",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "8636991de"
+      ],
+      "rootCause": "Twelve-month projections from three fixed monthly rates and a literal fallback history made every organization read as improving.",
+      "repair": "The engine reports measured current metrics only: no history, no projection, trend insufficient_data, confidence 0. The decision brief says no trend is reported.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/interview-derived-analytics.pglite.test.ts",
+        "apps/union-eyes/lib/knowledge-transfer/**/__tests__ (engine logic with the eligibility condition stubbed)"
+      ],
+      "remaining": [
+        "A measured history of the dependency map is needed before a trend can be reported"
+      ]
+    },
+    {
+      "defectId": "DEF-0B7-COGB-DERIVED-GRAPHS-IGNORE-INTERVIEW-SENSITIVITY",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "8636991de"
+      ],
+      "rootCause": "The topic graph and propagation map attached topics and roles of administrator-only interviews to nodes for any steward.",
+      "repair": "Same eligibility condition as the other derived engines, applied in the graph builder and the propagator.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/interview-derived-analytics.pglite.test.ts",
+        "apps/union-eyes/lib/knowledge-transfer/**/__tests__ (engine logic with the eligibility condition stubbed)"
+      ],
+      "remaining": [
+        "Native run",
+        "Minimum cohort before a role is attached to a tag",
+        "Inferred edges are not yet labelled as co-occurrence"
+      ]
+    },
+    {
+      "defectId": "DEF-0B7-COGB-SUCCESSION-SENDS-EVERY-PUBLISHED-INTERVIEW-TO-MODEL-IGNORING-SENSITIVITY",
+      "status": "UNIT_VERIFIED",
+      "commits": [
+        "8636991de"
+      ],
+      "rootCause": "The succession analysis sent every published interview to the model regardless of level or consent, accepted any reply and substituted a canned summary on a parse failure.",
+      "repair": "Only eligible interviews reach the model; the call is audited (requested, completed, failed); the reply is validated against a schema; an unusable reply is a 500, not a canned summary; the report says whether it is model-generated.",
+      "evidence": [
+        "apps/union-eyes/app/api/__tests__/interview-derived-analytics.pglite.test.ts",
+        "apps/union-eyes/lib/knowledge-transfer/**/__tests__ (engine logic with the eligibility condition stubbed)"
+      ],
+      "remaining": [
+        "Native run",
+        "Caching or rate limiting of the model call",
+        "Readiness is still derived from interview counts, not handover records"
+      ]
+    }
+  ],
+  "ratchetAllowlists": [
+    {
+      "ratchet": "MUTABLE-REP-IDENTIFIER",
+      "file": "apps/union-eyes/lib/authority/store/case-ownership-backfill.ts",
+      "verdict": "JUSTIFIED_BY_EXECUTABLE_PROOF",
+      "proof": [
+        "db/__tests__/authority-kernel-case-backfill.pglite.test.ts: plan lists only eligible legacy owners and defers the rest while writing nothing; stale approvals and a missing decision are refused; an issuer without case:assign rolls the whole backfill back; idempotent replay",
+        "db/__tests__/authority-kernel-case-backfill.native.test.ts: two concurrent executions assign once and replay the same receipt (native PG15 and PG16)"
+      ],
+      "note": "The module reads the legacy column and never treats it as authority; every owner it writes goes through assignCase."
+    },
+    {
+      "ratchet": "DIRECT-MANDATORY-AUDIT-IMPORT",
+      "file": "apps/union-eyes/lib/voting/election-succession.ts",
+      "verdict": "JUSTIFIED_BY_EXECUTABLE_PROOF",
+      "proof": [
+        "db/__tests__/election-certificate-succession.pglite.test.ts: the successor rolls back when the audit write fails; a certified row is unchanged; replay of the same decision",
+        "db/__tests__/election-certificate-succession.native.test.ts: two concurrent grants of the same decision store one successor (native PG15 and PG16)",
+        "app/api/__tests__/election-succession.route.test.ts: 404 for a foreign election, 501 without the ownership relation, 409 with no mandate"
+      ],
+      "note": "The module branches explicitly between the canonical ledger and an in-transaction hash-chained audit insert on the same executor; a failed write throws."
+    }
+  ],
+  "functionalGaps": {
+    "removedV2CallSites": {
+      "summary": "Every frontend call to /api/v2/* now has a recorded disposition. Callers whose capability exists at the root API were repointed; the rest are retired and visible: the v2 catch-all answers 410 and the dashboard shows a bilingual notice naming the retired path (RetiredCapabilityNotice, mounted in the dashboard layout); two server-rendered pages that used to show invented zeros now show an alert instead.",
+      "repointedToRootApi": [
+        "analytics/clause-stats",
+        "analytics/org-activity",
+        "analytics/precedent-stats",
+        "clc/remittances (list)",
+        "organization/members",
+        "stewards",
+        "organizing/campaigns (two consoles)",
+        "social-media/accounts",
+        "social-media/analytics",
+        "social-media/campaigns",
+        "social-media/feed",
+        "social-media/posts"
+      ],
+      "retiredAndVisible": [
+        "admin/reports/generate",
+        "admin/reports/export",
+        "analytics/overview",
+        "analytics/benchmarks",
+        "analytics/engagement",
+        "analytics/scheduled-reports",
+        "analytics/clc/sector-signals",
+        "analytics/clc/affiliate-trends",
+        "analytics/clc/knowledge-index",
+        "analytics/clc/governance",
+        "analytics/clc/decision-intelligence",
+        "analytics/clc/executive-brief",
+        "clc/compliance/metrics (page shows an alert, not zeros)",
+        "clc/remittances/{id}/approve",
+        "clc/remittances/{id}/reject",
+        "clc/sync",
+        "communications/analytics",
+        "communications/push/devices",
+        "communications/push/history",
+        "federation/remittances (page shows an alert, not zeros)",
+        "financial/reports/aged-receivables",
+        "social-media/hashtag-suggestions",
+        "social-media/scheduled-posts"
+      ],
+      "needsDecision": [
+        "admin/users/role: the canonical route is /api/admin/users/{userId}; the role-select component sends a different body and is not repointed blindly"
+      ],
+      "notVerified": "The repointed calls were matched on route existence and GET handlers, not exercised in a browser. Each retired capability is still required product functionality unless the institution retires it: this is visibility, not completion."
+    },
+    "arrearsAndHealthWelfare": "app/api/arrears and app/api/healthwelfare/plans were generic collections over per_capita_remittances; the capability is not implemented and the routes now refuse.",
+    "precedentFederationSharing": "RESOLVED for explicit grants and public precedents: cache migration 0030 adds one read-only policy for the runtime role. Proven on native PG15 and PG16 (projection without the owner's document location, grant list and author; revocation effective at once; a third organization and un-granted or federation-level precedents read as not found; the grantee's UPDATE, DELETE and INSERT touch nothing). NOT resolved: federation and congress levels stay owner-only at the database until their own reviewed design (hierarchy and congress-membership predicates) exists. The migration is registered as UNQUALIFIED and has not been applied to any live database.",
+    "gate0HistoricalTests": "Historical Gate 0 evidence tests are separated from current-source regression tests (docs/union-eyes/convergence/GATE0-TEST-TREATMENT.md; tooling/scripts/run-ue-gate0-historical.mjs). A recorded green run of the historical suite at its pinned commit is still outstanding.",
+    "drizzleInsertDefaults": "organization_members.created_at, updated_at and is_primary are NOT NULL without a database default on the canonical schema. The ORM now supplies them. Other tables whose Drizzle declaration relies on a DEFAULT the canonical table lacks have not been surveyed: only native runs expose them."
+  },
+  "frozenGate0Tooling": "tooling/scripts/lib/ue-gate0b*-classification.test.mjs quote pre-repair source text and fail once that source is repaired (for example crud-governance.ts, the docs routes). They are not CI gates and are not edited: the frozen records describe the pre-repair state.",
+  "verdicts": {
+    "READY_FOR_STAGING": "NO"
+  },
+  "runtimeFindings": {
+    "note": "Defects found by running the real application over HTTP against native PostgreSQL. They are NOT items of the 150-item release-debt register and do not change the addressed count. Detail and reproduction: docs/union-eyes/convergence/RUNTIME-ACCEPTANCE.md. FIXED_RUNTIME_VERIFIED means the repaired path was exercised by the Playwright runtime suite on the production build; it does not mean CLOSED. R-52–R-55 have exact-SHA UNIT-only proof in GitHub Actions run 40950669012 (39/39 tests, 0 skipped) against e75d4c07; none is yet native/HTTP/browser qualified.",
+    "evidence": "e2e/runtime/01-foundation-and-case-journey.spec.ts and 02-persistence-after-restart.spec.ts, run through tooling/scripts/ue-runtime-up.mjs on a fresh container",
+    "items": [
+      {
+        "id": "R-01",
+        "status": "OPEN",
+        "title": "Raw-handler routes may leak an unmapped EntitlementError as 500 (intake fixed; survey of 62 routes outstanding)"
+      },
+      {
+        "id": "R-02",
+        "status": "OPEN",
+        "title": "Platform audit tables have no storage-authority classification; topology decision outstanding"
+      },
+      {
+        "id": "R-03",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "No audit proof could be created without Azure immutable storage (strictly gated local sandbox store added; never immutable)"
+      },
+      {
+        "id": "R-04",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "UE_ENVIRONMENT=local was absent from the environment-validation enum (now aligned with lib/runtime/environment.ts); the validation error no longer logs on start"
+      },
+      {
+        "id": "R-05",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "No case-coordinator fixture: synthetic chief steward and resource-scoped supervisory mandate through the authority store"
+      },
+      {
+        "id": "R-06",
+        "status": "OPEN",
+        "title": "Steward claims console (/api/claims) is empty while /api/cases is not"
+      },
+      {
+        "id": "R-07",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "CSP blocked eval bundles under NODE_ENV=test; production build is now the acceptance runtime"
+      },
+      {
+        "id": "R-08",
+        "status": "OPEN",
+        "title": "Mobile header wraps and duplicates the organization name"
+      },
+      {
+        "id": "R-09",
+        "status": "OPEN",
+        "title": "predev align-org-schema masks canonical schema defects"
+      },
+      {
+        "id": "R-10",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "feature_flags lacked created_by/last_modified_by; every flag evaluation failed (migration 0031)"
+      },
+      {
+        "id": "R-11",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Redis retry loop: initRedis silently defaulted to redis://localhost:6379 and reconnected every ~2 s with nothing configured; it now does not reconnect, logs once, and every lookup is a miss"
+      },
+      {
+        "id": "R-12",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Dev server instability; resolved by the production-build runtime (33/33, repeatable)"
+      },
+      {
+        "id": "R-13",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "A newly filed case could not be routed: case facts carried no jurisdiction. The unit is now the owning organization (server-written at intake, exact match, never inherited); routing needs an explicit unit-scoped supervisory mandate with the assign power, sight of the queue needs a separate cases triage designation; assignment audit names the mandate. Proven on a freshly filed case with denials and revocation"
+      },
+      {
+        "id": "R-14",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "History writes used the public claim id against the internal-key FK when UE_CANONICAL_BOOTSTRAP_V2=0 (notes, transitions, reassignment 500)"
+      },
+      {
+        "id": "R-15",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Workbench status names were refused by the transition route (CUPE-only vocabulary)"
+      },
+      {
+        "id": "R-16",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "grievances insert failed: Django table has no DB defaults and the ORM emitted default (other Django-managed tables unswept)"
+      },
+      {
+        "id": "R-17",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "grievance_events.actor_user_id was uuid for text principals (migration 0032, UNQUALIFIED)"
+      },
+      {
+        "id": "R-18",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Workflow engine fed malformed signal input (every transition threw) and escalation committed a grievance when the transition was refused"
+      },
+      {
+        "id": "R-19",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Kernel executor passed Date objects to the driver (first assignment 500); no-op reassignment left the assigned_to mirror stale; QA case-assignment rules added"
+      },
+      {
+        "id": "R-20",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Rate limiting contract (lib/rate-limiter.ts + lib/rate-limit/proxy-api-guard.ts): explicit limits reject, the catch-all fails open, health reports a missing or unreachable Redis as degraded, the startup message no longer contradicts the behaviour; proven with a real Redis healthy, stopped and recovered"
+      },
+      {
+        "id": "R-21",
+        "status": "OPEN",
+        "title": "Cold start measured: port open in 5-6 s, first request after a restart 14.6 s before and 0.6 s after a background warm-up that completes about 10 s after the port opens (a request inside that window still pays the load); FIPS boundary warnings (environment prerequisite, FIPS-enabled Node) remain on every start; no latency budget has been set or enforced. Observed this session: 3 of the last 6 orchestrator starts exceeded the 240 s health budget on the loaded workstation although the app reported healthy within minutes afterwards; the cause is not yet measured. The orchestrator now waits up to 480 s and reports the elapsed time instead of hiding it. Cold start after a fresh seed measured 293 s and 346 s on the last two starts (health reported ok only after that long); the cause is unprofiled"
+      },
+      {
+        "id": "R-22",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Orchestrator defects: hard-coded Django password; Windows shell argument splitting"
+      },
+      {
+        "id": "R-23",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "NAR sandbox gate treated NODE_ENV=production as a deployment signal (aligned with the QA session gate; one test replaced and disclosed)"
+      },
+      {
+        "id": "R-24",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "/api/dashboard/stats returned tenant-wide case counts to any member and returned zeros when its query failed. It now counts only the cases inside the caller's kernel read scope (the same scope as GET /api/cases), withholds the organization member count from an ordinary member as null, ignores a client-supplied organization, and returns an error instead of zeros when the query fails. Verified by spec 07 (9 tests) and 5 route unit tests. The vulnerable behaviour was not re-run on the old build; the administrator and executive zero-total checks would have failed against a tenant-wide aggregate"
+      },
+      {
+        "id": "R-25",
+        "status": "OPEN",
+        "title": "PATCH /api/grievances/[id]/assign cannot assign an escalated grievance to a text-id representative. Root cause (traced, not yet fixed): the route validates stewardId as a GUID and uses the SAME value as a steward RECORD id (stewards.id, in assignSteward and steward_assignments, with a caseload counter) and as a user PRINCIPAL (assignPrimaryRepresentative, grievances.union_rep_id). Kernel principals are text, while grievances.union_rep_id is uuid; that column is referenced by 51 files (queries, pglite suites, the Django backend). The fix is a coordinated one: a text principal for the assignment input, a lookup from principal to steward record for the caseload bookkeeping (skipped when no record exists), and a migration of union_rep_id to text with its Django model and readers. It is deliberately not a partial change. Related to R-29"
+      },
+      {
+        "id": "R-26",
+        "status": "OPEN",
+        "title": "Two audit stores: kernel authority events are written to public.audit_logs and route audits to audit_security.audit_logs (different column sets); reporting must read both"
+      },
+      {
+        "id": "R-27",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Three unit tests encoded the old defective history behaviour (public id in legacy mode, response shape); replaced or updated with disclosure, the legacy test now asserts the internal-key contract against the Django-shaped foreign key"
+      },
+      {
+        "id": "R-28",
+        "status": "OPEN",
+        "title": "ORM/physical parity sweep: 662 NOT NULL columns in 216 tables have no database default while the ORM emits DEFAULT (class of R-16; organization_members and grievances fixed). Evidence: docs/union-eyes/convergence/evidence/vs-orm-physical-parity-eba009ba6.json"
+      },
+      {
+        "id": "R-29",
+        "status": "OPEN",
+        "title": "Principal columns declared text in the ORM but uuid in the database. 15 of 16 are now fixed: migration 0033 (nine columns of the three external representation tables) and migration 0034 (six columns: employer_communications sender_user_id and created_by, employer_contacts.created_by, ai_grievance_triages.reviewed_by, ai_clause_reasonings.reviewed_by, ai_copilot_sessions.user_id), each proven on native PG15 and PG16 (7 tests each, including the combined database where it applied for real) and re-measured with the parity tool (evidence/vs-orm-physical-parity-after-0034.json). ONE remains: cookie_consents.user_id is a foreign key to profiles(id) (uuid), so retyping it would remove referential integrity or require a principal-to-profile mapping: a product decision, left unchanged. Non-principal entity id columns (ORM text, database uuid) are a separate, lower-risk class"
+      },
+      {
+        "id": "R-30",
+        "status": "OPEN",
+        "title": "2,124 ORM-declared columns across 168 tables are absent from the physical schema (any select naming them fails); most belong to surfaces not yet exercised. Evidence: docs/union-eyes/convergence/evidence/vs-orm-physical-parity-eba009ba6.json"
+      },
+      {
+        "id": "R-31",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "The proxy mutation limiter was dead code for any request without an Idempotency-Key (an early return preceded it) and, where reachable, was keyed on a client-supplied x-org-id header: a client escaped it by omitting a header, and a caller of one tenant exhausted another tenant's bucket (the legitimate victim received 429). Replaced by an API guard keyed on the presented credential and the client address, covering every API request including public routes. Demonstrated on the vulnerable build, fixed, and re-proven over HTTP"
+      },
+      {
+        "id": "R-32",
+        "status": "OPEN",
+        "title": "Public API routes and several raw-handler write routes had no rate limit of their own (the guard now covers them at the edge); per-route limits for abuse-sensitive public endpoints (public intake, sign-up) and per-user limits for expensive operations should be reviewed route by route"
+      },
+      {
+        "id": "R-33",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Auditor duties were unreachable over HTTP. The finance routes keep their frozen role allow-list (pinned by the Financial Officer contract, so not loosened). A separate read-only route, GET /api/assurance/finance/ledger, now serves the independent auditor: authority is a live financial mandate holding the audit power on the organization ledger, issued through the governed workflow; every read is audited; it accepts no write. Verified over HTTP on the production build (spec 08: the auditor reads and the read is audited; the audit duty confers nothing else; finance duties, an auditor-titled user without a mandate, approver, administrator, executive, steward, member, another tenant, platform identity and unauthenticated caller are refused; revocation removes access at once and restoration reissues it). Trustees are NOT exercised: there is no trustee role in the platform role model and no trustee route"
+      },
+      {
+        "id": "R-34",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Runtime spec isolation: rate-limit probes shared identities with later specs and exhausted their mutation window; probes now use identities no other spec mutates with, and the restart check files its own state instead of depending on an earlier run"
+      },
+      {
+        "id": "R-35",
+        "status": "OPEN",
+        "title": "Outside Union Eyes: apps/console, apps/flow, apps/partners and apps/zonga proxies read x-org-id from the client request and key their org rate-limit bucket on it, the same pattern that was dead and forgeable in Union Eyes (R-31). Not changed here (out of this mission); needs its own review"
+      },
+      {
+        "id": "R-36",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Contract ORG-ENFC-003 (a lexical check for checkOrgRateLimit in proxy.ts) failed once the forgeable limiter was removed. REPLACED, with disclosure, by a stronger check for apps that adopt the edge guard: proxy.ts uses decideApiLimit, the guard file exists and keys no bucket on x-org-id or x-organization-id, proxy.ts reads no rate-limit key from x-org-id, and withApi applies the verified-organization DEFAULT_API_ORG bucket. The original pattern is still accepted for the other apps"
+      },
+      {
+        "id": "R-37",
+        "status": "OPEN",
+        "title": "P4 attestation (omitted suite, now executed): stages 1-4 pass; the post-apply verifier stage fails with 67 gaps in about 20 tables because the current storage-authority manifest expects more than the three frozen historical SQL files provide (deadline_reassignment_convergence, ICRA tables, dues ledgers, django_migrations, ...). Historical-versus-current drift, listed in evidence/vs-native-sweep2-d82edf706.json"
+      },
+      {
+        "id": "R-38",
+        "status": "OPEN",
+        "title": "Gate 0 historical validator cannot pass: the hash-pinned execution logs for UE-CAP-F-001, H-001, H-005, K-001 and K-002 were never committed (**/*.log is git-ignored) and exist nowhere; they cannot be regenerated and frozen history may not be rewritten. Needs recovery of the originals or an owner-authorised new evidence tranche. Evidence: evidence/vs-gate0-historical-run.json"
+      },
+      {
+        "id": "R-39",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Native test infrastructure: sweep v1 leaked DATABASE_URL and QA_TEST_ENV into every suite (false failures); the long-lived PG16 container accumulated ~120 scratch databases and entered crash recovery; two suites could not launch pnpm/npx on Windows; the P4 fixture silently skipped the real django_migrations shape. All repaired or contained, and the suites run in clean child processes"
+      },
+      {
+        "id": "R-40",
+        "status": "OPEN",
+        "title": "Authority-kernel bootstrap gap: the auditor and trustee capacities are appointment-only (earned from a live mandate), yet issuing the first financial mandate requires the holder to ALREADY hold one of financial_officer, executive, trustee or auditor. A genuinely independent person with only the member capacity can therefore never be appointed auditor or trustee through the kernel. The QA auditor fixture works around it by carrying the executive capacity through its stored role (disclosed in tests/fixtures/test-users.ts) and holds only the audit power. A product decision is needed on how an independent auditor is first appointed (for example a governed appointment instrument that confers the capacity); the issuance policy was not changed"
+      },
+      {
+        "id": "R-41",
+        "status": "OPEN",
+        "title": "External counsel cannot be granted access through the product. (1) No HTTP route issues, activates or revokes a representation authority or an external matter grant: the service functions exist but are wired to no route, so the legacy external routes are readable only for rows inserted directly into the database. (2) Two overlapping external-access designs exist: the legacy representation_authorities / matter-grant tables behind /api/external/*, and the kernel counsel engagement register, whose model is that counsel works in a SEPARATE system and the union only receives signed assertions. (3) The kernel assertion verifier is an injected port with no implementation, so every counsel assertion is refused. Which model is canonical is a product decision; building issuance on the legacy model would extend the second design, so it was not built. Spec 09 proves the READ side only, against a labelled synthetic database fixture (scripts/runtime/external-admin.ts)"
+      },
+      {
+        "id": "R-42",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "FIXED for the session and identity-provider paths, proven over HTTP. Root cause (found by tracing, not the first hypothesis): getCurrentUser() resolved the role from the identity provider, and an identity that asserts no role (the QA acceptance session, a provider without role claims) defaulted to member, so every withRoleAuth route above the member floor (55 routes) refused every caller. The role now comes from the caller's own active membership, read inside that organization's RLS context (a bare connection matches no row), only when the identity asserts none; no membership still means member, and an asserted role is never overridden. Verified: spec 10 (administrator reaches /api/docs, the pilot telemetry routes and organization settings; steward passes the steward role gate; member, steward and executive are refused where they must be) plus 6 unit tests. NOT proven: the real password-session path, which cannot run (R-43)"
+      },
+      {
+        "id": "R-43",
+        "status": "OPEN",
+        "title": "Real password login cannot run in the orchestrator's runtime (POST /api/auth/login returns 500: AUTH_DATABASE_URL, the dedicated auth-gateway role, is not provisioned). An attempt to provision it in that database was made and DELIBERATELY ABANDONED: the legacy-bootstrapped database is not a valid canonical topology (R-45) and the application's own catalog admission rejects it, correctly failing closed. The real login path IS exercised by the existing canonical V2 acceptance harness (next-acceptance.ts), whose evidence is recorded separately (evidence/vs-v2-real-login-smoke.json) and must not be merged with the synthetic-session runtime evidence. UPDATE: R-46 is fixed and the harness now reaches /api/health 200. Added real-login authority steps (42 of 42 as expected, evidence/vs-v2-real-login-authority-steps.json): multi-organization role isolation, hostile tenant header, forged cookie, cross-tenant administrator, suspended identity and reinstatement. Remaining open: provider-claim elevation (no external provider callback path in the harness) and cold-start reliability (one run aborted on a 120 s timeout before any step, R-21). Evidence level is HTTP smoke on a synthetic fixture only"
+      },
+      {
+        "id": "R-44",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "crud-factory DELETE hard-coded an administrator floor and ignored writeRole, so on a table whose writes are reserved for an elevated role an organization administrator could still delete any row by id. Found by promoting DEF-0B12-CRUD-TESTIMONIAL-ITEM-WRITES to HTTP: the historical repair raised the PATCH floor to content_manager but left DELETE at admin, and the route unit tests mocked the factory away and could not see it. Demonstrated on the pre-fix production build (the administrator's DELETE was not refused), fixed (delete floor is the higher of administrator and the write role), and re-run green. A unit test now inspects the factory's real floors (it fails without the fix). Other tables with an elevated writeRole share the factory: arbitration precedents and search (content_manager), data-classification policy (compliance_manager) and security events (security_manager)"
+      },
+      {
+        "id": "R-45",
+        "status": "OPEN",
+        "title": "The orchestrator's legacy-bootstrapped database cannot host the canonical authentication topology. Found by trying to provision the nzila_auth_* gateway roles in it: oauth_providers sits in public (canonical: user_management); magic_links lacks three nullable columns the canonical declaration has (requested_ip, consumed_ip, requested_user_agent); platform_identity_bindings does not exist; legacy bootstrap policies on the auth tables block the canonical bootstrap (\"explicit reconciliation\"); and after forced reconciliation the application's catalog admission still rejected it (legacy catalog contract vs canonical auth grants). So the QA runtime and the V2 topology are two different systems, and everything proven in the QA runtime is evidence about the legacy topology only"
+      },
+      {
+        "id": "R-46",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "FIXED. The canonical V2 acceptance ended FAIL on its last step with 25 catalog-admission violations. Causes: the V2 source plan embedded a stale snapshot of the storage-authority manifest (and lacked 24 authority-kernel and document tables); the canonical overlay kept the legacy runtime schema USAGE and left the bootstrap receipt unclassified; the two documented V2 privilege decisions (donations, evidence_packs) and the two generated system column reads were not in the contract; and the installer did not apply the member-access projection or the case and conversation assignee predicates. Repair: plan regenerated, overlay extended, installer applies the companions after the security statements, manifest-security approves exactly those two functions. Verified: admission 0 violations, /api/health 200, 33 of 33 HTTP steps as expected, contract suite 302 files / 10,280 tests, identity contract and V2 unit tests pass (evidence/vs-v2-real-login-after-r46.json). Disclosed test changes: canonical-catalog-admission.test.ts pins the two decided entries instead of requiring the legacy manifest verbatim; the identity census baseline drops grievance_timeline.created_by, which the current source no longer declares. The harness still reports HTTP_SMOKE_PASS_FINAL_ACCEPTANCE_NOT_PROVEN and exits 1 by design; this is smoke, not final acceptance"
+      },
+      {
+        "id": "R-47",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Under the canonical V2 topology every kernel-decided route returned 500: the authority kernel read membership straight from user_management.organization_users, but the V2 runtime role holds no grant on the identity relations (\"permission denied for table organization_users\"). The reader-owned SECURITY DEFINER source (membershipSourceViaDefiner, compileAuthorityMembershipReaderSql) existed only in native and in-process tests and was neither installed by the V2 bootstrap nor used by the application. Found by the V2 real-login acceptance (a steward's POST /api/claims). Fixed: an activeMembershipSource selects the definer function under V2 and the direct read on the legacy lineage (3 unit tests); the V2 installer now installs the reader function and its expectation is registered with the catalog contract. Verified: the V2 acceptance steps steward-claim-create (200), member-claim-create-denied (403) and role-revoked-claim-create-denied (403) pass over the real login path. Two in-process suites that mock V2 over a legacy-shaped database were adapted to read membership directly (disclosed)"
+      },
+      {
+        "id": "R-48",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "Catalog admission raised on a topology without an audit_security schema (has_schema_privilege on a missing schema), failing the whole admission instead of reporting violations; it now inspects only schemas that exist. Whether the V2 topology should HAVE an audit_security schema (the ORM audit writers target it) is not decided. Separately the V2 smoke's ordinary-preference-write step was stale: the route now refuses client-supplied organizationId and userId with 400. The step now asserts that refusal and that nothing was persisted, then performs the legitimate write (a strengthening of a historical acceptance step, disclosed)"
+      },
+      {
+        "id": "R-49",
+        "status": "FIXED_RUNTIME_VERIFIED",
+        "title": "The disposable runtime published its services on every interface: the orchestrator ran Postgres with -p 55430:5432 and Next on all interfaces, and the native-sweep helper did the same with a fixed password. Now Postgres, Redis, the native PG15/PG16 containers and the app (next start --hostname 127.0.0.1) all bind IPv4 loopback only, and every URL uses 127.0.0.1. Side effect found and resolved: once a container is published on IPv4 loopback only, \"localhost\" resolves to ::1 first on this Windows host and connections stall, which made the Django-audit native suite hang for ~400 s and fail 3 of 4; with explicit 127.0.0.1 it passes 4 of 4 in 18 s. That was an artefact of my own change, not a product regression. Verified: full runtime suite 110 passed, 0 failed on the loopback-only stack. NOT changed: an unrelated container ue-local-pg that this work did not create is still published on 0.0.0.0:55440; it was left alone and is flagged for its owner"
+      },
+      {
+        "id": "R-50",
+        "status": "FIXED_UNIT_VERIFIED",
+        "title": "Earlier full Union Eyes suite figures (about 1,425 files / 20,29x tests) were a directory subset, not the whole app. The v4 driver whole-app run found two pre-existing failing files (11 tests): app/api/version/route.test.ts called the version route without the deployment-probe credential that repair DEF-0B1 requires for topology disclosure, and organizations/__tests__/route.post-system-boundary.test.ts mocked api-auth-guard without ROLE_HIERARCHY and asserted a superseded read design. Both tests were adapted and disclosed (version: all six original assertions kept with the credential presented, plus two anonymous-caller tests proven to fail when a topology field is injected; organizations: mock completed and the GET test now asserts a membership-less caller reads nothing and the creation authority is never consulted). Measured whole app: 1,522 files passed, 4 skipped, 21,073 tests passed, 28 skipped, 0 failed. The driver contract step failed 2 tests only because bash resolved to the WSL relay; with Git bash the contract suite passes 302 files / 10,280 tests. Unit-level proof only"
+      },
+      {
+        "id": "R-51",
+        "status": "FIXED_UNIT_VERIFIED",
+        "title": "R-44 class audit of the shared CRUD factory (indirect references and silent scope loss). Findings: (1) crud-factory dropped its tenant or owner scope without saying so when the table had no organizationId column (orgScoped defaults to true) or when ownerColumn named a column the table lacks; 16 route modules were mounted that way. (2) bargaining_proposals has no organization column, only negotiation_id, so GET, PATCH, DELETE and POST on /api/bargaining/proposals were not tenant-scoped at the route and a create could attach a proposal to another organization's negotiation (a database RLS policy is the only backstop, and the legacy QA topology has none). (3) cnesst preventive-withdrawals and right-of-refusal declared ownerColumn workerId, a column that does not exist; harmless today only because their steward floor already excludes below-staff callers, but it switched the low-role guard off. Repairs: the factory now refuses to build a route whose scope resolves to nothing (declare parentScope, or unscopedByDesign with a reason); parentScope limits read, update and delete to rows whose parent belongs to the caller organization, requires a create to name an owned parent, and strips the parent column from PATCH so a row cannot be re-parented; the two dead ownerColumn declarations were removed; arbitration precedents, data classification policy, pending profiles, oauth providers and the data-subject routes now declare unscopedByDesign with the governance reason. Verified: 10 new factory tests, two mutations (parent condition removed, re-parent strip removed) fail them; all 289 route modules still build. Test adaptations (disclosed): bargaining-proposals route test mock gains negotiations; onboarding and data-classification-policy route tests expect the new unscopedByDesign option (original assertions retained). Side finding: the R-46 overlay named donations in a reachable module and flipped the schema-mutation-batch reachability ratchet to a false positive; the decisions now live in lib/operations/catalog-v2-decisions.json. NOT done: hand-written routes that do not use the factory (for example claims/bulk) and bulk or indirect-reference review beyond the factory; no authenticated HTTP test of /api/bargaining/proposals yet. Unit-level proof only Follow-up: a disposable-native-QA HTTP test now exists at e2e/runtime/11-bargaining-proposals-tenant-scope.spec.ts for list/read/create/update/delete/re-parent; it has NOT been executed and is NOT HTTP-verified."
+      },
+      {
+        "id": "R-52",
+        "status": "FIXED_UNIT_VERIFIED",
+        "title": "Factory lockedAuthCheck was ignored on ordinary PATCH and every DELETE, so another same-organization steward could mutate a member's personal calendar by ID. PATCH now uses a locked transaction whenever a lockedAuthCheck is configured; DELETE now locks, evaluates authorization against the fresh row and mutates with audit atomically. CI unit proof on e75d4c07, Union Eyes Security Regression run 40950669012; native/HTTP proof remains open."
+      },
+      {
+        "id": "R-53",
+        "status": "FIXED_UNIT_VERIFIED",
+        "title": "Generic PATCH sanitized the configured pk rather than resolvedPk, enabling detected physical-key mutation, and beforeUpdate could reintroduce protected tenant/owner/creator/parent fields. Factory now strips protected fields using actual PK both before and after hooks. CI unit proof on e75d4c07, run 40950669012; native/HTTP proof remains open."
+      },
+      {
+        "id": "R-54",
+        "status": "FIXED_UNIT_VERIFIED",
+        "title": "Public case-studies API listed drafts, scheduled and authenticated-only records because it filtered an absent status column; both rows and count are now constrained to visibility public AND published_at <= request time. Invalid draft status query is rejected; global case-study item reads and edits require content_manager instead of union member/admin. CI unit proof on e75d4c07, run 40950669012; HTTP/native proof remains open."
+      },
+      {
+        "id": "R-55",
+        "status": "FIXED_UNIT_VERIFIED",
+        "title": "Public marketing case-studies page treated the withApi nested success envelope as a top-level caseStudies array, hiding real published content. A typed response normalizer now recognizes current/legacy successful envelopes and refuses erroneous/malformed responses. CI unit proof on e75d4c07, run 40950669012; browser acceptance remains open."
+      }
+    ],
+    "summary": {
+      "total": 55,
+      "fixedRuntimeVerified": 30,
+      "fixedUnitVerified": 6,
+      "open": 19
+    }
+  },
+  "runtimeAcceptance": {
+    "runtime": "production build (next build + next start), native PostgreSQL 16 in a fresh Docker container, orchestrated by tooling/scripts/ue-runtime-up.mjs",
+    "executed": {
+      "passed": 110,
+      "failed": 0,
+      "note": "plain test command on the production build against a real Redis (post-restart checks run in restart-check); 166 skipped are API journeys that run once, at desktop. Includes specs 06 to 10. Measured on the final tree before commit"
+    },
+    "restartPersistence": "passed (3/3 after a self-contained file-route-prepare-restart cycle: the filed case and audit proof, the triage assignments with a revoked then restored coordinator, and the prepared and reconciled remittance)",
+    "stakeholdersWithRuntimeIdentity": [
+      "member",
+      "steward",
+      "representative (second steward)",
+      "case coordinator (chief steward)",
+      "supervisor (read and monitor mandate)",
+      "staff",
+      "executive / officer",
+      "financial officer: preparer (secretary_treasurer, prepare + view)",
+      "financial officer: reconciler (secretary_treasurer, reconcile + view)",
+      "independent approver (executive_office mandate)",
+      "governance",
+      "administrator",
+      "auditor (read only)",
+      "platform operator (platform_lead; no institutional mandate)",
+      "federation executive (fed_executive, parent-organization tenant; no affiliate mandate)",
+      "federation staff (fed_staff, parent-organization tenant; no affiliate mandate)",
+      "independent auditor (vice_president stored role for the executive capacity; audit-only financial mandate)",
+      "external counsel (synthetic grant fixture; read path only)"
+    ],
+    "stakeholderGroupsStillWithoutRuntimeJourney": 6,
+    "zeroOfJourneysAToIComplete": true,
+    "journeyAFreshCase": "complete: file, triage sight (metadata only), refused routing for administrator, unmandated steward, read-only supervisor, officer and another tenant, mandated assignment with the mandate named in the audit, steward work and escalation, reassignment to a representative with revocation of the first steward, supervisor oversight, officer aggregate reporting, mandate and designation revocation and restoration",
+    "fullUeSuiteOnThisTree": "1423 files, 20279 tests passed, 3 skipped (head e5a3ce5ae, app server stopped, --maxWorkers=4); contract tests 302 files: 10278 passed and 1 failed (ORG-ENFC-003, replaced with a stronger check; see R-36) before the replacement, passing after",
+    "migrationQualification": "cache migrations 0031 and 0032 qualified on native PostgreSQL 16 (upgrade from the preceding schema, idempotency, rollback or refusal, fail-closed, runtime privileges): db/__tests__/migration-0031-*.postgres.test.ts and migration-0032-*.postgres.test.ts, 11 tests; Migration 0030 had NO native test until the v4 kit supplied one (db/__tests__/migration-0030-precedent-explicit-share-select.postgres.test.ts, copied byte-identical, sha256 999106f8d08b776a69be9b491b506a69103d18b680c2628489a095a74430e334; the kit publishes no independent hash, so only identity with the kit file could be checked): 17 tests, 0 skipped, passed on the real Django-plus-Drizzle combined database from the orchestrator (127.0.0.1:55430/ue_runtime, run twice on two fresh builds) and on native PG15 and PG16 disposable databases. The kit's own mutation check (14 deliberately broken migrations, all caught) was recorded by the kit and was not re-run here. PG15 now also covers 0031 to 0034. Migration 0033 (external authority principals to text, R-29): native PG15 and PG16, 7 tests each (preceding-shape upgrade, text principals accepted, runtime-role row-level policies still enforce, idempotent, rollback refuses to lose history, fails closed, combined database); registered UNQUALIFIED in the lineage; not applied to any live database. Migration 0034 (six more principal columns to text, R-29): native PG15 and PG16, 7 tests each (preceding-shape upgrade with rows, index and policy preserved, text principals accepted, cookie_consents.user_id and its foreign key proven untouched, idempotent, rollback refuses to lose history, fails closed, combined database); registered UNQUALIFIED in the lineage; not applied to any live database.",
+    "rateLimiting": "proven against a real Redis 7 container started by ue-runtime-up.mjs --redis: credential-keyed mutation limit enforced exactly (60/min) with no organization header and no idempotency key; forged organization header cannot exhaust another tenant; shared mode with Redis up; Redis stopped: health degraded, limit still enforced from memory (exactly 60 allowed) and responses state X-RateLimit-Mode: degraded, reads unaffected; Redis recovered: back on the shared store within the 30 s circuit-breaker cool-down without restarting the app",
+    "auditSandboxContainment": "through the real adapter: no local record and no proof under staging, production, pilot, demo, production deployment type, Vercel production, app-environment production, NZILA mode production, deployment environment production, no QA flag or no sandbox mode; under the explicit local configuration the record is typed local_sandbox with immutable false and no environment variable can make it immutable (13 tests). The production Azure immutable adapter has NOT been exercised: it needs an approved nonproduction Azure integration environment, which is an external dependency",
+    "stakeholderGroupsRemaining": [
+      "organizing staff",
+      "employer / external counterparty",
+      "external representative / legal counsel (READ path proven against a synthetic grant; the grant cannot be issued through the product, R-41)",
+      "WorkAid / specialized service partner",
+      "governance officer / secretary (resolutions and elections: the identity exists, the journey does not)",
+      "union administrator / staff operations beyond navigation"
+    ],
+    "financeJourney": "complete for the remittance path: roles and titles without a mandate refused (admin, president, steward, member, auditor, another tenant); preparer lists the ledger and prepares a remittance that persists with its audit; malformed input writes nothing; duties segregated (preparer cannot reconcile, reconciler cannot prepare); reconciler reconciles and a caller cannot supply reconciliation outputs; revoking the preparer mandate removes view and prepare at once while the reconciler is unaffected; restoring reissues the mandate through the governed approval workflow. Financial mandates are issued through requestIssuanceApproval -> an independent approver decides -> issueMandate; only the root of trust (the executive_office rule and the approver mandate) is a labelled synthetic fixture. Approve, execute, payroll runs, remittance runs, arrears and tax are not yet exercised",
+    "nativePostgres": "20 suites on PG16: 19 pass in a clean-process sweep (message-lifecycle passes 26 with 1 skipped by design), rls-0108 passes 17/17 standalone, p4-authority-state-attest is PARTIAL (stages 1-4 pass, stage 5 has 67 historical-versus-current gaps, R-37). On PG15 the omitted five, the census, the migrations and the tenant-isolation suite were run: same results. Evidence: evidence/vs-native-sweep2-d82edf706.json",
+    "gate0Historical": "EXECUTED, FAILED: 13 test files at the pinned commit, one root cause (R-38: execution logs were never committed). Not fabricated, not weakened.",
+    "platformFederationBoundaries": {
+      "spec": "e2e/runtime/06-platform-and-federation-boundaries.spec.ts",
+      "executed": "desktop (API journeys run once, at desktop): 11 passed; landing and navigation matrix for platform and federation: 6 passed across desktop, tablet and mobile",
+      "proves": "a platform operator, a federation executive and federation staff cannot read, route or transition a union case, reach the dues ledger or prepare a remittance, or administer triage designations; a refused request writes nothing; a client-supplied organization header is not an authority grant; an unauthenticated caller is refused the same resources",
+      "notProven": "the POSITIVE journeys: a federation oversight mandate over an affiliate and a platform support-access grant have not been issued in the QA fixtures, so what these groups CAN do is not yet exercised. These groups count as boundary-proven only, not journey-complete"
+    },
+    "v2RealLogin": {
+      "evidence": "docs/union-eyes/convergence/evidence/vs-v2-real-login-smoke.json",
+      "result": "FAIL (33 HTTP steps recorded; every functional step passed; the final health step fails catalog admission, R-46)",
+      "separateFrom": "the synthetic-session runtime evidence; never merged"
+    }
+  }
+}

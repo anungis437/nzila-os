@@ -1,5 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+// The organization read authority is proven in organizations-read-authority.route.test.ts; these tests exercise the
+// route's own behaviour as a caller who may read and administer the organization.
+vi.mock('@/lib/organizations/read-authority', () => ({
+  resolveOrganizationAccess: async () => ({ platform: true, direct: new Map(), descendants: new Set() }),
+  canReadOrganization: () => true,
+  canAdministerOrganization: () => true,
+  readableOrganizationIds: () => null,
+  directRoleIn: () => 'admin',
+  UUID_PATTERN: /^[0-9a-fA-F-]{36}$/,
+}));
 const m = vi.hoisted(() => ({
   requireUserForOrganization: vi.fn(),
   appendMandatoryAudit: vi.fn(),
@@ -29,6 +39,7 @@ async function loadRoute() {
   return import('../organizations/[id]/members/route')
 }
 
+const ORG_ID = '11111111-1111-4111-8111-111111111111'
 const body = {
   user_id: 'ue-v2-closure-member-1',
   role: 'member',
@@ -36,7 +47,7 @@ const body = {
   email: 'member@example.invalid',
 }
 const post = (payload: unknown) =>
-  new Request('http://localhost/api/organizations/org_1/members', {
+  new Request('http://localhost/api/organizations/${ORG_ID}/members', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(payload),
@@ -52,13 +63,13 @@ describe('organizations/[id]/members POST', () => {
 
   it('accepts a non-UUID application user id and audits the membership in the same transaction', async () => {
     const { POST } = await loadRoute()
-    const response = await POST(post(body) as never, { params: Promise.resolve({ id: 'org_1' }) })
+    const response = await POST(post(body) as never, { params: Promise.resolve({ id: ORG_ID }) })
     expect(response.status).toBe(201)
-    expect(m.insertValues).toHaveBeenCalledWith(expect.objectContaining({ userId: body.user_id }))
+    expect(m.insertValues).toHaveBeenCalledWith(expect.objectContaining({ userId: body.user_id, status: 'pending' }))
     expect(m.appendMandatoryAudit).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        organizationId: 'org_1',
+        organizationId: ORG_ID,
         action: 'membership.create',
         userId: 'admin_1',
       }),
@@ -69,14 +80,14 @@ describe('organizations/[id]/members POST', () => {
     const { POST } = await loadRoute()
     m.appendMandatoryAudit.mockRejectedValueOnce(new Error('audit unavailable'))
     await expect(
-      POST(post(body) as never, { params: Promise.resolve({ id: 'org_1' }) }),
+      POST(post(body) as never, { params: Promise.resolve({ id: ORG_ID }) }),
     ).rejects.toThrow('audit unavailable')
   })
 
   it('rejects callers below steward', async () => {
     const { POST } = await loadRoute()
     m.requireUserForOrganization.mockResolvedValue({ userId: 'u1', roles: ['member'] })
-    const response = await POST(post(body) as never, { params: Promise.resolve({ id: 'org_1' }) })
+    const response = await POST(post(body) as never, { params: Promise.resolve({ id: ORG_ID }) })
     expect(response.status).toBe(403)
     expect(m.insertValues).not.toHaveBeenCalled()
   })

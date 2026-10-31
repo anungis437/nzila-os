@@ -19,16 +19,18 @@ export const GET = withApi(
       .orderBy(desc(auditLogs.createdAt))
       .limit(100);
     return {
+      // These are recorded audit-log entries, not audit engagements: no engagement table exists, so no findings count or report flag is
+      // reported (the earlier 0 and false were invented), and an entry that did not succeed is `unknown`, not an engagement `in-progress`.
+      kind: 'audit_log_entries' as const,
       audits: rows.map(row => ({
         id: row.auditId,
         title: row.action,
         type: row.resourceType,
-        status: row.outcome === 'success' ? 'completed' : 'in-progress',
+        status: row.outcome === 'success' ? 'completed' : 'unknown',
         dateCompleted: row.outcome === 'success' ? row.createdAt?.toISOString() : undefined,
         auditor: row.userId ?? 'system',
         severity: row.severity,
-        findings: 0,
-        hasReport: false,
+        outcome: row.outcome,
         createdAt: row.createdAt?.toISOString(),
       })),
       total: rows.length,

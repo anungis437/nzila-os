@@ -17,6 +17,7 @@ const m = vi.hoisted(() => ({
   setLegalHold: vi.fn(),
   adoptRetentionPolicy: vi.fn(),
   liveRetentionPolicy: vi.fn(),
+  readRetentionPolicy: vi.fn(),
   markThreadRead: vi.fn(),
   getThreadDetail: vi.fn(),
   listTriageQueue: vi.fn(),
@@ -35,6 +36,7 @@ vi.mock('@/lib/messaging/thread-lifecycle', async (original) => ({
   setLegalHold: m.setLegalHold,
   adoptRetentionPolicy: m.adoptRetentionPolicy,
   liveRetentionPolicy: m.liveRetentionPolicy,
+  readRetentionPolicy: m.readRetentionPolicy,
 }));
 vi.mock('@/lib/messaging/thread-read-state', () => ({ markThreadRead: m.markThreadRead, getThreadDetail: m.getThreadDetail }));
 vi.mock('@/lib/messaging/thread-assignment', () => ({ listTriageQueue: m.listTriageQueue }));
@@ -105,13 +107,14 @@ describe('messages lifecycle routes', () => {
   describe('POST threads/[threadId]/legal-hold', () => {
     const load = async () => (await import('../messages/threads/[threadId]/legal-hold/route')).POST;
 
-    it('is closed to everyone below administrator', async () => {
-      for (const role of ['member', 'steward', 'chief_steward']) {
+    it('has no role floor; a denied decision is forbidden for every role', async () => {
+      for (const role of ['member', 'steward', 'admin']) {
         m.getUserRoleInOrganization.mockResolvedValue(role);
+        m.setLegalHold.mockResolvedValueOnce({ kind: 'forbidden' });
         const response = await (await load())(post(`threads/${THREAD}/legal-hold`, { action: 'place', reference: 'MATTER-1' }), ctx);
         expect(response.status).toBe(403);
       }
-      expect(m.setLegalHold).not.toHaveBeenCalled();
+      expect(m.setLegalHold).toHaveBeenCalledTimes(3);
     });
 
     it('requires a reference and a known action', async () => {
@@ -144,17 +147,20 @@ describe('messages lifecycle routes', () => {
     const load = async () => import('../messages/retention-policy/route');
     const policyBody = { retentionDays: 365, policyReference: 'Policy 1', authorityReference: 'Resolution 9' };
 
-    it('is closed to everyone below administrator, for read and write', async () => {
-      m.getUserRoleInOrganization.mockResolvedValue('steward');
+    it('has no role floor; a denied decision is forbidden for read and write', async () => {
+      m.getUserRoleInOrganization.mockResolvedValue('admin');
+      m.readRetentionPolicy.mockResolvedValueOnce({ kind: 'forbidden' });
+      m.adoptRetentionPolicy.mockResolvedValueOnce({ kind: 'forbidden' });
       const { GET, POST } = await load();
       expect((await GET(new NextRequest('http://localhost/api/messages/retention-policy'), { params: Promise.resolve({}) })).status).toBe(403);
       expect((await POST(post('retention-policy', policyBody), { params: Promise.resolve({}) })).status).toBe(403);
-      expect(m.adoptRetentionPolicy).not.toHaveBeenCalled();
+      expect(m.readRetentionPolicy).toHaveBeenCalled();
+      expect(m.adoptRetentionPolicy).toHaveBeenCalled();
     });
 
     it('reports honestly that no policy is adopted', async () => {
       m.getUserRoleInOrganization.mockResolvedValue('admin');
-      m.liveRetentionPolicy.mockResolvedValueOnce(null);
+      m.readRetentionPolicy.mockResolvedValueOnce({ kind: 'ok', policy: null });
       const { GET } = await load();
       const response = await GET(new NextRequest('http://localhost/api/messages/retention-policy'), { params: Promise.resolve({}) });
       expect(response.status).toBe(200);

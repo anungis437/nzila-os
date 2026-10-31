@@ -82,6 +82,44 @@ describe('CampaignService', () => {
     service = new CampaignService(mockEmailService, mockSmsService);
   });
 
+
+  describe('campaign unsubscribe issuance', () => {
+    it('adds campaign-bound one-click headers to every campaign email', async () => {
+      process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
+      mocks.mockUpdate.mockReturnValue(chain([]));
+      const message = {
+        id: 'log-1', organizationId: 'org-1', campaignId: 'campaign-1',
+        recipientId: 'member-1', recipientEmail: 'member@example.org',
+        channelType: 'email', subject: 'Update', bodySnippet: 'Body',
+      };
+      try {
+        await (service as any).sendMessage(message);
+        expect(mockEmailService.send).toHaveBeenCalledTimes(1);
+        const sent = (mockEmailService.send as ReturnType<typeof vi.fn>).mock.calls[0][0];
+        const url = new URL(sent.headers['List-Unsubscribe'].slice(1, -1));
+        expect(url.pathname).toBe('/api/communications/unsubscribe/member-1');
+        expect(url.searchParams.get('campaignId')).toBe('campaign-1');
+        const crypto = await import('node:crypto');
+        expect(url.searchParams.get('token')).toBe(
+          crypto.createHmac('sha256', 'secret').update('campaign-1:member-1:unsubscribe').digest('hex'),
+        );
+        expect(sent.headers['List-Unsubscribe-Post']).toBe('List-Unsubscribe=One-Click');
+      } finally {
+        delete process.env.COMMUNICATIONS_TRACKING_SECRET;
+      }
+    });
+
+    it('refuses to send an email without a campaign-bound signing capability', async () => {
+      delete process.env.COMMUNICATIONS_TRACKING_SECRET;
+      delete process.env.RESEND_TRACKING_SECRET;
+      await expect((service as any).sendMessage({
+        id: 'log-2', organizationId: 'org-1', campaignId: 'campaign-1',
+        recipientId: 'member-1', recipientEmail: 'member@example.org', channelType: 'email',
+      })).rejects.toThrow('signing key not configured');
+      expect(mockEmailService.send).not.toHaveBeenCalled();
+    });
+  });
+
   // ── createCampaign ────────────────────────────────────────────────────
   describe('createCampaign', () => {
     it('inserts a new campaign with draft status', async () => {

@@ -24,6 +24,7 @@
 // Export all communication-related schemas from consolidated domain location
 export * from './messages';
 export * from './notifications';
+export * from './contact-submissions';
 export * from './newsletters';
 export * from './sms';
 export * from './surveys';

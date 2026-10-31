@@ -147,11 +147,18 @@ function resolveOrganizationId(input: { organizationId?: string }): string | nul
 
 async function resolveOrganizationIdFromPhoneNumber(phoneNumber: string): Promise<string | null> {
   try {
-    const [org] = await db
+    const matches = await db
       .select({ id: organizations.id })
       .from(organizations)
       .where(sql`(${organizations.settings} ->> 'twilioPhoneNumber') = ${phoneNumber}`)
-      .limit(1);
+      .limit(2);
+
+    // A number held by two organizations is ambiguous: attributing the message to either would store a member's text in the wrong tenant.
+    if (matches.length > 1) {
+      logger.error('Inbound SMS number is registered to more than one organization; message not attributed', { phoneNumber });
+      return null;
+    }
+    const org = matches[0];
 
     // BR-6: no default-org fallback. An unmatched inbound phone number must
     // fail closed (null) rather than be attributed to the Default Organization.

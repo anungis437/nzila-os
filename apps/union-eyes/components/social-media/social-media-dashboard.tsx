@@ -168,8 +168,8 @@ export default function SocialMediaDashboard() {
     try {
       setLoading(true);
       const [accRes, postsRes] = await Promise.all([
-        fetch('/api/v2/social-media/accounts'),
-        fetch('/api/v2/social-media/posts'),
+        fetch('/api/social-media/accounts'),
+        fetch('/api/social-media/posts'),
       ]);
       if (accRes.ok) {
         const data = await accRes.json();

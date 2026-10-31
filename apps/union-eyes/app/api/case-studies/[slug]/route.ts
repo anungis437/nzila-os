@@ -13,7 +13,8 @@ const { GET, PATCH, DELETE } = crudRoutes({
   tags: ["Marketing"],
   orgScoped: false,
   itemRoute: true,
-  readRole: 'member',
-  writeRole: 'admin',
+  // Drafts and organization-linked editorial content must not be enumerable by any union member.
+  readRole: 'content_manager',
+  writeRole: 'content_manager',
 });
 export { GET, PATCH, DELETE };

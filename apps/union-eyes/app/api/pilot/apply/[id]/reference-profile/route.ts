@@ -1,3 +1,4 @@
+import { parsePilotPayload, versionNotePayloadSchema } from '@/lib/pilot/write-payloads';
 import { NextResponse, type NextRequest } from 'next/server';
 import { and, desc, eq } from 'drizzle-orm';
 import { db } from '@/db';
@@ -60,11 +61,16 @@ function computeReferenceProfileData(application: PilotApplicationRow, metric: P
   const healthScore = metric?.healthScore ? Number(metric.healthScore) : 100 - proposal.signals.riskScore;
   const casesManaged = metric?.casesManaged ?? 0;
   const daysActive = metric?.daysActive ?? 0;
+  // Without a stored metric row every figure below comes from the application's self-assessed signals, and is labelled so.
+  const measured = Boolean(metric);
+  const quoteText = typeof responses.referenceTestimonialQuote === 'string' ? responses.referenceTestimonialQuote.trim() : '';
+  const textOrNull = (value: unknown) => (typeof value === 'string' && value.trim().length > 0 ? value.trim() : null);
 
   const referenceProfile = {
     pilotId: application.id,
     organizationName: application.organizationName,
     opportunityTier: proposal.qualificationScores.opportunityTier,
+    dataSource: measured ? 'pilot_metrics' : 'application_signals_not_measured',
     deploymentMetrics: {
       daysActive,
       casesManaged,
@@ -72,38 +78,29 @@ function computeReferenceProfileData(application: PilotApplicationRow, metric: P
       engagementRate,
       healthScore,
     },
-    testimonial: {
-      quote:
-        typeof responses.referenceTestimonialQuote === 'string' && responses.referenceTestimonialQuote.trim().length > 0
-          ? responses.referenceTestimonialQuote
-          : `${application.organizationName} established a repeatable pilot operating cadence with measurable adoption growth.`,
-      author:
-        typeof responses.referenceTestimonialAuthor === 'string' && responses.referenceTestimonialAuthor.trim().length > 0
-          ? responses.referenceTestimonialAuthor
-          : application.contactName,
-      role:
-        typeof responses.referenceTestimonialRole === 'string' && responses.referenceTestimonialRole.trim().length > 0
-          ? responses.referenceTestimonialRole
-          : 'Pilot Sponsor',
-    },
-    timeSaved: {
-      estimatedHoursPerWeek: Math.max(6, Math.round(adoptionRate * 0.18)),
-      methodology: 'Estimated from adoption and activity progression during pilot period.',
-    },
+    // A quote is shown only when one was supplied, and always as unattested: nothing here records that its author said it or consented.
+    testimonial: quoteText
+      ? { quote: quoteText, author: textOrNull(responses.referenceTestimonialAuthor), role: textOrNull(responses.referenceTestimonialRole), attested: false }
+      : null,
+    // No source measures time saved, so none is stated.
+    timeSaved: null,
     renewalLikelihood: proposal.signals.renewalLikelihood,
     generatedAt: proposal.generatedAt,
   };
 
   const caseStudy = {
-    title: `${application.organizationName}: 90-day pilot outcomes`,
+    title: measured ? `${application.organizationName}: pilot outcomes` : `${application.organizationName}: pilot profile (no measured outcomes)`,
     summary: `${application.organizationName} reached opportunity tier ${proposal.qualificationScores.opportunityTier} with overall score ${proposal.qualificationScores.overallOpportunityScore}.`,
-    outcomes: [
-      `Adoption rate: ${adoptionRate}`,
-      `Engagement rate: ${engagementRate}`,
-      `Health score: ${healthScore}`,
-      `Renewal likelihood: ${proposal.signals.renewalLikelihood}`,
-    ],
-    quote: referenceProfile.testimonial.quote,
+    outcomes: measured
+      ? [
+          `Adoption rate: ${adoptionRate}`,
+          `Engagement rate: ${engagementRate}`,
+          `Health score: ${healthScore}`,
+          `Renewal likelihood: ${proposal.signals.renewalLikelihood}`,
+        ]
+      : [],
+    quote: referenceProfile.testimonial?.quote ?? null,
+    attested: false,
   };
 
   const benchmarkDataset = {
@@ -232,7 +229,9 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       return NextResponse.json({ error: 'Pilot application id is required' }, { status: 400 });
     }
 
-    const requestPayload = (await request.json().catch(() => ({}))) as PersistReferencePayload;
+    const parsedPayload = await parsePilotPayload(request, versionNotePayloadSchema);
+    if (!parsedPayload.ok) return parsedPayload.response;
+    const requestPayload: PersistReferencePayload = parsedPayload.data;
     // Read-only, unrelated table — fetched BEFORE the lock, never nested
     // inside withLockedPilotMutation's own transaction (which would grab a
     // second connection from the pool while still holding the first).

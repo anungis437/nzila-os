@@ -21,12 +21,14 @@ import {
   reconciliationExceptions,
   platformInvoices,
   platformPayments,
+  billingPeriods,
   paymentAllocations,
   transactionFeeEvents,
   type ReconciliationRun,
   type ReconciliationException,
 } from '@/db/schema';
-import { eq, and, gte, lte, inArray, isNull } from 'drizzle-orm';
+import { eq, and, gte, lte, inArray, isNull, sql, desc } from 'drizzle-orm';
+import { ApiError } from '@/lib/api/errors';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { addMoney, subtractMoney, absMoney, toCents } from '@/lib/decimal-safe';
 
@@ -63,7 +65,49 @@ export interface ReconciliationResult {
 export async function runReconciliation(
   input: RunReconciliationInput,
 ): Promise<ReconciliationResult> {
+  // Never permit an organization-less reconciliation. That legacy mode scanned
+  // and matched invoices, payments and fees from unrelated tenants in one run.
+  // A caller must supply the organization whose financial ledger is in scope.
+  if (!input.organizationId || input.organizationId.trim() === '') {
+    throw ApiError.badRequest('An organization is required for reconciliation');
+  }
+  if (input.periodEnd < input.periodStart) {
+    throw ApiError.badRequest('The reconciliation period ends before it starts');
+  }
+
   return await db.transaction(async (tx) => {
+    // 0. A run for an organization is repeatable only as a refusal: the same organization and period are reconciled once. A second run
+    // inserted a second set of exceptions beside the first, so the open-exception list doubled with every click. The lock serialises two
+    // runs started together; the billing period, when named, must be the organization's own.
+    if (input.organizationId) {
+      await tx.execute(
+        sql`SELECT pg_advisory_xact_lock(hashtextextended(${`reconciliation:${input.organizationId}:${input.periodStart.toISOString()}:${input.periodEnd.toISOString()}`}, 0))`,
+      );
+      if (input.billingPeriodId) {
+        const [owned] = await tx
+          .select({ id: billingPeriods.id })
+          .from(billingPeriods)
+          .where(and(eq(billingPeriods.id, input.billingPeriodId), eq(billingPeriods.organizationId, input.organizationId)))
+          .limit(1);
+        if (!owned) throw ApiError.notFound('Billing period');
+      }
+      const [prior] = await tx
+        .select({ id: reconciliationRuns.id })
+        .from(reconciliationRuns)
+        .where(
+          and(
+            eq(reconciliationRuns.organizationId, input.organizationId),
+            eq(reconciliationRuns.periodStart, input.periodStart),
+            eq(reconciliationRuns.periodEnd, input.periodEnd),
+            inArray(reconciliationRuns.status, ['running', 'completed']),
+          ),
+        )
+        .limit(1);
+      if (prior) {
+        throw ApiError.conflict('This period has already been reconciled', { runId: prior.id });
+      }
+    }
+
     // 1. Create run record
     const [run] = await tx
       .insert(reconciliationRuns)
@@ -397,15 +441,17 @@ export async function resolveException(
 // ============================================================================
 
 /**
- * Get a reconciliation run with summary.
+ * Get a reconciliation run with summary. The run is looked up inside the caller's organization: an id from another
+ * organization is indistinguishable from a missing one.
  */
 export async function getReconciliationRun(
   runId: string,
+  organizationId: string,
 ): Promise<ReconciliationRun | null> {
   const [run] = await db
     .select()
     .from(reconciliationRuns)
-    .where(eq(reconciliationRuns.id, runId))
+    .where(and(eq(reconciliationRuns.id, runId), eq(reconciliationRuns.organizationId, organizationId)))
     .limit(1);
   return run ?? null;
 }
@@ -413,19 +459,32 @@ export async function getReconciliationRun(
 /**
  * List open exceptions for an org (paginated).
  */
+export const EXCEPTION_STATUSES = ['open', 'under_review', 'resolved', 'written_off'] as const;
+export const MAX_EXCEPTIONS_PER_READ = 200;
+
 export async function listExceptions(
   organizationId: string,
-  statusFilter: ('open' | 'under_review' | 'resolved' | 'written_off')[] = ['open', 'under_review'],
+  statusFilter: readonly string[] = ['open', 'under_review'],
+  limit: number = MAX_EXCEPTIONS_PER_READ,
 ): Promise<ReconciliationException[]> {
+  // A status outside the vocabulary is the caller's error, not a cast that reaches the database as an invalid enum value, and the list is
+  // bounded and ordered, so a large backlog is read in pages rather than whole.
+  const valid = statusFilter.filter((s): s is (typeof EXCEPTION_STATUSES)[number] => (EXCEPTION_STATUSES as readonly string[]).includes(s));
+  if (valid.length === 0 || valid.length !== statusFilter.length) {
+    throw ApiError.badRequest(`status must be one or more of: ${EXCEPTION_STATUSES.join(', ')}`);
+  }
+  const bounded = Math.min(MAX_EXCEPTIONS_PER_READ, Math.max(1, Math.trunc(limit) || MAX_EXCEPTIONS_PER_READ));
   return await db
     .select()
     .from(reconciliationExceptions)
     .where(
       and(
         eq(reconciliationExceptions.organizationId, organizationId),
-        inArray(reconciliationExceptions.status, statusFilter),
+        inArray(reconciliationExceptions.status, valid),
       ),
-    );
+    )
+    .orderBy(desc(reconciliationExceptions.createdAt))
+    .limit(bounded);
 }
 
 /**

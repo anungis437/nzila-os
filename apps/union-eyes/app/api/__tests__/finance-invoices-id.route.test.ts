@@ -56,7 +56,7 @@ describe('finance/invoices/[id] route', () => {
 
     expect(response.status).toBe(200);
     expect(m.requireEntitlement).toHaveBeenCalledWith('org_1', 'financial_intelligence_suite', 'u1');
-    expect(m.getInvoiceWithLineItems).toHaveBeenCalledWith('inv_1');
+    expect(m.getInvoiceWithLineItems).toHaveBeenCalledWith('inv_1', 'org_1');
     expect(json).toEqual({ id: 'inv_1', lineItems: [] });
   });
 });

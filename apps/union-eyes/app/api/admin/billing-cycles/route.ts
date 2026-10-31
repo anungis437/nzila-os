@@ -9,6 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { BillingCycleService } from '@/lib/services/billing-cycle-service';
+import { requireBillingCycleAuthority } from '@/lib/finance/billing-cycle-authority';
 import { withApiAuth, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
 import {
   ErrorCode,
@@ -68,6 +69,14 @@ export const POST = withApiAuth(async (request: NextRequest) => {
     }
 
     const { organizationId, frequency, periodStart, periodEnd, dryRun } = validation.data;
+
+    // A platform role is not a financial mandate for the caller-selected union.
+    // Authorize the target ledger before a preview, audit intent or charge.
+    try {
+      await requireBillingCycleAuthority(organizationId, user.id);
+    } catch {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Live financial execution mandate required for target organization');
+    }
 
     // Calculate period dates if not provided
     let start: Date;
@@ -186,18 +195,13 @@ export const GET = withApiAuth(async (request: NextRequest) => {
       );
     }
 
-    // Billing cycle history - returns cycles from the billing system
-    // No dedicated billing_cycle_history table exists yet; return empty with proper semantics
-
-    logger.info('Retrieving billing cycle history', {
-      organizationId,
-      userId: user.id,
-    });
-
-    return standardSuccessResponse({
-      cycles: [],
-      total: 0,
-    });
+    // There is no authoritative billing-cycle history store. An HTTP 200
+    // with [] would falsely certify that this organization has no history.
+    logger.warn('Billing cycle history unavailable', { organizationId, userId: user.id });
+    return NextResponse.json(
+      { success: false, error: { code: 'NOT_IMPLEMENTED', message: 'Billing-cycle history is not implemented' }, capabilityState: 'NOT_IMPLEMENTED' },
+      { status: 501 },
+    );
   } catch (error) {
     logger.error('Error retrieving billing cycle history', { error });
 

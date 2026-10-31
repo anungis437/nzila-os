@@ -145,10 +145,9 @@ export const signatureDocuments = pgTable(
     allowReassign: boolean("allow_reassign").notNull().default(false),
     
     // Template
-    templateId: uuid("template_id").references(
-      () => signatureTemplates.id,
-      { onDelete: "set null" }
-    ),
+    // Physical column and database foreign key stay. The signature_templates
+    // Drizzle declaration is retired; Django SignatureTemplates still owns the relation.
+    templateId: uuid("template_id"),
     
     // Metadata
     metadata: jsonb("metadata").$type<{
@@ -330,141 +329,9 @@ export const signatureAuditTrail = pgTable(
   })
 );
 
-/**
- * Signature Templates
- * Reusable document templates
- */
-export const signatureTemplates = pgTable(
-  "signature_templates",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    organizationId: uuid("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
-    
-    // Template details
-    name: text("name").notNull(),
-    description: text("description"),
-    category: text("category").notNull(), // contracts, forms, authorizations
-    
-    // Template content
-    templateFileUrl: text("template_file_url").notNull(),
-    templateFileName: text("template_file_name").notNull(),
-    
-    // Provider
-    provider: signatureProviderEnum("provider").notNull(),
-    providerTemplateId: text("provider_template_id"),
-    
-    // Fields
-    signatureFields: jsonb("signature_fields").$type<
-      Array<{
-        fieldId: string;
-        fieldType: "signature" | "initial" | "date" | "text" | "checkbox";
-        label: string;
-        required: boolean;
-        page: number;
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-        signerRole: string; // Which signer this field is for
-      }>
-    >().notNull(),
-    
-    // Default settings
-    defaultSettings: jsonb("default_settings").$type<{
-      expirationDays?: number;
-      reminderDays?: number[];
-      requireAuthentication?: boolean;
-      authenticationMethod?: string;
-      sequentialSigning?: boolean;
-    }>(),
-    
-    // Signer roles
-    signerRoles: jsonb("signer_roles").$type<
-      Array<{
-        role: string;
-        name: string;
-        signingOrder: number;
-        required: boolean;
-      }>
-    >().notNull(),
-    
-    // Status
-    isActive: boolean("is_active").notNull().default(true),
-    
-    // Usage
-    usageCount: integer("usage_count").notNull().default(0),
-    lastUsedAt: timestamp("last_used_at"),
-    
-    // Ownership
-    createdBy: text("created_by")
-      .notNull()
-      .references(() => profiles.userId),
-    
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  },
-  (table) => ({
-    organizationIdIdx: index("signature_templates_organization_id_idx").on(
-      table.organizationId
-    ),
-    categoryIdx: index("signature_templates_category_idx").on(
-      table.category
-    ),
-    isActiveIdx: index("signature_templates_is_active_idx").on(
-      table.isActive
-    ),
-  })
-);
-
-/**
- * Provider Webhooks Log
- * Track webhook events from signature providers
- */
-export const signatureWebhooksLog = pgTable(
-  "signature_webhooks_log",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    
-    // Provider info
-    provider: signatureProviderEnum("provider").notNull(),
-    eventType: text("event_type").notNull(),
-    
-    // Related document
-    documentId: uuid("document_id").references(() => signatureDocuments.id, {
-      onDelete: "set null",
-    }),
-    providerDocumentId: text("provider_document_id"),
-    
-    // Webhook data
-    payload: jsonb("payload").notNull(),
-    headers: jsonb("headers"),
-    
-    // Processing
-    receivedAt: timestamp("received_at").notNull().defaultNow(),
-    processedAt: timestamp("processed_at"),
-    processingStatus: text("processing_status")
-      .notNull()
-      .default("pending"), // pending, processed, failed
-    errorMessage: text("error_message"),
-    
-    // Security
-    signature: text("signature"), // Webhook signature for verification
-    signatureVerified: boolean("signature_verified"),
-    
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-  },
-  (table) => ({
-    providerIdx: index("signature_webhooks_provider_idx").on(table.provider),
-    documentIdIdx: index("signature_webhooks_document_id_idx").on(
-      table.documentId
-    ),
-    processingStatusIdx: index("signature_webhooks_processing_status_idx").on(
-      table.processingStatus
-    ),
-  })
-);
+// signature_templates and signature_webhooks_log are not declared here.
+// Django content.SignatureTemplates and content.SignatureWebhooksLog still define
+// the relations. Do not DROP them from this module.
 
 // Type exports for use in application code
 export type SignatureDocument = typeof signatureDocuments.$inferSelect;
@@ -473,10 +340,6 @@ export type DocumentSigner = typeof documentSigners.$inferSelect;
 export type NewDocumentSigner = typeof documentSigners.$inferInsert;
 export type SignatureAuditTrail = typeof signatureAuditTrail.$inferSelect;
 export type NewSignatureAuditTrail = typeof signatureAuditTrail.$inferInsert;
-export type SignatureTemplate = typeof signatureTemplates.$inferSelect;
-export type NewSignatureTemplate = typeof signatureTemplates.$inferInsert;
-export type SignatureWebhookLog = typeof signatureWebhooksLog.$inferSelect;
-export type NewSignatureWebhookLog = typeof signatureWebhooksLog.$inferInsert;
 
 // Drizzle relational query relations
 export const signatureDocumentsRelations = relations(signatureDocuments, ({ many }) => ({

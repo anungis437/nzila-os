@@ -250,58 +250,10 @@ describe('redemption-service', () => {
   });
 
   /* ============================= processRedemptionRefund ============================= */
-  describe('processRedemptionRefund', () => {
-    it('refunds credits and marks as refunded', async () => {
-      const redemption = {
-        id: 'r-1',
-        orgId: 'org-1',
-        userId: 'u-1',
-        creditsSpent: 200,
-        status: 'ordered',
-        providerPayloadJson: {},
-      };
-
-      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
-        const tx = {
-          query: {
-            rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(redemption) },
-          },
-          update: vi.fn().mockReturnValue({
-            set: vi.fn().mockReturnValue({
-              where: vi.fn().mockReturnValue({
-                returning: vi.fn().mockResolvedValue([{ ...redemption, status: 'refunded' }]),
-              }),
-            }),
-          }),
-        };
-        return cb(tx);
-      });
-      mocks.mockApplyLedgerEntry.mockResolvedValue({ balanceAfter: 700 });
-
-      const result = await processRedemptionRefund('r-1', 'org-1', { reason: 'defective' });
-
-      expect(result.redemption.status).toBe('refunded');
-      expect(result.newBalance).toBe(700);
-    });
-
-    it('returns existing if already refunded (idempotent)', async () => {
-      const redemption = { id: 'r-1', status: 'refunded', orgId: 'org-1', userId: 'u-1', creditsSpent: 100, providerPayloadJson: {} };
-
-      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
-        const tx = {
-          query: { rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(redemption) } },
-        };
-        return cb(tx);
-      });
-
-      const result = await processRedemptionRefund('r-1', 'org-1', {});
-
-      expect(result.redemption.status).toBe('refunded');
-      expect(mocks.mockApplyLedgerEntry).not.toHaveBeenCalled();
-    });
-  });
-
   /* ============================= audit and authority ============================= */
+  // processRedemptionRefund (partial and cumulative refunds, repeated refund ids, not-found, concurrency) is exercised against a real SQL
+  // engine in app/api/__tests__/integrations-shopify-webhooks.pglite.test.ts, where its ledger and status effects can be observed.
+
   describe('audit on the same transaction', () => {
     it('records the order with the webhook actor, and refuses an order that is not awaiting payment', async () => {
       mocks.mockReturning.mockResolvedValueOnce([{ id: 'r-1', status: 'ordered' }]);
@@ -483,44 +435,6 @@ describe('redemption-service', () => {
   });
 
   /* ============================= processRedemptionRefund — gap coverage ============================= */
-  describe('processRedemptionRefund — gap coverage', () => {
-    it('handles null providerPayloadJson in refund', async () => {
-      const redemption = {
-        id: 'r-rpj', orgId: 'org-1', userId: 'u-1', creditsSpent: 100,
-        status: 'ordered', providerPayloadJson: null,
-      };
-
-      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
-        const tx = {
-          query: { rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(redemption) } },
-          update: vi.fn().mockReturnValue({
-            set: vi.fn().mockReturnValue({
-              where: vi.fn().mockReturnValue({
-                returning: vi.fn().mockResolvedValue([{ ...redemption, status: 'refunded' }]),
-              }),
-            }),
-          }),
-        };
-        return cb(tx);
-      });
-      mocks.mockApplyLedgerEntry.mockResolvedValue({ balanceAfter: 300 });
-
-      const result = await processRedemptionRefund('r-rpj', 'org-1', { reason: 'test' });
-      expect(result.redemption.status).toBe('refunded');
-    });
-
-    it('throws when redemption not found', async () => {
-      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
-        const tx = {
-          query: { rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(null) } },
-        };
-        return cb(tx);
-      });
-
-      await expect(processRedemptionRefund('nope', 'org-1', {})).rejects.toThrow('Redemption not found');
-    });
-  });
-
   /* ============================= getRedemptionByOrderId — gap coverage ============================= */
   describe('getRedemptionByOrderId — gap coverage', () => {
     it('queries WITHOUT orgId (else branch)', async () => {

@@ -19,10 +19,12 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sharedClauseLibrary, clauseLibraryTags } from '@/db/schema/domains/agreements/shared-library';
 import { organizations } from '@/db/schema-organizations';
+import { createHash } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { canReadSharedClause, isSharedClauseOwner, sharingChangeDenial } from '@/lib/clause-library/sharing-authority';
+import { parseClauseBody, assertMayPublish } from '@/lib/clause-library/clause-body';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,7 +74,7 @@ function formatClause(r: Awaited<ReturnType<typeof getClauseRow>>, callerOrgId: 
     // reader, even one authorized to read the clause content itself.
     sharedWithOrgIds: isOwner ? r!.sharedWithOrgIds : undefined,
     isAnonymized: r!.isAnonymized,
-    originalEmployerName: r!.originalEmployerName,
+    originalEmployerName: isOwner || !r!.isAnonymized ? r!.originalEmployerName : undefined,
     anonymizedEmployerName: r!.anonymizedEmployerName,
     sector: r!.sector,
     province: r!.province,
@@ -80,8 +82,8 @@ function formatClause(r: Awaited<ReturnType<typeof getClauseRow>>, callerOrgId: 
     expiryDate: r!.expiryDate,
     viewCount: r!.viewCount,
     version: r!.version,
-    sourceOrganization: { id: r!.sourceOrganizationId, organizationName: r!.organizationName },
-    createdBy: r!.createdBy,
+    sourceOrganization: isOwner || !r!.isAnonymized ? { id: r!.sourceOrganizationId, organizationName: r!.organizationName } : undefined,
+    createdBy: isOwner ? r!.createdBy : undefined,
     createdAt: r!.createdAt,
     updatedAt: r!.updatedAt,
     tags: tags.map((t) => ({ id: t.id, tagName: t.tagName })),
@@ -118,10 +120,11 @@ export const PATCH = withApi(
     auth: { required: true, minRole: 'steward' },
     openapi: { tags: ['Clause-library'], summary: 'Update a shared clause' },
   },
-  async ({ request, userId, organizationId }) => {
+  async ({ request, userId, organizationId, user }) => {
     const url = new URL(request.url);
     const id = url.pathname.split('/').filter(Boolean).pop()!;
-    const body = await request.json();
+    const body = parseClauseBody(await request.json().catch(() => null), 'update');
+    assertMayPublish(user?.role, body.sharingLevel);
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
     const denial = await withSystemContext(() => sharingChangeDenial(organizationId, body));
@@ -154,6 +157,13 @@ export const PATCH = withApi(
       if (body.anonymizedEmployerName !== undefined) updateData.anonymizedEmployerName = body.anonymizedEmployerName;
       if (body.sharedWithOrgIds !== undefined) updateData.sharedWithOrgIds = body.sharedWithOrgIds;
 
+      // A change to what the clause says raises its version, so a reader who compared or cited it can tell it has changed. The audit keeps
+      // a digest of the text it replaced.
+      const contentChanged = (['clauseTitle', 'clauseText', 'clauseType'] as const).some(
+        (field) => body[field] !== undefined && body[field] !== existing[field],
+      );
+      if (contentChanged) updateData.version = (existing.version ?? 1) + 1;
+
       const [updated] = await tx
         .update(sharedClauseLibrary)
         .set(updateData)
@@ -171,6 +181,13 @@ export const PATCH = withApi(
         resourceId: id,
         details: {
           fields: Object.keys(updateData).filter((k) => k !== 'updatedAt'),
+          ...(contentChanged
+            ? {
+                fromVersion: existing.version ?? 1,
+                toVersion: updateData.version,
+                replacedTextSha256: createHash('sha256').update(existing.clauseText ?? '').digest('hex'),
+              }
+            : {}),
           ...(updateData.sharingLevel !== undefined
             ? { fromSharingLevel: existing.sharingLevel, toSharingLevel: updateData.sharingLevel }
             : {}),
@@ -197,6 +214,12 @@ export const DELETE = withApi(
         throw ApiError.notFound('clause', id);
       }
 
+      // A clause that is shared beyond its owner has been compared and cited by others, and the delete also removes its tags for good, so
+      // it is withdrawn from sharing first (sharingLevel private) and only then removed.
+      if (existing.sharingLevel !== 'private') {
+        throw ApiError.conflict('This clause is shared. Withdraw it from sharing (set its sharing level to private) before deleting it.');
+      }
+
       const [deleted] = await tx
         .delete(sharedClauseLibrary)
         .where(and(eq(sharedClauseLibrary.id, id), eq(sharedClauseLibrary.sourceOrganizationId, organizationId)))
@@ -211,7 +234,14 @@ export const DELETE = withApi(
         action: 'clause_library.delete',
         resourceType: 'shared_clause_library',
         resourceId: id,
-        details: { clauseNumber: existing.clauseNumber, sharingLevel: existing.sharingLevel },
+        details: {
+          clauseNumber: existing.clauseNumber,
+          clauseTitle: existing.clauseTitle,
+          clauseType: existing.clauseType,
+          version: existing.version ?? 1,
+          sharingLevel: existing.sharingLevel,
+          clauseTextSha256: createHash('sha256').update(existing.clauseText ?? '').digest('hex'),
+        },
       });
       return { success: true };
     });

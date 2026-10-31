@@ -111,7 +111,10 @@ function toPublicConfig(row: IntegrationConfigRow) {
     lastSyncAt: row.lastSyncAt,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
-    credentialsStored: true,
+    // No secret is stored or resolved: the credentials column holds only a reference, and nothing turns it into a credential. The
+    // field used to say true for every configuration, which a client read as an integration that could authenticate.
+    credentialsStored: false,
+    credentialsResolvable: false,
   };
 }
 
@@ -186,7 +189,8 @@ export async function configureIntegrationForOrg(
           eq(integrationConfigs.provider, input.provider as (typeof integrationProviderEnum.enumValues)[number]),
         ),
       )
-      .limit(1);
+      .limit(1)
+      .for('update');
 
     const values = {
       organizationId,
@@ -201,14 +205,28 @@ export async function configureIntegrationForOrg(
 
     let config: IntegrationConfigRow;
     if (existing) {
+      // An update changes only what the caller supplied: a steward who sends just a credential reference must not switch the
+      // integration off or clear its settings and webhook URL. (A create still takes the defaults: disabled, no settings.)
+      const changes: Partial<typeof values> = { updatedAt: values.updatedAt };
+      if (input.credentialRef) changes.credentials = values.credentials;
+      if (input.settings !== undefined) changes.settings = values.settings;
+      if (input.webhookUrl !== undefined) changes.webhookUrl = values.webhookUrl;
+      if (input.enabled !== undefined) changes.enabled = values.enabled;
+
+      // Switching an integration on or off here is the same decision as the activate route, so it carries the same concurrency
+      // predicate: the write applies only if the state read above is still the state.
       const [updated] = await tx
         .update(integrationConfigs)
-        .set({
-          ...values,
-          credentials: input.credentialRef ? values.credentials : existing.credentials,
-        })
-        .where(and(eq(integrationConfigs.id, existing.id), eq(integrationConfigs.organizationId, organizationId)))
+        .set(changes)
+        .where(
+          and(
+            eq(integrationConfigs.id, existing.id),
+            eq(integrationConfigs.organizationId, organizationId),
+            sql`${integrationConfigs.enabled} IS NOT DISTINCT FROM ${existing.enabled}`,
+          ),
+        )
         .returning();
+      if (!updated) throw ApiError.conflict('The integration was changed by someone else; reload and try again');
       config = updated;
     } else {
       [config] = await tx.insert(integrationConfigs).values(values).returning();
@@ -224,8 +242,11 @@ export async function configureIntegrationForOrg(
       details: {
         provider: input.provider,
         type: input.type,
-        enabled: input.enabled ?? false,
+        enabled: config.enabled ?? false,
+        previouslyEnabled: existing ? (existing.enabled ?? false) : undefined,
         settingsKeys: Object.keys(input.settings ?? {}),
+        settingsChanged: input.settings !== undefined,
+        webhookUrlChanged: input.webhookUrl !== undefined,
         credentialRefChanged: !!input.credentialRef,
       },
     });

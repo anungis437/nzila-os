@@ -16,7 +16,8 @@ import { createMetaClient } from '@/lib/social-media/meta-api-client';
 import { createTwitterClient } from '@/lib/social-media/twitter-api-client';
 import { createLinkedInClient } from '@/lib/social-media/linkedin-api-client';
 import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
-import { logApiAuditEvent } from '@/lib/middleware/api-security';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { sealToken, sealOptionalToken } from '@/lib/social-media/token-vault';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
 
 const SUPPORTED_PLATFORMS = ['facebook', 'instagram', 'twitter', 'linkedin'] as const;
@@ -44,7 +45,7 @@ function clearOAuthCookies(cookieStore: CookieStore) {
   cookieStore.set('twitter_code_verifier', '', expired);
 }
 
-export const GET = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
+export const GET = withRoleAuth('admin', async (request: NextRequest, context: BaseAuthContext) => {
   const cookieStore = await cookies();
   const { userId, organizationId } = context;
 
@@ -121,6 +122,14 @@ export const GET = withRoleAuth('steward', async (request: NextRequest, context:
         const shortLived = await metaClient.getAccessToken(code, redirectUri);
         const longLived = await metaClient.getLongLivedToken(shortLived.access_token);
         const pages = await metaClient.getUserPages();
+        // The authorizing user may manage several Pages. Picking the first would publish as an arbitrary one, and there is no
+        // selection step yet, so a connection is made only when exactly one Page is available.
+        if (pages.length > 1) {
+          return standardErrorResponse(
+            ErrorCode.VALIDATION_ERROR,
+            'This account manages more than one Page. Connect an account that manages exactly the Page to publish as.'
+          );
+        }
         const page = pages[0];
         if (!page) {
           return standardErrorResponse(
@@ -196,8 +205,11 @@ export const GET = withRoleAuth('steward', async (request: NextRequest, context:
 
     // organizationId/userId come only from the trusted, authenticated server
     // context (withRoleAuth) — never from query params, provider payload, or state.
-    const [account] = await withRLSContext({ organizationId }, async (tx) =>
-      tx
+        // Provider tokens are stored sealed, never as plaintext.
+    const sealedAccessToken = await sealToken(accessToken);
+    const sealedRefreshToken = await sealOptionalToken(refreshToken);
+    const [account] = await withRLSContext({ organizationId }, async (tx) => {
+      const rows = await tx
         .insert(socialAccounts)
         .values({
           organizationId,
@@ -205,8 +217,8 @@ export const GET = withRoleAuth('steward', async (request: NextRequest, context:
           platformUserId,
           username,
           displayName,
-          accessToken,
-          refreshToken,
+          accessToken: sealedAccessToken,
+          refreshToken: sealedRefreshToken,
           tokenExpiresAt,
           status: 'active',
           connectedBy: userId,
@@ -216,26 +228,26 @@ export const GET = withRoleAuth('steward', async (request: NextRequest, context:
           set: {
             username,
             displayName,
-            accessToken,
-            refreshToken,
+            accessToken: sealedAccessToken,
+            refreshToken: sealedRefreshToken,
             tokenExpiresAt,
             status: 'active',
             updatedAt: new Date(),
           },
         })
-        .returning({ id: socialAccounts.id, platform: socialAccounts.platform, username: socialAccounts.username })
-    );
+        .returning({ id: socialAccounts.id, platform: socialAccounts.platform, username: socialAccounts.username });
 
-    await logApiAuditEvent({
-      userId,
-      organizationId,
-      action: 'COMPLETE_SOCIAL_CONNECT',
-      dataType: 'SOCIAL_MEDIA',
-      recordId: account?.id,
-      success: true,
-      metadata: { platform },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+      // The credential and its audit record commit together: a connection with no record is not kept.
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'social_account.connected',
+        resourceType: 'social_accounts',
+        resourceId: rows[0]?.id,
+        details: { platform },
+      });
+      return rows;
+    });
 
     return NextResponse.json({
       message: 'Account connected successfully',

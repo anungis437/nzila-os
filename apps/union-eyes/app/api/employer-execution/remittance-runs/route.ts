@@ -1,8 +1,9 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
-import { db } from "@/db";
 import { withRLSContext } from "@/lib/db/with-rls-context";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { FINANCIAL_MEMBER_DATA_ROLES } from "@/lib/finance/financial-authority";
+import { requireLiveFinancialMandate } from "@/lib/finance/require-live-financial-mandate";
+import { rowsVisibleToGrant } from "@/lib/finance/principal-financial-authority";
 import { participantsFromRun, recordedRunAmounts } from "@/lib/employer-execution/run-duties";
 import {
   employerPayrollRuns,
@@ -17,6 +18,7 @@ import {
 import { and, desc, eq, ne } from "drizzle-orm";
 import { createEvidencePack, sha256 } from "../_lib";
 import { enforceRunDuty } from "../_guard";
+import { csvCell } from "@/lib/employer-execution/csv-cell";
 
 const LEGACY_TARGET_ID_COLUMN = "entityId" as const;
 
@@ -32,7 +34,7 @@ const defaultFormatter: RemittanceFormatter = {
     const header = "employee_external_id,gross_pay,dues_amount,benefit_amount,pension_amount,net_pay";
     const body = rows.map((row) =>
       [
-        row.employeeExternalId,
+        csvCell(row.employeeExternalId),
         row.gross.toFixed(2),
         row.dues.toFixed(2),
         row.benefits.toFixed(2),
@@ -47,23 +49,31 @@ const defaultFormatter: RemittanceFormatter = {
   },
 };
 
+// A group reports the members who actually contribute to it, not every item of the payroll run.
+function contributing(items: Array<Record<string, unknown>>, column: string): number {
+  return items.filter((item) => Number(item[column]) > 0).length;
+}
+
 const createSchema = z.object({
   payrollRunId: z.guid(),
 });
 
 export const GET = withApi(
   {
-    auth: { minRole: "member" },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_remittance_generation",
     openapi: { tags: ["Employer Execution"], summary: "List remittance runs" },
   },
-  async ({ organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest("Organization context required");
-    const rows = await db
-      .select()
-      .from(employerRemittanceRuns)
-      .where(eq(employerRemittanceRuns.organizationId, organizationId))
-      .orderBy(desc(employerRemittanceRuns.createdAt));
+  async ({ organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest("Organization context required");
+    const rows = await withRLSContext({ organizationId, userId }, async (tx) => {
+      const grant = await requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:view" });
+      return tx
+        .select()
+        .from(employerRemittanceRuns)
+        .where(rowsVisibleToGrant(grant, organizationId, employerRemittanceRuns.organizationId, employerRemittanceRuns.id))
+        .orderBy(desc(employerRemittanceRuns.createdAt));
+    });
     return { data: rows };
   },
 );
@@ -83,7 +93,8 @@ export const POST = withApi(
 
     // The payroll run is locked for the whole generation, so two concurrent requests cannot both produce a
     // remittance for it. Generation, its artifacts, its evidence link and the audit record commit together.
-    return withRLSContext({ organizationId }, async (tx) => {
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:execute", resourceId: body.payrollRunId });
       const [payrollRun] = await tx
         .select()
         .from(employerPayrollRuns)
@@ -249,16 +260,16 @@ export const POST = withApi(
 
       await tx.insert(employerRemittanceRunItems).values(
         [
-          { groupKey: "dues", contributionType: "dues", amount: totals.dues },
-          { groupKey: "benefits", contributionType: "benefits", amount: totals.benefits },
-          { groupKey: "pension", contributionType: "pension", amount: totals.pension },
+          { groupKey: "dues", contributionType: "dues", amount: totals.dues, members: contributing(items, "duesAmount") },
+          { groupKey: "benefits", contributionType: "benefits", amount: totals.benefits, members: contributing(items, "benefitAmount") },
+          { groupKey: "pension", contributionType: "pension", amount: totals.pension, members: contributing(items, "pensionAmount") },
         ].map((item) => ({
           organizationId,
           remittanceRunId: remittanceRun.id,
           groupKey: item.groupKey,
           contributionType: item.contributionType,
           amount: item.amount.toString(),
-          memberCount: items.length.toString(),
+          memberCount: item.members.toString(),
           traceJson: { sourcePayrollRunId: payrollRun.id },
         })),
       );

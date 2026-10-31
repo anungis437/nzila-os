@@ -11898,7 +11898,10 @@
         "title": "Digital membership card",
         "body": "A verifiable membership credential."
       }
-    }
+    },
+    "reviewsTitle": "Request a review",
+    "reviewsBody": "Ask your union to open a protected complaint, appeal or reconsideration. Opening one records your request. It does not assign a reviewer or send a notice.",
+    "reviewsLink": "Request a review"
   },
   "memberHelp": {
     "title": "Help & Resources",
@@ -11954,5 +11957,38 @@
     "requestsBody": "You can ask your union for a copy of your information, ask for a correction, or withdraw a consent. Your request is handled by your union.",
     "selfServiceUnavailable": "Online self-service for these requests is not available yet. A secure message is the supported way to make one.",
     "sendRequest": "Send a privacy request"
+  },
+  "reviewIntake": {
+    "memberTitle": "Request a review",
+    "oversightTitle": "Review intake and assigned reviews",
+    "openOversight": "Open review intake",
+    "boundary": "Opening a review records your request. It does not decide the outcome, assign a reviewer, or send a notice.",
+    "typeLabel": "What you are asking for",
+    "types": {
+      "complaint": "Complaint",
+      "appeal": "Appeal",
+      "reconsideration": "Reconsideration"
+    },
+    "adverseLabel": "People who should not handle this review",
+    "adverseHint": "Optional. Enter each person's internal identifier, one per line. Do not include yourself.",
+    "submit": "Open this review",
+    "submitting": "Opening…",
+    "opened": "The review is recorded.",
+    "noNotice": "No notice was sent. No review-notification policy is adopted.",
+    "validation": "Choose a review type. Name at most eight distinct internal identifiers, and do not name yourself.",
+    "denied": "This action is not available for your membership.",
+    "submitError": "The review could not be recorded. Try again.",
+    "loadError": "Reviews could not be loaded.",
+    "retry": "Try again",
+    "ownTitle": "Reviews you opened",
+    "emptyOwn": "You have not opened a review.",
+    "oversightListTitle": "Reviews your mandate covers",
+    "emptyOversight": "No review is assigned to a live monitor mandate for you.",
+    "status": {
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "complainant": "Complainant {id}",
+    "complainantAbsent": "No complainant is recorded."
   }
 }

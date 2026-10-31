@@ -22,8 +22,17 @@ describe('public intake guard', () => {
 
   it('keys the bucket on the client address, preferring the edge-set header', async () => {
     expect(clientAddress(post('{}', { 'cf-connecting-ip': '1.1.1.1', 'x-forwarded-for': '2.2.2.2' }))).toBe('1.1.1.1')
-    expect(clientAddress(post('{}', { 'x-forwarded-for': '2.2.2.2, 3.3.3.3' }))).toBe('2.2.2.2')
     expect(clientAddress(post('{}'))).toBe('unknown')
+  })
+
+  // DEF-0B8-ICRA-RATE-LIMITS-PER-PROCESS-AND-KEYED-ON-REQUEST-HEADER-ADDRESS
+  // Replaced: this test expected the first (client-typed) forwarded-for entry.
+  it('reads the forwarded-for list from the right, so a client-typed first entry does not choose the bucket', async () => {
+    expect(clientAddress(post('{}', { 'x-forwarded-for': '9.9.9.9, 2.2.2.2' }))).toBe('2.2.2.2')
+    expect(clientAddress(post('{}', { 'x-forwarded-for': '1.2.3.4' }))).toBe('1.2.3.4')
+    vi.stubEnv('TRUSTED_PROXY_HOPS', '2')
+    expect(clientAddress(post('{}', { 'x-forwarded-for': '9.9.9.9, 2.2.2.2, 3.3.3.3' }))).toBe('2.2.2.2')
+    vi.unstubAllEnvs()
   })
 
   it('answers 429 over the limit, and never reads the body', async () => {
@@ -49,8 +58,52 @@ describe('public intake guard', () => {
     const big = JSON.stringify({ x: 'y'.repeat(PUBLIC_INTAKE_MAX_BODY_BYTES) })
     const declared = await guardPublicIntake(post('{}', { 'content-length': String(PUBLIC_INTAKE_MAX_BODY_BYTES + 1) }), { bucket: 'write' })
     expect(declared.ok === false && declared.response.status).toBe(413)
-    const actual = await guardPublicIntake(post(big), { bucket: 'write' })
+    const request = post(big)
+    const text = vi.spyOn(request, 'text')
+    const actual = await guardPublicIntake(request, { bucket: 'write' })
     expect(actual.ok === false && actual.response.status).toBe(413)
+    // No whole-body buffering before the cap is enforced.
+    expect(text).not.toHaveBeenCalled()
+  })
+
+  it('decodes multibyte JSON split across streamed byte chunks', async () => {
+    const bytes = new TextEncoder().encode(JSON.stringify({ label: 'é🙂' }))
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        // Split inside the UTF-8 encoding of a multibyte character.
+        for (let i = 0; i < bytes.length; i += 1) controller.enqueue(bytes.slice(i, i + 1))
+        controller.close()
+      },
+    })
+    const request = new Request('http://localhost/api/x', {
+      method: 'POST',
+      body: stream,
+      duplex: 'half',
+    } as RequestInit & { duplex: 'half' })
+    expect(request.headers.get('content-length')).toBeNull()
+    expect(await guardPublicIntake(request, { bucket: 'write' })).toEqual({
+      ok: true,
+      json: { label: 'é🙂' },
+    })
+  })
+
+  it('refuses an oversized chunked body before consuming the entire stream', async () => {
+    let reads = 0
+    const stream = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        reads += 1
+        controller.enqueue(new Uint8Array(4096))
+        if (reads === 20) controller.close()
+      },
+    }, { highWaterMark: 0 })
+    const request = new Request('http://localhost/api/x', {
+      method: 'POST',
+      body: stream,
+      duplex: 'half',
+    } as RequestInit & { duplex: 'half' })
+    const result = await guardPublicIntake(request, { bucket: 'write' })
+    expect(result.ok === false && result.response.status).toBe(413)
+    expect(reads).toBeLessThan(20)
   })
 
   it('refuses malformed JSON, and treats an empty body as no payload', async () => {

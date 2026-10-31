@@ -46,7 +46,7 @@ export const GET = withApi(
           count(*) AS total_courses,
           count(*) FILTER (WHERE is_active = true) AS active_courses,
           COALESCE((SELECT count(*) FROM course_registrations cr
-            WHERE cr.organization_id = ${orgId}::uuid AND cr.attended IS TRUE), 0) AS total_completions
+            WHERE cr.organization_id = ${orgId}::uuid AND cr.completed IS TRUE), 0) AS total_completions
         FROM training_courses
         WHERE organization_id = ${orgId}::uuid
       `);

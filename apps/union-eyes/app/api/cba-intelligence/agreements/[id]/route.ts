@@ -1,4 +1,5 @@
 import { withApi, ApiError } from "@/lib/api/framework";
+import { hasMinRole } from "@/lib/api-auth-guard";
 import {
   getAgreementById,
   listWageAdjustments,
@@ -19,12 +20,14 @@ export const GET = withApi(
     },
   },
   async ({ params }) => {
+    const reviewer = await hasMinRole("steward");
     const agreement = await getAgreementById(params.id);
-    if (!agreement) throw ApiError.notFound("Agreement not found");
+    // A member does not learn that an unreviewed extraction exists.
+    if (!agreement || (!reviewer && agreement.reviewStatus !== "approved")) throw ApiError.notFound("Agreement not found");
 
     const [wages, clauses] = await Promise.all([
-      listWageAdjustments(params.id),
-      listClauses(params.id),
+      listWageAdjustments(params.id, { approvedOnly: !reviewer }),
+      listClauses(params.id, { approvedOnly: !reviewer }),
     ]);
 
     return {

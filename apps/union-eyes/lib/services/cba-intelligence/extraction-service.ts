@@ -321,12 +321,16 @@ export async function createWageAdjustment(data: NewWageAdjustment): Promise<Cba
   }
 }
 
-export async function listWageAdjustments(agreementId: string) {
+export async function listWageAdjustments(agreementId: string, options: { approvedOnly?: boolean } = {}) {
   try {
     return await db
       .select()
       .from(cbaIntelWageAdjustments)
-      .where(eq(cbaIntelWageAdjustments.agreementId, agreementId))
+      .where(
+        options.approvedOnly
+          ? and(eq(cbaIntelWageAdjustments.agreementId, agreementId), eq(cbaIntelWageAdjustments.reviewStatus, "approved"))
+          : eq(cbaIntelWageAdjustments.agreementId, agreementId),
+      )
       .orderBy(cbaIntelWageAdjustments.year, cbaIntelWageAdjustments.effectiveDate);
   } catch (error) {
     logger.error("Error listing wage adjustments", { error, agreementId });
@@ -355,12 +359,16 @@ export async function createClause(data: NewClause): Promise<CbaIntelClause> {
   }
 }
 
-export async function listClauses(agreementId: string) {
+export async function listClauses(agreementId: string, options: { approvedOnly?: boolean } = {}) {
   try {
     return await db
       .select()
       .from(cbaIntelClauses)
-      .where(eq(cbaIntelClauses.agreementId, agreementId))
+      .where(
+        options.approvedOnly
+          ? and(eq(cbaIntelClauses.agreementId, agreementId), eq(cbaIntelClauses.reviewStatus, "approved"))
+          : eq(cbaIntelClauses.agreementId, agreementId),
+      )
       .orderBy(cbaIntelClauses.clauseFamily, cbaIntelClauses.clauseNumber);
   } catch (error) {
     logger.error("Error listing clauses", { error, agreementId });

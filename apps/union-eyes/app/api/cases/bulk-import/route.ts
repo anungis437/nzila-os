@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { claims } from '@/db/schema/claims-schema';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { createClaim } from '@/db/queries/claims-queries';
-import { auditDataMutation } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { requireCaseFilingCapacity } from '@/lib/cases/case-authorization';
@@ -136,7 +136,7 @@ export async function POST(request: Request) {
         const claimType = (CLAIM_TYPE_MAP[record.caseType] ?? record.caseType) as Parameters<typeof createClaim>[0]['claimType'];
 
         const claim = await withRLSContext(async (tx) => {
-          return createClaim(
+          const created = await createClaim(
             {
               organizationId: orgId,
               memberId: record.memberId,
@@ -160,6 +160,15 @@ export async function POST(request: Request) {
             },
             tx,
           );
+          await persistAtomicAudit(tx, {
+            organizationId: orgId,
+            userId,
+            action: 'case.bulk_import_row',
+            resourceType: 'claims',
+            resourceId: created.claimId,
+            details: { event: 'BULK_IMPORT_ROW' },
+          });
+          return created;
         });
 
         results.push({
@@ -182,18 +191,22 @@ export async function POST(request: Request) {
     const duplicates = results.filter(r => r.status === 'duplicate').length;
     const errors = results.filter(r => r.status === 'error').length;
 
-    await auditDataMutation({
-      userId,
-      organizationId: orgId,
-      resource: 'claims',
-      action: 'create',
-      details: {
-        event: 'BULK_IMPORT',
-        totalRecords: caseRecords.length,
-        created,
-        duplicates,
-        errors,
-      },
+    // The batch summary commits on its own. A failed audit withholds the success response.
+    // Rows that already committed keep the per-claim audit from their own transaction.
+    await withRLSContext(async (tx) => {
+      await persistAtomicAudit(tx, {
+        organizationId: orgId,
+        userId,
+        action: 'case.bulk_import',
+        resourceType: 'claims',
+        details: {
+          event: 'BULK_IMPORT',
+          totalRecords: caseRecords.length,
+          created,
+          duplicates,
+          errors,
+        },
+      });
     });
 
     logger.info('Bulk import completed', { total: caseRecords.length, created, duplicates, errors });

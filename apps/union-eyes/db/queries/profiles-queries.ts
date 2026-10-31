@@ -57,38 +57,43 @@ export const createProfile = async (
   }
 };
 
-export const getProfileByUserId = async (
+/** The profile of a user, or null when there is none. A failed or timed-out lookup throws: it is not the same answer as "no profile". */
+export const findProfileByUserId = async (
   userId: string,
-   
   tx?: RLSTx
-) => {
-   
+): Promise<SelectProfile | null> => {
   const executeQuery = async (dbOrTx: RLSTx) => {
+    logger.info("Looking up profile by user ID", { userId });
+    let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      logger.info("Looking up profile by user ID", { userId });
-      
-      // Increase timeout from 5 to 10 seconds for more reliability in serverless environments
       const profiles = await Promise.race([
         dbOrTx.select().from(profilesTable).where(eq(profilesTable.userId, userId)),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error("Database query timeout")), 10000)
-        )
+        new Promise((_, reject) => {
+          timer = setTimeout(() => reject(new Error("Database query timeout")), 10000);
+        }),
       ]) as SelectProfile[];
-      
-      if (profiles && profiles.length > 0) {
-        return profiles[0];
-      }
-      return null;
-    } catch (error) {
-      logger.error("Error getting profile by user ID", { error, userId });
-      return null;
+      return profiles && profiles.length > 0 ? profiles[0] : null;
+    } finally {
+      if (timer) clearTimeout(timer);
     }
   };
 
   if (tx) {
     return executeQuery(tx);
-  } else {
-    return withRLSContext(async (tx) => executeQuery(tx));
+  }
+  return withRLSContext(async (tx) => executeQuery(tx));
+};
+
+/** Tolerant form for callers that treat a failed lookup as "no profile". */
+export const getProfileByUserId = async (
+  userId: string,
+  tx?: RLSTx
+) => {
+  try {
+    return await findProfileByUserId(userId, tx);
+  } catch (error) {
+    logger.error("Error getting profile by user ID", { error, userId });
+    return null;
   }
 };
 

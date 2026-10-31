@@ -7,7 +7,7 @@ const m = vi.hoisted(() => ({
   withRLSContext: vi.fn(),
   createClaim: vi.fn(),
   getClaimsByMember: vi.fn(),
-  auditDataMutation: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   requireEntitlement: vi.fn(),
   getOrganizationIdForUser: vi.fn(),
   enforceDecision: vi.fn(),
@@ -45,7 +45,7 @@ vi.mock('@/db/queries/claims-queries', () => ({
   createClaim: m.createClaim,
   getClaimsByMember: m.getClaimsByMember,
 }));
-vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
 vi.mock('@/lib/evidence', () => ({ buildUnionEvidencePack: vi.fn(() => Promise.resolve()) }));
 vi.mock('@/lib/events', () => ({
@@ -108,7 +108,7 @@ describe('cases/intake route', () => {
     m.enforceDecision.mockResolvedValue({ allowed: true, decision: { id: 'decision_1' } });
     m.createClaim.mockResolvedValue({ claimId: 'claim_1', claimNumber: 'CLM-1' });
     m.getClaimsByMember.mockResolvedValue([{ claimId: 'claim_1' }]);
-    m.auditDataMutation.mockResolvedValue(undefined);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
 
     m.withRLSContext.mockImplementation(async (fn: (tx: any) => Promise<unknown>) => {
       const tx = {
@@ -208,7 +208,13 @@ describe('cases/intake route', () => {
 
     expect(response.status).toBe(201);
     expect(payload).toMatchObject({ success: true, status: 'submitted', claimId: 'claim_1' });
-    expect(m.auditDataMutation).toHaveBeenCalled();
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      action: 'case.intake_submitted',
+      resourceType: 'claims',
+      resourceId: 'claim_1',
+      organizationId: 'org_1',
+      userId: 'user_1',
+    }));
   });
 
   it('normalizes only the verified native Entra actor to its platform id before every write and proof', async () => {
@@ -240,7 +246,7 @@ describe('cases/intake route', () => {
     expect(m.withRLSContext).not.toHaveBeenCalled();
     expect(m.enforceDecision).not.toHaveBeenCalled();
     expect(m.createClaim).not.toHaveBeenCalled();
-    expect(m.auditDataMutation).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('accepts the platform self id and fails closed when canonical proof persistence fails', async () => {
@@ -264,7 +270,7 @@ describe('cases/intake route', () => {
     expect(m.withRLSContext).not.toHaveBeenCalled();
     expect(m.enforceDecision).not.toHaveBeenCalled();
     expect(m.createClaim).not.toHaveBeenCalled();
-    expect(m.auditDataMutation).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('files nothing when the canonical membership is refused member filing capacity', async () => {
@@ -277,7 +283,23 @@ describe('cases/intake route', () => {
     expect((await response.json()).error).toBe('FORBIDDEN');
     expect(m.requireCaseFilingCapacity).toHaveBeenCalledWith(expect.anything(), { userId: 'user_1', organizationId: 'org_1' }, 'member');
     expect(m.createClaim).not.toHaveBeenCalled();
-    expect(m.auditDataMutation).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.eventEmit).not.toHaveBeenCalled();
+  });
+
+  it('does not report a submitted intake when the claim audit write fails', async () => {
+    const { POST } = await loadRoute();
+    m.selectClaimRows.push([]);
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit failed'));
+
+    const response = await POST(new Request('http://localhost/api/cases/intake', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ any: 'thing' }),
+    }));
+
+    expect(response.status).toBe(500);
+    expect((await response.json()).error).toBe('INTERNAL_ERROR');
     expect(m.eventEmit).not.toHaveBeenCalled();
   });
 });

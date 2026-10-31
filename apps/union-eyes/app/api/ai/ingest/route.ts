@@ -186,7 +186,7 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
     }
 
     // Add to RAG if requested
-    let ragResult: { status: string; documentId: string; chunkCount: number } | null = null;
+    let ragResult: { status: string; durable: boolean; documentId: string; chunkCount: number | null } | null = null;
     if (metadata.addToRAG) {
       // The index lives in process memory and the embedding call leaves the database, so the intent is recorded first
       // and nothing is indexed if that record cannot be written. Chunks carry the organization so another
@@ -217,10 +217,13 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
           }]),
       );
 
+      // The index is process memory: it is lost on restart and is not shared across instances. The answer says so and does not claim a
+      // durable index or a chunk count nothing computed.
       ragResult = {
-        status: 'indexed',
+        status: 'indexed_in_process_memory',
+        durable: false,
         documentId: document.id,
-        chunkCount: 1, // Simplified - actual implementation would count chunks
+        chunkCount: null,
       };
 
       logger.info('Document added to RAG', {

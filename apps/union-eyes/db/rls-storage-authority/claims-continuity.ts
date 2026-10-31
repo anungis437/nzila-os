@@ -462,7 +462,7 @@ export const claimsContinuityEntries: StorageAuthorityEntry[] = [
   {
     table: "arbitration_precedents",
     classification: "TENANT_RLS_REQUIRED",
-    reason: "6 non-test reference(s) to 'arbitrationPrecedents' found (round-7 scope-expansion scan). At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review). RESOLVED (round 11): app/api/precedents/[id]/route.ts uses crudRoutes({ orgScoped: true, writeRole: 'steward' }) — auto-filtered by the caller's own organizationId.",
+    reason: "6 non-test reference(s) to 'arbitrationPrecedents' found (round-7 scope-expansion scan). At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review). REPAIRED (UE-CONV precedent ownership): app/api/precedents/[id]/route.ts is an explicit owner-plus-sharing route (canReadSharedClause for reads; owner-only, RLS-context, audited writes). The earlier crudRoutes orgScoped declaration was a no-op because the table is keyed by source_organization_id.",
     supportingCapability: ["app/api/ai/semantic-search/route.ts","app/api/precedents/[id]/route.ts","lib/clc/data-products.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE","DELETE"],
     requiredSystemPrivileges: [],
@@ -715,6 +715,7 @@ export const claimsContinuityEntries: StorageAuthorityEntry[] = [
   },
   {
     table: "grievance_timeline",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
     classification: "TENANT_RLS_REQUIRED",
     reason: "1 non-test reference(s) to 'grievanceTimeline' found (round-7 scope-expansion scan). At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review). RESOLVED (round 11): sole reference app/api/cases/[caseId]/timeline/route.ts (minRole:'member', withRLSContext) — same route family as claim_updates/grievance_events above.",
     supportingCapability: ["app/api/cases/[caseId]/timeline/route.ts"],

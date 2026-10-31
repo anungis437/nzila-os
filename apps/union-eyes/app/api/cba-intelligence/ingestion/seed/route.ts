@@ -1,3 +1,4 @@
+import { requireSystemAdmin } from "@/lib/api-auth-guard";
 import { withApi, ApiError } from "@/lib/api/framework";
 import { performAuditedOperation, operationAuditResponse } from "@/lib/audit/operation-audit";
 import { seedSources } from "@/lib/services/cba-intelligence/seed-sources";
@@ -16,6 +17,8 @@ export const POST = withApi(
     },
   },
   async ({ userId, organizationId }) => {
+    // The dataset is platform-wide (no organization column): changing it is platform authority, not an organization administrator's.
+    await requireSystemAdmin();
     // Seeding inserts the registry one source at a time, so it cannot share one transaction: its intent is recorded
     // first and nothing is seeded if that record cannot be written.
     try {

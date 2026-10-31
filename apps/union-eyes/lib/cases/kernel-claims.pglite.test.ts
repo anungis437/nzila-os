@@ -21,7 +21,11 @@ vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: vi.fn() }))
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: vi.fn(), getUserRoleInOrganization: vi.fn() }))
 vi.mock('@/lib/audit-logger', () => ({ auditLog: m.audit, AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }))
 vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: () => m.v2.on }))
+// The in-process database here is legacy-shaped, so membership is read from the tables directly whichever way the V2 toggle is set;
+// the topology-aware source (definer function under V2) has its own tests.
+vi.mock('@/lib/authority/store/active-membership-source', async () => ({ activeMembershipSource: (await import('@/lib/authority/store/identity')).canonicalMembershipSource }))
 
+import { CONVERSATION_ASSIGNEE_ROLES } from '@/lib/authority/capacity'
 import { caseReadScope, caseTriageQueueScope, findReadableCase, type CaseActor } from './case-authorization'
 
 let pg: PGlite
@@ -71,7 +75,12 @@ beforeAll(async () => {
       -- answers from the same compatibility projection so both membership paths can be exercised here.
       CREATE FUNCTION public.ue_case_assignee_authorized(u text, o uuid) RETURNS boolean LANGUAGE sql STABLE AS $f$
         SELECT EXISTS (SELECT 1 FROM public.organization_members m WHERE m.user_id = u AND m.organization_id = o
-          AND m.status = 'active' AND m.deleted_at IS NULL AND m.role IN ('steward', 'chief_steward', 'officer', 'admin')) $f$;`)
+          AND m.status = 'active' AND m.deleted_at IS NULL AND m.role IN ('steward', 'chief_steward', 'officer', 'admin')) $f$;
+      -- TEST DOUBLE of public.ue_conversation_assignee_authorized. Designation liveness asks this
+      -- predicate, not the case-assignee predicate. Administrator is absent.
+      CREATE FUNCTION public.ue_conversation_assignee_authorized(u text, o uuid) RETURNS boolean LANGUAGE sql STABLE AS $f$
+        SELECT EXISTS (SELECT 1 FROM public.organization_members m WHERE m.user_id = u AND m.organization_id = o
+          AND m.status = 'active' AND m.deleted_at IS NULL AND lower(m.role) IN (${CONVERSATION_ASSIGNEE_ROLES.map((role) => `'${role}'`).join(',')})) $f$;`)
     await pg.query(
       `INSERT INTO public.claims (claim_id, claim_number, organization_id, member_id) VALUES
          ($1,'CASE-own',$5,$6), ($2,'CASE-unassigned',$5,'someone_else'), ($3,'CASE-assigned',$5,'someone_else'), ($4,'CASE-foreign',$7,$6)`,

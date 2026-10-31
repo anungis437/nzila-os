@@ -211,6 +211,139 @@
       "when": 1758850000000,
       "tag": "0028_location_deletion_log_shape",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1758860000000,
+      "tag": "0029_message_thread_authority_scope",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1758870000000,
+      "tag": "0030_message_retention_authority_scope",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1758880000000,
+      "tag": "0031_reachable_stub_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1758890000000,
+      "tag": "0032_notification_callback_identity",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1758900000000,
+      "tag": "0033_election_certificate_successions",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1758910000000,
+      "tag": "0034_election_organization_ownership",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1758920000000,
+      "tag": "0035_election_supersession_authority_scope",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1758930000000,
+      "tag": "0036_workaid_consent_wording_proposals",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1758940000000,
+      "tag": "0037_workaid_referral_scope",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1758950000000,
+      "tag": "0038_gate0_integrity_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1758960000000,
+      "tag": "0039_committee_memberships_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1758970000000,
+      "tag": "0040_gate0_integrity_enforcement",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1758980000000,
+      "tag": "0041_room_bookings_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1758990000000,
+      "tag": "0042_tenant_scoped_uniqueness",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1759000000000,
+      "tag": "0043_knowledge_transfer_owner",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1759010000000,
+      "tag": "0044_anti_scab_author",
+      "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1759020000000,
+      "tag": "0045_contact_submissions",
+      "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1759030000000,
+      "tag": "0046_row_integrity",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1759040000000,
+      "tag": "0047_ml_prediction_feedback",
+      "breakpoints": true
     }
   ]
 }

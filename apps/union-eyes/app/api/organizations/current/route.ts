@@ -5,6 +5,7 @@ import { organizations } from '@/db/schema-organizations';
 import { eq, sql } from 'drizzle-orm';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { canAdministerOrganization, canReadOrganization, resolveOrganizationAccess } from '@/lib/organizations/read-authority';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +26,12 @@ export async function GET() {
   } catch {
     return NextResponse.json({ error: 'Organization context required' }, { status: 403 });
   }
+
+  // The row is read only by someone who holds an active membership here, and its settings, billing contact and provenance are returned
+  // only to the organization's administrators; any other member receives the public profile.
+  const access = await resolveOrganizationAccess(userId);
+  if (!canReadOrganization(access, organizationId)) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  const administrative = canAdministerOrganization(access, organizationId);
 
   return withRLSContext({ organizationId }, async () => {
     const [row] = await db
@@ -73,15 +80,12 @@ export async function GET() {
         member_count: row.memberCount,
         active_member_count: row.activeMemberCount,
         last_member_count_update: row.lastMemberCountUpdate,
-        subscription_tier: row.subscriptionTier,
-        billing_contact_id: row.billingContactId,
-        settings: row.settings ?? {},
+        ...(administrative ? { subscription_tier: row.subscriptionTier, billing_contact_id: row.billingContactId, settings: row.settings ?? {} } : {}),
         features_enabled: row.featuresEnabled ?? [],
         status: row.status,
         created_at: row.createdAt,
         updated_at: row.updatedAt,
-        created_by: row.createdBy,
-        legacy_org_id: row.legacyOrgId,
+        ...(administrative ? { created_by: row.createdBy, legacy_org_id: row.legacyOrgId } : {}),
         memberCount: row.memberCount ?? 0,
         activeClaims: claims.active,
         totalClaims: claims.total,

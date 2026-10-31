@@ -26,6 +26,7 @@ import { logger } from "@/lib/logger";
 import {
   deriveVotingSessionKey,
 } from "./voting-crypto-service";
+import { checkVotingInstrumentChange, VotingRuleError } from "@/lib/voting/session-lifecycle";
 
 // ============================================================================
 // Types
@@ -242,12 +243,34 @@ export async function deleteVotingSession(id: string, organizationId: string): P
 // ============================================================================
 
 /**
- * Add voting option to session
+ * Voting options and eligibility rows carry no organization of their own: ownership is proven in the statement
+ * through the organization of the voting session they belong to. The instrument changes only while the session is a draft.
  */
+const sessionsOfOrganization = (organizationId: string) =>
+  db.select({ id: votingSessions.id }).from(votingSessions).where(eq(votingSessions.organizationId, organizationId));
+
+async function loadSession(sessionId: string, organizationId?: string) {
+  const where = organizationId
+    ? and(eq(votingSessions.id, sessionId), eq(votingSessions.organizationId, organizationId))
+    : eq(votingSessions.id, sessionId);
+  const [session] = await db.select().from(votingSessions).where(where).limit(1);
+  return session ?? null;
+}
+
+function assertDraftInstrument(status: string): void {
+  const decision = checkVotingInstrumentChange(status);
+  if (!decision.ok) throw new VotingRuleError(decision.code, decision.message);
+}
+
 export async function addVotingOption(
-  data: NewVotingOption
+  data: NewVotingOption,
+  organizationId: string
 ): Promise<VotingOption> {
   try {
+    if (!data.sessionId) throw new VotingRuleError('UNKNOWN_STATUS', 'A voting option belongs to a draft session.');
+    const session = await loadSession(data.sessionId, organizationId);
+    if (!session) throw new VotingRuleError('UNKNOWN_STATUS', 'The session is in a state this operation does not recognise.');
+    assertDraftInstrument(session.status);
     const [option] = await db
       .insert(votingOptions)
       .values(data)
@@ -255,20 +278,42 @@ export async function addVotingOption(
 
     return option;
   } catch (error) {
+    if (error instanceof VotingRuleError) throw error;
     logger.error("Error adding voting option", { error, data });
     throw new Error("Failed to add voting option");
   }
 }
 
-/**
- * Update voting option
- */
-/**
- * Voting options and eligibility rows carry no organization of their own: ownership is proven in the statement
- * through the organization of the voting session they belong to.
- */
-const sessionsOfOrganization = (organizationId: string) =>
-  db.select({ id: votingSessions.id }).from(votingSessions).where(eq(votingSessions.organizationId, organizationId));
+async function ownedOption(id: string, organizationId: string) {
+  const [option] = await db
+    .select()
+    .from(votingOptions)
+    .where(and(eq(votingOptions.id, id), inArray(votingOptions.sessionId, sessionsOfOrganization(organizationId))))
+    .limit(1);
+  return option ?? null;
+}
+
+async function ownedEligibilityById(id: string, organizationId: string) {
+  const [row] = await db
+    .select()
+    .from(voterEligibility)
+    .where(and(eq(voterEligibility.id, id), inArray(voterEligibility.sessionId, sessionsOfOrganization(organizationId))))
+    .limit(1);
+  return row ?? null;
+}
+
+async function ownedEligibilityByMember(sessionId: string, memberId: string, organizationId: string) {
+  const [row] = await db
+    .select()
+    .from(voterEligibility)
+    .where(and(
+      eq(voterEligibility.sessionId, sessionId),
+      eq(voterEligibility.memberId, memberId),
+      inArray(voterEligibility.sessionId, sessionsOfOrganization(organizationId)),
+    ))
+    .limit(1);
+  return row ?? null;
+}
 
 export async function updateVotingOption(
   id: string,
@@ -276,6 +321,11 @@ export async function updateVotingOption(
   data: Partial<NewVotingOption>
 ): Promise<VotingOption | null> {
   try {
+    const option = await ownedOption(id, organizationId);
+    if (!option?.sessionId) return null;
+    const session = await loadSession(option.sessionId, organizationId);
+    if (!session) return null;
+    assertDraftInstrument(session.status);
     const [updated] = await db
       .update(votingOptions)
       .set(data)
@@ -284,6 +334,7 @@ export async function updateVotingOption(
 
     return updated || null;
   } catch (error) {
+    if (error instanceof VotingRuleError) throw error;
     logger.error("Error updating voting option", { error, id });
     throw new Error("Failed to update voting option");
   }
@@ -294,12 +345,18 @@ export async function updateVotingOption(
  */
 export async function deleteVotingOption(id: string, organizationId: string): Promise<boolean> {
   try {
+    const option = await ownedOption(id, organizationId);
+    if (!option?.sessionId) return true;
+    const session = await loadSession(option.sessionId, organizationId);
+    if (!session) return true;
+    assertDraftInstrument(session.status);
     await db
       .delete(votingOptions)
       .where(and(eq(votingOptions.id, id), inArray(votingOptions.sessionId, sessionsOfOrganization(organizationId))));
 
     return true;
   } catch (error) {
+    if (error instanceof VotingRuleError) throw error;
     logger.error("Error deleting voting option", { error, id });
     throw new Error("Failed to delete voting option");
   }
@@ -313,9 +370,14 @@ export async function deleteVotingOption(id: string, organizationId: string): Pr
  * Add voter eligibility
  */
 export async function addVoterEligibility(
-  data: NewVoterEligibility
+  data: NewVoterEligibility,
+  organizationId: string
 ): Promise<VoterEligibility> {
   try {
+    if (!data.sessionId) throw new VotingRuleError('UNKNOWN_STATUS', 'Voter eligibility belongs to a draft session.');
+    const session = await loadSession(data.sessionId, organizationId);
+    if (!session) throw new VotingRuleError('UNKNOWN_STATUS', 'The session is in a state this operation does not recognise.');
+    assertDraftInstrument(session.status);
     const [eligibility] = await db
       .insert(voterEligibility)
       .values(data)
@@ -323,6 +385,7 @@ export async function addVoterEligibility(
 
     return eligibility;
   } catch (error) {
+    if (error instanceof VotingRuleError) throw error;
     logger.error("Error adding voter eligibility", { error, data });
     throw new Error("Failed to add voter eligibility");
   }
@@ -333,9 +396,13 @@ export async function addVoterEligibility(
  */
 export async function bulkAddVoterEligibility(
   sessionId: string,
-  memberIds: string[]
+  memberIds: string[],
+  organizationId: string
 ): Promise<number> {
   try {
+    const session = await loadSession(sessionId, organizationId);
+    if (!session) throw new VotingRuleError('UNKNOWN_STATUS', 'The session is in a state this operation does not recognise.');
+    assertDraftInstrument(session.status);
     const eligibilityRecords = memberIds.map(memberId => ({
       sessionId,
       memberId,
@@ -355,6 +422,7 @@ export async function bulkAddVoterEligibility(
       sessionId,
       memberCount: memberIds.length,
     });
+    if (error instanceof VotingRuleError) throw error;
     throw new Error("Failed to bulk add voter eligibility");
   }
 }
@@ -390,6 +458,11 @@ export async function updateVoterEligibility(
   data: Partial<NewVoterEligibility>
 ): Promise<VoterEligibility | null> {
   try {
+    const row = await ownedEligibilityById(id, organizationId);
+    if (!row?.sessionId) return null;
+    const session = await loadSession(row.sessionId, organizationId);
+    if (!session) return null;
+    assertDraftInstrument(session.status);
     const [updated] = await db
       .update(voterEligibility)
       .set({
@@ -401,6 +474,7 @@ export async function updateVoterEligibility(
 
     return updated || null;
   } catch (error) {
+    if (error instanceof VotingRuleError) throw error;
     logger.error("Error updating voter eligibility", { error, id });
     throw new Error("Failed to update voter eligibility");
   }
@@ -776,13 +850,21 @@ export async function setProxyVoter(
   organizationId: string
 ): Promise<VoterEligibility | null> {
   try {
-    const eligibility = await checkVoterEligibility(sessionId, memberId);
-    if (!eligibility) {
-      throw new Error("Voter eligibility not found");
-    }
+    const eligibility = await ownedEligibilityByMember(sessionId, memberId, organizationId);
+    if (!eligibility) return null;
+    const session = await loadSession(sessionId, organizationId);
+    if (!session) return null;
+    assertDraftInstrument(session.status);
 
     if (!eligibility.canDelegate) {
-      throw new Error("Voter cannot delegate");
+      throw new VotingRuleError('PROXY_REFUSED', 'Voter cannot delegate');
+    }
+    if (proxyMemberId === memberId) {
+      throw new VotingRuleError('PROXY_REFUSED', 'A voter cannot hold their own proxy');
+    }
+    const proxy = await ownedEligibilityByMember(sessionId, proxyMemberId, organizationId);
+    if (!proxy?.isEligible) {
+      throw new VotingRuleError('PROXY_REFUSED', 'The proxy is not an eligible voter in this session');
     }
 
     const updated = await updateVoterEligibility(eligibility.id, organizationId, {
@@ -791,6 +873,7 @@ export async function setProxyVoter(
 
     return updated;
   } catch (error) {
+    if (error instanceof VotingRuleError) throw error;
     logger.error("Error setting proxy voter", { error, sessionId, memberId, proxyMemberId });
     throw new Error("Failed to set proxy voter");
   }
@@ -805,10 +888,11 @@ export async function removeProxyVoter(
   organizationId: string
 ): Promise<VoterEligibility | null> {
   try {
-    const eligibility = await checkVoterEligibility(sessionId, memberId);
-    if (!eligibility) {
-      throw new Error("Voter eligibility not found");
-    }
+    const eligibility = await ownedEligibilityByMember(sessionId, memberId, organizationId);
+    if (!eligibility) return null;
+    const session = await loadSession(sessionId, organizationId);
+    if (!session) return null;
+    assertDraftInstrument(session.status);
 
     const updated = await updateVoterEligibility(eligibility.id, organizationId, {
       delegatedTo: null,
@@ -816,6 +900,7 @@ export async function removeProxyVoter(
 
     return updated;
   } catch (error) {
+    if (error instanceof VotingRuleError) throw error;
     logger.error("Error removing proxy voter", { error, sessionId, memberId });
     throw new Error("Failed to remove proxy voter");
   }

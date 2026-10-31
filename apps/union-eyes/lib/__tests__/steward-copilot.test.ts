@@ -31,6 +31,8 @@ function makeQueryProxy(): Record<string, unknown> {
   });
 }
 
+vi.mock("@/lib/services/case-access-service", () => ({ getEffectiveCaseAccess: vi.fn(async () => ({ canViewCase: true })) }));
+
 vi.mock("@/db/db", () => ({ db: { ...makeDbChain(), query: makeQueryProxy() } }));
 
 vi.mock("drizzle-orm", () => ({
@@ -55,6 +57,7 @@ vi.mock("@/lib/ai/ai-client", () => ({
     component: "test",
     action: "mock",
   })),
+  toGatewayDataClass: vi.fn(() => 'regulated'),
   UE_APP_KEY: "union-eyes",
   UE_PROFILES: {
     GRIEVANCE_TRIAGE: "ue-grievance-triage",
@@ -142,7 +145,7 @@ describe("Steward Copilot AI", () => {
   describe("executeCopilotAction", () => {
     it("calls AI client with copilot profile", async () => {
       mockGenerate.mockResolvedValue({
-        text: JSON.stringify({
+        content: JSON.stringify({
           responseText: "Here is a summary of the case timeline.",
           structuredOutput: null,
           suggestedActions: ["Schedule mediation", "Gather witness statements"],

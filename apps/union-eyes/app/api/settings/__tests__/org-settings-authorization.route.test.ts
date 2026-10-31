@@ -29,9 +29,18 @@ describe('organization settings API authorization policy', () => {
     }
   })
 
-  it('requires the admin role to read or change organization sharing settings', async () => {
-    await import('../../organizations/[id]/sharing-settings/route')
-    expect(captured.crud).toHaveLength(1)
-    expect(captured.crud[0]).toMatchObject({ readRole: 'admin', writeRole: 'admin', orgScoped: false, itemRoute: true })
+  it('denies the former generic organization-row sharing-settings facade and fails closed', async () => {
+    const route = await import('../../organizations/[id]/sharing-settings/route')
+    expect(captured.crud).toHaveLength(0)
+    expect(captured.withApi).toHaveLength(1)
+    expect(captured.withApi[0].auth).toEqual({ required: true, minRole: 'admin' })
+    expect('PATCH' in route).toBe(false)
+    expect('DELETE' in route).toBe(false)
+    const foreign = await (route.GET as any)({ organizationId: 'org-a', params: { id: 'org-b' } })
+    expect(foreign.status).toBe(403)
+    const own = await (route.GET as any)({ organizationId: 'org-a', params: { id: 'org-a' } })
+    expect(own.status).toBe(501)
+    expect(own.headers.get('cache-control')).toContain('no-store')
+    expect((await own.json()).error).toBe('GOVERNED_SHARING_SETTINGS_NOT_IMPLEMENTED')
   })
 })

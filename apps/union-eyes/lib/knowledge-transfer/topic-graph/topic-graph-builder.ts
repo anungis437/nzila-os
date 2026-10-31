@@ -12,7 +12,8 @@
  * It does NOT rank employees or evaluate individual performance.
  */
 
-import { and, eq } from 'drizzle-orm';
+import { INTERVIEW_READ_LIMIT } from '@/lib/knowledge-transfer/governance/interview-read-limit';
+import { derivedAnalyticsCondition } from '../governance/interview-access';
 import { db } from '@/db/db';
 import { exitInterviews } from '@/db/schema';
 
@@ -52,12 +53,20 @@ const VENDOR_KEYWORDS = ['vendor', 'provider', 'contractor', 'supplier', 'partne
 const GOVERNANCE_KEYWORDS = ['committee', 'policy', 'bylaw', 'procedure', 'regulation', 'compliance', 'obligation', 'meeting', 'report'];
 const COMPLIANCE_KEYWORDS = ['wsib', 'ohsa', 'esa', 'privacy', 'legal', 'arbitration', 'grievance', 'labour board'];
 
-function categorize(tag: string): string {
+/**
+ * A keyword matches a tag only as a whole word or phrase (with an optional plural s): "esa" is not found inside
+ * "message", nor "tool" inside "stool".
+ */
+export function tagHasKeyword(tag: string, keywords: readonly string[]): boolean {
   const lower = tag.toLowerCase();
-  if (SYSTEM_KEYWORDS.some((k) => lower.includes(k))) return 'system';
-  if (VENDOR_KEYWORDS.some((k) => lower.includes(k))) return 'vendor';
-  if (GOVERNANCE_KEYWORDS.some((k) => lower.includes(k))) return 'governance';
-  if (COMPLIANCE_KEYWORDS.some((k) => lower.includes(k))) return 'compliance';
+  return keywords.some((keyword) => new RegExp(`(^|[^a-z0-9])${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}s?($|[^a-z0-9])`).test(lower));
+}
+
+export function categorize(tag: string): string {
+  if (tagHasKeyword(tag, SYSTEM_KEYWORDS)) return 'system';
+  if (tagHasKeyword(tag, VENDOR_KEYWORDS)) return 'vendor';
+  if (tagHasKeyword(tag, GOVERNANCE_KEYWORDS)) return 'governance';
+  if (tagHasKeyword(tag, COMPLIANCE_KEYWORDS)) return 'compliance';
   return 'general';
 }
 
@@ -70,12 +79,8 @@ export async function buildTopicGraph(orgId: string): Promise<TopicGraph> {
       expertiseTags: exitInterviews.expertiseTags,
     })
     .from(exitInterviews)
-    .where(
-      and(
-        eq(exitInterviews.organizationId, orgId),
-        eq(exitInterviews.status, 'published'),
-      ),
-    );
+    .where(derivedAnalyticsCondition(orgId))
+    .limit(INTERVIEW_READ_LIMIT);
 
   // Build frequency map
   const nodeMap = new Map<

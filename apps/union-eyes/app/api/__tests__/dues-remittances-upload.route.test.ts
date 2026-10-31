@@ -12,6 +12,7 @@ const m = vi.hoisted(() => ({
   buildUnionEvidencePack: vi.fn(() => Promise.resolve()),
   putBlob: vi.fn(),
   deleteBlob: vi.fn(),
+  requireLiveFinancialMandate: vi.fn(),
 }));
 
 class TestApiError extends Error {
@@ -41,6 +42,9 @@ vi.mock('@/db/schema/dues-finance-schema', () => ({
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('@/lib/evidence', () => ({ buildUnionEvidencePack: m.buildUnionEvidencePack }));
 vi.mock('@/lib/blob-client', () => ({ putBlob: m.putBlob, deleteBlob: m.deleteBlob }));
+vi.mock('@/lib/finance/require-live-financial-mandate', () => ({
+  requireLiveFinancialMandate: m.requireLiveFinancialMandate,
+}));
 
 async function loadRoute() {
   return import('../dues/remittances/upload/route');
@@ -74,6 +78,7 @@ describe('dues/remittances/upload route', () => {
     m.deleteBlob.mockResolvedValue(undefined);
     m.buildUnionEvidencePack.mockResolvedValue(undefined);
     audit.tx.mockResolvedValue(undefined);
+    m.requireLiveFinancialMandate.mockResolvedValue(undefined);
   });
 
   it('is restricted to the financial allow-list, not a minimum role level', async () => {
@@ -198,5 +203,13 @@ describe('dues/remittances/upload route', () => {
     m.deleteBlob.mockClear();
     await expect(POST(ctx(request(new File(['x,y\n3,4'], 'second.csv', { type: 'text/csv' }), validMeta)))).rejects.toThrow('audit down');
     expect(m.deleteBlob).toHaveBeenCalledWith('remittances/org_1/stored.csv');
+  });
+
+  it('preserves nothing and inserts nothing when no financial mandate has been issued', async () => {
+    m.requireLiveFinancialMandate.mockRejectedValue(Object.assign(new Error('No financial mandate has been issued in this organization.'), { status: 403 }));
+    const { POST } = await loadRoute();
+    await expect(POST(ctx(request(csv(), validMeta)))).rejects.toThrow(/financial mandate/);
+    expect(m.putBlob).not.toHaveBeenCalled();
+    expect(m.db.insert).not.toHaveBeenCalled();
   });
 });

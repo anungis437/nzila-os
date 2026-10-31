@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
 import { AuditTrailService, SignatureService } from "@/lib/signature/signature-service";
+import { signatureViewForViewer } from "@/lib/signature/signer-privacy";
 
 import {
   ErrorCode,
@@ -40,6 +41,8 @@ export const GET = withApiAuth(async (
       );
     }
     
+    const senderId = await SignatureService.getDocumentSender(documentId);
+
     // Get query params
     const { searchParams } = new URL(req.url);
     const format = searchParams.get("format"); // 'json' or 'report'
@@ -49,7 +52,7 @@ export const GET = withApiAuth(async (
       const report = await AuditTrailService.generateAuditReport(documentId);
       
       return NextResponse.json({
-        report,
+        report: signatureViewForViewer(report, user.id, senderId),
         message: "Audit report generated successfully",
       });
     } else {
@@ -58,7 +61,7 @@ export const GET = withApiAuth(async (
       
       return NextResponse.json({
         documentId,
-        events: auditTrail,
+        events: signatureViewForViewer(auditTrail, user.id, senderId),
         totalEvents: auditTrail.length,
       });
     }

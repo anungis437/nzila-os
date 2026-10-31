@@ -78,6 +78,16 @@ describe('profiles-queries', () => {
     expect(await q.getProfileByUserId('u1')).toBeNull();
   });
 
+  // DEF-0B11-PRP-PROFILE-ME-GET-SWALLOWS-DATABASE-ERRORS-INTO-A-SUCCESS-WITH-NULL-DATA
+  it('findProfileByUserId reports a failed lookup instead of answering that there is no profile', async () => {
+    push([{ userId: 'u1' }]);
+    expect(await q.findProfileByUserId('u1')).toEqual({ userId: 'u1' });
+    push([]);
+    expect(await q.findProfileByUserId('u1')).toBeNull();
+    push(new Error('boom'));
+    await expect(q.findProfileByUserId('u1')).rejects.toThrow('boom');
+  });
+
   it('getAllProfiles returns rows', async () => {
     push([{ id: 'p1' }, { id: 'p2' }]);
     expect(await q.getAllProfiles()).toHaveLength(2);

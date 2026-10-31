@@ -171,6 +171,16 @@ export class GeofencePrivacyService {
   }
 
   /**
+   * Erase every location record of a member without requiring an active consent. Consent can already be opted out, expired or
+   * never recorded while rows remain (a retention sweep that failed, rows written before consent was tracked), and the right to
+   * have them removed does not depend on a consent row. Returns how many records were removed.
+   */
+  static async eraseLocationData(userId: string, tx: RLSTx = db) {
+    const deleted = await this.deleteAllUserLocationData(userId, "erasure_requested", tx);
+    return { ...deleted, total: deleted.trackingRecordsDeleted + deleted.eventRecordsDeleted };
+  }
+
+  /**
    * Check if user has valid location tracking consent
    */
   static async hasValidConsent(userId: string, context?: "strike" | "event"): Promise<boolean> {
@@ -189,9 +199,8 @@ export class GeofencePrivacyService {
 
     const userConsent = consent[0];
 
-    // Check expiry
+    // An expired consent is simply not valid, whatever its stored status. Checking consent is a read and writes nothing.
     if (userConsent.expiresAt && new Date() > userConsent.expiresAt) {
-      await this.expireConsent(userConsent.id, userId);
       return false;
     }
 
@@ -210,7 +219,7 @@ export class GeofencePrivacyService {
   /**
    * Track user location (foreground only, 24-hour retention)
    */
-  static async trackLocation(tracking: LocationTrackingRequest) {
+  static async trackLocation(tracking: LocationTrackingRequest, tx: RLSTx = db) {
     // Verify consent, including the strike/event permission the member granted
     const consentContext =
       tracking.purpose === "strike" || tracking.purpose === "picket"
@@ -234,7 +243,7 @@ export class GeofencePrivacyService {
     expiresAt.setHours(expiresAt.getHours() + this.MAX_RETENTION_HOURS);
 
     // Record location
-    const [location] = await db
+    const [location] = await tx
       .insert(locationTracking)
       .values({
         userId: tracking.userId,
@@ -289,7 +298,7 @@ export class GeofencePrivacyService {
     longitude: number,
     geofenceId: string,
     trustedUnionLocalId: string
-  ): Promise<{ inside: boolean; distance: number }> {
+  ): Promise<{ inside: boolean; distance: number; recorded: boolean }> {
     const geofence = await db
       .select()
       .from(geofences)
@@ -318,12 +327,18 @@ export class GeofencePrivacyService {
 
     const inside = distance <= parseFloat(fence.radiusMeters);
 
-    // Log entry/exit event if state changed
+    // The point is the caller's own and is only compared; a precise position is stored only for a member who opted in
+    // (for the strike permission when the fence belongs to a strike) while tracking is enabled.
+    let recorded = false;
     if (inside) {
-      await this.logGeofenceEvent(userId, geofenceId, "entry", latitude, longitude);
+      const consented = await this.hasValidConsent(userId, fence.strikeId ? "strike" : undefined);
+      if (consented && (await this.getConfig()).locationTrackingEnabled) {
+        await this.logGeofenceEvent(userId, geofenceId, "entry", latitude, longitude);
+        recorded = true;
+      }
     }
 
-    return { inside, distance };
+    return { inside, distance, recorded };
   }
 
   /**
@@ -378,40 +393,96 @@ export class GeofencePrivacyService {
   }
 
   /**
+   * Record the lapse of consents whose expiry has passed. A consent is not valid after its expiry whatever its stored status (the check
+   * is a read and writes nothing); this sweep makes the stored status say so, so a reader that looks at the status alone is not misled
+   * and the lapse is evident in the record. It runs under the system role with the retention sweep, one member at a time, capped like it.
+   */
+  static async expireLapsedConsents(tx: RLSTx = db) {
+    const now = new Date();
+    const cap = GeofencePrivacyService.RETENTION_MAX_USERS_PER_RUN;
+    const lapsed = await tx
+      .selectDistinct({ userId: memberLocationConsent.userId })
+      .from(memberLocationConsent)
+      .where(and(eq(memberLocationConsent.consentStatus, "opted_in"), lte(memberLocationConsent.expiresAt, now)))
+      .limit(cap + 1);
+    const truncated = lapsed.length > cap;
+    let expired = 0;
+    for (const { userId } of lapsed.slice(0, cap)) {
+      const rows = await tx
+        .update(memberLocationConsent)
+        .set({ consentStatus: "expired", updatedAt: now })
+        .where(and(eq(memberLocationConsent.userId, userId), eq(memberLocationConsent.consentStatus, "opted_in"), lte(memberLocationConsent.expiresAt, now)))
+        .returning({ id: memberLocationConsent.id });
+      expired += rows.length;
+    }
+    return { consentsExpired: expired, consentsTruncated: truncated };
+  }
+
+  /**
    * Delete expired location data (auto-cleanup job).
    * Runs hourly from app/api/cron/location-retention under the system role: the 24-hour retention covers every
    * member's rows, which an ordinary user-scoped session cannot see. Deletion and its evidence commit together.
    */
+  // One run reads and deletes at most this many members' expired rows: a backlog (for example after the job did not run) is worked off over
+  // several runs instead of one long system transaction. `truncated` tells the caller that more expired rows remain.
+  static readonly RETENTION_MAX_USERS_PER_RUN = 500;
+
   static async deleteExpiredLocationData(tx: RLSTx = db) {
     const now = new Date();
-
-    // Delete expired location tracking records
-    const deletedTracking = await tx
-      .delete(locationTracking)
+    const cap = GeofencePrivacyService.RETENTION_MAX_USERS_PER_RUN;
+    const expiredTracking = await tx
+      .selectDistinct({ userId: locationTracking.userId })
+      .from(locationTracking)
       .where(lte(locationTracking.expiresAt, now))
-      .returning({ id: locationTracking.id });
-
-    // Delete expired geofence events
-    const deletedEvents = await tx
-      .delete(geofenceEvents)
+      .limit(cap + 1);
+    const expiredEvents = await tx
+      .selectDistinct({ userId: geofenceEvents.userId })
+      .from(geofenceEvents)
       .where(lte(geofenceEvents.expiresAt, now))
-      .returning({ id: geofenceEvents.id });
+      .limit(cap + 1);
+    const everyUserId = [...new Set([...expiredTracking, ...expiredEvents].map((row) => row.userId))];
+    const truncated = everyUserId.length > cap;
+    const userIds = everyUserId.slice(0, cap);
 
-    // Log deletion
-    if (deletedTracking.length > 0 || deletedEvents.length > 0) {
+    let trackingRecordsDeleted = 0;
+    let eventRecordsDeleted = 0;
+    // The log records the real span of what was deleted, not the time of the run.
+    let oldest: Date | null = null;
+    let newest: Date | null = null;
+    const widen = (at: Date | string | null | undefined) => {
+      if (!at) return;
+      const when = at instanceof Date ? at : new Date(at);
+      if (Number.isNaN(when.getTime())) return;
+      if (!oldest || when < oldest) oldest = when;
+      if (!newest || when > newest) newest = when;
+    };
+    for (const userId of userIds) {
+      const deletedTracking = await tx
+        .delete(locationTracking)
+        .where(and(eq(locationTracking.userId, userId), lte(locationTracking.expiresAt, now)))
+        .returning({ id: locationTracking.id, at: locationTracking.recordedAt });
+      const deletedEvents = await tx
+        .delete(geofenceEvents)
+        .where(and(eq(geofenceEvents.userId, userId), lte(geofenceEvents.expiresAt, now)))
+        .returning({ id: geofenceEvents.id, at: geofenceEvents.eventTime });
+      trackingRecordsDeleted += deletedTracking.length;
+      eventRecordsDeleted += deletedEvents.length;
+      for (const row of deletedTracking) widen((row as { at?: Date | string | null }).at);
+      for (const row of deletedEvents) widen((row as { at?: Date | string | null }).at);
+    }
+
+    // The caller passes the system transaction. Every per-user delete and this log commit or roll back together.
+    if (trackingRecordsDeleted > 0 || eventRecordsDeleted > 0) {
       await tx.insert(locationDeletionLog).values({
         deletionType: "auto_24hr",
         deletionReason: "24-hour retention policy (automatic cleanup)",
-        recordCount: (deletedTracking.length + deletedEvents.length).toString(),
-        oldestRecordDate: now,
-        newestRecordDate: now,
+        recordCount: (trackingRecordsDeleted + eventRecordsDeleted).toString(),
+        oldestRecordDate: oldest ?? now,
+        newestRecordDate: newest ?? now,
       });
     }
 
-    return {
-      trackingRecordsDeleted: deletedTracking.length,
-      eventRecordsDeleted: deletedEvents.length,
-    };
+    return { trackingRecordsDeleted, eventRecordsDeleted, truncated };
   }
 
   /**
@@ -441,19 +512,6 @@ export class GeofencePrivacyService {
       trackingRecordsDeleted: deletedTracking.length,
       eventRecordsDeleted: deletedEvents.length,
     };
-  }
-
-  /**
-   * Expire consent (after 6 months)
-   */
-  private static async expireConsent(consentId: string, userId: string) {
-    await db
-      .update(memberLocationConsent)
-      .set({
-        consentStatus: "expired",
-        updatedAt: new Date(),
-      })
-      .where(and(eq(memberLocationConsent.id, consentId), eq(memberLocationConsent.userId, userId)));
   }
 
   /**

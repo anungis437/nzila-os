@@ -22,6 +22,8 @@ const m = vi.hoisted(() => {
   return {
     state,
     withSystemContext: vi.fn(),
+    audit: vi.fn(),
+    updateReturns: [] as unknown[][],
     logger: {
       warn: vi.fn(),
       info: vi.fn(),
@@ -40,7 +42,7 @@ const mockDb = {
   select: vi.fn(() => m.createSelectChain()),
   update: vi.fn(() => ({
     set: vi.fn(() => ({
-      where: vi.fn(async () => []),
+      where: vi.fn(() => ({ returning: vi.fn(async () => (m.updateReturns.shift() ?? [{ id: 'row' }]) as unknown[]) })),
     })),
   })),
 };
@@ -50,6 +52,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: m.withSystemContext,
 }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 
 async function loadRoute() {
   return import('../communications/track/click/route');
@@ -59,9 +62,11 @@ describe('communications/track/click route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.resetQueues();
+    m.updateReturns = [];
     delete process.env.COMMUNICATIONS_TRACKING_SECRET;
     delete process.env.RESEND_TRACKING_SECRET;
-    m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    // The click writes run on the transaction handed to the callback (B87); the mock db stands in for it.
+    m.withSystemContext.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => fn(mockDb));
   });
 
   it('returns 400 when url is missing or invalid', async () => {
@@ -109,6 +114,36 @@ describe('communications/track/click route', () => {
     expect(response.status).toBe(302);
     expect(response.headers.get('location')).toBe(redirect);
     expect(mockDb.update).toHaveBeenCalledTimes(2);
+    expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'campaign.message.clicked', details: expect.objectContaining({ impliedOpen: true }) }));
+  });
+
+  it('counts nothing and audits nothing when another request already claimed the click, and still redirects', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret_race';
+    const { GET } = await loadRoute();
+    const redirect = 'https://example.com/race';
+    const token = crypto.createHmac('sha256', 'secret_race').update(`c6:r6:${redirect}`).digest('hex');
+    m.queueSelect([{ id: 'msg_6', clickedAt: null, openedAt: new Date(), status: 'opened' }]);
+    m.updateReturns.push([]);
+
+    const response = await GET(new NextRequest(`http://localhost/api/communications/track/click?campaignId=c6&recipientId=r6&url=${encodeURIComponent(redirect)}&token=${token}`));
+
+    expect(response.status).toBe(302);
+    expect(mockDb.update).toHaveBeenCalledTimes(1);
+    expect(m.audit).not.toHaveBeenCalled();
+  });
+
+  it('redirects a verified link even when the analytics transaction fails', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret_fail';
+    const { GET } = await loadRoute();
+    const redirect = 'https://example.com/fail';
+    const token = crypto.createHmac('sha256', 'secret_fail').update(`c7:r7:${redirect}`).digest('hex');
+    m.queueSelect([{ id: 'msg_7', clickedAt: null, openedAt: null, status: 'sent' }]);
+    m.audit.mockRejectedValueOnce(new Error('audit down'));
+
+    const response = await GET(new NextRequest(`http://localhost/api/communications/track/click?campaignId=c7&recipientId=r7&url=${encodeURIComponent(redirect)}&token=${token}`));
+
+    expect(response.status).toBe(302);
+    expect(m.logger.error).toHaveBeenCalled();
   });
 
   it('fails closed with no configured secret: no redirect, no record', async () => {
@@ -153,6 +188,7 @@ describe('communications/track/click route', () => {
     expect(response.status).toBe(302);
     expect(response.headers.get('location')).toBe(redirect);
     expect(mockDb.update).toHaveBeenCalledTimes(2);
+    expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'campaign.message.clicked', details: expect.objectContaining({ impliedOpen: true }) }));
   });
 
   it('skips db writes when the message was already clicked', async () => {

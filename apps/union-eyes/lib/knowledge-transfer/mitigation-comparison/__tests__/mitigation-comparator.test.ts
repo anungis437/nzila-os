@@ -43,6 +43,12 @@ describe('lib/knowledge-transfer/mitigation-comparison/mitigation-comparator', (
     expect(comparison.recommendedScenario).toBeTruthy();
     expect(comparison.baselineScore).toBe(50);
     expect(comparison.recommendationRationale).toContain('resilience gain');
+    // The figures come from fixed assumptions, so the result says so and claims no confidence band.
+    expect(comparison.basis).toBe('ASSUMED_EFFECTIVENESS_NOT_CALIBRATED');
+    expect(comparison.assumptions.length).toBeGreaterThan(0);
+    expect(comparison.noNodesEvaluated).toBe(false);
+    expect(comparison.recommendationRationale).toContain('not calibrated');
+    comparison.scenarios.forEach((s) => s.domainDeltas.forEach((d) => expect(d.confidence).toBe('unvalidated')));
     expect(Array.isArray(comparison.residualRisks)).toBe(true);
     comparison.scenarios.forEach((s) => {
       expect(s.projectionCurve.length).toBe(12);
@@ -59,5 +65,9 @@ describe('lib/knowledge-transfer/mitigation-comparison/mitigation-comparator', (
     ]);
     expect(comparison.scenarios[0].actionPlan.length).toBeGreaterThan(0);
     expect(comparison.scenarios[0].implementationEffort).toBe('quarters');
+    // Nothing was evaluated, so no scenario is recommended and the result says so instead of ranking zeroes.
+    expect(comparison.noNodesEvaluated).toBe(true);
+    expect(comparison.recommendedScenario).toBe('');
+    expect(comparison.recommendationRationale).toContain('nothing was evaluated');
   });
 });

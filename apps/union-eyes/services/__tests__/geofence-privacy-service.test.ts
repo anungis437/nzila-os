@@ -5,7 +5,7 @@ const h = vi.hoisted(() => {
   const makeChain = () => {
     const chain: Record<string, unknown> = {};
     const methods = [
-      'select', 'from', 'where', 'limit', 'orderBy', 'groupBy',
+      'select', 'selectDistinct', 'from', 'where', 'limit', 'orderBy', 'groupBy',
       'innerJoin', 'leftJoin', 'insert', 'update', 'set', 'values', 'returning', 'delete', 'onConflictDoUpdate',
     ];
     for (const m of methods) chain[m] = vi.fn(() => chain);
@@ -18,6 +18,7 @@ const h = vi.hoisted(() => {
   };
   const db = {
     select: vi.fn(() => makeChain()),
+    selectDistinct: vi.fn(() => makeChain()),
     insert: vi.fn(() => makeChain()),
     update: vi.fn(() => makeChain()),
     delete: vi.fn(() => makeChain()),
@@ -112,6 +113,13 @@ describe('geofence-privacy-service', () => {
     expect(r.consentId).toBe('c1');
   });
 
+  it('eraseLocationData removes tracking and event rows without needing any consent, and reports the total', async () => {
+    pushSel([{ id: 't1' }, { id: 't2' }], [{ id: 'e1' }], []); // tracking delete, events delete, deletion log insert
+    const r = await S.eraseLocationData('u1');
+    expect(r).toEqual({ trackingRecordsDeleted: 2, eventRecordsDeleted: 1, total: 3 });
+    expect(h.db.update).not.toHaveBeenCalled();
+  });
+
   it('revokeLocationConsent throws and deletes nothing when there is no consent to revoke', async () => {
     h.db.delete.mockClear();
     pushSel([]); // update matched nothing
@@ -195,14 +203,46 @@ describe('geofence-privacy-service', () => {
       await expect(S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1')).rejects.toThrow('Geofence not found');
     });
 
-    it('reports inside and logs an entry event', async () => {
+    const fence = { id: 'g1', unionLocalId: 'org-1', centerLatitude: '45.50000000', centerLongitude: '-73.50000000', radiusMeters: '100' };
+
+    it('reports inside and logs an entry event for a member who opted in', async () => {
       pushSel(
-        [{ id: 'g1', unionLocalId: 'org-1', centerLatitude: '45.50000000', centerLongitude: '-73.50000000', radiusMeters: '100' }],
+        [fence],
+        [{ id: 'c1', expiresAt: new Date('2999-01-01') }], // hasValidConsent
+        [enabledConfig()], // getConfig
         [], // logGeofenceEvent insert
       );
       const r = await S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1');
       expect(r.inside).toBe(true);
+      expect(r.recorded).toBe(true);
       expect(r.distance).toBeLessThan(1);
+      expect(h.db.insert).toHaveBeenCalledTimes(1);
+    });
+
+    // DEF-0B8-JUR-GEOFENCE-GET-STORES-MEMBER-COORDINATES-WITHOUT-A-CONSENT-CHECK
+    it('reports inside but stores no position for a member who has not opted in', async () => {
+      h.db.insert.mockClear();
+      pushSel([fence], []); // no consent row
+      const r = await S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1');
+      expect(r.inside).toBe(true);
+      expect(r.recorded).toBe(false);
+      expect(h.db.insert).not.toHaveBeenCalled();
+    });
+
+    it('stores no position while location tracking is globally disabled', async () => {
+      h.db.insert.mockClear();
+      pushSel([fence], [{ id: 'c1', expiresAt: new Date('2999-01-01') }], [enabledConfig({ locationTrackingEnabled: false })]);
+      const r = await S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1');
+      expect(r.recorded).toBe(false);
+      expect(h.db.insert).not.toHaveBeenCalled();
+    });
+
+    it('asks for the strike permission when the fence belongs to a strike', async () => {
+      h.db.insert.mockClear();
+      pushSel([{ ...fence, strikeId: 's1' }], [{ id: 'c1', expiresAt: new Date('2999-01-01'), allowedDuringStrike: false }]);
+      const r = await S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1');
+      expect(r.recorded).toBe(false);
+      expect(h.db.insert).not.toHaveBeenCalled();
     });
 
     it('reports outside for a distant point', async () => {
@@ -214,15 +254,32 @@ describe('geofence-privacy-service', () => {
   });
 
   describe('deleteExpiredLocationData', () => {
-    it('deletes expired records and logs when there are deletions', async () => {
-      pushSel([{ id: 't1' }], [{ id: 'e1' }], []); // tracking delete, events delete, deletion log
+    it('deletes each expired owner and logs when there are deletions', async () => {
+      pushSel(
+        [{ userId: 'u1' }],
+        [{ userId: 'u2' }],
+        [{ id: 't1' }],
+        [],
+        [],
+        [{ id: 'e1' }],
+        [],
+      );
       const r = await S.deleteExpiredLocationData();
       expect(r.trackingRecordsDeleted).toBe(1);
       expect(r.eventRecordsDeleted).toBe(1);
+      expect(r.truncated).toBe(false);
+    });
+
+    it('works off at most the per-run cap of members and says more remain', async () => {
+      const cap = S.RETENTION_MAX_USERS_PER_RUN;
+      const many = Array.from({ length: cap + 1 }, (_, i) => ({ userId: `u${i}` }));
+      pushSel(many, []);
+      const r = await S.deleteExpiredLocationData();
+      expect(r.truncated).toBe(true);
     });
 
     it('does not log when there is nothing to delete', async () => {
-      pushSel([], []); // both deletes empty, no log
+      pushSel([], []);
       const r = await S.deleteExpiredLocationData();
       expect(r.trackingRecordsDeleted).toBe(0);
       expect(r.eventRecordsDeleted).toBe(0);

@@ -53,6 +53,9 @@ export const POST = withApi(
       eventNotes: 'Manual semantic re-index triggered',
     });
 
+    // A failed indexing is a failure of the request, not a 200 carrying the error text.
+    if (!result.indexed && 'failed' in result && result.failed) throw ApiError.internal('Indexing failed');
+
     return { data: result };
   },
 );

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 
-import { db } from '@/db';
 import { campaigns, messageLog } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { verifyTrackingToken } from '@/lib/communications/tracking-token';
 import { logger } from '@/lib/logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,19 +29,6 @@ function pixelResponse(): NextResponse {
       'X-Content-Type-Options': 'nosniff',
     },
   });
-}
-
-function incrementStat(stats: any, key: string): Record<string, unknown> {
-  const current =
-    typeof stats === 'object' && stats !== null && !Array.isArray(stats)
-      ? (stats as Record<string, unknown>)
-      : {};
-
-  const currentValue = typeof current[key] === 'number' ? current[key] : 0;
-  return {
-    ...current,
-    [key]: currentValue + 1,
-  };
 }
 
 export async function GET(
@@ -75,55 +62,80 @@ export async function GET(
     return pixelResponse();
   }
 
-  await withSystemContext(async () => {
-    const [existing] = await db
-      .select({
-        id: messageLog.id,
-        organizationId: messageLog.organizationId,
-        openedAt: messageLog.openedAt,
-        status: messageLog.status,
-      })
-      .from(messageLog)
-      .where(
-        and(
-          eq(messageLog.campaignId, campaignId),
-          eq(messageLog.recipientId, recipientId),
-          ...(messageId ? [eq(messageLog.providerMessageId, messageId)] : []),
-        ),
-      )
-      .limit(1);
-
-    if (!existing) {
-      return;
-    }
-
-    if (!existing.openedAt) {
-      const nextStatus = existing.status === 'clicked' ? 'clicked' : 'opened';
-      await db
-        .update(messageLog)
-        .set({
-          status: nextStatus,
-          openedAt: new Date(),
+  try {
+    await withSystemContext(async (tx) => {
+      const [existing] = await tx
+        .select({
+          id: messageLog.id,
+          organizationId: messageLog.organizationId,
+          openedAt: messageLog.openedAt,
+          status: messageLog.status,
         })
-        .where(and(eq(messageLog.id, existing.id), eq(messageLog.organizationId, existing.organizationId)));
-
-      const [campaign] = await db
-        .select({ stats: campaigns.stats })
-        .from(campaigns)
-        .where(and(eq(campaigns.id, campaignId), eq(campaigns.organizationId, existing.organizationId)))
+        .from(messageLog)
+        .where(
+          and(
+            eq(messageLog.campaignId, campaignId),
+            eq(messageLog.recipientId, recipientId),
+            ...(messageId ? [eq(messageLog.providerMessageId, messageId)] : []),
+          ),
+        )
         .limit(1);
 
-      if (campaign) {
-        await db
-          .update(campaigns)
-          .set({
-            stats: incrementStat(campaign.stats, 'opened'),
-            updatedAt: new Date(),
-          })
-          .where(and(eq(campaigns.id, campaignId), eq(campaigns.organizationId, existing.organizationId)));
-      }
-    }
-  });
+      if (!existing || existing.openedAt) return;
+
+      // Two simultaneous pixel requests may both read unopened. The conditional
+      // UPDATE elects exactly one winner; only that winner changes counters or audits.
+      const [claimed] = await tx
+        .update(messageLog)
+        .set({
+          status: existing.status === 'clicked' ? 'clicked' : 'opened',
+          openedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(messageLog.id, existing.id),
+            eq(messageLog.organizationId, existing.organizationId),
+            isNull(messageLog.openedAt),
+          ),
+        )
+        .returning({ id: messageLog.id });
+      if (!claimed) return;
+
+      // Increment in PostgreSQL, not in JavaScript after reading a stale JSON
+      // snapshot. Preserve other counters and do not lose concurrent clicks.
+      const [updatedCampaign] = await tx
+        .update(campaigns)
+        .set({
+          stats: sql`jsonb_set(
+            COALESCE(${campaigns.stats}, '{}'::jsonb),
+            '{opened}',
+            to_jsonb(COALESCE((${campaigns.stats}->>'opened')::integer, 0) + 1),
+            true
+          )`,
+          updatedAt: new Date(),
+        })
+        .where(and(eq(campaigns.id, campaignId), eq(campaigns.organizationId, existing.organizationId)))
+        .returning({ id: campaigns.id });
+      if (!updatedCampaign) throw new Error('Campaign was not found for an authorized tracking event');
+
+      // The message transition, campaign counter and audit are one transaction.
+      // If the audit or any other write fails, none of the three is committed.
+      await persistAtomicAudit(tx, {
+        organizationId: existing.organizationId,
+        userId: 'system:communications-tracking',
+        action: 'campaign.message.opened',
+        resourceType: 'message_log',
+        resourceId: existing.id,
+        details: { campaignId },
+      });
+    });
+  } catch (error) {
+    // Email rendering must remain neutral. A failed transaction is not counted.
+    logger.error('[communications/open-track] Tracking write rolled back', {
+      campaignId,
+      error: error instanceof Error ? error.name : 'unknown',
+    });
+  }
 
   return pixelResponse();
 }

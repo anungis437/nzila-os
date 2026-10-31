@@ -274,7 +274,9 @@ describe('report-executor', () => {
         fields: [{ fieldId: 'id', fieldName: 'ID' }],
       });
       expect(result.success).toBe(false);
-      expect(result.error).toContain('connection failed');
+      // The database message is not returned: it can name tables and columns.
+      expect(result.error).toBe('Report execution failed');
+      expect(result.kind).toBe('failed');
       expect(result.executionTimeMs).toBeGreaterThanOrEqual(0);
     });
   });
@@ -800,7 +802,8 @@ describe('report-executor', () => {
         fields: [{ fieldId: 'id', fieldName: 'ID' }],
       });
       expect(result.success).toBe(false);
-      expect(result.error).toContain('syntax error');
+      expect(result.error).toBe('Report execution failed');
+      expect(result.kind).toBe('failed');
     });
   });
 
@@ -877,9 +880,8 @@ describe('report-executor', () => {
       expect(result.error).toBe('Report execution failed');
     });
 
-    it('skips filter with unknown operator (switch default)', async () => {
-      // L502: switch default → continue; L535: conditions empty → return null
-      // L279: filterSQL falsy → if(filterSQL) false arm
+    it('refuses a filter with an unknown operator instead of dropping it (B75)', async () => {
+      // A dropped filter would return every row; the executor now refuses the configuration.
       mocks.mockExecute.mockResolvedValue([]);
       const executor = new ReportExecutor('org-1');
       const result = await executor.execute({
@@ -887,7 +889,8 @@ describe('report-executor', () => {
         fields: [{ fieldId: 'id', fieldName: 'ID' }],
         filters: [{ fieldId: 'status', operator: 'contains' as 'eq', value: 'open' }],
       });
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
+      expect(mocks.mockExecute).not.toHaveBeenCalled();
     });
 
     it('closes OR group when transitioning to AND', async () => {

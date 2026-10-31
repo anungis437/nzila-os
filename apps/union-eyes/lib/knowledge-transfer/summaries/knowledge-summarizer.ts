@@ -10,9 +10,12 @@
  * INV-01: All AI calls routed through @nzila/ai-sdk via getAiClient()
  */
 
+import { z } from 'zod';
+import { ApiError } from '@/lib/api/errors';
 import {
   buildOrgAiTrace,
   getAiClient,
+  toGatewayDataClass,
   UE_APP_KEY,
   UE_PROFILES,
   UE_SYSTEM_ORG_ID,
@@ -64,11 +67,26 @@ function buildSummaryInput(interview: ExitInterview): string {
   return parts.join('\n\n');
 }
 
+const SummaryOutputSchema = z.object({
+  operationalSummary: z.string().trim().min(1),
+  handoffPoints: z.array(z.string()).max(5).default([]),
+  recurringThemes: z.array(z.string()).default([]),
+  continuityRecommendations: z.array(z.string()).default([]),
+});
+
+// Interviews at the open levels leave the organization as internal data; every higher level goes as confidential.
+const OPEN_LEVELS = new Set(['public_internal', 'restricted']);
+
 export async function generateKnowledgeSummary(interview: ExitInterview): Promise<KnowledgeSummary> {
+  // The retiring employee's consent covers sharing the interview; without it nothing is sent to a provider.
+  if (interview.consentGranted !== true) {
+    throw ApiError.conflict('The retiring employee has not consented to this interview being shared, so it cannot be summarized.');
+  }
   const organizationId =
     typeof (interview as { organizationId?: unknown }).organizationId === 'string'
       ? ((interview as { organizationId?: string }).organizationId ?? undefined)
       : undefined;
+  const level = (interview as { sensitivityLevel?: string | null }).sensitivityLevel ?? 'restricted';
   const ai = getAiClient();
   const result = await ai.generate({
     orgId: UE_SYSTEM_ORG_ID,
@@ -79,21 +97,16 @@ export async function generateKnowledgeSummary(interview: ExitInterview): Promis
       { role: 'system', content: SUMMARY_SYSTEM_PROMPT },
       { role: 'user', content: buildSummaryInput(interview) },
     ],
-    dataClass: 'internal',
+    dataClass: toGatewayDataClass(OPEN_LEVELS.has(level) ? 'internal' : 'confidential'),
   });
 
-  const now = new Date().toISOString();
+  // Output that is not the requested JSON is a failed generation. It is never replaced by text that reads as a summary
+  // and stored as generated.
+  let parsed: z.infer<typeof SummaryOutputSchema>;
   try {
-    const parsed = JSON.parse(result.content) as Omit<KnowledgeSummary, 'sourceInterviewId' | 'generatedAt'>;
-    return { ...parsed, sourceInterviewId: interview.id, generatedAt: now };
+    parsed = SummaryOutputSchema.parse(JSON.parse(result.content));
   } catch {
-    return {
-      operationalSummary: `Exit interview for ${interview.roleInUnion} with ${interview.yearsOfService} years of service. Manual review of source content is recommended.`,
-      handoffPoints: [],
-      recurringThemes: [],
-      continuityRecommendations: [],
-      sourceInterviewId: interview.id,
-      generatedAt: now,
-    };
+    throw ApiError.externalService('AI provider', 'the response was not a valid knowledge summary; nothing was stored.');
   }
+  return { ...parsed, sourceInterviewId: interview.id, generatedAt: new Date().toISOString() };
 }

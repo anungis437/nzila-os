@@ -74,10 +74,10 @@ export async function createReasoningSession(
   await inOrganization(orgId, async (tx) => {
     await tx.execute(sql`
       INSERT INTO ue_reasoning_sessions
-        (id, organization_id, title, focus, context_description, created_at, updated_at)
+        (id, organization_id, title, focus, context_description, created_by, created_at, updated_at)
       VALUES (
         ${id}, ${orgId}, ${input.title}, ${input.focus ?? 'general_continuity'},
-        ${input.contextDescription ?? ''}, ${now}::timestamptz, ${now}::timestamptz
+        ${input.contextDescription ?? ''}, ${userId}, ${now}::timestamptz, ${now}::timestamptz
       )
     `);
     await auditSession(tx, orgId, userId, 'reasoning_session.create', id, { focus: input.focus ?? 'general_continuity' });
@@ -100,15 +100,20 @@ export async function createReasoningSession(
   };
 }
 
-/** List reasoning sessions for an organization. */
+/**
+ * List reasoning sessions for an organization. With ownerUserId, only that person's own sessions: a session belongs to the person
+ * who opened it. Without it the list is organization-wide, for the continuity engines that aggregate sessions into figures and
+ * show no session to anyone.
+ */
 export async function listReasoningSessions(
   orgId: string,
-  options: { status?: SessionStatus; limit?: number } = {},
+  options: { status?: SessionStatus; limit?: number; ownerUserId?: string } = {},
 ): Promise<ReasoningSession[]> {
   const rows = await inOrganization(orgId, (tx) =>
     tx.execute(sql`
       SELECT * FROM ue_reasoning_sessions
       WHERE organization_id = ${orgId}
+        ${options.ownerUserId ? sql`AND created_by = ${options.ownerUserId}` : sql``}
         ${options.status ? sql`AND status = ${options.status}` : sql``}
       ORDER BY updated_at DESC
       LIMIT ${options.limit ?? 20}
@@ -117,16 +122,17 @@ export async function listReasoningSessions(
   return (rows as any as Record<string, unknown>[]).map(rowToSession);
 }
 
-/** Get a single reasoning session. */
+/** Get a single reasoning session the caller opened (null for any other). */
 export async function getReasoningSession(
   orgId: string,
   sessionId: string,
+  userId: string,
 ): Promise<ReasoningSession | null> {
   if (!isUuid(sessionId)) return null;
   const rows = await inOrganization(orgId, (tx) =>
     tx.execute(sql`
       SELECT * FROM ue_reasoning_sessions
-      WHERE id = ${sessionId} AND organization_id = ${orgId}
+      WHERE id = ${sessionId} AND organization_id = ${orgId} AND created_by = ${userId}
       LIMIT 1
     `),
   );
@@ -157,7 +163,7 @@ export async function updateReasoningSession(
         status = COALESCE(${input.status ?? null}, status),
         latest_resilience_score = COALESCE(${input.latestResilienceScore ?? null}, latest_resilience_score),
         updated_at = ${now}::timestamptz
-      WHERE id = ${sessionId} AND organization_id = ${orgId}
+      WHERE id = ${sessionId} AND organization_id = ${orgId} AND created_by = ${userId}
       RETURNING id
     `);
     if (!matched(rows)) return false;
@@ -188,7 +194,7 @@ export async function addSessionAnnotation(
       UPDATE ue_reasoning_sessions
       SET annotations = annotations || ${JSON.stringify([annotation])}::jsonb,
           updated_at = now()
-      WHERE id = ${sessionId} AND organization_id = ${orgId}
+      WHERE id = ${sessionId} AND organization_id = ${orgId} AND created_by = ${userId}
       RETURNING id
     `);
     if (!matched(rows)) return false;
@@ -211,7 +217,7 @@ export async function linkMemoryToSession(
       UPDATE ue_reasoning_sessions
       SET linked_memory_ids = linked_memory_ids || ${JSON.stringify([memoryEntryId])}::jsonb,
           updated_at = now()
-      WHERE id = ${sessionId} AND organization_id = ${orgId}
+      WHERE id = ${sessionId} AND organization_id = ${orgId} AND created_by = ${userId}
       RETURNING id
     `);
     if (!matched(rows)) return false;
@@ -233,7 +239,7 @@ export async function addSessionSimulation(
       UPDATE ue_reasoning_sessions
       SET active_simulations = active_simulations || ${JSON.stringify([sim])}::jsonb,
           updated_at = now()
-      WHERE id = ${sessionId} AND organization_id = ${orgId}
+      WHERE id = ${sessionId} AND organization_id = ${orgId} AND created_by = ${userId}
       RETURNING id
     `);
     if (!matched(rows)) return false;

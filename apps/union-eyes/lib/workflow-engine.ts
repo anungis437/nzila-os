@@ -27,6 +27,8 @@ import {
   type ClaimPriority 
 } from './services/claim-workflow-fsm';
 import { detectAllSignals, type CaseForSignals } from './services/lro-signals';
+import { toLegacyCaseState, toLifecycleState } from './workflow/state-bridge';
+import { claimHistoryReference } from './cases/claim-history-reference';
 import { 
   generateDefensibilityPack,
   type TimelineEvent,
@@ -215,15 +217,21 @@ export async function updateClaimStatus(
     const priority = (claim.priority as ClaimPriority) || 'medium';
 
     // Detect LRO signals for this case (PR-7 integration)
-    const signals = await detectAllSignals([{
+    const claimCreatedAt = claim.createdAt ?? new Date();
+    const signalCase: CaseForSignals = {
       id: claim.claimId,
-      status: currentStatus,
-      priority,
-      createdAt: claim.createdAt ?? new Date(),
-      updatedAt: claim.updatedAt ?? claim.createdAt ?? new Date(),
-      assignedTo: claim.assignedTo || undefined,
-      organizationId: claim.organizationId,
-    } as unknown as CaseForSignals]);
+      title: claim.description?.slice(0, 120) ?? claim.claimNumber ?? claim.claimId,
+      memberId: claim.memberId ?? '',
+      memberName: claim.memberId ?? '',
+      currentState: toLegacyCaseState(toLifecycleState('claim', currentStatus) ?? 'submitted'),
+      priority: priority as CaseForSignals['priority'],
+      createdAt: claimCreatedAt,
+      lastUpdated: claim.updatedAt ?? claimCreatedAt,
+      // A claim carries its submission instant; later milestones are not recorded on the claim row itself.
+      timeline: [{ type: 'submitted', timestamp: claimCreatedAt }],
+      assignedOfficerId: claim.assignedTo || undefined,
+    };
+    const signals = await detectAllSignals([signalCase]);
 
     const hasUnresolvedCriticalSignals = signals.some(
       signal => signal.severity === 'critical' && signal.actionable
@@ -307,7 +315,7 @@ export async function updateClaimStatus(
       : notes || `Status changed from '${currentStatus}' to '${newStatus}'`;
     
     await tx.insert(claimUpdates).values({
-      claimId: claim.claimId,
+      claimId: claim.id, // history rows reference the internal primary key (Django FK)
       updateType: "status_change",
       message: auditMessage,
       createdBy: userId,
@@ -334,7 +342,7 @@ export async function updateClaimStatus(
         const updates = await tx
           .select()
           .from(claimUpdates)
-          .where(eq(claimUpdates.claimId, claim.claimId))
+          .where(eq(claimUpdates.claimId, claim.id))
           .orderBy(claimUpdates.createdAt);
         
         // Convert updates to timeline events
@@ -621,7 +629,7 @@ export async function assignClaim(
 
       // Create audit trail
       await tx.insert(claimUpdates).values({
-        claimId,
+        claimId: claimHistoryReference(claimId),
         updateType: "assignment",
         message: `Claim assigned to steward`,
         createdBy: assignedBy,
@@ -741,7 +749,7 @@ export async function addClaimNote(
 
     // Create note entry
     await tx.insert(claimUpdates).values({
-      claimId: claim.claimId,
+      claimId: claim.id,
       updateType: "note",
       message,
       createdBy: userId,

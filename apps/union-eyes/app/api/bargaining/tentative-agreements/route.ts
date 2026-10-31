@@ -11,8 +11,9 @@
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
-import { tentativeAgreements, negotiations } from '@/db/schema';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { tentativeAgreements, negotiations, bargainingProposals } from '@/db/schema';
+import { eq, and, desc, sql, inArray } from 'drizzle-orm';
+import { assertOriginalClauseOwned } from '@/lib/clause-library/original-clause';
 import { z } from 'zod';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -27,7 +28,7 @@ const createTentativeAgreementSchema = z.object({
   clauseCategory: z.string().min(1).max(100),
   agreedLanguage: z.string().min(1),
   previousLanguage: z.string().optional(),
-  relatedProposalIds: z.array(z.string()).optional(),
+  relatedProposalIds: z.array(z.guid()).max(50).optional(),
   relatedClauseId: z.guid().optional(),
   requiresRatification: z.boolean().optional(),
   annualCost: z.string().optional(),
@@ -105,6 +106,17 @@ export const POST = withApi(
       if (!negotiation) {
         throw ApiError.notFound('Negotiation', negotiationId);
       }
+
+      // A reference names a row of this negotiation (proposals) or of the organization (clause), never another one's.
+      const proposalIds = [...new Set(fields.relatedProposalIds ?? [])];
+      if (proposalIds.length > 0) {
+        const found = await tx
+          .select({ id: bargainingProposals.id })
+          .from(bargainingProposals)
+          .where(and(inArray(bargainingProposals.id, proposalIds), eq(bargainingProposals.negotiationId, negotiationId)));
+        if (found.length !== proposalIds.length) throw ApiError.notFound('relatedProposalIds');
+      }
+      await assertOriginalClauseOwned(tx, fields.relatedClauseId, organizationId);
 
       const [row] = await tx
         .insert(tentativeAgreements)

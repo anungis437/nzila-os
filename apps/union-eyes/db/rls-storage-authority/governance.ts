@@ -361,4 +361,35 @@ export const governanceEntries: StorageAuthorityEntry[] = [
     dbExecutionPrincipal: "TENANT_RUNTIME",
     reviewPriority: "NONE",
   },
+  electionTenant(
+    "election_certificate_successions",
+    "A correction of a certified council election: an uncertified successor plus this row naming the certified predecessor, version, provenance hash, distinct issuer and reviewer, and the decision. The certified election is never updated.",
+  ),
+  electionTenant(
+    "election_organization_ownership",
+    "Names the one organization that may see or supersede a council election, because council_elections has no organization column. A lookup joins it and filters organization_id.",
+  ),
 ]
+
+/** Council-election supersession relations: platform 0033 and 0034, protected by scoped cache 0029. */
+function electionTenant(table: string, reason: string): StorageAuthorityEntry {
+  return {
+    table,
+    classification: "TENANT_RLS_REQUIRED",
+    scopeDisposition: "OTHER_EXPLICITLY_JUSTIFIED",
+    reason: `Direct organization_id uuid NOT NULL, created by unqualified platform migration 0033/0034 and protected by scoped cache 0029 (FORCE RLS). ${reason} Not a Drizzle census declaration. Reached only through lib/voting/election-succession inside the authority transaction on the tenant runtime identity. Append-only: no UPDATE, no DELETE. No schema authority.`,
+    supportingCapability: [
+      "lib/voting/election-succession.ts",
+      "lib/voting/election-succession-grant.ts",
+      "lib/authority/store/resources.ts",
+      "db/migrations-platform/0033_election_certificate_successions.sql",
+      "db/migrations-platform/0034_election_organization_ownership.sql",
+      "db/migrations-cache/0029_election_succession_rls_closure.sql",
+    ],
+    requiredRuntimePrivileges: ["SELECT", "INSERT"],
+    requiredSystemPrivileges: [],
+    invocationAuthority: "TENANT_USER",
+    dbExecutionPrincipal: "TENANT_RUNTIME",
+    reviewPriority: "NONE",
+  };
+}

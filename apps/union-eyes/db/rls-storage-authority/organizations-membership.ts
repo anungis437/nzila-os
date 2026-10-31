@@ -386,9 +386,10 @@ export const organizationsMembershipEntries: StorageAuthorityEntry[] = [
     table: "member_location_consent",
     classification: "USER_RLS_REQUIRED",
     reason: "Resolved 2026-09-02 (round 17): userId-keyed (no organizationId column — real-time strike/event location tracking consent is an individual opt-in under Quebec Law 25, not org data). The manifest's own scan evidence cited only service files, missing the real, live HTTP routes: app/api/location/consent/route.ts (POST grant / GET check / DELETE revoke, services/geofence-privacy-service.ts's GeofencePrivacyService). REAL BUG FOUND+FIXED this round: all 3 handlers took `userId` directly from the client (POST body / GET+DELETE query string) with no verification against the authenticated caller — any authenticated user could forge another user's consent grant, read another user's private opt-in status, or revoke another user's legitimately-needed safety consent. Fixed: userId is now always resolved server-side via getCurrentUser() (lib/api-auth-guard.ts), never accepted from the request; regression test app/api/__tests__/location-consent.route.test.ts. This table needs a dedicated user-scoped (not org-scoped) RLS policy design if DB-level enforcement is ever added; currently enforced only at the app layer. POLICY-EXPANSION PREREQUISITE (round 18, recorded now rather than rediscovered during migration generation): today the service queries this table through the ordinary `db` import with no transaction/session-variable scoping at all (no `withRLSContext`/`withSystemContext`, no `set_config`) — acceptable ONLY because the 87-table RLS policy-expansion migration remains blocked/unimplemented and this table has no policy to enforce yet. Once a USER_RLS policy is built for this table (e.g. `USING (user_id = current_setting('app.current_user_id'))`), GeofencePrivacyService's requestLocationConsent/hasValidConsent/revokeLocationConsent must be moved inside a transaction that calls `set_config('app.current_user_id', <caller's own id>, true)` BEFORE querying — the same shape as withRLSContext's org-scoped set_config, but keyed by user id instead of org id. Do not add this table to the migration until that transaction wiring exists; otherwise every self-service consent request would silently return zero rows once RLS is enabled.",
-    supportingCapability: ["app/api/location/consent/route.ts","services/geofence-privacy-service.ts"],
+    supportingCapability: ["app/api/location/consent/route.ts","services/geofence-privacy-service.ts","app/api/cron/location-retention/route.ts"],
     requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
-    requiredSystemPrivileges: [],
+    // The retention job records the lapse of expired consents (status only) for every member, which a user-scoped session cannot see.
+    requiredSystemPrivileges: ["SELECT","UPDATE"],
     invocationAuthority: "TENANT_USER",
     dbExecutionPrincipal: "TENANT_RUNTIME",
     reviewPriority: "NONE",
@@ -440,6 +441,7 @@ export const organizationsMembershipEntries: StorageAuthorityEntry[] = [
   },
   {
     table: "org_usage",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
     classification: "LATENT_UNREACHABLE",
     reason: "PR #752 round 8: db/schema-organizations.ts (sibling-file census fix, see 'applications'). Only reference is actions/admin-actions.ts's getSystemStats — that whole module (actions/admin-actions.ts) has zero real importers anywhere in app/lib/actions/services/components (confirmed via grep, no barrel/indirect import found either), matching the round-5 lib/workers/** dead-code precedent. Zero raw-SQL references found either.",
     supportingCapability: [],

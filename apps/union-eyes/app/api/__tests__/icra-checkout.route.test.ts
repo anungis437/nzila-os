@@ -41,7 +41,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
     return fn(tx);
   },
 }));
-vi.mock('@/db/schema/icra-schema', () => ({ icraAssessments: { id: 'id', reportTierId: 'reportTierId' } }));
+vi.mock('@/db/schema/icra-schema', () => ({ icraAssessments: { id: 'id', reportTierId: 'reportTierId', status: 'status' } }));
 vi.mock('@nzila/payments-stripe', () => ({
   getStripeClient: () => ({ checkout: { sessions: { create: m.stripeCreate } } }),
 }));
@@ -96,7 +96,7 @@ describe('icra/checkout route', () => {
 
   it('returns 401 when no capability token is presented', async () => {
     const { POST } = await loadRoute();
-    m.selectQueue.push([{ reportTierId: 'continuity_reflection', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+    m.selectQueue.push([{ reportTierId: 'continuity_reflection', status: 'submitted', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
 
     const response = await POST(req(body(), false));
 
@@ -105,16 +105,46 @@ describe('icra/checkout route', () => {
 
   it('returns 409 when tier is already unlocked', async () => {
     const { POST } = await loadRoute();
-    m.selectQueue.push([{ reportTierId: 'institutional_continuity_diagnostic', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+    m.selectQueue.push([{ reportTierId: 'institutional_continuity_diagnostic', status: 'submitted', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
 
     const response = await POST(req(body()));
 
     expect(response.status).toBe(409);
   });
 
+  // DEF-0B8-ICRA-CHECKOUT-SELLS-A-TIER-WITHOUT-REQUIRING-A-SUBMITTED-ASSESSMENT
+  it('returns 409 and creates no checkout session for an assessment that has not been submitted', async () => {
+    const { POST } = await loadRoute();
+    for (const status of ['draft', 'in_progress', 'abandoned']) {
+      m.selectQueue.push([{ reportTierId: 'continuity_reflection', status, capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+      const response = await POST(req(body()));
+      expect(response.status, status).toBe(409);
+      expect((await response.json()).error).toContain('submitted');
+    }
+    expect(m.stripeCreate).not.toHaveBeenCalled();
+  });
+
+  // DEF-0B8-ICRA-CHECKOUT-REDIRECT-DEFAULTS-TO-LOCALHOST-AND-PRICE-MAY-DIFFER-FROM-DISPLAYED
+  it('refuses, creating no checkout session, when production has no application URL configured', async () => {
+    const { POST } = await loadRoute();
+    const previousUrl = process.env.NEXT_PUBLIC_APP_URL;
+    const previousEnv = process.env.NODE_ENV;
+    delete process.env.NEXT_PUBLIC_APP_URL;
+    (process.env as Record<string, string>).NODE_ENV = 'production';
+    try {
+      m.selectQueue.push([{ reportTierId: 'continuity_reflection', status: 'submitted', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+      const response = await POST(req(body()));
+      expect(response.status).toBe(503);
+      expect(m.stripeCreate).not.toHaveBeenCalled();
+    } finally {
+      process.env.NEXT_PUBLIC_APP_URL = previousUrl;
+      (process.env as Record<string, string>).NODE_ENV = previousEnv as string;
+    }
+  });
+
   it('returns checkout url on successful session creation', async () => {
     const { POST } = await loadRoute();
-    m.selectQueue.push([{ reportTierId: 'continuity_reflection', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+    m.selectQueue.push([{ reportTierId: 'continuity_reflection', status: 'submitted', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
 
     const response = await POST(req(body()));
 
@@ -125,7 +155,7 @@ describe('icra/checkout route', () => {
 
   it('returns 500 when stripe session creation fails', async () => {
     const { POST } = await loadRoute();
-    m.selectQueue.push([{ reportTierId: 'continuity_reflection', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
+    m.selectQueue.push([{ reportTierId: 'continuity_reflection', status: 'submitted', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]);
     m.stripeCreate.mockRejectedValueOnce(new Error('stripe down'));
 
     const response = await POST(req(body()));

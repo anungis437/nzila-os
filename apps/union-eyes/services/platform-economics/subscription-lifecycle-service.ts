@@ -68,23 +68,35 @@ export async function expireTrials(
     const newStatus = hasPm ? 'active' : 'cancelled';
     const eventType = hasPm ? 'trial_converted' : 'trial_expired';
 
-    await db
-      .update(orgSubscriptions)
-      .set({
-        status: newStatus,
-        updatedAt: new Date(),
-      })
-      .where(and(eq(orgSubscriptions.id, sub.id), eq(orgSubscriptions.organizationId, organizationId)));
+    // The status change, its event row and its audit record commit together.
+    await db.transaction(async (tx) => {
+      await tx
+        .update(orgSubscriptions)
+        .set({
+          status: newStatus,
+          updatedAt: new Date(),
+        })
+        .where(and(eq(orgSubscriptions.id, sub.id), eq(orgSubscriptions.organizationId, organizationId)));
 
-    await db.insert(subscriptionEventsLog).values({
-      organizationId: sub.organizationId,
-      subscriptionId: sub.id,
-      eventType,
-      previousState: { status: 'trialing' },
-      newState: { status: newStatus },
-      reason: hasPm
-        ? 'Trial converted — payment method on file'
-        : 'Trial expired — no payment method',
+      await tx.insert(subscriptionEventsLog).values({
+        organizationId: sub.organizationId,
+        subscriptionId: sub.id,
+        eventType,
+        previousState: { status: 'trialing' },
+        newState: { status: newStatus },
+        reason: hasPm
+          ? 'Trial converted — payment method on file'
+          : 'Trial expired — no payment method',
+      });
+
+      await persistAtomicAudit(tx as unknown as Parameters<typeof persistAtomicAudit>[0], {
+        organizationId: sub.organizationId,
+        userId: 'system:trial-expiry',
+        action: `subscription.${eventType}`,
+        resourceType: 'org_subscriptions',
+        resourceId: sub.id,
+        details: { previousStatus: 'trialing', newStatus },
+      });
     });
 
     actions.push({

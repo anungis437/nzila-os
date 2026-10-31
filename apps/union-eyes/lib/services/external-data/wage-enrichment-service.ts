@@ -61,6 +61,19 @@ export interface EnrichmentResult {
 // ENRICHMENT SERVICE CLASS
 // =============================================================================
 
+/**
+ * What the sync log records for a finished run. A run with failed records is "partial", not "completed", and keeps the errors it
+ * collected (bounded), so the log shows a partial run instead of a clean one.
+ */
+export function syncLogOutcome(recordsFailed: number, errors: readonly string[]): { status: 'completed' | 'partial'; errorMessage?: string; errorDetails?: string } {
+  if (recordsFailed === 0 && errors.length === 0) return { status: 'completed' };
+  return {
+    status: 'partial',
+    errorMessage: `${recordsFailed} record(s) failed; ${errors.length} error(s) collected`,
+    errorDetails: errors.slice(0, 50).join('\n').slice(0, 8000),
+  };
+}
+
 export class WageEnrichmentService {
   private statCanClient: typeof statCanClient;
   private syncId: string;
@@ -97,7 +110,7 @@ export class WageEnrichmentService {
   private async updateSyncLog(
     syncId: string,
     result: {
-      status: 'completed' | 'failed';
+      status: 'completed' | 'partial' | 'failed';
       recordsProcessed: number;
       recordsInserted: number;
       recordsUpdated: number;
@@ -226,7 +239,7 @@ export class WageEnrichmentService {
       }
 
       await this.updateSyncLog(syncId, {
-        status: 'completed',
+        ...syncLogOutcome(recordsFailed, errors),
         recordsProcessed,
         recordsInserted,
         recordsUpdated,
@@ -343,7 +356,7 @@ export class WageEnrichmentService {
       }
 
       await this.updateSyncLog(syncId, {
-        status: 'completed',
+        ...syncLogOutcome(recordsFailed, errors),
         recordsProcessed,
         recordsInserted,
         recordsUpdated,
@@ -442,7 +455,7 @@ export class WageEnrichmentService {
       }
 
       await this.updateSyncLog(syncId, {
-        status: 'completed',
+        ...syncLogOutcome(recordsFailed, errors),
         recordsProcessed,
         recordsInserted,
         recordsUpdated,
@@ -596,7 +609,7 @@ export class WageEnrichmentService {
       }
 
       await this.updateSyncLog(syncId, {
-        status: 'completed',
+        ...syncLogOutcome(recordsFailed, errors),
         recordsProcessed,
         recordsInserted,
         recordsUpdated,

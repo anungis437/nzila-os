@@ -1,0 +1,50 @@
+{
+  "record": "UE-RUNTIME-PARITY-AFTER-0034",
+  "tool": "apps/union-eyes/scripts/runtime/orm-physical-parity.ts (read-only heuristic; findings are leads, not proven defects)",
+  "database": "native PostgreSQL 16, built by Django migrate plus the approved Drizzle bootstrap, which applied cache migrations 0033 and 0034",
+  "baseline": "vs-orm-physical-parity-eba009ba6.json: 16 principal columns text-vs-uuid in 8 tables, before migrations 0033 and 0034",
+  "counts": {
+    "NO_DB_DEFAULT": 662,
+    "MISSING_COLUMN": 2124,
+    "TYPE_MISMATCH": 34
+  },
+  "principalColumnsStillOrmTextDatabaseUuid": [
+    "cookie_consents.user_id ORM text vs database uuid"
+  ],
+  "otherTypeMismatches": [
+    "pending_profiles.id ORM text vs database uuid",
+    "grievances.related_grievance_ids ORM uuid[] vs database jsonb",
+    "access_justification_requests.id ORM text vs database uuid",
+    "access_justification_requests.data_type_id ORM text vs database uuid",
+    "data_classification_policy.id ORM text vs database uuid",
+    "data_classification_registry.id ORM text vs database uuid",
+    "employer_access_attempts.id ORM text vs database uuid",
+    "employer_access_attempts.data_type_id ORM text vs database uuid",
+    "firewall_access_rules.id ORM text vs database uuid",
+    "firewall_access_rules.data_type_id ORM text vs database uuid",
+    "firewall_compliance_audit.id ORM text vs database uuid",
+    "firewall_violations.id ORM text vs database uuid",
+    "firewall_violations.data_type_id ORM text vs database uuid",
+    "union_only_data_tags.id ORM text vs database uuid",
+    "account_balance_reconciliation.id ORM text vs database uuid",
+    "account_balance_reconciliation.account_id ORM text vs database uuid",
+    "payment_classification_policy.id ORM text vs database uuid",
+    "payment_routing_rules.id ORM text vs database uuid",
+    "payment_routing_rules.destination_account_id ORM text vs database uuid",
+    "payment_routing_rules.fallback_account_id ORM text vs database uuid",
+    "separated_payment_transactions.id ORM text vs database uuid",
+    "separated_payment_transactions.routed_to_account_id ORM text vs database uuid",
+    "separated_payment_transactions.routing_rule_id ORM text vs database uuid",
+    "strike_fund_payment_audit.id ORM text vs database uuid",
+    "stripe_connect_accounts.id ORM text vs database uuid",
+    "whiplash_prevention_audit.id ORM text vs database uuid",
+    "whiplash_prevention_audit.account_id ORM text vs database uuid",
+    "whiplash_prevention_audit.transaction_id ORM text vs database uuid",
+    "whiplash_violations.id ORM text vs database uuid",
+    "whiplash_violations.transaction_id ORM text vs database uuid",
+    "whiplash_violations.expected_account_id ORM text vs database uuid",
+    "whiplash_violations.actual_account_id ORM text vs database uuid",
+    "webhook_events.id ORM text vs database uuid"
+  ],
+  "note": "The remaining non-principal mismatches are entity id columns the ORM declares text and the database holds as uuid: reads work, but a non-uuid id could not be written. grievances.related_grievance_ids is uuid[] in the ORM and jsonb in the database. cookie_consents.user_id is a foreign key to profiles(id) and was deliberately not retyped (product decision). The 662 missing-default and 2124 missing-column findings are unchanged and unaddressed (R-28, R-30)."
+}

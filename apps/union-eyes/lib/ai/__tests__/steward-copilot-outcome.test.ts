@@ -31,6 +31,7 @@ vi.mock('@/db/schema/domains/ml/ai-copilot-sessions', () => ({
 }));
 vi.mock('@/db/schema/domains/claims/grievances', () => ({ grievances: {} }));
 vi.mock('@/lib/ai/ai-client', () => ({
+  toGatewayDataClass: vi.fn((dataClass: string) => dataClass),
   getAiClient: () => ({ generate: vi.fn().mockResolvedValue({ content: '{}' }) }),
   buildOrgAiTrace: vi.fn(),
   UE_APP_KEY: 'ue',

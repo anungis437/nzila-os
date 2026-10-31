@@ -124,117 +124,9 @@ export const glAccountMappings = pgTable('gl_account_mappings', {
   erpAccountIdx: index('gl_mappings_erp_account_idx').on(table.erpAccountId),
 }));
 
-// ============================================================================
-// INVOICES
-// ============================================================================
-
-export const erpInvoices = pgTable('erp_invoices', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id')
-    .notNull()
-    .references(() => organizations.id, { onDelete: 'cascade' }),
-  connectorId: uuid('connector_id'),
-  
-  externalId: varchar('external_id', { length: 255 }),
-  invoiceNumber: varchar('invoice_number', { length: 100 }).notNull(),
-  invoiceDate: timestamp('invoice_date', { withTimezone: true }).notNull(),
-  dueDate: timestamp('due_date', { withTimezone: true }).notNull(),
-  
-  customerId: varchar('customer_id', { length: 255 }).notNull(),
-  customerName: varchar('customer_name', { length: 255 }).notNull(),
-  customerEmail: varchar('customer_email', { length: 255 }),
-  
-  billingAddress: jsonb('billing_address'),
-  shippingAddress: jsonb('shipping_address'),
-  
-  currency: varchar('currency', { length: 3 }).default('CAD').notNull(),
-  subtotal: decimal('subtotal', { precision: 19, scale: 4 }).notNull(),
-  taxAmount: decimal('tax_amount', { precision: 19, scale: 4 }).default('0').notNull(),
-  totalAmount: decimal('total_amount', { precision: 19, scale: 4 }).notNull(),
-  amountPaid: decimal('amount_paid', { precision: 19, scale: 4 }).default('0').notNull(),
-  amountDue: decimal('amount_due', { precision: 19, scale: 4 }).notNull(),
-  
-  status: varchar('status', { length: 50 }).notNull(),
-  terms: text('terms'),
-  memo: text('memo'),
-  
-  pdfUrl: text('pdf_url'),
-  
-  metadata: jsonb('metadata'),
-  syncedAt: timestamp('synced_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-}, (table) => ({
-  organizationIdx: index('invoices_organization_idx').on(table.organizationId),
-  invoiceNumberIdx: index('invoices_number_idx').on(table.invoiceNumber),
-  statusIdx: index('invoices_status_idx').on(table.status),
-  dueDateIdx: index('invoices_due_date_idx').on(table.dueDate),
-}));
-
-// ============================================================================
-// BANK ACCOUNTS
-// ============================================================================
-
-export const bankAccounts = pgTable('bank_accounts', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id')
-    .notNull()
-    .references(() => organizations.id, { onDelete: 'cascade' }),
-  connectorId: uuid('connector_id'),
-  
-  externalId: varchar('external_id', { length: 255 }),
-  bankName: varchar('bank_name', { length: 255 }).notNull(),
-  accountNumber: varchar('account_number', { length: 255 }).notNull(), // Last 4 digits only
-  accountType: varchar('account_type', { length: 50 }).notNull(),
-  
-  currency: varchar('currency', { length: 3 }).default('CAD').notNull(),
-  currentBalance: decimal('current_balance', { precision: 19, scale: 4 }).default('0').notNull(),
-  availableBalance: decimal('available_balance', { precision: 19, scale: 4 }).default('0').notNull(),
-  
-  glAccountId: uuid('gl_account_id').references(() => chartOfAccounts.id),
-  
-  // Bank feed provider
-  bankFeedProvider: varchar('bank_feed_provider', { length: 50 }),
-  bankFeedEnabled: boolean('bank_feed_enabled').default(false).notNull(),
-  encryptedBankCredentials: text('encrypted_bank_credentials'),
-  
-  lastSyncDate: timestamp('last_sync_date', { withTimezone: true }),
-  isActive: boolean('is_active').default(true).notNull(),
-  
-  metadata: jsonb('metadata'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-}, (table) => ({
-  organizationIdx: index('bank_accounts_organization_idx').on(table.organizationId),
-}));
-
-export const bankReconciliations = pgTable('bank_reconciliations', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id')
-    .notNull()
-    .references(() => organizations.id, { onDelete: 'cascade' }),
-  bankAccountId: uuid('bank_account_id').notNull().references(() => bankAccounts.id),
-  
-  statementDate: timestamp('statement_date', { withTimezone: true }).notNull(),
-  statementBalance: decimal('statement_balance', { precision: 19, scale: 4 }).notNull(),
-  glBalance: decimal('gl_balance', { precision: 19, scale: 4 }).notNull(),
-  difference: decimal('difference', { precision: 19, scale: 4 }).notNull(),
-  
-  status: varchar('status', { length: 50 }).default('in_progress').notNull(),
-  
-  reconciledBy: varchar('reconciled_by', { length: 255 }), // User ID - matches users.userId VARCHAR(255)
-  reconciledAt: timestamp('reconciled_at', { withTimezone: true }),
-  approvedBy: varchar('approved_by', { length: 255 }), // User ID - matches users.userId VARCHAR(255)
-  approvedAt: timestamp('approved_at', { withTimezone: true }),
-  
-  metadata: jsonb('metadata'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-}, (table) => ({
-  organizationIdx: index('bank_recon_organization_idx').on(table.organizationId),
-  bankAccountIdx: index('bank_recon_account_idx').on(table.bankAccountId),
-  statementDateIdx: index('bank_recon_date_idx').on(table.statementDate),
-}));
+// erp_invoices, bank_accounts, and bank_reconciliations are not declared in this
+// barrel. Django billing models still define them. packages/db exec-data.ts
+// still declares erp_invoices for the console reader. Do not DROP the relations.
 
 // ============================================================================
 // SYNC JOBS
@@ -345,13 +237,5 @@ export const currencyExchangeRates = pgTable('currency_exchange_rates', {
 
 export const chartOfAccountsRelations = relations(chartOfAccounts, ({ many }) => ({
   glMappings: many(glAccountMappings),
-}));
-
-export const bankAccountsRelations = relations(bankAccounts, ({ one, many }) => ({
-  glAccount: one(chartOfAccounts, {
-    fields: [bankAccounts.glAccountId],
-    references: [chartOfAccounts.id],
-  }),
-  reconciliations: many(bankReconciliations),
 }));
 

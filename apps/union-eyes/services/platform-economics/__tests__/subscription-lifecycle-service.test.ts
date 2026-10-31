@@ -38,6 +38,9 @@ vi.mock('@/db', () => ({
         return Promise.resolve([]);
       },
     }),
+    transaction: async function (this: unknown, fn: (tx: unknown) => Promise<unknown>) {
+      return fn(this);
+    },
   },
 }));
 
@@ -132,6 +135,11 @@ describe('platform-economics/subscription-lifecycle-service', () => {
       const actions = await expireTrials(ORG_A, async () => true);
       expect(actions[0]!.action).toBe('trial_converted');
       expect(actions[0]!.newStatus).toBe('active');
+      // The change, its event row and its audit record are one transaction (DEF-0B3-BILLING-AUDIT-NOT-ATOMIC).
+      expect(h.auditLog).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ action: 'subscription.trial_converted', resourceId: 'sub-a', organizationId: ORG_A }),
+      );
     });
 
     it('cancels a trial without a payment method', async () => {
@@ -139,6 +147,16 @@ describe('platform-economics/subscription-lifecycle-service', () => {
       const actions = await expireTrials(ORG_A, async () => false);
       expect(actions[0]!.action).toBe('trial_expired');
       expect(actions[0]!.newStatus).toBe('cancelled');
+      expect(h.auditLog).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ action: 'subscription.trial_expired', details: { previousStatus: 'trialing', newStatus: 'cancelled' } }),
+      );
+    });
+
+    it('fails the expiry of a trial when its audit record cannot be written', async () => {
+      setSubs([{ id: 'sub-a', organizationId: ORG_A, status: 'trialing', trialEndDate: PAST }]);
+      h.auditLog.mockRejectedValueOnce(new Error('audit down'));
+      await expect(expireTrials(ORG_A, async () => false)).rejects.toThrow('audit down');
     });
 
     it('returns an empty list when no trials are expired for the organization', async () => {

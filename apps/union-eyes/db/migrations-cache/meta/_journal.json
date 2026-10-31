@@ -176,6 +176,76 @@
       "when": 1790210000000,
       "tag": "0026_workaid_union_side_rls_closure",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1790220000000,
+      "tag": "0028_workaid_consent_wording_proposal_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1790230000000,
+      "tag": "0029_election_succession_rls_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1790240000000,
+      "tag": "0030_precedent_explicit_share_select",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1790250000000,
+      "tag": "0031_feature_flags_attribution_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1790260000000,
+      "tag": "0032_grievance_events_actor_text",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1790270000000,
+      "tag": "0033_external_authority_principals_text",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1790280000000,
+      "tag": "0034_remaining_principal_columns_text",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1790290000000,
+      "tag": "0035_room_bookings_rls_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1790300000000,
+      "tag": "0036_contact_submissions_rls_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1790310000000,
+      "tag": "0037_ml_prediction_feedback_rls_closure",
+      "breakpoints": true
     }
   ]
 }

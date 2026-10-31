@@ -6,6 +6,7 @@ import { db } from '@/db/db';
 import { organizationMembers, organizations } from '@/db/schema';
 import { desc, sql } from 'drizzle-orm';
 import { withApi } from '@/lib/api/framework';
+import { performAuditedPlatformRead } from '@/lib/audit/audited-platform-read';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,8 +14,13 @@ export const GET = withApi(
   { auth: { required: true, minRole: 'platform_lead' } },
   async (ctx) => {
     const url = new URL(ctx.request.url);
-    const limit = Math.min(Number(url.searchParams.get('limit') ?? '10'), 50);
+    const requested = Number(url.searchParams.get('limit') ?? '10');
+    const limit = Number.isFinite(requested) ? Math.min(Math.max(Math.trunc(requested), 1), 50) : 10;
 
+    return performAuditedPlatformRead(
+      ctx,
+      { action: 'platform.member_activity.read', resourceType: 'organization_members', details: { limit } },
+      async () => {
     // Recent member additions as activity feed
     const recentMembers = await db
       .select({
@@ -42,6 +48,8 @@ export const GET = withApi(
     }));
 
     return activity;
+      },
+    );
   },
 );
 

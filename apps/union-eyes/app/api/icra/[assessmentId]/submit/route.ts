@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { isAssessmentId } from '@/lib/icra/assessment-id'
 import { eq } from 'drizzle-orm'
 import {
   icraAssessments,
@@ -10,6 +11,8 @@ import {
 } from '@/db/schema/icra-schema'
 import { logger } from '@/lib/logger'
 import { computeProfile } from '@/lib/icra/scoring'
+import { hasRecordedConsent } from '@/lib/icra/consent'
+import { missingRequiredAnswerIds } from '@/lib/icra/stepwise-coverage'
 import type { Answer } from '@/lib/icra/types'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import { guardPublicIntake } from '@/lib/public-intake/guard'
@@ -25,6 +28,7 @@ interface RouteContext {
 
 export async function POST(request: Request, { params }: RouteContext) {
   const { assessmentId } = await params
+  if (!isAssessmentId(assessmentId)) return NextResponse.json({ error: 'Assessment not found' }, { status: 404 })
   // The capability token is the only protection here; slow guessing before any lookup.
   const intake = await guardPublicIntake(request, { bucket: 'capability', readBody: false })
   if (!intake.ok) return intake.response
@@ -65,6 +69,10 @@ export async function POST(request: Request, { params }: RouteContext) {
         return NextResponse.json({ error: 'Assessment already submitted' }, { status: 409 })
       }
 
+      if (!hasRecordedConsent(assessment.consent)) {
+        return NextResponse.json({ error: 'Consent has not been recorded for this assessment' }, { status: 409 })
+      }
+
       const answerRows = await tx
         .select()
         .from(icraAssessmentAnswers)
@@ -73,6 +81,14 @@ export async function POST(request: Request, { params }: RouteContext) {
       if (answerRows.length === 0) {
         return NextResponse.json(
           { error: 'No answers recorded; cannot generate continuity profile.' },
+          { status: 400 },
+        )
+      }
+
+      const missing = missingRequiredAnswerIds(answerRows.map((row) => row.questionId))
+      if (missing.length > 0) {
+        return NextResponse.json(
+          { error: 'Required questions are unanswered; a continuity profile cannot be generated.', missingCount: missing.length },
           { status: 400 },
         )
       }

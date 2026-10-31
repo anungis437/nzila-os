@@ -27,6 +27,7 @@ vi.mock('drizzle-orm', async (importOriginal) => {
 });
 
 vi.mock('@/lib/ai/ai-client', () => ({
+  toGatewayDataClass: vi.fn((dataClass: string) => dataClass),
   getAiClient: vi.fn(() => ({ generate: mockGenerate })),
   buildOrgAiTrace: vi.fn(() => ({
     component: 'test',
@@ -56,6 +57,11 @@ vi.mock('./ai-feature-guard', () => ({
     available: true, data, ...meta, disclaimer: 'AI disclaimer',
   })),
 }));
+
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: vi.fn(async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) => fn({})),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
 
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },

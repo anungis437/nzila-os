@@ -284,6 +284,7 @@ export const communicationsNotificationsEntries: StorageAuthorityEntry[] = [
   },
   {
     table: "notification_history",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
     classification: "LATENT_UNREACHABLE",
     reason: "RECLASSIFIED 2026-09-02 (round 5, from TENANT_RLS_REQUIRED/MIXED): re-verified against the actual imports of lib/services/notification-service.ts — it imports only `notificationQueue`, `notificationDeliveryLog`, `notificationTemplates` from db/schema/domains/communications; `notificationHistory` appears ONLY in a doc comment ('- notificationHistory: Audit log for all notifications'), never as an actual query. Its other cited evidence, lib/workers/{cleanup,email,notification,sms}-worker.ts, has ZERO real (non-test) importers anywhere in app/, actions/, lib/, or services/ — confirmed orphaned by the 2026-02-19 Django Celery migration (see lib/job-queue.ts's own doc comment; same dead-module family as user_sessions/grievance_transitions' prior citations). No other non-test reference to the 'notificationHistory' Drizzle export exists. Resolves the prior entry's own flagged follow-up ('execution authority for the worker path not yet independently confirmed').",
     supportingCapability: ["db/schema/domains/communications/notifications.ts"],
@@ -625,6 +626,17 @@ export const communicationsNotificationsEntries: StorageAuthorityEntry[] = [
     requiredSystemPrivileges: [],
     invocationAuthority: "TENANT_USER",
     dbExecutionPrincipal: "TENANT_RUNTIME",
+    reviewPriority: "NONE",
+  },
+  {
+    table: "contact_submissions",
+    classification: "SYSTEM_ONLY",
+    reason: "Local record of the public marketing contact form (platform migration 0045_contact_submissions, cache migration 0036_contact_submissions_rls_closure). Anonymous visitors' contact details, not tenant data: there is no organization column and no tenant session may read or write it. app/api/contact/route.ts stores the submission under withSystemContext before the CRM sync and acknowledges the visitor only once the local record exists; the public intake guard bounds the request. Every column is length-limited and retain_until states when the row is due for deletion. Both migrations are registered UNQUALIFIED and not applied to a live database; until then the route fails closed (503) because the record cannot be stored.",
+    supportingCapability: ["app/api/contact/route.ts","db/schema/domains/communications/contact-submissions.ts","lib/public-intake/guard.ts"],
+    requiredRuntimePrivileges: [],
+    requiredSystemPrivileges: ["SELECT", "INSERT", "UPDATE"],
+    invocationAuthority: "SYSTEM_SCHEDULE",
+    dbExecutionPrincipal: "SYSTEM_RUNTIME",
     reviewPriority: "NONE",
   },
 ]

@@ -456,7 +456,7 @@ describe('governance review register and WorkAid referral', () => {
     expect(await refer(['status'])).toBe(matter)
     // One live referral per case, enforced by the database even if the kernel is bypassed.
     await expect(k.as('user_assignee')(async (t) => {
-      await t.query(`INSERT INTO ue_authority_workaid_matters (organization_id, member_user_id, case_id, referred_by) VALUES ($1,$2,$3,$4)`, [ORG, U.member, CASE, 'user_assignee'])
+      await t.query(`INSERT INTO ue_authority_workaid_matters (organization_id, member_user_id, case_id, referred_by, referred_categories) VALUES ($1,$2,$3,$4,ARRAY['status']::text[])`, [ORG, U.member, CASE, 'user_assignee'])
       await auditAuthorityMutation(t, { organizationId: ORG, action: 'test.raw', resourceType: 'ue_authority_workaid_matters' })
     })).rejects.toThrow(/workaid_case_uq/)
   })

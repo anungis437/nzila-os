@@ -12,7 +12,7 @@
 import { requireAdmin } from '@/lib/auth/rbac-server';
 import { db } from '@/db/db';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';import { organizationUsers } from "@/db/schema/domains/member";
-import { organizations, orgConfigurations, orgUsage } from "@/db/schema";
+import { organizations, orgConfigurations } from "@/db/schema";
 import { eq, and, desc, sql, count, like, or, ne, sum as _sum } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { auth } from '@nzila/platform-auth/entra/server';
@@ -58,12 +58,6 @@ export async function getSystemStats(tx: AdminTx): Promise<SystemStats> {
         ne(organizations.status, 'archived')
       ));
 
-    // Aggregate storage across all org usage records
-    const storageResult = await tx
-      .select({ total: sql<number>`COALESCE(SUM(${orgUsage.storageUsedBytes}), 0)` })
-      .from(orgUsage);
-    const totalStorage = storageResult[0]?.total || 0;
-
     // Users active in last 24 hours
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const activeTodayResult = await tx
@@ -78,7 +72,6 @@ export async function getSystemStats(tx: AdminTx): Promise<SystemStats> {
       totalMembers: totalMembersResult[0]?.count || 0,
       totalOrgs: totalOrgsResult[0]?.count || 0,
       activeOrgs: activeOrgsResult[0]?.count || 0,
-      totalStorage: totalStorage,
       activeToday: activeTodayResult[0]?.count || 0,
     };
   } catch (error) {
@@ -194,15 +187,6 @@ export async function getAdminOrgs(searchQuery?: string): Promise<OrgWithStats[]
           .from(organizationUsers)
           .where(eq(organizationUsers.organizationId, org.orgId));
 
-        // Get latest storage usage for this org
-        const [usage] = await db
-          .select({ bytes: orgUsage.storageUsedBytes })
-          .from(orgUsage)
-          .where(eq(orgUsage.organizationId, org.orgId))
-          .orderBy(desc(orgUsage.periodEnd))
-          .limit(1);
-        const storageUsed = String(usage?.bytes ?? 0);
-
         return {
           id: org.orgId,
           slug: org.orgSlug,
@@ -211,7 +195,6 @@ export async function getAdminOrgs(searchQuery?: string): Promise<OrgWithStats[]
           subscriptionTier: org.subscriptionTier ?? 'free',
           totalUsers: userCount?.total || 0,
           activeUsers: userCount?.active || 0,
-          storageUsed: storageUsed,
           createdAt: org.createdAt?.toISOString() || "",
           contactEmail: org.contactEmail,
           phone: org.phone,

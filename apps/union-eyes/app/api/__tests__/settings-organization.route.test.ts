@@ -4,11 +4,15 @@ const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   db: { select: vi.fn(), update: vi.fn() },
   audit: vi.fn(),
+  lock: vi.fn(),
 }));
 
 vi.mock('@/lib/api/framework', () => ({
   withApi: m.withApi,
-  ApiError: { badRequest: () => new Error('bad') },
+  ApiError: {
+    badRequest: (message: string) => Object.assign(new Error(message), { status: 400 }),
+    notFound: (what: string) => Object.assign(new Error(`${what} not found`), { status: 404 }),
+  },
 }));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (fn: (tx: unknown) => Promise<unknown>) => fn(m.db) }));
@@ -20,19 +24,20 @@ async function loadRoute() {
   return import('../settings/organization/route');
 }
 
+// A selected row set that can be awaited as it is or locked with .for('update').
+const rows = (value: unknown[]) => Object.assign(Promise.resolve(value), { for: m.lock.mockImplementation(async () => value) });
+
 describe('settings/organization route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.withApi.mockImplementation((config: any, handler: any) => async (ctx: any) => handler(ctx));
     m.db.select = vi.fn(() => ({
       from: vi.fn(() => ({
-        where: vi.fn(async () => [
-          { id: 'org_1', name: 'Test Org', shortName: 'TO', memberCount: 100, settings: { theme: 'dark' } },
-        ]),
+        where: vi.fn(() => rows([{ id: 'org_1', name: 'Test Org', shortName: 'TO', memberCount: 100, settings: { theme: 'dark' } }])),
       })),
     }));
     m.audit.mockResolvedValue(undefined);
-    m.db.update = vi.fn(() => ({ set: vi.fn(() => ({ where: vi.fn(async () => []) })) }));
+    m.db.update = vi.fn(() => ({ set: vi.fn(() => ({ where: vi.fn(() => Object.assign(Promise.resolve([]), { returning: async () => [{ id: 'org_1' }] })) })) }));
   });
 
   it('returns organization settings', async () => {
@@ -54,9 +59,96 @@ describe('settings/organization route', () => {
     const result = await PUT({
       organizationId: 'org_1',
       userId: 'u1',
-      body: { name: 'Updated Org', settings: { theme: 'light' } },
+      body: { name: 'Updated Org', settings: { timezone: 'America/Toronto', showBranding: true } },
     });
     expect(result.updated).toBe(true);
     expect(m.audit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'organization.settings_update', userId: 'u1' }));
+  });
+
+  const put = (settings: unknown) => loadRoute().then(({ PUT }) => PUT({ organizationId: 'org_1', userId: 'u1', body: { settings } }));
+
+  it.each([
+    ['perCapitaRate', 0.01],
+    ['remittanceDay', 28],
+    ['credits', 1_000_000],
+    ['nextCreditRenewal', '2099-01-01'],
+    ['twilioPhoneNumber', '+15550100'],
+  ])('refuses to let an administrator write the authority key %s, saves nothing and audits nothing', async (key, value) => {
+    await expect(put({ timezone: 'America/Toronto', [key]: value })).rejects.toMatchObject({ status: 400, message: expect.stringContaining(key) });
+    expect(m.db.update).not.toHaveBeenCalled();
+    expect(m.audit).not.toHaveBeenCalled();
+  });
+
+  it('refuses an unknown key and never echoes the rejected value', async () => {
+    const attempt = put({ arbitraryKey: 'SECRET-VALUE-123' });
+    await expect(attempt).rejects.toMatchObject({ status: 400 });
+    await expect(attempt).rejects.not.toThrow(/SECRET-VALUE-123/);
+    expect(m.db.update).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [{ sessionTimeout: 0 }],
+    [{ sessionTimeout: 'forever' }],
+    [{ requireMFA: 'yes' }],
+    [{ webhookUrl: 'http://insecure.example/hook' }],
+    [{ webhookUrl: 'javascript:alert(1)' }],
+    [{ primaryColor: 'red; background:url(x)' }],
+    [{ defaultRole: 'system_admin' }],
+    [{ billingCycle: 'free-forever' }],
+  ])('refuses an invalid value for %j', async (settings) => {
+    await expect(put(settings)).rejects.toMatchObject({ status: 400 });
+    expect(m.db.update).not.toHaveBeenCalled();
+  });
+
+  it('records the before and after of every written setting in the audit row', async () => {
+    m.db.select = vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(() => rows([{ settings: { timezone: 'UTC', credits: 5 } }])) })) }));
+    const result = await put({ timezone: 'America/Toronto', sessionTimeout: 60 });
+    expect(result.updated).toBe(true);
+    expect(m.audit).toHaveBeenCalledWith(
+      m.db,
+      expect.objectContaining({
+        details: expect.objectContaining({
+          settingsBefore: { timezone: 'UTC', sessionTimeout: null },
+          settingsAfter: { timezone: 'America/Toronto', sessionTimeout: 60 },
+        }),
+      }),
+    );
+  });
+
+  // DEF-0B11-IDS-SETTINGS-PUT-IS-UNVALIDATED-AND-MERGES-OUTSIDE-THE-TRANSACTION
+  describe('PUT validation and the settings merge', () => {
+    const putBody = (body: unknown) => loadRoute().then(({ PUT }) => PUT({ organizationId: 'org_1', userId: 'u1', body }));
+
+    it.each([
+      ['an empty name', { name: '   ' }],
+      ['a name that is not text', { name: 7 }],
+      ['a name over 200 characters', { name: 'x'.repeat(201) }],
+      ['a short name over 50 characters', { shortName: 'x'.repeat(51) }],
+      ['a province that is not text', { provinceTerritory: ['ON'] }],
+    ])('refuses %s with 400, reading and writing nothing', async (_label, body) => {
+      await expect(putBody(body)).rejects.toMatchObject({ status: 400 });
+      expect(m.db.select).not.toHaveBeenCalled();
+      expect(m.db.update).not.toHaveBeenCalled();
+      expect(m.audit).not.toHaveBeenCalled();
+    });
+
+    it('answers 400, not a server error, for a missing body or a missing organization', async () => {
+      await expect(putBody(null)).rejects.toMatchObject({ status: 400 });
+      const { PUT } = await loadRoute();
+      await expect(PUT({ organizationId: null, userId: 'u1', body: { name: 'X' } })).rejects.toMatchObject({ status: 400 });
+    });
+
+    it('reads the current settings under a row lock inside the same transaction as the write', async () => {
+      await putBody({ settings: { timezone: 'America/Toronto' } });
+      expect(m.lock).toHaveBeenCalledTimes(1);
+      expect(m.db.update).toHaveBeenCalledTimes(1);
+      expect(m.audit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'organization.settings_update' }));
+    });
+
+    it('answers 404 and audits nothing when the organization row is gone', async () => {
+      m.db.update = vi.fn(() => ({ set: vi.fn(() => ({ where: vi.fn(() => Object.assign(Promise.resolve([]), { returning: async () => [] })) })) }));
+      await expect(putBody({ name: 'Renamed' })).rejects.toMatchObject({ status: 404 });
+      expect(m.audit).not.toHaveBeenCalled();
+    });
   });
 });

@@ -41,6 +41,7 @@ export type WorkAidRefusalCode =
   | 'MATTER_NOT_FOUND'
   | 'NOT_THE_CONSENTING_MEMBER'
   | 'COUNSEL_ACCESS_REFUSED'
+  | 'REFERRAL_SCOPE_EXCEEDED'
 
 export const sha256Hex = (text: string): string => createHash('sha256').update(text, 'utf8').digest('hex')
 

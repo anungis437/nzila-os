@@ -59,6 +59,23 @@ const CUPE_STATUSES: Status[] = [
 ];
 
 /**
+ * Bump VOCABULARY_REVISED_AT with any content change; contentDigest (a pure FNV-1a over the entries) then also changes, so the
+ * answer reflects the content and not the time of the call. A test pins the digest to the revision date.
+ */
+export const VOCABULARY_VERSION = '0.1.0';
+export const VOCABULARY_REVISED_AT = '2026-10-31T00:00:00.000Z';
+
+function contentDigest(): string {
+  const text = JSON.stringify([CUPE_CASE_TYPES, CUPE_PRIORITIES, CUPE_SEVERITIES, CUPE_ROLES, CUPE_STATUSES]);
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < text.length; i += 1) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash.toString(16).padStart(8, '0');
+}
+
+/**
  * Get the complete CUPE vocabulary.
  * 
  * v0.1: Returns hardcoded defaults.
@@ -71,8 +88,9 @@ export function getCUPEVocabulary(): CUPEVocabulary {
     severities: CUPE_SEVERITIES,
     roles: CUPE_ROLES,
     statuses: CUPE_STATUSES,
-    lastUpdated: new Date().toISOString(),
-    version: '0.1.0',
+    lastUpdated: VOCABULARY_REVISED_AT,
+    version: VOCABULARY_VERSION,
+    contentDigest: contentDigest(),
   };
 }
 

@@ -321,12 +321,10 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
         required: bank.requiredQuestions.length,
         optional: bank.optionalContextQuestions.length,
         safeDefault: bank.usedSafeDefault,
-        selection: bank.selectionFingerprint.slice(0, 60),
       });
       for (const r of bank.routingRationale) {
         if (r.decision.startsWith('defer_')) {
           emitTelemetry('adaptive_question_deferred', undefined, {
-            questionId: r.questionId.slice(0, 60),
             decision: r.decision,
             ruleId: r.ruleId.slice(0, 60),
           });

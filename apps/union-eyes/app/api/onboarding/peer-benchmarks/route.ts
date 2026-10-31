@@ -14,7 +14,7 @@ import { NextResponse } from 'next/server';
 import { withRoleAuth, type MemberRole } from '@/lib/role-middleware';
 import { getPeerBenchmarks } from '@/lib/utils/smart-onboarding';
 import { logger } from '@/lib/logger';
-import { eventBus, AppEvents } from '@/lib/events';
+import { recordOnboardingRead } from '@/lib/utils/onboarding-read-audit';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 
  
@@ -23,7 +23,7 @@ import {
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
 export const GET = withRoleAuth('member' as MemberRole, async (request, context) => {
-  const { userId, organizationId: _organizationId } = context;
+  const { userId, organizationId } = context;
 
   try {
     const rateLimit = await checkRateLimit(userId, RATE_LIMITS.ONBOARDING);
@@ -39,14 +39,17 @@ export const GET = withRoleAuth('member' as MemberRole, async (request, context)
     }
 
     const { searchParams } = new URL(request.url);
-    const reqOrgId = searchParams.get('organizationId');
-
-    if (!reqOrgId) {
-      return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'organizationId is required'
-    );
+    // The comparison is of the caller's own organization against its peers. A target taken from the request would let any member
+    // read another organization's standing (member count and rates), so a named target must be the caller's own and otherwise reads
+    // as not found.
+    if (!organizationId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
     }
+    const requested = searchParams.get('organizationId');
+    if (requested && requested !== organizationId) {
+      return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Organization not found');
+    }
+    const reqOrgId = organizationId;
 
     const benchmarks = await getPeerBenchmarks(reqOrgId);
 
@@ -56,13 +59,7 @@ export const GET = withRoleAuth('member' as MemberRole, async (request, context)
       benchmarkCount: benchmarks.length,
     });
 
-    // Emit audit event
-    eventBus.emit(AppEvents.AUDIT_LOG, {
-      userId,
-      action: 'peer_benchmarks',
-      resource: 'onboarding',
-      details: { organizationId: reqOrgId, benchmarkCount: benchmarks.length },
-    });
+    await recordOnboardingRead({ organizationId: reqOrgId, userId }, 'onboarding.peer_benchmarks', { benchmarkCount: benchmarks.length });
 
     return NextResponse.json({
       success: true,

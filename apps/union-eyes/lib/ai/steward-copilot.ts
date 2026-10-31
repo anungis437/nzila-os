@@ -22,9 +22,10 @@ import { randomUUID } from 'crypto';
 import { db } from '@/db/db';
 import { eq, and, desc } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { performAuditedOperation } from '@/lib/audit/operation-audit';
-import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import { buildOrgAiTrace, toGatewayDataClass, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { aiCopilotSessions, type AiCopilotSessionInsert } from '@/db/schema/domains/ml/ai-copilot-sessions';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { auditAiInteraction, buildAiEnvelope, type AiResponseEnvelope } from './ai-feature-guard';
@@ -64,6 +65,11 @@ export async function executeCopilotAction(
 ): Promise<AiResponseEnvelope<CopilotResult>> {
   const { organizationId, userId, userRole, actionType, relatedEntityType, relatedEntityId, query } = input;
 
+  if (relatedEntityType === 'grievance' && relatedEntityId) {
+    const access = await getEffectiveCaseAccess({ organizationId, grievanceId: relatedEntityId, userId });
+    if (!access.canViewCase) throw new Error('Case access denied');
+  }
+
   // 1. Build context-aware prompt
   const prompt = await buildCopilotPrompt(input);
 
@@ -86,7 +92,7 @@ export async function executeCopilotAction(
         appKey: UE_APP_KEY,
         profileKey: UE_PROFILES.STEWARD_COPILOT,
         input: prompt,
-        dataClass: 'internal',
+        dataClass: toGatewayDataClass('grievance_legal'),
       }),
   );
 

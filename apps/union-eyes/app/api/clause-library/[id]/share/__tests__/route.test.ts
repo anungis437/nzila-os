@@ -244,7 +244,7 @@ describe('clause-library/[id]/share route', () => {
     const { POST } = await loadHandlers();
 
     await expect(
-      POST({ request: req('clause-1', { sharingLevel: 'public' }), organizationId: 'org-b', userId: 'user-1' }),
+      POST({ request: req('clause-1', { sharingLevel: 'public' }), organizationId: 'org-b', userId: 'user-1', user: { role: 'officer' } }),
     ).rejects.toMatchObject({ status: 404 });
     expect(h.isSharedClauseOwner).toHaveBeenCalled();
     expect(h.calls.update).toBe(0);
@@ -259,7 +259,7 @@ describe('clause-library/[id]/share route', () => {
     pushSel([{
       id: 'clause-1',
       sharingLevel: 'federation',
-      sharedWithOrgIds: ['org-c'],
+      sharedWithOrgIds: ['00000000-0000-4000-8000-0000000000c3'],
       isAnonymized: true,
       anonymizedEmployerName: 'Employer',
     }]);
@@ -269,7 +269,7 @@ describe('clause-library/[id]/share route', () => {
     const result = (await POST({
       request: req('clause-1', {
         sharingLevel: 'federation',
-        sharedWithOrgIds: ['org-c'],
+        sharedWithOrgIds: ['00000000-0000-4000-8000-0000000000c3'],
         sourceOrganizationId: 'attacker-controlled-org',
       }),
       organizationId: 'org-a',
@@ -279,7 +279,7 @@ describe('clause-library/[id]/share route', () => {
     expect(result.sharing.sharingLevel).toBe('federation');
     expect(h.applied.updates).toBe(1);
     expect(h.updatePayloads[0].sharingLevel).toBe('federation');
-    expect(h.updatePayloads[0].sharedWithOrgIds).toEqual(['org-c']);
+    expect(h.updatePayloads[0].sharedWithOrgIds).toEqual(['00000000-0000-4000-8000-0000000000c3']);
     expect(h.updatePayloads[0].sourceOrganizationId).toBeUndefined();
     expect(h.persistAtomicAudit).toHaveBeenCalledTimes(1);
     expect(h.persistAtomicAudit).toHaveBeenCalledWith(
@@ -296,7 +296,7 @@ describe('clause-library/[id]/share route', () => {
     const { POST } = await loadHandlers();
 
     await expect(
-      POST({ request: req('clause-1', { sharingLevel: 'public' }), organizationId: 'org-a', userId: 'user-1' }),
+      POST({ request: req('clause-1', { sharingLevel: 'public' }), organizationId: 'org-a', userId: 'user-1', user: { role: 'officer' } }),
     ).rejects.toMatchObject({ status: 403 });
     expect(h.withRLSContext).not.toHaveBeenCalled();
     expect(h.calls.update).toBe(0);
@@ -306,7 +306,7 @@ describe('clause-library/[id]/share route', () => {
   it('POST rejects an empty sharing update before opening a tenant transaction', async () => {
     const { POST } = await loadHandlers();
 
-    await expect(POST({ request: req('clause-1', {}), organizationId: 'org-a', userId: 'user-1' })).rejects.toMatchObject({ status: 400 });
+    await expect(POST({ request: req('clause-1', {}), organizationId: 'org-a', userId: 'user-1', user: { role: 'officer' } })).rejects.toMatchObject({ status: 400 });
     expect(h.calls.update).toBe(0);
     expect(h.withRLSContext).not.toHaveBeenCalled();
     expect(h.withSystemContext).not.toHaveBeenCalled();
@@ -320,7 +320,7 @@ describe('clause-library/[id]/share route', () => {
     const { POST } = await loadHandlers();
 
     await expect(
-      POST({ request: req('clause-1', { sharingLevel: 'public' }), organizationId: 'org-b', userId: 'user-1' }),
+      POST({ request: req('clause-1', { sharingLevel: 'public' }), organizationId: 'org-b', userId: 'user-1', user: { role: 'officer' } }),
     ).rejects.toMatchObject({ status: 404 });
     expect(h.isSharedClauseOwner).not.toHaveBeenCalled();
     expect(h.calls.update).toBe(0);
@@ -337,7 +337,7 @@ describe('clause-library/[id]/share route', () => {
     const { POST } = await loadHandlers();
 
     await expect(
-      POST({ request: req('clause-1', { sharingLevel: 'congress' }), organizationId: 'org-b', userId: 'user-1' }),
+      POST({ request: req('clause-1', { sharingLevel: 'congress' }), organizationId: 'org-b', userId: 'user-1', user: { role: 'officer' } }),
     ).rejects.toMatchObject({ status: 404 });
     expect(h.isSharedClauseOwner).toHaveBeenCalled();
     expect(h.calls.update).toBe(1);

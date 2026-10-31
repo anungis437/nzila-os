@@ -18,5 +18,11 @@ const { GET, POST } = crudRoutes({
   orgScoped: true,
   readRole: 'steward',
   writeRole: 'steward',
+  // The author is the session user (the factory stamps createdBy); the reporter columns are not the caller's to assert, and a
+  // resolution, a penalty or a tribunal filing is not stated at the time a violation is reported.
+  writableFields: [
+    'strikeOrLockoutStartDate', 'isStrike', 'bargainingUnitDescription', 'violationType', 'violationDate', 'description',
+    'descriptionFr', 'evidenceSummary', 'replacementWorkerCount',
+  ],
 });
 export { GET, POST };

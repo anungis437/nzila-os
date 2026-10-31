@@ -17,6 +17,7 @@ import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
 import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { enforceAISafety } from '@nzila/policies';
+import { assertFinanceViewMandate } from '@/lib/finance/finance-view-mandate';
 import {
   generateFinancialInsight,
   type FinancialAnalysisType,
@@ -42,6 +43,9 @@ export const GET = withApi(
   async ({ organizationId, userId, query }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
     if (!userId) throw ApiError.unauthorized('User context required');
+
+    // The report reads dues, arrears, remittances and the ledger: the role title alone is not authority over them.
+    await assertFinanceViewMandate(organizationId, userId);
 
     // Feature gate
     const blocked = await guardAiFeature(AI_FEATURES.FINANCIAL_ANALYSIS, {

@@ -11,12 +11,15 @@ import { encryptSecret } from '@/lib/encryption';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { AUTH_TENANT_ASSIGNABLE_ROLES } from '@nzila/db/auth-storage-authority';
+import { validateSsoProviderInput } from '@/lib/sso/provider-input';
+import { isUniqueViolation } from '@/lib/db/unique-violation';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: true, minRole: 'member' },
+    // The identity-provider configuration (issuer, endpoints, client id, attribute mapping) is an administrator's, not every member's.
+    auth: { required: true, minRole: 'admin' },
     openapi: {
       tags: ['Auth'],
       summary: 'List SSO providers',
@@ -67,6 +70,7 @@ export const POST = withApi(
       roleMapping,
       autoProvision,
       enabled,
+      requireGroups,
     } = body as {
       name: string;
       providerType: string;
@@ -80,11 +84,16 @@ export const POST = withApi(
       roleMapping?: Record<string, string>;
       autoProvision?: boolean;
       enabled?: boolean;
+      requireGroups?: string[];
     };
 
     if (!name || !providerType || !attributeMapping) {
       throw ApiError.badRequest('name, providerType, and attributeMapping are required');
     }
+
+    // A provider is created disabled and without auto-provisioning unless the administrator asks otherwise, and one that is enabled
+    // must be complete for its type.
+    const validated = validateSsoProviderInput(body as Record<string, unknown>, enabled === true);
 
     // An identity provider may only map its groups to roles a tenant administrator can already assign; a mapping to a
     // platform or federation role would otherwise let an external directory mint authority the tenant cannot grant.
@@ -106,9 +115,14 @@ export const POST = withApi(
     // this field). Reuses the existing Key-Vault-backed encryption
     // service (lib/encryption.ts, already used for SIN encryption) rather
     // than inventing new cryptography.
-    const encryptedOidcClientSecret = oidcClientSecret
-      ? await encryptSecret(oidcClientSecret)
-      : oidcClientSecret;
+    const encryptedOidcClientSecret = validated.oidcClientSecret
+      ? await encryptSecret(validated.oidcClientSecret)
+      : undefined;
+
+    // Groups the identity provider must assert before anyone signs in through it: a bounded list of short names.
+    if (requireGroups !== undefined && (!Array.isArray(requireGroups) || requireGroups.length > 50 || !requireGroups.every((group) => typeof group === 'string' && group.trim().length > 0 && group.length <= 255))) {
+      throw ApiError.badRequest('requireGroups must be a list of at most 50 group names');
+    }
 
     const created = await withRLSContext(async (tx) => {
     const [row] = await tx
@@ -116,18 +130,19 @@ export const POST = withApi(
       .values({
         organizationId: organizationId!,
         createdBy: userId!,
-        name,
-        providerType,
-        samlEntityId,
-        samlSsoUrl,
-        samlCertificate,
-        oidcIssuer,
-        oidcClientId,
+        name: validated.name,
+        providerType: validated.providerType,
+        samlEntityId: validated.samlEntityId,
+        samlSsoUrl: validated.samlSsoUrl,
+        samlCertificate: validated.samlCertificate,
+        oidcIssuer: validated.oidcIssuer,
+        oidcClientId: validated.oidcClientId,
         oidcClientSecret: encryptedOidcClientSecret,
         attributeMapping,
         roleMapping,
-        autoProvision: autoProvision ?? true,
-        enabled: enabled ?? true,
+        autoProvision: autoProvision ?? false,
+        requireGroups: requireGroups ? requireGroups.map((group) => group.trim()) : undefined,
+        enabled: enabled ?? false,
       })
       .returning();
     await persistAtomicAudit(tx, {
@@ -136,9 +151,13 @@ export const POST = withApi(
       action: 'sso.provider.create',
       resourceType: 'sso_providers',
       resourceId: row.id,
-      details: { providerType, autoProvision: autoProvision ?? true, enabled: enabled ?? true, roleMapping: roleMapping ?? null },
+      details: { providerType, autoProvision: autoProvision ?? false, enabled: enabled ?? false, roleMapping: roleMapping ?? null },
     });
     return row;
+    }).catch((error) => {
+      // The unique indexes admit one provider per organization and entity id, and per organization, issuer and client.
+      if (isUniqueViolation(error)) throw ApiError.conflict('This identity provider is already configured for the organization');
+      throw error;
     });
 
     // Never echo raw credential material back to the client (same

@@ -1,6 +1,8 @@
+import { requireSystemAdmin } from "@/lib/api-auth-guard";
 import { withApi, ApiError, z } from "@/lib/api/framework";
 import { withRLSContext } from "@/lib/db/with-rls-context";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
+import { assertPublicHttpUrl } from "@/lib/security/outbound-url";
 import {
   getSourceById,
   updateSource,
@@ -31,6 +33,16 @@ export const GET = withApi(
 // PATCH /api/cba-intelligence/sources/[id] — Update source
 // ---------------------------------------------------------------------------
 
+// A source address is fetched by the server, so a changed address must be a public http(s) address as it is at registration.
+const publicUrl = z.string().url().max(2000).refine((value) => {
+  try {
+    assertPublicHttpUrl(value);
+    return true;
+  } catch {
+    return false;
+  }
+}, 'Must be a public http(s) address');
+
 const updateSourceSchema = z.object({
   nameEn: z.string().min(1).max(255).optional(),
   nameFr: z.string().max(255).optional(),
@@ -41,9 +53,9 @@ const updateSourceSchema = z.object({
   trustTier: z.string().optional(),
   jurisdictions: z.array(z.string()).optional(),
   sectors: z.array(z.string()).optional(),
-  baseUrl: z.string().url().optional(),
-  apiEndpoint: z.string().url().nullable().optional(),
-  feedUrl: z.string().url().nullable().optional(),
+  baseUrl: publicUrl.optional(),
+  apiEndpoint: publicUrl.nullable().optional(),
+  feedUrl: publicUrl.nullable().optional(),
   updateCadence: z.string().max(100).optional(),
   expectedUpdateDays: z.number().int().positive().optional(),
   robotsNotes: z.string().max(2000).optional(),
@@ -66,6 +78,8 @@ export const PATCH = withApi(
     },
   },
   async ({ params, body, userId, organizationId }) => {
+    // The dataset is platform-wide (no organization column): changing it is platform authority, not an organization administrator's.
+    await requireSystemAdmin();
     if (!userId || !organizationId) throw ApiError.badRequest("Organization context required");
     const { isActive, ...updateData } = body;
     const fields = Object.keys(updateData);

@@ -6,6 +6,10 @@ import { eq, sql } from 'drizzle-orm'
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context'
 import { requireUserForOrganization, requireSystemAdmin, ROLE_HIERARCHY } from '@/lib/api-auth-guard'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
+import { canAdministerOrganization, canReadOrganization, resolveOrganizationAccess } from '@/lib/organizations/read-authority'
+import { mergeSettings, organizationPatchSchema } from '@/lib/organizations/profile-input'
+import { repointHierarchy, ReparentRefusal, type ReparentPlan } from '@/lib/organizations/reparent'
+import { isUniqueViolation } from '@/lib/db/unique-violation'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,6 +50,10 @@ function mapOrg(row: typeof organizations.$inferSelect) {
 
 type Params = { params: Promise<{ id: string }> }
 
+/** A raw query answers an array on the production driver and { rows } on others; both are rows. */
+const rowsOf = <T,>(result: unknown): T[] =>
+  Array.isArray(result) ? (result as T[]) : ((result as { rows?: T[] } | null)?.rows ?? Array.from((result ?? []) as Iterable<T>))
+
 function assertOrgIdParam(id: string): NextResponse | null {
   if (id === 'current' || !/^[0-9a-fA-F-]{36}$/.test(id)) {
     return NextResponse.json({ error: 'Invalid organization id' }, { status: 400 })
@@ -60,27 +68,40 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const { id } = await params
   const invalid = assertOrgIdParam(id)
   if (invalid) return invalid
+  // The organizations table is read as the system role, which is not tenant-scoped: the caller must hold an active
+  // membership here, administer an organization above it, or be a platform administrator. Otherwise it does not exist.
+  const access = await resolveOrganizationAccess(userId)
+  if (!canReadOrganization(access, id)) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   const [row] = await withSystemContext(() =>
     db.select().from(organizations).where(eq(organizations.id, id)),
   )
   if (!row) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  // Compute stats
-  const claimRows = Array.from(
-    await db.execute(
-      sql`SELECT
-            count(*)::int AS total,
-            count(*) FILTER (WHERE status::text IN ('draft','filed','acknowledged','investigating','response_due','response_received','escalated','mediation','arbitration'))::int AS active
-          FROM grievances WHERE organization_id = ${id}`,
-    ),
-  ) as Array<{ total: number; active: number }>
+  // Counts are computed under explicit authority. A bare pooled connection has no
+  // tenant identity and can silently return zero or leak cross-tenant aggregates.
+  const claimCounts = (tx: typeof db) => tx.execute(sql`SELECT
+        count(*)::int AS total,
+        count(*) FILTER (WHERE status::text IN ('draft','filed','acknowledged','investigating','response_due','response_received','escalated','mediation','arbitration'))::int AS active
+        FROM grievances WHERE organization_id = ${id}`)
+  // Direct members are bound through tenant RLS. A platform or parent administrator
+  // may be authorized for a descendant without direct membership; canonical binding
+  // correctly rejects impersonating that descendant, so use the system role only
+  // after the explicit canReadOrganization check and the exact organization predicate.
+  const readClaims = access.platform || !access.direct.has(id)
+    ? withSystemContext(async () => rowsOf<{ total: number; active: number }>(await claimCounts(db)))
+    : withRLSContext({ organizationId: id }, async (tx) => rowsOf<{ total: number; active: number }>(await claimCounts(tx)))
+  const [claimRows, childRows] = await Promise.all([
+    readClaims,
+    withSystemContext(async () => rowsOf<{ cnt: number }>(
+      await db.execute(sql`SELECT count(*)::int AS cnt FROM organizations WHERE parent_id = ${id}`),
+    )),
+  ])
   const claims = claimRows[0] ?? { total: 0, active: 0 }
 
-  const childRows = Array.from(
-    await db.execute(sql`SELECT count(*)::int AS cnt FROM organizations WHERE parent_id = ${id}`),
-  ) as Array<{ cnt: number }>
-
-  const mapped = mapOrg(row)
+  // Settings, the billing contact and provenance belong to the organization's administrators.
+  const { settings: _settings, billing_contact_id: _billing, created_by: _createdBy, legacy_org_id: _legacy, subscription_tier: _tier, ...profile } = mapOrg(row)
+  const administrative = canAdministerOrganization(access, id)
+  const mapped = administrative ? mapOrg(row) : profile
   return NextResponse.json({
     data: {
       ...mapped,
@@ -111,7 +132,17 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Forbidden: requires admin role' }, { status: 403 })
   }
 
-  const body = await req.json()
+  let raw: unknown
+  try {
+    raw = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Request body must be valid JSON' }, { status: 400 })
+  }
+  const parsedBody = organizationPatchSchema.safeParse(raw)
+  if (!parsedBody.success) {
+    return NextResponse.json({ error: 'Invalid organization update', details: parsedBody.error.issues.slice(0, 5).map((issue) => `${issue.path.join('.') || 'body'}: ${issue.message}`) }, { status: 400 })
+  }
+  const body = parsedBody.data
 
   const updates: Record<string, unknown> = {}
   if (body.name !== undefined) updates.name = body.name
@@ -123,10 +154,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (body.website !== undefined) updates.website = body.website
   if (body.sectors !== undefined) updates.sectors = body.sectors
   if (body.parent_id !== undefined) updates.parentId = body.parent_id
-  if (body.settings !== undefined) updates.settings = body.settings
+  const settingsPatch = body.settings
   updates.updatedAt = new Date()
 
-  const updated = await withRLSContext(async (tx) => {
+  const apply = () => withRLSContext(async (tx) => {
     const [current] = await tx.select().from(organizations).where(eq(organizations.id, id))
     if (!current) return null
 
@@ -145,6 +176,26 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       delete updates.status
     }
 
+    // A parent change recomputes this organization's path and level and every descendant's, or is refused (unknown parent, a cycle, too deep).
+    let reparent: ReparentPlan | null = null
+    if (parentChanged) {
+      try {
+        reparent = await repointHierarchy(tx, id, body.parent_id ?? null)
+      } catch (error) {
+        if (error instanceof ReparentRefusal) return { refused: error.message } as const
+        throw error
+      }
+      updates.hierarchyPath = reparent.hierarchyPath
+      updates.hierarchyLevel = reparent.hierarchyLevel
+    }
+
+    // A new slug must be free: paths resolve organizations by slug. Settings are merged into the stored ones, not substituted.
+    if (typeof updates.slug === 'string' && updates.slug !== current.slug) {
+      const [taken] = await tx.select({ id: organizations.id }).from(organizations).where(eq(organizations.slug, updates.slug)).limit(1)
+      if (taken) return 'slug-taken' as const
+    }
+    if (settingsPatch !== undefined) updates.settings = mergeSettings(current.settings, settingsPatch)
+
     const [row] = await tx.update(organizations).set(updates).where(eq(organizations.id, id)).returning()
     if (!row) return null
     await persistAtomicAudit(tx, {
@@ -153,10 +204,23 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       action: 'organization.update',
       resourceType: 'organizations',
       resourceId: id,
-      details: { fields: Object.keys(updates).filter((k) => k !== 'updatedAt') },
+      details: {
+        fields: Object.keys(updates).filter((k) => k !== 'updatedAt'),
+        ...(reparent ? { previousParentId: reparent.previousParentId, newParentId: body.parent_id ?? null, descendantsRepointed: reparent.descendantsRepointed } : {}),
+      },
     })
     return row
   })
+  let updated: Awaited<ReturnType<typeof apply>>
+  try {
+    updated = await apply()
+  } catch (error) {
+    // Two requests for the same new slug: the unique index settles it.
+    if (isUniqueViolation(error)) return NextResponse.json({ error: 'That slug is already in use' }, { status: 409 })
+    throw error
+  }
+  if (updated && typeof updated === 'object' && 'refused' in updated) return NextResponse.json({ error: updated.refused }, { status: 400 })
+  if (updated === 'slug-taken') return NextResponse.json({ error: 'That slug is already in use' }, { status: 409 })
   if (updated === 'forbidden') {
     return NextResponse.json(
       { error: 'Forbidden: changing parent affiliation or status requires platform governance' },
@@ -186,23 +250,19 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Forbidden: requires admin role' }, { status: 403 })
   }
 
-  const archived = await withRLSContext(async (tx) => {
-    const [row] = await tx
-      .update(organizations)
-      .set({ status: 'archived', updatedAt: new Date() })
-      .where(eq(organizations.id, id))
-      .returning()
-    if (!row) return null
-    await persistAtomicAudit(tx, {
-      organizationId: id,
-      userId: userCtx.userId,
-      action: 'organization.archive',
-      resourceType: 'organizations',
-      resourceId: id,
-      details: { status: 'archived' },
-    })
-    return row
-  })
-  if (!archived) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  return NextResponse.json({ data: mapOrg(archived) })
+  // Archiving changes institutional standing. Local administrators cannot retire their own organization.
+  // The same platform-governance authority required for PATCH status transitions is mandatory here.
+  try {
+    await requireSystemAdmin()
+  } catch {
+    return NextResponse.json({ error: 'Forbidden: organization archival requires platform governance' }, { status: 403 })
+  }
+
+  // An archive request changes membership eligibility, descendant availability and billing.
+  // No durable independent-approval workflow or second-approver evidence is available here.
+  // Even a platform administrator must not bypass that institutional decision by direct UPDATE.
+  return NextResponse.json(
+    { error: 'Organization archival requires an approved institutional lifecycle workflow; this endpoint cannot archive directly' },
+    { status: 501 },
+  )
 }

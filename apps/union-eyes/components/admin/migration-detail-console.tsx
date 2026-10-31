@@ -134,8 +134,15 @@ export default function MigrationDetailConsole({ batchId }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ batch_id: batchId }),
       });
-      const data = await res.json();
-      setRetryResult(data.message ?? "Retry completed");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setRetryResult("Retry request failed; no completed replay is confirmed.");
+        return;
+      }
+      // withApi wraps successful responses under "data". The server only moves
+      // failed records back to pending; never report an import as completed.
+      const result = data?.success === true && data?.data ? data.data : data;
+      setRetryResult(result?.message ?? "Retry request accepted; records queued for processing.");
       await fetchDetail();
     } catch {
       setRetryResult("Retry failed");

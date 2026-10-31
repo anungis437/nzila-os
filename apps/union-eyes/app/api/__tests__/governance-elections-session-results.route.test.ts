@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   db: { select: vi.fn() },
+  recordRecount: vi.fn(),
 }));
 
 vi.mock('@/lib/api/framework', () => ({
@@ -13,6 +14,10 @@ vi.mock('@/lib/api/framework', () => ({
   },
 }));
 vi.mock('@/db/db', () => ({ db: m.db }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (...args: unknown[]) => (args[args.length - 1] as (tx: unknown) => Promise<unknown>)({}),
+}));
+vi.mock('@/lib/voting/ballot-process-audit', () => ({ recordRecount: m.recordRecount }));
 vi.mock('@/db/schema', () => ({ votingSessions: { id: 'id' }, votingOptions: { sessionId: 'sessionId', id: 'id', text: 'text' }, votes: { sessionId: 'sessionId', optionId: 'optionId' } }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
@@ -37,6 +42,7 @@ describe('governance/elections/sessions/[id]/results route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
+    m.recordRecount.mockResolvedValue(undefined);
   });
 
   it('returns aggregated, uncertified results once the session is closed', async () => {
@@ -50,6 +56,7 @@ describe('governance/elections/sessions/[id]/results route', () => {
       { optionId: 'o2', label: 'Option 2', votes: 1, percentage: 25 },
     ]);
     expect(result.certification).toBe('NOT_CERTIFIED');
+    expect(m.recordRecount).toHaveBeenCalledWith(expect.anything(), { organizationId: 'org-1', sessionId: 's1', totalBallots: 4 });
   });
 
   it('withholds tallies while the session is still active', async () => {
@@ -61,6 +68,7 @@ describe('governance/elections/sessions/[id]/results route', () => {
     expect(result.results).toEqual([]);
     expect(result.totalVotes).toBeNull();
     expect(m.db.select).toHaveBeenCalledTimes(2);
+    expect(m.recordRecount).not.toHaveBeenCalled();
   });
 
   it('requires an organization context', async () => {

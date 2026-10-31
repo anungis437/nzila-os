@@ -27,6 +27,7 @@ import { logger } from '@/lib/logger';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { putBlob, deleteBlob } from '@/lib/blob-client';
 import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
 
 export const dynamic = 'force-dynamic';
 
@@ -84,6 +85,10 @@ export const POST = withApi(
     if (file.size === 0) throw ApiError.badRequest('Remittance file is empty');
     if (file.size > MAX_REMITTANCE_FILE_BYTES) throw ApiError.badRequest('Remittance file exceeds the 10 MB limit');
 
+    await withRLSContext({ organizationId, userId }, (tx) =>
+      requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:prepare', employerId: meta.employerId }),
+    );
+
     const bytes = Buffer.from(await file.arrayBuffer());
     const fileHash = createHash('sha256').update(bytes).digest('hex');
 
@@ -114,7 +119,8 @@ export const POST = withApi(
     let remittance;
     try {
       // The record and its audit commit together; if either fails the preserved blob is removed again.
-      remittance = await withRLSContext({ organizationId }, async (tx) => {
+      remittance = await withRLSContext({ organizationId, userId }, async (tx) => {
+        await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:prepare', employerId: meta.employerId });
         const [row] = await tx
           .insert(employerRemittances)
           .values({

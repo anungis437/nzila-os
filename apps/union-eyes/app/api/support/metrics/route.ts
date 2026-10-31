@@ -1,17 +1,26 @@
 /**
- * CRUD collection route for inAppNotifications
+ * GET POST /api/support/metrics
+ *
+ * Not implemented. This path advertises an operation of its own but was the generic CRUD factory over in_app_notifications (notification rows, not support figures). It answered with that other behaviour as though
+ * it were the operation, so it now answers HTTP 501 and changes and returns nothing.
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { inAppNotifications } from '@/db/schema';
+import { withApi, ApiError } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
-  table: inAppNotifications,
-  pk: 'id',
-  tags: ["Notifications"],
-  orgScoped: true,
-  readRole: 'member',
-  writeRole: 'steward',
-});
-export { GET, POST };
+const handler = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ['Notifications'],
+      summary: '/api/support/metrics (not implemented)',
+      description: 'Not implemented: answers 501.',
+    },
+  },
+  async () => {
+    throw ApiError.notImplemented('/api/support/metrics is not implemented: it performed no operation of its own.');
+  },
+);
+
+export const GET = handler;
+export const POST = handler;

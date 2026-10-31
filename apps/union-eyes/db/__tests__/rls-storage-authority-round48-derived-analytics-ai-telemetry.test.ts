@@ -223,17 +223,19 @@ describe('round 48 cross-tenant IDOR ratchet: ml_predictions churn-risk route', 
     expect(src).not.toMatch(/searchParams\.get\('organizationId'\)\s*\?\?\s*searchParams\.get\('orgId'\)/);
   });
 
+  // The route answers 501 and reads neither the request nor the database, so it accepts no organization input at all.
   it('POST no longer accepts organizationId in its request-body schema', () => {
     const src = source('app/api/ml/predictions/churn-risk/route.ts');
-    const schemaMatch = src.match(/const mlPredictionsChurnRiskSchema = z\.object\(\{[\s\S]*?\}\);/);
-    expect(schemaMatch, 'mlPredictionsChurnRiskSchema not found').toBeTruthy();
-    expect(schemaMatch![0]).not.toContain('organizationId');
+    expect(src).not.toContain('organizationId');
+    expect(src).not.toContain('request.json');
   });
 
-  it('both handlers reject requests with no organization context', () => {
+  it('both handlers reject every request: they answer 501 and touch no stored prediction', () => {
     const src = source('app/api/ml/predictions/churn-risk/route.ts');
-    const requireOrgCount = (src.match(/Organization context required/g) ?? []).length;
-    expect(requireOrgCount).toBeGreaterThanOrEqual(2);
+    expect(src).toContain('ApiError.notImplemented');
+    expect(src).toContain('export const GET = handler');
+    expect(src).toContain('export const POST = handler');
+    expect(src).not.toContain('mlPredictions');
   });
 });
 

@@ -4,6 +4,7 @@
  * Replaces the old Django proxy to /api/content/cms-pages/.
  */
 import { withApi } from '@/lib/api/framework';
+import { listPage } from '@/lib/api/list-page';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -15,7 +16,8 @@ export const GET = withApi(
   async (ctx) => {
     const orgId = ctx.organizationId;
     const url = new URL(ctx.request.url);
-    const limit = Number(url.searchParams.get('limit')) || 50;
+    // A page is bounded: a non-numeric or negative limit is the default, and no page exceeds 200 rows.
+    const page = listPage(ctx.request, 200, 50);
     const contentType = url.searchParams.get('type') || null; // 'template', 'resource', or null for all
 
     let query = sql`
@@ -30,7 +32,7 @@ export const GET = withApi(
       query = sql`${query} AND content_type = ${contentType}`;
     }
 
-    query = sql`${query} ORDER BY updated_at DESC LIMIT ${limit}`;
+    query = sql`${query} ORDER BY updated_at DESC, id LIMIT ${page.limit} OFFSET ${page.offset}`;
 
     const result = await withRLSContext(async () => db.execute(query));
     const rows = Array.from(result);

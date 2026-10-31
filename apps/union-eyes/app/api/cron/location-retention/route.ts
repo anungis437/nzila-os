@@ -16,10 +16,11 @@ const handler = withApi(
     auth: { cron: true },
     openapi: { tags: ['Cron'], summary: 'Delete expired member location data (24-hour retention)' },
   },
-  async () => ({
-    ...(await withSystemContext((tx) => GeofencePrivacyService.deleteExpiredLocationData(tx))),
-  }),
+  // The deletion, its evidence and the record of lapsed consents commit together.
+  async () => withSystemContext(async (tx) => ({
+    ...(await GeofencePrivacyService.deleteExpiredLocationData(tx)),
+    ...(await GeofencePrivacyService.expireLapsedConsents(tx)),
+  })),
 );
 
-export const GET = handler;
 export const POST = handler;

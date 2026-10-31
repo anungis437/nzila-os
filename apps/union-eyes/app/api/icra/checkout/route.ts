@@ -86,7 +86,7 @@ function buildLineItems(
 // ── Handler ─────────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  const intake = await guardPublicIntake(request, { bucket: 'checkout' });
+  const intake = await guardPublicIntake(request, { bucket: 'checkout', challenge: true });
   if (!intake.ok) return intake.response;
 
   const parse = bodySchema.safeParse(intake.json);
@@ -102,13 +102,15 @@ export async function POST(request: NextRequest) {
   // Verify the assessment exists AND the caller holds its capability
   // (prevent arbitrary UUID injection / unlocking someone else's report).
   let existingTierId: string | null = null;
+  let assessmentStatus: string | null = null;
   try {
     const capResult = await withSystemContext(async (tx): Promise<
-      { denied: CapabilityDenialReason; tierId: null } | { denied: null; tierId: string }
+      { denied: CapabilityDenialReason; tierId: null; status: null } | { denied: null; tierId: string; status: string }
     > => {
       const [row] = await tx
         .select({
           reportTierId: icraAssessments.reportTierId,
+          status: icraAssessments.status,
           capabilityTokenHash: icraAssessments.capabilityTokenHash,
           capabilityTokenExpiresAt: icraAssessments.capabilityTokenExpiresAt,
         })
@@ -119,9 +121,9 @@ export async function POST(request: NextRequest) {
       const presented = extractCapabilityToken(request, assessmentId);
       const capCheck = checkCapability(presented, row);
       if (!capCheck.ok) {
-        return { denied: capCheck.reason, tierId: null };
+        return { denied: capCheck.reason, tierId: null, status: null };
       }
-      return { denied: null, tierId: row!.reportTierId ?? 'continuity_reflection' };
+      return { denied: null, tierId: row!.reportTierId ?? 'continuity_reflection', status: String(row!.status) };
     });
 
     if (capResult.denied) {
@@ -131,9 +133,16 @@ export async function POST(request: NextRequest) {
       );
     }
     existingTierId = capResult.tierId;
+    assessmentStatus = capResult.status;
   } catch (err) {
     logger.error('[icra-checkout] DB lookup failed', { assessmentId, err });
     return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
+  }
+
+  // A report is bought for an assessment that has been submitted: a draft has no results to unlock, and a purchase made against it
+  // would be paid for and then refused by the report route.
+  if (assessmentStatus !== 'submitted' && assessmentStatus !== 'completed') {
+    return NextResponse.json({ error: 'The assessment must be submitted before a report can be purchased' }, { status: 409 });
   }
 
   // Idempotency: already at or above this tier
@@ -152,8 +161,14 @@ export async function POST(request: NextRequest) {
   }
 
   // Build the checkout session
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? 'http://localhost:3000';
+  // The buyer is sent back to this origin after paying. Outside development a missing configuration is a refusal, not a redirect to a
+  // host that is not the application: a customer would pay and land on localhost.
+  const configuredBase = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '');
+  if (!configuredBase && process.env.NODE_ENV === 'production') {
+    logger.error('[icra-checkout] NEXT_PUBLIC_APP_URL is not configured');
+    return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
+  }
+  const baseUrl = configuredBase ?? 'http://localhost:3000';
   const successUrl = `${baseUrl}/${locale}/continuity-assessment/results/${assessmentId}?tier_unlocked=${tierId}`;
   const cancelUrl = `${baseUrl}/${locale}/continuity-assessment/results/${assessmentId}`;
 

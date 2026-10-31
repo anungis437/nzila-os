@@ -5,12 +5,18 @@ const m = vi.hoisted(() => ({
   withRoleAuth: vi.fn(),
   getAuthorizationUrl: vi.fn(),
   standardErrorResponse: vi.fn(),
+  issueCalendarOAuthState: vi.fn(),
+  setCalendarOAuthStateCookie: vi.fn(),
 }));
 
+vi.mock('@/lib/external-calendar-sync/oauth-state', () => ({
+  issueCalendarOAuthState: m.issueCalendarOAuthState,
+  setCalendarOAuthStateCookie: m.setCalendarOAuthStateCookie,
+}));
 vi.mock('@/lib/api-auth-guard', () => ({ withRoleAuth: m.withRoleAuth, BaseAuthContext: {} }));
 vi.mock('@/lib/external-calendar-sync/google-calendar-service', () => ({ getAuthorizationUrl: m.getAuthorizationUrl }));
 vi.mock('@/lib/api/standardized-responses', () => ({
-  ErrorCode: { AUTH_REQUIRED: 'AUTH_REQUIRED', INTERNAL_ERROR: 'INTERNAL_ERROR' },
+  ErrorCode: { AUTH_REQUIRED: 'AUTH_REQUIRED', FORBIDDEN: 'FORBIDDEN', INTERNAL_ERROR: 'INTERNAL_ERROR' },
   standardErrorResponse: m.standardErrorResponse,
 }));
 
@@ -21,10 +27,11 @@ async function loadRoute() {
 describe('calendar-sync/google/auth route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.issueCalendarOAuthState.mockReturnValue('signed-state');
     m.withRoleAuth.mockImplementation((_role: string, handler: any) => (request: NextRequest, context: any = { userId: 'u1' }) => handler(request, context));
     m.getAuthorizationUrl.mockReturnValue('https://accounts.google.com/o/oauth2/v2/auth');
     m.standardErrorResponse.mockImplementation((code: string, message: string) =>
-      new Response(JSON.stringify({ code, message }), { status: code === 'AUTH_REQUIRED' ? 401 : 500 }));
+      new Response(JSON.stringify({ code, message }), { status: code === 'AUTH_REQUIRED' ? 401 : code === 'FORBIDDEN' ? 403 : 500 }));
   });
 
   it('returns auth required when user context is missing', async () => {
@@ -35,14 +42,22 @@ describe('calendar-sync/google/auth route', () => {
     expect(response.status).toBe(401);
   });
 
+  it('rejects missing organization context without starting OAuth', async () => {
+    const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/google/auth'), { userId: 'u1' });
+    expect(response.status).toBe(403);
+    expect(m.getAuthorizationUrl).not.toHaveBeenCalled();
+  });
+
   it('redirects to Google authorization URL for authenticated users', async () => {
     const { GET } = await loadRoute();
 
-    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/google/auth'), { userId: 'u1' });
+    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/google/auth'), { userId: 'u1', organizationId: 'org-1' });
 
     expect(response.status).toBe(307);
     expect(response.headers.get('location')).toContain('accounts.google.com');
-    expect(m.getAuthorizationUrl).toHaveBeenCalledWith('u1');
+    expect(m.getAuthorizationUrl).toHaveBeenCalledWith('signed-state');
+    expect(m.setCalendarOAuthStateCookie).toHaveBeenCalledWith(response, 'google', 'signed-state');
   });
 
   it('returns internal error when URL generation fails', async () => {
@@ -51,7 +66,7 @@ describe('calendar-sync/google/auth route', () => {
       throw new Error('oauth unavailable');
     });
 
-    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/google/auth'), { userId: 'u1' });
+    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/google/auth'), { userId: 'u1', organizationId: 'org-1' });
 
     expect(response.status).toBe(500);
   });

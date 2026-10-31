@@ -20,7 +20,7 @@
  * @module health-safety-schema
  */
 
-import {
+import { uniqueIndex,
   pgTable,
   uuid,
   varchar,
@@ -355,7 +355,7 @@ export const workplaceIncidents = pgTable("workplace_incidents", {
   
   // Organization & References
   organizationId: uuid("organization_id").notNull(),
-  incidentNumber: varchar("incident_number", { length: 50 }).unique().notNull(),
+  incidentNumber: varchar("incident_number", { length: 50 }).notNull(),
   claimId: uuid("claim_id"), // Link to claims system
   
   // Incident Classification
@@ -463,6 +463,8 @@ export const workplaceIncidents = pgTable("workplace_incidents", {
   createdBy: text("created_by"),
   updatedBy: text("updated_by"),
 }, (table) => ({
+  // One number per organization, not one across all organizations (platform migration 0042).
+  uqOrgIncidentNumber: uniqueIndex("uq_workplace_incidents_org_incident_number").on(table.organizationId, table.incidentNumber),
   // Indexes for performance
   idxIncidentsOrg: index("idx_incidents_org").on(table.organizationId),
   idxIncidentsDate: index("idx_incidents_date").on(table.incidentDate),
@@ -489,7 +491,7 @@ export const safetyInspections = pgTable("safety_inspections", {
   
   // Organization & References
   organizationId: uuid("organization_id").notNull(),
-  inspectionNumber: varchar("inspection_number", { length: 50 }).unique().notNull(),
+  inspectionNumber: varchar("inspection_number", { length: 50 }).notNull(),
   
   // Classification
   inspectionType: inspectionTypeEnum("inspection_type").notNull(),
@@ -570,6 +572,8 @@ export const safetyInspections = pgTable("safety_inspections", {
   createdBy: text("created_by"),
   updatedBy: text("updated_by"),
 }, (table) => ({
+  // One number per organization, not one across all organizations (platform migration 0042).
+  uqOrgInspectionNumber: uniqueIndex("uq_safety_inspections_org_inspection_number").on(table.organizationId, table.inspectionNumber),
   idxInspectionsOrg: index("idx_inspections_org").on(table.organizationId),
   idxInspectionsStatus: index("idx_inspections_status").on(table.status),
   idxInspectionsDate: index("idx_inspections_date").on(table.scheduledDate),
@@ -591,7 +595,7 @@ export const hazardReports = pgTable("hazard_reports", {
   
   // Organization & References
   organizationId: uuid("organization_id").notNull(),
-  reportNumber: varchar("report_number", { length: 50 }).unique().notNull(),
+  reportNumber: varchar("report_number", { length: 50 }).notNull(),
   
   // Classification
   hazardCategory: hazardCategoryEnum("hazard_category").notNull(),
@@ -667,6 +671,8 @@ export const hazardReports = pgTable("hazard_reports", {
   createdBy: text("created_by"),
   updatedBy: text("updated_by"),
 }, (table) => ({
+  // One number per organization, not one across all organizations (platform migration 0042).
+  uqOrgReportNumber: uniqueIndex("uq_hazard_reports_org_report_number").on(table.organizationId, table.reportNumber),
   idxHazardsOrg: index("idx_hazards_org").on(table.organizationId),
   idxHazardsStatus: index("idx_hazards_status").on(table.status),
   idxHazardsLevel: index("idx_hazards_level").on(table.hazardLevel),
@@ -783,7 +789,7 @@ export const ppeEquipment = pgTable("ppe_equipment", {
   
   // Organization & References
   organizationId: uuid("organization_id").notNull(),
-  itemNumber: varchar("item_number", { length: 50 }).unique().notNull(),
+  itemNumber: varchar("item_number", { length: 50 }).notNull(),
   serialNumber: varchar("serial_number", { length: 100 }),
   
   // Equipment Details
@@ -856,6 +862,8 @@ export const ppeEquipment = pgTable("ppe_equipment", {
   createdBy: text("created_by"),
   updatedBy: text("updated_by"),
 }, (table) => ({
+  // One number per organization, not one across all organizations (platform migration 0042).
+  uqOrgItemNumber: uniqueIndex("uq_ppe_equipment_org_item_number").on(table.organizationId, table.itemNumber),
   idxPpeOrg: index("idx_ppe_org").on(table.organizationId),
   idxPpeStatus: index("idx_ppe_status").on(table.status),
   idxPpeType: index("idx_ppe_type").on(table.ppeType),

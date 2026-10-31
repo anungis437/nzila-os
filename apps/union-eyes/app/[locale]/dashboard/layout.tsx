@@ -1,4 +1,5 @@
 import { OperationalShell } from '@/components/dashboard/operational-shell';
+import { RetiredCapabilityNotice } from '@/components/system/retired-capability-notice';
 /**
  * Dashboard layout for Template App
  * This layout removes the global header from all dashboard pages
@@ -47,7 +48,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       },
     );
     return <OperationalShell profile={null} userEmail={context.email}
-      userRole={context.role} organizationProvince={organizationProvince}>{children}</OperationalShell>;
+      userRole={context.role} organizationProvince={organizationProvince}>{children}<RetiredCapabilityNotice /></OperationalShell>;
   }
 
   let profile: (typeof profiles.$inferSelect) | null = null;
@@ -267,5 +268,5 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   });
 
   return <OperationalShell profile={profile} userEmail={userEmail}
-    userRole={userRole} organizationProvince={organizationProvince}>{children}</OperationalShell>;
+    userRole={userRole} organizationProvince={organizationProvince}>{children}<RetiredCapabilityNotice /></OperationalShell>;
 }

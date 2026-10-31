@@ -161,13 +161,13 @@ describe('clause-service', () => {
   describe('getClausesByCBAId', () => {
     it('returns clauses ordered by index and number', async () => {
       mocks.mockSelect.mockReturnValue(chain([CLAUSE]));
-      const result = await getClausesByCBAId('cba1');
+      const result = await getClausesByCBAId('cba1', 'org1');
       expect(result).toEqual([CLAUSE]);
     });
 
     it('throws on error', async () => {
       mocks.mockSelect.mockImplementation(() => { throw new Error('fail'); });
-      await expect(getClausesByCBAId('cba1')).rejects.toThrow('Failed to fetch clauses');
+      await expect(getClausesByCBAId('cba1', 'org1')).rejects.toThrow('Failed to fetch clauses');
     });
   });
 
@@ -328,7 +328,8 @@ describe('clause-service', () => {
       const result = await compareClauses({ clauseIds: ['cl1', 'cl2'], analysisType: 'all' });
       expect(result.clauses).toHaveLength(2);
       expect(result.similarities.length).toBeGreaterThan(0);
-      expect(result.recommendations.length).toBeGreaterThan(0);
+      // No fixed recommendation is attached to a comparison (B80): the service reports what it found and nothing it cannot support.
+      expect(result.recommendations).toHaveLength(0);
     });
 
     it('throws when no clauses found', async () => {

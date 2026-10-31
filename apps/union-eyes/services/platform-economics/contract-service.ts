@@ -19,7 +19,8 @@ import {
   type OrgEntitlement,
 } from '@/db/schema';
 import { eq, and, lte, gte, isNull, or, sql, desc, inArray } from 'drizzle-orm';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { v4 as uuidv4 } from 'uuid';
 
 // ============================================================================
@@ -132,15 +133,14 @@ export async function createContract(
       }
     }
 
-    await auditLog({
-      eventType: AuditEventType.DATA_CREATE,
-      severity: AuditSeverity.HIGH,
+    // The record commits with the contract, or neither does.
+    await persistAtomicAudit(tx as unknown as RLSTx, {
       organizationId: input.organizationId,
-      resource: 'commercial_contract',
-      resourceId: contractId,
-      action: 'contract_created',
       userId: input.createdBy,
-      metadata: { contractNumber, lineCount: lines.length },
+      action: 'contract_created',
+      resourceType: 'commercial_contract',
+      resourceId: contractId,
+      details: { contractNumber, lineCount: lines.length },
     });
 
     return { contract, lineItems: lines };
@@ -220,15 +220,13 @@ export async function activateContract(
       entitlements.push(ent);
     }
 
-    await auditLog({
-      eventType: AuditEventType.DATA_UPDATE,
-      severity: AuditSeverity.HIGH,
+    await persistAtomicAudit(tx as unknown as RLSTx, {
       organizationId: contract.organizationId,
-      resource: 'commercial_contract',
-      resourceId: contractId,
-      action: 'contract_activated',
       userId: approvedBy,
-      metadata: { entitlementCount: entitlements.length },
+      action: 'contract_activated',
+      resourceType: 'commercial_contract',
+      resourceId: contractId,
+      details: { entitlementCount: entitlements.length },
     });
 
     return { contract, entitlements };
@@ -291,15 +289,13 @@ export async function terminateContract(
         );
     }
 
-    await auditLog({
-      eventType: AuditEventType.DATA_UPDATE,
-      severity: AuditSeverity.CRITICAL,
+    await persistAtomicAudit(tx as unknown as RLSTx, {
       organizationId: contract.organizationId,
-      resource: 'commercial_contract',
-      resourceId: contractId,
-      action: 'contract_terminated',
       userId: terminatedBy,
-      metadata: { reason },
+      action: 'contract_terminated',
+      resourceType: 'commercial_contract',
+      resourceId: contractId,
+      details: { reason },
     });
 
     return contract;

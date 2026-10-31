@@ -18,7 +18,8 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: true, minRole: 'member' },
+    // The list is the subscribers' e-mail addresses, so it is read by the staff who send to them, and bounded.
+    auth: { required: true, minRole: 'steward' },
     openapi: {
       tags: ['Communications'],
       summary: 'List distribution list subscribers',
@@ -38,7 +39,8 @@ export const GET = withApi(
       .select()
       .from(newsletterListSubscribers)
       .where(and(eq(newsletterListSubscribers.listId, listId), eq(newsletterListSubscribers.status, 'subscribed')))
-      .orderBy(desc(newsletterListSubscribers.subscribedAt));
+      .orderBy(desc(newsletterListSubscribers.subscribedAt))
+      .limit(5000);
 
     return { subscribers };
   },

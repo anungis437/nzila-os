@@ -31,11 +31,12 @@ describe('lib/knowledge-transfer/maturity-personalities/personality-profiler', (
     expect(p.stabilityProfile.stabilityRating).toBeTruthy();
   });
 
-  it('profiles a fragile organization with no history', async () => {
+  it('makes no characterization of an organization with no recorded history', async () => {
     loadCognitionMemory.mockResolvedValue({ entries: [], resilienceTimeline: [] } as never);
     listReasoningSessions.mockResolvedValue([]);
     const p = await profileGovernancePersonality('org-2');
-    expect(p.personalityType).toBe('resilience_fragile');
+    expect(p.personalityType).toBe('insufficient_data');
+    expect(p.identityStatement).not.toContain('Resilience-Fragile');
     expect(p.stabilityProfile.stabilityRating).toBe('insufficient_data');
   });
 

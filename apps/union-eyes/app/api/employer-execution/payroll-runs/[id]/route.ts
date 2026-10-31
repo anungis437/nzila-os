@@ -1,7 +1,7 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
-import { db } from "@/db";
 import { withRLSContext } from "@/lib/db/with-rls-context";
 import { FINANCIAL_MEMBER_DATA_ROLES } from "@/lib/finance/financial-authority";
+import { requireLiveFinancialMandate } from "@/lib/finance/require-live-financial-mandate";
 import { PLATFORM_MODULES, requireEntitlement } from "@/services/platform-economics/entitlement-guard";
 import { employerPayrollRuns, employerPayrollRunItems, employerExecutionArtifacts } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
@@ -17,31 +17,30 @@ const transitionSchema = z.object({
 
 export const GET = withApi(
   {
-    auth: { minRole: "member" },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_payroll_preview",
     openapi: { tags: ["Employer Execution"], summary: "Get payroll run detail" },
   },
-  async ({ organizationId, params }) => {
-    if (!organizationId) throw ApiError.badRequest("Organization context required");
+  async ({ organizationId, userId, params }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest("Organization context required");
     const id = params?.id;
     if (typeof id !== "string") throw ApiError.badRequest("Payroll run id is required");
 
-    const [run] = await db
-      .select()
-      .from(employerPayrollRuns)
-      .where(and(eq(employerPayrollRuns.organizationId, organizationId), eq(employerPayrollRuns.id, id)))
-      .limit(1);
-
-    if (!run) throw ApiError.notFound("Payroll run not found");
-
-    const items = await db
-      .select()
-      .from(employerPayrollRunItems)
-      .where(and(eq(employerPayrollRunItems.organizationId, organizationId), eq(employerPayrollRunItems.payrollRunId, id)));
-
-    const artifacts = await db
-      .select()
-      .from(employerExecutionArtifacts)
+    const loaded = await withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:view", resourceId: id });
+      const [run] = await tx
+        .select()
+        .from(employerPayrollRuns)
+        .where(and(eq(employerPayrollRuns.organizationId, organizationId), eq(employerPayrollRuns.id, id)))
+        .limit(1);
+      if (!run) throw ApiError.notFound("Payroll run not found");
+      const items = await tx
+        .select()
+        .from(employerPayrollRunItems)
+        .where(and(eq(employerPayrollRunItems.organizationId, organizationId), eq(employerPayrollRunItems.payrollRunId, id)));
+      const artifacts = await tx
+        .select()
+        .from(employerExecutionArtifacts)
       .where(
         and(
           eq(employerExecutionArtifacts.organizationId, organizationId),
@@ -49,6 +48,10 @@ export const GET = withApi(
           eq(employerExecutionArtifacts.artifactType, "evidence_manifest"),
         ),
       );
+
+      return { run, items, artifacts };
+    });
+    const { run, items, artifacts } = loaded;
 
     const chainLinks = artifacts
       .map((artifact) => ((artifact.manifestJson as Record<string, unknown>)?.chainLink ?? null) as Record<string, unknown> | null)
@@ -93,7 +96,13 @@ export const PATCH = withApi(
 
     // The run is read under a row lock so two concurrent transitions are serialised; the status predicate on each
     // UPDATE below is the second line of defence. The change, its evidence and its audit record commit together.
-    return withRLSContext({ organizationId }, async (tx) => {
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, {
+        organizationId,
+        userId,
+        action: body.action === "approve" ? "finance:approve" : "finance:execute",
+        resourceId: id,
+      });
       const [run] = await tx
         .select()
         .from(employerPayrollRuns)

@@ -15,6 +15,7 @@ import { db } from '@/db';
 import { sql } from 'drizzle-orm';
 import { getRemittanceStatusForParent } from '@/services/clc/per-capita-calculator';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,8 +33,11 @@ export const GET = withApi(
       summary: 'Inbound per-capita remittances from child organizations',
     },
   },
-  async ({ organizationId, query }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+  async ({ organizationId, userId, query }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    await withRLSContext({ organizationId, userId }, (tx) =>
+      requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view', requiresLedger: true }),
+    );
 
     // Verify the org is a parent (has child organizations)
     const [childCheck] = await withRLSContext(async () => db.execute(sql`

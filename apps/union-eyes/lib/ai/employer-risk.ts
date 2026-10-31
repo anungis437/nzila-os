@@ -19,12 +19,13 @@
 
 import { db } from '@/db/db';
 import { eq, and, gte, desc, count, sql as _sql } from 'drizzle-orm';
-import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
-import { employerRiskScores, type EmployerRiskScoreInsert } from '@/db/schema/domains/ml/employer-risk-scores';
+import { buildOrgAiTrace, toGatewayDataClass, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import { employerRiskScores } from '@/db/schema/domains/ml/employer-risk-scores';
 import { employers } from '@/db/schema/union-structure-schema';
 import { complianceAlerts } from '@/db/schema/domains/compliance/employer-compliance';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { auditAiInteraction, buildAiEnvelope, type AiResponseEnvelope } from './ai-feature-guard';
+import { performAuditedOperation } from '@/lib/audit/operation-audit';
 import { logger } from '@/lib/logger';
 
 // ============================================================================
@@ -80,14 +81,20 @@ export async function calculateEmployerRisk(
   // 3. Call AI for weighted scoring + explanation
   const ai = getAiClient();
   const prompt = buildRiskPrompt(employer, signals);
-  const aiResult = await ai.generate({
+  const aiResult = await performAuditedOperation({
+    organizationId,
+    userId,
+    action: 'ai.employer_risk.generate',
+    resourceType: 'ai_invocations',
+    resourceId: employerId,
+  }, () => ai.generate({
     orgId: UE_SYSTEM_ORG_ID,
     trace: buildOrgAiTrace(organizationId),
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.EMPLOYER_RISK,
     input: prompt,
-    dataClass: 'internal',
-  });
+    dataClass: toGatewayDataClass('confidential'),
+  }));
 
   const parsed = parseRiskResponse(aiResult.content ?? '', signals);
 
@@ -103,25 +110,9 @@ export async function calculateEmployerRisk(
     modelVersion: MODEL_VERSION,
   });
 
-  // 5. Persist
-  const insert: EmployerRiskScoreInsert = {
-    organizationId,
-    employerId,
-    overallScore: parsed.result.overallScore.toFixed(4),
-    riskBand: parsed.result.riskBand,
-    trendDirection: parsed.result.trendDirection,
-    signalsJson: parsed.result.signals,
-    grievanceCount30d: parsed.result.grievanceCount30d,
-    complianceAlertCount30d: parsed.result.complianceAlertCount30d,
-    arbitrationCount12m: parsed.result.arbitrationCount12m,
-    confidence: parsed.confidence.toFixed(4),
-    explanation: parsed.explanation,
-    modelVersion: MODEL_VERSION,
-    profileKey: UE_PROFILES.EMPLOYER_RISK,
-    auditRef,
-  };
-
-  await db.insert(employerRiskScores).values(insert);
+  // HTTP GET is observational. Do not materialize an AI report or risk score in
+  // the database as a side effect of reading it; explicit governed persistence
+  // requires a separately authorized, audited command.
 
   return buildAiEnvelope(parsed.result, {
     confidence: parsed.confidence,

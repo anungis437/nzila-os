@@ -22,7 +22,7 @@ export const GET = withApi(
     rateLimit: RATE_LIMITS.AI_COMPLETION,
     openapi: { tags: ['AI'], summary: 'List user chat sessions' },
   },
-  async ({ userId, organizationId }) => {
+  async ({ userId, organizationId, user }) => {
     const blocked = await guardAiFeature(AI_FEATURES.AI_CHATBOT, { userId: userId ?? undefined, organizationId: organizationId ?? undefined });
     if (blocked) return blocked;
     enforceAISafety({
@@ -30,11 +30,12 @@ export const GET = withApi(
       action: 'GET',
       organizationId,
       userId,
-      userRole: 'member',
+      userRole: user?.role ?? 'member',
       dataClass: 'internal',
     });
     const sessions = await sessionManager.getUserSessions(userId!, {
       organizationId: organizationId ?? undefined,
+      status: 'active', // Archived/deleted conversations are not readable through the active inbox.
     });
     return { data: sessions };
   },
@@ -52,7 +53,7 @@ export const POST = withApi(
     rateLimit: RATE_LIMITS.AI_COMPLETION,
     openapi: { tags: ['AI'], summary: 'Create new chat session' },
   },
-  async ({ body, userId, organizationId }) => {
+  async ({ body, userId, organizationId, user }) => {
     if (!organizationId) {
       throw ApiError.badRequest('No active organization. Please select an organization and try again.');
     }
@@ -63,7 +64,7 @@ export const POST = withApi(
       action: 'POST',
       organizationId,
       userId,
-      userRole: 'member',
+      userRole: user?.role ?? 'member',
       dataClass: 'internal',
     });
     const session = await sessionManager.createSession({

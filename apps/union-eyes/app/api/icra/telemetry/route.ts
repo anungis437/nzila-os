@@ -9,13 +9,14 @@
  * existing trackIcraEvent pipeline. Designed to be called via
  * navigator.sendBeacon for unload-time abandonment signals.
  *
- * Anti-surveillance: no PII accepted. Metadata values are coerced and
- * length-capped. Rate limited per IP. Silent 204 on success.
+ * Anti-surveillance: no PII accepted. Metadata keys and values are allowlisted and
+ * length-capped. Request bodies are streamed with a strict size bound. Rate limited per IP. Silent 204 on success.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { clientAddress } from '@/lib/public-intake/guard';
 import { fireAndForgetEvent, hashIp, type IcraEventKind } from '@/lib/icra/observability'
-import { rateLimit } from '@/lib/rate-limit'
+import { checkRateLimit } from '@/lib/rate-limiter'
 
 const ALLOWED_KINDS: ReadonlySet<IcraEventKind> = new Set<IcraEventKind>([
   'assessment_started',
@@ -32,7 +33,49 @@ const ALLOWED_KINDS: ReadonlySet<IcraEventKind> = new Set<IcraEventKind>([
 
 const MAX_METADATA_KEYS = 8
 const MAX_METADATA_VALUE_LEN = 64
-const MAX_SECTION_ID_LEN = 64
+const MAX_BODY_BYTES = 4096
+
+// Only coarse operational categories may leave the public assessment. In particular, free-text identifiers,
+// question IDs, organization names, contact details and client-supplied fingerprints are not telemetry.
+const SAFE_SECTIONS = new Set([
+  'org_context', 'governance', 'operational_dependency', 'governance_visibility',
+  'institutional_memory', 'transition_readiness', 'operational_coordination',
+  'explainability_trust', 'sovereignty_governance',
+])
+const NUMERIC_METADATA = new Set(['step', 'answered', 'included', 'deferred', 'required', 'optional'])
+const TOKEN_METADATA = new Set(['doctrineVersion', 'scale', 'continuity', 'governance', 'exposure', 'lens', 'routeVersion', 'decision', 'ruleId'])
+const BOOLEAN_METADATA = new Set(['safeDefault'])
+const SAFE_TOKEN = /^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,63}$/
+
+async function boundedJson(request: NextRequest): Promise<unknown> {
+  if (!request.body) return null
+  const reader = request.body.getReader()
+  const chunks: Uint8Array[] = []
+  let size = 0
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      size += value.byteLength
+      if (size > MAX_BODY_BYTES) {
+        await reader.cancel()
+        return null
+      }
+      chunks.push(value)
+    }
+    const data = new Uint8Array(size)
+    let offset = 0
+    for (const chunk of chunks) {
+      data.set(chunk, offset)
+      offset += chunk.byteLength
+    }
+    return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(data))
+  } catch {
+    return null
+  } finally {
+    reader.releaseLock()
+  }
+}
 
 interface TelemetryBody {
   kind: IcraEventKind
@@ -42,19 +85,26 @@ interface TelemetryBody {
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   // Generous limit — flow emits roughly 1 event per section transition.
-  const rl = rateLimit(req, { maxRequests: 60, windowSeconds: 60 })
-  if (!rl.success) {
-    return new NextResponse(null, { status: 204 })
-  }
-
-  let body: any
+  // Telemetry is best effort: a refusal or an unavailable limiter drops the event silently.
+  let allowed = false
   try {
-    body = await req.json()
+    const rl = await checkRateLimit(`icra-telemetry:${clientAddress(req)}`, {
+      limit: 60,
+      window: 60,
+      identifier: 'icra-telemetry',
+      failOpen: false,
+    })
+    allowed = rl.allowed
   } catch {
+    // Observability must not emit when its limiter cannot establish a quota.
+    return new NextResponse(null, { status: 204 })
+  }
+  if (!allowed) {
     return new NextResponse(null, { status: 204 })
   }
 
-  if (typeof body !== 'object' || body === null) {
+  const body = await boundedJson(req)
+  if (typeof body !== 'object' || body === null || Array.isArray(body)) {
     return new NextResponse(null, { status: 204 })
   }
 
@@ -65,28 +115,27 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   const sectionId =
-    typeof raw.sectionId === 'string' && raw.sectionId.length <= MAX_SECTION_ID_LEN
+    typeof raw.sectionId === 'string' && SAFE_SECTIONS.has(raw.sectionId)
       ? raw.sectionId
       : undefined
 
   let metadata: TelemetryBody['metadata']
-  if (raw.metadata && typeof raw.metadata === 'object') {
+  if (raw.metadata && typeof raw.metadata === 'object' && !Array.isArray(raw.metadata)) {
     const entries: Array<[string, string | number | boolean]> = []
     for (const [k, v] of Object.entries(raw.metadata as Record<string, unknown>)) {
       if (entries.length >= MAX_METADATA_KEYS) break
-      if (k.length > MAX_METADATA_VALUE_LEN) continue
-      if (typeof v === 'string') {
-        entries.push([k, v.slice(0, MAX_METADATA_VALUE_LEN)])
-      } else if (typeof v === 'number' && Number.isFinite(v)) {
+      if (NUMERIC_METADATA.has(k) && typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 100000) {
         entries.push([k, v])
-      } else if (typeof v === 'boolean') {
+      } else if (TOKEN_METADATA.has(k) && typeof v === 'string' && v.length <= MAX_METADATA_VALUE_LEN && SAFE_TOKEN.test(v)) {
+        entries.push([k, v])
+      } else if (BOOLEAN_METADATA.has(k) && typeof v === 'boolean') {
         entries.push([k, v])
       }
     }
     if (entries.length > 0) metadata = Object.fromEntries(entries)
   }
 
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
+  const ip = clientAddress(req)
   fireAndForgetEvent({
     kind,
     sectionId,

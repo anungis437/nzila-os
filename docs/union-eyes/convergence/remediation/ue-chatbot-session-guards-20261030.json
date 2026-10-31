@@ -1,0 +1,25 @@
+{
+  "record": "UE_GATE0_SOURCE_PATCH_AWAITING_QUALIFICATION",
+  "defectId": "DEF-0B4-CHATBOT-SESSION-READ-IGNORES-STATE-AND-FEATURE-GATE",
+  "sourceBaseSha": "199fd3b140e7908863c6e32cc902db589d89dac2",
+  "sourceState": "IMPLEMENTED_PENDING_QUALIFICATION",
+  "closed": false,
+  "institutionalApproval": false,
+  "changes": [
+    "List only active chat sessions in the authenticated organization.",
+    "Refuse transcript reads and message generation on archived/deleted sessions.",
+    "Require chatbot entitlement, rate limit, enabled feature and AI safety policy before transcript retrieval.",
+    "Reject missing organization context before any transcript lookup."
+  ],
+  "tests": [
+    "apps/union-eyes/app/api/__tests__/chatbot-session-read-guards.route.test.ts",
+    "apps/union-eyes/lib/ai/__tests__/chatbot-service.test.ts"
+  ],
+  "verification": {
+    "unit": "NOT_RUN",
+    "nativePg15Pg16": "NOT_RUN",
+    "httpBrowser": "NOT_RUN",
+    "staging": "NOT_RUN"
+  },
+  "qualificationNote": "This additive source record does not change the frozen 777 defects or claim an independently accepted closure."
+}

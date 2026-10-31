@@ -1,30 +1,21 @@
-import { db } from '@/db/db';
 import { kpiConfigurations, analyticsMetrics } from '@/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { computeKpiHealth } from '@/lib/kpi/health';
 
 export const dynamic = 'force-dynamic';
 
-/**
- * Determine KPI health by comparing currentValue against thresholds.
- */
-function computeHealth(
-  currentValue: number | null,
-  target: number | null,
-  warning: number | null,
-  critical: number | null,
-): 'on_track' | 'at_risk' | 'critical' | 'no_data' {
-  if (currentValue == null || target == null) return 'no_data';
-  if (critical != null && currentValue <= critical) return 'critical';
-  if (warning != null && currentValue <= warning) return 'at_risk';
-  return 'on_track';
-}
 
 export const GET = withApi(
-  { auth: { minRole: 'member' } },
-  async ({ organizationId }) => {
-    // Fetch all KPI configurations for the org
-    const configs = await db
+  { auth: { minRole: 'officer' }, requireOrg: true },
+  async ({ organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.forbidden('Organization officer context required');
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+    // Officer-only target summary: members must not receive financial target
+    // configurations, alert recipients, formulas or creator identifiers.
+    const configs = await tx
       .select()
       .from(kpiConfigurations)
       .where(eq(kpiConfigurations.organizationId, organizationId!))
@@ -33,7 +24,7 @@ export const GET = withApi(
     // For each KPI, grab the latest matching analytic metric to derive current value
     const enriched = await Promise.all(
       configs.map(async (cfg) => {
-        const [latestMetric] = await db
+        const [latestMetric] = await tx
           .select()
           .from(analyticsMetrics)
           .where(
@@ -52,14 +43,22 @@ export const GET = withApi(
         const warningNum = cfg.warningThreshold ? parseFloat(String(cfg.warningThreshold)) : null;
         const criticalNum = cfg.criticalThreshold ? parseFloat(String(cfg.criticalThreshold)) : null;
 
-        const health = computeHealth(currentValue, targetNum, warningNum, criticalNum);
+        const health = computeKpiHealth(currentValue, targetNum, warningNum, criticalNum, cfg.direction);
         const progress =
           currentValue != null && targetNum != null && targetNum !== 0
             ? Math.round((currentValue / targetNum) * 100)
             : null;
 
         return {
-          ...cfg,
+          id: cfg.id,
+          name: cfg.name,
+          description: cfg.description,
+          metricType: cfg.metricType,
+          dataSource: cfg.dataSource,
+          visualizationType: cfg.visualizationType,
+          targetValue: cfg.targetValue,
+          isActive: cfg.isActive,
+          displayOrder: cfg.displayOrder,
           health,
           currentValue,
           progress,
@@ -81,6 +80,13 @@ export const GET = withApi(
       }, {}),
     };
 
+    await persistAtomicAudit(tx, {
+      organizationId, userId,
+      action: 'target.summary.read',
+      resourceType: 'kpi_configurations',
+      details: { targetCount: enriched.length },
+    });
     return { summary, targets: enriched };
+    });
   },
 );

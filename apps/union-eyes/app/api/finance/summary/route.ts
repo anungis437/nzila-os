@@ -9,6 +9,7 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,8 +19,11 @@ export const GET = withApi(
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Finance'], summary: 'Executive financial summary' },
   },
-  async ({ organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+  async ({ organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    await withRLSContext({ organizationId, userId }, (tx) =>
+      requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view', requiresLedger: true }),
+    );
 
     return withRLSContext(async () => {
     const orgIdCast = sql`${organizationId}::uuid`;

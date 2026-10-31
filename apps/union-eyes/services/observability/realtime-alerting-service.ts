@@ -5,10 +5,11 @@ import {
   alertExecutions,
   alertRules,
   inAppNotifications,
-  notificationTracking,
+  organizationMembers,
 } from '@/db/schema';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
+import { logger } from '@/lib/logger';
 
 interface AlertSignal {
   organizationId: string;
@@ -20,13 +21,24 @@ interface AlertSignal {
 
 interface EmitResult {
   emitted: number;
+  alreadyAlerted: number;
   byKind: Record<string, number>;
+  failures: Array<{ organizationId: string; kind: string; reason: string }>;
 }
 
-async function getOrCreateRealtimeRule(signal: AlertSignal) {
+/** Organization members who receive a realtime alert in their inbox. */
+export const ALERT_RECIPIENT_ROLES = ['admin', 'president'] as const;
+
+type CountRow = { organization_id: string; count: number };
+
+/** A raw query answers an array on the production driver and { rows } on others; both are rows. */
+const rowsOf = (result: unknown): CountRow[] =>
+  Array.isArray(result) ? (result as CountRow[]) : ((result as { rows?: CountRow[] } | null)?.rows ?? []);
+
+async function getOrCreateRealtimeRule(signal: AlertSignal, tx: RLSTx) {
   const ruleName = `realtime:${signal.kind}`;
 
-  const [existing] = await db
+  const [existing] = await tx
     .select()
     .from(alertRules)
     .where(
@@ -39,7 +51,7 @@ async function getOrCreateRealtimeRule(signal: AlertSignal) {
 
   if (existing) return existing;
 
-  const [created] = await db
+  const [created] = await tx
     .insert(alertRules)
     .values({
       organizationId: signal.organizationId,
@@ -61,121 +73,131 @@ async function getOrCreateRealtimeRule(signal: AlertSignal) {
   return created;
 }
 
-async function emitSignal(signal: AlertSignal, tx: RLSTx) {
-  const rule = await getOrCreateRealtimeRule(signal);
+/** One alert per organization, signal and clock hour: the sweep runs on a schedule and its window overlaps the previous run. */
+export const alertDedupeKey = (signal: Pick<AlertSignal, 'organizationId' | 'kind'>, at: Date) =>
+  `obs:${signal.organizationId}:${signal.kind}:${at.toISOString().slice(0, 13)}`;
 
-  const execution = { id: randomUUID() };
-  await db
-    .insert(alertExecutions)
-    .values({
-      id: execution.id,
+export type SignalOutcome = 'emitted' | 'already_alerted' | 'no_recipient';
+
+/**
+ * Emits one signal. The rule, the inbox notices, the execution record and the audit entry are written on the sweep's transaction
+ * inside a savepoint, so they commit together or not at all and one organization's failure leaves the others untouched.
+ *
+ * The alert reaches the organization's administrators through the in-app inbox, which is the one channel with a reader. No e-mail
+ * is sent or queued, so the execution records only the channel that delivered; it used to record e-mail as an executed action
+ * although the queued row it wrote had no sender.
+ */
+async function emitSignal(signal: AlertSignal, tx: RLSTx, at: Date): Promise<SignalOutcome> {
+  const startedAt = Date.now();
+  return tx.transaction(async (inner) => {
+    const scoped = inner as unknown as RLSTx;
+    const recipients = await scoped
+      .select({ userId: organizationMembers.userId })
+      .from(organizationMembers)
+      .where(and(
+        eq(organizationMembers.organizationId, signal.organizationId),
+        inArray(organizationMembers.role, [...ALERT_RECIPIENT_ROLES]),
+        eq(organizationMembers.status, 'active'),
+        isNull(organizationMembers.deletedAt),
+      ))
+      .limit(50);
+
+    const rule = await getOrCreateRealtimeRule(signal, scoped);
+    const executionId = randomUUID();
+    const key = alertDedupeKey(signal, at);
+
+    if (recipients.length === 0) {
+      await scoped.insert(alertExecutions).values({
+        id: executionId,
+        alertRuleId: rule.id,
+        triggeredBy: 'threshold',
+        triggerData: { organizationId: signal.organizationId, signal: signal.kind, count: signal.count },
+        status: 'failed',
+        conditionsMet: true,
+        conditionsEvaluated: { thresholdMet: true, count: signal.count },
+        actionsExecuted: { channels: [], recipients: 0 },
+        errorMessage: 'No active administrator to notify',
+        startedAt: new Date(startedAt),
+        completedAt: new Date(),
+        executionTimeMs: Date.now() - startedAt,
+      });
+      return 'no_recipient' as const;
+    }
+
+    const delivered = await scoped
+      .insert(inAppNotifications)
+      .values(recipients.map((recipient) => ({
+        userId: recipient.userId,
+        organizationId: signal.organizationId,
+        title: 'Realtime Alert',
+        message: signal.message,
+        type: signal.severity === 'critical' ? 'error' : 'warning',
+        actionLabel: 'View alerts',
+        actionUrl: '/dashboard/alerts',
+        data: { origin: 'system:observability-alerts', signal: signal.kind, executionId, dedupeKey: key, count: signal.count },
+      })))
+      .onConflictDoNothing()
+      .returning({ id: inAppNotifications.id });
+
+    // Every recipient already holds this hour's alert: nothing new happened, so no execution or audit entry is added.
+    if (delivered.length === 0) return 'already_alerted' as const;
+
+    await scoped.insert(alertExecutions).values({
+      id: executionId,
       alertRuleId: rule.id,
       triggeredBy: 'threshold',
-      triggerData: {
-        organizationId: signal.organizationId,
-        signal: signal.kind,
-        count: signal.count,
-      },
+      triggerData: { organizationId: signal.organizationId, signal: signal.kind, count: signal.count },
       status: 'success',
       conditionsMet: true,
-      conditionsEvaluated: {
-        thresholdMet: true,
-        count: signal.count,
-      },
-      actionsExecuted: {
-        channels: ['email', 'in_app'],
-      },
-      startedAt: new Date(),
+      conditionsEvaluated: { thresholdMet: true, count: signal.count },
+      actionsExecuted: { channels: ['in_app'], recipients: delivered.length },
+      startedAt: new Date(startedAt),
       completedAt: new Date(),
-      executionTimeMs: 1,
+      executionTimeMs: Date.now() - startedAt,
     });
 
-  await db.insert(notificationTracking).values({
-    organizationId: signal.organizationId,
-    type: signal.kind === 'payment_reconciliation_failures' ? 'payment_failed' : 'system_announcement',
-    status: 'pending',
-    priority: signal.severity === 'critical' ? 'urgent' : 'high',
-    subject: `[${signal.severity.toUpperCase()}] ${signal.kind.replaceAll('_', ' ')}`,
-    body: signal.message,
-    templateData: {
-      signal: signal.kind,
-      count: signal.count,
-      executionId: execution.id,
-    },
-    metadata: {
-      source: 'system:observability-alerts',
-      executionId: execution.id,
+    // Each organization's alert is audited under that organization, in the same savepoint as the alert itself.
+    await persistAtomicAudit(scoped, {
       organizationId: signal.organizationId,
-    },
-  });
+      userId: 'system:cron:observability-alerts',
+      action: 'observability.alert.emit',
+      resourceType: 'alert_executions',
+      resourceId: executionId,
+      details: { signal: signal.kind, count: signal.count, severity: signal.severity, recipients: delivered.length },
+    });
 
-  await db.insert(inAppNotifications).values({
-    userId: 'system:observability-alerts',
-    organizationId: signal.organizationId,
-    title: 'Realtime Alert',
-    message: signal.message,
-    type: signal.severity === 'critical' ? 'error' : 'warning',
-    data: {
-      signal: signal.kind,
-      executionId: execution.id,
-    },
+    return 'emitted' as const;
   });
-
-  // Each organization's alert is audited under that organization, in the sweep's transaction.
-  await persistAtomicAudit(tx, {
-    organizationId: signal.organizationId,
-    userId: 'system:cron:observability-alerts',
-    action: 'observability.alert.emit',
-    resourceType: 'alert_executions',
-    resourceId: execution.id,
-    details: { signal: signal.kind, count: signal.count, severity: signal.severity },
-  });
-
-  return execution;
 }
 
 export async function runRealtimeObservabilitySweep(): Promise<EmitResult> {
-  // SECURITY FIX (round 46): this cross-org enumeration + per-org rule/execution
-  // writes previously ran on the plain tenant `db` import despite being a
-  // SYSTEM_SCHEDULE-invoked (cron) operation. withSystemContext(tx) is used
-  // explicitly for this function's own raw-SQL reads below; emitSignal/
-  // getOrCreateRealtimeRule still query through the module-level `db` import,
-  // which resolves to the same system connection via AsyncLocalStorage
-  // routing (db/db.ts) for the duration of this callback.
+  // Cross-organization signals are read by SYSTEM authority, and every write of an alert goes through the same transaction handle,
+  // so the alert and its audit entry commit together (one savepoint per signal).
   return withSystemContext(async (tx) => {
-  const slaRows = await tx.execute<{
-    organization_id: string;
-    count: number;
-  }>(sql`
+  const slaRows = rowsOf(await tx.execute(sql`
     SELECT organization_id::text, COUNT(*)::int AS count
     FROM ml_predictions
     WHERE prediction_type = 'sla_breach_risk'
       AND created_at >= NOW() - INTERVAL '60 minutes'
       AND predicted_value::numeric >= 0.80
     GROUP BY organization_id
-  `);
+  `));
 
-  const ingestionRows = await tx.execute<{
-    organization_id: string;
-    count: number;
-  }>(sql`
+  const ingestionRows = rowsOf(await tx.execute(sql`
     SELECT organization_id::text, COUNT(*)::int AS count
     FROM ingestion_batches
     WHERE created_at >= NOW() - INTERVAL '60 minutes'
       AND status IN ('failed', 'partial')
     GROUP BY organization_id
-  `);
+  `));
 
-  const paymentFailureRows = await tx.execute<{
-    organization_id: string;
-    count: number;
-  }>(sql`
+  const paymentFailureRows = rowsOf(await tx.execute(sql`
     SELECT organization_id::text, COUNT(*)::int AS count
     FROM platform_payments
     WHERE created_at >= NOW() - INTERVAL '60 minutes'
       AND status = 'failed'
     GROUP BY organization_id
-  `);
+  `));
 
   const signals: AlertSignal[] = [
     ...slaRows
@@ -212,16 +234,29 @@ export async function runRealtimeObservabilitySweep(): Promise<EmitResult> {
     ingestion_failures: 0,
     payment_reconciliation_failures: 0,
   };
+  const failures: EmitResult['failures'] = [];
+  let emitted = 0;
+  let alreadyAlerted = 0;
+  const at = new Date();
 
   for (const signal of signals) {
-    await emitSignal(signal, tx);
-    byKind[signal.kind] += 1;
+    try {
+      const outcome = await emitSignal(signal, tx, at);
+      if (outcome === 'emitted') {
+        emitted += 1;
+        byKind[signal.kind] += 1;
+      } else if (outcome === 'already_alerted') {
+        alreadyAlerted += 1;
+      } else {
+        failures.push({ organizationId: signal.organizationId, kind: signal.kind, reason: 'no active administrator to notify' });
+      }
+    } catch (error) {
+      logger.error('Observability alert was not emitted', { organizationId: signal.organizationId, kind: signal.kind, error: String(error) });
+      failures.push({ organizationId: signal.organizationId, kind: signal.kind, reason: 'alert write failed' });
+    }
   }
 
-  return {
-    emitted: signals.length,
-    byKind,
-  };
+  return { emitted, alreadyAlerted, byKind, failures };
   });
 }
 

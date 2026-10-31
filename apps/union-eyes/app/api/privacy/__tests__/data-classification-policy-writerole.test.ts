@@ -1,38 +1,24 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const m = vi.hoisted(() => ({
-  crudRoutes: vi.fn(),
-  dataClassificationPolicy: { __table: 'data_classification_policy' },
-  collectionGet: vi.fn(async () => ({ ok: true, scope: 'collection-get' })),
-  collectionPost: vi.fn(async () => ({ ok: true, scope: 'collection-post' })),
-}));
-
-vi.mock('@/lib/api/crud-factory', () => ({ crudRoutes: m.crudRoutes }));
-vi.mock('@/db/schema', () => ({ dataClassificationPolicy: m.dataClassificationPolicy }));
-
+// DEF-0B6-CMP-FIREWALL-POLICY-NO-WRITER-OR-ENFORCER: the route was the generic factory over data_classification_policy, a platform table no route
+// writes and nothing enforces, under the name of an employer data firewall. It answers 501 and no longer binds the table at all, so the
+// writeRole question this test used to pin (compliance_manager, never the per-org admin) has no write to protect.
 describe('compliance/data-classification-policy route (platform classification doctrine)', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    m.crudRoutes.mockReturnValue({ GET: m.collectionGet, POST: m.collectionPost });
+  const source = readFileSync(resolve(__dirname, '../../compliance/data-classification-policy/route.ts'), 'utf8');
+
+  it('answers 501 and binds neither the factory nor the table', () => {
+    expect(source).toContain('ApiError.notImplemented');
+    expect(source).not.toMatch(/crudRoutes\(/);
+    expect(source).not.toMatch(/dataClassificationPolicy/);
   });
 
-  it('registers CRUD with writeRole=compliance_manager, never the ordinary per-org admin role (data_classification_policy has no organizationId column — this is platform-wide doctrine)', async () => {
-    await import('../../compliance/data-classification-policy/route');
-
-    expect(m.crudRoutes).toHaveBeenCalledWith({
-      table: m.dataClassificationPolicy,
-      pk: 'id',
-      tags: ['Compliance'],
-      orgScoped: true,
-      readRole: 'member',
-      writeRole: 'compliance_manager',
-    });
-    expect(m.crudRoutes).not.toHaveBeenCalledWith(expect.objectContaining({ writeRole: 'admin' }));
+  it('exports the same methods it did, all refused', () => {
+    expect(source).toContain('export const GET = handler');
+    expect(source).toContain('export const POST = handler');
   });
 });
-
 // Governance Officer 2.1 P0-D: privacy workflow routes must never be bound to
 // classification-policy CRUD. They are NOT_IMPLEMENTED until real incident /
 // rights-request / jurisdictional stores exist.

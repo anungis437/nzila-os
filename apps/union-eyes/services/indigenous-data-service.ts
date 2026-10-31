@@ -6,7 +6,7 @@ import {
   indigenousDataAccessLog,
   indigenousDataSharingAgreements,
   traditionalKnowledgeRegistry,
-} from "@/db/schema/indigenous-data-schema";
+} from "@/db/schema/domains/compliance/indigenous-data";
 import { eq, and } from "drizzle-orm";
 
 /**

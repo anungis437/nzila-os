@@ -4,20 +4,23 @@ import { withRLSContext } from "@/lib/db/with-rls-context";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { employerExecutionComplianceEvents, employerPayrollRuns, employerRemittanceRuns } from "@/db/schema";
 import { and, desc, eq } from "drizzle-orm";
+import { FINANCIAL_MEMBER_DATA_ROLES } from "@/lib/finance/financial-authority";
 
+// A person flags a run for review; the engine raises error, critical and blocking events itself. A manual flag therefore
+// cannot carry those severities, cannot block an approval, and cannot take the code of an engine event.
 const createSchema = z.object({
   payrollRunId: z.guid().optional(),
   remittanceRunId: z.guid().optional(),
-  eventCode: z.string(),
-  severity: z.enum(["info", "warning", "error", "critical"]).default("warning"),
-  summary: z.string(),
+  eventCode: z.string().trim().regex(/^[a-z0-9_]{1,60}$/, "eventCode is lower-case letters, digits and underscores"),
+  severity: z.enum(["info", "warning"]).default("warning"),
+  summary: z.string().trim().min(1).max(500),
   details: z.record(z.string(), z.unknown()).default({}),
-  blocking: z.enum(["yes", "no"]).default("no"),
-});
+}).strict();
 
 export const GET = withApi(
   {
-    auth: { minRole: "member" },
+    // The events describe payroll and remittance runs, which the financial roles hold; a member reads none of them.
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_execution_compliance",
     openapi: { tags: ["Employer Execution"], summary: "List compliance events" },
   },
@@ -27,14 +30,15 @@ export const GET = withApi(
       .select()
       .from(employerExecutionComplianceEvents)
       .where(eq(employerExecutionComplianceEvents.organizationId, organizationId))
-      .orderBy(desc(employerExecutionComplianceEvents.detectedAt));
+      .orderBy(desc(employerExecutionComplianceEvents.detectedAt))
+      .limit(500);
     return { data: rows };
   },
 );
 
 export const POST = withApi(
   {
-    auth: { minRole: "steward" },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_execution_compliance",
     body: createSchema,
     successStatus: 201,
@@ -73,12 +77,12 @@ export const POST = withApi(
           organizationId,
           payrollRunId: body.payrollRunId,
           remittanceRunId: body.remittanceRunId,
-          eventCode: body.eventCode,
+          eventCode: body.eventCode.startsWith("manual_") ? body.eventCode : `manual_${body.eventCode}`,
           severity: body.severity,
           status: "open",
           summary: body.summary,
           details: { ...body.details, raisedBy: userId },
-          blocking: body.blocking,
+          blocking: "no",
         })
         .returning();
 
@@ -91,9 +95,9 @@ export const POST = withApi(
         resourceType: "employer_execution_compliance_events",
         resourceId: event.id,
         details: {
-          eventCode: body.eventCode,
+          eventCode: body.eventCode.startsWith("manual_") ? body.eventCode : `manual_${body.eventCode}`,
           severity: body.severity,
-          blocking: body.blocking,
+          blocking: "no",
           payrollRunId: body.payrollRunId ?? null,
           remittanceRunId: body.remittanceRunId ?? null,
         },

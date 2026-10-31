@@ -19,7 +19,7 @@
 
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
-import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import { buildOrgAiTrace, toGatewayDataClass, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { auditAiInteraction, buildAiEnvelope, type AiResponseEnvelope } from './ai-feature-guard';
 import { logger } from '@/lib/logger';
 
@@ -99,7 +99,7 @@ export async function generateFinancialInsight(params: {
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.FINANCIAL_ANALYSIS,
     input: prompt,
-    dataClass: 'internal',
+    dataClass: toGatewayDataClass('confidential'),
   });
 
   // 3. Parse

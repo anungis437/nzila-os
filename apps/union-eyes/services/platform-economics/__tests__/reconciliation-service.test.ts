@@ -31,6 +31,7 @@ const h = vi.hoisted(() => {
     insert: () => makeChain(),
     select: () => makeChain(),
     update: () => makeChain(),
+    execute: async () => [],
   };
   const db = {
     select: () => makeChain(),
@@ -60,6 +61,7 @@ vi.mock('drizzle-orm', async (orig) => ({
   gte: vi.fn(() => ({})),
   lte: vi.fn(() => ({})),
   inArray: vi.fn(() => ({})),
+  desc: vi.fn(() => ({})),
 }));
 vi.mock('@/lib/audit-logger', () => ({
   auditLog: h.auditLog,
@@ -67,6 +69,7 @@ vi.mock('@/lib/audit-logger', () => ({
   AuditSeverity: { HIGH: 'high', MEDIUM: 'medium', CRITICAL: 'critical' },
 }));
 
+import { eq } from 'drizzle-orm';
 import {
   getReconciliationRun,
   listExceptions,
@@ -95,6 +98,8 @@ describe('platform-economics/reconciliation-service', () => {
       const fee1 = { id: 'fee1', settlementBatchId: 'sb1', feeAmountCad: '1.00' };
       const fee2 = { id: 'fee2', settlementBatchId: null, feeAmountCad: '1.00' };
 
+      pushSel([{ id: 'bp1' }]); // 0a the billing period is the organization's
+      pushSel([]); // 0b no earlier run for the period
       pushSel([{ id: 'run-1' }]); // 1 insert run returning
       pushSel([inv1, inv2]); // 2 invoices
       pushSel([pmt1, pmt2, pmt3]); // 3 payments
@@ -126,6 +131,7 @@ describe('platform-economics/reconciliation-service', () => {
 
     it('handles a period with no payments and raises a critical variance alert', async () => {
       const inv1 = { id: 'inv1', organizationId: 'o1', totalAmount: '500.00', invoiceNumber: 'INV-1', status: 'issued' };
+      pushSel([]); // no prior run for this organization and period
       pushSel([{ id: 'run-2' }]); // insert run
       pushSel([inv1]); // invoices
       pushSel([]); // payments (empty → allocations skipped)
@@ -134,6 +140,7 @@ describe('platform-economics/reconciliation-service', () => {
       pushSel([]); // update run
 
       const result = await runReconciliation({
+        organizationId: 'o1',
         periodStart: new Date('2025-01-01'),
         periodEnd: new Date('2025-01-31'),
       });
@@ -142,6 +149,36 @@ describe('platform-economics/reconciliation-service', () => {
       expect(result.varianceCad).toBe('500.00');
       // base completed audit + critical variance audit
       expect(h.auditLog).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  // DEF-0B11-PRP-RECONCILIATION-RUNS-ARE-NOT-REPEATABLE-AND-THE-BILLING-PERIOD-IS-NOT-BOUND-TO-THE-ORGANIZATION
+  describe('runReconciliation guards', () => {
+    const period = { periodStart: new Date('2025-01-01'), periodEnd: new Date('2025-01-31') };
+
+    it('refuses a missing or blank organization before touching the financial ledger', async () => {
+      for (const organizationId of [undefined, '', '   ']) {
+        await expect(runReconciliation({ organizationId, ...period })).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+      }
+      expect(h.queue).toEqual([]);
+      expect(h.auditLog).not.toHaveBeenCalled();
+    });
+
+    it('refuses a billing period that is not the organization\u2019s own, before creating a run', async () => {
+      pushSel([]); // the billing period is not found for this organization
+      await expect(runReconciliation({ organizationId: 'o1', billingPeriodId: 'someone-elses', ...period })).rejects.toMatchObject({ code: 'NOT_FOUND' });
+      expect(h.queue).toEqual([]);
+      expect(h.auditLog).not.toHaveBeenCalled();
+    });
+
+    it('refuses to reconcile the same organization and period twice, naming the earlier run', async () => {
+      pushSel([{ id: 'run-0' }]); // an earlier run exists
+      await expect(runReconciliation({ organizationId: 'o1', ...period })).rejects.toMatchObject({ code: 'CONFLICT', details: { runId: 'run-0' } });
+      expect(h.auditLog).not.toHaveBeenCalled();
+    });
+
+    it('refuses a period that ends before it starts', async () => {
+      await expect(runReconciliation({ organizationId: 'o1', periodStart: period.periodEnd, periodEnd: period.periodStart })).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
     });
   });
 
@@ -168,12 +205,20 @@ describe('platform-economics/reconciliation-service', () => {
   describe('getReconciliationRun', () => {
     it('returns the run when found', async () => {
       pushSel([{ id: 'run-1' }]);
-      expect(await getReconciliationRun('run-1')).toEqual({ id: 'run-1' });
+      expect(await getReconciliationRun('run-1', 'org-A')).toEqual({ id: 'run-1' });
     });
 
     it('returns null when not found', async () => {
       pushSel([]);
-      expect(await getReconciliationRun('run-x')).toBeNull();
+      expect(await getReconciliationRun('run-x', 'org-A')).toBeNull();
+    });
+
+    it('binds the lookup to the caller organization, so another organization run reads as missing', async () => {
+      vi.mocked(eq).mockClear();
+      pushSel([]);
+      expect(await getReconciliationRun('run-of-org-B', 'org-A')).toBeNull();
+      expect(eq).toHaveBeenCalledWith({ __col: 'id' }, 'run-of-org-B');
+      expect(eq).toHaveBeenCalledWith({ __col: 'organizationId' }, 'org-A');
     });
   });
 
@@ -182,6 +227,19 @@ describe('platform-economics/reconciliation-service', () => {
       pushSel([{ id: 'ex1' }]);
       const result = await listExceptions('o1');
       expect(result).toHaveLength(1);
+    });
+  });
+
+  // DEF-0B11-PRP-RECONCILIATION-LISTS-ARE-UNBOUNDED-AND-THE-EXCEPTION-STATUS-FILTER-IS-AN-UNVALIDATED-CAST
+  describe('listExceptions input', () => {
+    it.each([[['bogus']], [['open', 'bogus']], [[]]])('refuses the status filter %j before querying', async (filter) => {
+      await expect(listExceptions('o1', filter as string[])).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+      expect(h.queue).toEqual([]);
+    });
+
+    it('accepts every status in the vocabulary', async () => {
+      pushSel([{ id: 'ex1' }]);
+      await expect(listExceptions('o1', ['open', 'under_review', 'resolved', 'written_off'], 5)).resolves.toHaveLength(1);
     });
   });
 

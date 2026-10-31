@@ -1,11 +1,18 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
 import { withRLSContext } from "@/lib/db/with-rls-context";
+import { requireSystemAdmin } from "@/lib/api-auth-guard";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import {
   getReviewQueue,
   getReviewQueueCounts,
   submitReview,
 } from "@/lib/services/cba-intelligence/review-service";
+
+// ---------------------------------------------------------------------------
+// The agreements, findings, wage adjustments and clauses reviewed here are one platform-wide extracted dataset: none of its tables has an
+// organization column. A decision changes what every organization reads, so reviewing is platform authority. A steward or administrator
+// of one organization held the floor and could approve, reject or supersede rows for all of them.
+// ---------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------
 // GET /api/cba-intelligence/review — Get review queue
@@ -35,6 +42,7 @@ export const GET = withApi(
     },
   },
   async ({ query }) => {
+    await requireSystemAdmin();
     if (query.counts) {
       return getReviewQueueCounts();
     }
@@ -69,6 +77,7 @@ export const POST = withApi(
   },
   async ({ body, userId, organizationId }) => {
     if (!userId) throw ApiError.unauthorized("User context required");
+    await requireSystemAdmin();
     if (!organizationId) throw ApiError.badRequest("Organization context required");
 
     // The decision, the status it sets on its target and the audit record commit together.
@@ -76,7 +85,7 @@ export const POST = withApi(
       const decision = await submitReview({
         ...body,
         reviewerId: userId,
-        reviewerRole: "steward", // Could be enriched from user context
+        reviewerRole: "platform_administrator",
       }, tx);
       await persistAtomicAudit(tx, {
         organizationId,

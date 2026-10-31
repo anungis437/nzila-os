@@ -15,7 +15,7 @@
  */
 
 import { withApi } from '@/lib/api/framework';
-import { and, eq } from 'drizzle-orm';
+import { derivedAnalyticsCondition } from '@/lib/knowledge-transfer/governance/interview-access';
 import { db } from '@/db/db';
 import { exitInterviews } from '@/db/schema';
 
@@ -62,12 +62,7 @@ export const GET = withApi(
         continuityRiskScore: exitInterviews.continuityRiskScore,
       })
       .from(exitInterviews)
-      .where(
-        and(
-          eq(exitInterviews.organizationId, organizationId!),
-          eq(exitInterviews.status, 'published'),
-        ),
-      );
+      .where(derivedAnalyticsCondition(organizationId!));
 
     // Aggregate expertise tags into domain coverage map
     const domainMap = new Map<

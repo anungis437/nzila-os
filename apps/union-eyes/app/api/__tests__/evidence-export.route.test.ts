@@ -1,87 +1,128 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { NextRequest, NextResponse } from 'next/server';
 
 const m = vi.hoisted(() => ({
-  authenticateUser: vi.fn(),
-  withRequestContext: vi.fn((_request: Request, handler: () => unknown) => handler()),
-  auth: vi.fn(),
-  withSpan: vi.fn((_name: string, _attributes: Record<string, unknown>, handler: () => unknown) => handler()),
-  recordEvidenceExport: vi.fn(),
+  context: { userId: 'actor-1', organizationId: '11111111-1111-1111-1111-111111111111', role: 'officer' },
+  withApi: vi.fn(),
+  withRLSContext: vi.fn(),
+  persistAtomicAudit: vi.fn(),
 }));
 
-vi.mock('@/lib/api-guards', () => ({
-  authenticateUser: m.authenticateUser,
-  withRequestContext: m.withRequestContext,
+vi.mock('@/lib/api/framework', () => ({
+  ApiError: {
+    forbidden: (message: string) => Object.assign(new Error(message), { status: 403 }),
+  },
+  withApi: m.withApi,
 }));
 
-vi.mock('@nzila/platform-auth/entra/server', () => ({
-  auth: m.auth,
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: m.withRLSContext,
 }));
 
-vi.mock('@nzila/os-core/telemetry', () => ({
-  withSpan: m.withSpan,
+vi.mock('@/lib/audit/atomic-audit', () => ({
+  persistAtomicAudit: m.persistAtomicAudit,
 }));
 
-vi.mock('@/app/api/governance/telemetry/route', () => ({
-  recordEvidenceExport: m.recordEvidenceExport,
-}));
-
-async function loadRoute() {
-  return import('../evidence/export/route');
+async function route() {
+  vi.resetModules();
+  return (await import('../evidence/export/route')).GET;
 }
 
-async function readJson(response: Response) {
-  return response.json() as Promise<Record<string, any>>;
+function request(orgId?: string) {
+  const url = new URL('http://localhost/api/evidence/export');
+  if (orgId) url.searchParams.set('orgId', orgId);
+  return new NextRequest(url);
 }
 
-describe('/api/evidence/export route', () => {
+describe('DEF-0B7 evidence export: no invented attestations, identity spoofing or unaudited reads', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.authenticateUser.mockResolvedValue({ ok: true });
-    m.auth.mockResolvedValue({ orgRole: 'staff' });
+    m.context = { userId: 'actor-1', organizationId: '11111111-1111-1111-1111-111111111111', role: 'officer' };
+    m.persistAtomicAudit.mockResolvedValue(undefined);
+    m.withRLSContext.mockImplementation(async (_scope, fn) => fn({ transaction: 'tenant-bound' }));
+    // A focused wrapper double: verifies the declared role/org contract and
+    // supplies the actor. Production role enforcement belongs to withApi.
+    m.withApi.mockImplementation((options, handler) => async (req: NextRequest) => {
+      if (!m.context.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      if (!options.requireOrg || options.auth?.minRole !== 'officer') {
+        throw new Error('Evidence export must use officer role and required organization');
+      }
+      if (m.context.role !== 'officer' && m.context.role !== 'admin') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
+      try {
+        return await handler({
+          request: req,
+          organizationId: m.context.organizationId,
+          userId: m.context.userId,
+        });
+      } catch (error) {
+        return NextResponse.json({ error: 'Unavailable' }, { status: (error as { status?: number }).status ?? 500 });
+      }
+    });
   });
 
-  it('denies plain members and does not record an export event', async () => {
-    vi.resetModules();
-    m.auth.mockResolvedValueOnce({ orgRole: 'member' });
-    const { GET } = await loadRoute();
+  it('refuses to claim evidence exists; logs the scoped attempt and returns no fake policy, SBOM or isolation claims', async () => {
+    const GET = await route();
+    const response = await GET(request());
+    const body = await response.json();
 
-    const response = await GET(new Request('http://localhost/api/evidence/export?orgId=liuna-synthetic'));
-    const body = await readJson(response);
+    expect(response.status).toBe(503);
+    expect(response.headers.get('Cache-Control')).toBe('private, no-store');
+    expect(body).toMatchObject({
+      org_id: m.context.organizationId,
+      verified: false,
+      status: 'not_attested',
+      error: 'VERIFIED_EVIDENCE_UNAVAILABLE',
+      sbom: { status: 'not_attested', artifact: null },
+      policy_checks: { status: 'not_attested', results: null },
+      org_isolation: { status: 'not_attested', results: null },
+      build: { status: 'not_attested', commit: null, timestamp: null },
+    });
+    expect(JSON.stringify(body)).not.toMatch(/"enforced"|"denied"|"available":true/);
+    expect(m.withRLSContext).toHaveBeenCalledWith(
+      { organizationId: m.context.organizationId, userId: m.context.userId },
+      expect.any(Function),
+    );
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      { transaction: 'tenant-bound' },
+      expect.objectContaining({
+        organizationId: m.context.organizationId,
+        userId: m.context.userId,
+        action: 'evidence.export.unavailable',
+      }),
+    );
+  });
 
+  it('rejects another organization ID without issuing or auditing an export', async () => {
+    const GET = await route();
+    const response = await GET(request('22222222-2222-2222-2222-222222222222'));
     expect(response.status).toBe(403);
-    expect(body).toMatchObject({
-      error: 'Forbidden',
-      message: 'Evidence export requires staff-level access.',
-    });
-    expect(m.recordEvidenceExport).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
-  it('returns an audit-safe org-scoped evidence snapshot for staff roles', async () => {
-    vi.resetModules();
-    m.auth.mockResolvedValueOnce({ orgRole: 'governance' });
-    const { GET, dynamic } = await loadRoute();
+  it('does not accept guest/member/steward role titles', async () => {
+    for (const role of ['guest', 'member', 'steward', 'unknown']) {
+      m.context.role = role;
+      const GET = await route();
+      const response = await GET(request());
+      expect(response.status).toBe(403);
+    }
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
 
-    const response = await GET(new Request('http://localhost/api/evidence/export?orgId=liuna-opdc-cecof-synthetic'));
-    const body = await readJson(response);
+  it('rejects anonymous callers without issuing an evidence export', async () => {
+    m.context.userId = '';
+    const GET = await route();
+    expect((await GET(request())).status).toBe(401);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
 
-    expect(dynamic).toBe('force-dynamic');
-    expect(response.status).toBe(200);
-    expect(body).toMatchObject({
-      org_id: 'liuna-opdc-cecof-synthetic',
-      app: 'union-eyes',
-      policy_checks: {
-        grievance_creation: 'enforced',
-        cross_org_access: 'denied',
-      },
-      org_isolation: {
-        enforced: true,
-        cross_org_read_attempts_blocked: true,
-      },
-    });
-    expect(body).not.toHaveProperty('documents');
-    expect(body).not.toHaveProperty('matters');
-    expect(body).not.toHaveProperty('raw_records');
-    expect(JSON.stringify(body)).not.toContain('privileged');
-    expect(m.recordEvidenceExport).toHaveBeenCalledTimes(1);
+  it('fails closed if the durable audit transaction cannot commit', async () => {
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit database unavailable'));
+    const GET = await route();
+    const response = await GET(request(m.context.organizationId));
+    expect(response.status).toBe(500);
+    expect(m.persistAtomicAudit).toHaveBeenCalledTimes(1);
   });
 });

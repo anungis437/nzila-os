@@ -79,9 +79,10 @@ function dataOf(source: string, guard: RouteGuard): RouteData {
 }
 
 /**
- * Ballot-casting routes carry no per-ballot audit row on purpose (G12): a row with the member and a timestamp would let a
- * reader of the audit log link a member to a ballot. The ballot row under the anonymous voter id is the participation
- * record, and the session lifecycle around it is audited. The manifest test pins this list and its justification.
+ * Ballot-casting routes carry no per-ballot choice audit on purpose (G12): a row with the member and a choice, or a
+ * member and a receipt that points at a choice, would let a reader link a voter to a selection. Acceptance, eligibility,
+ * proxy authorization and recount are audited by lib/voting/ballot-process-audit.ts without that pair. The manifest test
+ * pins this list: the route file itself must not call persistAtomicAudit.
  */
 export const BALLOT_SECRECY_EXEMPT_ROUTES = ['voting/sessions/[id]/vote/route.ts', 'governance/elections/sessions/[id]/vote/route.ts']
 
@@ -108,13 +109,20 @@ export const COMPUTE_ONLY_ROUTES: Record<string, string[]> = {
  * imports no function whose name says it changes state.
  */
 export const READ_ONLY_POST_ROUTES = [
-  'ai/classify/route.ts', 'ai/mamba/route.ts', 'ai/match-precedents/route.ts', 'ai/pension/plans/[id]/trustee-summary/route.ts',
-  'ai/search/route.ts', 'ai/semantic-search/route.ts', 'ai/summarize/route.ts', 'carbon/validate/route.ts',
+  // POST is a guarded, explicit HTTP 501; no role repair or data mutation occurs.
+  'admin/fix-super-admin-roles/route.ts',
+  // ai/classify, ai/match-precedents, ai/search and ai/summarize now write an atomic audit record, so they are audited routes, not read-only.
+  // The education reminder job only reads and sends email; it writes no row, and its per-send outcome is the job result.
+  'cron/education-reminders/route.ts',
+  'ai/mamba/route.ts', 'ai/pension/plans/[id]/trustee-summary/route.ts',
+  'ai/semantic-search/route.ts', 'carbon/validate/route.ts',
+  // voice/transcribe writes an atomic audit record of each transcription, so it is an audited route, not read-only.
+  'calendar-sync/connections/route.ts',
   'clause-library/search/route.ts', 'cognition/precedents/route.ts', 'compliance/validate/route.ts', 'emergency/pipeda/route.ts',
   'exit-interviews/graph-query/route.ts', 'exit-interviews/mitigation-comparison/route.ts', 'exit-interviews/scenarios/route.ts',
   'exit-interviews/search/route.ts', 'exit-interviews/simulation/route.ts', 'labour-standards/[jurisdiction]/compliance-check/route.ts',
-  'members/segments/preview/route.ts', 'ml/query/route.ts', 'precedents/search/route.ts', 'reports/execute/route.ts',
-  'social-media/analytics/route.ts', 'v2/[...path]/route.ts', 'voice/transcribe/route.ts', 'voice/upload/route.ts',
+  'members/segments/preview/route.ts', 'pension/t4a/route.ts', 'precedents/search/route.ts', 'profile/roles/route.ts', 'reports/execute/route.ts',
+  'social-media/analytics/route.ts', 'v2/[...path]/route.ts', 'voice/upload/route.ts',
   'voting/verify/route.ts', 'workspace/telemetry/route.ts',
 ]
 
@@ -132,7 +140,9 @@ export const UNATTRIBUTABLE_WRITE_ROUTES: Record<string, { why: string; control:
   'icra/[assessmentId]/capability/exchange/route.ts': { why: 'Exchanges a capability for a cookie; writes nothing audit-relevant.', control: /assessment-capability|rateLimit\(/ },
   'icra/checkout/route.ts': { why: 'Creates a payment-provider session for a pseudonymous assessment; no actor.', control: /assessment-capability|guardPublicIntake|rateLimit\(/ },
   'icra/email-results/route.ts': { why: 'Emails results of a pseudonymous assessment to its holder; no actor.', control: /assessment-capability|guardPublicIntake|rateLimit\(/ },
-  'icra/telemetry/route.ts': { why: 'Anonymous product telemetry.', control: /rateLimit\(/ },
+  'icra/telemetry/route.ts': { why: 'Anonymous product telemetry.', control: /rateLimit\(|checkRateLimit\(/ },
+  'contact/route.ts': { why: 'Public contact form: stores the submission in the system-only contact_submissions table before the CRM sync; no actor, no tenant (the row is platform-wide intake, not tenant data).', control: /guardPublicIntake/ },
+  'workbook/checkout/route.ts': { why: 'Creates a payment-provider checkout session for a pseudonymous workbook, which is a bearer reference until claimed (the claim is audited); it stores nothing for the buyer here.', control: /guardPublicIntake/ },
   'workbook/start/route.ts': { why: 'Public pseudonymous workbook intake; the id is a bearer reference until claimed (the claim is audited).', control: /guardPublicIntake/ },
   'pilot/events/route.ts': { why: 'Pilot usage telemetry stamped from the session; an audit row per usage event would flood the audit log.', control: /withRoleAuth|withApiAuth/ },
   'location/track/route.ts': { why: 'Per-ping location telemetry of a consenting member; consent, geofence and disable changes are audited.', control: /withApiAuth/ },
@@ -140,7 +150,7 @@ export const UNATTRIBUTABLE_WRITE_ROUTES: Record<string, { why: string; control:
   'cron/location-retention/route.ts': { why: 'Platform-wide 24-hour retention sweep over user-scoped location rows; no acting organization. Its evidence row (location_deletion_log) commits in the same system transaction, so a failed evidence write keeps the data for the next run.', control: /cron:\s*true/ },
   'whop/create-checkout/route.ts': { why: 'Creates a payment-provider checkout session for the signed-in user, who may hold no organization yet; nothing is stored here.', control: /requireUser/ },
   'organizations/switch/route.ts': { why: 'Session rotation is owned and audited by platform-auth; the legacy branch only validates membership and stores nothing.', control: /auth\(\)/ },
-  'cron/sla-watchdog/route.ts': { why: 'Emits deadline events and metrics only; no acting organization.', control: /cron:\s*true|CRON_SECRET|verifyCronAuth|cronAuth/i },
+  'cron/sla-watchdog/route.ts': { why: 'Platform-wide scan with no acting organization; it writes one deduplicated inbox alert per claim, kind and deadline inside each organization\'s own context (an audit row per alert would double every alert), plus metrics.', control: /cron:\s*true|CRON_SECRET|verifyCronAuth|cronAuth/i },
 }
 
 const ATOMIC_AUDIT = /persistAtomicAudit|appendMandatoryAudit/
@@ -197,6 +207,14 @@ function auditOf(route: string, source: string, guard: RouteGuard, mutating: boo
   if (BALLOT_SECRECY_EXEMPT_ROUTES.includes(route)) return 'EXEMPT_BALLOT_SECRECY'
   if (route in COMPUTE_ONLY_ROUTES || READ_ONLY_POST_ROUTES.includes(route)) return 'COMPUTE_ONLY'
   if (route in UNATTRIBUTABLE_WRITE_ROUTES) return 'EXEMPT_UNATTRIBUTABLE'
+  // The legacy event item API delegates PATCH/DELETE to the canonical handler, whose tenant-locked
+  // transaction commits its mutation and mandatory audit together. This is a narrow, pinned alias:
+  // the manifest ratchet checks both the delegate and the canonical audited implementation.
+  if (route === 'events/[id]/route.ts' &&
+      /from ['"]@\/app\/api\/calendar\/events\/\[id\]\/route['"]/.test(source) &&
+      /canonicalPATCH\(request/.test(source) && /canonicalDELETE\(request/.test(source)) {
+    return 'ATOMIC_SERVICE'
+  }
   if (guard === 'CRUD_FACTORY') return 'CRUD_ATOMIC'
   if (ATOMIC_AUDIT.test(source)) return 'ATOMIC'
   if (imports.some((f) => ATOMIC_AUDIT.test(readFileSync(f, 'utf8')))) return 'ATOMIC_SERVICE'

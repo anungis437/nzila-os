@@ -2,7 +2,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import crypto from 'crypto';
 import { NextRequest } from 'next/server';
 import type { PGlite } from '@electric-sql/pglite';
-import { campaigns, communicationPreferences, consentRecords, messageLog } from '@/db/schema';
+import { campaigns, communicationPreferences, consentRecords, messageLog, newsletterDistributionLists, newsletterListSubscribers } from '@/db/schema';
+import { notificationDeliveryLog } from '@/db/schema/domains/communications';
 import { createTableDatabase } from './support/pglite-tables';
 
 // UE-CONV-K-006: the public/callback communications routes run with no tenant bound. Every statement derives the
@@ -87,7 +88,7 @@ async function preference(id: string) {
 }
 
 beforeAll(async () => {
-  const created = await createTableDatabase([campaigns, messageLog, communicationPreferences, consentRecords]);
+  const created = await createTableDatabase([campaigns, messageLog, communicationPreferences, consentRecords, notificationDeliveryLog, newsletterDistributionLists, newsletterListSubscribers]);
   pg = created.pg;
   state.db = created.db;
   process.env.COMMUNICATIONS_TRACKING_SECRET = SECRET;
@@ -170,11 +171,27 @@ describe('communications/track/open — organization-bound mutation', () => {
 });
 
 describe('communications/unsubscribe — organization-bound mutation', () => {
-  async function unsubscribe(recipientId: string, campaignId?: string) {
+
+  it('a scanner GET leaves real SQL preference, consent and campaign rows unchanged', async () => {
+    const pref = await insertPreference(ORG_A, 'r1');
     const { GET } = await import('../communications/unsubscribe/[recipientId]/route');
-    const token = sign(campaignId ? `${campaignId}:${recipientId}:unsubscribe` : `${recipientId}:unsubscribe`);
-    const query = `${campaignId ? `campaignId=${campaignId}&` : ''}token=${token}`;
-    return GET(new NextRequest(`http://localhost/api/communications/unsubscribe/${recipientId}?${query}`), {
+    const signed = sign(`${CAMPAIGN_A}:r1:unsubscribe`);
+    const response = await GET(
+      new NextRequest(`http://localhost/api/communications/unsubscribe/r1?campaignId=${CAMPAIGN_A}&token=${signed}`),
+      { params: Promise.resolve({ recipientId: 'r1' }) },
+    );
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain('<form method="post">');
+    expect(await preference(pref)).toEqual({ email_enabled: true, globally_unsubscribed: false });
+    expect((await pg.query('SELECT id FROM consent_records')).rows).toHaveLength(0);
+    expect(await stats(CAMPAIGN_A)).toEqual({});
+  });
+
+  async function unsubscribe(recipientId: string, campaignId?: string) {
+    const { POST } = await import('../communications/unsubscribe/[recipientId]/route');
+    const token = sign(campaignId ? `${campaignId}:${recipientId}:unsubscribe` : `${recipientId}:unsubscribe-all`);
+    const query = `${campaignId ? `campaignId=${campaignId}&` : 'scope=all&'}token=${token}`;
+    return POST(new NextRequest(`http://localhost/api/communications/unsubscribe/${recipientId}?${query}`, { method: 'POST' }), {
       params: Promise.resolve({ recipientId }),
     });
   }

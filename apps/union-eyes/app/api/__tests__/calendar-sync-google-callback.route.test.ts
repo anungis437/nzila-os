@@ -9,8 +9,16 @@ const m = vi.hoisted(() => ({
   withRLSContext: vi.fn(),
   standardErrorResponse: vi.fn(),
   selectQueue: [] as unknown[][],
+  verifyCalendarOAuthState: vi.fn(),
+  clearCalendarOAuthStateCookie: vi.fn(),
+  persistAtomicAudit: vi.fn(),
 }));
 
+vi.mock('@/lib/external-calendar-sync/oauth-state', () => ({
+  verifyCalendarOAuthState: m.verifyCalendarOAuthState,
+  clearCalendarOAuthStateCookie: m.clearCalendarOAuthStateCookie,
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/api-auth-guard', () => ({ withRoleAuth: m.withRoleAuth, BaseAuthContext: {} }));
 vi.mock('@/lib/external-calendar-sync/google-calendar-service', () => ({
   exchangeCodeForTokens: m.exchangeCodeForTokens,
@@ -49,6 +57,8 @@ describe('calendar-sync/google/callback route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.selectQueue = [];
+    m.verifyCalendarOAuthState.mockImplementation((_request: unknown, _provider: string, state: string | null) => state === 'signed-state');
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.withRoleAuth.mockImplementation((_role: string, handler: any) => (request: any, ctx: any = { userId: 'u1', organizationId: 'org_1' }) => handler(request, ctx));
     m.exchangeCodeForTokens.mockResolvedValue({
       accessToken: 'access_123',
@@ -73,9 +83,9 @@ describe('calendar-sync/google/callback route', () => {
     };
 
     m.db.select = vi.fn(() => createSelectChain());
-    m.db.insert = vi.fn(() => ({ values: vi.fn(async () => null) }));
+    m.db.insert = vi.fn(() => ({ values: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 'new-conn' }]) })) }));
     m.db.update = vi.fn(() => ({ set: vi.fn(() => ({ where: vi.fn(async () => null) })) }));
-    m.withRLSContext.mockImplementation((fn: any) => fn());
+    m.withRLSContext.mockImplementation((_context: unknown, fn: any) => fn(m.db));
   });
 
   it('returns auth required when user id is missing', async () => {
@@ -104,6 +114,22 @@ describe('calendar-sync/google/callback route', () => {
     expect(response.status).toBe(403);
   });
 
+  it('rejects missing OAuth state before any provider token exchange', async () => {
+    const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/google/callback?code=abc'));
+    expect(response.status).toBe(403);
+    expect(m.exchangeCodeForTokens).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when the mandatory connection audit cannot be written', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push([]);
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/google/callback?code=oauth_code&state=signed-state'));
+    expect(response.status).toBe(500);
+    expect(m.persistAtomicAudit).toHaveBeenCalled();
+  });
+
   it('returns service unavailable when no refresh token exists for new connection', async () => {
     const { GET } = await loadRoute();
     m.selectQueue.push([]);
@@ -113,7 +139,7 @@ describe('calendar-sync/google/callback route', () => {
       expiresAt: new Date(Date.now() + 3600000),
     });
 
-    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/google/callback?code=oauth_code&state=u1'));
+    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/google/callback?code=oauth_code&state=signed-state'));
 
     expect(response.status).toBe(503);
   });
@@ -122,11 +148,22 @@ describe('calendar-sync/google/callback route', () => {
     const { GET } = await loadRoute();
     m.selectQueue.push([]);
 
-    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/google/callback?code=oauth_code&state=u1'));
+    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/google/callback?code=oauth_code&state=signed-state'));
 
     expect(response.status).toBe(307);
     expect(response.headers.get('location')).toContain('/calendar?sync=connected&provider=google');
     expect(m.db.insert).toHaveBeenCalled();
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.db, expect.objectContaining({ organizationId: 'org_1', action: 'calendar.connection.oauth.connect' }));
+  });
+
+  it('encrypts rotated refresh tokens before updating an existing connection', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push([{ id: 'existing-google-conn' }]);
+    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/google/callback?code=oauth_code&state=signed-state'));
+    expect(response.status).toBe(307);
+    const set = m.db.update.mock.results[0].value.set;
+    expect(set).toHaveBeenCalledWith(expect.objectContaining({ refreshToken: 'encrypted_token' }));
+    expect(m.persistAtomicAudit).toHaveBeenCalled();
   });
 
   it('updates existing connection when record already exists', async () => {
@@ -138,9 +175,10 @@ describe('calendar-sync/google/callback route', () => {
       expiresAt: new Date(Date.now() + 3600000),
     });
 
-    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/google/callback?code=oauth_code&state=u1'));
+    const response = await GET(new NextRequest('http://localhost/api/calendar-sync/google/callback?code=oauth_code&state=signed-state'));
 
     expect(response.status).toBe(307);
     expect(m.db.update).toHaveBeenCalled();
+    expect(m.persistAtomicAudit).toHaveBeenCalled();
   });
 });

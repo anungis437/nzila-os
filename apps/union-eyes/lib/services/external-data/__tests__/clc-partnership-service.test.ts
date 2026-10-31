@@ -1,3 +1,5 @@
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import path from 'node:path';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // === Hoisted mocks ===
@@ -92,19 +94,20 @@ describe('CLCPartnershipService', () => {
         .rejects.toThrow();
     });
 
-    it('creates a sync log entry', async () => {
+    it('does not insert a clc_sync_log row when OAuth is unavailable', async () => {
       mocks.mockLimit.mockResolvedValue([]);
 
       try { await service.syncPerCapitaBenchmarks({}); } catch { /* expected */ }
-      // Insert for sync log
-      expect(mocks.mockInsert).toHaveBeenCalled();
+      expect(mocks.mockInsert).not.toHaveBeenCalled();
+      expect(mocks.mockUpdate).not.toHaveBeenCalled();
     });
 
-    it('accepts fiscalYear and jurisdiction params', async () => {
+    it('accepts fiscalYear and jurisdiction params without writing clc_sync_log', async () => {
       mocks.mockLimit.mockResolvedValue([]);
 
       try { await service.syncPerCapitaBenchmarks({ fiscalYear: 2024, jurisdiction: 'ON' }); } catch { /* expected */ }
-      expect(mocks.mockInsert).toHaveBeenCalled();
+      expect(mocks.mockInsert).not.toHaveBeenCalled();
+      expect(mocks.mockUpdate).not.toHaveBeenCalled();
     });
   });
 
@@ -116,13 +119,12 @@ describe('CLCPartnershipService', () => {
         .rejects.toThrow();
     });
 
-    it('creates a sync log with correct type', async () => {
+    it('does not update clc_sync_log when OAuth is unavailable', async () => {
       mocks.mockLimit.mockResolvedValue([]);
 
       try { await service.syncUnionDensity({}); } catch { /* expected */ }
-      expect(mocks.mockValues).toHaveBeenCalledWith(
-        expect.objectContaining({ syncType: 'union_density', status: 'running' }),
-      );
+      expect(mocks.mockInsert).not.toHaveBeenCalled();
+      expect(mocks.mockUpdate).not.toHaveBeenCalled();
     });
   });
 
@@ -157,12 +159,51 @@ describe('CLCPartnershipService', () => {
   });
 
   describe('getSyncHistory', () => {
-    it('returns sync log entries', async () => {
-      const logs = [{ syncId: 's1' }];
-      mocks.mockLimit.mockResolvedValueOnce(logs);
-
-      const result = await service.getSyncHistory(5);
-      expect(result).toEqual(logs);
+    it('refuses to read every tenant sync log', async () => {
+      await expect(service.getSyncHistory(5)).rejects.toThrow(/organization-scoped CLC routes/);
+      expect(mocks.mockSelect).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('clc partnership dependency', () => {
+  const appRoot = path.resolve(__dirname, '../../../..');
+  const servicePath = path.join(appRoot, 'lib/services/external-data/clc-partnership-service.ts');
+
+  it('does not insert or update clc_sync_log', () => {
+    const source = readFileSync(servicePath, 'utf8');
+    expect(source).not.toMatch(/\.update\(\s*clcSyncLog\s*\)/);
+    expect(source).not.toMatch(/\.insert\(\s*clcSyncLog\s*\)/);
+  });
+
+  it('has no production, dynamic, or worker importer', () => {
+    const importer = /(?:from\s+['"][^'"]*clc-partnership-service|import\s*\(\s*['"][^'"]*clc-partnership-service|require\(\s*['"][^'"]*clc-partnership-service|\bclcPartnershipService\b|new\s+CLCPartnershipService)/;
+    const allowed = new Set([
+      'lib/services/external-data/clc-partnership-service.ts',
+      'lib/services/external-data/__tests__/clc-partnership-service.test.ts',
+    ]);
+    const hits: string[] = [];
+    const skip = new Set(['node_modules', '.next', 'dist', 'coverage', '.git']);
+    const walk = (dir: string) => {
+      for (const name of readdirSync(dir)) {
+        if (skip.has(name)) continue;
+        const full = path.join(dir, name);
+        if (statSync(full).isDirectory()) {
+          walk(full);
+          continue;
+        }
+        if (!/\.(ts|tsx|js|mjs|py)$/.test(name)) continue;
+        const rel = path.relative(appRoot, full).split(path.sep).join('/');
+        if (allowed.has(rel)) continue;
+        if (importer.test(readFileSync(full, 'utf8'))) hits.push(rel);
+      }
+    };
+    walk(appRoot);
+    expect(hits).toEqual([]);
+    for (const rel of ['backend/billing/views.py', 'backend/billing/tests_round51_dead_service_containment.py']) {
+      const text = readFileSync(path.join(appRoot, rel), 'utf8');
+      expect(text).toMatch(/clc-partnership-service/);
+      expect(text).not.toMatch(importer);
+    }
   });
 });

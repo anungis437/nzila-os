@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm'
 import { icraAssessments, icraOrganizations } from '@/db/schema/icra-schema'
 import { logger } from '@/lib/logger'
 import { DOCTRINE_VERSION } from '@/lib/icra/copy'
+import { serverConsentRecord } from '@/lib/icra/consent'
 import { QUESTION_BANK_VERSION } from '@/lib/icra/questions'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import { guardPublicIntake } from '@/lib/public-intake/guard'
@@ -41,7 +42,7 @@ const startSchema = z.object({
 export async function POST(request: Request) {
   let payload: z.infer<typeof startSchema>
   try {
-    const intake = await guardPublicIntake(request, { bucket: 'write' })
+    const intake = await guardPublicIntake(request, { bucket: 'write', challenge: true })
     if (!intake.ok) return intake.response
     payload = startSchema.parse(intake.json ?? {})
   } catch (err) {
@@ -51,10 +52,10 @@ export async function POST(request: Request) {
     )
   }
 
-  const consentComplete =
-    payload.consent?.acknowledgedAntiSurveillance === true &&
-    payload.consent?.acknowledgedDataHandling === true &&
-    payload.consent?.acknowledgedExplainability === true
+  const consent = serverConsentRecord(payload.consent)
+  if (!consent) {
+    return NextResponse.json({ error: 'The three acknowledgements are required before an assessment can start.' }, { status: 400 })
+  }
 
   try {
     return await withSystemContext(async (tx) => {
@@ -85,13 +86,7 @@ export async function POST(request: Request) {
           status: 'in_progress',
           questionBankVersion: QUESTION_BANK_VERSION,
           doctrineVersion: DOCTRINE_VERSION,
-          consent: consentComplete
-            ? {
-                ...payload.consent,
-                acceptedAt: new Date().toISOString(),
-                doctrineVersion: DOCTRINE_VERSION,
-              }
-            : null,
+          consent,
           organizationContext: ctx ?? null,
           locale: payload.locale ?? 'en-CA',
           capabilityTokenHash: hashCapabilityToken(capabilityToken),
@@ -119,6 +114,9 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
+  // A capability read is bounded like the writes: a caller cannot probe assessment ids or render reports without limit.
+  const intake = await guardPublicIntake(request, { bucket: 'capability', readBody: false })
+  if (!intake.ok) return intake.response
   const url = new URL(request.url)
   const id = url.searchParams.get('assessmentId')
   if (!id) {

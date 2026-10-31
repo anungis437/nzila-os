@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getBuildMetadata } from '@nzila/os-core/health'
 import { getEnvironmentSnapshot } from '@/lib/runtime/environment'
+import { hasDeploymentProbeCredential } from '@/lib/runtime/deployment-probe'
 
 const APP = 'union-eyes'
 
@@ -26,8 +27,31 @@ function inferSurfaceEnvironment(host: string): 'staging' | 'production' | 'unkn
   return 'unknown'
 }
 
+/**
+ * GET /api/version — build identity for drift detection.
+ *
+ * Anonymous callers receive only the build identity (commit, build time, release and artifact ids). The deployment
+ * topology (environment, host, deployment type, feature profile, image digests) is disclosed only to a caller that
+ * presents the deployment-probe credential, and always with a no-store policy.
+ */
 export async function GET(request: Request) {
   const metadata = getBuildMetadata(APP)
+  const headers = { 'Cache-Control': 'no-store' }
+
+  if (!hasDeploymentProbeCredential(request.headers.get('authorization'))) {
+    return NextResponse.json(
+      {
+        app: metadata.app,
+        gitSha: metadata.gitSha,
+        buildTimestamp: metadata.buildTimestamp,
+        appVersion: metadata.appVersion,
+        releaseId: metadata.releaseId,
+        artifactId: metadata.artifactId,
+      },
+      { headers },
+    )
+  }
+
   const environmentSnapshot = getEnvironmentSnapshot()
   const hostHeader = request.headers.get('x-forwarded-host') || request.headers.get('host') || ''
   const surfaceEnvironment = inferSurfaceEnvironment(hostHeader)
@@ -45,5 +69,5 @@ export async function GET(request: Request) {
     requestHost: hostHeader || null,
     frontendImageDigest: process.env.UE_FRONTEND_IMAGE_DIGEST ?? null,
     backendImageDigest: process.env.UE_BACKEND_IMAGE_DIGEST ?? null,
-  })
+  }, { headers })
 }

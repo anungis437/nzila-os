@@ -7,6 +7,7 @@ const m = vi.hoisted(() => ({
   updateSet: vi.fn(),
   db: { insert: vi.fn(), select: vi.fn(), update: vi.fn() },
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  requireLiveFinancialMandate: vi.fn(),
 }));
 
 vi.mock('@/lib/api/framework', () => ({
@@ -18,7 +19,7 @@ vi.mock('@/lib/api/framework', () => ({
   },
 }));
 vi.mock('@/db', () => ({ db: m.db }));
-vi.mock('drizzle-orm', () => ({ and: vi.fn(), eq: vi.fn(), desc: vi.fn() }));
+vi.mock('drizzle-orm', () => ({ and: vi.fn(), eq: vi.fn(), desc: vi.fn(), inArray: vi.fn() }));
 vi.mock('@/db/schema/dues-finance-schema', () => ({ employerRemittances: { id: 'id', organizationId: 'o', createdAt: 'c' } }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('@/lib/db/with-rls-context', () => ({
@@ -26,6 +27,9 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn().mockResolvedValue(undefined) }));
 vi.mock('@/lib/evidence', () => ({ buildUnionEvidencePack: vi.fn(() => Promise.resolve()) }));
+vi.mock('@/lib/finance/require-live-financial-mandate', () => ({
+  requireLiveFinancialMandate: m.requireLiveFinancialMandate,
+}));
 
 const EMPLOYER_ID = '11111111-1111-4111-8111-111111111111';
 
@@ -43,6 +47,7 @@ describe('employer remittance records cannot be reconciled or file-bound by the 
     m.updateSet.mockReturnValue({ where: () => ({ returning: async () => [{ id: 'rem_1' }] }) });
     m.db.update.mockReturnValue({ set: m.updateSet });
     m.db.select.mockReturnValue({ from: () => ({ where: async () => [{ id: 'rem_1' }] }) });
+    m.requireLiveFinancialMandate.mockResolvedValue({ mandateId: 'synthetic', ledgerWide: true, resourceIds: [], accountIds: [] });
   });
 
   it('PATCH rejects reconciliation, completion and result-counter fields', async () => {
@@ -95,5 +100,26 @@ describe('employer remittance records cannot be reconciled or file-bound by the 
     expect(values.processingStatus).toBe('pending');
     expect(values.isReconciled).toBe(false);
     expect(values.organizationId).toBe('org_1');
+    expect(m.requireLiveFinancialMandate).toHaveBeenCalled();
+  });
+
+  it('POST writes nothing when no financial mandate has been issued', async () => {
+    m.requireLiveFinancialMandate.mockRejectedValue(Object.assign(new Error('No financial mandate has been issued in this organization.'), { status: 403 }));
+    const { POST } = await import('../dues/remittances/route');
+    await expect((POST as any)({
+      organizationId: 'org_1',
+      userId: 'u1',
+      request: jsonRequest({
+        employerId: EMPLOYER_ID,
+        periodStart: '2026-01-01',
+        periodEnd: '2026-01-31',
+        fiscalYear: 2026,
+        fiscalMonth: 1,
+        remittanceDate: '2026-02-01',
+        totalAmount: '100.00',
+        memberCount: 3,
+      }),
+    })).rejects.toThrow(/financial mandate/);
+    expect(m.db.insert).not.toHaveBeenCalled();
   });
 });

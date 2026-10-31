@@ -10,6 +10,7 @@ const h = vi.hoisted(() => ({
   compareInOrg: vi.fn(),
   saveComparison: vi.fn(),
   submitReview: vi.fn(),
+  requireSystemAdmin: vi.fn(),
   createJob: vi.fn(),
   getSource: vi.fn(),
   updateSource: vi.fn(),
@@ -32,9 +33,11 @@ vi.mock('@/lib/api/framework', () => ({
     badRequest: (message: string) => Object.assign(new Error(message), { status: 400 }),
     notFound: (resource: string) => Object.assign(new Error(`${resource} not found`), { status: 404 }),
     unauthorized: (message: string) => Object.assign(new Error(message), { status: 401 }),
+    conflict: (message: string) => Object.assign(new Error(message), { status: 409 }),
   },
 }));
 vi.mock('@/lib/api-auth-guard', () => ({
+  requireSystemAdmin: () => h.requireSystemAdmin(),
   withRoleAuth: (role: string, handler: (req: NextRequest, ctx: unknown) => Promise<Response>) => {
     h.roles.push(role);
     return (req: NextRequest, ctx: Record<string, unknown> = {}) =>
@@ -45,6 +48,7 @@ vi.mock('@/db/db', () => ({ db: {} }));
 vi.mock('@/db', () => ({ db: {} }));
 vi.mock('@/db/schema/integration-schema', () => ({
   apiIntegrations: new Proxy({}, { get: (_t, p) => `api.${String(p)}` }),
+  integrationSyncLogs: new Proxy({}, { get: (_t, p) => `log.${String(p)}` }),
 }));
 vi.mock('@/db/schema', () => ({
   tribunalTypeEnum: { enumValues: ['other'] },
@@ -109,7 +113,7 @@ beforeEach(() => {
   h.compareInOrg.mockReset();
   h.saveComparison.mockReset();
   h.submitReview.mockReset();
-  h.createJob.mockReset();
+  h.requireSystemAdmin.mockReset().mockResolvedValue(undefined);
   h.getSource.mockReset();
   h.updateSource.mockReset();
   h.deactivateSource.mockReset();
@@ -149,45 +153,50 @@ describe('extensions/[id]', () => {
     await expect(PATCH({ params: { id: 'i1' }, request: { json: async () => ({ enabled: true }) }, organizationId: 'org-1', userId: 'u1' })).rejects.toMatchObject({ status: 404 });
 
     h.audit.mockClear();
-    h.queue.push([{ id: 'i1', name: 'N' }]);
+    h.queue.push([{ id: 'i1' }], [], [{ id: 'i1', name: 'N' }]); // owned, no sync history, deleted
     await DELETE({ params: { id: 'i1' }, organizationId: 'org-1', userId: 'u1' });
     expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'integration.delete', resourceId: 'i1' }));
     h.audit.mockClear();
-    h.queue.push([]);
+    h.queue.push([]); // not the organization's integration
     await expect(DELETE({ params: { id: 'i1' }, organizationId: 'org-1', userId: 'u1' })).rejects.toMatchObject({ status: 404 });
     expect(h.audit).not.toHaveBeenCalled();
-  });
-});
 
-describe('ml/monitoring/alerts POST', () => {
-  const alertId = '11111111-1111-4111-8111-111111111111';
-
-  it('requires a steward and never substitutes the user id for a missing organization', async () => {
-    const { POST } = await import('../ml/monitoring/alerts/route');
-    expect(h.roles).toContain('steward');
-    const response = await POST(post({ alertId }), { organizationId: undefined } as never);
-    expect(response.status).toBe(400);
-    expect(h.audit).not.toHaveBeenCalled();
-  });
-
-  it('acknowledges in the caller\'s organization and audits on the same transaction', async () => {
-    const { POST } = await import('../ml/monitoring/alerts/route');
-    h.executeResult.mockResolvedValue([{ alert_id: alertId }]);
-    const response = await POST(post({ alertId }));
-    expect(response.status).toBe(200);
-    expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'ml.alert.acknowledge', organizationId: 'org-1', userId: 'u1', resourceId: alertId }));
-  });
-
-  it('an acknowledgment held by another organization is not overwritten and not audited', async () => {
-    const { POST } = await import('../ml/monitoring/alerts/route');
-    h.executeResult.mockResolvedValue([]);
-    const response = await POST(post({ alertId }));
-    expect(response.status).toBe(500);
+    // DEF-0B7-PLT-EXT-DELETE-HARD-DELETE-CASCADES-SYNC-LOG-HISTORY: an integration that has run keeps its history, so it is not deleted.
+    h.queue.push([{ id: 'i1' }], [{ id: 'log-1' }]);
+    await expect(DELETE({ params: { id: 'i1' }, organizationId: 'org-1', userId: 'u1' })).rejects.toMatchObject({ status: 409 });
     expect(h.audit).not.toHaveBeenCalled();
   });
 });
 
+// The acknowledgment route wrote to ml_alert_acknowledgments, a table no migration or schema defines, and the alert list it
+// acknowledged queried columns that do not exist and stated a fixed drift alert. Both methods answer 501, so no acknowledgment is
+// recorded or audited for an alert that cannot exist.
+describe('ml/monitoring/alerts', () => {
+  it('answers 501 for GET and POST and writes nothing', async () => {
+    const { readFileSync } = await import('node:fs');
+    const { resolve } = await import('node:path');
+    const source = readFileSync(resolve(__dirname, '../ml/monitoring/alerts/route.ts'), 'utf8');
+    expect(source).toContain('ApiError.notImplemented');
+    expect(source).not.toContain('ml_alert_acknowledgments');
+    expect(source).not.toContain('persistAtomicAudit');
+    const { GET, POST } = await import('../ml/monitoring/alerts/route');
+    expect(typeof GET).toBe('function');
+    expect(typeof POST).toBe('function');
+    expect(h.audit).not.toHaveBeenCalled();
+  });
+});
 describe('cba-intelligence routes', () => {
+  // DEF-0B4-CBA-INTEL-TENANT-STEWARD-REVIEWS-SHARED-DATASET / ...-TENANT-ADMIN-WRITES-SHARED-DATASET: the extracted CBA dataset has no organization column, so a
+  // decision changes what every organization reads. Reviewing is platform authority; an organization's steward or administrator is refused.
+  it('review POST and the review queue refuse a caller who is not a platform administrator, writing and reading nothing', async () => {
+    h.requireSystemAdmin.mockRejectedValue(Object.assign(new Error('System administrator privileges required'), { status: 403 }));
+    const mod = await import('../cba-intelligence/review/route');
+    await expect((mod.POST as never as (c: unknown) => Promise<unknown>)({ body: { targetType: 'agreement', targetId: '11111111-1111-4111-8111-111111111111', decision: 'approved' }, userId: 'u1', organizationId: 'org-1' })).rejects.toMatchObject({ status: 403 });
+    await expect((mod.GET as never as (c: unknown) => Promise<unknown>)({ query: {}, userId: 'u1', organizationId: 'org-1' })).rejects.toMatchObject({ status: 403 });
+    expect(h.submitReview).not.toHaveBeenCalled();
+    expect(h.audit).not.toHaveBeenCalled();
+  });
+
   it('review POST records the decision and the audit on the same transaction', async () => {
     const { POST } = await import('../cba-intelligence/review/route');
     h.submitReview.mockResolvedValue({ id: 'd1' });

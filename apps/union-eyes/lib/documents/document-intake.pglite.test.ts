@@ -85,7 +85,7 @@ const { POST: createDocument } = await import('@/app/api/documents/repository/ro
 const { POST: appendVersion } = await import('@/app/api/documents/repository/[id]/versions/route');
 const { createDocumentDatabase, resetDocumentDatabase } = await import('@/lib/documents/test-support/pglite-document-database');
 
-const { openIntake, checkIntakeForAcceptance, bindIntakeInTx, cancelIntake, expireDueIntakes, finalizeIntakeObjects, runIntakeReaper, IntakeConflictError, INTAKE_MAX_DELETION_ATTEMPTS } = lifecycle;
+const { openIntake, checkIntakeForAcceptance, bindIntakeInTx, cancelIntake, expireDueIntakes, finalizeIntakeObjects, runIntakeReaper, countAbandonedIntakeObjects, IntakeConflictError, INTAKE_MAX_DELETION_ATTEMPTS } = lifecycle;
 
 let pg: PGlite;
 const q = (text: string, params: unknown[] = []) => pg.query(text, params);
@@ -372,7 +372,7 @@ describe('expiry and abandoned-upload reconciliation', () => {
     await acceptInTx(accepted.view.intakeId, id(1));
 
     const report = await runIntakeReaper(state.storage);
-    expect(report).toEqual({ expired: 1, objectsDeleted: 1, deletionFailed: 0, skipped: 0 });
+    expect(report).toEqual({ expired: 1, objectsDeleted: 1, deletionFailed: 0, skipped: 0, abandoned: 0 });
     expect(state.removed).toEqual([lapsed.key]);
     expect(state.blobs.has(live.key)).toBe(true);
     expect(state.blobs.has(accepted.key)).toBe(true);
@@ -410,6 +410,9 @@ describe('expiry and abandoned-upload reconciliation', () => {
       await finalizeIntakeObjects(state.storage, { now: new Date(Date.now() + minutes(10 * (attempt + 1))) });
     }
     expect(await intakeRow(lapsed.view.intakeId)).toMatchObject({ object_state: 'deletion_failed', deletion_attempts: INTAKE_MAX_DELETION_ATTEMPTS });
+    // Nothing retries it any more, so the run reports it (disclosed addition).
+    expect(await countAbandonedIntakeObjects()).toBe(1);
+    expect(await runIntakeReaper(state.storage, { now: new Date(Date.now() + minutes(10 * 100)) })).toMatchObject({ abandoned: 1 });
   });
 
   it('is safe to run twice and resumes an interrupted deletion', async () => {
@@ -418,7 +421,7 @@ describe('expiry and abandoned-upload reconciliation', () => {
     // A crash after the claim leaves the row deletion_pending.
     await q(`UPDATE document_intakes SET object_state = 'deletion_pending', deletion_attempted_at = now() - interval '1 hour' WHERE id = $1`, [lapsed.view.intakeId]);
     expect(await runIntakeReaper(state.storage)).toMatchObject({ objectsDeleted: 1 });
-    expect(await runIntakeReaper(state.storage)).toEqual({ expired: 0, objectsDeleted: 0, deletionFailed: 0, skipped: 0 });
+    expect(await runIntakeReaper(state.storage)).toEqual({ expired: 0, objectsDeleted: 0, deletionFailed: 0, skipped: 0, abandoned: 0 });
   });
 
   it('skips, and never deletes, an object that a version references even if its intake lapsed', async () => {

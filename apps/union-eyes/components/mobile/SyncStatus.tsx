@@ -152,7 +152,9 @@ export function SyncStatusButton({ className }: { className?: string }) {
       });
 
       if (response.ok) {
-        setSyncState('success');
+        // The route registers the device and runs no synchronization; only a result that says it synced is shown as a success.
+        const result = (await response.json().catch(() => null)) as { sync?: { performed?: boolean } } | null;
+        setSyncState(result?.sync?.performed === true ? 'success' : 'idle');
       } else {
         setSyncState('error');
       }

@@ -15,7 +15,12 @@ vi.mock('@/db/db', async () => {
   return { db: lateBoundDb(state) };
 });
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: async (fn: (tx: unknown) => Promise<unknown>) => fn(state.db),
+  withRLSContext: async (_context: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(state.db),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: async () => undefined }));
+vi.mock('@/lib/external-calendar-sync/oauth-state', () => ({
+  verifyCalendarOAuthState: (_req: unknown, _provider: string, supplied: string | null) => supplied === 'signed-state',
+  clearCalendarOAuthStateCookie: () => undefined,
 }));
 vi.mock('@/lib/api-auth-guard', () => ({
   BaseAuthContext: {},
@@ -81,7 +86,7 @@ describe.each([
   async function callback(organizationId: string) {
     const { GET } = await load();
     return (GET as unknown as (request: NextRequest, context: unknown) => Promise<Response>)(
-      new NextRequest(`http://localhost/api/calendar-sync/${provider}/callback?code=abc&state=${USER}`),
+      new NextRequest(`http://localhost/api/calendar-sync/${provider}/callback?code=abc&state=signed-state`),
       { userId: USER, organizationId },
     );
   }

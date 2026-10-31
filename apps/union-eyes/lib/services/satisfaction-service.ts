@@ -44,7 +44,15 @@ export interface LroPerformance {
   avgOutcome: number;
   overallAverage: number;
   recommendRate: number;
+  /** True when too few responses were completed to show a figure without identifying the people who gave them. */
+  suppressed?: boolean;
 }
+
+/**
+ * Fewest completed responses for which an average is returned. A figure over one or two responses is that response, and a steward
+ * who knows which claim the representative handled can name the member, whatever the form said about anonymity.
+ */
+export const MIN_RESPONSES_FOR_AVERAGES = 5;
 
 // ============================================================================
 // Survey Lifecycle
@@ -133,13 +141,14 @@ export async function getOwnSatisfactionSurvey(
 /**
  * Get pending surveys for a member
  */
-export async function getPendingSurveys(memberId: string): Promise<SatisfactionSurvey[]> {
+export async function getPendingSurveys(memberId: string, organizationId: string): Promise<SatisfactionSurvey[]> {
   return db
     .select()
     .from(satisfactionSurveys)
     .where(
       and(
         eq(satisfactionSurveys.memberId, memberId),
+        eq(satisfactionSurveys.organizationId, organizationId),
         eq(satisfactionSurveys.status, 'pending')
       )
     )
@@ -322,6 +331,23 @@ export async function getLroPerformance(
 
     const n = (v: string | null) => parseFloat(v ?? '0');
 
+    if (metrics.totalSurveys < MIN_RESPONSES_FOR_AVERAGES) {
+      return {
+        lroId,
+        totalSurveys: metrics.totalSurveys,
+        completedSurveys: metrics.totalSurveys,
+        avgCommunication: 0,
+        avgResponsiveness: 0,
+        avgKnowledge: 0,
+        avgAdvocacy: 0,
+        avgProfessionalism: 0,
+        avgOutcome: 0,
+        overallAverage: 0,
+        recommendRate: 0,
+        suppressed: true,
+      };
+    }
+
     const avgValues = [
       n(metrics.avgCommunication),
       n(metrics.avgResponsiveness),
@@ -375,7 +401,8 @@ export async function getOrganizationLroRankings(
     );
 
     // Sort by overall average descending
-    performances.sort((a, b) => b.overallAverage - a.overallAverage);
+    // A representative with too few responses is listed without a figure, after the ranked ones.
+    performances.sort((a, b) => Number(a.suppressed ?? false) - Number(b.suppressed ?? false) || b.overallAverage - a.overallAverage);
 
     return performances;
   } catch (error) {

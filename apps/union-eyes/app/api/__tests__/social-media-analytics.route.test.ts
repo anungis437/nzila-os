@@ -18,6 +18,7 @@ const m = vi.hoisted(() => {
     const chain = {
       from: vi.fn(() => chain),
       leftJoin: vi.fn(() => chain),
+      innerJoin: vi.fn(() => chain),
       where: vi.fn(() => chain),
       orderBy: vi.fn(() => chain),
       limit: vi.fn(() => chain),
@@ -30,6 +31,7 @@ const m = vi.hoisted(() => {
   return {
     state,
     checkRateLimit: vi.fn(),
+    auditSocialAnalyticsExport: vi.fn(),
     queueSelect: (...results: unknown[][]) => state.selectQueue.push(...results),
     resetQueues: () => {
       state.selectQueue = [];
@@ -43,6 +45,7 @@ const mockDb = {
 };
 
 vi.mock('@/db', () => ({ db: mockDb }));
+vi.mock('@/lib/social-media/export-audit', () => ({ auditSocialAnalyticsExport: m.auditSocialAnalyticsExport }));
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: m.checkRateLimit,
   RATE_LIMITS: {
@@ -65,6 +68,7 @@ describe('social-media/analytics route', () => {
     vi.clearAllMocks();
     m.resetQueues();
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0, remaining: 99 });
+    m.auditSocialAnalyticsExport.mockResolvedValue(undefined);
   });
 
   it('returns forbidden when organization context is missing', async () => {
@@ -87,6 +91,24 @@ describe('social-media/analytics route', () => {
     await expect(response.json()).resolves.toMatchObject({ code: 'RATE_LIMIT_EXCEEDED' });
   });
 
+  // DEF-0B11-SOC-ANALYTICS-AND-ENGAGEMENT-FIGURES-HAVE-NO-WRITER-SO-EVERY-METRIC-IS-ZERO-OR-EMPTY
+  it('says that nothing has been collected, rather than reading an empty range as no activity', async () => {
+    const { GET } = await loadRoute();
+    m.queueSelect([], []);
+    const response = await GET(new NextRequest('http://localhost/api/social-media/analytics'));
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({ accounts: [], data_collected: false });
+    expect(body.message).toContain('have not been collected');
+  });
+
+  it('distinguishes an empty range from an organization whose analytics were collected earlier', async () => {
+    const { GET } = await loadRoute();
+    m.queueSelect([], [{ id: 'earlier-row' }]);
+    const body = await (await GET(new NextRequest('http://localhost/api/social-media/analytics'))).json();
+    expect(body).toMatchObject({ accounts: [], data_collected: true });
+    expect(body).not.toHaveProperty('message');
+  });
   it('returns grouped account analytics summary on GET success', async () => {
     const { GET } = await loadRoute();
     m.queueSelect([
@@ -196,6 +218,7 @@ describe('social-media/analytics route', () => {
     expect(response.status).toBe(200);
     expect(payload.total).toBe(2);
     expect(payload.summary).toMatchObject({ total_posts: 2, total_impressions: 300, total_engagement: 47 });
+    expect(payload.summary.total_clicks).toBeNull(); // no clicks are measured for posts
     expect(payload.top_posts).toHaveLength(2);
   });
 
@@ -243,33 +266,72 @@ describe('social-media/analytics route', () => {
     expect(response.status).toBe(200);
     expect(payload.campaign).toMatchObject({ id: 'camp-1' });
     expect(payload.metrics).toMatchObject({ total_posts: 1, total_impressions: 100 });
+    expect(payload.metrics.total_clicks).toBeNull(); // no campaign click collector
     expect(payload.platform_metrics).toHaveLength(1);
   });
 
-  it('returns validation error for unsupported DELETE data type', async () => {
+  it('refuses the misleading DELETE export verb without reading or auditing data', async () => {
     const { DELETE } = await loadRoute();
-    const response = await DELETE(new NextRequest('http://localhost/api/social-media/analytics?type=invalid', { method: 'DELETE' }));
-
-    expect(response.status).toBe(400);
-    await expect(response.json()).resolves.toMatchObject({ code: 'VALIDATION_ERROR' });
+    const response = await DELETE(new NextRequest('http://localhost/api/social-media/analytics?type=accounts', { method: 'DELETE' }));
+    expect(response.status).toBe(405);
+    expect(response.headers.get('allow')).toBe('GET');
+    expect(mockDb.select).not.toHaveBeenCalled();
+    expect(m.auditSocialAnalyticsExport).not.toHaveBeenCalled();
   });
 
-  it('returns json export payload for DELETE format=json', async () => {
-    const { DELETE } = await loadRoute();
-    m.queueSelect([
-      {
-        date: '2026-05-01',
-        platform: 'facebook',
-        account: 'union-eyes',
-        impressions: 100,
-      },
-    ]);
+  it('validates export parameters before querying or auditing', async () => {
+    const { GET } = await loadRoute();
+    for (const query of [
+      'type=invalid&format=json', 'type=accounts&format=xml',
+      'type=accounts&start_date=2026-02-30', 'type=accounts&start_date=2025-01-01&end_date=2026-10-01',
+    ]) {
+      const response = await GET(new NextRequest('http://localhost/api/social-media/analytics?export=true&' + query));
+      expect(response.status).toBe(400);
+    }
+    expect(mockDb.select).not.toHaveBeenCalled();
+    expect(m.auditSocialAnalyticsExport).not.toHaveBeenCalled();
+  });
 
-    const response = await DELETE(new NextRequest('http://localhost/api/social-media/analytics?type=accounts&format=json', { method: 'DELETE' }));
+  it('exports account analytics over GET only after mandatory audit, with no-store', async () => {
+    const { GET } = await loadRoute();
+    m.queueSelect([{ date: '2026-05-01', platform: 'facebook', account: 'union-eyes', impressions: 100 }]);
+    const response = await GET(new NextRequest('http://localhost/api/social-media/analytics?export=true&type=accounts&format=json'));
     const payload = await response.json();
-
     expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toContain('no-store');
     expect(payload.data).toHaveLength(1);
     expect(payload.headers).toContain('Date');
+    expect(m.auditSocialAnalyticsExport).toHaveBeenCalledWith(expect.objectContaining({
+      organizationId: TEST_USER.organizationId, userId: TEST_USER.userId,
+      dataType: 'accounts', format: 'json', rowCount: 1,
+    }));
+  });
+
+  it('does not fabricate zero clicks for a campaign with no click collector', async () => {
+    const { GET } = await loadRoute();
+    m.queueSelect([
+      { id: 'campaign-1', name: 'Campaign', platforms: [], startDate: '2026-05-01', endDate: '2026-05-31', status: 'active' },
+    ], []);
+    const response = await GET(new NextRequest('http://localhost/api/social-media/analytics?export=true&type=campaigns&format=json'));
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.data[0].total_clicks).toBeNull();
+  });
+
+  it('fails closed if mandatory export audit cannot be persisted', async () => {
+    const { GET } = await loadRoute();
+    m.queueSelect([{ date: '2026-05-01' }]);
+    m.auditSocialAnalyticsExport.mockRejectedValueOnce(new Error('audit unavailable'));
+    const response = await GET(new NextRequest('http://localhost/api/social-media/analytics?export=true&type=accounts&format=json'));
+    expect(response.status).toBe(503);
+    expect((await response.json()).data).toBeUndefined();
+  });
+
+  it('does not silently truncate exports exceeding the safe row bound', async () => {
+    const { GET } = await loadRoute();
+    m.queueSelect(Array.from({ length: 5001 }, (_, i) => ({ date: '2026-05-01', impressions: i })));
+    const response = await GET(new NextRequest('http://localhost/api/social-media/analytics?export=true&type=accounts&format=json'));
+    expect(response.status).toBe(409);
+    expect(m.auditSocialAnalyticsExport).not.toHaveBeenCalled();
   });
 });

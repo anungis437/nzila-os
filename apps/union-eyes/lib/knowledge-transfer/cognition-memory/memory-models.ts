@@ -17,6 +17,19 @@ export type CognitionMemoryType =
   | 'continuity_assessment'
   | 'decision_brief';
 
+/**
+ * Every entry is something an officer typed in: the server does not check a snapshot, score or insight against a real
+ * simulation or index. The author is kept so a figure can always be traced to the person who stated it.
+ */
+export interface MemoryProvenance {
+  source: 'officer_asserted';
+  /** The officer who saved it; null for an entry saved before authorship was kept. */
+  recordedBy: string | null;
+}
+
+/** The payload key the server reserves for provenance; a caller cannot supply it. */
+export const PROVENANCE_KEY = '__provenance';
+
 export type MemoryStatus = 'active' | 'archived' | 'superseded';
 
 export interface CognitionMemoryEntry {
@@ -39,6 +52,7 @@ export interface CognitionMemoryEntry {
   sessionId: string | null;
   /** Key insights distilled from the payload */
   keyInsights: string[];
+  provenance?: MemoryProvenance;
 }
 
 export interface ResilienceSnapshotPoint {
@@ -46,6 +60,8 @@ export interface ResilienceSnapshotPoint {
   resilienceScore: number;
   memoryEntryId: string;
   title: string;
+  /** The score is the one the officer typed when saving the entry. */
+  source?: 'officer_asserted';
   changeFromPrevious: number | null;
 }
 

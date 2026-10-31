@@ -288,7 +288,7 @@ export const organizationMembers = pgTable(
     
     role: text('role').notNull(),
     status: text('status').notNull().default('active'),
-    isPrimary: boolean('is_primary').default(false),
+    isPrimary: boolean('is_primary').default(false).$defaultFn(() => false),
     
     // Additional fields
     department: text('department'),
@@ -309,10 +309,11 @@ export const organizationMembers = pgTable(
     exemptionReason: text('exemption_reason'),
     exemptionApprovedBy: varchar('exemption_approved_by', { length: 255 }),
 
-    // Timestamps
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    // Timestamps. The canonical created_at, updated_at and is_primary columns are NOT NULL without a database default (Django
+    // sets them in Python), so an ORM insert that leaves them out fails natively; the ORM supplies the value.
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow().$defaultFn(() => new Date()),
     joinedAt: timestamp('joined_at', { withTimezone: true }).defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().$defaultFn(() => new Date()),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
   (table) => ({
@@ -412,42 +413,9 @@ export const orgConfigurationsRelations = relations(orgConfigurations, ({ one })
   }),
 }));
 
-// =====================================================
-// ORGANIZATION USAGE TABLE
-// Tracks per-org resource consumption (storage, API calls, etc.)
-// =====================================================
-
-export const orgUsage = pgTable(
-  'org_usage',
-  {
-    id: uuid('id').defaultRandom().primaryKey(),
-    organizationId: uuid('organization_id')
-      .notNull()
-      .references(() => organizations.id, { onDelete: 'cascade' }),
-    storageUsedBytes: integer('storage_used_bytes').notNull().default(0),
-    documentCount: integer('document_count').notNull().default(0),
-    apiCallCount: integer('api_call_count').notNull().default(0),
-    lastCalculatedAt: timestamp('last_calculated_at', { withTimezone: true }).defaultNow(),
-    periodStart: timestamp('period_start', { withTimezone: true }).notNull(),
-    periodEnd: timestamp('period_end', { withTimezone: true }).notNull(),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  },
-  (table) => ({
-    orgPeriodIdx: uniqueIndex('idx_org_usage_org_period').on(
-      table.organizationId,
-      table.periodStart,
-      table.periodEnd,
-    ),
-    orgIdx: index('idx_org_usage_org').on(table.organizationId),
-  }),
-);
-
-export const orgUsageRelations = relations(orgUsage, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [orgUsage.organizationId],
-    references: [organizations.id],
-  }),
-}));
+// org_usage is not declared here. The physical relation stays. Django does not
+// define it. The unwired admin-actions module no longer returns a storage figure.
+// Do not DROP the relation from this file.
 
 // =====================================================
 // TYPE EXPORTS
@@ -461,8 +429,6 @@ export type OrganizationMember = typeof organizationMembers.$inferSelect;
 export type NewOrganizationMember = typeof organizationMembers.$inferInsert;
 export type OrgConfiguration = typeof orgConfigurations.$inferSelect;
 export type NewOrgConfiguration = typeof orgConfigurations.$inferInsert;
-export type OrgUsage = typeof orgUsage.$inferSelect;
-export type NewOrgUsage = typeof orgUsage.$inferInsert;
 
 // =====================================================
 // HELPER TYPE GUARDS

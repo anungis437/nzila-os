@@ -209,6 +209,26 @@ describe('clause-library/[id]/tags route (round 55)', () => {
     vi.resetModules();
   });
 
+  it.each([
+    ['POST', { tagName: 'x'.repeat(101) }],
+    ['POST', { tagName: 12 }],
+    ['POST', { tagName: 'ok', sourceOrganizationId: 'foreign' }],
+    ['DELETE', { tagId: 'not-a-uuid' }],
+    ['DELETE', { tagName: 'one', tag: 'two' }],
+    ['DELETE', { tagId: '00000000-0000-4000-8000-000000000001', tagName: 'one' }],
+  ])('%s rejects invalid tag payload before any database access', async (method, body) => {
+    const handlers = await loadHandlers();
+    await expect(handlers[method as 'POST' | 'DELETE']({
+      request: req('clause-1', body),
+      organizationId: 'org-a',
+      userId: 'user-1',
+    })).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    expect(h.calls.insert).toBe(0);
+    expect(h.calls.delete).toBe(0);
+    expect(h.withRLSContext).not.toHaveBeenCalled();
+    expect(h.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
   it('GET 404s when the caller cannot read the parent clause', async () => {
     h.allowPrivilegedRead.current = true;
     pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'private', sharedWithOrgIds: [] }]);
@@ -224,11 +244,11 @@ describe('clause-library/[id]/tags route (round 55)', () => {
     h.allowPrivilegedRead.current = true;
     pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'public', sharedWithOrgIds: null }]);
     h.canReadSharedClause.mockResolvedValue(true);
-    pushSel([{ id: 'tag-1', tagName: 'wages' }]);
+    pushSel([{ id: '00000000-0000-4000-8000-000000000001', tagName: 'wages' }]);
     const { GET } = await loadHandlers();
 
     const result = (await GET({ request: req('clause-1'), organizationId: 'org-b' })) as { tags: unknown[] };
-    expect(result.tags).toEqual([{ id: 'tag-1', tagName: 'wages' }]);
+    expect(result.tags).toEqual([{ id: '00000000-0000-4000-8000-000000000001', tagName: 'wages' }]);
     expect(h.withSystemContext).toHaveBeenCalled();
     expect(h.withRLSContext).not.toHaveBeenCalled();
   });
@@ -264,7 +284,7 @@ describe('clause-library/[id]/tags route (round 55)', () => {
   it('POST succeeds for the owner and attributes the authenticated user', async () => {
     pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a' }]);
     h.isSharedClauseOwner.mockReturnValue(true);
-    pushSel([{ id: 'tag-1', tagName: 'benefits' }]);
+    pushSel([{ id: '00000000-0000-4000-8000-000000000001', tagName: 'benefits' }]);
     const { POST } = await loadHandlers();
 
     const result = (await POST({ request: req('clause-1', { tagName: 'benefits' }), organizationId: 'org-a', userId: 'user-1' })) as { tag: { tagName: string } };
@@ -275,7 +295,7 @@ describe('clause-library/[id]/tags route (round 55)', () => {
     expect(h.persistAtomicAudit).toHaveBeenCalledTimes(1);
     expect(h.persistAtomicAudit).toHaveBeenCalledWith(
       h.db,
-      expect.objectContaining({ organizationId: 'org-a', userId: 'user-1', action: 'clause_library.tag.add', resourceId: 'tag-1' }),
+      expect.objectContaining({ organizationId: 'org-a', userId: 'user-1', action: 'clause_library.tag.add', resourceId: '00000000-0000-4000-8000-000000000001' }),
     );
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-a' }, expect.any(Function));
     expect(h.withSystemContext).not.toHaveBeenCalled();
@@ -296,22 +316,22 @@ describe('clause-library/[id]/tags route (round 55)', () => {
   it('DELETE by tagId requires BOTH tagId and clauseId to match (tag parent-injection fix)', async () => {
     pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a' }]);
     h.isSharedClauseOwner.mockReturnValue(true);
-    pushSel([{ id: 'tag-from-another-clause', tagName: 'wages' }]); // delete returns the removed row
+    pushSel([{ id: '00000000-0000-4000-8000-000000000002', tagName: 'wages' }]); // delete returns the removed row
     const { DELETE } = await loadHandlers();
 
-    await DELETE({ request: req('clause-1', { tagId: 'tag-from-another-clause' }), organizationId: 'org-a', userId: 'user-1' });
+    await DELETE({ request: req('clause-1', { tagId: '00000000-0000-4000-8000-000000000002' }), organizationId: 'org-a', userId: 'user-1' });
 
     // and(eq(clauseId, id), <tag belongs to a clause owned by the caller's organization>, eq(id, tagId)).
     expect(h.whereSpy).toHaveBeenCalledWith(
       { op: 'eq', col: 'clt.clauseId', val: 'clause-1' },
       { op: 'sql', values: ['clt.clauseId', 'clause-1', 'org-a'] },
-      { op: 'eq', col: 'clt.id', val: 'tag-from-another-clause' },
+      { op: 'eq', col: 'clt.id', val: '00000000-0000-4000-8000-000000000002' },
     );
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-a' }, expect.any(Function));
     expect(h.withSystemContext).not.toHaveBeenCalled();
     expect(h.persistAtomicAudit).toHaveBeenCalledWith(
       h.db,
-      expect.objectContaining({ action: 'clause_library.tag.remove', resourceId: 'tag-from-another-clause' }),
+      expect.objectContaining({ action: 'clause_library.tag.remove', resourceId: '00000000-0000-4000-8000-000000000002' }),
     );
   });
 
@@ -321,7 +341,7 @@ describe('clause-library/[id]/tags route (round 55)', () => {
     const { DELETE } = await loadHandlers();
 
     await expect(
-      DELETE({ request: req('clause-1', { tagId: 'tag-1' }), organizationId: 'org-b', userId: 'user-b' }),
+      DELETE({ request: req('clause-1', { tagId: '00000000-0000-4000-8000-000000000001' }), organizationId: 'org-b', userId: 'user-b' }),
     ).rejects.toMatchObject({ status: 404 });
     expect(h.isSharedClauseOwner).toHaveBeenCalled();
     expect(h.calls.delete).toBe(0);
@@ -333,7 +353,7 @@ describe('clause-library/[id]/tags route (round 55)', () => {
 
   it('POST hides a private clause from another organization even when the owner predicate is stubbed open', async () => {
     pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'private', sharedWithOrgIds: [] }]);
-    pushSel([{ id: 'tag-1', tagName: 'benefits' }]);
+    pushSel([{ id: '00000000-0000-4000-8000-000000000001', tagName: 'benefits' }]);
     h.isSharedClauseOwner.mockReturnValue(true);
     const { POST } = await loadHandlers();
 
@@ -355,7 +375,7 @@ describe('clause-library/[id]/tags route (round 55)', () => {
       sharingLevel: 'private',
       sharedWithOrgIds: ['org-b'],
     }]);
-    pushSel([{ id: 'tag-1', tagName: 'benefits' }]);
+    pushSel([{ id: '00000000-0000-4000-8000-000000000001', tagName: 'benefits' }]);
     h.isSharedClauseOwner.mockReturnValue(true);
     const { POST } = await loadHandlers();
 
@@ -372,7 +392,7 @@ describe('clause-library/[id]/tags route (round 55)', () => {
 
   it('DELETE does not remove a tag on another organization clause when the owner predicate is stubbed open', async () => {
     pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'public' }]);
-    pushSel([{ id: 'tag-1' }]);
+    pushSel([{ id: '00000000-0000-4000-8000-000000000001' }]);
     h.isSharedClauseOwner.mockReturnValue(true);
     const { DELETE } = await loadHandlers();
 
@@ -380,7 +400,7 @@ describe('clause-library/[id]/tags route (round 55)', () => {
     // and is not audited; system context would have applied the queued delete.
     await expect(
       DELETE({
-        request: req('clause-1', { tagId: 'tag-1' }),
+        request: req('clause-1', { tagId: '00000000-0000-4000-8000-000000000001' }),
         organizationId: 'org-b',
         userId: 'user-b',
       }),
@@ -396,18 +416,18 @@ describe('clause-library/[id]/tags route (round 55)', () => {
   it('does not treat a system-context tag write as tenant success', async () => {
     h.witnessedParentOrg.current = 'org-a';
     h.allowPrivilegedRead.current = true;
-    h.queue.push([{ id: 'tag-1', tagName: 'benefits' }]);
+    h.queue.push([{ id: '00000000-0000-4000-8000-000000000001', tagName: 'benefits' }]);
 
     const systemRows = await h.withSystemContext(() =>
       h.db.insert().values({ clauseId: 'clause-1', tagName: 'benefits', createdBy: 'user-b' }),
     );
-    expect(systemRows).toEqual([{ id: 'tag-1', tagName: 'benefits' }]);
+    expect(systemRows).toEqual([{ id: '00000000-0000-4000-8000-000000000001', tagName: 'benefits' }]);
     expect(h.applied.inserts).toBe(1);
     expect(h.insertedValues).toEqual([{ clauseId: 'clause-1', tagName: 'benefits', createdBy: 'user-b' }]);
 
     h.applied.inserts = 0;
     h.insertedValues.length = 0;
-    h.queue.push([{ id: 'tag-1', tagName: 'benefits' }]);
+    h.queue.push([{ id: '00000000-0000-4000-8000-000000000001', tagName: 'benefits' }]);
     const tenantRows = await h.withRLSContext({ organizationId: 'org-b' }, () =>
       h.db.insert().values({ clauseId: 'clause-1', tagName: 'benefits', createdBy: 'user-b' }),
     );

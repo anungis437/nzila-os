@@ -15,6 +15,24 @@ import { UE_TEST_ORGS } from '@/tests/fixtures/test-orgs'
 import { UE_TEST_USERS, UE_TEST_USER_PASSWORD } from '@/tests/fixtures/test-users'
 import { UE_TEST_CASES } from '@/tests/fixtures/test-cases'
 import { seedQaCaseAssignments } from './seed-test-env-kernel'
+import { PLATFORM_MODULES } from '@/services/platform-economics/entitlement-guard'
+
+/** Synthetic grants for the QA organizations only; idempotent and marked so they can never be mistaken for a contract. */
+async function seedQaEntitlements(organizationIds: string[]): Promise<number> {
+  const keys = Object.values(PLATFORM_MODULES)
+  let granted = 0
+  for (const organizationId of organizationIds) {
+    for (const featureKey of keys) {
+      const result = await db.execute(sql`
+        INSERT INTO org_entitlements (organization_id, feature_key, status, granted_by, metadata)
+        VALUES (${organizationId}::uuid, ${featureKey}, 'active', 'ue-qa-seed', '{"synthetic":true,"source":"seed:test-env"}'::jsonb)
+        ON CONFLICT (organization_id, feature_key) DO UPDATE SET status = 'active', revoked_at = NULL, revoked_by = NULL, updated_at = now()
+        RETURNING id`)
+      granted += Array.from(result as unknown as unknown[]).length
+    }
+  }
+  return granted
+}
 
 const NOW = new Date('2026-05-01T00:00:00.000Z')
 
@@ -182,7 +200,8 @@ async function seed(): Promise<void> {
       console.warn('[ue:seed:test-env] cleanup skipped, relation missing: audit_security.audit_logs')
     }
 
-    // Remove existing QA orgs and recreate deterministically.
+    // Remove existing QA orgs and recreate deterministically. The synthetic entitlements reference them (ON DELETE RESTRICT).
+    await tx.execute(sql`DELETE FROM org_entitlements WHERE organization_id IN (${sql.join(orgIds.map((id) => sql`${id}::uuid`), sql`, `)})`)
     await tx.delete(organizations).where(inArray(organizations.id, orgIds))
 
     await tx.insert(organizations).values(
@@ -447,6 +466,11 @@ async function seed(): Promise<void> {
   // Case authority is relationship-based: give the QA steward the QA cases (synthetic fixture, audited by the store).
   const assignments = await seedQaCaseAssignments(process.env.DATABASE_URL as string)
   console.log(`[ue:seed:test-env] QA case assignments created: ${assignments}`)
+
+  // Module entitlements are institutional grants. The QA organizations get synthetic, clearly marked grants for every module
+  // so the application can be exercised end to end; no production organization is ever touched (see assertSafeRuntime).
+  const entitlementCount = await seedQaEntitlements([UE_TEST_ORGS.primary.id, UE_TEST_ORGS.secondary.id])
+  console.log(`[ue:seed:test-env] QA module entitlements granted: ${entitlementCount}`)
 
   // Required containment artifacts for external UX tester access.
   console.log('[ue:seed:test-env] Seed complete')

@@ -8,10 +8,13 @@
  * and rate limit management across all platforms.
  */
 
+import { openToken, openOptionalToken, sealToken, sealOptionalToken } from '@/lib/social-media/token-vault';
 import { MetaAPIClient, createMetaClient } from './meta-api-client';
 import { TwitterAPIClient, createTwitterClient } from './twitter-api-client';
 import { LinkedInAPIClient, createLinkedInClient } from './linkedin-api-client';
 import { db } from '@/db';
+import { ApiError } from '@/lib/api/errors';
+import { logger } from '@/lib/logger';
 import { socialAccounts, socialPosts, socialAnalytics } from '@/db/schema/social-media-schema';
 import { eq, and, inArray } from 'drizzle-orm';
 import type {
@@ -31,18 +34,69 @@ export interface UnifiedPostContent {
   hashtags?: string[];
   mentions?: string[];
   scheduled_for?: Date;
+  campaign_id?: string;
   platforms: SocialPlatform[];
+}
+
+/** Platforms whose API is asked to publish later; the others would publish at once, so a schedule is refused for them. */
+const SCHEDULING_PLATFORMS: readonly SocialPlatform[] = ['facebook'];
+
+const TWITTER_LIMIT = 280;
+
+/** The text as sent: hashtags are part of the post, so they are written into it rather than stored beside text that omits them. */
+export function composePostText(content: Pick<UnifiedPostContent, 'text' | 'hashtags'>): string {
+  const tags = (content.hashtags ?? []).map((tag) => `#${tag}`).join(' ');
+  return tags ? `${content.text}\n\n${tags}` : content.text;
 }
 
 /**
  * Platform-specific post result
  */
+/** Narrows a publish: to named accounts, and to a draft that already exists and is completed rather than inserted. */
+export interface PublishOptions {
+  accountIds?: string[];
+  existingPostId?: string;
+}
+
+/** The kind of post, from its content; used for a draft as well as for a published post. */
+export function postTypeFor(content: Pick<UnifiedPostContent, 'media_urls' | 'link_url'>): SocialPostType {
+  if (content.media_urls && content.media_urls.length > 0) {
+    if (content.media_urls.length > 1) return 'carousel';
+    const url = content.media_urls[0].toLowerCase();
+    return url.includes('.mp4') || url.includes('.mov') || url.includes('video') ? 'video' : 'image';
+  }
+  return content.link_url ? 'link' : 'text';
+}
+
 export interface PlatformPostResult {
   platform: SocialPlatform;
   success: boolean;
   post_id?: string;
   error?: string;
   permalink?: string;
+  /** false when the platform accepted the post but this application could not save its own record of it. */
+  recorded?: boolean;
+}
+
+/** Raised by a publish in which no platform accepted the post, so the operation audit records a failure, not a completion. */
+export class AllPlatformsFailedError extends Error {
+  constructor(readonly results: PlatformPostResult[]) {
+    super('No platform accepted the post');
+    this.name = 'AllPlatformsFailedError';
+  }
+}
+
+/** A refusal made by this application before the platform is asked; its message is ours and safe to return. */
+export class PublishRefusal extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PublishRefusal';
+  }
+}
+
+/** What a caller may be told about a failed platform call: this application's own refusals, never the platform's text. */
+function publishFailureMessage(error: unknown): string {
+  return error instanceof ApiError || error instanceof PublishRefusal ? error.message : 'The platform did not accept the post.';
 }
 
 /**
@@ -110,13 +164,13 @@ export class SocialMediaService {
     switch (typedAccount.platform) {
       case 'facebook':
       case 'instagram':
-        return createMetaClient(typedAccount.accessToken);
+        return createMetaClient((await openToken(typedAccount.accessToken)));
 
       case 'twitter':
-        return createTwitterClient(typedAccount.accessToken, typedAccount.refreshToken || undefined);
+        return createTwitterClient((await openToken(typedAccount.accessToken)), (await openOptionalToken(typedAccount.refreshToken)));
 
       case 'linkedin':
-        return createLinkedInClient(typedAccount.accessToken);
+        return createLinkedInClient((await openToken(typedAccount.accessToken)));
 
       default:
         throw new Error(`Unsupported platform: ${typedAccount.platform}`);
@@ -149,8 +203,8 @@ export class SocialMediaService {
       switch (typedAccount.platform) {
         case 'facebook':
         case 'instagram': {
-          const metaClient = createMetaClient(typedAccount.accessToken);
-          const tokenData = await metaClient.getLongLivedToken(typedAccount.accessToken);
+          const metaClient = createMetaClient((await openToken(typedAccount.accessToken)));
+          const tokenData = await metaClient.getLongLivedToken((await openToken(typedAccount.accessToken)));
           newAccessToken = tokenData.access_token;
           expiresIn = tokenData.expires_in;
           break;
@@ -161,8 +215,8 @@ export class SocialMediaService {
             throw new Error('No refresh token available for Twitter account');
           }
           const twitterClient = createTwitterClient(
-            typedAccount.accessToken,
-            typedAccount.refreshToken
+            (await openToken(typedAccount.accessToken)),
+            (await openToken(typedAccount.refreshToken))
           );
           const tokenData = await twitterClient.refreshAccessToken();
           newAccessToken = tokenData.access_token;
@@ -175,7 +229,7 @@ export class SocialMediaService {
           if (!typedAccount.refreshToken) {
             throw new Error('No refresh token available for LinkedIn account');
           }
-          const linkedInClient = createLinkedInClient(typedAccount.accessToken);
+          const linkedInClient = createLinkedInClient((await openToken(typedAccount.accessToken)));
           const tokenData = await linkedInClient.refreshAccessToken(typedAccount.refreshToken);
           newAccessToken = tokenData.access_token;
           newRefreshToken = tokenData.refresh_token || null;
@@ -190,10 +244,10 @@ export class SocialMediaService {
       // Update account with new tokens
       const expiresAt = new Date(Date.now() + expiresIn * 1000);
       await db.update(socialAccounts).set({
-        accessToken: newAccessToken,
+        accessToken: await sealToken(newAccessToken),
         tokenExpiresAt: expiresAt,
         updatedAt: new Date(),
-        ...(newRefreshToken ? { refreshToken: newRefreshToken } : {}),
+        ...(newRefreshToken ? { refreshToken: await sealToken(newRefreshToken) } : {}),
       }).where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId)));
     } catch (error) {
       // Update account status to error
@@ -212,7 +266,8 @@ export class SocialMediaService {
   async publishPost(
     organizationId: string,
     content: UnifiedPostContent,
-    createdById: string
+    createdById: string,
+    options: PublishOptions = {},
   ): Promise<PlatformPostResult[]> {
     const results: PlatformPostResult[] = [];
 
@@ -225,6 +280,8 @@ export class SocialMediaService {
           eq(socialAccounts.organizationId, organizationId),
           inArray(socialAccounts.platform, content.platforms),
           eq(socialAccounts.status, 'active'),
+          // Publishing reaches only the accounts the post names: never every connected page of a platform.
+          ...(options.accountIds ? [inArray(socialAccounts.id, options.accountIds)] : []),
         )
       );
 
@@ -232,9 +289,18 @@ export class SocialMediaService {
       throw new Error('No active accounts found for specified platforms');
     }
 
+    const text = composePostText(content);
+
     // Publish to each platform
     for (const account of typedAccounts) {
       try {
+        // A schedule is never turned into an immediate post: a platform that cannot schedule refuses it.
+        if (content.scheduled_for && !SCHEDULING_PLATFORMS.includes(account.platform)) {
+          throw new PublishRefusal(`Scheduled publishing is not supported on ${account.platform}; the post was not published.`);
+        }
+        if (account.platform === 'twitter' && text.length > TWITTER_LIMIT) {
+          throw new PublishRefusal(`The post with its hashtags exceeds ${TWITTER_LIMIT} characters.`);
+        }
         const client = await this.getClient(account.id, organizationId);
         let postId: string;
         let permalink: string | undefined;
@@ -244,9 +310,9 @@ export class SocialMediaService {
             const metaClient = client as MetaAPIClient;
             const response = await metaClient.publishFacebookPost(
               account.platformUserId,
-              account.accessToken,
+              (await openToken(account.accessToken)),
               {
-                message: content.text,
+                message: text,
                 media_urls: content.media_urls,
                 link: content.link_url,
                 scheduled_publish_time: content.scheduled_for
@@ -264,14 +330,14 @@ export class SocialMediaService {
             
             // Instagram requires at least one image
             if (!content.media_urls || content.media_urls.length === 0) {
-              throw new Error('Instagram posts require at least one image');
+              throw new PublishRefusal('Instagram posts require at least one image');
             }
 
             const response = await metaClient.publishInstagramPost(
               account.platformUserId,
               {
                 image_url: content.media_urls[0],
-                caption: content.text,
+                caption: text,
               }
             );
             postId = response.id;
@@ -282,28 +348,19 @@ export class SocialMediaService {
           case 'twitter': {
             const twitterClient = client as TwitterAPIClient;
             
-            // Upload media if present
-            let mediaIds: string[] | undefined;
+            // No arbitrary remote media URL may be fetched by the application server.
+            // A scheme check does not prevent redirects, DNS rebinding, private-IP access,
+            // oversized responses or unsupported content types. Until trusted uploaded
+            // asset IDs are supported, refuse media publishing explicitly and preserve
+            // the fully functional text-only publishing path.
             if (content.media_urls && content.media_urls.length > 0) {
-              mediaIds = [];
-              for (const url of content.media_urls) {
-                // Validate media URL to prevent SSRF
-                const parsed = new URL(url);
-                if (!['http:', 'https:'].includes(parsed.protocol)) {
-                  throw new Error(`Blocked media URL scheme: ${parsed.protocol}`);
-                }
-                // Fetch and upload media
-                const mediaResponse = await fetch(url);
-                const mediaBuffer = Buffer.from(await mediaResponse.arrayBuffer());
-                const mediaType = mediaResponse.headers.get('content-type') as 'image/jpeg' | 'image/png' | 'image/gif' | 'video/mp4';
-                const media = await twitterClient.uploadMedia(mediaBuffer, mediaType);
-                mediaIds.push(media.media_id_string);
-              }
+              throw ApiError.notImplemented(
+                'X media publishing requires verified uploaded assets; remote media URL ingestion is disabled',
+              );
             }
 
             const tweet = await twitterClient.postTweet({
-              text: content.text,
-              media_ids: mediaIds,
+              text,
             });
             postId = tweet.id;
             permalink = `https://twitter.com/i/web/status/${tweet.id}`;
@@ -318,7 +375,7 @@ export class SocialMediaService {
               response = await linkedInClient.createOrganizationPostWithImage(
                 account.platformUserId,
                 {
-                  text: content.text,
+                  text,
                   imageUrl: content.media_urls[0],
                 }
               );
@@ -326,7 +383,7 @@ export class SocialMediaService {
               response = await linkedInClient.createOrganizationPostWithLink(
                 account.platformUserId,
                 {
-                  text: content.text,
+                  text,
                   linkUrl: content.link_url,
                   linkTitle: content.link_title,
                   linkDescription: content.link_description,
@@ -336,7 +393,7 @@ export class SocialMediaService {
               response = await linkedInClient.createOrganizationPost(
                 account.platformUserId,
                 {
-                  text: content.text,
+                  text,
                 }
               );
             }
@@ -345,37 +402,70 @@ export class SocialMediaService {
           }
 
           default:
-            throw new Error(`Unsupported platform: ${account.platform}`);
+            throw new PublishRefusal(`Unsupported platform: ${account.platform}`);
         }
 
-        // Save post to database
-        await db.insert(socialPosts).values({
-          organizationId,
-          accountId: account.id,
-          platformPostId: postId,
-          postType: this.detectPostType(content),
-          content: content.text,
-          mediaUrls: content.media_urls || [],
-          hashtags: content.hashtags || [],
-          mentions: content.mentions || [],
-          status: content.scheduled_for ? 'scheduled' : 'published',
-          scheduledFor: content.scheduled_for ?? null,
-          publishedAt: content.scheduled_for ? null : new Date(),
-          platformUrl: permalink ?? null,
-          createdBy: createdById,
-        });
+        // The platform has accepted the post. A failure to save our record of it must not be reported as a failed publish:
+        // the post is live, so it is reported as published and unrecorded, and the failure is logged.
+        let recorded = true;
+        try {
+          if (options.existingPostId) {
+            // An approved draft is completed in place: it is the record of what was approved.
+            const completed = await db
+              .update(socialPosts)
+              .set({
+                platformPostId: postId,
+                status: content.scheduled_for ? 'scheduled' : 'published',
+                publishedAt: content.scheduled_for ? null : new Date(),
+                platformUrl: permalink ?? null,
+                updatedAt: new Date(),
+              })
+              .where(and(eq(socialPosts.id, options.existingPostId), eq(socialPosts.organizationId, organizationId), eq(socialPosts.accountId, account.id)))
+              .returning({ id: socialPosts.id });
+            if (completed.length === 0) throw new Error('The approved draft no longer exists');
+          } else await db.insert(socialPosts).values({
+            organizationId,
+            accountId: account.id,
+            platformPostId: postId,
+            campaignId: content.campaign_id ?? null,
+            postType: this.detectPostType(content),
+            content: content.text,
+            mediaUrls: content.media_urls || [],
+            hashtags: content.hashtags || [],
+            mentions: content.mentions || [],
+            status: content.scheduled_for ? 'scheduled' : 'published',
+            scheduledFor: content.scheduled_for ?? null,
+            publishedAt: content.scheduled_for ? null : new Date(),
+            platformUrl: permalink ?? null,
+            createdBy: createdById,
+          });
+        } catch (recordError) {
+          recorded = false;
+          logger.error('Post accepted by the platform but not recorded', {
+            organizationId,
+            platform: account.platform,
+            platformPostId: postId,
+            error: recordError instanceof Error ? recordError.message : String(recordError),
+          });
+        }
 
         results.push({
           platform: account.platform,
           success: true,
           post_id: postId,
           permalink,
+          recorded,
         });
       } catch (error) {
+        logger.warn('Platform publish failed', {
+          organizationId,
+          platform: account.platform,
+          error: error instanceof Error ? error.message : String(error),
+        });
         results.push({
           platform: account.platform,
           success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: publishFailureMessage(error),
         });
       }
     }
@@ -415,7 +505,7 @@ export class SocialMediaService {
         case 'facebook':
         case 'instagram': {
           const metaClient = client as MetaAPIClient;
-          await metaClient.deletePost(typedPost.platformPostId!, typedPost.accessToken!);
+          await metaClient.deletePost(typedPost.platformPostId!, (await openToken(typedPost.accessToken!)));
           break;
         }
 
@@ -478,7 +568,7 @@ export class SocialMediaService {
           const metaClient = client as MetaAPIClient;
           const _insights = await metaClient.getPageInsights(
             typedAccount.platformUserId,
-            typedAccount.accessToken,
+            (await openToken(typedAccount.accessToken)),
             [
               'page_impressions',
               'page_engaged_users',
@@ -526,6 +616,14 @@ export class SocialMediaService {
           // Transform LinkedIn stats to unified format
           break;
         }
+      }
+
+      // The platform responses above are fetched but not yet transformed, so nothing was collected. Returning an empty list as a
+      // successful collection would leave the analytics table unwritten and every dashboard figure at zero without saying so.
+      if (analytics.length === 0) {
+        throw ApiError.notImplemented(
+          `Analytics collection for ${typedAccount.platform} is not implemented: the platform response is not transformed, so nothing was collected.`,
+        );
       }
 
       // Save analytics to database
@@ -646,23 +744,7 @@ throw error;
    * Detect post type from content
    */
   private detectPostType(content: UnifiedPostContent): SocialPostType {
-    if (content.media_urls && content.media_urls.length > 0) {
-      if (content.media_urls.length > 1) {
-        return 'carousel';
-      }
-      // Check if it&apos;s a video (simple check, could be more sophisticated)
-      const url = content.media_urls[0].toLowerCase();
-      if (url.includes('.mp4') || url.includes('.mov') || url.includes('video')) {
-        return 'video';
-      }
-      return 'image';
-    }
-
-    if (content.link_url) {
-      return 'link';
-    }
-
-    return 'text';
+    return postTypeFor(content);
   }
 }
 
@@ -674,4 +756,3 @@ export function createSocialMediaService(): SocialMediaService {
 }
 
 export default SocialMediaService;
-

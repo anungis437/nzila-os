@@ -114,7 +114,15 @@ const h = vi.hoisted(() => {
     if (state.auditFails) throw new Error("audit unavailable");
   });
 
-  return { state, tx, db, withRLSContext, audit, requireEntitlement: vi.fn(async () => undefined) };
+  return {
+    state,
+    tx,
+    db,
+    withRLSContext,
+    audit,
+    requireEntitlement: vi.fn(async () => undefined),
+    requireLiveFinancialMandate: vi.fn(async () => ({ mandateId: 'synthetic', ledgerWide: true, resourceIds: [], accountIds: [] })),
+  };
 });
 
 vi.mock("@/lib/api/framework", async () => {
@@ -130,6 +138,7 @@ vi.mock("@/lib/api/framework", async () => {
 vi.mock("@/db", () => ({ db: h.db }));
 vi.mock("@/lib/db/with-rls-context", () => ({ withRLSContext: h.withRLSContext }));
 vi.mock("@/lib/audit/atomic-audit", () => ({ persistAtomicAudit: h.audit }));
+vi.mock("@/lib/finance/require-live-financial-mandate", () => ({ requireLiveFinancialMandate: h.requireLiveFinancialMandate }));
 vi.mock("@/services/platform-economics/entitlement-guard", () => ({
   PLATFORM_MODULES: { EMPLOYER_PAYROLL_OFFICIAL: "employer_payroll_official" },
   requireEntitlement: h.requireEntitlement,
@@ -213,7 +222,7 @@ describe("payroll-runs/[id] PATCH (approve / execute)", () => {
     const response = await PATCH(ctx(APPROVER, "approve"));
 
     expect(response.data.run.status).toBe("approved");
-    expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: ORG }, expect.any(Function));
+    expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: ORG, userId: APPROVER }, expect.any(Function));
     expect(h.audit).toHaveBeenCalledTimes(1);
     expect(h.audit).toHaveBeenCalledWith(
       h.tx,
@@ -578,7 +587,7 @@ describe("payroll-runs POST (prepare)", () => {
     await expect(POST(ctx(PREPARER))).rejects.toMatchObject({ code: "NOT_FOUND" });
     const lookup = h.state.calls.find((c) => c.op === "db.select")!;
     expect(paramsOf(lookup.where)).toEqual(expect.arrayContaining([ORG, BATCH_ID]));
-    expect(h.withRLSContext).not.toHaveBeenCalled();
+    expect(h.withRLSContext).toHaveBeenCalledTimes(1);
     expect(h.audit).not.toHaveBeenCalled();
   });
 
@@ -586,7 +595,8 @@ describe("payroll-runs POST (prepare)", () => {
     const POST = await load();
     h.state.dbSelects = [[batch("rejected")]];
     await expect(POST(ctx(PREPARER))).rejects.toMatchObject({ code: "VALIDATION_ERROR" });
-    expect(h.withRLSContext).not.toHaveBeenCalled();
+    expect(h.withRLSContext).toHaveBeenCalledTimes(1);
+    expect(h.audit).not.toHaveBeenCalled();
   });
 
   it("refuses an unauthenticated actor", async () => {
@@ -666,7 +676,7 @@ describe("replay/[runId] POST", () => {
 
     const lookup = h.state.calls.find((c) => c.op === "db.select")!;
     expect(paramsOf(lookup.where)).toEqual(expect.arrayContaining([ORG, RUN_ID]));
-    expect(h.withRLSContext).not.toHaveBeenCalled();
+    expect(h.requireLiveFinancialMandate).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: "finance:view", resourceId: RUN_ID }));
     expect(h.audit).not.toHaveBeenCalled();
   });
 

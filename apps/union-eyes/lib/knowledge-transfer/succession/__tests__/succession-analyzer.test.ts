@@ -1,16 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+// The SQL of the eligibility condition is proven against real SQL in app/api/__tests__/interview-derived-analytics.pglite.test.ts.
+vi.mock('@/lib/knowledge-transfer/governance/interview-access', () => ({ derivedAnalyticsCondition: () => 'derived-analytics-condition' }))
 
 const { whereMock, generateMock } = vi.hoisted(() => ({
   whereMock: vi.fn(),
   generateMock: vi.fn(),
 }));
 vi.mock('@/db/db', () => ({
-  db: { select: () => ({ from: () => ({ where: whereMock }) }) },
+  db: { select: () => ({ from: () => ({ where: (...args: unknown[]) => ({ limit: () => whereMock(...args) }) }) }) },
 }));
 vi.mock('@/db/schema', () => ({
   exitInterviews: new Proxy({}, { get: (_t, p) => String(p) }),
 }));
 vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (_ctx: unknown, fn: (tx: unknown) => unknown) => fn({}) }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
+vi.mock('@/lib/api/errors', () => ({ ApiError: { internal: (m: string) => Object.assign(new Error(m), { status: 500 }) } }));
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: () => ({ generate: generateMock }),
   buildOrgAiTrace: () => ({}),
@@ -70,6 +75,7 @@ describe('lib/knowledge-transfer/succession/succession-analyzer', () => {
     expect(generateMock).toHaveBeenCalledOnce();
     expect(report.criticalOperationalGaps).toEqual(['gap1']);
     expect(report.executiveSummary).toBe('AI summary');
+    expect(report.modelGenerated).toBe(true);
     const steward = report.roleSuccessionStatus.find((r) => r.role === 'steward');
     expect(steward?.successorReadiness).toBe('minimal');
     const admin = report.roleSuccessionStatus.find((r) => r.role === 'admin');
@@ -80,11 +86,16 @@ describe('lib/knowledge-transfer/succession/succession-analyzer', () => {
     expect(member?.successorReadiness).toBe('none');
   });
 
-  it('falls back to default summary on invalid AI JSON', async () => {
+  it('fails instead of returning a canned summary when the model reply is not usable', async () => {
     whereMock.mockResolvedValue([interview('steward', 50)]);
     generateMock.mockResolvedValue({ content: 'not json' });
-    const report = await analyzeSuccessionFragility('org-1');
-    expect(report.executiveSummary).toContain('Transition readiness score');
-    expect(report.criticalOperationalGaps).toEqual([]);
+    await expect(analyzeSuccessionFragility('org-1')).rejects.toMatchObject({ status: 500 });
+    generateMock.mockResolvedValue({ content: JSON.stringify({ executiveSummary: 'incomplete' }) });
+    await expect(analyzeSuccessionFragility('org-1')).rejects.toMatchObject({ status: 500 });
+  });
+
+  it('marks the report as model-generated only when a model produced it', async () => {
+    whereMock.mockResolvedValue([]);
+    expect((await analyzeSuccessionFragility('org-1')).modelGenerated).toBe(false);
   });
 });

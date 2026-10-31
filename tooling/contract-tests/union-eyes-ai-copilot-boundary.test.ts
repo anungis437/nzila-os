@@ -46,7 +46,9 @@ describe('UnionEyes AI copilot boundary contract', () => {
 
     expect(source).toContain('trace: buildOrgAiTrace(organizationId)');
     expect(source).toContain('profileKey: UE_PROFILES.STEWARD_COPILOT');
-    expect(source).toContain("dataClass: 'internal'");
+    // Grievance case content must retain its sensitive classification at the gateway.
+    expect(source).toContain("dataClass: toGatewayDataClass('grievance_legal')");
+    expect(source).not.toContain("dataClass: 'internal'");
     expect(source).toContain('auditAiInteraction');
     expect(source).toContain("outcome: 'pending'");
     expect(source).toContain('humanApproved: outcome ===');

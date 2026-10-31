@@ -1,31 +1,22 @@
 /**
- * Billing Credits — Check Expired
+ * POST /api/billing/credits/check-expired
  *
- * POST /api/billing/credits/check-expired — Expire past-due trials/credits
+ * Not implemented. This route cancelled an organization's expired trials after asking a placeholder whether the organization had a
+ * payment method on file, and the placeholder always answered no. Any steward's page load therefore cancelled a trial that had a
+ * payment method. There is no payment-method record to ask yet, so it answers 501 and changes nothing; trial expiry belongs to a
+ * scheduled job that reads the payment-method record.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { expireTrials } from '@/services/platform-economics/subscription-lifecycle-service';
-import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
 export const POST = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { required: true, minRole: 'steward' },
     entitlement: 'financial_intelligence_suite',
-    openapi: { tags: ['Billing'], summary: 'Expire past-due trials and credits' },
+    openapi: { tags: ['Billing'], summary: 'Expire past-due trials and credits (not implemented)' },
   },
-  async ({ organizationId, userId: _userId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
-
-    // expireTrials requires a payment-method checker callback
-    const actions = await expireTrials(organizationId, async (_orgId: string) => {
-      // Default: assume no payment method on file — trials expire to cancelled
-      return false;
-    });
-
-    logger.info('Expired trials check completed', { organizationId, expiredCount: actions.length });
-
-    return { data: { expiredCount: actions.length, actions } };
+  async () => {
+    throw ApiError.notImplemented('Trial expiry is not implemented: there is no payment-method record to decide whether a trial converts or cancels.');
   },
 );

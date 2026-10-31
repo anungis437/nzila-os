@@ -31,6 +31,9 @@ const m = vi.hoisted(() => ({
 vi.mock('@/lib/api-auth-guard', () => ({
   auth: m.auth,
   requireSystemAdmin: m.requireSystemAdmin,
+  // read at import time by lib/organizations/read-authority.ts
+  ROLE_HIERARCHY: { member: 1, steward: 2, officer: 3, admin: 4, system_admin: 5 },
+  isPlatformAdminUser: vi.fn().mockResolvedValue(false),
 }));
 
 vi.mock('@/lib/db/with-rls-context', () => ({
@@ -45,7 +48,15 @@ vi.mock('@/db/db', () => ({
   },
 }));
 
+// The list route reads through the transaction handed to it by withSystemContext, a chain that ends in the readable set.
+const listTx = {
+  select: () => ({ from: () => ({ where: () => Object.assign(Promise.resolve([]), { orderBy: () => ({ limit: async () => [] }) }) }) }),
+  execute: async () => [],
+};
+
 vi.mock('@/db/schema', () => ({ organizations: {} }));
+// The legacy membership read is the path under test; the canonical identity-scope read is covered with its own suite.
+vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: () => false }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn().mockResolvedValue(undefined) }));
 vi.mock('@/lib/utils/hierarchy-validation', () => ({ MAX_HIERARCHY_DEPTH: 10 }));
 
@@ -135,20 +146,24 @@ describe('POST /api/organizations — creation authority + execution boundary (P
 describe('GET /api/organizations — unchanged tenant-scoped read path', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withSystemContext.mockImplementation(async (fn: (tx?: unknown) => unknown) => fn({}));
+    m.withSystemContext.mockImplementation(async (fn: (tx?: unknown) => unknown) => fn(listTx));
     m.withRLSContext.mockImplementation(async (fn: (tx?: unknown) => unknown) => fn({}));
     m.selectWhere.mockResolvedValue([]);
   });
 
-  it('GET still executes through withRLSContext (tenant runtime), never withSystemContext — creation authority does not leak into the read path', async () => {
+  // The read path was redesigned (lib/organizations/read-authority.ts): the route decides the caller's readable set first,
+  // then reads as the system role. The original "never withSystemContext" assertion described the superseded design; the
+  // property it protected — creation authority does not leak into reads — is asserted directly instead.
+  it('GET grants no read access to a signed-in caller without a membership, and never consults the creation authority', async () => {
     m.auth.mockResolvedValue({ userId: 'member-1' });
 
     const { GET } = await import('../route');
     const { NextRequest } = await import('next/server');
     const req = new NextRequest('http://localhost/api/organizations');
-    await GET(req);
+    const response = await GET(req);
 
-    expect(m.withRLSContext).toHaveBeenCalled();
-    expect(m.withSystemContext).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ data: [] });
+    expect(m.requireSystemAdmin).not.toHaveBeenCalled();
   });
 });

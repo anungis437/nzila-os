@@ -3,18 +3,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const m = vi.hoisted(() => ({
   rows: [] as Array<Record<string, unknown>>,
   select: vi.fn(),
-  withRLSContext: vi.fn((handler: () => unknown) => handler()),
+  withSystemContext: vi.fn((handler: (tx: unknown) => unknown) => handler({ select: (...args: unknown[]) => m.select(...args) })),
+  audit: vi.fn(),
 }));
 
 vi.mock('@/lib/api/with-api', () => ({
   withApi: vi.fn((_: unknown, handler: (...args: any[]) => unknown) => handler),
 }));
 
-vi.mock('@/db/db', () => ({
-  db: {
-    select: m.select,
-  },
-}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
+vi.mock('@/lib/api/errors', () => ({ ApiError: { forbidden: (message: string) => Object.assign(new Error(message), { status: 403 }) } }));
 
 vi.mock('@/db/schema', () => ({
   analyticsMetrics: {
@@ -29,8 +27,9 @@ vi.mock('@/db/schema', () => ({
   },
 }));
 
+// The read runs under the system role on purpose and is audited with the read (B89).
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: m.withRLSContext,
+  withSystemContext: m.withSystemContext,
 }));
 
 vi.mock('drizzle-orm', async (importOriginal) => {
@@ -83,9 +82,10 @@ describe('/api/analytics/cross-org route', () => {
     ];
 
     const { GET, dynamic } = await loadRoute();
-    const result = await GET({} as any);
+    const result = await GET({ userId: 'u1', organizationId: 'org1' } as any);
 
     expect(dynamic).toBe('force-dynamic');
+    expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'analytics.cross_org.read', details: { sourceRowsAggregated: 2 } }));
     expect(result).toEqual({
       dataClass: 'aggregate_only',
       sourceRowsAggregated: 2,
@@ -110,5 +110,11 @@ describe('/api/analytics/cross-org route', () => {
     expect(serialized).not.toContain('liuna-local-002');
     expect(serialized).not.toContain('privilegedMatterId');
     expect(serialized).not.toContain('memberId');
+  });
+
+  it('refuses a caller with no active organization and reads nothing', async () => {
+    const { GET } = await loadRoute();
+    await expect(GET({ userId: 'u1', organizationId: null } as any)).rejects.toThrow('active organization');
+    expect(m.select).not.toHaveBeenCalled();
   });
 });

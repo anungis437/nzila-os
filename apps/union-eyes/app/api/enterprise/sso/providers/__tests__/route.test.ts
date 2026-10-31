@@ -58,8 +58,8 @@ describe('enterprise/sso/providers route (round 53 — credential redaction on c
     await loadRoute();
   });
 
-  it('GET requires at least member role and reads org-scoped', async () => {
-    expect(capturedGetOpts?.auth).toMatchObject({ required: true, minRole: 'member' });
+  it('GET requires at least admin role and reads org-scoped', async () => {
+    expect(capturedGetOpts?.auth).toMatchObject({ required: true, minRole: 'admin' });
 
     m.where.mockResolvedValue([
       { id: 'sp1', name: 'Okta', samlCertificate: 'CERT-DATA', oidcClientSecret: null },

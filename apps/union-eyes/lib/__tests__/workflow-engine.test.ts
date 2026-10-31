@@ -88,6 +88,8 @@ vi.mock('@/lib/events/event-bus', () => ({
 vi.mock('@/lib/services/satisfaction-service', () => ({
   createSatisfactionSurvey: (...a: any[]) => mocks.mockCreateSatisfactionSurvey(...a),
 }));
+// The history reference is a SQL sub-select in production; this suite mocks drizzle-orm without sql, so it is passed through.
+vi.mock('@/lib/cases/claim-history-reference', () => ({ claimHistoryReference: (id: string) => id }))
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn(), and: vi.fn(), relations: vi.fn(() => ({})),
 }));

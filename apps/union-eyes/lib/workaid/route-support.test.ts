@@ -28,4 +28,10 @@ describe('WorkAid route support', () => {
   it('does not turn an unexpected failure into a response', () => {
     expect(() => workAidErrorResponse(new Error('database exploded'))).toThrow('database exploded')
   })
+
+  it('answers 501 when the wording proposal store is not installed', async () => {
+    const response = workAidErrorResponse(new AuthorityStoreError('PRECONDITION', 'STORE_UNAPPLIED: consent wording proposals are not installed'))
+    expect(response.status).toBe(501)
+    expect(await response.json()).toEqual({ success: false, error: 'PRECONDITION', code: 'STORE_UNAPPLIED' })
+  })
 })

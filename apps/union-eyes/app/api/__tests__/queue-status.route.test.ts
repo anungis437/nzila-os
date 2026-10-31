@@ -4,13 +4,15 @@ const mocks = vi.hoisted(() => ({
   getAllQueueStats: vi.fn(),
   getFailedJobs: vi.fn(),
   requireApiAuth: vi.fn(),
+  requireSystemAdmin: vi.fn(),
 }))
 
 vi.mock('@/lib/job-queue', () => ({
   getAllQueueStats: mocks.getAllQueueStats,
   getFailedJobs: mocks.getFailedJobs,
 }))
-vi.mock('@/lib/api-auth-guard', () => ({ requireApiAuth: mocks.requireApiAuth }))
+vi.mock('@/lib/api-auth-guard', () => ({ requireApiAuth: mocks.requireApiAuth, requireSystemAdmin: mocks.requireSystemAdmin }))
+vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }))
 
 import { GET } from '../union-eyes/queue-status/route'
 
@@ -20,6 +22,7 @@ describe('queue status route', () => {
     delete process.env.DJANGO_API_URL
     delete process.env.NEXT_PUBLIC_DJANGO_API_URL
     mocks.requireApiAuth.mockResolvedValue({ userId: 'user-1' })
+    mocks.requireSystemAdmin.mockResolvedValue(undefined)
   })
 
   afterEach(() => {
@@ -61,5 +64,39 @@ describe('queue status route', () => {
     expect(response.status).toBe(503)
     expect(body.availability).toBe('error')
     expect(body.queue).toBeNull()
+  })
+
+  // DEF-0B12-PLT-QUEUE-STATUS-SERVICE-KEY-IS-THE-SHARED-AI-KEY-COMPARED-WITH-A-PLAIN-EQUALITY
+  it('accepts the control-plane service key, and refuses a wrong or different-length key without the admin path', async () => {
+    process.env.AI_SERVICE_KEY = 'service-key-value'
+    process.env.DJANGO_API_URL = 'https://django.local'
+    mocks.getAllQueueStats.mockResolvedValue([])
+    mocks.getFailedJobs.mockResolvedValue([])
+    mocks.requireApiAuth.mockRejectedValue(new Error('no session'))
+
+    const ok = await GET(new Request('http://localhost/api/union-eyes/queue-status', { headers: { 'x-service-key': 'service-key-value' } }))
+    expect(ok.status).toBe(200)
+    for (const wrong of ['service-key-valuX', 'short', '']) {
+      const refused = await GET(new Request('http://localhost/api/union-eyes/queue-status', { headers: { 'x-service-key': wrong } }))
+      expect(refused.status).toBe(401)
+    }
+    delete process.env.AI_SERVICE_KEY
+  })
+
+  it('prefers a dedicated queue-status key, and in production does not accept the shared AI key (B93)', async () => {
+    process.env.QUEUE_STATUS_SERVICE_KEY = 'queue-key-value'
+    process.env.AI_SERVICE_KEY = 'service-key-value'
+    process.env.DJANGO_API_URL = 'https://django.local'
+    mocks.getAllQueueStats.mockResolvedValue([])
+    mocks.getFailedJobs.mockResolvedValue([])
+    mocks.requireApiAuth.mockRejectedValue(new Error('no session'))
+    const withKey = (key: string) => GET(new Request('http://localhost/api/union-eyes/queue-status', { headers: { 'x-service-key': key } }))
+    expect((await withKey('queue-key-value')).status).toBe(200)
+    expect((await withKey('service-key-value')).status).toBe(401)
+    delete process.env.QUEUE_STATUS_SERVICE_KEY
+    vi.stubEnv('NODE_ENV', 'production')
+    expect((await withKey('service-key-value')).status).toBe(401)
+    vi.unstubAllEnvs()
+    delete process.env.AI_SERVICE_KEY
   })
 })

@@ -2,10 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
+  audited: vi.fn(async (_actor: unknown, _read: unknown, operation: () => Promise<unknown>) => operation()),
   db: { select: vi.fn() },
 }));
 
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi }));
+vi.mock('@/lib/audit/audited-platform-read', () => ({ performAuditedPlatformRead: m.audited }));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/db/schema', () => ({ organizationMembers: {}, organizations: {} }));
 vi.mock('drizzle-orm', async (importOriginal) => {
@@ -49,6 +51,7 @@ describe('admin/users route', () => {
     const { GET } = await loadRoute();
     const result = await GET({ request: new Request('http://localhost/api/admin/users?search=Ada') });
 
+    expect(m.audited).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'platform.user_directory.read', details: { searched: true, limit: 100 } }), expect.any(Function));
     expect(Array.isArray(result)).toBe(true);
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({

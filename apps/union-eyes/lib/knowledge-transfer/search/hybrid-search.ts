@@ -9,7 +9,7 @@
  * on the caller's resolved role level.
  */
 
-import { and, eq, ilike, or, sql } from 'drizzle-orm';
+import { and, eq, ilike, inArray, or, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { exitInterviews } from '@/db/schema';
 import {
@@ -85,7 +85,9 @@ async function keywordSearch(
   allowedSensitivityLevels: ExitInterviewSensitivityLevel[],
   limit: number,
 ): Promise<KnowledgeSearchResult[]> {
-  const pattern = `%${query}%`;
+  // LIKE wildcards typed in the query are literal characters, not a pattern the caller controls.
+  const pattern = `%${query.replace(/[\\%_]/g, (ch) => `\\${ch}`)}%`;
+  if (allowedSensitivityLevels.length === 0) return [];
   const rows = await db
     .select({
       id: exitInterviews.id,
@@ -103,6 +105,8 @@ async function keywordSearch(
       and(
         eq(exitInterviews.organizationId, orgId),
         eq(exitInterviews.status, 'published'),
+        // The sensitivity floor is part of the query, so the limit counts only interviews the caller may read.
+        inArray(exitInterviews.sensitivityLevel, allowedSensitivityLevels),
         or(
           ilike(exitInterviews.title, pattern),
           ilike(exitInterviews.keyLessons, pattern),

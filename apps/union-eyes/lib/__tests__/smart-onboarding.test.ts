@@ -177,7 +177,24 @@ describe('smart-onboarding', () => {
       mocks.mockOrgFindMany.mockResolvedValue([fedWithCount]);
 
       const results = await autoDetectParentFederation('ON', null, 1000);
-      expect(results[0].matchReasons).toContain('Similar size category');
+      expect(results[0].matchReasons).toContain('Similar size');
+    });
+
+    // DEF-0B9-ASM-FEDERATION-MATCH-IGNORES-THE-SECTOR-AND-REPORTS-SIMILAR-SIZE-FOR-ANY-RATIO
+    it('states a similar size only when the sizes are close', async () => {
+      mocks.mockOrgFindMany.mockResolvedValue([{ ...FED, memberCount: 50000 }]);
+      const far = await autoDetectParentFederation('ON', null, 1000);
+      expect(far[0].matchReasons).not.toContain('Similar size');
+      expect(far[0].matchReasons).not.toContain('Similar size category');
+    });
+
+    it('scores the sector, case-insensitively, and does not when the federation does not represent it', async () => {
+      mocks.mockOrgFindMany.mockResolvedValue([FED]);
+      const match = await autoDetectParentFederation('ON', 'PUBLIC');
+      expect(match[0].matchReasons).toContain('Represents the PUBLIC sector');
+      const other = await autoDetectParentFederation('ON', 'manufacturing');
+      expect(other[0].matchReasons.join(' ')).not.toContain('sector');
+      expect(match[0].matchScore - other[0].matchScore).toBe(25);
     });
 
     it('returns empty array when no federations found', async () => {

@@ -53,7 +53,6 @@ import {
   buildRecurringInstances,
   addRecurringException, updateRecurringInstance,
   addAttendee, updateAttendeeResponse, removeAttendee, getEventAttendees,
-  listMeetingRooms, checkRoomAvailability, bookMeetingRoom, cancelRoomBooking,
   getUserAvailability, findCommonAvailability, syncExternalCalendar,
   enableCalendarSync, disableCalendarSync, addEventReminder, getPendingReminders,
   getCalendarStatistics,
@@ -322,34 +321,6 @@ describe("calendar-service", () => {
   describe("getEventAttendees", () => {
     it("returns empty array (stub)", async () => {
       expect(await getEventAttendees("e1")).toEqual([]);
-    });
-  });
-
-  // ── Meeting rooms ────────────────────────────────────────────────────────
-  describe("listMeetingRooms", () => {
-    it("returns empty array (stub)", async () => {
-      expect(await listMeetingRooms()).toEqual([]);
-      expect(await listMeetingRooms({ location: 'HQ', minCapacity: 10, amenities: ['video'] })).toEqual([]);
-    });
-  });
-
-  describe("checkRoomAvailability", () => {
-    it("returns true (stub)", async () => {
-      expect(await checkRoomAvailability("room-1", new Date(), new Date())).toBe(true);
-    });
-  });
-
-  describe("bookMeetingRoom", () => {
-    it("returns booking with generated ID", async () => {
-      const booking = await bookMeetingRoom("room-1", "event-1", new Date(), new Date(), "u1");
-      expect(booking.id).toMatch(/^booking-/);
-      expect(booking.roomId).toBe("room-1");
-    });
-  });
-
-  describe("cancelRoomBooking", () => {
-    it("returns true (stub)", async () => {
-      expect(await cancelRoomBooking("booking-1")).toBe(true);
     });
   });
 

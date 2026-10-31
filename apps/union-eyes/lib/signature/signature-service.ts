@@ -12,7 +12,9 @@ import {
 } from "@/db/schema";
 import SignatureProviderFactory from "./providers";
 import { decideProviderSync, mayAdvanceSigner } from "./provider-sync";
-import { eq, and, or, desc, inArray, notInArray, isNull } from "drizzle-orm";
+import { eq, and, or, desc, inArray, notInArray, isNull, lt } from "drizzle-orm";
+import { organizationMembers } from "@/db/schema-organizations";
+import { signerListSchema, verifySignerList, SignerVerificationError } from "./signer-verification";
 import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { createHash } from "crypto";
@@ -33,6 +35,8 @@ export class SignatureAuthorityError extends Error {
 
 /** Document states in which no signature or void can be applied any more. */
 const FINAL_DOCUMENT_STATES = ["completed", "voided", "declined", "expired"] as const;
+/** A caller's own document list is a page, not the whole history. */
+const USER_DOCUMENT_LIMIT = 200;
 /** Signer states that are settled: a signature is not applied over them. */
 const SETTLED_SIGNER_STATES = ["signed", "declined", "authentication_failed", "expired"] as const;
 
@@ -80,12 +84,38 @@ export class SignatureService {
       role?: string;
       signingOrder?: number;
     }>;
-    provider?: "docusign" | "hellosign" | "internal";
+    provider?: "docusign" | "hellosign";
     expirationDays?: number;
     requireAuthentication?: boolean;
     sequentialSigning?: boolean;
     metadata?: any;
   }): Promise<typeof signatureDocuments.$inferSelect> {
+    // Who may sign is decided before anything leaves the platform: no envelope is created and no file is stored for a
+    // signer list that names someone the organization cannot vouch for.
+    const parsedSigners = signerListSchema.safeParse(data.signers);
+    if (!parsedSigners.success) throw new SignatureAuthorityError("CONFLICT", "The signer list is invalid");
+    const listedUserIds = parsedSigners.data.flatMap((s) => (s.userId ? [s.userId] : []));
+    const activeMembers = listedUserIds.length
+      ? await withRLSContext({ organizationId: data.organizationId }, (tx) =>
+          tx
+            .select({ userId: organizationMembers.userId, name: organizationMembers.name, email: organizationMembers.email })
+            .from(organizationMembers)
+            .where(
+              and(
+                eq(organizationMembers.organizationId, data.organizationId),
+                inArray(organizationMembers.userId, listedUserIds),
+                eq(organizationMembers.status, "active"),
+              ),
+            ),
+        )
+      : [];
+    try {
+      data = { ...data, signers: verifySignerList(parsedSigners.data, activeMembers) };
+    } catch (error) {
+      if (error instanceof SignerVerificationError) throw new SignatureAuthorityError("FORBIDDEN", error.message);
+      throw error;
+    }
+
     // Calculate file hash for integrity
     const fileHash = createHash("sha256").update(data.file).digest("hex");
 
@@ -153,7 +183,9 @@ export class SignatureService {
 
     // The document, its signers, its trail and the platform audit commit together. The envelope and the stored file
     // above are external effects and happen first.
-    const document = await withRLSContext({ organizationId: data.organizationId }, async (tx) => {
+    let document: typeof signatureDocuments.$inferSelect;
+    try {
+      document = await withRLSContext({ organizationId: data.organizationId }, async (tx) => {
       const [created] = await tx
         .insert(signatureDocuments)
         .values(documentInsert)
@@ -198,8 +230,25 @@ export class SignatureService {
       });
       return created;
     });
+    } catch (error) {
+      // The envelope can e-mail signers who could still complete it, and the file has no record: undo both, best effort, and report the original failure.
+      await Promise.allSettled([
+        provider.voidEnvelope(envelope.envelopeId, "The request could not be recorded"),
+        storageService.deleteDocument(uploadResult.key),
+      ]);
+      throw error;
+    }
 
     return document;
+  }
+
+  /** The user who sent the document, or null when it does not exist. */
+  static async getDocumentSender(documentId: string): Promise<string | null> {
+    const document = await db.query.signatureDocuments.findFirst({
+      where: eq(signatureDocuments.id, documentId),
+      columns: { sentBy: true },
+    });
+    return document?.sentBy ?? null;
   }
 
   /**
@@ -243,11 +292,7 @@ export class SignatureService {
       throw new Error("Document not found");
     }
 
-    // Optionally sync with provider for latest status
-    if (document.providerEnvelopeId && document.status !== "completed") {
-      await this.syncDocumentStatus(documentId);
-    }
-
+    // A read never calls the provider or writes a row; the sender refreshes explicitly through syncDocumentStatus.
     return document;
   }
 
@@ -273,7 +318,7 @@ export class SignatureService {
     let status;
     try {
       const provider = SignatureProviderFactory.getProvider(
-        document.provider as "docusign" | "hellosign" | "internal"
+        document.provider as "docusign" | "hellosign"
       );
       status = await provider.getEnvelopeStatus(document.providerEnvelopeId);
     } catch (_error) {
@@ -441,6 +486,11 @@ export class SignatureService {
       where: eq(signatureDocuments.id, existingSigner.documentId),
     });
     if (!document) throw new Error("Document not found");
+    // A document held by a signature provider is signed with that provider. Recording a signature here would mark
+    // signers signed, and the document completed, without the provider ever having been asked.
+    if (document.provider !== "internal") {
+      throw new SignatureAuthorityError("CONFLICT", "This document is signed through its signature provider and cannot be signed here");
+    }
 
     return withRLSContext({ organizationId: document.organizationId }, async (tx) => {
       // A signature lands only on a document that is still open and a signer who has not already settled: a voided
@@ -450,6 +500,25 @@ export class SignatureService {
         .from(signatureDocuments)
         .where(and(eq(signatureDocuments.id, document.id), notInArray(signatureDocuments.status, [...FINAL_DOCUMENT_STATES])));
       if (!open) throw new SignatureAuthorityError("CONFLICT", "This document is no longer open for signing");
+
+      // The stored terms of the request bind the signature: an expired request is not signed, and with sequential signing a signer waits for
+      // every signer before them.
+      const [terms] = await tx
+        .select({ expiresAt: signatureDocuments.expiresAt, sequentialSigning: signatureDocuments.sequentialSigning })
+        .from(signatureDocuments)
+        .where(eq(signatureDocuments.id, document.id));
+      if (terms?.expiresAt && terms.expiresAt.getTime() < Date.now()) {
+        throw new SignatureAuthorityError("CONFLICT", "This signature request has expired");
+      }
+      if (terms?.sequentialSigning && existingSigner.signingOrder != null) {
+        const earlier = await tx
+          .select({ id: documentSigners.id, status: documentSigners.status })
+          .from(documentSigners)
+          .where(and(eq(documentSigners.documentId, document.id), lt(documentSigners.signingOrder, existingSigner.signingOrder)));
+        if (earlier.some((signer) => signer.status !== "signed")) {
+          throw new SignatureAuthorityError("CONFLICT", "An earlier signer has not signed yet");
+        }
+      }
 
       const [updated] = await tx
         .update(documentSigners)
@@ -556,10 +625,13 @@ export class SignatureService {
     if (document.providerEnvelopeId) {
       try {
         const provider = SignatureProviderFactory.getProvider(
-          document.provider as "docusign" | "hellosign" | "internal"
+          document.provider as "docusign" | "hellosign"
         );
         await provider.voidEnvelope(document.providerEnvelopeId, reason);
       } catch (_error) {
+        // The envelope is still live at the provider and can still be signed there. Recording the document as voided here would say otherwise,
+        // so nothing is changed and the sender is told the void did not happen.
+        throw new SignatureAuthorityError("CONFLICT", "The signature provider could not void the envelope, so the document was not voided");
       }
     }
 
@@ -668,7 +740,8 @@ export class SignatureService {
           eq(signatureDocuments.organizationId, organizationId)
         )
       )
-      .orderBy(desc(signatureDocuments.createdAt));
+      .orderBy(desc(signatureDocuments.createdAt))
+      .limit(USER_DOCUMENT_LIMIT);
 
     // Documents to be signed by user
     const toSign = await db
@@ -687,7 +760,8 @@ export class SignatureService {
           eq(signatureDocuments.organizationId, organizationId)
         )
       )
-      .orderBy(desc(signatureDocuments.createdAt));
+      .orderBy(desc(signatureDocuments.createdAt))
+      .limit(USER_DOCUMENT_LIMIT);
 
     return { sent, toSign };
   }
@@ -769,6 +843,8 @@ export class AuditTrailService {
         actor: entry.actorEmail || entry.actorUserId,
         ipAddress: entry.ipAddress,
       })),
+      // The trail is a plain record: its rows are not hash-chained or sealed, and the stored file hash is not recomputed here.
+      integrity: { hashChained: false, sealed: false, notice: 'Unsealed record. It is not tamper-evident and is not a certified e-signature audit.' },
       generatedAt: new Date(),
     };
   }

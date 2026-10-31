@@ -1,0 +1,15 @@
+{
+  "record": "UE-GATE0-SOCIAL-EXTERNAL-ACCEPTANCE-LOCAL-UNCERTAIN",
+  "branch": "agents/ue-cursor-final-closure",
+  "baselineSha": "581dbbec05a6a66c344f699909aebc456c083744",
+  "frozenDefect": "DEF-0B11-SOC-PUBLISH-RECORDS-THE-ROW-AFTER-THE-EXTERNAL-POST-AUDITS-COMPLETED-WHEN-EVERY-PLATFORM-FAILED-AND-RETURNS-PLATFORM-ERROR-TEXT",
+  "finding": "A provider may accept a post while the local database write fails. The service reports success=true, recorded=false, but the review route previously responded as if the draft was successfully published and marked approval approved.",
+  "correction": "Return HTTP 502 with an explicit reconciliation-required state, no provider identifier, and preserve the atomic approval claim to prevent automatic duplicate publication. No invented durable reconciliation or independent verification.",
+  "regression": "apps/union-eyes/app/api/__tests__/social-posts-review.route.test.ts",
+  "sourceState": "IMPLEMENTED_PENDING_QUALIFICATION",
+  "unit": "NOT_RUN",
+  "nativePg15Pg16": "NOT_RUN",
+  "httpBrowserStaging": "NOT_RUN",
+  "limitation": "Crash between external acceptance and local persistence still requires durable provider-aware reconciliation and independent qualification. Frozen defect remains PARTIAL.",
+  "original777TotalsUnchanged": true
+}

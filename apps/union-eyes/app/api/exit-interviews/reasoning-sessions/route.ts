@@ -40,8 +40,9 @@ export const GET = withApi(
     entitlement: 'union_knowledge_suite',
     query: GetSessionsQuerySchema,
   },
-  async ({ organizationId, query }) => {
+  async ({ organizationId, userId, query }) => {
     const sessions = await listReasoningSessions(organizationId!, {
+      ownerUserId: userId!,
       status: query.status,
       limit: query.limit,
     });

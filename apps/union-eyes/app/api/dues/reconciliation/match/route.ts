@@ -7,6 +7,7 @@
  */
 import { withApi, ApiError, z } from '@/lib/api/framework';
 import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { remittanceLineItems } from '@/db/schema/dues-finance-schema';
@@ -26,7 +27,7 @@ export const POST = withApi(
     openapi: { tags: ['Dues'], summary: 'Manually match a line item to a member' },
   },
   async ({ request, organizationId, userId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
     const body = await request.json();
     const parsed = schema.safeParse(body);
@@ -34,7 +35,8 @@ export const POST = withApi(
 
     const { remittanceId, memberId } = parsed.data;
 
-    const updated = await withRLSContext(async (tx) => {
+    const updated = await withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:reconcile', resourceId: remittanceId });
       const rows = await tx
         .update(remittanceLineItems)
         .set({

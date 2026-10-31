@@ -14,7 +14,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withRoleAuth } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { ReportExecutor, type ReportConfig } from '@/lib/report-executor';
+import { validateReportConfig } from '@/lib/reports/report-config-validation';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 import {
   ErrorCode,
@@ -116,7 +119,23 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
     const executor = new ReportExecutor(organizationId);
     const result = await executor.execute(config);
 
-    // Log successful execution
+    // A refused configuration is the caller's error and a failed query is ours; neither is a 200, and neither is recorded as a success.
+    if (!result.success) {
+      const refused = result.kind === 'invalid';
+      logApiAuditEvent({
+        timestamp: new Date().toISOString(),
+        userId,
+        endpoint: '/api/reports/execute',
+        method: 'POST',
+        eventType: refused ? 'validation_failed' : 'failure',
+        severity: refused ? 'medium' : 'high',
+        details: { dataSource: config.dataSourceId, organizationId, reason: result.error ?? 'Report execution failed' },
+      });
+      return refused
+        ? NextResponse.json({ error: result.error ?? 'Invalid report configuration' }, { status: 400 })
+        : standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to execute report');
+    }
+
     logApiAuditEvent({
       timestamp: new Date().toISOString(),
       userId,
@@ -130,13 +149,29 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
         filterCount: config.filters?.length || 0,
         rowCount: result.rowCount,
         executionTime: result.executionTimeMs,
-        success: result.success,
         organizationId,
       },
     });
 
+    // What was returned is recorded durably, by source and fields and the number of rows, never the rows themselves: a report can carry
+    // member contact and case data, and the answer must leave a record the log line did not.
+    await withRLSContext({ organizationId, userId }, (tx) =>
+      persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'report.execute',
+        resourceType: 'report_execution',
+        details: {
+          dataSource: config.dataSourceId,
+          fields: config.fields.map((field) => field.fieldId).slice(0, 100),
+          filterCount: config.filters?.length ?? 0,
+          rowCount: result.rowCount,
+        },
+      }),
+    );
+
     return NextResponse.json({
-      success: result.success,
+      success: true,
       data: result.data,
       rowCount: result.rowCount,
       executionTime: result.executionTimeMs,
@@ -147,7 +182,7 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
       userId: userId || 'unknown',
       endpoint: '/api/reports/execute',
       method: 'POST',
-      eventType: 'auth_failed',
+      eventType: 'failure',
       severity: 'high',
       details: {
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -162,86 +197,3 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
     );
   }
 });
-
-/**
- * SECURITY: Allowlisted tables and their valid columns
- */
-const ALLOWED_TABLES: Record<string, string[]> = {
-  'claims': ['id', 'claim_number', 'status', 'amount', 'created_at', 'organization_id', 'claimant_name', 'claim_type'],
-  'members': ['id', 'first_name', 'last_name', 'email', 'status', 'created_at', 'organization_id', 'membership_number'],
-  'organization_members': ['id', 'first_name', 'last_name', 'email', 'status', 'created_at', 'organization_id'],
-  'deadlines': ['id', 'title', 'due_date', 'status', 'created_at', 'organization_id', 'priority'],
-  'grievances': ['id', 'grievance_number', 'status', 'created_at', 'organization_id', 'grievance_type'],
-};
-
-const ALLOWED_AGGREGATIONS = ['count', 'sum', 'avg', 'min', 'max', 'distinct'];
-const ALLOWED_OPERATORS = ['equals', 'not_equals', 'contains', 'greater_than', 'less_than', 'between', 'in'];
-const ALLOWED_SORT_DIRECTIONS = ['asc', 'desc'];
-
-/**
- * SECURITY: Validate report configuration against allowlists
- */
-function validateReportConfig(config: ReportConfig): string | null {
-  // Validate table name
-  if (!ALLOWED_TABLES[config.dataSourceId]) {
-    return `Invalid data source: ${config.dataSourceId}`;
-  }
-
-  const allowedColumns = ALLOWED_TABLES[config.dataSourceId];
-
-  // SECURITY: Block custom formulas (P0 protection)
-  for (const field of config.fields) {
-    if (field && typeof field === 'object' && 'formula' in field) {
-      return 'Custom formulas are not supported for security reasons';
-    }
-  }
-
-  // Validate all field IDs
-  for (const field of config.fields) {
-    if (!allowedColumns.includes(field.fieldId)) {
-      return `Invalid field: ${field.fieldId}`;
-    }
-    if (field.aggregation && !ALLOWED_AGGREGATIONS.includes(field.aggregation)) {
-      return `Invalid aggregation: ${field.aggregation}`;
-    }
-    if (field.alias && !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(field.alias)) {
-      return `Invalid alias format: ${field.alias}`;
-    }
-  }
-
-  // Validate filters
-  if (config.filters) {
-    for (const filter of config.filters) {
-      if (!allowedColumns.includes(filter.fieldId)) {
-        return `Invalid filter field: ${filter.fieldId}`;
-      }
-      if (!ALLOWED_OPERATORS.includes(filter.operator)) {
-        return `Invalid operator: ${filter.operator}`;
-      }
-    }
-  }
-
-  // Validate groupBy
-  if (config.groupBy) {
-    for (const field of config.groupBy) {
-      if (!allowedColumns.includes(field)) {
-        return `Invalid group by field: ${field}`;
-      }
-    }
-  }
-
-  // Validate sortBy
-  if (config.sortBy) {
-    for (const sort of config.sortBy) {
-      if (!allowedColumns.includes(sort.fieldId)) {
-        return `Invalid sort field: ${sort.fieldId}`;
-      }
-      if (!ALLOWED_SORT_DIRECTIONS.includes(sort.direction)) {
-        return `Invalid sort direction: ${sort.direction}`;
-      }
-    }
-  }
-
-  return null;
-}
-

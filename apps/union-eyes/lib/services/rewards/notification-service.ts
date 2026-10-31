@@ -19,8 +19,9 @@ import {
   sendCreditExpirationEmail, 
   sendRedemptionConfirmationEmail 
 } from './email-service';
-import { eq, and, lte, gte, sql, gt } from 'drizzle-orm';
+import { eq, and, lte, lt, gte, sql, gt, desc, inArray } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
+import { claimExpiryWarning, releaseExpiryWarning } from './expiry-warning-marker';
 
 // Batch configuration
 const BATCH_SIZE = 100;
@@ -28,6 +29,7 @@ const EMAIL_RATE_LIMIT_MS = 100; // Rate limit for sending emails
 
 interface ExpiringCreditsNotification {
   userId: string;
+  organizationId: string;
   userEmail: string;
   userName: string;
   organizationName: string;
@@ -39,7 +41,10 @@ interface ExpiringCreditsNotification {
 interface NotificationResult {
   success: boolean;
   userId: string;
+  organizationId?: string;
   emailSent: boolean;
+  /** The warning for this lot and tier was already recorded by an earlier run. */
+  alreadyWarned?: boolean;
   error?: string;
 }
 
@@ -202,14 +207,25 @@ export async function notifyAwardPendingApproval(awardId: string) {
  * Amounts are dated earnings, not allocated remaining lots: the current ledger
  * does not define a spend-to-earning allocation or an expiration debit worker.
  */
-export async function getExpiringCreditsUsers(daysBeforeExpiration: number, batchSize = BATCH_SIZE, organizationId?: string) {
+export async function getExpiringCreditsUsers(
+  daysBeforeExpiration: number,
+  batchSize = BATCH_SIZE,
+  organizationId?: string,
+  options: { exactDay?: boolean } = {},
+) {
   const now = new Date();
   const expiresBefore = new Date();
   expiresBefore.setDate(expiresBefore.getDate() + daysBeforeExpiration);
+  // exactDay selects the earnings that expire on the calendar day N days from today, so a daily run warns each earning once per
+  // tier (30, 14 and 7 days out) instead of the three overlapping windows selecting the same row on every run.
+  const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const windowStart = options.exactDay ? startOfDay(expiresBefore) : now;
+  const windowEnd = options.exactDay ? new Date(startOfDay(expiresBefore).getTime() + 24 * 60 * 60 * 1000) : null;
 
   const rows = await db
     .select({
       userId: rewardWalletLedger.userId,
+      orgId: rewardWalletLedger.orgId,
       userEmail: users.email,
       userName: organizationMembers.name,
       organizationId: rewardWalletLedger.orgId,
@@ -226,8 +242,8 @@ export async function getExpiringCreditsUsers(daysBeforeExpiration: number, batc
     .leftJoin(organizations, eq(organizations.id, rewardWalletLedger.orgId))
     .where(
       and(
-        gte(rewardWalletLedger.expiresAt, now),
-        lte(rewardWalletLedger.expiresAt, expiresBefore),
+        gte(rewardWalletLedger.expiresAt, windowStart),
+        windowEnd ? lt(rewardWalletLedger.expiresAt, windowEnd) : lte(rewardWalletLedger.expiresAt, expiresBefore),
         gt(rewardWalletLedger.amountCredits, 0),
         eq(rewardWalletLedger.eventType, 'earn'),
         organizationId ? eq(rewardWalletLedger.orgId, organizationId) : undefined
@@ -243,19 +259,48 @@ export async function getExpiringCreditsUsers(daysBeforeExpiration: number, batc
     )
     .limit(batchSize);
 
+  // The earnings are dated lots, not allocated against spending, so what can still expire is at most what the member holds now.
+  const balances = await currentBalances(rows.map((row) => ({ orgId: row.orgId, userId: row.userId })));
+
   return rows
     .filter((row) => row.userEmail && row.expirationDate)
-    .map((row) => ({
-      userId: row.userId,
-      userEmail: row.userEmail as string,
-      userName: row.userName || (row.userEmail as string).split('@')[0],
-      organizationName: row.organizationName || 'UnionEyes',
-      expiringAmount: row.expiringAmount || 0,
-      expirationDate: row.expirationDate as Date,
-      daysRemaining: Math.ceil(
-        ((row.expirationDate as Date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-      ),
-    } as ExpiringCreditsNotification));
+    .map((row) => {
+      const held = balances.get(`${row.orgId}:${row.userId}`) ?? 0;
+      return {
+        userId: row.userId,
+        organizationId: row.orgId,
+        userEmail: row.userEmail as string,
+        userName: row.userName || (row.userEmail as string).split('@')[0],
+        organizationName: row.organizationName || 'UnionEyes',
+        expiringAmount: Math.min(Number(row.expiringAmount) || 0, held),
+        expirationDate: row.expirationDate as Date,
+        daysRemaining: Math.ceil(
+          ((row.expirationDate as Date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+        ),
+      } as ExpiringCreditsNotification;
+    })
+    // Credits that were spent can no longer expire, so there is nothing to warn about.
+    .filter((entry) => entry.expiringAmount > 0);
+}
+
+/** The latest ledger balance of each organization and member in the list. */
+async function currentBalances(members: Array<{ orgId: string; userId: string }>): Promise<Map<string, number>> {
+  const balances = new Map<string, number>();
+  const userIds = [...new Set(members.map((member) => member.userId))];
+  const wanted = new Set(members.map((member) => `${member.orgId}:${member.userId}`));
+  for (let i = 0; i < userIds.length; i += 500) {
+    const chunk = userIds.slice(i, i + 500);
+    const ledger = await db
+      .select({ orgId: rewardWalletLedger.orgId, userId: rewardWalletLedger.userId, balanceAfter: rewardWalletLedger.balanceAfter })
+      .from(rewardWalletLedger)
+      .where(inArray(rewardWalletLedger.userId, chunk))
+      .orderBy(desc(rewardWalletLedger.createdAt));
+    for (const entry of ledger) {
+      const key = `${entry.orgId}:${entry.userId}`;
+      if (wanted.has(key) && !balances.has(key)) balances.set(key, Number(entry.balanceAfter) || 0);
+    }
+  }
+  return balances;
 }
 
 /**
@@ -263,9 +308,16 @@ export async function getExpiringCreditsUsers(daysBeforeExpiration: number, batc
  * 
  */
 async function sendExpirationNotificationToUser(
-  entry: ExpiringCreditsNotification
+  entry: ExpiringCreditsNotification,
+  tierDays: number,
 ): Promise<NotificationResult> {
+  let claimed = false;
   try {
+    // The record is written before the mail leaves, so a retry or an overlapping run cannot mail the same lot twice.
+    claimed = await claimExpiryWarning(entry, tierDays);
+    if (!claimed) {
+      return { success: true, userId: entry.userId, organizationId: entry.organizationId, emailSent: false, alreadyWarned: true };
+    }
     await sendCreditExpirationEmail({
       recipientName: entry.userName,
       recipientEmail: entry.userEmail,
@@ -274,12 +326,15 @@ async function sendExpirationNotificationToUser(
       expirationDate: entry.expirationDate,
     });
 
-    return { success: true, userId: entry.userId, emailSent: true };
+    return { success: true, userId: entry.userId, organizationId: entry.organizationId, emailSent: true };
   } catch (error) {
     logger.error('[Notifications] Error sending expiration notification', { error, userId: entry.userId });
+    // A warning that was not delivered is not a warning that was given: release it so the next run tries again.
+    if (claimed) await releaseExpiryWarning(entry, tierDays).catch(() => undefined);
     return { 
       success: false, 
       userId: entry.userId, 
+      organizationId: entry.organizationId,
       emailSent: false, 
       error: error instanceof Error ? error.message : 'Unknown error' 
     };
@@ -290,7 +345,7 @@ async function sendExpirationNotificationToUser(
  * Trigger notification for expiring credits
  * Processes in batches with rate limiting
  */
-export async function notifyExpiringCredits(daysBeforeExpiration = 7) {
+export async function notifyExpiringCredits(daysBeforeExpiration = 7, options: { exactDay?: boolean } = {}) {
   try {
     const now = Date.now();
     const expirationDate = new Date();
@@ -302,7 +357,7 @@ export async function notifyExpiringCredits(daysBeforeExpiration = 7) {
     });
 
     // Get all users with expiring credits (paginated)
-    const usersWithExpiringCredits = await getExpiringCreditsUsers(daysBeforeExpiration, 10000);
+    const usersWithExpiringCredits = await getExpiringCreditsUsers(daysBeforeExpiration, 10000, undefined, options);
     
     logger.info('[Notifications] Found users with expiring credits', {
       count: usersWithExpiringCredits.length,
@@ -319,7 +374,7 @@ export async function notifyExpiringCredits(daysBeforeExpiration = 7) {
           // Rate limit between emails
           await new Promise((resolve) => setTimeout(resolve, EMAIL_RATE_LIMIT_MS));
           
-          return sendExpirationNotificationToUser(userEntry);
+          return sendExpirationNotificationToUser(userEntry, daysBeforeExpiration);
         })
       );
       
@@ -334,7 +389,7 @@ export async function notifyExpiringCredits(daysBeforeExpiration = 7) {
     }
 
     const successCount = results.filter((r) => r.emailSent).length;
-    const failedCount = results.filter((r) => !r.emailSent).length;
+    const failedCount = results.filter((r) => !r.emailSent && !r.alreadyWarned).length;
     const duration = Date.now() - now;
 
     logger.info('[Notifications] Completed expiration notifications', {
@@ -343,11 +398,21 @@ export async function notifyExpiringCredits(daysBeforeExpiration = 7) {
       durationMs: duration,
     });
 
+    // The e-mails left the application, so who was mailed is reported per organization for the caller to audit.
+    const byOrganization: Record<string, { sent: number; failed: number }> = {};
+    for (const entry of results) {
+      if (!entry.organizationId || entry.alreadyWarned) continue;
+      const tally = (byOrganization[entry.organizationId] ??= { sent: 0, failed: 0 });
+      if (entry.emailSent) tally.sent += 1;
+      else tally.failed += 1;
+    }
+
     return {
-      success: true,
+      success: failedCount === 0,
       totalUsers: usersWithExpiringCredits.length,
       sent: successCount,
       failed: failedCount,
+      byOrganization,
       duration: `${duration}ms`,
     };
   } catch (error) {
@@ -416,6 +481,7 @@ export async function sendBatchExpirationWarnings() {
       usersNotified14Days: 0,
       usersNotified30Days: 0,
       errors: [] as string[],
+      byOrganization: {} as Record<string, { sent: number; failed: number }>,
     };
 
     // Send notifications at multiple intervals
@@ -426,17 +492,26 @@ export async function sendBatchExpirationWarnings() {
     ];
 
     for (const interval of intervals) {
-      const result = await notifyExpiringCredits(interval.days);
-      
-      if (result.success) {
+      // Each tier warns the earnings that expire exactly that many days from today, so a member is warned once per tier.
+      const result = await notifyExpiringCredits(interval.days, { exactDay: true });
+
+      if ('sent' in result) {
         results[interval.counter] = result.sent ?? 0;
-      } else {
+        for (const [organizationId, tally] of Object.entries(result.byOrganization ?? {})) {
+          const total = (results.byOrganization[organizationId] ??= { sent: 0, failed: 0 });
+          total.sent += tally.sent;
+          total.failed += tally.failed;
+        }
+      }
+      if (!result.success) {
         const errorMessage =
           result.error instanceof Error
             ? result.error.message
             : typeof result.error === 'string'
               ? result.error
-              : 'Unknown error';
+              : 'failed' in result && result.failed
+                ? `${result.failed} e-mail(s) were not sent`
+                : 'Unknown error';
         results.errors.push(`Failed for ${interval.days} days: ${errorMessage}`);
       }
     }

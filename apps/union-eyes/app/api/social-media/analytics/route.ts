@@ -13,13 +13,47 @@ import { socialAnalytics, socialPosts, socialAccounts, socialCampaigns } from '@
 import { eq, and, gte, lte, asc, desc, count, SQL } from 'drizzle-orm';
 import { z } from "zod";
 import { BaseAuthContext, withRoleAuth } from '@/lib/api-auth-guard';
+import { csvCell } from '@/lib/employer-execution/csv-cell';
+import { auditSocialAnalyticsExport } from '@/lib/social-media/export-audit';
+import {
+  summarizePosts,
+  averageEngagementRate,
+  figuresRecorded,
+  platformFigures,
+  goalProgress as campaignGoalProgress,
+} from '@/lib/social-media/campaign-figures';
 
 import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
 
+const MAX_ANALYTICS_ROWS = 5000;
+const MAX_EXPORT_ROWS = 5000;
+const MAX_CAMPAIGN_EXPORT_ROWS = 200;
+
+// The campaign export names its columns differently from its header text, so each header maps to its own row key.
+const ACCOUNT_EXPORT_KEYS: Record<string, string> = { Followers: 'follower_count' };
+const CAMPAIGN_EXPORT_KEYS: Record<string, string> = {
+  Campaign: 'name',
+  'Start Date': 'start_date',
+  'End Date': 'end_date',
+  Status: 'status',
+  Platforms: 'platforms',
+  'Total Posts': 'total_posts',
+  Impressions: 'total_impressions',
+  Engagement: 'total_engagement',
+  Likes: 'total_likes',
+  Comments: 'total_comments',
+  Shares: 'total_shares',
+  Clicks: 'total_clicks',
+};
+
 export const GET = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
+  // An export is a separate, steward-gated read. The normal analytics view remains member-readable.
+  if (request.nextUrl.searchParams.get('export') === 'true') {
+    return exportSocialMediaAnalyticsWithAuth(request, context);
+  }
   try {
       const { userId, organizationId } = context;
 
@@ -49,6 +83,18 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
       const startDate = searchParams.get('start_date') || format(subDays(new Date(), 30), 'yyyy-MM-dd');
       const endDate = searchParams.get('end_date') || format(new Date(), 'yyyy-MM-dd');
       const accountId = searchParams.get('account_id');
+
+      // The range and the account id are validated and bounded before they reach a query.
+      const isDay = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value));
+      if (!isDay(startDate) || !isDay(endDate) || startDate > endDate) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'start_date and end_date must be valid YYYY-MM-DD dates in order');
+      }
+      if ((Date.parse(endDate) - Date.parse(startDate)) / 86_400_000 > 366) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'The date range may not exceed 366 days');
+      }
+      if (accountId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(accountId)) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'account_id must be a valid id');
+      }
 
       // Build query with Drizzle
       const analyticsConditions: SQL[] = [
@@ -86,7 +132,8 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
         .from(socialAnalytics)
         .leftJoin(socialAccounts, eq(socialAnalytics.accountId, socialAccounts.id))
         .where(and(...analyticsConditions))
-        .orderBy(asc(socialAnalytics.analyticsDate));
+        .orderBy(asc(socialAnalytics.analyticsDate))
+        .limit(MAX_ANALYTICS_ROWS);
 
       // Group analytics by account
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -142,12 +189,27 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
         }
       });
 
+      // An empty range is not the same as nothing ever collected: no collector writes platform analytics yet, so say which it is
+      // rather than let the dashboard read the absence of rows as zero activity.
+      let dataCollected = analytics.length > 0;
+      if (!dataCollected) {
+        const [anyRow] = await db
+          .select({ id: socialAnalytics.id })
+          .from(socialAnalytics)
+          .innerJoin(socialAccounts, eq(socialAnalytics.accountId, socialAccounts.id))
+          .where(eq(socialAccounts.organizationId, organizationId))
+          .limit(1);
+        dataCollected = Boolean(anyRow);
+      }
+
       return NextResponse.json({
         accounts: Object.values(accountAnalytics),
         date_range: {
           start_date: startDate,
           end_date: endDate,
         },
+        data_collected: dataCollected,
+        ...(dataCollected ? {} : { message: 'Platform analytics have not been collected for this organization, so no figure is available.' }),
       });
     } catch (_error) {
 return NextResponse.json(
@@ -275,7 +337,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
           total_likes: 0,
           total_comments: 0,
           total_shares: 0,
-          total_clicks: 0,
+          total_clicks: null,
           avg_engagement_rate: 0,
         }
       );
@@ -324,7 +386,7 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
       const [campaign] = await db
         .select()
         .from(socialCampaigns)
-        .where(eq(socialCampaigns.id, campaignId))
+        .where(and(eq(socialCampaigns.id, campaignId), eq(socialCampaigns.organizationId, organizationId)))
         .limit(1);
 
       if (!campaign) {
@@ -332,13 +394,6 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
       ErrorCode.RESOURCE_NOT_FOUND,
       'Campaign not found'
     );
-      }
-
-      if (organizationId !== campaign.organizationId) {
-        return standardErrorResponse(
-          ErrorCode.FORBIDDEN,
-          'Unauthorized'
-        );
       }
 
       // Get campaign posts
@@ -357,79 +412,15 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
         })
         .from(socialPosts)
         .leftJoin(socialAccounts, eq(socialPosts.accountId, socialAccounts.id))
-        .where(and(eq(socialPosts.campaignId, campaignId), eq(socialPosts.status, 'published')))
+        .where(and(eq(socialPosts.campaignId, campaignId), eq(socialPosts.organizationId, organizationId), eq(socialPosts.status, 'published')))
         .orderBy(asc(socialPosts.publishedAt));
 
-      // Calculate overall metrics
-      const metrics = posts.reduce(
-        (acc, post) => ({
-          total_posts: acc.total_posts + 1,
-          total_impressions: acc.total_impressions + (post.impressionsCount || 0),
-          total_reach: acc.total_reach + (post.reachCount || 0),
-          total_engagement: acc.total_engagement + ((post.likesCount || 0) + (post.commentsCount || 0) + (post.sharesCount || 0)),
-          total_likes: acc.total_likes + (post.likesCount || 0),
-          total_comments: acc.total_comments + (post.commentsCount || 0),
-          total_shares: acc.total_shares + (post.sharesCount || 0),
-          total_clicks: acc.total_clicks,
-        }),
-        {
-          total_posts: 0,
-          total_impressions: 0,
-          total_reach: 0,
-          total_engagement: 0,
-          total_likes: 0,
-          total_comments: 0,
-          total_shares: 0,
-          total_clicks: 0,
-        }
-      );
-
-      // Calculate average engagement rate
-      const avgEngagementRate =
-        posts.length > 0
-          ? posts.reduce((sum, post) => sum + (Number(post.engagementRate) || 0), 0) / posts.length
-          : 0;
-
-      // Goal progress: schema has individual goal fields, not a goals array
-      const goalProgress = undefined;
-
-      // Group posts by platform
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const postsByPlatform = posts.reduce((acc: Record<string, any[]>, post) => {
-        const platform = post.accountPlatform ?? 'unknown';
-        if (!acc[platform]) {
-          acc[platform] = [];
-        }
-        acc[platform].push(post);
-        return acc;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      }, {} as Record<string, any[]>);
-
-      // Calculate platform-specific metrics
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const platformMetrics = Object.entries(postsByPlatform).map(([platform, platformPosts]: [string, any]) => {
-        const platformTotal = platformPosts.reduce(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (acc: any, post: any) => ({
-            posts: acc.posts + 1,
-            impressions: acc.impressions + (post.impressions || 0),
-            engagement: acc.engagement + (post.engagement || 0),
-            likes: acc.likes + (post.likes || 0),
-            comments: acc.comments + (post.comments || 0),
-            shares: acc.shares + (post.shares || 0),
-          }),
-          { posts: 0, impressions: 0, engagement: 0, likes: 0, comments: 0, shares: 0 }
-        );
-
-        return {
-          platform,
-          ...platformTotal,
-          avg_engagement_rate:
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            platformPosts.reduce((sum: number, post: any) => sum + (post.engagement_rate || 0), 0) /
-            platformPosts.length,
-        };
-      });
+      // The figures come from the counters the post rows hold; nothing collects platform analytics yet, so the response says
+      // whether any counter was recorded rather than presenting default zeros as measured performance.
+      const metrics = summarizePosts(posts);
+      const avgEngagementRate = averageEngagementRate(posts);
+      const goalProgress = campaignGoalProgress(campaign, metrics, avgEngagementRate);
+      const platformMetrics = platformFigures(posts);
 
       // Get timeline data (daily metrics)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -468,6 +459,7 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
           ...metrics,
           avg_engagement_rate: avgEngagementRate,
         },
+        figures_recorded: figuresRecorded(posts),
         goal_progress: goalProgress,
         platform_metrics: platformMetrics,
         timeline: Object.values(timeline),
@@ -483,9 +475,10 @@ return NextResponse.json(
     }
 });
 
-export const DELETE = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
+// An export of the organization's posts, account figures and campaigns is a staff read.
+const exportSocialMediaAnalyticsWithAuth = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
   try {
-      const { _userId, organizationId } = context;
+      const { userId, organizationId } = context;
 
       if (!organizationId) {
         return standardErrorResponse(
@@ -494,12 +487,23 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
         );
       }
 
+      const exportLimit = await checkRateLimit(`social-analytics-export:${userId}`, RATE_LIMITS.SOCIAL_MEDIA_API);
+      if (!exportLimit.allowed) {
+        return standardErrorResponse(ErrorCode.RATE_LIMIT_EXCEEDED, 'Rate limit exceeded', { resetIn: exportLimit.resetIn });
+      }
+
       // Parse query parameters
       const searchParams = request.nextUrl.searchParams;
       const format_type = searchParams.get('format') || 'csv';
       const data_type = searchParams.get('type') || 'posts'; // posts, accounts, campaigns
       const startDate = searchParams.get('start_date') || format(subDays(new Date(), 30), 'yyyy-MM-dd');
       const endDate = searchParams.get('end_date') || format(new Date(), 'yyyy-MM-dd');
+      const validDay = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+        !Number.isNaN(Date.parse(value)) && new Date(value + 'T00:00:00.000Z').toISOString().slice(0, 10) === value;
+      if (!['csv', 'json'].includes(format_type) || !validDay(startDate) || !validDay(endDate) ||
+          startDate > endDate || (Date.parse(endDate) - Date.parse(startDate)) / 86_400_000 > 366) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid export format or date range');
+      }
 
       let data: Array<Record<string, unknown>> = [];
       let headers: string[] = [];
@@ -530,7 +534,8 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
                 lte(socialPosts.publishedAt, new Date(endDate + 'T23:59:59'))
               )
             )
-            .orderBy(desc(socialPosts.publishedAt));
+            .orderBy(desc(socialPosts.publishedAt))
+            .limit(MAX_EXPORT_ROWS + 1);
 
           data = exportPosts;
           headers = [
@@ -573,7 +578,8 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
                 lte(socialAnalytics.analyticsDate, endDate)
               )
             )
-            .orderBy(asc(socialAnalytics.analyticsDate));
+            .orderBy(asc(socialAnalytics.analyticsDate))
+            .limit(MAX_EXPORT_ROWS + 1);
 
           data = exportAnalytics;
           headers = [
@@ -598,7 +604,12 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
             .select()
             .from(socialCampaigns)
             .where(eq(socialCampaigns.organizationId, organizationId))
-            .orderBy(desc(socialCampaigns.createdAt));
+            .orderBy(desc(socialCampaigns.createdAt))
+            .limit(MAX_CAMPAIGN_EXPORT_ROWS + 1);
+
+          if (exportCampaigns.length > MAX_CAMPAIGN_EXPORT_ROWS) {
+            return NextResponse.json({ error: 'Campaign export exceeds the supported limit; narrow the selection' }, { status: 409 });
+          }
 
           data = await Promise.all(
             exportCampaigns.map(async (campaign) => {
@@ -610,7 +621,9 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
                   sharesCount: socialPosts.sharesCount,
                 })
                 .from(socialPosts)
-                .where(eq(socialPosts.campaignId, campaign.id));
+                .where(eq(socialPosts.campaignId, campaign.id))
+                .limit(MAX_EXPORT_ROWS + 1);
+              if (campaignPosts.length > MAX_EXPORT_ROWS) throw new Error('Campaign post export exceeds safe bound');
 
               return {
                 name: campaign.name,
@@ -624,7 +637,7 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
                 total_likes: campaignPosts.reduce((sum, p) => sum + (p.likesCount || 0), 0),
                 total_comments: campaignPosts.reduce((sum, p) => sum + (p.commentsCount || 0), 0),
                 total_shares: campaignPosts.reduce((sum, p) => sum + (p.sharesCount || 0), 0),
-                total_clicks: 0,
+                total_clicks: null,
               };
             })
           );
@@ -653,6 +666,13 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
     );
       }
 
+      // An export is never silently truncated and is never delivered without a durable, tenant-scoped audit.
+      if (data.length > MAX_EXPORT_ROWS) {
+        return NextResponse.json({ error: 'Export exceeds the supported limit; narrow the date range' }, { status: 409 });
+      }
+      await auditSocialAnalyticsExport({ organizationId, userId, dataType: data_type, format: format_type,
+        startDate, endDate, rowCount: data.length });
+
       // Generate CSV
       if (format_type === 'csv') {
         const csv = [
@@ -660,9 +680,10 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
           ...data.map((row) => {
             return headers
               .map((header) => {
-                const key = header.toLowerCase().replace(/ /g, '_');
+                const key = data_type === 'campaigns' ? CAMPAIGN_EXPORT_KEYS[header] :
+                  (ACCOUNT_EXPORT_KEYS[header] ?? header.toLowerCase().replace(/ /g, '_'));
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                let value: any = row[key] || '';
+                let value: any = row[key] ?? '';
                 
                 // Handle nested objects
                 if (typeof value === 'object' && value !== null) {
@@ -673,9 +694,8 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
                   }
                 }
                 
-                // Escape quotes and wrap in quotes if contains comma
-                value = String(value).replace(/"/g, '""');
-                return value.includes(',') ? `"${value}"` : value;
+                // Text a spreadsheet would read as a formula is neutralised, then quoted where needed.
+                return csvCell(String(value));
               })
               .join(',');
           }),
@@ -684,6 +704,8 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
         return new NextResponse(csv, {
           headers: {
             'Content-Type': 'text/csv',
+            'Cache-Control': 'private, no-store',
+            'X-Content-Type-Options': 'nosniff',
             'Content-Disposition': `attachment; filename="social-media-${data_type}-${format(
               new Date(),
               'yyyy-MM-dd'
@@ -701,13 +723,18 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
           end_date: endDate,
         },
         exported_at: new Date().toISOString(),
-      });
+      }, { headers: { 'Cache-Control': 'private, no-store' } });
     } catch (_error) {
 return NextResponse.json(
         {
-          error: 'Failed to export analytics',
+          error: 'Export temporarily unavailable',
         },
-        { status: 500 }
+        { status: 503 }
       );
     }
 });
+
+// DELETE never performed a deletion; it formerly exported data. Refuse that misleading verb.
+export const DELETE = withRoleAuth('steward', async () =>
+  NextResponse.json({ error: 'Use GET /api/social-media/analytics?export=true' },
+    { status: 405, headers: { Allow: 'GET', 'Cache-Control': 'no-store' } }));

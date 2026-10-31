@@ -1,5 +1,7 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { checkSessionDeletion, checkSessionUpdate } from '../session-lifecycle'
+import { checkSessionDeletion, checkSessionExtension, checkSessionUpdate, checkVotingInstrumentChange, type LoadedSessionExtensionGrant } from '../session-lifecycle'
 
 describe('voting session lifecycle (UE-CONV-K-009)', () => {
   it.each([
@@ -42,5 +44,39 @@ describe('voting session lifecycle (UE-CONV-K-009)', () => {
     expect(checkSessionDeletion('draft', 1)).toMatchObject({ ok: false, code: 'HAS_BALLOTS' })
     for (const status of ['active', 'paused', 'closed', 'cancelled']) expect(checkSessionDeletion(status, 0)).toMatchObject({ ok: false, code: 'NOT_DRAFT' })
     expect(checkSessionDeletion('weird', 0)).toMatchObject({ ok: false, code: 'UNKNOWN_STATUS' })
+  })
+
+  it('changes options, eligibility and proxies only while the session is a draft', () => {
+    expect(checkVotingInstrumentChange('draft')).toEqual({ ok: true })
+    for (const status of ['active', 'paused', 'closed', 'cancelled']) {
+      expect(checkVotingInstrumentChange(status)).toMatchObject({ ok: false, code: 'INSTRUMENT_LOCKED' })
+    }
+    expect(checkVotingInstrumentChange('certified')).toMatchObject({ ok: false, code: 'UNKNOWN_STATUS' })
+  })
+
+  it('extends an open session only for a kernel grant naming that session', () => {
+    const grant: LoadedSessionExtensionGrant = {
+      loadedBy: 'authority-kernel',
+      action: 'voting:extend_session',
+      organizationId: 'org-1',
+      sessionId: 'session-1',
+      issued: true,
+    }
+    expect(checkSessionExtension('active', 'org-1', 'session-1', '2030-01-01T00:00:00.000Z', grant)).toEqual({ ok: true })
+    expect(checkSessionExtension('paused', 'org-1', 'session-1', '2030-01-01T00:00:00.000Z', grant)).toEqual({ ok: true })
+    expect(checkSessionExtension('active', 'org-1', 'session-1', '2030-01-01T00:00:00.000Z', null)).toMatchObject({ ok: false, code: 'EXTENSION_UNISSUED' })
+    expect(checkSessionExtension('active', 'org-1', 'session-1', '2030-01-01T00:00:00.000Z', { ...grant, sessionId: 'other' })).toMatchObject({ ok: false, code: 'EXTENSION_UNISSUED' })
+    expect(checkSessionExtension('active', 'org-1', 'session-1', '2030-01-01T00:00:00.000Z', { ...grant, issued: false as true })).toMatchObject({ ok: false, code: 'EXTENSION_UNISSUED' })
+    expect(checkSessionExtension('active', 'org-1', 'session-1', undefined, grant)).toMatchObject({ ok: false, code: 'EXTENSION_UNISSUED' })
+    expect(checkSessionExtension('draft', 'org-1', 'session-1', '2030-01-01T00:00:00.000Z', grant)).toMatchObject({ ok: false, code: 'EXTENSION_NOT_OPEN' })
+    expect(checkSessionExtension('closed', 'org-1', 'session-1', '2030-01-01T00:00:00.000Z', grant)).toMatchObject({ ok: false, code: 'EXTENSION_TERMINAL' })
+    expect(checkSessionExtension('cancelled', 'org-1', 'session-1', '2030-01-01T00:00:00.000Z', grant)).toMatchObject({ ok: false, code: 'EXTENSION_TERMINAL' })
+    expect(checkSessionExtension('weird', 'org-1', 'session-1', '2030-01-01T00:00:00.000Z', grant)).toMatchObject({ ok: false, code: 'UNKNOWN_STATUS' })
+  })
+
+  it('keeps the session route from treating a request field as an extension grant', () => {
+    const source = readFileSync(join(__dirname, '..', '..', '..', 'app', 'api', 'voting', 'sessions', '[id]', 'route.ts'), 'utf8')
+    expect(source).toContain('checkSessionUpdate')
+    expect(source).not.toContain('checkSessionExtension')
   })
 })

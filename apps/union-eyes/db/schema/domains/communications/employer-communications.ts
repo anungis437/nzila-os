@@ -17,7 +17,9 @@ import {
   boolean,
   jsonb,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { grievances } from "../claims/grievances";
 
 // ─── Enums ────────────────────────────────────────────────────
@@ -86,6 +88,9 @@ export const employerContacts = pgTable(
     index("idx_employer_contacts_org").on(table.organizationId),
     index("idx_employer_contacts_employer").on(table.employerId),
     index("idx_employer_contacts_role").on(table.role),
+    uniqueIndex("employer_contacts_one_primary_per_employer_idx")
+      .on(table.organizationId, table.employerId)
+      .where(sql`${table.isPrimary} IS TRUE AND ${table.isActive} IS NOT FALSE`),
   ]
 );
 

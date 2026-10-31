@@ -1,4 +1,6 @@
 import { withApi, z } from "@/lib/api/framework";
+import { hasMinRole } from "@/lib/api-auth-guard";
+import { reviewStatusFilter } from "@/lib/services/cba-intelligence/review-visibility";
 import {
   listAgreements,
 } from "@/lib/services/cba-intelligence/extraction-service";
@@ -28,6 +30,7 @@ export const GET = withApi(
   },
   async ({ query }) => {
     const { page, limit, ...filters } = query;
-    return listAgreements(filters, { page, limit });
+    // A member reads approved agreements only; a reviewer may name any review status.
+    return listAgreements({ ...filters, reviewStatus: reviewStatusFilter(await hasMinRole("steward"), filters.reviewStatus) }, { page, limit });
   },
 );

@@ -12,9 +12,12 @@ import { hasMinRole } from '@/lib/api-auth-guard';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { findPrecedents, CrossOrgPrecedentLeakError } from '@nzila/ue-cognition';
 import { caseSubject } from '@/lib/cognition/ue-adapter';
+import { visibleCaseIds } from '@/lib/cognition/case-visibility';
 import { db } from '@/db/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { and, eq, inArray } from 'drizzle-orm';
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const POST = withOrganizationAuth(async (
   request: NextRequest,
@@ -33,6 +36,14 @@ export const POST = withOrganizationAuth(async (
   }
   if (!body.forCaseId || !body.type) {
     return NextResponse.json({ error: 'forCaseId and type are required' }, { status: 400 });
+  }
+
+  if (!UUID.test(body.forCaseId) || (body.candidateCaseIds ?? []).some((id) => !UUID.test(id)) || (body.candidateCaseIds ?? []).length > 50) {
+    return NextResponse.json({ error: 'forCaseId and candidateCaseIds must be case ids (at most 50 candidates)' }, { status: 400 });
+  }
+  // The case searched for must be one the caller holds.
+  if (!(await visibleCaseIds(context.organizationId, context.userId, [body.forCaseId])).has(body.forCaseId)) {
+    return NextResponse.json({ error: 'Grievance not found' }, { status: 404 });
   }
 
   const candidateIds = body.candidateCaseIds ?? [];
@@ -55,6 +66,10 @@ export const POST = withOrganizationAuth(async (
       ))
       .limit(50);
   }
+
+  // Only candidates the caller may read are compared, so a precedent search never returns the title of a case they do not hold.
+  const readable = await visibleCaseIds(context.organizationId, context.userId, candidateRows.map((g) => g.id));
+  candidateRows = candidateRows.filter((g) => readable.has(g.id));
 
   const subject = caseSubject(context.organizationId, body.forCaseId);
   let result;

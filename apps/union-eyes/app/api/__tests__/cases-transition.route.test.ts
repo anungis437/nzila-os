@@ -187,6 +187,41 @@ describe('cases/[caseId]/transition route', () => {
     expect(m.validateTransition).toHaveBeenCalledWith(expect.objectContaining({ assignedTo: 'agent_1', actorRole: 'steward' }));
   });
 
+  it('accepts a claim-status name from the workbench and records it in the CUPE vocabulary', async () => {
+    const bridge = await vi.importActual<typeof import('@/lib/workflow/state-bridge')>('@/lib/workflow/state-bridge');
+    m.toLifecycleState.mockImplementation(bridge.toLifecycleState);
+    const { PATCH } = await loadRoute();
+    m.state.claimRows = [{
+      claimId: 'case_1',
+      status: 'submitted',
+      priority: 'medium',
+      organizationId: 'org_1',
+      assignedTo: 'agent_1',
+    }];
+
+    const response = await PATCH(makeRequest({ targetStatus: 'under_review' }), { params: Promise.resolve({ caseId: 'case_1' }) });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ success: true, toStatus: 'acknowledged' });
+    expect(m.validateTransition).toHaveBeenCalledWith(expect.objectContaining({ targetState: 'triage' }));
+  });
+
+  it('still refuses a status that belongs to neither vocabulary', async () => {
+    const bridge = await vi.importActual<typeof import('@/lib/workflow/state-bridge')>('@/lib/workflow/state-bridge');
+    m.toLifecycleState.mockImplementation(bridge.toLifecycleState);
+    const { PATCH } = await loadRoute();
+    m.state.claimRows = [{
+      claimId: 'case_1',
+      status: 'submitted',
+      priority: 'medium',
+      organizationId: 'org_1',
+      assignedTo: 'agent_1',
+    }];
+
+    const response = await PATCH(makeRequest({ targetStatus: 'not_a_status' }), { params: Promise.resolve({ caseId: 'case_1' }) });
+    expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({ error: 'TRANSITION_DENIED' });
+  });
+
   it('notifies the owning member in-app when their case moves', async () => {
     const { PATCH } = await loadRoute();
     m.state.claimRows = [{

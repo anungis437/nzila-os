@@ -406,6 +406,7 @@ export default function WorkbenchConsole() {
       >
         {/* Header */}
         <PageHeading title={t('workbench.title')} description={t('workbench.subtitle')} />
+        <a className="inline-flex text-sm underline" href={`/${locale}/dashboard/workbench/workaid`}>{t('workAidPage.openJourney')}</a>
 
         {/* Loading State */}
         {isLoading && (

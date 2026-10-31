@@ -22,7 +22,7 @@
  * Created: February 13, 2026
  */
 
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import {
   boolean,
   integer,
@@ -34,6 +34,7 @@ import {
   uuid,
   varchar,
   index,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { organizations } from '../../../schema-organizations';
 
@@ -239,7 +240,8 @@ export const campaigns = pgTable('campaigns', {
 
 /**
  * Message Log
- * Immutable delivery log for all sent messages
+ * Delivery log for all sent messages. Identity, recipient and content columns are never rewritten; the delivery-state columns
+ * (status, fact timestamps, metadata) only ever advance, by the ordering rules in lib/communications/resend-event-rules.ts.
  * Used for compliance, auditing, and analytics
  */
 export const messageLog = pgTable('message_log', {
@@ -291,6 +293,8 @@ export const messageLog = pgTable('message_log', {
   recipientIdx: index('idx_message_log_recipient').on(table.recipientId),
   statusIdx: index('idx_message_log_status').on(table.status),
   sentAtIdx: index('idx_message_log_sent').on(table.sentAt),
+  // The provider's message id identifies one message (migration 20261031); the webhook looks every event up by it.
+  providerMessageUq: uniqueIndex('uq_message_log_provider_message').on(table.provider, table.providerMessageId).where(sql`${table.providerMessageId} IS NOT NULL`),
   createdAtIdx: index('idx_message_log_created').on(table.createdAt),
 }));
 

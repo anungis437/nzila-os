@@ -8,6 +8,7 @@ import { exitInterviews, exitInterviewEvents, knowledgeBase } from '@/db/schema'
 import { indexExitInterview } from '@/lib/knowledge-transfer/indexing/semantic-indexer';
 import { extractExpertise, flattenExpertiseTags } from '@/lib/knowledge-transfer/expertise/expertise-extractor';
 import { isIndexingAllowed } from '@/lib/knowledge-transfer/governance/consent-controls';
+import { decidePublication } from '@/lib/knowledge-transfer/governance/publication-policy';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,18 +43,28 @@ export const POST = withApi(
       throw ApiError.conflict('Only reviewed interviews can be published');
     }
 
+    const decision = decidePublication({
+      sensitivityLevel: existing.sensitivityLevel ?? null,
+      consentGranted: existing.consentGranted ?? null,
+      createdBy: existing.createdBy ?? null,
+      reviewedBy: existing.reviewedBy ?? null,
+      publisher: userId!,
+    });
+    if (!decision.allowed) throw ApiError.conflict(decision.reason);
+
     const now = new Date();
     // The knowledge-base record, the status change, the event and the audit commit together; the status predicate
     // keeps two concurrent publications from creating two records.
     const { kbRecord, updated } = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
-      const [kb] = await tx
+      // Only a level that permits indexing is copied into the shared knowledge base, and the copy omits the retiring
+      // employee's name. Its sensitivity and consent stay with the interview (sourceId) and are applied on every read.
+      const [kb] = decision.copyToKnowledgeBase ? await tx
         .insert(knowledgeBase)
         .values({
           organizationId: organizationId!,
           title: existing.title,
           documentType: 'guide',
           content: [
-            `Retiring employee: ${existing.retiringEmployeeName}`,
             `Role in union: ${existing.roleInUnion}`,
             `Years of service: ${existing.yearsOfService}`,
             `Key lessons: ${existing.keyLessons}`,
@@ -75,7 +86,7 @@ export const POST = withApi(
           createdAt: now,
           updatedAt: now,
         })
-        .returning();
+        .returning() : [undefined];
 
       const [row] = await tx
         .update(exitInterviews)
@@ -84,7 +95,7 @@ export const POST = withApi(
           reviewedAt: existing.reviewedAt ?? now,
           reviewedBy: existing.reviewedBy ?? userId!,
           publishedAt: now,
-          knowledgeBaseId: kb.id,
+          knowledgeBaseId: kb?.id ?? null,
           updatedAt: now,
           updatedBy: userId!,
         })
@@ -98,7 +109,7 @@ export const POST = withApi(
         eventType: 'published',
         actorUserId: userId!,
         notes: 'Exit interview published to knowledge base',
-        payload: { knowledgeBaseId: kb.id },
+        payload: { knowledgeBaseId: kb?.id ?? null },
       });
       await persistAtomicAudit(tx, {
         organizationId: organizationId!,
@@ -106,45 +117,57 @@ export const POST = withApi(
         action: 'exit_interview.publish',
         resourceType: 'exit_interviews',
         resourceId: params.id,
-        details: { knowledgeBaseId: kb.id },
+        details: { knowledgeBaseId: kb?.id ?? null, sensitivityLevel: existing.sensitivityLevel, copiedToKnowledgeBase: Boolean(kb) },
       });
       return { kbRecord: kb, updated: row };
     });
 
     // --- Intelligence Layer: expertise extraction + semantic indexing ---
-    // Run non-blocking — publish response is not gated on these
-    setImmediate(async () => {
-      try {
-        // Extract expertise tags before indexing (enriches vector content)
-        const expertiseProfile = await extractExpertise(existing);
-        const expertiseTags = flattenExpertiseTags(expertiseProfile);
-        const riskScore = expertiseProfile.continuitySensitivity === 'critical' ? 90
-          : expertiseProfile.continuitySensitivity === 'high' ? 70
-          : expertiseProfile.continuitySensitivity === 'medium' ? 40
-          : 15;
-
-        await db
-          .update(exitInterviews)
-          .set({
-            expertiseTags,
-            continuityRiskScore: riskScore,
-            continuityRiskFlags: expertiseProfile.undocumentedWorkflows,
-            updatedAt: new Date(),
-          })
-          .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!)));
-
-        // Semantic index if governance permits
-        const shouldIndex = isIndexingAllowed(
-          existing.sensitivityLevel as never ?? 'public_internal',
-          existing.consentGranted ?? false,
+    // Not part of the publish response, and not run at all unless the interview's level and consent allow it: the text is
+    // not handed to the AI control plane for an interview that may not be indexed. The intent and the outcome are audited
+    // and a failure is recorded, not swallowed; indexing can be retried through POST /[id]/index.
+    if (decision.extractExpertise) {
+      const organization = organizationId!;
+      const actor = userId!;
+      const interviewId = params.id;
+      const auditStep = (action: string, details: Record<string, unknown>) =>
+        withRLSContext({ organizationId: organization }, (tx) =>
+          persistAtomicAudit(tx, { organizationId: organization, userId: actor, action, resourceType: 'exit_interviews', resourceId: interviewId, details }),
         );
-        if (shouldIndex) {
-          await indexExitInterview(params.id, organizationId!, userId!);
+      setImmediate(async () => {
+        try {
+          await auditStep('exit_interview.ai_extraction.requested', { sensitivityLevel: existing.sensitivityLevel, dataClass: 'internal' });
+          const expertiseProfile = await extractExpertise(existing);
+          const expertiseTags = flattenExpertiseTags(expertiseProfile);
+          const riskScore = expertiseProfile.continuitySensitivity === 'critical' ? 90
+            : expertiseProfile.continuitySensitivity === 'high' ? 70
+            : expertiseProfile.continuitySensitivity === 'medium' ? 40
+            : 15;
+
+          // Only a published interview is updated, and the update is audited with the extraction outcome.
+          await withRLSContext({ organizationId: organization }, async (tx) => {
+            await tx
+              .update(exitInterviews)
+              .set({ expertiseTags, continuityRiskScore: riskScore, continuityRiskFlags: expertiseProfile.undocumentedWorkflows, updatedAt: new Date() })
+              .where(and(eq(exitInterviews.id, interviewId), eq(exitInterviews.organizationId, organization), eq(exitInterviews.status, 'published')));
+            await persistAtomicAudit(tx, {
+              organizationId: organization,
+              userId: actor,
+              action: 'exit_interview.ai_extraction.completed',
+              resourceType: 'exit_interviews',
+              resourceId: interviewId,
+              details: { tags: expertiseTags.length, riskScore },
+            });
+          });
+
+          if (isIndexingAllowed((existing.sensitivityLevel ?? 'public_internal') as never, existing.consentGranted ?? false)) {
+            await indexExitInterview(interviewId, organization, actor);
+          }
+        } catch (error) {
+          await auditStep('exit_interview.ai_extraction.failed', { reason: error instanceof Error ? error.name : 'unknown' }).catch(() => undefined);
         }
-      } catch {
-        // Non-critical — indexing can be retried via POST /[id]/index
-      }
-    });
+      });
+    }
     // --- end Intelligence Layer ---
 
     return { data: updated, knowledgeAsset: kbRecord };

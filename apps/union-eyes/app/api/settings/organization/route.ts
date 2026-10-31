@@ -6,7 +6,8 @@ import { db } from '@/db/db';
 import { organizations } from '@/db/schema-organizations';
 import { organizationMembers } from '@/db/schema';
 import { eq, sql, count } from 'drizzle-orm';
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { validateOrganizationSettingsPatch } from '@/lib/settings/organization-settings-policy';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
@@ -57,55 +58,94 @@ export const GET = withApi(
 );
 
 /* ── PUT ──────────────────────────────────────────────────────────────────── */
+const boundedText = (value: unknown, field: string, max: number, required = false): string | undefined => {
+  if (value === undefined) return undefined;
+  if (typeof value !== 'string') throw ApiError.badRequest(`${field} must be text`);
+  const text = value.trim();
+  if (required && text.length === 0) throw ApiError.badRequest(`${field} must not be empty`);
+  if (text.length > max) throw ApiError.badRequest(`${field} must be at most ${max} characters`);
+  return text;
+};
+
 export const PUT = withApi(
   { auth: { required: true, minRole: 'admin' } },
   async (ctx) => {
     const orgId = ctx.organizationId;
     if (!orgId) {
-      throw new Error('No organization context');
+      throw ApiError.badRequest('Organization context required');
     }
 
     const body = ctx.body as Record<string, unknown> | null;
-    if (!body) {
-      throw new Error('Request body is required');
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      throw ApiError.badRequest('Request body is required');
     }
 
-    // Build the update payload — only touch fields that were provided
+    // Build the update payload — only touch fields that were provided, each validated before anything is read or written.
     const updates: Record<string, unknown> = {};
+    const name = boundedText(body.name, 'name', 200, true);
+    const shortName = boundedText(body.shortName, 'shortName', 50);
+    const provinceTerritory = boundedText(body.provinceTerritory, 'provinceTerritory', 100);
+    if (name !== undefined) updates.name = name;
+    if (shortName !== undefined) updates.shortName = shortName;
+    if (provinceTerritory !== undefined) updates.provinceTerritory = provinceTerritory;
 
-    if (typeof body.name === 'string') updates.name = body.name;
-    if (typeof body.shortName === 'string') updates.shortName = body.shortName;
-    if (typeof body.provinceTerritory === 'string') updates.provinceTerritory = body.provinceTerritory;
-
-    // Merge settings jsonb — we MERGE not replace to avoid clobbering keys
-    if (body.settings && typeof body.settings === 'object') {
-      const [currentOrg] = await db
-        .select({ settings: organizations.settings })
-        .from(organizations)
-        .where(eq(sql`${organizations.id}::text`, orgId));
-
-      const currentSettings = (currentOrg?.settings ?? {}) as Record<string, unknown>;
-      updates.settings = { ...currentSettings, ...(body.settings as Record<string, unknown>) };
+    // Settings are merged, not replaced, and only the keys an administrator may set are accepted.
+    let checkedSettings: Record<string, unknown> | null = null;
+    if (body.settings !== undefined && body.settings !== null) {
+      const checked = validateOrganizationSettingsPatch(body.settings);
+      if (!checked.ok) {
+        // Key names only: a rejected value is never echoed back or logged.
+        const detail = [
+          checked.rejectedKeys.length ? `not writable: ${checked.rejectedKeys.join(', ')}` : '',
+          checked.invalidKeys.length ? `invalid value: ${checked.invalidKeys.join(', ')}` : '',
+        ].filter(Boolean).join('; ');
+        throw ApiError.badRequest(`Settings were not saved (${detail})`);
+      }
+      checkedSettings = checked.settings;
     }
 
-    if (Object.keys(updates).length === 0) {
+    if (Object.keys(updates).length === 0 && checkedSettings === null) {
       return { updated: false, message: 'No fields to update' };
     }
 
-    updates.updatedAt = new Date();
-
+    const now = new Date();
     await withRLSContext(async (tx) => {
-      await tx
+      let previousSettings: Record<string, unknown> = {};
+      let writtenSettings: Record<string, unknown> = {};
+      if (checkedSettings !== null) {
+        // The merge reads the current settings and writes the result in one transaction, holding the row, so two administrators
+        // saving different keys cannot overwrite each other with a stale copy.
+        const [currentOrg] = await tx
+          .select({ settings: organizations.settings })
+          .from(organizations)
+          .where(eq(sql`${organizations.id}::text`, orgId))
+          .for('update');
+        if (!currentOrg) throw ApiError.notFound('Organization');
+        const currentSettings = (currentOrg.settings ?? {}) as Record<string, unknown>;
+        writtenSettings = checkedSettings;
+        previousSettings = Object.fromEntries(Object.keys(writtenSettings).map((key) => [key, currentSettings[key] ?? null]));
+        updates.settings = { ...currentSettings, ...writtenSettings };
+      }
+      updates.updatedAt = now;
+
+      const updated = await tx
         .update(organizations)
         .set(updates)
-        .where(eq(sql`${organizations.id}::text`, orgId));
+        .where(eq(sql`${organizations.id}::text`, orgId))
+        .returning({ id: organizations.id });
+      if (updated.length === 0) throw ApiError.notFound('Organization');
       await persistAtomicAudit(tx, {
         organizationId: orgId,
         userId: ctx.userId!,
         action: 'organization.settings_update',
         resourceType: 'organizations',
         resourceId: orgId,
-        details: { fields: Object.keys(updates).filter((k) => k !== 'updatedAt') },
+        details: {
+          fields: Object.keys(updates).filter((k) => k !== 'updatedAt'),
+          // Every writable setting is a non-secret preference, so the change is recorded with its before and after.
+          settingsBefore: previousSettings,
+          settingsAfter: writtenSettings,
+        },
       });
     });
 

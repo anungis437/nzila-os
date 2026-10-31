@@ -28,7 +28,8 @@ const envSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.string().url('Invalid SITE_URL').optional(),
   NEXT_PUBLIC_APP_URL_STAGING: z.string().url('Invalid staging APP_URL').optional(),
   NEXT_PUBLIC_SITE_URL_STAGING: z.string().url('Invalid staging SITE_URL').optional(),
-  UE_ENVIRONMENT: z.enum(['development', 'staging', 'demo', 'pilot', 'production', 'test']).optional(),
+  // 'local' and 'dev' are the identities lib/runtime/environment.ts documents; a locally run acceptance stack sets 'local'.
+  UE_ENVIRONMENT: z.enum(['local', 'dev', 'development', 'staging', 'demo', 'pilot', 'production', 'test']).optional(),
   // Operational deployment types only. The operational package MUST NOT accept a
   // customer-branded demo type here — the demo application is a separate package
   // (@nzila/union-eyes-demo) with its own env schema.

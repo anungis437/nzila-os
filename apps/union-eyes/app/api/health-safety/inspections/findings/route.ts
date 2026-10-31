@@ -3,7 +3,7 @@
  * Recent completed inspection findings for the InspectionFindingsCard UI.
  * Returns { findings: InspectionFinding[] }.
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -27,7 +27,9 @@ export const GET = withApi(
     },
   },
   async ({ organizationId }) => {
-    const orgFilter = organizationId ? sql`organization_id = ${organizationId}` : sql`1=1`;
+    // With no organization the query used to run unscoped (1=1) and count every tenant's rows; it now refuses.
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    const orgFilter = sql`organization_id = ${organizationId}`;
 
     const rows = Array.from(
       await withRLSContext(async () =>
@@ -68,7 +70,8 @@ export const GET = withApi(
         date: row.finding_date,
         location: (row.location as string) || '',
         inspector: (row.lead_inspector_name as string) || '',
-        complianceRate: row.score_percentage != null ? Number(row.score_percentage) : 0,
+        // An inspection with no recorded score has no compliance rate; it is not 0%.
+        complianceRate: row.score_percentage != null ? Number(row.score_percentage) : null,
         passCount,
         failCount,
         naCount,

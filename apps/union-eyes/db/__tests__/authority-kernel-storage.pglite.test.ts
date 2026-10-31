@@ -8,7 +8,7 @@
  */
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { authorityKernelEntries } from '../rls-storage-authority/authority-kernel'
-import { newUuid, ORG, ORG_B, PLATFORM_SQL, RLS_SQL, U, WORKAID_PLATFORM_SQL, WORKAID_RLS_SQL } from './authority-kernel-harness'
+import { newUuid, ORG, ORG_B, PLATFORM_SQL, RLS_SQL, U, WORKAID_PLATFORM_SQL, WORKAID_RLS_SQL, WORKAID_WORDING_RLS_SQL, WORKAID_WORDING_SQL } from './authority-kernel-harness'
 import { daysAhead, freshDb, kit, minutesAgo } from './authority-kernel-testkit'
 import { auditAuthorityMutation } from '../../lib/authority/store/audit'
 import { declareOwnRecusal, issueDelegation } from '../../lib/authority/store/lifecycle'
@@ -55,12 +55,20 @@ const insertMandate = (o = mandate(), holder = U.chief, issuer = U.president) =>
     o.granted === '$3' ? [ORG, holder, issuer] : [ORG, holder])
 
 describe('migration structure', () => {
-  it('registry, migrations and RLS closures agree on exactly the same 21 relations (16 kernel + 5 WorkAid union-side)', () => {
-    const created = [...PLATFORM_SQL.matchAll(/CREATE TABLE IF NOT EXISTS (ue_authority_\w+)/g), ...WORKAID_PLATFORM_SQL.matchAll(/CREATE TABLE IF NOT EXISTS (ue_authority_\w+)/g)].map((m) => m[1]).sort()
-    const protectedTables = [...RLS_SQL.matchAll(/ue_create_direct_org_rls_policy\('(ue_authority_\w+)'\)/g), ...WORKAID_RLS_SQL.matchAll(/ue_create_direct_org_rls_policy\('(ue_authority_\w+)'\)/g)].map((m) => m[1]).sort()
+  it('registry, migrations and RLS closures agree on the kernel relations plus the WorkAid union-side relations', () => {
+    const created = [
+      ...PLATFORM_SQL.matchAll(/CREATE TABLE IF NOT EXISTS (ue_authority_\w+)/g),
+      ...WORKAID_PLATFORM_SQL.matchAll(/CREATE TABLE IF NOT EXISTS (ue_authority_\w+)/g),
+      ...WORKAID_WORDING_SQL.matchAll(/CREATE TABLE IF NOT EXISTS (ue_authority_\w+)/g),
+    ].map((m) => m[1]).sort()
+    const protectedTables = [
+      ...RLS_SQL.matchAll(/ue_create_direct_org_rls_policy\('(ue_authority_\w+)'\)/g),
+      ...WORKAID_RLS_SQL.matchAll(/ue_create_direct_org_rls_policy\('(ue_authority_\w+)'\)/g),
+      ...WORKAID_WORDING_RLS_SQL.matchAll(/ue_create_direct_org_rls_policy\('(ue_authority_\w+)'\)/g),
+    ].map((m) => m[1]).sort()
     expect(authorityKernelEntries.map((e) => e.table).sort()).toEqual(created)
     expect(protectedTables).toEqual(created)
-    expect(created).toHaveLength(21)
+    expect(created).toHaveLength(authorityKernelEntries.length)
   })
 
   it('no registry entry grants DELETE, and no table is writable beyond its declared DML', async () => {

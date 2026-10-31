@@ -20,6 +20,7 @@ const m = vi.hoisted(() => {
     withRLSContext: vi.fn(),
     persistAtomicAudit: vi.fn(),
     requireEntitlement: vi.fn(),
+    requireLiveFinancialMandate: vi.fn(),
     resolvePayrollRules: vi.fn(),
     calculatePayroll: vi.fn(),
     sha256: vi.fn(),
@@ -33,6 +34,9 @@ const m = vi.hoisted(() => {
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError: m.ApiError, z: require('zod') }));
 vi.mock('@/db', () => ({ db: m.db }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
+vi.mock('@/lib/finance/require-live-financial-mandate', () => ({
+  requireLiveFinancialMandate: m.requireLiveFinancialMandate,
+}));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({
   requireEntitlement: m.requireEntitlement,
@@ -88,6 +92,9 @@ describe('employer-execution/payroll-runs route', () => {
 
     m.withRLSContext.mockImplementation((_ctx: unknown, fn: any) => {
       const tx = {
+        select: vi.fn(() => ({
+          from: vi.fn(() => makeQuery(m.selectResults.shift() ?? [])),
+        })),
         insert: vi.fn((table: unknown) => ({
           values: vi.fn((values: any) => {
             m.txInserts.push({ table, values });
@@ -102,6 +109,7 @@ describe('employer-execution/payroll-runs route', () => {
     });
 
     m.resolvePayrollRules.mockReturnValue({});
+    m.requireLiveFinancialMandate.mockResolvedValue({ mandateId: 'synthetic', ledgerWide: true, resourceIds: [], accountIds: [] });
     m.calculatePayroll.mockReturnValue({
       items: [
         {
@@ -143,7 +151,7 @@ describe('employer-execution/payroll-runs route', () => {
   it('GET returns payroll runs for organization', async () => {
     const { GET } = await loadRoute();
     m.selectResults = [[{ id: 'run_1', organizationId: 'org_1' }]];
-    const result = await GET({ organizationId: 'org_1' });
+    const result = await GET({ organizationId: 'org_1', userId: 'u1' });
     expect(result.data).toEqual([{ id: 'run_1', organizationId: 'org_1' }]);
   });
 
@@ -193,7 +201,8 @@ describe('employer-execution/payroll-runs route', () => {
       userId: 'u1',
       body: validRequest,
     })).rejects.toMatchObject({ status: 404 });
-    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.requireLiveFinancialMandate).toHaveBeenCalledTimes(1);
+    expect(m.withRLSContext).toHaveBeenCalledTimes(1);
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
@@ -206,7 +215,8 @@ describe('employer-execution/payroll-runs route', () => {
       userId: 'u1',
       body: validRequest,
     })).rejects.toMatchObject({ status: 400 });
-    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.requireLiveFinancialMandate).toHaveBeenCalledTimes(1);
+    expect(m.withRLSContext).toHaveBeenCalledTimes(1);
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
@@ -222,7 +232,9 @@ describe('employer-execution/payroll-runs route', () => {
       userId: 'u1',
       body: { ...validRequest, runType: 'official' },
     })).rejects.toMatchObject({ status: 400 });
-    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.requireLiveFinancialMandate).toHaveBeenCalledTimes(1);
+    expect(m.withRLSContext).toHaveBeenCalledTimes(1);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('POST prepares a preview run, records the preparer and audits on the same transaction', async () => {

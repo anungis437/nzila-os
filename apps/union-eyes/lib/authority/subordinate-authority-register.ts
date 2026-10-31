@@ -127,7 +127,7 @@ export const SUBORDINATE_AUTHORITY_REGISTER: readonly SubordinateAuthorityRecord
     record: 'Triage designations (messages and cases)',
     storage: ['triage_designations'],
     consumers: ['apps/union-eyes/lib/triage/designations.ts', 'apps/union-eyes/lib/messaging/thread-assignment.ts', 'apps/union-eyes/lib/cases/case-authorization.ts'],
-    gate: 'A designation is only ever consulted for the AUTHENTICATED actor (td.user_id = actor.userId), and that actor exists only if the route guard produced a binding (live session + active membership + active lifecycle). The designation predicates themselves also require the holder\'s live eligible staff membership (Canonical V2: public.ue_case_assignee_authorized; legacy lineage: the organization_members compatibility projection with the assignment-eligible roles), so a removed, suspended, deleted or demoted holder loses the queue and the notifications at once.',
+    gate: 'A designation is only ever consulted for the AUTHENTICATED actor (td.user_id = actor.userId), and that actor exists only if the route guard produced a binding (live session + active membership + active lifecycle). The designation predicates themselves also require the holder\'s live conversation-assignee membership (Canonical V2: public.ue_conversation_assignee_authorized; legacy lineage: the organization_members compatibility projection with the conversation-assignee roles, which exclude an administrator title), so a removed, suspended, deleted or demoted holder loses the queue and the notifications at once.',
     status: 'LAYERED',
     proof: BINDING_PROOF,
     residual:
@@ -137,12 +137,17 @@ export const SUBORDINATE_AUTHORITY_REGISTER: readonly SubordinateAuthorityRecord
     id: 'external-representation',
     record: 'Representation authorities and external matter / document access grants',
     storage: ['representation_authorities', 'external_matter_access_grants', 'external_document_access_grants'],
-    consumers: ['apps/union-eyes/lib/services/external-resource-authorization-service.ts', 'apps/union-eyes/lib/external-resource-middleware.ts'],
-    gate: 'The authorisation evaluator judges the records only; it is reachable only through withRLSContext({ organizationId }) in the middleware, whose V2 binder requires a live session AND an active membership in the matter’s organization.',
+    consumers: [
+      'apps/union-eyes/lib/services/external-resource-authorization-service.ts',
+      'apps/union-eyes/lib/external-resource-middleware.ts',
+      'apps/union-eyes/lib/services/external-upload-authority.ts',
+      'apps/union-eyes/app/api/external/grievances/[id]/documents/upload/route.ts',
+    ],
+    gate: 'The authorisation evaluator judges the records only; it is reachable only through withRLSContext({ organizationId }) in the middleware, whose V2 binder requires a live session AND an active membership in the matter’s organization. An external grievance upload re-reads that matter grant inside the write and copies its document permissions; the representative cannot issue the document grant.',
     status: 'LAYERED',
     proof: BINDING_PROOF,
     residual:
-      'In V2 an external representative therefore needs an active membership in the matter organization (the feature is as narrow as the guard). The evaluator does not check the representative’s own lifecycle; the legacy lineage relies on session revocation.',
+      'In V2 an external representative therefore needs an active membership in the matter organization (the feature is as narrow as the guard). The evaluator does not check the representative’s own lifecycle; the legacy lineage relies on session revocation. The upload copies canViewDocuments and canDownloadDocuments, forces canShare false, and refuses a grantedBy equal to the representative. Privilege labels are rejected before any insert. The route stays EXTERNAL_AUTHORITY.',
   },
   {
     id: 'document-grants',
@@ -181,18 +186,28 @@ export const SUBORDINATE_AUTHORITY_REGISTER: readonly SubordinateAuthorityRecord
     status: 'ENFORCED',
     proof: BINDING_PROOF,
     residual:
-      'A bridge outlives revocation of its parent session by at most 30 seconds (the definer predicates check the bridge row, not its parent); closing that needs a parent link and a predicate migration. Suspension does not revoke sessions; the binder refuses them regardless.',
+      'A bridge that records parentSessionId is denied on the same statement its parent is revoked, expired, or no longer that user. A bridge with no parent is denied unless device_info.bridgeClass is provider-no-parent, which is only the provider sign-in path and stays bounded by the bridge row expiry plus the live user and membership checks. Suspension does not revoke sessions; the binder refuses them regardless.',
   },
   {
     id: 'invite-tokens',
     record: 'Admin-issued invite tokens',
     storage: ['user_management.invites'],
-    consumers: ['packages/platform-auth/src/invites/service.ts'],
-    gate: 'Single use, 7 days, hashed, role fixed by the row and capped to the tenant-assignable roles; the new session is minted only for an active, lifecycle-active user.',
-    status: 'OPEN',
-    proof: [],
+    consumers: [
+      'packages/platform-auth/src/invites/service.ts',
+      'packages/db/src/auth-client.ts',
+      'packages/db/src/auth-inviter-lock.ts',
+    ],
+    gate: 'Single use, 7 days, hashed, role fixed by the row. Every redemption statement requires auth_invite_inviter_live(). The redemption transaction locks the inviter and re-reads that predicate before any membership or session write. Losing admin authority revokes that inviter’s still-pending invitations in the same statement. The conferred role is a tenant role, never a kernel authority.',
+    status: 'FIXED',
+    proof: [
+      'packages/db/src/auth-invite-revocation.test.ts',
+      'packages/db/src/auth-inviter-lock.test.ts',
+      'packages/platform-auth/src/invites/accept-invite-serialization.test.ts',
+      'apps/union-eyes/scripts/bootstrap-v2/auth-native.test.ts',
+      'apps/union-eyes/scripts/bootstrap-v2/auth-invite-concurrency.native.test.ts',
+    ],
     residual:
-      'An invite survives the INVITER’s removal: acceptance does not re-check that the inviter is still an active administrator of the organization. Under the deployed auth policies the redemption role cannot read the inviter’s membership, so the check cannot be added in application code; it needs the `inviteLive` predicate in packages/db/src/auth-storage-authority/bootstrap-sql.ts to join the inviter’s live admin membership (governed migration, proven on the native auth suite). The role an invite can confer is a plain tenant role, never a kernel authority.',
+      'Native concurrency, rollback, and reactivation proof is READY_FOR_VS_EXECUTION. The auth manifest grant is UPDATE(revoked_at) for the invite reader only, exercised by the revoke function. Reactivation does not clear revoked_at. A new invitation is required after authority returns.',
   },
   {
     id: 'mfa-challenges',
@@ -235,4 +250,5 @@ export const NON_CONFERRING_KERNEL_TABLES: Readonly<Record<string, string>> = {
   ue_authority_recusals: 'only ever REMOVES authority',
   ue_authority_financial_steps: 'record of acts already performed; authority comes from the principal’s financial mandate',
   ue_authority_reviews: 'resource facts for governance reviews, not a grant',
+  ue_authority_workaid_consent_text_proposals: 'a proposed consent wording; it confers nothing, and only adoption by a different executive inserts current wording',
 }

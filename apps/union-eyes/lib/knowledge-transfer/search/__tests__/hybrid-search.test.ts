@@ -24,7 +24,7 @@ vi.mock('@/db/schema', () => ({
   exitInterviews: new Proxy({}, { get: (_t, p) => String(p) }),
 }));
 vi.mock('drizzle-orm', () => ({
-  and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a, ilike: (...a: unknown[]) => a, or: (...a: unknown[]) => a,
+  and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a, ilike: (...a: unknown[]) => a, inArray: (...a: unknown[]) => a, or: (...a: unknown[]) => a,
   sql: Object.assign((..._a: unknown[]) => ({}), { raw: (s: string) => s }),
 }));
 vi.mock('@/lib/ai/ai-client', () => ({
@@ -92,5 +92,11 @@ describe('lib/knowledge-transfer/search/hybrid-search', () => {
     expect(results[0].semanticScore).toBeNull();
     expect(results[0].keywordScore).toBe(1);
     expect(h.execute).not.toHaveBeenCalled();
+  });
+
+  // DEF-0B7-EXC-SEARCH-LIMITS-BEFORE-FILTERING-BY-SENSITIVITY
+  it('puts the sensitivity floor in the query and reads nothing when no level is allowed', async () => {
+    const results = await hybridKnowledgeSearch({ query: 'safety', orgId: 'org-1', allowedSensitivityLevels: [] });
+    expect(results).toEqual([]);
   });
 });

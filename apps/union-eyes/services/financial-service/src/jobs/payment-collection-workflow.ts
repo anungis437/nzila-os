@@ -20,6 +20,7 @@ import {
   payments,
 } from '../db/schema';
 import { eq, and, inArray } from 'drizzle-orm';
+import { inOrganization } from './tenant-scope';
 import { queueNotification } from '../services/notification-service';
 import { logger } from '@/lib/logger';
 import { JobCancellationService } from '../services/job-cancellation-service';
@@ -173,7 +174,7 @@ export async function processPaymentCollection(params: {
               failureReason: 'No outstanding dues transactions found for member',
               updatedAt: new Date().toISOString(),
             })
-            .where(eq(payments.id, payment.id))
+            .where(and(eq(payments.id, payment.id), inOrganization(payments.tenantId, tenantId)))
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             .catch((err: any) => {
               logger.error('Failed to mark payment as unmatched', { error: err, paymentId: payment.id });
@@ -199,7 +200,7 @@ export async function processPaymentCollection(params: {
               status: 'paid',
               notes: `Paid ${amountToApply} via ${payment.paymentMethod}`,
             } as Partial<typeof duesTransactions.$inferInsert>)
-            .where(eq(duesTransactions.id, transaction.id));
+            .where(and(eq(duesTransactions.id, transaction.id), eq(duesTransactions.organizationId, tenantId)));
 
           updatedTransactionIds.push(transaction.id);
           remainingAmount -= amountToApply;
@@ -226,7 +227,7 @@ export async function processPaymentCollection(params: {
                   arrearsStatus: 'resolved',
                   notes: `Paid via ${payment.paymentMethod} - Ref: ${payment.processorPaymentId || payment.id}`,
                 } as Partial<typeof arrears.$inferInsert>)
-                .where(eq(arrears.id, arrearsRecord[0].id));
+                .where(and(eq(arrears.id, arrearsRecord[0].id), inOrganization(arrears.tenantId, tenantId)));
 
               arrearsUpdated++;
             }
@@ -248,7 +249,7 @@ export async function processPaymentCollection(params: {
             failureReason: remainingAmount > 0 ? paymentNotes : null,
             updatedAt: new Date().toISOString(),
           })
-          .where(eq(payments.id, payment.id))
+          .where(and(eq(payments.id, payment.id), inOrganization(payments.tenantId, tenantId)))
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .catch((err: any) => {
             logger.error('Failed to update payment status', { error: err, paymentId: payment.id });
@@ -319,7 +320,7 @@ export async function processPaymentCollection(params: {
             failureReason: paymentError instanceof Error ? paymentError.message : String(paymentError),
             updatedAt: new Date().toISOString(),
           })
-          .where(eq(payments.id, payment.id))
+          .where(and(eq(payments.id, payment.id), inOrganization(payments.tenantId, tenantId)))
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .catch((err: any) => {
             logger.error('Failed to mark payment as failed', { error: err, paymentId: payment.id });

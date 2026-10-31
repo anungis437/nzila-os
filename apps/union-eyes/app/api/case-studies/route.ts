@@ -7,7 +7,8 @@ import { withApi } from '@/lib/api/with-api';
 import { db } from '@/db/db';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { caseStudies } from '@/db/schema';
-import { eq, desc, count, type SQL } from 'drizzle-orm';
+import { eq, and, lte, desc, count } from 'drizzle-orm';
+import { ApiError } from '@/lib/api/errors';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +18,8 @@ const handlers = crudRoutes({
   tags: ["Marketing"],
   orgScoped: false,
   readRole: 'member',
-  writeRole: 'admin',
+  // Organization administrators do not have platform-wide publishing authority.
+  writeRole: 'content_manager',
 });
 
 /** Public GET — no auth required (used on marketing pages) */
@@ -33,17 +35,20 @@ export const GET = withApi(
   async ({ request }) => {
     const url = new URL(request.url);
     const status = url.searchParams.get('status');
+    if (status && status !== 'published') {
+      throw ApiError.badRequest('Public case studies expose published content only');
+    }
     const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
     const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '50')));
     const offset = (page - 1) * limit;
 
-    const conditions: SQL[] = [];
-    if (status) {
-      const statusCol = (caseStudies as any as Record<string, unknown>)['status'];
-      if (statusCol) conditions.push(eq(statusCol as never, status as never));
-    }
-
-    const whereClause = conditions.length > 0 ? conditions[0] : undefined;
+    // case_studies has NO status column. Publication is governed by visibility and publishedAt.
+    // The predicate is mandatory for BOTH the rows and the total count, and scheduled or
+    // never-published drafts must not become public even through ?status=... .
+    const publicOnly = and(
+      eq(caseStudies.visibility, 'public'),
+      lte(caseStudies.publishedAt, new Date()),
+    );
 
     // Public marketing content has no actor: it is global reference data read through the
     // SYSTEM role (SELECT only), never the ordinary tenant runtime connection.
@@ -51,11 +56,11 @@ export const GET = withApi(
       const baseQuery = db.select().from(caseStudies);
       const countQuery = db.select({ total: count() }).from(caseStudies);
       return Promise.all([
-        (whereClause ? baseQuery.where(whereClause) : baseQuery)
-          .orderBy(desc((caseStudies as any as Record<string, unknown>)['createdAt'] as never))
+        baseQuery.where(publicOnly)
+          .orderBy(desc(caseStudies.createdAt))
           .limit(limit)
           .offset(offset),
-        whereClause ? countQuery.where(whereClause) : countQuery,
+        countQuery.where(publicOnly),
       ]);
     });
 

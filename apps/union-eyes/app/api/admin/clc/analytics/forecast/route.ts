@@ -10,19 +10,31 @@ import { NextResponse } from 'next/server';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
 import { forecastRemittances } from '@/services/clc/compliance-reports';
 import { withRoleAuth } from '@/lib/api-auth-guard';
+import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 
 import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
 export const GET = withRoleAuth('admin', async (request, context) => {
-    const { userId } = context as { userId: string };
+    const { userId, organizationId } = context;
+    if (!userId) return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
+    if (!organizationId) return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
 
   try {
-        const searchParams = request.nextUrl.searchParams;
-        const monthsAhead = parseInt(searchParams.get('months') || '12');
+        const rateLimitResult = await checkRateLimit(userId, RATE_LIMITS.CLC_OPERATIONS);
+        if (!rateLimitResult.allowed) {
+          return NextResponse.json(
+            { error: 'Rate limit exceeded. Too many CLC requests.', resetIn: rateLimitResult.resetIn },
+            { status: 429, headers: createRateLimitHeaders(rateLimitResult) },
+          );
+        }
 
-        if (monthsAhead < 1 || monthsAhead > 24) {
+        const searchParams = request.nextUrl.searchParams;
+        const rawMonths = searchParams.get('months');
+        const monthsAhead = rawMonths === null ? 12 : Number(rawMonths);
+
+        if (!Number.isInteger(monthsAhead) || monthsAhead < 1 || monthsAhead > 24) {
           logApiAuditEvent({
             timestamp: new Date().toISOString(), userId,
             endpoint: '/api/admin/clc/analytics/forecast',
@@ -37,7 +49,7 @@ export const GET = withRoleAuth('admin', async (request, context) => {
     );
         }
 
-        const forecast = await forecastRemittances(monthsAhead);
+        const forecast = await forecastRemittances(monthsAhead, organizationId);
 
         logApiAuditEvent({
           timestamp: new Date().toISOString(), userId,
@@ -50,7 +62,7 @@ export const GET = withRoleAuth('admin', async (request, context) => {
 
         return NextResponse.json(forecast, {
           headers: {
-            'Cache-Control': 'public, max-age=7200' // Cache for 2 hours
+            'Cache-Control': 'private, no-store'
           }
         });
 

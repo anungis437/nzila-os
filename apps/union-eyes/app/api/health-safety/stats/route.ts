@@ -3,7 +3,7 @@
  * Cross-domain health & safety summary statistics (currently used by the
  * training overview page). Returns { trainingDue }.
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -19,24 +19,29 @@ export const GET = withApi(
     },
   },
   async ({ organizationId }) => {
-    const orgFilter = organizationId ? sql`organization_id = ${organizationId}` : sql`1=1`;
+    // With no organization the query used to run unscoped (1=1) and count every tenant's rows; it now refuses.
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    const orgFilter = sql`organization_id = ${organizationId}`;
 
     const rows = Array.from(
       await withRLSContext(async () =>
         db.execute(sql`
-          SELECT count(*)::int AS training_due
+          SELECT count(*)::int AS records_held,
+                 count(*) FILTER (WHERE expiry_date IS NOT NULL AND expiry_date <= (CURRENT_DATE + INTERVAL '30 days'))::int AS training_due
           FROM safety_training_records
           WHERE ${orgFilter}
-            AND expiry_date IS NOT NULL
-            AND expiry_date <= (CURRENT_DATE + INTERVAL '30 days')
         `)
       )
     );
 
     const row = (rows[0] ?? {}) as Record<string, unknown>;
 
+    // No route or job of the application writes training records, so an organization with none has measured nothing: that is not
+    // "zero due". The figure is null until records exist.
+    const recordsHeld = Number(row.records_held ?? 0);
     return {
-      trainingDue: Number(row.training_due ?? 0),
+      trainingDue: recordsHeld > 0 ? Number(row.training_due ?? 0) : null,
+      trainingRecordsHeld: recordsHeld,
     };
   },
 );

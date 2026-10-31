@@ -12,7 +12,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
 import type { OrganizationalContinuityProfile } from '@/lib/icra/types';
-import { rateLimit } from '@/lib/rate-limit';
+import { checkRateLimit } from '@/lib/rate-limiter';
+import { clientAddress } from '@/lib/public-intake/guard';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import {
   extractCapabilityToken,
@@ -34,9 +35,14 @@ export async function GET(req: NextRequest, { params }: Params): Promise<NextRes
     return NextResponse.json({ error: 'Invalid assessment ID.' }, { status: 400 });
   }
 
-  const rl = rateLimit(req, { maxRequests: 20, windowSeconds: 60 });
-  if (!rl.success) {
-    return NextResponse.json({ error: 'Rate limit exceeded.' }, { status: 429 });
+  const rl = await checkRateLimit(`icra-results:${clientAddress(req)}`, {
+    limit: 20,
+    window: 60,
+    identifier: 'icra-results',
+    failOpen: process.env.NODE_ENV !== 'production',
+  });
+  if (!rl.allowed) {
+    return NextResponse.json({ error: rl.error ? 'Temporarily unavailable.' : 'Rate limit exceeded.' }, { status: rl.error ? 503 : 429 });
   }
 
   try {

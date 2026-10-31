@@ -207,6 +207,47 @@ describe('social-media/campaigns route', () => {
     );
   });
 
+  it('persists typed campaign goals and requested status rather than silently discarding them', async () => {
+    const { POST } = await loadRoute();
+    m.queueInsert([{ id: 'camp-goals', organizationId: TEST_USER.organizationId }]);
+    const response = await POST(new NextRequest('http://localhost/api/social-media/campaigns', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'Evidence-backed campaign', platforms: ['facebook'], status: 'planning',
+        goals: [
+          { metric: 'impressions', target_value: 1200 },
+          { metric: 'engagement_rate', target_value: 4.5 },
+          { metric: 'conversions', target_value: 80 },
+        ],
+      }),
+      headers: { 'content-type': 'application/json' },
+    }));
+    expect(response.status).toBe(200);
+    expect(mockDb.insert).toHaveBeenCalled();
+    const values = (mockDb.insert.mock.results.at(-1)?.value as any).values;
+    expect(values).toHaveBeenCalledWith(expect.objectContaining({
+      status: 'planning', goalImpressions: 1200, goalEngagementRate: '4.50', goalConversions: 80,
+    }));
+  });
+
+  it.each([
+    { goals: [{ metric: 'made_up', target_value: 10 }] },
+    { goals: [{ metric: 'impressions', target_value: -1 }] },
+    { goals: [{ metric: 'impressions', target_value: 10.5 }] },
+    { goals: [{ metric: 'impressions', target_value: 10 }, { metric: 'impressions', target_value: 20 }] },
+    { status: 'published' },
+    { arbitraryApproval: true },
+  ])('refuses unsupported campaign creation fields and goals: %j', async (extra) => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/social-media/campaigns', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Test', platforms: ['facebook'], ...extra }),
+      headers: { 'content-type': 'application/json' },
+    }));
+    expect(response.status).toBe(400);
+    expect(mockDb.insert).not.toHaveBeenCalled();
+  });
+
   it('does not create a campaign when its audit cannot be written', async () => {
     const { POST } = await loadRoute();
     m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
@@ -252,6 +293,25 @@ describe('social-media/campaigns route', () => {
 
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toMatchObject({ code: 'VALIDATION_ERROR' });
+  });
+
+  it.each([
+    { status: 'published' },
+    { platforms: ['unapproved-network'] },
+    { name: 123 },
+    { goals: [{ metric: 'conversions', target_value: 'lots' }] },
+    { organizationId: 'foreign-org' },
+    { completedBy: 'caller-supplied' },
+  ])('rejects invalid or privileged campaign updates: %j', async (payload) => {
+    const { PUT } = await loadRoute();
+    m.queueSelect([{ id: 'camp-1', organizationId: TEST_USER.organizationId }]);
+    const response = await PUT(new NextRequest('http://localhost/api/social-media/campaigns?id=camp-1', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+      headers: { 'content-type': 'application/json' },
+    }));
+    expect(response.status).toBe(400);
+    expect(mockDb.update).not.toHaveBeenCalled();
   });
 
   it('updates a campaign when caller is authorized', async () => {

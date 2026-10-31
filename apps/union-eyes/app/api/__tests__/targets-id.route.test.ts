@@ -29,12 +29,12 @@ async function loadRoute() {
   return import('../targets/[id]/route');
 }
 
-const ctx = { body: { isActive: true }, organizationId: 'org_1', userId: 'u1', params: { id: 't1' } };
+const ctx = { body: { isActive: true }, organizationId: 'org_1', userId: 'u1', params: { id: '11111111-1111-4111-8111-111111111111' } };
 
 describe('targets/[id] route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.returned = [{ id: 't1', isActive: true }];
+    m.returned = [{ id: '11111111-1111-4111-8111-111111111111', isActive: true }];
     m.persistAtomicAudit.mockResolvedValue(undefined);
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (c: any) => handler(c));
     m.tx.update.mockReturnValue({
@@ -48,11 +48,18 @@ describe('targets/[id] route', () => {
     const { PATCH } = await loadRoute();
     const result = await PATCH(ctx);
 
-    expect(result).toEqual({ id: 't1', isActive: true });
+    expect(result).toEqual({ id: '11111111-1111-4111-8111-111111111111', isActive: true });
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(
       m.tx,
-      expect.objectContaining({ organizationId: 'org_1', userId: 'u1', action: 'target.activate', resourceId: 't1' }),
+      expect.objectContaining({ organizationId: 'org_1', userId: 'u1', action: 'target.activate', resourceId: '11111111-1111-4111-8111-111111111111' }),
     );
+  });
+
+  it('rejects malformed target ids without querying or auditing', async () => {
+    const { PATCH } = await loadRoute();
+    await expect(PATCH({ ...ctx, params: { id: 'not-a-uuid' } })).rejects.toMatchObject({ status: 400 });
+    expect(m.tx.update).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
   it('answers 404 and writes no audit when the target is not in the caller\u2019s organization', async () => {

@@ -60,6 +60,14 @@ vi.mock('@/db/schema/domains/communications', () => ({
   },
   notificationDeliveryLog: { id: 'id' },
   notificationTemplates: { id: 'id', templateKey: 'template_key' },
+  userNotificationPreferences: {
+    userId: 'preference_user_id',
+    organizationId: 'preference_organization_id',
+    emailEnabled: 'email_enabled',
+    smsEnabled: 'sms_enabled',
+    pushEnabled: 'push_enabled',
+    inAppEnabled: 'in_app_enabled',
+  },
 }));
 
 vi.mock('@/db/schema', () => ({
@@ -810,53 +818,173 @@ describe('NotificationService', () => {
       );
     });
 
-    it('executes persistence and audit catch callbacks without failing send', async () => {
+    it('does not call the provider when the delivery ledger rejects the attempt', async () => {
+      const send = vi.fn().mockResolvedValue({ id: 'msg-catch', status: 'sent', sentAt: new Date() });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (service as any).providers.set('email', {
-        name: 'mock',
-        send: vi.fn().mockResolvedValue({ id: 'msg-catch', status: 'sent', sentAt: new Date() }),
-      });
-
+      (service as any).providers.set('email', { name: 'mock', send });
       mocks.mockInsert.mockReturnValue({
-        values: vi.fn(() => Promise.reject(new Error('insert catch path'))),
-      });
-      mocks.mockCreateAuditLog.mockRejectedValue(new Error('audit catch path'));
-
-      await expect(service.send({ ...emailPayload, userId: 'user-2' })).resolves.toEqual(
-        expect.objectContaining({ status: 'sent' }),
-      );
-    });
-    it('handles non-Error catch values from persistence and audit callbacks', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (service as any).providers.set('email', {
-        name: 'mock',
-        send: vi.fn().mockResolvedValue({ id: 'msg-catch-string', status: 'sent', sentAt: new Date() }),
+        values: vi.fn(() => Promise.reject(new Error('ledger down'))),
       });
 
-      mocks.mockInsert.mockReturnValue({
-        values: vi.fn(() => Promise.reject('insert string failure')),
-      });
-      mocks.mockCreateAuditLog.mockRejectedValue('audit string failure');
-
-      await expect(service.send({ ...emailPayload, userId: 'user-2' })).resolves.toEqual(
-        expect.objectContaining({ status: 'sent' }),
-      );
+      await expect(service.send(emailPayload)).rejects.toThrow('ledger down');
+      expect(send).not.toHaveBeenCalled();
     });
 
-    it('handles synchronous database persistence errors and still returns provider response', async () => {
+    it('records provider submission as accepted and confirmed delivery as delivered', async () => {
+      const send = vi.fn().mockResolvedValue({ id: 'msg-accepted', status: 'sent', sentAt: new Date() });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (service as any).providers.set('email', {
-        name: 'mock',
-        send: vi.fn().mockResolvedValue({ id: 'msg-sync-db', status: 'sent', sentAt: new Date() }),
+      (service as any).providers.set('email', { name: 'mock', send });
+
+      await service.send(emailPayload);
+
+      const events = mocks.mockValues.mock.calls.map((call) => call[0]?.event);
+      expect(events).toContain('attempted');
+      expect(events).toContain('accepted');
+      expect(events).not.toContain('sent');
+      expect(send).toHaveBeenCalledOnce();
+    });
+
+    function historySelect() {
+      mocks.mockWhere.mockReturnValue({ limit: mocks.mockLimit });
+      mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });
+      mocks.mockSelect.mockReturnValue({ from: mocks.mockFrom });
+    }
+
+    it('does not call the provider again when the prior attempt has no outcome', async () => {
+      const send = vi.fn();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+      mocks.mockLimit.mockResolvedValue([
+        { event: 'attempted', organizationId: 'org-1', notificationId: '11111111-1111-4111-8111-111111111111', externalEventId: null },
+      ]);
+      historySelect();
+
+      const result = await service.send({
+        ...emailPayload,
+        idempotencyKey: '11111111-1111-4111-8111-111111111111',
       });
 
-      mocks.mockInsert.mockImplementation(() => {
-        throw new Error('sync insert failure');
+      expect(result.status).toBe('uncertain');
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    it('returns uncertain and does not resend when the provider accepted but the ledger write failed', async () => {
+      const send = vi.fn().mockResolvedValue({ id: 'provider-msg-1', status: 'sent', sentAt: new Date() });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+      const key = '22222222-2222-4222-8222-222222222222';
+      let inserts = 0;
+      mocks.mockInsert.mockImplementation(() => ({
+        values: () => {
+          inserts += 1;
+          if (inserts >= 3) return Promise.reject(new Error('acceptance lost'));
+          return Promise.resolve();
+        },
+      }));
+      mocks.mockLimit
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([
+          { event: 'attempted', organizationId: 'org-1', notificationId: key, externalEventId: 'provider-msg-1' },
+        ]);
+      historySelect();
+
+      const first = await service.send({ ...emailPayload, idempotencyKey: key });
+      const second = await service.send({ ...emailPayload, idempotencyKey: key });
+
+      expect(first.status).toBe('uncertain');
+      expect(first.providerMessageId).toBe('provider-msg-1');
+      expect(first.status).not.toBe('delivered');
+      expect(second.status).toBe('uncertain');
+      expect(send).toHaveBeenCalledOnce();
+    });
+
+    it('does not call the provider when another worker already claimed the delivery', async () => {
+      const send = vi.fn();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+      mocks.mockLimit.mockResolvedValue([]);
+      historySelect();
+      mocks.mockInsert.mockReturnValue({
+        values: () => Promise.reject(Object.assign(new Error('duplicate key value violates unique constraint'), { code: '23505' })),
+      });
+      const returning = vi.fn().mockResolvedValue([]);
+      mocks.mockSet.mockReturnValue({ where: vi.fn().mockReturnValue({ returning }) });
+      mocks.mockUpdate.mockReturnValue({ set: mocks.mockSet });
+
+      const result = await service.send({
+        ...emailPayload,
+        idempotencyKey: '33333333-3333-4333-8333-333333333333',
       });
 
-      await expect(service.send({ ...emailPayload })).resolves.toEqual(
-        expect.objectContaining({ id: 'msg-sync-db', status: 'sent' }),
-      );
+      expect(result.status).toBe('uncertain');
+      expect(result.failureReason).toContain('claimed');
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    it('does not resend a confirmed failure when another worker already took the retry', async () => {
+      const send = vi.fn();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+      const key = '55555555-5555-4555-8555-555555555555';
+      mocks.mockLimit.mockResolvedValue([
+        { event: 'failed', organizationId: 'org-1', notificationId: key },
+      ]);
+      historySelect();
+      const returning = vi.fn().mockResolvedValue([]);
+      mocks.mockSet.mockReturnValue({ where: vi.fn().mockReturnValue({ returning }) });
+      mocks.mockUpdate.mockReturnValue({ set: mocks.mockSet });
+
+      const result = await service.send({ ...emailPayload, idempotencyKey: key });
+
+      expect(result.status).toBe('uncertain');
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    it('sends a queued notice when its queue row already exists and no outcome is recorded', async () => {
+      const send = vi.fn().mockResolvedValue({ id: 'provider-msg', status: 'sent', sentAt: new Date() });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+      const key = '44444444-4444-4444-8444-444444444444';
+      let inserts = 0;
+      mocks.mockInsert.mockImplementation(() => ({
+        values: () => {
+          inserts += 1;
+          if (inserts === 1) {
+            return Promise.reject(Object.assign(new Error('duplicate key value violates unique constraint'), { code: '23505' }));
+          }
+          return Promise.resolve();
+        },
+      }));
+      mocks.mockLimit.mockResolvedValue([]);
+      historySelect();
+      const returning = vi.fn().mockResolvedValue([{ id: key }]);
+      mocks.mockSet.mockReturnValue({ where: vi.fn().mockReturnValue({ returning }) });
+      mocks.mockUpdate.mockReturnValue({ set: mocks.mockSet });
+
+      const result = await service.send({ ...emailPayload, idempotencyKey: key });
+
+      expect(result.status).toBe('sent');
+      expect(result.status).not.toBe('delivered');
+      expect(send).toHaveBeenCalledOnce();
+    });
+
+    it('does not record a preference suppression as a successful send', async () => {
+      const send = vi.fn().mockResolvedValue({ id: 'msg-pref', status: 'sent', sentAt: new Date() });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+      mocks.mockLimit.mockResolvedValue([
+        { emailEnabled: false, smsEnabled: false, pushEnabled: true, inAppEnabled: true },
+      ]);
+      mocks.mockWhere.mockReturnValue({ limit: mocks.mockLimit });
+      mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });
+      mocks.mockSelect.mockReturnValue({ from: mocks.mockFrom });
+
+      const result = await service.send({ ...emailPayload, recipientId: 'user-1' });
+
+      expect(result.status).not.toBe('sent');
+      expect(result.failureReason).toContain('suppressed');
+      expect(send).not.toHaveBeenCalled();
+      expect(mocks.mockValues.mock.calls.map((call) => call[0]?.event)).toContain('suppressed');
     });
   });
 
@@ -871,31 +999,27 @@ describe('NotificationService', () => {
       expect(mocks.mockInsert).toHaveBeenCalled();
     });
 
-    it('handles queued insert rejection callback and still returns ID', async () => {
+    it('does not return a queue id when the queue insert is rejected', async () => {
       mocks.mockInsert.mockReturnValue({
         values: vi.fn(() => Promise.reject(new Error('queue catch path'))),
       });
 
-      const id = await service.queue({
+      await expect(service.queue({
         organizationId: 'org-1',
         type: 'email',
         body: 'Queued notification',
-      });
-
-      expect(id).toBe('notif-uuid');
+      })).rejects.toThrow('queue catch path');
     });
-    it('handles queue insert callback rejection with non-Error reason', async () => {
+    it('does not return a queue id when the queue insert rejects with a non-Error', async () => {
       mocks.mockInsert.mockReturnValue({
         values: vi.fn(() => Promise.reject('queue string failure')),
       });
 
-      const id = await service.queue({
+      await expect(service.queue({
         organizationId: 'org-1',
         type: 'email',
         body: 'Queued notification',
-      });
-
-      expect(id).toBe('notif-uuid');
+      })).rejects.toBe('queue string failure');
     });
 
     it('throws when queue insert fails synchronously', async () => {
@@ -1480,6 +1604,7 @@ describe('processPendingNotifications', () => {
           },
         },
       ])
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
     mocks.mockWhere.mockReturnValue({ limit: mocks.mockLimit });
     mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });

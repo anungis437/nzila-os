@@ -3,7 +3,8 @@ export const dynamic = 'force-dynamic';
 import { Metadata } from 'next';
 import { requireUser } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, getLocale } from 'next-intl/server';
+import { CapabilityUnavailable } from '@/components/system/capability-unavailable';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -78,7 +79,7 @@ async function getComplianceMetrics(clcId: string) {
       return await res.json();
     }
     
-    // Fallback to empty metrics
+    // The service is unavailable: say so. These zeros are not data and must not be read as a compliance position.
     const totalAffiliates = 0;
     const compliantAffiliates = 0;
     const atRiskAffiliates = 0;
@@ -96,6 +97,7 @@ async function getComplianceMetrics(clcId: string) {
     const complianceTrends: never[] = [];
 
     return {
+      unavailable: true,
       national: {
         totalAffiliates,
         compliantAffiliates,
@@ -118,6 +120,7 @@ async function getComplianceMetrics(clcId: string) {
   } catch (error) {
     logger.error('Error fetching compliance metrics:', error);
     return {
+      unavailable: true,
       national: {
         totalAffiliates: 0,
         compliantAffiliates: 0,
@@ -164,11 +167,13 @@ export default async function CLCCompliancePage() {
 
   const t = await getTranslations('clc.compliance');
   const metrics = await getComplianceMetrics(orgId);
+  const locale = await getLocale();
 
   const StatusIcon = getComplianceStatusIcon(metrics.national.overallComplianceRate);
 
   return (
     <div className="container mx-auto py-8 space-y-8">
+      {metrics.unavailable ? <CapabilityUnavailable locale={locale} capability="clc/compliance/metrics" /> : null}
       {/* Page Header */}
       <div className="flex justify-between items-start">
         <div>

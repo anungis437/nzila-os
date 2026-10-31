@@ -47,6 +47,7 @@ export const kpiConfigurations = pgTable('kpi_configurations', {
   warningThreshold: numeric('warning_threshold'),
   criticalThreshold: numeric('critical_threshold'),
   alertEnabled: boolean('alert_enabled').default(false),
+  direction: text('direction'), // 'higher_is_better' | 'lower_is_better'; null means the direction is read from the thresholds
   alertRecipients: jsonb('alert_recipients'), // Array of user IDs or emails
   refreshInterval: integer('refresh_interval').default(3600), // Seconds
   isActive: boolean('is_active').default(true),

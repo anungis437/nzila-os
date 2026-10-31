@@ -54,6 +54,12 @@ export const PATCH = withApi(
       throw ApiError.badRequest("Cannot approve — no minutes recorded yet");
     }
 
+    // The recorder is the person who recorded the minutes; a meeting whose minutes were recorded before that was kept falls back to its last editor.
+    const recorder = meeting.minutesRecordedBy ?? meeting.updatedBy;
+    if (recorder && recorder === userId) {
+      throw ApiError.forbidden("Minutes cannot be approved by the person who recorded them");
+    }
+
     const updated = await approveMinutes(meetingId, organizationId, userId!);
     if (!updated) throw ApiError.conflict("The minutes have already been approved");
 

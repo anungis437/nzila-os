@@ -11,7 +11,8 @@
 import { db } from '@/db';
 import { platformCostLedgerEntries, type NewPlatformCostLedgerEntry } from '@/db/schema';
 import { eq, and, sql, desc } from 'drizzle-orm';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { v4 as uuidv4 } from 'uuid';
 
 // ============================================================================
@@ -49,17 +50,8 @@ export interface LedgerSummary {
 // Service
 // ============================================================================
 
-/**
- * Append a single immutable entry to the platform cost ledger.
- * Validates CAD currency enforcement and logs audit event.
- */
-export async function appendLedgerEntry(
-  input: LedgerEntryInput,
-): Promise<string> {
-  const entryId = uuidv4();
-  const auditReference = `DAPL-${Date.now()}-${entryId.slice(0, 8)}`;
-
-  await db.insert(platformCostLedgerEntries).values({
+function ledgerValues(input: LedgerEntryInput, entryId: string, auditReference: string) {
+  return {
     id: entryId,
     organizationId: input.organizationId,
     parentOrganizationId: input.parentOrganizationId,
@@ -80,16 +72,16 @@ export async function appendLedgerEntry(
     metadata: input.metadata,
     createdBy: input.createdBy,
     auditReference,
-  });
+  };
+}
 
-  await auditLog({
-    eventType: AuditEventType.DATA_CREATE,
-    severity: AuditSeverity.HIGH,
+async function recordLedgerAppend(tx: RLSTx, input: LedgerEntryInput, entryId: string, auditReference: string) {
+  await persistAtomicAudit(tx, {
     organizationId: input.organizationId,
-    resource: 'platform_cost_ledger',
-    resourceId: entryId,
-    action: 'ledger_entry_appended',
     userId: input.createdBy,
+    action: 'ledger_entry_appended',
+    resourceType: 'platform_cost_ledger',
+    resourceId: entryId,
     details: {
       costType: input.costType,
       eventType: input.eventType,
@@ -97,12 +89,33 @@ export async function appendLedgerEntry(
       auditReference,
     },
   });
+}
+
+/**
+ * Append a single immutable entry to the platform cost ledger.
+ * The row and its audit commit together. A failed audit leaves no entry. A caller that is already inside a transaction
+ * passes it, so the entry commits or rolls back with that caller's own writes.
+ */
+export async function appendLedgerEntry(
+  input: LedgerEntryInput,
+  callerTx?: unknown,
+): Promise<string> {
+  const entryId = uuidv4();
+  const auditReference = `DAPL-${Date.now()}-${entryId.slice(0, 8)}`;
+
+  const write = async (tx: any) => {
+    await tx.insert(platformCostLedgerEntries).values(ledgerValues(input, entryId, auditReference));
+    await recordLedgerAppend(tx as unknown as RLSTx, input, entryId, auditReference);
+  };
+  if (callerTx) await write(callerTx);
+  else await db.transaction(write);
 
   return entryId;
 }
 
 /**
  * Append multiple ledger entries in a single transaction.
+ * Each entry's audit is in that transaction. One failed audit rolls the batch back.
  */
 export async function appendLedgerEntries(
   entries: LedgerEntryInput[],
@@ -114,28 +127,8 @@ export async function appendLedgerEntries(
       const entryId = uuidv4();
       const auditReference = `DAPL-${Date.now()}-${entryId.slice(0, 8)}`;
 
-      await tx.insert(platformCostLedgerEntries).values({
-        id: entryId,
-        organizationId: input.organizationId,
-        parentOrganizationId: input.parentOrganizationId,
-        localId: input.localId,
-        employerId: input.employerId,
-        regionId: input.regionId,
-        bargainingUnitId: input.bargainingUnitId,
-        billingPeriodId: input.billingPeriodId,
-        costType: input.costType,
-        eventType: input.eventType,
-        sourceType: input.sourceType,
-        sourceId: input.sourceId,
-        quantity: input.quantity ?? '1',
-        unitPriceCad: input.unitPriceCad,
-        amountCad: input.amountCad,
-        costCenterId: input.costCenterId,
-        description: input.description,
-        metadata: input.metadata,
-        createdBy: input.createdBy,
-        auditReference,
-      });
+      await tx.insert(platformCostLedgerEntries).values(ledgerValues(input, entryId, auditReference));
+      await recordLedgerAppend(tx as unknown as RLSTx, input, entryId, auditReference);
 
       ids.push(entryId);
     }

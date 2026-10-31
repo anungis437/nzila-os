@@ -9,7 +9,13 @@ import {
   exitInterviewEvents,
   exitInterviewStatusEnum,
 } from '@/db/schema';
-import { ROLE_HIERARCHY, normalizeRole } from '@/lib/api-auth-guard';
+import { ROLE_HIERARCHY, normalizeRole, hasMinRole } from '@/lib/api-auth-guard';
+import {
+  interviewListCondition,
+  projectInterview,
+  resolveInterviewReader,
+  UNRECORDED_LEVEL,
+} from '@/lib/knowledge-transfer/governance/interview-access';
 import { createExitInterviewSchema, listQuerySchema } from './schemas';
 
 export const dynamic = 'force-dynamic';
@@ -47,12 +53,10 @@ export const GET = withApi(
       }
     }
 
+    // The sensitivity floor and the consent condition apply to every row of the list, as they do to the item.
     const stewardPlus = hasStewardPrivileges(user?.role ?? null);
-    if (!stewardPlus) {
-      conditions.push(
-        inArray(exitInterviews.status, ['published', 'archived']),
-      );
-    }
+    const reader = await resolveInterviewReader(userId ?? null, stewardPlus, hasMinRole);
+    conditions.push(interviewListCondition(reader));
 
     if (query.mine === 'true') {
       conditions.push(eq(exitInterviews.createdBy, userId!));
@@ -65,7 +69,7 @@ export const GET = withApi(
       .orderBy(desc(exitInterviews.createdAt))
       .limit(200);
 
-    return { data: rows, total: rows.length };
+    return { data: rows.map((row) => projectInterview(row, reader, row.createdBy === userId)), total: rows.length };
   },
 );
 
@@ -88,6 +92,9 @@ export const POST = withApi(
         .insert(exitInterviews)
         .values({
           ...body,
+          // A new interview is unclassified until an administrator sets its level through the governance step, so it starts at
+          // the most protective readable level instead of the column default (public_internal).
+          sensitivityLevel: UNRECORDED_LEVEL,
           organizationId: organizationId!,
           createdBy: userId!,
           updatedBy: userId!,

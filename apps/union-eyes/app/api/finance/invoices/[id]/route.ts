@@ -29,7 +29,7 @@ export const GET = withMinRole('secretary_treasurer', async (
   }
 
   try {
-    const invoice = await getInvoiceWithLineItems(id);
+    const invoice = await getInvoiceWithLineItems(id, organizationId);
     if (!invoice) {
       return standardErrorResponse(ErrorCode.NOT_FOUND, 'Invoice not found');
     }

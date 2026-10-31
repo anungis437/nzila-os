@@ -18,6 +18,10 @@ import { z } from "zod";
 import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { checkEntitlement } from '@/lib/services/entitlements';
+import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
+import { AI_FEATURES } from '@/lib/services/feature-flags';
+import { enforceAISafety } from '@nzila/policies';
+import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 
 import {
   ErrorCode,
@@ -52,7 +56,8 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
     }
 
     // CRITICAL: Check subscription entitlement for AI classify
-    const entitlement = await checkEntitlement(context.organizationId!, 'ai_classify');
+    if (!context.organizationId) return NextResponse.json({ error: 'Organization context required' }, { status: 403 });
+    const entitlement = await checkEntitlement(context.organizationId, 'ai_classify');
     if (!entitlement.allowed) {
       return NextResponse.json(
         { 
@@ -63,6 +68,10 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         { status: 403 }
       );
     }
+
+    const blocked = await guardAiFeature(AI_FEATURES.AI_EXTRACT_CLAUSES, { userId: context.userId, organizationId: context.organizationId });
+    if (blocked) return blocked;
+    enforceAISafety({ origin: 'extract-clauses', action: 'POST', organizationId: context.organizationId, userId: context.userId, userRole: 'member', dataClass: 'internal' });
 
     try {
       const body = await request.json();
@@ -88,6 +97,12 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         decision,
       } = validation.data;
 
+      return await performAuditedOperation({
+        organizationId: context.organizationId,
+        userId: context.userId,
+        action: 'ai.classification.' + action,
+        resourceType: 'ai_invocations',
+      }, async () => {
       switch (action) {
         case 'classify-clause':
           if (!content) {
@@ -198,7 +213,10 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
             { status: 400 }
           );
       }
-    } catch {
+      });
+    } catch (error) {
+      const refused = operationAuditResponse(error);
+      if (refused) return NextResponse.json(refused.body, { status: refused.status });
 return NextResponse.json(
         {
           error: 'Classification failed',

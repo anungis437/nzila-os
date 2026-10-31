@@ -64,8 +64,10 @@ function sfw(data: any[] = []) {
 function sfol(data: any[] = []) {
   return {
     from: vi.fn(() => ({
-      orderBy: vi.fn(() => ({
-        limit: vi.fn().mockResolvedValue(data),
+      where: vi.fn(() => ({
+        orderBy: vi.fn(() => ({
+          limit: vi.fn().mockResolvedValue(data),
+        })),
       })),
     })),
   };
@@ -86,7 +88,9 @@ function _sfwool(data: any[] = []) {
 function sfg(data: any[] = []) {
   return {
     from: vi.fn(() => ({
-      groupBy: vi.fn().mockResolvedValue(data),
+      where: vi.fn(() => ({
+        groupBy: vi.fn().mockResolvedValue(data),
+      })),
     })),
   };
 }
@@ -127,6 +131,8 @@ vi.mock("@/db/schema", () => ({
     createdAt: "createdAt",
     updatedAt: "updatedAt",
     fullText: "fullText",
+    isPublic: "isPublic",
+    accessRestrictions: "accessRestrictions",
   },
   arbitratorProfiles: {
     id: "id",
@@ -156,7 +162,9 @@ vi.mock("@/lib/logger", () => ({
 /* ── imports ────────────────────────────────────────────────────────── */
 
 import { db } from "@/db/db";
+import { eq, like } from "drizzle-orm";
 import {
+  PrecedentFilterError,
   getPrecedentById,
   getPrecedentByCaseNumber,
   listPrecedents,
@@ -364,6 +372,40 @@ describe("precedent-service", () => {
     });
   });
 
+  // DEF-0B3-ARBITRATION-DECISIONS-NON-PUBLIC-READABLE-CROSS-TENANT, DEF-0B11-PRP-PRECEDENT-SEARCH-USES-UNESCAPED-WILDCARD-LIKE
+  describe("what the library reads", () => {
+    it("takes the wildcards of a search term literally", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfwolNoOffset([]));
+      await searchPrecedents("50%_off");
+      expect(like).toHaveBeenCalledWith("fullText", "%50\\%\\_off%");
+    });
+
+    it("restricts a search to decisions marked public with no access restriction", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfwolNoOffset([]));
+      await searchPrecedents("discipline");
+      expect(eq).toHaveBeenCalledWith("isPublic", true);
+      expect(eq).toHaveBeenCalledWith("accessRestrictions", "");
+    });
+
+    it("applies the same restriction to a read by id", async () => {
+      (db.query.arbitrationDecisions.findFirst as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
+      expect(await getPrecedentById("d1")).toBeNull();
+      expect(eq).toHaveBeenCalledWith("isPublic", true);
+    });
+
+    it("refuses a filter value outside the column's declared values instead of casting it to the database", async () => {
+      const columns = (await import("@/db/schema")).arbitrationDecisions as unknown as Record<string, unknown>;
+      const original = columns.tribunal;
+      columns.tribunal = { enumValues: ["OLRB", "CIRB"] };
+      try {
+        await expect(searchPrecedents("x", { tribunal: ["NOT-A-TRIBUNAL"] })).rejects.toBeInstanceOf(PrecedentFilterError);
+        await expect(searchPrecedents("x", { tribunal: ["NOT-A-TRIBUNAL"] })).rejects.toMatchObject({ code: "INVALID_PRECEDENT_FILTER" });
+      } finally {
+        columns.tribunal = original;
+      }
+    });
+  });
+
   // ── getPrecedentsByIssueType ───────────────────────────────────────
   describe("getPrecedentsByIssueType", () => {
     it("returns decisions matching JSONB issue type", async () => {
@@ -466,7 +508,7 @@ describe("precedent-service", () => {
       (db.select as ReturnType<typeof vi.fn>)
         .mockReturnValueOnce(sfg([{ outcome: "upheld", count: 3 }]))
         .mockReturnValueOnce(sfg([{ tribunal: "OLRB", count: 2 }]))
-        .mockReturnValueOnce(sf([{ total: 5 }]));
+        .mockReturnValueOnce(sfw([{ total: 5 }]));
       const r = await getPrecedentStatistics();
       expect(r.total).toBe(5);
       expect(r.byOutcome).toHaveLength(1);
@@ -480,6 +522,50 @@ describe("precedent-service", () => {
       (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfol([dec]));
       const r = await getMostCitedPrecedents(5);
       expect(r).toHaveLength(1);
+    });
+  });
+
+
+  // DEF-0B11-PRP-PRECEDENT-LIBRARY-READS-RETURN-EVERY-COLUMN-AND-IGNORE-IS-PUBLIC-AND-ACCESS-RESTRICTIONS
+  describe("public-only SQL predicates across every shared-library read mode", () => {
+    it("filters issue-type lookup before returning rows", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfwolNoOffset([]));
+      await getPrecedentsByIssueType("discipline");
+      expect(eq).toHaveBeenCalledWith("isPublic", true);
+      expect(eq).toHaveBeenCalledWith("accessRestrictions", "");
+    });
+
+    it("filters most-cited rankings before returning rows", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfol([]));
+      await getMostCitedPrecedents(10);
+      expect(eq).toHaveBeenCalledWith("isPublic", true);
+      expect(eq).toHaveBeenCalledWith("accessRestrictions", "");
+    });
+
+    it("filters every statistics query, including the total count", async () => {
+      const groupedOutcome = sfg([]);
+      const groupedTribunal = sfg([]);
+      const total = sfw([{ total: 0 }]);
+      (db.select as ReturnType<typeof vi.fn>)
+        .mockReturnValueOnce(groupedOutcome)
+        .mockReturnValueOnce(groupedTribunal)
+        .mockReturnValueOnce(total);
+      await getPrecedentStatistics();
+      expect(groupedOutcome.from.mock.results[0].value.where).toHaveBeenCalled();
+      expect(groupedTribunal.from.mock.results[0].value.where).toHaveBeenCalled();
+      expect(total.from.mock.results[0].value.where).toHaveBeenCalled();
+      expect(eq).toHaveBeenCalledWith("isPublic", true);
+    });
+
+    it("filters related decisions independently of the source decision", async () => {
+      mocks.mockFindFirst.mockResolvedValueOnce(dec);
+      mocks.mockUpdateSet.mockReturnValueOnce({
+        where: vi.fn().mockResolvedValue([dec]),
+      });
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfwolNoOffset([]));
+      await getRelatedPrecedents("d-1");
+      expect(eq).toHaveBeenCalledWith("isPublic", true);
+      expect(eq).toHaveBeenCalledWith("accessRestrictions", "");
     });
   });
 
@@ -608,9 +694,3 @@ describe("precedent-service", () => {
   });
 });
 
-/* sf: select→from (no where/orderBy) */
-function sf(data: any[] = []) {
-  return {
-    from: vi.fn().mockResolvedValue(data),
-  };
-}

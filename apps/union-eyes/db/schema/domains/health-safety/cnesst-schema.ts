@@ -427,6 +427,8 @@ export const antiScabViolations = pgTable("anti_scab_violations", {
   documentIds: jsonb("document_ids").$type<string[]>(),
   metadata: jsonb("metadata"),
 
+  // The principal that filed the violation, recorded by the server (platform migration 0044).
+  createdBy: text("created_by"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({

@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { isSupportedLanguage, transcribeAudioWithLanguage, type SupportedLanguage } from "@/lib/azure-speech";
 import { withRoleAuth } from '@/lib/api-auth-guard';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -9,9 +12,19 @@ import {
 export const runtime = "nodejs";
 export const maxDuration = 60; // Maximum duration in seconds
 
-export const POST = withRoleAuth('steward', async (request, _context) => {
+export const POST = withRoleAuth('steward', async (request, context) => {
   try {
-      // Authenticate user
+      const { userId, organizationId } = context as { userId?: string; organizationId?: string };
+      if (!userId || !organizationId) {
+        return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
+      }
+
+      // The recording goes to an external speech service, so each caller's use is bounded.
+      const limit = await checkRateLimit(`voice-transcribe:${userId}`, RATE_LIMITS.AI_COMPLETION);
+      if (!limit.allowed) {
+        return standardErrorResponse(ErrorCode.RATE_LIMIT_EXCEEDED, 'Rate limit exceeded', { resetIn: limit.resetIn });
+      }
+
       // Parse form data
       const formData = await request.formData();
       const audioFile = formData.get("audio") as File;
@@ -37,6 +50,16 @@ export const POST = withRoleAuth('steward', async (request, _context) => {
         return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Audio file too large (max 25MB)');
       }
 
+      // The disclosure to the external service is recorded before the audio leaves; no transcript or audio is kept in the record.
+      await withRLSContext({ organizationId, userId }, (tx) => persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'voice.transcribe.requested',
+        resourceType: 'voice_recording',
+        resourceId: userId,
+        details: { language, bytes: audioFile.size, contentType: audioFile.type },
+      }));
+
       // Convert file to buffer
       const arrayBuffer = await audioFile.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
@@ -51,7 +74,7 @@ export const POST = withRoleAuth('steward', async (request, _context) => {
       return NextResponse.json({
         text: text.trim(),
         language,
-        duration: audioFile.size, // Approximate
+        // Duration is not returned: the speech adapter provides text, not measured seconds.\n        // Audio byte length is not elapsed recording time.
         success: true,
       });
 

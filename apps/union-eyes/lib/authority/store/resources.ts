@@ -14,6 +14,7 @@
  *   financial     public.payments (amount, currency) + ue_authority_financial_steps
  *   review        ue_authority_reviews
  *   workaid       ue_authority_workaid_matters (union-side references only)
+ *   message       message_threads (identity of the conversation only; never its subject or body)
  * No authoritative source exists for: case unit/territory, case respondents,
  * member financial records keyed to a principal, or WorkAid counsel content.
  */
@@ -22,7 +23,10 @@ import type {
   AuthorityRequest,
   CaseFacts,
   FinancialTransactionFacts,
+  CouncilElectionFacts,
   GovernanceReviewFacts,
+  MessageRetentionFacts,
+  MessageThreadFacts,
   ResourceFacts,
   ResourceRelationship,
   WorkAidMatterFacts,
@@ -104,8 +108,11 @@ export async function loadCase(exec: SqlExecutor, req: AuthorityRequest, now: Da
     kind: 'case',
     id: String(row.id),
     organizationId: String(row.organization_id),
-    // No source column for unit, territory or respondents: they stay absent and scoped authority cannot match.
-    unitId: null,
+    // The unit is the organization that owns the claim. It is written by the server from the authenticated membership when the
+    // case is filed and is never accepted from a client, so it is a trusted jurisdiction: a mandate scoped to this unit covers
+    // only this organization's cases (exact match, never inherited through the hierarchy). Territory has no governed source yet
+    // and stays absent, so a territory-scoped mandate cannot match.
+    unitId: String(row.organization_id),
     territoryId: null,
     // Legal implications are the only privilege signal; confidentiality is carried separately.
     classification: row.has_legal_implications === true ? 'privileged' : 'standard',
@@ -336,7 +343,83 @@ export async function loadWorkAidMatter(exec: SqlExecutor, req: AuthorityRequest
   return { resource: facts }
 }
 
-/** The default loader bound to the canonical sources above. */
+export async function loadMessageThread(exec: SqlExecutor, req: AuthorityRequest): Promise<LoadedResource | null> {
+  const org = req.resource.organizationId
+  if (!isUuid(org) || !isUuid(req.resource.id)) return null
+  const r = (
+    await exec.query<Row>(
+      `SELECT id::text AS id, organization_id::text AS organization_id, member_id, staff_id, status
+         FROM message_threads WHERE organization_id = $1::uuid AND id = $2::uuid`,
+      [org, req.resource.id],
+    )
+  ).rows[0]
+  if (!r) return null
+  const facts: MessageThreadFacts = {
+    kind: 'message_thread',
+    id: String(r.id),
+    organizationId: String(r.organization_id),
+    memberUserId: String(r.member_id),
+    assigneeUserId: r.staff_id == null ? null : String(r.staff_id),
+    status: r.status === 'closed' ? 'closed' : 'open',
+  }
+  return { resource: facts }
+}
+
+function namedElectionUserIds(value: unknown): string[] {
+  if (!value || typeof value !== 'object') return []
+  if (Array.isArray(value)) return value.flatMap(namedElectionUserIds)
+  const record = value as Record<string, unknown>
+  const ids = typeof record.userId === 'string' ? [record.userId] : []
+  return [...ids, ...Object.values(record).flatMap(namedElectionUserIds)]
+}
+
+function jsonElectionValue(value: unknown): unknown {
+  if (typeof value !== 'string') return value
+  try {
+    return JSON.parse(value)
+  } catch {
+    return value
+  }
+}
+
+/**
+ * A council election is visible only through its ownership row for this organization.
+ * The ownership relation is unqualified. When it is absent this returns null and does not
+ * query `council_elections`, so a missing relation is not an existence oracle.
+ */
+export async function loadCouncilElection(exec: SqlExecutor, req: AuthorityRequest): Promise<LoadedResource | null> {
+  const org = req.resource.organizationId
+  if (!isUuid(org) || !isUuid(req.resource.id)) return null
+  const relation = (await exec.query<{ rel: string | null }>(`SELECT to_regclass('public.election_organization_ownership')::text AS rel`)).rows[0]?.rel
+  if (!relation) return null
+  const r = (
+    await exec.query<Row>(
+      `SELECT e.id::text AS id, o.organization_id::text AS organization_id, e.verified_by, e.verification_date, e.candidates, e.winners
+         FROM public.council_elections e
+         INNER JOIN public.election_organization_ownership o ON o.election_id = e.id
+        WHERE e.id = $1::uuid AND o.organization_id = $2::uuid`,
+      [req.resource.id, org],
+    )
+  ).rows[0]
+  if (!r) return null
+  const facts: CouncilElectionFacts = {
+    kind: 'council_election',
+    id: String(r.id),
+    organizationId: String(r.organization_id),
+    certified: r.verified_by != null || r.verification_date != null,
+    namedUserIds: [...new Set([...namedElectionUserIds(jsonElectionValue(r.candidates)), ...namedElectionUserIds(jsonElectionValue(r.winners))])],
+  }
+  return { resource: facts }
+}
+
+/** The organization's retention duty. There is no row to load: the duty is the organization itself. */
+export async function loadMessageRetention(_exec: SqlExecutor, req: AuthorityRequest): Promise<LoadedResource | null> {
+  const org = req.resource.organizationId
+  if (!isUuid(org) || req.resource.id !== org) return null
+  const facts: MessageRetentionFacts = { kind: 'message_retention', id: org, organizationId: org }
+  return { resource: facts }
+}
+
 /** The canonical loaders under the document classification policy in force (provisional default unless an institution supplies one). */
 export const createCanonicalResourceLoader = (policy: DocumentClassPolicy = DEFAULT_DOCUMENT_CLASS_POLICY): ResourceLoader => async (exec, req, now) => {
   switch (req.resource.type) {
@@ -348,6 +431,12 @@ export const createCanonicalResourceLoader = (policy: DocumentClassPolicy = DEFA
       return loadReview(exec, req)
     case 'workaid_matter':
       return loadWorkAidMatter(exec, req)
+    case 'message_thread':
+      return loadMessageThread(exec, req)
+    case 'message_retention':
+      return loadMessageRetention(exec, req)
+    case 'council_election':
+      return loadCouncilElection(exec, req)
     default:
       // member_financial_record has no authoritative principal-keyed source; approval_request is loaded by the store.
       return null

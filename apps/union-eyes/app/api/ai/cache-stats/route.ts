@@ -9,14 +9,14 @@
  * - Cache hit rate (percentage)
  * - Estimated cost savings (USD)
  * 
- * Authentication: Requires admin role (role >= 90)
+ * Authentication: Requires verified system administrator authority (shared platform data)
  * 
  * Created: February 11, 2026
  */
 
 import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth, withSystemAdminAuth, getCurrentUser, type BaseAuthContext } from '@/lib/api-auth-guard';
+import { withSystemAdminAuth, getCurrentUser, type BaseAuthContext } from '@/lib/api-auth-guard';
 import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 import { embeddingCache } from '@/lib/services/ai/embedding-cache';
 import { logger } from '@/lib/logger';
@@ -26,18 +26,25 @@ import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-respons
  * GET /api/ai/cache-stats
  * 
  * Get embedding cache statistics
- * Requires admin role
+ * Requires system administrator authority — tenant administrators cannot see platform-wide cache state.
  */
-export const GET = withAdminAuth(async (_request: NextRequest) => {
+export const GET = withSystemAdminAuth(async (_request: NextRequest, context: BaseAuthContext) => {
   try {
     const user = await getCurrentUser();
     
     // Get cache statistics
-    const stats = await embeddingCache.getStats();
+    const stats = await performAuditedOperation(
+      {
+        organizationId: context.organizationId,
+        userId: context.userId,
+        action: 'ai.embedding_cache.stats.read',
+        resourceType: 'embedding_cache',
+      },
+      () => embeddingCache.getStats(),
+    );
 
       logger.info('Admin viewed embedding cache stats', {
         userId: user?.id,
-        stats,
       });
 
       return NextResponse.json({
@@ -51,6 +58,8 @@ export const GET = withAdminAuth(async (_request: NextRequest) => {
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
+      const refused = operationAuditResponse(error);
+      if (refused) return NextResponse.json(refused.body, { status: refused.status });
       logger.error('Failed to fetch embedding cache stats', error);
 
       return NextResponse.json(

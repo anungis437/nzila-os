@@ -67,6 +67,9 @@ export interface SmartDefaults {
 // AUTO-DISCOVER PARENT FEDERATION
 // =============================================================================
 
+/** The smaller of two member counts must be at least this share of the larger for the sizes to be called similar. */
+const SIMILAR_SIZE_RATIO = 0.5;
+
 /**
  * Auto-detect potential parent federation based on province, sector, and size
  * 
@@ -118,13 +121,18 @@ export async function autoDetectParentFederation(
         matchReasons.push('CLC affiliated');
       }
 
-      // Size proximity (federations with similar-sized locals)
+      // Sector (the federation's sectors name the trades it represents)
+      if (sector && (org.sectors ?? []).some((s) => s.toLowerCase() === sector.toLowerCase())) {
+        matchScore += 25;
+        matchReasons.push(`Represents the ${sector} sector`);
+      }
+
+      // Size proximity: the score follows the ratio, and the reason is stated only when the sizes really are close.
       if (estimatedMemberCount && org.memberCount) {
-        const sizeRatio = Math.min(estimatedMemberCount, org.memberCount) / 
+        const sizeRatio = Math.min(estimatedMemberCount, org.memberCount) /
                          Math.max(estimatedMemberCount, org.memberCount);
-        const sizeScore = sizeRatio * 20;
-        matchScore += sizeScore;
-        matchReasons.push(`Similar size category`);
+        matchScore += sizeRatio * 20;
+        if (sizeRatio >= SIMILAR_SIZE_RATIO) matchReasons.push('Similar size');
       }
 
       // Organization type bonus

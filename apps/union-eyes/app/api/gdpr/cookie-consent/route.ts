@@ -12,13 +12,15 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { organizations } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { CookieConsentManager, CookieConsentOwnershipError } from "@/lib/gdpr/consent-manager";
+import { publicCookieConsent } from '@/lib/gdpr/public-cookie-consent';
 import { logger } from '@/lib/logger';
 import { guardPublicIntake } from '@/lib/public-intake/guard';
 
 const gdprCookieConsentSchema = z.object({
   consentId: z.guid('Invalid consentId'),
   organizationId: z.guid('Invalid organizationId'),
-  essential: z.boolean().optional(),
+  // Necessary cookies are not an optional marketing preference.
+  essential: z.literal(true).optional(),
   functional: z.boolean().optional(),
   analytics: z.boolean().optional(),
   marketing: z.boolean().optional(),
@@ -39,7 +41,7 @@ export const POST = async (request: NextRequest) => {
       return NextResponse.json({ error: 'Invalid request data' }, { status: 400 });
     }
     
-    const { consentId, organizationId, essential, functional, analytics, marketing, userAgent } = validation.data;
+    const { consentId, organizationId, functional, analytics, marketing, userAgent } = validation.data;
 
     const ipAddress = request.headers.get("x-forwarded-for") || 
                       request.headers.get("x-real-ip") || 
@@ -59,7 +61,7 @@ export const POST = async (request: NextRequest) => {
         userId,
         organizationId,
         consentId,
-        essential: essential ?? true,
+        essential: true,
         functional: functional ?? false,
         analytics: analytics ?? false,
         marketing: marketing ?? false,
@@ -83,7 +85,7 @@ export const POST = async (request: NextRequest) => {
     });
     if ('error' in result) return NextResponse.json({ error: 'Invalid request data' }, { status: 400 });
 
-    return NextResponse.json(result.consent);
+    return NextResponse.json(publicCookieConsent(result.consent));
   } catch (error) {
     if (error instanceof CookieConsentOwnershipError) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
@@ -109,7 +111,7 @@ export const GET = async (request: NextRequest) => {
       return NextResponse.json({ consent: null });
     }
 
-    return NextResponse.json(consent);
+    return NextResponse.json(publicCookieConsent(consent));
   } catch (error) {
     // Gracefully handle missing table / DB errors — don't block the page
     logger.error('[cookie-consent] GET error', { error });

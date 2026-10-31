@@ -17,11 +17,26 @@ interface ComplianceCheck {
   severity: 'low' | 'medium' | 'high' | 'critical';
 }
 
-interface ComplianceRequestBody {
-  jurisdiction?: string;
-  checksToPerform?: string[];
-  data?: Record<string, unknown>;
-}
+export const COMPLIANCE_CHECKS = ['arbitration_deadline', 'strike_vote', 'certification'] as const;
+export const COMPLIANCE_JURISDICTIONS = ['CA-FED', 'CA-AB', 'CA-BC', 'CA-MB', 'CA-NB', 'CA-NL', 'CA-NS', 'CA-NT', 'CA-NU', 'CA-ON', 'CA-PE', 'CA-QC', 'CA-SK', 'CA-YT'] as const;
+
+const dateText = z.string().max(40).refine((value) => !Number.isNaN(new Date(value).getTime()), 'must be a valid date');
+const countLike = z.union([z.number(), z.string().max(20)]);
+
+// The body is parsed, not cast: an unknown jurisdiction or check name is a 400 instead of silently producing no check, and a date that
+// is not a date is refused instead of being passed to Date.
+export const complianceValidateSchema = z.object({
+  jurisdiction: z.enum(COMPLIANCE_JURISDICTIONS).optional(),
+  checksToPerform: z.array(z.enum(COMPLIANCE_CHECKS)).max(10).optional(),
+  data: z.object({
+    arbitrationDate: dateText.optional(),
+    grievanceDate: dateText.optional(),
+    totalMembers: countLike.optional(),
+    votesCase: countLike.optional(),
+    signedCards: countLike.optional(),
+    bargainingUnit: countLike.optional(),
+  }).strict().optional(),
+}).strict();
 
 async function handler(request: NextRequest) {
   try {
@@ -33,9 +48,13 @@ async function handler(request: NextRequest) {
     );
     }
 
-    const body = (await request.json().catch(() => ({}))) as ComplianceRequestBody;
+    const parsed = complianceValidateSchema.safeParse(await request.json().catch(() => ({})));
+    if (!parsed.success) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid compliance validation request', parsed.error.issues.slice(0, 5));
+    }
+    const body = parsed.data;
     const jurisdiction = body.jurisdiction || 'CA-FED';
-    const checksToPerform = Array.isArray(body.checksToPerform) ? body.checksToPerform : [];
+    const checksToPerform: readonly string[] = body.checksToPerform ?? [];
     const data = (body.data || {}) as Record<string, unknown>;
 
     const shouldRun = (category: string) =>
@@ -47,125 +66,65 @@ async function handler(request: NextRequest) {
     const grievanceDate = typeof data.grievanceDate === 'string' ? data.grievanceDate : null;
 
     if (shouldRun('arbitration_deadline') && arbitrationDate && grievanceDate) {
-      const daysDiff = Math.ceil(
-        (new Date(arbitrationDate).getTime() - new Date(grievanceDate).getTime()) /
-          (1000 * 60 * 60 * 24)
-      );
-
-      let maxDays = 30;
-      try {
-        const rulesUrl = new URL('/api/jurisdiction-rules', request.nextUrl.origin);
-        rulesUrl.searchParams.set('jurisdiction', jurisdiction);
-        rulesUrl.searchParams.set('category', 'arbitration_deadline');
-
-        const deadlineRule = await fetch(rulesUrl.toString()).then((r) => r.json());
-        const rule = deadlineRule?.data?.[0];
-        if (rule?.parameters?.deadline_days) {
-          maxDays = rule.parameters.deadline_days;
-        }
-
-        if (daysDiff <= maxDays) {
-          checks.push({
-            id: 'arbitration-deadline',
-            ruleName: rule?.ruleName || 'Arbitration Deadline',
-            ruleCategory: 'arbitration_deadline',
-            status: 'compliant',
-            message: `Arbitration scheduled within ${maxDays}-day deadline (${daysDiff} days)`,
-            legalReference: rule?.legalReference,
-            severity: 'low',
-          });
-        } else {
-          checks.push({
-            id: 'arbitration-deadline',
-            ruleName: rule?.ruleName || 'Arbitration Deadline',
-            ruleCategory: 'arbitration_deadline',
-            status: 'violation',
-            message: `Arbitration deadline exceeded: ${daysDiff} days (max: ${maxDays})`,
-            legalReference: rule?.legalReference,
-            recommendation: 'File extension request or expedited arbitration',
-            severity: 'critical',
-          });
-        }
-      } catch (_error) {
-}
+      // No jurisdiction-validated arbitration deadline rule exists here.
+      // Never substitute workers-compensation reporting periods or 30 days.
+      checks.push({
+        id: 'arbitration-deadline',
+        ruleName: 'Arbitration Deadline — Verification Required',
+        ruleCategory: 'arbitration_deadline',
+        status: 'info',
+        message: 'No validated arbitration deadline is configured. Review the collective agreement, grievance procedure and applicable tribunal rules before relying on a deadline.',
+        recommendation: 'Confirm the applicable deadline with authorized union counsel or an officer.',
+        severity: 'medium',
+      });
     }
 
-    const totalMembersValue = data.totalMembers;
-    const votesCaseValue = data.votesCase;
+    // The two checks below used to state a verdict (compliant, warning, violation) from numbers the caller typed, against thresholds
+    // written into this file (50% turnout; 35 to 55% of cards by jurisdiction). No jurisdiction-validated rule exists here, so each check
+    // reports only the arithmetic of what was supplied and says that the governing rule is not verified.
+    const percentage = (part: unknown, whole: unknown): number | null => {
+      const numerator = Number(part);
+      const denominator = Number(whole);
+      if (!Number.isFinite(numerator) || !Number.isFinite(denominator) || numerator < 0 || denominator <= 0) return null;
+      return (numerator / denominator) * 100;
+    };
 
-    if (shouldRun('strike_vote') && totalMembersValue && votesCaseValue) {
-      const totalMembers = Number(totalMembersValue);
-      const votesCast = Number(votesCaseValue);
-
-      if (!Number.isNaN(totalMembers) && totalMembers > 0 && !Number.isNaN(votesCast)) {
-        const turnout = (votesCast / totalMembers) * 100;
-
+    if (shouldRun('strike_vote') && data.totalMembers && data.votesCase) {
+      const turnout = percentage(data.votesCase, data.totalMembers);
+      if (turnout !== null) {
         checks.push({
           id: 'strike-vote-quorum',
-          ruleName: 'Strike Vote Quorum',
+          ruleName: 'Strike Vote Turnout — Verification Required',
           ruleCategory: 'strike_vote',
-          status: turnout >= 50 ? 'compliant' : 'violation',
-          message:
-            turnout >= 50
-              ? `Quorum met: ${turnout.toFixed(1)}% turnout`
-              : `Quorum not met: ${turnout.toFixed(1)}% turnout (minimum 50%)`,
-          severity: turnout >= 50 ? 'low' : 'critical',
+          status: 'info',
+          message: `Reported turnout is ${turnout.toFixed(1)}% of the members supplied. No validated quorum rule is configured for ${jurisdiction}; the figures were typed by the caller and are not checked against a membership or ballot record.`,
+          recommendation: 'Confirm the quorum and ballot rules in the constitution, the applicable labour statute and the ballot record.',
+          severity: 'medium',
         });
       }
     }
 
-    const signedCardsValue = data.signedCards;
-    const bargainingUnitValue = data.bargainingUnit;
-
-    if (shouldRun('certification') && signedCardsValue && bargainingUnitValue) {
-      const signedCards = Number(signedCardsValue);
-      const bargainingUnit = Number(bargainingUnitValue);
-
-      if (!Number.isNaN(signedCards) && !Number.isNaN(bargainingUnit) && bargainingUnit > 0) {
-        const cardPercentage = (signedCards / bargainingUnit) * 100;
-
-        let thresholds: { automatic?: number; vote?: number } = {};
-        if (jurisdiction === 'CA-FED') {
-          thresholds = { vote: 35, automatic: 50 };
-        } else if (jurisdiction === 'CA-ON') {
-          thresholds = { vote: 40, automatic: 55 };
-        } else if (jurisdiction === 'CA-QC') {
-          thresholds = { vote: 35 };
-        }
-
-        if (thresholds.automatic && cardPercentage >= thresholds.automatic) {
-          checks.push({
-            id: 'certification-cards',
-            ruleName: 'Certification Card Threshold',
-            ruleCategory: 'certification',
-            status: 'compliant',
-            message: `Automatic certification available: ${cardPercentage.toFixed(1)}% cards (${thresholds.automatic}% required)`,
-            severity: 'low',
-          });
-        } else if (thresholds.vote && cardPercentage >= thresholds.vote) {
-          checks.push({
-            id: 'certification-cards',
-            ruleName: 'Certification Card Threshold',
-            ruleCategory: 'certification',
-            status: 'warning',
-            message: `Vote required: ${cardPercentage.toFixed(1)}% cards (${thresholds.vote}%-${thresholds.automatic || 100}% range)`,
-            severity: 'medium',
-          });
-        } else if (thresholds.vote) {
-          checks.push({
-            id: 'certification-cards',
-            ruleName: 'Certification Card Threshold',
-            ruleCategory: 'certification',
-            status: 'violation',
-            message: `Insufficient cards: ${cardPercentage.toFixed(1)}% (minimum ${thresholds.vote}%)`,
-            recommendation: 'Continue organizing campaign to reach minimum threshold',
-            severity: 'high',
-          });
-        }
+    if (shouldRun('certification') && data.signedCards && data.bargainingUnit) {
+      const cardPercentage = percentage(data.signedCards, data.bargainingUnit);
+      if (cardPercentage !== null) {
+        checks.push({
+          id: 'certification-cards',
+          ruleName: 'Certification Card Share — Verification Required',
+          ruleCategory: 'certification',
+          status: 'info',
+          message: `Reported card share is ${cardPercentage.toFixed(1)}% of the unit size supplied. No validated certification threshold is configured for ${jurisdiction}; the figures were typed by the caller and are not checked against card records.`,
+          recommendation: 'Confirm the certification thresholds with the labour board and counsel before relying on this figure.',
+          severity: 'medium',
+        });
       }
     }
 
-    return NextResponse.json({ checks });
+    // An empty list is not a clean result: it means no check applied to what was supplied.
+    return NextResponse.json({
+      checks,
+      evaluated: checks.length,
+      ...(checks.length === 0 ? { notice: 'No check applied to the data supplied; this is not a finding of compliance.' } : {}),
+    });
   } catch (error) {
 return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
@@ -174,13 +133,5 @@ return standardErrorResponse(
     );
   }
 }
-
-
-const _complianceValidateSchema = z.object({
-  jurisdiction: z.boolean().optional(),
-  checksToPerform: z.unknown().optional(),
-  data: z.unknown().optional(),
-});
-
 
 export const POST = withApiAuth(handler);

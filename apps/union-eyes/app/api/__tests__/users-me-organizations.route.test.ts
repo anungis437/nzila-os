@@ -79,21 +79,34 @@ describe('users/me/organizations route', () => {
     expect(payload.memberships).toHaveLength(1);
   });
 
-  it('self-heals memberships by email and returns linked memberships', async () => {
+  // DEF-0B12-PLT-ORGANIZATIONS-GET-REBINDS-EVERY-MEMBERSHIP-ROW-OF-AN-E-MAIL-ADDRESS-TO-THE-CALLER-IN-THE-LEGACY-BRANCH
+  it('never links memberships to the caller by e-mail address, in any organization', async () => {
     const { GET } = await loadRoute();
+    // The caller has no membership of their own; another user's roster rows carry the caller's e-mail address.
     m.selectQueue.push(
       [],
-      [{ id: 'm1', organizationId: 'org_2', userId: 'legacy', email: 'user@example.com', role: 'member', isPrimary: false, joinedAt: new Date(), createdAt: new Date() }],
-      [{ id: 'm1', organizationId: 'org_2', userId: 'user_1', role: 'member', isPrimary: false, joinedAt: new Date(), createdAt: new Date() }],
-      [{ id: 'org_2', name: 'Org Two', slug: 'org-two', organizationType: 'union', sectors: ['private'], provinceTerritory: 'BC', createdAt: new Date(), updatedAt: new Date() }],
+      [{ id: 'm1', organizationId: 'org_2', userId: 'legacy', email: 'user@example.com', role: 'admin', isPrimary: false, joinedAt: new Date(), createdAt: new Date() }],
     );
 
     const response = await GET(new NextRequest('http://localhost/api/users/me/organizations'));
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.memberships).toHaveLength(1);
-    expect(mockDb.update).toHaveBeenCalled();
+    expect(payload.memberships).toEqual([]);
+    expect(payload.organizations).toEqual([]);
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.currentUser).not.toHaveBeenCalled();
+    // Only the membership lookup by the authenticated user id ran.
+    expect(mockDb.select).toHaveBeenCalledTimes(1);
+  });
+
+  it('never moves another user id\'s memberships to the caller through a matching profile', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push([], [], [{ legacyUserId: 'legacy-user' }]);
+
+    await GET(new NextRequest('http://localhost/api/users/me/organizations'));
+
+    expect(mockDb.update).not.toHaveBeenCalled();
   });
 
   it('returns all organizations for platform admins', async () => {

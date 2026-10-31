@@ -3,7 +3,8 @@ import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { enforceAISafety } from '@nzila/policies';
 import { db } from '@/db';
-import { mlPredictions, modelMetadata } from '@/db/schema';
+import { claims, mlPredictions, modelMetadata } from '@/db/schema';
+import { SLA_MODEL_VERSION, SLA_SCORING_METHOD, caseFacts, computeSlaBreachProbability } from '@/lib/ml/sla-breach-score';
 import { and, desc, eq } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -11,23 +12,17 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 const bodySchema = z.object({
   caseId: z.guid(),
   features: z.object({
-    hoursRemaining: z.number(),
+    // The case's priority and time remaining are read from the case; values sent here are not used, and are accepted only so
+    // existing callers keep working.
+    hoursRemaining: z.number().optional(),
+    priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
     transitionCount: z.number().int().nonnegative(),
     hasPreviousBreaches: z.boolean(),
-    priority: z.enum(['low', 'medium', 'high', 'urgent']),
     featureRefs: z.array(z.string().min(2)).min(1),
   }),
-  modelVersion: z.string().min(1).optional(),
+  // Only the version this scorer implements: naming another used to create a model row for any string a steward typed.
+  modelVersion: z.literal(SLA_MODEL_VERSION).optional(),
 });
-
-function computeSlaBreachProbability(input: z.infer<typeof bodySchema>['features']): number {
-  const priorityWeight = input.priority === 'urgent' ? 0.25 : input.priority === 'high' ? 0.18 : input.priority === 'medium' ? 0.1 : 0.04;
-  const timePressure = input.hoursRemaining <= 0 ? 0.45 : input.hoursRemaining < 12 ? 0.32 : input.hoursRemaining < 24 ? 0.2 : 0.08;
-  const transitionPressure = Math.min(input.transitionCount * 0.03, 0.18);
-  const historyWeight = input.hasPreviousBreaches ? 0.16 : 0;
-  const score = Math.min(0.99, Math.max(0.01, priorityWeight + timePressure + transitionPressure + historyWeight));
-  return Number(score.toFixed(4));
-}
 
 export const POST = withApi(
   {
@@ -51,12 +46,25 @@ export const POST = withApi(
 
     enforceAISafety({ origin: 'sla-breach-risk', action: 'POST', organizationId: organizationId!, userId: userId ?? '', userRole: 'steward', dataClass: 'confidential' });
 
-    const selectedVersion = body.modelVersion ?? 'sla-risk-v1';
-    const score = computeSlaBreachProbability(body.features);
+    const selectedVersion = SLA_MODEL_VERSION;
     const now = new Date();
 
     // The model record (when first used), the prediction and their audit record commit together
-    const { activeModel, prediction } = await withRLSContext({ organizationId }, async (tx) => {
+    const { activeModel, prediction, score, derived } = await withRLSContext({ organizationId }, async (tx) => {
+      // The case must exist in this organization, and its priority and deadline decide the score.
+      const [claim] = await tx
+        .select({ status: claims.status, priority: claims.priority, updatedAt: claims.updatedAt, createdAt: claims.createdAt })
+        .from(claims)
+        .where(and(eq(claims.claimId, body.caseId), eq(claims.organizationId, organizationId)))
+        .limit(1);
+      if (!claim) throw ApiError.notFound('Case');
+      const derived = caseFacts(claim, now);
+      const score = computeSlaBreachProbability({
+        ...derived,
+        transitionCount: body.features.transitionCount,
+        hasPreviousBreaches: body.features.hasPreviousBreaches,
+      });
+
       const [existingModel] = await tx
         .select()
         .from(modelMetadata)
@@ -80,7 +88,7 @@ export const POST = withApi(
                 version: selectedVersion,
                 parameters: {
                   featureSet: body.features.featureRefs,
-                  scoring: 'heuristic_v1',
+                  scoring: SLA_SCORING_METHOD,
                 },
               })
               .returning()
@@ -93,11 +101,14 @@ export const POST = withApi(
           predictionType: 'sla_breach_risk',
           predictionDate: now,
           predictedValue: score.toString(),
-          lowerBound: Math.max(0, score - 0.08).toFixed(4),
-          upperBound: Math.min(1, score + 0.08).toFixed(4),
-          confidence: '0.78',
+          // No calibration exists, so no interval and no confidence are recorded.
+          lowerBound: null,
+          upperBound: null,
+          confidence: null,
           horizon: 72,
           granularity: 'case',
+          modelVersion: model.version,
+          subjectId: body.caseId,
         })
         .returning();
 
@@ -113,30 +124,38 @@ export const POST = withApi(
           modelType: model.modelType,
           featureRefs: body.features.featureRefs,
           score,
+          method: SLA_SCORING_METHOD,
+          derivedFromCase: { priority: derived.priority, hoursRemaining: Number(derived.hoursRemaining.toFixed(2)) },
         },
       });
 
-      return { activeModel: model, prediction: stored };
+      return { activeModel: model, prediction: stored, score, derived };
     });
 
     return {
       predictionId: prediction.id,
       caseId: body.caseId,
       score,
+      // A rule-based score, not a trained model: there is no training date, confidence or interval to report.
+      method: SLA_SCORING_METHOD,
       model: {
         type: activeModel.modelType,
         version: activeModel.version,
-        trainedAt: activeModel.trainedAt,
+      },
+      inputs: {
+        fromCase: { priority: derived.priority, hoursRemaining: Number(derived.hoursRemaining.toFixed(2)) },
+        supplied: { transitionCount: body.features.transitionCount, hasPreviousBreaches: body.features.hasPreviousBreaches },
       },
       featureRefs: body.features.featureRefs,
-      confidence: 0.78,
+      confidence: null,
     };
   },
 );
 
 export const GET = withApi(
   {
-    auth: { minRole: 'member' },
+    // The list is the same model output the POST produces, so it is read at the same floor and behind the same gate and safety check.
+    auth: { minRole: 'steward' },
     entitlement: 'grievance_case_suite',
     rateLimit: RATE_LIMITS.ML_PREDICTIONS,
     openapi: {
@@ -144,8 +163,16 @@ export const GET = withApi(
       summary: 'List latest SLA breach risk predictions',
     },
   },
-  async ({ organizationId }) => {
+  async ({ organizationId, userId }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
+
+    const blocked = await guardAiFeature(AI_FEATURES.GRIEVANCE_TRIAGE, {
+      organizationId,
+      userId: userId ?? '',
+    });
+    if (blocked) return blocked;
+
+    enforceAISafety({ origin: 'sla-breach-risk', action: 'GET', organizationId, userId: userId ?? '', userRole: 'steward', dataClass: 'confidential' });
 
     const predictions = await db
       .select()

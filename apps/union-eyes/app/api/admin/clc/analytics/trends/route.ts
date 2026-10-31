@@ -17,7 +17,8 @@ import {
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
 export const GET = withRoleAuth('admin', async (request, context) => {
-    const { userId } = context as { userId: string };
+    const { userId, organizationId } = context;
+    if (!userId) return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
   try {
         // Rate limiting: 50 CLC operations per hour per user
@@ -36,7 +37,8 @@ export const GET = withRoleAuth('admin', async (request, context) => {
         }
 
         const searchParams = request.nextUrl.searchParams;
-        const years = parseInt(searchParams.get('years') || '3');
+        const yearsInput = searchParams.get('years') ?? '3';
+        const years = /^(3|5|10)$/.test(yearsInput) ? Number(yearsInput) : NaN;
         
         if (![3, 5, 10].includes(years)) {
           logApiAuditEvent({
@@ -53,7 +55,8 @@ export const GET = withRoleAuth('admin', async (request, context) => {
     );
         }
 
-        const trends = await analyzeMultiYearTrends({ years: years as 3 | 5 | 10 });
+        if (!organizationId) return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
+        const trends = await analyzeMultiYearTrends({ years: years as 3 | 5 | 10, organizationId });
 
         logApiAuditEvent({
           timestamp: new Date().toISOString(), userId,
@@ -66,7 +69,7 @@ export const GET = withRoleAuth('admin', async (request, context) => {
 
         return NextResponse.json(trends, {
           headers: {
-            'Cache-Control': 'public, max-age=3600' // Cache for 1 hour
+            'Cache-Control': 'private, no-store' // Cache for 1 hour
           }
         });
 

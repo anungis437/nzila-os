@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { getTableName } from 'drizzle-orm'
 import * as schema from '@/db/schema'
-import { CRUD_GOVERNED_TABLES, assertCrudRead, assertCrudWrite, crudGovernanceFor } from '../crud-governance'
+import { CRUD_GOVERNED_TABLES, assertCrudRead, assertCrudWrite, crudGovernanceFor, supportsGenericArchive } from '../crud-governance'
 import { lowRoleModeFor, ownRowsScope } from '../crud-low-role-guard'
 
 const ROOT = join(__dirname, '..', '..', '..')
@@ -49,11 +49,63 @@ describe('generic CRUD governance (UE-CONV-K-007)', () => {
   })
 
   it.each([
-    ['claims', 'OWN_ROWS_READ'], ['grievances', 'OWN_ROWS_READ'], ['documents', 'DENIED'], ['data_subject_access_requests', 'SUBJECT_OWNED'], ['user_consents', 'SUBJECT_OWNED'],
-    ['organization_members', 'READ_ONLY'], ['organizations', 'READ_ONLY'], ['dues_transactions', 'READ_ONLY'], ['per_capita_remittances', 'READ_ONLY'],
-    ['integration_api_keys', 'DENIED'], ['poll_votes', 'DENIED'], ['security_events', 'DENIED'],
+    ['claims', 'OWN_ROWS_READ'], ['documents', 'DENIED'], ['data_subject_access_requests', 'SUBJECT_OWNED'], ['user_consents', 'SUBJECT_OWNED'],
+    ['organization_members', 'READ_ONLY'], ['dues_transactions', 'READ_ONLY'], ['per_capita_remittances', 'DENIED'],
+    // poll_votes and security_events left the list when their generic routes became 501 paths; unlisted means DENIED.
+    ['poll_votes', undefined], ['security_events', undefined],
   ])('keeps %s as %s', (name, expected) => {
     expect(CRUD_GOVERNED_TABLES.get(name)).toBe(expected)
+  })
+
+  // DEF-0B12-CRUD-TAX-PATHS-SERVE-THE-PER-CAPITA-REMITTANCE-LEDGER-TO-ANY-MEMBER (and the arrears and health-and-welfare
+  // collections over the same table): the ledger has no owner column, so a member-level read returned the whole ledger.
+  it('refuses every generic read and write over the per-capita remittance ledger', () => {
+    const gate = crudGovernanceFor(schema.perCapitaRemittances)
+    expect(gate.class).toBe('DENIED')
+    expect(() => assertCrudRead(gate)).toThrow()
+    expect(() => assertCrudWrite(gate)).toThrow()
+  })
+
+  // DEF-0B1-CLC-ANALYTICS-WRITABLE: a steward must not be able to invent
+  // dashboard metrics through a generic CRUD POST, even within their own tenant.
+  // The tenant-scoped read remains available; a governed computation/ingestion
+  // journey must be implemented and independently verified separately.
+  it('treats analytics metrics as read-only evidence across every generic metric alias', () => {
+    const gate = crudGovernanceFor(schema.analyticsMetrics)
+    expect(gate.class).toBe('READ_ONLY')
+    expect(() => assertCrudRead(gate)).not.toThrow()
+    expect(() => assertCrudWrite(gate)).toThrow()
+    for (const route of ['metrics/route.ts', 'analytics/refresh/route.ts']) {
+      const source = readFileSync(join(API, route), 'utf8')
+      expect(source).toMatch(/table:\s*analyticsMetrics/)
+      expect(source).toMatch(/crudRoutes\(/)
+    }
+    const factory = readFileSync(join(ROOT, 'lib', 'api', 'crud-factory.ts'), 'utf8')
+    expect(factory).toMatch(/assertCrudWrite\(governance\)/)
+  })
+
+  it('denies invented archived enum values rather than raising 500 or deleting institutional bargaining history', () => {
+    expect(schema.proposalStatusEnum.enumValues).not.toContain('archived')
+    expect(supportsGenericArchive(schema.bargainingProposals.status)).toBe(false)
+    expect(supportsGenericArchive(schema.negotiations.status)).toBe(false)
+    expect(supportsGenericArchive({ enumValues: ['draft', 'archived'] })).toBe(true)
+    expect(supportsGenericArchive({ enumValues: ['draft', 'withdrawn'] })).toBe(false)
+    expect(supportsGenericArchive({})).toBe(true) // unbounded text status supports archived
+    expect(supportsGenericArchive(undefined)).toBe(false) // separate hard-delete branch
+    const factory = readFileSync(join(ROOT, 'lib', 'api', 'crud-factory.ts'), 'utf8')
+    expect(factory).toMatch(/statusCol && !supportsGenericArchive\(statusCol\)/)
+    expect(factory).toMatch(/throw ApiError\.forbidden\(`Generic deletion is unavailable/)
+  })
+
+  it('denies the organizations table through generic CRUD after removing the unrelated organization-row facades', () => {
+    expect(tables.has('organizations')).toBe(false)
+    expect(CRUD_GOVERNED_TABLES.has('organizations')).toBe(false)
+    expect(crudGovernanceFor(schema.organizations).class).toBe('DENIED')
+  })
+
+  it('leaves dedicated confidential notes and OAuth connections denied by default generic CRUD', () => {
+    expect(crudGovernanceFor(schema.bargainingNotes).class).toBe('DENIED')
+    expect(crudGovernanceFor(schema.externalCalendarConnections).class).toBe('DENIED')
   })
 
   it('refuses generic writes for every class except OPERATIONAL, and generic reads only for DENIED', () => {
@@ -92,6 +144,8 @@ describe('generic CRUD governance (UE-CONV-K-007)', () => {
   it('performs every generic write inside the audited transaction, never directly on the shared connection', () => {
     const factory = readFileSync(join(ROOT, 'lib', 'api', 'crud-factory.ts'), 'utf8')
     expect(factory).not.toMatch(/\bdb\s*\.\s*(insert|update|delete)\(/)
-    expect((factory.match(/await audited\(/g) ?? []).length).toBe(5)
+    // R-52 added a separate audited locked DELETE path alongside the original
+    // soft/hard-delete fallbacks; each generic write still uses audited(...).
+    expect((factory.match(/await audited\(/g) ?? []).length).toBe(6)
   })
 })

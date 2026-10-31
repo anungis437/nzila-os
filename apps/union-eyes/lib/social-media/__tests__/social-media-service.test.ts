@@ -8,6 +8,12 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
+// Provider tokens are stored sealed (B91); a deterministic stand-in for the secret service keeps these tests free of key material.
+vi.mock('@/lib/encryption', () => ({
+  encryptSecret: async (value: string) => `sealed(${value})`,
+  decryptSecret: async (value: string) => value.replace(/^sealed\((.*)\)$/, '$1'),
+}));
+
 const state = vi.hoisted(() => ({
   selects: {} as Record<string, unknown>,
   inserts: {} as Record<string, unknown>,
@@ -237,32 +243,35 @@ describe('publishPost', () => {
     expect(results[0].error).toMatch(/require at least one image/);
   });
 
-  it('publishes a Twitter post with uploaded media via fetch', async () => {
+  it.each([
+    'https://img.example.com/picture.jpg',
+    'http://127.0.0.1/admin',
+    'http://169.254.169.254/latest/meta-data',
+    'https://example.com/redirect-to-private',
+    'file:///etc/passwd',
+  ])('refuses server-side X media fetching for untrusted URL %s', async url => {
     state.selects.socialAccounts = [account({ platform: 'twitter' })];
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      arrayBuffer: async () => new ArrayBuffer(8),
-      headers: new Headers({ 'content-type': 'image/jpeg' }),
-    }));
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
     const svc = new SocialMediaService();
     const results = await svc.publishPost(
       'org-1',
-      { text: 'tweet', media_urls: ['https://img/1.jpg'], platforms: ['twitter'] },
-      'user-1',
-    );
-    expect(results[0]).toMatchObject({ platform: 'twitter', success: true, post_id: 'tw-post-1' });
-    expect(clients.twitter.uploadMedia).toHaveBeenCalled();
-  });
-
-  it('blocks a Twitter media URL with a disallowed scheme (SSRF guard)', async () => {
-    state.selects.socialAccounts = [account({ platform: 'twitter' })];
-    const svc = new SocialMediaService();
-    const results = await svc.publishPost(
-      'org-1',
-      { text: 'tweet', media_urls: ['file:///etc/passwd'], platforms: ['twitter'] },
+      { text: 'tweet', media_urls: [url], platforms: ['twitter'] },
       'user-1',
     );
     expect(results[0].success).toBe(false);
-    expect(results[0].error).toMatch(/Blocked media URL scheme/);
+    expect(results[0].error).toMatch(/remote media URL ingestion is disabled/);
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(clients.twitter.uploadMedia).not.toHaveBeenCalled();
+    expect(clients.twitter.postTweet).not.toHaveBeenCalled();
+  });
+
+  it('keeps the text-only X publishing journey available', async () => {
+    state.selects.socialAccounts = [account({ platform: 'twitter' })];
+    const svc = new SocialMediaService();
+    const results = await svc.publishPost('org-1', { text: 'safe text', platforms: ['twitter'] }, 'user-1');
+    expect(results[0]).toMatchObject({ platform: 'twitter', success: true, post_id: 'tw-post-1' });
+    expect(clients.twitter.postTweet).toHaveBeenCalledWith({ text: 'safe text' });
   });
 
   it('publishes a LinkedIn link post', async () => {
@@ -286,20 +295,51 @@ describe('publishPost', () => {
   });
 
   it('saves a scheduled carousel post (detectPostType branches)', async () => {
-    state.selects.socialAccounts = [account({ platform: 'linkedin' })];
+    state.selects.socialAccounts = [account({ platform: 'facebook' })];
     const svc = new SocialMediaService();
     const results = await svc.publishPost(
       'org-1',
       {
         text: 'scheduled',
         media_urls: ['https://img/1.jpg', 'https://img/2.jpg'],
-        platforms: ['linkedin'],
+        platforms: ['facebook'],
         scheduled_for: new Date('2030-01-01'),
       },
       'user-1',
     );
     expect(results[0].success).toBe(true);
-    expect(clients.linkedin.createOrganizationPostWithImage).toHaveBeenCalled();
+    expect(clients.meta.publishFacebookPost).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ scheduled_publish_time: Math.floor(new Date('2030-01-01').getTime() / 1000) }),
+    );
+  });
+
+  // DEF-0B11-SOC-SCHEDULED-POST-IS-PUBLISHED-AT-ONCE-ON-INSTAGRAM-X-AND-LINKEDIN-WHILE-THE-ROW-SAYS-SCHEDULED
+  it.each(['instagram', 'twitter', 'linkedin'] as const)('refuses a schedule on %s instead of publishing at once', async (platform) => {
+    state.selects.socialAccounts = [account({ platform })];
+    const results = await new SocialMediaService().publishPost(
+      'org-1',
+      { text: 'later', media_urls: platform === 'instagram' ? ['https://img/1.jpg'] : [], platforms: [platform], scheduled_for: new Date('2030-01-01') },
+      'user-1',
+    );
+    expect(results[0]).toMatchObject({ success: false, error: expect.stringContaining('Scheduled publishing is not supported') });
+    expect(clients.twitter.postTweet).not.toHaveBeenCalled();
+    expect(clients.linkedin.createOrganizationPost).not.toHaveBeenCalled();
+    expect(clients.meta.publishInstagramPost).not.toHaveBeenCalled();
+  });
+
+  it('sends the hashtags as part of the post text', async () => {
+    state.selects.socialAccounts = [account({ platform: 'twitter' })];
+    await new SocialMediaService().publishPost('org-1', { text: 'hello', hashtags: ['union', 'strong'], platforms: ['twitter'] }, 'user-1');
+    expect(clients.twitter.postTweet).toHaveBeenCalledWith({ text: 'hello\n\n#union #strong' });
+  });
+
+  it('refuses an X post that is over the limit once its hashtags are added', async () => {
+    state.selects.socialAccounts = [account({ platform: 'twitter' })];
+    const results = await new SocialMediaService().publishPost('org-1', { text: 'x'.repeat(275), hashtags: ['union'], platforms: ['twitter'] }, 'user-1');
+    expect(results[0].success).toBe(false);
+    expect(clients.twitter.postTweet).not.toHaveBeenCalled();
   });
 });
 
@@ -357,19 +397,17 @@ describe('fetchAnalytics', () => {
     await expect(svc.fetchAnalytics('org-1', 'acct-x', new Date(), new Date())).rejects.toThrow(/Account not found/);
   });
 
-  it('fetches LinkedIn analytics (empty unified set)', async () => {
-    state.selects.socialAccounts = [account({ platform: 'linkedin' })];
+  // DEF-0B11-SOC-ANALYTICS-AND-ENGAGEMENT-FIGURES-HAVE-NO-WRITER-SO-EVERY-METRIC-IS-ZERO-OR-EMPTY: the platform responses are fetched but not
+  // transformed, so an empty result used to be returned as a successful collection and nothing was written. It is a 501 now.
+  it.each([
+    ['linkedin', () => clients.linkedin.getOrganizationStatistics],
+    ['facebook', () => clients.meta.getPageInsights],
+    ['instagram', () => clients.meta.getInstagramInsights],
+  ])('refuses with 501, not an empty success, when the %s response cannot be turned into analytics', async (platform, called) => {
+    state.selects.socialAccounts = [account({ platform })];
     const svc = new SocialMediaService();
-    const result = await svc.fetchAnalytics('org-1', 'acct-1', new Date('2025-01-01'), new Date('2025-01-31'));
-    expect(Array.isArray(result)).toBe(true);
-    expect(clients.linkedin.getOrganizationStatistics).toHaveBeenCalled();
-  });
-
-  it('fetches Facebook page insights', async () => {
-    state.selects.socialAccounts = [account({ platform: 'facebook' })];
-    const svc = new SocialMediaService();
-    await svc.fetchAnalytics('org-1', 'acct-1', new Date('2025-01-01'), new Date('2025-01-31'));
-    expect(clients.meta.getPageInsights).toHaveBeenCalled();
+    await expect(svc.fetchAnalytics('org-1', 'acct-1', new Date('2025-01-01'), new Date('2025-01-31'))).rejects.toMatchObject({ code: 'NOT_IMPLEMENTED' });
+    expect(called()).toHaveBeenCalled();
   });
 });
 
@@ -410,5 +448,60 @@ describe('getRateLimitStatus', () => {
     const svc = new SocialMediaService();
     const statuses = await svc.getRateLimitStatus('org-1');
     expect(statuses).toEqual([]);
+  });
+});
+
+
+// DEF-0B11-SOC-PUBLISH-RECORDS-THE-ROW-AFTER-THE-EXTERNAL-POST-AUDITS-COMPLETED-WHEN-EVERY-PLATFORM-FAILED-AND-RETURNS-PLATFORM-ERROR-TEXT
+describe('publishPost reports what happened without echoing the platform or hiding a live post', () => {
+  it('never returns the platform error text', async () => {
+    state.selects.socialAccounts = [account({ platform: 'twitter' })];
+    clients.twitter.postTweet = vi.fn().mockRejectedValue(new Error('401 Unauthorized: bearer abc.def.ghi rejected for app 12345'));
+    const results = await new SocialMediaService().publishPost('org-1', { text: 'hello', platforms: ['twitter'] }, 'user-1');
+    expect(results[0].success).toBe(false);
+    expect(results[0].error).toBe('The platform did not accept the post.');
+    expect(JSON.stringify(results)).not.toContain('bearer');
+  });
+
+  it('reports a post the platform accepted as published and unrecorded when the row cannot be saved', async () => {
+    state.selects.socialAccounts = [account({ platform: 'twitter' })];
+    const original = dbMock.insert;
+    (dbMock as any).insert = () => { throw new Error('db down'); };
+    try {
+      const results = await new SocialMediaService().publishPost('org-1', { text: 'hello', platforms: ['twitter'] }, 'user-1');
+      expect(results[0]).toMatchObject({ success: true, post_id: 'tw-post-1', recorded: false });
+    } finally {
+      (dbMock as any).insert = original;
+    }
+  });
+
+  it('marks a recorded post as recorded', async () => {
+    state.selects.socialAccounts = [account({ platform: 'twitter' })];
+    const results = await new SocialMediaService().publishPost('org-1', { text: 'hello', platforms: ['twitter'] }, 'user-1');
+    expect(results[0]).toMatchObject({ success: true, recorded: true });
+  });
+});
+
+// An approved draft is published to its own account only and completed in place.
+describe('publishPost options', () => {
+  it('publishes only to the named accounts', async () => {
+    state.selects.socialAccounts = [account({ platform: 'twitter' })];
+    const results = await new SocialMediaService().publishPost('org-1', { text: 'hello', platforms: ['twitter'] }, 'user-1', { accountIds: ['acct-1'] });
+    expect(results[0]).toMatchObject({ success: true });
+  });
+
+  it('completes an existing draft instead of inserting a second row', async () => {
+    state.selects.socialAccounts = [account({ platform: 'twitter' })];
+    state.updates.socialPosts = [{ id: 'draft-1' }];
+    let inserted = false;
+    const original = dbMock.insert;
+    (dbMock as any).insert = (...args: unknown[]) => { inserted = true; return (original as any)(...args); };
+    try {
+      const results = await new SocialMediaService().publishPost('org-1', { text: 'hello', platforms: ['twitter'] }, 'user-1', { accountIds: ['acct-1'], existingPostId: 'draft-1' });
+      expect(results[0]).toMatchObject({ success: true, recorded: true });
+      expect(inserted).toBe(false);
+    } finally {
+      (dbMock as any).insert = original;
+    }
   });
 });

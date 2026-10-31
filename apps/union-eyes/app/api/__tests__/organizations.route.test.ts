@@ -15,7 +15,10 @@ const m = vi.hoisted(() => ({
 const mockDb: any = {
   select: vi.fn(() => ({
     from: vi.fn(() => ({
-      where: vi.fn(async () => (m.rowsQueue.shift() ?? []) as unknown[]),
+      where: vi.fn(() => {
+        const rows = (m.rowsQueue.shift() ?? []) as unknown[];
+        return Object.assign(Promise.resolve(rows), { orderBy: () => ({ limit: async () => rows }) });
+      }),
     })),
   })),
   execute: vi.fn(async () => (m.executeQueue.shift() ?? []) as unknown[]),
@@ -28,6 +31,14 @@ const mockDb: any = {
 
 vi.mock('@/lib/api-auth-guard', () => ({ auth: m.auth, requireSystemAdmin: m.requireSystemAdmin }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
+// The list is scoped by the shared read authority, whose SQL behaviour is proven in organizations-read-authority.pglite.test.ts;
+// here the caller is a platform administrator so this suite keeps testing the route's mapping and creation rules.
+vi.mock('@/lib/organizations/read-authority', () => ({
+  resolveOrganizationAccess: async () => ({ platform: true, direct: new Map(), descendants: new Set() }),
+  readableOrganizationIds: () => null,
+  canAdministerOrganization: () => true,
+  UUID_PATTERN: /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+}));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/db/schema', () => ({ organizations: { id: 'id', parentId: 'parentId', status: 'status', hierarchyPath: 'hierarchyPath', hierarchyLevel: 'hierarchyLevel' } }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext, withSystemContext: m.withSystemContext }));
@@ -60,7 +71,7 @@ describe('organizations route', () => {
     m.audit.mockResolvedValue(undefined);
     m.requireSystemAdmin.mockResolvedValue(undefined);
     m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
-    m.withSystemContext.mockImplementation(async (fn: (tx?: unknown) => unknown) => fn({}));
+    m.withSystemContext.mockImplementation(async (fn: (tx?: unknown) => unknown) => fn(mockDb));
   });
 
   it('GET returns 401 when unauthenticated', async () => {

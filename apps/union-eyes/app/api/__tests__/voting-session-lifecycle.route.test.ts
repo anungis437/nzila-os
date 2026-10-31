@@ -77,6 +77,18 @@ describe('voting/sessions/[id] PATCH and DELETE (UE-CONV-K-009)', () => {
     expect(m.updateVotingSession).not.toHaveBeenCalled();
   });
 
+  it('does not treat a request field as authority to extend an opened session', async () => {
+    session.status = 'active';
+    const { PATCH } = await route();
+    const response = await call(PATCH as never, 'PATCH', {
+      endTime: '2030-01-01T00:00:00.000Z',
+      mandateId: 'client-supplied',
+      extensionGrant: { issued: true, loadedBy: 'authority-kernel' },
+    });
+    expect(response.status).toBe(409);
+    expect(m.updateVotingSession).not.toHaveBeenCalled();
+  });
+
   it('does not let a session of another organization be touched', async () => {
     session.organizationId = 'org_2';
     const { PATCH, DELETE } = await route();

@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 const m = vi.hoisted(() => ({
   execute: vi.fn(),
   withRLSContext: vi.fn(),
+  requireLiveFinancialMandate: vi.fn(),
 }));
 
 vi.mock('@/lib/api/framework', () => {
@@ -26,6 +27,9 @@ vi.mock('@/db', () => ({
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: m.withRLSContext,
 }));
+vi.mock('@/lib/finance/require-live-financial-mandate', () => ({
+  requireLiveFinancialMandate: m.requireLiveFinancialMandate,
+}));
 
 async function loadRoute() {
   return import('../finance/summary/route');
@@ -34,7 +38,11 @@ async function loadRoute() {
 describe('finance/summary route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.requireLiveFinancialMandate.mockResolvedValue({ mandateId: 'synthetic', ledgerWide: true, resourceIds: [], accountIds: [] });
+    m.withRLSContext.mockImplementation(async (a: unknown, b?: unknown) => {
+      const fn = typeof a === 'function' ? a : b;
+      return (fn as () => Promise<unknown>)();
+    });
     m.execute
       .mockResolvedValueOnce([{ year: 2026, month: 1, amount: '100', memberCount: 10, expected: '110', variance: '-10', reconciled: true, status: 'ok' }])
       .mockResolvedValueOnce([{ totalPaid: '200', totalCharged: '400', uniqueMembers: 5 }])
@@ -62,7 +70,7 @@ describe('finance/summary route', () => {
 
   it('returns normalized finance summary payload', async () => {
     const { GET } = await loadRoute();
-    const payload = await GET({ organizationId: 'org_1' } as any);
+    const payload = await GET({ organizationId: 'org_1', userId: 'u1' } as any);
 
     expect(payload).toMatchObject({
       collectionRate: 50,

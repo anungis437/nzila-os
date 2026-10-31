@@ -207,6 +207,21 @@ describe('SendGridAdapter', () => {
     global.fetch = vi.fn();
   });
 
+
+  it('passes one-click unsubscribe headers to SendGrid without dropping them', async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: true, headers: { get: () => 'sg-1' }, json: () => Promise.resolve({}),
+    });
+    const headers = {
+      'List-Unsubscribe': '<https://app.unioneyes.app/api/communications/unsubscribe/u?campaignId=c&token=abc>',
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+    };
+    await adapter.send({ ...testMessage, headers });
+    const body = JSON.parse((global.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body);
+    expect(body.headers).toEqual(headers);
+  });
+
+
   it('has name "sendgrid"', () => {
     expect(adapter.name).toBe('sendgrid');
   });

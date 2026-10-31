@@ -19,7 +19,7 @@ const actionSchema = z.object({
 
 export const GET = withApi(
   {
-    auth: { minRole: 'member' },
+    auth: { minRole: 'officer' },
     entitlement: 'financial_intelligence_suite',
     openapi: {
       tags: ['Billing'],
@@ -39,7 +39,8 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { minRole: 'steward' },
+    // Pausing or resuming billing changes what the organization is charged: an administrator's act.
+    auth: { minRole: 'admin' },
     entitlement: 'financial_intelligence_suite',
     body: actionSchema,
     rateLimit: RATE_LIMITS.FINANCIAL_WRITE,

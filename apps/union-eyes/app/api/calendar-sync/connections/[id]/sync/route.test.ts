@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
+import { readFileSync } from 'node:fs'
 
 const mocks = vi.hoisted(() => {
   const selectQueue: any[][] = []
@@ -71,6 +72,21 @@ describe('POST /api/calendar-sync/connections/[id]/sync', () => {
   const conn = { id: 'conn-1', provider: 'google', syncDirection: 'import', isActive: true, organizationId: 'org-1' }
   const ids = { localCalendarId: '11111111-1111-1111-1111-111111111111', externalCalendarId: 'google-cal-1' }
   const actor = { organizationId: 'org-1', userId: 'user-1', memberId: 'member-1' }
+
+  it('refuses sync without an authenticated actor before any database or provider operation', async () => {
+    const res = await POST(makePostRequest(ids), { organizationId: 'org-1', userId: '' }, { id: 'conn-1' });
+    expect(res.status).toBe(403);
+    expect(mocks.db.select).not.toHaveBeenCalled();
+    expect(mocks.importGoogleEvents).not.toHaveBeenCalled();
+  });
+
+  it('enforces connection ownership, local calendar ownership, and event ownership in the query predicates', () => {
+    const src = readFileSync(new URL('./route.ts', import.meta.url), 'utf8');
+    expect(src).toContain('eq(externalCalendarConnections.userId, userId)');
+    expect(src).toContain('eq(calendars.ownerId, userId)');
+    expect(src).toContain('eq(calendarEvents.calendarId, localCalendarId)');
+    expect(src).toContain('eq(calendarEvents.organizerId, userId)');
+  });
 
   it('records the intent first under the caller organization and actor, then runs the provider sync', async () => {
     mocks.importGoogleEvents.mockResolvedValue({ imported: 1 })

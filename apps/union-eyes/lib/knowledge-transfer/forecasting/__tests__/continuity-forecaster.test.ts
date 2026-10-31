@@ -6,12 +6,12 @@ const { buildDependencyPropagationMap, orderByMock } = vi.hoisted(() => ({
 }));
 vi.mock('../../propagation/dependency-propagator', () => ({ buildDependencyPropagationMap }));
 vi.mock('@/db/db', () => ({
-  db: { select: () => ({ from: () => ({ where: () => ({ orderBy: orderByMock }) }) }) },
+  db: { select: () => ({ from: () => ({ where: orderByMock }) }) },
 }));
 vi.mock('@/db/schema', () => ({
-  exitInterviews: { organizationId: 'organizationId', status: 'status', publishedAt: 'publishedAt' },
+  exitInterviews: { id: 'id' },
 }));
-vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a }));
+vi.mock('@/lib/knowledge-transfer/governance/interview-access', () => ({ derivedAnalyticsCondition: () => 'derived-analytics-condition' }));
 
 import { forecastContinuityTrends } from '../continuity-forecaster';
 
@@ -19,41 +19,42 @@ function node(overrides: Record<string, unknown> = {}) {
   return { isSingleSource: false, category: 'operational', frequency: 2, continuitySensitivity: 'moderate', ...overrides };
 }
 
-function daysAgo(d: number) {
-  return new Date(Date.now() - d * 86_400_000).toISOString();
-}
-
 describe('lib/knowledge-transfer/forecasting/continuity-forecaster', () => {
-  it('forecasts trends with rich node graph and interview history', async () => {
-    const nodes = [
+  // The earlier engine projected twelve months from fixed rates and always reported an improving curve; this one reports
+  // measured current metrics and says plainly that no trend can be given.
+  it('reports no projection, no history and no trend, with confidence 0', async () => {
+    buildDependencyPropagationMap.mockResolvedValue({ nodes: [
       ...Array.from({ length: 5 }, () => node({ isSingleSource: true, continuitySensitivity: 'critical' })),
-      node({ category: 'governance' }),
-      node({ category: 'governance' }),
       node({ category: 'vendor', isSingleSource: true }),
-      ...Array.from({ length: 15 }, () => node()),
-    ];
-    buildDependencyPropagationMap.mockResolvedValue({ nodes });
-    orderByMock.mockResolvedValue([
-      { publishedAt: daysAgo(300), status: 'published' },
-      { publishedAt: daysAgo(120), status: 'published' },
-      { publishedAt: daysAgo(30), status: 'published' },
-    ]);
-
+      ...Array.from({ length: 10 }, () => node()),
+    ] });
+    orderByMock.mockResolvedValue([{ id: 'a' }, { id: 'b' }, { id: 'c' }]);
     const forecast = await forecastContinuityTrends('org-1');
-    expect(forecast.projections.length).toBe(12);
-    expect(forecast.historicalData.length).toBeGreaterThan(0);
-    expect(forecast.trackedRisks.length).toBe(5);
-    expect(['degrading', 'improving', 'stable']).toContain(forecast.trendDirection);
-    expect(forecast.confidence).toBeGreaterThanOrEqual(50);
-    expect(Array.isArray(forecast.recommendations)).toBe(true);
+    expect(forecast.projections).toEqual([]);
+    expect(forecast.historicalData).toEqual([]);
+    expect(forecast.trackedRisks).toEqual([]);
+    expect(forecast.trendDirection).toBe('insufficient_data');
+    expect(forecast.confidence).toBe(0);
+    expect(forecast.dataPoints).toBe(3);
   });
 
-  it('uses fallback historical point when no interviews', async () => {
-    buildDependencyPropagationMap.mockResolvedValue({ nodes: [node({ isSingleSource: true }), node()] });
+  it('derives recommendations only from measured current metrics', async () => {
+    buildDependencyPropagationMap.mockResolvedValue({ nodes: [
+      ...Array.from({ length: 5 }, () => node({ isSingleSource: true, continuitySensitivity: 'critical', frequency: 1 })),
+      node({ category: 'vendor', isSingleSource: true, frequency: 1 }),
+    ] });
+    orderByMock.mockResolvedValue([]);
+    const forecast = await forecastContinuityTrends('org-1');
+    expect(forecast.currentMetrics).toMatchObject({ singleSourceCount: 6, totalNodes: 6 });
+    expect(forecast.recommendations.length).toBeGreaterThan(0);
+  });
+
+  it('gives no metrics and no recommendations for an organization with nothing to measure', async () => {
+    buildDependencyPropagationMap.mockResolvedValue({ nodes: [] });
     orderByMock.mockResolvedValue([]);
     const forecast = await forecastContinuityTrends('org-2');
-    expect(forecast.historicalData.length).toBe(1);
-    expect(forecast.projections.length).toBe(12);
-    expect(forecast.confidence).toBeLessThanOrEqual(85);
+    expect(forecast.currentMetrics).toBeUndefined();
+    expect(forecast.recommendations).toEqual([]);
+    expect(forecast.trendDirection).toBe('insufficient_data');
   });
 });

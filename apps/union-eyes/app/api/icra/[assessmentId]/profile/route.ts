@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
+import { isAssessmentId } from '@/lib/icra/assessment-id'
 import { eq } from 'drizzle-orm';
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { guardPublicIntake } from '@/lib/public-intake/guard';
 import {
   extractCapabilityToken,
   checkCapability,
@@ -13,7 +15,11 @@ interface RouteContext {
 }
 
 export async function GET(request: Request, { params }: RouteContext) {
+  // A capability read is bounded like the writes: a caller cannot probe assessment ids or render reports without limit.
+  const intake = await guardPublicIntake(request, { bucket: 'capability', readBody: false })
+  if (!intake.ok) return intake.response
   const { assessmentId } = await params;
+  if (!isAssessmentId(assessmentId)) return NextResponse.json({ error: 'Assessment not found' }, { status: 404 })
 
   return withSystemContext(async (tx) => {
     const [assessment] = await tx

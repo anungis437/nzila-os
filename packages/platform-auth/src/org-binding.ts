@@ -2,7 +2,7 @@ import { createHash, randomBytes } from 'node:crypto'
 import { and, asc, desc, eq, sql } from 'drizzle-orm'
 import { authOrganizationUsers, authUserSessions, authUsers } from '@nzila/db/schema'
 import { authDb, withAuthContext } from './auth-db'
-import { AUTH_BRIDGE_PURPOSE } from '@nzila/db/auth-storage-authority'
+import { AUTH_BRIDGE_PROVIDER_NO_PARENT, AUTH_BRIDGE_PURPOSE } from '@nzila/db/auth-storage-authority'
 import { SESSION_COOKIE_NAME, validateSession, type SessionData } from './password/session'
 
 export class AuthOrgBindingError extends Error {
@@ -192,12 +192,14 @@ async function withResolvedOrgBinding<T>(
           createdAt: sql`statement_timestamp()`,
           expiresAt: sql`statement_timestamp()+interval '30 seconds'`,
           isActive: true,
-          // The bridge is a request-scoped child of the validated parent session. The business predicate
-          // re-reads the parent on every statement, so revoking it ends the bridge's authority at once.
+          // A cookie session is a child of that parent, re-read on every statement.
+          // A provider sign-in has no parent and must say so. Omitting both is not authority.
           deviceInfo: {
             purpose: AUTH_BRIDGE_PURPOSE,
             provider: actor.identityProvider,
-            ...(session && cookie ? { parentSessionId: session.sessionId } : {}),
+            ...(session && cookie
+              ? { parentSessionId: session.sessionId }
+              : { bridgeClass: AUTH_BRIDGE_PROVIDER_NO_PARENT }),
           },
         })
         .returning({ expiresAt: authUserSessions.expiresAt })

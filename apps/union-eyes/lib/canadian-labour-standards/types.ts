@@ -120,5 +120,6 @@ export interface JurisdictionProfile {
   labourRelationsBoard: LabourRelationsBoard;
   antiScab: AntiScabProvision;
   payEquity: PayEquityRegime;
-  minimumWage: { hourly: number; effectiveDate: string };
+  /** null when no source of rates is available; never a placeholder rate. */
+  minimumWage: { hourly: number; effectiveDate: string } | null;
 }

@@ -27,14 +27,17 @@ import {
  */
 
 
-const _locationGeofenceSchema = z.object({
-  name: z.string().min(1, 'name is required'),
-  description: z.string().optional(),
-  geofenceType: z.unknown().optional(),
-  centerLatitude: z.string().min(1, 'centerLatitude is required'),
-  centerLongitude: z.string().min(1, 'centerLongitude is required'),
-  radiusMeters: z.unknown().optional(),
-  strikeId: z.guid('Invalid strikeId'),
+// A geofence is a place a member's position is compared with, so every field is bounded: a radius of a planet would make every
+// position inside it, and a type outside the known vocabulary means nothing to the privacy rules that read it.
+const MAX_RADIUS_METERS = 10_000;
+const locationGeofenceSchema = z.object({
+  name: z.string().trim().min(1, 'name is required').max(200),
+  description: z.string().max(1000).optional(),
+  geofenceType: z.enum(['strike_line', 'union_hall', 'safety_zone']),
+  centerLatitude: z.number().min(-90, 'centerLatitude must be -90 to 90').max(90, 'centerLatitude must be -90 to 90'),
+  centerLongitude: z.number().min(-180, 'centerLongitude must be -180 to 180').max(180, 'centerLongitude must be -180 to 180'),
+  radiusMeters: z.number().positive('radiusMeters must be > 0').max(MAX_RADIUS_METERS, `radiusMeters must be at most ${MAX_RADIUS_METERS}`),
+  strikeId: z.unknown().optional(),
 });
 
 
@@ -49,36 +52,20 @@ export const POST = withApiAuth(async (req: NextRequest) => {
       return NextResponse.json({ error: 'Creating a geofence requires steward authority' }, { status: 403 });
     }
 
-    const body = await req.json();
-    const { name, description, geofenceType, centerLatitude, centerLongitude, radiusMeters, strikeId } = body;
-
-    if (!name || !geofenceType || centerLatitude === undefined || centerLongitude === undefined || !radiusMeters) {
-      return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      'Missing required fields: name, geofenceType, centerLatitude, centerLongitude, radiusMeters'
-    );
+    let raw: unknown;
+    try {
+      raw = await req.json();
+    } catch {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Request body must be valid JSON');
     }
-
-    // Validate coordinates
-    if (centerLatitude < -90 || centerLatitude > 90) {
-      return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      'Invalid centerLatitude (must be -90 to 90)'
-    );
+    const parsed = locationGeofenceSchema.safeParse(raw);
+    if (!parsed.success) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, parsed.error.issues[0]?.message ?? 'Invalid geofence');
     }
-
-    if (centerLongitude < -180 || centerLongitude > 180) {
-      return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      'Invalid centerLongitude (must be -180 to 180)'
-    );
-    }
-
-    if (radiusMeters <= 0) {
-      return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      'Invalid radiusMeters (must be > 0)'
-    );
+    const { name, description, geofenceType, centerLatitude, centerLongitude, radiusMeters, strikeId } = parsed.data;
+    // There is no strike register to prove a strike belongs to the organization, so a strike is not linked by a body-supplied id.
+    if (strikeId !== undefined && strikeId !== null) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'strikeId is not accepted: no strike register exists to verify it');
     }
 
     const trustedUnionLocalId = await getOrganizationIdForUser(user.id);
@@ -92,7 +79,6 @@ export const POST = withApiAuth(async (req: NextRequest) => {
           centerLatitude,
           centerLongitude,
           radiusMeters,
-          strikeId,
         },
         trustedUnionLocalId,
         tx,
@@ -103,7 +89,7 @@ export const POST = withApiAuth(async (req: NextRequest) => {
         action: 'location.geofence.create',
         resourceType: 'geofences',
         resourceId: created.id,
-        details: { name, geofenceType, radiusMeters, strikeId },
+        details: { name, geofenceType, radiusMeters },
       });
       return created;
     });
@@ -157,6 +143,7 @@ export const GET = withApiAuth(async (req: NextRequest) => {
       geofenceId,
       inside: result.inside,
       distance: result.distance,
+      recorded: result.recorded,
       message: result.inside ? "User is inside geofence" : "User is outside geofence",
     });
   } catch (_error) {

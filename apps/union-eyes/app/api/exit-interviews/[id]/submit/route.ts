@@ -50,7 +50,7 @@ export const POST = withApi(
     const updated = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
       const [row] = await tx
         .update(exitInterviews)
-        .set({ status: 'submitted', submittedAt: now, updatedAt: now, updatedBy: userId! })
+        .set({ status: 'submitted', submittedAt: now, submittedBy: userId!, updatedAt: now, updatedBy: userId! })
         .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!), eq(exitInterviews.status, 'draft')))
         .returning();
       if (!row) throw ApiError.conflict('Only draft interviews can be submitted');

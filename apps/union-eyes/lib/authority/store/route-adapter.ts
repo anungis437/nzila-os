@@ -13,11 +13,15 @@ import { PgDialect } from 'drizzle-orm/pg-core'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import type { Action, Decision } from '../ontology'
 import { enforceAuthority, type EnforcementDeps } from './enforce'
-import { canonicalMembershipSource } from './identity'
+import { activeMembershipSource } from './active-membership-source'
 import type { SqlExecutor } from './executor'
 
-/** A JS array travels as one Postgres array literal; drizzle would otherwise expand it into a parameter list. */
+/**
+ * A JS array travels as one Postgres array literal (drizzle would otherwise expand it into a parameter list). A Date travels
+ * as its ISO instant: the postgres driver cannot serialise a Date handed to it through a raw, untyped parameter.
+ */
 export function bind(value: unknown): unknown {
+  if (value instanceof Date) return value.toISOString()
   if (!Array.isArray(value)) return value
   return `{${value.map((v) => (v === null ? 'NULL' : `"${String(v).replace(/["\\]/g, (c) => `\\${c}`)}"`)).join(',')}}`
 }
@@ -44,7 +48,7 @@ export function drizzleExecutor(tx: RLSTx): SqlExecutor {
   }
 }
 
-export const kernelDeps: EnforcementDeps = { memberships: canonicalMembershipSource }
+export const kernelDeps: EnforcementDeps = { memberships: activeMembershipSource }
 
 export interface KernelCaseRequest {
   userId: string
@@ -53,7 +57,43 @@ export interface KernelCaseRequest {
   action: Action
 }
 
-/** A full kernel decision for one action on one case, for the authenticated principal of `tx`. */
+/** A full kernel decision for a legal hold on one conversation, for the authenticated principal of `tx`. */
+export function decideMessageRetention(
+  tx: RLSTx,
+  input: { userId: string; organizationId: string; action: 'message:adopt_retention' | 'message:read_retention_policy' },
+  deps: EnforcementDeps = kernelDeps,
+): Promise<Decision> {
+  return enforceAuthority(
+    drizzleExecutor(tx),
+    deps,
+    {
+      principalUserId: input.userId,
+      organizationId: input.organizationId,
+      action: input.action,
+      resource: { type: 'message_retention', id: input.organizationId, organizationId: input.organizationId },
+    },
+    { authenticated: true },
+  )
+}
+
+export function decideMessageHold(
+  tx: RLSTx,
+  input: { userId: string; organizationId: string; threadId: string; action: 'message:place_legal_hold' | 'message:release_legal_hold' },
+  deps: EnforcementDeps = kernelDeps,
+): Promise<Decision> {
+  return enforceAuthority(
+    drizzleExecutor(tx),
+    deps,
+    {
+      principalUserId: input.userId,
+      organizationId: input.organizationId,
+      action: input.action,
+      resource: { type: 'message_thread', id: input.threadId, organizationId: input.organizationId },
+    },
+    { authenticated: true },
+  )
+}
+
 export function decideCase(tx: RLSTx, input: KernelCaseRequest, deps: EnforcementDeps = kernelDeps): Promise<Decision> {
   return enforceAuthority(
     drizzleExecutor(tx),

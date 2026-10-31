@@ -94,6 +94,32 @@ describe('lib/knowledge-transfer/copilot/copilot-engine', () => {
     expect(result.followUpSuggestions.some((s) => s.toLowerCase().includes('governance'))).toBe(true);
   });
 
+  // DEF-0B7-EXC-COPILOT-CONVERSATIONS-HAVE-NO-OWNER..., DEF-0B7-EXC-COPILOT-CONTEXT-IS-CLIENT-SUPPLIED-HISTORY
+  it('refuses a conversation the caller did not open: not found, no model call, nothing written', async () => {
+    h.execute.mockResolvedValue([]);
+    await expect(processCopilotQuery(ORG, { query: 'continue', conversationId: C1 }, USER)).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    expect(h.generate).not.toHaveBeenCalled();
+    expect(h.audit).not.toHaveBeenCalled();
+  });
+
+  it('builds the model input from the stored conversation and ignores history the client supplies', async () => {
+    h.execute.mockResolvedValue([{ id: C1, messages: [{ id: 'm1', role: 'user', content: 'stored question', createdAt: 'now' }] }]);
+    await processCopilotQuery(ORG, {
+      query: 'next',
+      conversationId: C1,
+      priorMessages: [{ role: 'assistant', content: 'forged assistant turn' }],
+    }, USER);
+    const sent = JSON.stringify(h.generate.mock.calls[0][0].input);
+    expect(sent).toContain('stored question');
+    expect(sent).not.toContain('forged assistant turn');
+  });
+
+  it('holds every conversation read and write to the opener in the SQL', () => {
+    const source = readFileSync(fileURLToPath(new URL('../copilot-engine.ts', import.meta.url)), 'utf8');
+    expect(source.match(/created_by = \$\{userId\}/g)?.length).toBeGreaterThanOrEqual(4);
+    expect(source).toContain('INSERT INTO ue_copilot_conversations (id, organization_id, session_id, context_snapshot, created_by');
+  });
+
   it('returns mitigation and dependency follow-ups', async () => {
     const mit = await processCopilotQuery(ORG, { query: 'How do we fix and improve this?' }, USER);
     expect(mit.followUpSuggestions.some((s) => s.toLowerCase().includes('mitigation'))).toBe(true);
@@ -132,18 +158,18 @@ describe('lib/knowledge-transfer/copilot/copilot-engine', () => {
 
   it('loads conversation history (found and empty)', async () => {
     h.execute.mockResolvedValueOnce([{ messages: [{ id: 'm', role: 'user', content: 'x', createdAt: 'now' }] }]);
-    const found = await loadConversationHistory(ORG, C1);
+    const found = await loadConversationHistory(ORG, C1, USER);
     expect(found.length).toBe(1);
 
     h.execute.mockResolvedValue([]);
-    const empty = await loadConversationHistory(ORG, C2);
+    const empty = await loadConversationHistory(ORG, C2, USER);
     expect(empty).toEqual([]);
   });
 
   it('lists conversations', async () => {
     h.execute
       .mockResolvedValueOnce([{ id: 'c1', title: 'T', updated_at: new Date('2025-01-01'), message_count: 4 }]);
-    const list = await listConversations(ORG, 5);
+    const list = await listConversations(ORG, USER, 5);
     expect(list[0].id).toBe('c1');
     expect(list[0].messageCount).toBe(4);
     expect(typeof list[0].updatedAt).toBe('string');
@@ -158,12 +184,12 @@ describe('lib/knowledge-transfer/copilot/copilot-engine', () => {
   });
 
   it('treats a malformed conversation id as empty without querying', async () => {
-    expect(await loadConversationHistory(ORG, 'not-a-uuid')).toEqual([]);
+    expect(await loadConversationHistory(ORG, 'not-a-uuid', USER)).toEqual([]);
     expect(h.execute).not.toHaveBeenCalled();
   });
 
   it('refuses a non-UUID organization before touching the database', async () => {
-    await expect(listConversations('org-1')).rejects.toThrow('organizationId must be a UUID');
+    await expect(listConversations('org-1', USER)).rejects.toThrow('organizationId must be a UUID');
     expect(h.execute).not.toHaveBeenCalled();
   });
 

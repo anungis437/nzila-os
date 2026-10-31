@@ -187,11 +187,27 @@ describe('voting service (rows owned through their session)', () => {
 
   it('does not set a proxy on another organization voter row', async () => {
     const a = await session(ORG_A);
+    await db.insert(schema.voterEligibility).values({ sessionId: a.sessionId, memberId: MEMBER_2, isEligible: true } as never);
     await expect(voting.setProxyVoter(a.sessionId, MEMBER_1, MEMBER_2, ORG_B)).resolves.toBeNull();
     expect((await rows('SELECT delegated_to FROM voter_eligibility WHERE id = $1', [a.eligibilityId]))[0].delegated_to).toBeNull();
 
     await voting.setProxyVoter(a.sessionId, MEMBER_1, MEMBER_2, ORG_A);
     expect((await rows('SELECT delegated_to FROM voter_eligibility WHERE id = $1', [a.eligibilityId]))[0].delegated_to).toBe(MEMBER_2);
+  });
+
+  it('does not rewrite an option, an eligibility row or a proxy once the session has opened', async () => {
+    const a = await session(ORG_A);
+    await pg.query('UPDATE voting_sessions SET status = $1 WHERE id = $2', ['active', a.sessionId]);
+
+    await expect(voting.updateVotingOption(a.optionId, ORG_A, { text: 'Hijacked' } as never)).rejects.toThrow(/opened/);
+    await expect(voting.updateVoterEligibility(a.eligibilityId, ORG_A, { isEligible: false } as never)).rejects.toThrow(/opened/);
+    await expect(voting.setProxyVoter(a.sessionId, MEMBER_1, MEMBER_2, ORG_A)).rejects.toThrow(/opened/);
+
+    expect((await rows('SELECT text FROM voting_options WHERE id = $1', [a.optionId]))[0].text).toBe('Yes');
+    expect((await rows('SELECT is_eligible, delegated_to FROM voter_eligibility WHERE id = $1', [a.eligibilityId]))[0]).toMatchObject({
+      is_eligible: true,
+      delegated_to: null,
+    });
   });
 });
 

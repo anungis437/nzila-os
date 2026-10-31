@@ -60,6 +60,8 @@ function runScript(scriptRelPath: string, extraArgs: string[], extraEnv: Record<
         env: { ...process.env, ...extraEnv },
         encoding: "utf8",
         stdio: "pipe",
+        // npx is a .cmd shim on Windows and cannot be launched without a shell.
+        shell: process.platform === "win32",
       }
     );
     return { status: 0, output };

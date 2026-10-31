@@ -295,6 +295,8 @@ export interface ReaperReport {
   objectsDeleted: number;
   deletionFailed: number;
   skipped: number;
+  /** Objects of cancelled or expired intakes whose deletion failed INTAKE_MAX_DELETION_ATTEMPTS times: nothing retries them, so they are reported. */
+  abandoned: number;
 }
 
 /** Marks every lapsed open intake expired. System role; one audit record per intake. */
@@ -404,8 +406,23 @@ export async function finalizeIntakeObjects(storage: IntakeStorage, input: { lim
   return report;
 }
 
+/** An object past its retry limit is never selected again, so without this count it would sit in storage unreported. */
+export async function countAbandonedIntakeObjects(): Promise<number> {
+  return withSystemContext(async (tx) => {
+    const [row] = await (tx as unknown as RLSTx)
+      .select({ n: sql<number>`count(*)::int` })
+      .from(documentIntakes)
+      .where(and(
+        inArray(documentIntakes.status, ['cancelled', 'expired']),
+        inArray(documentIntakes.objectState, ['present', 'deletion_pending', 'deletion_failed']),
+        sql`${documentIntakes.deletionAttempts} >= ${INTAKE_MAX_DELETION_ATTEMPTS}`,
+      ));
+    return Number(row?.n ?? 0);
+  });
+}
+
 export async function runIntakeReaper(storage: IntakeStorage, input: { now?: Date } = {}): Promise<ReaperReport> {
   const expired = await expireDueIntakes({ now: input.now });
   const objects = await finalizeIntakeObjects(storage, { now: input.now });
-  return { expired, ...objects };
+  return { expired, ...objects, abandoned: await countAbandonedIntakeObjects() };
 }

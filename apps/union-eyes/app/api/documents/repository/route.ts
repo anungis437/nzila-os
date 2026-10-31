@@ -29,6 +29,7 @@ import { bindIntakeInTx, checkIntakeForAcceptance, IntakeConflictError } from '@
 import { blobIntakeStorage } from '@/lib/documents/intake-storage';
 import { intakeRefusal } from '@/lib/documents/intake-acceptance';
 import { generateSasUrl } from '@/lib/blob-client';
+import { listPage } from '@/lib/api/list-page';
 
 const uploadDocumentSchema = z.object({
   title: z.string().min(1).max(300),
@@ -84,6 +85,18 @@ export const GET = withOrganizationAuth(async (request, context) => {
   const uploader = searchParams.get('uploader');
   const fromDate = searchParams.get('from');
   const toDate = searchParams.get('to');
+  // Bound candidate scans before per-document case-authority checks. The offset always
+  // addresses candidate rows, not visible rows, so a filtered page cannot repeat rows.
+  const { limit, offset } = listPage(request, 100, 50);
+  if (linkedCase && !z.guid().safeParse(linkedCase).success) {
+    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'linkedCase must be a valid case identifier');
+  }
+  if ((keyword?.length ?? 0) > 200 || (documentType?.length ?? 0) > 120 || (uploader?.length ?? 0) > 128) {
+    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Document search filter is too long');
+  }
+  if ((fromDate && !Number.isFinite(Date.parse(fromDate))) || (toDate && !Number.isFinite(Date.parse(toDate)))) {
+    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid document date filter');
+  }
 
   const conditions = [eq(documents.organizationId, organizationId), sql`${documents.deletedAt} IS NULL`];
 
@@ -108,6 +121,12 @@ export const GET = withOrganizationAuth(async (request, context) => {
 
   if (uploader) {
     conditions.push(eq(documents.uploadedBy, uploader));
+  }
+
+  // A case filter is enforced in SQL rather than scanning the organization's
+  // entire repository and discarding nonmatching links after the read.
+  if (linkedCase) {
+    conditions.push(eq(documentLinks.linkedEntityId, linkedCase));
   }
 
   if (fromDate) {
@@ -135,7 +154,9 @@ export const GET = withOrganizationAuth(async (request, context) => {
     .from(documents)
     .leftJoin(documentLinks, eq(documentLinks.documentId, documents.id))
     .where(and(...conditions))
-    .orderBy(desc(documents.updatedAt));
+    .orderBy(desc(documents.updatedAt), desc(documents.id))
+    .limit(limit)
+    .offset(offset);
 
   // Representative-level role: eligibility for organization-level (unlinked) documents and the uploader
   // projection only, never case content.
@@ -185,10 +206,6 @@ export const GET = withOrganizationAuth(async (request, context) => {
         return null;
       }
 
-      if (linkedCase && row.linkedEntityId !== linkedCase) {
-        return null;
-      }
-
       // Uploader identity is staff-only; members see their documents without other users' ids.
       const { uploadedBy: uploaderId, ...withoutUploader } = row;
 
@@ -199,7 +216,15 @@ export const GET = withOrganizationAuth(async (request, context) => {
     }),
   );
 
-  return standardSuccessResponse(visible.filter(Boolean));
+  // Keep the response's data as an array for existing clients. Metadata lets them
+  // continue from a fixed candidate-row offset, even when visibility removes an entire page.
+  // Do not disclose hasMore or the candidate count: either would reveal the presence
+  // of documents that the case/privilege policy withheld from this member.
+  return standardSuccessResponse(visible.filter(Boolean), {
+    page: Math.floor(offset / limit) + 1,
+    pageSize: limit,
+    nextOffset: offset + limit,
+  });
 });
 
 export const POST = withOrganizationAuth(async (request, context) => {

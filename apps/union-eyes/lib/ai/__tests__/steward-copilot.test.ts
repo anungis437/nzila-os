@@ -1,10 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockFindFirst, mockInsertValues, mockGenerate } = vi.hoisted(() => ({
+const { mockFindFirst, mockInsertValues, mockGenerate, mockCaseAccess } = vi.hoisted(() => ({
   mockFindFirst: vi.fn(),
   mockInsertValues: vi.fn(),
   mockGenerate: vi.fn(),
+  mockCaseAccess: vi.fn(),
 }));
+
+vi.mock('@/lib/services/case-access-service', () => ({ getEffectiveCaseAccess: mockCaseAccess }));
 
 vi.mock('@/db/db', () => ({
   db: {
@@ -26,6 +29,7 @@ vi.mock('@/lib/ai/ai-client', () => ({
     component: 'test',
     action: 'mock',
   })),
+  toGatewayDataClass: vi.fn(() => 'regulated'),
   UE_APP_KEY: 'union-eyes',
   UE_PROFILES: { STEWARD_COPILOT: 'ue-steward-copilot' },
   UE_SYSTEM_ORG_ID: '00000000-0000-0000-0000-000000000000',
@@ -64,6 +68,7 @@ import { executeCopilotAction, summarizeTimeline, suggestAction } from '../stewa
 describe('executeCopilotAction', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockCaseAccess.mockResolvedValue({ canViewCase: true });
     mockGenerate.mockResolvedValue({
       content: JSON.stringify({
         responseText: 'Here is a summary of the grievance timeline...',
@@ -74,6 +79,13 @@ describe('executeCopilotAction', () => {
       }),
     });
     mockInsertValues.mockResolvedValue(undefined);
+  });
+
+  it('refuses unauthorized grievance context before any model call', async () => {
+    mockCaseAccess.mockResolvedValueOnce({ canViewCase: false });
+    await expect(executeCopilotAction({ organizationId: 'org-1', userId: 'user-1', userRole: 'steward', actionType: 'timeline_summary', relatedEntityType: 'grievance', relatedEntityId: 'grv-1' })).rejects.toThrow('Case access denied');
+    expect(mockGenerate).not.toHaveBeenCalled();
+    expect(mockInsertValues).not.toHaveBeenCalled();
   });
 
   it('returns an AI envelope with copilot result', async () => {

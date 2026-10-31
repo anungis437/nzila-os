@@ -17,11 +17,13 @@ import {
   type AiClient,
   type AiExecutionTelemetry,
   type AiTrace,
+  type DataClass,
   type EmbedResult,
   type ExtractResult,
   type GenerateResult,
 } from '@nzila/ai-sdk'
 import { auth } from '@nzila/platform-auth/entra/server'
+import type { AISurfaceDataClass } from '@nzila/policies'
 
 function resolveAiBaseUrl(): string {
   const configured = process.env.AI_SDK_BASE_URL?.trim() || process.env.NEXT_PUBLIC_APP_URL?.trim()
@@ -120,6 +122,24 @@ export const UE_PROFILES = {
   CONTINUITY_RISK: 'ue-continuity-risk',
   TOPIC_EXTRACTION: 'ue-topic-extraction',
 } as const
+
+/** The policy surface and AI gateway use different sensitivity vocabularies.
+ * This exhaustive translation preserves (never downgrades) grievance/legal,
+ * pension, member-personal, and confidential classifications at the gateway.
+ * A gateway profile that cannot process the translated class must reject it.
+ */
+export function toGatewayDataClass(dataClass: AISurfaceDataClass): DataClass {
+  const map: Record<AISurfaceDataClass, DataClass> = {
+    public: 'public',
+    internal: 'internal',
+    confidential: 'sensitive',
+    restricted: 'regulated',
+    pension_financial: 'regulated',
+    member_personal: 'sensitive',
+    grievance_legal: 'regulated',
+  }
+  return map[dataClass]
+}
 
 export function buildOrgAiTrace(
   organizationId?: string | null,

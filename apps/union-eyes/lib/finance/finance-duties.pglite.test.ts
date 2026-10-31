@@ -16,6 +16,9 @@ import { memberArrears, memberDuesLedger } from '@/db/schema/dues-finance-schema
 const m = vi.hoisted(() => ({ audit: vi.fn() }))
 vi.mock('@/lib/audit-logger', () => ({ auditLog: m.audit, AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }))
 vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: () => true }))
+// These suites run the canonical session context against a legacy-shaped in-process database, so membership is read from the tables
+// directly. The topology-aware source (definer function under V2) has its own tests and a native proof.
+vi.mock('@/lib/authority/store/active-membership-source', async () => ({ activeMembershipSource: (await import('@/lib/authority/store/identity')).canonicalMembershipSource }))
 
 import { performFinancialDuty, readFinancialTransaction, requireFinancialDuty, type FinancialDutyInput } from '@/lib/authority/store/finance-route-adapter'
 import { recordArrearsPayment } from '@/lib/dues/arrears-payment'

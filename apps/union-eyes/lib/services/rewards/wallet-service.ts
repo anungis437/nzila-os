@@ -102,6 +102,25 @@ export async function listLedger(
 }
 
 /**
+ * The balance and one page of the ledger as they stand at one instant. Read as two statements, a movement between them made the
+ * balance disagree with the entries beside it; here both come from one repeatable-read snapshot.
+ */
+export async function getWalletSnapshot(
+  orgId: string,
+  userId: string,
+  limit = 20,
+  offset = 0,
+): Promise<{ balance: number; entries: RewardWalletLedgerEntry[]; total: number }> {
+  return db.transaction(async (tx) => {
+    const owned = and(eq(rewardWalletLedger.orgId, orgId), eq(rewardWalletLedger.userId, userId));
+    const [latest] = await tx.select().from(rewardWalletLedger).where(owned).orderBy(desc(rewardWalletLedger.createdAt)).limit(1);
+    const entries = await tx.select().from(rewardWalletLedger).where(owned).orderBy(desc(rewardWalletLedger.createdAt)).limit(limit).offset(offset);
+    const [{ count }] = await tx.select({ count: sql<number>`count(*)::int` }).from(rewardWalletLedger).where(owned);
+    return { balance: latest?.balanceAfter ?? 0, entries, total: count };
+  }, { isolationLevel: 'repeatable read' });
+}
+
+/**
  * Apply a ledger entry (transactional)
  * Calculates new balance and enforces the canonical non-negative constraint.
  * 

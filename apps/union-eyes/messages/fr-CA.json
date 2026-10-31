@@ -11898,7 +11898,10 @@
         "title": "Carte de membre numérique",
         "body": "Une preuve d’adhésion vérifiable."
       }
-    }
+    },
+    "reviewsTitle": "Demander une revue",
+    "reviewsBody": "Demandez à votre syndicat d’ouvrir une plainte, un appel ou un réexamen protégé. L’ouverture enregistre votre demande. Elle n’assigne personne et n’envoie aucun avis.",
+    "reviewsLink": "Demander une revue"
   },
   "memberHelp": {
     "title": "Aide et ressources",
@@ -11954,5 +11957,38 @@
     "requestsBody": "Vous pouvez demander à votre syndicat une copie de vos renseignements, demander une correction ou retirer un consentement. Votre demande est traitée par votre syndicat.",
     "selfServiceUnavailable": "Le libre-service en ligne pour ces demandes n’est pas encore offert. Un message sécurisé est le moyen pris en charge d’en faire une.",
     "sendRequest": "Envoyer une demande relative à la vie privée"
+  },
+  "reviewIntake": {
+    "memberTitle": "Demander une revue",
+    "oversightTitle": "Ouverture et revues assignées",
+    "openOversight": "Ouvrir les revues",
+    "boundary": "Ouvrir une revue enregistre votre demande. Cela ne tranche pas l’issue, n’assigne personne et n’envoie aucun avis.",
+    "typeLabel": "Ce que vous demandez",
+    "types": {
+      "complaint": "Plainte",
+      "appeal": "Appel",
+      "reconsideration": "Réexamen"
+    },
+    "adverseLabel": "Personnes qui ne doivent pas traiter cette revue",
+    "adverseHint": "Facultatif. Indiquez l’identifiant interne de chaque personne, un par ligne. Ne vous incluez pas.",
+    "submit": "Ouvrir cette revue",
+    "submitting": "Ouverture…",
+    "opened": "La revue est enregistrée.",
+    "noNotice": "Aucun avis n’a été envoyé. Aucune politique d’avis de revue n’est adoptée.",
+    "validation": "Choisissez un type de revue. Nommez au plus huit identifiants internes distincts, et ne vous nommez pas.",
+    "denied": "Cette action n’est pas disponible pour votre adhésion.",
+    "submitError": "La revue n’a pas pu être enregistrée. Réessayez.",
+    "loadError": "Les revues n’ont pas pu être chargées.",
+    "retry": "Réessayer",
+    "ownTitle": "Revues que vous avez ouvertes",
+    "emptyOwn": "Vous n’avez ouvert aucune revue.",
+    "oversightListTitle": "Revues couvertes par votre mandat",
+    "emptyOversight": "Aucune revue n’est assignée à un mandat de surveillance en vigueur pour vous.",
+    "status": {
+      "open": "Ouverte",
+      "closed": "Fermée"
+    },
+    "complainant": "Plaignant {id}",
+    "complainantAbsent": "Aucun plaignant n’est enregistré."
   }
 }

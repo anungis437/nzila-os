@@ -1,0 +1,22 @@
+{
+  "$comment": "Single source of truth for scheduled (cron) jobs. Every route here is POST-only and authenticated by the shared cron secret. infrastructure/bicep/ue-v2/modules/apps.bicep generates one Azure Container Apps schedule job per entry from this file, and lib/operations/scheduled-jobs.contract.test.ts fails if a cron route is missing here, if an entry names a route that does not exist or is not POST-only, or if the bicep stops reading this file. Schedules are UTC cron expressions chosen from each route's own documented cadence; the platform owner may tune them without touching a route. code is the Container Apps job name suffix (job names are limited to 32 characters).",
+  "jobs": [
+    { "code": "dlrem", "path": "/api/cron/deadline-reminders", "schedule": "*/5 * * * *", "timeoutSeconds": 100, "legacyJobSuffix": "cron-deadlines" },
+    { "code": "dlovd", "path": "/api/cron/deadline-overdue", "schedule": "*/15 * * * *", "timeoutSeconds": 100 },
+    { "code": "notif", "path": "/api/cron/process-notifications", "schedule": "*/5 * * * *", "timeoutSeconds": 100 },
+    { "code": "msgs", "path": "/api/cron/process-messages", "schedule": "*/5 * * * *", "timeoutSeconds": 100 },
+    { "code": "ovdn", "path": "/api/cron/overdue-notifications", "schedule": "0 8 * * *", "timeoutSeconds": 100 },
+    { "code": "edu", "path": "/api/cron/education-reminders", "schedule": "0 13 * * *", "timeoutSeconds": 100 },
+    { "code": "rpts", "path": "/api/cron/scheduled-reports", "schedule": "0 * * * *", "timeoutSeconds": 300 },
+    { "code": "dues", "path": "/api/cron/monthly-dues", "schedule": "0 6 1 * *", "timeoutSeconds": 300 },
+    { "code": "kpi", "path": "/api/cron/analytics/daily-metrics", "schedule": "30 2 * * *", "timeoutSeconds": 300 },
+    { "code": "bill", "path": "/api/cron/billing-lifecycle", "schedule": "0 3 * * *", "timeoutSeconds": 300 },
+    { "code": "cal", "path": "/api/cron/calendar-sync", "schedule": "*/15 * * * *", "timeoutSeconds": 100 },
+    { "code": "alert", "path": "/api/cron/observability-alerts", "schedule": "*/10 * * * *", "timeoutSeconds": 100 },
+    { "code": "sla", "path": "/api/cron/sla-watchdog", "schedule": "*/15 * * * *", "timeoutSeconds": 100 },
+    { "code": "reap", "path": "/api/cron/document-intake-reaper", "schedule": "*/30 * * * *", "timeoutSeconds": 100 },
+    { "code": "xsync", "path": "/api/cron/external-data-sync", "schedule": "0 4 * * *", "timeoutSeconds": 300 },
+    { "code": "locret", "path": "/api/cron/location-retention", "schedule": "0 * * * *", "timeoutSeconds": 100 },
+    { "code": "rwds", "path": "/api/rewards/cron?task=all", "schedule": "0 9 * * *", "timeoutSeconds": 300 }
+  ]
+}

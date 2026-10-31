@@ -19,11 +19,13 @@
  * assessment. This is resource-abuse protection, not authorization.
  */
 import { NextResponse } from 'next/server';
+import { isAssessmentId } from '@/lib/icra/assessment-id'
+import { clientAddress } from '@/lib/public-intake/guard';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { icraAssessments } from '@/db/schema/icra-schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
-import { rateLimit } from '@/lib/rate-limit';
+import { checkRateLimit } from '@/lib/rate-limiter';
 import {
   checkCapability,
   capabilityDenialStatus,
@@ -40,18 +42,19 @@ interface RouteContext {
 
 export async function POST(request: Request, { params }: RouteContext) {
   const { assessmentId } = await params;
+  if (!isAssessmentId(assessmentId)) return NextResponse.json({ error: 'Assessment not found' }, { status: 404 })
 
-  const rl = rateLimit(request, {
-    maxRequests: 20,
-    windowSeconds: 60 * 60,
-    keyGenerator: (req) => {
-      const forwarded = req.headers.get('x-forwarded-for');
-      const ip = forwarded ? forwarded.split(',')[0]?.trim() : 'unknown';
-      return `icra-capability-exchange:${ip}:${assessmentId}`;
-    },
+  const rl = await checkRateLimit(`icra-capability-exchange:${clientAddress(request)}:${assessmentId}`, {
+    limit: 20,
+    window: 60 * 60,
+    identifier: 'icra-capability-exchange',
+    failOpen: process.env.NODE_ENV !== 'production',
   });
-  if (!rl.success) {
-    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: rl.error ? 'Temporarily unavailable.' : 'Too many requests. Please try again later.' },
+      { status: rl.error ? 503 : 429 },
+    );
   }
 
   let body: unknown;

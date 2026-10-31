@@ -5,7 +5,8 @@ import { db } from '@/db/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { exitInterviews, exitInterviewEvents, exitInterviewDocuments } from '@/db/schema';
-import { ROLE_HIERARCHY, normalizeRole } from '@/lib/api-auth-guard';
+import { ROLE_HIERARCHY, normalizeRole, hasMinRole } from '@/lib/api-auth-guard';
+import { canReadInterview, projectInterview, resolveInterviewReader } from '@/lib/knowledge-transfer/governance/interview-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,10 +57,11 @@ export const GET = withApi(
 
     const stewardPlus = hasStewardPrivileges(user?.role ?? null);
     const isOwner = row.createdBy === userId;
-    const isPublished = row.status === 'published' || row.status === 'archived';
+    const reader = await resolveInterviewReader(userId ?? null, stewardPlus, hasMinRole);
 
-    if (!stewardPlus && !isOwner && !isPublished) {
-      throw ApiError.forbidden('You do not have permission to access this interview');
+    // Sensitivity floor, consent and workflow state: an interview the caller may not read does not exist for them.
+    if (!canReadInterview(row, reader)) {
+      throw ApiError.notFound('Exit interview');
     }
 
     const [events, documents] = await Promise.all([
@@ -75,7 +77,9 @@ export const GET = withApi(
         .orderBy(asc(exitInterviewDocuments.createdAt)),
     ]);
 
-    return { data: { ...row, events, documents } };
+    // The workflow events (who reviewed and when) belong to the people who manage the interview; attachments follow the
+    // interview's own gate.
+    return { data: { ...projectInterview(row, reader, isOwner), events: stewardPlus || isOwner ? events : [], documents } };
   },
 );
 

@@ -230,7 +230,7 @@ async function extractClaimKeywords(
       profileKey: UE_PROFILES.PRECEDENT_KEYWORDS,
       promptKey: UE_PROFILES.PRECEDENT_KEYWORDS,
       input: `Extract 10-15 key legal terms and concepts from this grievance/claim:\n\n${claimText}`,
-      dataClass: 'internal',
+      dataClass: 'regulated',
     });
 
     const result = response.data as Record<string, unknown>;
@@ -328,7 +328,7 @@ PRECEDENT: ${precedent.caseTitle}
 Facts: ${precedent.keyFacts}
 Reasoning: ${precedent.reasoning}
 Outcome: ${precedent.outcome}`,
-      dataClass: 'internal',
+      dataClass: 'regulated',
     });
 
     const result = response.data as Record<string, unknown>;
@@ -445,7 +445,7 @@ RELEVANT PRECEDENTS:
 ${precedentSummaries}
 
 Provide analysis.`,
-      dataClass: 'internal',
+      dataClass: 'regulated',
     });
 
     const result = response.data as Record<string, unknown>;

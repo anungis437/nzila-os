@@ -4,16 +4,17 @@ import { inAppNotifications } from '@/db/schema'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { notifyTriagers } from '@/lib/messaging/thread-assignment'
 import type { CaseActor } from '@/lib/cases/case-authorization'
-import { caseActionAllowed } from '@/lib/cases/case-permissions'
+import { loadParticipationContext, participationAllows, type ConversationRow } from '@/lib/messaging/conversation-participation'
 import { staffMembershipLive } from '@/lib/messaging/staff-liveness'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 
 /**
  * Conversation authority. message_threads/messages carry tenant RLS only, so participation is
  * enforced here: a member sees threads they own; staff see threads they are assigned to or own, and only while their
- * own membership is still live (re-read in the same transaction on every call). Seniority never confers a tenant-wide
+ * stored role still carries a conversation-assignee capacity (re-read in the same transaction on every call). The
+ * actor's role label is ignored. An administrator title is not that capacity. Seniority never confers a tenant-wide
  * read of private conversations, and same-organization membership grants nothing. Unassigned threads stay invisible to
- * staff until a triager assigns them (UE-CONV-I-002).
+ * staff until a triager assigns them (UE-CONV-I-002). The read decision is decide() on the thread relationship.
  *
  * The runtime role holds SELECT and INSERT on messages and SELECT, INSERT and UPDATE on message_threads, where UPDATE
  * is limited by trigger to assignment and lifecycle. Reading never writes; read state is recorded separately by
@@ -26,9 +27,15 @@ export function isOpenThread(thread: { status: string; isArchived: boolean | nul
   return thread.status === 'open' && !thread.isArchived
 }
 
-/** Staff participation needs a staff policy role AND a membership that is live now. */
+/** Staff participation is the live stored membership. The actor role label is not consulted. */
 export async function staffActing(tx: RLSTx, actor: CaseActor): Promise<boolean> {
-  return caseActionAllowed('note_add_internal', actor.role) && (await staffMembershipLive(tx, actor))
+  return staffMembershipLive(tx, actor)
+}
+
+async function readableRows<T extends ConversationRow>(tx: RLSTx, actor: CaseActor, threads: T[]): Promise<T[]> {
+  if (threads.length === 0) return []
+  const context = await loadParticipationContext(tx, actor)
+  return threads.filter((thread) => participationAllows(context, thread, 'message:read'))
 }
 
 export function threadReadScope(actor: CaseActor, staffLive: boolean): SQL {
@@ -80,7 +87,8 @@ export async function listThreads(tx: RLSTx, actor: CaseActor): Promise<ThreadVi
     .where(threadReadScope(actor, staffLive))
     .orderBy(desc(sql`coalesce(${lastActivity}, ${messageThreads.createdAt})`))
     .limit(100)
-  return threads.map(({ thread: t, lastActivity: last }) => ({
+  const allowed = new Set((await readableRows(tx, actor, threads.map((row) => row.thread))).map((thread) => thread.id))
+  return threads.filter(({ thread: t }) => allowed.has(t.id)).map(({ thread: t, lastActivity: last }) => ({
     id: t.id,
     subject: t.subject,
     status: t.status,
@@ -96,7 +104,9 @@ export async function findReadableThread(tx: RLSTx, actor: CaseActor, threadId: 
   if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(threadId)) return null
   const staffLive = await staffActing(tx, actor)
   const [thread] = await tx.select().from(messageThreads).where(and(threadReadScope(actor, staffLive), eq(messageThreads.id, threadId))).limit(1)
-  return thread ?? null
+  if (!thread) return null
+  const [allowed] = await readableRows(tx, actor, [thread])
+  return allowed ?? null
 }
 
 function toView(m: typeof messages.$inferSelect, actor: CaseActor, read = false): MessageView {

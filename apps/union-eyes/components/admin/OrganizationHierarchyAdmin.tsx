@@ -45,7 +45,7 @@ interface Organization {
   level: number;
   member_count?: number;
   child_count?: number;
-  rls_enabled: boolean;
+  rls_enabled?: boolean;
 }
 
 interface OrganizationHierarchyAdminProps {
@@ -66,9 +66,13 @@ export function OrganizationHierarchyAdmin({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   
+  // The canonical organization types the API accepts (app/api/organizations/route.ts).
+  const ORGANIZATION_TYPES = ['platform', 'congress', 'federation', 'union', 'local', 'region', 'district'] as const;
+  const [actionError, setActionError] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
     name: '',
-    organizationType: 'local_union',
+    organizationType: 'local',
     parentOrganizationId: '',
   });
 
@@ -134,15 +138,20 @@ export function OrganizationHierarchyAdmin({
         }),
       });
 
-      const data = await response.json();
-      
-      if (data.success) {
+      if (!response.ok) {
+        const refusal = await response.json().catch(() => null);
+        setActionError(refusal?.error ?? t('createFailed'));
+        return;
+      }
+      setActionError(null);
+      {
         setIsCreateDialogOpen(false);
-        setFormData({ name: '', organizationType: 'local_union', parentOrganizationId: '' });
+        setFormData({ name: '', organizationType: 'local', parentOrganizationId: '' });
         fetchOrganizations();
       }
     } catch (_error) {
-}
+      setActionError(t('createFailed'));
+    }
   };
 
   const handleUpdateOrganization = async () => {
@@ -159,24 +168,29 @@ export function OrganizationHierarchyAdmin({
         }),
       });
 
-      const data = await response.json();
-      
-      if (data.success) {
-        setIsEditDialogOpen(false);
-        setSelectedOrg(null);
-        fetchOrganizations();
+      if (!response.ok) {
+        const refusal = await response.json().catch(() => null);
+        setActionError(refusal?.error ?? t('updateFailed'));
+        return;
       }
+      setActionError(null);
+      setIsEditDialogOpen(false);
+      setSelectedOrg(null);
+      fetchOrganizations();
     } catch (_error) {
-}
+      setActionError(t('updateFailed'));
+    }
   };
 
   const getOrgTypeColor = (type: string) => {
     const colors: Record<string, string> = {
-      'international': 'bg-purple-500',
-      'national': 'bg-blue-500',
-      'regional': 'bg-green-500',
-      'local_union': 'bg-yellow-500',
-      'chapter': 'bg-orange-500',
+      'platform': 'bg-slate-500',
+      'congress': 'bg-purple-500',
+      'federation': 'bg-blue-500',
+      'union': 'bg-indigo-500',
+      'region': 'bg-green-500',
+      'district': 'bg-orange-500',
+      'local': 'bg-yellow-500',
     };
     return colors[type] || 'bg-gray-500';
   };
@@ -197,8 +211,8 @@ export function OrganizationHierarchyAdmin({
               <h4 className="font-semibold">{node.name}</h4>
               <div className="flex items-center gap-2 mt-1">
                 <Badge className={getOrgTypeColor(node.organization_type)}>
-                  {(['international','national','regional','local_union','chapter'] as const).includes(node.organization_type as 'international') 
-                    ? t(node.organization_type as 'international')
+                  {(ORGANIZATION_TYPES as readonly string[]).includes(node.organization_type)
+                    ? t(`types.${node.organization_type as (typeof ORGANIZATION_TYPES)[number]}`)
                     : node.organization_type.replace('_', ' ')}
                 </Badge>
                 <span className="text-sm text-muted-foreground">
@@ -303,11 +317,9 @@ export function OrganizationHierarchyAdmin({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="international">{t('international')}</SelectItem>
-                      <SelectItem value="national">{t('national')}</SelectItem>
-                      <SelectItem value="regional">{t('regional')}</SelectItem>
-                      <SelectItem value="local_union">{t('localUnion')}</SelectItem>
-                      <SelectItem value="chapter">{t('chapter')}</SelectItem>
+                      {ORGANIZATION_TYPES.map((type) => (
+                        <SelectItem key={type} value={type}>{t(`types.${type}`)}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -333,6 +345,7 @@ export function OrganizationHierarchyAdmin({
                 </div>
               </div>
               
+              {actionError && <p role="alert" className="text-sm text-destructive">{actionError}</p>}
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                   {t('cancel')}
@@ -429,11 +442,9 @@ export function OrganizationHierarchyAdmin({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="international">International</SelectItem>
-                    <SelectItem value="national">National</SelectItem>
-                    <SelectItem value="regional">Regional</SelectItem>
-                    <SelectItem value="local_union">Local Union</SelectItem>
-                    <SelectItem value="chapter">Chapter</SelectItem>
+                    {ORGANIZATION_TYPES.map((type) => (
+                      <SelectItem key={type} value={type}>{t(`types.${type}`)}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -461,6 +472,7 @@ export function OrganizationHierarchyAdmin({
               </div>
             </div>
             
+            {actionError && <p role="alert" className="text-sm text-destructive">{actionError}</p>}
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                 Cancel

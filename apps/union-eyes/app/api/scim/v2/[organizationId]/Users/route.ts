@@ -8,9 +8,17 @@ import { db } from '@/db/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { organizationMembers } from '@/db/schema/organization-members-schema';
-import { eq } from 'drizzle-orm';
+import { z } from 'zod';
+import { and, asc, count as countRows, eq, isNull } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
+
+// A provisioning request is bounded, typed input. Malformed or oversized input is a 400 naming the field, not a 500 from a failed insert.
+const provisionSchema = z.object({
+  userName: z.string().trim().min(1).max(320),
+  name: z.object({ givenName: z.string().trim().max(100).optional(), familyName: z.string().trim().max(100).optional() }).optional(),
+  emails: z.array(z.object({ value: z.string().trim().email().max(320), primary: z.boolean().optional() })).max(10).optional(),
+});
 
 function toScimUser(member: typeof organizationMembers.$inferSelect) {
   const parts = (member.name ?? '').split(' ');
@@ -52,19 +60,25 @@ export const GET = withApi(
     if (params.organizationId !== organizationId) throw ApiError.notFound('Organization');
     const orgId = organizationId;
     const url = new URL(request.url);
-    const startIndex = Math.max(1, parseInt(url.searchParams.get('startIndex') || '1', 10));
-    const count = Math.min(100, parseInt(url.searchParams.get('count') || '50', 10));
+    const startIndex = Math.max(1, Number.parseInt(url.searchParams.get('startIndex') || '1', 10) || 1);
+    const count = Math.min(100, Math.max(0, Number.parseInt(url.searchParams.get('count') || '50', 10) || 0));
 
-    const members = await db
-      .select()
-      .from(organizationMembers)
-      .where(eq(organizationMembers.organizationId, orgId));
-
-    const paged = members.slice(startIndex - 1, startIndex - 1 + count);
+    // A removed member is not a user of the organization, and the page is read in SQL with the count, not by loading the whole roster.
+    const live = and(eq(organizationMembers.organizationId, orgId), isNull(organizationMembers.deletedAt));
+    const [{ total }] = await db.select({ total: countRows() }).from(organizationMembers).where(live);
+    const paged = count === 0
+      ? []
+      : await db
+          .select()
+          .from(organizationMembers)
+          .where(live)
+          .orderBy(asc(organizationMembers.createdAt), asc(organizationMembers.id))
+          .limit(count)
+          .offset(startIndex - 1);
 
     return {
         schemas: ['urn:ietf:params:scim:api:messages:2.0:ListResponse'],
-        totalResults: members.length,
+        totalResults: Number(total),
         startIndex,
         itemsPerPage: paged.length,
         Resources: paged.map(toScimUser),
@@ -85,16 +99,11 @@ export const POST = withApi(
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     // An administrator provisions users only into the organization they are acting in.
     if (params.organizationId !== organizationId) throw ApiError.notFound('Organization');
-    const body = await request.json();
-    const { userName, name, emails } = body as {
-      userName: string;
-      name?: { givenName?: string; familyName?: string };
-      emails?: Array<{ value: string; primary?: boolean }>;
-    };
-
-    if (!userName) {
-      throw ApiError.badRequest('userName is required');
+    const parsed = provisionSchema.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) {
+      throw ApiError.badRequest(`Invalid SCIM user: ${parsed.error.issues.map((i) => i.path.join('.') || 'body').join(', ')}`);
     }
+    const { userName, name, emails } = parsed.data;
 
     const primaryEmail = emails?.find((e) => e.primary)?.value ?? emails?.[0]?.value;
 
@@ -109,7 +118,9 @@ export const POST = withApi(
           email: primaryEmail ?? userName,
           name: fullName,
           role: 'member',
-          status: 'active',
+          // Provisioning names a user; it does not give that user access. The membership is pending until the person accepts, as for a
+          // member added through the roster route, and the SCIM representation reports it as not active.
+          status: 'pending',
         })
         .onConflictDoNothing()
         .returning();
