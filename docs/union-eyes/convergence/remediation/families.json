@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 537,
- "partial": 78,
- "outstanding": 240,
- "accountedFor": 240,
+ "corrected": 543,
+ "partial": 76,
+ "outstanding": 234,
+ "accountedFor": 234,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -91,11 +91,11 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 44,
+   "defects": 38,
    "severity": {
-    "HIGH": 8,
-    "MEDIUM": 27,
-    "LOW": 9
+    "HIGH": 6,
+    "MEDIUM": 24,
+    "LOW": 8
    },
    "namedRoutes": 3,
    "namedFiles": 0,
@@ -103,11 +103,11 @@
     "0B.2": 3,
     "0B.3": 1,
     "0B.5": 2,
-    "0B.6": 7,
+    "0B.6": 3,
     "0B.7": 13,
     "0B.8": 2,
     "0B.9": 1,
-    "0B.10": 3,
+    "0B.10": 1,
     "0B.11": 10,
     "0B.12": 2
    }
@@ -526,23 +526,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B6-EMP-CONTACT-PII-READ-AT-STEWARD-UNAUDITED",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B6-EMP-COMMUNICATION-GRIEVANCE-CORRESPONDENCE-STEWARD-READ",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-CMP-CONTRACT-CREATE-REFERENCES-UNVERIFIED",
-    "severity": "HIGH",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B6-CMP-DISPATCH-ASSIGN-NO-STATE-OR-FILL-CHECK",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B6-SYS-CONTINUITY-LIST-UNBOUNDED-AND-FILTERED-AFTER-FETCH",
     "severity": "LOW"
    },
@@ -623,15 +606,6 @@
    },
    {
     "id": "DEF-0B10-PEN-PENSION-ADMINISTRATION-WRITES-REST-ON-ONE-ROLE-TITLE-WITH-NO-MANDATE-OR-TRUSTEE-DECISION",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-PIL-USAGE-TELEMETRY-ROUTES-READ-ANY-ORGANIZATION-NAMED-IN-THE-QUERY-AT-AN-ADMIN-FLOOR-AND-RETURN-PER-USER-IDS-THROUGH-THE-BARE-DB-IMPORT",
-    "severity": "HIGH",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B10-PIL-USAGE-EVENTS-ARE-CALLER-ASSERTED-AND-DRIVE-THE-CHAMPION-AND-CONVERSION-SIGNALS-WITHOUT-ANY-CHECK-THAT-THE-ACTION-HAPPENED",
     "severity": "MEDIUM"
    },
    {

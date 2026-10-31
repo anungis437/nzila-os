@@ -23,6 +23,7 @@ describe('B52 references in a body name rows of the caller organization', () => 
     for (const field of ['employerId', 'grievanceId', 'recipientContactId', 'templateId']) {
       expect(route).toContain(`field: '${field}'`)
     }
-    expect(route).toContain('.limit(200)')
+    expect(route).toContain('const LIST_LIMIT = 200')
+    expect(route).toContain('.limit(LIST_LIMIT)')
   })
 })

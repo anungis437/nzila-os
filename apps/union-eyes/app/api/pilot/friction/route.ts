@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { withRoleAuth, type BaseAuthContext } from "@/lib/api-auth-guard";
 import { resolveTelemetryOrganization } from "@/lib/pilot/telemetry-scope";
+import { withRLSContext } from "@/lib/db/with-rls-context";
 import { logger } from "@/lib/logger";
 import { getFrictionReport, getFrictionSummary } from "@/lib/services/pilot-friction";
 
@@ -18,11 +19,11 @@ export const GET = withRoleAuth('admin', async (req, context: BaseAuthContext) =
     const summaryOnly = req.nextUrl.searchParams.get("summary") === "true";
 
     if (summaryOnly) {
-      const summary = await getFrictionSummary(orgId);
+      const summary = await withRLSContext({ organizationId: orgId }, async () => getFrictionSummary(orgId));
       return NextResponse.json(summary);
     }
 
-    const report = await getFrictionReport(orgId);
+    const report = await withRLSContext({ organizationId: orgId }, async () => getFrictionReport(orgId));
     return NextResponse.json(report);
   } catch (error) {
     logger.error("[pilot/friction] Error:", error as Error);

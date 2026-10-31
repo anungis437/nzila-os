@@ -22,6 +22,7 @@ import {
 import { eq, desc, and } from 'drizzle-orm'
 import { assertOrganizationOwns } from '@/lib/api/org-references'
 import { ApiError } from '@/lib/api/errors'
+import { kernelCaseAccess } from '@/lib/services/case-access-service'
 import { employers } from '@/db/schema/union-structure-schema'
 import { employerContacts } from '@/db/schema/domains/communications/employer-communications'
 import { grievances } from '@/db/schema/domains/claims/grievances'
@@ -120,8 +121,10 @@ export const POST = withOrganizationAuth(async (request, context) => {
 
 // ── GET — List communications ───────────────────────────────────────────────
 
+const LIST_LIMIT = 200
+
 export const GET = withOrganizationAuth(async (request, context) => {
-  const { organizationId } = context
+  const { organizationId, userId } = context
 
   try {
     const canAccess = await hasMinRole('steward')
@@ -137,14 +140,38 @@ export const GET = withOrganizationAuth(async (request, context) => {
       conditions.push(eq(employerCommunications.employerId, employerId))
     }
 
-    const rows = await db
-      .select()
-      .from(employerCommunications)
-      .where(and(...conditions))
-      .orderBy(desc(employerCommunications.createdAt))
-      .limit(200)
+    // Correspondence linked to a grievance is readable only by someone the case authority lets see that case; the rest of
+    // the organization's stewards see the unlinked records. The read is audited with what was withheld.
+    const result = await withRLSContext({ organizationId }, async (tx) => {
+      const rows = await tx
+        .select()
+        .from(employerCommunications)
+        .where(and(...conditions))
+        .orderBy(desc(employerCommunications.createdAt))
+        .limit(LIST_LIMIT)
 
-    return standardSuccessResponse(rows)
+      const verdicts = new Map<string, boolean>()
+      const visible = []
+      for (const row of rows) {
+        if (!row.grievanceId) { visible.push(row); continue }
+        if (!verdicts.has(row.grievanceId)) {
+          verdicts.set(row.grievanceId, (await kernelCaseAccess(tx, { organizationId, grievanceId: row.grievanceId, userId })).canViewCase)
+        }
+        if (verdicts.get(row.grievanceId)) visible.push(row)
+      }
+
+      await persistAtomicAudit(tx, {
+        userId,
+        organizationId,
+        resourceType: 'employer_communications',
+        action: 'employer_communication.list',
+        resourceId: employerId ?? 'all',
+        details: { returned: visible.length, withheldForCaseAuthority: rows.length - visible.length, truncated: rows.length === LIST_LIMIT },
+      })
+      return { visible, truncated: rows.length === LIST_LIMIT }
+    })
+
+    return standardSuccessResponse(result.visible, { pageSize: LIST_LIMIT, hasMore: result.truncated })
   } catch (_error) {
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to list communications')
   }

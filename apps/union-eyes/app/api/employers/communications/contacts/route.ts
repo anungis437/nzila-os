@@ -121,8 +121,10 @@ export const POST = withOrganizationAuth(async (request, context) => {
 
 // ── GET ─────────────────────────────────────────────────────────────────────
 
+const LIST_LIMIT = 200
+
 export const GET = withOrganizationAuth(async (request, context) => {
-  const { organizationId } = context
+  const { organizationId, userId } = context
 
   try {
     const canAccess = await hasMinRole('steward')
@@ -138,13 +140,26 @@ export const GET = withOrganizationAuth(async (request, context) => {
       conditions.push(eq(employerContacts.employerId, employerId))
     }
 
-    const rows = await db
-      .select()
-      .from(employerContacts)
-      .where(and(...conditions))
-      .orderBy(desc(employerContacts.createdAt))
+    // Employer representatives' names and contact details are personal information: the list is bounded and each read is audited.
+    const rows = await withRLSContext({ organizationId }, async (tx) => {
+      const found = await tx
+        .select()
+        .from(employerContacts)
+        .where(and(...conditions))
+        .orderBy(desc(employerContacts.createdAt))
+        .limit(LIST_LIMIT)
+      await persistAtomicAudit(tx, {
+        userId,
+        organizationId,
+        resourceType: 'employer_contacts',
+        action: 'employer_contact.list',
+        resourceId: employerId ?? 'all',
+        details: { returned: found.length, truncated: found.length === LIST_LIMIT },
+      })
+      return found
+    })
 
-    return standardSuccessResponse(rows)
+    return standardSuccessResponse(rows, { pageSize: LIST_LIMIT, hasMore: rows.length === LIST_LIMIT })
   } catch (_error) {
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to list employer contacts')
   }

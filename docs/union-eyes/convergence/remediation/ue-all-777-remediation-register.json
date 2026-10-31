@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 537,
-    "engineeringRemaining": 240,
+    "engineeringCorrected": 543,
+    "engineeringRemaining": 234,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 78
+    "engineeringPartial": 76
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -5457,9 +5457,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B76-PILOT-EMPLOYER-CONTRACT",
+        "path": "apps/union-eyes/app/api/employers/communications/contacts/route.ts; apps/union-eyes/app/api/__tests__/employers-read-exposure.route.test.ts; apps/union-eyes/app/api/__tests__/f03-b52-references.contract.test.ts; apps/union-eyes/lib/services/__tests__/s20-pilot-employer-contract.test.ts",
+        "explanation": "The contact list is bounded to 200 and every read is audited in the same transaction with counts only (no names or addresses in the audit record). The f03-b52 pin that looked for the literal .limit(200) now looks for the LIST_LIMIT constant and its value (disclosed).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-EMP-REGISTRY-PARENT-COMPANY-CROSS-ORG-LINK",
@@ -5563,9 +5570,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B76-PILOT-EMPLOYER-CONTRACT",
+        "path": "apps/union-eyes/app/api/employers/communications/route.ts; apps/union-eyes/app/api/__tests__/employers-read-exposure.route.test.ts; apps/union-eyes/lib/services/__tests__/s20-pilot-employer-contract.test.ts",
+        "explanation": "Correspondence linked to a grievance is returned only when the case authority (kernelCaseAccess canViewCase) lets the caller see that case; unlinked records stay visible to stewards. The list stays bounded at 200 and each read is audited in the same transaction with the count returned and withheld.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-EMP-CAPE-AUDIT-EVENT-AFTER-COMMIT",
@@ -5704,11 +5718,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B27-F05-F06-COMMERCIAL-BOUNDS-AUDIT-AND-RETENTION",
-        "path": "apps/union-eyes/app/api/contracts/route.ts; apps/union-eyes/lib/api/org-references.ts; apps/union-eyes/lib/api/__tests__/f05-commercial-bounds.contract.test.ts",
-        "explanation": "A contract create checks that its billing account and subscription belong to the caller's organization (400 malformed, 404 otherwise) before anything is written; a contract provisions entitlements from its lines.",
-        "remaining": "Contract line items still provision entitlements from administrator-typed feature keys with no catalogue check.",
+        "path": "apps/union-eyes/app/api/contracts/route.ts; apps/union-eyes/lib/api/org-references.ts; apps/union-eyes/lib/api/__tests__/f05-commercial-bounds.contract.test.ts; apps/union-eyes/lib/contracts/contract-input.ts; apps/union-eyes/lib/services/__tests__/s20-pilot-employer-contract.test.ts",
+        "explanation": "A contract create checks that its billing account and subscription belong to the caller's organization (400 malformed, 404 otherwise) before anything is written; a contract provisions entitlements from its lines. B76: amounts are decimals with at most two places, the expiry must follow the effective date, a line total must equal unit price times quantity, a stated total that disagrees with the priced lines is refused, and the line count (100) and text lengths are bounded.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -5982,9 +5995,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B76-PILOT-EMPLOYER-CONTRACT",
+        "path": "apps/union-eyes/app/api/dispatch/assign/route.ts; apps/union-eyes/lib/services/dispatch-engine.ts; apps/union-eyes/lib/services/__tests__/s20-pilot-employer-contract.test.ts",
+        "explanation": "Verified in source: assignment refuses a request that is not open or partially filled, a worker already offered or placed, a worker who is not an active member, and more workers than the request still needs; filled is derived from the live assignments plus the new ones.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-CMP-DISPATCH-RULES-ENGINE-NEVER-APPLIED",
@@ -14608,11 +14628,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B32-F06-CONSENT-GATED-RECORDING-AND-VERIFIED-TELEMETRY-SCOPE",
-        "path": "apps/union-eyes/lib/pilot/telemetry-scope.ts; apps/union-eyes/lib/pilot/__tests__/telemetry-scope.test.ts; apps/union-eyes/app/api/pilot/champions/route.ts; apps/union-eyes/app/api/pilot/friction/route.ts; apps/union-eyes/app/api/pilot/metrics/route.ts; apps/union-eyes/app/api/pilot/readiness/route.ts",
-        "explanation": "A pilot telemetry read uses the caller's authenticated organization; a request naming another organization is refused 403 identically whether or not it exists. The resolver had no test; it now has one, and each route is pinned to use it.",
-        "remaining": "The telemetry services still run raw SQL over pilot_events through the shared database handle, filtered by the organization id only, and return per-user identifiers.",
+        "path": "apps/union-eyes/lib/pilot/telemetry-scope.ts; apps/union-eyes/lib/pilot/__tests__/telemetry-scope.test.ts; apps/union-eyes/app/api/pilot/champions/route.ts; apps/union-eyes/app/api/pilot/friction/route.ts; apps/union-eyes/app/api/pilot/metrics/route.ts; apps/union-eyes/app/api/pilot/readiness/route.ts; apps/union-eyes/lib/services/__tests__/s20-pilot-employer-contract.test.ts",
+        "explanation": "A pilot telemetry read uses the caller's authenticated organization; a request naming another organization is refused 403 identically whether or not it exists. The resolver had no test; it now has one, and each route is pinned to use it. B76: the services no longer run on the bare handle: each read runs inside the tenant context of the session organization, so the row-level policy applies as a second boundary.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -14629,9 +14648,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B76-PILOT-EMPLOYER-CONTRACT",
+        "path": "apps/union-eyes/app/api/pilot/events/route.ts; apps/union-eyes/app/api/pilot/__tests__/pilot-events-authority.route.test.ts; apps/union-eyes/lib/services/__tests__/s20-pilot-employer-contract.test.ts",
+        "explanation": "A browser may report only usage signals (login, session, active_user, feature_used, user_action, case_viewed). case_created and update_added are accepted only for a claim that exists in the caller organization; every other type records something a server route does and is refused (400), so a member can no longer make an organization appear to hold champions or be conversion-ready without filing a case. The session id bound now matches the column (100). The existing events test was extended (disclosed): it mocks the claim lookup and the tenant context.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-PIL-CUPE-BOOTSTRAP-RESET-DELETES-ALL-GRIEVANCES-MEMBERS-AND-CHECKLIST-ROWS-OF-THE-ORGANIZATION-AT-THE-FIXTURE-SLUG-WITH-NO-DEMO-MARKER",

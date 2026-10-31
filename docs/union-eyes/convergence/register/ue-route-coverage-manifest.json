@@ -3,7 +3,7 @@
  "summary": {
   "routes": 998,
   "mutating": 726,
-  "kernel": 59,
+  "kernel": 60,
   "byGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 12,
@@ -48,9 +48,9 @@
   "mutatingByData": {
    "AMBIENT_DB": 14,
    "CRUD_TENANT_TX": 141,
-   "NONE": 342,
+   "NONE": 341,
    "SYSTEM_CONTEXT": 65,
-   "TENANT_TX": 164
+   "TENANT_TX": 165
   }
  },
  "routes": [
@@ -6035,7 +6035,7 @@
    ],
    "mutating": true,
    "guard": "ORG_AUTH",
-   "kernel": false,
+   "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
@@ -10771,7 +10771,7 @@
    "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -10808,7 +10808,7 @@
    "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "EXEMPT_UNATTRIBUTABLE"
   },
   {
@@ -10833,7 +10833,7 @@
    "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -10845,7 +10845,7 @@
    "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -10882,7 +10882,7 @@
    "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {

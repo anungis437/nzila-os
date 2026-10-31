@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { withRoleAuth, type BaseAuthContext } from "@/lib/api-auth-guard";
 import { resolveTelemetryOrganization } from "@/lib/pilot/telemetry-scope";
+import { withRLSContext } from "@/lib/db/with-rls-context";
 import { logger } from "@/lib/logger";
 import { getPilotMetrics, getDAUTrend } from "@/lib/services/pilot-metrics";
 
@@ -17,10 +18,10 @@ export const GET = withRoleAuth('admin', async (req, context: BaseAuthContext) =
     const orgId = scope.organizationId;
     const includeTrend = req.nextUrl.searchParams.get("trend") === "true";
 
-    const metrics = await getPilotMetrics(orgId);
+    const metrics = await withRLSContext({ organizationId: orgId }, async () => getPilotMetrics(orgId));
 
     if (includeTrend) {
-      const trend = await getDAUTrend(orgId, 30);
+      const trend = await withRLSContext({ organizationId: orgId }, async () => getDAUTrend(orgId, 30));
       return NextResponse.json({ ...metrics, dauTrend: trend });
     }
 

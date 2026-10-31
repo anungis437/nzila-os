@@ -5,7 +5,8 @@
  * POST /api/contracts — Create a new commercial contract
  */
 
-import { withApi, ApiError, z } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { createContractSchema } from '@/lib/contracts/contract-input';
 import {
   createContract,
 } from '@/services/platform-economics';
@@ -13,32 +14,6 @@ import { db } from '@/db';
 import { commercialContracts, billingAccounts, orgSubscriptions } from '@/db/schema';
 import { assertOrganizationOwns } from '@/lib/api/org-references';
 import { eq, desc } from 'drizzle-orm';
-
-const createContractSchema = z.object({
-  billingAccountId: z.guid(),
-  subscriptionId: z.guid().optional(),
-  name: z.string().min(1).max(255),
-  description: z.string().optional(),
-  effectiveDate: z.coerce.date(),
-  expirationDate: z.coerce.date(),
-  autoRenew: z.boolean().optional(),
-  renewalTermMonths: z.number().int().positive().optional(),
-  terminationNoticeDays: z.number().int().nonnegative().optional(),
-  totalContractValue: z.string().optional(),
-  lineItems: z.array(z.object({
-    lineType: z.enum(['module_license', 'feature_access', 'usage_quota', 'seat_allocation', 'support_level', 'sla_commitment', 'custom']),
-    featureKey: z.string(),
-    description: z.string(),
-    quantity: z.number().int().positive().optional(),
-    unitPrice: z.string().optional(),
-    totalPrice: z.string().optional(),
-    usageLimit: z.number().int().nonnegative().optional(),
-    usagePeriod: z.string().optional(),
-    slaTarget: z.string().optional(),
-    effectiveDate: z.coerce.date(),
-    expirationDate: z.coerce.date().optional(),
-  })).optional(),
-});
 
 export const GET = withApi(
   {
