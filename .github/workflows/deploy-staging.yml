@@ -64,8 +64,10 @@ jobs:
       - uses: ./.github/actions/setup-monorepo
       - name: Emergency acknowledgement gate (manual dispatch only)
         if: github.event_name == 'workflow_dispatch'
+        env:
+          EMERGENCY_ACK_INPUT: ${{ github.event.inputs.emergency_ack }}
         run: |
-          if [ "${{ github.event.inputs.emergency_ack }}" != "EMERGENCY" ]; then
+          if [ "$EMERGENCY_ACK_INPUT" != "EMERGENCY" ]; then
             echo "Manual runs of this workflow are emergency-only. Use gitops-deploy.yml for canonical staging deployment."
             exit 1
           fi
@@ -135,8 +137,9 @@ jobs:
         env:
           # Do not interpolate secrets into generated shell source.
           STAGING_DEPLOY_TARGETS_JSON: ${{ secrets.STAGING_DEPLOY_TARGETS_JSON }}
+          REQUESTED_APPS_INPUT: ${{ github.event.inputs.apps || 'all' }}
         run: |
-          REQUESTED_APPS="${{ github.event.inputs.apps || 'all' }}"
+          REQUESTED_APPS="$REQUESTED_APPS_INPUT"
           RESOLVED_JSON=$(pnpm tsx scripts/release/resolve-deploy-apps.ts --env staging --apps "$REQUESTED_APPS")
           APPROVED_APPS=$(echo "$RESOLVED_JSON" | jq -r '.approvedApps | join(",")')
 
@@ -248,7 +251,9 @@ jobs:
           exit 1
 
       - name: Run smoke tests
-        run: pnpm tsx scripts/release/run-smoke.ts --env staging --apps "${{ github.event.inputs.apps || 'all' }}"
+        env:
+          REQUESTED_APPS_INPUT: ${{ github.event.inputs.apps || 'all' }}
+        run: pnpm tsx scripts/release/run-smoke.ts --env staging --apps "$REQUESTED_APPS_INPUT"
 
       - name: Ingest GitHub Actions CI evidence
         env:

@@ -115,6 +115,22 @@ describe('RELEASE_ATTESTATION_REQUIRED_001 — Release Attestation on Deploy', (
     expect(staging).not.toContain('[ -n "${{ secrets.STAGING_DEPLOY_TARGETS_JSON }}" ]')
   })
 
+  it('RELEASE_ATTESTATION_REQUIRED_001: dispatch inputs cannot inject workflow shell source', () => {
+    const production = readContent('.github/workflows/deploy-production.yml')
+    const staging = readContent('.github/workflows/deploy-staging.yml')
+    // GitHub expressions inside run: are evaluated before bash parses them.
+    // Quoting an expression does not prevent shell command substitution.
+    for (const workflow of [production, staging]) {
+      const scripts = [...workflow.matchAll(/^\\s*run:\\s*\\|\\s*\\n((?: {10,}.*\\n)*)/gm)]
+        .map(match => match[1]).join('\\n')
+      expect(scripts).not.toMatch(/\\$\\{\\{\\s*github\\.event\\.inputs\\./)
+      expect(scripts).not.toMatch(/\\$\\{\\{\\s*(?:steps\\.resolve|needs\\.verify-artifact)\\.outputs\\.approved_apps/)
+    }
+    expect(production).toContain('STAGING_RUN_ID_INPUT: ${{ github.event.inputs.staging_run_id }}')
+    expect(production).toContain('REQUESTED_APPS_INPUT: ${{ github.event.inputs.apps || \'all\' }}')
+    expect(staging).toContain('EMERGENCY_ACK_INPUT: ${{ github.event.inputs.emergency_ack }}')
+  })
+
   // 3. The same exact verified attestation must survive production promotion
   it('RELEASE_ATTESTATION_REQUIRED_001: deploy workflows upload attestation artifact', () => {
     const workflowDir = join(ROOT, '.github', 'workflows')

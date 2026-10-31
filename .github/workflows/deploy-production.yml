@@ -105,16 +105,20 @@ jobs:
         id: resolve
         env:
           GH_TOKEN: ${{ github.token }}
+          REQUESTED_APPS_INPUT: ${{ github.event.inputs.apps || 'all' }}
+          ZONGA_OVERRIDE_INPUT: ${{ github.event.inputs.zonga_prod_override || 'false' }}
+          STAGING_RUN_ID_INPUT: ${{ github.event.inputs.staging_run_id }}
         run: |
           set -euo pipefail
 
-          REQUESTED_APPS="${{ github.event.inputs.apps || 'all' }}"
-          ZONGA_OVERRIDE="${{ github.event.inputs.zonga_prod_override || 'false' }}"
+          # Dispatch inputs are untrusted data, not executable shell source.
+          REQUESTED_APPS="$REQUESTED_APPS_INPUT"
+          ZONGA_OVERRIDE="$ZONGA_OVERRIDE_INPUT"
           RESOLVED_JSON=$(pnpm tsx scripts/release/resolve-deploy-apps.ts --env production --apps "$REQUESTED_APPS" --zonga-override "$ZONGA_OVERRIDE")
           APPROVED_APPS=$(echo "$RESOLVED_JSON" | jq -r '.approvedApps | join(",")')
           echo "approved_apps=$APPROVED_APPS" >> "$GITHUB_OUTPUT"
 
-          SOURCE_RUN_ID="${{ github.event.inputs.staging_run_id }}"
+          SOURCE_RUN_ID="$STAGING_RUN_ID_INPUT"
           if [ -z "$SOURCE_RUN_ID" ]; then
             SOURCE_RUN_ID=$(gh run list --workflow deploy-staging.yml --branch main --status success --limit 1 --json databaseId --jq '.[0].databaseId')
           fi
@@ -148,6 +152,8 @@ jobs:
           gh run download "${{ steps.resolve.outputs.source_run_id }}" --name staging-build-artifacts --dir ./staging-artifacts
 
       - name: Parse artifact manifest and apply app policy filter
+        env:
+          APPROVED_APPS: ${{ steps.resolve.outputs.approved_apps }}
         run: |
           set -euo pipefail
           test -f staging-artifacts/artifact-manifest.json
@@ -155,7 +161,7 @@ jobs:
           jq . staging-artifacts/artifact-manifest.json >/dev/null
 
           # Ensure manifest targets exist and intersect with approved production apps.
-          APPROVED='${{ steps.resolve.outputs.approved_apps }}'
+          APPROVED="$APPROVED_APPS"
           jq --arg approved "$APPROVED" '
             .deployTargets = (
               (.deployTargets // [])
@@ -287,10 +293,13 @@ jobs:
           echo "✅ Resource group nzila-canada-prod-rg: ready"
 
       - name: Transactional production promotion
+        env:
+          APPROVED_APPS: ${{ needs.verify-artifact.outputs.approved_apps }}
+          PRODUCTION_DEPLOY_TARGETS_JSON: ${{ secrets.PRODUCTION_DEPLOY_TARGETS_JSON }}
         run: |
           set -euo pipefail
 
-          APPROVED='${{ needs.verify-artifact.outputs.approved_apps }}'
+          APPROVED="$APPROVED_APPS"
           jq --arg approved "$APPROVED" '
             .deployTargets = (
               (.deployTargets // [])
@@ -328,11 +337,10 @@ jobs:
             --health-delay-ms 5000 \
             --health-timeout-ms 20000 \
             --evidence-out ops/deploy-evidence/production-${{ github.run_id }}.json
-        env:
-          PRODUCTION_DEPLOY_TARGETS_JSON: ${{ secrets.PRODUCTION_DEPLOY_TARGETS_JSON }}
-
       - name: Post-deploy smoke tests
-        run: pnpm tsx scripts/release/run-smoke.ts --env production --apps "${{ needs.verify-artifact.outputs.approved_apps }}"
+        env:
+          APPROVED_APPS: ${{ needs.verify-artifact.outputs.approved_apps }}
+        run: pnpm tsx scripts/release/run-smoke.ts --env production --apps "$APPROVED_APPS"
 
       - name: Ingest GitHub Actions CI evidence
         env:
@@ -345,13 +353,15 @@ jobs:
         run: pnpm exec tsx scripts/proof/ingest-azure-runtime.ts
 
       - name: Record governance snapshot + release manifest
+        env:
+          APPROVED_APPS: ${{ needs.verify-artifact.outputs.approved_apps }}
         run: |
           set -euo pipefail
           mkdir -p ops/governance-snapshots ops/releases
 
           TAG_NAME="${GITHUB_REF#refs/tags/}"
           RELEASE_DATE=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)
-          APPROVED='${{ needs.verify-artifact.outputs.approved_apps }}'
+          APPROVED="$APPROVED_APPS"
 
           cat > ops/governance-snapshots/governance-snapshot-prod-$(date -u +%Y-%m-%d).json <<EOF
           {
