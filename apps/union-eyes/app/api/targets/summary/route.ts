@@ -3,23 +3,10 @@ import { eq, and, desc } from 'drizzle-orm';
 import { withApi, ApiError } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { computeKpiHealth } from '@/lib/kpi/health';
 
 export const dynamic = 'force-dynamic';
 
-/**
- * Determine KPI health by comparing currentValue against thresholds.
- */
-function computeHealth(
-  currentValue: number | null,
-  target: number | null,
-  warning: number | null,
-  critical: number | null,
-): 'on_track' | 'at_risk' | 'critical' | 'no_data' {
-  if (currentValue == null || target == null) return 'no_data';
-  if (critical != null && currentValue <= critical) return 'critical';
-  if (warning != null && currentValue <= warning) return 'at_risk';
-  return 'on_track';
-}
 
 export const GET = withApi(
   { auth: { minRole: 'officer' }, requireOrg: true },
@@ -56,7 +43,7 @@ export const GET = withApi(
         const warningNum = cfg.warningThreshold ? parseFloat(String(cfg.warningThreshold)) : null;
         const criticalNum = cfg.criticalThreshold ? parseFloat(String(cfg.criticalThreshold)) : null;
 
-        const health = computeHealth(currentValue, targetNum, warningNum, criticalNum);
+        const health = computeKpiHealth(currentValue, targetNum, warningNum, criticalNum);
         const progress =
           currentValue != null && targetNum != null && targetNum !== 0
             ? Math.round((currentValue / targetNum) * 100)

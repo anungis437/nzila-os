@@ -104,9 +104,11 @@ export interface LeadershipDashboardPayload {
   }>;
   compliance: {
     metrics: {
-      deadlineAdherence: number;
+      /** Null when no alert has been resolved: there is nothing to measure. */
+      deadlineAdherence: number | null;
       avgResponseTime: number;
-      documentationRate: number;
+      /** Null when no alert exists. */
+      documentationRate: number | null;
       openAlerts: number;
     };
     alerts: Array<{
@@ -344,9 +346,9 @@ export function buildLeadershipDashboard(
     stewards,
     compliance: {
       metrics: {
-        deadlineAdherence: resolvedAlerts.length > 0 ? Math.round((resolvedWithinThreshold / resolvedAlerts.length) * 100) : 100,
+        deadlineAdherence: resolvedAlerts.length > 0 ? Math.round((resolvedWithinThreshold / resolvedAlerts.length) * 100) : null,
         avgResponseTime: averageRounded(responseTimes),
-        documentationRate: alertRows.length > 0 ? Math.round((documentedAlertCount / alertRows.length) * 100) : 100,
+        documentationRate: alertRows.length > 0 ? Math.round((documentedAlertCount / alertRows.length) * 100) : null,
         openAlerts: openAlerts.length,
       },
       alerts: openAlerts

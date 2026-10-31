@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 415,
- "partial": 88,
- "outstanding": 362,
- "accountedFor": 362,
+ "corrected": 419,
+ "partial": 92,
+ "outstanding": 358,
+ "accountedFor": 358,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -245,10 +245,10 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 83,
+   "defects": 79,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 58,
+    "MEDIUM": 54,
     "LOW": 23
    },
    "namedRoutes": 11,
@@ -256,12 +256,12 @@
    "tranches": {
     "0B.1": 4,
     "0B.2": 1,
-    "0B.3": 3,
-    "0B.4": 6,
-    "0B.5": 14,
+    "0B.3": 2,
+    "0B.4": 5,
+    "0B.5": 13,
     "0B.6": 14,
     "0B.7": 11,
-    "0B.8": 11,
+    "0B.8": 10,
     "0B.9": 1,
     "0B.10": 6,
     "0B.11": 5,
@@ -1509,10 +1509,6 @@
     "severity": "HIGH"
    },
    {
-    "id": "DEF-0B3-TENTATIVE-AGREEMENT-REFERENCES-UNVERIFIED",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B3-METRICS-ORG-RESOLVED-TWICE",
     "severity": "MEDIUM"
    },
@@ -1522,7 +1518,8 @@
    },
    {
     "id": "DEF-0B4-CALENDAR-EVENT-CALENDAR-ID-UNVERIFIED",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B4-CBA-INTEL-UNREVIEWED-ROWS-SERVED",
@@ -1537,15 +1534,7 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B4-OHS-FILINGS-OWNER-FILTER-INCONSISTENT",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B4-CLAUSES-COMPARE-PLACEHOLDER-RECOMMENDATIONS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B5-OHS-OWNER-COLUMN-WORKERID-ABSENT",
     "severity": "MEDIUM"
    },
    {
@@ -1626,7 +1615,8 @@
    },
    {
     "id": "DEF-0B6-EMP-CONTACT-PRIMARY-NOT-EXCLUSIVE",
-    "severity": "LOW"
+    "severity": "LOW",
+    "partial": true
    },
    {
     "id": "DEF-0B6-CMP-ALERT-AND-REPORT-TABLES-HAVE-NO-WRITER",
@@ -1638,7 +1628,8 @@
    },
    {
     "id": "DEF-0B6-CMP-LEADERSHIP-COMPLIANCE-DEFAULTS-TO-100-AND-TRUNCATES",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B6-SYS-CONTACT-ACKNOWLEDGES-SUBMISSION-WITH-NOTHING-STORED",
@@ -1716,10 +1707,6 @@
    },
    {
     "id": "DEF-0B8-HS-DASHBOARD-METRICS-DERIVED-FROM-RECORD-CREATION-AND-DEFAULTS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B8-HS-UNMEASURED-VALUES-COERCED-TO-ZERO",
     "severity": "MEDIUM"
    },
    {
@@ -1803,7 +1790,8 @@
    },
    {
     "id": "DEF-0B12-PLT-KPI-HEALTH-TREATS-A-LOWER-FIGURE-AS-WORSE-FOR-EVERY-TARGET",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B12-PLT-KPI-CALCULATION-AND-ALERT-FLAG-ARE-STORED-AND-APPLIED-BY-NO-CODE",

@@ -70,7 +70,8 @@ export const GET = withApi(
         date: row.finding_date,
         location: (row.location as string) || '',
         inspector: (row.lead_inspector_name as string) || '',
-        complianceRate: row.score_percentage != null ? Number(row.score_percentage) : 0,
+        // An inspection with no recorded score has no compliance rate; it is not 0%.
+        complianceRate: row.score_percentage != null ? Number(row.score_percentage) : null,
         passCount,
         failCount,
         naCount,

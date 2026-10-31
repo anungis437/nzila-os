@@ -75,6 +75,13 @@ export const POST = withOrganizationAuth(async (request, context) => {
 
     // The contact and its audit record commit together.
     const contact = await withRLSContext({ organizationId }, async (tx) => {
+      // An employer has one primary contact: naming a new one demotes the previous one in the same transaction.
+      if (data.isPrimary) {
+        await tx
+          .update(employerContacts)
+          .set({ isPrimary: false, updatedAt: new Date() })
+          .where(and(eq(employerContacts.organizationId, organizationId), eq(employerContacts.employerId, data.employerId), eq(employerContacts.isPrimary, true)))
+      }
       const [row] = await tx
         .insert(employerContacts)
         .values({

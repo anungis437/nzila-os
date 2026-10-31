@@ -27,7 +27,7 @@ export interface InspectionFinding {
   date: Date;
   location: string;
   inspector: string;
-  complianceRate: number;
+  complianceRate: number | null;
   passCount: number;
   failCount: number;
   naCount: number;
@@ -44,7 +44,7 @@ export function InspectionFindingsCard({
   finding,
   onViewDetails
 }: InspectionFindingsCardProps) {
-  const isGoodCompliance = finding.complianceRate >= 90;
+  const isGoodCompliance = finding.complianceRate !== null && finding.complianceRate >= 90;
   const hasCriticalIssues = finding.criticalIssues > 0;
 
   return (
@@ -77,11 +77,11 @@ export function InspectionFindingsCard({
               "font-bold",
               isGoodCompliance ? "text-green-600" : "text-orange-600"
             )}>
-              {finding.complianceRate}%
+              {finding.complianceRate === null ? "—" : `${finding.complianceRate}%`}
             </span>
           </div>
           <Progress 
-            value={finding.complianceRate} 
+            value={finding.complianceRate ?? 0} 
             className={cn(
               "h-2",
               isGoodCompliance ? "bg-green-100" : "bg-orange-100"
