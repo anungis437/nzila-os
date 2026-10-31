@@ -3706,10 +3706,14 @@
       "batch": "B27-F05-F06-COMMERCIAL-BOUNDS-AUDIT-AND-RETENTION",
       "files": [
         "apps/union-eyes/app/api/workbook/[id]/memory-holders/route.ts",
-        "apps/union-eyes/lib/api/__tests__/f06-controls.contract.test.ts"
+        "apps/union-eyes/lib/api/__tests__/f06-controls.contract.test.ts",
+        "apps/union-eyes/app/api/workbook/[id]/memory-holders/[holderId]/route.ts",
+        "apps/union-eyes/lib/public-intake/guard.ts",
+        "apps/union-eyes/lib/public-intake/__tests__/guard.test.ts",
+        "docs/union-eyes/convergence/remediation/ue-bearer-stream-and-memory-holder-20261031.md"
       ],
-      "explanation": "The collection reads and writes run through the public-intake guard (rate limit; body cap on writes). Claimed-workbook writes were already audited.",
-      "remaining": "The per-holder item route is not yet behind the guard, there is no per-workbook holder cap, and unclaimed-workbook reads are not audited."
+      "explanation": "The collection GET/POST and item PATCH/DELETE now use the public-intake capability limiter before database access. PATCH/POST enforce an actual streamed byte cap, refusing oversized chunked bodies before full buffering. Claimed-workbook writes already invoke the claimed-write audit. Source patches and regression tests committed; exact-HEAD execution and runtime acceptance pending.",
+      "remaining": "Per-workbook holder count ceiling and unclaimed-workbook read audit are not implemented. Bearer-id security and deployment trust boundary need independent validation; exact-HEAD behavioral, native PostgreSQL, HTTP/browser and staging acceptance are outstanding. Do not mark CLOSED."
     },
     "DEF-0B5-COMMS-SUBSCRIBER-EMAILS-READ-BY-ANY-MEMBER": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
