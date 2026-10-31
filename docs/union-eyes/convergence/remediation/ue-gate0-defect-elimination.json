@@ -4343,8 +4343,8 @@
         "apps/union-eyes/app/api/cba-intelligence/sources/route.ts",
         "apps/union-eyes/lib/api/__tests__/f08-b41-outbound.contract.test.ts"
       ],
-      "explanation": "A shared guard refuses non-http(s) schemes, credentials in the address, localhost and internal names, private, loopback, link-local, metadata and reserved IPv4 and IPv6 literals (including IPv4-mapped forms). The base adapter checks every address before fetching, follows redirects by hand (three at most) re-checking each hop, and refuses a source larger than 10 million characters; every ingestion adapter fetches through it, and a source address is checked when it is saved.",
-      "remaining": "The guard reads the address as written and does not resolve DNS, so a public name that resolves to a private address is not caught; that needs an egress policy or a resolving fetch. The body is still read whole before the size check."
+      "explanation": "A shared guard refuses non-http(s) schemes, credentials in the address, localhost and internal names, private, loopback, link-local, metadata and reserved IPv4 and IPv6 literals (including IPv4-mapped and transition forms). The base adapter checks every address before fetching, follows redirects by hand (three at most) re-checking each hop, and now enforces a 10,000,000-byte bound while streaming the body rather than after reading it whole. Every ingestion adapter fetches through it, and a source address is checked when saved. Additional reserved-address and streaming regression cases were committed at 986ea8ce, 623f638e; exact-HEAD executable qualification is pending.",
+      "remaining": "The guard reads the address as written and does not resolve DNS, so a public name resolving to a private address remains an SSRF risk. DNS resolution, connection pinning and verified egress restrictions are required; do not mark this defect CLOSED. Exact-HEAD tests, native and HTTP/browser acceptance remain required."
     }
   }
 }
