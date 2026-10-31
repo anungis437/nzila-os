@@ -103,6 +103,26 @@ describe('P0 Postgres Trust Ledger CAS adapter',()=>{
     expect(db.commits).toBe(0)
   })
 
+  it('rejects unhashed metadata and unrecognized fields in durable trust receipts', async () => {
+    const valid = auditRecord(LEDGER_GENESIS_HASH, 1)
+    for (const altered of [
+      { ...valid, traceId: 'unhashed-trace' },
+      { ...valid, spanId: 'unhashed-span' },
+      { ...valid, unrecognized: 'not-covered-by-audit-hash' },
+    ]) {
+      const persisted = new PostgresAtomicTrustLedgerStore(fake({
+        revision: 1, hash: valid.hash, entries: [altered],
+      }))
+      await expect(persisted.readSnapshot(ORG)).rejects.toThrow('malformed')
+      const db = fake()
+      const store = new PostgresAtomicTrustLedgerStore(db)
+      await expect(store.compareAndAppend(
+        ORG, { revision: 0, headHash: LEDGER_GENESIS_HASH }, altered,
+      )).rejects.toBeInstanceOf(LedgerConflictError)
+      expect(db.commits).toBe(0)
+    }
+  })
+
   it('verifies every stored audit hash before returning a PostgreSQL snapshot', async () => {
     const entry = auditRecord(LEDGER_GENESIS_HASH, 1)
     const store = new PostgresAtomicTrustLedgerStore(fake({

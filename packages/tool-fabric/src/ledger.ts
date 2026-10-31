@@ -15,12 +15,13 @@
  */
 import { createHash, randomUUID } from 'node:crypto'
 import { z } from 'zod'
-import { auditEntrySchema, computeAuditHash, verifyChain, type AuditEntry, type AuditStore } from '@nzila/audit'
+import { computeAuditHash, verifyChain, type AuditEntry, type AuditStore } from '@nzila/audit'
 
 import {
   DenyOnlyAtomicTrustLedgerStore,
   LedgerDuplicateError,
   LedgerStoreUnavailableError,
+  trustLedgerAuditEntrySchema,
   type AtomicTrustLedgerStore,
   type LedgerSnapshot,
   type TrustLedgerHeadWitness,
@@ -272,7 +273,7 @@ export class ToolTrustLedger {
     const entries = snapshot.entries
     const ids = new Set<string>()
     for (const entry of entries) {
-      if (!auditEntrySchema.safeParse(entry).success || entry.orgId !== TOOL_TRUST_LEDGER_ORG || ids.has(entry.id)) {
+      if (!trustLedgerAuditEntrySchema.safeParse(entry).success || entry.orgId !== TOOL_TRUST_LEDGER_ORG || ids.has(entry.id)) {
         throw new LedgerIntegrityError('Malformed, duplicate or cross-stream audit entry')
       }
       ids.add(entry.id)

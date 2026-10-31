@@ -2,6 +2,17 @@ import { auditEntrySchema, verifyChain, type AuditEntry } from '@nzila/audit'
 
 export const LEDGER_GENESIS_HASH = '0'.repeat(64)
 
+/**
+ * Trust receipts may not carry unrecognized or unhashed top-level metadata.
+ * The generic audit schema accepts trace/span identifiers for observability,
+ * but its v2 hash does not cover them. Persisting those fields in an
+ * authoritative trust receipt would allow a changed record to verify.
+ */
+export const trustLedgerAuditEntrySchema = auditEntrySchema.strict().refine(
+  entry => entry.traceId === undefined && entry.spanId === undefined,
+  { message: 'Trust ledger receipts cannot carry unhashed trace/span metadata' },
+)
+
 export interface LedgerHead {
   /** Monotonic event count for this stream, not a separately fetched count. */
   readonly revision: number
@@ -121,7 +132,7 @@ export class InMemoryAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
     ) {
       throw new LedgerConflictError('Entry does not extend the expected trust ledger head')
     }
-    if (!auditEntrySchema.safeParse(entry).success || !verifyChain([...entries, entry], { requireFullCoverage: true }).valid) {
+    if (!trustLedgerAuditEntrySchema.safeParse(entry).success || !verifyChain([...entries, entry], { requireFullCoverage: true }).valid) {
       throw new LedgerConflictError('Entry has invalid audit integrity')
     }
     entries.push(structuredClone(entry))

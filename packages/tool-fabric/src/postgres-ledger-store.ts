@@ -11,9 +11,10 @@
  * mandatory (ToolTrustLedger); this DB is not its own trust anchor.
  */
 import type { AuditEntry } from '@nzila/audit'
-import { auditEntrySchema, computeAuditHash, verifyChain } from '@nzila/audit'
+import { computeAuditHash, verifyChain } from '@nzila/audit'
 import {
   LEDGER_GENESIS_HASH, LedgerConflictError, LedgerDuplicateError,
+  trustLedgerAuditEntrySchema,
   LedgerStoreUnavailableError, type AtomicTrustLedgerStore,
   type LedgerHead, type LedgerSnapshot,
 } from './ledger-store'
@@ -64,7 +65,7 @@ function parseAuditEntry(row: Record<string, unknown>): AuditEntry {
   } catch {
     throw new LedgerStoreUnavailableError('Persistent audit entry could not be decoded')
   }
-  const result = auditEntrySchema.safeParse(value)
+  const result = trustLedgerAuditEntrySchema.safeParse(value)
   if (!result.success) throw new LedgerStoreUnavailableError('Persistent audit entry is malformed')
   return result.data
 }
@@ -141,7 +142,7 @@ export class PostgresAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
 
   async compareAndAppend(orgId: string, expected: LedgerHead, entry: AuditEntry): Promise<LedgerHead> {
     assertStream(orgId)
-    if (!auditEntrySchema.safeParse(entry).success || entry.orgId !== orgId ||
+    if (!trustLedgerAuditEntrySchema.safeParse(entry).success || entry.orgId !== orgId ||
         entry.prevHash !== expected.headHash ||
         entry.payload.seq !== expected.revision + 1 ||
         !/^[0-9a-f]{64}$/.test(entry.hash ?? '')) {
