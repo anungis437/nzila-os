@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocale } from 'next-intl';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import { trackEvent } from '@/lib/telemetry';
@@ -171,27 +171,36 @@ export default function Contact() {
   const locale = useLocale() as Locale;
   const copy = contactCopy[locale] ?? contactCopy['en-CA'];
 
-  const [formData, setFormData] = useState(() => {
-    const params = typeof window !== 'undefined'
-      ? new URLSearchParams(window.location.search)
-      : null;
-
-    return {
-      name: '',
-      email: '',
-      company: '',
-      vertical: '',
-      message: '',
-      source: params?.get('interest') === 'union-eyes' ? 'union_eyes_pilot'
-        : params?.get('interest') === 'civic' ? 'civic_briefing'
-        : params?.get('interest') === 'portfolio' ? 'portfolio_inquiry'
-        : 'contact_page',
-      utmSource: params?.get('utm_source') ?? '',
-      utmMedium: params?.get('utm_medium') ?? '',
-      utmCampaign: params?.get('utm_campaign') ?? '',
-      website: '',
-    };
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    company: '',
+    vertical: '',
+    message: '',
+    source: 'contact_page',
+    utmSource: '',
+    utmMedium: '',
+    utmCampaign: '',
+    website: '',
   });
+
+  // Read attribution after hydration so server and client render the same
+  // initial form. The only accepted product intents are enumerated here.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const intent = params.get('interest');
+    const source = intent === 'union-eyes' ? 'union_eyes_pilot'
+      : intent === 'civic' ? 'civic_briefing'
+      : intent === 'portfolio' ? 'portfolio_inquiry'
+      : 'contact_page';
+    setFormData((previous) => ({
+      ...previous,
+      source,
+      utmSource: params.get('utm_source') ?? '',
+      utmMedium: params.get('utm_medium') ?? '',
+      utmCampaign: params.get('utm_campaign') ?? '',
+    }));
+  }, []);
 
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
