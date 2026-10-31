@@ -8,6 +8,7 @@ import { logger } from '@/lib/logger'
 import { questionById, QUESTION_BANK_VERSION } from '@/lib/icra/questions'
 import { buildAnswer } from '@/lib/icra/scoring'
 import { withSystemContext } from '@/lib/db/with-rls-context'
+import { hasRecordedConsent } from '@/lib/icra/consent'
 import { checkRateLimit } from '@/lib/rate-limiter'
 import {
   extractCapabilityToken,
@@ -90,6 +91,9 @@ export async function POST(request: Request, { params }: RouteContext) {
 
       if (assessment.status !== 'in_progress') {
         return NextResponse.json({ error: 'Assessment is not accepting answers' }, { status: 409 })
+      }
+      if (!hasRecordedConsent(assessment.consent)) {
+        return NextResponse.json({ error: 'Consent has not been recorded for this assessment' }, { status: 409 })
       }
 
       await tx

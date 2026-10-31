@@ -70,6 +70,7 @@ describe('icra/[assessmentId]/answer route', () => {
                 {
                   id: 'a1',
                   status: 'in_progress',
+                  consent: { acceptedAt: '2026-01-01T00:00:00.000Z', doctrineVersion: '1.0.0', acknowledgedAntiSurveillance: true, acknowledgedDataHandling: true, acknowledgedExplainability: true },
                   capabilityTokenHash: TOKEN_HASH,
                   capabilityTokenExpiresAt: FUTURE,
                 },
@@ -82,6 +83,23 @@ describe('icra/[assessmentId]/answer route', () => {
       };
       return fn(tx);
     });
+  });
+
+  it('refuses to store an answer for an assessment with no recorded consent', async () => {
+    m.withSystemContext.mockImplementation(async (fn: (tx: any) => Promise<unknown>) => {
+      const insert = vi.fn(() => ({ values: vi.fn(async () => ({})) }));
+      const tx = {
+        select: vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => [{ id: 'a1', status: 'in_progress', consent: null, capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }]) })) })) })),
+        delete: vi.fn(() => ({ where: vi.fn(async () => ({})) })),
+        insert,
+      };
+      const result = await fn(tx);
+      expect(insert).not.toHaveBeenCalled();
+      return result;
+    });
+    const { POST } = await loadRoute();
+    const response = await POST(req({ questionId: 'q1', rawValue: 'yes' }), { params: Promise.resolve({ assessmentId: A1 }) });
+    expect(response.status).toBe(409);
   });
 
   it('returns 400 for invalid answer payload', async () => {

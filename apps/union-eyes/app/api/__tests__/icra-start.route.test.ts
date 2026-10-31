@@ -118,10 +118,26 @@ describe('icra/start route', () => {
     const response = await POST(new NextRequest('http://localhost/api/icra/start', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ locale: 'en-CA' }),
+      body: JSON.stringify({
+        locale: 'en-CA',
+        consent: { acknowledgedAntiSurveillance: true, acknowledgedDataHandling: true, acknowledgedExplainability: true },
+      }),
     }));
 
     expect(response.status).toBe(500);
+  });
+
+  it('POST refuses to start without all three acknowledgements and stamps the consent itself', async () => {
+    const { POST } = await loadRoute();
+    const post = (consent: unknown) => POST(new NextRequest('http://localhost/api/icra/start', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ locale: 'en-CA', consent }),
+    }));
+
+    expect((await post(undefined)).status).toBe(400);
+    expect((await post({ acknowledgedAntiSurveillance: true, acknowledgedDataHandling: true, acknowledgedExplainability: false })).status).toBe(400);
+    expect(m.withSystemContext).not.toHaveBeenCalled();
   });
 
   it('GET returns 400 when assessmentId is missing', async () => {

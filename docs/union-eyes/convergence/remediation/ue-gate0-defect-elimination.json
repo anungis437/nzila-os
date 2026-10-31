@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 350,
+    "implementedPendingQualification": 353,
     "partial": 68,
     "qualificationVerified": 0,
-    "unresolved": 427,
+    "unresolved": 424,
     "externalBlockers": 0
   },
   "batches": [
@@ -420,6 +420,15 @@
       "newlyImplemented": 2,
       "outstandingAfter": 427,
       "partial": 2,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B46-F12-ICRA-CONSENT-AND-REQUIRED-COVERAGE",
+      "family": "F12: an ICRA assessment exists only with server-stamped consent and is scored only from the required answers",
+      "outstandingBefore": 427,
+      "newlyImplemented": 3,
+      "outstandingAfter": 424,
+      "partial": 0,
       "evidenceCommit": null
     }
   ],
@@ -4541,6 +4550,43 @@
         "apps/union-eyes/lib/clause-library/__tests__/b45-clause-body.test.ts"
       ],
       "explanation": "A comparison no longer increments comparisonCount on rows another organization owns: it is a read of those rows and writes only the usage counter of the caller own clauses. The audit stays with the comparing organization."
+    },
+    "DEF-0B8-ICRA-ONE-SHOT-SUBMIT-STORES-CLIENT-SUPPLIED-CONSENT-AND-UNBOUNDED-BODY": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B46-F12-ICRA-CONSENT-AND-REQUIRED-COVERAGE",
+      "files": [
+        "apps/union-eyes/lib/icra/consent.ts",
+        "apps/union-eyes/app/api/icra/submit/route.ts",
+        "apps/union-eyes/app/api/__tests__/icra-submit.route.test.ts",
+        "apps/union-eyes/lib/icra/__tests__/b46-consent.test.ts"
+      ],
+      "explanation": "The one-shot submit builds the stored consent on the server from the three acknowledgements (time and doctrine version stamped here; client time, version and extra keys dropped), accepts only the en-CA and fr-CA locales, reads the body as text under a 64 KB cap (413 beyond), and refuses organization-context keys that are not short lower-case identifiers or exceed 40. Unit and source-contract tests added; existing route tests still pass."
+    },
+    "DEF-0B8-ICRA-STEPWISE-FLOW-NEVER-REQUIRES-CONSENT": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B46-F12-ICRA-CONSENT-AND-REQUIRED-COVERAGE",
+      "files": [
+        "apps/union-eyes/lib/icra/consent.ts",
+        "apps/union-eyes/app/api/icra/start/route.ts",
+        "apps/union-eyes/app/api/icra/[assessmentId]/answer/route.ts",
+        "apps/union-eyes/app/api/icra/[assessmentId]/submit/route.ts",
+        "apps/union-eyes/app/api/__tests__/icra-start.route.test.ts",
+        "apps/union-eyes/app/api/__tests__/icra-assessmentId-answer.route.test.ts",
+        "apps/union-eyes/app/api/__tests__/icra-assessmentId-submit.route.test.ts",
+        "apps/union-eyes/lib/icra/__tests__/b46-consent.test.ts"
+      ],
+      "explanation": "The stepwise flow requires all three acknowledgements to start (400 otherwise, consent stamped by the server), the answer route refuses to store anything for an assessment with no recorded consent (409), and so does the stepwise submit. No application caller of these routes existed. Existing tests were adapted: assessment fixtures now carry a recorded consent, the start 500 test sends consent, and the submit tests mock the coverage helper (disclosed); new tests cover the refusals."
+    },
+    "DEF-0B8-ICRA-STEPWISE-SUBMIT-SCORES-ANY-NON-EMPTY-ANSWER-SET": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B46-F12-ICRA-CONSENT-AND-REQUIRED-COVERAGE",
+      "files": [
+        "apps/union-eyes/lib/icra/stepwise-coverage.ts",
+        "apps/union-eyes/app/api/icra/[assessmentId]/submit/route.ts",
+        "apps/union-eyes/app/api/__tests__/icra-assessmentId-submit.route.test.ts",
+        "apps/union-eyes/lib/icra/__tests__/b46-consent.test.ts"
+      ],
+      "explanation": "The stepwise submit scores nothing unless every question the routing engine requires for an unclassified organization has an answer (400 with the missing count otherwise), using the same routed-submission validator as the live flow. Proven against the real question bank: one answer is refused, a full set is accepted."
     }
   }
 }

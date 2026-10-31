@@ -13,6 +13,7 @@ const m = vi.hoisted(() => ({
   computeProfile: vi.fn(),
   logger: { info: vi.fn(), error: vi.fn() },
   eq: vi.fn(),
+  missingRequiredAnswerIds: vi.fn(),
 }));
 
 // The rate limiter and body cap are proven in lib/public-intake; here the guard passes the request through.
@@ -31,6 +32,7 @@ vi.mock('@/lib/public-intake/guard', () => ({
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
 vi.mock('@/lib/icra/scoring', () => ({ computeProfile: m.computeProfile }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+vi.mock('@/lib/icra/stepwise-coverage', () => ({ missingRequiredAnswerIds: m.missingRequiredAnswerIds }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return { ...actual, eq: m.eq };
@@ -58,6 +60,7 @@ describe('icra/[assessmentId]/submit route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.eq.mockReturnValue('eq');
+    m.missingRequiredAnswerIds.mockReturnValue([]);
     m.computeProfile.mockReturnValue({
       maturityBand: { id: 'developing' },
       composite: 62.5,
@@ -93,7 +96,7 @@ describe('icra/[assessmentId]/submit route', () => {
           from: vi.fn(() => ({
             where: vi.fn(() => ({
               limit: vi.fn(async () => [
-                { id: 'a1', status: 'in_progress', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE },
+                { id: 'a1', status: 'in_progress', consent: { acceptedAt: '2026-01-01T00:00:00.000Z', doctrineVersion: '1.0.0', acknowledgedAntiSurveillance: true, acknowledgedDataHandling: true, acknowledgedExplainability: true }, capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE },
               ]),
             })),
           })),
@@ -118,7 +121,7 @@ describe('icra/[assessmentId]/submit route', () => {
               if (selectCall === 1) {
                 return {
                   limit: vi.fn(async () => [
-                    { id: 'a1', status: 'in_progress', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE },
+                    { id: 'a1', status: 'in_progress', consent: { acceptedAt: '2026-01-01T00:00:00.000Z', doctrineVersion: '1.0.0', acknowledgedAntiSurveillance: true, acknowledgedDataHandling: true, acknowledgedExplainability: true }, capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE },
                   ]),
                 };
               }
@@ -146,7 +149,7 @@ describe('icra/[assessmentId]/submit route', () => {
               if (selectCall === 1) {
                 return {
                   limit: vi.fn(async () => [
-                    { id: 'a1', status: 'in_progress', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE },
+                    { id: 'a1', status: 'in_progress', consent: { acceptedAt: '2026-01-01T00:00:00.000Z', doctrineVersion: '1.0.0', acknowledgedAntiSurveillance: true, acknowledgedDataHandling: true, acknowledgedExplainability: true }, capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE },
                   ]),
                 };
               }
