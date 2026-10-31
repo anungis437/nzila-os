@@ -3,15 +3,15 @@
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import TrackedLink from './TrackedLink';
-import { MARKETING_FACTS, platformCoverageLabel } from '@/lib/marketing-facts';
 import type { Locale } from '@/lib/locales';
 
-const CONSOLE_URL = process.env.NEXT_PUBLIC_CONSOLE_URL ?? 'http://localhost:3001';
-const UNION_EYES_URL = process.env.NEXT_PUBLIC_UNION_EYES_URL ?? 'http://localhost:3003';
+const CONSOLE_URL = process.env.NEXT_PUBLIC_CONSOLE_URL;
+const UNION_EYES_URL = process.env.NEXT_PUBLIC_UNION_EYES_URL;
 
+// Never send a production visitor to a localhost or unconfigured environment.
 const appLinks = [
-  { name: 'Console', href: CONSOLE_URL, external: true },
-  { name: 'Union Eyes', href: UNION_EYES_URL, external: true },
+  ...(CONSOLE_URL && /^https:\/\//.test(CONSOLE_URL) ? [{ name: 'Console', href: CONSOLE_URL }] : []),
+  ...(UNION_EYES_URL && /^https:\/\//.test(UNION_EYES_URL) ? [{ name: 'Union Eyes', href: UNION_EYES_URL }] : []),
 ];
 
 const footerCopy: Record<Locale, {
@@ -66,7 +66,7 @@ const footerCopy: Record<Locale, {
         ],
       },
     ],
-    blurb: 'Nzila Ventures builds organizational continuity infrastructure across {platformCoverage}.',
+    blurb: 'Nzila Ventures builds software to preserve institutional knowledge, connected decisions and accountable operations through change.',
     seriesA: 'Continuity Infrastructure',
     appsLabel: 'Apps',
     copyright: 'All rights reserved.',
@@ -116,7 +116,7 @@ const footerCopy: Record<Locale, {
         ],
       },
     ],
-    blurb: "Nzila Ventures construit une infrastructure de continuité organisationnelle dans {platformCoverage}.",
+    blurb: 'Nzila Ventures conçoit des logiciels pour préserver le savoir institutionnel, relier les décisions et soutenir des opérations responsables pendant les transitions.',
     seriesA: 'Infrastructure de continuité',
     appsLabel: 'Applications',
     copyright: 'Tous droits réservés.',
@@ -131,10 +131,6 @@ const footerCopy: Record<Locale, {
 export default function Footer() {
   const locale = useLocale() as Locale;
   const copy = footerCopy[locale] ?? footerCopy['en-CA'];
-  const platformCoverage = locale === 'fr-CA'
-    ? `plus de ${MARKETING_FACTS.verticalsLabel.replace('+', '')} secteurs sensibles a la confiance`
-    : platformCoverageLabel();
-  const blurb = copy.blurb.replace('{platformCoverage}', platformCoverage);
 
   return (
     <footer className="bg-navy text-gray-300">
@@ -149,14 +145,14 @@ export default function Footer() {
               <span className="text-2xl font-bold text-white">Nzila Ventures</span>
             </div>
             <p className="text-gray-400 mb-6 max-w-sm">
-              {blurb}
+              {copy.blurb}
             </p>
             <div className="flex items-center gap-3">
               <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-gold/20 text-gold">
                 {copy.seriesA}
               </span>
               <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-emerald/20 text-emerald">
-                Union Eyes Flagship
+                {locale === 'fr-CA' ? 'Union Eyes · Produit phare' : 'Union Eyes · Flagship'}
               </span>
             </div>
           </div>
@@ -182,8 +178,8 @@ export default function Footer() {
             </div>
           ))}
 
-          {/* Apps Column */}
-          <div>
+          {/* Configured application destinations only */}
+          {appLinks.length > 0 && <div>
             <h4 className="text-white font-semibold mb-4 text-sm tracking-wider uppercase">{copy.appsLabel}</h4>
             <ul className="space-y-3">
               {appLinks.map((link) => (
@@ -203,7 +199,7 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
+          </div>}
         </div>
       </div>
 
@@ -214,9 +210,6 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Nzila Ventures. {copy.copyright}
           </p>
           <div className="flex items-center gap-4 text-sm text-gray-500">
-            <span className="hidden lg:inline text-gray-600">
-              {MARKETING_FACTS.governedApplications} {copy.governedAppsLabel}
-            </span>
             <Link href="/legal/privacy" className="hover:text-gray-300 transition-colors">{copy.privacy}</Link>
             <span>·</span>
             <Link href="/legal/terms" className="hover:text-gray-300 transition-colors">{copy.terms}</Link>
