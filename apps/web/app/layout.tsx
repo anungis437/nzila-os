@@ -80,7 +80,7 @@ export default async function RootLayout({
         <head>
           <JsonLd />
         </head>
-        <body className={`${poppins.className} custom-scrollbar`}>
+        <body className={poppins.className}>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <a
               href="#main-content"
