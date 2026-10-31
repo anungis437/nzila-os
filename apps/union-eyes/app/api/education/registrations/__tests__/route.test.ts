@@ -25,7 +25,7 @@ vi.mock('@/db/schema', () => ({
   trainingCourses: { id: 'tc.id', organizationId: 'tc.organizationId', isActive: 'tc.isActive' },
   courseSessions: { id: 'cs.id', courseId: 'cs.courseId', organizationId: 'cs.organizationId' },
 }));
-vi.mock('drizzle-orm', () => ({ eq: m.eq, and: m.and }));
+vi.mock('drizzle-orm', () => ({ eq: m.eq, and: m.and, count: vi.fn(() => 'count') }));
 vi.mock('@/db/db', () => ({
   db: { select: (...args: unknown[]) => { m.select(...args); return { from: m.from }; } },
 }));
@@ -93,6 +93,30 @@ describe('education/registrations: self-enrollment and cross-tenant FK protectio
     await expect(beforeCreate({
       courseId: 'course-1', sessionId: 'session-1',
     }, { organizationId: 'org-real', userId: 'member' })).rejects.toMatchObject({ status: 409 });
+  });
+
+  const open = (extra: Record<string, unknown>) => {
+    m.limit.mockResolvedValueOnce([{ id: 'course-1' }]).mockResolvedValueOnce([{ id: 'session-1', ...extra }]);
+  };
+
+  it.each([
+    ['a cancelled session', { sessionStatus: 'cancelled' }],
+    ['a session whose registration has not opened', { registrationOpenDate: '2999-01-01' }],
+    ['a session whose registration has closed', { registrationCloseDate: '2000-01-01' }],
+  ])('refuses registration for %s (DEF-0B6-EDU-REGISTRATION-NO-CAPACITY-DUPLICATE-OR-SESSION-COURSE-CHECK)', async (_name, extra) => {
+    open(extra);
+    await expect(beforeCreate({ courseId: 'course-1', sessionId: 'session-1' }, { organizationId: 'org-real', userId: 'member' })).rejects.toMatchObject({ status: 409 });
+  });
+
+  it('refuses registration for a session that is full, and allows one with room', async () => {
+    open({ maxEnrollment: 2 });
+    m.where.mockReturnValueOnce({ limit: m.limit }).mockReturnValueOnce({ limit: m.limit }).mockResolvedValueOnce([{ registered: 2 }]);
+    await expect(beforeCreate({ courseId: 'course-1', sessionId: 'session-1' }, { organizationId: 'org-real', userId: 'member' })).rejects.toMatchObject({ status: 409 });
+
+    open({ maxEnrollment: 2 });
+    m.where.mockReturnValueOnce({ limit: m.limit }).mockReturnValueOnce({ limit: m.limit }).mockResolvedValueOnce([{ registered: 1 }]).mockReturnValueOnce({ limit: m.limit });
+    m.limit.mockResolvedValueOnce([]);
+    await expect(beforeCreate({ courseId: 'course-1', sessionId: 'session-1' }, { organizationId: 'org-real', userId: 'member' })).resolves.toMatchObject({ registrationStatus: 'registered' });
   });
 
   it('allows enrollment when both foreign keys belong to the caller organization', async () => {

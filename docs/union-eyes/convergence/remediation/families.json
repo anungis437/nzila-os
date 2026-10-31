@@ -2,7 +2,7 @@
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
  "corrected": 422,
- "partial": 96,
+ "partial": 98,
  "outstanding": 355,
  "accountedFor": 355,
  "families": [
@@ -1590,11 +1590,13 @@
    },
    {
     "id": "DEF-0B6-EDU-REGISTRATION-NO-CAPACITY-DUPLICATE-OR-SESSION-COURSE-CHECK",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B6-EDU-CONTENT-PUBLISH-NO-SEPARATION-OF-DUTIES",
-    "severity": "LOW"
+    "severity": "LOW",
+    "partial": true
    },
    {
     "id": "DEF-0B6-EMP-OFFICIAL-APPROVAL-UNREACHABLE",

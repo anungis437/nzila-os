@@ -11,7 +11,7 @@
   "totals": {
     "original": 777,
     "implementedPendingQualification": 378,
-    "partial": 87,
+    "partial": 89,
     "qualificationVerified": 0,
     "unresolved": 399,
     "externalBlockers": 0
@@ -510,6 +510,15 @@
       "newlyImplemented": 3,
       "outstandingAfter": 399,
       "partial": 4,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B56-F12-CONTENT-PUBLISH-AND-REGISTRATION-RULES",
+      "family": "F12: publication needs a second person, and registration follows the session window and capacity",
+      "outstandingBefore": 399,
+      "newlyImplemented": 0,
+      "outstandingAfter": 399,
+      "partial": 2,
       "evidenceCommit": null
     }
   ],
@@ -5122,6 +5131,28 @@
         "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts"
       ],
       "explanation": "A campaign-link unsubscribe also marks the recipient subscriptions to the distribution lists of that organization unsubscribed, in the same transaction. Proven on real SQL (pglite) not to fail; contract test pins the update."
+    },
+    "DEF-0B6-EDU-CONTENT-PUBLISH-NO-SEPARATION-OF-DUTIES": {
+      "status": "PARTIAL",
+      "batch": "B56-F12-CONTENT-PUBLISH-AND-REGISTRATION-RULES",
+      "files": [
+        "apps/union-eyes/app/api/content/templates/[id]/status/route.ts",
+        "apps/union-eyes/app/api/__tests__/content-template-status.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/b56-content-registration.test.ts"
+      ],
+      "explanation": "Moving an item from review to published is refused for the person who last changed it (who moved it to review), and republishing no longer rewrites the first publication time (coalesce). Existing status route tests pass.",
+      "remaining": "The row records only its last editor, not a separate submitter; a submitted_by column is the proper fix."
+    },
+    "DEF-0B6-EDU-REGISTRATION-NO-CAPACITY-DUPLICATE-OR-SESSION-COURSE-CHECK": {
+      "status": "PARTIAL",
+      "batch": "B56-F12-CONTENT-PUBLISH-AND-REGISTRATION-RULES",
+      "files": [
+        "apps/union-eyes/app/api/education/registrations/route.ts",
+        "apps/union-eyes/app/api/education/registrations/__tests__/route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/b56-content-registration.test.ts"
+      ],
+      "explanation": "Registration is refused (409) for a session that is not scheduled, outside its registration window, or at its maximum enrollment (counted from registered rows). The session-belongs-to-course and duplicate checks already existed. The route test mock gained the count helper and new cases for closed, not-yet-open, cancelled and full sessions (disclosed).",
+      "remaining": "The capacity count is read then written, so two simultaneous registrations for the last place can both pass; a transactional lock or counter is still needed."
     }
   }
 }

@@ -16,7 +16,7 @@
  * itself lands in their own org (a cross-org FK injection / data-integrity
  * defect, round-53 doctrine section 27).
  */
-import { and, eq } from 'drizzle-orm';
+import { and, count, eq } from 'drizzle-orm';
 import { ApiError } from '@/lib/api/errors';
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { db } from '@/db/db';
@@ -44,11 +44,29 @@ const { GET, POST } = crudRoutes({
       .where(and(eq(trainingCourses.id, courseId), eq(trainingCourses.organizationId, ctx.organizationId),
         eq(trainingCourses.isActive, true))).limit(1);
     if (!course) throw ApiError.badRequest('Course is not available to this organization');
-    const [session] = await db.select({ id: courseSessions.id }).from(courseSessions)
+    const [session] = await db.select({
+      id: courseSessions.id,
+      sessionStatus: courseSessions.sessionStatus,
+      maxEnrollment: courseSessions.maxEnrollment,
+      registrationOpenDate: courseSessions.registrationOpenDate,
+      registrationCloseDate: courseSessions.registrationCloseDate,
+    }).from(courseSessions)
       .where(and(eq(courseSessions.id, sessionId),
         eq(courseSessions.courseId, courseId),
         eq(courseSessions.organizationId, ctx.organizationId))).limit(1);
     if (!session) throw ApiError.badRequest('Session does not belong to this course and organization');
+
+    // Registration is open only for a scheduled session inside its registration window, and only while there is room.
+    const today = new Date().toISOString().slice(0, 10);
+    if (session.sessionStatus != null && session.sessionStatus !== 'scheduled') throw ApiError.conflict('This session is not open for registration');
+    if ((session.registrationOpenDate && session.registrationOpenDate > today) || (session.registrationCloseDate && session.registrationCloseDate < today)) {
+      throw ApiError.conflict('Registration for this session is not open');
+    }
+    if (session.maxEnrollment != null) {
+      const [{ registered }] = await db.select({ registered: count() }).from(courseRegistrations)
+        .where(and(eq(courseRegistrations.organizationId, ctx.organizationId), eq(courseRegistrations.sessionId, sessionId), eq(courseRegistrations.registrationStatus, 'registered')));
+      if (Number(registered) >= session.maxEnrollment) throw ApiError.conflict('This session is full');
+    }
     const [existing] = await db.select({ id: courseRegistrations.id }).from(courseRegistrations)
       .where(and(eq(courseRegistrations.organizationId, ctx.organizationId),
         eq(courseRegistrations.memberId, ctx.userId),
