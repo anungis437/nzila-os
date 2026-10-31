@@ -80,6 +80,7 @@ export const POST = withApiAuth(async (req: NextRequest) => {
           purpose,
           purposeDescription,
           consentText,
+          noticeVersion: notice.version,
           allowedDuringStrike,
           allowedDuringEvents,
           ipAddress,
