@@ -12,8 +12,8 @@ export const GET = withExternalMatterResourceAuth(
     resolve: resolveExternalGrievanceResource,
   },
   async (_request, context) => {
-    // Only the columns the projection exposes are read, under the names the grievance table really has: the table has no case
-    // number or summary column, so the earlier whole-row read left both empty.
+    // Select only approved external columns. grievances.description is internal union material,
+    // not a reviewed counsel-safe summary; never fetch it under an external view grant.
     const [row] = await db
       .select({
         id: grievances.id,
@@ -23,7 +23,6 @@ export const GET = withExternalMatterResourceAuth(
         step: grievances.step,
         filedDate: grievances.filedDate,
         responseDeadline: grievances.responseDeadline,
-        summary: grievances.description,
       })
       .from(grievances)
       .where(
