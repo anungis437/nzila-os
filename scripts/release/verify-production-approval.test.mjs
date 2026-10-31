@@ -11,13 +11,13 @@ function fixture() {
   return {
     environment:{
       name:'production',can_admins_bypass:false,
-      protection_rules:[{type:'required_reviewers',reviewers:[{type:'User',reviewer:{login:'security-reviewer'}}]}],
+      protection_rules:[{type:'required_reviewers',reviewers:[{type:'User',reviewer:{id:202,login:'security-reviewer',type:'User'}}]}],
     },
     run:{id:12345,head_sha:SHA,name:'Deploy Production',event:'workflow_dispatch',
-      actor:{login:'developer'},triggering_actor:{login:'developer'},head_branch:'main',
+      actor:{id:101,login:'developer',type:'User'},triggering_actor:{id:101,login:'developer',type:'User'},head_branch:'main',
       run_attempt:1,created_at:'2026-10-30T14:00:00Z',
       run_started_at:'2026-10-30T14:01:00Z'},
-    approvals:[{id:890,state:'approved',user:{login:'security-reviewer',type:'User'},
+    approvals:[{id:890,state:'approved',user:{id:202,login:'security-reviewer',type:'User'},
       created_at:'2026-10-30T14:15:00Z',environments:[{name:'production'}]}],
     expectedRunId:'12345',expectedSha:SHA,now:NOW,
   }
@@ -49,6 +49,29 @@ test('GitHub actor type must independently identify a human User, not a bot with
   }
 })
 
+test('production approval is bound to immutable reviewer and initiator account IDs',()=> {
+  for (const mutate of [
+    f => { f.approvals[0].user.id = 999 },
+    f => { delete f.approvals[0].user.id },
+    f => { f.approvals[0].user.id = '202' },
+    f => { f.approvals[0].user.id = f.run.actor.id },
+    f => { f.run.triggering_actor = { id:202, login:'other-login', type:'User' } },
+    f => { f.approvals[0].user.login = 'renamed-reviewer' },
+    f => { delete f.environment.protection_rules[0].reviewers[0].reviewer.id },
+    f => { f.environment.protection_rules[0].reviewers[0].reviewer.type = 'Bot' },
+  ]) {
+    const f=fixture(); mutate(f)
+    assert.throws(() => verifyProductionApproval(f), /PRODUCTION_APPROVAL_DENIED/)
+  }
+})
+test('production run actors must have authenticated GitHub account IDs',()=> {
+  for (const key of ['actor','triggering_actor']) {
+    for (const id of [undefined,null,'101',0,-1]) {
+      const f=fixture(); f.run[key].id=id
+      assert.throws(() => verifyProductionApproval(f), /run initiator not authenticated/)
+    }
+  }
+})
 test('run substitution, wrong SHA and workflow substitution rejected',()=>{
   for (const key of ['head_sha','name','event']) {
     const f=fixture();f.run[key]='substituted'

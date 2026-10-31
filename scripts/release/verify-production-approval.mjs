@@ -11,6 +11,13 @@ import { fileURLToPath } from 'node:url'
 function deny(msg) { throw new Error('PRODUCTION_APPROVAL_DENIED: ' + msg) }
 const userName = v => typeof v?.login === 'string' ? v.login.toLowerCase() : null
 const human = login => Boolean(login && !login.endsWith('[bot]') && login !== 'github-actions')
+// Login names are mutable. Approval authority and self-review separation must
+// also bind the immutable GitHub account ID supplied by authenticated APIs.
+const identity = user => {
+  const login = userName(user)
+  return login && Number.isSafeInteger(user?.id) && user.id > 0 &&
+    ['User', 'Bot'].includes(user?.type) ? { id: user.id, login } : null
+}
 const matches = entry => Array.isArray(entry?.environments) &&
   entry.environments.some(e => String(e?.name ?? '').toLowerCase() === 'production')
 
@@ -42,12 +49,17 @@ export function verifyProductionApproval({environment,run,approvals,expectedRunI
   // Undefined is NOT proof that privileged bypass is disabled.
   if (environment.can_admins_bypass !== false) deny('admin bypass is not demonstrably disabled')
   const rule=environment.protection_rules.find(p=>p?.type==='required_reviewers')
-  const entitled=new Set((rule?.reviewers ?? []).filter(r=>r.type==='User')
-    .map(r=>userName(r.reviewer)).filter(human))
+  const entitled=new Map((rule?.reviewers ?? [])
+    .filter(r => r?.type === 'User' && r.reviewer?.type === 'User')
+    .map(r => identity(r.reviewer))
+    .filter(v => v && human(v.login))
+    .map(v => [v.id, v.login]))
   if (!entitled.size) deny('no individually verifiable required human reviewers')
   if (!Array.isArray(approvals)) deny('run approvals API unavailable')
-  const initiators=new Set([userName(run.actor),userName(run.triggering_actor)].filter(Boolean))
-  if (!userName(run.actor) || !userName(run.triggering_actor)) deny('run initiator not authenticated')
+  const actors=[identity(run.actor), identity(run.triggering_actor)]
+  if (actors.some(v => !v)) deny('run initiator not authenticated')
+  const initiatorIds=new Set(actors.map(v => v.id))
+  const initiatorLogins=new Set(actors.map(v => v.login))
   const started=Date.parse(run.created_at ?? ''), end=now.getTime()
   if (!Number.isFinite(started) || started > end+300000) deny('invalid run time')
   // An unknown, withdrawn or pending production review must not disappear
@@ -71,8 +83,15 @@ export function verifyProductionApproval({environment,run,approvals,expectedRunI
   }
   const last=reviews.at(-1)
   if (!last || String(last.state).toLowerCase()!=='approved') deny('no current approved environment review')
-  const reviewer=userName(last.user), at=Date.parse(last.created_at ?? '')
-  if (last.user?.type !== 'User' || !human(reviewer) || !entitled.has(reviewer) || initiators.has(reviewer)) deny('approval is not by independent entitled human')
+  const reviewerIdentity=identity(last.user), at=Date.parse(last.created_at ?? '')
+  if (last.user?.type !== 'User' || !reviewerIdentity ||
+      !human(reviewerIdentity.login) ||
+      entitled.get(reviewerIdentity.id) !== reviewerIdentity.login ||
+      initiatorIds.has(reviewerIdentity.id) ||
+      initiatorLogins.has(reviewerIdentity.login)) {
+    deny('approval is not by independent entitled human')
+  }
+  const reviewer=reviewerIdentity.login
   if (!Number.isFinite(at) || at<attemptStarted || at>end+300000 || end-at>7*86400000) deny('approval timestamp invalid or stale')
   return Object.freeze({
     verdict:'APPROVED',source:'github_environment_run_review_api',
