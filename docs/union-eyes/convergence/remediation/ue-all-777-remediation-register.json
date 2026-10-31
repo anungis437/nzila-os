@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 402,
-    "engineeringRemaining": 375,
+    "engineeringCorrected": 405,
+    "engineeringRemaining": 372,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 81
   },
@@ -3235,9 +3235,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B49-F06-REGULATORY-RECORDS-AND-SYNC-HISTORY-ARE-RETAINED",
+        "path": "apps/union-eyes/lib/api/crud-factory.ts; apps/union-eyes/app/api/cnesst/anti-scab/[id]/route.ts; apps/union-eyes/app/api/cnesst/hs-committees/[id]/route.ts; apps/union-eyes/lib/api/__tests__/f06-b49-retain.contract.test.ts",
+        "explanation": "New crud-factory option retainOnDelete: DELETE answers 409 before any lookup or write, so the row is kept. Applied to the anti-scab violation and joint health-and-safety committee item routes, the two tables the defect names. A contract test pins that the refusal comes before any audited write or tx.delete.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-OHS-COMMITTEE-ROSTER-MEMBER-READ",
@@ -3690,9 +3697,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B49-F06-REGULATORY-RECORDS-AND-SYNC-HISTORY-ARE-RETAINED",
+        "path": "apps/union-eyes/lib/api/crud-factory.ts; apps/union-eyes/app/api/cnesst/right-of-refusal/[id]/route.ts; apps/union-eyes/lib/api/__tests__/f06-b49-retain.contract.test.ts",
+        "explanation": "The right-of-refusal item route declares retainOnDelete, so the refusal record and any reprisal complaint are never removed through the generic delete (409).",
+        "remaining": "No retention rule is named by a source, so the record is retained rather than archived; a governed withdrawal action is still to be defined.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B5-PAY-EQUITY-NO-STATE-MACHINE-OR-DEADLINES",
@@ -8356,9 +8371,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B49-F06-REGULATORY-RECORDS-AND-SYNC-HISTORY-ARE-RETAINED",
+        "path": "apps/union-eyes/app/api/extensions/[id]/route.ts; apps/union-eyes/app/api/__tests__/ae-audit-misc.route.test.ts",
+        "explanation": "Deleting an integration first confirms it belongs to the organization (404 otherwise), then refuses with 409 when any synchronization history exists, so the cascade can never erase it; the integration is disabled instead. The existing extensions test was adapted to the new query sequence and gained the history case (disclosed).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-PLT-EXT-CONFIGURATION-HAS-NO-CREATE-PATH-AND-NO-CONSUMER",

@@ -33,6 +33,7 @@ vi.mock('@/lib/api/framework', () => ({
     badRequest: (message: string) => Object.assign(new Error(message), { status: 400 }),
     notFound: (resource: string) => Object.assign(new Error(`${resource} not found`), { status: 404 }),
     unauthorized: (message: string) => Object.assign(new Error(message), { status: 401 }),
+    conflict: (message: string) => Object.assign(new Error(message), { status: 409 }),
   },
 }));
 vi.mock('@/lib/api-auth-guard', () => ({
@@ -47,6 +48,7 @@ vi.mock('@/db/db', () => ({ db: {} }));
 vi.mock('@/db', () => ({ db: {} }));
 vi.mock('@/db/schema/integration-schema', () => ({
   apiIntegrations: new Proxy({}, { get: (_t, p) => `api.${String(p)}` }),
+  integrationSyncLogs: new Proxy({}, { get: (_t, p) => `log.${String(p)}` }),
 }));
 vi.mock('@/db/schema', () => ({
   tribunalTypeEnum: { enumValues: ['other'] },
@@ -151,12 +153,17 @@ describe('extensions/[id]', () => {
     await expect(PATCH({ params: { id: 'i1' }, request: { json: async () => ({ enabled: true }) }, organizationId: 'org-1', userId: 'u1' })).rejects.toMatchObject({ status: 404 });
 
     h.audit.mockClear();
-    h.queue.push([{ id: 'i1', name: 'N' }]);
+    h.queue.push([{ id: 'i1' }], [], [{ id: 'i1', name: 'N' }]); // owned, no sync history, deleted
     await DELETE({ params: { id: 'i1' }, organizationId: 'org-1', userId: 'u1' });
     expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'integration.delete', resourceId: 'i1' }));
     h.audit.mockClear();
-    h.queue.push([]);
+    h.queue.push([]); // not the organization's integration
     await expect(DELETE({ params: { id: 'i1' }, organizationId: 'org-1', userId: 'u1' })).rejects.toMatchObject({ status: 404 });
+    expect(h.audit).not.toHaveBeenCalled();
+
+    // DEF-0B7-PLT-EXT-DELETE-HARD-DELETE-CASCADES-SYNC-LOG-HISTORY: an integration that has run keeps its history, so it is not deleted.
+    h.queue.push([{ id: 'i1' }], [{ id: 'log-1' }]);
+    await expect(DELETE({ params: { id: 'i1' }, organizationId: 'org-1', userId: 'u1' })).rejects.toMatchObject({ status: 409 });
     expect(h.audit).not.toHaveBeenCalled();
   });
 });

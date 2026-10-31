@@ -6,7 +6,7 @@
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
-import { apiIntegrations } from '@/db/schema/integration-schema';
+import { apiIntegrations, integrationSyncLogs } from '@/db/schema/integration-schema';
 import { eq, and } from 'drizzle-orm';
 import { z } from 'zod';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -122,6 +122,24 @@ export const DELETE = withApi(
   async ({ params, organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     return withRLSContext({ organizationId }, async (tx) => {
+      const [owned] = await tx
+        .select({ id: apiIntegrations.id })
+        .from(apiIntegrations)
+        .where(and(eq(apiIntegrations.id, params.id), eq(apiIntegrations.organizationId, organizationId)))
+        .limit(1);
+      if (!owned) throw ApiError.notFound('Integration');
+
+      // The sync history cascades from the integration, so deleting one that has run would erase its record of what was processed,
+      // what failed and who triggered it. Such an integration is disabled instead, and its history stays.
+      const [history] = await tx
+        .select({ id: integrationSyncLogs.id })
+        .from(integrationSyncLogs)
+        .where(eq(integrationSyncLogs.integrationId, params.id))
+        .limit(1);
+      if (history) {
+        throw ApiError.conflict('This integration has synchronization history that deleting it would erase; disable it instead.');
+      }
+
       const [deleted] = await tx
         .delete(apiIntegrations)
         .where(

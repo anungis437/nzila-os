@@ -16,6 +16,7 @@ const { GET, PATCH, DELETE } = crudRoutes({
   tags: ['CNESST', 'H&S Committee'],
   orgScoped: true,
   itemRoute: true,
+  retainOnDelete: true,
   // The roster names the worker and employer members of the committee.
   readRole: 'steward',
   writeRole: 'officer',

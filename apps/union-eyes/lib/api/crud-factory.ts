@@ -84,6 +84,11 @@ export interface CrudOptions {
    * still reads only their own. Writes keep the owner scope, so staff reading a member's record never edits it as the member.
    */
   staffReadsAll?: boolean;
+  /**
+   * A regulatory or evidentiary record that is never deleted through the generic route: DELETE answers 409 before any write, so the
+   * row (and what cascades from it) survives, and the record is changed only through its governed correction or withdrawal process.
+   */
+  retainOnDelete?: boolean;
   /** A condition added to every GET, whatever the caller's role (for example, a restricted row of shared reference data is never listed). */
   readCondition?: SQL;
   /** A condition added to GET only for a caller below the steward floor (for example, hiding unpublished rows from members). */
@@ -855,6 +860,9 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       async ({ params, organizationId, userId }) => {
         assertRequiredScope(organizationId, userId);
         assertCrudWrite(governance);
+        if (opts.retainOnDelete) {
+          throw ApiError.conflict(`${resourceName} records are retained and cannot be deleted; use the governed correction or withdrawal process.`);
+        }
         const id = params[paramName];
         const conditions: SQL[] = [eq(pkCol, id)];
         if (orgScoped && orgCol && organizationId) {
