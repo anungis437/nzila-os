@@ -21,7 +21,8 @@ describe('B44 signer network data (DEF-0B11-SOC-SIGNATURE-STATUS-AND-AUDIT-DISCL
   it('shows a signer only their own network data', () => {
     const view = signatureViewForViewer(document, 'a', 'sender')
     expect(view.signers[0]).toMatchObject({ ipAddress: '10.0.0.1', userAgent: 'UA-A' })
-    expect(view.signers[1]).toEqual({ userId: 'b', email: 'b@example.test' })
+    expect(view.signers[0].email).toBe('a@example.test')
+    expect(view.signers[1]).toEqual({ userId: 'b' })
   })
 
   it('removes network data from audit rows that describe someone else', () => {
@@ -30,6 +31,39 @@ describe('B44 signer network data (DEF-0B11-SOC-SIGNATURE-STATUS-AND-AUDIT-DISCL
       { actorUserId: 'b', ipAddress: '10.0.0.2', userAgent: 'UA-B', eventType: 'signed' },
     ]
     expect(redactSignerNetworkData(rows, 'a')).toEqual([rows[0], { actorUserId: 'b', eventType: 'signed' }])
+  })
+
+
+  it('does not leak a peer signer through a viewer-owned outer report', () => {
+    const view = redactSignerNetworkData({
+      userId: 'a',
+      signers: [
+        { userId: 'a', email: 'a@example.test', ipAddress: '10.0.0.1' },
+        { userId: 'b', email: 'b@example.test', ipAddress: '10.0.0.2' },
+      ],
+    }, 'a')
+    expect(view.signers).toEqual([
+      { userId: 'a', email: 'a@example.test', ipAddress: '10.0.0.1' },
+      { userId: 'b' },
+    ])
+  })
+
+  it('redacts unstructured audit descriptions containing peer identity or network details', () => {
+    const view = signatureViewForViewer([
+      { actorUserId: 'b', eventType: 'signer_status_updated',
+        eventDescription: 'Signer b@example.test signed from 10.0.0.2',
+        metadata: { signerEmail: 'b@example.test', ip_address: '10.0.0.2', outcome: 'signed' } },
+      { actorUserId: 'a', eventType: 'signed', eventDescription: 'Own signature recorded' },
+    ], 'a', 'sender')
+    expect(view).toEqual([
+      { actorUserId: 'b', eventType: 'signer_status_updated', metadata: { outcome: 'signed' } },
+      { actorUserId: 'a', eventType: 'signed', eventDescription: 'Own signature recorded' },
+    ])
+  })
+
+  it('preserves the sender audit report unchanged', () => {
+    const report = [{ actorUserId: 'b', email: 'b@example.test', eventDescription: 'Signer b@example.test signed' }]
+    expect(signatureViewForViewer(report, 'sender', 'sender')).toEqual(report)
   })
 
   it('leaves dates untouched', () => {

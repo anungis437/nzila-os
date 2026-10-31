@@ -1,18 +1,28 @@
-const NETWORK_KEYS = new Set(['ipAddress', 'ip_address', 'userAgent', 'user_agent', 'geolocation']);
+const PRIVATE_KEYS = new Set([
+  'ipAddress', 'ip_address', 'userAgent', 'user_agent', 'geolocation',
+  'email', 'emailAddress', 'email_address', 'signerEmail', 'signer_email',
+  'recipientEmail', 'recipient_email',
+]);
 
 /**
- * A signature record carries the network address, device and location each person signed from. That is evidence for the
- * sender, who is accountable for the request, and for the person it describes; it is not something one signer, or an
- * external counterparty with a platform account, may read about another. Rows that describe the viewer are kept whole.
+ * A signer can see their own identity and network evidence; the sender can see
+ * the full audit. Other signers' contact addresses, devices, locations and
+ * free-form audit descriptions must not be exposed to a peer signer.
+ *
+ * Recursion is mandatory even when the outer object belongs to the viewer:
+ * a document or report may embed a collection of other signers.
  */
 export function redactSignerNetworkData<T>(value: T, viewerUserId: string): T {
   if (Array.isArray(value)) return value.map((item) => redactSignerNetworkData(item, viewerUserId)) as T;
   if (!value || typeof value !== 'object' || value instanceof Date) return value;
   const row = value as Record<string, unknown>;
-  if (row.userId === viewerUserId || row.actorUserId === viewerUserId) return value;
+  const ownRow = row.userId === viewerUserId || row.actorUserId === viewerUserId;
   const output: Record<string, unknown> = {};
   for (const [key, entry] of Object.entries(row)) {
-    if (NETWORK_KEYS.has(key)) continue;
+    if (!ownRow && PRIVATE_KEYS.has(key)) continue;
+    // Event descriptions are unstructured and can contain signer email, IP or location
+    // even if the typed columns were redacted. Keep eventType and timestamps instead.
+    if (!ownRow && key === 'eventDescription') continue;
     output[key] = redactSignerNetworkData(entry, viewerUserId);
   }
   return output as T;

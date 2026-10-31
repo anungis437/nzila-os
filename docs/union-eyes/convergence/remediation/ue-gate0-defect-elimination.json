@@ -4932,8 +4932,8 @@
         "apps/union-eyes/lib/signature/__tests__/b44-signer-privacy.test.ts",
         "apps/union-eyes/app/api/signatures/audit/[documentId]/__tests__/route.test.ts"
       ],
-      "explanation": "The status, the audit trail and the audit report keep every signer network address, user agent and geolocation for the sender only. A signer sees those fields only on the rows that describe themselves. Unit tests cover sender, signer and audit rows. The audit route test mock gained getDocumentSender (disclosed adaptation).",
-      "remaining": "Signer e-mail addresses are still visible to every signer, and the report actor and signer rows carry no user id, so a signer own network data is also withheld from the report."
+      "explanation": "The status, the audit trail and the audit report keep every signer network address, user agent and geolocation for the sender only. A signer sees those fields only on the rows that describe themselves. Unit tests cover sender, signer and audit rows. The audit route test mock gained getDocumentSender (disclosed adaptation). The signer projection now also removes peer email/contact fields and unstructured audit descriptions, and recursively filters nested signers even when the parent report belongs to the viewer; sender access remains unchanged. Adversarial regression cases added.",
+      "remaining": "Exact-HEAD unit/contract, native PostgreSQL 15/16, HTTP/browser/staging and independent privacy review are outstanding. Audit rows with no actor user ID cannot expose even the viewer's own network evidence; no identity is fabricated."
     },
     "DEF-0B11-SOC-SIGNATURE-AUDIT-TRAIL-HAS-NO-HASH-CHAIN-OR-VERIFICATION-AND-IS-SERVED-AS-A-LEGAL-COMPLIANCE-REPORT-OF-SELF-ASSERTED-EVIDENCE": {
       "status": "PARTIAL",
