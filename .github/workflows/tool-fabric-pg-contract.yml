@@ -53,6 +53,7 @@ jobs:
           psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/001_trust_ledger_pg.sql
           psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/002_trust_ledger_pg_immutability.sql
           psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/003_trust_ledger_pg_commit_guard.sql
+          psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/004_trust_ledger_pg_search_path.sql
       - name: Verify append-only receipts and monotonic head CAS on live PostgreSQL
         run: |
           set -euo pipefail
@@ -120,6 +121,11 @@ jobs:
           # Uses a temporary restricted role and rolls back both role and data.
           # Production grants and independently administered identity remain HOLD.
           psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/test_trust_ledger_pg_least_privilege.sql
+
+      - name: Reject PostgreSQL temporary-schema shadowing of trust-ledger triggers (ephemeral CI only)
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/test_trust_ledger_pg_search_path.sql
 
       - name: Verify serialized concurrent CAS under PostgreSQL row locks (ephemeral CI only)
         run: |
