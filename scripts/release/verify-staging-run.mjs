@@ -38,23 +38,39 @@ export function verifyStagingRun(run, expectedCommit, expectedRunId, expectedWor
       jobs[0].conclusion !== 'success') {
     deny('no independently successful real staging deployment job')
   }
+  // A green deployment job cannot replace independently completed source
+  // governance, tests, build and attestation in the exact staging run.
+  for (const name of ['Staging Pre-Deploy Gates', 'Build & Attest']) {
+    const matches = run.jobs.filter(job => job?.name === name)
+    if (matches.length !== 1 || matches[0].status !== 'completed' ||
+        matches[0].conclusion !== 'success') {
+      deny('staging prerequisite gate or artifact build did not independently complete')
+    }
+  }
   // A green job label is not proof that the deployment, boundary gate,
   // smoke checks and live runtime evidence steps actually executed. GitHub
   // job steps are fetched for this exact run by the promotion workflow.
   // This is still only workflow evidence, NOT independent runtime certification.
   const requiredSteps = [
+    'Assert staging deployment identity is configured (fail-closed)',
     'Azure login (OIDC, staging-scoped)',
     'Staging boundary gate (fail-closed)',
     'Require real staging deployment implementation',
     'Run smoke tests',
     'Ingest Azure runtime evidence (live)',
   ]
+  // GitHub returns steps in execution order; smoke before deploy or
+  // runtime evidence before smoke cannot certify the deployed revision.
+  let previousStep = -1
   if (!Array.isArray(jobs[0].steps) || requiredSteps.some(name => {
     const matches = jobs[0].steps.filter(step => step?.name === name)
-    return matches.length !== 1 || matches[0].status !== 'completed' ||
-      matches[0].conclusion !== 'success'
+    const index = jobs[0].steps.findIndex(step => step?.name === name)
+    if (matches.length !== 1 || matches[0].status !== 'completed' ||
+        matches[0].conclusion !== 'success' || index <= previousStep) return true
+    previousStep = index
+    return false
   })) {
-    deny('staging deployment and live runtime verification steps did not independently complete')
+    deny('staging deployment and live runtime verification steps did not independently complete in order')
   }
   return { runId: String(expectedRunId), commitSha: expectedCommit }
 }

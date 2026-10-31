@@ -18,13 +18,17 @@ function validRun() {
     attempt: 1,
     jobs: [{ name: 'Deploy to Staging', status: 'completed', conclusion: 'success',
       steps: [
+        'Assert staging deployment identity is configured (fail-closed)',
         'Azure login (OIDC, staging-scoped)',
         'Staging boundary gate (fail-closed)',
         'Require real staging deployment implementation',
         'Run smoke tests',
         'Ingest Azure runtime evidence (live)',
       ].map(name => ({ name, status: 'completed', conclusion: 'success' })),
-    }],
+    },
+      { name: 'Staging Pre-Deploy Gates', status: 'completed', conclusion: 'success' },
+      { name: 'Build & Attest', status: 'completed', conclusion: 'success' },
+    ],
   }
 }
 
@@ -89,6 +93,7 @@ test('rejects missing, duplicate and spoofed deployment job evidence', () => {
 
 test('a green staging job without independently completed deployment and runtime steps is denied', () => {
   const names = [
+    'Assert staging deployment identity is configured (fail-closed)',
     'Azure login (OIDC, staging-scoped)',
     'Staging boundary gate (fail-closed)',
     'Require real staging deployment implementation',
@@ -117,4 +122,31 @@ test('skipped, failed, duplicate or absent runtime step evidence cannot promote'
   delete absent.jobs[0].steps
   assert.throws(() => verifyStagingRun(absent, SHA, RUN_ID, WORKFLOW_ID),
     /staging deployment and live runtime verification steps/)
+})
+
+
+test('green deploy cannot substitute missing, skipped or duplicate prerequisite jobs', () => {
+  for (const name of ['Staging Pre-Deploy Gates', 'Build & Attest']) {
+    const missing = validRun()
+    missing.jobs = missing.jobs.filter(job => job.name !== name)
+    assert.throws(() => verifyStagingRun(missing, SHA, RUN_ID, WORKFLOW_ID), /staging prerequisite gate/)
+    for (const conclusion of ['skipped', 'failure', 'cancelled', null]) {
+      const invalid = validRun()
+      invalid.jobs.find(job => job.name === name).conclusion = conclusion
+      assert.throws(() => verifyStagingRun(invalid, SHA, RUN_ID, WORKFLOW_ID), /staging prerequisite gate/)
+    }
+    const duplicate = validRun()
+    duplicate.jobs.push({ ...duplicate.jobs.find(job => job.name === name) })
+    assert.throws(() => verifyStagingRun(duplicate, SHA, RUN_ID, WORKFLOW_ID), /staging prerequisite gate/)
+  }
+})
+
+test('smoke and runtime evidence must follow deployment in staging execution order', () => {
+  for (const [first, second] of [[2, 3], [3, 4], [4, 5]]) {
+    const run = validRun()
+    const steps = run.jobs[0].steps
+    ;[steps[first], steps[second]] = [steps[second], steps[first]]
+    assert.throws(() => verifyStagingRun(run, SHA, RUN_ID, WORKFLOW_ID),
+      /staging deployment and live runtime verification steps/)
+  }
 })
