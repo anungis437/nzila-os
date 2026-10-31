@@ -2210,8 +2210,8 @@
         "apps/union-eyes/services/platform-economics/reconciliation-service.ts",
         "apps/union-eyes/services/platform-economics/__tests__/reconciliation-service.test.ts"
       ],
-      "explanation": "For an organization run, the period is locked, a billing period named in the request must be the organization's own (404), and a second run for the same period is refused (409, naming the earlier run) instead of adding a second set of exceptions. A period that ends before it starts is refused. The existing mocked test of a run gained the two new checks in its queue; three tests were added.",
-      "remaining": "The service still accepts a run with no organization, which reconciles every organization together; no route uses that mode, but it is not removed."
+      "explanation": "Reconciliation now requires an organization at the TypeScript API boundary and validates it at runtime before any database work. Removed the legacy organization-less query branches: prior-run lookup, invoice/payment/fee reads and final update always use organization predicates. Existing advisory lock, billing-period ownership check, duplicate-run refusal and period validation remain; new regression asserts tenant predicates across all financial datasets.",
+      "remaining": "Native PostgreSQL 15/16 under real tenant RLS, exact-HEAD full unit/contract execution, HTTP/browser/staging proof, and audit/financial-mandate qualification are still outstanding. No independent CLOSED credit."
     },
     "DEF-0B12-CRUD-TESTIMONIAL-APPROVAL-COMPONENT-SENDS-FIELDS-THE-TABLE-DOES-NOT-HAVE": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",

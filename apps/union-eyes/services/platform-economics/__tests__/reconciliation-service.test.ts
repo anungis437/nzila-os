@@ -158,10 +158,26 @@ describe('platform-economics/reconciliation-service', () => {
 
     it('refuses a missing or blank organization before touching the financial ledger', async () => {
       for (const organizationId of [undefined, '', '   ']) {
-        await expect(runReconciliation({ organizationId, ...period })).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+        // Deliberately violate the required type to prove runtime callers fail closed too.
+        await expect(runReconciliation({ organizationId: organizationId as string, ...period })).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
       }
       expect(h.queue).toEqual([]);
       expect(h.auditLog).not.toHaveBeenCalled();
+    });
+
+    it('binds every invoice, payment, fee and run update query to the required organization', async () => {
+      vi.mocked(eq).mockClear();
+      pushSel([]); // no prior reconciliation
+      pushSel([{ id: 'run-A', organizationId: 'org-A' }]); // inserted run
+      pushSel([]); // invoices
+      pushSel([]); // payments
+      pushSel([]); // fee events
+      pushSel([]); // final run update
+      const result = await runReconciliation({ organizationId: 'org-A', ...period });
+      expect(result.runId).toBe('run-A');
+      const scoped = vi.mocked(eq).mock.calls.filter(([column, value]) =>
+        (column as { __col?: string })?.__col === 'organizationId' && value === 'org-A');
+      expect(scoped.length).toBeGreaterThanOrEqual(5);
     });
 
     it('refuses a billing period that is not the organization\u2019s own, before creating a run', async () => {

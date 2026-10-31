@@ -27,7 +27,7 @@ import {
   type ReconciliationRun,
   type ReconciliationException,
 } from '@/db/schema';
-import { eq, and, gte, lte, inArray, isNull, sql, desc } from 'drizzle-orm';
+import { eq, and, gte, lte, inArray, sql, desc } from 'drizzle-orm';
 import { ApiError } from '@/lib/api/errors';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { addMoney, subtractMoney, absMoney, toCents } from '@/lib/decimal-safe';
@@ -37,7 +37,7 @@ import { addMoney, subtractMoney, absMoney, toCents } from '@/lib/decimal-safe';
 // ============================================================================
 
 export interface RunReconciliationInput {
-  organizationId?: string;
+  organizationId: string;
   billingPeriodId?: string;
   periodStart: Date;
   periodEnd: Date;
@@ -79,33 +79,31 @@ export async function runReconciliation(
     // 0. A run for an organization is repeatable only as a refusal: the same organization and period are reconciled once. A second run
     // inserted a second set of exceptions beside the first, so the open-exception list doubled with every click. The lock serialises two
     // runs started together; the billing period, when named, must be the organization's own.
-    if (input.organizationId) {
-      await tx.execute(
-        sql`SELECT pg_advisory_xact_lock(hashtextextended(${`reconciliation:${input.organizationId}:${input.periodStart.toISOString()}:${input.periodEnd.toISOString()}`}, 0))`,
-      );
-      if (input.billingPeriodId) {
-        const [owned] = await tx
-          .select({ id: billingPeriods.id })
-          .from(billingPeriods)
-          .where(and(eq(billingPeriods.id, input.billingPeriodId), eq(billingPeriods.organizationId, input.organizationId)))
-          .limit(1);
-        if (!owned) throw ApiError.notFound('Billing period');
-      }
-      const [prior] = await tx
-        .select({ id: reconciliationRuns.id })
-        .from(reconciliationRuns)
-        .where(
-          and(
-            eq(reconciliationRuns.organizationId, input.organizationId),
-            eq(reconciliationRuns.periodStart, input.periodStart),
-            eq(reconciliationRuns.periodEnd, input.periodEnd),
-            inArray(reconciliationRuns.status, ['running', 'completed']),
-          ),
-        )
+    await tx.execute(
+      sql`SELECT pg_advisory_xact_lock(hashtextextended(${`reconciliation:${input.organizationId}:${input.periodStart.toISOString()}:${input.periodEnd.toISOString()}`}, 0))`,
+    );
+    if (input.billingPeriodId) {
+      const [owned] = await tx
+        .select({ id: billingPeriods.id })
+        .from(billingPeriods)
+        .where(and(eq(billingPeriods.id, input.billingPeriodId), eq(billingPeriods.organizationId, input.organizationId)))
         .limit(1);
-      if (prior) {
-        throw ApiError.conflict('This period has already been reconciled', { runId: prior.id });
-      }
+      if (!owned) throw ApiError.notFound('Billing period');
+    }
+    const [prior] = await tx
+      .select({ id: reconciliationRuns.id })
+      .from(reconciliationRuns)
+      .where(
+        and(
+          eq(reconciliationRuns.organizationId, input.organizationId),
+          eq(reconciliationRuns.periodStart, input.periodStart),
+          eq(reconciliationRuns.periodEnd, input.periodEnd),
+          inArray(reconciliationRuns.status, ['running', 'completed']),
+        ),
+      )
+      .limit(1);
+    if (prior) {
+      throw ApiError.conflict('This period has already been reconciled', { runId: prior.id });
     }
 
     // 1. Create run record
@@ -126,9 +124,7 @@ export async function runReconciliation(
       gte(platformInvoices.issueDate, input.periodStart),
       lte(platformInvoices.issueDate, input.periodEnd),
     ];
-    if (input.organizationId) {
-      invoiceConditions.push(eq(platformInvoices.organizationId, input.organizationId));
-    }
+    invoiceConditions.push(eq(platformInvoices.organizationId, input.organizationId));
     const invoices = await tx
       .select()
       .from(platformInvoices)
@@ -140,9 +136,7 @@ export async function runReconciliation(
       lte(platformPayments.createdAt, input.periodEnd),
       inArray(platformPayments.status, ['completed', 'refunded']),
     ];
-    if (input.organizationId) {
-      paymentConditions.push(eq(platformPayments.organizationId, input.organizationId));
-    }
+    paymentConditions.push(eq(platformPayments.organizationId, input.organizationId));
     const payments = await tx
       .select()
       .from(platformPayments)
@@ -283,9 +277,7 @@ export async function runReconciliation(
       gte(transactionFeeEvents.capturedAt, input.periodStart),
       lte(transactionFeeEvents.capturedAt, input.periodEnd),
     ];
-    if (input.organizationId) {
-      feeConditions.push(eq(transactionFeeEvents.organizationId, input.organizationId));
-    }
+    feeConditions.push(eq(transactionFeeEvents.organizationId, input.organizationId));
     const feeEvents = await tx
       .select()
       .from(transactionFeeEvents)
@@ -328,9 +320,7 @@ export async function runReconciliation(
       .where(
         and(
           eq(reconciliationRuns.id, run.id),
-          run.organizationId
-            ? eq(reconciliationRuns.organizationId, run.organizationId)
-            : isNull(reconciliationRuns.organizationId),
+          eq(reconciliationRuns.organizationId, input.organizationId),
         ),
       );
 
