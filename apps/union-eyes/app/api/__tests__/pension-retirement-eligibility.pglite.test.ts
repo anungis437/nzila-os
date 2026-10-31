@@ -66,10 +66,16 @@ describe('GET /api/pension/retirement-eligibility', () => {
     expect((state.config as { auth: { minRole: string } }).auth.minRole).toBe('officer');
   });
 
-  it('lists only the caller organization, at the default threshold, most service first', async () => {
-    const result = await call(ORG_A);
+  it('lists only the caller organization at the stated threshold, most service first, and says it is not an eligibility determination', async () => {
+    const result = await call(ORG_A, '?threshold=25');
     expect(result.data.map((r: { name: string }) => r.name)).toEqual(['Alice', 'Cara']);
     expect(result.threshold).toBe(25);
+    expect(result.basis).toBe('YEARS_OF_SERVICE_FILTER_NOT_AN_ELIGIBILITY_DETERMINATION');
+  });
+
+  it('requires the threshold instead of applying a silent default of 25', async () => {
+    await expect(call(ORG_A)).rejects.toMatchObject({ status: 400 });
+    expect(audit).not.toHaveBeenCalled();
   });
 
   it('never returns another organization\'s enrolment even for a low threshold', async () => {
@@ -79,7 +85,7 @@ describe('GET /api/pension/retirement-eligibility', () => {
   });
 
   it('returns an allow-listed projection with no user id, plan id or metadata', async () => {
-    const [row] = (await call(ORG_A)).data;
+    const [row] = (await call(ORG_A, '?threshold=25')).data;
     expect(Object.keys(row).sort()).toEqual(['enrollmentDate', 'id', 'membershipStatus', 'name', 'planName', 'vestingStatus', 'yearsOfService']);
     expect(JSON.stringify(row)).not.toContain('123-456-789');
   });
@@ -94,7 +100,7 @@ describe('GET /api/pension/retirement-eligibility', () => {
   });
 
   it('records who read the list in the same transaction', async () => {
-    await call(ORG_A);
+    await call(ORG_A, '?threshold=25');
     expect(audit).toHaveBeenCalledTimes(1);
     expect(audit.mock.calls[0][1]).toMatchObject({
       organizationId: ORG_A,

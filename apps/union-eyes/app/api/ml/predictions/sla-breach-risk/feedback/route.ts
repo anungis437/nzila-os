@@ -8,6 +8,7 @@ import { mlPredictions, modelMetadata } from '@/db/schema';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
+import { logger } from '@/lib/logger';
 
 const bodySchema = z.object({
   predictionId: z.guid(),
@@ -173,7 +174,8 @@ export const POST = withApi(
     });
     const { prediction, updatedModel, absError, observations, meanAbsoluteError, qualityScore, retrainRecommended } = result;
 
-    // Pilot tracking is usage telemetry, not a governed change
+    // Pilot tracking is usage telemetry, not a governed change: the feedback is committed, so a telemetry failure must not turn a
+    // recorded result into an error response.
     await trackPilotEvent({
       userId: userId ?? 'system:ml-feedback',
       organizationId,
@@ -185,7 +187,7 @@ export const POST = withApi(
         absError,
         retrainRecommended,
       },
-    });
+    }).catch((error) => logger.warn('sla feedback pilot event was not recorded', { error: String(error) }));
 
     return {
       predictionId: prediction.id,

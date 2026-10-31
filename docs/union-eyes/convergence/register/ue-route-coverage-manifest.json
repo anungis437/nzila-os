@@ -2,7 +2,7 @@
  "register": "UE-CONV-K-008",
  "summary": {
   "routes": 998,
-  "mutating": 728,
+  "mutating": 726,
   "kernel": 59,
   "byGuard": {
    "ADMIN_AUTH": 7,
@@ -24,7 +24,7 @@
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 8,
    "CRON_SECRET": 1,
-   "CRUD_FACTORY": 142,
+   "CRUD_FACTORY": 140,
    "DELEGATED": 11,
    "NONE": 8,
    "ORG_AUTH": 32,
@@ -39,7 +39,7 @@
    "ATOMIC": 148,
    "ATOMIC_SERVICE": 153,
    "COMPUTE_ONLY": 34,
-   "CRUD_ATOMIC": 143,
+   "CRUD_ATOMIC": 141,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 25,
    "NO_WRITES_FOUND": 12,
@@ -47,7 +47,7 @@
   },
   "mutatingByData": {
    "AMBIENT_DB": 14,
-   "CRUD_TENANT_TX": 143,
+   "CRUD_TENANT_TX": 141,
    "NONE": 343,
    "SYSTEM_CONTEXT": 65,
    "TENANT_TX": 163
@@ -7146,16 +7146,14 @@
   {
    "route": "federations/[id]/route.ts",
    "methods": [
-    "DELETE",
-    "GET",
-    "PATCH"
+    "GET"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "federations/benchmark/grievances/route.ts",
@@ -7173,15 +7171,14 @@
   {
    "route": "federations/route.ts",
    "methods": [
-    "GET",
-    "POST"
+    "GET"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "finance/allocation/route.ts",
@@ -10134,7 +10131,7 @@
    "guard": "SESSION_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
+   "data": "SYSTEM_CONTEXT",
    "audit": "READ_ONLY"
   },
   {

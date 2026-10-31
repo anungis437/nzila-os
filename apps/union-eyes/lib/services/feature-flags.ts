@@ -159,6 +159,8 @@ export async function evaluateFeature(
       case 'percentage':
         return evaluatePercentageFlag(flag, context);
       
+      // The schema documents the type as `organization`; `tenant` is the earlier spelling the evaluator already handled.
+      case 'organization':
       case 'tenant':
         return evaluateOrgFlag(flag, context);
       

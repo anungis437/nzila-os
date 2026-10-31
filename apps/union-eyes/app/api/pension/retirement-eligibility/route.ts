@@ -6,6 +6,9 @@
  * administrator's record, not a member's: it was open at the member floor and returned whole rows. It now needs an
  * officer, returns an allow-listed projection, validates and bounds its inputs, runs in the tenant context, and records
  * who read it in the same transaction.
+ *
+ * It applies no eligibility rule: no plan in the source defines one. The caller must name the years-of-service threshold (the earlier
+ * silent default of 25 is removed) and the answer says it is a years-of-service filter, not a determination of eligibility.
  */
 import { and, desc, eq, gte } from 'drizzle-orm';
 import { pensionMembers } from '@/db/schema';
@@ -18,18 +21,19 @@ export const dynamic = 'force-dynamic';
 const MAX_ROWS = 500;
 
 const querySchema = z.object({
-  threshold: z.coerce.number().min(1).max(60).default(25),
+  threshold: z.coerce.number().min(1).max(60),
 });
 
 export const GET = withApi(
   {
     auth: { required: true, minRole: 'officer' },
-    openapi: { tags: ['Pension'], summary: 'Check retirement eligibility', description: 'List members meeting the years-of-service threshold for retirement eligibility' },
+    openapi: { tags: ['Pension'], summary: 'List pension members at or above a years-of-service threshold', description: 'A years-of-service filter the caller parameterizes; it does not determine retirement eligibility' },
   },
   async ({ request, organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
-    const parsed = querySchema.safeParse({ threshold: new URL(request.url).searchParams.get('threshold') ?? undefined });
-    if (!parsed.success) throw ApiError.badRequest('threshold must be a number between 1 and 60');
+    const raw = new URL(request.url).searchParams.get('threshold');
+    const parsed = querySchema.safeParse({ threshold: raw ?? undefined });
+    if (!parsed.success) throw ApiError.badRequest('threshold (years of service) is required and must be a number between 1 and 60');
     const { threshold } = parsed.data;
 
     return withRLSContext({ organizationId, userId }, async (tx) => {
@@ -56,7 +60,7 @@ export const GET = withApi(
         resourceId: organizationId,
         details: { threshold, rows: rows.length },
       });
-      return { data: rows, threshold, limit: MAX_ROWS };
+      return { data: rows, threshold, limit: MAX_ROWS, basis: 'YEARS_OF_SERVICE_FILTER_NOT_AN_ELIGIBILITY_DETERMINATION' as const };
     });
   },
 );

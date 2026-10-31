@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 451,
+    "implementedPendingQualification": 460,
     "partial": 80,
     "qualificationVerified": 0,
-    "unresolved": 326,
+    "unresolved": 317,
     "externalBlockers": 0
   },
   "batches": [
@@ -690,6 +690,15 @@
       "newlyImplemented": 10,
       "outstandingAfter": 326,
       "partial": 3,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B68-REGISTERS-SINKS-AND-HONEST-ANSWERS",
+      "family": "Read-only registers, observability sinks and answers that stated more than the source computes",
+      "outstandingBefore": 326,
+      "newlyImplemented": 9,
+      "outstandingAfter": 317,
+      "partial": 0,
       "evidenceCommit": null
     }
   ],
@@ -6108,6 +6117,90 @@
       ],
       "explanation": "Claiming now requires an organization administrator in addition to the token and a membership; a member is refused before anything is written or audited. The claim test gained a case and a mock (disclosed).",
       "remaining": "The claim still clears only the claim token: the pseudonymous capability token hash and expiry stay valid, and nothing checks that the claiming organization is the purchaser."
+    },
+    "DEF-0B6-SYS-OBSERVABILITY-SWEEP-NO-DEDUPE-REPEATS-EVERY-RUN": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B68-REGISTERS-SINKS-AND-HONEST-ANSWERS",
+      "files": [
+        "apps/union-eyes/services/observability/realtime-alerting-service.ts",
+        "apps/union-eyes/lib/services/__tests__/s12-registers-sinks-and-answers.test.ts"
+      ],
+      "explanation": "Verified in source: an alert is keyed per organization, signal and clock hour, inserted with conflict-do-nothing, and an hour in which every recipient already holds it adds no execution, tracking row or audit entry."
+    },
+    "DEF-0B8-ICRA-EVENT-SINK-WRITES-A-TABLE-NO-SCHEMA-DEFINES-AND-SWALLOWS-FAILURE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B68-REGISTERS-SINKS-AND-HONEST-ANSWERS",
+      "files": [
+        "apps/union-eyes/lib/icra/observability.ts",
+        "apps/union-eyes/lib/services/__tests__/s12-registers-sinks-and-answers.test.ts"
+      ],
+      "explanation": "The sink no longer inserts into an icra_events table that nothing defines inside a try that swallowed every error; each event is a structured log record (kind, ids, hashed address, no personal identifier). Persisting events again needs its own reviewed table and retention."
+    },
+    "DEF-0B8-FED-FEDERATION-WRITES-REFUSED-NO-ROUTE-MAINTAINS-THE-REGISTER": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B68-REGISTERS-SINKS-AND-HONEST-ANSWERS",
+      "files": [
+        "apps/union-eyes/app/api/federations/route.ts",
+        "apps/union-eyes/app/api/federations/[id]/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s12-registers-sinks-and-answers.test.ts"
+      ],
+      "explanation": "The federation routes export only the read, matching the READ_ONLY governance class, so a write is a 405 instead of a configured steward write that always answered 403."
+    },
+    "DEF-0B8-FED-FLAGS-TYPE-VOCABULARY-ORGANIZATION-NOT-EVALUATED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B68-REGISTERS-SINKS-AND-HONEST-ANSWERS",
+      "files": [
+        "apps/union-eyes/lib/services/feature-flags.ts",
+        "apps/union-eyes/lib/services/__tests__/s12-registers-sinks-and-answers.test.ts"
+      ],
+      "explanation": "The evaluator handles the documented organization flag type as well as the earlier tenant spelling, so an organization flag is no longer answered disabled as an unknown type."
+    },
+    "DEF-0B9-ML-SLA-FEEDBACK-PILOT-EVENT-IS-AN-AWAITED-POST-COMMIT-WRITE-THROUGH-THE-BARE-DB": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B68-REGISTERS-SINKS-AND-HONEST-ANSWERS",
+      "files": [
+        "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/feedback/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s12-registers-sinks-and-answers.test.ts"
+      ],
+      "explanation": "The pilot event after the committed feedback is caught and logged, so a telemetry failure no longer turns a recorded result into an error response."
+    },
+    "DEF-0B9-ORG-ORGANIZATION-ROW-FACADES-CONFIGURE-STEWARD-WRITES-OVER-ORGANIZATIONS-REFUSED-ONLY-BY-GOVERNANCE-LIST": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B68-REGISTERS-SINKS-AND-HONEST-ANSWERS",
+      "files": [
+        "apps/union-eyes/app/api/organizations/[id]/access-logs/route.ts",
+        "apps/union-eyes/app/api/organizations/[id]/sharing-settings/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s12-registers-sinks-and-answers.test.ts"
+      ],
+      "explanation": "Verified in source: both routes are explicit admin reads that answer 501 for their own organization and 403 otherwise, with no generic organizations write configured."
+    },
+    "DEF-0B10-PEN-RETIREMENT-ELIGIBILITY-IS-A-YEARS-OF-SERVICE-COMPARISON-WITH-A-FIXED-DEFAULT-OF-25": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B68-REGISTERS-SINKS-AND-HONEST-ANSWERS",
+      "files": [
+        "apps/union-eyes/app/api/pension/retirement-eligibility/route.ts",
+        "apps/union-eyes/app/api/__tests__/pension-retirement-eligibility.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s12-registers-sinks-and-answers.test.ts"
+      ],
+      "explanation": "The threshold is required (the silent default of 25 is removed), the route is described as a years-of-service filter and the answer says it is not an eligibility determination. The PGlite test now passes the threshold and gained a required-threshold case (disclosed)."
+    },
+    "DEF-0B10-OPL-11": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B68-REGISTERS-SINKS-AND-HONEST-ANSWERS",
+      "files": [
+        "apps/union-eyes/app/api/organizations/platform-id/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s12-registers-sinks-and-answers.test.ts"
+      ],
+      "explanation": "The platform organization id is answered from the organizations table, and a deployment where that row was never provisioned is a 404 instead of a constant the table does not back."
+    },
+    "DEF-0B11-IDS-STEWARD-ROUTES-ARE-CONFIGURED-AT-THE-STEWARD-WRITE-FLOOR-AND-REFUSED-ONLY-BY-THE-GOVERNANCE-LIST": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B68-REGISTERS-SINKS-AND-HONEST-ANSWERS",
+      "files": [
+        "apps/union-eyes/app/api/stewards/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s12-registers-sinks-and-answers.test.ts"
+      ],
+      "explanation": "Verified in source: the steward routes expose only the directory read (a member-safe projection, the full audited rows for an officer) and no write is configured."
     }
   }
 }
