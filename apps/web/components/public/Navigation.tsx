@@ -19,7 +19,7 @@ const navigation = [
   { key: 'contact', href: '/contact' },
 ] as const;
 
-const appLinks = CONSOLE_URL ? [{ key: 'console' as const, href: CONSOLE_URL }] : [];
+const appLinks = CONSOLE_URL && /^https:\/\//.test(CONSOLE_URL) ? [{ key: 'console' as const, href: CONSOLE_URL }] : [];
 
 const localeLabels: Record<Locale, string> = {
   'en-CA': 'EN',
