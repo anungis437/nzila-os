@@ -424,7 +424,7 @@ describe('merge authority surface', () => {
     const inventory = ci.jobs['repository-inventory'].steps.map(
       (step: { name?: string }) => step.name,
     )
-    expect(inventory).toContain('Enforce committed inventory lock')
+    expect(inventory).toContain('Verify inventory lock structurally')
     expect(inventory).toContain('Regenerate inventory')
   })
 

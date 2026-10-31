@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "authorityOrder": [
+    "LAW_SAFETY_PRIVACY",
+    "PLATFORM_SECURITY_AND_TOOL_FABRIC",
+    "REPOSITORY_AGENTS_AND_REQUIRED_CHECKS",
+    "PRODUCT_ACCEPTANCE_AND_DECISION_CONTRACTS",
+    "CANONICAL_SKILL_PROCEDURES",
+    "AGENT_TASK_REQUEST"
+  ],
+  "denyOnConflict": true,
+  "skillMayGrantAuthority": false,
+  "mcpMayGrantAuthority": false,
+  "executionBrokerEnabled": false,
+  "installerEnabled": false,
+  "requiredOutcomeStates": [
+    "IMPLEMENTED",
+    "VERIFIED",
+    "RELEASE_AUTHORIZED"
+  ],
+  "releaseAuthorizationSource": "EXISTING_HUMAN_AND_RELEASE_GOVERNANCE",
+  "exceptionsRequireVerifiedGovernanceDecision": true,
+  "notes": "Descriptions, prompts, skills, external MCP descriptors and agent-supplied claims never grant authority. Branch protection and CI must enforce independently."
+}

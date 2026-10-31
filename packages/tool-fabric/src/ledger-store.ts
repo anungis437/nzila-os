@@ -2,6 +2,17 @@ import { auditEntrySchema, verifyChain, type AuditEntry } from '@nzila/audit'
 
 export const LEDGER_GENESIS_HASH = '0'.repeat(64)
 
+/**
+ * Trust receipts may not carry unrecognized or unhashed top-level metadata.
+ * The generic audit schema accepts trace/span identifiers for observability,
+ * but its v2 hash does not cover them. Persisting those fields in an
+ * authoritative trust receipt would allow a changed record to verify.
+ */
+export const trustLedgerAuditEntrySchema = auditEntrySchema.strict().refine(
+  entry => entry.traceId === undefined && entry.spanId === undefined,
+  { message: 'Trust ledger receipts cannot carry unhashed trace/span metadata' },
+)
+
 export interface LedgerHead {
   /** Monotonic event count for this stream, not a separately fetched count. */
   readonly revision: number
@@ -11,6 +22,25 @@ export interface LedgerHead {
 export interface LedgerSnapshot extends LedgerHead {
   /** Complete ordered stream captured atomically with revision and headHash; never a live paginated query. */
   readonly entries: readonly AuditEntry[]
+}
+
+/**
+ * Rollback witness MUST be independently administered from persistent CAS
+ * storage (separate account/secret/durability domain). Hash chains alone do
+ * not detect a fully replaced but internally valid ledger history.
+ *
+ * The host adapter must compare both the revision and hash on every read, and
+ * advance its witness with CAS after the durable append. Missing/mismatched
+ * witnesses are terminal errors; a partially committed append cannot be
+ * silently acknowledged as successful.
+ */
+export interface TrustLedgerHeadWitness {
+  verifyCurrentHead(orgId: string, head: Readonly<LedgerHead>): Promise<boolean>
+  sealCommittedHead(
+    orgId: string,
+    previous: Readonly<LedgerHead>,
+    committed: Readonly<LedgerHead>,
+  ): Promise<boolean>
 }
 
 /**
@@ -102,7 +132,7 @@ export class InMemoryAtomicTrustLedgerStore implements AtomicTrustLedgerStore {
     ) {
       throw new LedgerConflictError('Entry does not extend the expected trust ledger head')
     }
-    if (!auditEntrySchema.safeParse(entry).success || !verifyChain([...entries, entry], { requireFullCoverage: true }).valid) {
+    if (!trustLedgerAuditEntrySchema.safeParse(entry).success || !verifyChain([...entries, entry], { requireFullCoverage: true }).valid) {
       throw new LedgerConflictError('Entry has invalid audit integrity')
     }
     entries.push(structuredClone(entry))

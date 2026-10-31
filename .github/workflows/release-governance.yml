@@ -59,7 +59,9 @@ jobs:
     environment: staging
     steps:
       - name: Staging gate placeholder
-        run: echo "Staging gate check passed"
+        run: |
+          echo "::error::Staging environment selection is not release certification. A verified deployment and evidence gate must be wired before this job can pass."
+          exit 1
 
   production-gate:
     if: github.event_name == 'workflow_dispatch'
@@ -69,4 +71,6 @@ jobs:
       name: production
     steps:
       - name: Production approval gate placeholder
-        run: echo "Production gate approved"
+        run: |
+          echo "::error::Production approval cannot be represented by a placeholder. Governed runtime evidence and required human authority must be verified."
+          exit 1

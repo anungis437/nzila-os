@@ -15,14 +15,16 @@
  */
 import { createHash, randomUUID } from 'node:crypto'
 import { z } from 'zod'
-import { auditEntrySchema, computeAuditHash, verifyChain, type AuditEntry, type AuditStore } from '@nzila/audit'
+import { computeAuditHash, verifyChain, type AuditEntry, type AuditStore } from '@nzila/audit'
 
 import {
   DenyOnlyAtomicTrustLedgerStore,
   LedgerDuplicateError,
   LedgerStoreUnavailableError,
+  trustLedgerAuditEntrySchema,
   type AtomicTrustLedgerStore,
   type LedgerSnapshot,
+  type TrustLedgerHeadWitness,
 } from './ledger-store'
 
 import {
@@ -154,6 +156,11 @@ export interface LedgerOptions {
   /** Trusted host DI only. Never deserialize either adapter from a request. */
   readonly mutationAuthority?: LedgerMutationAuthority
   readonly governanceVerifier?: GovernanceDecisionVerifier
+  /**
+   * Mandatory for a persistent trust store. Independent of the ledger DB;
+   * otherwise an attacker can roll back the entire valid hash chain.
+   */
+  readonly headWitness?: TrustLedgerHeadWitness
 }
 
 export type LedgerMutationOperation = 'register' | 'decide' | 'observe' | 'reaffirm'
@@ -222,7 +229,34 @@ export class ToolTrustLedger {
       typeof store.readSnapshot !== 'function' ||
       typeof store.compareAndAppend !== 'function'
     ) throw new LedgerStoreUnavailableError('A coherent atomic snapshot/CAS store is required; AuditStore alone is unsafe')
+    if (store.persistence !== 'NON_DURABLE_CONTRACT_ONLY' &&
+        store.persistence !== 'HOST_ATTESTED_PERSISTENT') {
+      throw new LedgerStoreUnavailableError('Unrecognized trust ledger persistence mode')
+    }
+    if (store.persistence === 'HOST_ATTESTED_PERSISTENT' &&
+        (!this.options.headWitness ||
+         typeof this.options.headWitness.verifyCurrentHead !== 'function' ||
+         typeof this.options.headWitness.sealCommittedHead !== 'function')) {
+      throw new LedgerStoreUnavailableError('Persistent trust ledger requires independent rollback witness')
+    }
     return store as AtomicTrustLedgerStore
+  }
+
+  private async requireWitness(
+    head: { revision: number; headHash: string },
+  ): Promise<void> {
+    if (this.atomicStore().persistence !== 'HOST_ATTESTED_PERSISTENT') return
+    let matches = false
+    try {
+      matches = await this.options.headWitness!.verifyCurrentHead(
+        TOOL_TRUST_LEDGER_ORG,
+        Object.freeze({ ...head }),
+      )
+    } catch {
+      // An unavailable anchor is not permission to accept a self-consistent
+      // but rolled-back store.
+    }
+    if (!matches) throw new LedgerIntegrityError('TRUST_LEDGER_ROLLBACK_WITNESS_MISMATCH')
   }
 
   private async loadSnapshot(): Promise<{ registry: ToolRegistry; snapshot: LedgerSnapshot }> {
@@ -233,10 +267,13 @@ export class ToolTrustLedger {
       snapshot.revision !== snapshot.entries.length ||
       snapshot.headHash !== (snapshot.entries.at(-1)?.hash ?? GENESIS)
     ) throw new LedgerIntegrityError('Incomplete or incoherent trust ledger snapshot')
+    // Cross-check a separately managed high-watermark BEFORE replay. It must
+    // include both revision and hash, never just an event count.
+    await this.requireWitness({ revision: snapshot.revision, headHash: snapshot.headHash })
     const entries = snapshot.entries
     const ids = new Set<string>()
     for (const entry of entries) {
-      if (!auditEntrySchema.safeParse(entry).success || entry.orgId !== TOOL_TRUST_LEDGER_ORG || ids.has(entry.id)) {
+      if (!trustLedgerAuditEntrySchema.safeParse(entry).success || entry.orgId !== TOOL_TRUST_LEDGER_ORG || ids.has(entry.id)) {
         throw new LedgerIntegrityError('Malformed, duplicate or cross-stream audit entry')
       }
       ids.add(entry.id)
@@ -504,6 +541,21 @@ export class ToolTrustLedger {
     )
     if (committed.revision !== seq || committed.headHash !== entry.hash) {
       throw new LedgerIntegrityError('Atomic store returned an invalid commit receipt')
+    }
+    if (this.atomicStore().persistence === 'HOST_ATTESTED_PERSISTENT') {
+      // Durable append may already have committed; failure to advance the
+      // independent anchor MUST be visible as failure (no false success).
+      let sealed = false
+      try {
+        sealed = await this.options.headWitness!.sealCommittedHead(
+          TOOL_TRUST_LEDGER_ORG,
+          Object.freeze({ revision: snapshot.revision, headHash: snapshot.headHash }),
+          Object.freeze({ revision: committed.revision, headHash: committed.headHash }),
+        )
+      } catch {
+        // Preserve fail-closed status across inconsistent crash boundaries.
+      }
+      if (!sealed) throw new LedgerIntegrityError('TRUST_LEDGER_WITNESS_SEAL_FAILED')
     }
     return entry
   }

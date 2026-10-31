@@ -54,6 +54,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      # P0 governance is a prerequisite of the existing mandatory classifier.
+      # This does not create a new optional/advisory status context.
+      - name: Verify engineering authority and outcome boundaries
+        run: |
+          node scripts/engineering/p0-static-guard.mjs
+          node --test scripts/engineering/p0-static-guard.test.mjs
+          node --test scripts/release/verify-promotion-evidence.test.mjs
+          node --test scripts/release/verify-staging-run.test.mjs
+          node --test scripts/release/verify-production-approval.test.mjs
+          node --test scripts/release/artifact-tree.test.mjs
+
       - name: Classify changed paths once
         id: plan
         run: |
@@ -550,6 +561,18 @@ jobs:
       - name: GA gate check
         run: pnpm exec tsx tooling/ga-check/ga-check.ts
 
+      # P0 #1036. Required checks alone do not enforce real human code review.
+      # Fail closed until administrator fixes active ruleset and team ownership.
+      - name: Verify actual CODEOWNER review enforcement
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "repos/${GITHUB_REPOSITORY}" > "$RUNNER_TEMP/repository.json"
+          gh api "repos/${GITHUB_REPOSITORY}/rulesets/12952284" > "$RUNNER_TEMP/branch-ruleset.json"
+          node --test scripts/engineering/verify-review-ruleset.test.mjs
+          node scripts/engineering/verify-review-ruleset.mjs "$RUNNER_TEMP/repository.json" "$RUNNER_TEMP/branch-ruleset.json" CODEOWNERS
+
       - name: Governance fail-closed gate
         run: pnpm exec tsx tooling/governance/validate-governance-gate.ts
 
@@ -769,12 +792,39 @@ jobs:
     if: needs.classify.outputs.ops_pack_validation == 'APPLICABLE'
     runs-on: ubuntu-latest
     name: Ops Documentation Pack
+    permissions:
+      contents: read
+      actions: read
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
+      # The committed snapshot is historical evidence, not a seven-day
+      # subscription to new data. Recompute from real sources every CI run.
+      - name: Prove operational evidence generator fails truthfully
+        run: node --test tooling/scripts/generate-ops-evidence.test.mjs
+      - name: Prove ops metrics cannot launder stale observations
+        run: node --import tsx --test tooling/ops/validate-ops-pack.test.mjs
+
+      - name: Collect current operational evidence (no synthetic values)
+        run: pnpm ops:evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+
       - name: Validate ops pack completeness
         run: pnpm tsx tooling/ops/validate-ops-pack.ts ${{ github.workspace }}
+
+      - name: Preserve generated evidence and unresolved source declarations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ops-evidence-${{ github.run_id }}
+          path: |
+            reports/ops/snapshot.json
+            reports/ops/snapshot.md
+          if-no-files-found: error
+          retention-days: 30
 
   # ─── Schema Drift Detection ───────────────────────────────────────────────
   schema-drift:
@@ -982,16 +1032,10 @@ jobs:
       - uses: ./.github/actions/setup-monorepo
       - name: Regenerate inventory
         run: pnpm inventory:generate
-      - name: Enforce committed inventory lock
-        run: |
-          DIFF=$(git diff -- tooling/repo-inventory/output/inventory.json tooling/repo-inventory/output/inventory.md tooling/repo-inventory/output/repo-inventory.json tooling/repo-inventory/output/repo-inventory.md)
-          SUBSTANTIVE=$(echo "$DIFF" | grep '^[+-]' | grep -v '^[+-][+-][+-]' | grep -Ev '"generatedAt"|Auto-generated on' || true)
-          if [ -n "$SUBSTANTIVE" ]; then
-            echo "Substantive inventory drift detected:"
-            echo "$DIFF"
-            exit 1
-          fi
-          echo "Inventory check passed (date-stamp differences ignored)"
+      - name: Test semantic inventory gate against drift and alias corruption
+        run: node --test tooling/repo-inventory/verify-inventory-lock.test.mjs
+      - name: Verify inventory lock structurally
+        run: node tooling/repo-inventory/verify-inventory-lock.mjs
 
   # Merge-critical source-tree validators extracted from Governance Gates.
   # DORA, cost, onboarding, scorecards, release proof, and runtime evidence stay out.

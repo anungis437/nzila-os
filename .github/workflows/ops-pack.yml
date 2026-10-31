@@ -9,6 +9,8 @@ on:
       - 'ARCHITECTURE.md'
       - 'SECURITY.md'
       - 'tooling/ops/**'
+      - 'tooling/scripts/generate-ops-evidence.mjs'
+      - '.github/workflows/ops-pack.yml'
   pull_request:
     branches: [main]
     paths:
@@ -17,6 +19,9 @@ on:
       - 'ARCHITECTURE.md'
       - 'SECURITY.md'
       - 'tooling/ops/**'
+      - 'tooling/scripts/generate-ops-evidence.mjs'
+      - 'tooling/scripts/generate-ops-evidence.test.mjs'
+      - '.github/workflows/ops-pack.yml'
   # Also run weekly to catch staleness
   schedule:
     - cron: '0 9 * * 1'
@@ -31,10 +36,32 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      actions: read
 
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
+      - name: Prove source freshness and outage handling
+        run: node --test tooling/scripts/generate-ops-evidence.test.mjs
+      - name: Prove ops metrics cannot launder stale observations
+        run: node --import tsx --test tooling/ops/validate-ops-pack.test.mjs
+
+      - name: Generate truthful time-stamped operational evidence
+        run: pnpm ops:evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+
       - name: Validate ops pack completeness
-        run: |
-          pnpm tsx tooling/ops/validate-ops-pack.ts ${{ github.workspace }}
+        run: pnpm tsx tooling/ops/validate-ops-pack.ts ${{ github.workspace }}
+
+      - name: Retain source-backed ops evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ops-pack-evidence-${{ github.run_id }}
+          path: |
+            reports/ops/snapshot.json
+            reports/ops/snapshot.md
+          if-no-files-found: error
+          retention-days: 30

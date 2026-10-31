@@ -22,9 +22,10 @@
  *
  * @module scripts/release-attestation
  */
-import { createHash, sign, verify, generateKeyPairSync } from 'node:crypto'
-import { writeFileSync, readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
+import { createHash, createPrivateKey, createPublicKey, sign, verify } from 'node:crypto'
+import { writeFileSync, readFileSync, existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
+import { hashDirectory } from './release/artifact-tree.mjs'
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -39,6 +40,10 @@ export interface ReleaseAttestation {
   sloGateResult: 'pass' | 'fail' | 'skipped'
   /** SHA-256 digest of the SBOM file (null if not available) */
   sbomDigest: string | null
+  /** Raw staging manifest SHA-256, binding deploy target image digests to signature */
+  manifestDigest: string | null
+  /** GitHub Actions run ID of the staging artifact build */
+  stagingRunId: string | null
   /** Trivy vulnerability scan summary */
   trivySummary: TrivySummary
   /** Secret scan summary */
@@ -115,6 +120,12 @@ function computeSbomDigest(): string | null {
   return null
 }
 
+function computeManifestDigest(): string | null {
+  const path = join(ROOT, 'artifact-manifest.json')
+  if (!existsSync(path)) return null
+  return createHash('sha256').update(readFileSync(path)).digest('hex')
+}
+
 function parseTrivyResults(): TrivySummary {
   const trivyPaths = [
     join(ROOT, 'trivy-results.json'),
@@ -158,9 +169,22 @@ function parseSecretScanResults(): SecretScanSummary {
   return { ran: false, findings: 0, clean: true }
 }
 
+function deepCanonical(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(deepCanonical)
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.keys(value as Record<string, unknown>)
+        .sort()
+        .map(key => [key, deepCanonical((value as Record<string, unknown>)[key])]),
+    )
+  }
+  return value
+}
+
 function computeAttestationDigest(attestation: Omit<ReleaseAttestation, 'attestationDigest' | 'signature'>): string {
-  const canonical = JSON.stringify(attestation, Object.keys(attestation).sort(), 0)
-  return createHash('sha256').update(canonical).digest('hex')
+  // A top-level JSON.stringify replacer drops nested security fields. Recursive
+  // canonicalisation is mandatory before signing any release evidence.
+  return createHash('sha256').update(JSON.stringify(deepCanonical(attestation))).digest('hex')
 }
 
 /**
@@ -189,29 +213,7 @@ function computeArtifactDigests(): ArtifactDigest[] {
   return digests
 }
 
-function hashDirectory(dir: string): { digest: string; fileCount: number } {
-  const hash = createHash('sha256')
-  let fileCount = 0
-
-  function walk(d: string) {
-    const entries = readdirSync(d, { withFileTypes: true })
-    for (const entry of entries) {
-      const full = join(d, entry.name)
-      if (entry.isDirectory()) {
-        if (!['node_modules', '.git', 'cache'].includes(entry.name)) {
-          walk(full)
-        }
-      } else if (entry.isFile()) {
-        const content = readFileSync(full)
-        hash.update(content)
-        fileCount++
-      }
-    }
-  }
-
-  walk(dir)
-  return { digest: hash.digest('hex'), fileCount }
-}
+// Deterministic, path-bound, domain-separated hashing is in release/artifact-tree.mjs.
 
 /**
  * Compute SHA-256 hash of the pnpm lockfile for supply-chain provenance.
@@ -231,13 +233,15 @@ function signAttestation(digest: string): string | null {
   const key = process.env.ATTESTATION_SIGNING_KEY
   if (!key) return null
 
-  try {
-    const signature = sign(null, Buffer.from(digest, 'hex'), key)
-    return signature.toString('hex')
-  } catch {
-    console.warn('⚠ Failed to sign attestation — invalid ATTESTATION_SIGNING_KEY')
-    return null
+  // RSA-512 also yields a 64-byte signature. Enforce the signing algorithm,
+  // not merely a PEM private key and an apparently valid signature length.
+  let signingKey
+  try { signingKey = createPrivateKey(key) }
+  catch { throw new Error('Invalid release attestation signing key') }
+  if (signingKey.asymmetricKeyType !== 'ed25519') {
+    throw new Error('Release attestation signing key must be Ed25519')
   }
+  return sign(null, Buffer.from(digest, 'hex'), signingKey).toString('hex')
 }
 
 /**
@@ -249,7 +253,10 @@ export function verifyAttestationSignature(
   publicKeyPem: string,
 ): boolean {
   try {
-    return verify(null, Buffer.from(digest, 'hex'), publicKeyPem, Buffer.from(signatureHex, 'hex'))
+    const key = createPublicKey(publicKeyPem)
+    return key.asymmetricKeyType === 'ed25519' &&
+      /^[0-9a-f]{64}$/i.test(digest) && /^[0-9a-f]{128}$/i.test(signatureHex) &&
+      verify(null, Buffer.from(digest, 'hex'), key, Buffer.from(signatureHex, 'hex'))
   } catch {
     return false
   }
@@ -271,6 +278,8 @@ export function generateReleaseAttestation(opts: GenerateAttestationOptions): Re
     contractTestResult: opts.contractTestResult ?? 'skipped',
     sloGateResult: opts.sloGateResult ?? 'skipped',
     sbomDigest: computeSbomDigest(),
+    manifestDigest: computeManifestDigest(),
+    stagingRunId: process.env.GITHUB_RUN_ID ?? null,
     trivySummary: parseTrivyResults(),
     secretScanSummary: parseSecretScanResults(),
     artifactDigests: computeArtifactDigests(),
@@ -281,6 +290,12 @@ export function generateReleaseAttestation(opts: GenerateAttestationOptions): Re
 
   const attestationDigest = computeAttestationDigest(base)
   const signature = signAttestation(attestationDigest)
+  // A staging artifact that cannot be independently verified must never be
+  // published as a promotable release candidate. Non-staging diagnostics may
+  // still record an unsigned (non-authoritative) report.
+  if (opts.environment === 'staging' && !signature) {
+    throw new Error('Staging release attestation requires an Ed25519 signature')
+  }
 
   return {
     ...base,

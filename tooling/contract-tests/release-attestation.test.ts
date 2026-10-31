@@ -3,13 +3,18 @@
  *
  * Enforces that:
  *   1. The release attestation generator script exists.
- *   2. All deploy workflows generate and upload attestation artifacts.
+ *   2. Build workflows generate and upload attestation artifacts;
+ *      production promotion verifies and retains the SAME signed artifact.
  *   3. Attestation includes required fields (SHA, contract test, SLO, SBOM, trivy, secret-scan).
  *
  * @invariant RELEASE_ATTESTATION_REQUIRED_001
  */
-import { readFileSync, existsSync, readdirSync } from 'node:fs'
+import { readFileSync, existsSync, readdirSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
+import { tmpdir } from 'node:os'
+import { generateKeyPairSync, sign } from 'node:crypto'
+import { generateReleaseAttestation, verifyAttestationSignature } from '../../scripts/release-attestation'
+import { assertPromotedRevision, parseArgs, parseManifestTargets, resolveAzureHealthUrl } from '../../scripts/deploy-transactional'
 import { describe, it, expect } from 'vitest'
 
 const ROOT = join(__dirname, '..', '..')
@@ -21,6 +26,32 @@ function readContent(rel: string): string {
 }
 
 describe('RELEASE_ATTESTATION_REQUIRED_001 — Release Attestation on Deploy', () => {
+  it('P0 #1038: RSA-512 cannot impersonate Ed25519 attestation verification', () => {
+    const digest = 'a'.repeat(64)
+    const payload = Buffer.from(digest, 'hex')
+    const ed = generateKeyPairSync('ed25519')
+    const rsa = generateKeyPairSync('rsa', { modulusLength: 512 })
+    const edSignature = sign(null, payload, ed.privateKey).toString('hex')
+    const rsaSignature = sign(null, payload, rsa.privateKey).toString('hex')
+    const pem = (key: typeof ed.publicKey) => key.export({ type: 'spki', format: 'pem' }).toString()
+    expect(edSignature).toHaveLength(128)
+    expect(rsaSignature).toHaveLength(128)
+    expect(verifyAttestationSignature(digest, edSignature, pem(ed.publicKey))).toBe(true)
+    expect(verifyAttestationSignature(digest, rsaSignature, pem(rsa.publicKey))).toBe(false)
+    expect(verifyAttestationSignature('invalid', edSignature, pem(ed.publicKey))).toBe(false)
+  })
+
+  it('P0 #1038: staging release cannot be generated without a signing key', () => {
+    const prior = process.env.ATTESTATION_SIGNING_KEY
+    try {
+      delete process.env.ATTESTATION_SIGNING_KEY
+      expect(() => generateReleaseAttestation({ commitSha: 'a'.repeat(40), environment: 'staging' }))
+        .toThrow(/requires an Ed25519 signature/)
+    } finally {
+      if (prior === undefined) delete process.env.ATTESTATION_SIGNING_KEY
+      else process.env.ATTESTATION_SIGNING_KEY = prior
+    }
+  })
   // 1. The generator script must exist
   it('RELEASE_ATTESTATION_REQUIRED_001: release attestation generator exists', () => {
     const script = readContent('scripts/release-attestation.ts')
@@ -67,7 +98,7 @@ describe('RELEASE_ATTESTATION_REQUIRED_001 — Release Attestation on Deploy', (
     ).toBe(true)
   })
 
-  // 2. All deploy workflows must reference release attestation
+  // 2. Build workflows generate; promotion cryptographically verifies the staged artifact
   it('RELEASE_ATTESTATION_REQUIRED_001: all deploy workflows generate release attestation', () => {
     const workflowDir = join(ROOT, '.github', 'workflows')
     if (!existsSync(workflowDir)) {
@@ -86,7 +117,16 @@ describe('RELEASE_ATTESTATION_REQUIRED_001 — Release Attestation on Deploy', (
     for (const wf of deployWorkflows) {
       const content = readContent(`.github/workflows/${wf}`)
 
-      if (!content.includes('release-attestation')) {
+      if (wf === 'deploy-production.yml') {
+        // Production promotion must not generate another self-claimed PASS.
+        // It consumes verified signed staging evidence and binds image digest.
+        if (!content.includes('verify-promotion-evidence.mjs') ||
+            !content.includes('staging-artifacts/release-attestation.json') ||
+            !content.includes('staging-artifacts/artifact-manifest.json') ||
+            !content.includes('staging-artifacts/sbom.json')) {
+          violations.push(wf)
+        }
+      } else if (!content.includes('scripts/release-attestation.ts')) {
         violations.push(wf)
       }
     }
@@ -97,7 +137,125 @@ describe('RELEASE_ATTESTATION_REQUIRED_001 — Release Attestation on Deploy', (
     ).toEqual([])
   })
 
-  // 3. Deploy workflows must upload attestation as artifact
+  it('RELEASE_ATTESTATION_REQUIRED_001: staging manifest secrets are parsed as data, not shell source', () => {
+    const staging = readContent('.github/workflows/deploy-staging.yml')
+    expect(staging).toContain('STAGING_DEPLOY_TARGETS_JSON: ${{ secrets.STAGING_DEPLOY_TARGETS_JSON }}')
+    expect(staging).toContain('<<< "$STAGING_DEPLOY_TARGETS_JSON"')
+    expect(staging).not.toMatch(/echo\s+['"]\$\{\{\s*secrets\.STAGING_DEPLOY_TARGETS_JSON/)
+    expect(staging).not.toContain('[ -n "${{ secrets.STAGING_DEPLOY_TARGETS_JSON }}" ]')
+  })
+
+  it('RELEASE_ATTESTATION_REQUIRED_001: dispatch inputs cannot inject workflow shell source', () => {
+    const production = readContent('.github/workflows/deploy-production.yml')
+    const staging = readContent('.github/workflows/deploy-staging.yml')
+    // GitHub expressions inside run: are evaluated before bash parses them.
+    // Quoting an expression does not prevent shell command substitution.
+    for (const workflow of [production, staging]) {
+      const scripts = [...workflow.matchAll(/^\s*run:\s*\|\s*\n((?: {10,}.*\n)*)/gm)]
+        .map(match => match[1]).join('\n')
+      expect(scripts).not.toMatch(/\$\{\{\s*github\.event\.inputs\./)
+      expect(scripts).not.toMatch(/\$\{\{\s*(?:steps\.resolve|needs\.verify-artifact)\.outputs\.approved_apps/)
+    }
+    expect(production).toContain('STAGING_RUN_ID_INPUT: ${{ github.event.inputs.staging_run_id }}')
+    expect(production).toContain('REQUESTED_APPS_INPUT: ${{ github.event.inputs.apps || \'all\' }}')
+    expect(staging).toContain('EMERGENCY_ACK_INPUT: ${{ github.event.inputs.emergency_ack }}')
+  })
+
+  it('P0 #1038: production digest enforcement cannot be disabled through CLI', () => {
+    expect(parseArgs(['--resource-group', 'nzila-canada-prod-rg']).requireDigestPinned).toBe(true)
+    expect(() => parseArgs(['--resource-group', 'nzila-canada-prod-rg', '--require-digest-pinned', 'false']))
+      .toThrow(/production digest pinning cannot be disabled/)
+    expect(() => parseArgs(['--resource-group', 'nzila-canada-prod-rg', '--require-digest-pinned', 'maybe']))
+      .toThrow(/Invalid --require-digest-pinned/)
+  })
+
+  it('P0 #1038: production target parsing rejects fallback, conflicting aliases, and shell payloads', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nzila-release-targets-'))
+    const manifestPath = join(dir, 'manifest.json')
+    const pinned = 'registry.example/app@sha256:' + 'a'.repeat(64)
+    const fallback = JSON.stringify([{ name: 'demo', image: pinned }])
+    const write = (deployTargets: unknown[]) => writeFileSync(manifestPath, JSON.stringify({ deployTargets }))
+    try {
+      write([])
+      expect(() => parseManifestTargets(manifestPath, fallback, true)).toThrow(/No deploy targets/)
+      write([{ name: 'demo', image: pinned }])
+      expect(parseManifestTargets(manifestPath, fallback, true)).toMatchObject([
+        { containerAppName: 'demo', image: pinned },
+      ])
+      write([{ name: 'demo', image: 'registry.example/$(touch /tmp/owned)@sha256:' + 'a'.repeat(64) }])
+      expect(() => parseManifestTargets(manifestPath, undefined, true)).toThrow(/not pinned/)
+      write([{ name: 'demo";touch /tmp/owned', image: pinned }])
+      expect(() => parseManifestTargets(manifestPath, undefined, true)).toThrow(/Noncanonical/)
+      write([{ name: 'demo', app: 'other', image: pinned }])
+      expect(() => parseManifestTargets(manifestPath, undefined, true)).toThrow(/conflicting deployment target/)
+      write([{ name: 'demo', image: pinned, imageRef: 'registry.example/other@sha256:' + 'b'.repeat(64) }])
+      expect(() => parseManifestTargets(manifestPath, undefined, true)).toThrow(/conflicting deployment image/)
+      write([{ name: 'demo', image: pinned }, { name: 'demo', image: pinned }])
+      expect(() => parseManifestTargets(manifestPath, undefined, true)).toThrow(/Duplicate Azure/)
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  it('P0 #1038: ready revision and signed image must match before a public health check can pass', () => {
+    const image = 'registry.example/app@sha256:' + 'a'.repeat(64)
+    const other = 'registry.example/app@sha256:' + 'b'.repeat(64)
+    const target = { containerAppName: 'demo', image }
+    const previous = {
+      appName: 'demo',
+      previousImage: other,
+      previousRevision: 'demo--old',
+      newImage: image,
+    }
+    const azure = (deployedImage: string, latest: unknown, ready: unknown) => ({
+      properties: {
+        template: { containers: [{ image: deployedImage }] },
+        latestRevisionName: latest,
+        latestReadyRevisionName: ready,
+      },
+    })
+    expect(assertPromotedRevision(target, previous, azure(image, 'demo--new', 'demo--new')))
+      .toBe('demo--new')
+    expect(() => assertPromotedRevision(target, previous, azure(other, 'demo--new', 'demo--new')))
+      .toThrow(/image mismatch/)
+    expect(() => assertPromotedRevision(target, previous, azure(image, 'demo--new', 'demo--old')))
+      .toThrow(/not ready/)
+    expect(() => assertPromotedRevision(target, previous, azure(image, 'demo--old', 'demo--old')))
+      .toThrow(/previous revision/)
+    expect(() => assertPromotedRevision(target, previous, azure(image, undefined, undefined)))
+      .toThrow(/Missing latest Azure revision/)
+    expect(() => assertPromotedRevision(target, previous, null))
+      .toThrow(/image mismatch/)
+  })
+
+  it('P0 #1038: a healthy third-party endpoint cannot impersonate Azure ingress', () => {
+    const target = { containerAppName: 'demo', image: 'registry.example/app@sha256:' + 'a'.repeat(64) }
+    const azure = { properties: { configuration: { ingress: {
+      fqdn: 'demo.canadacentral.azurecontainerapps.io',
+    } } } }
+    const canonical = 'https://demo.canadacentral.azurecontainerapps.io/api/health'
+    expect(resolveAzureHealthUrl(target, azure)).toBe(canonical)
+    expect(resolveAzureHealthUrl({ ...target, healthUrl: canonical }, azure)).toBe(canonical)
+    expect(() => resolveAzureHealthUrl({ ...target, healthUrl: 'https://attacker.example/api/health' }, azure))
+      .toThrow(/does not match Azure ingress/)
+    expect(() => resolveAzureHealthUrl({ ...target, healthUrl: 'http://demo.canadacentral.azurecontainerapps.io/api/health' }, azure))
+      .toThrow(/does not match Azure ingress/)
+    expect(() => resolveAzureHealthUrl({ ...target, healthPath: '//attacker.example/' }, azure))
+      .toThrow(/Invalid health path/)
+    expect(() => resolveAzureHealthUrl({ ...target, healthPath: '/api/health?skip=true' }, azure))
+      .toThrow(/Invalid health path/)
+    expect(() => resolveAzureHealthUrl(target, { properties: { configuration: { ingress: { fqdn: '127.0.0.1' } } } }))
+      .toThrow(/No canonical Azure ingress FQDN|does not match Azure ingress/)
+    expect(() => resolveAzureHealthUrl(target, {})).toThrow(/No canonical Azure ingress FQDN/)
+  })
+
+  it('P0 #1038: production Azure commands cannot interpolate signed manifest values into shell', () => {
+    const deployer = readContent('scripts/deploy-transactional.ts')
+    expect(deployer).toContain("execFileSync('az',")
+    expect(deployer).not.toContain('execSync(')
+  })
+
+  // 3. The same exact verified attestation must survive production promotion
   it('RELEASE_ATTESTATION_REQUIRED_001: deploy workflows upload attestation artifact', () => {
     const workflowDir = join(ROOT, '.github', 'workflows')
     if (!existsSync(workflowDir)) return

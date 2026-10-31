@@ -105,16 +105,20 @@ jobs:
         id: resolve
         env:
           GH_TOKEN: ${{ github.token }}
+          REQUESTED_APPS_INPUT: ${{ github.event.inputs.apps || 'all' }}
+          ZONGA_OVERRIDE_INPUT: ${{ github.event.inputs.zonga_prod_override || 'false' }}
+          STAGING_RUN_ID_INPUT: ${{ github.event.inputs.staging_run_id }}
         run: |
           set -euo pipefail
 
-          REQUESTED_APPS="${{ github.event.inputs.apps || 'all' }}"
-          ZONGA_OVERRIDE="${{ github.event.inputs.zonga_prod_override || 'false' }}"
+          # Dispatch inputs are untrusted data, not executable shell source.
+          REQUESTED_APPS="$REQUESTED_APPS_INPUT"
+          ZONGA_OVERRIDE="$ZONGA_OVERRIDE_INPUT"
           RESOLVED_JSON=$(pnpm tsx scripts/release/resolve-deploy-apps.ts --env production --apps "$REQUESTED_APPS" --zonga-override "$ZONGA_OVERRIDE")
           APPROVED_APPS=$(echo "$RESOLVED_JSON" | jq -r '.approvedApps | join(",")')
           echo "approved_apps=$APPROVED_APPS" >> "$GITHUB_OUTPUT"
 
-          SOURCE_RUN_ID="${{ github.event.inputs.staging_run_id }}"
+          SOURCE_RUN_ID="$STAGING_RUN_ID_INPUT"
           if [ -z "$SOURCE_RUN_ID" ]; then
             SOURCE_RUN_ID=$(gh run list --workflow deploy-staging.yml --branch main --status success --limit 1 --json databaseId --jq '.[0].databaseId')
           fi
@@ -122,6 +126,16 @@ jobs:
             echo "Unable to determine source staging run id"
             exit 1
           fi
+
+          # GitHub is the independent source for the workflow run identity. A
+          # caller-supplied run ID must not substitute another SHA or workflow.
+          # A successful build-only staging run is NOT a deployed/verified
+          # staging revision. GitHub must independently report a completed,
+          # successful real staging-deploy job for this exact dispatch run.
+          STAGING_WORKFLOW_ID=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/deploy-staging.yml" --jq '.id')
+          RUN_JSON=$(gh run view "$SOURCE_RUN_ID" --json databaseId,workflowDatabaseId,headSha,headBranch,workflowName,event,conclusion,status,attempt,jobs)
+          printf '%s\n' "$RUN_JSON" > "$RUNNER_TEMP/nzila-staging-run.json"
+          node scripts/release/verify-staging-run.mjs "$RUNNER_TEMP/nzila-staging-run.json" "$GITHUB_SHA" "$SOURCE_RUN_ID" "$STAGING_WORKFLOW_ID"
 
           echo "source_run_id=$SOURCE_RUN_ID" >> "$GITHUB_OUTPUT"
 
@@ -138,7 +152,9 @@ jobs:
           mkdir -p staging-artifacts
           gh run download "${{ steps.resolve.outputs.source_run_id }}" --name staging-build-artifacts --dir ./staging-artifacts
 
-      - name: Verify artifact digest
+      - name: Parse artifact manifest and apply app policy filter
+        env:
+          APPROVED_APPS: ${{ steps.resolve.outputs.approved_apps }}
         run: |
           set -euo pipefail
           test -f staging-artifacts/artifact-manifest.json
@@ -146,7 +162,7 @@ jobs:
           jq . staging-artifacts/artifact-manifest.json >/dev/null
 
           # Ensure manifest targets exist and intersect with approved production apps.
-          APPROVED='${{ steps.resolve.outputs.approved_apps }}'
+          APPROVED="$APPROVED_APPS"
           jq --arg approved "$APPROVED" '
             .deployTargets = (
               (.deployTargets // [])
@@ -162,17 +178,14 @@ jobs:
 
           echo "Artifact manifest verified"
 
-      - name: Verify SBOM
+      - name: Verify signed staging provenance and exact artifact continuity
+        env:
+          ATTESTATION_VERIFY_PUBLIC_KEY: ${{ secrets.ATTESTATION_VERIFY_PUBLIC_KEY }}
         run: |
           set -euo pipefail
-          test -f staging-artifacts/sbom.json
-          echo "SBOM verified: $(wc -c < staging-artifacts/sbom.json) bytes"
-
-      - name: Verify attestation
-        run: |
-          set -euo pipefail
-          test -f staging-artifacts/release-attestation.json
-          echo "Attestation verified"
+          # Fail closed for missing keys, invalid/unsigned or stale evidence,
+          # source SHA drift, missing independent scans or mutable images.
+          node scripts/release/verify-promotion-evidence.mjs staging-artifacts "${GITHUB_SHA}" "${{ steps.resolve.outputs.source_run_id }}"
 
       - name: Verify release signature
         run: |
@@ -200,11 +213,13 @@ jobs:
           mkdir -p staging-artifacts
           gh run download "${{ needs.verify-artifact.outputs.source_run_id }}" --name staging-build-artifacts --dir ./staging-artifacts
 
-      - name: Generate SLSA provenance
+      # A Git commit SHA is NOT a SHA-256 digest of the deployable image.
+      # Attest only the actual downloaded SBOM subject; image provenance
+      # remains a separate release prerequisite and must not be inferred.
+      - name: Attest downloaded staging SBOM
         uses: actions/attest-build-provenance@v2
         with:
-          subject-name: nzila-os
-          subject-digest: sha256:${{ github.sha }}
+          subject-path: staging-artifacts/sbom.json
 
   # ── W2-9: Human Approval Gate ──────────────────────────────────────────────
   deploy-production:
@@ -216,6 +231,40 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
+      # Environment declarations are insufficient proof of human authorization.
+      # Reject absent review rules, admin bypass, wrong run/SHA, and self-review.
+      - name: Verify authenticated independent production approval
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/nzila-production-review"
+          gh api "repos/${GITHUB_REPOSITORY}/environments/production" > "$RUNNER_TEMP/nzila-production-review/environment.json"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" > "$RUNNER_TEMP/nzila-production-review/run.json"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/approvals" > "$RUNNER_TEMP/nzila-production-review/approvals.json"
+          # Workflow display names are not unique. Resolve the canonical
+          # workflow ID through authenticated GitHub API before approval proof.
+          PRODUCTION_WORKFLOW_ID=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/deploy-production.yml" --jq '.id')
+          mkdir -p ops/deploy-evidence
+          node scripts/release/verify-production-approval.mjs "$RUNNER_TEMP/nzila-production-review" "$GITHUB_RUN_ID" "$GITHUB_SHA" "ops/deploy-evidence/production-approval-${GITHUB_RUN_ID}.json" "$PRODUCTION_WORKFLOW_ID"
+
+      # Jobs have isolated filesystems: download again after the independent
+      # GitHub Environment approval, then re-verify the exact signed artifact.
+      - name: Download approved staging artifact set
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p staging-artifacts
+          gh run download "${{ needs.verify-artifact.outputs.source_run_id }}" --name staging-build-artifacts --dir ./staging-artifacts
+
+      - name: Reverify signed artifact after human approval
+        env:
+          ATTESTATION_VERIFY_PUBLIC_KEY: ${{ secrets.ATTESTATION_VERIFY_PUBLIC_KEY }}
+        run: |
+          set -euo pipefail
+          node scripts/release/verify-promotion-evidence.mjs staging-artifacts "${GITHUB_SHA}" "${{ needs.verify-artifact.outputs.source_run_id }}"
+
       - name: Azure login (OIDC)
         uses: azure/login@v3
         with:
@@ -248,10 +297,13 @@ jobs:
           echo "✅ Resource group nzila-canada-prod-rg: ready"
 
       - name: Transactional production promotion
+        env:
+          APPROVED_APPS: ${{ needs.verify-artifact.outputs.approved_apps }}
+          PRODUCTION_DEPLOY_TARGETS_JSON: ${{ secrets.PRODUCTION_DEPLOY_TARGETS_JSON }}
         run: |
           set -euo pipefail
 
-          APPROVED='${{ needs.verify-artifact.outputs.approved_apps }}'
+          APPROVED="$APPROVED_APPS"
           jq --arg approved "$APPROVED" '
             .deployTargets = (
               (.deployTargets // [])
@@ -289,11 +341,10 @@ jobs:
             --health-delay-ms 5000 \
             --health-timeout-ms 20000 \
             --evidence-out ops/deploy-evidence/production-${{ github.run_id }}.json
-        env:
-          PRODUCTION_DEPLOY_TARGETS_JSON: ${{ secrets.PRODUCTION_DEPLOY_TARGETS_JSON }}
-
       - name: Post-deploy smoke tests
-        run: pnpm tsx scripts/release/run-smoke.ts --env production --apps "${{ needs.verify-artifact.outputs.approved_apps }}"
+        env:
+          APPROVED_APPS: ${{ needs.verify-artifact.outputs.approved_apps }}
+        run: pnpm tsx scripts/release/run-smoke.ts --env production --apps "$APPROVED_APPS"
 
       - name: Ingest GitHub Actions CI evidence
         env:
@@ -306,21 +357,23 @@ jobs:
         run: pnpm exec tsx scripts/proof/ingest-azure-runtime.ts
 
       - name: Record governance snapshot + release manifest
+        env:
+          APPROVED_APPS: ${{ needs.verify-artifact.outputs.approved_apps }}
         run: |
           set -euo pipefail
           mkdir -p ops/governance-snapshots ops/releases
 
           TAG_NAME="${GITHUB_REF#refs/tags/}"
           RELEASE_DATE=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)
-          APPROVED='${{ needs.verify-artifact.outputs.approved_apps }}'
+          APPROVED="$APPROVED_APPS"
 
           cat > ops/governance-snapshots/governance-snapshot-prod-$(date -u +%Y-%m-%d).json <<EOF
           {
             "environment": "PRODUCTION",
             "commit": "${{ github.sha }}",
-            "artifact_digest": "promoted-from-staging",
-            "sbom_hash": "promoted-from-staging",
-            "policy_engine_status": "pass",
+            "artifact_digest": "$(sha256sum staging-artifacts/sbom.json | cut -d ' ' -f 1)",
+            "sbom_hash": "$(sha256sum staging-artifacts/sbom.json | cut -d ' ' -f 1)",
+            "policy_engine_status": "not_independently_attested",
             "change_record_ref": "$TAG_NAME",
             "timestamp": "$RELEASE_DATE"
           }
@@ -355,7 +408,13 @@ jobs:
         with:
           name: production-deploy-evidence
           path: |
+            # Includes the minimal GitHub API-verified human approval receipt.
             ops/deploy-evidence/*.json
+            # Include the EXACT verified upstream attestation and image
+            # manifest, never substitute a locally asserted green report.
+            staging-artifacts/release-attestation.json
+            staging-artifacts/artifact-manifest.json
+            staging-artifacts/sbom.json
             ops/evidence/*.json
             ops/governance-snapshots/governance-snapshot-prod-*.json
             ops/releases/release-*.json
@@ -369,7 +428,7 @@ jobs:
     needs: deploy-production
     name: Post-Deploy Housekeeping
     permissions:
-      contents: write
+      contents: read
     steps:
       - uses: actions/checkout@v5
         with:
@@ -396,10 +455,15 @@ jobs:
       - name: Generate portfolio release dashboard
         run: pnpm exec tsx scripts/release/portfolio-dashboard.ts --output markdown
 
-      - name: Commit post-deploy artifacts
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add CHANGELOG.md docs/ops/release-status.md || true
-          git diff --cached --quiet || git commit -m "docs: update changelog and release dashboard [skip ci]"
-          git push origin HEAD:main || true
+      # Do not push directly to a protected branch or silently ignore a
+      # rejected push. Publish the generated outputs as run-scoped evidence;
+      # any repository update must use a separately reviewed pull request.
+      - name: Retain post-deploy documentation artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-post-deploy-${{ github.run_id }}
+          path: |
+            CHANGELOG.md
+            docs/ops/release-status.md
+          if-no-files-found: error
+          retention-days: 365

@@ -1,0 +1,120 @@
+name: Tool Fabric PostgreSQL Trust Ledger Contract
+
+on:
+  pull_request:
+    paths:
+      - 'packages/tool-fabric/sql/**'
+      - '.github/workflows/tool-fabric-pg-contract.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'packages/tool-fabric/sql/**'
+      - '.github/workflows/tool-fabric-pg-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  postgres-trust-ledger:
+    name: PostgreSQL trust receipt immutability (contract only)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: tool_fabric_contract
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d tool_fabric_contract"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: tool_fabric_contract
+    steps:
+      - uses: actions/checkout@v5
+      - name: Ensure PostgreSQL client exists
+        run: |
+          set -euo pipefail
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y postgresql-client
+          fi
+      - name: Apply governed migration scripts to ephemeral PostgreSQL 16 only
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/001_trust_ledger_pg.sql
+          psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/002_trust_ledger_pg_immutability.sql
+          psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/003_trust_ledger_pg_commit_guard.sql
+      - name: Verify append-only receipts and monotonic head CAS on live PostgreSQL
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/test_trust_ledger_pg.sql
+      - name: Prove durable append and orphan denial across PostgreSQL sessions
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/test_trust_ledger_pg_durable.sql
+          # This is a NEW psql process/connection. It verifies committed rows,
+          # not a database restart, PITR, external witness, or broker authority.
+          observed="$(psql -X -At -v ON_ERROR_STOP=1 -c "SELECT
+            s.revision = 2 AND s.head_hash = repeat('2',64)
+            AND (SELECT count(*) FROM tool_fabric_trust_entry e
+                 WHERE e.stream_id = s.stream_id) = 2
+            AND (SELECT entry_hash FROM tool_fabric_trust_entry e
+                 WHERE e.stream_id = s.stream_id AND e.seq = 2) = repeat('2',64)
+            FROM tool_fabric_trust_stream s
+            WHERE s.stream_id = 'platform:tool-fabric:trust'")"
+          test "$observed" = "t"
+
+      - name: Verify committed trust receipts survive an actual PostgreSQL restart (ephemeral CI only)
+        run: |
+          set -euo pipefail
+          # Restart only this job's uniquely identified PostgreSQL service.
+          # A new psql connection alone does not prove restart persistence.
+          mapfile -t postgres_ids < <(docker ps --filter 'ancestor=postgres:16' --format '{{.ID}}')
+          if [ "${#postgres_ids[@]}" -ne 1 ]; then
+            echo "::error::Expected exactly one ephemeral PostgreSQL 16 service container"
+            exit 1
+          fi
+          docker restart "${postgres_ids[0]}"
+          ready=false
+          for attempt in $(seq 1 30); do
+            if pg_isready -q -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE"; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" != true ]; then
+            echo "::error::PostgreSQL did not recover after service restart"
+            exit 1
+          fi
+          # A fresh connection must observe both committed receipts, the
+          # matching head, and no orphan from the rejected transaction.
+          observed="$(psql -X -At -v ON_ERROR_STOP=1 -c "SELECT
+            s.revision = 2
+            AND s.head_hash = repeat('2',64)
+            AND (SELECT count(*) FROM tool_fabric_trust_entry e
+                 WHERE e.stream_id = s.stream_id) = 2
+            AND (SELECT count(*) FROM tool_fabric_trust_entry e
+                 WHERE e.stream_id = s.stream_id AND e.seq > s.revision) = 0
+            AND (SELECT entry_hash FROM tool_fabric_trust_entry e
+                 WHERE e.stream_id = s.stream_id AND e.seq = 2) = repeat('2',64)
+            FROM tool_fabric_trust_stream s
+            WHERE s.stream_id = 'platform:tool-fabric:trust'")"
+          if [ "$observed" != "t" ]; then
+            echo "::error::PostgreSQL restart changed durable trust receipts or head"
+            exit 1
+          fi
+
+      - name: Verify serialized concurrent CAS under PostgreSQL row locks (ephemeral CI only)
+        run: |
+          set -euo pipefail
+          bash packages/tool-fabric/sql/test_trust_ledger_pg_concurrent.sh
