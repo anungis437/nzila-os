@@ -1,26 +1,25 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 422,
- "partial": 98,
- "outstanding": 355,
- "accountedFor": 355,
+ "corrected": 438,
+ "partial": 82,
+ "outstanding": 339,
+ "accountedFor": 339,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
    "purpose": "Scheduled and provider-driven jobs: method, secret, scheduling, replay and failure reporting",
-   "defects": 11,
+   "defects": 10,
    "severity": {
     "HIGH": 0,
     "MEDIUM": 7,
-    "LOW": 4
+    "LOW": 3
    },
    "namedRoutes": 3,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 1,
     "0B.5": 1,
-    "0B.6": 1,
     "0B.7": 1,
     "0B.8": 2,
     "0B.9": 1,
@@ -30,16 +29,15 @@
   {
    "family": "F02-PLACEHOLDER-FABRICATED-OR-NOT-IMPLEMENTED",
    "purpose": "Stubs, fabricated figures and false-success answers: return 501 or implement for real",
-   "defects": 11,
+   "defects": 10,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 11,
+    "MEDIUM": 10,
     "LOW": 0
    },
    "namedRoutes": 1,
    "namedFiles": 1,
    "tranches": {
-    "0B.3": 1,
     "0B.6": 1,
     "0B.7": 2,
     "0B.8": 1,
@@ -76,18 +74,18 @@
   {
    "family": "F04-MASS-ASSIGNMENT-AND-GENERIC-CRUD",
    "purpose": "Generic-CRUD exposure and mass assignment: allow-lists, governance classification, response projection",
-   "defects": 8,
+   "defects": 6,
    "severity": {
-    "HIGH": 2,
-    "MEDIUM": 5,
+    "HIGH": 1,
+    "MEDIUM": 4,
     "LOW": 1
    },
-   "namedRoutes": 6,
+   "namedRoutes": 4,
    "namedFiles": 2,
    "tranches": {
     "0B.3": 2,
-    "0B.9": 3,
-    "0B.11": 2,
+    "0B.9": 2,
+    "0B.11": 1,
     "0B.12": 1
    }
   },
@@ -120,10 +118,10 @@
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 66,
+   "defects": 65,
    "severity": {
     "HIGH": 3,
-    "MEDIUM": 53,
+    "MEDIUM": 52,
     "LOW": 10
    },
    "namedRoutes": 10,
@@ -133,7 +131,7 @@
     "0B.2": 3,
     "0B.3": 3,
     "0B.4": 5,
-    "0B.6": 6,
+    "0B.6": 5,
     "0B.7": 5,
     "0B.8": 9,
     "0B.9": 5,
@@ -145,24 +143,24 @@
   {
    "family": "F07-AUTHORIZATION-ROLE-FLOOR-AND-OBJECT-LEVEL",
    "purpose": "Authorization beyond a role floor: object-level ownership, sensitivity and kernel decisions",
-   "defects": 25,
+   "defects": 21,
    "severity": {
     "HIGH": 4,
-    "MEDIUM": 20,
+    "MEDIUM": 16,
     "LOW": 1
    },
-   "namedRoutes": 4,
+   "namedRoutes": 3,
    "namedFiles": 2,
    "tranches": {
     "0B.1": 1,
     "0B.3": 1,
     "0B.4": 3,
     "0B.5": 4,
-    "0B.6": 2,
-    "0B.7": 6,
-    "0B.8": 3,
+    "0B.6": 1,
+    "0B.7": 5,
+    "0B.8": 2,
     "0B.9": 2,
-    "0B.10": 3
+    "0B.10": 2
    }
   },
   {
@@ -245,11 +243,11 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 76,
+   "defects": 69,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 51,
-    "LOW": 23
+    "MEDIUM": 48,
+    "LOW": 19
    },
    "namedRoutes": 11,
    "namedFiles": 0,
@@ -258,14 +256,14 @@
     "0B.2": 1,
     "0B.3": 2,
     "0B.4": 5,
-    "0B.5": 11,
-    "0B.6": 14,
-    "0B.7": 10,
+    "0B.5": 8,
+    "0B.6": 12,
+    "0B.7": 9,
     "0B.8": 10,
     "0B.9": 1,
     "0B.10": 6,
     "0B.11": 5,
-    "0B.12": 7
+    "0B.12": 6
    }
   }
  ],
@@ -279,11 +277,6 @@
    {
     "id": "DEF-0B5-COGNITION-KPI-ROI-FROM-ASSUMED-HOURS",
     "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B6-SYS-SLA-WATCHDOG-UNBOUNDED-SCAN-AND-UNAWAITED-DUPLICATE-METRICS",
-    "severity": "LOW",
-    "partial": true
    },
    {
     "id": "DEF-0B7-PLT-EQUITY-SNAPSHOT-SCHEMA-HAS-NO-SMALL-CELL-RULE",
@@ -324,11 +317,6 @@
    }
   ],
   "F02-PLACEHOLDER-FABRICATED-OR-NOT-IMPLEMENTED": [
-   {
-    "id": "DEF-0B3-EXTERNAL-INVOICES-WRITE-ADVERTISED",
-    "severity": "MEDIUM",
-    "partial": true
-   },
    {
     "id": "DEF-0B6-CMP-DISPATCH-RULES-ENGINE-NEVER-APPLIED",
     "severity": "MEDIUM",
@@ -539,22 +527,12 @@
     "severity": "LOW"
    },
    {
-    "id": "DEF-0B9-MOB-PUSH-DEVICE-REGISTRATION-REQUIRES-A-STEWARD-SO-A-MEMBER-DEVICE-IS-REFUSED",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
     "id": "DEF-0B9-ASM-ONBOARDING-LOOKUP-LIBRARY-SWALLOWS-EVERY-FAILURE-INTO-AN-EMPTY-SUCCESS-RESPONSE",
     "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B11-PRP-PRECEDENT-ITEM-PATCH-WRITES-SHARING-LEVEL-SHARED-WITH-LIST-AND-SOURCE-ORGANIZATION-FROM-THE-BODY",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-SOC-X-MEDIA-URL-IS-FETCHED-BY-THE-SERVER-WITH-ONLY-A-SCHEME-CHECK-AND-THE-BODY-IS-UPLOADED-TO-THE-PLATFORM",
-    "severity": "HIGH",
-    "partial": true
    },
    {
     "id": "DEF-0B12-CRUD-BARGAINING-UNIT-CERTIFICATION-AND-REPRESENTATION-FIELDS-WRITABLE-BY-ANY-STEWARD",
@@ -962,11 +940,6 @@
     "severity": "LOW"
    },
    {
-    "id": "DEF-0B6-CMP-AUDIT-LOG-FULL-ROW-READ-BY-OFFICER",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
     "id": "DEF-0B6-SYS-RESEND-SUPPRESSION-UPDATES-ONLY-ONE-PREFERENCE-ROW",
     "severity": "MEDIUM",
     "partial": true
@@ -1206,11 +1179,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B6-EDU-SESSION-READ-EXPOSES-ACCESS-CODE-AND-COSTS",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
     "id": "DEF-0B6-EDU-CONTENT-COMPLETIONS-COUNT-ATTENDED",
     "severity": "MEDIUM"
    },
@@ -1232,18 +1200,8 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B7-PLT-EVENT-ITEM-IGNORES-PRIVATE-VISIBILITY-AND-RETURNS-MEETING-PASSWORD",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
     "id": "DEF-0B7-PLT-EVENT-ITEM-PUBLIC-REGISTRATION-CALLER-EXPECTS-PUBLIC-EVENT",
     "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B8-HS-STATUS-AND-OUTCOME-FIELDS-WRITABLE-WITHOUT-WORKFLOW",
-    "severity": "MEDIUM",
-    "partial": true
    },
    {
     "id": "DEF-0B8-FED-EXTERNAL-UPLOAD-ATTACHES-ANY-ORGANIZATION-BLOB-TO-GRIEVANCE",
@@ -1272,11 +1230,6 @@
    {
     "id": "DEF-0B10-PIL-PLATFORM-TIER-OF-THE-PILOT-ROUTES-IS-ANY-ROLE-TITLE-AT-OR-ABOVE-SYSTEM-ADMIN-LEVEL-AND-NOT-A-PLATFORM-MANDATE",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-OPL-09",
-    "severity": "MEDIUM",
-    "partial": true
    }
   ],
   "F08-PII-DISCLOSURE-AND-PROJECTION": [
@@ -1551,26 +1504,11 @@
     "partial": true
    },
    {
-    "id": "DEF-0B5-COMMITTEE-MINUTES-NO-SEPARATION-OF-DUTIES",
-    "severity": "LOW",
-    "partial": true
-   },
-   {
     "id": "DEF-0B5-COMMITTEE-INTELLIGENCE-GATHERS-ALL-COMMITTEES",
     "severity": "MEDIUM"
    },
    {
     "id": "DEF-0B5-COMMS-CAMPAIGN-DETACHED-FROM-CONSENT-AND-DELIVERY",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B5-COMMS-TEMPLATE-HARD-DELETE",
-    "severity": "LOW",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B5-COMMS-LIST-DELETE-ERASES-SUBSCRIBER-CONSENT-TRAIL",
     "severity": "MEDIUM",
     "partial": true
    },
@@ -1594,11 +1532,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B6-EDU-CONTENT-PUBLISH-NO-SEPARATION-OF-DUTIES",
-    "severity": "LOW",
-    "partial": true
-   },
-   {
     "id": "DEF-0B6-EMP-OFFICIAL-APPROVAL-UNREACHABLE",
     "severity": "MEDIUM"
    },
@@ -1609,11 +1542,6 @@
    {
     "id": "DEF-0B6-EMP-REGISTRY-ARCHIVE-IGNORES-DEPENDENTS",
     "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B6-EMP-CONTACT-PRIMARY-NOT-EXCLUSIVE",
-    "severity": "LOW",
-    "partial": true
    },
    {
     "id": "DEF-0B6-CMP-ALERT-AND-REPORT-TABLES-HAVE-NO-WRITER",
@@ -1648,11 +1576,6 @@
    {
     "id": "DEF-0B6-SYS-SLA-CLOCK-RESTARTS-ON-ANY-CLAIM-UPDATE",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-EXC-SEPARATION-OF-DUTIES-ONLY-AGAINST-THE-CREATOR",
-    "severity": "MEDIUM",
-    "partial": true
    },
    {
     "id": "DEF-0B7-EXC-GRAPH-QUERY-ACCEPTS-FILTERS-AND-EXPLANATION-LEVEL-IT-NEVER-READS",
@@ -1781,11 +1704,6 @@
    {
     "id": "DEF-0B11-IDS-SATISFACTION-ANONYMITY-FLAG-IS-STORED-AND-NEVER-READ-WHILE-THE-FORM-PROMISES-THE-NAME-IS-HIDDEN",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-PLT-KPI-HEALTH-TREATS-A-LOWER-FIGURE-AS-WORSE-FOR-EVERY-TARGET",
-    "severity": "MEDIUM",
-    "partial": true
    },
    {
     "id": "DEF-0B12-PLT-KPI-CALCULATION-AND-ALERT-FLAG-ARE-STORED-AND-APPLIED-BY-NO-CODE",

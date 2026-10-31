@@ -95,6 +95,7 @@ export const committeeMeetings = pgTable(
     minutes: text('minutes'),        // Post-meeting minutes (markdown/rich text)
     minutesApprovedBy: text('minutes_approved_by').references(() => profiles.userId),
     minutesApprovedAt: timestamp('minutes_approved_at', { withTimezone: true }),
+  minutesRecordedBy: text('minutes_recorded_by'),
 
     // Attendance summary
     quorumMet: boolean('quorum_met'),

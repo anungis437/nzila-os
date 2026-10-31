@@ -41,7 +41,7 @@ export const PATCH = withApi(
     return withRLSContext({ organizationId: orgId }, async (tx) => {
       // Lock the row so the transition is validated against the state it will be applied to
       const result = await tx.execute(sql`
-        SELECT id, status, title, updated_by FROM cms_pages
+        SELECT id, status, title, updated_by, submitted_by FROM cms_pages
         WHERE id = ${itemId}::uuid AND organization_id = ${orgId}::uuid
         LIMIT 1
         FOR UPDATE
@@ -74,11 +74,13 @@ export const PATCH = withApi(
       }
 
       // Whoever moved an item to review (or last edited it) is not the person who approves it for publication.
-      if (currentStatus === 'review' && newStatus === 'published' && current.updated_by === userId) {
+      const submitter = (current.submitted_by ?? current.updated_by) as string | null;
+      if (currentStatus === 'review' && newStatus === 'published' && submitter === userId) {
         throw ApiError.forbidden('The person who prepared this item for review cannot publish it');
       }
 
       // The first publication time is kept: republishing does not rewrite it.
+      const submittedClause = newStatus === 'review' ? sql`, submitted_by = ${userId}` : sql``;
       const publishedClause = newStatus === 'published'
         ? sql`, published_at = coalesce(published_at, now())`
         : sql``;
@@ -88,6 +90,7 @@ export const PATCH = withApi(
         SET status = ${newStatus},
             updated_by = ${userId},
             updated_at = now()
+            ${submittedClause}
             ${publishedClause}
         WHERE id = ${itemId}::uuid AND organization_id = ${orgId}::uuid AND status = ${currentStatus}
         RETURNING id

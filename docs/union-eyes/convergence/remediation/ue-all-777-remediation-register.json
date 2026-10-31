@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 422,
-    "engineeringRemaining": 355,
+    "engineeringCorrected": 438,
+    "engineeringRemaining": 339,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 98
+    "engineeringPartial": 82
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -1703,11 +1703,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B12-F02-FINANCE-CBA-COMPLIANCE-ICRA-ONBOARDING",
-        "path": "apps/union-eyes/app/api/billing/invoices/route.ts; apps/union-eyes/lib/api/crud-governance.ts; apps/union-eyes/lib/api/__tests__/roster-facades.contract.test.ts; apps/union-eyes/db/__tests__/rls-storage-authority-round39-contained-cohort.test.ts",
-        "explanation": "An external invoice is a copy of a provider record, and nothing ingests one. The collection keeps its mandate-checked read; POST answers 501 instead of writing a hand-made financial row through the generic factory, and the table's governance entry was removed with its last binding. The round-39 cohort ratchet that required a crud-factory route for the table was rewritten to require the mandate-checked read and the absence of the factory.",
-        "remaining": "The storage-authority manifest still lists INSERT for the tenant runtime role on external_invoices, which nothing in the tenant runtime now uses; reducing it needs a grant migration and is not done.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B30-F09-F10-LIMITS-REPLAY-REMITTANCE-AND-CANCEL-CONTRACT",
+        "path": "apps/union-eyes/app/api/billing/invoices/route.ts; apps/union-eyes/lib/api/__tests__/f10-financial-shape.contract.test.ts",
+        "explanation": "The invoice create path answers 501 stating that invoices are ingested from the provider; the contract test pins that it never inserts.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -3928,10 +3927,10 @@
       "closed": false,
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
-        "path": "apps/union-eyes/app/api/committees/route.ts; apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts",
-        "explanation": "Internal working fields are no longer returned to every member.",
-        "remaining": "A committee is still listed to every member of the organization: there is no committee-membership scope on the generic read.",
+        "batch": "B37-F07-COMMITTEE-WORKING-RECORD-AND-VERIFIED-OBJECT-READS",
+        "path": "apps/union-eyes/lib/services/committee-read-access.ts; apps/union-eyes/lib/services/__tests__/committee-read-access.test.ts; apps/union-eyes/app/api/committees/[id]/action-items/route.ts; apps/union-eyes/app/api/committees/[id]/documents/route.ts; apps/union-eyes/app/api/committees/[id]/meetings/route.ts; apps/union-eyes/app/api/committees/[id]/meetings/[meetingId]/route.ts; apps/union-eyes/app/api/committees/[id]/meetings/[meetingId]/attendance/route.ts; apps/union-eyes/lib/api/__tests__/f07-b37-object-access.contract.test.ts",
+        "explanation": "The five committee read routes (meetings, meeting detail, attendance, action items, documents) require the committee to be the organization's and the reader to be staff or an active member of that committee; any other member gets the not-found answer. Tests cover staff, an active member, an outsider, no identity and another organization's committee.",
+        "remaining": "The committee directory entry itself stays readable by every member (without notes), and the minutes read is steward-level but not checked against membership.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -4001,11 +4000,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B55-F12-WORKFLOW-INTEGRITY-APPROVAL-LOCKS-AND-ATOMIC-UNSUBSCRIBE",
-        "path": "apps/union-eyes/app/api/committees/[id]/meetings/[meetingId]/minutes/route.ts; apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts",
-        "explanation": "The person who last edited the meeting record, which includes recording the minutes, cannot approve them (403).",
-        "remaining": "The table records no separate recorder, so the last editor stands in for the recorder; a recordedBy column is the proper fix.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
+        "path": "apps/union-eyes/lib/services/committee-workspace-service.ts; apps/union-eyes/app/api/committees/[id]/meetings/[meetingId]/minutes/route.ts; apps/union-eyes/db/schema/committee-workspace-schema.ts; apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.sql; apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.rollback.sql; apps/union-eyes/db/__tests__/platform-0038-gate0-integrity-columns.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s1-schema-closure.test.ts",
+        "explanation": "Migration 0038 adds committee_meetings.minutes_recorded_by and a check that the approver is not the recorder. Recording the minutes stores the recorder and approval refuses that person (403); a meeting recorded before the column existed falls back to its last editor.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -4174,11 +4172,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
-        "path": "apps/union-eyes/app/api/communications/templates/[id]/route.ts; apps/union-eyes/app/api/messaging/templates/[id]/route.ts; apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts",
-        "explanation": "Both message-template item routes declare retainOnDelete: DELETE answers 409 and the template (and the campaign links it keeps) survives.",
-        "remaining": "No archive or withdrawal action exists yet, so a template can no longer be removed through the API.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
+        "path": "apps/union-eyes/lib/api/crud-factory.ts; apps/union-eyes/app/api/communications/templates/[id]/route.ts; apps/union-eyes/app/api/messaging/templates/[id]/route.ts; apps/union-eyes/app/api/communications/templates/route.ts; apps/union-eyes/app/api/messaging/templates/route.ts; apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.sql; apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.rollback.sql; apps/union-eyes/db/__tests__/platform-0038-gate0-integrity-columns.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s1-schema-closure.test.ts",
+        "explanation": "No schema change was needed: the tables already carry is_active. The shared CRUD factory gains archiveColumn, so DELETE archives the template (is_active false, audited) instead of removing it, and the collections list active templates only. The B53 retain-on-delete pin was replaced by an archive pin (disclosed).",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -4223,11 +4220,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
-        "path": "apps/union-eyes/app/api/communications/distribution-lists/[id]/route.ts; apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts",
-        "explanation": "The distribution-list item route declares retainOnDelete, so a delete can no longer cascade away the subscribed, unsubscribed and unsubscribe-reason history of the list.",
-        "remaining": "No archive action exists yet.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
+        "path": "apps/union-eyes/lib/api/crud-factory.ts; apps/union-eyes/app/api/communications/distribution-lists/[id]/route.ts; apps/union-eyes/app/api/communications/distribution-lists/route.ts; apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.sql; apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.rollback.sql; apps/union-eyes/db/__tests__/platform-0038-gate0-integrity-columns.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s1-schema-closure.test.ts",
+        "explanation": "DELETE of a distribution list now archives it (is_active false), so the cascade that erased the subscribed, unsubscribed and unsubscribe-reason trail can no longer fire through the API; the collection lists active lists only.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -4799,11 +4795,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B37-F07-COMMITTEE-WORKING-RECORD-AND-VERIFIED-OBJECT-READS",
         "path": "apps/union-eyes/app/api/education/sessions/route.ts; apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts",
-        "explanation": "The virtual-meeting access code, session budget and actual cost are omitted from every session response.",
-        "remaining": "The factory has no per-role column view, so staff also cannot read the cost columns through this route.",
+        "explanation": "A session read omits the virtual-meeting access code and the session budget and actual cost (existing implementation, pinned by the F07 contract test).",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -5046,11 +5041,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B56-F12-CONTENT-PUBLISH-AND-REGISTRATION-RULES",
-        "path": "apps/union-eyes/app/api/content/templates/[id]/status/route.ts; apps/union-eyes/app/api/__tests__/content-template-status.route.test.ts; apps/union-eyes/lib/services/__tests__/b56-content-registration.test.ts",
-        "explanation": "Moving an item from review to published is refused for the person who last changed it (who moved it to review), and republishing no longer rewrites the first publication time (coalesce). Existing status route tests pass.",
-        "remaining": "The row records only its last editor, not a separate submitter; a submitted_by column is the proper fix.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
+        "path": "apps/union-eyes/app/api/content/templates/[id]/status/route.ts; apps/union-eyes/db/schema/cms-website-schema.ts; apps/union-eyes/db/schema/domains/infrastructure/cms.ts; apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.sql; apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.rollback.sql; apps/union-eyes/db/__tests__/platform-0038-gate0-integrity-columns.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s1-schema-closure.test.ts",
+        "explanation": "Migration 0038 adds cms_pages.submitted_by. Moving an item to review records who did it, and publication is refused for that person, with the last-editor fallback only for earlier rows. Existing status tests pass.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -5461,11 +5455,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B54-F12-REFERENCES-AND-FIGURES-STATE-WHAT-THEY-ARE",
-        "path": "apps/union-eyes/app/api/employers/communications/contacts/route.ts; apps/union-eyes/lib/kpi/__tests__/b54-references-and-figures.test.ts",
-        "explanation": "Adding a primary contact demotes the employer previous primary contact in the same transaction, so at most one is primary per create.",
-        "remaining": "No unique index enforces it, so two concurrent creates could still both be primary.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
+        "path": "apps/union-eyes/app/api/employers/communications/contacts/route.ts; apps/union-eyes/lib/db/unique-violation.ts; apps/union-eyes/db/schema/domains/communications/employer-communications.ts; apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.sql; apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.rollback.sql; apps/union-eyes/db/__tests__/platform-0038-gate0-integrity-columns.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s1-schema-closure.test.ts",
+        "explanation": "Migration 0038 adds a partial unique index so an employer has at most one active primary contact; it refuses to apply over an employer that already has two. The create keeps its in-transaction demotion and answers a lost race with 409. Proven on PGlite, including the refusal over existing duplicates.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -5486,11 +5479,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B28-F12-F06-COMPLIANCE-VERDICTS-AND-UNSCOPED-AGGREGATES",
-        "path": "apps/union-eyes/app/api/compliance/audit-logs/route.ts; apps/union-eyes/app/api/__tests__/write-routes-atomic-audit.route.test.ts",
-        "explanation": "The organization audit records are read at the administrator floor, tenant-scoped, bounded to 100 and read-audited (upstream's change, existing test).",
-        "remaining": "The read still returns the whole audit row; a field projection for the administrator view is not defined.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B35-F06-AUDIT-READS-ALIASES-AND-READ-ONLY-GETS",
+        "path": "apps/union-eyes/app/api/compliance/audit-logs/route.ts; apps/union-eyes/lib/api/__tests__/f06-b35-records.contract.test.ts",
+        "explanation": "The organization audit-log list names eight columns (who, what, which resource, severity, outcome, time) and no longer serves the captured old and new values, network address, user agent, session and correlation ids, metadata, error text or archive path. The read is still audited in the same transaction.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -6765,11 +6757,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B06-SLA-OBSERVABILITY-CALENDAR",
-        "path": "apps/union-eyes/app/api/cron/sla-watchdog/route.ts; apps/union-eyes/lib/workflow/sla-alerts.ts",
-        "explanation": "The scan is keyset-paged (500 per page, bounded page count that fails the run rather than truncating silently), each claim is assessed once, and the metrics are awaited with their failures reported through the job result (500 naming the organization). Metrics are keyed by organization and clock hour.",
-        "remaining": "recordPilotMetricEvent does not deduplicate by trace id, so two runs in one hour still record two metric rows; an idempotency key needs support in @nzila/platform-pilot-metrics.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B38-F01-F09-F10-DEPRECATION-REGISTRY-AND-VERIFIED-JOBS",
+        "path": "apps/union-eyes/app/api/cron/sla-watchdog/route.ts; apps/union-eyes/app/api/__tests__/cron-sla-watchdog.route.test.ts; apps/union-eyes/lib/workflow/__tests__/sla-alerts.pglite.test.ts",
+        "explanation": "The watchdog keyset-pages the claims scan under a page cap, assesses each claim once, awaits the metric writes keyed by organization and hour, and reports a failed metric or alert write as a failed job (existing implementation, existing route and pglite tests).",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -6992,11 +6983,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B55-F12-WORKFLOW-INTEGRITY-APPROVAL-LOCKS-AND-ATOMIC-UNSUBSCRIBE",
-        "path": "apps/union-eyes/app/api/exit-interviews/[id]/review/route.ts; apps/union-eyes/app/api/__tests__/exit-interviews-review.route.test.ts; apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts",
-        "explanation": "The person who last edited or submitted an exit interview, not only its creator, cannot review it (403). Existing review tests pass.",
-        "remaining": "No submitter column exists; the last editor stands in for the submitter.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
+        "path": "apps/union-eyes/app/api/exit-interviews/[id]/submit/route.ts; apps/union-eyes/app/api/exit-interviews/[id]/review/route.ts; apps/union-eyes/db/schema/domains/infrastructure/exit-interviews.ts; apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.sql; apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.rollback.sql; apps/union-eyes/db/__tests__/platform-0038-gate0-integrity-columns.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s1-schema-closure.test.ts",
+        "explanation": "Migration 0038 adds exit_interviews.submitted_by and a check that the reviewer is not the submitter. Submitting stores the submitter and review refuses that person (403), with the last-editor fallback only for earlier rows. Existing review tests pass.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -7230,7 +7220,7 @@
       "closed": false,
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+        "batch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
         "path": "apps/union-eyes/app/api/exit-interviews/analytics/route.ts; apps/union-eyes/lib/knowledge-transfer/governance/interview-access.ts; apps/union-eyes/app/api/__tests__/exit-interviews-analytics.route.test.ts",
         "explanation": "The analytics aggregate takes a content-derived risk score only from interviews that are published, consented and at a derived-analytics level; the other derived views already read through that condition. The analytics test mocks the database, so the CASE expression is not exercised against real SQL.",
         "remaining": "The analytics SQL expression has no real-database test.",
@@ -8604,11 +8594,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
-        "path": "apps/union-eyes/app/api/events/[id]/route.ts; apps/union-eyes/app/api/calendar/events/[id]/route.ts; apps/union-eyes/app/api/__tests__/hs-calendar-tenant-privacy.contract.test.ts",
-        "explanation": "The event item routes delegate to the canonical calendar item, which applies owner, visibility and tenant predicates and selects no meeting password (upstream's change, existing contract test).",
-        "remaining": "The privacy test is a source contract; there is no real-SQL test of a private event read by a non-owner.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B37-F07-COMMITTEE-WORKING-RECORD-AND-VERIFIED-OBJECT-READS",
+        "path": "apps/union-eyes/app/api/events/[id]/route.ts; apps/union-eyes/app/api/calendar/events/[id]/route.ts; apps/union-eyes/lib/calendar/event-visibility.ts; apps/union-eyes/lib/calendar/event-visibility.test.ts; apps/union-eyes/lib/api/__tests__/f07-b37-object-access.contract.test.ts",
+        "explanation": "The legacy event item delegates to the canonical calendar route, which applies private and confidential visibility and selects no meeting password or access code.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -8743,10 +8732,10 @@
       "closed": false,
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B51-F08-SSO-CREATE-CALENDAR-TOKENS-AND-ENTITLEMENT-LIST",
-        "path": "apps/union-eyes/lib/sso/provider-input.ts; apps/union-eyes/app/api/enterprise/sso/providers/route.ts; apps/union-eyes/app/api/enterprise/sso/providers/__tests__/route.test.ts; apps/union-eyes/lib/sso/__tests__/b51-sso-entitlements.test.ts",
-        "explanation": "The SSO provider create now accepts only saml or oidc, bounds every text field, requires https URLs without credentials for the SSO URL and issuer, requires the fields of the type when the provider is to be enabled, and creates a provider disabled and without auto-provisioning unless the administrator asks otherwise. The existing route tests pass unchanged; new unit tests cover each rule.",
-        "remaining": "No unique index on organization, entity id or issuer, no proof the organization owns the identity domain, and requireGroups still cannot be set.",
+        "batch": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
+        "path": "apps/union-eyes/app/api/enterprise/sso/providers/route.ts; apps/union-eyes/db/schema/sso-scim-schema.ts; apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.sql; apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.rollback.sql; apps/union-eyes/db/__tests__/platform-0038-gate0-integrity-columns.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s1-schema-closure.test.ts",
+        "explanation": "Migration 0038 adds unique partial indexes (organization and SAML entity id; organization, OIDC issuer and client id), refusing to apply over duplicates; a duplicate create answers 409. The create now accepts requireGroups (at most 50 short names). Proven on PGlite.",
+        "remaining": "No proof that the organization owns the identity domain: that needs a DNS or e-mail verification process with the identity provider, which a schema cannot supply.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -9099,11 +9088,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B37-F07-COMMITTEE-WORKING-RECORD-AND-VERIFIED-OBJECT-READS",
         "path": "apps/union-eyes/app/api/health-safety/incidents/[id]/route.ts; apps/union-eyes/app/api/health-safety/hazards/[id]/route.ts; apps/union-eyes/app/api/health-safety/inspections/[id]/route.ts; apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts",
-        "explanation": "A PATCH can no longer set status, closure, verification, investigation outcome or scoring fields on incidents, hazards and inspections.",
-        "remaining": "No dedicated workflow route yet performs the investigation, verification and closure transitions that the blocked fields now require.",
+        "explanation": "The incident, hazard and inspection item routes block a status or outcome PATCH (existing implementation, pinned by the F07 contract test).",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -9721,10 +9709,10 @@
       "closed": false,
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B16-F09-F10-DUES-RECONCILIATION-ICRA",
+        "batch": "B38-F01-F09-F10-DEPRECATION-REGISTRY-AND-VERIFIED-JOBS",
         "path": "apps/union-eyes/app/api/icra/checkout/route.ts; apps/union-eyes/app/api/__tests__/icra-checkout.route.test.ts",
-        "explanation": "In production a missing NEXT_PUBLIC_APP_URL is a 503 with no Stripe session instead of a redirect to localhost.",
-        "remaining": "The charged amount comes from a Stripe price id or a built-in default and is not compared with the price the page displays.",
+        "explanation": "Production with no application URL refuses to open a session instead of redirecting a buyer to localhost (existing implementation and test).",
+        "remaining": "A configured Stripe price id can still differ from the amount the application displays; nothing compares them.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -11536,11 +11524,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
-        "path": "apps/union-eyes/app/api/mobile/devices/route.ts; apps/union-eyes/lib/api/crud-factory.ts",
-        "explanation": "Registration is at the member floor with an allow-list of fields, a platform check and a token check, so unknown platforms no longer reach the database enum as a 500.",
-        "remaining": "A user with no profiles row still fails the foreign key as a 500.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
+        "path": "apps/union-eyes/app/api/mobile/devices/route.ts",
+        "explanation": "The person who holds the phone registers it at the member floor, every row is the caller's own, and the token is never returned (batch B02).",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -11828,10 +11815,10 @@
       "closed": false,
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
-        "path": "apps/union-eyes/lib/services/room-booking-rules.ts; apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts",
-        "explanation": "Every stored rule (active state, hours, blocked dates, durations, advance window, allowed roles, capacity, approval) is implemented as one tested pure function (19 tests). A first route that wired it to room_bookings was withdrawn before commit because the physical room_bookings table lacks 26 declared columns and the runtime role has no grant on it, so it could never have worked; the bookings path answers 501 until that exists.",
-        "remaining": "Needs a reviewed migration that brings room_bookings to the declared shape (organization_id, booked_by, start_time, end_time, status and 21 more columns), RLS, and a storage-authority classification granting the runtime role access; then wire evaluateBooking into a bookings route under a room lock. lib/services/calendar-service.ts also still has an unused checkRoomAvailability stub that returns true.",
+        "batch": "B12-F02-FINANCE-CBA-COMPLIANCE-ICRA-ONBOARDING",
+        "path": "apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts; apps/union-eyes/lib/services/room-booking-rules.ts",
+        "explanation": "The bookings route answers 501 and reads and writes nothing; the booking rules are implemented and tested in room-booking-rules.ts.",
+        "remaining": "The physical room_bookings table lacks the columns the application declares and has no runtime grant; booking needs that migration before the rules can be wired in.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -14143,10 +14130,10 @@
       "closed": false,
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B19-PILOT-TRUTHFULNESS-SOCIAL-CONTROLS",
+        "batch": "B25-F03-ORGANIZATION-BOUND-REFERENCES-AND-VERIFIED-CREDITS",
         "path": "apps/union-eyes/app/api/pilot/bootstrap/cupe/route.ts; apps/union-eyes/app/api/__tests__/pilot-bootstrap-cupe.route.test.ts",
-        "explanation": "Existing fixture-slug organizations now require a durable route-origin marker before bootstrap/reset, and reset preserves all onboarding checklist rows. Non-fixture members and grievances are refused before deletion. This is containment, not a fully governed safe reset.",
-        "remaining": "Per-row immutable fixture provenance, changed fixture-row protection, related-record handling, dry-run and independent approval are still absent.",
+        "explanation": "The reset needs a system administrator, a pilot or demo runtime and an explicit confirmation naming the organization (upstream's change, existing test).",
+        "remaining": "Seeded rows still carry no demo marker, so a reset deletes by organization and slug rather than by marker.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -14526,11 +14513,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B21-F07-OBJECT-AUTHORITY-AND-VERIFIED-CREDITS",
-        "path": "apps/union-eyes/app/api/organizations/switch/route.ts; apps/union-eyes/app/api/__tests__/organizations-switch.route.test.ts; apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts",
-        "explanation": "The legacy switch requires an active, non-removed membership of an active organization, matching the resolver that later reads the selection; an archived organization is a 404. A platform administrator still switches without membership, as the platform mandate allows.",
-        "remaining": "The legacy route still stores nothing server side: it validates and returns metadata, and the client writes the selection cookie.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B37-F07-COMMITTEE-WORKING-RECORD-AND-VERIFIED-OBJECT-READS",
+        "path": "apps/union-eyes/app/api/organizations/switch/route.ts; apps/union-eyes/lib/api/__tests__/f07-read-authority.contract.test.ts",
+        "explanation": "A legacy organization switch needs an active, non-removed membership of an active organization (B21 implementation, pinned by the F07 contract test).",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -16092,10 +16078,10 @@
       "closed": false,
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B18-F06-AUDIT-AND-SIGNATURE-INTEGRITY",
+        "batch": "B44-F05-SIGNATURE-DISCLOSURE-AND-BOUNDED-DIRECTORY-SEARCH",
         "path": "apps/union-eyes/lib/signature/signature-service.ts; apps/union-eyes/lib/signature/__tests__/signature-service.test.ts",
-        "explanation": "Signing now refuses an expired request and, when sequential signing is set, a signer whose earlier signers have not all signed; the signer must already be the authenticated platform user. The mocked drizzle-orm in the service test gained lt.",
-        "remaining": "The stored requireAuthentication flag is not given a second factor: signing relies on the platform session only.",
+        "explanation": "Existing implementation, verified: recordSignature refuses an expired request and enforces sequential signing order, each with a test.",
+        "remaining": "The requireAuthentication option is still stored and not enforced, and nothing sets the expired status for an internal document.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -16283,11 +16269,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B19-PILOT-TRUTHFULNESS-SOCIAL-CONTROLS",
-        "path": "apps/union-eyes/lib/social-media/social-media-service.ts; apps/union-eyes/lib/social-media/__tests__/social-media-service.test.ts",
-        "explanation": "Removed all arbitrary server-side X media URL fetching and uploading; the route explicitly refuses remote media ingestion while retaining text-only X publishing. Regression cases cover metadata IPs, loopback, redirects and file schemes without invoking fetch.",
-        "remaining": "Secure verified-asset ingestion and an approved media-publishing journey must be built before X media publishing is available.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B34-F04-F12-COMPUTED-ROWS-ARE-NOT-TYPED-IN-AND-REFERENCE-FIGURES-ARE-NOT-INVENTED",
+        "path": "apps/union-eyes/lib/social-media/social-media-service.ts; apps/union-eyes/lib/social-media/linkedin-api-client.ts; apps/union-eyes/lib/social-media/__tests__/social-media-service.test.ts; apps/union-eyes/lib/social-media/__tests__/social-media-clients-full.test.ts",
+        "explanation": "X publishing refuses every remote media URL (existing refusal and test); the LinkedIn path, which does fetch a caller-supplied image, now follows no redirect, accepts only an image content type and refuses an image over 8 MB, with tests.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -17576,11 +17561,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B54-F12-REFERENCES-AND-FIGURES-STATE-WHAT-THEY-ARE",
-        "path": "apps/union-eyes/lib/kpi/health.ts; apps/union-eyes/app/api/targets/summary/route.ts; apps/union-eyes/lib/kpi/__tests__/b54-references-and-figures.test.ts",
-        "explanation": "Target health now reads its direction from the thresholds: critical above warning above target means lower is better, and the comparison flips; otherwise higher is better as before. A missing or non-finite value or target is no_data. Pure unit tests cover both directions.",
-        "remaining": "The direction is inferred from threshold order because no direction column exists; a column is the proper fix. The current value is still the latest row of the metric type.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
+        "path": "apps/union-eyes/lib/kpi/health.ts; apps/union-eyes/app/api/targets/summary/route.ts; apps/union-eyes/app/api/targets/route.ts; apps/union-eyes/db/schema/analytics.ts; apps/union-eyes/db/schema/domains/analytics/analytics.ts; apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.sql; apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.rollback.sql; apps/union-eyes/db/__tests__/platform-0038-gate0-integrity-columns.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s1-schema-closure.test.ts",
+        "explanation": "Migration 0038 adds kpi_configurations.direction (higher_is_better or lower_is_better, null for rows that predate it). A target can be created with a direction, and the summary lets a stored direction decide; only a target with none keeps the threshold-order inference. Proven on PGlite (check constraint) and by unit tests.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },

@@ -4,7 +4,7 @@
  * Enterprise identity management with SAML/OIDC SSO and SCIM 2.0 provisioning
  */
 
-import { pgTable, uuid, varchar, text, timestamp, jsonb, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, jsonb, boolean, integer, uniqueIndex } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { organizations } from "../schema-organizations";
 
@@ -64,7 +64,10 @@ export const ssoProviders = pgTable("sso_providers", {
   createdBy: varchar("created_by", { length: 255 }).notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   updatedBy: varchar("updated_by", { length: 255 }),
-});
+}, (table) => [
+  uniqueIndex("sso_providers_org_saml_entity_idx").on(table.organizationId, table.samlEntityId).where(sql`${table.samlEntityId} IS NOT NULL`),
+  uniqueIndex("sso_providers_org_oidc_issuer_client_idx").on(table.organizationId, table.oidcIssuer, table.oidcClientId).where(sql`${table.oidcIssuer} IS NOT NULL`),
+]);
 
 /**
  * SCIM Configuration Table

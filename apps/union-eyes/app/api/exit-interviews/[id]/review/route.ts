@@ -56,8 +56,10 @@ export const POST = withApi(
     }
     // Nor does whoever last changed it: the record keeps no separate submitter, so the last editor stands in for the person who prepared the
     // interview for review.
-    if (existing.updatedBy && existing.updatedBy === userId) {
-      throw ApiError.forbidden('The person who last edited or submitted an exit interview cannot review it');
+    // The submitter is recorded; an interview submitted before that was kept falls back to its last editor.
+    const submitter = existing.submittedBy ?? existing.updatedBy;
+    if (submitter && submitter === userId) {
+      throw ApiError.forbidden('The person who submitted an exit interview cannot review it');
     }
 
     const now = new Date();

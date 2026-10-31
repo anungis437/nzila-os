@@ -12,6 +12,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { AUTH_TENANT_ASSIGNABLE_ROLES } from '@nzila/db/auth-storage-authority';
 import { validateSsoProviderInput } from '@/lib/sso/provider-input';
+import { isUniqueViolation } from '@/lib/db/unique-violation';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,6 +70,7 @@ export const POST = withApi(
       roleMapping,
       autoProvision,
       enabled,
+      requireGroups,
     } = body as {
       name: string;
       providerType: string;
@@ -82,6 +84,7 @@ export const POST = withApi(
       roleMapping?: Record<string, string>;
       autoProvision?: boolean;
       enabled?: boolean;
+      requireGroups?: string[];
     };
 
     if (!name || !providerType || !attributeMapping) {
@@ -116,6 +119,11 @@ export const POST = withApi(
       ? await encryptSecret(validated.oidcClientSecret)
       : undefined;
 
+    // Groups the identity provider must assert before anyone signs in through it: a bounded list of short names.
+    if (requireGroups !== undefined && (!Array.isArray(requireGroups) || requireGroups.length > 50 || !requireGroups.every((group) => typeof group === 'string' && group.trim().length > 0 && group.length <= 255))) {
+      throw ApiError.badRequest('requireGroups must be a list of at most 50 group names');
+    }
+
     const created = await withRLSContext(async (tx) => {
     const [row] = await tx
       .insert(ssoProviders)
@@ -133,6 +141,7 @@ export const POST = withApi(
         attributeMapping,
         roleMapping,
         autoProvision: autoProvision ?? false,
+        requireGroups: requireGroups ? requireGroups.map((group) => group.trim()) : undefined,
         enabled: enabled ?? false,
       })
       .returning();
@@ -145,6 +154,10 @@ export const POST = withApi(
       details: { providerType, autoProvision: autoProvision ?? false, enabled: enabled ?? false, roleMapping: roleMapping ?? null },
     });
     return row;
+    }).catch((error) => {
+      // The unique indexes admit one provider per organization and entity id, and per organization, issuer and client.
+      if (isUniqueViolation(error)) throw ApiError.conflict('This identity provider is already configured for the organization');
+      throw error;
     });
 
     // Never echo raw credential material back to the client (same

@@ -18,7 +18,8 @@ for (const [id, entry] of Object.entries(ledger.entries)) {
   const record = byId.get(id)
   if (!record) throw new Error(`not in the 777 overlay: ${id}`)
   const existing = record.engineeringCorrection
-  if (existing && existing.batch !== entry.batch) {
+  // A partial correction is superseded by a later batch that completes it; an implemented one made by another run is kept.
+  if (existing && existing.batch !== entry.batch && existing.state !== 'PARTIAL_SOURCE_REMAINING_WORK') {
     // Another run corrected this defect first; keep its record and note the overlap.
     skipped.push(id)
     continue

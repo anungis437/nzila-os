@@ -19,6 +19,7 @@ export const POST = withApi(
       warningThreshold: z.number().optional(),
       criticalThreshold: z.number().optional(),
       alertEnabled: z.boolean().default(false),
+      direction: z.enum(['higher_is_better', 'lower_is_better']).optional(),
     }),
   },
   async ({ body, organizationId, userId }) => {
@@ -39,6 +40,7 @@ export const POST = withApi(
           warningThreshold: body.warningThreshold != null ? String(body.warningThreshold) : null,
           criticalThreshold: body.criticalThreshold != null ? String(body.criticalThreshold) : null,
           alertEnabled: body.alertEnabled,
+          direction: body.direction ?? null,
         })
         .returning();
 

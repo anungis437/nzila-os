@@ -274,6 +274,13 @@
       "when": 1758940000000,
       "tag": "0037_workaid_referral_scope",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1758950000000,
+      "tag": "0038_gate0_integrity_columns",
+      "breakpoints": true
     }
   ]
 }

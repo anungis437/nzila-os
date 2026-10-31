@@ -14,7 +14,7 @@ describe('B55 workflow integrity', () => {
 
   it('does not let the last editor of the meeting record approve its minutes (DEF-0B5-COMMITTEE-MINUTES-NO-SEPARATION-OF-DUTIES)', () => {
     const route = read('app/api/committees/[id]/meetings/[meetingId]/minutes/route.ts')
-    const guard = route.indexOf('meeting.updatedBy === userId')
+    const guard = route.indexOf('recorder === userId')
     expect(guard).toBeGreaterThan(0)
     expect(guard).toBeLessThan(route.indexOf('approveMinutes(meetingId, organizationId, userId!)'))
   })
@@ -26,7 +26,7 @@ describe('B55 workflow integrity', () => {
   })
 
   it('does not let the last editor review an interview, nor attach documents once it is reviewed (DEF-0B7-EXC-SEPARATION-OF-DUTIES-ONLY-AGAINST-THE-CREATOR, DEF-0B7-EXC-DOCUMENTS-ATTACHABLE-AFTER-REVIEW)', () => {
-    expect(read('app/api/exit-interviews/[id]/review/route.ts')).toContain('existing.updatedBy === userId')
+    expect(read('app/api/exit-interviews/[id]/review/route.ts')).toContain('submitter === userId')
     expect(read('app/api/exit-interviews/[id]/documents/route.ts')).toContain("interview.status === 'reviewed'")
   })
 

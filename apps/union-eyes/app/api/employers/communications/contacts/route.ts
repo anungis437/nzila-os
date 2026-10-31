@@ -20,6 +20,7 @@ import {
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses'
 import { eq, desc, and } from 'drizzle-orm'
+import { isUniqueViolation } from '@/lib/db/unique-violation'
 
 // ── Validation ──────────────────────────────────────────────────────────────
 
@@ -124,7 +125,9 @@ export const POST = withOrganizationAuth(async (request, context) => {
     })
 
     return standardSuccessResponse(contact)
-  } catch (_error) {
+  } catch (error) {
+    // The unique index admits one active primary contact per employer; a concurrent create that lost the race is a conflict.
+    if (isUniqueViolation(error)) return standardErrorResponse(ErrorCode.CONFLICT, 'This employer already has a primary contact')
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to add employer contact')
   }
 })

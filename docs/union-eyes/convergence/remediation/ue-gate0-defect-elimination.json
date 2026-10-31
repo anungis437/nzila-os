@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 378,
-    "partial": 89,
+    "implementedPendingQualification": 385,
+    "partial": 82,
     "qualificationVerified": 0,
-    "unresolved": 399,
+    "unresolved": 392,
     "externalBlockers": 0
   },
   "batches": [
@@ -519,6 +519,15 @@
       "newlyImplemented": 0,
       "outstandingAfter": 399,
       "partial": 2,
+      "evidenceCommit": null
+    },
+    {
+      "id": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
+      "family": "Schema closure: the columns and indexes that let earlier partial fixes record the real fact instead of approximating it",
+      "outstandingBefore": 399,
+      "newlyImplemented": 7,
+      "outstandingAfter": 392,
+      "partial": 1,
       "evidenceCommit": null
     }
   ],
@@ -4829,15 +4838,17 @@
     },
     "DEF-0B7-PLT-SSO-CREATE-STORES-UNVALIDATED-CONFIGURATION-ENABLED-BY-DEFAULT": {
       "status": "PARTIAL",
-      "batch": "B51-F08-SSO-CREATE-CALENDAR-TOKENS-AND-ENTITLEMENT-LIST",
+      "batch": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
       "files": [
-        "apps/union-eyes/lib/sso/provider-input.ts",
         "apps/union-eyes/app/api/enterprise/sso/providers/route.ts",
-        "apps/union-eyes/app/api/enterprise/sso/providers/__tests__/route.test.ts",
-        "apps/union-eyes/lib/sso/__tests__/b51-sso-entitlements.test.ts"
+        "apps/union-eyes/db/schema/sso-scim-schema.ts",
+        "apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.sql",
+        "apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.rollback.sql",
+        "apps/union-eyes/db/__tests__/platform-0038-gate0-integrity-columns.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s1-schema-closure.test.ts"
       ],
-      "explanation": "The SSO provider create now accepts only saml or oidc, bounds every text field, requires https URLs without credentials for the SSO URL and issuer, requires the fields of the type when the provider is to be enabled, and creates a provider disabled and without auto-provisioning unless the administrator asks otherwise. The existing route tests pass unchanged; new unit tests cover each rule.",
-      "remaining": "No unique index on organization, entity id or issuer, no proof the organization owns the identity domain, and requireGroups still cannot be set."
+      "explanation": "Migration 0038 adds unique partial indexes (organization and SAML entity id; organization, OIDC issuer and client id), refusing to apply over duplicates; a duplicate create answers 409. The create now accepts requireGroups (at most 50 short names). Proven on PGlite.",
+      "remaining": "No proof that the organization owns the identity domain: that needs a DNS or e-mail verification process with the identity provider, which a schema cannot supply."
     },
     "DEF-0B4-CALENDAR-TOKEN-PLAINTEXT-FALLBACK": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -4900,25 +4911,34 @@
       "explanation": "The conversation read path no longer lists every message of the organization or inserts a message row: both methods answer 501 at the officer floor. The F07 read-authority contract test listed this path among the CRUD floors and was adjusted to drop it (disclosed); the new test pins the 501."
     },
     "DEF-0B5-COMMS-TEMPLATE-HARD-DELETE": {
-      "status": "PARTIAL",
-      "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
       "files": [
+        "apps/union-eyes/lib/api/crud-factory.ts",
         "apps/union-eyes/app/api/communications/templates/[id]/route.ts",
         "apps/union-eyes/app/api/messaging/templates/[id]/route.ts",
-        "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts"
+        "apps/union-eyes/app/api/communications/templates/route.ts",
+        "apps/union-eyes/app/api/messaging/templates/route.ts",
+        "apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.sql",
+        "apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.rollback.sql",
+        "apps/union-eyes/db/__tests__/platform-0038-gate0-integrity-columns.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s1-schema-closure.test.ts"
       ],
-      "explanation": "Both message-template item routes declare retainOnDelete: DELETE answers 409 and the template (and the campaign links it keeps) survives.",
-      "remaining": "No archive or withdrawal action exists yet, so a template can no longer be removed through the API."
+      "explanation": "No schema change was needed: the tables already carry is_active. The shared CRUD factory gains archiveColumn, so DELETE archives the template (is_active false, audited) instead of removing it, and the collections list active templates only. The B53 retain-on-delete pin was replaced by an archive pin (disclosed)."
     },
     "DEF-0B5-COMMS-LIST-DELETE-ERASES-SUBSCRIBER-CONSENT-TRAIL": {
-      "status": "PARTIAL",
-      "batch": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
       "files": [
+        "apps/union-eyes/lib/api/crud-factory.ts",
         "apps/union-eyes/app/api/communications/distribution-lists/[id]/route.ts",
-        "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts"
+        "apps/union-eyes/app/api/communications/distribution-lists/route.ts",
+        "apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.sql",
+        "apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.rollback.sql",
+        "apps/union-eyes/db/__tests__/platform-0038-gate0-integrity-columns.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s1-schema-closure.test.ts"
       ],
-      "explanation": "The distribution-list item route declares retainOnDelete, so a delete can no longer cascade away the subscribed, unsubscribed and unsubscribe-reason history of the list.",
-      "remaining": "No archive action exists yet."
+      "explanation": "DELETE of a distribution list now archives it (is_active false), so the cascade that erased the subscribed, unsubscribed and unsubscribe-reason trail can no longer fire through the API; the collection lists active lists only."
     },
     "DEF-0B4-BATCH-STATUS-FABRICATED-PROCESSING": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -4979,15 +4999,20 @@
       "remaining": "Path-parent source correction and focused regression cases are committed, but executable Vitest, exact-HEAD native PostgreSQL 15/16, HTTP/browser and independent release qualification remain unverified. Do not mark CLOSED."
     },
     "DEF-0B12-PLT-KPI-HEALTH-TREATS-A-LOWER-FIGURE-AS-WORSE-FOR-EVERY-TARGET": {
-      "status": "PARTIAL",
-      "batch": "B54-F12-REFERENCES-AND-FIGURES-STATE-WHAT-THEY-ARE",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
       "files": [
         "apps/union-eyes/lib/kpi/health.ts",
         "apps/union-eyes/app/api/targets/summary/route.ts",
-        "apps/union-eyes/lib/kpi/__tests__/b54-references-and-figures.test.ts"
+        "apps/union-eyes/app/api/targets/route.ts",
+        "apps/union-eyes/db/schema/analytics.ts",
+        "apps/union-eyes/db/schema/domains/analytics/analytics.ts",
+        "apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.sql",
+        "apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.rollback.sql",
+        "apps/union-eyes/db/__tests__/platform-0038-gate0-integrity-columns.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s1-schema-closure.test.ts"
       ],
-      "explanation": "Target health now reads its direction from the thresholds: critical above warning above target means lower is better, and the comparison flips; otherwise higher is better as before. A missing or non-finite value or target is no_data. Pure unit tests cover both directions.",
-      "remaining": "The direction is inferred from threshold order because no direction column exists; a column is the proper fix. The current value is still the latest row of the metric type."
+      "explanation": "Migration 0038 adds kpi_configurations.direction (higher_is_better or lower_is_better, null for rows that predate it). A target can be created with a direction, and the summary lets a stored direction decide; only a target with none keeps the threshold-order inference. Proven on PGlite (check constraint) and by unit tests."
     },
     "DEF-0B3-TENTATIVE-AGREEMENT-REFERENCES-UNVERIFIED": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -5030,14 +5055,18 @@
       "explanation": "The inspection findings list reports a missing score as null (shown as a dash) instead of 0%. The statistics and dashboard routes already reported unmeasured values as null (existing implementation, existing tests pass)."
     },
     "DEF-0B6-EMP-CONTACT-PRIMARY-NOT-EXCLUSIVE": {
-      "status": "PARTIAL",
-      "batch": "B54-F12-REFERENCES-AND-FIGURES-STATE-WHAT-THEY-ARE",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
       "files": [
         "apps/union-eyes/app/api/employers/communications/contacts/route.ts",
-        "apps/union-eyes/lib/kpi/__tests__/b54-references-and-figures.test.ts"
+        "apps/union-eyes/lib/db/unique-violation.ts",
+        "apps/union-eyes/db/schema/domains/communications/employer-communications.ts",
+        "apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.sql",
+        "apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.rollback.sql",
+        "apps/union-eyes/db/__tests__/platform-0038-gate0-integrity-columns.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s1-schema-closure.test.ts"
       ],
-      "explanation": "Adding a primary contact demotes the employer previous primary contact in the same transaction, so at most one is primary per create.",
-      "remaining": "No unique index enforces it, so two concurrent creates could still both be primary."
+      "explanation": "Migration 0038 adds a partial unique index so an employer has at most one active primary contact; it refuses to apply over an employer that already has two. The create keeps its in-transaction demotion and answers a lost race with 409. Proven on PGlite, including the refusal over existing duplicates."
     },
     "DEF-0B5-OHS-OWNER-COLUMN-WORKERID-ABSENT": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -5069,14 +5098,18 @@
       "explanation": "A meeting update that touches decisions, agenda items, agenda or status is conditional on the minutes not yet being approved; when they are, the update answers 409 (404 only for a missing meeting). Other fields (location, link) stay editable. Existing committee tests pass; a source-contract test pins the predicate."
     },
     "DEF-0B5-COMMITTEE-MINUTES-NO-SEPARATION-OF-DUTIES": {
-      "status": "PARTIAL",
-      "batch": "B55-F12-WORKFLOW-INTEGRITY-APPROVAL-LOCKS-AND-ATOMIC-UNSUBSCRIBE",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
       "files": [
+        "apps/union-eyes/lib/services/committee-workspace-service.ts",
         "apps/union-eyes/app/api/committees/[id]/meetings/[meetingId]/minutes/route.ts",
-        "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts"
+        "apps/union-eyes/db/schema/committee-workspace-schema.ts",
+        "apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.sql",
+        "apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.rollback.sql",
+        "apps/union-eyes/db/__tests__/platform-0038-gate0-integrity-columns.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s1-schema-closure.test.ts"
       ],
-      "explanation": "The person who last edited the meeting record, which includes recording the minutes, cannot approve them (403).",
-      "remaining": "The table records no separate recorder, so the last editor stands in for the recorder; a recordedBy column is the proper fix."
+      "explanation": "Migration 0038 adds committee_meetings.minutes_recorded_by and a check that the approver is not the recorder. Recording the minutes stores the recorder and approval refuses that person (403); a meeting recorded before the column existed falls back to its last editor."
     },
     "DEF-0B5-COMMITTEE-REFERENCED-IDS-NOT-VERIFIED": {
       "status": "PARTIAL",
@@ -5092,15 +5125,18 @@
       "remaining": "A linked fileUrl is still accepted from the body without a storage-host allow-list."
     },
     "DEF-0B7-EXC-SEPARATION-OF-DUTIES-ONLY-AGAINST-THE-CREATOR": {
-      "status": "PARTIAL",
-      "batch": "B55-F12-WORKFLOW-INTEGRITY-APPROVAL-LOCKS-AND-ATOMIC-UNSUBSCRIBE",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
       "files": [
+        "apps/union-eyes/app/api/exit-interviews/[id]/submit/route.ts",
         "apps/union-eyes/app/api/exit-interviews/[id]/review/route.ts",
-        "apps/union-eyes/app/api/__tests__/exit-interviews-review.route.test.ts",
-        "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts"
+        "apps/union-eyes/db/schema/domains/infrastructure/exit-interviews.ts",
+        "apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.sql",
+        "apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.rollback.sql",
+        "apps/union-eyes/db/__tests__/platform-0038-gate0-integrity-columns.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s1-schema-closure.test.ts"
       ],
-      "explanation": "The person who last edited or submitted an exit interview, not only its creator, cannot review it (403). Existing review tests pass.",
-      "remaining": "No submitter column exists; the last editor stands in for the submitter."
+      "explanation": "Migration 0038 adds exit_interviews.submitted_by and a check that the reviewer is not the submitter. Submitting stores the submitter and review refuses that person (403), with the last-editor fallback only for earlier rows. Existing review tests pass."
     },
     "DEF-0B7-EXC-DOCUMENTS-ATTACHABLE-AFTER-REVIEW": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -5133,15 +5169,18 @@
       "explanation": "A campaign-link unsubscribe also marks the recipient subscriptions to the distribution lists of that organization unsubscribed, in the same transaction. Proven on real SQL (pglite) not to fail; contract test pins the update."
     },
     "DEF-0B6-EDU-CONTENT-PUBLISH-NO-SEPARATION-OF-DUTIES": {
-      "status": "PARTIAL",
-      "batch": "B56-F12-CONTENT-PUBLISH-AND-REGISTRATION-RULES",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
       "files": [
         "apps/union-eyes/app/api/content/templates/[id]/status/route.ts",
-        "apps/union-eyes/app/api/__tests__/content-template-status.route.test.ts",
-        "apps/union-eyes/lib/services/__tests__/b56-content-registration.test.ts"
+        "apps/union-eyes/db/schema/cms-website-schema.ts",
+        "apps/union-eyes/db/schema/domains/infrastructure/cms.ts",
+        "apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.sql",
+        "apps/union-eyes/db/migrations-platform/0038_gate0_integrity_columns.rollback.sql",
+        "apps/union-eyes/db/__tests__/platform-0038-gate0-integrity-columns.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s1-schema-closure.test.ts"
       ],
-      "explanation": "Moving an item from review to published is refused for the person who last changed it (who moved it to review), and republishing no longer rewrites the first publication time (coalesce). Existing status route tests pass.",
-      "remaining": "The row records only its last editor, not a separate submitter; a submitted_by column is the proper fix."
+      "explanation": "Migration 0038 adds cms_pages.submitted_by. Moving an item to review records who did it, and publication is refused for that person, with the last-editor fallback only for earlier rows. Existing status tests pass."
     },
     "DEF-0B6-EDU-REGISTRATION-NO-CAPACITY-DUPLICATE-OR-SESSION-COURSE-CHECK": {
       "status": "PARTIAL",

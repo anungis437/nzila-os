@@ -89,6 +89,11 @@ export interface CrudOptions {
    * row (and what cascades from it) survives, and the record is changed only through its governed correction or withdrawal process.
    */
   retainOnDelete?: boolean;
+  /**
+   * Name of a boolean column that marks a row inactive. DELETE sets it to false (an archive: the row, its history and what cascades from it
+   * stay) instead of removing the row. The route lists active rows only, through its own readCondition.
+   */
+  archiveColumn?: string;
   /** A condition added to every GET, whatever the caller's role (for example, a restricted row of shared reference data is never listed). */
   readCondition?: SQL;
   /** A condition added to GET only for a caller below the steward floor (for example, hiding unpublished rows from members). */
@@ -898,6 +903,17 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         if (parentScoped) conditions.push(parentScoped);
         if (ownerCol && userId) {
           conditions.push(eq(ownerCol, userId));
+        }
+
+        if (opts.archiveColumn) {
+          const flag = getColumn(table, opts.archiveColumn);
+          if (!flag) throw ApiError.internal(`${resourceName} has no ${opts.archiveColumn} column to archive with`);
+          const archived = await audited(organizationId, userId, 'delete', [opts.archiveColumn], async (tx) => (await tx.update(table)
+            .set({ [opts.archiveColumn as string]: false, ...(getColumn(table, 'updatedAt') ? { updatedAt: new Date() } : {}) } as Record<string, unknown>)
+            .where(and(...conditions))
+            .returning())[0] as Record<string, unknown> | undefined);
+          if (!archived) throw ApiError.notFound(`${resourceName} not found`);
+          return { data: shape(archived) };
         }
 
         // Never write an invented 'archived' value to a domain-specific enum. In particular,

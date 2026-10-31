@@ -7,7 +7,7 @@ const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
 describe('B56 content publication and registration', () => {
   it('does not let the person who prepared an item for review publish it, and keeps the first publication time (DEF-0B6-EDU-CONTENT-PUBLISH-NO-SEPARATION-OF-DUTIES)', () => {
     const route = read('app/api/content/templates/[id]/status/route.ts')
-    expect(route).toContain("currentStatus === 'review' && newStatus === 'published' && current.updated_by === userId")
+    expect(route).toContain("currentStatus === 'review' && newStatus === 'published' && submitter === userId")
     expect(route).toContain('published_at = coalesce(published_at, now())')
     expect(route).not.toContain('published_at = now()')
   })

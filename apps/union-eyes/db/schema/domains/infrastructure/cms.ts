@@ -34,6 +34,7 @@ export const cmsPages = pgTable('cms_pages', {
   seoConfig: jsonb('seo_config').default({}),
   createdBy: text('created_by').references(() => profiles.userId),
   updatedBy: text('updated_by').references(() => profiles.userId),
+  submittedBy: text('submitted_by'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 }, (table) => ({

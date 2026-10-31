@@ -28,8 +28,9 @@ describe('B53 messaging records and retained communications', () => {
     'app/api/communications/templates/[id]/route.ts',
     'app/api/messaging/templates/[id]/route.ts',
     'app/api/communications/distribution-lists/[id]/route.ts',
-  ])('%s is retained on delete (DEF-0B5-COMMS-TEMPLATE-HARD-DELETE, DEF-0B5-COMMS-LIST-DELETE-ERASES-SUBSCRIBER-CONSENT-TRAIL)', (route) => {
-    expect(read(route)).toContain('retainOnDelete: true')
+  ])('%s archives on delete instead of removing the row (DEF-0B5-COMMS-TEMPLATE-HARD-DELETE, DEF-0B5-COMMS-LIST-DELETE-ERASES-SUBSCRIBER-CONSENT-TRAIL)', (route) => {
+    expect(read(route)).toContain("archiveColumn: 'isActive'")
+    expect(read(route)).not.toContain('retainOnDelete')
   })
 
   it('reports an unknown batch job as not found and discloses no recipient address (DEF-0B4-BATCH-STATUS-FABRICATED-PROCESSING)', () => {

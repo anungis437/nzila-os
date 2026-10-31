@@ -43,7 +43,7 @@ export const GET = withApi(
         const warningNum = cfg.warningThreshold ? parseFloat(String(cfg.warningThreshold)) : null;
         const criticalNum = cfg.criticalThreshold ? parseFloat(String(cfg.criticalThreshold)) : null;
 
-        const health = computeKpiHealth(currentValue, targetNum, warningNum, criticalNum);
+        const health = computeKpiHealth(currentValue, targetNum, warningNum, criticalNum, cfg.direction);
         const progress =
           currentValue != null && targetNum != null && targetNum !== 0
             ? Math.round((currentValue / targetNum) * 100)

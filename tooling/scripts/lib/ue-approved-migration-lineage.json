@@ -398,6 +398,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Adds immutable referred_categories on ue_authority_workaid_matters. New referrals must record the categories actually referred. Does not copy a broader consent. Has not been applied to a native or live database."
+      },
+      {
+        "tag": "0038_gate0_integrity_columns",
+        "sha256": "8e48666ac479f44b0d9291a67640423167a3dc06e644afe718a0afcc5958e4ba",
+        "status": "UNQUALIFIED",
+        "introducedBy": "agents/ue-cursor-final-closure",
+        "note": "Adds kpi_configurations.direction, committee_meetings.minutes_recorded_by, exit_interviews.submitted_by, cms_pages.submitted_by, one active primary contact per employer and unique SSO provider indexes, each with a check or index that refuses the earlier approximation. Additive and nullable; refuses data that already breaks a unique index. Proven on PGlite only; has not been applied to a native or live database."
       }
     ]
   }

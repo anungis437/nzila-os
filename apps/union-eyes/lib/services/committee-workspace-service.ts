@@ -172,7 +172,7 @@ export async function recordMinutes(
     // minutes that were approved in the meantime.
     const [updated] = await tx
       .update(committeeMeetings)
-      .set({ minutes, status: 'completed', updatedBy, updatedAt: sql`now()` })
+      .set({ minutes, status: 'completed', minutesRecordedBy: updatedBy, updatedBy, updatedAt: sql`now()` })
       .where(and(eq(committeeMeetings.id, meetingId), isNull(committeeMeetings.minutesApprovedAt), eq(committeeMeetings.organizationId, organizationId)))
       .returning();
     if (!updated) return null;
