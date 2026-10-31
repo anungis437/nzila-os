@@ -45,7 +45,10 @@ const VALID_EVENT_TYPES: PilotEventType[] = [
  */
 export const POST = withRoleAuth('member', async (req, context: BaseAuthContext) => {
   try {
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "A JSON object is required" }, { status: 400 });
+    }
     const { eventType, userId: claimedUserId, organizationId: claimedOrganizationId, sessionId, metadata } = body;
     const userId = context.userId;
     const organizationId = context.organizationId;
@@ -66,6 +69,20 @@ export const POST = withRoleAuth('member', async (req, context: BaseAuthContext)
       (claimedOrganizationId !== undefined && claimedOrganizationId !== organizationId)
     ) {
       return NextResponse.json({ error: "Events can only be recorded for the authenticated user and organization" }, { status: 403 });
+    }
+
+    // The free-form fields are bounded: a session id is short text and the metadata a small plain object.
+    if (typeof sessionId !== "string" || sessionId.length > 200) {
+      return NextResponse.json({ error: "sessionId must be text of at most 200 characters" }, { status: 400 });
+    }
+    if (metadata !== undefined && metadata !== null) {
+      const isObject = typeof metadata === "object" && !Array.isArray(metadata);
+      if (!isObject || JSON.stringify(metadata).length > 4096) {
+        return NextResponse.json({ error: "metadata must be an object of at most 4 KB" }, { status: 400 });
+      }
+      if (metadata.caseId !== undefined && (typeof metadata.caseId !== "string" || metadata.caseId.length > 100)) {
+        return NextResponse.json({ error: "metadata.caseId must be text of at most 100 characters" }, { status: 400 });
+      }
     }
 
     if (!VALID_EVENT_TYPES.includes(eventType)) {

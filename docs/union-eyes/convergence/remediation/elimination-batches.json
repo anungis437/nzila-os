@@ -4409,6 +4409,44 @@
           "remaining": "The contract test pins the source only; no behavioural test drives the route with an unknown node."
         }
       ]
+    },
+    {
+      "id": "B43-F05-PARSED-WINDOWS-AND-VERIFIED-TELEMETRY",
+      "family": "F05: a numeric query parameter is parsed into a bounded integer, and a telemetry body is bounded",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B12-PLT-WORKSPACE-TELEMETRY-LOGS-UNBOUNDED-CLIENT-STRINGS-AND-HAS-NO-LIMIT",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/workspace/telemetry/route.ts",
+            "apps/union-eyes/app/api/__tests__/workspace-telemetry.route.test.ts"
+          ],
+          "explanation": "The telemetry body is bounded to 2 KB while it is streamed (not only by Content-Length), the payload is reduced to an allow-list of canonical event, tab and static route, and the client attests to no timestamp or workspace name (existing implementation and tests).",
+          "remaining": "The route has no rate limit of its own beyond the member floor."
+        },
+        {
+          "prefix": "DEF-0B10-PIL-PILOT-FEEDBACK-COMMENT-IS-UNVALIDATED-AND-UNBOUNDED-AND-IS-RETURNED-RAW-WITH-THE-USER-ID",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/pilot/feedback/route.ts",
+            "apps/union-eyes/app/api/__tests__/pilot-feedback.route.test.ts"
+          ],
+          "explanation": "The comment must be text of at most 2000 characters (trimmed; an empty one is stored as none), a body that is not a JSON object is refused, and the administrator summary no longer returns the author user id of recent feedback. New route test covers each."
+        },
+        {
+          "prefix": "DEF-0B10-PIL-PILOT-WRITE-ROUTES-CAST-THE-JSON-BODY-WITHOUT-A-SCHEMA-AND-STORE-CALLER-TEXT-IN-AN-UNBOUNDED-JSO",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/app/api/pilot/events/route.ts",
+            "apps/union-eyes/app/api/pilot/feedback/route.ts",
+            "apps/union-eyes/app/api/pilot/__tests__/pilot-events-authority.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/pilot-feedback.route.test.ts"
+          ],
+          "explanation": "The pilot events and feedback writes bound their free-form fields (session id 200 characters, metadata a plain object of at most 4 KB, comment 2000 characters) and refuse a body that is not a JSON object; tests added for each bound.",
+          "remaining": "The other pilot write routes (apply, onboarding, demo data) still cast their JSON body without a schema, and the event type stays caller-asserted."
+        }
+      ]
     }
   ]
 }

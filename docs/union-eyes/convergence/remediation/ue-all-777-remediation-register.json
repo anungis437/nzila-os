@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 387,
-    "engineeringRemaining": 390,
+    "engineeringCorrected": 388,
+    "engineeringRemaining": 389,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 71
+    "engineeringPartial": 73
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -13629,9 +13629,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B43-F05-PARSED-WINDOWS-AND-VERIFIED-TELEMETRY",
+        "path": "apps/union-eyes/app/api/pilot/events/route.ts; apps/union-eyes/app/api/pilot/feedback/route.ts; apps/union-eyes/app/api/pilot/__tests__/pilot-events-authority.route.test.ts; apps/union-eyes/app/api/__tests__/pilot-feedback.route.test.ts",
+        "explanation": "The pilot events and feedback writes bound their free-form fields (session id 200 characters, metadata a plain object of at most 4 KB, comment 2000 characters) and refuse a body that is not a JSON object; tests added for each bound.",
+        "remaining": "The other pilot write routes (apply, onboarding, demo data) still cast their JSON body without a schema, and the event type stays caller-asserted.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-PIL-ARTIFACT-INTELLIGENCE-AND-REFERENCE-WRITES-COMMIT-NO-AUDIT-ROW-THOUGH-THE-MANIFEST-DECLARES-ATOMIC-AUDIT",
@@ -13890,9 +13898,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B43-F05-PARSED-WINDOWS-AND-VERIFIED-TELEMETRY",
+        "path": "apps/union-eyes/app/api/pilot/feedback/route.ts; apps/union-eyes/app/api/__tests__/pilot-feedback.route.test.ts",
+        "explanation": "The comment must be text of at most 2000 characters (trimmed; an empty one is stored as none), a body that is not a JSON object is refused, and the administrator summary no longer returns the author user id of recent feedback. New route test covers each.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-OPL-01",
@@ -17712,9 +17727,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B43-F05-PARSED-WINDOWS-AND-VERIFIED-TELEMETRY",
+        "path": "apps/union-eyes/app/api/workspace/telemetry/route.ts; apps/union-eyes/app/api/__tests__/workspace-telemetry.route.test.ts",
+        "explanation": "The telemetry body is bounded to 2 KB while it is streamed (not only by Content-Length), the payload is reduced to an allow-list of canonical event, tab and static route, and the client attests to no timestamp or workspace name (existing implementation and tests).",
+        "remaining": "The route has no rate limit of its own beyond the member floor.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-WBK-MEMORY-HOLDER-ROUTES-ACCEPT-READS-AND-WRITES-ON-THE-BEARER-ID-OF-AN-UNCLAIMED-WORKBOOK-WITH-NO-LIMIT-AND-NO-AUDIT",

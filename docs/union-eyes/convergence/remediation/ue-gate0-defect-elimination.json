@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 343,
-    "partial": 62,
+    "implementedPendingQualification": 344,
+    "partial": 64,
     "qualificationVerified": 0,
-    "unresolved": 434,
+    "unresolved": 433,
     "externalBlockers": 0
   },
   "batches": [
@@ -393,6 +393,15 @@
       "newlyImplemented": 1,
       "outstandingAfter": 434,
       "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B43-F05-PARSED-WINDOWS-AND-VERIFIED-TELEMETRY",
+      "family": "F05: a numeric query parameter is parsed into a bounded integer, and a telemetry body is bounded",
+      "outstandingBefore": 434,
+      "newlyImplemented": 1,
+      "outstandingAfter": 433,
+      "partial": 2,
       "evidenceCommit": null
     }
   ],
@@ -4376,6 +4385,37 @@
       ],
       "explanation": "The query is validated (nodeId bounded text, analysisType one of four values, unknown parameters refused), an unknown node answers 404 instead of a thrown 500.",
       "remaining": "The contract test pins the source only; no behavioural test drives the route with an unknown node."
+    },
+    "DEF-0B12-PLT-WORKSPACE-TELEMETRY-LOGS-UNBOUNDED-CLIENT-STRINGS-AND-HAS-NO-LIMIT": {
+      "status": "PARTIAL",
+      "batch": "B43-F05-PARSED-WINDOWS-AND-VERIFIED-TELEMETRY",
+      "files": [
+        "apps/union-eyes/app/api/workspace/telemetry/route.ts",
+        "apps/union-eyes/app/api/__tests__/workspace-telemetry.route.test.ts"
+      ],
+      "explanation": "The telemetry body is bounded to 2 KB while it is streamed (not only by Content-Length), the payload is reduced to an allow-list of canonical event, tab and static route, and the client attests to no timestamp or workspace name (existing implementation and tests).",
+      "remaining": "The route has no rate limit of its own beyond the member floor."
+    },
+    "DEF-0B10-PIL-PILOT-FEEDBACK-COMMENT-IS-UNVALIDATED-AND-UNBOUNDED-AND-IS-RETURNED-RAW-WITH-THE-USER-ID": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B43-F05-PARSED-WINDOWS-AND-VERIFIED-TELEMETRY",
+      "files": [
+        "apps/union-eyes/app/api/pilot/feedback/route.ts",
+        "apps/union-eyes/app/api/__tests__/pilot-feedback.route.test.ts"
+      ],
+      "explanation": "The comment must be text of at most 2000 characters (trimmed; an empty one is stored as none), a body that is not a JSON object is refused, and the administrator summary no longer returns the author user id of recent feedback. New route test covers each."
+    },
+    "DEF-0B10-PIL-PILOT-WRITE-ROUTES-CAST-THE-JSON-BODY-WITHOUT-A-SCHEMA-AND-STORE-CALLER-TEXT-IN-AN-UNBOUNDED-JSONB-COLUMN": {
+      "status": "PARTIAL",
+      "batch": "B43-F05-PARSED-WINDOWS-AND-VERIFIED-TELEMETRY",
+      "files": [
+        "apps/union-eyes/app/api/pilot/events/route.ts",
+        "apps/union-eyes/app/api/pilot/feedback/route.ts",
+        "apps/union-eyes/app/api/pilot/__tests__/pilot-events-authority.route.test.ts",
+        "apps/union-eyes/app/api/__tests__/pilot-feedback.route.test.ts"
+      ],
+      "explanation": "The pilot events and feedback writes bound their free-form fields (session id 200 characters, metadata a plain object of at most 4 KB, comment 2000 characters) and refuse a body that is not a JSON object; tests added for each bound.",
+      "remaining": "The other pilot write routes (apply, onboarding, demo data) still cast their JSON body without a schema, and the event type stays caller-asserted."
     }
   }
 }
