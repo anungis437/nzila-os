@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 561,
-    "engineeringRemaining": 216,
+    "engineeringCorrected": 564,
+    "engineeringRemaining": 213,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 78
   },
@@ -7610,9 +7610,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B81-SOCIAL-SCHEDULE-GRAPH-HS",
+        "path": "apps/union-eyes/app/api/exit-interviews/graph-query/route.ts; apps/union-eyes/lib/services/__tests__/s25-social-schedule-graph-hs.test.ts",
+        "explanation": "The request schema is strict: category, roleFilter and depthLimit, which the reasoner never read, are refused (400); minimumRiskLevel is accepted only for isolated_knowledge, the one query that applies it; explanationLevel is optional and the response states one level and the filters actually applied.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR",
@@ -17143,9 +17150,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B81-SOCIAL-SCHEDULE-GRAPH-HS",
+        "path": "apps/union-eyes/lib/social-media/social-media-service.ts; apps/union-eyes/app/api/social-media/posts/route.ts; apps/union-eyes/lib/social-media/__tests__/social-media-service.test.ts; apps/union-eyes/lib/services/__tests__/s25-social-schedule-graph-hs.test.ts",
+        "explanation": "A schedule is passed on only to Facebook, whose API schedules; for Instagram, X and LinkedIn the platform entry is refused (\"not published\") instead of publishing at once under a row that says scheduled. Hashtags are written into the post text that is sent (and an X post over 280 characters with them is refused); mentions, which no platform integration sends, are refused with 400. The scheduled-carousel service test, which pinned an immediate LinkedIn publish of a scheduled post, was changed to Facebook and its assertion to the scheduled publish time (disclosed); four cases were added.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-SOC-POSTS-ARE-NEVER-LINKED-TO-A-CAMPAIGN-SO-CAMPAIGN-METRICS-AND-THE-DELETE-GUARD-NEVER-SEE-A-POST",
@@ -17160,9 +17174,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B81-SOCIAL-SCHEDULE-GRAPH-HS",
+        "path": "apps/union-eyes/lib/social-media/social-media-service.ts; apps/union-eyes/app/api/social-media/posts/route.ts; apps/union-eyes/lib/services/__tests__/s25-social-schedule-graph-hs.test.ts",
+        "explanation": "The post route verifies campaign_id belongs to the organization (404 otherwise), passes it on, and the service stores it as the post campaignId, so campaign metrics and the campaign delete guard see the post.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-SOC-ANALYTICS-AND-ENGAGEMENT-FIGURES-HAVE-NO-WRITER-SO-EVERY-METRIC-IS-ZERO-OR-EMPTY",

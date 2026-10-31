@@ -50,7 +50,7 @@ export const GET = withApi(
       critical: Number(row.critical ?? 0),
       avgResolutionTime: row.avg_resolution_days != null
         ? Math.round(Number(row.avg_resolution_days) * 10) / 10
-        : 0,
+        : null, // Unknown is not zero: no route records the dates this is measured from.
     };
   },
 );

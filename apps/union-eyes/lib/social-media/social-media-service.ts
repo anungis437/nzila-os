@@ -33,7 +33,19 @@ export interface UnifiedPostContent {
   hashtags?: string[];
   mentions?: string[];
   scheduled_for?: Date;
+  campaign_id?: string;
   platforms: SocialPlatform[];
+}
+
+/** Platforms whose API is asked to publish later; the others would publish at once, so a schedule is refused for them. */
+const SCHEDULING_PLATFORMS: readonly SocialPlatform[] = ['facebook'];
+
+const TWITTER_LIMIT = 280;
+
+/** The text as sent: hashtags are part of the post, so they are written into it rather than stored beside text that omits them. */
+export function composePostText(content: Pick<UnifiedPostContent, 'text' | 'hashtags'>): string {
+  const tags = (content.hashtags ?? []).map((tag) => `#${tag}`).join(' ');
+  return tags ? `${content.text}\n\n${tags}` : content.text;
 }
 
 /**
@@ -257,9 +269,18 @@ export class SocialMediaService {
       throw new Error('No active accounts found for specified platforms');
     }
 
+    const text = composePostText(content);
+
     // Publish to each platform
     for (const account of typedAccounts) {
       try {
+        // A schedule is never turned into an immediate post: a platform that cannot schedule refuses it.
+        if (content.scheduled_for && !SCHEDULING_PLATFORMS.includes(account.platform)) {
+          throw new PublishRefusal(`Scheduled publishing is not supported on ${account.platform}; the post was not published.`);
+        }
+        if (account.platform === 'twitter' && text.length > TWITTER_LIMIT) {
+          throw new PublishRefusal(`The post with its hashtags exceeds ${TWITTER_LIMIT} characters.`);
+        }
         const client = await this.getClient(account.id, organizationId);
         let postId: string;
         let permalink: string | undefined;
@@ -271,7 +292,7 @@ export class SocialMediaService {
               account.platformUserId,
               account.accessToken,
               {
-                message: content.text,
+                message: text,
                 media_urls: content.media_urls,
                 link: content.link_url,
                 scheduled_publish_time: content.scheduled_for
@@ -296,7 +317,7 @@ export class SocialMediaService {
               account.platformUserId,
               {
                 image_url: content.media_urls[0],
-                caption: content.text,
+                caption: text,
               }
             );
             postId = response.id;
@@ -319,7 +340,7 @@ export class SocialMediaService {
             }
 
             const tweet = await twitterClient.postTweet({
-              text: content.text,
+              text,
             });
             postId = tweet.id;
             permalink = `https://twitter.com/i/web/status/${tweet.id}`;
@@ -334,7 +355,7 @@ export class SocialMediaService {
               response = await linkedInClient.createOrganizationPostWithImage(
                 account.platformUserId,
                 {
-                  text: content.text,
+                  text,
                   imageUrl: content.media_urls[0],
                 }
               );
@@ -342,7 +363,7 @@ export class SocialMediaService {
               response = await linkedInClient.createOrganizationPostWithLink(
                 account.platformUserId,
                 {
-                  text: content.text,
+                  text,
                   linkUrl: content.link_url,
                   linkTitle: content.link_title,
                   linkDescription: content.link_description,
@@ -352,7 +373,7 @@ export class SocialMediaService {
               response = await linkedInClient.createOrganizationPost(
                 account.platformUserId,
                 {
-                  text: content.text,
+                  text,
                 }
               );
             }
@@ -372,6 +393,7 @@ export class SocialMediaService {
             organizationId,
             accountId: account.id,
             platformPostId: postId,
+            campaignId: content.campaign_id ?? null,
             postType: this.detectPostType(content),
             content: content.text,
             mediaUrls: content.media_urls || [],

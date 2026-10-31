@@ -11,7 +11,7 @@ import { createSocialMediaService, AllPlatformsFailedError } from '@/lib/social-
 import { parseSocialPostPagination } from '@/lib/social-media/social-post-pagination';
 import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 import { db } from '@/db';
-import { socialPosts, socialAccounts } from '@/db/schema/social-media-schema';
+import { socialPosts, socialAccounts, socialCampaigns } from '@/db/schema/social-media-schema';
 import { eq, and, ilike, desc, count, SQL } from 'drizzle-orm';
 import { z } from "zod";
 import { BaseAuthContext, withRoleAuth } from '@/lib/api-auth-guard';
@@ -164,8 +164,23 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
         hashtags,
         mentions,
         scheduled_for,
-        campaign_id: _campaign_id,
+        campaign_id,
       } = validation.data;
+
+      // The platform APIs here take no mention markup, so a mention would be stored as sent while nothing sends it.
+      if ((mentions ?? []).length > 0) {
+        return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Mentions are not supported: no platform integration sends them');
+      }
+
+      // A post can be linked only to a campaign of this organization.
+      if (campaign_id) {
+        const [campaign] = await db
+          .select({ id: socialCampaigns.id })
+          .from(socialCampaigns)
+          .where(and(eq(socialCampaigns.id, campaign_id), eq(socialCampaigns.organizationId, organizationId)))
+          .limit(1);
+        if (!campaign) return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Campaign not found');
+      }
 
       // Check character limits per platform
       const characterLimits: Record<string, number> = {
@@ -209,6 +224,7 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
               hashtags: hashtags || [],
               mentions: mentions || [],
               scheduled_for: scheduled_for ? new Date(scheduled_for) : undefined,
+              campaign_id,
               platforms,
             },
             userId

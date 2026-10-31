@@ -6979,6 +6979,43 @@
           "explanation": "Verified in source: the synthesis POST validates every named committee and then answers 501 without gathering minutes or storing a snapshot."
         }
       ]
+    },
+    {
+      "id": "B81-SOCIAL-SCHEDULE-GRAPH-HS",
+      "family": "Social scheduling and campaign link, graph query inputs, health-safety statistics",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B11-SOC-SCHEDULED-POST-IS-PUBLISHED-AT-ONCE-ON-INSTAGRAM-X-AND-LINKEDIN-WHILE-THE-ROW-SAYS-SCHEDULED-AND-HASHTAGS-AND-MENTIONS-ARE-NOT-SENT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/social-media/social-media-service.ts",
+            "apps/union-eyes/app/api/social-media/posts/route.ts",
+            "apps/union-eyes/lib/social-media/__tests__/social-media-service.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s25-social-schedule-graph-hs.test.ts"
+          ],
+          "explanation": "A schedule is passed on only to Facebook, whose API schedules; for Instagram, X and LinkedIn the platform entry is refused (\"not published\") instead of publishing at once under a row that says scheduled. Hashtags are written into the post text that is sent (and an X post over 280 characters with them is refused); mentions, which no platform integration sends, are refused with 400. The scheduled-carousel service test, which pinned an immediate LinkedIn publish of a scheduled post, was changed to Facebook and its assertion to the scheduled publish time (disclosed); four cases were added."
+        },
+        {
+          "prefix": "DEF-0B11-SOC-POSTS-ARE-NEVER-LINKED-TO-A-CAMPAIGN-SO-CAMPAIGN-METRICS-AND-THE-DELETE-GUARD-NEVER-SEE-A-POST",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/social-media/social-media-service.ts",
+            "apps/union-eyes/app/api/social-media/posts/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s25-social-schedule-graph-hs.test.ts"
+          ],
+          "explanation": "The post route verifies campaign_id belongs to the organization (404 otherwise), passes it on, and the service stores it as the post campaignId, so campaign metrics and the campaign delete guard see the post."
+        },
+        {
+          "prefix": "DEF-0B7-EXC-GRAPH-QUERY-ACCEPTS-FILTERS-AND-EXPLANATION-LEVEL-IT-NEVER-READS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/exit-interviews/graph-query/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s25-social-schedule-graph-hs.test.ts"
+          ],
+          "explanation": "The request schema is strict: category, roleFilter and depthLimit, which the reasoner never read, are refused (400); minimumRiskLevel is accepted only for isolated_knowledge, the one query that applies it; explanationLevel is optional and the response states one level and the filters actually applied."
+        }
+      ]
     }
   ]
 }

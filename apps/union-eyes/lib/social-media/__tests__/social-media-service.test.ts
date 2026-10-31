@@ -289,20 +289,51 @@ describe('publishPost', () => {
   });
 
   it('saves a scheduled carousel post (detectPostType branches)', async () => {
-    state.selects.socialAccounts = [account({ platform: 'linkedin' })];
+    state.selects.socialAccounts = [account({ platform: 'facebook' })];
     const svc = new SocialMediaService();
     const results = await svc.publishPost(
       'org-1',
       {
         text: 'scheduled',
         media_urls: ['https://img/1.jpg', 'https://img/2.jpg'],
-        platforms: ['linkedin'],
+        platforms: ['facebook'],
         scheduled_for: new Date('2030-01-01'),
       },
       'user-1',
     );
     expect(results[0].success).toBe(true);
-    expect(clients.linkedin.createOrganizationPostWithImage).toHaveBeenCalled();
+    expect(clients.meta.publishFacebookPost).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ scheduled_publish_time: Math.floor(new Date('2030-01-01').getTime() / 1000) }),
+    );
+  });
+
+  // DEF-0B11-SOC-SCHEDULED-POST-IS-PUBLISHED-AT-ONCE-ON-INSTAGRAM-X-AND-LINKEDIN-WHILE-THE-ROW-SAYS-SCHEDULED
+  it.each(['instagram', 'twitter', 'linkedin'] as const)('refuses a schedule on %s instead of publishing at once', async (platform) => {
+    state.selects.socialAccounts = [account({ platform })];
+    const results = await new SocialMediaService().publishPost(
+      'org-1',
+      { text: 'later', media_urls: platform === 'instagram' ? ['https://img/1.jpg'] : [], platforms: [platform], scheduled_for: new Date('2030-01-01') },
+      'user-1',
+    );
+    expect(results[0]).toMatchObject({ success: false, error: expect.stringContaining('Scheduled publishing is not supported') });
+    expect(clients.twitter.postTweet).not.toHaveBeenCalled();
+    expect(clients.linkedin.createOrganizationPost).not.toHaveBeenCalled();
+    expect(clients.meta.publishInstagramPost).not.toHaveBeenCalled();
+  });
+
+  it('sends the hashtags as part of the post text', async () => {
+    state.selects.socialAccounts = [account({ platform: 'twitter' })];
+    await new SocialMediaService().publishPost('org-1', { text: 'hello', hashtags: ['union', 'strong'], platforms: ['twitter'] }, 'user-1');
+    expect(clients.twitter.postTweet).toHaveBeenCalledWith({ text: 'hello\n\n#union #strong' });
+  });
+
+  it('refuses an X post that is over the limit once its hashtags are added', async () => {
+    state.selects.socialAccounts = [account({ platform: 'twitter' })];
+    const results = await new SocialMediaService().publishPost('org-1', { text: 'x'.repeat(275), hashtags: ['union'], platforms: ['twitter'] }, 'user-1');
+    expect(results[0].success).toBe(false);
+    expect(clients.twitter.postTweet).not.toHaveBeenCalled();
   });
 });
 
