@@ -16,7 +16,7 @@ describe('assertPublicHttpUrl', () => {
     'http://198.18.0.1/', 'http://198.19.255.255/', 'http://198.51.100.1/', 'http://203.0.113.7/',
     'http://192.0.2.4/', 'http://192.88.99.1/',
     'http://[::ffff:198.18.0.1]/', 'http://[::ffff:203.0.113.7]/',
-    'http://[2001:db8::1]/', 'http://[2002:c0a8:0101::1]/', 'http://[64:ff9b::a00:1]/',
+    'http://[2001:db8::1]/', 'http://[2001::1]/', 'http://[2002:c0a8:0101::1]/', 'http://[64:ff9b::a00:1]/',
     'https://user:pass@example.com/',
   ])('refuses %s', (url) => {
     expect(() => assertPublicHttpUrl(url)).toThrow(OutboundUrlError)
