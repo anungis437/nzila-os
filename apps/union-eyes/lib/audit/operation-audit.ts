@@ -1,4 +1,12 @@
 /**
+ * THE AUDIT-WRITE CONTRACT. There are two kinds of audited operation, and the kind is decided by where the effect lands:
+ *
+ *   - The effect is rows in our own database: performAtomicAuditedOperation (below). The change and its audit record are written in
+ *     one tenant transaction, so a failed audit write rolls the change back and a failed change leaves no record of success. The
+ *     record is hash-chained by persistAtomicAudit.
+ *   - The effect is somewhere our transaction cannot reach (a provider call, an e-mail, a payment, a queue): performAuditedOperation.
+ *     It is a durable two-phase record, not an atomic one. The route manifest labels such routes INTENT_OUTCOME, never ATOMIC.
+ *
  * Audit for operations whose effect is not a row in the caller's transaction (UE-CONV-K-011).
  *
  * A platform operation (pausing a job queue, running a platform-wide job, flipping a platform flag) acts on a
@@ -23,6 +31,17 @@ export class OperationAuditError extends Error {
     super(message)
     this.name = 'OperationAuditError'
   }
+}
+
+export interface AtomicAuditedOperation {
+  organizationId: string | null | undefined
+  userId: string | null | undefined
+  /** The single audit action recorded with the change (there is no .requested/.completed pair: there is one transaction). */
+  action: string
+  resourceType: string
+  resourceId?: string
+  details?: Record<string, unknown>
+  scope?: 'organization' | 'system'
 }
 
 export interface AuditedOperation {
@@ -76,6 +95,46 @@ export async function performAuditedOperation<T>(op: AuditedOperation, operation
   }
 }
 
+/**
+ * Runs `work` and writes its audit record in ONE transaction. If the audit record cannot be written the work rolls back and the caller
+ * gets an OperationAuditError (HTTP 409 through operationAuditResponse); if the work throws, nothing is recorded as done.
+ * `afterCommit` runs only once the transaction has committed (cache invalidation, for example) and cannot undo it.
+ */
+export async function performAtomicAuditedOperation<T>(
+  op: AtomicAuditedOperation,
+  work: (tx: RLSTx) => Promise<T>,
+  afterCommit?: () => Promise<void> | void,
+): Promise<T> {
+  const { organizationId, userId } = op
+  if (!organizationId || !userId) {
+    throw new OperationAuditError('A platform operation needs an authenticated administrator acting in an organization.')
+  }
+  const result = await inScope(op.scope, organizationId, async (tx) => {
+    const value = await work(tx)
+    try {
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: op.action,
+        resourceType: op.resourceType,
+        resourceId: op.resourceId,
+        details: op.details ?? {},
+      })
+    } catch (error) {
+      logger.error('platform_operation_atomic_audit_not_recorded', { action: op.action, error })
+      throw new OperationAuditError('The operation was not performed because its audit record could not be written.')
+    }
+    return value
+  })
+  if (afterCommit) {
+    try {
+      await afterCommit()
+    } catch (error) {
+      logger.error('platform_operation_after_commit_failed', { action: op.action, error })
+    }
+  }
+  return result
+}
 const inScope = <T>(scope: 'organization' | 'system' | undefined, organizationId: string, work: (tx: RLSTx) => Promise<T>) =>
   scope === 'system' ? withSystemContext((tx) => work(tx as unknown as RLSTx)) : withRLSContext({ organizationId }, work)
 

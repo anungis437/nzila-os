@@ -1033,6 +1033,27 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'whose protocol per operating model needs stakeholder validation).',
   },
   {
+    id: 'UE-REP-PROTOCOL-GOVERNANCE',
+    title: 'Representation protocol: administrator-saved, separately approved, audited',
+    state: 'LIMITED',
+    ownedBy: [
+      'apps/union-eyes/app/api/admin/representation-protocol/route.ts',
+      'apps/union-eyes/lib/representation/protocol-service.ts',
+    ],
+    evidence: [
+      'lib/representation/protocol-service.ts — saveRepresentationProtocol, submitLegacyRepresentationProtocolForApproval, approveRepresentationProtocol and resetRepresentationProtocol each write persistAtomicAudit in the same transaction as the protocol change',
+      'lib/representation/protocol-service.ts approveRepresentationProtocol — SELF_APPROVAL_FORBIDDEN: a protocol is approved only by someone other than its author',
+      'lib/representation/__tests__/protocol-resolution.test.ts, lib/__tests__/representation-protocol.test.ts and app/api/__tests__/admin-representation-protocol.route.test.ts — resolution, separation of duties and route behaviour with mocked persistence',
+    ],
+    targetWave: 1,
+    notes:
+      'LIMITED, not REAL: assignment, filing and escalation consume only an approved (executable) protocol, but the model is a single ' +
+      'organization-wide setting. The GET read is logged by the API audit logger, not recorded atomically. There is no per-office, ' +
+      'per-jurisdiction or per-affiliate protocol, and the protocol is not yet a mandate (UE-REP-MANDATE-RECUSAL-DELEGATION). ' +
+      'Source and mocked-persistence evidence only; no native or browser run. Added so that a real, separation-of-duties flow is owned by ' +
+      'a named capability (DEF-0B1-REP-PROTOCOL-NOT-IN-CAPABILITY-MODEL); the frozen register entry is unchanged.',
+  },
+  {
     id: 'UE-REP-MANDATE-RECUSAL-DELEGATION',
     title: 'Representative mandate model: recusal, territory, privileged-matter restriction, temporary delegation',
     state: 'NOT_IMPLEMENTED',

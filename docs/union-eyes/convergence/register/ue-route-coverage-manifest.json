@@ -2,52 +2,53 @@
  "register": "UE-CONV-K-008",
  "summary": {
   "routes": 1004,
-  "mutating": 733,
+  "mutating": 679,
   "kernel": 60,
   "byGuard": {
-   "ADMIN_AUTH": 7,
+   "ADMIN_AUTH": 19,
    "CAPABILITY_TOKEN": 13,
    "CRON_SECRET": 2,
    "CRUD_FACTORY": 141,
    "DELEGATED": 17,
    "NONE": 48,
-   "ORG_AUTH": 53,
+   "ORG_AUTH": 12,
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 223,
-   "ROLE_AUTH": 121,
-   "SESSION_AUTH": 64,
+   "ROLE_AUTH": 173,
+   "SESSION_AUTH": 56,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 300,
+   "WITH_API": 285,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
-   "ADMIN_AUTH": 7,
+   "ADMIN_AUTH": 18,
    "CAPABILITY_TOKEN": 9,
    "CRON_SECRET": 1,
-   "CRUD_FACTORY": 139,
+   "CRUD_FACTORY": 85,
    "DELEGATED": 11,
    "NONE": 9,
-   "ORG_AUTH": 32,
+   "ORG_AUTH": 8,
    "PLATFORM_AUTH_HANDLER": 7,
    "RETIRED": 216,
-   "ROLE_AUTH": 72,
-   "SESSION_AUTH": 35,
+   "ROLE_AUTH": 98,
+   "SESSION_AUTH": 31,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 191
+   "WITH_API": 182
   },
   "mutatingByAudit": {
    "ATOMIC": 157,
-   "ATOMIC_SERVICE": 151,
+   "ATOMIC_SERVICE": 111,
    "COMPUTE_ONLY": 32,
-   "CRUD_ATOMIC": 140,
+   "CRUD_ATOMIC": 86,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 26,
+   "INTENT_OUTCOME": 40,
    "NO_WRITES_FOUND": 12,
    "NONE": 213
   },
   "mutatingByData": {
    "AMBIENT_DB": 14,
-   "CRUD_TENANT_TX": 140,
+   "CRUD_TENANT_TX": 86,
    "NONE": 339,
    "SYSTEM_CONTEXT": 66,
    "TENANT_TX": 174
@@ -208,7 +209,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "admin/billing-cycles/trigger-scheduled/route.ts",
@@ -220,7 +221,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "admin/clc/analytics/annual-report/route.ts",
@@ -277,12 +278,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "admin/clc/analytics/patterns/route.ts",
@@ -397,7 +398,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "admin/documents/legacy-backfill/route.ts",
@@ -409,7 +410,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "admin/dues/overview/route.ts",
@@ -460,7 +461,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "admin/duplicates/route.ts",
@@ -600,7 +601,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "admin/job-classifications/[id]/route.ts",
@@ -639,7 +640,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "admin/jobs/retry/route.ts",
@@ -651,7 +652,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "admin/jobs/route.ts",
@@ -738,7 +739,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "SESSION_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -793,7 +794,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "admin/pilot-status/route.ts",
@@ -844,7 +845,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "admin/pki/signatures/[id]/verify/route.ts",
@@ -856,7 +857,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "admin/pki/signatures/route.ts",
@@ -883,7 +884,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "admin/pki/workflows/route.ts",
@@ -1102,7 +1103,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "ai/classify/route.ts",
@@ -1114,7 +1115,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "ai/copilot/query/route.ts",
@@ -1127,7 +1128,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "ai/copilot/sessions/[id]/route.ts",
@@ -1139,7 +1140,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "ai/employers/[id]/risk/route.ts",
@@ -1163,7 +1164,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "ai/feedback/route.ts",
@@ -1200,7 +1201,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "ai/grievances/[id]/triage/route.ts",
@@ -1212,7 +1213,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "ai/grievances/triage/route.ts",
@@ -1224,7 +1225,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "ai/ingest/route.ts",
@@ -1237,7 +1238,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "ai/insights/[reportType]/route.ts",
@@ -1286,7 +1287,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "ai/pension/members/[id]/projection/route.ts",
@@ -1335,7 +1336,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "ai/semantic-search/route.ts",
@@ -1360,7 +1361,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "AMBIENT_DB",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "alerts/realtime/route.ts",
@@ -1380,12 +1381,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/claims/route.ts",
@@ -1393,12 +1394,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/claims/stewards/route.ts",
@@ -1406,12 +1407,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/claims/trends/route.ts",
@@ -1432,12 +1433,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/comparative/route.ts",
@@ -1445,12 +1446,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/cross-org/route.ts",
@@ -1470,12 +1471,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/deadlines-metrics/route.ts",
@@ -1483,12 +1484,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/executive/route.ts",
@@ -1496,12 +1497,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/financial/categories/route.ts",
@@ -1509,12 +1510,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/financial/costs/route.ts",
@@ -1522,12 +1523,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/financial/outcomes/route.ts",
@@ -1535,12 +1536,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/financial/route.ts",
@@ -1548,12 +1549,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/financial/trends/route.ts",
@@ -1561,12 +1562,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/heatmap/route.ts",
@@ -1574,12 +1575,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/insights/route.ts",
@@ -1626,12 +1627,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/members/cohorts/route.ts",
@@ -1639,12 +1640,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/members/route.ts",
@@ -1652,12 +1653,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/members/trends/route.ts",
@@ -1665,12 +1666,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/metrics/route.ts",
@@ -1691,12 +1692,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/operational/derived-case-metrics/route.ts",
@@ -1704,7 +1705,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -1716,12 +1717,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/operational/route.ts",
@@ -1729,12 +1730,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/operational/sla/route.ts",
@@ -1742,12 +1743,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/operational/workload/route.ts",
@@ -1755,12 +1756,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/org-activity/route.ts",
@@ -1768,12 +1769,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/precedent-stats/route.ts",
@@ -1781,12 +1782,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/predictions/route.ts",
@@ -1794,12 +1795,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/refresh/route.ts",
@@ -1807,12 +1808,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "analytics/trends/route.ts",
@@ -1820,12 +1821,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "arbitration/precedents/[id]/citations/route.ts",
@@ -1928,12 +1929,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "arrears/cases/route.ts",
@@ -1941,12 +1942,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "arrears/create-payment-plan/route.ts",
@@ -1954,12 +1955,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "arrears/escalate/[caseId]/route.ts",
@@ -1967,12 +1968,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "arrears/log-contact/route.ts",
@@ -1980,12 +1981,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "arrears/resolve/[caseId]/route.ts",
@@ -1993,12 +1994,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "assurance/finance/ledger/route.ts",
@@ -2033,7 +2034,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "AMBIENT_DB",
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {
@@ -2088,7 +2089,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -2234,7 +2235,7 @@
     "PUT"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -2597,7 +2598,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "AMBIENT_DB",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "calendar-sync/connections/route.ts",
@@ -3034,7 +3035,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -3046,7 +3047,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -3058,7 +3059,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -3071,11 +3072,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "ADMIN_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "cba-intelligence/documents/route.ts",
@@ -3095,11 +3096,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "ADMIN_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "cba-intelligence/freshness/route.ts",
@@ -3132,7 +3133,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "ADMIN_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -3144,11 +3145,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "ADMIN_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "cba-intelligence/ingestion/seed/route.ts",
@@ -3156,11 +3157,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "ADMIN_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "cba-intelligence/review/route.ts",
@@ -3169,7 +3170,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "ADMIN_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -3182,7 +3183,7 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "ADMIN_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -3195,7 +3196,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "ADMIN_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -3238,7 +3239,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "chatbot/sessions/[sessionId]/messages/route.ts",
@@ -3263,7 +3264,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "claims/[id]/defensibility-pack/route.ts",
@@ -3298,12 +3299,12 @@
     "GET",
     "PATCH"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": true,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "claims/[id]/status/route.ts",
@@ -3378,12 +3379,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": true,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "clause-library/[id]/route.ts",
@@ -3723,7 +3724,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -3735,7 +3736,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -3747,7 +3748,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -3771,7 +3772,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "AMBIENT_DB",
@@ -3783,7 +3784,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "AMBIENT_DB",
@@ -3795,7 +3796,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -4084,12 +4085,12 @@
     "GET",
     "PATCH"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "communications/polls/[pollId]/vote/route.ts",
@@ -4110,12 +4111,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "communications/sms/campaigns/route.ts",
@@ -4330,7 +4331,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "AMBIENT_DB",
@@ -4368,7 +4369,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "AMBIENT_DB",
@@ -4392,12 +4393,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "contact/route.ts",
@@ -4429,7 +4430,7 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -4883,12 +4884,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "dashboard/export-csv/route.ts",
@@ -4908,7 +4909,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -4933,12 +4934,12 @@
     "GET",
     "PATCH"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "deadlines/[id]/extend/route.ts",
@@ -4947,12 +4948,12 @@
     "GET",
     "PATCH"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "deadlines/compliance/route.ts",
@@ -4960,12 +4961,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "deadlines/dashboard/route.ts",
@@ -4985,12 +4986,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "deadlines/route.ts",
@@ -4998,12 +4999,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "deadlines/upcoming/route.ts",
@@ -5011,12 +5012,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "debug/user-role/route.ts",
@@ -5049,7 +5050,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -5061,7 +5062,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -5073,7 +5074,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -5121,7 +5122,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "NONE",
@@ -5133,7 +5134,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -5159,7 +5160,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -5172,7 +5173,7 @@
     "PUT"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -5222,7 +5223,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "NONE",
@@ -5234,7 +5235,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "NONE",
@@ -5246,7 +5247,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "NONE",
@@ -5259,7 +5260,7 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -5283,7 +5284,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "NONE",
@@ -5296,7 +5297,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -5349,7 +5350,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "dues/arrears/calculate/route.ts",
@@ -5653,7 +5654,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "education/certifications/generate/route.ts",
@@ -6022,7 +6023,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -6035,7 +6036,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -6282,7 +6283,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "AMBIENT_DB",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "exit-interviews/[id]/publish/route.ts",
@@ -6429,7 +6430,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "exit-interviews/cross-domain-correlation/route.ts",
@@ -7480,12 +7481,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "gdpr/cookie-consent/route.ts",
@@ -7506,12 +7507,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "gdpr/data-export/route.ts",
@@ -7532,12 +7533,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "governance/board-packets/[id]/distribute/route.ts",
@@ -7996,7 +7997,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -8010,7 +8011,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -8022,7 +8023,7 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
@@ -8046,7 +8047,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -8058,7 +8059,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "AMBIENT_DB",
@@ -8094,7 +8095,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "AMBIENT_DB",
@@ -8106,7 +8107,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -8118,7 +8119,7 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -8130,7 +8131,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -8443,7 +8444,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "SESSION_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
@@ -8503,7 +8504,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "SESSION_AUTH",
+   "guard": "ADMIN_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
@@ -8593,7 +8594,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "integrations/framework/[id]/sync/route.ts",
@@ -8605,7 +8606,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "integrations/framework/route.ts",
@@ -8618,7 +8619,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "integrations/shopify/webhooks/route.ts",
@@ -8944,12 +8945,12 @@
     "GET",
     "PATCH"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "members/[id]/employment/route.ts",
@@ -8958,12 +8959,12 @@
     "GET",
     "PATCH"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "members/[id]/history/route.ts",
@@ -9053,12 +9054,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "members/export/route.ts",
@@ -9356,12 +9357,12 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "mutating": false,
    "guard": "CRUD_FACTORY",
    "kernel": false,
    "subordinate": null,
    "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "ml/monitoring/alerts/route.ts",
@@ -9923,7 +9924,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -10144,7 +10145,7 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "SESSION_AUTH",
+   "guard": "ADMIN_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
@@ -10205,7 +10206,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "SESSION_AUTH",
+   "guard": "ADMIN_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
@@ -10494,7 +10495,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "payments/webhooks/paypal/route.ts",
@@ -10506,7 +10507,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "INTENT_OUTCOME"
   },
   {
    "route": "payments/webhooks/stripe/route.ts",
@@ -10844,7 +10845,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
@@ -10857,7 +10858,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -10919,7 +10920,7 @@
     "PATCH"
    ],
    "mutating": true,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -10931,7 +10932,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "SESSION_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
@@ -11429,7 +11430,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "SESSION_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -11479,7 +11480,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -11529,7 +11530,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ORG_AUTH",
+   "guard": "ROLE_AUTH",
    "kernel": true,
    "subordinate": null,
    "data": "AMBIENT_DB",
@@ -11738,7 +11739,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -11750,7 +11751,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "WITH_API",
+   "guard": "ROLE_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
@@ -12124,7 +12125,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "SESSION_AUTH",
+   "guard": "ADMIN_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",

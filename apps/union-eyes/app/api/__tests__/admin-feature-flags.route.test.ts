@@ -1,11 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
+// Disclosed adaptation (F06 A1): the toggle is one transaction with its audit record (performAtomicAuditedOperation), so the audit seam
+// hands the work a transaction handle and runs afterCommit.
+const TX = { tx: true };
 const audit = vi.hoisted(() => ({
-  run: vi.fn(async (_op: unknown, fn: () => Promise<unknown>) => fn()),
+  run: vi.fn(async (_op: unknown, fn: (tx: unknown) => Promise<unknown>, after?: () => Promise<void>) => { const v = await fn({ tx: true }); await after?.(); return v; }),
 }));
 vi.mock('@/lib/audit/operation-audit', () => ({
-  performAuditedOperation: audit.run,
+  performAtomicAuditedOperation: audit.run,
   operationAuditResponse: () => null,
 }));
 
@@ -13,20 +16,26 @@ const m = vi.hoisted(() => ({
   withAdminAuth: vi.fn(),
   withSystemAdminAuth: vi.fn(),
   getAllFeatureFlags: vi.fn(),
-  toggleFeatureFlag: vi.fn(),
+  setFlag: vi.fn(),
+  invalidate: vi.fn(),
   logApiAuditEvent: vi.fn(),
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({ withAdminAuth: m.withAdminAuth, withSystemAdminAuth: m.withSystemAdminAuth }));
-vi.mock('@/lib/feature-flags', () => ({
-  getAllFeatureFlags: m.getAllFeatureFlags,
-  toggleFeatureFlag: m.toggleFeatureFlag,
-}));
+vi.mock('@/lib/feature-flags', () => {
+  class FeatureFlagNotFoundError extends Error {}
+  return {
+    getAllFeatureFlags: m.getAllFeatureFlags,
+    setFeatureFlagEnabledInTransaction: m.setFlag,
+    invalidateFeatureFlagCache: m.invalidate,
+    FeatureFlagNotFoundError,
+  };
+});
 vi.mock('@/lib/middleware/api-security', () => ({ logApiAuditEvent: m.logApiAuditEvent }));
 vi.mock('@/lib/api/standardized-responses', () => ({
-  ErrorCode: { VALIDATION_ERROR: 'VALIDATION_ERROR', FORBIDDEN: 'FORBIDDEN' },
+  ErrorCode: { VALIDATION_ERROR: 'VALIDATION_ERROR', FORBIDDEN: 'FORBIDDEN', RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND' },
   standardErrorResponse: (code: string, message: string, details?: unknown) =>
-    new Response(JSON.stringify({ code, message, details }), { status: code === 'FORBIDDEN' ? 403 : 400 }),
+    new Response(JSON.stringify({ code, message, details }), { status: code === 'FORBIDDEN' ? 403 : code === 'RESOURCE_NOT_FOUND' ? 404 : 400 }),
 }));
 
 async function loadRoute() {
@@ -46,7 +55,8 @@ describe('admin/feature-flags route', () => {
         (request: NextRequest, context: any = { userId: 'u1', organizationId: 'org_1' }) => handler(request, context),
     );
     m.getAllFeatureFlags.mockResolvedValue({ featureA: true, featureB: false });
-    m.toggleFeatureFlag.mockResolvedValue(undefined);
+    m.setFlag.mockResolvedValue(undefined);
+    m.invalidate.mockResolvedValue(undefined);
   });
 
   it('GET returns feature flags', async () => {
@@ -92,7 +102,7 @@ describe('admin/feature-flags route', () => {
     }), { userId: 'u1', organizationId: 'org_1' } as any);
 
     expect(response.status).toBe(200);
-    expect(m.toggleFeatureFlag).toHaveBeenCalledWith('featureA', false);
+    expect(m.setFlag).toHaveBeenCalledWith(TX, 'featureA', false);
   });
 
   it('PATCH toggles feature flag and returns success', async () => {
@@ -106,7 +116,7 @@ describe('admin/feature-flags route', () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.success).toBe(true);
-    expect(m.toggleFeatureFlag).toHaveBeenCalledWith('featureA', false);
+    expect(m.setFlag).toHaveBeenCalledWith(TX, 'featureA', false);
   });
 
   it('PATCH is gated by withSystemAdminAuth, not the ordinary per-org withAdminAuth (round 51: feature_flags is platform-wide, an org admin must not flip it)', async () => {
@@ -127,12 +137,12 @@ describe('admin/feature-flags route', () => {
     }), { userId: 'u1', organizationId: 'org_1' } as any);
 
     expect(response.status).toBe(403);
-    expect(m.toggleFeatureFlag).not.toHaveBeenCalled();
+    expect(m.setFlag).not.toHaveBeenCalled();
   });
 
   it('PATCH rethrows toggle errors', async () => {
     const { PATCH } = await loadRoute();
-    m.toggleFeatureFlag.mockRejectedValueOnce(new Error('toggle failed'));
+    m.setFlag.mockRejectedValueOnce(new Error('toggle failed'));
 
     await expect(PATCH(new NextRequest('http://localhost/api/admin/feature-flags', {
       method: 'PATCH',
@@ -151,6 +161,20 @@ describe('admin/feature-flags route', () => {
     expect(audit.run).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'platform.feature_flag.toggle', resourceId: 'featureA', details: { enabled: false } }),
       expect.any(Function),
+      m.invalidate,
     );
+  });
+
+  it('PATCH answers 404 for a flag that is not defined, and does not refresh the cache', async () => {
+    const { PATCH } = await loadRoute();
+    const { FeatureFlagNotFoundError } = await import('@/lib/feature-flags');
+    audit.run.mockImplementationOnce(async () => { throw new FeatureFlagNotFoundError('nope'); });
+    const response = await PATCH(new NextRequest('http://localhost/api/admin/feature-flags', {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'nope', enabled: true }),
+    }), { userId: 'u1', organizationId: 'org_1' } as any);
+    expect(response.status).toBe(404);
+    expect(m.invalidate).not.toHaveBeenCalled();
   });
 });

@@ -6,8 +6,7 @@
 import { withApi, ApiError } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { auditLogs } from '@/db/schema/audit-security-schema';
-import { eq, and } from 'drizzle-orm';
+import { readAuditEntry } from '@/lib/audit/audit-reader';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,10 +20,7 @@ export const GET = withApi(
     if (!UUID.test(id)) throw ApiError.badRequest('Invalid audit identifier');
 
     return withRLSContext({ organizationId, userId }, async (tx) => {
-      const [row] = await tx.select().from(auditLogs).where(and(
-        eq(auditLogs.auditId, id),
-        eq(auditLogs.organizationId, organizationId),
-      )).limit(1);
+      const row = await readAuditEntry(tx, organizationId, id);
       if (!row) throw ApiError.notFound('Audit log');
 
       await persistAtomicAudit(tx, {
@@ -41,6 +37,7 @@ export const GET = withApi(
         resourceId: row.resourceId,
         severity: row.severity,
         outcome: row.outcome,
+        source: row.source,
         createdAt: row.createdAt,
       };
     });

@@ -6,10 +6,15 @@
  */
 
 import { NextResponse } from 'next/server';
-import { getAllFeatureFlags, toggleFeatureFlag } from '@/lib/feature-flags';
+import {
+  getAllFeatureFlags,
+  setFeatureFlagEnabledInTransaction,
+  invalidateFeatureFlagCache,
+  FeatureFlagNotFoundError,
+} from '@/lib/feature-flags';
 import { z } from 'zod';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
-import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
+import { performAtomicAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 import { withAdminAuth, withSystemAdminAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
 
 import {
@@ -96,8 +101,9 @@ try {
 
       const { name, enabled } = body;
 
-      // A platform-wide flag: the intent is recorded durably before it changes and the outcome after.
-      await performAuditedOperation(
+      // A platform-wide flag is rows in our own database: the change and its audit record commit in one transaction, so a failed audit
+      // write leaves the flag as it was. The in-memory cache is refreshed only after the commit.
+      await performAtomicAuditedOperation(
         {
           organizationId,
           userId,
@@ -106,7 +112,8 @@ try {
           resourceId: name,
           details: { enabled },
         },
-        () => toggleFeatureFlag(name, enabled),
+        (tx) => setFeatureFlagEnabledInTransaction(tx, name, enabled),
+        invalidateFeatureFlagCache,
       );
 
       logApiAuditEvent({
@@ -128,7 +135,10 @@ try {
         severity: 'high',
         details: { error: error instanceof Error ? error.message : 'Unknown error' },
       });
-const refused = operationAuditResponse(error);
+if (error instanceof FeatureFlagNotFoundError) {
+        return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Feature flag not found');
+      }
+      const refused = operationAuditResponse(error);
       if (refused) return NextResponse.json(refused.body, { status: refused.status });
       throw error;
     }

@@ -218,6 +218,36 @@ async function updateFeatureFlag(
   }
 }
 
+/** A flag that is not defined cannot be switched: the runtime role may update a flag row but not create one. */
+export class FeatureFlagNotFoundError extends Error {
+  constructor(readonly flagName: string) {
+    super(`Feature flag ${flagName} is not defined`);
+    this.name = 'FeatureFlagNotFoundError';
+  }
+}
+
+/**
+ * Switch an existing flag inside the caller's transaction, so the change can commit with its audit record
+ * (performAtomicAuditedOperation). The in-memory cache is refreshed by invalidateFeatureFlagCache after the commit.
+ */
+export async function setFeatureFlagEnabledInTransaction(
+  tx: { update: typeof db.update },
+  name: string,
+  enabled: boolean,
+): Promise<void> {
+  const updated = await tx
+    .update(featureFlags)
+    .set({ enabled, updatedAt: new Date() })
+    .where(eq(featureFlags.name, name))
+    .returning({ name: featureFlags.name });
+  if (updated.length === 0) throw new FeatureFlagNotFoundError(name);
+}
+
+export async function invalidateFeatureFlagCache(): Promise<void> {
+  lastFetchTime = 0;
+  await refreshFeatureFlags();
+}
+
 /**
  * Feature flags registry
  * Add new features here as they&apos;re developed

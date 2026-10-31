@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 560,
-    "partial": 90,
+    "implementedPendingQualification": 563,
+    "partial": 91,
     "qualificationVerified": 0,
-    "unresolved": 217,
+    "unresolved": 214,
     "externalBlockers": 0
   },
   "batches": [
@@ -1014,6 +1014,15 @@
       "newlyImplemented": 1,
       "outstandingAfter": 217,
       "partial": 0,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B105-F06-A1-AUDIT-FOUNDATION",
+      "family": "F06 A1: audit-write contract, truthful route manifest, canonical audit visibility, representation protocol capability",
+      "outstandingBefore": 217,
+      "newlyImplemented": 3,
+      "outstandingAfter": 214,
+      "partial": 1,
       "evidenceCommit": null
     }
   ],
@@ -3731,14 +3740,10 @@
       "batch": "B23-F11-AI-AND-MODEL-OUTPUT-GOVERNANCE",
       "files": [
         "apps/union-eyes/app/api/location/consent/route.ts",
-        "apps/union-eyes/app/api/__tests__/location-consent.route.test.ts",
-        "apps/union-eyes/lib/location/consent-notice.ts",
-        "apps/union-eyes/services/geofence-privacy-service.ts",
-        "apps/union-eyes/services/__tests__/geofence-privacy-service.test.ts",
-        "docs/union-eyes/convergence/remediation/ue-location-consent-notice-authority-20261031.md"
+        "apps/union-eyes/app/api/__tests__/location-consent.route.test.ts"
       ],
-      "explanation": "The route now refuses client-authored notice fields, requires explicit acknowledgment of the exact configured version and selected tracking scopes, and fails closed when no institutional notice is configured. The service also validates the canonical notice before database work and persists its version; grant and audit remain transactional. Route and service regression tests committed; see additive engineering evidence.",
-      "remaining": "An institutionally adopted notice/version must be configured; member UI must display GET notice and POST version, acknowledgment and scope. Exact-HEAD unit, native PostgreSQL 15/16, HTTP/browser, staging and independent qualification are outstanding."
+      "explanation": "The body is parsed with a typed, bounded schema: purpose, description and text are non-empty bounded strings and the two allowance flags must be booleans (a string \"false\" was stored as consent); an invalid or non-JSON body is a 400 that records no consent.",
+      "remaining": "The consent text and purpose are still supplied by the client; a server-owned notice with a version the member acknowledges needs a client change."
     },
     "DEF-0B9-ML-ALERTS-DRIFT-FINDING-IS-A-LITERAL-PSI-AND-ALERT-IDS-CHANGE-EVERY-SECOND": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -7793,6 +7798,55 @@
       ],
       "explanation": "Selecting an organization to work in now leaves an organization.select audit record (actor, organization, and whether the authority was membership or platform administrator) written through the atomic audit before the session is rebound, the preference cookie is set or the organization is returned; if the record cannot be written the selection is refused (503 in legacy mode, an error in canonical mode). A platform administrator selecting an organization they hold no membership of is named as such.",
       "remaining": "The session store and the audit store are separate databases, so the record is written first rather than in one transaction with the rebind; a record can exist for a rebind that then fails. The canonical path is covered by source pins and mocks only, not by a native or HTTP run."
+    },
+    "DEF-0B1-MANIFEST-DETECTOR": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B105-F06-A1-AUDIT-FOUNDATION",
+      "files": [
+        "apps/union-eyes/scripts/lib/route-coverage-scan.ts",
+        "apps/union-eyes/lib/__tests__/route-scan-classification.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s47-f06-a1-audit-foundation.test.ts"
+      ],
+      "explanation": "The scanner no longer overstates. A generic CRUD route whose table is not OPERATIONAL (read from lib/api/crud-governance.ts, the one place that decides it) refuses every write, so it is reported as not mutating with a READ_ONLY audit class (54 routes); a route that reaches performAuditedOperation is reported INTENT_OUTCOME instead of ATOMIC_SERVICE (41 routes), because operation-audit.ts contains persistAtomicAudit and every route importing it was being counted atomic; and a handler-level requireSystemAdmin( or hasMinRole( is now seen as the ADMIN_AUTH or ROLE_AUTH guard it is (it was reported as a bare session check). Each rule is exercised on a synthetic tree."
+    },
+    "DEF-0B3-AUDITS-LEGACY-TABLE-NOT-CANONICAL": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B105-F06-A1-AUDIT-FOUNDATION",
+      "files": [
+        "apps/union-eyes/lib/audit/audit-reader.ts",
+        "apps/union-eyes/lib/audit/__tests__/audit-reader.test.ts",
+        "apps/union-eyes/app/api/audits/route.ts",
+        "apps/union-eyes/app/api/audits/[id]/route.ts",
+        "apps/union-eyes/app/api/__tests__/audits-id.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s47-f06-a1-audit-foundation.test.ts"
+      ],
+      "explanation": "The audits list and detail routes now read through lib/audit/audit-reader.ts in the caller's tenant transaction: the legacy audit_security.audit_logs always, and in canonical mode the hash-chained public.audit_logs that persistAtomicAudit actually writes (including the audit.entry.read record the detail route writes). Each entry says which store it came from; the canonical store records no severity or outcome, so those are null, not invented. No details, changes, addresses or session data are returned from either store, and the page is bounded.",
+      "remaining": "Proven with mocked transactions only; the canonical read has not been run against the combined PostgreSQL database."
+    },
+    "DEF-0B1-REP-PROTOCOL-NOT-IN-CAPABILITY-MODEL": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B105-F06-A1-AUDIT-FOUNDATION",
+      "files": [
+        "apps/union-eyes/lib/reality/capability-registry.ts",
+        "apps/union-eyes/lib/services/__tests__/s47-f06-a1-audit-foundation.test.ts"
+      ],
+      "explanation": "The representation protocol (administrator-saved, approved by someone other than its author, every change written with persistAtomicAudit) is now owned by a named capability, UE-REP-PROTOCOL-GOVERNANCE, recorded LIMITED with its files, evidence and limits. The frozen register entry is untouched.",
+      "remaining": "The Gate 0B.2 ownership ratification is an institutional decision this change cannot make; the GET read is still logged by the API audit logger rather than recorded atomically."
+    },
+    "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME": {
+      "status": "PARTIAL",
+      "batch": "B105-F06-A1-AUDIT-FOUNDATION",
+      "files": [
+        "apps/union-eyes/lib/audit/operation-audit.ts",
+        "apps/union-eyes/lib/audit/__tests__/operation-audit.test.ts",
+        "apps/union-eyes/lib/feature-flags.ts",
+        "apps/union-eyes/app/api/admin/feature-flags/route.ts",
+        "apps/union-eyes/app/api/__tests__/admin-feature-flags.route.test.ts",
+        "apps/union-eyes/scripts/lib/route-coverage-scan.ts",
+        "apps/union-eyes/lib/services/__tests__/s47-f06-a1-audit-foundation.test.ts"
+      ],
+      "explanation": "The audit-write contract is now stated in one place: performAtomicAuditedOperation writes the change and a single hash-chained audit record in one tenant transaction (a failed audit write abandons the change; a failed change records nothing; afterCommit runs only after commit), and performAuditedOperation is documented and labelled INTENT_OUTCOME as the durable two-phase record for effects our transaction cannot reach. The manifest no longer declares the two-phase routes atomic. The platform feature-flag toggle, a pure database change, moved onto the atomic contract (an undefined flag is a 404 rather than an insert the runtime role may not make).",
+      "remaining": "Other operations audited as intent and outcome whose effect is only database rows (CBA source seeding and benchmark snapshot) still use the two-phase helper; they are converted in the external/multi-store batch."
     }
   }
 }

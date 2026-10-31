@@ -45,7 +45,7 @@ describe('audits/[id] route', () => {
 
     expect(result).toEqual({
       auditId: AUDIT_ID, action: 'viewed', resourceType: 'claim', resourceId: 'c1', severity: 'info', outcome: 'success',
-      createdAt: '2026-01-01T00:00:00Z',
+      source: 'legacy', createdAt: '2026-01-01T00:00:00Z',
     });
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
       organizationId: 'org_1', userId: 'user_1', action: 'audit.entry.read', resourceId: AUDIT_ID,

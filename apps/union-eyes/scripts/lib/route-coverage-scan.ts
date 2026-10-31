@@ -10,7 +10,7 @@ import { dirname, join, relative, sep } from 'node:path'
 export type RouteGuard =
   | 'CRUD_FACTORY' | 'WITH_API' | 'WITH_API_PUBLIC' | 'ROLE_AUTH' | 'ADMIN_AUTH' | 'ORG_AUTH' | 'SESSION_AUTH' | 'CRON_SECRET'
   | 'WEBHOOK_SIGNATURE' | 'PLATFORM_AUTH_HANDLER' | 'CAPABILITY_TOKEN' | 'RETIRED' | 'DELEGATED' | 'NONE'
-export type RouteAudit = 'COMPUTE_ONLY' | 'EXEMPT_UNATTRIBUTABLE' | 'EXEMPT_BALLOT_SECRECY' | 'ATOMIC' | 'ATOMIC_SERVICE' | 'NO_WRITES_FOUND' | 'CRUD_ATOMIC' | 'BEST_EFFORT' | 'NONE' | 'READ_ONLY'
+export type RouteAudit = 'COMPUTE_ONLY' | 'EXEMPT_UNATTRIBUTABLE' | 'EXEMPT_BALLOT_SECRECY' | 'ATOMIC' | 'ATOMIC_SERVICE' | 'NO_WRITES_FOUND' | 'CRUD_ATOMIC' | 'INTENT_OUTCOME' | 'BEST_EFFORT' | 'NONE' | 'READ_ONLY'
 export type RouteData = 'TENANT_TX' | 'SYSTEM_CONTEXT' | 'CRUD_TENANT_TX' | 'AMBIENT_DB' | 'NONE'
 
 export interface RouteEntry {
@@ -60,8 +60,10 @@ function guardOf(source: string): RouteGuard {
   if (/crudRoutes\(/.test(source)) return 'CRUD_FACTORY'
   // The identity provider's bearer token is the credential (lib/scim/scim-token.ts); the route acts for the token's organization.
   if (/authenticateScimRequest\(/.test(source)) return 'CAPABILITY_TOKEN'
-  if (/withAdminAuth|withSystemAdminAuth/.test(source)) return 'ADMIN_AUTH'
-  if (/withRoleAuth|withEnhancedRoleAuth|withSecureAPI|withMinRole|withApiAuth/.test(source)) return 'ROLE_AUTH'
+  // requireSystemAdmin( is an administrator gate applied inside the handler; hasMinRole( is a role gate. Both were missed and the route
+  // was reported as holding a bare session check.
+  if (/withAdminAuth|withSystemAdminAuth|requireSystemAdmin\(/.test(source)) return 'ADMIN_AUTH'
+  if (/withRoleAuth|withEnhancedRoleAuth|withSecureAPI|withMinRole|withApiAuth|\bhasMinRole\(/.test(source)) return 'ROLE_AUTH'
   if (/withOrganizationAuth|withOrganizationMiddleware|withExternalResourceAuth|external-resource-middleware/.test(source)) return 'ORG_AUTH'
   if (/withApi\(/.test(source)) return /required:\s*false/.test(source) ? 'WITH_API_PUBLIC' : 'WITH_API'
   if (/CRON_SECRET|verifyCronAuth|cronAuth/i.test(source)) return 'CRON_SECRET'
@@ -205,6 +207,46 @@ function reachable(root: string, file: string, source: string, depth: number, se
   return out
 }
 
+/** The generic-CRUD governance class of each table, read from lib/api/crud-governance.ts (the one place that decides it). */
+function crudGovernanceByTable(root: string): Map<string, string> {
+  const text = readFileSync(join(root, 'lib', 'api', 'crud-governance.ts'), 'utf8').replace(/\/\/[^\n]*/g, '')
+  const out = new Map<string, string>()
+  for (const m of text.matchAll(/const (DENIED|SUBJECT_OWNED|OWN_ROWS_READ|READ_ONLY|OPERATIONAL) = \[([\s\S]*?)\] as const/g)) {
+    for (const name of m[2].matchAll(/'([\w]+)'/g)) out.set(name[1], m[1])
+  }
+  return out
+}
+
+function schemaTableNames(root: string): Map<string, string> {
+  const out = new Map<string, string>()
+  const visit = (dir: string) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const path = join(dir, entry.name)
+      if (entry.isDirectory()) visit(path)
+      else if (/\.ts$/.test(entry.name)) {
+        for (const m of readFileSync(path, 'utf8').matchAll(/export const (\w+)\s*=\s*pgTable\(\s*["'`](\w+)["'`]/g)) out.set(m[1], m[2])
+      }
+    }
+  }
+  visit(join(root, 'db', 'schema'))
+  return out
+}
+
+/**
+ * A generic CRUD route whose table is not OPERATIONAL (or SUBJECT_OWNED with an owner column) refuses every write with a 403 in
+ * assertCrudWrite, so exporting POST/PATCH/DELETE does not make it a route that changes state. It was reported as mutating, with a
+ * CRUD_ATOMIC audit, which overstated both.
+ */
+function crudWritesRefused(source: string, tables: Map<string, string>, names: Map<string, string>): boolean {
+  const variable = /crudRoutes\(\s*\{[\s\S]*?\btable:\s*(\w+)/.exec(source)?.[1]
+  const name = variable ? names.get(variable) : undefined
+  if (!name) return false
+  const governance = tables.get(name) ?? 'DENIED'
+  if (governance === 'OPERATIONAL') return false
+  if (governance === 'SUBJECT_OWNED' && /\bownerColumn\s*:/.test(source)) return false
+  return true
+}
+
 function auditOf(route: string, source: string, guard: RouteGuard, mutating: boolean, imports: string[]): RouteAudit {
   if (!mutating) return 'READ_ONLY'
   if (BALLOT_SECRECY_EXEMPT_ROUTES.includes(route)) return 'EXEMPT_BALLOT_SECRECY'
@@ -220,7 +262,14 @@ function auditOf(route: string, source: string, guard: RouteGuard, mutating: boo
   }
   if (guard === 'CRUD_FACTORY') return 'CRUD_ATOMIC'
   if (ATOMIC_AUDIT.test(source)) return 'ATOMIC'
-  if (imports.some((f) => ATOMIC_AUDIT.test(readFileSync(f, 'utf8')))) return 'ATOMIC_SERVICE'
+  // performAuditedOperation records the intent, then runs the effect, then records the outcome, each in its own transaction (see
+  // lib/audit/operation-audit.ts). That is a durable two-phase record, not an atomic one: the effect and its audit row do not commit
+  // together. operation-audit.ts itself contains persistAtomicAudit, so a route that only reaches it through that module is not atomic.
+  const reached = imports.filter((f) => !f.endsWith('operation-audit.ts'))
+  if (/\bperformAuditedOperation\(/.test(source) || reached.some((f) => /\bperformAuditedOperation\(/.test(readFileSync(f, 'utf8')))) {
+    return 'INTENT_OUTCOME'
+  }
+  if (reached.some((f) => ATOMIC_AUDIT.test(readFileSync(f, 'utf8')))) return 'ATOMIC_SERVICE'
   if (AUTH_AUDITED_CALL.test(source) || KERNEL_AUDITED_CALL.test(source)) return 'ATOMIC_SERVICE'
   // A mutating method whose handler and everything it reaches contain no write is read-only in effect.
   if (!WRITE_TOKEN.test(source) && !imports.some((f) => WRITE_TOKEN.test(readFileSync(f, 'utf8')))) return 'NO_WRITES_FOUND'
@@ -230,12 +279,14 @@ function auditOf(route: string, source: string, guard: RouteGuard, mutating: boo
 
 export function scanRoutes(root: string): RouteEntry[] {
   const api = join(root, 'app', 'api')
+  const governance = crudGovernanceByTable(root)
+  const tableNames = schemaTableNames(root)
   const entries = walk(api)
     .map((file) => {
       const source = readFileSync(file, 'utf8')
       const methods = methodsOf(source)
-      const mutating = methods.some((m) => MUTATING.has(m))
       const guard = guardOf(source)
+      const mutating = methods.some((m) => MUTATING.has(m)) && !(guard === 'CRUD_FACTORY' && crudWritesRefused(source, governance, tableNames))
       return {
         route: relative(api, file).split(sep).join('/'),
         methods,

@@ -16,7 +16,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 
-import { performAuditedOperation, OperationAuditError, operationAuditResponse } from '../operation-audit';
+import { performAuditedOperation, performAtomicAuditedOperation, OperationAuditError, operationAuditResponse } from '../operation-audit';
 
 const op = { organizationId: 'org_1', userId: 'admin', action: 'platform.thing', resourceType: 'thing', resourceId: 't1' };
 
@@ -84,5 +84,46 @@ describe('performAuditedOperation', () => {
   it('maps the refusal to a 409 for routes', () => {
     expect(operationAuditResponse(new OperationAuditError('x'))).toMatchObject({ status: 409 });
     expect(operationAuditResponse(new Error('other'))).toBeNull();
+  });
+});
+
+describe('performAtomicAuditedOperation', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    m.orgs = [];
+    m.audit.mockResolvedValue(undefined);
+  });
+
+  it('writes the work and its single audit record on the same transaction handle, in that order', async () => {
+    const order: string[] = [];
+    m.audit.mockImplementation(async (tx: unknown, entry: { action: string }) => { order.push(`audit:${entry.action}:${tx === m.tx}`); });
+    const result = await performAtomicAuditedOperation(op, async (tx) => { order.push(`work:${tx === m.tx}`); return 9; });
+    expect(result).toBe(9);
+    expect(order).toEqual(['work:true', 'audit:platform.thing:true']);
+  });
+
+  it('turns a failed audit write into OperationAuditError so the transaction (and the work in it) is abandoned, and does not run afterCommit', async () => {
+    m.audit.mockRejectedValue(new Error('audit down'));
+    const after = vi.fn();
+    await expect(performAtomicAuditedOperation(op, async () => 1, after)).rejects.toBeInstanceOf(OperationAuditError);
+    expect(after).not.toHaveBeenCalled();
+  });
+
+  it('records nothing when the work itself fails, and rethrows the original error', async () => {
+    const boom = new Error('boom');
+    await expect(performAtomicAuditedOperation(op, async () => { throw boom; })).rejects.toBe(boom);
+    expect(m.audit).not.toHaveBeenCalled();
+  });
+
+  it('refuses an unattributed operation without opening a transaction', async () => {
+    await expect(performAtomicAuditedOperation({ ...op, userId: null }, async () => 1)).rejects.toBeInstanceOf(OperationAuditError);
+    expect(m.orgs).toHaveLength(0);
+  });
+
+  it('runs afterCommit once, and a failing afterCommit cannot undo the committed work', async () => {
+    const after = vi.fn(async () => { throw new Error('cache refresh failed'); });
+    await expect(performAtomicAuditedOperation(op, async () => 5, after)).resolves.toBe(5);
+    expect(after).toHaveBeenCalledTimes(1);
+    expect(m.logger.error).toHaveBeenCalledWith('platform_operation_after_commit_failed', expect.anything());
   });
 });
