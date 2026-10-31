@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { SQL, getTableName } from 'drizzle-orm';
 import { analyticsMetrics } from '@/db/schema';
 import type { PgTable } from 'drizzle-orm/pg-core';
-import { enforceCreateSecurityInvariants, assertGenericWritePayload, parseCrudPagination, stripBlockedPatchFields, buildMergeSetValues, validateMergeJsonColumnValues, shapeCrudResponseRow } from '../crud-factory';
+import { bindCreatePathIdentifier, enforceCreateSecurityInvariants, assertGenericWritePayload, parseCrudPagination, stripBlockedPatchFields, buildMergeSetValues, validateMergeJsonColumnValues, shapeCrudResponseRow } from '../crud-factory';
 
 describe('crud-factory enforceCreateSecurityInvariants', () => {
   it('applies organizationId/createdBy when a hook returns a clean object without them', () => {
@@ -297,5 +297,27 @@ describe('generic analytics metric read confidentiality', () => {
     expect(shapeCrudResponseRow({ id: 'x', metadata: { public: true } }, 'other_table'))
       .toEqual({ id: 'x', metadata: { public: true } });
     expect(shapeCrudResponseRow(undefined, 'analytics_metrics')).toBeUndefined();
+  });
+});
+
+
+describe('nested collection POST parent binding (DEF-0B5-SURVEY-RESPONSES-ROUTE-IGNORES-SURVEY-ID)', () => {
+  const binding = { paramName: 'surveyId', field: 'surveyId' };
+  it('derives surveyId from the URL when omitted from JSON', () => {
+    const values: Record<string, unknown> = {};
+    expect(bindCreatePathIdentifier(values, { surveyId: 'survey-A' }, binding)).toBe('survey-A');
+    expect(values.surveyId).toBe('survey-A');
+  });
+  it('permits a matching legacy body surveyId', () => {
+    expect(bindCreatePathIdentifier({ surveyId: 'survey-A' }, { surveyId: 'survey-A' }, binding)).toBe('survey-A');
+  });
+  it('rejects a mismatched body identifier without changing the body', () => {
+    const values = { surveyId: 'survey-B' };
+    expect(() => bindCreatePathIdentifier(values, { surveyId: 'survey-A' }, binding)).toThrow();
+    expect(values.surveyId).toBe('survey-B');
+  });
+  it('rejects a missing or blank path identifier instead of trusting JSON', () => {
+    expect(() => bindCreatePathIdentifier({ surveyId: 'survey-B' }, {}, binding)).toThrow();
+    expect(() => bindCreatePathIdentifier({}, { surveyId: ' ' }, binding)).toThrow();
   });
 });

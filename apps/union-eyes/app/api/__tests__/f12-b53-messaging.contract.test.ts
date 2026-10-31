@@ -56,6 +56,7 @@ describe('B53 messaging records and retained communications', () => {
     const text = read('app/api/communications/surveys/[surveyId]/responses/route.ts')
     expect(text).toContain('eq(surveys.organizationId, organizationId)')
     expect(text).toContain('Survey is not open')
+    expect(text).toContain("createPathBinding: { paramName: 'surveyId', field: 'surveyId' }")
     expect(text).toContain('zUUID.safeParse(params.surveyId)')
   })
 })

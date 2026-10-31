@@ -16,6 +16,8 @@ const { POST } = crudRoutes({
   pk: 'id',
   tags: ['Surveys'],
   orgScoped: true,
+  // The path survey is authoritative; JSON may omit it but may not change it.
+  createPathBinding: { paramName: 'surveyId', field: 'surveyId' },
   writeRole: 'member',
   // A member cannot create a response for another tenant's survey, impersonate
   // another respondent, or bypass a survey's anonymous-identity setting.

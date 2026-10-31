@@ -101,6 +101,8 @@ export interface CrudOptions {
   itemRoute?: boolean;
   /** URL param name for the item ID (default: 'id') */
   paramName?: string;
+  /** Bind a nested collection POST's foreign-key to the parent identifier in its URL. */
+  createPathBinding?: { paramName: string; field: string };
   /** Column to order by (default: 'createdAt') */
   orderBy?: string;
   /** Minimum role for read operations (default: 'member') */
@@ -238,6 +240,24 @@ function getTableName(table: PgTable): string {
  */
 /** Recorded as the creator and audit actor of a record filed anonymously. */
 export const ANONYMOUS_ACTOR = 'anonymous';
+
+/** Enforce the URL parent for a nested collection create before any domain hook. */
+export function bindCreatePathIdentifier(
+  values: Record<string, unknown>,
+  params: Record<string, string>,
+  binding: { paramName: string; field: string },
+): string {
+  const pathId = params[binding.paramName];
+  if (typeof pathId !== 'string' || !pathId.trim()) {
+    throw ApiError.badRequest('Missing parent identifier in URL');
+  }
+  const supplied = values[binding.field];
+  if (supplied !== undefined && supplied !== pathId) {
+    throw ApiError.badRequest('Body parent identifier does not match URL');
+  }
+  values[binding.field] = pathId;
+  return pathId;
+}
 
 export function enforceCreateSecurityInvariants(
   transformed: Record<string, unknown>,
@@ -606,7 +626,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           description: `Creates a new ${resourceName} record.`,
         },
       },
-      async ({ body, organizationId, userId }) => {
+      async ({ body, params, organizationId, userId }) => {
         assertRequiredScope(organizationId, userId);
         const normalizedBody = opts.preprocessCreateBody ? opts.preprocessCreateBody(body) : body;
         const values = assertGenericWritePayload(normalizedBody, table, {
@@ -615,6 +635,9 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           blockedFields: blockedPatchFields,
         });
         assertWritable(values);
+        const boundParentId = opts.createPathBinding
+          ? bindCreatePathIdentifier(values, params, opts.createPathBinding)
+          : null;
 
         if (orgScoped && orgCol && organizationId) {
           values.organizationId = organizationId;
@@ -644,6 +667,9 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           hasOrgColumn: Boolean(orgScoped && orgCol),
           hasCreatedByColumn: Boolean(createdByCol),
         });
+        if (opts.createPathBinding && boundParentId !== null) {
+          finalValues[opts.createPathBinding.field] = boundParentId;
+        }
 
         // A record the reporter chose to file anonymously is not attributed to them: neither the row nor the audit entry
         // carries the session user. This is the one sanctioned override of the created-by invariant, and only the route

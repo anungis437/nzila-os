@@ -4975,8 +4975,8 @@
         "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/route.ts",
         "apps/union-eyes/app/api/__tests__/f12-b53-messaging.contract.test.ts"
       ],
-      "explanation": "Existing implementation, verified: the response create verifies the survey belongs to the caller organization, is active and open, and strips respondent identity for an anonymous survey; the list is a count-only steward read of the path survey.",
-      "remaining": "The POST still takes the survey id from the body rather than the path."
+      "explanation": "The nested response POST now binds surveyId to the URL before the existing tenant-bound, active/open survey lookup; conflicting body identifiers fail closed and the URL identifier is reasserted after the create hook. The anonymous identity suppression and count-only steward GET remain intact.",
+      "remaining": "Path-parent source correction and focused regression cases are committed, but executable Vitest, exact-HEAD native PostgreSQL 15/16, HTTP/browser and independent release qualification remain unverified. Do not mark CLOSED."
     },
     "DEF-0B12-PLT-KPI-HEALTH-TREATS-A-LOWER-FIGURE-AS-WORSE-FOR-EVERY-TARGET": {
       "status": "PARTIAL",
