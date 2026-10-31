@@ -92,7 +92,7 @@
     "engineeringCorrected": 606,
     "engineeringRemaining": 171,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 85
+    "engineeringPartial": 86
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -1796,9 +1796,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B98-ARBITRATION-CASE-AUTHORITY",
+        "path": "apps/union-eyes/lib/arbitration/arbitration-case-authority.ts; apps/union-eyes/lib/arbitration/__tests__/arbitration-case-authority.test.ts; apps/union-eyes/app/api/arbitrations/route.ts; apps/union-eyes/app/api/arbitrations/[id]/route.ts; apps/union-eyes/lib/services/__tests__/s42-arbitration-case-authority.test.ts",
+        "explanation": "Creating an arbitration now requires that the grievanceId in the body be a grievance of the caller's organization (assertOrganizationOwns) and that the case authority allow the caller to edit that case (owner, or a collaborator with editing permission); changing one re-checks the same authority against the row loaded under the update's lock, and the grievance an arbitration belongs to cannot be changed.",
+        "remaining": "Reads of the collection and item still return every arbitration of the organization to a steward, and DELETE is not re-checked against the case; the generic factory has no per-row read hook for a kernel decision.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B3-BARGAINING-PROPOSALS-NO-TENANT-PREDICATE",

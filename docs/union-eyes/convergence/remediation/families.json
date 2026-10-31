@@ -2,7 +2,7 @@
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
  "corrected": 606,
- "partial": 85,
+ "partial": 86,
  "outstanding": 171,
  "accountedFor": 171,
  "families": [
@@ -726,7 +726,8 @@
    },
    {
     "id": "DEF-0B3-ARBITRATION-RECORD-NO-CASE-AUTHORITY",
-    "severity": "HIGH"
+    "severity": "HIGH",
+    "partial": true
    },
    {
     "id": "DEF-0B4-CLAUSE-LIBRARY-FEDERATION-PREDICATES-DISAGREE",
