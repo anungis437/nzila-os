@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { SQL } from 'drizzle-orm';
+import { SQL, getTableName } from 'drizzle-orm';
+import { analyticsMetrics } from '@/db/schema';
 import type { PgTable } from 'drizzle-orm/pg-core';
 import { enforceCreateSecurityInvariants, assertGenericWritePayload, parseCrudPagination, stripBlockedPatchFields, buildMergeSetValues, validateMergeJsonColumnValues, shapeCrudResponseRow } from '../crud-factory';
 
@@ -265,6 +266,10 @@ describe('generic CRUD pagination boundaries', () => {
 
 
 describe('generic analytics metric read confidentiality', () => {
+  it('uses the canonical Drizzle table name for the generic analytics aliases', () => {
+    expect(getTableName(analyticsMetrics)).toBe('analytics_metrics');
+  });
+
   it('redacts historical case identifiers and other metadata on every analytics_metrics read', () => {
     const stored = {
       id: 'metric-1',
