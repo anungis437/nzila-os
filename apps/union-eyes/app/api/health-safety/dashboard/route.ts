@@ -34,19 +34,21 @@ export const GET = withApi(
     const startDate = getStartDate(period);
     if (!organizationId) throw ApiError.badRequest('Organization context required');
     const orgFilter = sql`organization_id = ${organizationId}`;
-    const dateFilter = sql`created_at >= ${startDate}::timestamptz`;
+    // Workplace measures are taken on the dates the events happened (incident date, scheduled inspection date, hazard report date), not on when a row was created.
+    const incidentWindow = sql`incident_date >= ${startDate}::timestamptz`;
+    const inspectionWindow = sql`scheduled_date >= ${startDate}::timestamptz AND scheduled_date <= now()`;
 
     try {
     return await withRLSContext({ organizationId }, async (tx) => {
     const incidentRows = Array.from(
-        await tx.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND status <> 'archived' AND ${dateFilter}`)
+        await tx.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND status <> 'archived' AND ${incidentWindow}`)
       );
       const totalIncidents = Number((incidentRows[0] as Record<string, unknown>)?.cnt ?? 0);
 
       const startMs = new Date(startDate).getTime();
       const prevStart = new Date(startMs - (Date.now() - startMs)).toISOString();
       const prevRows = Array.from(
-        await tx.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND status <> 'archived' AND created_at >= ${prevStart}::timestamptz AND created_at < ${startDate}::timestamptz`)
+        await tx.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND status <> 'archived' AND incident_date >= ${prevStart}::timestamptz AND incident_date < ${startDate}::timestamptz`)
       );
       const prevIncidents = Number((prevRows[0] as Record<string, unknown>)?.cnt ?? 0);
       const incidentChange = prevIncidents > 0
@@ -58,15 +60,24 @@ export const GET = withApi(
         await tx.execute(sql`SELECT count(*)::int AS cnt FROM hazard_reports WHERE ${orgFilter} AND (status IS NULL OR status NOT IN ('resolved','closed','archived'))`)
       );
       const openHazards = Number((hazardRows[0] as Record<string, unknown>)?.cnt ?? 0);
-      const hazardTrend = openHazards > 3 ? 'up' : openHazards === 0 ? 'down' : 'stable';
+      // The trend compares hazards reported in this window with the same length before it; the number open says nothing about direction.
+      const newHazardRows = Array.from(
+        await tx.execute(sql`SELECT
+          count(*) FILTER (WHERE reported_date >= ${startDate}::timestamptz)::int AS current_cnt,
+          count(*) FILTER (WHERE reported_date >= ${prevStart}::timestamptz AND reported_date < ${startDate}::timestamptz)::int AS previous_cnt
+          FROM hazard_reports WHERE ${orgFilter} AND status <> 'archived'`)
+      );
+      const newHazards = Number((newHazardRows[0] as Record<string, unknown>)?.current_cnt ?? 0);
+      const prevHazards = Number((newHazardRows[0] as Record<string, unknown>)?.previous_cnt ?? 0);
+      const hazardTrend = newHazards > prevHazards ? 'up' : newHazards < prevHazards ? 'down' : 'stable';
 
       const inspDueRows = Array.from(
-        await tx.execute(sql`SELECT count(*)::int AS cnt FROM safety_inspections WHERE ${orgFilter} AND ${dateFilter}`)
+        await tx.execute(sql`SELECT count(*)::int AS cnt FROM safety_inspections WHERE ${orgFilter} AND ${inspectionWindow}`)
       );
       const inspectionsDue = Number((inspDueRows[0] as Record<string, unknown>)?.cnt ?? 0);
 
       const inspCompRows = Array.from(
-        await tx.execute(sql`SELECT count(*)::int AS cnt FROM safety_inspections WHERE ${orgFilter} AND status = 'completed' AND ${dateFilter}`)
+        await tx.execute(sql`SELECT count(*)::int AS cnt FROM safety_inspections WHERE ${orgFilter} AND status = 'completed' AND ${inspectionWindow}`)
       );
       const inspectionsCompleted = Number((inspCompRows[0] as Record<string, unknown>)?.cnt ?? 0);
       // No inspections in the period is not a 100% rate: it is no measurement.
@@ -75,7 +86,7 @@ export const GET = withApi(
         : null;
 
       const lastRows = Array.from(
-        await tx.execute(sql`SELECT max(created_at)::text AS last_dt FROM workplace_incidents WHERE ${orgFilter} AND status <> 'archived'`)
+        await tx.execute(sql`SELECT max(incident_date)::text AS last_dt FROM workplace_incidents WHERE ${orgFilter} AND status <> 'archived'`)
       );
       const lastDt = (lastRows[0] as Record<string, unknown>)?.last_dt as string | null;
       // No incident on record is not 90 days: it is no measurement.

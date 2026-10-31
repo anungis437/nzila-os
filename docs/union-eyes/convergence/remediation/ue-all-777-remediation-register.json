@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 600,
-    "engineeringRemaining": 177,
+    "engineeringCorrected": 603,
+    "engineeringRemaining": 174,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 79
+    "engineeringPartial": 78
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -5639,9 +5639,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B93-DASHBOARD-MEASURES-KEYS-ARCHIVE",
+        "path": "apps/union-eyes/app/api/employer-execution/timesheets/route.ts; apps/union-eyes/lib/services/__tests__/s37-dashboard-measures-keys-archive.test.ts",
+        "explanation": "Timesheet ingest now refuses an archived employer (409) instead of continuing to take payroll input for it.",
+        "remaining": "The generic employer delete still sets only status archived (no archived-at stamp) and does not check for open timesheet batches, contacts or communications; a governed archive action is needed.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B6-EMP-COMMUNICATION-NOT-DELIVERED",
@@ -9788,9 +9796,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B93-DASHBOARD-MEASURES-KEYS-ARCHIVE",
+        "path": "apps/union-eyes/app/api/health-safety/dashboard/route.ts; apps/union-eyes/app/api/__tests__/health-safety-dashboard.route.test.ts; apps/union-eyes/lib/services/__tests__/s37-dashboard-measures-keys-archive.test.ts",
+        "explanation": "The measures are now taken on the dates the events happened: incidents are counted and the previous window compared by incident date, days without incident run from the latest incident date (null when none is on record, as before), inspections are those scheduled within the window up to now and the rate is completed over those, and the hazard trend compares hazards reported in the window with the same length before it instead of reading the number currently open. Fixed clean metrics on a failure and a constant training figure were already removed.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-HS-TRAINING-FIGURES-READ-A-TABLE-NO-ROUTE-WRITES",
@@ -19012,11 +19027,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
-        "path": "apps/union-eyes/app/api/union-eyes/queue-status/route.ts; apps/union-eyes/app/api/__tests__/queue-status.route.test.ts",
-        "explanation": "The service key is compared in constant time; a wrong, short or empty key falls to the platform-administrator path.",
-        "remaining": "The control plane still authenticates with the shared AI service key rather than a key dedicated to queue status.",
+        "path": "apps/union-eyes/app/api/union-eyes/queue-status/route.ts; apps/union-eyes/app/api/__tests__/queue-status.route.test.ts; apps/union-eyes/lib/services/__tests__/s37-dashboard-measures-keys-archive.test.ts",
+        "explanation": "The service key is compared in constant time; a wrong, short or empty key falls to the platform-administrator path. B93: the control-plane key is QUEUE_STATUS_SERVICE_KEY, compared in constant time; the shared AI service key is accepted only outside production, so in production a leak of the AI key does not open platform queue data. The deployment must set the dedicated key for the control plane to read this route. A route test covers the dedicated key and the production refusal.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -19347,11 +19361,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
-        "path": "apps/union-eyes/lib/public-intake/guard.ts; apps/union-eyes/lib/public-intake/__tests__/guard.test.ts",
-        "explanation": "The workbook start and checkout buckets key on the trusted address (they use the shared guard).",
-        "remaining": "There is still no bot challenge on workbook start or checkout.",
+        "path": "apps/union-eyes/lib/public-intake/guard.ts; apps/union-eyes/lib/public-intake/__tests__/guard.test.ts; apps/union-eyes/app/api/workbook/start/route.ts; apps/union-eyes/app/api/workbook/checkout/route.ts; apps/union-eyes/lib/public-intake/bot-challenge.ts; apps/union-eyes/lib/services/__tests__/s37-dashboard-measures-keys-archive.test.ts",
+        "explanation": "The workbook start and checkout buckets key on the trusted address (they use the shared guard). Verified on source in B93: workbook start and checkout both call guardPublicIntake with a Turnstile challenge that fails closed in production (added in B85).",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },

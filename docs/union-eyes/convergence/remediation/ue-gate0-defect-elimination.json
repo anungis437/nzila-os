@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 547,
-    "partial": 79,
+    "implementedPendingQualification": 550,
+    "partial": 78,
     "qualificationVerified": 0,
-    "unresolved": 230,
+    "unresolved": 227,
     "externalBlockers": 0
   },
   "batches": [
@@ -210,701 +210,710 @@
       "id": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
       "family": "F08: public routes are bounded by a shared limiter keyed on a trusted address, bearer identifiers stay out of logs, and responses carry a projection rather than the stored row",
       "outstandingBefore": 556,
-      "newlyImplemented": 11,
-      "outstandingAfter": 545,
-      "partial": 3,
+      "newlyImplemented": 13,
+      "outstandingAfter": 543,
+      "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B23-F11-AI-AND-MODEL-OUTPUT-GOVERNANCE",
       "family": "F11: model output is shown as what it is: no canned reply stored as a model answer, no value typed into a provenance field, scoring before limiting, and feedback that counts a case once",
-      "outstandingBefore": 545,
+      "outstandingBefore": 543,
       "newlyImplemented": 9,
-      "outstandingAfter": 536,
+      "outstandingAfter": 534,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
       "family": "F04: a generic CRUD route names the fields a body may write and the columns a response omits, and a path that the factory cannot serve answers 501 instead of refusing every request under another name",
-      "outstandingBefore": 536,
+      "outstandingBefore": 534,
       "newlyImplemented": 16,
-      "outstandingAfter": 520,
+      "outstandingAfter": 518,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B25-F03-ORGANIZATION-BOUND-REFERENCES-AND-VERIFIED-CREDITS",
       "family": "F03: a reference in a body names a row of the caller's own organization or is refused, and a read over joined or hierarchical data stays inside the caller's organization",
-      "outstandingBefore": 520,
+      "outstandingBefore": 518,
       "newlyImplemented": 10,
-      "outstandingAfter": 510,
+      "outstandingAfter": 508,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B26-F12-VERIFIED-CREDITS-EDUCATION-ANALYTICS-CALENDAR",
       "family": "F12: route-specific defects already repaired in source, credited only where an existing or new test pins the repair",
-      "outstandingBefore": 510,
+      "outstandingBefore": 508,
       "newlyImplemented": 4,
-      "outstandingAfter": 506,
+      "outstandingAfter": 504,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B27-F05-F06-COMMERCIAL-BOUNDS-AUDIT-AND-RETENTION",
       "family": "F05/F06: inputs are typed and bounded, commercial data is read by those who administer it, effects are audited with their record, and retained records are ended rather than deleted",
-      "outstandingBefore": 506,
+      "outstandingBefore": 504,
       "newlyImplemented": 11,
-      "outstandingAfter": 495,
+      "outstandingAfter": 493,
       "partial": 4,
       "evidenceCommit": null
     },
     {
       "id": "B28-F12-F06-COMPLIANCE-VERDICTS-AND-UNSCOPED-AGGREGATES",
       "family": "F12/F06: a check states only what it verified, an aggregate never runs without an organization, and an administrative record is read and written as exactly that",
-      "outstandingBefore": 495,
+      "outstandingBefore": 493,
       "newlyImplemented": 4,
-      "outstandingAfter": 491,
+      "outstandingAfter": 489,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B29-F12-COMMUNICATIONS-LIFECYCLE-AND-VERIFIED-CREDITS",
       "family": "F12: a record moves through its lifecycle by rule, the server owns its status and counters, and a route reads the id from the path segment it is mounted on",
-      "outstandingBefore": 491,
+      "outstandingBefore": 489,
       "newlyImplemented": 5,
-      "outstandingAfter": 486,
+      "outstandingAfter": 484,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B30-F09-F10-LIMITS-REPLAY-REMITTANCE-AND-CANCEL-CONTRACT",
       "family": "F09/F10: a financial write is rate limited and repeatable without piling up records, an endpoint validates the request it actually performs, and an exported package states only what the data supports",
-      "outstandingBefore": 486,
+      "outstandingBefore": 484,
       "newlyImplemented": 5,
-      "outstandingAfter": 481,
+      "outstandingAfter": 479,
       "partial": 3,
       "evidenceCommit": null
     },
     {
       "id": "B31-F03-TENANT-SCOPE-OF-SHARED-AND-CHILD-RECORDS",
       "family": "F03: a record is read under the organization that holds it, a shared record under what its own row permits, and a platform read of other organizations is attributed and recorded first",
-      "outstandingBefore": 481,
+      "outstandingBefore": 479,
       "newlyImplemented": 8,
-      "outstandingAfter": 473,
+      "outstandingAfter": 471,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B32-F06-CONSENT-GATED-RECORDING-AND-VERIFIED-TELEMETRY-SCOPE",
       "family": "F06: a precise position or interview text is recorded or sent onward only after the consent and configuration checks, and a telemetry read stays in the caller's organization",
-      "outstandingBefore": 473,
+      "outstandingBefore": 471,
       "newlyImplemented": 6,
-      "outstandingAfter": 467,
+      "outstandingAfter": 465,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B33-F12-TRUTHFUL-READS-SCHEMA-CHECKED-JOBS-AND-RECORD-LIFECYCLE",
       "family": "F12: a job runs statements the schema declares, a read states a failure as a failure, an acknowledgement means the record exists, and a removed record is no longer read or counted",
-      "outstandingBefore": 467,
+      "outstandingBefore": 465,
       "newlyImplemented": 11,
-      "outstandingAfter": 456,
+      "outstandingAfter": 454,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B34-F04-F12-COMPUTED-ROWS-ARE-NOT-TYPED-IN-AND-REFERENCE-FIGURES-ARE-NOT-INVENTED",
       "family": "F04/F12: a row served as analytics comes from a job, a stored object is attached only if nothing else holds it, and a reference profile states only what was measured",
-      "outstandingBefore": 456,
+      "outstandingBefore": 454,
       "newlyImplemented": 5,
-      "outstandingAfter": 451,
+      "outstandingAfter": 449,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B35-F06-AUDIT-READS-ALIASES-AND-READ-ONLY-GETS",
       "family": "F06: an audit read serves the record and not the captured values, a recorded position and its audit commit together, and a GET changes nothing",
-      "outstandingBefore": 451,
+      "outstandingBefore": 449,
       "newlyImplemented": 6,
-      "outstandingAfter": 445,
+      "outstandingAfter": 443,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B36-F05-BOUNDED-LISTS-AND-ACCURATE-FILTERS",
       "family": "F05: a list is bounded, a field is bounded, and a filter filters by the values the record can hold",
-      "outstandingBefore": 445,
+      "outstandingBefore": 443,
       "newlyImplemented": 7,
-      "outstandingAfter": 438,
+      "outstandingAfter": 436,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B37-F07-COMMITTEE-WORKING-RECORD-AND-VERIFIED-OBJECT-READS",
       "family": "F07: a committee's working record is read by staff and its own members, and a read names only what the caller may see",
-      "outstandingBefore": 438,
+      "outstandingBefore": 436,
       "newlyImplemented": 5,
-      "outstandingAfter": 433,
+      "outstandingAfter": 431,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B38-F01-F09-F10-DEPRECATION-REGISTRY-AND-VERIFIED-JOBS",
       "family": "F01/F09/F10: a registry names replacements that exist, a job pages its scan and awaits its writes, and a read honours the record's state and the feature gate",
-      "outstandingBefore": 433,
+      "outstandingBefore": 431,
       "newlyImplemented": 3,
-      "outstandingAfter": 430,
+      "outstandingAfter": 428,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B39-F05-FINANCIAL-INTELLIGENCE-NEEDS-A-MANDATE-AND-FLAGS-CANNOT-BE-FORGED",
       "family": "F05: financial intelligence needs a live financial mandate, and a record a person raises cannot pass for an engine record",
-      "outstandingBefore": 430,
+      "outstandingBefore": 428,
       "newlyImplemented": 2,
-      "outstandingAfter": 428,
+      "outstandingAfter": 426,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B40-F05-REWARDS-PAGING-AND-EXPORT",
       "family": "F05: a page request is parsed into bounded integers and an export is bounded, administrative and audited",
-      "outstandingBefore": 428,
+      "outstandingBefore": 426,
       "newlyImplemented": 1,
-      "outstandingAfter": 427,
+      "outstandingAfter": 425,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B41-F08-OUTBOUND-FETCH-OF-SUPPLIED-ADDRESSES",
       "family": "F08: the server fetches a supplied address only if it is a public http(s) address, follows each redirect by hand and reads a bounded document",
-      "outstandingBefore": 427,
+      "outstandingBefore": 425,
       "newlyImplemented": 1,
-      "outstandingAfter": 426,
+      "outstandingAfter": 424,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B42-F12-FAILURES-ARE-STATED-AS-FAILURES",
       "family": "F12: a failure is answered as a failure without internal text, and a query is validated",
-      "outstandingBefore": 426,
+      "outstandingBefore": 424,
       "newlyImplemented": 2,
-      "outstandingAfter": 424,
+      "outstandingAfter": 422,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B43-F05-PARSED-WINDOWS-AND-VERIFIED-TELEMETRY",
       "family": "F05: a numeric query parameter is parsed into a bounded integer, and a telemetry body is bounded",
-      "outstandingBefore": 424,
+      "outstandingBefore": 422,
       "newlyImplemented": 3,
-      "outstandingAfter": 421,
+      "outstandingAfter": 419,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B44-F05-SIGNATURE-DISCLOSURE-AND-BOUNDED-DIRECTORY-SEARCH",
       "family": "F05: signature records disclose only what the viewer is entitled to and are bounded; a search term is literal and bounded",
-      "outstandingBefore": 421,
+      "outstandingBefore": 419,
       "newlyImplemented": 4,
-      "outstandingAfter": 417,
+      "outstandingAfter": 415,
       "partial": 3,
       "evidenceCommit": null
     },
     {
       "id": "B45-F03-CLAUSE-LIBRARY-BODY-AUTHORITY-AND-OWNERSHIP",
       "family": "F03/F05: the shared clause library validates what it stores, reserves public publishing to an officer, and writes only rows it owns",
-      "outstandingBefore": 417,
+      "outstandingBefore": 415,
       "newlyImplemented": 4,
-      "outstandingAfter": 413,
+      "outstandingAfter": 411,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B46-F12-ICRA-CONSENT-AND-REQUIRED-COVERAGE",
       "family": "F12: an ICRA assessment exists only with server-stamped consent and is scored only from the required answers",
-      "outstandingBefore": 413,
+      "outstandingBefore": 411,
       "newlyImplemented": 3,
-      "outstandingAfter": 410,
+      "outstandingAfter": 408,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B47-F12-COGNITION-RESULTS-STATE-WHAT-THEY-REST-ON",
       "family": "F12: cognition and knowledge-transfer results do not present absence, defaults or literals as measurement",
-      "outstandingBefore": 410,
+      "outstandingBefore": 408,
       "newlyImplemented": 4,
-      "outstandingAfter": 406,
+      "outstandingAfter": 404,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B48-F05-LITERAL-SEARCH-AND-BOUNDED-ANONYMOUS-JSON",
       "family": "F05/F12: searches match literally and list only active organizations; free-form JSON from callers is bounded and cannot overwrite audited fields",
-      "outstandingBefore": 406,
+      "outstandingBefore": 404,
       "newlyImplemented": 3,
-      "outstandingAfter": 403,
+      "outstandingAfter": 401,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B49-F06-REGULATORY-RECORDS-AND-SYNC-HISTORY-ARE-RETAINED",
       "family": "F06: regulatory records and integration sync history are not erased by the generic delete",
-      "outstandingBefore": 403,
+      "outstandingBefore": 401,
       "newlyImplemented": 3,
-      "outstandingAfter": 400,
+      "outstandingAfter": 398,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B50-F05-SOCIAL-EXPORT-AND-ORG-BOUND-LOOKUPS",
       "family": "F05/F03: the social export is a bounded staff read with safe cells; records are looked up inside the caller organization",
-      "outstandingBefore": 400,
+      "outstandingBefore": 398,
       "newlyImplemented": 1,
-      "outstandingAfter": 399,
+      "outstandingAfter": 397,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B51-F08-SSO-CREATE-CALENDAR-TOKENS-AND-ENTITLEMENT-LIST",
       "family": "F08: stored credentials and access configuration fail closed",
-      "outstandingBefore": 399,
+      "outstandingBefore": 397,
       "newlyImplemented": 2,
-      "outstandingAfter": 397,
+      "outstandingAfter": 395,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B52-F03-ORGANIZATION-OWNED-REFERENCES",
       "family": "F03: an id taken from a body must name a row of the caller organization",
-      "outstandingBefore": 397,
+      "outstandingBefore": 395,
       "newlyImplemented": 2,
-      "outstandingAfter": 395,
+      "outstandingAfter": 393,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B53-F12-NOT-SENT-NOT-IMPLEMENTED-AND-RETAINED",
       "family": "F12: routes that record a send or advertise an operation they do not perform answer 501; communications history is retained",
-      "outstandingBefore": 395,
+      "outstandingBefore": 393,
       "newlyImplemented": 6,
-      "outstandingAfter": 389,
+      "outstandingAfter": 387,
       "partial": 4,
       "evidenceCommit": null
     },
     {
       "id": "B54-F12-REFERENCES-AND-FIGURES-STATE-WHAT-THEY-ARE",
       "family": "F12: referenced ids belong to the right parent, and a figure with nothing to measure is unknown rather than 0 or 100",
-      "outstandingBefore": 389,
+      "outstandingBefore": 387,
       "newlyImplemented": 4,
-      "outstandingAfter": 385,
+      "outstandingAfter": 383,
       "partial": 4,
       "evidenceCommit": null
     },
     {
       "id": "B55-F12-WORKFLOW-INTEGRITY-APPROVAL-LOCKS-AND-ATOMIC-UNSUBSCRIBE",
       "family": "F12: approved records are locked, reviewers are independent, referenced members and documents are the organization own, and an unsubscribe is one transaction",
-      "outstandingBefore": 385,
+      "outstandingBefore": 383,
       "newlyImplemented": 3,
-      "outstandingAfter": 382,
+      "outstandingAfter": 380,
       "partial": 4,
       "evidenceCommit": null
     },
     {
       "id": "B56-F12-CONTENT-PUBLISH-AND-REGISTRATION-RULES",
       "family": "F12: publication needs a second person, and registration follows the session window and capacity",
-      "outstandingBefore": 382,
+      "outstandingBefore": 380,
       "newlyImplemented": 0,
-      "outstandingAfter": 382,
+      "outstandingAfter": 380,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "S01-SCHEMA-CLOSURE-OF-PARTIAL-FIXES-MIGRATION-0038",
       "family": "Schema closure: the columns and indexes that let earlier partial fixes record the real fact instead of approximating it",
-      "outstandingBefore": 382,
+      "outstandingBefore": 380,
       "newlyImplemented": 7,
-      "outstandingAfter": 375,
+      "outstandingAfter": 373,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "S02-DATABASE-ENFORCEMENT-MIGRATION-0040",
       "family": "Database enforcement: constraints, triggers and columns that settle what application checks could only attempt",
-      "outstandingBefore": 375,
+      "outstandingBefore": 373,
       "newlyImplemented": 4,
-      "outstandingAfter": 371,
+      "outstandingAfter": 369,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "S03-ROOM-BOOKING-MIGRATIONS-0041-AND-0035",
       "family": "Room booking: the booking store, its tenant isolation and the route that enforces the room's own rules",
-      "outstandingBefore": 371,
+      "outstandingBefore": 369,
       "newlyImplemented": 2,
-      "outstandingAfter": 369,
+      "outstandingAfter": 367,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S04-CODE-CLOSURE-OF-REMAINING-PARTIALS",
       "family": "Code closure of partial fixes whose remaining part needed no external decision",
-      "outstandingBefore": 369,
+      "outstandingBefore": 367,
       "newlyImplemented": 4,
-      "outstandingAfter": 365,
+      "outstandingAfter": 363,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B57-F05-INPUT-VALIDATION-AND-BOUNDS-SWEEP",
       "family": "F05 input validation and bounds: typed bodies, bounded pages and limited anonymous reads",
-      "outstandingBefore": 365,
+      "outstandingBefore": 363,
       "newlyImplemented": 9,
-      "outstandingAfter": 356,
+      "outstandingAfter": 354,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B58-F06-VERIFIED-AUDIT-AND-COMPLETION-COUNTS",
       "family": "F06 audit and records: verified existing audit and a completion count that measured attendance",
-      "outstandingBefore": 356,
+      "outstandingBefore": 354,
       "newlyImplemented": 2,
-      "outstandingAfter": 354,
+      "outstandingAfter": 352,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B59-F05-F08-READS-WITHOUT-SIDE-EFFECTS-AND-PRIVATE-DEFINITIONS",
       "family": "Reads that wrote, private definitions readable by others, and paths that advertised what they did not do",
-      "outstandingBefore": 354,
+      "outstandingBefore": 352,
       "newlyImplemented": 4,
-      "outstandingAfter": 350,
+      "outstandingAfter": 348,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S05-TENANT-SCOPED-UNIQUENESS-MIGRATION-0042",
       "family": "Schema: record numbers and codes unique within an organization, not across every organization",
-      "outstandingBefore": 350,
+      "outstandingBefore": 348,
       "newlyImplemented": 2,
-      "outstandingAfter": 348,
+      "outstandingAfter": 346,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B60-F03-F08-RETENTION-LOG-AND-VERIFIED-PROJECTIONS",
       "family": "Retention evidence that told the truth, and projections verified free of canned values and address logging",
-      "outstandingBefore": 348,
+      "outstandingBefore": 346,
       "newlyImplemented": 2,
-      "outstandingAfter": 346,
+      "outstandingAfter": 344,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B61-F01-F02-VERIFIED-NOT-IMPLEMENTED-PATHS",
       "family": "Paths that advertised an operation but were generic CRUD over another table, verified as honest 501",
-      "outstandingBefore": 346,
+      "outstandingBefore": 344,
       "newlyImplemented": 4,
-      "outstandingAfter": 342,
+      "outstandingAfter": 340,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S06-KNOWLEDGE-TRANSFER-OWNER-MIGRATION-0043",
       "family": "Schema: a copilot conversation and a reasoning session belong to the person who opened them",
-      "outstandingBefore": 342,
+      "outstandingBefore": 340,
       "newlyImplemented": 3,
-      "outstandingAfter": 339,
+      "outstandingAfter": 337,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S07-ANTI-SCAB-AUTHOR-MIGRATION-0044",
       "family": "Schema: the author of an anti-scab violation is recorded by the server",
-      "outstandingBefore": 339,
+      "outstandingBefore": 337,
       "newlyImplemented": 0,
-      "outstandingAfter": 339,
+      "outstandingAfter": 337,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B62-F03-F08-F06-VERIFIED-PATHS-AND-HONEST-DISCONNECT",
       "family": "Verified honest 501 paths, and a disconnect that reports whether the platform token was revoked",
-      "outstandingBefore": 339,
+      "outstandingBefore": 337,
       "newlyImplemented": 3,
-      "outstandingAfter": 336,
+      "outstandingAfter": 334,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "S08-CONTACT-SUBMISSIONS-STORE-MIGRATIONS-0045-AND-0036",
       "family": "Schema: a local, system-only record of public contact-form submissions",
-      "outstandingBefore": 336,
+      "outstandingBefore": 334,
       "newlyImplemented": 1,
-      "outstandingAfter": 335,
+      "outstandingAfter": 333,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B63-F10-F02-UNMEASURED-FIGURES-AND-PENSION-CONTRIBUTION-REFERENCES",
       "family": "A figure nothing measures is not zero, and a pension contribution names a real pension member",
-      "outstandingBefore": 335,
+      "outstandingBefore": 333,
       "newlyImplemented": 1,
-      "outstandingAfter": 334,
+      "outstandingAfter": 332,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B64-F05-F06-BATCH-STATUS-ENTITLEMENT-AND-DISCLOSURE",
       "family": "Newsletter batch status: the right gate and no recipient addresses",
-      "outstandingBefore": 334,
+      "outstandingBefore": 332,
       "newlyImplemented": 2,
-      "outstandingAfter": 332,
+      "outstandingAfter": 330,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B65-F05-GENERIC-PATHS-THAT-ADVERTISED-OTHER-OPERATIONS",
       "family": "Campaign analytics and poll-vote paths that were generic CRUD over another table",
-      "outstandingBefore": 332,
+      "outstandingBefore": 330,
       "newlyImplemented": 1,
-      "outstandingAfter": 331,
+      "outstandingAfter": 329,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B66-S09-SMALL-PLATFORM-FIXES-AND-ROW-INTEGRITY-MIGRATION-0046",
       "family": "Small platform fixes, list filters and migration 0046 (row integrity)",
-      "outstandingBefore": 331,
+      "outstandingBefore": 329,
       "newlyImplemented": 10,
-      "outstandingAfter": 321,
+      "outstandingAfter": 319,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B67-COGNITION-HONESTY-AGGREGATE-GUARDS-AUDIT-AND-SYNC-INTEGRITY",
       "family": "Cognition honesty, aggregator guards, audit-list honesty, employer correspondence and calendar-sync integrity",
-      "outstandingBefore": 321,
+      "outstandingBefore": 319,
       "newlyImplemented": 10,
-      "outstandingAfter": 311,
+      "outstandingAfter": 309,
       "partial": 3,
       "evidenceCommit": null
     },
     {
       "id": "B68-REGISTERS-SINKS-AND-HONEST-ANSWERS",
       "family": "Read-only registers, observability sinks and answers that stated more than the source computes",
-      "outstandingBefore": 311,
+      "outstandingBefore": 309,
       "newlyImplemented": 9,
-      "outstandingAfter": 302,
+      "outstandingAfter": 300,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B69-SATISFACTION-FIGURES-PLATFORM-STATS-AND-ORGANIZATION-REPARENT",
       "family": "Representative satisfaction figures, platform statistics definitions, the in-memory index answer and organization parent changes",
-      "outstandingBefore": 302,
+      "outstandingBefore": 300,
       "newlyImplemented": 3,
-      "outstandingAfter": 299,
+      "outstandingAfter": 297,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B70-CLAUSE-TAGS-REMINDER-OPT-OUT-AND-CHATBOT-ROLE",
       "family": "Clause tag projection, education reminder opt-out and chatbot role and review markers",
-      "outstandingBefore": 299,
+      "outstandingBefore": 297,
       "newlyImplemented": 2,
-      "outstandingAfter": 297,
+      "outstandingAfter": 295,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B71-VALIDATED-INPUT-AND-BOUNDED-SYSTEM-JOBS",
       "family": "Parsed request bodies and system jobs that were unbounded or unreported",
-      "outstandingBefore": 297,
+      "outstandingBefore": 295,
       "newlyImplemented": 4,
-      "outstandingAfter": 293,
+      "outstandingAfter": 291,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B72-S10-ML-FEEDBACK-TABLE-QUERY-DISCLOSURE-AND-ALIAS-ROUTES",
       "family": "Schema: append-only prediction feedback (0047, cache 0037); ML query disclosure; alias routes; hierarchy list",
-      "outstandingBefore": 293,
+      "outstandingBefore": 291,
       "newlyImplemented": 5,
-      "outstandingAfter": 288,
+      "outstandingAfter": 286,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B73-PENSION-PLAN-FIGURES-AND-READS",
       "family": "Pension plan figures, member list authority and tenant-context reads",
-      "outstandingBefore": 288,
+      "outstandingBefore": 286,
       "newlyImplemented": 3,
-      "outstandingAfter": 285,
+      "outstandingAfter": 283,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B74-PILOT-WRITE-PAYLOADS",
       "family": "Pilot write routes: parsed, bounded request bodies",
-      "outstandingBefore": 285,
+      "outstandingBefore": 283,
       "newlyImplemented": 0,
-      "outstandingAfter": 285,
+      "outstandingAfter": 283,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B75-REPORT-OPERATORS-AND-QUEUE-STATUS",
       "family": "Report filter operators that were silently dropped; queue status verified",
-      "outstandingBefore": 285,
+      "outstandingBefore": 283,
       "newlyImplemented": 1,
-      "outstandingAfter": 284,
+      "outstandingAfter": 282,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B76-PILOT-EMPLOYER-CONTRACT",
       "family": "Pilot telemetry authority, employer read exposure, contract input",
-      "outstandingBefore": 284,
+      "outstandingBefore": 282,
       "newlyImplemented": 4,
-      "outstandingAfter": 280,
+      "outstandingAfter": 278,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B77-COGNITION-HONESTY",
       "family": "Cognition and exit-interview analytics: officer-asserted inputs, whole-word topics, windowed attribution, uncapped counts",
-      "outstandingBefore": 280,
+      "outstandingBefore": 278,
       "newlyImplemented": 4,
-      "outstandingAfter": 276,
+      "outstandingAfter": 274,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B78-AUDIT-ATOMICITY",
       "family": "Audit atomicity: invoice generation, trial expiry, lapsed designations, workbook export, deprecated-route access",
-      "outstandingBefore": 276,
+      "outstandingBefore": 274,
       "newlyImplemented": 4,
-      "outstandingAfter": 272,
+      "outstandingAfter": 270,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B79-SOCIAL-FIGURES-AND-PUBLISH",
       "family": "Social campaign figures, publish handling and token refresh",
-      "outstandingBefore": 272,
+      "outstandingBefore": 270,
       "newlyImplemented": 2,
-      "outstandingAfter": 270,
+      "outstandingAfter": 268,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B80-CBA-VISIBILITY-AND-ANALYTICS",
       "family": "CBA review visibility, benchmark and comparison honesty, cognition health scope, derived case metrics, metrics organization binding",
-      "outstandingBefore": 270,
+      "outstandingBefore": 268,
       "newlyImplemented": 7,
-      "outstandingAfter": 263,
+      "outstandingAfter": 261,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B81-SOCIAL-SCHEDULE-GRAPH-HS",
       "family": "Social scheduling and campaign link, graph query inputs, health-safety statistics",
-      "outstandingBefore": 263,
+      "outstandingBefore": 261,
       "newlyImplemented": 3,
-      "outstandingAfter": 260,
+      "outstandingAfter": 258,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B82-ATTACH-CASCADE-CRON",
       "family": "Interview document location, cascade wording, per-capita job, education reminder cap, precedent reads",
-      "outstandingBefore": 260,
+      "outstandingBefore": 258,
       "newlyImplemented": 5,
-      "outstandingAfter": 255,
+      "outstandingAfter": 253,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B83-COGNITION-CASE-AUTHORITY",
       "family": "Cognition reads follow the case authority",
-      "outstandingBefore": 255,
+      "outstandingBefore": 253,
       "newlyImplemented": 2,
-      "outstandingAfter": 253,
+      "outstandingAfter": 251,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B84-SMALL-VALIDATION",
       "family": "Small validation and verification items",
-      "outstandingBefore": 253,
+      "outstandingBefore": 251,
       "newlyImplemented": 0,
-      "outstandingAfter": 253,
+      "outstandingAfter": 251,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B85-DECISIONS-APPLIED",
       "family": "Owner decisions applied: organization types, calendar revocation, bot challenge",
-      "outstandingBefore": 253,
+      "outstandingBefore": 251,
       "newlyImplemented": 4,
-      "outstandingAfter": 249,
+      "outstandingAfter": 247,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B87-PLATFORM-READS-COMMUNICATIONS-SIGNATURES",
       "family": "Platform reads, communications tracking and unsubscribe, signature service",
-      "outstandingBefore": 249,
+      "outstandingBefore": 247,
       "newlyImplemented": 7,
-      "outstandingAfter": 242,
+      "outstandingAfter": 240,
       "partial": 2,
       "evidenceCommit": null
     },
     {
       "id": "B88-AUDIT-RECORDS-ONBOARDING-SOCIAL-SYNC",
       "family": "Audit records: onboarding reads, social connection, integration sync",
-      "outstandingBefore": 242,
+      "outstandingBefore": 240,
       "newlyImplemented": 3,
-      "outstandingAfter": 239,
+      "outstandingAfter": 237,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B89-REPORT-CONFIG-CROSS-ORG-READ-AI-CLASS",
       "family": "Stored report contract, cross-organization read authority, AI data class, verified signer and list fixes",
-      "outstandingBefore": 239,
+      "outstandingBefore": 237,
       "newlyImplemented": 4,
-      "outstandingAfter": 235,
+      "outstandingAfter": 233,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B90-LIFECYCLE-ROUTES-AND-MINIMUM-COHORT",
       "family": "Lifecycle routes (health-safety close, SSO provider) and minimum cohort for satisfaction figures",
-      "outstandingBefore": 235,
+      "outstandingBefore": 233,
       "newlyImplemented": 2,
-      "outstandingAfter": 233,
+      "outstandingAfter": 231,
       "partial": 1,
       "evidenceCommit": null
     },
     {
       "id": "B91-TOKEN-SEALING-OUTBOUND-RESOLUTION",
       "family": "Provider token sealing, resolved outbound fetch guard, verified analytics suppression",
-      "outstandingBefore": 233,
+      "outstandingBefore": 231,
       "newlyImplemented": 1,
-      "outstandingAfter": 232,
+      "outstandingAfter": 230,
       "partial": 0,
       "evidenceCommit": null
     },
     {
       "id": "B92-FACTORY-ATTRIBUTION-AND-VERIFIED-CREDITS",
       "family": "Generic CRUD attribution fields and verified credits",
-      "outstandingBefore": 232,
+      "outstandingBefore": 230,
       "newlyImplemented": 2,
-      "outstandingAfter": 230,
+      "outstandingAfter": 228,
+      "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B93-DASHBOARD-MEASURES-KEYS-ARCHIVE",
+      "family": "Health-safety dashboard measures, dedicated queue key, archived employer input, verified credits",
+      "outstandingBefore": 228,
+      "newlyImplemented": 1,
+      "outstandingAfter": 227,
       "partial": 1,
       "evidenceCommit": null
     }
@@ -3432,14 +3441,17 @@
       "explanation": "The pilot application limiter keys on the trusted client address instead of the first forwarded-for value."
     },
     "DEF-0B12-WBK-PUBLIC-START-AND-CHECKOUT-ARE-LIMITED-BY-A-REQUEST-HEADER-ADDRESS-WITH-NO-BOT-CHALLENGE": {
-      "status": "PARTIAL",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
       "batch": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
       "files": [
         "apps/union-eyes/lib/public-intake/guard.ts",
-        "apps/union-eyes/lib/public-intake/__tests__/guard.test.ts"
+        "apps/union-eyes/lib/public-intake/__tests__/guard.test.ts",
+        "apps/union-eyes/app/api/workbook/start/route.ts",
+        "apps/union-eyes/app/api/workbook/checkout/route.ts",
+        "apps/union-eyes/lib/public-intake/bot-challenge.ts",
+        "apps/union-eyes/lib/services/__tests__/s37-dashboard-measures-keys-archive.test.ts"
       ],
-      "explanation": "The workbook start and checkout buckets key on the trusted address (they use the shared guard).",
-      "remaining": "There is still no bot challenge on workbook start or checkout."
+      "explanation": "The workbook start and checkout buckets key on the trusted address (they use the shared guard). Verified on source in B93: workbook start and checkout both call guardPublicIntake with a Turnstile challenge that fails closed in production (added in B85)."
     },
     "DEF-0B8-ICRA-EMAIL-RESULTS-SENDS-THE-BEARER-CAPABILITY-TO-ANY-TYPED-ADDRESS": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -3514,14 +3526,14 @@
       "explanation": "The list omits the provider payload and checkout identifier, and a non-numeric or negative page request becomes the bounded default instead of NaN."
     },
     "DEF-0B12-PLT-QUEUE-STATUS-SERVICE-KEY-IS-THE-SHARED-AI-KEY-COMPARED-WITH-A-PLAIN-EQUALITY": {
-      "status": "PARTIAL",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
       "batch": "B22-F08-PUBLIC-ROUTE-CONTROLS-AND-PROJECTION",
       "files": [
         "apps/union-eyes/app/api/union-eyes/queue-status/route.ts",
-        "apps/union-eyes/app/api/__tests__/queue-status.route.test.ts"
+        "apps/union-eyes/app/api/__tests__/queue-status.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s37-dashboard-measures-keys-archive.test.ts"
       ],
-      "explanation": "The service key is compared in constant time; a wrong, short or empty key falls to the platform-administrator path.",
-      "remaining": "The control plane still authenticates with the shared AI service key rather than a key dedicated to queue status."
+      "explanation": "The service key is compared in constant time; a wrong, short or empty key falls to the platform-administrator path. B93: the control-plane key is QUEUE_STATUS_SERVICE_KEY, compared in constant time; the shared AI service key is accepted only outside production, so in production a leak of the AI key does not open platform queue data. The deployment must set the dedicated key for the control plane to read this route. A route test covers the dedicated key and the production refusal."
     },
     "DEF-0B9-ORG-ROSTER-POST-DUPLICATE-USER-ID-AND-INVALID-JSON-HANDLING-LEAVES-UNHANDLED-ERRORS": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -7369,6 +7381,26 @@
         "apps/union-eyes/lib/services/__tests__/s36-factory-attribution-and-verified-credits.test.ts"
       ],
       "explanation": "Verified on source in B92: the item PATCH parses a strict schema (no body copy), is owner-only under the caller's tenant context, and audits a change of sharing level with the previous and new level."
+    },
+    "DEF-0B8-HS-DASHBOARD-METRICS-DERIVED-FROM-RECORD-CREATION-AND-DEFAULTS": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B93-DASHBOARD-MEASURES-KEYS-ARCHIVE",
+      "files": [
+        "apps/union-eyes/app/api/health-safety/dashboard/route.ts",
+        "apps/union-eyes/app/api/__tests__/health-safety-dashboard.route.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s37-dashboard-measures-keys-archive.test.ts"
+      ],
+      "explanation": "The measures are now taken on the dates the events happened: incidents are counted and the previous window compared by incident date, days without incident run from the latest incident date (null when none is on record, as before), inspections are those scheduled within the window up to now and the rate is completed over those, and the hazard trend compares hazards reported in the window with the same length before it instead of reading the number currently open. Fixed clean metrics on a failure and a constant training figure were already removed."
+    },
+    "DEF-0B6-EMP-REGISTRY-ARCHIVE-IGNORES-DEPENDENTS": {
+      "status": "PARTIAL",
+      "batch": "B93-DASHBOARD-MEASURES-KEYS-ARCHIVE",
+      "files": [
+        "apps/union-eyes/app/api/employer-execution/timesheets/route.ts",
+        "apps/union-eyes/lib/services/__tests__/s37-dashboard-measures-keys-archive.test.ts"
+      ],
+      "explanation": "Timesheet ingest now refuses an archived employer (409) instead of continuing to take payroll input for it.",
+      "remaining": "The generic employer delete still sets only status archived (no archived-at stamp) and does not check for open timesheet batches, contacts or communications; a governed archive action is needed."
     }
   }
 }

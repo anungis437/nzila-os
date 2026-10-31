@@ -55,11 +55,13 @@ export const POST = withApi(
     const batch = await withRLSContext({ organizationId }, async (tx) => {
       // Every structural reference must belong to this organization.
       const [employer] = await tx
-        .select({ id: employers.id })
+        .select({ id: employers.id, status: employers.status })
         .from(employers)
         .where(and(eq(employers.organizationId, organizationId), eq(employers.id, body.employerId)))
         .limit(1);
       if (!employer) throw ApiError.notFound("Employer not found");
+      // An archived employer is out of the registry: it takes no further payroll input.
+      if (employer.status === "archived") throw ApiError.conflict("The employer is archived and takes no timesheet input");
 
       if (body.worksiteId) {
         const [worksite] = await tx

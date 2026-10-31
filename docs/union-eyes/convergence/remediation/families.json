@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 600,
- "partial": 79,
- "outstanding": 177,
- "accountedFor": 177,
+ "corrected": 603,
+ "partial": 78,
+ "outstanding": 174,
+ "accountedFor": 174,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -158,11 +158,11 @@
   {
    "family": "F08-PII-DISCLOSURE-AND-PROJECTION",
    "purpose": "Personal-data disclosure: project, redact or restrict returned fields",
-   "defects": 14,
+   "defects": 12,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 13,
-    "LOW": 1
+    "MEDIUM": 12,
+    "LOW": 0
    },
    "namedRoutes": 4,
    "namedFiles": 1,
@@ -172,7 +172,7 @@
     "0B.9": 2,
     "0B.10": 2,
     "0B.11": 2,
-    "0B.12": 4
+    "0B.12": 2
    }
   },
   {
@@ -232,10 +232,10 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 34,
+   "defects": 33,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 26,
+    "MEDIUM": 25,
     "LOW": 6
    },
    "namedRoutes": 6,
@@ -246,7 +246,7 @@
     "0B.5": 4,
     "0B.6": 6,
     "0B.7": 6,
-    "0B.8": 4,
+    "0B.8": 3,
     "0B.10": 4,
     "0B.11": 2,
     "0B.12": 3
@@ -831,18 +831,8 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B12-PLT-QUEUE-STATUS-SERVICE-KEY-IS-THE-SHARED-AI-KEY-COMPARED-WITH-A-PLAIN-EQUALITY",
-    "severity": "LOW",
-    "partial": true
-   },
-   {
     "id": "DEF-0B12-PLT-VOICE-ROUTES-SEND-THE-RECORDING-TO-AN-EXTERNAL-SERVICE-WITH-NO-CONSENT-OR-RECORD",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-WBK-PUBLIC-START-AND-CHECKOUT-ARE-LIMITED-BY-A-REQUEST-HEADER-ADDRESS-WITH-NO-BOT-CHALLENGE",
-    "severity": "MEDIUM",
-    "partial": true
    },
    {
     "id": "DEF-0B12-WBK-CHECKOUT-SENDS-THE-BEARER-WORKBOOK-ID-TO-STRIPE-IN-THE-REDIRECT-ADDRESSES-AND-METADATA",
@@ -970,7 +960,8 @@
    },
    {
     "id": "DEF-0B6-EMP-REGISTRY-ARCHIVE-IGNORES-DEPENDENTS",
-    "severity": "LOW"
+    "severity": "LOW",
+    "partial": true
    },
    {
     "id": "DEF-0B6-CMP-ALERT-AND-REPORT-TABLES-HAVE-NO-WRITER",
@@ -1007,10 +998,6 @@
    },
    {
     "id": "DEF-0B7-PLT-EQUITY-CONSENT-AND-PRIVACY-PROMISES-NOT-BACKED-BY-SERVER",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B8-HS-DASHBOARD-METRICS-DERIVED-FROM-RECORD-CREATION-AND-DEFAULTS",
     "severity": "MEDIUM"
    },
    {

@@ -26,7 +26,8 @@ export async function GET(req: Request) {
   try {
     // Queue counts and failed task names are platform-wide operational data, not an organization's: the control plane (service key)
     // or a platform administrator may read them, and a signed-in member may not.
-    const svcKey = process.env.AI_SERVICE_KEY
+    // A key dedicated to this route; the shared AI service key is accepted only outside production, so a leak of the AI key does not open platform queue data.
+    const svcKey = process.env.QUEUE_STATUS_SERVICE_KEY || (process.env.NODE_ENV === 'production' ? undefined : process.env.AI_SERVICE_KEY)
     const isServiceRequest = !!svcKey && sameSecret(req.headers.get('x-service-key'), svcKey)
     if (!isServiceRequest) {
       try {
