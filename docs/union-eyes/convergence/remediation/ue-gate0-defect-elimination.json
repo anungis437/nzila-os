@@ -3722,10 +3722,14 @@
       "batch": "B23-F11-AI-AND-MODEL-OUTPUT-GOVERNANCE",
       "files": [
         "apps/union-eyes/app/api/location/consent/route.ts",
-        "apps/union-eyes/app/api/__tests__/location-consent.route.test.ts"
+        "apps/union-eyes/app/api/__tests__/location-consent.route.test.ts",
+        "apps/union-eyes/lib/location/consent-notice.ts",
+        "apps/union-eyes/services/geofence-privacy-service.ts",
+        "apps/union-eyes/services/__tests__/geofence-privacy-service.test.ts",
+        "docs/union-eyes/convergence/remediation/ue-location-consent-notice-authority-20261031.md"
       ],
-      "explanation": "The body is parsed with a typed, bounded schema: purpose, description and text are non-empty bounded strings and the two allowance flags must be booleans (a string \"false\" was stored as consent); an invalid or non-JSON body is a 400 that records no consent.",
-      "remaining": "The consent text and purpose are still supplied by the client; a server-owned notice with a version the member acknowledges needs a client change."
+      "explanation": "The route now refuses client-authored notice fields, requires explicit acknowledgment of the exact configured version and selected tracking scopes, and fails closed when no institutional notice is configured. The service also validates the canonical notice before database work and persists its version; grant and audit remain transactional. Route and service regression tests committed; see additive engineering evidence.",
+      "remaining": "An institutionally adopted notice/version must be configured; member UI must display GET notice and POST version, acknowledgment and scope. Exact-HEAD unit, native PostgreSQL 15/16, HTTP/browser, staging and independent qualification are outstanding."
     },
     "DEF-0B9-ML-ALERTS-DRIFT-FINDING-IS-A-LITERAL-PSI-AND-ALERT-IDS-CHANGE-EVERY-SECOND": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
