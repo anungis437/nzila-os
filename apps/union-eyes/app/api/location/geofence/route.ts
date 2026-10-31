@@ -157,6 +157,7 @@ export const GET = withApiAuth(async (req: NextRequest) => {
       geofenceId,
       inside: result.inside,
       distance: result.distance,
+      recorded: result.recorded,
       message: result.inside ? "User is inside geofence" : "User is outside geofence",
     });
   } catch (_error) {

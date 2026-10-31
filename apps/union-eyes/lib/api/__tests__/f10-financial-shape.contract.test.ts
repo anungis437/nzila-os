@@ -41,4 +41,20 @@ describe('F09/F10 rate limits, cancellation contract and financial record shape'
     expect(source).not.toContain('memberCount: items.length.toString()')
     expect(source).toContain('memberCount: item.members.toString()')
   })
+
+  // DEF-0B11-SOC-POST-PUBLISHES-AT-ONCE-TO-EVERY-ACTIVE-ACCOUNT
+  it('publishing to the connected social accounts is an officer act and is audited around the publish', () => {
+    const source = read('app/api/social-media/posts/route.ts')
+    expect(source).toMatch(/export const POST = withRoleAuth\('officer'/)
+    expect(source).toContain('performAuditedOperation(')
+  })
+
+  // DEF-0B8-JUR-GEOFENCE-GET-STORES-MEMBER-COORDINATES-WITHOUT-A-CONSENT-CHECK
+  it('a geofence entry stores a position only after the consent and configuration checks', () => {
+    const source = read('services/geofence-privacy-service.ts')
+    const entry = source.slice(source.indexOf('static async checkGeofenceEntry'))
+    expect(entry.indexOf('hasValidConsent(')).toBeGreaterThan(0)
+    expect(entry.indexOf('hasValidConsent(')).toBeLessThan(entry.indexOf('logGeofenceEvent('))
+    expect(entry.indexOf('locationTrackingEnabled')).toBeLessThan(entry.indexOf('logGeofenceEvent('))
+  })
 })

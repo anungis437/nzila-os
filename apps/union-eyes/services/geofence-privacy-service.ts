@@ -299,7 +299,7 @@ export class GeofencePrivacyService {
     longitude: number,
     geofenceId: string,
     trustedUnionLocalId: string
-  ): Promise<{ inside: boolean; distance: number }> {
+  ): Promise<{ inside: boolean; distance: number; recorded: boolean }> {
     const geofence = await db
       .select()
       .from(geofences)
@@ -328,12 +328,18 @@ export class GeofencePrivacyService {
 
     const inside = distance <= parseFloat(fence.radiusMeters);
 
-    // Log entry/exit event if state changed
+    // The point is the caller's own and is only compared; a precise position is stored only for a member who opted in
+    // (for the strike permission when the fence belongs to a strike) while tracking is enabled.
+    let recorded = false;
     if (inside) {
-      await this.logGeofenceEvent(userId, geofenceId, "entry", latitude, longitude);
+      const consented = await this.hasValidConsent(userId, fence.strikeId ? "strike" : undefined);
+      if (consented && (await this.getConfig()).locationTrackingEnabled) {
+        await this.logGeofenceEvent(userId, geofenceId, "entry", latitude, longitude);
+        recorded = true;
+      }
     }
 
-    return { inside, distance };
+    return { inside, distance, recorded };
   }
 
   /**

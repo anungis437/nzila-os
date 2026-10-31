@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 352,
-    "engineeringRemaining": 425,
+    "engineeringCorrected": 355,
+    "engineeringRemaining": 422,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 58
+    "engineeringPartial": 62
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -6529,9 +6529,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B32-F06-CONSENT-GATED-RECORDING-AND-VERIFIED-TELEMETRY-SCOPE",
+        "path": "apps/union-eyes/app/api/exit-interviews/[id]/governance/route.ts; apps/union-eyes/app/api/__tests__/exit-interviews-read-gates.pglite.test.ts",
+        "explanation": "Reads of the interview and of its knowledge-base copy apply the interview's current consent and sensitivity, so a withdrawal or reclassification takes effect on the next read (existing read-gate tests).",
+        "remaining": "The knowledge-base row, its content and its embedding are not erased or deactivated when consent is withdrawn; they are only filtered at read time.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-EXC-PUBLISH-SENDS-EVERY-INTERVIEW-TO-AI-WITHOUT-CONSENT-GATE-OR-AUDIT",
@@ -6558,9 +6566,16 @@
         ]
       },
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B32-F06-CONSENT-GATED-RECORDING-AND-VERIFIED-TELEMETRY-SCOPE",
+        "path": "apps/union-eyes/app/api/exit-interviews/[id]/publish/route.ts; apps/union-eyes/app/api/__tests__/exit-interviews-publish.route.test.ts",
+        "explanation": "The publication decision gates expertise extraction by the interview's level and consent, the AI call is bracketed by requested, completed and failed audit records, and the result update is limited to the published row (existing implementation and tests).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-EXC-PUBLISH-PARSE-FAILURE-STORES-DEFAULT-MEDIUM-RISK-SCORE",
@@ -7028,9 +7043,16 @@
         ]
       },
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B32-F06-CONSENT-GATED-RECORDING-AND-VERIFIED-TELEMETRY-SCOPE",
+        "path": "apps/union-eyes/app/api/exit-interviews/expertise-map/route.ts; apps/union-eyes/app/api/exit-interviews/governance-timeline/route.ts; apps/union-eyes/app/api/__tests__/interview-derived-analytics.pglite.test.ts",
+        "explanation": "The expertise map, topic graph, propagation map and timeline aggregate only published, consented interviews of the organization at the levels the caller may read, proven against a real SQL engine (existing implementation and tests).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-COGA-CROSS-DOMAIN-CORRELATIONS-ARE-FIXED-LITERALS",
@@ -10036,9 +10058,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B32-F06-CONSENT-GATED-RECORDING-AND-VERIFIED-TELEMETRY-SCOPE",
+        "path": "apps/union-eyes/services/geofence-privacy-service.ts; apps/union-eyes/app/api/location/geofence/route.ts; apps/union-eyes/services/__tests__/geofence-privacy-service.test.ts; apps/union-eyes/lib/api/__tests__/f10-financial-shape.contract.test.ts",
+        "explanation": "A geofence entry still answers inside or outside for the point the caller supplies, but a geofence_events row is stored only when the member holds a valid opt-in (the strike permission for a strike fence) and tracking is enabled; the response states whether anything was recorded. Existing test adapted: the opted-in case now queues the consent and configuration reads; three new tests cover no consent, tracking disabled and a missing strike permission.",
+        "remaining": "The insert still uses the shared database handle without a transaction or an audit record, and the entry check runs from a GET.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B8-JUR-LOCATION-ERASURE-IS-REACHABLE-ONLY-THROUGH-AN-ACTIVE-CONSENT",
@@ -13454,9 +13484,17 @@
         ]
       },
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B32-F06-CONSENT-GATED-RECORDING-AND-VERIFIED-TELEMETRY-SCOPE",
+        "path": "apps/union-eyes/lib/pilot/telemetry-scope.ts; apps/union-eyes/lib/pilot/__tests__/telemetry-scope.test.ts; apps/union-eyes/app/api/pilot/champions/route.ts; apps/union-eyes/app/api/pilot/friction/route.ts; apps/union-eyes/app/api/pilot/metrics/route.ts; apps/union-eyes/app/api/pilot/readiness/route.ts",
+        "explanation": "A pilot telemetry read uses the caller's authenticated organization; a request naming another organization is refused 403 identically whether or not it exists. The resolver had no test; it now has one, and each route is pinned to use it.",
+        "remaining": "The telemetry services still run raw SQL over pilot_events through the shared database handle, filtered by the organization id only, and return per-user identifiers.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-PIL-USAGE-EVENTS-ARE-CALLER-ASSERTED-AND-DRIVE-THE-CHAMPION-AND-CONVERSION-SIGNALS-WITHOUT-ANY-CHECK-THAT-THE-ACTION-HAPPENED",
@@ -13945,7 +13983,14 @@
       },
       "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B32-F06-CONSENT-GATED-RECORDING-AND-VERIFIED-TELEMETRY-SCOPE",
+        "path": "apps/union-eyes/app/api/platform/metrics/mrr/route.ts; apps/union-eyes/app/api/platform/metrics/churn/route.ts; apps/union-eyes/app/api/platform/metrics/unit-economics/route.ts; apps/union-eyes/app/api/__tests__/platform-financial-metrics-unavailable.route.test.ts",
+        "explanation": "The three platform financial metrics answer 501 with a NOT_IMPLEMENTED capability state and no figures (existing implementation and test).",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B10-OPL-13",
@@ -15521,9 +15566,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B32-F06-CONSENT-GATED-RECORDING-AND-VERIFIED-TELEMETRY-SCOPE",
+        "path": "apps/union-eyes/app/api/social-media/posts/route.ts; apps/union-eyes/lib/api/__tests__/f10-financial-shape.contract.test.ts",
+        "explanation": "Publishing now needs the officer floor instead of the steward floor; the publish is already rate limited and bracketed by intent and outcome audit records.",
+        "remaining": "There is still no draft, review or approval state, no content classification check, and the caller cannot choose which connected account of a platform receives the post.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-SOC-X-MEDIA-URL-IS-FETCHED-BY-THE-SERVER-WITH-ONLY-A-SCHEME-CHECK-AND-THE-BODY-IS-UPLOADED-TO-THE-PLATFORM",

@@ -202,14 +202,46 @@ describe('geofence-privacy-service', () => {
       await expect(S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1')).rejects.toThrow('Geofence not found');
     });
 
-    it('reports inside and logs an entry event', async () => {
+    const fence = { id: 'g1', unionLocalId: 'org-1', centerLatitude: '45.50000000', centerLongitude: '-73.50000000', radiusMeters: '100' };
+
+    it('reports inside and logs an entry event for a member who opted in', async () => {
       pushSel(
-        [{ id: 'g1', unionLocalId: 'org-1', centerLatitude: '45.50000000', centerLongitude: '-73.50000000', radiusMeters: '100' }],
+        [fence],
+        [{ id: 'c1', expiresAt: new Date('2999-01-01') }], // hasValidConsent
+        [enabledConfig()], // getConfig
         [], // logGeofenceEvent insert
       );
       const r = await S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1');
       expect(r.inside).toBe(true);
+      expect(r.recorded).toBe(true);
       expect(r.distance).toBeLessThan(1);
+      expect(h.db.insert).toHaveBeenCalledTimes(1);
+    });
+
+    // DEF-0B8-JUR-GEOFENCE-GET-STORES-MEMBER-COORDINATES-WITHOUT-A-CONSENT-CHECK
+    it('reports inside but stores no position for a member who has not opted in', async () => {
+      h.db.insert.mockClear();
+      pushSel([fence], []); // no consent row
+      const r = await S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1');
+      expect(r.inside).toBe(true);
+      expect(r.recorded).toBe(false);
+      expect(h.db.insert).not.toHaveBeenCalled();
+    });
+
+    it('stores no position while location tracking is globally disabled', async () => {
+      h.db.insert.mockClear();
+      pushSel([fence], [{ id: 'c1', expiresAt: new Date('2999-01-01') }], [enabledConfig({ locationTrackingEnabled: false })]);
+      const r = await S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1');
+      expect(r.recorded).toBe(false);
+      expect(h.db.insert).not.toHaveBeenCalled();
+    });
+
+    it('asks for the strike permission when the fence belongs to a strike', async () => {
+      h.db.insert.mockClear();
+      pushSel([{ ...fence, strikeId: 's1' }], [{ id: 'c1', expiresAt: new Date('2999-01-01'), allowedDuringStrike: false }]);
+      const r = await S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1');
+      expect(r.recorded).toBe(false);
+      expect(h.db.insert).not.toHaveBeenCalled();
     });
 
     it('reports outside for a distant point', async () => {

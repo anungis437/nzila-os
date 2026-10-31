@@ -111,7 +111,8 @@ const socialMediaPostsSchema = z.object({
   campaign_id: z.guid("Invalid campaign_id").optional(),
 });
 
-export const POST = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
+// A post goes at once to every connected account of each selected platform in the organization's name, so publishing is an officer's act.
+export const POST = withRoleAuth('officer', async (request: NextRequest, context: BaseAuthContext) => {
   try {
       const { userId, organizationId } = context;
 
