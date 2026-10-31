@@ -37,11 +37,11 @@ function getNextSyncAt(): Date {
 
 const syncRequestSchema = z.object({
   localCalendarId: z.guid(),
-  externalCalendarId: z.string().min(1),
+  externalCalendarId: z.string().trim().min(1).max(255),
   mode: z.enum(['import', 'export', 'both']).optional(),
   localEventId: z.guid().optional(),
   since: z.string().datetime().optional(),
-})
+}).strict()
 
 type SyncRouteParams = { id: string }
 
@@ -52,7 +52,7 @@ async function recordConnectionState(
   audit: { action: string; details: Record<string, unknown> },
 ) {
   await withRLSContext({ organizationId: actor.organizationId }, async (tx) => {
-    await tx
+    const [updated] = await tx
       .update(externalCalendarConnections)
       .set({ ...state, updatedAt: new Date() })
       .where(
@@ -62,6 +62,9 @@ async function recordConnectionState(
           eq(externalCalendarConnections.userId, actor.userId),
         ),
       )
+      .returning({ id: externalCalendarConnections.id })
+    // A disconnected/revoked connection cannot be reported as successfully synced.
+    if (!updated) throw new Error('Calendar connection changed during sync')
     await persistAtomicAudit(tx, {
       organizationId: actor.organizationId,
       userId: actor.userId,
@@ -110,6 +113,18 @@ export const POST = withOrganizationAuth(async (request, context, params?: SyncR
     if (!connection) {
       return standardErrorResponse(ErrorCode.NOT_FOUND, 'Calendar connection not found')
     }
+    if (connection.syncEnabled !== true) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Calendar sync is disabled for this connection')
+    }
+    // Request parameters cannot escalate an import-only grant into an export or vice versa.
+    const configuredDirection = connection.syncDirection
+    if (configuredDirection !== 'import' && configuredDirection !== 'export' && configuredDirection !== 'both') {
+      return standardErrorResponse(ErrorCode.CONFLICT, 'Calendar sync direction is not configured')
+    }
+    const effectiveMode = mode ?? configuredDirection
+    if (configuredDirection !== 'both' && effectiveMode !== configuredDirection) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Requested sync mode is not authorized by this connection')
+    }
 
     const [calendar] = await db
       .select({ id: calendars.id })
@@ -130,7 +145,6 @@ export const POST = withOrganizationAuth(async (request, context, params?: SyncR
       )
     }
 
-    const effectiveMode = mode ?? (connection.syncDirection as 'import' | 'export' | 'both' | null) ?? 'import'
     const sinceDate = since ? new Date(since) : undefined
 
     if ((effectiveMode === 'export' || effectiveMode === 'both') && !localEventId) {
@@ -202,7 +216,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: SyncR
           } catch (providerError) {
             await recordConnectionState(
               { organizationId, userId, connectionId: connection.id },
-              { syncStatus: 'failed', syncError: providerError instanceof Error ? providerError.message.slice(0, 500) : 'Provider sync failed' },
+              { syncStatus: 'failed', syncError: 'Provider sync failed' },
               { action: 'calendar_sync.connection.sync_failed', details: { provider: connection.provider, mode: effectiveMode } },
             )
             throw providerError
@@ -230,6 +244,6 @@ export const POST = withOrganizationAuth(async (request, context, params?: SyncR
       results,
     })
   } catch (error) {
-    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Calendar sync failed', error)
+    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Calendar sync failed')
   }
 })
