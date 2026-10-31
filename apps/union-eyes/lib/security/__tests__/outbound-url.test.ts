@@ -13,6 +13,10 @@ describe('assertPublicHttpUrl', () => {
     'http://127.0.0.1/', 'http://127.1.2.3/', 'http://0.0.0.0/', 'http://10.0.0.5/', 'http://172.16.0.1/', 'http://172.31.255.255/',
     'http://192.168.1.1/', 'http://169.254.169.254/latest/meta-data', 'http://100.64.0.1/', 'http://224.0.0.1/',
     'http://metadata.google.internal/computeMetadata/v1/', 'http://[::1]/', 'http://[fd00::1]/', 'http://[fe80::1]/', 'http://[::ffff:10.0.0.1]/',
+    'http://198.18.0.1/', 'http://198.19.255.255/', 'http://198.51.100.1/', 'http://203.0.113.7/',
+    'http://192.0.2.4/', 'http://192.88.99.1/',
+    'http://[::ffff:198.18.0.1]/', 'http://[::ffff:203.0.113.7]/',
+    'http://[2001:db8::1]/', 'http://[2002:c0a8:0101::1]/', 'http://[64:ff9b::a00:1]/',
     'https://user:pass@example.com/',
   ])('refuses %s', (url) => {
     expect(() => assertPublicHttpUrl(url)).toThrow(OutboundUrlError)
