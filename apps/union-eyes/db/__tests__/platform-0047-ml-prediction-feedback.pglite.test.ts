@@ -2,9 +2,11 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { PGlite } from '@electric-sql/pglite'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
+const dir = fileURLToPath(new URL('../migrations-platform/', import.meta.url))
 const statements = (file: string) =>
-  readFileSync(join(process.cwd(), 'db/migrations-platform', file), 'utf8')
+  readFileSync(join(dir, file), 'utf8')
     .split('--> statement-breakpoint')
     .map((s) => s.trim())
     .filter((s) => s && !s.split('\n').every((l) => l.startsWith('--')))
