@@ -25,12 +25,14 @@ beforeAll(async () => {
     CREATE TABLE location_tracking (
       id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
       user_id varchar(255) NOT NULL,
+      recorded_at timestamp NOT NULL DEFAULT now(),
       expires_at timestamp NOT NULL
     );
     CREATE TABLE geofence_events (
       id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
       user_id varchar(255) NOT NULL,
       geofence_id uuid NOT NULL,
+      event_time timestamp NOT NULL DEFAULT now(),
       expires_at timestamp NOT NULL
     );
     CREATE TABLE location_deletion_log (
@@ -82,14 +84,14 @@ async function seed() {
   await pg.exec('RESET ROLE')
   await pg.exec(`DELETE FROM location_tracking; DELETE FROM geofence_events; DELETE FROM location_deletion_log; DELETE FROM location_log_faults;`)
   await pg.exec(`
-    INSERT INTO location_tracking (user_id, expires_at) VALUES
-      ('user-a', now() - interval '1 hour'),
-      ('user-a', now() + interval '20 hours'),
-      ('user-b', now() - interval '2 hours'),
-      ('user-b', now() + interval '3 hours');
-    INSERT INTO geofence_events (user_id, geofence_id, expires_at) VALUES
-      ('user-b', gen_random_uuid(), now() - interval '6 hours'),
-      ('user-a', gen_random_uuid(), now() + interval '4 hours');
+    INSERT INTO location_tracking (user_id, recorded_at, expires_at) VALUES
+      ('user-a', now() - interval '25 hours', now() - interval '1 hour'),
+      ('user-a', now(), now() + interval '20 hours'),
+      ('user-b', now() - interval '26 hours', now() - interval '2 hours'),
+      ('user-b', now(), now() + interval '3 hours');
+    INSERT INTO geofence_events (user_id, geofence_id, event_time, expires_at) VALUES
+      ('user-b', gen_random_uuid(), now() - interval '30 hours', now() - interval '6 hours'),
+      ('user-a', gen_random_uuid(), now(), now() + interval '4 hours');
   `)
 }
 
@@ -109,6 +111,10 @@ describe('location retention owner sweep', () => {
     expect(await count(`SELECT count(*) AS n FROM geofence_events WHERE expires_at <= now()`)).toBe(0)
     expect(await count(`SELECT count(*) AS n FROM geofence_events WHERE expires_at > now()`)).toBe(1)
     expect(await count(`SELECT count(*) AS n FROM location_deletion_log WHERE deletion_type = 'auto_24hr'`)).toBe(1)
+    // DEF-0B6-SYS-LOCATION-DELETION-LOG-FABRICATES-DATES: the log holds the real span of what was deleted, not the run time.
+    const span = await pg.query<{ hours: string }>(`SELECT round(extract(epoch FROM (newest_record_date - oldest_record_date)) / 3600)::text AS hours FROM location_deletion_log WHERE deletion_type = 'auto_24hr'`)
+    expect(Number(span.rows[0].hours)).toBeGreaterThanOrEqual(4)
+    expect(await count(`SELECT count(*) AS n FROM location_deletion_log WHERE oldest_record_date >= deleted_at - interval '1 minute'`)).toBe(0)
   })
 
   it('a runtime session leaves the other member expired rows in place', async () => {

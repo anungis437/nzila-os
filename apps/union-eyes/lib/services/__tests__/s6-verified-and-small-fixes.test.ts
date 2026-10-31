@@ -46,4 +46,23 @@ describe('S6 verified and small fixes', () => {
       expect(source, route).not.toContain('crudRoutes')
     }
   })
+
+  it('does not invent a department or position for a member, and does not log or branch on e-mail addresses in the organizations list (verified existing implementation)', () => {
+    for (const route of ['app/api/organization/members/route.ts', 'app/api/organization/members/search/route.ts']) {
+      const source = read(route)
+      expect(source, route).not.toContain('Union Member')
+      expect(source, route).not.toContain("'Administration'")
+    }
+    const orgs = read('app/api/organizations/route.ts')
+    expect(orgs).not.toContain('PLATFORM_ADMIN_USER_IDS')
+    expect(orgs).not.toContain('userEmail')
+  })
+
+  it('records the real span of what a retention run deleted, not the run time', () => {
+    const service = read('services/geofence-privacy-service.ts')
+    expect(service).toContain('oldestRecordDate: oldest ?? now')
+    expect(service).toContain('newestRecordDate: newest ?? now')
+    expect(service).toContain('at: locationTracking.recordedAt')
+    expect(service).toContain('at: geofenceEvents.eventTime')
+  })
 })

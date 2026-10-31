@@ -411,17 +411,29 @@ export class GeofencePrivacyService {
 
     let trackingRecordsDeleted = 0;
     let eventRecordsDeleted = 0;
+    // The log records the real span of what was deleted, not the time of the run.
+    let oldest: Date | null = null;
+    let newest: Date | null = null;
+    const widen = (at: Date | string | null | undefined) => {
+      if (!at) return;
+      const when = at instanceof Date ? at : new Date(at);
+      if (Number.isNaN(when.getTime())) return;
+      if (!oldest || when < oldest) oldest = when;
+      if (!newest || when > newest) newest = when;
+    };
     for (const userId of userIds) {
       const deletedTracking = await tx
         .delete(locationTracking)
         .where(and(eq(locationTracking.userId, userId), lte(locationTracking.expiresAt, now)))
-        .returning({ id: locationTracking.id });
+        .returning({ id: locationTracking.id, at: locationTracking.recordedAt });
       const deletedEvents = await tx
         .delete(geofenceEvents)
         .where(and(eq(geofenceEvents.userId, userId), lte(geofenceEvents.expiresAt, now)))
-        .returning({ id: geofenceEvents.id });
+        .returning({ id: geofenceEvents.id, at: geofenceEvents.eventTime });
       trackingRecordsDeleted += deletedTracking.length;
       eventRecordsDeleted += deletedEvents.length;
+      for (const row of deletedTracking) widen((row as { at?: Date | string | null }).at);
+      for (const row of deletedEvents) widen((row as { at?: Date | string | null }).at);
     }
 
     // The caller passes the system transaction. Every per-user delete and this log commit or roll back together.
@@ -430,8 +442,8 @@ export class GeofencePrivacyService {
         deletionType: "auto_24hr",
         deletionReason: "24-hour retention policy (automatic cleanup)",
         recordCount: (trackingRecordsDeleted + eventRecordsDeleted).toString(),
-        oldestRecordDate: now,
-        newestRecordDate: now,
+        oldestRecordDate: oldest ?? now,
+        newestRecordDate: newest ?? now,
       });
     }
 
