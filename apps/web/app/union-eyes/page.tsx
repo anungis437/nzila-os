@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import HumanCenteredAI from '@/components/public/HumanCenteredAI';
 import { getLocale } from 'next-intl/server';
 import TrackedLink from '@/components/public/TrackedLink';
 import type { Locale } from '@/lib/locales';
@@ -209,6 +210,8 @@ export default async function UnionEyesPage() {
           </div>
         </div>
       </section>
+
+      <HumanCenteredAI isFr={locale === "fr-CA"} audience="union" />
 
       <section className="py-20 sm:py-24">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
