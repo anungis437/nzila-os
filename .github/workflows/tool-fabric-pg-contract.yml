@@ -131,3 +131,22 @@ jobs:
         run: |
           set -euo pipefail
           bash packages/tool-fabric/sql/test_trust_ledger_pg_concurrent.sh
+
+      - name: Verify aborted stale CAS leaves no receipt and retry survives a fresh session (ephemeral CI only)
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -f packages/tool-fabric/sql/test_trust_ledger_pg_abort_recovery.sql
+          # This is a separate SQL connection, not a restart/PITR proof.
+          observed="$(psql -X -At -v ON_ERROR_STOP=1 -c "SELECT
+            s.revision = 4 AND s.head_hash = repeat('4',64)
+            AND (SELECT count(*) FROM public.tool_fabric_trust_entry e
+                 WHERE e.stream_id = s.stream_id) = 4
+            AND (SELECT count(*) FROM public.tool_fabric_trust_entry e
+                 WHERE e.stream_id = s.stream_id AND e.seq = 4
+                   AND e.audit_id = '00000000-0000-4000-8000-000000000041'
+                   AND e.entry_hash = repeat('4',64)) = 1
+            AND (SELECT count(*) FROM public.tool_fabric_trust_entry e
+                 WHERE e.stream_id = s.stream_id AND e.seq > s.revision) = 0
+            FROM public.tool_fabric_trust_stream s
+            WHERE s.stream_id = 'platform:tool-fabric:trust'")"
+          test "$observed" = "t"
