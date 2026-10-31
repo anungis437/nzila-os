@@ -12,7 +12,7 @@
 import { readFileSync, existsSync, readdirSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { assertPromotedRevision, parseArgs, parseManifestTargets } from '../../scripts/deploy-transactional'
+import { assertPromotedRevision, parseArgs, parseManifestTargets, resolveAzureHealthUrl } from '../../scripts/deploy-transactional'
 import { describe, it, expect } from 'vitest'
 
 const ROOT = join(__dirname, '..', '..')
@@ -198,6 +198,27 @@ describe('RELEASE_ATTESTATION_REQUIRED_001 — Release Attestation on Deploy', (
       .toThrow(/Missing latest Azure revision/)
     expect(() => assertPromotedRevision(target, previous, null))
       .toThrow(/image mismatch/)
+  })
+
+  it('P0 #1038: a healthy third-party endpoint cannot impersonate Azure ingress', () => {
+    const target = { containerAppName: 'demo', image: 'registry.example/app@sha256:' + 'a'.repeat(64) }
+    const azure = { properties: { configuration: { ingress: {
+      fqdn: 'demo.canadacentral.azurecontainerapps.io',
+    } } } }
+    const canonical = 'https://demo.canadacentral.azurecontainerapps.io/api/health'
+    expect(resolveAzureHealthUrl(target, azure)).toBe(canonical)
+    expect(resolveAzureHealthUrl({ ...target, healthUrl: canonical }, azure)).toBe(canonical)
+    expect(() => resolveAzureHealthUrl({ ...target, healthUrl: 'https://attacker.example/api/health' }, azure))
+      .toThrow(/does not match Azure ingress/)
+    expect(() => resolveAzureHealthUrl({ ...target, healthUrl: 'http://demo.canadacentral.azurecontainerapps.io/api/health' }, azure))
+      .toThrow(/does not match Azure ingress/)
+    expect(() => resolveAzureHealthUrl({ ...target, healthPath: '//attacker.example/' }, azure))
+      .toThrow(/Invalid health path/)
+    expect(() => resolveAzureHealthUrl({ ...target, healthPath: '/api/health?skip=true' }, azure))
+      .toThrow(/Invalid health path/)
+    expect(() => resolveAzureHealthUrl(target, { properties: { configuration: { ingress: { fqdn: '127.0.0.1' } } } }))
+      .toThrow(/No canonical Azure ingress FQDN|does not match Azure ingress/)
+    expect(() => resolveAzureHealthUrl(target, {})).toThrow(/No canonical Azure ingress FQDN/)
   })
 
   it('P0 #1038: production Azure commands cannot interpolate signed manifest values into shell', () => {

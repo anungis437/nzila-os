@@ -215,17 +215,38 @@ function captureCurrentState(target: DeployTarget, resourceGroup: string): Targe
   }
 }
 
-async function runHealthCheck(target: DeployTarget, args: ParsedArgs, resourceGroup: string): Promise<HealthCheckResult> {
-  const defaultHealthPath = target.healthPath ?? '/api/health'
-  let url = target.healthUrl
-
-  if (!url) {
-    const app = runJsonCommand(['containerapp', 'show', '--name', target.containerAppName,
-      '--resource-group', resourceGroup, '--output', 'json'])
-    const fqdn = app?.properties?.configuration?.ingress?.fqdn
-    ensure(fqdn, `No ingress FQDN found for ${target.containerAppName}; provide healthUrl in deploy target`)
-    url = `https://${fqdn}${defaultHealthPath}`
+/**
+ * A signed manifest's healthUrl is not independent proof of a deployed app:
+ * an arbitrary external endpoint could return 200 while Azure serves a broken
+ * revision. Resolve the URL from Azure's own ingress identity and reject any
+ * caller-supplied URL that does not match it exactly.
+ */
+export function resolveAzureHealthUrl(target: DeployTarget, details: unknown): string {
+  const fqdn = (details as {
+    properties?: { configuration?: { ingress?: { fqdn?: unknown } } }
+  } | null)?.properties?.configuration?.ingress?.fqdn
+  ensure(typeof fqdn === 'string' &&
+    /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/i.test(fqdn) &&
+    !fqdn.includes('..') && fqdn.includes('.'),
+    `No canonical Azure ingress FQDN for ${target.containerAppName}`)
+  const healthPath = target.healthPath ?? '/api/health'
+  ensure(/^\/(?!\/)[^\s?#\\]*$/.test(healthPath),
+    `Invalid health path for ${target.containerAppName}`)
+  const canonicalUrl = new URL(`https://${fqdn}${healthPath}`)
+  ensure(canonicalUrl.hostname.toLowerCase() === fqdn.toLowerCase() &&
+    canonicalUrl.pathname === healthPath,
+    `Noncanonical Azure health path for ${target.containerAppName}`)
+  if (target.healthUrl !== undefined) {
+    ensure(target.healthUrl === canonicalUrl.href,
+      `Health URL does not match Azure ingress for ${target.containerAppName}`)
   }
+  return canonicalUrl.href
+}
+
+async function runHealthCheck(target: DeployTarget, args: ParsedArgs, resourceGroup: string): Promise<HealthCheckResult> {
+  const app = runJsonCommand(['containerapp', 'show', '--name', target.containerAppName,
+    '--resource-group', resourceGroup, '--output', 'json'])
+  const url = resolveAzureHealthUrl(target, app)
 
   let lastError = ''
   let statusCode: number | undefined
