@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-export const alt = 'Nzila Ventures — Software for institutional continuity';
+export const alt = 'Nzila Ventures — Human-centered software for institutions';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -28,10 +28,12 @@ export default function OpenGraphImage() {
               justifyContent: 'center',
               width: 56,
               height: 56,
-              background: '#2563eb',
+              background: '#18335d',
               borderRadius: 14,
               fontWeight: 700,
               fontSize: 21,
+              border: '1px solid #a78a4a',
+              color: '#dfbe70',
             }}
           >
             NV
@@ -42,13 +44,13 @@ export default function OpenGraphImage() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 25 }}>
           <div style={{ display: 'flex', color: '#dfbe70', letterSpacing: 3, textTransform: 'uppercase', fontSize: 20 }}>
-            Institutional software · Nzila OS
+            Human-centered institutional software
           </div>
           <div style={{ display: 'flex', maxWidth: 980, fontSize: 67, fontWeight: 700, lineHeight: 1.08, letterSpacing: -2 }}>
-            Build continuity. Preserve accountability.
+            Technology for the people behind institutions.
           </div>
           <div style={{ display: 'flex', fontSize: 23, color: '#cbd5e1' }}>
-            Union Eyes · CIVIC · Nzila Ventures
+            Union Eyes · CIVIC · Nzila OS
           </div>
         </div>
         <div style={{ display: 'flex', width: '100%', height: 3, background: '#dfbe70' }} />
