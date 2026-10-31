@@ -22,7 +22,7 @@
  *
  * @module scripts/release-attestation
  */
-import { createHash, sign, verify } from 'node:crypto'
+import { createHash, createPrivateKey, createPublicKey, sign, verify } from 'node:crypto'
 import { writeFileSync, readFileSync, existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { hashDirectory } from './release/artifact-tree.mjs'
@@ -233,13 +233,15 @@ function signAttestation(digest: string): string | null {
   const key = process.env.ATTESTATION_SIGNING_KEY
   if (!key) return null
 
-  try {
-    const signature = sign(null, Buffer.from(digest, 'hex'), key)
-    return signature.toString('hex')
-  } catch {
-    console.warn('⚠ Failed to sign attestation — invalid ATTESTATION_SIGNING_KEY')
-    return null
+  // RSA-512 also yields a 64-byte signature. Enforce the signing algorithm,
+  // not merely a PEM private key and an apparently valid signature length.
+  let signingKey
+  try { signingKey = createPrivateKey(key) }
+  catch { throw new Error('Invalid release attestation signing key') }
+  if (signingKey.asymmetricKeyType !== 'ed25519') {
+    throw new Error('Release attestation signing key must be Ed25519')
   }
+  return sign(null, Buffer.from(digest, 'hex'), signingKey).toString('hex')
 }
 
 /**
@@ -251,7 +253,10 @@ export function verifyAttestationSignature(
   publicKeyPem: string,
 ): boolean {
   try {
-    return verify(null, Buffer.from(digest, 'hex'), publicKeyPem, Buffer.from(signatureHex, 'hex'))
+    const key = createPublicKey(publicKeyPem)
+    return key.asymmetricKeyType === 'ed25519' &&
+      /^[0-9a-f]{64}$/i.test(digest) && /^[0-9a-f]{128}$/i.test(signatureHex) &&
+      verify(null, Buffer.from(digest, 'hex'), key, Buffer.from(signatureHex, 'hex'))
   } catch {
     return false
   }
@@ -285,6 +290,12 @@ export function generateReleaseAttestation(opts: GenerateAttestationOptions): Re
 
   const attestationDigest = computeAttestationDigest(base)
   const signature = signAttestation(attestationDigest)
+  // A staging artifact that cannot be independently verified must never be
+  // published as a promotable release candidate. Non-staging diagnostics may
+  // still record an unsigned (non-authoritative) report.
+  if (opts.environment === 'staging' && !signature) {
+    throw new Error('Staging release attestation requires an Ed25519 signature')
+  }
 
   return {
     ...base,

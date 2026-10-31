@@ -12,6 +12,8 @@
 import { readFileSync, existsSync, readdirSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
+import { generateKeyPairSync, sign } from 'node:crypto'
+import { generateReleaseAttestation, verifyAttestationSignature } from '../../scripts/release-attestation'
 import { assertPromotedRevision, parseArgs, parseManifestTargets, resolveAzureHealthUrl } from '../../scripts/deploy-transactional'
 import { describe, it, expect } from 'vitest'
 
@@ -24,6 +26,32 @@ function readContent(rel: string): string {
 }
 
 describe('RELEASE_ATTESTATION_REQUIRED_001 — Release Attestation on Deploy', () => {
+  it('P0 #1038: RSA-512 cannot impersonate Ed25519 attestation verification', () => {
+    const digest = 'a'.repeat(64)
+    const payload = Buffer.from(digest, 'hex')
+    const ed = generateKeyPairSync('ed25519')
+    const rsa = generateKeyPairSync('rsa', { modulusLength: 512 })
+    const edSignature = sign(null, payload, ed.privateKey).toString('hex')
+    const rsaSignature = sign(null, payload, rsa.privateKey).toString('hex')
+    const pem = (key: typeof ed.publicKey) => key.export({ type: 'spki', format: 'pem' }).toString()
+    expect(edSignature).toHaveLength(128)
+    expect(rsaSignature).toHaveLength(128)
+    expect(verifyAttestationSignature(digest, edSignature, pem(ed.publicKey))).toBe(true)
+    expect(verifyAttestationSignature(digest, rsaSignature, pem(rsa.publicKey))).toBe(false)
+    expect(verifyAttestationSignature('invalid', edSignature, pem(ed.publicKey))).toBe(false)
+  })
+
+  it('P0 #1038: staging release cannot be generated without a signing key', () => {
+    const prior = process.env.ATTESTATION_SIGNING_KEY
+    try {
+      delete process.env.ATTESTATION_SIGNING_KEY
+      expect(() => generateReleaseAttestation({ commitSha: 'a'.repeat(40), environment: 'staging' }))
+        .toThrow(/requires an Ed25519 signature/)
+    } finally {
+      if (prior === undefined) delete process.env.ATTESTATION_SIGNING_KEY
+      else process.env.ATTESTATION_SIGNING_KEY = prior
+    }
+  })
   // 1. The generator script must exist
   it('RELEASE_ATTESTATION_REQUIRED_001: release attestation generator exists', () => {
     const script = readContent('scripts/release-attestation.ts')
