@@ -26,8 +26,6 @@ import {
 
 import { ApiError } from '@/lib/api/errors';
 import {
-  measureOrganizationalElasticity,
-  modelGovernanceMomentum,
   type SystemsDynamicsProfile,
   type GovernanceCoherenceProfile,
   type OperationalCoordinationProfile,
@@ -88,11 +86,6 @@ function notImplementedCompute<T>(analysis: string): (orgId: string) => Promise<
   };
 }
 
-/** Confidence reflects evidence volume only: one point per cognition-memory entry analysed, capped at 100. */
-function evidenceVolumeConfidence(payload: { entriesAnalyzed: number }): number {
-  return Math.max(0, Math.min(100, Math.round(payload.entriesAnalyzed)));
-}
-
 export const systemsDynamicsEngine = adaptLegacyEngine<SystemsDynamicsProfile>({
   engineId: 'systems-dynamics',
   domain: 'systems_coherence',
@@ -128,8 +121,7 @@ export const operatingRhythmsEngine = adaptLegacyEngine<OperatingRhythmProfile>(
 export const responseElasticityEngine = adaptLegacyEngine<OrganizationalResponseElasticityProfile>({
   engineId: 'response-elasticity',
   domain: 'resilience',
-  compute: measureOrganizationalElasticity,
-  confidenceFromPayload: evidenceVolumeConfidence,
+  compute: notImplementedCompute<OrganizationalResponseElasticityProfile>('Organizational response elasticity analysis'),
   interpretationGuidance:
     'Organizational ability to absorb stress and recover. Inputs into resilience modeling.',
 });
@@ -137,8 +129,7 @@ export const responseElasticityEngine = adaptLegacyEngine<OrganizationalResponse
 export const governanceMomentumEngine = adaptLegacyEngine<GovernanceMomentumProfile>({
   engineId: 'governance-momentum',
   domain: 'governance',
-  compute: modelGovernanceMomentum,
-  confidenceFromPayload: evidenceVolumeConfidence,
+  compute: notImplementedCompute<GovernanceMomentumProfile>('Governance momentum analysis'),
   interpretationGuidance:
     'Direction and speed of governance trajectory. Negative momentum requires human review.',
 });

@@ -2428,19 +2428,21 @@
       "status": "PARTIAL",
       "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
       "files": [
-        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts"
+        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
+        "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/unmeasured-engines.test.ts"
       ],
-      "explanation": "The governance-coherence engine, which embedded literal scores, answers 501 (batch B10).",
-      "remaining": "The governance-momentum engine still derives scores from ratios of cognition-memory entry counts with arbitrary scaling."
+      "explanation": "Governance coherence and momentum now explicitly refuse to manufacture a result; neither computes a governed governance trajectory.",
+      "remaining": "Implement a defensible governance-momentum measurement from authorized organization records, evidence provenance and an accepted model; verify the 501 path and later real behavior at unit, native and HTTP levels."
     },
     "DEF-0B7-COGB-ENTRY-COUNT-PROXIES-LABELLED-AS-COORDINATION-RHYTHM-ELASTICITY-AND-TRUST": {
       "status": "PARTIAL",
       "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
       "files": [
-        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts"
+        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
+        "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/unmeasured-engines.test.ts"
       ],
-      "explanation": "The coordination, rhythm and trust engines answer 501 (batch B10).",
-      "remaining": "The response-elasticity engine still derives its indicators from entry counts and labels them elasticity."
+      "explanation": "Coordination, rhythm, trust and response elasticity now explicitly refuse to manufacture results from cognition-memory entry counts.",
+      "remaining": "Implement a defensible response-elasticity measurement with governed evidence, meaningful denominators and provenance; verify the 501 path and later real behavior at unit, native and HTTP levels."
     },
     "DEF-0B9-ML-CHURN-SQL-NAMES-COLUMNS-AND-STATUS-VALUES-THE-REPOSITORY-DOES-NOT-DEFINE": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
