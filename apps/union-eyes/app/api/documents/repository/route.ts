@@ -217,11 +217,12 @@ export const GET = withOrganizationAuth(async (request, context) => {
   );
 
   // Keep the response's data as an array for existing clients. Metadata lets them
-  // continue from the candidate-row offset even when visibility removes an entire page.
+  // continue from a fixed candidate-row offset, even when visibility removes an entire page.
+  // Do not disclose hasMore or the candidate count: either would reveal the presence
+  // of documents that the case/privilege policy withheld from this member.
   return standardSuccessResponse(visible.filter(Boolean), {
     page: Math.floor(offset / limit) + 1,
     pageSize: limit,
-    hasMore: rows.length === limit,
     nextOffset: offset + limit,
   });
 });
