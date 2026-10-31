@@ -150,3 +150,7 @@ jobs:
             FROM public.tool_fabric_trust_stream s
             WHERE s.stream_id = 'platform:tool-fabric:trust'")"
           test "$observed" = "t"
+      - name: Verify terminated backend aborts uncommitted trust receipt (ephemeral CI only)
+        run: |
+          set -euo pipefail
+          bash packages/tool-fabric/sql/test_trust_ledger_pg_backend_termination.sh
