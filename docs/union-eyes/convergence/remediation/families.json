@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 406,
- "partial": 82,
- "outstanding": 371,
- "accountedFor": 371,
+ "corrected": 408,
+ "partial": 83,
+ "outstanding": 369,
+ "accountedFor": 369,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -168,19 +168,19 @@
   {
    "family": "F08-PII-DISCLOSURE-AND-PROJECTION",
    "purpose": "Personal-data disclosure: project, redact or restrict returned fields",
-   "defects": 30,
+   "defects": 28,
    "severity": {
     "HIGH": 1,
-    "MEDIUM": 22,
-    "LOW": 7
+    "MEDIUM": 21,
+    "LOW": 6
    },
    "namedRoutes": 7,
    "namedFiles": 1,
    "tranches": {
     "0B.3": 1,
-    "0B.4": 3,
+    "0B.4": 2,
     "0B.6": 1,
-    "0B.7": 6,
+    "0B.7": 5,
     "0B.8": 3,
     "0B.9": 3,
     "0B.10": 3,
@@ -1293,10 +1293,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B4-CALENDAR-TOKEN-PLAINTEXT-FALLBACK",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B4-CBA-INGESTION-FETCHES-UNRESTRICTED-URLS",
     "severity": "MEDIUM",
     "partial": true
@@ -1322,12 +1318,9 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B7-PLT-ENT-LISTS-EXPIRED-AND-UNBACKED-ENTITLEMENTS-AS-ACTIVE",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B7-PLT-SSO-CREATE-STORES-UNVALIDATED-CONFIGURATION-ENABLED-BY-DEFAULT",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B7-PLT-EQUITY-SELF-IDENTIFY-WRITE-FLOOR-EXCLUDES-DATA-SUBJECT",

@@ -4799,6 +4799,44 @@
           "explanation": "The post delete and the campaign analytics lookups name the caller organization inside the query (the post through an inner join to its account), so another organization row is simply not found (404) and the 403-versus-404 existence oracle is gone. The campaign routes already did this. The post delete test mock gained the inner join and now expects 404 for a foreign post (disclosed)."
         }
       ]
+    },
+    {
+      "id": "B51-F08-SSO-CREATE-CALENDAR-TOKENS-AND-ENTITLEMENT-LIST",
+      "family": "F08: stored credentials and access configuration fail closed",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B7-PLT-SSO-CREATE-STORES-UNVALIDATED-CONFIGURATION-ENABLED-BY-DEFAULT",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/lib/sso/provider-input.ts",
+            "apps/union-eyes/app/api/enterprise/sso/providers/route.ts",
+            "apps/union-eyes/app/api/enterprise/sso/providers/__tests__/route.test.ts",
+            "apps/union-eyes/lib/sso/__tests__/b51-sso-entitlements.test.ts"
+          ],
+          "explanation": "The SSO provider create now accepts only saml or oidc, bounds every text field, requires https URLs without credentials for the SSO URL and issuer, requires the fields of the type when the provider is to be enabled, and creates a provider disabled and without auto-provisioning unless the administrator asks otherwise. The existing route tests pass unchanged; new unit tests cover each rule.",
+          "remaining": "No unique index on organization, entity id or issuer, no proof the organization owns the identity domain, and requireGroups still cannot be set."
+        },
+        {
+          "prefix": "DEF-0B4-CALENDAR-TOKEN-PLAINTEXT-FALLBACK",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/external-calendar-sync/token-crypto.ts",
+            "apps/union-eyes/lib/external-calendar-sync/__tests__/token-crypto.test.ts"
+          ],
+          "explanation": "A provider token is never stored without an encryption key (development included; plaintext only under the test runner), and a stored value with no encryption prefix is refused unless CALENDAR_TOKEN_ALLOW_LEGACY_PLAINTEXT is set for a flagged migration window. New unit tests cover round trip, missing key in development and production, and the legacy flag.",
+          "remaining": "Existing plaintext rows need a one-time re-encryption or re-authorization; none is performed here."
+        },
+        {
+          "prefix": "DEF-0B7-PLT-ENT-LISTS-EXPIRED-AND-UNBACKED-ENTITLEMENTS-AS-ACTIVE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/entitlements/route.ts",
+            "apps/union-eyes/lib/sso/__tests__/b51-sso-entitlements.test.ts"
+          ],
+          "explanation": "The entitlement list now names only the feature keys that the server-side checkModuleEntitlement allows (not expired, backing contract active) and is limited to 200 rows. Contract test pins the check."
+        }
+      ]
     }
   ]
 }

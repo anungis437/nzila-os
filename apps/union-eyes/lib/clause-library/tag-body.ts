@@ -32,6 +32,6 @@ export function parseClauseTagBody(raw: unknown, operation: 'add' | 'remove'): {
   }
   return {
     ...(result.data.tagName || result.data.tag ? { tagName: result.data.tagName ?? result.data.tag } : {}),
-    ...('tagId' in result.data && result.data.tagId ? { tagId: result.data.tagId } : {}),
+    ...((result.data as { tagId?: string }).tagId ? { tagId: (result.data as { tagId?: string }).tagId } : {}),
   }
 }

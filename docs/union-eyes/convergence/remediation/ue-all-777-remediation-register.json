@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 406,
-    "engineeringRemaining": 371,
+    "engineeringCorrected": 408,
+    "engineeringRemaining": 369,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 82
+    "engineeringPartial": 83
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -2365,9 +2365,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B51-F08-SSO-CREATE-CALENDAR-TOKENS-AND-ENTITLEMENT-LIST",
+        "path": "apps/union-eyes/lib/external-calendar-sync/token-crypto.ts; apps/union-eyes/lib/external-calendar-sync/__tests__/token-crypto.test.ts",
+        "explanation": "A provider token is never stored without an encryption key (development included; plaintext only under the test runner), and a stored value with no encryption prefix is refused unless CALENDAR_TOKEN_ALLOW_LEGACY_PLAINTEXT is set for a flagged migration window. New unit tests cover round trip, missing key in development and production, and the legacy flag.",
+        "remaining": "Existing plaintext rows need a one-time re-encryption or re-authorization; none is performed here.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-CALENDAR-CONNECTION-ROW-RETURNS-TOKENS",
@@ -8478,9 +8486,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B51-F08-SSO-CREATE-CALENDAR-TOKENS-AND-ENTITLEMENT-LIST",
+        "path": "apps/union-eyes/app/api/entitlements/route.ts; apps/union-eyes/lib/sso/__tests__/b51-sso-entitlements.test.ts",
+        "explanation": "The entitlement list now names only the feature keys that the server-side checkModuleEntitlement allows (not expired, backing contract active) and is limited to 200 rows. Contract test pins the check.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-PLT-ENT-EMPTY-200-WITHOUT-ORGANIZATION-AND-SECOND-RESOLUTION",
@@ -8543,9 +8558,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B51-F08-SSO-CREATE-CALENDAR-TOKENS-AND-ENTITLEMENT-LIST",
+        "path": "apps/union-eyes/lib/sso/provider-input.ts; apps/union-eyes/app/api/enterprise/sso/providers/route.ts; apps/union-eyes/app/api/enterprise/sso/providers/__tests__/route.test.ts; apps/union-eyes/lib/sso/__tests__/b51-sso-entitlements.test.ts",
+        "explanation": "The SSO provider create now accepts only saml or oidc, bounds every text field, requires https URLs without credentials for the SSO URL and issuer, requires the fields of the type when the provider is to be enabled, and creates a provider disabled and without auto-provisioning unless the administrator asks otherwise. The existing route tests pass unchanged; new unit tests cover each rule.",
+        "remaining": "No unique index on organization, entity id or issuer, no proof the organization owns the identity domain, and requireGroups still cannot be set.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B7-PLT-SSO-CONFIGURATION-NEVER-CONSUMED-BY-SIGN-IN",

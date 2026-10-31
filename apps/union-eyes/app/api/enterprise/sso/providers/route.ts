@@ -11,6 +11,7 @@ import { encryptSecret } from '@/lib/encryption';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { AUTH_TENANT_ASSIGNABLE_ROLES } from '@nzila/db/auth-storage-authority';
+import { validateSsoProviderInput } from '@/lib/sso/provider-input';
 
 export const dynamic = 'force-dynamic';
 
@@ -87,6 +88,10 @@ export const POST = withApi(
       throw ApiError.badRequest('name, providerType, and attributeMapping are required');
     }
 
+    // A provider is created disabled and without auto-provisioning unless the administrator asks otherwise, and one that is enabled
+    // must be complete for its type.
+    const validated = validateSsoProviderInput(body as Record<string, unknown>, enabled === true);
+
     // An identity provider may only map its groups to roles a tenant administrator can already assign; a mapping to a
     // platform or federation role would otherwise let an external directory mint authority the tenant cannot grant.
     const assignable: readonly string[] = AUTH_TENANT_ASSIGNABLE_ROLES;
@@ -107,9 +112,9 @@ export const POST = withApi(
     // this field). Reuses the existing Key-Vault-backed encryption
     // service (lib/encryption.ts, already used for SIN encryption) rather
     // than inventing new cryptography.
-    const encryptedOidcClientSecret = oidcClientSecret
-      ? await encryptSecret(oidcClientSecret)
-      : oidcClientSecret;
+    const encryptedOidcClientSecret = validated.oidcClientSecret
+      ? await encryptSecret(validated.oidcClientSecret)
+      : undefined;
 
     const created = await withRLSContext(async (tx) => {
     const [row] = await tx
@@ -117,18 +122,18 @@ export const POST = withApi(
       .values({
         organizationId: organizationId!,
         createdBy: userId!,
-        name,
-        providerType,
-        samlEntityId,
-        samlSsoUrl,
-        samlCertificate,
-        oidcIssuer,
-        oidcClientId,
+        name: validated.name,
+        providerType: validated.providerType,
+        samlEntityId: validated.samlEntityId,
+        samlSsoUrl: validated.samlSsoUrl,
+        samlCertificate: validated.samlCertificate,
+        oidcIssuer: validated.oidcIssuer,
+        oidcClientId: validated.oidcClientId,
         oidcClientSecret: encryptedOidcClientSecret,
         attributeMapping,
         roleMapping,
-        autoProvision: autoProvision ?? true,
-        enabled: enabled ?? true,
+        autoProvision: autoProvision ?? false,
+        enabled: enabled ?? false,
       })
       .returning();
     await persistAtomicAudit(tx, {
@@ -137,7 +142,7 @@ export const POST = withApi(
       action: 'sso.provider.create',
       resourceType: 'sso_providers',
       resourceId: row.id,
-      details: { providerType, autoProvision: autoProvision ?? true, enabled: enabled ?? true, roleMapping: roleMapping ?? null },
+      details: { providerType, autoProvision: autoProvision ?? false, enabled: enabled ?? false, roleMapping: roleMapping ?? null },
     });
     return row;
     });

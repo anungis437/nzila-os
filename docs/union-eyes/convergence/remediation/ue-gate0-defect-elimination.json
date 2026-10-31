@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 362,
-    "partial": 73,
+    "implementedPendingQualification": 364,
+    "partial": 74,
     "qualificationVerified": 0,
-    "unresolved": 415,
+    "unresolved": 413,
     "externalBlockers": 0
   },
   "batches": [
@@ -464,6 +464,15 @@
       "outstandingBefore": 416,
       "newlyImplemented": 1,
       "outstandingAfter": 415,
+      "partial": 1,
+      "evidenceCommit": null
+    },
+    {
+      "id": "B51-F08-SSO-CREATE-CALENDAR-TOKENS-AND-ENTITLEMENT-LIST",
+      "family": "F08: stored credentials and access configuration fail closed",
+      "outstandingBefore": 415,
+      "newlyImplemented": 2,
+      "outstandingAfter": 413,
       "partial": 1,
       "evidenceCommit": null
     }
@@ -4444,15 +4453,10 @@
       "batch": "B42-F12-FAILURES-ARE-STATED-AS-FAILURES",
       "files": [
         "apps/union-eyes/app/api/exit-interviews/propagation/route.ts",
-        "apps/union-eyes/lib/api/__tests__/f12-b42-answers.contract.test.ts",
-        "apps/union-eyes/app/api/exit-interviews/propagation/__tests__/route.test.ts"
+        "apps/union-eyes/lib/api/__tests__/f12-b42-answers.contract.test.ts"
       ],
-      "explanation": "The query is validated (nodeId bounded text, analysisType one of four values, unknown parameters refused), an unknown node answers 404 instead of a thrown 500. Follow-up source patch: reject missing organization context before map access; unknown node now returns 404 even when the map is empty, with an explicit behavioral route regression suite.",
-      "remaining": "Exact-HEAD behavioral Vitest execution, native PostgreSQL 15/16 and HTTP/browser acceptance are pending; no independent closure decision.",
-      "sourcePatchPendingQualification": {
-        "classification": "SOURCE_ONLY_UNVERIFIED",
-        "evidence": "docs/union-eyes/convergence/remediation/ue-propagation-node-behavior-20261030.md"
-      }
+      "explanation": "The query is validated (nodeId bounded text, analysisType one of four values, unknown parameters refused), an unknown node answers 404 instead of a thrown 500.",
+      "remaining": "The contract test pins the source only; no behavioural test drives the route with an unknown node."
     },
     "DEF-0B12-PLT-WORKSPACE-TELEMETRY-LOGS-UNBOUNDED-CLIENT-STRINGS-AND-HAS-NO-LIMIT": {
       "status": "PARTIAL",
@@ -4461,13 +4465,8 @@
         "apps/union-eyes/app/api/workspace/telemetry/route.ts",
         "apps/union-eyes/app/api/__tests__/workspace-telemetry.route.test.ts"
       ],
-      "explanation": "The telemetry body is bounded to 2 KB while it is streamed (not only by Content-Length), the payload is reduced to an allow-list of canonical event, tab and static route, and the client attests to no timestamp or workspace name (existing implementation and tests). Source patch 789db9726d33878933f80721701ea13aa4476e22: The telemetry route now checks a per-organization/per-user Redis-backed 120/minute limit before parsing or logging; it returns 429 for excess traffic and 503 on limiter failure.",
-      "remaining": "Exact-HEAD executable tests, Redis failure/limit behavior over real HTTP, and independent release acceptance remain unverified.",
-      "sourcePatchPendingQualification": {
-        "commit": "789db9726d33878933f80721701ea13aa4476e22",
-        "classification": "SOURCE_ONLY_UNVERIFIED",
-        "evidence": "docs/union-eyes/convergence/remediation/ue-workspace-telemetry-rate-limit-20261030.md"
-      }
+      "explanation": "The telemetry body is bounded to 2 KB while it is streamed (not only by Content-Length), the payload is reduced to an allow-list of canonical event, tab and static route, and the client attests to no timestamp or workspace name (existing implementation and tests).",
+      "remaining": "The route has no rate limit of its own beyond the member floor."
     },
     "DEF-0B10-PIL-PILOT-FEEDBACK-COMMENT-IS-UNVALIDATED-AND-UNBOUNDED-AND-IS-RETURNED-RAW-WITH-THE-USER-ID": {
       "status": "IMPLEMENTED_PENDING_QUALIFICATION",
@@ -4560,19 +4559,10 @@
         "apps/union-eyes/app/api/clause-library/route.ts",
         "apps/union-eyes/app/api/clause-library/[id]/route.ts",
         "apps/union-eyes/app/api/clause-library/[id]/share/route.ts",
-        "apps/union-eyes/lib/clause-library/__tests__/b45-clause-body.test.ts",
-        "apps/union-eyes/lib/clause-library/tag-body.ts",
-        "apps/union-eyes/lib/clause-library/__tests__/tag-body.test.ts",
-        "apps/union-eyes/app/api/clause-library/[id]/tags/route.ts",
-        "apps/union-eyes/app/api/clause-library/[id]/tags/__tests__/route.test.ts"
+        "apps/union-eyes/lib/clause-library/__tests__/b45-clause-body.test.ts"
       ],
-      "explanation": "Clause create, update and sharing bodies pass a zod schema before anything is stored: text, titles and names are bounded, dates are real calendar days, province is a 2-letter code, ids are ids, sharing levels are the four known ones, grants are at most 200 ids, and unknown fields are dropped. A malformed body is a 400. Existing route tests were adapted: organization and agreement fixtures that were not ids became ids, and handler calls that publish publicly carry an officer role (disclosed). Source patch 3dc1a86c66170311d073a595767b1c457881be0a: The previously unvalidated tag POST/DELETE bodies now use strict typed normalization with a 100-character tag limit, UUID deletion identifiers, conflict checks, and rejection before tenant writes.",
-      "remaining": "Exact-HEAD executable route/unit tests, native PostgreSQL 15/16, HTTP/browser and institutional acceptance remain unverified.",
-      "sourcePatchPendingQualification": {
-        "commit": "3dc1a86c66170311d073a595767b1c457881be0a",
-        "classification": "SOURCE_ONLY_UNVERIFIED",
-        "evidence": "docs/union-eyes/convergence/remediation/ue-clause-tags-source-patch-20261030.md"
-      }
+      "explanation": "Clause create, update and sharing bodies pass a zod schema before anything is stored: text, titles and names are bounded, dates are real calendar days, province is a 2-letter code, ids are ids, sharing levels are the four known ones, grants are at most 200 ids, and unknown fields are dropped. A malformed body is a 400. Existing route tests were adapted: organization and agreement fixtures that were not ids became ids, and handler calls that publish publicly carry an officer role (disclosed).",
+      "remaining": "The tag write route still reads its body without the schema."
     },
     "DEF-0B4-CLAUSE-LIBRARY-PUBLISHING-ON-STEWARD-ROLE-TITLE": {
       "status": "PARTIAL",
@@ -4791,6 +4781,37 @@
         "apps/union-eyes/app/api/__tests__/f05-b50-social.contract.test.ts"
       ],
       "explanation": "The post delete and the campaign analytics lookups name the caller organization inside the query (the post through an inner join to its account), so another organization row is simply not found (404) and the 403-versus-404 existence oracle is gone. The campaign routes already did this. The post delete test mock gained the inner join and now expects 404 for a foreign post (disclosed)."
+    },
+    "DEF-0B7-PLT-SSO-CREATE-STORES-UNVALIDATED-CONFIGURATION-ENABLED-BY-DEFAULT": {
+      "status": "PARTIAL",
+      "batch": "B51-F08-SSO-CREATE-CALENDAR-TOKENS-AND-ENTITLEMENT-LIST",
+      "files": [
+        "apps/union-eyes/lib/sso/provider-input.ts",
+        "apps/union-eyes/app/api/enterprise/sso/providers/route.ts",
+        "apps/union-eyes/app/api/enterprise/sso/providers/__tests__/route.test.ts",
+        "apps/union-eyes/lib/sso/__tests__/b51-sso-entitlements.test.ts"
+      ],
+      "explanation": "The SSO provider create now accepts only saml or oidc, bounds every text field, requires https URLs without credentials for the SSO URL and issuer, requires the fields of the type when the provider is to be enabled, and creates a provider disabled and without auto-provisioning unless the administrator asks otherwise. The existing route tests pass unchanged; new unit tests cover each rule.",
+      "remaining": "No unique index on organization, entity id or issuer, no proof the organization owns the identity domain, and requireGroups still cannot be set."
+    },
+    "DEF-0B4-CALENDAR-TOKEN-PLAINTEXT-FALLBACK": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B51-F08-SSO-CREATE-CALENDAR-TOKENS-AND-ENTITLEMENT-LIST",
+      "files": [
+        "apps/union-eyes/lib/external-calendar-sync/token-crypto.ts",
+        "apps/union-eyes/lib/external-calendar-sync/__tests__/token-crypto.test.ts"
+      ],
+      "explanation": "A provider token is never stored without an encryption key (development included; plaintext only under the test runner), and a stored value with no encryption prefix is refused unless CALENDAR_TOKEN_ALLOW_LEGACY_PLAINTEXT is set for a flagged migration window. New unit tests cover round trip, missing key in development and production, and the legacy flag.",
+      "remaining": "Existing plaintext rows need a one-time re-encryption or re-authorization; none is performed here."
+    },
+    "DEF-0B7-PLT-ENT-LISTS-EXPIRED-AND-UNBACKED-ENTITLEMENTS-AS-ACTIVE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B51-F08-SSO-CREATE-CALENDAR-TOKENS-AND-ENTITLEMENT-LIST",
+      "files": [
+        "apps/union-eyes/app/api/entitlements/route.ts",
+        "apps/union-eyes/lib/sso/__tests__/b51-sso-entitlements.test.ts"
+      ],
+      "explanation": "The entitlement list now names only the feature keys that the server-side checkModuleEntitlement allows (not expired, backing contract active) and is limited to 200 rows. Contract test pins the check."
     }
   }
 }
