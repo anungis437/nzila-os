@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   withApiAuth: vi.fn(),
   getCurrentUser: vi.fn(),
   verifyDocumentAccess: vi.fn(),
+  getDocumentSender: vi.fn(),
   getDocumentAudit: vi.fn(),
   generateAuditReport: vi.fn(),
   standardErrorResponse: vi.fn(),
@@ -18,6 +19,7 @@ vi.mock('@/lib/signature/signature-service', () => ({
   },
   SignatureService: {
     verifyDocumentAccess: m.verifyDocumentAccess,
+    getDocumentSender: m.getDocumentSender,
   },
 }));
 vi.mock('@/lib/api/standardized-responses', () => {
@@ -43,6 +45,7 @@ describe('signatures/audit/[documentId] route (PR #752 round 49 — cross-tenant
     m.withApiAuth.mockImplementation((handler: any) => handler);
     m.getCurrentUser.mockResolvedValue({ id: 'caller-own-id' });
     m.verifyDocumentAccess.mockResolvedValue(true);
+    m.getDocumentSender.mockResolvedValue('caller-own-id');
     m.getDocumentAudit.mockResolvedValue([{ id: 'evt_1' }]);
   });
 

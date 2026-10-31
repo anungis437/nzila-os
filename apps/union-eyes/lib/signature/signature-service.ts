@@ -35,6 +35,8 @@ export class SignatureAuthorityError extends Error {
 
 /** Document states in which no signature or void can be applied any more. */
 const FINAL_DOCUMENT_STATES = ["completed", "voided", "declined", "expired"] as const;
+/** A caller's own document list is a page, not the whole history. */
+const USER_DOCUMENT_LIMIT = 200;
 /** Signer states that are settled: a signature is not applied over them. */
 const SETTLED_SIGNER_STATES = ["signed", "declined", "authentication_failed", "expired"] as const;
 
@@ -228,6 +230,15 @@ export class SignatureService {
     });
 
     return document;
+  }
+
+  /** The user who sent the document, or null when it does not exist. */
+  static async getDocumentSender(documentId: string): Promise<string | null> {
+    const document = await db.query.signatureDocuments.findFirst({
+      where: eq(signatureDocuments.id, documentId),
+      columns: { sentBy: true },
+    });
+    return document?.sentBy ?? null;
   }
 
   /**
@@ -723,7 +734,8 @@ export class SignatureService {
           eq(signatureDocuments.organizationId, organizationId)
         )
       )
-      .orderBy(desc(signatureDocuments.createdAt));
+      .orderBy(desc(signatureDocuments.createdAt))
+      .limit(USER_DOCUMENT_LIMIT);
 
     // Documents to be signed by user
     const toSign = await db
@@ -742,7 +754,8 @@ export class SignatureService {
           eq(signatureDocuments.organizationId, organizationId)
         )
       )
-      .orderBy(desc(signatureDocuments.createdAt));
+      .orderBy(desc(signatureDocuments.createdAt))
+      .limit(USER_DOCUMENT_LIMIT);
 
     return { sent, toSign };
   }
@@ -824,6 +837,8 @@ export class AuditTrailService {
         actor: entry.actorEmail || entry.actorUserId,
         ipAddress: entry.ipAddress,
       })),
+      // The trail is a plain record: its rows are not hash-chained or sealed, and the stored file hash is not recomputed here.
+      integrity: { hashChained: false, sealed: false, notice: 'Unsealed record. It is not tamper-evident and is not a certified e-signature audit.' },
       generatedAt: new Date(),
     };
   }

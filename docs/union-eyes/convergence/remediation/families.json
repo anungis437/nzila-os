@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 388,
- "partial": 73,
- "outstanding": 389,
- "accountedFor": 389,
+ "corrected": 392,
+ "partial": 75,
+ "outstanding": 385,
+ "accountedFor": 385,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -94,13 +94,13 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 88,
+   "defects": 84,
    "severity": {
     "HIGH": 8,
     "MEDIUM": 51,
-    "LOW": 29
+    "LOW": 25
    },
-   "namedRoutes": 14,
+   "namedRoutes": 12,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 1,
@@ -111,10 +111,10 @@
     "0B.6": 9,
     "0B.7": 22,
     "0B.8": 9,
-    "0B.9": 7,
+    "0B.9": 6,
     "0B.10": 10,
-    "0B.11": 16,
-    "0B.12": 3
+    "0B.11": 14,
+    "0B.12": 2
    }
   },
   {
@@ -821,10 +821,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B9-ORG-DIRECTORY-SEARCH-UNESCAPED-WILDCARDS-FIXED-FIFTY-NO-ORDER-OR-PAGE",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B9-ORG-ORGANIZATION-ROW-FACADES-CONFIGURE-STEWARD-WRITES-OVER-ORGANIZATIONS-REFUSED-ONLY-BY-GOVERNANCE-LIST",
     "severity": "MEDIUM"
    },
@@ -901,14 +897,6 @@
     "severity": "HIGH"
    },
    {
-    "id": "DEF-0B11-SOC-SIGNATURE-PATCH-DECLARES-A-SCHEMA-IT-NEVER-APPLIES-AND-STORES-UNBOUNDED-REASON-TEXT",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B11-SOC-SIGNATURE-LIST-IS-UNPAGINATED-AND-RETURNS-WHOLE-SIGNER-ROWS",
-    "severity": "LOW"
-   },
-   {
     "id": "DEF-0B11-SOC-POST-PUBLISHES-AT-ONCE-TO-EVERY-ACTIVE-ACCOUNT-OF-THE-SELECTED-PLATFORMS-AT-STEWARD-FLOOR-WITH-NO-APPROVAL-OR-CLASSIFICATION-CHECK",
     "severity": "HIGH",
     "partial": true
@@ -940,10 +928,6 @@
    {
     "id": "DEF-0B12-PLT-KPI-CURRENT-VALUE-IS-THE-LATEST-ROW-OF-THE-METRIC-TYPE-TEXT-NOT-THE-DECLARED-SOURCE-OR-CALCULATION",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-PLT-KPI-ITEM-ID-IS-NOT-VALIDATED-AND-A-MALFORMED-ID-IS-A-DATABASE-ERROR",
-    "severity": "LOW"
    },
    {
     "id": "DEF-0B12-PLT-WORKSPACE-TELEMETRY-LOGS-UNBOUNDED-CLIENT-STRINGS-AND-HAS-NO-LIMIT",
@@ -1170,7 +1154,8 @@
    },
    {
     "id": "DEF-0B11-SOC-SIGNATURE-AUDIT-TRAIL-HAS-NO-HASH-CHAIN-OR-VERIFICATION-AND-IS-SERVED-AS-A-LEGAL-COMPLIANCE-REPORT-OF-SELF-ASSERTED-EVIDENCE",
-    "severity": "HIGH"
+    "severity": "HIGH",
+    "partial": true
    },
    {
     "id": "DEF-0B11-SOC-SIGNING-IGNORES-THE-STORED-EXPIRY-SIGNING-ORDER-AND-AUTHENTICATION-REQUIREMENT",
@@ -1183,7 +1168,8 @@
    },
    {
     "id": "DEF-0B11-SOC-SIGNATURE-STATUS-AND-AUDIT-DISCLOSE-EVERY-SIGNER-ADDRESS-IP-USER-AGENT-AND-LOCATION-TO-EVERY-OTHER-SIGNER",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B11-SOC-SIGNATURE-ENVELOPE-AND-STORED-FILE-ARE-CREATED-BEFORE-AND-OUTSIDE-THE-TRANSACTION-THAT-RECORDS-THEM",

@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 388,
-    "engineeringRemaining": 389,
+    "engineeringCorrected": 392,
+    "engineeringRemaining": 385,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 73
+    "engineeringPartial": 75
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -12212,9 +12212,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B44-F05-SIGNATURE-DISCLOSURE-AND-BOUNDED-DIRECTORY-SEARCH",
+        "path": "apps/union-eyes/app/api/organization/members/search/route.ts; apps/union-eyes/lib/api/like-pattern.ts; apps/union-eyes/app/api/__tests__/organization-members-search.route.test.ts",
+        "explanation": "The search term is trimmed, bounded to 100 characters (400 beyond), and its LIKE wildcards are taken literally. Results are ordered by name then id and paged by limit (at most 50) and offset. The test mock chain was adapted to the ordered, paged query (disclosed), and a new test covers escaping, bounds and offset.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B9-ORG-CURRENT-CONTEXT-ROUTE-RETURNS-PLACEHOLDER-ORGANIZATION-WITH-NULL-NAME-AND-NO-FEATURES",
@@ -15594,9 +15601,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B44-F05-SIGNATURE-DISCLOSURE-AND-BOUNDED-DIRECTORY-SEARCH",
+        "path": "apps/union-eyes/lib/signature/signature-service.ts; apps/union-eyes/lib/signature/__tests__/b44-signer-privacy.test.ts",
+        "explanation": "The audit report no longer reads as certified evidence: it carries an integrity block stating the trail is unsealed, not hash-chained and not tamper-evident.",
+        "remaining": "No hash chain, file-hash recomputation at signing, or sealing is implemented, and the signer address still comes from a client-supplied forwarded header.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-SOC-VOID-SWALLOWS-THE-PROVIDER-FAILURE-AND-RECORDS-VOIDED-WHILE-THE-ENVELOPE-CAN-STILL-BE-SIGNED",
@@ -15757,9 +15772,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B44-F05-SIGNATURE-DISCLOSURE-AND-BOUNDED-DIRECTORY-SEARCH",
+        "path": "apps/union-eyes/lib/signature/signer-privacy.ts; apps/union-eyes/app/api/signatures/documents/[id]/route.ts; apps/union-eyes/app/api/signatures/audit/[documentId]/route.ts; apps/union-eyes/lib/signature/__tests__/b44-signer-privacy.test.ts; apps/union-eyes/app/api/signatures/audit/[documentId]/__tests__/route.test.ts",
+        "explanation": "The status, the audit trail and the audit report keep every signer network address, user agent and geolocation for the sender only. A signer sees those fields only on the rows that describe themselves. Unit tests cover sender, signer and audit rows. The audit route test mock gained getDocumentSender (disclosed adaptation).",
+        "remaining": "Signer e-mail addresses are still visible to every signer, and the report actor and signer rows carry no user id, so a signer own network data is also withheld from the report.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-SOC-SIGNATURE-ENVELOPE-AND-STORED-FILE-ARE-CREATED-BEFORE-AND-OUTSIDE-THE-TRANSACTION-THAT-RECORDS-THEM",
@@ -15791,9 +15814,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B44-F05-SIGNATURE-DISCLOSURE-AND-BOUNDED-DIRECTORY-SEARCH",
+        "path": "apps/union-eyes/app/api/signatures/documents/[id]/route.ts; apps/union-eyes/lib/signature/__tests__/b44-signer-privacy.test.ts",
+        "explanation": "The void PATCH now applies its schema: a strict body with the literal action void and a trimmed reason of 1 to 1000 characters. A body that does not match is a 400 and nothing is stored. Contract test added.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-SOC-SIGNATURE-LIST-IS-UNPAGINATED-AND-RETURNS-WHOLE-SIGNER-ROWS",
@@ -15808,9 +15838,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B44-F05-SIGNATURE-DISCLOSURE-AND-BOUNDED-DIRECTORY-SEARCH",
+        "path": "apps/union-eyes/lib/signature/signature-service.ts; apps/union-eyes/lib/signature/__tests__/b44-signer-privacy.test.ts",
+        "explanation": "Both queries of the caller own document list (sent and to-sign) are limited to 200 rows, newest first, and the to-sign side returns only the caller own signer row. Contract test pins both limits.",
+        "remaining": "No cursor or offset parameter yet; the newest 200 are returned.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B11-SOC-OAUTH-ACCESS-AND-REFRESH-TOKENS-ARE-STORED-AS-PLAINTEXT-TEXT-COLUMNS-WITH-PAGE-AND-ORGANIZATION-ADMIN-SCOPES",
@@ -17193,9 +17231,17 @@
         "repair": "Reject malformed target IDs before UUID database predicate and audit; added regression proving no DB call.",
         "limits": "The same frozen defect also requires edit/rename/delete capabilities; these remain unimplemented. Do not count as engineering-corrected."
       },
-      "currentHeadVerification": "SOURCE_PARTIAL_NOT_VERIFIED_AT_CURRENT_HEAD",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B44-F05-SIGNATURE-DISCLOSURE-AND-BOUNDED-DIRECTORY-SEARCH",
+        "path": "apps/union-eyes/app/api/targets/[id]/route.ts; apps/union-eyes/app/api/__tests__/targets-id.route.test.ts",
+        "explanation": "Existing implementation, verified: a malformed target id is a 400 before any database predicate is built, with an existing test that no query or audit happens.",
+        "remaining": "The route still offers no edit, rename or delete of a target.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B12-PLT-ORGANIZATIONS-GET-REBINDS-EVERY-MEMBERSHIP-ROW-OF-AN-E-MAIL-ADDRESS-TO-THE-CALLER-IN-THE-LEGACY-BRANCH",
