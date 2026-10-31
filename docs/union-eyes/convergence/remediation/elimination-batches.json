@@ -1123,8 +1123,8 @@
             "apps/union-eyes/lib/social-media/__tests__/social-media-service.test.ts",
             "apps/union-eyes/app/api/__tests__/social-media-analytics.route.test.ts"
           ],
-          "explanation": "fetchAnalytics fetched platform responses it never transformed and returned an empty list as a success. It now answers 501 when nothing was collected, and the analytics read says (data_collected, message) whether analytics were ever collected instead of letting an empty range read as no activity.",
-          "remaining": "No collector transforms the Meta, Instagram, Twitter or LinkedIn responses into the analytics table, and nothing calls fetchAnalytics, so no figure exists yet."
+          "explanation": "Existing collection-unavailable and data_collected safeguards remain. Additionally, the post analytics summary, campaign analytics summary and campaign export no longer claim zero clicks when no click collector or click field exists; they return null (unknown) while account analytics retains actual recorded linkClicks. Regression assertions cover all three projections; tests and native/runtime acceptance remain pending.",
+          "remaining": "The social platform collector still does not transform provider responses into stored analytics and no proven worker calls it. Exact-HEAD unit, native PostgreSQL and HTTP/browser/staging qualification and institutional analytics authority remain outstanding."
         },
         {
           "prefix": "DEF-0B11-IDS-STEWARD-ROUTES-SERVE-ASSIGNMENT-ROWS",

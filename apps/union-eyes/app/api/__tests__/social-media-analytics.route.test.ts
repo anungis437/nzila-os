@@ -218,6 +218,7 @@ describe('social-media/analytics route', () => {
     expect(response.status).toBe(200);
     expect(payload.total).toBe(2);
     expect(payload.summary).toMatchObject({ total_posts: 2, total_impressions: 300, total_engagement: 47 });
+    expect(payload.summary.total_clicks).toBeNull(); // no clicks are measured for posts
     expect(payload.top_posts).toHaveLength(2);
   });
 
@@ -265,6 +266,7 @@ describe('social-media/analytics route', () => {
     expect(response.status).toBe(200);
     expect(payload.campaign).toMatchObject({ id: 'camp-1' });
     expect(payload.metrics).toMatchObject({ total_posts: 1, total_impressions: 100 });
+    expect(payload.metrics.total_clicks).toBeNull(); // no campaign click collector
     expect(payload.platform_metrics).toHaveLength(1);
   });
 
@@ -303,6 +305,17 @@ describe('social-media/analytics route', () => {
       organizationId: TEST_USER.organizationId, userId: TEST_USER.userId,
       dataType: 'accounts', format: 'json', rowCount: 1,
     }));
+  });
+
+  it('does not fabricate zero clicks for a campaign with no click collector', async () => {
+    const { GET } = await loadRoute();
+    m.queueSelect([
+      { id: 'campaign-1', name: 'Campaign', platforms: [], startDate: '2026-05-01', endDate: '2026-05-31', status: 'active' },
+    ], []);
+    const response = await GET(new NextRequest('http://localhost/api/social-media/analytics?export=true&type=campaigns&format=json'));
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.data[0].total_clicks).toBeNull();
   });
 
   it('fails closed if mandatory export audit cannot be persisted', async () => {

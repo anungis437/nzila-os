@@ -330,7 +330,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
           total_likes: 0,
           total_comments: 0,
           total_shares: 0,
-          total_clicks: 0,
+          total_clicks: null,
           avg_engagement_rate: 0,
         }
       );
@@ -428,7 +428,7 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
           total_likes: 0,
           total_comments: 0,
           total_shares: 0,
-          total_clicks: 0,
+          total_clicks: null,
         }
       );
 
@@ -693,7 +693,7 @@ const exportSocialMediaAnalyticsWithAuth = withRoleAuth('steward', async (reques
                 total_likes: campaignPosts.reduce((sum, p) => sum + (p.likesCount || 0), 0),
                 total_comments: campaignPosts.reduce((sum, p) => sum + (p.commentsCount || 0), 0),
                 total_shares: campaignPosts.reduce((sum, p) => sum + (p.sharesCount || 0), 0),
-                total_clicks: 0,
+                total_clicks: null,
               };
             })
           );
